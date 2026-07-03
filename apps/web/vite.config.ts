@@ -1,9 +1,12 @@
 import { defineConfig } from 'vite';
+import { viteSingleFile } from 'vite-plugin-singlefile';
 import { fileURLToPath } from 'node:url';
 
 export default defineConfig({
-  // Ścieżki względne: zbudowany dist/index.html działa też otwarty PROSTO Z DYSKU
-  // (podwójny klik, file://) — bez żadnego serwera.
+  // JEDEN samowystarczalny index.html (JS+CSS inline). Kluczowe dla użycia z dysku:
+  // Chromium blokuje <script type="module"> i <link crossorigin> na file:// (CORS,
+  // origin null), więc rozbite assety NIE działają po podwójnym kliknięciu.
+  plugins: [viteSingleFile()],
   base: './',
   resolve: {
     alias: {

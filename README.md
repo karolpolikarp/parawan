@@ -12,6 +12,8 @@ numery dowodów, e-maile, telefony, adresy oraz imiona i nazwiska na neutralne p
 z tego repozytorium i uruchamiasz na własnym komputerze — cała anonimizacja odbywa się
 lokalnie, w Twojej przeglądarce. Możesz rozłączyć internet i sprawdzić.
 
+![Aplikacja Anonimizator — tekst źródłowy po lewej, zredagowany wynik z podświetlonymi maskami po prawej](docs/screenshot.png)
+
 ## Pobierz i używaj (bez instalacji)
 
 1. Wejdź w [**Releases**](https://github.com/karolpolikarp/anonimizator/releases) i pobierz

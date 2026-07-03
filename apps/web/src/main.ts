@@ -111,9 +111,17 @@ function renderChips(found: PiiFinding[]): void {
     .join(' ');
 }
 
+// Powyżej tego progu rezygnujemy z podświetlania masek (dziesiątki tysięcy elementów <mark>
+// potrafią przyciąć DOM); sama redakcja jest szybka (~30 ms na 1,5 mln znaków).
+const HIGHLIGHT_LIMIT = 300_000;
+
 function renderResult(redacted: string, found: PiiFinding[]): void {
   lastRedacted = redacted;
-  output.innerHTML = highlightMasks(escapeHtml(redacted));
+  if (redacted.length > HIGHLIGHT_LIMIT) {
+    output.textContent = redacted;
+  } else {
+    output.innerHTML = highlightMasks(escapeHtml(redacted));
+  }
   findingsBar.hidden = false;
   if (found.length === 0) {
     findingsChips.innerHTML = '<span class="chip chip-ok">nie wykryto danych osobowych</span>';
@@ -279,5 +287,11 @@ input.addEventListener('drop', (e) => {
   const file = e.dataTransfer?.files?.[0];
   if (file) loadTextFile(file);
 });
+
+// ?demo — autouzupełnij przykład (do linków demonstracyjnych i zrzutów ekranu).
+// MUSI być po deklaracji EXAMPLE_TEXT (const, TDZ) i tuż przed startowym update().
+if (new URLSearchParams(location.search).has('demo')) {
+  input.value = EXAMPLE_TEXT;
+}
 
 update();
