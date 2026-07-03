@@ -189,6 +189,54 @@ mark.mask {
   color: var(--ok-text);
 }
 
+.ner-box {
+  margin-top: 0.9rem;
+  padding: 0.7rem 0.9rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+.ner-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ner-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.ner-status { color: var(--muted); font-size: 0.85rem; }
+.ner-ok { color: var(--ok-text); }
+.ner-fail { color: var(--mask-text); }
+
+.ner-details { margin-top: 0.6rem; }
+
+.ner-details input {
+  width: 100%;
+  max-width: 360px;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+}
+
+.ner-note {
+  margin: 0.5rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
 .info {
   margin-top: 2.25rem;
 }

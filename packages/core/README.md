@@ -26,8 +26,16 @@ CLI:
 npx anonimizator dokument.txt --out czysty.txt
 ```
 
-**Ograniczenie:** wykrywanie imion/nazwisk jest heurystyczne (słownik imion + wyzwalacze
-kontekstu) — zawsze przejrzyj wynik przed udostępnieniem.
+**Ograniczenie:** wykrywanie imion/nazwisk warstwą podstawową jest heurystyczne (słownik
+imion + wyzwalacze kontekstu) — zawsze przejrzyj wynik przed udostępnieniem. Recall rzadkich
+nazwisk podnosi opcjonalna lokalna usługa NER (fail-safe — jej awaria nigdy nie obniża
+ochrony poniżej warstwy regex):
+
+```ts
+import { redactPIIFull } from 'anonimizator/ner';
+
+const { redacted } = await redactPIIFull(tekst, { url: 'http://127.0.0.1:8090' });
+```
 
 Pełna dokumentacja: <https://github.com/karolpolikarp/anonimizator>
 

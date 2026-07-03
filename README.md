@@ -4,13 +4,28 @@ Lokalny anonimizator polskich danych osobowych (PII). Zamienia PESEL, NIP, REGON
 numery dowodów, e-maile, telefony, adresy oraz imiona i nazwiska na neutralne placeholdery —
 **zanim** tekst trafi do czatu z modelem językowym, e-maila, zgłoszenia czy bazy danych.
 
-Trzy formy użycia, jeden silnik:
+**Nikt niczego nie serwuje centralnie i nie przetwarza Twoich danych.** Pobierasz aplikację
+z tego repozytorium i uruchamiasz na własnym komputerze — cała anonimizacja odbywa się
+lokalnie, w Twojej przeglądarce. Możesz rozłączyć internet i sprawdzić.
 
-- **Strona WWW** (`apps/web`) — wklejasz tekst, dostajesz zredagowany. Działa w 100% w przeglądarce:
-  żaden znak nie opuszcza Twojego komputera (możesz rozłączyć internet i sprawdzić).
+## Pobierz i używaj (bez instalacji)
+
+1. Wejdź w [**Releases**](https://github.com/karolpolikarp/anonimizator/releases) i pobierz
+   `anonimizator-offline.zip`.
+2. Rozpakuj i otwórz `index.html` **podwójnym kliknięciem** — aplikacja działa prosto z dysku,
+   bez serwera, bez instalacji, bez internetu.
+3. Wklej tekst albo wczytaj plik — po prawej dostajesz wersję zredagowaną do skopiowania.
+
+Alternatywnie sklonuj repo i odpal z kodu (sekcja „Dla programistów" niżej).
+
+## Formy użycia — jeden silnik
+
+- **Aplikacja w przeglądarce** (`apps/web`) — patrz wyżej; 100% offline.
 - **Biblioteka npm** (`packages/core`, pakiet `anonimizator`) — zero zależności, działa w Node,
   Deno, Bun i przeglądarce.
 - **CLI** — `anonimizator plik.txt`, także stdin → stdout do potoków.
+- **Opcjonalny lokalny NER** (`services/ner`) — usługa spaCy PL na Twoim komputerze,
+  podnosząca wykrywalność rzadkich nazwisk (szczegóły niżej).
 
 ```
 Nazywam się Jan Kowalski, PESEL 44051401359, ul. Polna 12/3, tel. 600 700 800.
@@ -45,10 +60,32 @@ przebieg po zredagowanym tekście niczego nie psuje.
 
 ## Ograniczenia (przeczytaj przed użyciem)
 
-Wykrywanie **imion i nazwisk jest heurystyczne** — rzadkie nazwisko bez imienia ze słownika
-i bez wyzwalacza kontekstu może przejść niewykryte. To narzędzie pomocnicze: **zawsze przejrzyj
-wynik przed udostępnieniem**. Pełny NER (model językowy rozpoznający odmienione i rzadkie
-nazwiska) jest na roadmapie jako opcjonalny, również lokalny moduł.
+Wykrywanie **imion i nazwisk warstwą podstawową jest heurystyczne** — rzadkie nazwisko bez
+imienia ze słownika i bez wyzwalacza kontekstu może przejść niewykryte. Lukę domyka opcjonalny
+lokalny NER (niżej), ale zasada pozostaje: to narzędzie pomocnicze — **zawsze przejrzyj wynik
+przed udostępnieniem**.
+
+## Opcjonalny lokalny NER (rzadkie i odmienione nazwiska)
+
+Zdanie „Wczoraj Bąkiewicz podpisał umowę z Szczepankowską" nie zawiera ani imienia ze słownika,
+ani wyzwalacza kontekstu — warstwa regex go nie zamaskuje. Rozwiązaniem jest **NER** (model
+spaCy PL rozpoznający osoby z kontekstu zdania), uruchamiany **na Twoim komputerze**:
+
+```bash
+cd services/ner
+docker compose up -d      # usługa na 127.0.0.1:8090 (tylko localhost)
+```
+
+Potem w aplikacji webowej zaznacz „Użyj lokalnego NER". Architektura jest **fail-safe**:
+
+- NER dostaje tekst JUŻ po redakcji strukturalnej — **nigdy nie widzi** surowego PESEL/NIP;
+- gdy usługa nie działa / nie odpowiada / przekroczy timeout, wynik zostaje na warstwie
+  regex + sumy kontrolne — ochrona nigdy nie spada do zera;
+- circuit breaker przestaje odpytywać padniętą usługę (3 porażki → 30 s przerwy).
+
+Z biblioteki: `import { redactPIIFull } from 'anonimizator/ner'` —
+`await redactPIIFull(tekst, { url: 'http://127.0.0.1:8090' })`.
+Szczegóły: [`services/ner/README.md`](./services/ner/README.md).
 
 ## Użycie — biblioteka
 
@@ -82,35 +119,38 @@ type dokument.txt | npx anonimizator           # Windows
 cat dokument.txt | npx anonimizator            # Linux/macOS
 ```
 
-## Użycie — strona WWW (deweloperska)
+## Dla programistów
 
 ```bash
 npm install
-npm run dev        # http://localhost:5173
-npm run build      # statyczne pliki w apps/web/dist — hostuj gdziekolwiek (GitHub Pages, Vercel…)
+npm run dev        # http://localhost:5173 (hot reload)
+npm run build      # statyczne pliki w apps/web/dist — działają też otwarte prosto z dysku (file://)
+npm test
 ```
 
-Strona nie ma backendu, analityki ani żadnych zapytań sieciowych — cała logika wykonuje się
-w przeglądarce.
+Aplikacja nie ma backendu, analityki ani żadnych zapytań sieciowych — cała logika wykonuje
+się w przeglądarce. Jedyny wyjątek to świadomie włączony lokalny NER (żądania idą wyłącznie
+pod adres localhost wskazany przez użytkownika).
 
 ## Struktura repozytorium
 
 ```
-packages/core/    # silnik redakcji (TS, zero zależności) + CLI + testy (Vitest)
-apps/web/         # statyczna strona (Vite, bez frameworka)
+packages/core/    # silnik redakcji (TS, zero zależności) + klient NER + CLI + testy (Vitest)
+apps/web/         # statyczna aplikacja (Vite, bez frameworka), działa z file://
+services/ner/     # opcjonalna lokalna usługa NER (Python/FastAPI + spaCy PL, Docker)
 ```
 
 ## Testy
 
 ```bash
-npm test          # 26 testów: sumy kontrolne, maskowanie, fałszywe trafienia, idempotencja
+npm test          # 33 testy: sumy kontrolne, maskowanie, fałszywe trafienia, idempotencja,
+                  # fail-safe NER (mock), scalanie znalezisk, circuit breaker
 ```
 
 ## Roadmapa
 
-- [ ] Opcjonalny lokalny NER (rozpoznawanie odmienionych/rzadkich nazwisk) — np. model w
-      przeglądarce (ONNX/transformers.js) albo kontener Docker ze spaCy PL, zawsze fail-safe
-      do warstwy regex.
+- [ ] NER bez Dockera: model ONNX odpalany bezpośrednio w przeglądarce (transformers.js) —
+      pełny recall nazwisk bez instalowania czegokolwiek.
 - [ ] Konfigurowalne placeholdery i wybór typów do maskowania.
 - [ ] Obsługa plików PDF/DOCX w aplikacji webowej (ekstrakcja tekstu lokalnie).
 

@@ -1,4 +1,5 @@
 import { redactPII, type PiiFinding } from 'anonimizator';
+import { mergeFindings, nerHealthCheck, nerRedact } from 'anonimizator/ner';
 import './style.css';
 
 const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
@@ -12,6 +13,10 @@ const downloadBtn = $<HTMLButtonElement>('download');
 const clearBtn = $<HTMLButtonElement>('clear');
 const loadFileBtn = $<HTMLButtonElement>('load-file');
 const fileInput = $<HTMLInputElement>('file-input');
+const nerEnabledBox = $<HTMLInputElement>('ner-enabled');
+const nerDetails = $<HTMLDivElement>('ner-details');
+const nerUrlInput = $<HTMLInputElement>('ner-url');
+const nerStatus = $<HTMLSpanElement>('ner-status');
 
 let lastRedacted = '';
 
@@ -57,8 +62,69 @@ function renderChips(found: PiiFinding[]): void {
     .join(' ');
 }
 
+function renderResult(redacted: string, found: PiiFinding[]): void {
+  lastRedacted = redacted;
+  output.innerHTML = highlightMasks(escapeHtml(redacted));
+  findingsBar.hidden = false;
+  if (found.length === 0) {
+    findingsChips.innerHTML = '<span class="chip chip-ok">nie wykryto danych osobowych</span>';
+  } else {
+    renderChips(found);
+  }
+}
+
+// ── Opcjonalny lokalny NER (usługa na komputerze użytkownika, services/ner) ──
+// Warstwa regex działa natychmiast; NER dokłada się z opóźnieniem (debounce) i jest
+// FAIL-SAFE: gdy usługa nie odpowiada, zostaje wynik warstwy regex. Licznik sekwencji
+// odrzuca spóźnione odpowiedzi, żeby stary wynik nie nadpisał nowszego tekstu.
+let nerSeq = 0;
+let nerTimer: ReturnType<typeof setTimeout> | undefined;
+
+function nerConfig() {
+  return { url: nerUrlInput.value.trim(), timeoutMs: 5000 };
+}
+
+function scheduleNer(baseRedacted: string, baseFound: PiiFinding[]): void {
+  if (!nerEnabledBox.checked || !nerUrlInput.value.trim()) return;
+  const seq = ++nerSeq;
+  clearTimeout(nerTimer);
+  nerTimer = setTimeout(async () => {
+    const ner = await nerRedact(baseRedacted, nerConfig());
+    if (seq !== nerSeq) return; // w międzyczasie użytkownik zmienił tekst
+    if (!ner) {
+      setNerStatus(false);
+      return;
+    }
+    setNerStatus(true);
+    renderResult(ner.redacted, mergeFindings(baseFound, ner.found));
+  }, 400);
+}
+
+function setNerStatus(ok: boolean | null): void {
+  if (ok === null) {
+    nerStatus.textContent = 'sprawdzam…';
+    nerStatus.className = 'ner-status';
+  } else if (ok) {
+    nerStatus.textContent = 'aktywny ✓';
+    nerStatus.className = 'ner-status ner-ok';
+  } else {
+    nerStatus.textContent = 'niedostępny — działa warstwa regex';
+    nerStatus.className = 'ner-status ner-fail';
+  }
+}
+
+async function checkNer(): Promise<void> {
+  if (!nerEnabledBox.checked) {
+    nerStatus.textContent = '';
+    return;
+  }
+  setNerStatus(null);
+  setNerStatus(await nerHealthCheck(nerConfig()));
+}
+
 function update(): void {
   const text = input.value;
+  nerSeq++; // unieważnij ewentualną spóźnioną odpowiedź NER
   if (!text.trim()) {
     output.innerHTML = '<span class="placeholder">Tu pojawi się zredagowany tekst.</span>';
     findingsBar.hidden = true;
@@ -66,19 +132,33 @@ function update(): void {
     return;
   }
   const { redacted, found } = redactPII(text);
-  lastRedacted = redacted;
-  output.innerHTML = highlightMasks(escapeHtml(redacted));
-
-  if (found.length === 0) {
-    findingsBar.hidden = false;
-    findingsChips.innerHTML = '<span class="chip chip-ok">nie wykryto danych osobowych</span>';
-  } else {
-    findingsBar.hidden = false;
-    renderChips(found);
-  }
+  renderResult(redacted, found);
+  scheduleNer(redacted, found);
 }
 
 input.addEventListener('input', update);
+
+nerEnabledBox.addEventListener('change', () => {
+  nerDetails.hidden = !nerEnabledBox.checked;
+  localStorage.setItem('ner-enabled', nerEnabledBox.checked ? '1' : '');
+  checkNer();
+  update();
+});
+
+nerUrlInput.addEventListener('change', () => {
+  localStorage.setItem('ner-url', nerUrlInput.value.trim());
+  checkNer();
+  update();
+});
+
+// przywróć ustawienia NER z poprzedniej wizyty (localStorage — lokalnie, jak wszystko tutaj)
+const savedUrl = localStorage.getItem('ner-url');
+if (savedUrl) nerUrlInput.value = savedUrl;
+if (localStorage.getItem('ner-enabled')) {
+  nerEnabledBox.checked = true;
+  nerDetails.hidden = false;
+  checkNer();
+}
 
 clearBtn.addEventListener('click', () => {
   input.value = '';

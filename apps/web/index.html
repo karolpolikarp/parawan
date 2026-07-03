@@ -54,6 +54,25 @@
         <span id="findings-chips"></span>
       </section>
 
+      <section class="ner-box">
+        <div class="ner-row">
+          <label class="ner-toggle">
+            <input type="checkbox" id="ner-enabled" />
+            Użyj lokalnego NER — lepsze wykrywanie rzadkich i odmienionych nazwisk
+          </label>
+          <span id="ner-status" class="ner-status"></span>
+        </div>
+        <div id="ner-details" class="ner-details" hidden>
+          <input id="ner-url" type="text" value="http://127.0.0.1:8090" spellcheck="false" aria-label="Adres lokalnej usługi NER" />
+          <p class="ner-note">
+            Opcjonalna usługa uruchamiana <strong>na Twoim komputerze</strong> — folder
+            <code>services/ner</code> w repozytorium, start jedną komendą: <code>docker compose up -d</code>.
+            Tekst trafia wyłącznie pod wskazany adres lokalny — nadal nic nie wychodzi do internetu.
+            Gdy usługa nie działa, anonimizacja opiera się na warstwie regex + sumy kontrolne.
+          </p>
+        </div>
+      </section>
+
       <section class="info">
         <h2>Co wykrywa</h2>
         <div class="table-wrap">
@@ -72,7 +91,7 @@
               <tr><td>Kod pocztowy</td><td>XX-XXX</td><td><code>[KOD-POCZTOWY]</code></td></tr>
               <tr><td>Data urodzenia</td><td>data z kontekstem „ur./urodzony”</td><td><code>[DATA-URODZENIA]</code></td></tr>
               <tr><td>Adres</td><td>ul./al./os./pl. + nazwa + numer</td><td><code>[ADRES]</code></td></tr>
-              <tr><td>Imię i nazwisko</td><td>słownik ~200 polskich imion + wyzwalacze („nazywam się”, „Pan/Pani”)</td><td><code>[IMIĘ I NAZWISKO]</code></td></tr>
+              <tr><td>Imię i nazwisko</td><td>słownik ~200 polskich imion + wyzwalacze („nazywam się”, „Pan/Pani”); opcjonalnie lokalny NER (spaCy)</td><td><code>[IMIĘ I NAZWISKO]</code></td></tr>
             </tbody>
           </table>
         </div>
