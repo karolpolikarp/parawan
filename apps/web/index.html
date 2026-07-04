@@ -113,6 +113,7 @@
       </section>
       </div>
 
+      <div class="info-grid">
       <section class="info">
         <h2>Co wykrywa</h2>
         <div class="table-wrap" role="region" tabindex="0" aria-label="Co wykrywa — tabela">
@@ -135,22 +136,37 @@
             </tbody>
           </table>
         </div>
-        <p>
-          Walidacja sum kontrolnych odróżnia prawdziwy PESEL czy NIP od przypadkowego ciągu cyfr
-          (sygnatury akt, numery przepisów) — dlatego fałszywych trafień jest bardzo mało.
-          Strażnik kontekstu pilnuje, żeby „art. 123 456 789” nie został uznany za telefon.
-        </p>
       </section>
 
-      <section id="ograniczenia" class="info caveat">
-        <h2>Ograniczenia — przeczytaj</h2>
-        <p>
-          Wykrywanie imion i nazwisk jest <strong>heurystyczne</strong>: rzadkie nazwisko bez
-          imienia ze słownika i bez wyzwalacza kontekstu może nie zostać zamaskowane. Numery
-          w nietypowych formatach też mogą się prześlizgnąć. <strong>Zawsze przejrzyj wynik,
-          zanim go udostępnisz.</strong> To narzędzie pomocnicze, a nie gwarancja anonimizacji.
-        </p>
-      </section>
+      <aside class="info-side">
+        <section class="side-card">
+          <h3>Dlaczego mało fałszywych trafień</h3>
+          <p>
+            Walidacja sum kontrolnych odróżnia prawdziwy PESEL czy NIP od przypadkowego ciągu
+            cyfr (sygnatury akt, numery przepisów). Strażnik kontekstu pilnuje, żeby
+            „art. 123 456 789” nie został uznany za telefon.
+          </p>
+        </section>
+        <section id="ograniczenia" class="side-card caveat">
+          <h3>Ograniczenia — przeczytaj</h3>
+          <p>
+            Wykrywanie imion i nazwisk jest <strong>heurystyczne</strong>: rzadkie nazwisko bez
+            imienia ze słownika i bez wyzwalacza kontekstu może nie zostać zamaskowane. Numery
+            w nietypowych formatach też mogą się prześlizgnąć. <strong>Zawsze przejrzyj wynik,
+            zanim go udostępnisz.</strong> To narzędzie pomocnicze, a nie gwarancja anonimizacji.
+          </p>
+        </section>
+        <section class="side-card">
+          <h3>Wskazówki</h3>
+          <ul class="tips">
+            <li><kbd>Ctrl</kbd>+<kbd>Enter</kbd> kopiuje wynik.</li>
+            <li>Plik możesz upuścić w dowolnym miejscu strony.</li>
+            <li>Po wczytaniu dokumentu włącza się widok <strong>Porównanie</strong> — oryginał obok znacznika, jak w recenzji Worda.</li>
+            <li>Odznaczenie „imię i nazwisko” w „Co maskować” wyłącza też NER.</li>
+          </ul>
+        </section>
+      </aside>
+      </div>
     </main>
 
     <footer class="site-footer">

@@ -35,7 +35,7 @@ html { background: var(--bg0); }
 
 body {
   margin: 0 auto;
-  max-width: 1240px;
+  max-width: 1320px;
   padding: 4.5rem 1.6rem 6rem;
   color: var(--text);
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -554,6 +554,103 @@ a:hover { color: #9fbcf8; }
   .mask-toggles { gap: 0.65rem 1.25rem; }
 }
 
-/* Ikony ze sprite'a wyłączone — kreskówkowa stylistyka gryzła się z tonem
-   enterprise (zostaje favicon). Ukrywamy też span plakietki NER. */
-.ner-ico { display: none; }
+/* ── Ikony ze sprite'a — stonowane kafelki wpasowane w ton enterprise ── */
+
+h1::before,
+button.ico::before,
+.mask-settings summary::before,
+.ner-ico {
+  content: '';
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background-color: #141926;
+  box-shadow: inset 0 0 0 1px var(--line);
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-right: 0.5rem;
+  vertical-align: -4px;
+}
+
+h1::before {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  margin-right: 0.65rem;
+  vertical-align: -7px;
+  background-image: url('./icons/anonimizuj.png');
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+}
+
+#example::before { background-image: url('./icons/przyklad.png'); }
+#copy::before { background-image: url('./icons/kopiuj.png'); }
+#clear::before { background-image: url('./icons/wyczysc.png'); }
+#load-file::before { background-image: url('./icons/plik-txt.png'); }
+#download::before { background-image: url('./icons/plik-txt.png'); }
+.mask-settings summary::before { background-image: url('./icons/ustawienia.png'); }
+.ner-ico { background-image: url('./icons/ner.png'); width: 24px; }
+
+/* ── Dwukolumnowa sekcja informacyjna: tabela + boczne karty ── */
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1.65fr 1fr;
+  gap: 2rem;
+  align-items: start;
+  margin-top: 4.5rem;
+}
+
+@media (max-width: 980px) { .info-grid { grid-template-columns: 1fr; } }
+
+.info-grid .info { margin-top: 0; }
+
+.info-side {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  /* wyrównanie z tabelą (h2 sekcji obok ma swoją wysokość) */
+  margin-top: 3.1rem;
+}
+
+@media (max-width: 980px) { .info-side { margin-top: 0; } }
+
+.side-card {
+  background: var(--bg1);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1.25rem 1.4rem;
+  box-shadow: var(--shadow-card);
+}
+
+.side-card h3 {
+  margin: 0 0 0.6rem;
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.side-card p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+
+.side-card.caveat { border-left: 2px solid var(--warn-text); }
+.side-card.caveat p { color: var(--text); }
+
+.tips {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+kbd {
+  font-family: var(--mono);
+  font-size: 0.8em;
+  background: #1a2130;
+  border: 1px solid var(--line-strong);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 0.08em 0.42em;
+  color: #c9d4e8;
+}

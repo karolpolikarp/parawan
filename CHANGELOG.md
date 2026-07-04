@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.16.0 — 2026-07-05
+
+- **Ikony wróciły** (sprite użytkownika) — nagłówek, przyciski, karty ustawień;
+  na stonowanych kafelkach wpasowanych w ton enterprise.
+- **Wypełnienie ekranu**: sekcja „Co wykrywa" w układzie dwukolumnowym —
+  tabela + boczna kolumna trzech kart („Dlaczego mało fałszywych trafień",
+  „Ograniczenia", „Wskazówki" ze skrótami klawiszowymi w stylu <kbd>);
+  całość poszerzona do 1320 px. Koniec pustych flanków na szerokich ekranach.
+
 ## v0.15.0 — 2026-07-05
 
 **Ułożenie treści** (architektura informacji):
