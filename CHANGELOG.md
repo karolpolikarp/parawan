@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.12.0 — 2026-07-04
+
+- **Widok „Porównanie"** — recenzja jak w Wordzie: oryginalna wartość przekreślona
+  na czerwono obok kolorowego znacznika, w jednym dokumencie. Przełącznik
+  Wynik | Porównanie w panelu wyniku; po wczytaniu pliku (DOCX/PDF/TXT) tryb
+  porównania włącza się automatycznie. Diff w O(n) bez bibliotek (nie-maskowe
+  segmenty wyniku występują w oryginale dosłownie i po kolei).
+- **Oddech**: większe światło w całym układzie (padding paneli/pól/tabeli,
+  odstępy sekcji 4rem, delikatniejsza siatka tła) — czytelniej i bardziej
+  profesjonalnie, klimat „2027" bez zmian.
+
 ## v0.11.0 — 2026-07-04
 
 **Pełny redesign wizualny „2027"** (kierunek: cyber-privacy, na bazie UI-kitu użytkownika):

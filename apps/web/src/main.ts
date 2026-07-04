@@ -24,6 +24,8 @@ const nerUrlInput = $<HTMLInputElement>('ner-url');
 const nerStatus = $<HTMLSpanElement>('ner-status');
 
 let lastRedacted = '';
+let lastInput = '';
+let viewMode: 'result' | 'compare' = 'result';
 
 // ── Wybór typów do maskowania (panel „Co maskować") ──
 // Grupy logiczne widoczne dla użytkownika; IBAN i NR-KONTA to technicznie dwa typy,
@@ -110,13 +112,83 @@ function maskCategory(name: string): string {
   return 'cat-id'; // PESEL / NIP / REGON / NR-DOWODU
 }
 
+const MASK_TOKEN_RE =
+  /\[(PESEL|NIP|REGON|NR-KONTA|NR-DOWODU|EMAIL|TELEFON|KOD-POCZTOWY|DATA-URODZENIA|ADRES|IMIĘ I NAZWISKO|OSOBA-[A-Z]+)\]/g;
+
 /** Podświetl placeholdery ([PESEL], [IMIĘ I NAZWISKO]…) w zanonimizowanym tekście. */
 function highlightMasks(escaped: string): string {
   return escaped.replace(
-    /\[(PESEL|NIP|REGON|NR-KONTA|NR-DOWODU|EMAIL|TELEFON|KOD-POCZTOWY|DATA-URODZENIA|ADRES|IMIĘ I NAZWISKO|OSOBA-[A-Z]+)\]/g,
+    MASK_TOKEN_RE,
     (_m, name: string) => `<mark class="mask ${maskCategory(name)}">[${name}]</mark>`,
   );
 }
+
+/**
+ * Widok „Porównanie" (jak recenzja w Wordzie): oryginalna wartość przekreślona,
+ * obok kolorowy znacznik. Diff w O(n): nie-maskowe segmenty wyniku występują
+ * w oryginale DOSŁOWNIE i PO KOLEI (redakcja tylko podmienia fragmenty), więc luka
+ * w oryginale między kolejnymi segmentami to wartość zastąpiona maską.
+ * Heurystyka może się zsunąć tylko, gdy zamaskowana wartość zawiera w sobie tekst
+ * następujący tuż po masce — w praktyce pomijalne dla podglądu.
+ */
+function buildCompareHtml(original: string, redacted: string): string {
+  const tokens = redacted.split(MASK_TOKEN_RE); // [literal, nazwa, literal, nazwa, …]
+  let html = '';
+  let pos = 0;
+  let pending: string[] = [];
+
+  const flush = (gapEnd: number) => {
+    if (pending.length) {
+      const orig = original.slice(pos, gapEnd);
+      if (orig) html += `<del>${escapeHtml(orig)}</del> `;
+      for (const name of pending) {
+        html += `<mark class="mask ${maskCategory(name)}">[${name}]</mark>`;
+      }
+      pending = [];
+    }
+    pos = gapEnd;
+  };
+
+  for (let i = 0; i < tokens.length; i++) {
+    if (i % 2 === 1) {
+      pending.push(tokens[i]);
+      continue;
+    }
+    const lit = tokens[i];
+    if (!lit) continue;
+    const idx = original.indexOf(lit, pos);
+    flush(idx === -1 ? pos : idx);
+    html += escapeHtml(lit);
+    pos += lit.length;
+  }
+  flush(original.length);
+  return html;
+}
+
+const viewResultBtn = $<HTMLButtonElement>('view-result');
+const viewCompareBtn = $<HTMLButtonElement>('view-compare');
+
+function renderOutput(): void {
+  if (!lastRedacted) return;
+  if (lastRedacted.length > HIGHLIGHT_LIMIT) {
+    output.textContent = lastRedacted;
+    return;
+  }
+  output.innerHTML =
+    viewMode === 'compare'
+      ? buildCompareHtml(lastInput, lastRedacted)
+      : highlightMasks(escapeHtml(lastRedacted));
+}
+
+function setViewMode(mode: 'result' | 'compare'): void {
+  viewMode = mode;
+  viewResultBtn.classList.toggle('active', mode === 'result');
+  viewCompareBtn.classList.toggle('active', mode === 'compare');
+  renderOutput();
+}
+
+viewResultBtn.addEventListener('click', () => setViewMode('result'));
+viewCompareBtn.addEventListener('click', () => setViewMode('compare'));
 
 const TYPE_CAT: Record<string, string> = {
   IMIE: 'cat-person',
@@ -151,12 +223,9 @@ const HIGHLIGHT_LIMIT = 300_000;
 
 function renderResult(redacted: string, found: PiiFinding[]): void {
   lastRedacted = redacted;
+  lastInput = input.value; // oryginał dla widoku „Porównanie"
   setResultActions(true);
-  if (redacted.length > HIGHLIGHT_LIMIT) {
-    output.textContent = redacted;
-  } else {
-    output.innerHTML = highlightMasks(escapeHtml(redacted));
-  }
+  renderOutput();
   findingsBar.hidden = false;
   const label = findingsBar.querySelector<HTMLSpanElement>('.findings-label')!;
   if (found.length === 0) {
@@ -416,6 +485,8 @@ async function loadAnyFile(file: File): Promise<void> {
     const buf = new Uint8Array(await file.arrayBuffer());
     input.value = isDocx ? extractDocxText(buf) : await extractPdfText(buf);
     update();
+    // dokumenty najlepiej przegląda się w trybie recenzji (oryginał ↔ maska w jednym widoku)
+    setViewMode('compare');
   } catch (err) {
     showError(err instanceof Error ? err.message : 'Nie udało się odczytać pliku.');
   } finally {
