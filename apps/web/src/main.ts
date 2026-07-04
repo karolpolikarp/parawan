@@ -101,23 +101,47 @@ function escapeHtml(s: string): string {
     .replace(/>/g, '&gt;');
 }
 
-/** Podświetl placeholdery ([PESEL], [IMIĘ I NAZWISKO]…) w zredagowanym tekście. */
+/** Kategoria wizualna znacznika — spójna paleta masek i chipów (osoby/kontakt/ID/finanse/miejsce). */
+function maskCategory(name: string): string {
+  if (name.startsWith('OSOBA-') || name === 'IMIĘ I NAZWISKO') return 'cat-person';
+  if (name === 'EMAIL' || name === 'TELEFON') return 'cat-contact';
+  if (name === 'NR-KONTA') return 'cat-money';
+  if (name === 'ADRES' || name === 'KOD-POCZTOWY' || name === 'DATA-URODZENIA') return 'cat-place';
+  return 'cat-id'; // PESEL / NIP / REGON / NR-DOWODU
+}
+
+/** Podświetl placeholdery ([PESEL], [IMIĘ I NAZWISKO]…) w zanonimizowanym tekście. */
 function highlightMasks(escaped: string): string {
   return escaped.replace(
     /\[(PESEL|NIP|REGON|NR-KONTA|NR-DOWODU|EMAIL|TELEFON|KOD-POCZTOWY|DATA-URODZENIA|ADRES|IMIĘ I NAZWISKO|OSOBA-[A-Z]+)\]/g,
-    '<mark class="mask">[$1]</mark>',
+    (_m, name: string) => `<mark class="mask ${maskCategory(name)}">[${name}]</mark>`,
   );
 }
 
+const TYPE_CAT: Record<string, string> = {
+  IMIE: 'cat-person',
+  EMAIL: 'cat-contact',
+  TELEFON: 'cat-contact',
+  IBAN: 'cat-money',
+  'NR-KONTA': 'cat-money',
+  ADRES: 'cat-place',
+  'KOD-POCZTOWY': 'cat-place',
+  'DATA-UR': 'cat-place',
+};
+
 function renderChips(found: PiiFinding[]): void {
   // scal duplikaty etykiet (IBAN i NR-KONTA mają tę samą etykietę)
-  const byLabel = new Map<string, number>();
+  const byLabel = new Map<string, { count: number; cat: string }>();
   for (const f of found) {
     const label = CHIP_LABEL[f.type] ?? f.type;
-    byLabel.set(label, (byLabel.get(label) ?? 0) + f.count);
+    const prev = byLabel.get(label);
+    byLabel.set(label, {
+      count: (prev?.count ?? 0) + f.count,
+      cat: TYPE_CAT[f.type] ?? 'cat-id',
+    });
   }
   findingsChips.innerHTML = [...byLabel.entries()]
-    .map(([label, count]) => `<span class="chip">${escapeHtml(label)} ×${count}</span>`)
+    .map(([label, v]) => `<span class="chip ${v.cat}">${escapeHtml(label)} ×${v.count}</span>`)
     .join(' ');
 }
 

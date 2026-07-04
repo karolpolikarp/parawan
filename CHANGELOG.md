@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.11.0 — 2026-07-04
+
+**Pełny redesign wizualny „2027"** (kierunek: cyber-privacy, na bazie UI-kitu użytkownika):
+
+- Dark-only: głęboki granat z techniczną siatką i poświatami (czysty CSS, zero
+  zewnętrznych zasobów — single-file bez zmian architektury).
+- Gradientowy tytuł ze świecącą plakietką, rząd badge'ów (100% Offline / Bezpieczne /
+  Open Source·MIT / Reguły+lokalne AI), pasek kroków 1→4, nagłówki sekcji w stylu `//`.
+- **Kolorowe znaczniki per kategoria PII** — spójnie w wyniku i chipach:
+  osoby=fiolet, kontakt=cyjan, identyfikatory=bursztyn, finanse=zieleń,
+  adres/czas=błękit. Wynik czyta się na pierwszy rzut oka.
+- Świecące CTA (gradient + glow), neonowe stany hover/focus/drag, tabela
+  z hover-em wierszy, sekcja ograniczeń z bursztynową listwą.
+- Weryfikacja: pełnostronicowe zrzuty desktop/mobile (0 px poziomego overflow),
+  regresja NER ONNX 4/4.
+
 ## v0.10.0 — 2026-07-04
 
 Duży szlif UX/UI po audycie panelu 5 agentów (5 soczewek, 39 znalezisk — wdrożone
