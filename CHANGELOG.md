@@ -3,6 +3,14 @@
 Format wersji: [SemVer](https://semver.org/lang/pl/). Tagi `vX.Y.Z` budują paczkę
 offline (`anonimizator-offline.zip`) w [Releases](https://github.com/karolpolikarp/anonimizator/releases).
 
+## v0.4.0 — 2026-07-04
+
+- **Aplikacja czyta pliki PDF** — pdf.js (legacy build) z fake-workerem w buildzie
+  single-file; ekstrakcja w pełni offline, zweryfikowana E2E z `file://`.
+  Skany (bez warstwy tekstu) i PDF-y z hasłem dostają jasne polskie komunikaty.
+  Paczka offline: ~31 kB → ~1,7 MB (544 kB gzip) — nadal jeden plik.
+- 3 testy ekstrakcji PDF (minimalny PDF budowany w teście) + diagnostyczny `?pdftest`.
+
 ## v0.3.4 — 2026-07-04
 
 - Zmergowane wszystkie 8 PR-ów Dependabota: TypeScript 6.0, Vitest 4, Vite 8,

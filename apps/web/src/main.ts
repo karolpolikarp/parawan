@@ -1,6 +1,7 @@
 import { redactPII, type PiiFinding, type PiiType } from 'anonimizator';
 import { mergeFindings, nerHealthCheck, nerRedact } from 'anonimizator/ner';
 import { extractDocxText } from './docx';
+import { extractPdfText } from './pdf';
 import './style.css';
 
 const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
@@ -294,17 +295,19 @@ function loadTextFile(file: File): void {
 }
 
 async function loadAnyFile(file: File): Promise<void> {
-  if (/\.docx$/i.test(file.name)) {
-    try {
-      const buf = new Uint8Array(await file.arrayBuffer());
-      input.value = extractDocxText(buf);
-      update();
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Nie udało się odczytać pliku .docx.');
-    }
+  const isDocx = /\.docx$/i.test(file.name);
+  const isPdf = /\.pdf$/i.test(file.name);
+  if (!isDocx && !isPdf) {
+    loadTextFile(file);
     return;
   }
-  loadTextFile(file);
+  try {
+    const buf = new Uint8Array(await file.arrayBuffer());
+    input.value = isDocx ? extractDocxText(buf) : await extractPdfText(buf);
+    update();
+  } catch (err) {
+    alert(err instanceof Error ? err.message : 'Nie udało się odczytać pliku.');
+  }
 }
 
 fileInput.addEventListener('change', () => {
@@ -337,10 +340,45 @@ document.addEventListener('keydown', (e) => {
 
 // ?demo — autouzupełnij przykład (do linków demonstracyjnych i zrzutów ekranu).
 // MUSI być po deklaracji EXAMPLE_TEXT (const, TDZ) i tuż przed startowym update().
-if (new URLSearchParams(location.search).has('demo')) {
+const params = new URLSearchParams(location.search);
+if (params.has('demo')) {
   input.value = EXAMPLE_TEXT;
 } else {
   input.focus();
+}
+
+// ?pdftest — samodiagnostyka ścieżki PDF (fake worker w buildzie single-file):
+// generuje minimalny PDF w pamięci i przepuszcza przez ekstraktor.
+if (params.has('pdftest')) {
+  const body = 'BT /F1 12 Tf 72 720 Td (PDFTEST PESEL 44051401359) Tj ET';
+  const objs = [
+    '1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n',
+    '2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n',
+    '3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>endobj\n',
+    `4 0 obj<</Length ${body.length}>>stream\n${body}\nendstream endobj\n`,
+    '5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj\n',
+  ];
+  let off = '%PDF-1.4\n'.length;
+  const offs = objs.map((o) => {
+    const cur = off;
+    off += o.length;
+    return cur;
+  });
+  const xref =
+    'xref\n0 6\n0000000000 65535 f \n' +
+    offs.map((o) => `${String(o).padStart(10, '0')} 00000 n \n`).join('');
+  const pdfBytes = new TextEncoder().encode(
+    '%PDF-1.4\n' + objs.join('') + xref + `trailer<</Size 6/Root 1 0 R>>\nstartxref\n${off}\n%%EOF`,
+  );
+  extractPdfText(pdfBytes)
+    .then((t) => {
+      input.value = `[PDF OK] ${t}`;
+      update();
+    })
+    .catch((e) => {
+      input.value = `[PDF FAIL] ${e instanceof Error ? e.message : e}`;
+      update();
+    });
 }
 
 update();

@@ -20,8 +20,8 @@ lokalnie, w Twojej przeglądarce. Możesz rozłączyć internet i sprawdzić.
    `anonimizator-offline.zip`.
 2. Rozpakuj i otwórz `index.html` **podwójnym kliknięciem** — aplikacja działa prosto z dysku,
    bez serwera, bez instalacji, bez internetu.
-3. Wklej tekst albo upuść plik (`.txt`, `.docx`) — po prawej dostajesz wersję zredagowaną
-   do skopiowania. Pliki Word są czytane w całości lokalnie, jak wszystko tutaj.
+3. Wklej tekst albo upuść plik (`.txt`, `.docx`, `.pdf`) — po prawej dostajesz wersję
+   zredagowaną do skopiowania. Pliki Word i PDF są czytane w całości lokalnie, jak wszystko tutaj.
 
 Alternatywnie sklonuj repo i odpal z kodu (sekcja „Dla programistów" niżej).
 
@@ -170,7 +170,8 @@ npm test          # sumy kontrolne, maskowanie, fałszywe trafienia, idempotencj
       pełny recall nazwisk bez instalowania czegokolwiek.
 - [x] Konfigurowalne placeholdery i wybór typów do maskowania (v0.2.0).
 - [x] Obsługa plików DOCX w aplikacji webowej — ekstrakcja tekstu lokalnie (v0.3.0).
-- [ ] Obsługa plików PDF (wymaga pdf.js — rozważane vs. rozmiar paczki offline).
+- [x] Obsługa plików PDF — pdf.js w buildzie single-file, w pełni offline (v0.4.0).
+      PDF-y bez warstwy tekstu (skany) dostają jasny komunikat — OCR nie jest wspierany.
 
 ## Pochodzenie
 
