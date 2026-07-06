@@ -133,3 +133,63 @@ export function surnameBase(word: string): string | null {
 
   return null;
 }
+
+// ============================================================================
+// Morfologiczny rozpoznawacz nazwisk (poza słownikiem) — recall dla rzadkich nazwisk
+// ============================================================================
+
+/**
+ * Charakterystyczne polskie sufiksy nazwiskowe (mianownik + częste formy odmienione):
+ *  - przymiotnikowe -ski/-cki/-dzki (rodz. żeński -ska, mnogie -scy, przypadki zależne),
+ *  - patronimiczne -icz/-wicz/-owicz/-ewicz (+ odmiana),
+ *  - -czyk (+ odmiana).
+ * To sygnał o wysokiej precyzji: takich końcówek prawie nie mają wyrazy pospolite (poza
+ * przymiotnikami geo/narodowymi — te odsiewa NON_SURNAME_ADJ + kontekst w index.ts).
+ */
+const SURNAME_SUFFIX =
+  /(?:sk|ck|dzk)(?:i|a|iego|iej|iemu|im|imi|ich|ą)$|(?:scy|ccy|dzcy)$|icz(?:a|owi|em|owie|ami|ach)?$|czyk(?:a|owi|iem|ami|ach|owie)?$/;
+
+/**
+ * Wyrazy z wielkiej litery o końcówce „nazwiskowej", które nazwiskami NIE są:
+ * przymiotniki narodowe, regionalne i miejskie (formy bazowe -ski/-cki/-dzki — odmienione
+ * warianty sprowadzamy do bazy regułami ADJ_RULES przed sprawdzeniem). Bez tego rozpoznawacz
+ * pożerałby „Polski", „Śląski", „Warszawski", „Mazowiecki" w nazwach własnych.
+ * UWAGA: nie wpisujemy tu nazwisk-przymiotników (np. „Górski") — te mają zostać maskowane.
+ */
+export const NON_SURNAME_ADJ = new Set<string>((
+  // narodowe / etniczne
+  'polski niemiecki francuski rosyjski angielski brytyjski amerykański włoski hiszpański ' +
+  'portugalski czeski słowacki ukraiński białoruski litewski łotewski estoński fiński ' +
+  'węgierski rumuński bułgarski serbski chorwacki grecki turecki chiński japoński koreański ' +
+  'indyjski arabski izraelski żydowski romski cygański europejski azjatycki afrykański ' +
+  'skandynawski bałtycki słowiański unijny radziecki sowiecki ' +
+  // regiony / województwa
+  'mazowiecki małopolski wielkopolski śląski dolnośląski górnośląski pomorski zachodniopomorski ' +
+  'kujawski podlaski lubelski lubuski łódzki opolski podkarpacki świętokrzyski warmiński ' +
+  'mazurski kaszubski beskidzki tatrzański ' +
+  // miejskie
+  'warszawski krakowski gdański poznański wrocławski szczeciński bydgoski katowicki radomski ' +
+  'toruński kielecki rzeszowski olsztyński gliwicki tarnowski płocki częstochowski gdyński ' +
+  // ogólne / instytucjonalne / relacyjne przymiotniki na -ski/-cki/-dzki
+  'miejski wiejski wojewódzki morski nadmorski królewski cesarski papieski biskupi diecezjalny ' +
+  'boski niebiański ziemski świecki damski męski żeński ludzki dziecięcy ojcowski macierzyński ' +
+  'lekarski adwokacki nauczycielski rybacki górniczy(NIE) rycerski sąsiedzki wiejski ludowy(NIE) ' +
+  'znicz'
+).split(/\s+/).filter((w) => w && !w.includes('(')));
+
+/**
+ * Czy wyraz WYGLĄDA na polskie nazwisko po samej morfologii (bez słownika)?
+ * Precyzja: końcówka nazwiskowa + odsianie przymiotników geo/narodowych + min. długość.
+ * Kontekst (poprzedzający wyraz, pozycja) rozstrzyga index.ts — tu tylko warstwa leksykalna.
+ */
+export function looksLikeSurname(word: string): boolean {
+  const w = word.toLowerCase();
+  if (w.length < 5) return false;
+  if (!SURNAME_SUFFIX.test(w)) return false;
+  if (NON_SURNAME_ADJ.has(w)) return false;
+  // sprowadź odmieniony przymiotnik do bazy -ski i sprawdź stoplistę raz jeszcze
+  for (const [re, rep] of ADJ_RULES) {
+    if (re.test(w)) return !NON_SURNAME_ADJ.has(w.replace(re, rep));
+  }
+  return true;
+}

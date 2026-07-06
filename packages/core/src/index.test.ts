@@ -473,6 +473,58 @@ test('krok 13c nie psuje idempotencji', () => {
   expect(redactPII(once).redacted).toBe(once);
 });
 
+// ── Nazwiska rozpoznane MORFOLOGICZNIE (spoza słownika: -ski/-cki/-icz/-czyk) ──
+test('rzadkie nazwisko solo w mianowniku (Fiołkowska)', () => {
+  const r = redactPII('Fiołkowska wygrała przetarg na dostawę mebli.');
+  expect(r.redacted).toContain('[IMIĘ I NAZWISKO]');
+  expect(r.redacted.includes('Fiołkowska')).toBe(false);
+});
+test('rzadkie nazwisko solo w dopełniaczu (Gzowskiego)', () => {
+  const r = redactPII('list od Gzowskiego leżał na biurku tydzień');
+  expect(r.redacted.includes('Gzowskiego')).toBe(false);
+});
+test('rzadkie nazwisko -icz w odmianie (Bąkiewiczowi)', () => {
+  const r = redactPII('Bąkiewiczowi zależało na szybkiej wypłacie.');
+  expect(r.redacted.includes('Bąkiewiczowi')).toBe(false);
+});
+test('rzadkie nazwisko -czyk w odmianie (Zdrojewczyka)', () => {
+  const r = redactPII('sprawę Zdrojewczyka przekazano do prokuratury');
+  expect(r.redacted.includes('Zdrojewczyka')).toBe(false);
+});
+test('para rzadkie imię + rzadkie nazwisko (Świętomira Gzowska) — oba maskowane', () => {
+  const r = redactPII('Świętomira Gzowska przyszła na przesłuchanie.');
+  expect(r.redacted.includes('Świętomira')).toBe(false);
+  expect(r.redacted.includes('Gzowska')).toBe(false);
+});
+test('nazwisko dwuczłonowe morfologiczne (Rzepeckiej-Gil)', () => {
+  const r = redactPII('opinia Rzepeckiej-Gil była druzgocąca');
+  expect(r.redacted.includes('Rzepeckiej')).toBe(false);
+});
+test('małżonkowie o wspólnym nazwisku (Anna i Jan Kowalscy) — nic nie wycieka', () => {
+  const r = redactPII('Anna i Jan Kowalscy kupili mieszkanie na osiedlu.');
+  expect(r.redacted.includes('Anna')).toBe(false);
+  expect(r.redacted.includes('Jan')).toBe(false);
+  expect(r.redacted.includes('Kowalscy')).toBe(false);
+});
+
+// ── ANTY-NADMASKOWANIE morfologiczne: przymiotnik w nazwie instytucji/geo NIE jest nazwiskiem ──
+test('nazwy instytucji z przymiotnikiem -ski/-cki pozostają nietknięte', () => {
+  const clean = [
+    'Uniwersytet Warszawski ogłosił konkurs.',
+    'Izba Lekarska wydała opinię.',
+    'Bank Śląski przygotował ofertę.',
+    'Sąd Okręgowy w Krakowie wydał wyrok.',
+    'Narodowy Bank Polski obniżył stopy.',
+    'Politechnika Śląska otworzyła nabór.',
+  ];
+  for (const t of clean) expect(redactPII(t).redacted).toBe(t);
+});
+test('rzeczownik przed nazwiskiem w dopełniaczu ZOSTAJE (Zaległości Trzebiatowskiego)', () => {
+  const r = redactPII('Zaległości Trzebiatowskiego rosły z miesiąca na miesiąc.');
+  expect(r.redacted).toContain('Zaległości'); // rzeczownik pospolity — nie nazwisko
+  expect(r.redacted.includes('Trzebiatowskiego')).toBe(false); // nazwisko zamaskowane
+});
+
 // ── Regresje z benchmarku (docs/BENCHMARK.md, 2026-07-04) ──
 test('REGON ze złą sumą NIE jest zjadany przez detektor telefonu', () => {
   const r = redactPII('Firma o REGON 123456784 w rejestrze');

@@ -369,7 +369,8 @@ export function buildDataset() {
   str('Zgłoszenia przyjmujemy pod adresem biuro+rekrutacja@firma.com.pl.', ['biuro+rekrutacja@firma.com.pl'], ['Zgłoszenia']);
   str('e-mail: a.nowak-wojcik@uw.edu.pl (służbowy)', ['a.nowak-wojcik@uw.edu.pl'], ['służbowy']);
   // kody pocztowe
-  str('Adres do doręczeń: 00-950 Warszawa, skrytka 21.', ['00-950'], ['Warszawa', 'skrytka 21']);
+  // miejscowość po kodzie pocztowym jest maskowana od v0.26 (funkcja „Miejscowość")
+  str('Adres do doręczeń: 00-950 Warszawa, skrytka 21.', ['00-950', 'Warszawa'], ['skrytka 21']);
   str('Przesyłkę nadano z kodu 31-042.', ['31-042'], ['nadano']);
   // adresy
   str('Zamieszkały przy ul. Polnej 12/3 w Krakowie.', ['ul. Polnej 12/3'], ['Krakowie']);
@@ -446,7 +447,9 @@ export function buildDataset() {
   neg('Ciąg 1234563210 to przykładowy identyfikator testowy.', ['1234563210']);
   neg('REGON 123456784 zawiera błąd i został odrzucony.', ['123456784']);
   neg(`Rachunek ${IBAN_BAD} ma błędną sumę kontrolną.`, [IBAN_BAD]);
-  neg('Seria ABA300001 nie jest poprawnym numerem dowodu.', ['ABA300001']);
+  // format dowodu (3 wielkie litery + 6 cyfr) maskujemy nawet bez poprawnej sumy — od v0.20
+  // (numery w pismach bywają testowe/z literówką; bezpieczniej zamaskować układ dowodu)
+  str('Seria ABA300001 nie jest poprawnym numerem dowodu.', ['ABA300001'], []);
   neg('Wartość 12345678901 pojawiła się w logu importu.', ['12345678901']);
   // ciągi cyfr osłonięte kontekstem numeracyjnym
   neg('Zamówienie nr 987654321 zostało wysłane kurierem.', ['987654321']);

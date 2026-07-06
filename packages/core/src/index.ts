@@ -21,7 +21,7 @@
  * (np. dwa niezależne przejścia redakcji) niczego nie psuje.
  */
 
-import { normalizeSurnameKey, surnameBase } from './surnames.js';
+import { normalizeSurnameKey, surnameBase, looksLikeSurname } from './surnames.js';
 
 export type PiiType =
   | 'EMAIL'
@@ -243,13 +243,36 @@ const LEGAL_ENTITY_WORDS = new Set<string>(
     'krajowy krajowa główny główna społecznych ' +
     // częste rzeczowniki „dokumentowe" — nie mylić z nazwiskiem w parze „Słowo Imię"
     'umowa umowie załącznik rozdział artykuł ustęp punkt pozycja faktura pismo wniosek decyzja ' +
-    'departament biuro wydział referat oddział sekcja nowy nowa'
+    'departament biuro wydział referat oddział sekcja nowy nowa ' +
+    // rzeczowniki instytucjonalne — chronią przymiotnik w nazwie („Uniwersytet Warszawski",
+    // „Izba Lekarska", „Bank Śląski") przed morfologicznym rozpoznawaczem nazwisk (krok 13a2)
+    'uniwersytet uniwersytetu politechnika akademia akademii instytut instytutu bank banku ' +
+    'szpital szpitala teatr muzeum klub związek związku kancelaria kancelarii fundacja fundacji ' +
+    'stowarzyszenie spółka spółki spółdzielnia spółdzielni samorząd samorządu rada rady zarząd ' +
+    'zarządu gmina gminy powiat powiatu województwo starostwo kuratorium izby prawa'
   ).split(/\s+/),
 );
 
 /** Tytuły/grzecznościowe — NIE są nazwiskiem w parze „Tytuł Imię" (trigger obsługuje je osobno). */
 const TITLE_WORDS = new Set<string>(
   'pan pani pana panu panią panie państwo szanowny szanowna dr prof mgr inż'.split(/\s+/),
+);
+
+/**
+ * Role/funkcje/tytuły zawodowe stojące PRZED nazwiskiem („Prezes Gzowski", „Sędzia Trzebiatowski").
+ * W parze morfologicznej (krok 13a2) maskujemy wtedy SAMO nazwisko, a rolę zostawiamy —
+ * inaczej znikałoby słowo niosące sens („Dyrektor [IMIĘ] podpisał").
+ */
+const ROLE_WORDS = new Set<string>(
+  (
+    'prezes prezesa prezesie dyrektor dyrektora dyrektorze minister ministra prezydent prezydenta ' +
+    'wiceprezes wicedyrektor wojewoda wojewody starosta starosty burmistrz burmistrza wójt wójta ' +
+    'marszałek marszałka sędzia sędziego sędzię prokurator prokuratora adwokat adwokata radca radcy ' +
+    'notariusz notariusza komornik komornika kierownik kierownika naczelnik naczelnika inspektor ' +
+    'inspektora kurator kuratora rektor rektora dziekan dziekana profesor profesora doktor doktora ' +
+    'mecenas mecenasa kanclerz przewodniczący przewodnicząca sekretarz skarbnik pełnomocnik biegły ' +
+    'świadek powód pozwany oskarżony wnioskodawca'
+  ).split(/\s+/),
 );
 
 /**
@@ -667,6 +690,20 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   if (on('IMIE')) {
     const capWord = `[${PL_UP}][${PL_LO}]+(?:-[${PL_UP}][${PL_LO}]+)?`;
 
+    // (a0) „Imię i Imię Nazwisko" — małżonkowie/rodzeństwo o WSPÓLNYM nazwisku („Anna i Jan
+    // Kowalscy"). Bez tego (a) maskuje tylko „Jan Kowalscy", a pierwsze imię („Anna") wycieka.
+    // Wymaga DWÓCH imion słownikowych + spójnika + trzeciego wyrazu z wielkiej (nazwisko) —
+    // wąski, wysokoprecyzyjny wzorzec (nie rusza „Sąd i Trybunał Konstytucyjny").
+    text = text.replace(
+      new RegExp(`(?<![${PL_UP}${PL_LO}-])(${capWord})\\s+(?:i|oraz)\\s+(${capWord})\\s+(${capWord})`, 'g'),
+      (m, a: string, b: string, c: string) => {
+        if (!isFirstNameLike(a) || !isFirstNameLike(b)) return m;
+        if (LEGAL_ENTITY_WORDS.has(c.toLowerCase())) return m;
+        bump('IMIE');
+        return `${personMask(c)} i ${personMask(c)}`; // wspólne nazwisko = ten sam klucz osoby
+      },
+    );
+
     // (a) IMIĘ/IMIONA + NAZWISKO — jedno lub dwa imiona (mianownik LUB odmiana) + nazwisko:
     // „Jan Kowalski", „Anną Kowalską", „Monika Ewa Nojszewska", „Prezes Zarządu Jan Kowalski".
     // Kotwiczymy na PIERWSZYM słowie-imieniu w ciągu wyrazów z wielkiej litery: wyrazy przed nim
@@ -687,6 +724,36 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
       const rest = words.slice(k + 1).join(' ');
       return [prefix, personMask(surname), rest].filter(Boolean).join(' ');
     });
+
+    // (a2) para „Wyraz Nazwisko(morfologiczne)" — drugi wyraz ma mocny sufiks nazwiskowy spoza
+    // słownika (-ski/-cki/-icz/-czyk). Rozstrzyga PRZYPADEK nazwiska:
+    //   • DOPEŁNIACZ/zależny („Zaległości Trzebiatowskiego", „Wniosek Kowalskiego") — to
+    //     dzierżawczy dopełniacz przy rzeczowniku → maskujemy TYLKO nazwisko, wyraz zostaje;
+    //   • MIANOWNIK („Świętomira Gzowska", „Bożydar Krzemieniecki") — para imię+nazwisko →
+    //     maskujemy oba, chyba że w1 to encja/tytuł/rola (wtedy samo nazwisko lub nic).
+    // Kotwica PL-aware (nie `\b` — ASCII \b nie działa przed „Ś/Ł/Ą…"). Po (a), więc pary
+    // z imieniem słownikowym już zamaskowane. Stoplista chroni „Warszawski/Lekarska" (krok wyżej).
+    const surnameOblique =
+      /(?:sk|ck|dzk)(?:iego|iej|iemu|im|imi|ich|ą)$|icz(?:a|owi|em|owie|ami|ach)$|czyk(?:a|owi|iem|ami|ach|owie)$/;
+    text = text.replace(
+      new RegExp(`(?<![${PL_UP}${PL_LO}-])(${capWord})\\s+(${capWord})`, 'g'),
+      (m, w1: string, w2: string) => {
+        if (!looksLikeSurname(w2)) return m;
+        const w1l = w1.toLowerCase();
+        if (surnameOblique.test(w2.toLowerCase())) {
+          bump('IMIE'); // dzierżawczy dopełniacz → rzeczownik/imię w w1 zostaje
+          return `${w1} ${personMask(w2)}`;
+        }
+        // mianownik:
+        if (LEGAL_ENTITY_WORDS.has(w1l)) return m; // „Nowa Ruda", „Izba …" — raczej nazwa własna
+        if (TITLE_WORDS.has(w1l) || ROLE_WORDS.has(w1l)) {
+          bump('IMIE');
+          return `${w1} ${personMask(w2)}`; // „Prezes Gzowski" → rola zostaje
+        }
+        bump('IMIE');
+        return personMask(w2); // rzadkie imię + nazwisko (mianownik) → oba
+      },
+    );
 
     // (a3) ODWRÓCONA kolejność „Nazwisko Imię" — częsta w nagłówkach e-maili (To/Cc/From:
     // „Kowalska Ewa", „Ejkszto Anna"). DRUGIE słowo musi być znanym imieniem, pierwsze —
@@ -736,6 +803,26 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
         if (!surnameBase(m)) return m;
         bump('IMIE');
         return personMask(m);
+      },
+    );
+  }
+
+  // (c2) SAMODZIELNE nazwisko rozpoznane MORFOLOGICZNIE (sufiks -ski/-cki/-icz/-czyk), spoza
+  // słownika: „sprawę Gzowskiego przekazano", „Fiołkowska wygrała", „opinia Rzepeckiej-Gil".
+  // Precyzja: maskujemy TYLKO gdy wyraz NIE jest drugim członem złożenia z wielkiej litery
+  // (przymiotnik po rzeczowniku: „Izba Lekarska", „Uniwersytet Warszawski" — te zostają).
+  // Obsługuje formy dwuczłonowe (kotwica na pierwszym członie).
+  if (on('IMIE')) {
+    text = text.replace(
+      new RegExp(`(?<![${PL_UP}${PL_LO}-])[${PL_UP}][${PL_LO}]+(?:-[${PL_UP}][${PL_LO}]+)?`, 'g'),
+      (m, offset: number) => {
+        if (LEGAL_ENTITY_WORDS.has(m.toLowerCase())) return m;
+        const first = m.split('-')[0];
+        if (!looksLikeSurname(m) && !looksLikeSurname(first)) return m;
+        // drugi człon złożenia z wielkiej litery (np. „… Warszawski") → to przymiotnik nazwy
+        if (new RegExp(`[${PL_UP}][${PL_LO}]+\\s+$`).test(text.slice(0, offset))) return m;
+        bump('IMIE');
+        return personMask(first);
       },
     );
   }

@@ -187,7 +187,7 @@ test('redactPIIUltra — kompozycja NER→LLM: LLM widzi wynik NER, awarie żadn
         const { text } = JSON.parse(String(init?.body));
         return new Response(
           JSON.stringify({
-            redacted: String(text).replace('Szczepankowską', '[IMIĘ I NAZWISKO]'),
+            redacted: String(text).replace('Chrząszcz', '[IMIĘ I NAZWISKO]'),
             found: [{ type: 'IMIE', count: 1 }],
           }),
           { status: 200 },
@@ -195,18 +195,20 @@ test('redactPIIUltra — kompozycja NER→LLM: LLM widzi wynik NER, awarie żadn
       }
       // Ollama: dostaje tekst po NER i wskazuje pozostałe nazwisko
       seenByLlm = JSON.parse(String(init?.body)).messages[1].content;
-      return ollamaResponse(JSON.stringify({ pii: ['Bąkiewicz'] }));
+      return ollamaResponse(JSON.stringify({ pii: ['Grzmot'] }));
     }),
   );
 
-  const r = await redactPIIUltra('Umowa: Bąkiewicz i Szczepankowską, PESEL 44051401359.', {
+  // Nazwiska bez charakterystycznego sufiksu (-ski/-icz/-czyk) — rdzeń ich NIE łapie
+  // morfologicznie, więc realnie testują kompozycję warstw NER→LLM.
+  const r = await redactPIIUltra('Umowa: Chrząszcz i Grzmot, PESEL 44051401359.', {
     ner: { url: 'http://127.0.0.1:8090' },
     llm: CFG,
   });
   expect(seenByLlm).toContain('[IMIĘ I NAZWISKO]'); // wynik NER widoczny dla LLM
-  expect(seenByLlm.includes('Szczepankowską')).toBe(false);
-  expect(r.redacted.includes('Bąkiewicz')).toBe(false);
-  expect(r.redacted.includes('Szczepankowską')).toBe(false);
+  expect(seenByLlm.includes('Chrząszcz')).toBe(false);
+  expect(r.redacted.includes('Grzmot')).toBe(false);
+  expect(r.redacted.includes('Chrząszcz')).toBe(false);
   expect(r.found.find((f) => f.type === 'IMIE')?.count).toBe(2); // NER (1) + LLM (1)
   expect(r.found.find((f) => f.type === 'PESEL')?.count).toBe(1);
 });

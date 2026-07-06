@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.28.0 — 2026-07-06
+
+- **Rzadkie i odmienione nazwiska maskowane BEZ słownika i BEZ AI — rozpoznawanie
+  morfologiczne.** Nazwiska o charakterystycznym polskim sufiksie (`-ski/-cki/-dzki` +
+  odmiana, `-icz/-wicz`, `-czyk`) są teraz wykrywane po samej formie: „Gzowskiego",
+  „Krzemieniecka", „Bąkiewiczowi", „Zdrojewczyka", „Świętomira Gzowska", „Rzepeckiej-Gil".
+  Dotąd łapał je tylko opcjonalny NER — teraz działa to w warstwie offline (edycja „urzędnik").
+  **Benchmark (offline, bez NER): recall 89% → 100%, rzadkie nazwiska 51% → 100%, precyzja
+  99,4%** — poziom NER, ale w jednym pliku HTML bez instalacji.
+- **Precyzja utrzymana dzięki trzem zabezpieczeniom:** (1) stoplista przymiotników
+  narodowych/regionalnych/miejskich („polski", „śląski", „warszawski", „mazowiecki"…);
+  (2) ochrona nazw instytucji — przymiotnik po rzeczowniku z wielkiej litery nie jest
+  nazwiskiem („Uniwersytet Warszawski", „Izba Lekarska", „Bank Śląski", „Politechnika Śląska");
+  (3) dzierżawczy dopełniacz przy rzeczowniku maskuje SAMO nazwisko, zostawiając wyraz
+  („Zaległości Trzebiatowskiego" → „Zaległości [IMIĘ I NAZWISKO]"). Zweryfikowane na
+  realnych frazach urzędowych (zero nadmaskowań).
+- **Małżonkowie/rodzeństwo o wspólnym nazwisku** („Anna i Jan Kowalscy") maskowani w całości
+  — wcześniej pierwsze imię wyciekało.
+- Benchmark uzgodniony z aktualną specyfikacją (miejscowość po kodzie, format dowodu).
+
 ## v0.27.0 — 2026-07-06
 
 - **Nowe ikony — inline SVG zamiast ciemnych rastrów.** Dotychczasowe ikony były ciemnymi
