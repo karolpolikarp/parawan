@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.22.0 — 2026-07-06
+
+- **Numer wersji w nagłówku + link „sprawdź najnowszą"** — pod tytułem widnieje teraz
+  „wersja X · sprawdź najnowszą ↗" prowadząca do strony wydań. Rozwiązuje powracające
+  zamieszanie: użytkownik testował stary, wcześniej pobrany plik, nie wiedząc, że jest
+  nieaktualny — teraz od razu porówna numer.
+- **Edycja urzędnik bez wzmianek o AI** — nagłówek, plakietka i krok „Analiza" nie mówią
+  już o „lokalnym AI/NER" (którego w tej edycji nie ma) — spójny, uczciwy przekaz dla
+  głównej grupy docelowej.
+
 ## v0.21.0 — 2026-07-06
 
 - **Imiona w ODMIANIE nie wyciekają już obok nazwiska** — „Anną Kowalską", „Janem

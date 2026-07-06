@@ -55,6 +55,13 @@ let viewMode: 'result' | 'compare' = 'result';
 const CLERK_EDITION = import.meta.env.VITE_EDITION === 'urzednik';
 if (CLERK_EDITION) {
   for (const el of document.querySelectorAll('[data-full]')) el.remove();
+  // Edycja urzędnik nie ma warstwy AI — usuwamy wzmianki o niej z nagłówka (uczciwość).
+  const sub = document.getElementById('hero-sub');
+  if (sub) sub.textContent = 'Lokalny anonimizator polskich danych osobowych — reguły i sumy kontrolne';
+  const badge = document.getElementById('badge-ai-txt');
+  if (badge) badge.textContent = 'Reguły + sumy kontrolne';
+  const step2 = document.getElementById('step2-sub');
+  if (step2) step2.textContent = 'reguły, słowniki i sumy kontrolne';
 }
 
 /* ── Kategorie i metadane typów PII (jedna rodzina kolorów w całej aplikacji) ── */
@@ -679,5 +686,6 @@ if (params.has('pdftest')) {
 }
 
 $('app-version').textContent = __APP_VERSION__;
+$('app-version-top').textContent = __APP_VERSION__;
 
 update();

@@ -23,14 +23,15 @@
           </span>
           <div class="card-t">
             <h1>Anonimizator</h1>
-            <p>Lokalny anonimizator polskich danych osobowych — reguły, sumy kontrolne, opcjonalne lokalne AI</p>
+            <p id="hero-sub">Lokalny anonimizator polskich danych osobowych — reguły, sumy kontrolne, opcjonalne lokalne AI</p>
+            <a class="ver-link" id="ver-link" href="https://github.com/karolpolikarp/anonimizator/releases/latest" target="_blank" rel="noopener noreferrer" data-tip="Otwiera stronę wydań — porównaj numer, by sprawdzić, czy masz najnowszą wersję">wersja <span id="app-version-top">—</span> · sprawdź najnowszą ↗</a>
           </div>
           <span class="card-sp"></span>
           <ul class="badges" aria-label="Cechy">
             <li class="badge b-fin" data-tip="Działa bez internetu — możesz rozłączyć sieć i sprawdzić" tabindex="0"><img src="./src/icons/onoff.png" alt="" />100% Offline</li>
             <li class="badge b-place" data-tip="Tekst nie opuszcza przeglądarki — zero wysyłania na serwery" tabindex="0"><img src="./src/icons/haslo.png" alt="" />Bezpieczne</li>
             <li class="badge b-person" data-tip="Kod otwarty na licencji MIT — możesz go samodzielnie zweryfikować" tabindex="0"><img src="./src/icons/regula.png" alt="" />Open Source · MIT</li>
-            <li class="badge b-ident" data-tip="Warstwa reguł i sum kontrolnych + opcjonalny lokalny model NER" tabindex="0"><img src="./src/icons/ner.png" alt="" />Reguły + lokalne AI</li>
+            <li class="badge b-ident" id="badge-ai" data-tip="Warstwa reguł i sum kontrolnych + opcjonalny lokalny model NER" tabindex="0"><img src="./src/icons/ner.png" alt="" /><span id="badge-ai-txt">Reguły + lokalne AI</span></li>
           </ul>
         </div>
         <div class="card-b hero-b">
@@ -58,7 +59,7 @@
           <span class="ic" data-tip="Analiza działa na bieżąco, podczas pisania" tabindex="0"><img src="./src/icons/sprawdz.png" alt="" /></span>
           <div class="card-t"><span class="kick">Krok 2</span><h2>Analiza</h2></div>
         </div>
-        <div class="card-b"><p>reguły, sumy kontrolne, opcjonalny lokalny NER</p></div>
+        <div class="card-b"><p id="step2-sub">reguły, sumy kontrolne, opcjonalny lokalny NER</p></div>
       </section>
 
       <section class="card step g3" aria-label="Krok 3">
