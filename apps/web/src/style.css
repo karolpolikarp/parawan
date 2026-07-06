@@ -5,35 +5,37 @@
    ============================================================ */
 
 :root {
-  color-scheme: dark;
-  --bg:        #0b0e14;
-  --card:      #11151d;
-  --card-2:    #0d1119;
-  --well:      #0a0d13;
-  --line:      #232a36;
-  --line-2:    #313a49;
-  --text:      #e8ebf0;
-  --mut:       #98a1b3;
-  --mut-2:     #77839a; /* ≥4,5:1 na --well/--card (audyt kontrastu) */
-  --acc:       #3663d9;
-  --acc-soft:  rgba(54, 99, 217, .16);
-  --acc-line:  rgba(54, 99, 217, .55);
+  color-scheme: light;
+  /* Jasny, przyjazny motyw — bliski oprogramowaniu biurowemu/urzędowemu (gov.pl),
+     mniej onieśmielający dla urzędników niż ciemny „enterprise". */
+  --bg:        #eef2f8;
+  --card:      #ffffff;
+  --card-2:    #f4f7fc;
+  --well:      #eef2f8;
+  --line:      #e3e8f0;
+  --line-2:    #cdd6e3;
+  --text:      #1b2533;
+  --mut:       #556174;
+  --mut-2:     #677284; /* ≥4,5:1 na --well/--card (audyt kontrastu) */
+  --acc:       #2159c5;
+  --acc-soft:  rgba(33, 89, 197, .10);
+  --acc-line:  rgba(33, 89, 197, .42);
 
-  /* kategorie PII — jedna rodzina kolorów w całej aplikacji */
-  --person:  #a596e8;
-  --contact: #67c8dc;
-  --ident:   #d9a949;
-  --fin:     #6fc79b;
-  --place:   #7ea6e8;
+  /* kategorie PII — jedna rodzina kolorów, przyciemniona dla kontrastu na jasnym tle */
+  --person:  #6b4fd6;
+  --contact: #0e7d99;
+  --ident:   #9a6a00;
+  --fin:     #17835a;
+  --place:   #2f5fc0;
 
   /* stany — NIEZALEŻNE od kolorów kategorii PII (semantyka kategorii nietykalna) */
-  --ok: #4fc08d;
-  --warn: #e0b566;
-  --err: #e07284;
+  --ok: #17915a;
+  --warn: #9a6a12;
+  --err: #cf3a54;
   --r-card: 14px;
   --r-ctl:  10px;
   --mono: ui-monospace, "Cascadia Mono", Consolas, "JetBrains Mono", monospace;
-  --shadow: 0 10px 30px rgba(0, 0, 0, .28);
+  --shadow: 0 6px 20px rgba(30, 50, 90, .08);
   accent-color: var(--acc);
 }
 
@@ -54,7 +56,7 @@ body {
 }
 
 img { display: block; }
-a { color: #8fb0f2; text-decoration: none; }
+a { color: var(--acc); text-decoration: none; }
 a:hover { text-decoration: underline; }
 code, kbd { font-family: var(--mono); font-size: .88em; }
 kbd {
@@ -108,11 +110,11 @@ kbd {
 .ic {
   flex: none; display: grid; place-items: center;
   width: 46px; height: 46px; border-radius: 12px;
-  background: linear-gradient(180deg, #171d29, var(--card-2));
+  background: linear-gradient(180deg, #ffffff, var(--card-2));
   border: 1px solid var(--line-2);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6);
 }
-.ic img { width: 28px; height: 28px; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .4)); }
+.ic img { width: 28px; height: 28px; filter: drop-shadow(0 1px 2px rgba(30, 50, 90, .18)); }
 .ic-xl { width: 56px; height: 56px; border-radius: 14px; }
 .ic-xl img { width: 32px; height: 32px; }
 .ic-s { width: 34px; height: 34px; border-radius: 9px; }
@@ -137,7 +139,7 @@ kbd {
 details.card > summary { list-style: none; cursor: pointer; border-radius: var(--r-card) var(--r-card) 0 0; }
 details.card > summary::-webkit-details-marker { display: none; }
 details.card:not([open]) > summary { border-bottom: none; }
-details.card > summary:hover { background: rgba(255, 255, 255, .015); }
+details.card > summary:hover { background: rgba(30, 50, 90, .02); }
 .chev {
   flex: none; display: grid; place-items: center;
   width: 26px; height: 26px; border-radius: 8px;
@@ -164,8 +166,8 @@ details.card::details-content {
   left: 50%; bottom: calc(100% + 9px);
   transform: translate(-50%, 4px);
   width: max-content; max-width: 250px;
-  background: #1a2130; color: var(--text);
-  border: 1px solid var(--line-2); border-radius: 8px;
+  background: #2b3648; color: #f2f5fa;
+  border: 1px solid #3a465a; border-radius: 8px;
   padding: 7px 10px;
   font: 400 12px/1.45 "Segoe UI", system-ui, sans-serif;
   letter-spacing: 0; text-align: left; white-space: normal; text-transform: none;
@@ -178,8 +180,8 @@ details.card::details-content {
   left: 50%; bottom: calc(100% + 5px);
   width: 8px; height: 8px;
   transform: translate(-50%, 4px) rotate(45deg);
-  background: #1a2130;
-  border-right: 1px solid var(--line-2); border-bottom: 1px solid var(--line-2);
+  background: #2b3648;
+  border-right: 1px solid #3a465a; border-bottom: 1px solid #3a465a;
   opacity: 0; visibility: hidden; pointer-events: none;
   transition: opacity .13s ease, transform .13s ease;
 }
@@ -219,23 +221,24 @@ details.card::details-content {
 .btn {
   display: inline-flex; align-items: center; gap: 8px;
   height: 38px; padding: 0 13px;
-  background: #161c27; color: var(--text);
+  background: #ffffff; color: var(--text);
   border: 1px solid var(--line-2); border-radius: var(--r-ctl);
   font: 600 13px/1 "Segoe UI", system-ui, sans-serif;
   cursor: pointer; white-space: nowrap;
   transition: background-color .13s ease, border-color .13s ease, color .13s ease;
 }
-.btn img { width: 24px; height: 24px; filter: drop-shadow(0 1px 2px rgba(0,0,0,.4)); }
-.btn:hover { background: #1b2331; border-color: #3d4859; }
+.btn img { width: 24px; height: 24px; filter: drop-shadow(0 1px 1px rgba(30,50,90,.15)); }
+.btn:hover { background: #f0f4fa; border-color: var(--acc-line); }
 .btn:active:not(:disabled) { transform: translateY(1px); }
-.btn:disabled { opacity: .4; cursor: not-allowed; }
-.btn:disabled:hover { background: #161c27; border-color: var(--line-2); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn:disabled:hover { background: #ffffff; border-color: var(--line-2); }
 .btn-acc {
-  background: linear-gradient(180deg, #3f6de0, #2f57c2);
-  border-color: #4a76e8;
+  background: linear-gradient(180deg, #2f6ae0, #2159c5);
+  border-color: #2159c5; color: #ffffff;
 }
-.btn-acc:hover { background: linear-gradient(180deg, #4877e8, #3560ce); border-color: #5c86f0; }
-.btn-acc:disabled:hover { background: linear-gradient(180deg, #3f6de0, #2f57c2); border-color: #4a76e8; }
+.btn-acc img { filter: drop-shadow(0 1px 1px rgba(0,0,0,.25)); }
+.btn-acc:hover { background: linear-gradient(180deg, #3a74e8, #1f52bb); border-color: #1f52bb; }
+.btn-acc:disabled:hover { background: linear-gradient(180deg, #2f6ae0, #2159c5); border-color: #2159c5; }
 
 /* duże pionowe ikono-przyciski toolbara (przeszczep z wariantu A) */
 .tbtn {
@@ -258,22 +261,22 @@ details.card::details-content {
   font-size: 12px;
 }
 .seg .btn img { width: 26px; height: 26px; }
-.seg .btn:not(.on):hover { background: rgba(255, 255, 255, .04); border-color: transparent; color: var(--text); }
-.seg .btn.on { background: var(--acc-soft); border-color: var(--acc-line); color: #d3ddf5; }
+.seg .btn:not(.on):hover { background: rgba(30, 50, 90, .04); border-color: transparent; color: var(--text); }
+.seg .btn.on { background: var(--acc-soft); border-color: var(--acc-line); color: var(--acc); }
 
 /* przełącznik suwakowy */
 .sw {
   appearance: none; -webkit-appearance: none; flex: none;
   width: 38px; height: 22px; border-radius: 22px;
-  background: #222a38; border: 1px solid var(--line-2);
+  background: #d3dbe7; border: 1px solid var(--line-2);
   position: relative; cursor: pointer; transition: background .15s;
 }
 .sw::after {
   content: ""; position: absolute; top: 3px; left: 4px;
   width: 14px; height: 14px; border-radius: 50%;
-  background: #8b94a6; transition: left .15s, background .15s;
+  background: #fff; box-shadow: 0 1px 2px rgba(30,50,90,.25); transition: left .15s, background .15s;
 }
-.sw:checked { background: var(--acc); border-color: #4a76e8; }
+.sw:checked { background: var(--acc); border-color: var(--acc); }
 .sw:checked::after { left: 18px; background: #fff; }
 
 /* pola tekstowe / select */
@@ -297,19 +300,19 @@ select.field { font-family: "Segoe UI", system-ui, sans-serif; line-height: norm
 .badge img { width: 18px; height: 18px; }
 /* badge'e hero NEUTRALNE — kolory 5 kategorii zarezerwowane dla semantyki PII (audyt P0) */
 .b-fin, .b-place, .b-person, .b-ident {
-  color: #b9c4d6;
+  color: var(--mut);
   border: 1px solid var(--line-2);
   background: var(--card-2);
 }
 
 .hero-b { display: flex; align-items: center; gap: 16px; }
-.hero-lead { font-size: 16.5px; color: #c6cdd9; flex: 1; }
+.hero-lead { font-size: 16.5px; color: var(--mut); flex: 1; }
 .hero-lead strong { color: var(--text); }
 .privacy {
   margin-left: auto; display: flex; align-items: center; gap: 10px;
   padding: 11px 14px; border-radius: var(--r-ctl);
-  border: 1px dashed rgba(79, 192, 141, .38); background: rgba(79, 192, 141, .06);
-  color: #b9dcc9; font-size: 13px; max-width: 46ch;
+  border: 1px dashed rgba(23, 131, 90, .42); background: rgba(23, 131, 90, .07);
+  color: #146848; font-size: 13px; max-width: 46ch;
 }
 .privacy img { width: 24px; height: 24px; flex: none; }
 
@@ -317,7 +320,7 @@ select.field { font-family: "Segoe UI", system-ui, sans-serif; line-height: norm
 .step { position: relative; }
 .step .card-h { border-bottom: none; min-height: 0; padding: 15px 16px 5px; }
 .step .card-b { padding: 0 16px 15px 75px; }
-.step .kick { font-size: 10.5px; font-weight: 700; letter-spacing: .14em; color: #7f96d8; text-transform: uppercase; }
+.step .kick { font-size: 10.5px; font-weight: 700; letter-spacing: .14em; color: var(--acc); text-transform: uppercase; }
 .step .card-t h2 { font-size: 14.5px; }
 .step .card-b p { font-size: 12.5px; color: var(--mut); }
 .step-no {
@@ -325,7 +328,7 @@ select.field { font-family: "Segoe UI", system-ui, sans-serif; line-height: norm
   display: grid; place-items: center;
   width: 24px; height: 24px; border-radius: 50%;
   background: var(--acc-soft); border: 1px solid var(--acc-line);
-  color: #b9c9f2; font-size: 12px; font-weight: 700;
+  color: var(--acc); font-size: 12px; font-weight: 700;
 }
 
 /* ============ LEGENDA ============ */
@@ -354,7 +357,7 @@ select.field { font-family: "Segoe UI", system-ui, sans-serif; line-height: norm
 .toolbar {
   display: flex; align-items: center; gap: 8px;
   padding: 10px 16px; border-bottom: 1px solid var(--line);
-  background: rgba(255, 255, 255, .012);
+  background: rgba(30, 50, 90, .015);
   flex-wrap: wrap;
 }
 .toolbar .hint { margin-left: auto; font-size: 11.5px; color: var(--mut-2); letter-spacing: .06em; }
@@ -364,7 +367,7 @@ select.field { font-family: "Segoe UI", system-ui, sans-serif; line-height: norm
   border: 1px solid var(--line); border-radius: var(--r-ctl);
   padding: 13px 14px 13px 8px;
   font: 400 13.5px/1.9 var(--mono);
-  color: #ccd3e0;
+  color: var(--text);
   min-height: 300px;
   max-height: 560px;
   overflow-y: auto;
@@ -424,8 +427,8 @@ textarea.editor-ta.dragover {
   padding: 1px 4px;
 }
 
-.warn-note { color: #d9bb84; }
-.warn-note a { color: #e7cf9f; text-decoration: underline; }
+.warn-note { color: var(--warn); }
+.warn-note a { color: var(--warn); text-decoration: underline; }
 
 .app-error {
   padding: 10px 14px;
@@ -464,7 +467,7 @@ textarea.editor-ta.dragover {
 .ch-fin     { color: var(--fin);     border-color: rgba(111,199,155,.42); background: rgba(111,199,155,.08); }
 .ch-place   { color: var(--place);   border-color: rgba(126,166,232,.42); background: rgba(126,166,232,.08); }
 .chip-ok  { color: var(--ok); border-color: rgba(79,192,141,.42); background: rgba(79,192,141,.08); padding: 0 12px; }
-.chip-hint { color: #b6c8f2; border-color: var(--acc-line); background: var(--acc-soft); padding: 0 12px; font-weight: 500; }
+.chip-hint { color: var(--acc); border-color: var(--acc-line); background: var(--acc-soft); padding: 0 12px; font-weight: 500; }
 .stat-total {
   display: inline-flex; align-items: center; gap: 6px;
   font-size: 12.5px; color: var(--mut); padding: 0 4px;
@@ -510,9 +513,13 @@ textarea.editor-ta.dragover {
   font-size: 12.5px; color: var(--mut);
   border-left: 3px solid var(--line-2); padding: 2px 0 2px 12px;
 }
-.ner-note code { color: #b9c4d6; }
+.ner-note code { color: var(--mut); }
 /* Edycja „urzędnik": ukryj warstwę AI/NER od pierwszego malowania (bez mignięcia). */
 html[data-hide-full] [data-full] { display: none !important; }
+/* Bez karty NER (edycja urzędnik) „Co maskować" rozciąga się na całą szerokość —
+   inaczej po prawej zostaje dziura po zniknięciu karty NER (g7 + g5). */
+html[data-hide-full] #co-maskowac { grid-column: 1 / -1; }
+.toggles { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
 .ner-lead { font-size: 13px; color: var(--mut); margin: 0 0 12px; line-height: 1.55; }
 .ner-lead strong { color: var(--txt); }
 .tag-opt {
@@ -532,7 +539,7 @@ th {
 td { padding: 9px 14px; border-top: 1px solid var(--line); font-size: 13.5px; vertical-align: middle; }
 tbody tr:hover { background: rgba(255, 255, 255, .015); }
 .td-name { display: flex; align-items: center; gap: 11px; font-weight: 600; white-space: nowrap; }
-td .how { color: #b9c2d2; }
+td .how { color: var(--mut); }
 td .how strong { color: var(--text); }
 .catpill {
   display: inline-block; font-size: 11px; font-weight: 700;
@@ -548,12 +555,12 @@ td .how strong { color: var(--text); }
 table .pii { cursor: default; }
 
 /* ============ KARTY INFORMACYJNE ============ */
-.note-b p { font-size: 13px; color: #b9c2d2; }
+.note-b p { font-size: 13px; color: var(--mut); }
 .note-b p strong { color: var(--text); }
 .caveat { border-color: rgba(224, 181, 102, .38); }
 .caveat .card-h { border-bottom-color: rgba(224, 181, 102, .22); }
 .tips { list-style: none; display: grid; gap: 9px; }
-.tips li { display: flex; gap: 9px; font-size: 13px; color: #b9c2d2; align-items: baseline; }
+.tips li { display: flex; gap: 9px; font-size: 13px; color: var(--mut); align-items: baseline; }
 .tips li::before { content: "▪"; color: var(--acc); font-size: 11px; }
 
 /* ============ STOPKA ============ */

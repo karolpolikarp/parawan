@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.20.0 — 2026-07-06
+
+- **Jasny, przyjazny motyw** (feedback: „zrób bardziej przyjazną kolorystykę") — cała
+  aplikacja przełączona z ciemnego „enterprise" na jasny, bliski oprogramowaniu
+  biurowemu/urzędowemu: białe karty, delikatne błękity, przyciemnione kolory kategorii
+  dla kontrastu. Zweryfikowane zrzutem (obie edycje).
+- **Koniec dziury obok „Co maskować"** — po usunięciu karty NER w edycji urzędnik
+  „Co maskować" rozciąga się na całą szerokość, a przełączniki układają się w responsywną
+  siatkę (5 w rzędzie zamiast 2). Struktura strony bez pustych flanków.
+- **Numer dowodu wykrywany także BEZ kontekstu** — sam format „3 wielkie litery + 6 cyfr"
+  (`ABC 123456`, `ABC123456`) jest maskowany, bo to charakterystyczny układ dowodu; wyjątek:
+  kody walut (`PLN 123456`). Rozszerzone też wyzwalacze kontekstowe (legitymacja, dokument
+  tożsamości, „dowód osobisty nr …"). Kompromis: numer typu `FVS 202401` też zostanie
+  zamaskowany — świadomie w stronę bezpieczeństwa.
+
 ## v0.19.0 — 2026-07-06
 
 Wydanie skrojone pod główną grupę docelową — **urzędników** (feedback z testów na realnych

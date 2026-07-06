@@ -190,6 +190,23 @@ test('dowód zakupu (nie ID) NIE jest maskowany jako dowód osobisty', () => {
   const r = redactPII('dowód zakupu nr 445566 w załączniku');
   expect(r.redacted.includes('[NR-DOWODU]')).toBe(false);
 });
+test('numer dowodu STANDALONE (3 wielkie litery + 6 cyfr) maskowany bez kontekstu', () => {
+  expect(redactPII('ABC 123456').redacted).toBe('[NR-DOWODU]');
+  expect(redactPII('ABC123456').redacted).toBe('[NR-DOWODU]');
+});
+test('dowód osobisty z wtrąconym „nr" maskowany', () => {
+  const r = redactPII('dowód osobisty nr ABC123456');
+  expect(r.redacted).toContain('[NR-DOWODU]');
+  expect(r.redacted.includes('ABC123456')).toBe(false);
+});
+test('kod waluty + kwota NIE jest mylony z dowodem', () => {
+  expect(redactPII('PLN 123456').redacted.includes('[NR-DOWODU]')).toBe(false);
+  expect(redactPII('EUR 250000').redacted.includes('[NR-DOWODU]')).toBe(false);
+});
+test('małe litery + 6 cyfr bez sumy kontrolnej NIE są maskowane', () => {
+  // „abc123456" (małe) bez poprawnej sumy → zostaje (mniej fałszywych trafień).
+  expect(redactPII('kod abc123456 systemu').redacted.includes('[NR-DOWODU]')).toBe(false);
+});
 
 // ── Samodzielne nazwiska ze słownika (krok 13c) ──
 test('nazwisko solo w odmianie — dopełniacz maskowany', () => {

@@ -412,17 +412,31 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
     // (a) Z KONTEKSTEM („dowód"/„dowodu"/„seria i numer"/„nr dowodu") — maskujemy nawet BEZ
     //     poprawnej sumy kontrolnej. Kontekst to mocny sygnał, a w pismach numer bywa fikcyjny
     //     lub z literówką; zachowujemy słowo kontekstowe, maskujemy sam numer.
-    // „dow[oó]d…" akceptuje pisownię z diakrytykiem i bez (urzędnicy piszą różnie).
+    //     „dow[oó]d…" akceptuje pisownię z diakrytykiem i bez; między słowem a numerem
+    //     dopuszczamy wypełniacze („nr", „seria", „numer", „osobisty", „służbowy").
     text = text.replace(
-      /\b((?:dow[oó]d\w*|dow\.|seria i numer|nr dowodu)(?:\s+osobist\w+)?[\s:.=-]*)([A-Za-z]{3}[\s-]?\d{6})(?!\d)/gi,
+      /\b((?:dow[oó]d\w*|dow\.|legitymacj\w*|dokument\w*\s+tożsamości|seria i numer|nr dowodu)(?:\s+(?:osobist\w+|służbow\w+|nr|numer|seria|i))*[\s:.=-]*)([A-Za-z]{3}[\s-]?\d{6})(?!\d)/gi,
       (_m, ctx: string, _num: string) => {
         bump('DOWOD');
         return `${ctx}${M.DOWOD}`;
       },
     );
 
-    // (b) BEZ kontekstu — 3 litery + 6 cyfr, ale TYLKO gdy suma kontrolna się zgadza
-    //     (bez tego „ABC 123456" w treści dawałoby zbyt wiele fałszywych trafień).
+    // (b) BEZ kontekstu — dokładny format polskiego dowodu: 3 WIELKIE litery + 6 cyfr.
+    //     Układ jest na tyle charakterystyczny, że maskujemy go także bez sumy kontrolnej
+    //     (numery w pismach bywają testowe albo z literówką). Wyjątek: kody walut
+    //     (np. „PLN 123456" to kwota, nie dowód).
+    const CURRENCY_CODES = new Set([
+      'PLN', 'EUR', 'USD', 'GBP', 'CHF', 'CZK', 'SEK', 'NOK', 'DKK', 'JPY', 'UAH', 'RUB',
+    ]);
+    text = text.replace(/\b([A-Z]{3})[\s-]?\d{6}\b/g, (m, letters: string) => {
+      if (CURRENCY_CODES.has(letters)) return m;
+      bump('DOWOD');
+      return M.DOWOD;
+    });
+
+    // (c) Litery mieszane/małe (np. „abc123456") — tylko gdy suma kontrolna się zgadza
+    //     (bez tego dowolne 3 litery + 6 cyfr dawałyby za dużo fałszywych trafień).
     text = text.replace(/\b[A-Za-z]{3}[\s-]?\d{6}\b/g, (m) => {
       if (isValidDowod(m)) {
         bump('DOWOD');
