@@ -18,7 +18,7 @@
  */
 
 /** Nazwiska jednoznaczne — lowercase, mianownik (forma męska dla -ski/-cki/-dzki). */
-export const SURNAMES = new Set<string>((
+const SURNAMES = new Set<string>((
   'nowak kowalski wiśniewski wójcik kowalczyk kamiński lewandowski zieliński szymański ' +
   'woźniak dąbrowski kozłowski jankowski wojciechowski kwiatkowski krawczyk kaczmarek ' +
   'piotrowski grabowski pawłowski michalski nowakowski wieczorek jabłoński adamczyk ' +
@@ -86,10 +86,6 @@ function lookup(candidate: string): string | null {
 }
 
 /**
- * Zwraca formę bazową nazwiska ze słownika (lowercase) albo null.
- * `word` — pojedynczy token (bez spacji), wielkość liter dowolna.
- */
-/**
  * Deterministyczny klucz tożsamości dla pseudonimizacji: forma bazowa ze słownika,
  * a dla nazwisk spoza słownika — normalizacja czysto morfologiczna (reguły przymiotnikowe,
  * potem odcięcie typowej końcówki). Nie musi być poprawna językowo — musi być STABILNA
@@ -109,6 +105,10 @@ export function normalizeSurnameKey(word: string): string {
   return w;
 }
 
+/**
+ * Zwraca formę bazową nazwiska ze słownika (lowercase) albo null.
+ * `word` — pojedynczy token (bez spacji), wielkość liter dowolna.
+ */
 export function surnameBase(word: string): string | null {
   const w = word.toLowerCase();
   if (w.length < 3) return null;
@@ -176,14 +176,15 @@ export const NON_SURNAME_ADJ = new Set<string>((
   'lekarski adwokacki nauczycielski rybacki rycerski sąsiedzki ' +
   // relacyjne (nazwy komitetów/związków/funduszy): „Komitet Obywatelski", „Hufiec Harcerski"
   'obywatelski harcerski sołecki chłopski pański szlachecki żołnierski marynarski kupiecki ' +
-  'związkowski robotniczy(NIE) ' +
+  'związkowski ' +
   // dalsze regiony / pasma / parki: „Bieszczadzki Park", „Podhalański", „Sądecki"
   'podhalański bieszczadzki karkonoski sądecki gorczański elbląski nadwiślański nadbużański ' +
   'kołobrzeski koszaliński słupski legnicki wałbrzyski jeleniogórski nowosądecki ' +
   // pospolite przymiotniki na -ski/-cki: „Niski poziom", „wąski", „bliski"
-  'niski wąski płaski bliski śliski grząski wszelki(NIE) ' +
+  'niski wąski płaski bliski śliski grząski ' +
+  // wieloznaczny wyraz o końcówce nazwiskowej, który nazwiskiem nie jest (Znicz Pruszków itp.)
   'znicz'
-).split(/\s+/).filter((w) => w && !w.includes('(')));
+).split(/\s+/).filter(Boolean));
 
 /**
  * Czy wyraz WYGLĄDA na polskie nazwisko po samej morfologii (bez słownika)?

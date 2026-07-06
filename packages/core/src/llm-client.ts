@@ -19,6 +19,7 @@
 
 import { redactPII, type PiiFinding, type RedactionResult } from './index.js';
 import { mergeFindings, nerRedact, type NerConfig } from './ner-client.js';
+import { createBreaker } from './breaker.js';
 
 export interface LlmConfig {
   /** Bazowy URL Ollamy. Domyślnie `http://127.0.0.1:11434`. */
@@ -57,7 +58,9 @@ const KNOWN_MASKS = [
   '[REGON]',
   '[TELEFON]',
   '[NR-DOWODU]',
+  '[NR-PASZPORTU]',
   '[KOD-POCZTOWY]',
+  '[MIEJSCOWOŚĆ]',
   '[DATA-URODZENIA]',
   '[ADRES]',
   '[IMIĘ I NAZWISKO]',
@@ -75,41 +78,12 @@ const SYSTEM_PROMPT =
   'Nie dodawaj wyjaśnień ani żadnego tekstu poza JSON.';
 
 // ── Minimalny circuit breaker (per URL) ──
-// Jak w ner-client: LLM to wzbogacenie, nie ścieżka krytyczna; gdy Ollama pada,
-// szybko przestajemy ją odpytywać i jedziemy na wcześniejszych warstwach.
-const FAILURE_THRESHOLD = 3;
-const RESET_TIMEOUT_MS = 30000;
+// Circuit breaker (per URL) — wspólna implementacja, osobna mapa dla LLM (patrz breaker.ts).
+const breaker = createBreaker();
 
-interface BreakerState {
-  failures: number;
-  openedAt: number | null;
-}
-
-const breakers = new Map<string, BreakerState>();
-
-function breakerFor(url: string): BreakerState {
-  let b = breakers.get(url);
-  if (!b) {
-    b = { failures: 0, openedAt: null };
-    breakers.set(url, b);
-  }
-  return b;
-}
-
-function breakerIsOpen(b: BreakerState, now: number): boolean {
-  if (b.openedAt === null) return false;
-  if (now - b.openedAt >= RESET_TIMEOUT_MS) {
-    // half-open: przepuść jedną próbę
-    b.openedAt = null;
-    b.failures = FAILURE_THRESHOLD - 1;
-    return false;
-  }
-  return true;
-}
-
-/** Testy/diagnostyka: wyzeruj stan breakerów. */
+/** Testy/diagnostyka: wyzeruj stan breakerów LLM. */
 export function resetLlmBreakers(): void {
-  breakers.clear();
+  breaker.reset();
 }
 
 /**
@@ -150,8 +124,7 @@ export async function llmRedact(
   if (!config?.model || !text || text.length === 0) return null;
 
   const url = (config.url && config.url.length > 0 ? config.url : DEFAULT_URL).replace(/\/$/, '');
-  const b = breakerFor(url);
-  if (breakerIsOpen(b, Date.now())) return null;
+  if (breaker.isOpen(url)) return null;
 
   const timeoutMs = config.timeoutMs && config.timeoutMs > 0 ? config.timeoutMs : DEFAULT_TIMEOUT_MS;
   const maxChars = config.maxChars && config.maxChars > 0 ? config.maxChars : DEFAULT_MAX_CHARS;
@@ -194,8 +167,7 @@ export async function llmRedact(
     if (!Array.isArray(pii)) throw new Error('Brak listy "pii" w odpowiedzi LLM');
 
     // Sukces protokołu (nawet jeśli lista pusta) — breaker się zamyka.
-    b.failures = 0;
-    b.openedAt = null;
+    breaker.recordSuccess(url);
 
     const candidates = validateCandidates(pii, text);
 
@@ -212,8 +184,7 @@ export async function llmRedact(
     if (count === 0) return null; // pusty wynik — nic do zamiany, zostajemy przy wejściu
     return { redacted, found: [{ type: 'IMIE', count }] };
   } catch {
-    b.failures += 1;
-    if (b.failures >= FAILURE_THRESHOLD) b.openedAt = Date.now();
+    breaker.recordFailure(url);
     return null;
   } finally {
     clearTimeout(timer);

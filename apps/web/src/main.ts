@@ -334,7 +334,9 @@ function refreshMaskNav(): void {
   updateMaskCount();
 }
 
-maskPrev.addEventListener('click', () => goToMask(maskIdx <= 0 ? maskEls.length - 1 : maskIdx - 1));
+const goToPrevMask = (): void => goToMask(maskIdx <= 0 ? maskEls.length - 1 : maskIdx - 1);
+
+maskPrev.addEventListener('click', goToPrevMask);
 maskNext.addEventListener('click', () => goToMask(maskIdx + 1));
 
 // Klik w znacznik → uczyń go bieżącym (bez przewijania — użytkownik już na niego patrzy).
@@ -348,7 +350,7 @@ output.addEventListener('click', (e) => {
 output.addEventListener('keydown', (e) => {
   if (!maskEls.length) return;
   if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); goToMask(maskIdx + 1); }
-  else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); goToMask(maskIdx <= 0 ? maskEls.length - 1 : maskIdx - 1); }
+  else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); goToPrevMask(); }
 });
 
 /* ── Pasek „Zamaskowano" (chipy z ikonami, licznik, kategorie) ── */

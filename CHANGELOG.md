@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.33.0 — 2026-07-06
+
+Sprzątanie kodu z wieloagentowego przeglądu (bez zmiany zachowania — 138 testów rdzenia + 10 web,
+benchmark 100%/99,4%):
+
+- **Rdzeń:** wspólny circuit breaker wydzielony do `breaker.ts` (był kopiowany 1:1 w NER i LLM);
+  helper `escapeRe` i stała `CAP_CITY`/`CURRENCY_CODES` zamiast powtórzeń; regex `RE_SOLO_MORPH`
+  z jednego źródła (`CAP_WORD`); `KNOWN_MASKS` w warstwie LLM uzupełnione o `[NR-PASZPORTU]`
+  i `[MIEJSCOWOŚĆ]`; ujednolicony timeout w `nerHealthCheck`; usunięty artefakt stoplisty
+  i zbędny eksport `SURNAMES`; poprawiony przesunięty komentarz JSDoc.
+- **Web:** martwe reguły CSS usunięte (`.tip-open`, nadpisane kolumny `.toggles`, ukryte
+  `.step-no`, no-op `margin-left`); cztery identyczne klasy plakietek scalone w `.badge`;
+  meta `color-scheme`/`theme-color` zmienione na jasne (spójnie z motywem); helper `goToPrevMask`
+  zamiast zdublowanego wyrażenia; nagłówkowy komentarz CSS zaktualizowany.
+- **Konfiguracja:** usunięte martwe pole `allowScripts` z root `package.json`.
+
 ## v0.32.0 — 2026-07-06
 
 - **NIP zapisany spacjami już maskowany** — „526 27 35 917" (i grupowanie 3-3-2-2:

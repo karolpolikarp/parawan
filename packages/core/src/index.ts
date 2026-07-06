@@ -243,9 +243,18 @@ const RE_SPOUSES = new RegExp(`(?<![${PL_UP}${PL_LO}-])(${CAP_WORD})\\s+(?:i|ora
 const RE_NAME_SEQ = new RegExp(`(?<![${PL_UP}${PL_LO}-])${CAP_WORD}(?:\\s+${CAP_WORD}){1,3}`, 'g');
 const RE_PAIR = new RegExp(`(?<![${PL_UP}${PL_LO}-])(${CAP_WORD})\\s+(${CAP_WORD})`, 'g');
 const RE_SOLO_DICT = new RegExp(`(?<![${PL_UP}${PL_LO}-])[${PL_UP}][${PL_LO}]+(?![${PL_LO}-])`, 'g');
-const RE_SOLO_MORPH = new RegExp(`(?<![${PL_UP}${PL_LO}-])[${PL_UP}][${PL_LO}]+(?:-[${PL_UP}][${PL_LO}]+)?`, 'g');
+const RE_SOLO_MORPH = new RegExp(`(?<![${PL_UP}${PL_LO}-])${CAP_WORD}`, 'g');
 const RE_SURNAME_OBLIQUE =
   /(?:sk|ck|dzk)(?:iego|iej|iemu|im|imi|ich|ą)$|icz(?:a|owi|em|owie|ami|ach)$|czyk(?:a|owi|iem|ami|ach|owie)$/;
+
+// Wyraz z wielkiej litery z myślnikami wielokrotnymi (miejscowości: „Kędzierzyn-Koźle") — '*' (nie '?').
+const CAP_CITY = `[${PL_UP}][${PL_LO}]+(?:-[${PL_UP}][${PL_LO}]+)*`;
+/** Escapuje metaznaki regexu w literale (do budowy wzorca z placeholdera maski). */
+const escapeRe = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+/** Kody walut — „PLN 123456" to kwota, nie dowód (wyjątek w kroku DOWÓD bez kontekstu). */
+const CURRENCY_CODES = new Set([
+  'PLN', 'EUR', 'USD', 'GBP', 'CHF', 'CZK', 'SEK', 'NOK', 'DKK', 'JPY', 'UAH', 'RUB',
+]);
 
 /**
  * Encje prawne/instytucje, których NIE traktujemy jako „imię nazwisko"
@@ -566,10 +575,7 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
     // (b) BEZ kontekstu — dokładny format polskiego dowodu: 3 WIELKIE litery + 6 cyfr.
     //     Układ jest na tyle charakterystyczny, że maskujemy go także bez sumy kontrolnej
     //     (numery w pismach bywają testowe albo z literówką). Wyjątek: kody walut
-    //     (np. „PLN 123456" to kwota, nie dowód).
-    const CURRENCY_CODES = new Set([
-      'PLN', 'EUR', 'USD', 'GBP', 'CHF', 'CZK', 'SEK', 'NOK', 'DKK', 'JPY', 'UAH', 'RUB',
-    ]);
+    //     (np. „PLN 123456" to kwota, nie dowód) — CURRENCY_CODES na poziomie modułu.
     text = text.replace(/\b([A-Z]{3})[\s-]?\d{6}\b/g, (m, letters: string) => {
       if (CURRENCY_CODES.has(letters)) return m;
       // BEZ kontekstu wymagamy poprawnej sumy kontrolnej — inaczej sygnatury/kody urzędowe
@@ -648,7 +654,7 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
     // „Nazwa[ Nazwa] Numer, [KOD-POCZTOWY]" pewnie wskazuje ulicę („Królewska 27,
     // 00-060 Warszawa" → „Aleje Jerozolimskie 100…"). Kotwica na placeholderze daje
     // wysoką precyzję — „Rozdział 5" czy „Załącznik 2" nie stoją przed kodem pocztowym.
-    const KOD = M['KOD-POCZTOWY'].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const KOD = escapeRe(M['KOD-POCZTOWY']);
     text = text.replace(
       new RegExp(
         `\\b([${PL_UP}][${PL_LO}]+(?:\\s+[${PL_UP}][${PL_LO}]+){0,2})` +
@@ -673,10 +679,9 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   // TYLKO gdy tworzą znaną wielowyrazową miejscowość (słownik) — inaczej zostają nietknięte,
   // żeby nie pożreć następnego zdania („[KOD] Warszawa. Sprawę…" → „Sprawę" zostaje).
   if (on('MIEJSCOWOSC')) {
-    const KOD = M['KOD-POCZTOWY'].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const cap = `[${PL_UP}][${PL_LO}]+(?:-[${PL_UP}][${PL_LO}]+)*`;
+    const KOD = escapeRe(M['KOD-POCZTOWY']);
     text = text.replace(
-      new RegExp(`(${KOD}|(?<![\\d-])\\d{2}-\\d{3})(\\s+)(${cap})((?:\\s+${cap}){0,2})`, 'g'),
+      new RegExp(`(${KOD}|(?<![\\d-])\\d{2}-\\d{3})(\\s+)(${CAP_CITY})((?:\\s+${CAP_CITY}){0,2})`, 'g'),
       (m, anchor: string, sep: string, first: string, restRaw: string, offset: number) => {
         // surowy kod poprzedzony odwołaniem prawnym („poz. 12-345 Rejestr") → nie adres
         if (anchor !== M['KOD-POCZTOWY'] && precededByLegalRef(text, offset)) return m;
@@ -701,10 +706,9 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
     // miejscowością ze słownika. Słownik działa TYLKO w tej pozycji — „mieszka w Warszawie" (bez
     // „, ul./[ADRES]" obok) nie jest ruszane. Bierzemy NAJDŁUŻSZY pasujący sufiks (do 3 słów:
     // „Zielona Góra", „Nowy Sącz"), a wyrazy przed nim zostawiamy nietknięte.
-    const ADR = M.ADRES.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const capCity = `[${PL_UP}][${PL_LO}]+(?:-[${PL_UP}][${PL_LO}]+)*`;
+    const ADR = escapeRe(M.ADRES);
     text = text.replace(
-      new RegExp(`((?:${capCity}\\s+){0,2}${capCity})(\\s*,?\\s+)(${ADR}|ul\\.|al\\.|os\\.|pl\\.)`, 'g'),
+      new RegExp(`((?:${CAP_CITY}\\s+){0,2}${CAP_CITY})(\\s*,?\\s+)(${ADR}|ul\\.|al\\.|os\\.|pl\\.)`, 'g'),
       (m, capRun: string, sep: string, anchor: string) => {
         const words = capRun.split(/\s+/);
         for (let n = Math.min(3, words.length); n >= 1; n--) {

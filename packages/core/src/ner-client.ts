@@ -16,6 +16,7 @@
  */
 
 import { redactPII, type PiiFinding, type PiiType, type RedactionResult } from './index.js';
+import { createBreaker } from './breaker.js';
 
 export interface NerConfig {
   /** Bazowy URL usługi NER, np. `http://127.0.0.1:8090`. */
@@ -31,42 +32,12 @@ export interface NerConfig {
 const DEFAULT_TIMEOUT_MS = 3000;
 const DEFAULT_MAX_CHARS = 20000;
 
-// ── Minimalny circuit breaker (per URL) ──
-// Wrażliwy (3 porażki → otwarcie na 30 s): NER to wzbogacenie, nie ścieżka krytyczna;
-// gdy usługa pada, szybko przestajemy ją odpytywać i jedziemy na redakcji in-process.
-const FAILURE_THRESHOLD = 3;
-const RESET_TIMEOUT_MS = 30000;
+// Circuit breaker (per URL) — wspólna implementacja, osobna mapa dla NER (patrz breaker.ts).
+const breaker = createBreaker();
 
-interface BreakerState {
-  failures: number;
-  openedAt: number | null;
-}
-
-const breakers = new Map<string, BreakerState>();
-
-function breakerFor(url: string): BreakerState {
-  let b = breakers.get(url);
-  if (!b) {
-    b = { failures: 0, openedAt: null };
-    breakers.set(url, b);
-  }
-  return b;
-}
-
-function breakerIsOpen(b: BreakerState, now: number): boolean {
-  if (b.openedAt === null) return false;
-  if (now - b.openedAt >= RESET_TIMEOUT_MS) {
-    // half-open: przepuść jedną próbę
-    b.openedAt = null;
-    b.failures = FAILURE_THRESHOLD - 1;
-    return false;
-  }
-  return true;
-}
-
-/** Testy/diagnostyka: wyzeruj stan breakerów. */
+/** Testy/diagnostyka: wyzeruj stan breakerów NER. */
 export function resetNerBreakers(): void {
-  breakers.clear();
+  breaker.reset();
 }
 
 interface NerResponse {
@@ -91,8 +62,7 @@ export async function nerRedact(
 ): Promise<{ redacted: string; found: PiiFinding[] } | null> {
   if (!config?.url || !text || text.length === 0) return null;
 
-  const b = breakerFor(config.url);
-  if (breakerIsOpen(b, Date.now())) return null;
+  if (breaker.isOpen(config.url)) return null;
 
   const timeoutMs = config.timeoutMs && config.timeoutMs > 0 ? config.timeoutMs : DEFAULT_TIMEOUT_MS;
   const maxChars = config.maxChars && config.maxChars > 0 ? config.maxChars : DEFAULT_MAX_CHARS;
@@ -119,12 +89,10 @@ export async function nerRedact(
     const data = (await res.json()) as NerResponse;
     if (typeof data.redacted !== 'string') throw new Error('Nieprawidłowa odpowiedź NER');
 
-    b.failures = 0;
-    b.openedAt = null;
+    breaker.recordSuccess(config.url);
     return { redacted: data.redacted + tail, found: data.found ?? [] };
   } catch {
-    b.failures += 1;
-    if (b.failures >= FAILURE_THRESHOLD) b.openedAt = Date.now();
+    breaker.recordFailure(config.url);
     return null;
   } finally {
     clearTimeout(timer);
@@ -151,7 +119,9 @@ export async function redactPIIFull(input: string, config?: NerConfig): Promise<
 export async function nerHealthCheck(config: NerConfig): Promise<boolean> {
   if (!config?.url) return false;
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), config.timeoutMs ?? DEFAULT_TIMEOUT_MS);
+  // spójnie z nerRedact: timeoutMs <= 0 traktujemy jak brak → DEFAULT (nie 0 ms = natychmiastowy abort)
+  const timeoutMs = config.timeoutMs && config.timeoutMs > 0 ? config.timeoutMs : DEFAULT_TIMEOUT_MS;
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const res = await fetch(`${config.url.replace(/\/$/, '')}/health`, { signal: controller.signal });
     return res.ok;

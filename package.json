@@ -9,8 +9,5 @@
     "build": "npm run build -w anonimizator && npm run build -w anonimizator-web",
     "test": "npm run test -w anonimizator && npm run test -w anonimizator-web",
     "dev": "npm run dev -w anonimizator-web"
-  },
-  "allowScripts": {
-    "esbuild@0.28.1": true
   }
 }

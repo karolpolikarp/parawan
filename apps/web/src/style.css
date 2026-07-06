@@ -1,7 +1,7 @@
 /* ============================================================
    ANONIMIZATOR — układ „Modularna siatka kart" (zwycięzca turnieju C)
    + przeszczepy: duże ikono-przyciski (A), inline-diff Porównania (B)
-   Dark-enterprise · siatka 12 kolumn · jednolite nagłówki kart · tooltipy CSS
+   Jasny motyw (biurowy/gov.pl) · siatka 12 kolumn · jednolite nagłówki kart · ikony inline-SVG
    ============================================================ */
 
 :root {
@@ -192,14 +192,12 @@ details.card::details-content {
 }
 [data-tip]:hover::after,
 [data-tip]:focus-visible::after,
-[data-tip]:focus-within::after,
-[data-tip].tip-open::after {
+[data-tip]:focus-within::after {
   opacity: 1; visibility: visible; transform: translate(-50%, 0);
 }
 [data-tip]:hover::before,
 [data-tip]:focus-visible::before,
-[data-tip]:focus-within::before,
-[data-tip].tip-open::before {
+[data-tip]:focus-within::before {
   opacity: 1; visibility: visible; transform: translate(-50%, 0) rotate(45deg);
 }
 
@@ -302,18 +300,14 @@ select.field { font-family: "Segoe UI", system-ui, sans-serif; line-height: norm
 }
 .ver-link:hover { color: var(--acc); border-color: var(--acc-line); text-decoration: none; }
 .badges { display: flex; gap: 8px; flex-wrap: wrap; list-style: none; }
+/* badge'e hero NEUTRALNE — kolory 5 kategorii zarezerwowane dla semantyki PII (audyt P0) */
 .badge {
   display: inline-flex; align-items: center; gap: 7px;
   height: 32px; padding: 0 12px; border-radius: 999px;
   font-size: 12.5px; font-weight: 600; cursor: default;
+  color: var(--mut); border: 1px solid var(--line-2); background: var(--card-2);
 }
 .badge .gi { width: 18px; height: 18px; }
-/* badge'e hero NEUTRALNE — kolory 5 kategorii zarezerwowane dla semantyki PII (audyt P0) */
-.b-fin, .b-place, .b-person, .b-ident {
-  color: var(--mut);
-  border: 1px solid var(--line-2);
-  background: var(--card-2);
-}
 
 .hero-b { display: flex; align-items: center; gap: 16px; }
 .hero-lead { font-size: 16.5px; color: var(--mut); flex: 1; }
@@ -333,7 +327,6 @@ select.field { font-family: "Segoe UI", system-ui, sans-serif; line-height: norm
 .step .kick { font-size: 10.5px; font-weight: 700; letter-spacing: .14em; color: var(--acc); text-transform: uppercase; }
 .step .card-t h2 { font-size: 14.5px; }
 .step .card-b p { font-size: 12.5px; color: var(--mut); }
-.step-no { display: none; } /* numer niesie już kicker „KROK N" */
 
 /* ============ LEGENDA ============ */
 .legend .card-h { border-bottom: none; flex-wrap: wrap; gap: 12px 18px; }
@@ -522,7 +515,8 @@ mark.pii.pii-linked { box-shadow: 0 0 0 2px var(--acc-line); }
 .stat-total b { color: var(--text); font-size: 15px; }
 
 /* ============ CO MASKOWAĆ ============ */
-.toggles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+/* kolumny ustawia reguła responsywna niżej (repeat auto-fit); tu tylko szkielet gridu */
+.toggles { display: grid; gap: 10px; }
 .mask-toggles-host { display: contents; }
 .tg {
   display: flex; align-items: center; gap: 11px;
@@ -662,7 +656,6 @@ table .pii { cursor: default; }
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
     justify-content: stretch;
-    margin-left: 0;
   }
 }
 @media (max-width: 640px) {
