@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.38.0 — 2026-07-07
+
+UX i dokumentacja (bez zmian w silniku):
+
+- **„Co maskować" pogrupowane po kategoriach** (Identyfikatory, Kontakt, Finanse, Adres i czas,
+  Dane osobowe) — każda sekcja z kolorową kropką jak w legendzie. Koniec poszarpanej siatki;
+  układ ma teraz „ład i skład".
+- **Okna źródła i wyniku: większe, równej wysokości, ze synchronicznym przewijaniem** — przewijasz
+  jedno, drugie podąża (jak w recenzji dokumentu). Ułatwia porównywanie oryginału z wynikiem.
+- **README rozbudowany o przystępną sekcję „Jak to działa i dlaczego jest bezpieczne — bez
+  żargonu"** dla osób bez wiedzy technicznej: gdzie trafiają dane (nigdzie), jak to sprawdzić,
+  jak działa rozpoznawanie, co można ustawić. Tabela „Co wykrywa" uzupełniona (KRS, miasto
+  w kontekście zamieszkania, daty słowne, pola formularza).
+
 ## v0.37.0 — 2026-07-07
 
 **Miejscowość w kontekście adresu i zamieszkania jest teraz maskowana** (zgłoszony wyciek miast).

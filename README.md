@@ -4,15 +4,63 @@
 [![Release](https://img.shields.io/github/v/release/karolpolikarp/anonimizator)](https://github.com/karolpolikarp/anonimizator/releases)
 [![Licencja MIT](https://img.shields.io/badge/licencja-MIT-blue.svg)](./LICENSE)
 
-Lokalny anonimizator polskich danych osobowych (PII). Zamienia PESEL, NIP, REGON, numery kont,
-numery dowodów, e-maile, telefony, adresy oraz imiona i nazwiska na neutralne placeholdery —
-**zanim** tekst trafi do czatu z modelem językowym, e-maila, zgłoszenia czy bazy danych.
+Lokalny anonimizator polskich danych osobowych (PII). Zamienia PESEL, NIP, REGON, KRS, numery kont,
+numery dowodów i paszportów, e-maile, telefony, adresy, miejscowości, daty urodzenia oraz imiona
+i nazwiska na neutralne placeholdery — **zanim** tekst trafi do czatu z modelem językowym, e-maila,
+zgłoszenia czy bazy danych.
 
 **Nikt niczego nie serwuje centralnie i nie przetwarza Twoich danych.** Pobierasz aplikację
 z tego repozytorium i uruchamiasz na własnym komputerze — cała anonimizacja odbywa się
 lokalnie, w Twojej przeglądarce. Możesz rozłączyć internet i sprawdzić.
 
 ![Aplikacja Anonimizator — tekst źródłowy po lewej, zredagowany wynik z podświetlonymi maskami po prawej](docs/screenshot.png)
+
+## Jak to działa i dlaczego jest bezpieczne — w skrócie, bez żargonu
+
+> Ta sekcja jest dla **każdego**, także bez wiedzy technicznej. Reszta README jest bardziej techniczna.
+
+**Co to robi.** Wklejasz tekst, a program znajduje w nim dane osobowe (imię i nazwisko, PESEL, NIP,
+adres, miejscowość, e-mail, telefon, numer konta, numer dowodu, KRS itd.) i zamienia je na neutralne
+etykiety, na przykład `Jan Kowalski` → `[IMIĘ I NAZWISKO]`, `44051401359` → `[PESEL]`. Dzięki temu
+możesz spokojnie wysłać treść dalej — do czatu z AI, e-maila, urzędu — nie ujawniając, kogo dotyczy.
+
+**Gdzie trafiają Twoje dane? Nigdzie.** To jest najważniejsze. Aplikacja to **jeden plik**, który
+otwierasz na **własnym komputerze**. Cała praca dzieje się w Twojej przeglądarce, u Ciebie. Program
+**nie wysyła** tekstu na żaden serwer, do internetu, do autora ani do nikogo. Nie ma logowania, konta
+ani chmury. **Możesz odłączyć internet (wyłączyć Wi‑Fi / wyjąć kabel) i aplikacja nadal będzie
+działać** — to najprostszy dowód, że nic nie wychodzi na zewnątrz.
+
+**Skąd pewność, że tak jest naprawdę.**
+1. **Sprawdź sam** — odłącz internet i użyj aplikacji; zadziała tak samo.
+2. **Kod jest otwarty** (licencja MIT) — każdy może go przeczytać albo poprosić o sprawdzenie
+   znajomego informatyka. Nic nie jest ukryte.
+3. **Plik jest samodzielny** — nie dociąga niczego w tle podczas pracy.
+
+**Jak program rozpoznaje dane (w uproszczeniu).** Większość danych ma stały wzór, który da się
+sprawdzić matematycznie lub po układzie znaków — dlatego trafień „na ślepo" jest mało:
+- **PESEL, NIP, REGON, numer konta (IBAN), numer dowodu** mają tzw. *cyfrę/sumę kontrolną* —
+  wbudowany w numer sprawdzian poprawności. Program go **przelicza**, więc przypadkowy ciąg cyfr
+  (np. numer sprawy albo sygnatura) **nie** zostanie pomylony z PESEL‑em.
+- **E‑mail** ma znak `@`, **telefon** to 9 cyfr, **kod pocztowy** to `XX‑XXX` — rozpoznawane po wzorze.
+- **Imiona i nazwiska** rozpoznaje po słowniku polskich imion i nazwisk, po typowych końcówkach
+  (np. `‑ski`, `‑cki`, `‑icz`) oraz po kontekście („Pan…", „zamieszkały w…", nagłówki formularzy).
+- **Miejscowość** maskuje w kontekście adresu i zamieszkania („ul. Kwiatowa 5, **Warszawa**",
+  „zamieszkały w **Krakowie**"), ale **nie** w zwykłym zdaniu („spotkanie w Łodzi") ani w nazwie
+  instytucji („Sąd Okręgowy w Katowicach") — żeby nie zasłaniać za dużo.
+
+**Czego program może nie złapać.** To narzędzie **pomocnicze, nie gwarancja**. Najtrudniejsze są
+np. obce nazwiska bez polskiej końcówki i spoza słownika. Dlatego **zawsze przejrzyj wynik przed
+wysłaniem** — masz go od razu obok, z podświetleniem; strzałkami `‹ ›` przejdziesz po kolei przez
+zamaskowane fragmenty, a najechanie kursorem pokaże powód każdej maski.
+
+**Co możesz sam ustawić.** W panelu „Co maskować" włączasz i wyłączasz poszczególne rodzaje danych
+(pogrupowane w kategorie: Identyfikatory, Kontakt, Finanse, Adres i czas, Dane osobowe). Opcja
+„Rozróżniaj osoby" nadaje tej samej osobie stałą etykietę (`[OSOBA‑A]`, `[OSOBA‑B]`) — przydatne
+w umowach i pismach, gdzie trzeba wiedzieć, kto jest kim, bez podawania nazwisk.
+
+**Bezpieczeństwo także wtedy, gdy coś nie działa.** Nawet jeśli włączysz zaawansowane, opcjonalne
+warstwy AI (opisane niżej) i one się zawieszą — ochrona **nigdy nie spada poniżej** warstwy reguł
+i sum kontrolnych. AI może co najwyżej zamaskować *więcej*, nigdy *odsłonić* danych.
 
 ## Pobierz i używaj (jeden plik, bez instalacji)
 
@@ -63,12 +111,14 @@ przebieg po zredagowanym tekście niczego nie psuje.
 | IBAN / nr konta | mod 97 lub kontekst „konto/rachunek" + 26 cyfr | `[NR-KONTA]` |
 | Nr dowodu | 3 litery + 6 cyfr + suma kontrolna | `[NR-DOWODU]` |
 | Nr paszportu | kontekst „paszport" + 2 litery + 7 cyfr | `[NR-PASZPORTU]` |
+| Numer KRS | kontekst „KRS" + 10 cyfr (też z zerami wiodącymi) | `[KRS]` |
 | E-mail | wzorzec adresu | `[EMAIL]` |
 | Telefon | 9 cyfr, opcjonalnie +48 | `[TELEFON]` |
 | Kod pocztowy | XX-XXX | `[KOD-POCZTOWY]` |
-| Data urodzenia | data z kontekstem „ur./urodzony" | `[DATA-URODZENIA]` |
+| Data urodzenia | data z kontekstem „ur./urodzony" — cyfrowa i słowna („5 maja 1985") | `[DATA-URODZENIA]` |
 | Adres | ul./al./os./pl. + nazwa + numer (też „3 Maja", „gen./ks./św.") | `[ADRES]` |
-| Miejscowość | po kodzie pocztowym lub przed adresem („Warszawa, ul. …") | `[MIEJSCOWOŚĆ]` |
+| Miejscowość | w adresie (po kodzie, przed/po adresie) i przy zamieszkaniu („zamieszkały w Krakowie"); **nie** w prozie/instytucji | `[MIEJSCOWOŚĆ]` |
+| Pola formularza | „Nazwisko / Imię / Data urodzenia / Ulica / Miejscowość" z wartością w tej samej lub następnej linii (też WERSALIKAMI) | wg typu |
 | Imię i nazwisko | słownik imion + nazwisk (z odmianą), **morfologia nazwisk** (-ski/-cki/-icz/-czyk), kolejność odwrócona (nagłówki e-maili), wyzwalacze kontekstu | `[IMIĘ I NAZWISKO]` |
 
 ## Ograniczenia (przeczytaj przed użyciem)

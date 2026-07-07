@@ -365,8 +365,9 @@ select.field { font-family: "Segoe UI", system-ui, sans-serif; line-height: norm
   padding: 13px 14px 13px 8px;
   font: 400 14px/1.6 var(--mono);
   color: var(--text);
-  min-height: 300px;
-  max-height: 560px;
+  /* Większe i RÓWNE okna źródła i wyniku — obie mają tę samą wysokość (ta sama reguła),
+     rosną razem z ekranem; scroll wewnątrz. Synchronizację przewijania robi main.ts. */
+  height: clamp(360px, 58vh, 760px);
   overflow-y: auto;
   word-wrap: break-word;
 }
@@ -374,11 +375,11 @@ select.field { font-family: "Segoe UI", system-ui, sans-serif; line-height: norm
 .cl .no { text-align: right; color: var(--mut-2); user-select: none; font-size: 12px; padding-top: 2px; }
 .cl > span:last-child { white-space: pre-wrap; min-width: 0; }
 
-/* textarea źródła — ta sama anatomia co .editor, ale edytowalna */
+/* textarea źródła — ta sama anatomia co .editor, ale edytowalna. resize: none, by okno źródła
+   miało DOKŁADNIE tę samą wysokość co okno wyniku (nie rozjeżdżały się). */
 textarea.editor-ta {
-  width: 100%; resize: vertical;
+  width: 100%; resize: none;
   padding: 13px 14px;
-  max-height: none;
   overflow-y: auto;
 }
 textarea.editor-ta:focus {
@@ -515,13 +516,21 @@ mark.pii.pii-linked { box-shadow: 0 0 0 2px var(--acc-line); }
 .stat-total b { color: var(--text); font-size: 15px; }
 
 /* ============ CO MASKOWAĆ ============ */
-/* Flexbox z zawijaniem: przełączniki ROSNĄ, by wypełnić rząd — ostatni (niepełny) rząd nie
-   zostawia „dziury" niezależnie od liczby typów (dziś 13 = liczba pierwsza, żadna siatka nie
-   dzieli równo). Bazowa szerokość ~230px → tyle kolumn, ile mieści szerokość karty. */
-.toggles { display: flex; flex-wrap: wrap; gap: 10px; }
+/* Układ pogrupowany po KATEGORIACH (jak legenda): pionowy stos sekcji z nagłówkiem, w każdej
+   przełączniki wypełniają swój rząd. Grupowanie daje porządek, którego płaska siatka 13 pozycji
+   (liczba pierwsza — nie dzieli się równo) mieć nie mogła. */
+.toggles { display: flex; flex-direction: column; gap: 15px; }
 .mask-toggles-host { display: contents; }
+.tg-cat { display: flex; flex-direction: column; gap: 9px; }
+.tg-cat-h {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--mut);
+}
+.tg-cat-h .dot { width: 9px; height: 9px; }
+.tg-cat-body { display: flex; flex-wrap: wrap; gap: 10px; }
 .tg {
-  flex: 1 1 230px;
+  flex: 1 1 200px;
   display: flex; align-items: center; gap: 11px;
   padding: 9px 12px 9px 9px;
   background: var(--card-2); border: 1px solid var(--line); border-radius: var(--r-ctl);

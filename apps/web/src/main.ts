@@ -143,7 +143,8 @@ const disabledGroups = new Set<string>(
   (localStorage.getItem('mask-disabled') ?? '').split(',').filter(Boolean),
 );
 
-for (const g of MASK_GROUPS) {
+/** Buduje jeden przełącznik typu PII. */
+function buildToggle(g: MaskGroup): HTMLLabelElement {
   const label = document.createElement('label');
   label.className = `tg${g.full ? ' tg-full' : ''}`;
   label.dataset.tip = g.tip;
@@ -176,7 +177,35 @@ for (const g of MASK_GROUPS) {
   });
 
   label.append(ic, t, box);
-  maskTogglesEl.append(label);
+  return label;
+}
+
+// Grupowanie po KATEGORIACH (jak w legendzie) — porządek zamiast płaskiej, poszarpanej siatki.
+const CAT_LABELS: Record<Cat, string> = {
+  ident: 'Identyfikatory',
+  contact: 'Kontakt',
+  fin: 'Finanse',
+  place: 'Adres i czas',
+  person: 'Dane osobowe',
+};
+const CAT_ORDER: Cat[] = ['ident', 'contact', 'fin', 'place', 'person'];
+for (const cat of CAT_ORDER) {
+  const groups = MASK_GROUPS.filter((g) => g.cat === cat);
+  if (!groups.length) continue;
+  const section = document.createElement('section');
+  section.className = 'tg-cat';
+  const h = document.createElement('div');
+  h.className = 'tg-cat-h';
+  const dot = document.createElement('span');
+  dot.className = `dot dot-${cat}`;
+  const hl = document.createElement('span');
+  hl.textContent = CAT_LABELS[cat];
+  h.append(dot, hl);
+  const body = document.createElement('div');
+  body.className = 'tg-cat-body';
+  for (const g of groups) body.append(buildToggle(g));
+  section.append(h, body);
+  maskTogglesEl.append(section);
 }
 
 /** Typy aktywne wg przełączników; undefined = wszystkie. */
@@ -361,6 +390,24 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); goToMask(maskIdx + 1); }
   else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); goToPrevMask(); }
 });
+
+// Synchroniczne przewijanie źródła i wyniku — przewijasz jedno, drugie podąża (jak w recenzji
+// dokumentu). Proporcjonalnie (treści mają różną długość), z blokadą pętli sprzężenia zwrotnego.
+let syncingScroll = false;
+function linkScroll(from: HTMLElement, to: HTMLElement): void {
+  from.addEventListener('scroll', () => {
+    if (syncingScroll) return;
+    syncingScroll = true;
+    const fromMax = from.scrollHeight - from.clientHeight;
+    const toMax = to.scrollHeight - to.clientHeight;
+    to.scrollTop = fromMax > 0 ? (from.scrollTop / fromMax) * toMax : 0;
+    requestAnimationFrame(() => {
+      syncingScroll = false;
+    });
+  });
+}
+linkScroll(input, output);
+linkScroll(output, input);
 
 /* ── Pasek „Zamaskowano" (chipy z ikonami, licznik, kategorie) ── */
 
