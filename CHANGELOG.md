@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.39.0 — 2026-07-07
+
+Dopracowanie UX (bez zmian w silniku):
+
+- **„Co maskować": jednolita siatka kafelków tej samej szerokości.** Pojedynczy typ w kategorii
+  (IBAN w „Finansach", Imię i nazwisko w „Danych osobowych") to teraz normalny kafelek, a nie
+  rozciągnięta belka na całą szerokość. Tokeny (`[NR-PASZPORTU]` itd.) nie łamią się już na dwie linie.
+- **Okna źródła i wyniku zmniejszone** do rozsądnej wysokości (było za duże) — nadal równe
+  i ze synchronicznym przewijaniem.
+
 ## v0.38.0 — 2026-07-07
 
 UX i dokumentacja (bez zmian w silniku):

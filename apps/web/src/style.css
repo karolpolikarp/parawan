@@ -365,9 +365,9 @@ select.field { font-family: "Segoe UI", system-ui, sans-serif; line-height: norm
   padding: 13px 14px 13px 8px;
   font: 400 14px/1.6 var(--mono);
   color: var(--text);
-  /* Większe i RÓWNE okna źródła i wyniku — obie mają tę samą wysokość (ta sama reguła),
-     rosną razem z ekranem; scroll wewnątrz. Synchronizację przewijania robi main.ts. */
-  height: clamp(360px, 58vh, 760px);
+  /* RÓWNE okna źródła i wyniku — ta sama wysokość (ta sama reguła), scroll wewnątrz.
+     Synchronizację przewijania robi main.ts. Wysokość umiarkowana (nie zajmuje całego ekranu). */
+  height: clamp(280px, 42vh, 500px);
   overflow-y: auto;
   word-wrap: break-word;
 }
@@ -528,9 +528,10 @@ mark.pii.pii-linked { box-shadow: 0 0 0 2px var(--acc-line); }
   color: var(--mut);
 }
 .tg-cat-h .dot { width: 9px; height: 9px; }
-.tg-cat-body { display: flex; flex-wrap: wrap; gap: 10px; }
+/* Jednolita siatka: WSZYSTKIE kafelki tej samej szerokości (auto-fill, nie -fit → pojedynczy typ
+   w kategorii, np. IBAN, zostaje normalnym kafelkiem, a nie rozciągniętą belką na całą szerokość). */
+.tg-cat-body { display: grid; grid-template-columns: repeat(auto-fill, minmax(205px, 1fr)); gap: 10px; }
 .tg {
-  flex: 1 1 200px;
   display: flex; align-items: center; gap: 11px;
   padding: 9px 12px 9px 9px;
   background: var(--card-2); border: 1px solid var(--line); border-radius: var(--r-ctl);
@@ -539,9 +540,9 @@ mark.pii.pii-linked { box-shadow: 0 0 0 2px var(--acc-line); }
 .tg:hover { border-color: var(--line-2); }
 .tg .tg-t { min-width: 0; flex: 1; }
 .tg b { display: block; font-size: 13px; font-weight: 600; }
-.tg code { font-size: 11px; color: var(--mut); }
-.tg-wide { flex-basis: 100%; border-style: dashed; }
-.tg-full { flex-basis: 100%; }
+.tg code { display: block; font-size: 11px; color: var(--mut); white-space: nowrap; } /* token nie łamie się */
+/* „Rozróżniaj osoby" to tryb (nie typ danych) — zostaje pełną szerokością u góry, z linią przerywaną */
+.tg-wide { border-style: dashed; }
 
 /* ============ NER ============ */
 .ner-row {
