@@ -131,6 +131,9 @@ async function mapPool(items, limit, fn) {
 
 const pct = (num, den) => (den === 0 ? null : num / den);
 const fmtPct = (v) => (v === null ? '—' : `${(v * 100).toFixed(1)}%`);
+// F1 = średnia harmoniczna recall i precision-proxy. Null, gdy którakolwiek składowa nie istnieje
+// (np. negatywy nie mają recall) — F1 nie jest wtedy zdefiniowane.
+const f1 = (r, p) => (r === null || p === null || r + p === 0 ? null : (2 * r * p) / (r + p));
 
 /** Ocena jednego przypadku: co przeszło (wyciek) i co zostało zjedzone (nadmaskowanie). */
 function evaluateCase(c, redacted) {
@@ -224,11 +227,17 @@ async function main() {
       changedVsCore: isNer ? changedVsCore : null,
       recall: pct(agg.maskHit, agg.maskTotal),
       precision: pct(agg.keepHit, agg.keepTotal),
+      f1: f1(pct(agg.maskHit, agg.maskTotal), pct(agg.keepHit, agg.keepTotal)),
       agg,
       perCategory: Object.fromEntries(
         [...perCat.entries()].map(([cat, v]) => [
           cat,
-          { recall: pct(v.maskHit, v.maskTotal), precision: pct(v.keepHit, v.keepTotal), ...v },
+          {
+            recall: pct(v.maskHit, v.maskTotal),
+            precision: pct(v.keepHit, v.keepTotal),
+            f1: f1(pct(v.maskHit, v.maskTotal), pct(v.keepHit, v.keepTotal)),
+            ...v,
+          },
         ]),
       ),
       failures,
@@ -238,6 +247,7 @@ async function main() {
     console.log(
       `${layer.name}: recall ${fmtPct(pct(agg.maskHit, agg.maskTotal))}, ` +
         `precision ${fmtPct(pct(agg.keepHit, agg.keepTotal))}, ` +
+        `F1 ${fmtPct(f1(pct(agg.maskHit, agg.maskTotal), pct(agg.keepHit, agg.keepTotal)))}, ` +
         `porażek: ${failures.length}, czas: ${(elapsedMs / 1000).toFixed(1)} s` +
         (isNer ? `, wynik różny od core w ${changedVsCore} przypadkach` : ''),
     );
@@ -248,6 +258,7 @@ async function main() {
     'osoby-podstawowe': 'os-podst',
     'osoby-odmiana': 'os-odmiana',
     'osoby-rzadkie': 'os-rzadkie',
+    'osoby-rzadkie-ner': 'os-rz-ner',
     strukturalne: 'struktur.',
     negatywy: 'negatywy',
   };
@@ -256,6 +267,8 @@ async function main() {
   printTable(layerResults, categories, catShort, 'recall');
   console.log('\n=== PRECISION-PROXY (odsetek mustKeep zachowanych) ===');
   printTable(layerResults, categories, catShort, 'precision');
+  console.log('\n=== F1 (średnia harmoniczna recall i precision-proxy) ===');
+  printTable(layerResults, categories, catShort, 'f1');
 
   // ── Zapis results.json ──
   const resultsPayload = {
@@ -342,15 +355,18 @@ function buildMarkdown({ startedAt, coreVersion, cases, categories, layerResults
   push('');
   push(`## Wyniki`);
   push('');
-  push(`| Warstwa | Recall (łącznie) | Precision-proxy (łącznie) | Porażki (przypadki) | Czas | Wynik ≠ core |`);
-  push(`|---|---|---|---|---|---|`);
+  push(`| Warstwa | Recall (łącznie) | Precision-proxy (łącznie) | F1 | Porażki (przypadki) | Czas | Wynik ≠ core |`);
+  push(`|---|---|---|---|---|---|---|`);
   for (const lr of layerResults) {
     push(
       `| ${lr.name} | ${fmtPct(lr.recall)} (${lr.agg.maskHit}/${lr.agg.maskTotal}) | ` +
-        `${fmtPct(lr.precision)} (${lr.agg.keepHit}/${lr.agg.keepTotal}) | ${lr.failures.length} | ` +
+        `${fmtPct(lr.precision)} (${lr.agg.keepHit}/${lr.agg.keepTotal}) | ${fmtPct(lr.f1)} | ${lr.failures.length} | ` +
         `${(lr.elapsedMs / 1000).toFixed(1)} s | ${lr.changedVsCore === null ? '—' : `${lr.changedVsCore} przyp.`} |`,
     );
   }
+  push('');
+  push(`F1 liczone jako średnia harmoniczna recall i precision-proxy (łącznie po wszystkich kategoriach`);
+  push(`z oboma rodzajami elementów; kategoria „negatywy" nie ma recall, więc nie wchodzi do składowej recall).`);
   push('');
   push(`### Recall per kategoria`);
   push('');
@@ -358,6 +374,14 @@ function buildMarkdown({ startedAt, coreVersion, cases, categories, layerResults
   push(`|---|${categories.map(() => '---').join('|')}|`);
   for (const lr of layerResults) {
     push(`| ${lr.name} | ${categories.map((c) => fmtPct(lr.perCategory[c].recall)).join(' | ')} |`);
+  }
+  push('');
+  push(`### F1 per kategoria`);
+  push('');
+  push(`| Warstwa | ${categories.join(' | ')} |`);
+  push(`|---|${categories.map(() => '---').join('|')}|`);
+  for (const lr of layerResults) {
+    push(`| ${lr.name} | ${categories.map((c) => fmtPct(lr.perCategory[c].f1)).join(' | ')} |`);
   }
   push('');
   push(`### Precision-proxy per kategoria`);

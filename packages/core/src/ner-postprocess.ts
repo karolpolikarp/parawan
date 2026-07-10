@@ -27,14 +27,7 @@
  * (ner-browser.ts / nerRedact), które łapią wyjątki modelu. Działa w Node/przeglądarce/CLI.
  */
 
-import {
-  NON_SURNAME_ADJ,
-  HOMOGRAPH_SURNAMES,
-  isGeoAdjective,
-  normalizeSurnameKey,
-  looksLikeSurname,
-  surnameBase,
-} from './surnames.js';
+import { NON_SURNAME_ADJ, HOMOGRAPH_SURNAMES, isGeoAdjective, normalizeSurnameKey } from './surnames.js';
 import { LEGAL_ENTITY_WORDS, NON_PERSON_CONTEXT } from './index.js';
 
 const DEFAULT_MASK = '[IMIĘ I NAZWISKO]';
@@ -173,18 +166,6 @@ function locate(
 }
 
 /**
- * Czy powierzchniowe słowo (po rozszerzeniu do granic słowa) wygląda na osobę? Bramka „prefix-grow":
- * gdy krótkie trafienie urosło na dłuższe słowo, maskujemy tylko jeśli to naprawdę nazwisko.
- * Wielowyrazowy kandydat = silny sygnał osoby → nie bramkujemy. Pierwszy człon złożenia z myślnikiem
- * też liczy się jako nazwisko (Nowak-Schmidt z tokenem „Nowak").
- */
-function surfaceLooksLikePerson(surf: string): boolean {
-  if (/\s/.test(surf)) return true;
-  const first = surf.split('-')[0];
-  return looksLikeSurname(surf) || Boolean(surnameBase(surf)) || looksLikeSurname(first) || Boolean(surnameBase(first));
-}
-
-/**
  * Zamień wyjście NER na tekst z zamaskowanymi osobami. Deterministyczne, bez `throw`.
  *
  * @param text   tekst wejściowy (u nas: JUŻ po redakcji strukturalnej — patrz scheduleNer/app.py).
@@ -205,8 +186,11 @@ export function applyNerPersons(
   const isStopword = options.isStopword ?? defaultIsStopword;
   const isHomograph = options.isHomograph ?? defaultIsHomograph;
 
-  // 1) Grupowanie kolejnych tokenów osobowych. Nowy `B-` (albo token osobowy po nie-osobowym)
-  //    zamyka grupę — dwie sąsiednie osoby („Kowalski Nowak") nie zlepiają się w jedną.
+  // 1) Grupowanie KOLEJNYCH tokenów osobowych (bez dzielenia po B-/I-). FastPDN int8 znakuje
+  //    subwordy jako osobne B- (np. „Achtelika" = A|ch|te|lika, każdy B-), więc dzielenie po B-
+  //    fragmentowałoby jedno nazwisko i gubiło je. Sąsiednie osoby bez separatora scalą się w jedną
+  //    maskę — bezpieczne dla anonimizacji (oba nazwiska ukryte); w piśmie ludzie są i tak
+  //    rozdzieleni interpunkcją (przecinek/„i" = token nie-osobowy, który zamyka grupę).
   const groups: Group[] = [];
   let cur: Group | null = null;
   const flush = () => {
@@ -216,11 +200,7 @@ export function applyNerPersons(
   for (const t of tokens) {
     const entity = String(t?.entity ?? '');
     if (isPersonLabel(entity)) {
-      const isBegin = /^B[-_]/.test(entity);
-      if (!cur || isBegin) {
-        flush();
-        cur = { words: [], headScore: typeof t.score === 'number' ? t.score : 1 };
-      }
+      if (!cur) cur = { words: [], headScore: typeof t.score === 'number' ? t.score : 1 };
       cur.words.push(String(t.word ?? ''));
       if (typeof t.start === 'number' && cur.start === undefined) cur.start = t.start;
       if (typeof t.end === 'number') cur.end = t.end;
@@ -264,9 +244,17 @@ export function applyNerPersons(
     const [s, e] = expandToWord(text, hit.rawS, hit.rawE);
     if (inMask(s, e)) continue; // nie dotykaj istniejącego placeholdera
 
-    // Bramka „prefix-grow": span urósł ponad litery kandydata → maskuj tylko, gdy to nazwisko.
-    const surfLetters = text.slice(s, e).toLowerCase().replace(NON_LETTER_G, '');
-    if (surfLetters !== candLetters && !surfaceLooksLikePerson(text.slice(s, e).trim())) continue;
+    // Filtr precyzji na słowie POWIERZCHNIOWYM (po rozszerzeniu): odrzuć instytucje/homonimy,
+    // które kandydat-fragment mógł ominąć (np. „War"→„Warszawski", „Ba"→„Baran"). Homonim wg tego
+    // samego progu co na poziomie kandydata (domyślnie Infinity = zawsze, opt-in = wg score).
+    const surf = text.slice(s, e).trim();
+    if (isStopword(surf)) continue;
+    if (isHomograph(surf) && g.headScore < homographMinScore) continue;
+    // Bramka „prefix-grow": rozrost na słowo pisane z MAŁEJ litery to zwykły wyraz, nie nazwisko
+    // własne („mai"→„maila", „tre"→„treść") — odrzuć. Pełne trafienia i słowa z wielkiej przechodzą,
+    // więc obce nazwiska tagowane krótkim prefiksem (Kovač←„Ko", Schmidt←„Schmi") zostają maskowane.
+    const surfLetters = surf.toLowerCase().replace(NON_LETTER_G, '');
+    if (surfLetters !== candLetters && !/^\p{Lu}/u.test(surf)) continue;
 
     if (!overlaps(s, e)) spans.push([s, e]);
   }

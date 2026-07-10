@@ -28,11 +28,30 @@ test('B-/I- ciągłe → jedna maska pokrywa całe imię i nazwisko', () => {
   expect(r.found).toEqual([{ type: 'IMIE', count: 1 }]);
 });
 
-test('dwa B- obok siebie → dwie osoby, dwie maski', () => {
+test('sąsiednie osoby bez separatora scalają się w jedną maskę (bezpieczne — oba ukryte)', () => {
   const text = 'Obecni Kowalski Nowak wyszli.';
   const r = applyNerPersons(text, [person('Kowalski'), person('Nowak')]);
-  expect(r.redacted).toBe(`Obecni ${MASK} ${MASK} wyszli.`);
-  expect(r.found).toEqual([{ type: 'IMIE', count: 2 }]);
+  expect(r.redacted).toBe(`Obecni ${MASK} wyszli.`);
+  expect(r.found).toEqual([{ type: 'IMIE', count: 1 }]);
+});
+
+test('nazwisko pofragmentowane na osobne B- (jak int8 FastPDN) scala się i jest maskowane', () => {
+  const text = 'list od Achtelika leżał na biurku';
+  // model int8 znakuje subwordy osobno: A|ch|te|lika — każdy jako B-
+  const tokens = [
+    tok('B-nam_liv_person', 'A', 1.0),
+    tok('B-nam_liv_person', 'ch', 0.99),
+    tok('B-nam_liv_person', 'te', 0.91),
+    tok('B-nam_liv_person', 'lika', 0.98),
+  ];
+  expect(applyNerPersons(text, tokens).redacted).toBe(`list od ${MASK} leżał na biurku`);
+});
+
+test('obce nazwisko tagowane krótkim prefiksem z wielkiej litery — maskowane (Schmi → Schmidt)', () => {
+  const text = 'pełnomocnikiem był mecenas Schmidt osobiście';
+  expect(applyNerPersons(text, [person('Schmi', 1.0)]).redacted).toBe(
+    `pełnomocnikiem był mecenas ${MASK} osobiście`,
+  );
 });
 
 test('token nie-osobowy zamyka grupę', () => {

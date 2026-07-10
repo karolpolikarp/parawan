@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-10T22:26:30.928Z",
+  "generatedAt": "2026-07-10T22:40:04.513Z",
   "seed": 20260704,
   "coreVersion": "0.24.0",
   "casesTotal": 177,
@@ -21,10 +21,11 @@
     {
       "name": "T0+T1 core",
       "desc": "redactPII() — regex + sumy kontrolne + słownik (in-process, offline)",
-      "elapsedMs": 21,
+      "elapsedMs": 17,
       "changedVsCore": null,
       "recall": 0.9428571428571428,
       "precision": 0.9893048128342246,
+      "f1": 0.9655226949232958,
       "agg": {
         "maskTotal": 175,
         "maskHit": 165,
@@ -35,6 +36,7 @@
         "osoby-podstawowe": {
           "recall": 1,
           "precision": 1,
+          "f1": 1,
           "maskTotal": 44,
           "maskHit": 44,
           "keepTotal": 25,
@@ -43,6 +45,7 @@
         "osoby-odmiana": {
           "recall": 1,
           "precision": 1,
+          "f1": 1,
           "maskTotal": 36,
           "maskHit": 36,
           "keepTotal": 35,
@@ -51,6 +54,7 @@
         "osoby-rzadkie": {
           "recall": 1,
           "precision": 1,
+          "f1": 1,
           "maskTotal": 35,
           "maskHit": 35,
           "keepTotal": 24,
@@ -59,6 +63,7 @@
         "strukturalne": {
           "recall": 1,
           "precision": 1,
+          "f1": 1,
           "maskTotal": 50,
           "maskHit": 50,
           "keepTotal": 42,
@@ -67,6 +72,7 @@
         "negatywy": {
           "recall": null,
           "precision": 0.9607843137254902,
+          "f1": null,
           "maskTotal": 0,
           "maskHit": 0,
           "keepTotal": 51,
@@ -75,6 +81,7 @@
         "osoby-rzadkie-ner": {
           "recall": 0,
           "precision": 1,
+          "f1": 0,
           "maskTotal": 10,
           "maskHit": 0,
           "keepTotal": 10,
@@ -1118,13 +1125,14 @@
     {
       "name": "core+onnx (Node)",
       "desc": "redactPII() + FastPDN ONNX int8 (q8) w Node przez @huggingface/transformers — bez Dockera",
-      "elapsedMs": 1301,
-      "changedVsCore": 2,
-      "recall": 0.9542857142857143,
+      "elapsedMs": 1222,
+      "changedVsCore": 8,
+      "recall": 0.9885714285714285,
       "precision": 0.9893048128342246,
+      "f1": 0.988937984735655,
       "agg": {
         "maskTotal": 175,
-        "maskHit": 167,
+        "maskHit": 173,
         "keepTotal": 187,
         "keepHit": 185
       },
@@ -1132,6 +1140,7 @@
         "osoby-podstawowe": {
           "recall": 1,
           "precision": 1,
+          "f1": 1,
           "maskTotal": 44,
           "maskHit": 44,
           "keepTotal": 25,
@@ -1140,6 +1149,7 @@
         "osoby-odmiana": {
           "recall": 1,
           "precision": 1,
+          "f1": 1,
           "maskTotal": 36,
           "maskHit": 36,
           "keepTotal": 35,
@@ -1148,6 +1158,7 @@
         "osoby-rzadkie": {
           "recall": 1,
           "precision": 1,
+          "f1": 1,
           "maskTotal": 35,
           "maskHit": 35,
           "keepTotal": 24,
@@ -1156,6 +1167,7 @@
         "strukturalne": {
           "recall": 1,
           "precision": 1,
+          "f1": 1,
           "maskTotal": 50,
           "maskHit": 50,
           "keepTotal": 42,
@@ -1164,16 +1176,18 @@
         "negatywy": {
           "recall": null,
           "precision": 0.9607843137254902,
+          "f1": null,
           "maskTotal": 0,
           "maskHit": 0,
           "keepTotal": 51,
           "keepHit": 49
         },
         "osoby-rzadkie-ner": {
-          "recall": 0.2,
+          "recall": 0.8,
           "precision": 1,
+          "f1": 0.888888888888889,
           "maskTotal": 10,
-          "maskHit": 2,
+          "maskHit": 8,
           "keepTotal": 10,
           "keepHit": 10
         }
@@ -1200,26 +1214,6 @@
           "redacted": "Pan [IMIĘ I NAZWISKO] to najsłynniejsza polska epopeja narodowa."
         },
         {
-          "id": "os-rn-01",
-          "category": "osoby-rzadkie-ner",
-          "text": "list od Achtelika leżał tydzień na biurku",
-          "leaked": [
-            "Achtelika"
-          ],
-          "eaten": [],
-          "redacted": "list od Achtelika leżał tydzień na biurku"
-        },
-        {
-          "id": "os-rn-02",
-          "category": "osoby-rzadkie-ner",
-          "text": "sprawę Fąfary umorzono w drugiej instancji",
-          "leaked": [
-            "Fąfary"
-          ],
-          "eaten": [],
-          "redacted": "sprawę Fąfary umorzono w drugiej instancji"
-        },
-        {
           "id": "os-rn-03",
           "category": "osoby-rzadkie-ner",
           "text": "zeznania Gągały spisano protokolarnie",
@@ -1230,16 +1224,6 @@
           "redacted": "zeznania Gągały spisano protokolarnie"
         },
         {
-          "id": "os-rn-04",
-          "category": "osoby-rzadkie-ner",
-          "text": "wniosek Grzmota rozpatrzono odmownie",
-          "leaked": [
-            "Grzmota"
-          ],
-          "eaten": [],
-          "redacted": "wniosek Grzmota rozpatrzono odmownie"
-        },
-        {
           "id": "os-rn-05",
           "category": "osoby-rzadkie-ner",
           "text": "do akt dołączono notatkę Ciołka z rozmowy",
@@ -1248,36 +1232,6 @@
           ],
           "eaten": [],
           "redacted": "do akt dołączono notatkę Ciołka z rozmowy"
-        },
-        {
-          "id": "os-rn-08",
-          "category": "osoby-rzadkie-ner",
-          "text": "protokół podpisał Kovač w obecności świadka",
-          "leaked": [
-            "Kovač"
-          ],
-          "eaten": [],
-          "redacted": "protokół podpisał Kovač w obecności świadka"
-        },
-        {
-          "id": "os-rn-09",
-          "category": "osoby-rzadkie-ner",
-          "text": "opinię biegłego sporządził Popescu w terminie",
-          "leaked": [
-            "Popescu"
-          ],
-          "eaten": [],
-          "redacted": "opinię biegłego sporządził Popescu w terminie"
-        },
-        {
-          "id": "os-rn-10",
-          "category": "osoby-rzadkie-ner",
-          "text": "pełnomocnikiem powoda był mecenas Schmidt",
-          "leaked": [
-            "Schmidt"
-          ],
-          "eaten": [],
-          "redacted": "pełnomocnikiem powoda był mecenas Schmidt"
         }
       ],
       "perCase": [
@@ -2122,16 +2076,12 @@
         },
         {
           "id": "os-rn-01",
-          "leaked": [
-            "Achtelika"
-          ],
+          "leaked": [],
           "eaten": []
         },
         {
           "id": "os-rn-02",
-          "leaked": [
-            "Fąfary"
-          ],
+          "leaked": [],
           "eaten": []
         },
         {
@@ -2143,9 +2093,7 @@
         },
         {
           "id": "os-rn-04",
-          "leaked": [
-            "Grzmota"
-          ],
+          "leaked": [],
           "eaten": []
         },
         {
@@ -2167,23 +2115,17 @@
         },
         {
           "id": "os-rn-08",
-          "leaked": [
-            "Kovač"
-          ],
+          "leaked": [],
           "eaten": []
         },
         {
           "id": "os-rn-09",
-          "leaked": [
-            "Popescu"
-          ],
+          "leaked": [],
           "eaten": []
         },
         {
           "id": "os-rn-10",
-          "leaked": [
-            "Schmidt"
-          ],
+          "leaked": [],
           "eaten": []
         }
       ]
