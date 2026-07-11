@@ -388,9 +388,10 @@ export function buildDataset() {
   // daty urodzenia (z jawnym kontekstem)
   // miasto zamieszkania to dana osobowa (decyzja produktowa): marker „zamieszkały w" → maskuj miasto
   str('Wnioskodawca, ur. 12.05.1985, zamieszkały w Łodzi.', ['12.05.1985', 'Łodzi'], ['Wnioskodawca']);
-  str('Urodzona 3.04.1992 w Poznaniu.', ['3.04.1992'], ['Poznaniu']);
+  // v0.44.2: miasto urodzenia po markerze „urodzona … w" to PII — maskowane (krok 12g)
+  str('Urodzona 3.04.1992 w Poznaniu.', ['3.04.1992', 'Poznaniu'], []);
   str('Data urodzenia: 1990-01-01 (wg aktu).', ['1990-01-01'], ['wg aktu']);
-  str('urodzony 07/11/1978 w Gdańsku', ['07/11/1978'], ['Gdańsku']);
+  str('urodzony 07/11/1978 w Gdańsku', ['07/11/1978', 'Gdańsku'], []);
   // numery dowodów osobistych
   str('Seria i numer dowodu: ABA300000.', ['ABA300000'], ['Seria i numer']);
   str(`Legitymuje się dowodem ${DOWOD_B}.`, [DOWOD_B], ['Legitymuje']);
@@ -424,7 +425,9 @@ export function buildDataset() {
   neg('Zakres art. 10-100 obejmuje przepisy ogólne.', ['10-100']);
   // sygnatury akt
   neg('Wyrok w sprawie II K 123/45 uprawomocnił się.', ['II K 123/45']);
-  neg('Sygn. akt III CZP 12/23 — uchwała siedmiu sędziów.', ['III CZP 12/23']);
+  // v0.44.2 (decyzja polityki): sygnatura sądowa PRZY KOTWICY „Sygn. akt" identyfikuje sprawę
+  // → maskowana; cytowane orzecznictwo BEZ kotwicy („w sprawie III CZP 45/22") zostaje jawne.
+  str('Sygn. akt III CZP 12/23 — uchwała siedmiu sędziów.', ['III CZP 12/23'], ['uchwała']);
   neg('Apelację oddalono w sprawie I ACa 1234/22.', ['I ACa 1234/22']);
   // instytucje i akty prawne (wielkie litery, ale to nie osoby)
   neg('Sąd Najwyższy oddalił skargę kasacyjną.', ['Sąd Najwyższy']);
@@ -466,6 +469,25 @@ export function buildDataset() {
   // numer prawa jazdy ze slashami maskowany W CAŁOŚCI (nie fragment)
   str('Prawo jazdy: 12345/67/8901 (kat. B).', ['12345/67/8901'], ['kat']);
   str('Pojazd o nr rejestracyjnym WI1234K, marka Audi.', ['WI1234K'], ['Audi']);
+  // v0.44.2 (raport testów partii 1–3): sekrety prefiksowe, warianty telefonu, Cisco MAC,
+  // sygnatura sądowa z wydziałem, KRS/prawo jazdy z odmianą frazy, adres z „lok."/„m."
+  str('Klucz API sk_live_a1b2c3d4e5f6g7h8i9j0 w konfiguracji.', ['sk_live_a1b2c3d4e5f6g7h8i9j0'], ['konfiguracji']);
+  str('Sekret ghp_AbCdEfGh1234567890IjKlMnOpQrStUv w repozytorium.', ['ghp_AbCdEfGh1234567890IjKlMnOpQrStUv'], ['repozytorium']);
+  str('Telefon kontaktowy (22) 501-23-45 czynny do 16.', ['(22) 501-23-45'], ['czynny']);
+  // notacja kropkowa telefonu wymaga kotwicy (bez niej pożerała kwoty „123.456.789 zł")
+  str('Telefon 512.345.678 zapisano w aktach.', ['512.345.678'], ['aktach']);
+  neg('Wartość zamówienia: 123.456.789 zł brutto.', ['123.456.789']);
+  str('Interfejs o adresie aabb.ccdd.eeff w notacji Cisco.', ['aabb.ccdd.eeff'], ['notacji']);
+  str('Sygn. akt: II SA/Wa 1234/23 w postępowaniu.', ['II SA/Wa 1234/23'], ['postępowaniu']);
+  str('Spółka wpisana do KRS pod numerem 0000123456.', ['0000123456'], ['wpisana']);
+  str('Legitymował się prawem jazdy nr 05678/13/1234 podczas kontroli.', ['05678/13/1234'], ['kontroli']);
+  str('Zamieszkały przy ul. Polnej 12 lok. 5 od urodzenia.', ['Polnej 12 lok. 5'], ['urodzenia']);
+  str('Świadek, ur. dnia 31 XII 2010, stawił się z opiekunem.', ['31 XII 2010'], ['opiekunem']);
+  // precyzja: numer porządkowy / lp. / cytowane orzecznictwo NIE są maskowane
+  neg('Numer porządkowy pozycji w rejestrze 000012345 pozostaje jawny.', ['000012345']);
+  neg('Lp. 123456789 w wykazie środków trwałych.', ['123456789']);
+  neg('Orzeczenie w sprawie III CZP 45/22 przywołano w uzasadnieniu.', ['III CZP 45/22']);
+  neg('Oprogramowanie w wersji 10.0.19045.3803 zainstalowano zdalnie.', ['10.0.19045.3803']);
   // precyzja: numer wersji oprogramowania to NIE adres IP
   neg('Aktualizacja do wersji 1.2.3.4 usuwa błędy krytyczne.', ['1.2.3.4']);
   // dowód BEZ kontekstu wymaga poprawnej sumy kontrolnej (v0.30) — ABA300001 ma złą sumę,

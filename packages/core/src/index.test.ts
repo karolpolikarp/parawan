@@ -877,3 +877,152 @@ test('options — brak opcji identyczny z domyślnym wywołaniem', () => {
   const input = 'PESEL 44051401359, NIP 123-456-32-18, Jan Kowalski, ul. Polna 12/3, x@y.pl';
   expect(redactPII(input, {}).redacted).toBe(redactPII(input).redacted);
 });
+
+// ============================================================================
+// Poprawki po raporcie testów partii 1–3 (v0.44.2)
+// ============================================================================
+
+test('sygnatura sądowa z dwuczłonowym wydziałem („II SA/Wa 1234/23") maskowana przy kotwicy', () => {
+  const r = redactPII('Sygn. akt: II SA/Wa 1234/23 w toku postępowania.');
+  expect(r.redacted).toContain('[ZNAK-SPRAWY]');
+  expect(r.redacted.includes('1234/23')).toBe(false);
+});
+test('sygnatura sądowa BEZ kotwicy (cytowane orzecznictwo) NIE jest maskowana', () => {
+  const t = 'Orzeczenie w sprawie III CZP 45/22 oraz wyrok I OSK 1122/21.';
+  expect(redactPII(t).redacted).toBe(t);
+});
+
+test('KRS z wypełniaczem „pod numerem" maskowany', () => {
+  const r = redactPII('spółkę wpisaną do KRS pod numerem 0000123456.');
+  expect(r.redacted).toContain('[KRS]');
+  expect(r.redacted.includes('0000123456')).toBe(false);
+});
+
+test('prawo jazdy w odmianie („prawem jazdy nr") maskowane w całości', () => {
+  const r = redactPII('posługujący się prawem jazdy nr 05678/13/1234.');
+  expect(r.redacted).toContain('[PRAWO-JAZDY]');
+  expect(r.redacted.includes('05678')).toBe(false);
+  expect(r.redacted.includes('1234')).toBe(false);
+});
+
+test('sekrety prefiksowe (sk_live_/sk_test_/ghp_/github_pat_) maskowane jako TOKEN', () => {
+  const r = redactPII('Klucz sk_live_a1b2c3d4e5f6g7h8i9j0 oraz ghp_AbCdEfGh1234567890IjKlMnOpQrStUv.');
+  expect(r.redacted.match(/\[TOKEN\]/g)?.length).toBe(2);
+  expect(r.redacted.includes('sk_live')).toBe(false);
+  expect(r.redacted.includes('ghp_')).toBe(false);
+});
+
+test('telefon: wtrącenie po słowie kontekstowym i kierunkowy w nawiasie', () => {
+  const r = redactPII('telefon kontaktowy (22) 501-23-45 czynny w godzinach pracy.');
+  expect(r.redacted).toContain('[TELEFON]');
+  expect(r.redacted.includes('501-23-45')).toBe(false);
+});
+test('telefon: format z kropkami wymaga kotwicy; kierunkowy w nawiasie działa bez niej', () => {
+  expect(redactPII('Telefon 512.345.678 w aktach.').redacted).toContain('[TELEFON]');
+  expect(redactPII('Numery: 512.345.678 w aktach.').redacted.includes('[TELEFON]')).toBe(false);
+  expect(redactPII('Dzwonić: (22) 501-23-45 rano.').redacted).toContain('[TELEFON]');
+});
+test('telefon: goły prefiks „48" maskowany razem z numerem', () => {
+  const r = redactPII('kom. 48 512 345 678 dostępny wieczorem.');
+  expect(r.redacted).toContain('[TELEFON]');
+  expect(/48\s*\[TELEFON\]/.test(r.redacted)).toBe(false);
+});
+test('telefon: 9 cyfr od zera i numer porządkowy w rejestrze NIE są telefonem', () => {
+  const t = 'Numer porządkowy pozycji w rejestrze 000012345 nie jest telefonem. Lp. 123456789.';
+  expect(redactPII(t).redacted).toBe(t);
+});
+test('telefon: kropkowy 3-3-3 nie zjada członów numeru wersji', () => {
+  const t = 'Oprogramowanie w wersji 10.0.19045.3803 oraz build 1.234.567.890 działa.';
+  expect(redactPII(t).redacted).toBe(t);
+});
+
+test('MAC w notacji Cisco (aabb.ccdd.eeff) maskowany; wersja czysto cyfrowa nie', () => {
+  const r = redactPII('Interfejs aabb.ccdd.eeff w notacji Cisco.');
+  expect(r.redacted).toContain('[MAC]');
+  expect(redactPII('Pozycja 1234.5678.9012 w tabeli.').redacted.includes('[MAC]')).toBe(false);
+});
+
+test('skompresowany IPv6 przed kropką końca zdania maskowany', () => {
+  const r = redactPII('host IPv6 fe80::1ff:fe23:4567:890a. Dalej tekst.');
+  expect(r.redacted).toContain('[IP]');
+  expect(r.redacted.includes('fe80')).toBe(false);
+});
+
+test('data urodzenia z „dnia" i miesiącem rzymskim („ur. dnia 31 XII 2010")', () => {
+  const r = redactPII('Zgłaszający, ur. dnia 31 XII 2010, stawił się.');
+  expect(r.redacted).toContain('[DATA-URODZENIA]');
+  expect(r.redacted.includes('31 XII 2010')).toBe(false);
+});
+
+test('NIP z prefiksem kraju „PL" maskowany w całości', () => {
+  const r = redactPII('Firma o numerze NIP PL5262735917 wystawiła fakturę.');
+  expect(r.redacted).toContain('[NIP]');
+  expect(/PL\s*\[NIP\]/.test(r.redacted)).toBe(false);
+});
+
+test('miejscowość po markerze urodzenia z datą pomiędzy („ur. … w Krakowie")', () => {
+  const r = redactPII('Pani Anna, ur. 08.05.1992 w Krakowie, stawiła się osobiście.');
+  expect(r.redacted).toContain('[MIEJSCOWOŚĆ]');
+  expect(r.redacted.includes('Krakowie')).toBe(false);
+  // goła proza bez markera zostaje
+  expect(redactPII('Spotkanie odbyło się w Krakowie.').redacted).toBe('Spotkanie odbyło się w Krakowie.');
+});
+
+test('adres z numerem lokalu po „lok."/„m." maskowany w całości', () => {
+  const r1 = redactPII('zamieszkały przy ul. Polnej 12 lok. 5 od lat.');
+  expect(r1.redacted).toContain('[ADRES]');
+  expect(r1.redacted.includes('lok. 5')).toBe(false);
+  const r2 = redactPII('adres: ul. Długa 3 m. 7 w centrum.');
+  expect(r2.redacted).toContain('[ADRES]');
+  expect(r2.redacted.includes('m. 7')).toBe(false);
+});
+
+test('inicjał imienia przed zamaskowaną osobą wciągany do maski', () => {
+  const r = redactPII('Pełnomocnikiem był mec. J. Kowalski z kancelarii.');
+  expect(/\bJ\.\s/.test(r.redacted)).toBe(false);
+  // punkt wyliczenia na początku linii zostaje
+  const r2 = redactPII('A. Jan Kowalski zeznał, że...');
+  expect(r2.redacted.startsWith('A.')).toBe(true);
+});
+
+// Poprawki po audycie adwersarialnym v0.44.2
+test('kwoty z separatorem tysięcy (kropki/spacje) NIE są telefonem', () => {
+  for (const t of [
+    'Wartość zamówienia: 123.456.789 zł brutto.',
+    'Kwota 512.345.678,00 zł na rachunku.',
+    'Kapitał 123 456 789 zł wniesiono.',
+  ]) {
+    expect(redactPII(t).redacted.includes('[TELEFON]')).toBe(false);
+  }
+});
+test('kropkowy telefon TYLKO z kotwicą; numer seryjny/wersja bez maskowania', () => {
+  expect(redactPII('tel. 512.345.678 czynny.').redacted).toContain('[TELEFON]');
+  expect(redactPII('Telefony: 512.345.678 w aktach.').redacted).toContain('[TELEFON]');
+  const t = 'Numer seryjny urządzenia: 745.812.903. Wersja oprogramowania 512.345.678 wydana.';
+  expect(redactPII(t).redacted).toBe(t);
+});
+test('MAC Cisco czysto cyfrowy maskowany przy etykiecie „MAC", bez etykiety nie', () => {
+  expect(redactPII('Adres MAC: 0011.2233.4455 urządzenia.').redacted).toContain('[MAC]');
+  expect(redactPII('Pozycja 0011.2233.4455 w tabeli.').redacted.includes('[MAC]')).toBe(false);
+});
+test('znak sprawy z inicjałami referenta maskowany w całości', () => {
+  const r = redactPII('znak sprawy: WKU.5589.12.2026.AB w aktach.');
+  expect(r.redacted).toContain('[ZNAK-SPRAWY]');
+  expect(r.redacted.includes('.AB')).toBe(false);
+});
+test('prawo jazdy z wtrąceniem kategorii („kat. B o numerze") maskowane', () => {
+  for (const t of [
+    'okazał prawo jazdy kat. B o numerze 12345/67/8901',
+    'informacje o prawie jazdy kategorii B nr 12345/67/8901',
+  ]) {
+    const r = redactPII(t);
+    expect(r.redacted).toContain('[PRAWO-JAZDY]');
+    expect(r.redacted.includes('12345')).toBe(false);
+  }
+});
+test('miasto z myślnikiem i mianownik po „zam." maskowane', () => {
+  expect(redactPII('Oskarżony ur. 1.01.1970 w Bielsku-Białej.').redacted).toContain('[MIEJSCOWOŚĆ]');
+  const r = redactPII('ur. 3 maja 1980 r. w Poznaniu, zam. Kraków');
+  expect(r.redacted.includes('Poznaniu')).toBe(false);
+  expect(r.redacted.includes('Kraków')).toBe(false);
+});

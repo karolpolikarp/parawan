@@ -1,5 +1,61 @@
 # Changelog
 
+## v0.44.2 — 2026-07-11
+
+**Poprawki detekcji po zewnętrznym raporcie z testów (partie 1–3).**
+
+Fałszywe negatywy (wycieki) usunięte:
+
+- **Sekrety prefiksowe jako TOKEN**: `sk_live_`/`sk_test_` (Stripe), `ghp_`/`gho_`/`ghs_`/`ghu_`/
+  `ghr_`/`github_pat_` (GitHub), `xox?-` (Slack) — dotąd kategoria łapała wyłącznie JWT, a to
+  najczęstszy wyciek przy wklejaniu logów do asystenta AI.
+- **Telefon**: format z kropkami (`512.345.678`), kierunkowy w nawiasie (`(22) 501-23-45`),
+  wtrącenie po słowie kontekstowym („telefon **kontaktowy**…"), goły prefiks kraju
+  („kom. **48** 512 345 678" — prefiks maskowany razem z numerem).
+- **MAC w notacji Cisco** (`aabb.ccdd.eeff`; wymagana ≥1 litera hex — czysto cyfrowe ciągi
+  z kropkami zostają).
+- **IPv6 przed kropką końca zdania** (`…fe80::1ff:fe23:4567:890a.` — adres wyciekał w całości).
+- **Sygnatura sądowa z dwuczłonowym wydziałem** („Sygn. akt: II SA/Wa 1234/23") — decyzja
+  polityki: sygnatury maskowane TYLKO przy kotwicy („Sygn. akt"), cytowane orzecznictwo
+  w prozie („w sprawie III CZP 45/22") pozostaje jawne.
+- **KRS z wypełniaczem** („wpisana do KRS **pod numerem** 0000123456").
+- **Prawo jazdy w odmianie** („**prawem** jazdy nr 05678/13/1234" — narzędnik nie był kotwicą).
+- **Data urodzenia z „dnia" i miesiącem rzymskim** („ur. dnia 31 XII 2010").
+- **Miasto urodzenia z datą pomiędzy** („ur. 08.05.1992 **w Krakowie**" — nowy krok 12g,
+  wyłącznie miasta ze słownika; goła proza „spotkanie w Krakowie" nietknięta).
+- **Numer lokalu w adresie** („ul. Polna 12 **lok. 5**", „ul. Długa 3 **m. 7**" — dotąd poza
+  znacznikiem `[ADRES]`).
+- **NIP z prefiksem kraju** („NIP **PL**5262735917" — prefiks maskowany razem z numerem).
+- **Inicjał przed nazwiskiem** („mec. **J.** Kowalski" — inicjał wciągany do maski osoby;
+  punkty wyliczeń na początku linii nietknięte).
+
+Fałszywe pozytywy (nadmaskowanie) usunięte:
+
+- **Numer porządkowy ≠ telefon**: 9-cyfrowe ciągi zaczynające się od zera odrzucane (polski
+  numer nigdy nie zaczyna się od 0), a strażnik kontekstu zna teraz „lp.", „porządkowy",
+  „rejestr…" (okno poszerzone do 24 znaków).
+
+Dodatkowo po wewnętrznym audycie adwersarialnym nowych reguł:
+
+- **Notacja kropkowa telefonu wymaga kotwicy** („tel./telefon…") — bez niej pożerała kwoty
+  z separatorem tysięcy („123.456.789 zł") i numery seryjne. Fallback bez kotwicy nie maskuje
+  też ciągów przed częścią groszową/walutą („512 345 678,00 zł" to kwota) i zna negatywne
+  kotwice „seryjny"/„wersja".
+- **MAC Cisco czysto cyfrowy** maskowany przy jawnej etykiecie „MAC" (etykieta wygrywa
+  z warunkiem strukturalnym, jak przy PESEL/NIP ze złą sumą).
+- **Znak sprawy z inicjałami referenta** („WKU.5589.12.2026.AB") maskowany w całości —
+  końcówka `.AB` identyfikuje urzędnika.
+- **Prawo jazdy z wtrąceniem kategorii** („prawo jazdy kat. B o numerze …") — wypełniacze
+  między kotwicą a numerem nie przerywają już dopasowania.
+- **Miasta z myślnikiem w odmianie** („w Bielsku-Białej") i **mianownik po „zam."**
+  („zam. Kraków") dodane do detekcji miejscowości.
+
+Poza zakresem deterministyki (domena warstwy NER/słownika): obce nazwiska wieloczłonowe
+(„Jean-Pierre Dubois", „Nguyen Van Anh") oraz tablica rejestracyjna bez kotwicy („ZS 4567" —
+format zbyt wieloznaczny, precyzja > nadmaskowanie).
+
+Aplikacja web 0.44.1 → 0.44.2, rdzeń `anonimizator` 0.26.1 → 0.27.0.
+
 ## v0.44.1 — 2026-07-11
 
 **Poprawki interfejsu + pełne maskowanie numeru prawa jazdy.**

@@ -209,10 +209,13 @@ export function isValidDowod(raw: string): boolean {
  * (Dokumenty urzędowe i prawne są pełne takich odwołań — bez tego strażnika toną w maskach.)
  */
 function precededByLegalRef(full: string, offset: number): boolean {
-  const before = full.slice(Math.max(0, offset - 16), offset);
+  // Okno 24 znaki — mieści dłuższe frazy jak „w rejestrze " czy „porządkowy ".
+  const before = full.slice(Math.max(0, offset - 24), offset);
   // „regon": ciąg po tej kotwicy to (nie)poprawny REGON — obsłużony (albo słusznie
   // odrzucony) przez krok REGON; detektor telefonu nie może go pożerać (bug z benchmarku).
-  return /(art\.?|§|ust\.?|pkt|poz\.?|sygn\.?|nr\s|dz\.?\s?u|regon)\s*$/i.test(before);
+  // „lp./porządkow…/rejestr…": numer porządkowy pozycji w rejestrze ≠ telefon.
+  // „seryjn…/wersj…": numer seryjny urządzenia i numer wersji ≠ telefon/IP.
+  return /(art\.?|§|ust\.?|pkt|poz\.?|sygn\.?|nr\s|dz\.?\s?u|regon|lp\.?|porządkow\w+|rejestr\w*|seryjn\w+|wersj\w+)\s*$/i.test(before);
 }
 
 // ============================================================================
@@ -503,6 +506,9 @@ const POLISH_CITIES = new Set<string>([
     'bielsko-biała|kędzierzyn-koźle|jastrzębie-zdrój|skarżysko-kamienna|konstancin-jeziorna|' +
     'kudowa-zdrój|polanica-zdrój|duszniki-zdrój|lądek-zdrój|busko-zdrój|rabka-zdrój|iwonicz-zdrój|' +
     'świeradów-zdrój|połczyn-zdrój|goczałkowice-zdrój|' +
+    // formy zależne miast z myślnikiem („ur. w Bielsku-Białej", „zam. w Jastrzębiu-Zdroju")
+    'bielsku-białej|bielska-białej|kędzierzynie-koźlu|kędzierzyna-koźla|jastrzębiu-zdroju|' +
+    'skarżysku-kamiennej|konstancinie-jeziornie|' +
     // częste formy zależne dużych miast (pozycja „w <mieście>, ul. …")
     'warszawie|warszawy|krakowie|krakowa|łodzi|wrocławiu|wrocławia|poznaniu|poznania|gdańsku|gdańska|' +
     'szczecinie|bydgoszczy|lublinie|lublina|katowicach|gdyni|częstochowie|radomiu|radomia|sosnowcu|' +
@@ -597,6 +603,16 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
       bump('TOKEN');
       return M.TOKEN;
     });
+    // TOKEN (sekrety prefiksowe): sk_live_/sk_test_ (Stripe), ghp_/gho_/ghs_/ghu_/ghr_ i
+    // github_pat_ (GitHub), xox?- (Slack). Prefiks + minimalna długość ≈ zerowe FP, a to
+    // najczęstszy wyciek przy wklejaniu logów/konfiguracji do asystenta AI.
+    text = text.replace(
+      /\b(?:sk_(?:live|test)_[A-Za-z0-9]{8,}|(?:ghp|gho|ghs|ghu|ghr)_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|xox[baprs]-[A-Za-z0-9-]{10,})/g,
+      () => {
+        bump('TOKEN');
+        return M.TOKEN;
+      },
+    );
   }
 
   // MAC: 6 par hex po „:"/„-". MUSI biec PRZED IPv6 (MAC pasuje do wzorca grup hex IPv6).
@@ -605,6 +621,25 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
       bump('MAC');
       return M.MAC;
     });
+    // MAC w notacji Cisco: „aabb.ccdd.eeff" (3 grupy po 4 hex). Wymagamy ≥1 LITERY hex,
+    // żeby nie pożreć czysto cyfrowego ciągu z kropkami (numer wersji/pozycji). Prawa
+    // granica dopuszcza kropkę końca zdania, ale nie kolejny człon („.3803" ≠ koniec MAC).
+    text = text.replace(
+      /\b(?=[0-9A-Fa-f.]*[A-Fa-f])(?:[0-9A-Fa-f]{4}\.){2}[0-9A-Fa-f]{4}(?![:\w-]|\.\w)/g,
+      () => {
+        bump('MAC');
+        return M.MAC;
+      },
+    );
+    // Z SILNĄ etykietą „MAC" maskujemy notację Cisco także CZYSTO CYFROWĄ (konwencja
+    // projektu: etykieta wygrywa z warunkiem strukturalnym — jak PESEL/NIP ze złą sumą).
+    text = text.replace(
+      /\b((?:adres\w*\s+)?MAC[\s:.=-]+)((?:[0-9A-Fa-f]{4}\.){2}[0-9A-Fa-f]{4})(?![:\w-]|\.\w)/gi,
+      (_m, ctx: string) => {
+        bump('MAC');
+        return `${ctx}${M.MAC}`;
+      },
+    );
   }
 
   // IP: IPv6 (grupy hex, także skrócone „::") PRZED IPv4 (oktety 0–255). Jeden typ dla obu wersji.
@@ -614,7 +649,9 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
       `(?:${H}:){7}${H}|(?:${H}:){1,7}:|(?:${H}:){1,6}:${H}|(?:${H}:){1,5}(?::${H}){1,2}|` +
       `(?:${H}:){1,4}(?::${H}){1,3}|(?:${H}:){1,3}(?::${H}){1,4}|(?:${H}:){1,2}(?::${H}){1,5}|` +
       `${H}:(?:(?::${H}){1,6})|:(?:(?::${H}){1,7}|:)`;
-    text = text.replace(new RegExp(`(?<![:.\\w])(?:${IPV6})(?![:.\\w])`, 'g'), (m) => {
+    // Prawa granica: kropka KOŃCA ZDANIA po adresie jest OK („…fe80::1ff:fe23:4567:890a."),
+    // ale kropka z kolejnym znakiem słownym już nie (fragment IPv4-mapped / wersji).
+    text = text.replace(new RegExp(`(?<![:.\\w])(?:${IPV6})(?![:\\w]|\\.\\w)`, 'g'), (m) => {
       bump('IP');
       return M.IP;
     });
@@ -707,7 +744,9 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
     const ZNAK_START = `[${PL_UP}]{2,}[0-9]*(?:-[A-Za-z${PL_UP}${PL_LO}0-9]+)*`;
     const ZNAK_MID = `(?:\\.[A-Za-z${PL_UP}${PL_LO}0-9-]+)*?`;
     text = text.replace(
-      new RegExp(`(?<![A-Za-z0-9./-])${ZNAK_START}${ZNAK_MID}\\.\\d+\\.(?:19|20)\\d{2}(?!\\d)`, 'g'),
+      // po roku bywa jeszcze człon z inicjałami referenta („WKU.5589.12.2026.AB") — wciągamy
+      // do maski (inicjały urzędnika identyfikują; maskuj całość, nie fragment)
+      new RegExp(`(?<![A-Za-z0-9./-])${ZNAK_START}${ZNAK_MID}\\.\\d+\\.(?:19|20)\\d{2}(?:\\.[${PL_UP}]{2,3})?(?!\\d)`, 'g'),
       () => {
         bump('ZNAK-SPRAWY');
         return M['ZNAK-SPRAWY'];
@@ -719,7 +758,8 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
     //     których suchy wzorzec (a) nie ujmuje. Wartość musi zawierać separator + cyfrę, więc
     //     zwykłe frazy („znak drogowy", „nasz znak rozpoznawczy") nie są ruszane.
     const ZNAK_VALUE =
-      `(?:[IVXLCDM]{1,4}[ \\t]+)?[${PL_UP}][A-Za-z${PL_LO}]{0,4}[ \\t]+\\d+[ \\t]*/[ \\t]*\\d{2,4}` + // sygn. sądowa
+      // sygn. sądowa; wydział bywa dwuczłonowy z ukośnikiem („II SA/Wa 1234/23")
+      `(?:[IVXLCDM]{1,4}[ \\t]+)?[${PL_UP}][A-Za-z${PL_LO}]{0,4}(?:/[${PL_UP}][A-Za-z${PL_LO}]{0,3})?[ \\t]+\\d+[ \\t]*/[ \\t]*\\d{2,4}` +
       `|[A-Za-z0-9${PL_UP}${PL_LO}]+(?:[.\\-/][A-Za-z0-9${PL_UP}${PL_LO}]+)+`; // znak z kropkami/ukośnikiem
     text = text.replace(
       new RegExp(
@@ -795,11 +835,13 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   // + suma kontrolna. Realne faktury/pisma zapisują NIP także spacjami („526 27 35 917") — bez [- ]
   // wyciekał. isValidNip liczy sumę po samych cyfrach, więc separator jest bez znaczenia dla walidacji.
   if (on('NIP')) {
+    // Opcjonalny prefiks kraju „PL" (faktury UE: „PL5262735917") maskujemy RAZEM z numerem —
+    // maskuj całość, nie fragment.
     text = text.replace(
-      /(?<![\d])(?:\d{3}[- ]\d{3}[- ]\d{2}[- ]\d{2}|\d{3}[- ]\d{2}[- ]\d{2}[- ]\d{3}|\d{10})(?![\d])/g,
+      /(?<![\d])(?:PL[- ]?)?(?:\d{3}[- ]\d{3}[- ]\d{2}[- ]\d{2}|\d{3}[- ]\d{2}[- ]\d{2}[- ]\d{3}|\d{10})(?![\d])/g,
       (m, offset: number) => {
         if (precededByLegalRef(text, offset)) return m;
-        if (isValidNip(m)) {
+        if (isValidNip(m.replace(/^PL[- ]?/, ''))) {
           bump('NIP');
           return M.NIP;
         }
@@ -809,7 +851,7 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
     // (b) z SILNĄ etykietą „NIP" (opcjonalnie + kwalifikator: „NIP działalności/firmy") — maskuj
     //     10 cyfr (dowolny separator) NAWET bez poprawnej sumy.
     text = text.replace(
-      /\b(nip(?:\s+[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]{3,})?)([\s:=.-]+)(\d{3}[- ]\d{3}[- ]\d{2}[- ]\d{2}|\d{3}[- ]\d{2}[- ]\d{2}[- ]\d{3}|\d{10})(?![\d])/gi,
+      /\b(nip(?:\s+[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]{3,})?)([\s:=.-]+)((?:PL[- ]?)?(?:\d{3}[- ]\d{3}[- ]\d{2}[- ]\d{2}|\d{3}[- ]\d{2}[- ]\d{2}[- ]\d{3}|\d{10}))(?![\d])/gi,
       (_m, kw: string, sep: string) => {
         bump('NIP');
         return `${kw}${sep}${M.NIP}`;
@@ -860,21 +902,30 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
     );
 
     // (b) słowo kontekstowe + 9 cyfr (zachowujemy słowo, maskujemy numer). Numer może zaczynać się
-    //     od „(" i mieć nawiasy/myślniki: „tel. (22) 621-02-03".
+    //     od „(" i mieć nawiasy/myślniki: „tel. (22) 621-02-03". Po słowie dopuszczamy jeden
+    //     przymiotnik-wypełniacz („telefon kontaktowy") oraz goły prefiks kraju „48" bez plusa
+    //     („kom. 48 512 345 678") — prefiks maskujemy razem z numerem (maskuj całość).
     text = text.replace(
-      /\b(tel\.?|telefon(?:u|em)?|kom\.?|komórk[aiwy]|fax|faks|nr tel\.?)([\s:.=-]*)((?:[\s\-()]{0,3}\d){9})(?![\d])/gi,
+      /\b(tel\.?|telefon\w{0,4}|kom\.?|komórk[aiwy]|fax|faks|nr tel\.?)((?:\s+(?:kontaktow\w+|stacjonarn\w+|służbow\w+|komórkow\w+|domow\w+))?[\s:.=-]*)((?:\+?48[\s-]+)?(?:[\s\-().]{0,3}\d){9})(?!\.?\d)/gi,
       (m, kw: string, sep: string, num: string) => {
-        if (!hasNineDigits(num)) return m;
+        if (!hasNineDigits(num.replace(/^\+?48[\s-]+/, ''))) return m;
         bump('TELEFON');
         return `${kw}${sep}${M.TELEFON}`;
       },
     );
 
-    // (c) fallback bez kontekstu — klasyczne 3-3-3 lub 9 cyfr ciągiem. Nie po „art./poz.".
+    // (c) fallback bez kontekstu — klasyczne 3-3-3 (spacje/myślniki), 9 cyfr ciągiem lub
+    //     kierunkowy w nawiasie „(22) 501-23-45" (układ sam w sobie telefoniczny). Notacja
+    //     KROPKOWA („512.345.678") celowo TYLKO w trybie (b) z kotwicą — bez niej pożerała
+    //     kwoty z separatorem tysięcy („123.456.789 zł") i numery seryjne. Nie po „art./poz.".
+    //     Polski numer 9-cyfrowy nigdy nie zaczyna się od zera — odrzucamy (numery porządkowe
+    //     „000012345" ≠ telefon). Nie przed częścią groszową/walutą („512 345 678,00 zł" to
+    //     kwota, nie telefon).
     text = text.replace(
-      /(?<![\d])\d{3}[\s-]?\d{3}[\s-]?\d{3}(?![\d])/g,
+      /(?<![\d.])(?:\(\d{2}\)[ \t]?\d{3}[ \t-]?\d{2}[ \t-]?\d{2}|\d{3}[\s-]?\d{3}[\s-]?\d{3})(?!\.?\d)(?![ \t]*(?:,\d{2})?[ \t]*(?:zł|PLN|EUR|USD|gr\b))/g,
       (m, offset: number) => {
         if (precededByLegalRef(text, offset)) return m;
+        if (m.replace(/\D/g, '').startsWith('0')) return m;
         bump('TELEFON');
         return M.TELEFON;
       },
@@ -935,10 +986,14 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   // 9c) NUMER KRS — 10 cyfr (często z zerami wiodącymi: „0000173413"). TYLKO z kontekstem „KRS",
   // bo KRS nie ma publicznej sumy kontrolnej. Słowo KRS zostaje, maskowany sam numer.
   if (on('KRS')) {
-    text = text.replace(/\bKRS([\s:.=-]*)(\d{10})(?!\d)/gi, (_m, sep: string, _num: string) => {
-      bump('KRS');
-      return `KRS${sep}${M.KRS}`;
-    });
+    // Między „KRS" a numerem bywa wypełniacz: „wpisana do KRS pod numerem 0000123456".
+    text = text.replace(
+      /\bKRS((?:\s+(?:pod\s+)?(?:nr\.?|numer(?:em)?))?[\s:.=-]*)(\d{10})(?!\d)/gi,
+      (_m, sep: string, _num: string) => {
+        bump('KRS');
+        return `KRS${sep}${M.KRS}`;
+      },
+    );
   }
 
   // 9d) PRAWO JAZDY — TYLKO z kontekstem („prawo jazdy"/„nr prawa jazdy"), bo polski numer blankietu
@@ -947,7 +1002,9 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   //     bo maskujemy całą informację, nie jej fragment.
   if (on('PRAWO-JAZDY')) {
     text = text.replace(
-      /\b((?:prawo\s+jazdy|prawa\s+jazdy|nr\s+prawa\s+jazdy|numer\s+prawa\s+jazdy)(?:\s+(?:nr\.?|numer|seria))*[\s:=.-]*)((?=[A-Za-z0-9/-]*\d)[A-Za-z0-9]{4,15}(?:[/-][A-Za-z0-9]{1,6}){0,3})/gi,
+      // wypełniacze między kotwicą a numerem: „nr/numer(ze)/seria", kategoria („kat. B",
+      // „kategorii B"), „o numerze" — częste w protokołach („prawo jazdy kat. B o numerze …")
+      /\b((?:(?:nr|numer)\s+)?praw(?:o|a|em|ie)\s+jazdy(?:\s+(?:nr\.?|numer(?:u|ze|em)?|seri[ai]|kat\.?|kategori[ai]|o|[ABCDEMT]{1,2}\d?))*[\s:=.-]*)((?=[A-Za-z0-9/-]*\d)[A-Za-z0-9]{4,15}(?:[/-][A-Za-z0-9]{1,6}){0,3})/gi,
       (_m, ctx: string) => {
         bump('PRAWO-JAZDY');
         return `${ctx}${M['PRAWO-JAZDY']}`;
@@ -982,7 +1039,8 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   if (on('DATA-UR')) {
     text = text.replace(
       // data: cyfrowa (DD.MM.RRRR / RRRR-MM-DD) albo słowna („5 maja 1985", miesiąc po polsku)
-      /\b(ur\.|urodzony|urodzona|urodzeni[ae]|data urodzenia)([\s:.,-]*)(\d{1,2}[.\-/]\d{1,2}[.\-/]\d{2,4}|\d{4}-\d{2}-\d{2}|\d{1,2}\s+(?:stycznia|lutego|marca|kwietnia|maja|czerwca|lipca|sierpnia|września|października|listopada|grudnia)\s+\d{4})/gi,
+      // Po markerze bywa „dnia" („ur. dnia 31 XII 2010"); miesiąc bywa RZYMSKI (I–XII).
+      /\b(ur\.|urodzony|urodzona|urodzeni[ae]|data urodzenia)((?:\s+dnia)?[\s:.,-]*)(\d{1,2}[.\-/]\d{1,2}[.\-/]\d{2,4}|\d{4}-\d{2}-\d{2}|\d{1,2}\s+(?:[IVX]{1,4}|stycznia|lutego|marca|kwietnia|maja|czerwca|lipca|sierpnia|września|października|listopada|grudnia)\s+\d{4})/gi,
       (_m, kw, sep) => {
         bump('DATA-UR');
         return `${kw}${sep}${M['DATA-UR']}`;
@@ -1000,7 +1058,8 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
           // małego SKRÓTU rangi/tytułu („gen. Andersa", „ks. Popiełuszki", „św. Marcin") —
           // bez tego ulice te zostawały jawne (nazwa nie startowała wielką literą).
           `(?:(?:\\d+|gen|płk|ppłk|mjr|kpt|por|ks|św|bp|abp|kard|marsz|prof|dr|inż|hr)\\.?\\s+){0,2}` +
-          `[${PL_UP}][${PL_LO}${PL_UP}.-]*(?:\\s+[${PL_UP}0-9][${PL_LO}${PL_UP}0-9.-]*){0,3}\\s+\\d+[A-Za-z]?(?:\\s*/\\s*\\d+[A-Za-z]?)?`,
+          // numer lokalu także po „m."/„lok." („Długa 5 m. 7", „Polna 3 lok. 5"), nie tylko po „/"
+          `[${PL_UP}][${PL_LO}${PL_UP}.-]*(?:\\s+[${PL_UP}0-9][${PL_LO}${PL_UP}0-9.-]*){0,3}\\s+\\d+[A-Za-z]?(?:\\s*(?:/|m\\.?|lok\\.?)\\s*\\d+[A-Za-z]?)?`,
         'g',
       ),
       () => {
@@ -1018,7 +1077,7 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
     text = text.replace(
       new RegExp(
         `\\b([${PL_UP}][${PL_LO}]+(?:\\s+[${PL_UP}][${PL_LO}]+){0,2})` +
-          `\\s+\\d+[A-Za-z]?(?:\\s*(?:m\\.?|/)\\s*\\d+[A-Za-z]?)?` +
+          `\\s+\\d+[A-Za-z]?(?:\\s*(?:m\\.?|lok\\.?|/)\\s*\\d+[A-Za-z]?)?` +
           `(\\s*,?\\s*)(${KOD})`,
         'g',
       ),
@@ -1112,7 +1171,9 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
       new RegExp(
         `\\b((?:[Zz]am\\.|(?:[Zz]a)?[Mm]ieszka[łl]?\\w*|[Zz]ameldowan\\w*|` +
           `(?:[Mm]iejsce|[Aa]dres)[ \\t]+(?:zamieszkania|zameldowania|pobytu|urodzenia))` +
-          `[ \\t]*(?::[ \\t]*|[Ww]e?[ \\t]+))` +
+          // po markerze: „:", „w/we", albo miasto wprost w MIANOWNIKU („zam. Kraków" —
+          // typowe w formularzach; bramka słownikowa chroni przed pożarciem nazwisk)
+          `[ \\t]*(?::[ \\t]*|[Ww]e?[ \\t]+|[ \\t]+))` +
           `((?:${CAP_CITY}[ \\t]+){0,2}${CAP_CITY})(?=[ \\t.,;:?!)]|$)`,
         'g',
       ),
@@ -1126,6 +1187,30 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
           }
         }
         return m; // nieznane miasto po markerze (instytucja/ulica) → nie ruszaj
+      },
+    );
+
+    // 12g) MIEJSCOWOŚĆ po markerze URODZENIA, z datą pomiędzy: „ur. [DATA-URODZENIA] w Krakowie",
+    // „urodzona [DATA-URODZENIA] r. we Wrocławiu" (data jest już zamaskowana — krok 11 biegnie
+    // wcześniej). Ta sama bramka słownikowa co 12f; goła proza („spotkanie w Krakowie") bez
+    // markera urodzenia pozostaje nietknięta (precyzja > nadmaskowanie).
+    const DUR = escapeRe(M['DATA-UR']);
+    text = text.replace(
+      new RegExp(
+        `\\b((?:[Uu]r\\.|[Uu]rodzon\\w+)[ \\t]+(?:dnia[ \\t]+)?(?:${DUR}[ \\t]*r?\\.?,?[ \\t]*)?[Ww]e?[ \\t]+)` +
+          `((?:${CAP_CITY}[ \\t]+){0,2}${CAP_CITY})(?=[ \\t.,;:?!)]|$)`,
+        'g',
+      ),
+      (m, marker: string, run: string) => {
+        const words = run.split(/[ \t]+/);
+        for (let n = Math.min(3, words.length); n >= 1; n--) {
+          if (POLISH_CITIES.has(words.slice(0, n).join(' ').toLowerCase())) {
+            bump('MIEJSCOWOSC');
+            const leftover = words.slice(n).join(' ');
+            return `${marker}${M.MIEJSCOWOSC}${leftover ? ' ' + leftover : ''}`;
+          }
+        }
+        return m;
       },
     );
   }
@@ -1301,6 +1386,11 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
       },
     );
   }
+
+  // DOMKNIĘCIE: inicjał imienia tuż przed zamaskowaną osobą („mec. J. [OSOBA-B]") wciąga
+  // do maski — inicjał + nazwisko potrafi identyfikować osobę (maskuj całość, nie fragment).
+  // (nie na początku linii — tam samotna wielka litera z kropką to punkt wyliczenia „A. …")
+  text = text.replace(/(?<!(?:^|\n)[ \t]*)\b[A-ZĄĆĘŁŃÓŚŹŻ]\.[ \t]*(\[OSOBA-[A-Z]+\]|\[IMIĘ I NAZWISKO\])/g, '$1');
 
   const found: PiiFinding[] = [...counts.entries()].map(([type, count]) => ({ type, count }));
   return { redacted: text, found };

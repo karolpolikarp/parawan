@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-11T10:35:50.809Z",
+  "generatedAt": "2026-07-11T12:31:40.088Z",
   "seed": 20260704,
-  "coreVersion": "0.26.1",
-  "casesTotal": 212,
-  "mustMaskTotal": 204,
-  "mustKeepTotal": 222,
+  "coreVersion": "0.27.0",
+  "casesTotal": 227,
+  "mustMaskTotal": 217,
+  "mustKeepTotal": 235,
   "skippedLayers": [
     {
       "name": "core+spacy",
@@ -26,16 +26,16 @@
     {
       "name": "T0+T1 core",
       "desc": "redactPII() — regex + sumy kontrolne + słownik (in-process, offline)",
-      "elapsedMs": 19,
+      "elapsedMs": 18,
       "changedVsCore": null,
-      "recall": 0.9264705882352942,
-      "precision": 0.990990990990991,
-      "f1": 0.9576452705036965,
+      "recall": 0.9308755760368663,
+      "precision": 0.9957446808510638,
+      "f1": 0.9622180604185326,
       "agg": {
-        "maskTotal": 204,
-        "maskHit": 189,
-        "keepTotal": 222,
-        "keepHit": 220
+        "maskTotal": 217,
+        "maskHit": 202,
+        "keepTotal": 235,
+        "keepHit": 234
       },
       "perCategory": {
         "osoby-podstawowe": {
@@ -69,19 +69,19 @@
           "recall": 1,
           "precision": 1,
           "f1": 1,
-          "maskTotal": 60,
-          "maskHit": 60,
-          "keepTotal": 52,
-          "keepHit": 52
+          "maskTotal": 73,
+          "maskHit": 73,
+          "keepTotal": 61,
+          "keepHit": 61
         },
         "negatywy": {
           "recall": null,
-          "precision": 0.9649122807017544,
+          "precision": 0.9836065573770492,
           "f1": null,
           "maskTotal": 0,
           "maskHit": 0,
-          "keepTotal": 57,
-          "keepHit": 55
+          "keepTotal": 61,
+          "keepHit": 60
         },
         "osoby-rzadkie-ner": {
           "recall": 0.21052631578947367,
@@ -104,17 +104,7 @@
       },
       "failures": [
         {
-          "id": "neg-09",
-          "category": "negatywy",
-          "text": "Sygn. akt III CZP 12/23 — uchwała siedmiu sędziów.",
-          "leaked": [],
-          "eaten": [
-            "III CZP 12/23"
-          ],
-          "redacted": "Sygn. akt [ZNAK-SPRAWY] — uchwała siedmiu sędziów."
-        },
-        {
-          "id": "neg-39",
+          "id": "neg-43",
           "category": "negatywy",
           "text": "Pan Tadeusz to najsłynniejsza polska epopeja narodowa.",
           "leaked": [],
@@ -911,11 +901,14 @@
           "eaten": []
         },
         {
+          "id": "str-41",
+          "leaked": [],
+          "eaten": []
+        },
+        {
           "id": "neg-09",
           "leaked": [],
-          "eaten": [
-            "III CZP 12/23"
-          ]
+          "eaten": []
         },
         {
           "id": "neg-10",
@@ -1033,16 +1026,6 @@
           "eaten": []
         },
         {
-          "id": "neg-33",
-          "leaked": [],
-          "eaten": []
-        },
-        {
-          "id": "str-41",
-          "leaked": [],
-          "eaten": []
-        },
-        {
           "id": "str-42",
           "leaked": [],
           "eaten": []
@@ -1088,6 +1071,66 @@
           "eaten": []
         },
         {
+          "id": "str-51",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-52",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-53",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-54",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-55",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-33",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-56",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-57",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-58",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-59",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-60",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-61",
+          "leaked": [],
+          "eaten": []
+        },
+        {
           "id": "neg-34",
           "leaked": [],
           "eaten": []
@@ -1115,9 +1158,7 @@
         {
           "id": "neg-39",
           "leaked": [],
-          "eaten": [
-            "Tadeusz"
-          ]
+          "eaten": []
         },
         {
           "id": "neg-40",
@@ -1137,7 +1178,9 @@
         {
           "id": "neg-43",
           "leaked": [],
-          "eaten": []
+          "eaten": [
+            "Tadeusz"
+          ]
         },
         {
           "id": "neg-44",
@@ -1191,6 +1234,26 @@
         },
         {
           "id": "neg-54",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-55",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-56",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-57",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-58",
           "leaked": [],
           "eaten": []
         },
