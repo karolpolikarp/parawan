@@ -225,6 +225,12 @@ export function buildDataset() {
   const osp = (t, mm, mk) => add('osoby-podstawowe', 'os-p', t, mm, mk);
   const oso = (t, mm, mk) => add('osoby-odmiana', 'os-o', t, mm, mk);
   const osr = (t, mm, mk) => add('osoby-rzadkie', 'os-r', t, mm, mk);
+  // osoby-rzadkie-ner: nazwiska, których rdzeń deterministyczny NIE łapie (brak wyzwalacza,
+  // brak sufiksu -ski/-cki/-icz/-czyk, nazwiska obce) — tu warstwa NER ma dać przewagę recall.
+  const osrn = (t, mm, mk) => add('osoby-rzadkie-ner', 'os-rn', t, mm, mk);
+  // osoby-slownik: częste nazwiska z rozszerzonego słownika PESEL (bez sufiksu -ski/-cki/-icz/-czyk),
+  // samodzielnie/w odmianie, bez wyzwalacza — rdzeń deterministyczny łapie je BEZ AI (strażnik słownika).
+  const osd = (t, mm, mk) => add('osoby-slownik', 'os-sl', t, mm, mk);
   const str = (t, mm, mk) => add('strukturalne', 'str', t, mm, mk);
   const neg = (t, mk) => add('negatywy', 'neg', t, [], mk);
 
@@ -457,6 +463,67 @@ export function buildDataset() {
   neg('Faktura VAT nr 4561237891 czeka na akceptację.', ['4561237891']);
   // pułapka wyzwalacza „Pan" — tytuł dzieła, nie osoba
   neg('Pan Tadeusz to najsłynniejsza polska epopeja narodowa.', ['Tadeusz']);
+  // przymiotniki geograficzne/instytucjonalne w nazwach własnych — warstwa NER NIE może ich
+  // maskować (stoplista NON_SURNAME_ADJ / LEGAL_ENTITY w ner-postprocess). To dowód precyzji AI.
+  neg('Uniwersytet Warmiński ogłosił nabór na studia.', ['Warmiński']);
+  neg('Kredyt zaciągnięto w Banku Śląskim w zeszłym roku.', ['Śląskim']);
+  neg('Komitet Obywatelski wystosował apel do władz.', ['Obywatelski']);
+  neg('Powstał Ogólnopolski Związek Przewoźników Drogowych.', ['Ogólnopolski']);
+  neg('Uniwersytet Jagielloński świętuje jubileusz.', ['Jagielloński']);
+  neg('Skargę rozpoznał Wojewódzki Sąd Administracyjny.', ['Wojewódzki']);
+  // dodatkowe sygnatury akt (pilnują, że warstwa NER nie tknie oznaczeń spraw)
+  neg('Postanowienie zapadło w sprawie IV CSK 77/24.', ['IV CSK 77/24']);
+  neg('Skargę kasacyjną zarejestrowano pod III UK 210/23.', ['III UK 210/23']);
+  // instytucje z przymiotnikiem (chronione stoplistą LEGAL_ENTITY/NON_SURNAME_ADJ w NER)
+  neg('Sąd Rejonowy w Pruszkowie wydał nakaz.', ['Rejonowy']);
+  neg('Prokuratura Krajowa wszczęła postępowanie.', ['Krajowa']);
+  neg('Wojewódzki Fundusz Ochrony Środowiska ogłosił nabór.', ['Wojewódzki']);
+  neg('Naczelny Sąd Administracyjny oddalił skargę.', ['Naczelny']);
+  // homonimy w kontekście rzeczownikowym (warstwa NER nie maskuje homonimów)
+  neg('Sroka skakała po świeżo skoszonym trawniku.', ['Sroka']);
+  neg('Mróz ściął kałuże twardą skorupą nad ranem.', ['Mróz']);
+  neg('Kruk siedział na gałęzi i obserwował drogę.', ['Kruk']);
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // OSOBY-RZADKIE-NER — rdzeń deterministyczny je PRZEPUSZCZA (brak wyzwalacza, brak sufiksu
+  // -ski/-cki/-icz/-czyk, nazwiska obce). Recall zależy od warstwy NER — to tu dowodzimy jej
+  // przewagi. mustKeep pilnuje, że kontekst nie jest zjadany.
+  // ──────────────────────────────────────────────────────────────────────────
+  osrn('list od Achtelika leżał tydzień na biurku', ['Achtelika'], ['biurku']);
+  osrn('sprawę Fąfary umorzono w drugiej instancji', ['Fąfary'], ['umorzono']);
+  osrn('zeznania Gągały spisano protokolarnie', ['Gągały'], ['protokolarnie']);
+  osrn('wniosek Grzmota rozpatrzono odmownie', ['Grzmota'], ['odmownie']);
+  osrn('do akt dołączono notatkę Ciołka z rozmowy', ['Ciołka'], ['notatkę']);
+  osrn('reklamację złożył wczoraj Müller osobiście', ['Müller'], ['reklamację']);
+  osrn('umowę parafował Nguyen dzień wcześniej', ['Nguyen'], ['umowę']);
+  osrn('protokół podpisał Kovač w obecności świadka', ['Kovač'], ['świadka']);
+  osrn('opinię biegłego sporządził Popescu w terminie', ['Popescu'], ['opinię']);
+  osrn('pełnomocnikiem powoda był mecenas Schmidt', ['Schmidt'], ['powoda']);
+  // dalsze rzadkie rodzime bez wyzwalacza/sufiksu -ski/-cki/-icz/-czyk
+  osrn('sprawę Pytlaka odroczono do przyszłego miesiąca', ['Pytlaka'], ['odroczono']);
+  osrn('zeznania Habaja spisano na komisariacie', ['Habaja'], ['komisariacie']);
+  osrn('wniosek Momota oddalono w pierwszej instancji', ['Momota'], ['instancji']);
+  osrn('do akt dołączono notatkę Cieciory z narady', ['Cieciory'], ['narady']);
+  osrn('pismo od Bździucha wpłynęło z opóźnieniem', ['Bździucha'], ['opóźnieniem']);
+  // dalsze nazwiska obce (różne systemy)
+  osrn('opinię prawną wydał Petrov zeszłego tygodnia', ['Petrov'], ['opinię']);
+  osrn('umowę serwisową parafował Horvat osobiście', ['Horvat'], ['umowę']);
+  osrn('reklamację rozpatrzył Weber w dwa dni', ['Weber'], ['reklamację']);
+  osrn('kontrakt firmował Rossi przed notariuszem', ['Rossi'], ['kontrakt']);
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // OSOBY-SLOWNIK — częste nazwiska z rozszerzonego słownika PESEL (deterministyka, bez AI)
+  // ──────────────────────────────────────────────────────────────────────────
+  osd('Sprawę Szczepaniaka umorzono w drugiej instancji.', ['Szczepaniaka'], ['umorzono']);
+  osd('Zeznania Madeja potwierdzili sąsiedzi.', ['Madeja'], ['sąsiedzi']);
+  osd('Wniosek Michalika rozpatrzono odmownie.', ['Michalika'], ['odmownie']);
+  osd('list od Ratajczaka leżał tydzień na biurku', ['Ratajczaka'], ['biurku']);
+  osd('pismo od Grzelaka wpłynęło z opóźnieniem', ['Grzelaka'], ['opóźnieniem']);
+  osd('opinię sporządził biegły Kujawa w terminie', ['Kujawa'], ['opinię']);
+  osd('reklamację złożył wczoraj Nguyen osobiście', ['Nguyen'], ['reklamację']);
+  osd('umowę serwisową parafował Melnyk', ['Melnyk'], ['umowę']);
+  osd('protokół podpisał mecenas Schulz', ['Schulz'], ['protokół']);
+  osd('do akt dołączono zeznania świadka Petrova', ['Petrova'], ['akt']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

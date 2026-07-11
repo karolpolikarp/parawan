@@ -1,5 +1,68 @@
 # Changelog
 
+## v0.43.0 — 2026-07-11
+
+**Rozszerzenie słownika nazwisk — wyższy recall edycji „czysty HTML", bez AI, bez launchera.**
+Warstwa deterministyczna (jeden plik, `file://`, zero instalacji) łapie teraz ~900 dodatkowych
+najczęstszych nazwisk BEZ sufiksu `-ski/-cki/-icz/-czyk` (te i tak łapie morfologia) — w tym częste
+nazwiska obce (ukraińskie, niemieckie, wietnamskie), coraz realniejsze w dzisiejszej Polsce.
+
+- **Źródło:** rejestr PESEL osób żyjących (dane.gov.pl, 2023, licencja **CC0**).
+- **Kuracja precyzja > recall:** odsiew homonimów wyrazów pospolitych (filtr listy częstości korpusu)
+  + wieloagentowa klasyfikacja nazwisko/wyraz. Homonimy typu „górka/zięba/żurek/bednarz" świadomie
+  pominięte — łapie je warstwa kontekstowa (imię obok / „Pan"). Zero nowego nadmaskowania.
+- **Wynik (benchmark):** recall rdzenia 89,7% → 91,8% (kategoria `osoby-rzadkie-ner` 0% → 21%),
+  **precyzja 99,0% bez zmian**. Plik edycji „urząd" nadal ~1,83 MB (fosa single-HTML zachowana).
+- Nowa kategoria benchmarku `osoby-slownik` (strażnik słownika) + bramka regresji CI na nią.
+
+Rdzeń `anonimizator` 0.24.0 → 0.25.0.
+
+## v0.42.0 — 2026-07-11
+
+**Utwardzenie warstwy NER w przeglądarce (ONNX + transformers.js) — precyzyjniej, bez Dockera.**
+Funkcja „Wykrywanie nazwisk AI" działała, ale jej post-processing był stratny. Teraz:
+
+- **Poprawna lokalizacja bez offsetów.** Przeglądarkowy transformers.js nie zwraca offsetów
+  znakowych ani nie agreguje encji — dawne sklejanie subwordów i globalny `indexOf` gubiły
+  pozycje przy duplikatach nazwisk, subwordach i obcych diakrytykach. Zastąpione lokalizacją
+  przez strumień liter (Unicode) z mapą na oryginał + rozszerzeniem do granic słowa.
+- **Próg pewności `score`** (min 0.5; homonimy rzeczowników — Wilk, Baran, Lis — tylko przy
+  score ≥ 0.9) i **reużyte stoplisty rdzenia** (przymiotniki geo/narodowe, słowa instytucji):
+  „Uniwersytet Warmiński", „Bank Śląski", „Sąd Najwyższy" nie są maskowane. Zgodnie z zasadą
+  precyzja > nadmaskowanie.
+- **Koniec duplikacji:** cała selekcja i maskowanie osób to jeden wspólny moduł rdzenia
+  `anonimizator/ner-postprocess`, używany przez przeglądarkę, przykład Node i benchmark.
+- **Testy:** nowe zestawy jednostkowe dla modułu i dla warstwy przeglądarki (mock pipeline,
+  kontrakt fail-safe).
+
+**Dwie edycje w release.** `Anonimizator.html` — „czysty HTML" (jeden plik, `file://`, bez AI,
+bez uruchamiania) dla maszyn z blokadami firmowymi. `Anonimizator-AI.zip` — „pełna / AI"
+(HTML z sekcją AI + launcher HTTP + instrukcja) dla komputerów bez blokad.
+
+**Benchmark.** Nowa warstwa `core+onnx (Node)` — FastPDN ONNX int8 w Node, bez Dockera
+(pomijana fail-safe, gdy brak biblioteki/modelu). Nowa kategoria `osoby-rzadkie-ner` — przypadki,
+których rdzeń deterministyczny świadomie nie łapie (recall ~0%), mierzące przewagę warstwy NER.
+
+Rdzeń `anonimizator` 0.23.0 → 0.24.0 (nowy publiczny eksport `./ner-postprocess`; wyeksportowane
+stoplisty `LEGAL_ENTITY_WORDS`, `NON_PERSON_CONTEXT`, pomocnik `isGeoAdjective`).
+
+## v0.41.0 — 2026-07-09
+
+**Maskowanie znaku sprawy / znaku pisma** (nowy typ `[ZNAK-SPRAWY]`) — z myślą o urzędnikach,
+u których sygnatura pisma identyfikuje sprawę i pośrednio osobę. Dwa tryby wykrywania:
+
+- **Strukturalnie, wg JRWA** — znak `SYMBOL.klasa.numer.ROK` (np. `DPR-II.054.3.2026`,
+  `ZP.271.12.2026`, `DC.WAC.5555.30.2026`, `ABC-def.123.77.2016`). Kotwica: symbol komórki
+  (≥2 wersaliki, człony po „-" lub „.") + grupy cyfr zakończone 4-cyfrowym rokiem. Rozpoznawany
+  także w środku zdania, bez etykiety.
+- **Z kontekstem** — „Znak sprawy:", „Znak pisma:", „Nasz/Wasz znak:", „Sygn. akt", „Znak:";
+  łapie też sygnatury sądowe („Sygn. akt II CSK 234/19"). Słowo kontekstowe zostaje, maskujemy
+  sam znak.
+
+Anty-nadmaskowanie: daty (`12.05.2024`), odwołania prawne (`art. 5 ust. 1`), numeracja
+(`Rozdział 5.2`) i frazy typu „znak drogowy B-2" pozostają nietknięte. Nowy przełącznik
+w „Co maskować" (Identyfikatory).
+
 ## v0.39.0 — 2026-07-07
 
 Dopracowanie UX (bez zmian w silniku):
