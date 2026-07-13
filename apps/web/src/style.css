@@ -348,8 +348,8 @@ select.field { font-family: var(--sans); line-height: normal; cursor: pointer; }
 .brand-row { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .hero .card-t h1 { text-transform: uppercase; letter-spacing: -.005em; }
 #hero-sub {
-  font-family: var(--mono); font-size: 11px; font-weight: 600;
-  letter-spacing: .14em; text-transform: uppercase; color: var(--acc); margin-top: 7px;
+  font-family: var(--sans); font-size: 12px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--acc); margin-top: 7px;
 }
 .ver-chip { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--mut); }
 .hero-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
@@ -361,8 +361,8 @@ select.field { font-family: var(--sans); line-height: normal; cursor: pointer; }
 .ver-link:hover { color: var(--acc); border-color: var(--acc-line); text-decoration: none; }
 /* ikona strony autora (favicon karolwilczynski.com) przy linku „autor" — w jednej linii z tekstem */
 .site-fav { width: 14px; height: 14px; border-radius: 3px; margin-right: 6px; flex: none; }
-/* pasek cech pod leadem — czyste pigułki z „✓", jeden rząd (zamiast bloku 4 badge'y) */
-.feat-strip { display: flex; gap: 8px; flex-wrap: wrap; list-style: none; }
+/* pasek cech — czyste pigułki z „✓" po PRAWEJ stronie leadu (wypełnia dolny rząd) */
+.feat-strip { display: flex; gap: 8px; flex-wrap: wrap; list-style: none; justify-content: flex-end; }
 .feat-strip li {
   display: inline-flex; align-items: center; gap: 7px;
   font-size: 12.5px; font-weight: 600; cursor: default;
@@ -373,8 +373,8 @@ select.field { font-family: var(--sans); line-height: normal; cursor: pointer; }
 .feat-strip .feat-solid { color: #f4f6f1; background: var(--acc); border-color: var(--acc); }
 .feat-strip .feat-solid::before { color: #a9c6b4; }
 
-.hero-b { display: flex; flex-direction: column; align-items: flex-start; gap: 13px; }
-.hero-lead { font-size: 18px; color: var(--text); }
+.hero-b { display: flex; align-items: center; gap: 16px 24px; flex-wrap: wrap; }
+.hero-lead { font-size: 18px; color: var(--text); flex: 1 1 320px; }
 .hero-lead strong { color: var(--acc); }
 /* callout prywatności w prawej części nagłówka — mocny akcent zaufania, dopasowany do treści */
 .privacy {
@@ -440,8 +440,8 @@ select.field { font-family: var(--sans); line-height: normal; cursor: pointer; }
 .demo-zone {
   position: absolute; top: 18px; z-index: 5;
   display: inline-flex; align-items: center; gap: 8px;
-  font-family: var(--mono); font-size: 11px; font-weight: 700;
-  letter-spacing: .1em; text-transform: uppercase;
+  font-family: var(--sans); font-size: 11.5px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase;
   padding: 7px 14px; border-radius: 999px;
 }
 .demo-zone::before { content: ""; width: 8px; height: 8px; border-radius: 50%; flex: none; }
@@ -767,12 +767,14 @@ table .pii { cursor: default; }
 
 /* ============ KARTY INFORMACYJNE ============ */
 .note-b p { font-size: 13px; color: var(--mut); }
-.note-b p strong { color: var(--text); }
+/* wyróżnienia w kartach informacyjnych — zieleń marki (także „Parawan", „Porównanie", „heurystyczne") */
+.note-b p strong { color: var(--acc); font-weight: 700; }
 .caveat { border-color: rgba(224, 181, 102, .38); }
 .caveat .card-h { border-bottom-color: rgba(224, 181, 102, .22); }
 .tips { list-style: none; display: grid; gap: 9px; }
 .tips li { display: flex; gap: 9px; font-size: 13px; color: var(--mut); align-items: baseline; }
 .tips li::before { content: "▪"; color: var(--acc); font-size: 11px; }
+.tips strong { color: var(--acc); font-weight: 700; }
 
 /* ============ STOPKA ============ */
 .foot .card-b {

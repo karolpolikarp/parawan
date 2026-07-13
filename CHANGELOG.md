@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.46.5 — 2026-07-13
+
+**Dopięcie hero, czcionek, kart i kompletna tabela „Co wykrywa".**
+
+- **Hero bez pustej przestrzeni**: lead i pasek cech w jednym rzędzie (lead po lewej, cechy po prawej),
+  wyrównane z rzędem nagłówka (lockup │ callout prywatności).
+- **Czcionki**: tagline „Lokalny anonimizator polskich danych" i etykiety stref demo z monospace na
+  Archivo (sans) — czytelniej, mniej „technicznie".
+- **Tabela „Co wykrywa" kompletna**: dodane brakujące typy (Znak sprawy, Prawo jazdy, Nr rejestracyjny,
+  VIN, IP, MAC, Token/JWT, Login, Miejscowość) — pełne 22 typy zgodne z panelem i benchmarkiem.
+- **Karty informacyjne**: wyróżnienia (w tym „Parawan", „Porównanie", „heurystyczne", „Strażnik
+  kontekstu") na zielono marki.
+
+Aplikacja web 0.46.4 → 0.46.5. Rdzeń bez zmian.
+
 ## v0.46.4 — 2026-07-13
 
 **Kompozycja hero i strefy demo.**

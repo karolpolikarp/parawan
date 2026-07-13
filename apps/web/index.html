@@ -307,6 +307,54 @@
                 <td><mark class="pii pii-ident">[KRS]</mark></td>
               </tr>
               <tr>
+                <td><span class="td-name"><span class="ic ic-s c-ident"><i class="gi" data-i="numer-dok"></i></span>Znak sprawy / pisma</span></td>
+                <td><span class="catpill cp-ident">identyfikatory</span></td>
+                <td><span class="how">znak sprawy/pisma wg JRWA lub sygnatura akt („Sygn. akt II CSK 234/19")</span></td>
+                <td><mark class="pii pii-ident">[ZNAK-SPRAWY]</mark></td>
+              </tr>
+              <tr>
+                <td><span class="td-name"><span class="ic ic-s c-ident"><i class="gi" data-i="numer-dok"></i></span>Nr prawa jazdy</span></td>
+                <td><span class="catpill cp-ident">identyfikatory</span></td>
+                <td><span class="how">kontekst „prawo jazdy" + numer (z cyfrą)</span></td>
+                <td><mark class="pii pii-ident">[PRAWO-JAZDY]</mark></td>
+              </tr>
+              <tr>
+                <td><span class="td-name"><span class="ic ic-s c-ident"><i class="gi" data-i="numer-dok"></i></span>Nr rejestracyjny</span></td>
+                <td><span class="catpill cp-ident">identyfikatory</span></td>
+                <td><span class="how">kontekst „rejestracyjny/tablica/pojazd" + tablica (np. WI1234K)</span></td>
+                <td><mark class="pii pii-ident">[NR-REJESTRACYJNY]</mark></td>
+              </tr>
+              <tr>
+                <td><span class="td-name"><span class="ic ic-s c-ident"><i class="gi" data-i="dane-id"></i></span>VIN</span></td>
+                <td><span class="catpill cp-ident">identyfikatory</span></td>
+                <td><span class="how">17 znaków bez I/O/Q; kontekst „VIN/nadwozia" lub wyraźny układ VIN</span></td>
+                <td><mark class="pii pii-ident">[VIN]</mark></td>
+              </tr>
+              <tr>
+                <td><span class="td-name"><span class="ic ic-s c-ident"><i class="gi" data-i="dane-id"></i></span>Adres IP</span></td>
+                <td><span class="catpill cp-ident">identyfikatory</span></td>
+                <td><span class="how">IPv4 (oktety 0–255) oraz IPv6</span></td>
+                <td><mark class="pii pii-ident">[IP]</mark></td>
+              </tr>
+              <tr>
+                <td><span class="td-name"><span class="ic ic-s c-ident"><i class="gi" data-i="dane-id"></i></span>Adres MAC</span></td>
+                <td><span class="catpill cp-ident">identyfikatory</span></td>
+                <td><span class="how">6 par hex (00:1A:2B:3C:4D:5E)</span></td>
+                <td><mark class="pii pii-ident">[MAC]</mark></td>
+              </tr>
+              <tr>
+                <td><span class="td-name"><span class="ic ic-s c-ident"><i class="gi" data-i="login"></i></span>Token / JWT</span></td>
+                <td><span class="catpill cp-ident">identyfikatory</span></td>
+                <td><span class="how">token JWT (<code>eyJ…</code>) — może dawać dostęp</span></td>
+                <td><mark class="pii pii-ident">[TOKEN]</mark></td>
+              </tr>
+              <tr>
+                <td><span class="td-name"><span class="ic ic-s c-ident"><i class="gi" data-i="login"></i></span>Login / nazwa użytkownika</span></td>
+                <td><span class="catpill cp-ident">identyfikatory</span></td>
+                <td><span class="how">kontekst „login/username" + wartość (też w URL i XML/JSON)</span></td>
+                <td><mark class="pii pii-ident">[LOGIN]</mark></td>
+              </tr>
+              <tr>
                 <td><span class="td-name"><span class="ic ic-s c-fin"><i class="gi" data-i="iban"></i></span>IBAN / nr konta</span></td>
                 <td><span class="catpill cp-fin">finanse</span></td>
                 <td><span class="how">walidacja <strong>mod 97</strong> lub kontekst „konto/rachunek”</span></td>
@@ -337,6 +385,12 @@
                 <td><mark class="pii pii-place">[KOD-POCZTOWY]</mark></td>
               </tr>
               <tr>
+                <td><span class="td-name"><span class="ic ic-s c-place"><i class="gi" data-i="mapa-pl"></i></span>Miejscowość</span></td>
+                <td><span class="catpill cp-place">adres</span></td>
+                <td><span class="how">miejscowość po kodzie pocztowym lub przy zamieszkaniu (nie w prozie/instytucji)</span></td>
+                <td><mark class="pii pii-place">[MIEJSCOWOŚĆ]</mark></td>
+              </tr>
+              <tr>
                 <td><span class="td-name"><span class="ic ic-s c-person"><i class="gi" data-i="kalendarz"></i></span>Data urodzenia</span></td>
                 <td><span class="catpill cp-person">osoby</span></td>
                 <td><span class="how">data z kontekstem „ur./urodzony”</span></td>
@@ -362,9 +416,10 @@
           <span class="help" data-tip="Suma kontrolna to matematyczna cecha prawdziwych numerów, przypadkowy ciąg cyfr jej nie spełnia" data-tip-pos="left" tabindex="0">?</span>
         </div>
         <div class="card-b note-b">
-          <p>Numery takie jak PESEL, NIP czy IBAN mają wbudowaną sumę kontrolną. Parawan ją przelicza,
-          więc przypadkowy ciąg cyfr (sygnatura akt, numer przepisu) jej nie spełnia i zostaje nietknięty.
-          Strażnik kontekstu pilnuje z kolei, żeby „art.&nbsp;123&nbsp;456&nbsp;789” nie trafił jako telefon.</p>
+          <p>Numery takie jak PESEL, NIP czy IBAN mają wbudowaną sumę kontrolną. <strong>Parawan</strong>
+          ją przelicza, więc przypadkowy ciąg cyfr (sygnatura akt, numer przepisu) jej nie spełnia i zostaje
+          nietknięty. <strong>Strażnik kontekstu</strong> pilnuje z kolei, żeby „art.&nbsp;123&nbsp;456&nbsp;789”
+          nie trafił jako telefon.</p>
         </div>
       </section>
 
@@ -378,8 +433,8 @@
         <div class="card-b note-b">
           <p>Rozpoznawanie imion i nazwisk jest <strong>heurystyczne</strong>: rzadkie lub obce nazwisko,
           bez imienia ze słownika i bez podpowiedzi z kontekstu, może się prześlizgnąć. Podobnie numery
-          w nietypowym zapisie. Traktuj Parawan jak pomoc, nie gwarancję, i <strong>zawsze przejrzyj
-          wynik, zanim go wyślesz.</strong></p>
+          w nietypowym zapisie. Traktuj <strong>Parawan</strong> jak pomoc, nie gwarancję, i <strong>zawsze
+          przejrzyj wynik, zanim go wyślesz.</strong></p>
         </div>
       </section>
 
