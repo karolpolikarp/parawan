@@ -4,7 +4,7 @@
 
 <br>
 
-**Usuwa dane osobowe z tekstu — zanim udostępnisz go poza urząd, wkleisz do czatu AI albo wyślesz mailem.**
+**Usuwa dane osobowe z tekstu — zanim wkleisz go do czatu AI, wyślesz mailem albo udostępnisz gdziekolwiek dalej.**
 Wszystko dzieje się na Twoim komputerze. Nic nie trafia do internetu.
 
 <br>
@@ -14,7 +14,7 @@ Wszystko dzieje się na Twoim komputerze. Nic nie trafia do internetu.
 [![Licencja Apache 2.0](https://img.shields.io/badge/licencja-Apache%202.0-0B3D2E?style=flat-square)](./LICENSE)
 
 ![100% offline](https://img.shields.io/badge/aplikacja-100%25%20offline-0B3D2E?style=flat-square)
-![bez AI](https://img.shields.io/badge/detekcja-bez%20AI%20%C2%B7%20tryb%20urz%C4%99dowy-B9791F?style=flat-square)
+![bez AI](https://img.shields.io/badge/detekcja-bez%20AI-B9791F?style=flat-square)
 ![jeden plik](https://img.shields.io/badge/dystrybucja-jeden%20plik%20%C2%B7%20file%3A%2F%2F-0B3D2E?style=flat-square)
 ![zero zależności](https://img.shields.io/badge/zale%C5%BCno%C5%9Bci-zero-0B3D2E?style=flat-square)
 ![zgodność RODO](https://img.shields.io/badge/zgodno%C5%9B%C4%87-RODO%20%C2%B7%20minimalizacja-0B3D2E?style=flat-square)
@@ -59,7 +59,7 @@ etykiety — na przykład `Jan Kowalski` → `[IMIĘ I NAZWISKO]`, `44051401359`
 > działa, najpierw porównaj numer i pobierz świeży plik. Obok w wydaniu jest też `JAK-UZYC.txt`
 > z tą samą instrukcją do wydrukowania lub rozesłania.
 
-Działa też na komputerach **z blokadami firmowymi/urzędowymi** — bo to zwykły dokument HTML,
+Działa też na komputerach **z blokadami firmowymi** — bo to zwykły dokument HTML,
 a nie program do zainstalowania (`.exe`, `.bat`, serwer). To jest cała idea Parawana.
 
 ## 🟢 Jak to działa (w uproszczeniu)
@@ -68,7 +68,7 @@ a nie program do zainstalowania (`.exe`, `.bat`, serwer). To jest cała idea Par
 
 **Co to robi.** Znajduje w tekście dane osobowe i zamienia je na neutralne etykiety, np.
 `Jan Kowalski` → `[IMIĘ I NAZWISKO]`, `44051401359` → `[PESEL]`. Dzięki temu możesz spokojnie
-wysłać treść dalej — do urzędu, e-maila, czatu z AI — nie ujawniając, kogo dotyczy.
+wysłać treść dalej — do czatu z AI, e-maila, zgłoszenia — nie ujawniając, kogo dotyczy.
 
 **Jak rozpoznaje dane (bez „sztucznej inteligencji").** To **deterministyczne reguły** — te same
 dane zawsze dają ten sam wynik, nic nie „zgaduje" modelem:

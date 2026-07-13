@@ -55,7 +55,7 @@ jobs:
             ### `Parawan.html` — jeden plik, zero instalacji
 
             **Parawan** — „Dane za parawanem". Pobierz i otwórz podwójnym kliknięciem — działa nawet
-            na komputerach z blokadami firmowymi/urzędowymi (nie wymaga `.bat` ani serwera).
+            na komputerach z blokadami firmowymi (nie wymaga `.bat` ani serwera).
             Anonimizacja regułami, słownikami i sumami kontrolnymi, w całości offline, **bez AI**
             (możesz wyłączyć internet i sprawdzić).
 
