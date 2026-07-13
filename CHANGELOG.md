@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.46.3 — 2026-07-13
+
+**Pass polerski przed finałem: hero-lockup, demo, box prywatności, ikony, tła pól.**
+
+- **Hero — poziomy lockup marki**: znak │ dzielnik │ **PARAWAN** (wersaliki) + tagline
+  „Lokalny anonimizator polskich danych" (mono, wersaliki). Badge'y ułożone w zwarty blok 2×2.
+- **Box prywatności** mocniejszy: nagłówek „Twój tekst nie opuszcza przeglądarki" + podtekst
+  wypełniający dotąd pustą przestrzeń, obwódka.
+- **Demo „Jak to działa"**: nagłówek przeniesiony na górę karty (koniec „zwisania"), lepszy tekst
+  („Wrzucasz dokument z danymi, wychodzi zanonimizowany"), strefy **Wejście/Wyjście** wyeksponowane
+  jako etykiety z akcentem (zielony / bursztyn), powiązane z przepływem animacji.
+- **Ikony SVG**: „Co maskować" dostaje sensowną ikonę suwaków zamiast koła-„słoneczka".
+- **„Co maskować"**: pola dostały tła i obwódki (wyraźna separacja wierszy).
+- **Favicon aplikacji** nieodwrócony (ciemny znak na jasnym kaflu, jak baner); favicon autora
+  w jednej linii z linkiem. Przepracowane teksty 3 kart informacyjnych na dole. Legenda: „Adres i czas"
+  → „Adres", „Osoby" = 2 typy (z Datą urodzenia).
+
+Aplikacja web 0.46.2 → 0.46.3. Rdzeń bez zmian.
+
 ## v0.46.2 — 2026-07-13
 
 **Przebudowa panelu „Co maskować", zmiana nazwy repozytorium na `parawan`, marka i favicony.**

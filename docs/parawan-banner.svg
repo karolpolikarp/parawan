@@ -23,7 +23,7 @@
   </svg>
   <!-- wordmark + tagline -->
   <text x="258" y="132" font-family="'Archivo', 'Arial Black', Arial, sans-serif" font-size="76" font-weight="900" letter-spacing="-2" fill="#0B3D2E">PARAWAN</text>
-  <text x="262" y="176" font-family="'Archivo', Arial, sans-serif" font-size="22" font-weight="600" fill="#3D4A42">Lokalny anonimizator polskich danych osobowych</text>
+  <text x="262" y="176" font-family="'Archivo', Arial, sans-serif" font-size="22" font-weight="600" fill="#3D4A42">Lokalny anonimizator polskich danych</text>
   <text x="262" y="214" font-family="'IBM Plex Mono', 'Courier New', monospace" font-size="15" letter-spacing="1.5" fill="#6B7A70">100% OFFLINE  ·  BEZ AI  ·  APACHE 2.0  ·  PO POLSKU  ·  JEDEN PLIK</text>
   <!-- akcent bursztynowy -->
   <rect x="262" y="230" width="150" height="4" rx="2" fill="#B9791F"/>
