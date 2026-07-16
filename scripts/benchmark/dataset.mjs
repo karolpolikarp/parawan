@@ -662,6 +662,18 @@ export function buildDataset() {
   // liczba w kształcie 2-3-2-2 BEZ kontekstu telefonicznego to numer pozycji — zostaje jawna
   neg('Pozycja 32 774 91 55 w wykazie inwentarza magazynowego.', ['32 774 91 55']);
 
+  // v0.46.19: PESEL po słabym łączniku „to"; adres z typem ulicy bez skrótu (Rondo); przymiotnik
+  // powiatowy po roli; zdrobnienia imion w parze z nazwiskiem
+  str('Wnioskodawca podał PESEL to 89010112345 w formularzu.', ['89010112345'], ['formularzu']);
+  str('Adres zamieszkania: Rondo Kościuszki 5 w bloku.', ['Rondo Kościuszki 5'], ['zamieszkania']);
+  neg('Park Narodowy Gór Stołowych 2024 świętuje jubileusz.', ['Park Narodowy Gór Stołowych 2024']);
+  neg('Decyzję wydał Starosta Wołomiński osobiście.', ['Wołomiński']);
+  osd('Zgłosił się wczoraj Janek Kowalski osobiście.', ['Janek Kowalski'], ['osobiście']);
+  osd('Reklamację złożyła Kasia Nowak w sklepie.', ['Kasia Nowak'], ['sklepie']);
+  // rok po nowym typie obiektu to NIE numer domu; kotwica IBAN nie zjada następnego słowa (audyt v0.46.19)
+  neg('Bulwar Filadelfijski 1998 objęty jest programem rewitalizacji nadbrzeży.', ['Bulwar Filadelfijski 1998']);
+  str('Na rachunek wspólnoty PL61 1090 1014 0000 0712 1981 3152 wpłynęły zaliczki.', ['PL61 1090 1014 0000 0712 1981 3152'], ['wpłynęły']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {

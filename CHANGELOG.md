@@ -1,5 +1,34 @@
 # Changelog
 
+## v0.46.19 — 2026-07-16
+
+**Rdzeń: cztery domknięcia wykryte audytem adwersarialnym v0.46.18 + systemowe zdrobnienia imion.**
+
+- **PESEL/NIP/REGON po słabym łączniku:** „PESEL **to** 71030512399", „PESEL o numerze …",
+  „NIP to …" wyciekały — grupa wtrącenia między silną etykietą a numerem dopuszczała tylko wyraz
+  ≥3 liter. Teraz obejmuje krótkie łączniki „to/o/nr" (do 2 wyrazów). Zgodne z zasadą „przy silnej
+  etykiecie maskuj MIMO złej sumy".
+- **ADRES z typem ulicy bez skrótu:** „zam. Rondo Romana Dmowskiego 3/7" wyciekał (i kaskadowo
+  miasto) — prefiks ADRES znał tylko ul./al./os./pl. Dodano **rondo/most/skwer/bulwar** (odmieniane).
+  „park" ŚWIADOMIE pominięty (częsta nazwa instytucji — „Park Narodowy … 2024" dawał FP). Dla nowych
+  typów GOŁA 4-cyfrowa liczba-ROK (1900–2099) NIE jest numerem domu („Most Grunwaldzki 1910",
+  „Bulwar Filadelfijski 1998" zostają) — strażnik dodany po audycie.
+- **Kotwica IBAN nie zjada następnego słowa:** „…3152 wpłynęły" dawało „[NR-KONTA]łynęły" — flaga
+  `/i` pozwalała klasie `[A-Z0-9]` wartości łapać małe litery „wp" przylegające do diakrytyku „ł".
+  Usunięto `/i` z wartości (warianty etykiety wyliczone jawnie). Wada wcześniejsza (od v0.44.0).
+- **Przymiotnik ODMIEJSCOWY powiatowy po roli:** „Starosty Wołomińskiego" → [OSOBA] (nadmaskowanie).
+  Gałąź dzierżawczego dopełniacza (RE_PAIR) nie sprawdzała `NON_SURNAME_ADJ` (inaczej niż sąsiednie)
+  — dodano guard `isGeoAdjective`. `NON_SURNAME_ADJ` rozszerzone o ~300 przymiotników powiatowych
+  (wygenerowane i zweryfikowane adwersarialnie; wykluczono formy będące częstym NAZWISKIEM).
+- **Zdrobnienia imion (systemowo):** „Janek Kowalski", „Kasia Nowak", „Tomek/Gosia/Zosia/Franek …"
+  nie były wykrywane — słownik miał tylko formy pełne. Dodano ~150 kuratorowanych zdrobnień
+  (mianownik). Imiona maskowane TYLKO w parze z nazwiskiem/po wyzwalaczu, więc samo zdrobnienie
+  („Janek poszedł") ani wyraz pospolity o podobnej formie („anka zamówień") nie są maskowane.
+
+Bez regresji: 317 testów zielonych, golden-master czysto addytywny, bramka benchmarku bez regresji
+(recall 94,6%, precyzja 99,7%). Zweryfikowane adwersarialnie wieloagentowo.
+Rdzeń 0.29.9 → 0.29.10, web/landing 0.46.18 → 0.46.19.
+
 ## v0.46.18 — 2026-07-16
 
 **Rdzeń: dwie wady wykryte audytem adwersarialnym v0.46.17 — eponimy uliczne i telefon 2-3-2-2.**

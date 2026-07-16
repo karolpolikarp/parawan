@@ -22,7 +22,7 @@
  * (np. dwa niezależne przejścia redakcji) niczego nie psuje.
  */
 
-import { normalizeSurnameKey, surnameBase, looksLikeSurname, NON_SURNAME_ADJ, HOMOGRAPH_SURNAMES } from './surnames.js';
+import { normalizeSurnameKey, surnameBase, looksLikeSurname, isGeoAdjective, NON_SURNAME_ADJ, HOMOGRAPH_SURNAMES } from './surnames.js';
 
 export type PiiType =
   | 'EMAIL'
@@ -309,7 +309,25 @@ const POLISH_FIRST_NAMES = new Set<string>(
     'krystian leonard iwo alojzy bruno feliks gerard konstanty maksym miron przemek roch salomon tymon tymoteusz ' +
     // uzupełnienie: częste imiona wcześniej pomijane — bez nich pary „imię nazwisko" pisane
     // WERSALIKAMI lub małymi literami nie były łapane (detekcja par zależy od słownika imion)
-    'pamela melania kornelia apolonia sonia tamara żaklina walentyna celina aurelia benedykt alfred edmund herbert oktawian klemens'
+    'pamela melania kornelia apolonia sonia tamara żaklina walentyna celina aurelia benedykt alfred edmund herbert oktawian klemens ' +
+    // ZDROBNIENIA/spieszczenia (v0.46.19) — imiona są maskowane TYLKO w parze z nazwiskiem/po
+    // wyzwalaczu, więc dodanie zdrobnień podnosi recall („Janek Kowalski") bez FP na samo zdrobnienie.
+    // Kuratorowane z listy wygenerowanej adwersarialnie: mianownik, ≥4 znaki, bez kolizji z wyrazem
+    // pospolitym (odrzucono m.in. kuba/maks/jasiek/pola/misiek/ryś — mylące z rzeczownikiem).
+    'janek jaś tomek tomcio franek franio staś stasiek staszek michałek michaś wojtek wojtuś bartek ' +
+    'bartuś maciek maciuś piotrek piotruś krzysiek krzyś grzesiek grześ adaś jędrek jędrko jędruś olek ' +
+    'oleś romek romcio heniek henio władek stefek zbyszek zbyś mietek antek antoś benek benio gustek ' +
+    'kacperek kajtek kubuś mirek darek arek radek rafałek przemek sławek sylwek tadek tymek tymuś wicek ' +
+    'witek zenek kamilek konradek oskarek filipek szymek szymuś dawidek damianek bronek gienek jurek ' +
+    'marecik nikodemek tobiaszek gabrielek borysek cyprianek fabianek sebastianek ksaweryk arturek ' +
+    'andrzejek ignaś leoś lucek zdzisiek zdziś czesiek józek longinek walek wawrek gieniek heniuś ' +
+    'kasia zosia basia gosia małgosia madzia ania hania asia jola renia marysia magda magdusia dorotka ' +
+    'dorka dosia kingusia natalka julka julcia ulcia wiktorka gabrysia monisia monka kamcia martusia ' +
+    'marteczka danusia danka halinka krysia kryśka jadzia wiesia stefcia bożenka tereska tesia elka ewka ' +
+    'ewelinka kaśka gośka baśka zośka agatka alcia anka hanka izabelka joasia józia karolinka lidka ' +
+    'lucynka marlenka natusia olcia olka paulinka roksanka sabinka sylwka wandzia weronka wiolka zuzia ' +
+    'zuzka jagusia kalinka klaudka kornelka michasia martunia nikolka otylka rózia tosia beatka anetka ' +
+    'aneczka emilka klarka nelka nadzia oleńka helcia'
   ).split(/\s+/),
 );
 
@@ -1138,9 +1156,12 @@ function passAccount(ctx: RedactCtx): void {
     'NR-KONTA',
   );
   // (b) z etykietą + wartość w formacie IBAN — maskuj NAWET bez poprawnej sumy mod-97.
+  // BEZ flagi /i: wartość [A-Z0-9] musi być WIELKIMI literami/cyframi (jak realny IBAN). Z /i klasa
+  // łapała małe litery następnego słowa („…3152 wpłynęły" → maska zjadała „ wp"). Warianty wielkości
+  // liter etykiety wyliczone jawnie; lookahead (?![A-Za-z0-9]) domyka wartość na granicy słowa.
   maskAfterLabel(
     ctx,
-    /\b((?:konto|konta|rachunek|rachunku|nr konta|numer konta|iban)(?:\s+[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]{3,})?)([\s:=.-]+)([A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]){11,30})(?![A-Z0-9])/gi,
+    /\b((?:konto|Konto|KONTO|konta|Konta|rachunek|Rachunek|RACHUNEK|rachunku|Rachunku|nr konta|Nr konta|numer konta|Numer konta|iban|Iban|IBAN)(?:\s+(?:to|o|nr|[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]{3,})){0,2})([\s:=.-]+)([A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]){11,30})(?![A-Za-z0-9])/g,
     'NR-KONTA',
   );
   // (c) NRB BEZ prefiksu „PL" i BEZ etykiety — 26 cyfr z POPRAWNĄ sumą (walidacja po dodaniu „PL").
@@ -1167,7 +1188,7 @@ function passPesel(ctx: RedactCtx): void {
   // (b) z SILNĄ etykietą „PESEL" — maskuj 11 cyfr NAWET bez poprawnej sumy (etykieta to sygnał).
   maskAfterLabel(
     ctx,
-    /\b(pesel(?:\s+[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]{3,})?)([\s:=.-]+)(\d{11})(?![\d])/gi,
+    /\b(pesel(?:\s+(?:to|o|nr|[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]{3,})){0,2})([\s:=.-]+)(\d{11})(?![\d])/gi,
     'PESEL',
   );
 }
@@ -1190,7 +1211,7 @@ function passNip(ctx: RedactCtx): void {
   // (b) z SILNĄ etykietą „NIP" — maskuj 10 cyfr (dowolny separator) NAWET bez poprawnej sumy.
   maskAfterLabel(
     ctx,
-    /\b(nip(?:\s+[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]{3,})?)([\s:=.-]+)((?:PL[- ]?)?(?:\d{3}[- ]\d{3}[- ]\d{2}[- ]\d{2}|\d{3}[- ]\d{2}[- ]\d{2}[- ]\d{3}|\d{10}))(?![\d])/gi,
+    /\b(nip(?:\s+(?:to|o|nr|[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]{3,})){0,2})([\s:=.-]+)((?:PL[- ]?)?(?:\d{3}[- ]\d{3}[- ]\d{2}[- ]\d{2}|\d{3}[- ]\d{2}[- ]\d{2}[- ]\d{3}|\d{10}))(?![\d])/gi,
     'NIP',
   );
 }
@@ -1208,7 +1229,7 @@ function passRegon(ctx: RedactCtx): void {
   // 6a) REGON z etykietą „REGON" — 9 lub 14 cyfr. Maskuj NAWET bez poprawnej sumy.
   maskAfterLabel(
     ctx,
-    /\b(regon(?:\s+[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]{3,})?)([\s:=.-]+)(\d{14}|\d{9})(?![\d])/gi,
+    /\b(regon(?:\s+(?:to|o|nr|[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]{3,})){0,2})([\s:=.-]+)(\d{14}|\d{9})(?![\d])/gi,
     'REGON',
   );
 }
@@ -1413,12 +1434,22 @@ function passAddress(ctx: RedactCtx): void {
     new RegExp(
       // każda litera skrótu case-insensitive — łapie też WERSALIKI ze skanów/OCR („UL. KWIATOWA 5",
       // „AL. JANA PAWŁA II 12"). Bez tego adres OSOBY zapisany WERSALIKAMI wyciekał (case-sensitive „ul.").
-      `\\b([Uu][lLI1]\\.|[Uu][Ll][Ii][Cc][AaIiYy]|[Aa][Ll]\\.|[Aa][Ll][Ee][IiJj][AaIiĘę]?|[Oo][Ss]\\.|[Oo][Ss][Ii][Ee][Dd][Ll][EeAaUu]|[Pp][Ll]\\.|[Pp][Ll][Aa][Cc][UuAa]?)\\s+` +
+      `\\b([Uu][lLI1]\\.|[Uu][Ll][Ii][Cc][AaIiYy]|[Aa][Ll]\\.|[Aa][Ll][Ee][IiJj][AaIiĘę]?|[Oo][Ss]\\.|[Oo][Ss][Ii][Ee][Dd][Ll][EeAaUu]|[Pp][Ll]\\.|[Pp][Ll][Aa][Cc][UuAa]?|` +
+        // typy ulic bez skrótu (nazwa własna + numer): „Rondo Dmowskiego 3", „skwer Kościuszki 5".
+        // BEZ „park" — częsta nazwa instytucji („Park Narodowy … 2024") dawała FP.
+        `[Rr]ond[${PL_LO}]*|[Mm]ost[${PL_LO}]*|[Ss]kwer[${PL_LO}]*|[Bb]ulwar[${PL_LO}]*)\\s+` +
         `(?:(?:\\d+|gen|płk|ppłk|mjr|kpt|por|ks|św|bp|abp|kard|marsz|prof|dr|inż|hr)\\.?\\s+|[A-ZĄĆĘŁŃÓŚŹŻ]\\.\\s+){0,2}` +
         `[${PL_UP}][${PL_LO}${PL_UP}01.-]*(?:[ \\t]+[${PL_UP}0-9][${PL_LO}${PL_UP}0-9.-]*){0,3}[ \\t]+\\d+[A-Za-z]?(?:\\s*(?:/|m\\.?|lok\\.?)\\s*\\d+[A-Za-z]?)?`,
       'g',
     ),
-    maskConst(ctx, 'ADRES'),
+    (m: string, prefix: string) => {
+      // nowe typy obiektów (rondo/most/skwer/bulwar) + GOŁA 4-cyfrowa liczba 1900–2099 to ROK obiektu
+      // („Most Grunwaldzki 1910", „Bulwar Filadelfijski 1998"), NIE numer domu — pomiń. Numer domu z
+      // literą/mieszkaniem („Bulwar Nadmorski 10", „Rondo X 12/5") kończy się inaczej → maskowany.
+      if (/^(?:rond|most|skwer|bulwar)/i.test(prefix) && /[^0-9](?:19|20)\d{2}$/.test(m)) return m;
+      ctx.bump('ADRES');
+      return ctx.M.ADRES;
+    },
   );
   // 12b) ADRES bez prefiksu „ul." — rozpoznawany po SĄSIEDZTWIE (już zamaskowanego) kodu pocztowego.
   const KOD = escapeRe(ctx.M['KOD-POCZTOWY']);
@@ -1578,6 +1609,10 @@ function passPersonPairs(ctx: RedactCtx): void {
     if (precededByPatron(ctx.text, offset) || precededByStreetEponym(ctx.text, offset) || RE_STREET_WORD.test(w1)) return m;
     const w1l = w1.toLowerCase();
     if (RE_SURNAME_OBLIQUE.test(w2.toLowerCase())) {
+      // przymiotnik ODMIEJSCOWY po roli/rzeczowniku („Starosty Wołomińskiego", „Wojewody
+      // Mazowieckiego") to nazwa urzędu, NIE nazwisko — ta gałąź (inaczej niż sąsiednie) tego
+      // nie sprawdzała, więc -ski/-cki odmiejscowe leciały jako osoba.
+      if (isGeoAdjective(w2)) return m;
       ctx.bump('IMIE'); // dzierżawczy dopełniacz → rzeczownik/imię w w1 zostaje
       return `${w1} ${ctx.personMask(w2)}`;
     }

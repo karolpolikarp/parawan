@@ -1553,6 +1553,51 @@ test('REGRESJA: realna osoba w sąsiedztwie słowa „ulica" NADAL maskowana', (
   expect(redactPII('Biuro: ul. Zielona 5\nJan Kowalski złożył wniosek.', { pseudonyms: true }).redacted.includes('Jan Kowalski')).toBe(false);
 });
 
+// ── Domknięcia z audytu v0.46.19: łącznik przy etykiecie, typy ulic, przymiotnik powiatowy, zdrobnienia ──
+test('PESEL/NIP/REGON po słabym łączniku („to/o numerze/nr") maskowane mimo złej sumy', () => {
+  expect(redactPII('jego PESEL to 71030512399', { pseudonyms: true }).redacted).toContain('[PESEL]');
+  expect(redactPII('PESEL o numerze 89010112345', { pseudonyms: true }).redacted).toContain('[PESEL]');
+  expect(redactPII('NIP to 1234563218', { pseudonyms: true }).redacted).toContain('[NIP]');
+  expect(redactPII('REGON nr 123456785', { pseudonyms: true }).redacted).toContain('[REGON]');
+});
+test('adres z typem ulicy bez skrótu (Rondo/most/skwer/bulwar) maskowany; „Park …" to nie adres', () => {
+  expect(redactPII('zam. Rondo Romana Dmowskiego 3/7 w Warszawie', { pseudonyms: true }).redacted).toContain('[ADRES]');
+  expect(redactPII('biuro: skwer Kościuszki 12', { pseudonyms: true }).redacted).toContain('[ADRES]');
+  expect(redactPII('mieszka przy most Piłsudskiego 5', { pseudonyms: true }).redacted).toContain('[ADRES]');
+  // „park" WYKLUCZONE — częsta nazwa instytucji („Park Narodowy … 2024") dawała FP
+  const neg = 'Park Narodowy Gór Stołowych 2024 obchodzi jubileusz.';
+  expect(redactPII(neg, { pseudonyms: true }).redacted).toBe(neg);
+  // ROK (4 cyfry 1900–2099) po nowym typie obiektu to NIE numer domu (regresja z audytu v0.46.19)
+  for (const y of ['Bulwar Filadelfijski 1998 objęty rewitalizacją.', 'Most Grunwaldzki 1910 wybudowano.', 'Skwer Powstańców 1944 odsłonięto.']) {
+    expect(redactPII(y, { pseudonyms: true }).redacted).toBe(y);
+  }
+  // …ale realny numer domu (mała liczba/mieszkanie) NADAL adresem
+  expect(redactPII('Bulwar Nadmorski 10', { pseudonyms: true }).redacted).toBe('[ADRES]');
+});
+test('kotwica IBAN nie zjada liter następnego słowa (diakrytyk po IBAN)', () => {
+  const r = redactPII('na rachunek wspólnoty PL61 1090 1014 0000 0712 1981 3152 wpłynęły zaliczki.', { pseudonyms: true }).redacted;
+  expect(r).toContain('[NR-KONTA]');
+  expect(r).toContain('wpłynęły'); // słowo nietknięte (dawniej „[NR-KONTA]łynęły")
+  expect(r.includes('[NR-KONTA]łynęły')).toBe(false); // brak zjedzenia „wp"
+});
+test('przymiotnik ODMIEJSCOWY powiatowy po roli to nie nazwisko; realne nazwisko po roli — tak', () => {
+  expect(redactPII('Z upoważnienia Starosty Wołomińskiego', { pseudonyms: true }).redacted).toBe('Z upoważnienia Starosty Wołomińskiego');
+  expect(redactPII('Decyzja Wojewody Mazowieckiego', { pseudonyms: true }).redacted).toBe('Decyzja Wojewody Mazowieckiego');
+  // po roli realne nazwisko NADAL maskowane
+  expect(redactPII('Prezes Kowalski podpisał uchwałę.', { pseudonyms: true }).redacted.includes('Kowalski')).toBe(false);
+});
+test('zdrobnienia imion w parze z nazwiskiem maskowane; samo zdrobnienie/wyraz pospolity — nie', () => {
+  for (const t of ['Zgłosił się Janek Kowalski.', 'Rozmawiałem z Kasią Nowak.', 'Tomek Wiśniewski zeznał.', 'Zosia Dąbrowska przyszła.']) {
+    const r = redactPII(t, { pseudonyms: true }).redacted;
+    expect(/Kowalski|Nowak|Wiśniewski|Dąbrowska/.test(r)).toBe(false);
+    expect(r).toContain('[OSOBA-A]');
+  }
+  // samo zdrobnienie / zdrobnienie + wyraz pospolity (mała litera) — NIE maskowane (brak nazwiska)
+  for (const neg of ['Janek poszedł do sklepu.', 'To była wielka anka zamówień.', 'Elka wisiała na ścianie.']) {
+    expect(redactPII(neg, { pseudonyms: true }).redacted).toBe(neg);
+  }
+});
+
 // ── Telefon: most „pod numerem" po kotwicy; bez kotwicy 2-3-2-2 świadomie NIE maskowany (v0.46.18) ──
 test('telefon 2-3-2-2 po kotwicy „kontakt … pod numerem" (też przez nową linię)', () => {
   const t = 'Prosimy o kontakt telefoniczny pod numerem\n32 774 91 55 lub adresem.';

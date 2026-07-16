@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-16T16:42:58.407Z",
+  "generatedAt": "2026-07-16T21:20:15.540Z",
   "seed": 20260704,
-  "coreVersion": "0.29.9",
-  "casesTotal": 297,
-  "mustMaskTotal": 276,
-  "mustKeepTotal": 328,
+  "coreVersion": "0.29.10",
+  "casesTotal": 305,
+  "mustMaskTotal": 281,
+  "mustKeepTotal": 336,
   "skippedLayers": [
     {
       "name": "core+spacy",
@@ -26,16 +26,16 @@
     {
       "name": "T0+T1 core",
       "desc": "redactPII() — regex + sumy kontrolne + słownik (in-process, offline)",
-      "elapsedMs": 88,
+      "elapsedMs": 41,
       "changedVsCore": null,
-      "recall": 0.9456521739130435,
-      "precision": 0.9969512195121951,
-      "f1": 0.9706243602865916,
+      "recall": 0.9466192170818505,
+      "precision": 0.9970238095238095,
+      "f1": 0.9711679408863774,
       "agg": {
-        "maskTotal": 276,
-        "maskHit": 261,
-        "keepTotal": 328,
-        "keepHit": 327
+        "maskTotal": 281,
+        "maskHit": 266,
+        "keepTotal": 336,
+        "keepHit": 335
       },
       "perCategory": {
         "osoby-podstawowe": {
@@ -69,19 +69,19 @@
           "recall": 1,
           "precision": 1,
           "f1": 1,
-          "maskTotal": 112,
-          "maskHit": 112,
-          "keepTotal": 89,
-          "keepHit": 89
+          "maskTotal": 115,
+          "maskHit": 115,
+          "keepTotal": 92,
+          "keepHit": 92
         },
         "negatywy": {
           "recall": null,
-          "precision": 0.990990990990991,
+          "precision": 0.9912280701754386,
           "f1": null,
           "maskTotal": 0,
           "maskHit": 0,
-          "keepTotal": 111,
-          "keepHit": 110
+          "keepTotal": 114,
+          "keepHit": 113
         },
         "osoby-rzadkie-ner": {
           "recall": 0.21052631578947367,
@@ -96,10 +96,10 @@
           "recall": 1,
           "precision": 1,
           "f1": 1,
-          "maskTotal": 10,
-          "maskHit": 10,
-          "keepTotal": 10,
-          "keepHit": 10
+          "maskTotal": 12,
+          "maskHit": 12,
+          "keepTotal": 12,
+          "keepHit": 12
         }
       },
       "failures": [
@@ -1779,6 +1779,46 @@
         },
         {
           "id": "neg-92",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-85",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-86",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-93",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-94",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-sl-11",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-sl-12",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-95",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-87",
           "leaked": [],
           "eaten": []
         }

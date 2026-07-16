@@ -193,6 +193,45 @@ export const NON_SURNAME_ADJ = new Set<string>((
   // dalsze regiony / pasma / parki: „Bieszczadzki Park", „Podhalański", „Sądecki"
   'podhalański bieszczadzki karkonoski sądecki gorczański elbląski nadwiślański nadbużański ' +
   'kołobrzeski koszaliński słupski legnicki wałbrzyski jeleniogórski nowosądecki ' +
+  // PRZYMIOTNIKI ODMIEJSCOWE od nazw POWIATÓW/regionów/miast („Starosta Wołomiński", „powiat
+  // grójecki") — to nazwy jednostek, NIE nazwiska. Lista wygenerowana i zweryfikowana adwersarialnie
+  // (v0.46.19): wykluczono formy będące częstym NAZWISKIEM (bielski, sokołowski, dąbrowski, krakowski,
+  // warszawski…) — te zostają maskowalne. Osoba w parze „Jan <-ski>" i tak maskowana (detektor par).
+  'aleksandrowski andrychowski augustowski barliński bartoszycki bełchatowski bialski ' +
+  'bialskopodlaski białobrzeski białogardzki bieruński biskupiecki biłgorajski ' +
+  'bogatyński bolesławiecki braniewski buski bydgoski bystrzycki bytomski bytowski będziński ' +
+  'chodzieski chojnicki chorzowski choszczeński ciechociński czarnkowski czechowicki człuchowski ' +
+  'dobromiejski drawski drezdenecki działdowski dzierżoniowski dębliński ełcki garwoliński ' +
+  'gdyński giżycki gliwicki gnieźnieński goleniowski golubski gorlicki gorzowski gostyniński gołdapski ' +
+  'gośliński grodziski grudziądzki gryficki gryfiński grójecki gubiński górowski głubczycki ' +
+  'hajnowski helski hrubieszowski inowrocławski iławski jarociński jasielski jaworznicki jelczański ' +
+  'jędrzejowski kamiennogórski kartuski katowicki kazimierski kielecki kleczewski ' +
+  'kluczborski kolbuszowski kolneński konecki koniński konstantynowski koronowski kostrzyński ' +
+  'kowarski kozielski kozienicki kołobrzeski kościański kościerski krajeński krapkowicki ' +
+  'krasnostawski kraśnicki krotoszyński krośnieński kutnowski kwidzyński kórnicki kędzierzyński kętrzyński ' +
+  'kłobucki kłodzki legionowski leski leżajski lidzbarski limanowski lipnowski lubaczowski lubartowski ' +
+  'lubawski lubliniecki luboński lwówecki lęborski lędziński malborski miechowski ' +
+  'mikołowski milicki międzychodzki międzyrzecki miński mogileński moniecki morąski mosiński mrągowski ' +
+  'mysłowicki myślenicki myśliborski mławski nadnotecki nakielski nidzicki niżański nowogardzki nowomiejski ' +
+  'noworudzki nowosolski nowotarski nowotomyski nyski obornicki olecki oleski oleśnicki olkuski ' +
+  'olsztyński opalenicki opatowski opoczyński ostrowiecki ostrołęcki ostrzeszowski ostródzki otwocki ozorkowski ' +
+  'oławski oświęcimski ożarowski pabianicki pajęczański parczewski pałucki piaseczyński piastowski pilski piski ' +
+  'pińczowski pleszewski pniewski podbeskidzki poddębicki policki polkowicki ' +
+  'proszowicki prudnicki pruszczański pruszkowski przasnyski przemyski przeworski przysuski pszczyński pucki ' +
+  'puszczykowski puławski pułtuski pyrzycki płocki płoński radomszczański radziejowski radzyński rawicki redzki ' +
+  'ropczycki roztoczański rumski rybnicki rycki rypiński rzeszowski sandomierski sejneński siemianowicki ' +
+  'siemiatycki sierpecki skarżyski skierniewicki sochaczewski sokólski sopocki sosnowiecki stalowowolski ' +
+  'starachowicki stargardzki starogardzki staszowski strzegomski strzeliński strzyżowski stęszewski ' +
+  'sulechowski sulejówecki sulęciński suwalski swarzędzki szamotulski szczecinecki szczeciński szczycieński ' +
+  'sztumski szydłowiecki sędziszowski sępoleński sławieński słubicki słupecki tarnobrzeski tarnogórski ' +
+  'tczewski tomaszowski toruński trzcianecki trzebnicki tyski ustecki ustrzycki wadowicki ' +
+  'wałbrzyski wałecki wejherowski wieluński wieruszowski wodzisławski wolsztyński wołomiński ' +
+  'wronecki wrzesiński wschowski wysokomazowiecki wąbrzeski wągrowiecki węgorzewski węgrowski ' +
+  'władysławowski włocławski włodawski włoszczowski zabrzański zagłębiowski zakopiański ' +
+  'zambrowski zawierciański zbąszyński zduńskowolski zgorzelecki zielonogórski zwoleński ząbkowicki złotoryjski ' +
+  'złotowski łaski łańcucki łobeski łomżyński łosicki łęczycki średzki śremski świdnicki świdwiński ' +
+  'świebodzicki świebodziński świnoujski świętochłowicki żagański żarski żniński żorski ' +
+  'żuromiński żyrardowski żywiecki ' +
   // pospolite przymiotniki na -ski/-cki: „Niski poziom", „wąski", „bliski"
   'niski wąski płaski bliski śliski grząski ' +
   // rzeczowniki pospolite w liczbie mnogiej o końcówce -ski (lm. od -sek/-sk/-ska):
