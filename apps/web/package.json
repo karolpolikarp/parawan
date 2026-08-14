@@ -11,12 +11,12 @@
   },
   "devDependencies": {
     "typescript": "^7.0.2",
-    "vite": "^8.1.4",
+    "vite": "^8.2.1",
     "vite-plugin-singlefile": "^2.3.3",
     "vitest": "^4.1.10"
   },
   "dependencies": {
     "fflate": "^0.8.3",
-    "pdfjs-dist": "^6.1.200"
+    "pdfjs-dist": "^6.2.108"
   }
 }
