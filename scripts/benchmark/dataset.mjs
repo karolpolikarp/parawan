@@ -701,6 +701,25 @@ export function buildDataset() {
   // separatorem numeru KSeF jest TYLKO myślnik — kolumny liczb w raporcie nie są scalane
   neg('Raport KSeF 5265877635 20250826 000000012345 23 w podziale na kanały.', ['20250826 000000012345 23']);
 
+  // Czyste wyjście (audyt, partia b1): tekst POZA maską zostaje co do znaku — odstępy i tabulatory
+  // między kolumnami, zapis etykiety, kropki skrótów, składnia JSON-a. mustKeep z odstępami pilnuje
+  // struktury, której sama detekcja nie mierzy.
+  osp('2024-03-01\tJan Kowalski\tWarszawa\t1250,00', ['Jan', 'Kowalski'], ['\tWarszawa\t1250,00']);
+  osp('Wystawił: Marek Dąbrowski     Odebrał: Ewa Kamińska', ['Marek', 'Dąbrowski', 'Ewa', 'Kamińska'], ['     Odebrał:']);
+  str('kod\tmiasto\tkraj\n00-001\tWarszawa\tPolska', ['00-001', 'Warszawa'], ['\tPolska']);
+  str('krs: 0000123456, regon: 123456785', ['0000123456', '123456785'], ['krs:', 'regon:']);
+  str('Kontakt: tel. 601-222-333 lub 22 501 23 45, faks 12 634 55 22 / 12 634 55 23.', ['601-222-333', '22 501 23 45', '12 634 55 22', '12 634 55 23'], ['Kontakt', 'lub', 'faks']);
+  str('tel. 22 501 23 45, kom. 601 222 333 lub 120 000 000 zł zaliczki', ['22 501 23 45', '601 222 333'], ['kom. ', '120 000 000 zł']);
+  osp('ORLEN S.A. Jan Kowalski — pełnomocnik spółki.', ['Jan', 'Kowalski'], ['ORLEN S.A. ', 'pełnomocnik']);
+  osp('Sz. P. Andrzej Górski — odpowiedź na pismo.', ['Andrzej', 'Górski'], ['Sz. P. ', 'odpowiedź']);
+  osp('Pełnomocnik: mec. Ł. Baran przedłożył pełnomocnictwo.', ['Ł.', 'Baran'], ['Pełnomocnik', 'przedłożył']);
+  neg('P.S. Mróz ma być w nocy, okryj róże.', ['P.S. Mróz']);
+  str(String.raw`{"opis": "Zgłosił:\nKowalski Jan, PESEL:\n85031412347"}`, ['Kowalski', 'Jan', '85031412347'], [String.raw`"Zgłosił:\n`, String.raw`PESEL:\n`]);
+  str(String.raw`{"payload":"{\"imie\":\"Jadwiga\",\"nazwisko\":\"Gżegżółka\",\"miasto\":\"Słupsk\"}"}`, ['Jadwiga', 'Gżegżółka', 'Słupsk'], [String.raw`{\"imie\":\"`]);
+  neg(String.raw`{"sciezka": "C:\\Users\\nowak\\Documents\\raport.docx", "opis": "Linia 1\nLinia 2"}`, [String.raw`C:\\Users\\nowak\\Documents`, String.raw`Linia 1\nLinia 2`]);
+  // (cudzysłowy wokół masek w miejscu liczb pilnuje snapshot golden — mustKeep musi stać w wejściu)
+  str('{"klient_id": 7, "pesel": 85031412347, "telefon": 601234567}', ['85031412347', '601234567'], ['"klient_id": 7']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {

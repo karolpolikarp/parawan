@@ -1824,3 +1824,342 @@ test('DOWOD — wzór MSWiA ABS123456 i numery z poprawną sumą bez kontekstu',
     expect(redactPII(`Okazał dokument ${nr} przy odbiorze.`).redacted).toBe('Okazał dokument [NR-DOWODU] przy odbiorze.');
   }
 });
+
+// ── Audyt, partia b1: czyste wyjście (tekst poza maską bez zmian) ──
+const keep = (texts: string[], opts?: Parameters<typeof redactPII>[1]): void => {
+  for (const t of texts) expect(redactPII(t, opts).redacted, t).toBe(t);
+};
+test('K02: odstępy wokół maski osoby zostają co do znaku (tabulatory, wyrównanie spacjami)', () => {
+  expect(redactPII('Lekarz SOR: lek. Natalia Wróbel   Pielęgniarka: Ewa Kruk').redacted).toBe(
+    'Lekarz SOR: lek. [IMIĘ I NAZWISKO]   Pielęgniarka: [IMIĘ I NAZWISKO]',
+  );
+  expect(redactPII('2024-03-01\tJan Kowalski\tWarszawa\t1250,00').redacted).toBe('2024-03-01\t[IMIĘ I NAZWISKO]\tWarszawa\t1250,00');
+  expect(redactPII('Wystawił: Marek Dąbrowski     Odebrał: Ewa Kamińska').redacted).toBe(
+    'Wystawił: [IMIĘ I NAZWISKO]     Odebrał: [IMIĘ I NAZWISKO]',
+  );
+  expect(redactPII('Dyrektor\tJan Kowalski\tWarszawa').redacted).toBe('Dyrektor\t[IMIĘ I NAZWISKO]\tWarszawa');
+  expect(redactPII('Jan\tKowalski\tWarszawa').redacted).toBe('[IMIĘ I NAZWISKO]\tWarszawa');
+  expect(redactPII('Pan   Jan Kowalski   Nr 5').redacted).toBe('Pan   [IMIĘ I NAZWISKO]   Nr 5');
+  // małżonkowie: spójnik i odstępy z oryginału („oraz" nie zamienia się w „i")
+  expect(redactPII('Anna oraz Jan Kowalscy').redacted).toBe('[IMIĘ I NAZWISKO] oraz [IMIĘ I NAZWISKO]');
+  expect(redactPII('Anna   i   Jan Kowalscy', { pseudonyms: true }).redacted).toBe('[OSOBA-A]   i   [OSOBA-A]');
+  // rola/tytuł przed maską z oryginalnym odstępem (para morfologiczna, wyzwalacz, WERSALIKI, OCR)
+  expect(redactPII('Prezes\tGzowski\tKraków').redacted).toBe('Prezes\t[IMIĘ I NAZWISKO]\tKraków');
+  expect(redactPII('Kierownik\tKowalski\t5000').redacted).toBe('Kierownik\t[IMIĘ I NAZWISKO]\t5000');
+  expect(redactPII('Pan Dyrektor\tKowalski').redacted).toBe('Pan Dyrektor\t[IMIĘ I NAZWISKO]');
+  expect(redactPII('SSO\tJAN KOWALSKI').redacted).toBe('SSO\t[IMIĘ I NAZWISKO]');
+  expect(redactPII('PREZES   JAN   KOWALSKI').redacted).toBe('PREZES   [IMIĘ I NAZWISKO]');
+  expect(redactPII('Firma\tKowaIski').redacted).toBe('Firma\t[IMIĘ I NAZWISKO]');
+  expect(redactPII('Jan Nowak\tAnna Kowalska', { pseudonyms: true }).redacted).toBe('[OSOBA-A]\t[OSOBA-B]');
+});
+test('K02: niedoklejona reszta po masce miejscowości wraca z oryginalnym separatorem', () => {
+  expect(redactPII('kod\tmiasto\tkraj\n00-001\tWarszawa\tPolska').redacted).toBe('kod\tmiasto\tkraj\n[KOD-POCZTOWY]\t[MIEJSCOWOŚĆ]\tPolska');
+  expect(redactPII('00-950   Warszawa   Mazowieckie').redacted).toBe('[KOD-POCZTOWY]   [MIEJSCOWOŚĆ]   Mazowieckie');
+  expect(redactPII('Jan\tKowalski\t00-001\tWarszawa\tMazowieckie\tPolska').redacted).toBe(
+    '[IMIĘ I NAZWISKO]\t[KOD-POCZTOWY]\t[MIEJSCOWOŚĆ]\tMazowieckie\tPolska',
+  );
+  expect(redactPII('zamieszkały w Krakowie\tPolska').redacted).toBe('zamieszkały w [MIEJSCOWOŚĆ]\tPolska');
+  expect(redactPII('ul. Długa 5, Warszawa\tPolska').redacted).toBe('[ADRES], [MIEJSCOWOŚĆ]\tPolska');
+  expect(redactPII('Jan Kowalski, ur. 12.03.1980 r. w Krakowie\tPolska').redacted).toBe(
+    '[IMIĘ I NAZWISKO], ur. [DATA-URODZENIA] r. w [MIEJSCOWOŚĆ]\tPolska',
+  );
+  expect(redactPII('Polska\tWarszawa, ul. Długa 5').redacted).toBe('Polska\t[MIEJSCOWOŚĆ], [ADRES]');
+  expect(redactPII('Polska\tGliwice (miasto)').redacted).toBe('Polska\t[MIEJSCOWOŚĆ] (miasto)');
+  expect(redactPII('00-001 Warszawa    Tel. 22 123 45 67').redacted).toBe('[KOD-POCZTOWY] [MIEJSCOWOŚĆ]    Tel. [TELEFON]');
+});
+test('K02 pułapki: nazwy własne i nagłówki z wyrównaniem nadal bez zmian', () => {
+  keep([
+    'Rondo Romana Dmowskiego   Wjazd od strony parku',
+    'Sąd Rejonowy   Wydział Cywilny   Sekcja Druga',
+    'Nowa Ruda   Gmina Miejska',
+    'Imię\tNazwisko\tStanowisko\tDział',
+    'Prezes   Zarządu   Spółki',
+    'Plac Jana Pawła   Parking',
+    'Aleja Jana   Pawła II   Gdańsk',
+    'Klinika Kardiologii   Oddział Intensywnej Terapii',
+    'Mieszkam przy ulicy Jana Pawła w Krakowie.',
+    'Dz. U. poz. 12-345\tWarszawa\tPolska',
+    'Spotkanie w Gdańsku\tPolska\tjutro',
+    'Sąd Okręgowy w Warszawie\tWydział I Cywilny',
+    'Wojewoda Mazowiecki\tWarszawa\tPolska',
+    'Na rynku w Krakowie    Sukiennice',
+    'Starosty Wołomińskiego\tWołomin',
+    'Elektro-Instal Sp. z o.o.\tNowa Ruda',
+  ]);
+});
+
+test('K18: etykieta „krs" zostaje w oryginalnym zapisie', () => {
+  expect(redactPII('krs: 0000123456').redacted).toBe('krs: [KRS]');
+  expect(redactPII('krs=0000123456').redacted).toBe('krs=[KRS]');
+  expect(redactPII('Krs: 0000123456, regon: 012345678').redacted).toBe('Krs: [KRS], regon: [REGON]');
+  // pułapki: wielkie litery i kotwice z wypełniaczem jak dotąd; wzmianka bez numeru bez zmian
+  expect(redactPII('nr KRS 0000123456').redacted).toBe('nr KRS [KRS]');
+  expect(redactPII('Spółka wpisana do KRS pod numerem 0000123456.').redacted).toBe('Spółka wpisana do KRS pod numerem [KRS].');
+  keep(['Wpis do KRS z dnia 12.03.2020 dokonany przez Sąd Rejonowy.', 'ustawa o KRS z 1997 r., art. 36 ust. 1']);
+});
+
+test('K19: wyliczenie telefonów po „lub/albo/bądź", „/" i „;" — maskowane wszystkie numery', () => {
+  expect(redactPII('tel. 601-222-333 lub 22 501 23 45').redacted).toBe('tel. [TELEFON] lub [TELEFON]');
+  expect(redactPII('tel. 12 634 55 22 / 12 634 55 23').redacted).toBe('tel. [TELEFON] / [TELEFON]');
+  expect(redactPII('Kontakt: 512 345 678 / 22 501 23 45').redacted).toBe('Kontakt: [TELEFON] / [TELEFON]');
+  expect(redactPII('tel. 601 222 333 albo 22 501 23 46').redacted).toBe('tel. [TELEFON] albo [TELEFON]');
+  expect(redactPII('tel. 601 222 333; 22 501 23 46').redacted).toBe('tel. [TELEFON]; [TELEFON]');
+  expect(redactPII('tel. 601 222 333 bądź 22 501 23 46').redacted).toBe('tel. [TELEFON] bądź [TELEFON]');
+  expect(redactPII('Tel. kontaktowy: 601 222 333 albo stacjonarny 22 501 23 45').redacted).toBe(
+    'Tel. kontaktowy: [TELEFON] albo stacjonarny [TELEFON]',
+  );
+  // prefiks „0048" po „lub" przejmuje tryb (a) w całości — bez ogona „33 48"
+  expect(redactPII('tel. +48 61 852 33 47 lub 0048 61 852 33 48').redacted).toBe('tel. [TELEFON] lub [TELEFON]');
+});
+test('K19: kropka skrótu przed kolejnym numerem zostaje („kom. [TELEFON]", nie „kom[TELEFON]")', () => {
+  expect(redactPII('tel. 22 501 23 45, kom. 601 222 333').redacted).toBe('tel. [TELEFON], kom. [TELEFON]');
+  expect(redactPII('tel. 22 501 23 45 oraz tel. 22 501 23 46').redacted).toBe('tel. [TELEFON] oraz tel. [TELEFON]');
+  expect(redactPII('Telefon 512 345 678, tel. 601 234 567').redacted).toBe('Telefon [TELEFON], tel. [TELEFON]');
+});
+test('K19 pułapki: kwota, data, przepis, numer wewnętrzny i niepełny numer po separatorze zostają', () => {
+  keep(['Pozycja 32 774 91 55 w wykazie lub 32 774 91 56', 'Wpłata 120 000 000 zł lub 130 000 000 zł']);
+  const cases: [string, string][] = [
+    ['tel. 601 222 333 lub 120 000 000 zł', 'tel. [TELEFON] lub 120 000 000 zł'],
+    ['tel. 601 222 333, 120 000 000 zł', 'tel. [TELEFON], 120 000 000 zł'],
+    ['tel. 601 222 333 / 12/03/2020', 'tel. [TELEFON] / 12/03/2020'],
+    ['tel. 601 222 333; pozycja 32 774 91 55 w wykazie', 'tel. [TELEFON]; pozycja 32 774 91 55 w wykazie'],
+    ['tel. 22 501 23 45 / Dz.U. 2020 poz. 1234', 'tel. [TELEFON] / Dz.U. 2020 poz. 1234'],
+    ['Kontakt: 512 345 678 / art. 22 ust. 1 pkt 2', 'Kontakt: [TELEFON] / art. 22 ust. 1 pkt 2'],
+    ['tel. 22 501 23 45 / 46', 'tel. [TELEFON] / 46'],
+    ['tel. 601 222 333 lub 601 222 33', 'tel. [TELEFON] lub 601 222 33'],
+    ['tel. 601 222 333 lub 0000123456', 'tel. [TELEFON] lub 0000123456'],
+    ['tel. 601 222 333; 2024-03-12 10:00', 'tel. [TELEFON]; 2024-03-12 10:00'],
+    ['tel. 512 345 678, 601-234-567 oraz 512.345.678.', 'tel. [TELEFON], [TELEFON] oraz [TELEFON].'],
+    ['Kontakt telefoniczny: +48 600 700 800 lub 601-202-303.', 'Kontakt telefoniczny: [TELEFON] lub [TELEFON].'],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
+});
+
+test('K05: człony kropkowych skrótów (P.S., S.A., O.O., Sp. J.) nie są inicjałem imienia', () => {
+  keep(['P.S. Mróz ma być w nocy.', 'P.S. Lis znowu był w kurniku.', 'P.S. Kowal przyjdzie w środę', 'Dz.U. Lis', 'P.S. Wilk i Zając poszli.']);
+  const cases: [string, string][] = [
+    ['P.S. Nowak dzwonił, oddzwoń.', 'P.S. [IMIĘ I NAZWISKO] dzwonił, oddzwoń.'],
+    ['P.S. Kasia Nowak też przyjdzie.', 'P.S. [IMIĘ I NAZWISKO] też przyjdzie.'],
+    ['PKO B.P. Nowak', 'PKO B.P. [IMIĘ I NAZWISKO]'],
+    ['P.P.S. Kowalski', 'P.P.S. [IMIĘ I NAZWISKO]'],
+    ['ORLEN S.A. Jan Kowalski\nBUDMAX SP. Z O.O. Jan Kowalski', 'ORLEN S.A. [IMIĘ I NAZWISKO]\nBUDMAX SP. Z O.O. [IMIĘ I NAZWISKO]'],
+    ['Budmax Sp. z O.O. Jan Kowalski', 'Budmax Sp. z O.O. [IMIĘ I NAZWISKO]'],
+    ['P.P.H.U. Jan Kowalski', 'P.P.H.U. [IMIĘ I NAZWISKO]'],
+    ['F.H.U. Anna Nowak', 'F.H.U. [IMIĘ I NAZWISKO]'],
+    ['BUDMAX SP.J. Jan Kowalski', 'BUDMAX SP.J. [IMIĘ I NAZWISKO]'],
+    ['BUDMAX SP. J. Jan Kowalski', 'BUDMAX SP. J. [IMIĘ I NAZWISKO]'],
+    ['Budmax Sp. K. Jan Kowalski', 'Budmax Sp. K. [IMIĘ I NAZWISKO]'],
+    ['POLSKA GRUPA ENERGETYCZNA S.A.      PAWEŁ GÓRSKI', 'POLSKA GRUPA ENERGETYCZNA S.A.      [IMIĘ I NAZWISKO]'],
+    // dwa inicjały bez spacji: sklejone „J.[…]" znika, oba inicjały zostają przed maską
+    ['J.K. Kowalski podpisał.', 'J.K. [IMIĘ I NAZWISKO] podpisał.'],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
+});
+test('K05: inicjał z polską literą („Ł.", „Ś.") jest inicjałem — nie wycieka', () => {
+  expect(redactPII('Pełnomocnik: mec. Ł. Baran').redacted).toBe('Pełnomocnik: mec. [IMIĘ I NAZWISKO]');
+  expect(redactPII('Nadawca: Ł. Mróz').redacted).toBe('Nadawca: [IMIĘ I NAZWISKO]');
+  expect(redactPII('Świadek Ł. Kowalski').redacted).toBe('Świadek [IMIĘ I NAZWISKO]');
+  expect(redactPII('Wnioskodawca Ś. Wiśniewski').redacted).toBe('Wnioskodawca [IMIĘ I NAZWISKO]');
+});
+test('K05: „P." w nagłówku listu (Sz. P., Szanowny P., W.P.) to „Pan" — zostaje przed maską', () => {
+  const cases: [string, string][] = [
+    ['Sz. P. Andrzej Górski', 'Sz. P. [IMIĘ I NAZWISKO]'],
+    ['Sz.P. Andrzej Górski', 'Sz.P. [IMIĘ I NAZWISKO]'],
+    ['W.P. Jan Kowalski', 'W.P. [IMIĘ I NAZWISKO]'],
+    ['Szanowny P. Jan Kowalski', 'Szanowny P. [IMIĘ I NAZWISKO]'],
+    ['Szanowna P. Anna Nowak', 'Szanowna P. [IMIĘ I NAZWISKO]'],
+    ['Wielmożny P. Jan Kowalski', 'Wielmożny P. [IMIĘ I NAZWISKO]'],
+    ['Sz. P. Kowalskiemu', 'Sz. P. [IMIĘ I NAZWISKO]'],
+    ['Szanowny P. Mróz', 'Szanowny P. [IMIĘ I NAZWISKO]'],
+    ['Do: Sz. P. Andrzej Górski, ul. Lipowa 5', 'Do: Sz. P. [IMIĘ I NAZWISKO], [ADRES]'],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
+  expect(redactPII('Sz. P. Andrzej Górski', { pseudonyms: true }).redacted).toBe('Sz. P. [OSOBA-A]');
+});
+test('K05 pułapki: prawdziwe inicjały nadal w masce; patroni i skróty bez osób bez zmian', () => {
+  const cases: [string, string][] = [
+    ['mec. J. Kowalski', 'mec. [IMIĘ I NAZWISKO]'],
+    ['r.pr. J. Kowalski', 'r.pr. [IMIĘ I NAZWISKO]'],
+    ['Sprawę prowadzi st. sierż. J. Kowalski.', 'Sprawę prowadzi st. sierż. [IMIĘ I NAZWISKO].'],
+    ['A. Jan Kowalski zeznał', 'A. [IMIĘ I NAZWISKO] zeznał'], // punkt wyliczenia na początku wiersza zostaje
+    ['Pan A. Nowak', 'Pan [IMIĘ I NAZWISKO]'],
+    ['Zawiadomienie otrzymał P. Kowalski.', 'Zawiadomienie otrzymał [IMIĘ I NAZWISKO].'],
+    ['Kierownik działu: A. Wiśniewska, zastępca: P. Zieliński.', 'Kierownik działu: [IMIĘ I NAZWISKO], zastępca: [IMIĘ I NAZWISKO].'],
+    ['Opinię wydał biegły dr A. Lis.', 'Opinię wydał biegły dr [IMIĘ I NAZWISKO].'],
+    ['Obecni: dr A. Nowak, prof. B. Wiśniewski.', 'Obecni: dr [IMIĘ I NAZWISKO], prof. [IMIĘ I NAZWISKO].'],
+    ['Sz. Pan Andrzej Górski', 'Sz. Pan [IMIĘ I NAZWISKO]'],
+    ['Sprzedawca: ORLEN S.A. Pan Jan Kowalski', 'Sprzedawca: ORLEN S.A. Pan [IMIĘ I NAZWISKO]'],
+    ['Budmax sp. z o.o. Jan Kowalski', 'Budmax sp. z o.o. [IMIĘ I NAZWISKO]'],
+    ['Biuro przy Al. W. Andersa 15 czynne.', 'Biuro przy [ADRES] czynne.'],
+    // „W. P." ze spacją to dwa inicjały, nie „W.P." — drugi wchodzi do maski jak dotąd
+    ['W. P. Kowalski', 'W. [IMIĘ I NAZWISKO]'],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
+  keep([
+    'Szkoła im. A. Mickiewicza',
+    'J.P. Morgan zainwestował w spółkę.',
+    'U.S. Steel ogłosił wyniki.',
+    'Dz.U. z 2020 r. poz. 1740',
+    'Dz. U. Nr 16, poz. 93',
+    'św. J. Pawła II',
+    'Szkoła im. A. Mickiewicza. A. Wnioski stron. B. Uzasadnienie.',
+    'P.S. Pozdrowienia dla Mamy.',
+  ]);
+});
+
+test('K06: imię kończące wpis listy „Nazwisko Imię" nie skleja go z osobą z następnego wiersza', () => {
+  expect(redactPII('Sowa Przemysław\nPawlak Wiesław').redacted).toBe('Sowa Przemysław\n[IMIĘ I NAZWISKO]');
+  expect(redactPII('Sowa;Przemysław\nPawlak;Wiesław').redacted).toBe('Sowa;Przemysław\n[IMIĘ I NAZWISKO];Wiesław');
+  expect(redactPII('Obecni: Lis Marek\nNowak Piotr').redacted).toBe('Obecni: Lis Marek\n[IMIĘ I NAZWISKO]');
+  expect(redactPII('Sowa Przemysław\nPawlak Wiesław', { pseudonyms: true }).redacted).toBe('Sowa Przemysław\n[OSOBA-A]');
+  // lista 10 osób zostaje listą 10 wierszy
+  const lista =
+    'Wróbel Katarzyna\nZając Paweł\nSowa Przemysław\nPawlak Wiesław\nKubiak Renata\nMazur Grzegorz\nSikora Anna\nWilk Bartosz\nNowak Barbara\nLis Jakub';
+  expect(redactPII(lista).redacted.split('\n')).toHaveLength(10);
+});
+test('K06 pułapki: łamanie wiersza w prozie i podpisie nadal domyka osobę', () => {
+  const cases: [string, string][] = [
+    ['Jan\nWiśniewski złożył wniosek.', '[IMIĘ I NAZWISKO] złożył wniosek.'],
+    ['Starosta Jan\nWiśniewski przeprowadził kontrolę.', 'Starosta [IMIĘ I NAZWISKO] przeprowadził kontrolę.'],
+    ['protokół\nKowalski podpisał.', 'protokół\n[IMIĘ I NAZWISKO] podpisał.'],
+    ['Z poważaniem\nJan\nKowalski', 'Z poważaniem\n[IMIĘ I NAZWISKO]'],
+    ['Wnioskodawca Anna\nNowak', 'Wnioskodawca [IMIĘ I NAZWISKO]'],
+    ['Anna Maria\nKowalska podpisała.', '[IMIĘ I NAZWISKO] podpisała.'],
+    ['Dyrektor Anna Maria\nKowalska podpisała.', 'Dyrektor [IMIĘ I NAZWISKO] podpisała.'],
+    ['Wczoraj Jan\nKowalski złożył wniosek.', 'Wczoraj [IMIĘ I NAZWISKO] złożył wniosek.'],
+    ['Wczoraj Jan\nKowalski.', 'Wczoraj [IMIĘ I NAZWISKO].'],
+    ['Wójt Gminy: Jan\nKowalski\n', 'Wójt Gminy: [IMIĘ I NAZWISKO]\n'],
+    ['Świadek, Jan\nKowalski, zeznał.', 'Świadek, [IMIĘ I NAZWISKO], zeznał.'],
+    ['Pracownik: Anna\nNowak\n', 'Pracownik: [IMIĘ I NAZWISKO]\n'],
+    ['Barbara\nz Nowaków była obecna.', '[IMIĘ I NAZWISKO] była obecna.'],
+    ['Przemysław Sowa\nWiesław Pawlak\n', '[IMIĘ I NAZWISKO]\n[IMIĘ I NAZWISKO]\n'],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
+});
+
+test('K04: dosłowne ucieczki „\\n"/„\\t" w JSON-ie nie sklejają się z daną; wynik się parsuje', () => {
+  const cases: [string, string][] = [
+    [String.raw`{"opis": "Dane:\n85031412347"}`, String.raw`{"opis": "Dane:\n[PESEL]"}`],
+    [String.raw`{"opis": "PESEL:\n85031412347"}`, String.raw`{"opis": "PESEL:\n[PESEL]"}`],
+    [String.raw`{"opis": "\t85031412347"}`, String.raw`{"opis": "\t[PESEL]"}`],
+    [String.raw`{"opis": "Zgłosił:\nKowalski Jan"}`, String.raw`{"opis": "Zgłosił:\n[IMIĘ I NAZWISKO]"}`],
+    [String.raw`{"opis": "\nAnna Nowak"}`, String.raw`{"opis": "\n[IMIĘ I NAZWISKO]"}`],
+    [String.raw`{"opis": "Jan\tKowalski\tWarszawa"}`, String.raw`{"opis": "[IMIĘ I NAZWISKO]\tWarszawa"}`],
+    [String.raw`{"opis": "Adres:\nul. Lipowa 4"}`, String.raw`{"opis": "Adres:\n[ADRES]"}`],
+    [String.raw`{"opis": "Ulica:\nul. Jana Pawła II 12"}`, String.raw`{"opis": "Ulica:\n[ADRES]"}`],
+    [String.raw`{"opis": "Dowód:\nABA300000"}`, String.raw`{"opis": "Dowód:\n[NR-DOWODU]"}`],
+    // maska e-maila nie zjada litery ucieczki (dawniej „\[EMAIL]" — JSON.parse: Bad escaped character)
+    [String.raw`{"opis": "E-mail:\njan.kowalski@example.com"}`, String.raw`{"opis": "E-mail:\n[EMAIL]"}`],
+    // ucieczka kończy adres URL — nazwisko za nią nie chowa się w linku
+    [String.raw`{"opis": "Link: https://example.com/x\nKowalski Jan"}`, String.raw`{"opis": "Link: https://example.com/x\n[IMIĘ I NAZWISKO]"}`],
+  ];
+  for (const [t, want] of cases) {
+    const r = redactPII(t).redacted;
+    expect(r, t).toBe(want);
+    expect(() => JSON.parse(r), t).not.toThrow();
+    expect(redactPII(r).redacted, t).toBe(r);
+  }
+  expect(redactPII(String.raw`log: msg=Zgłosił:\nKowalski Jan`).redacted).toBe(String.raw`log: msg=Zgłosił:\n[IMIĘ I NAZWISKO]`);
+});
+test('K04 pułapki: ścieżki Windows, kod źródłowy i ucieczki bez danych zostają bez zmian', () => {
+  keep([
+    String.raw`{"sciezka": "C:\\Users\\nowak\\Documents\\raport.docx"}`,
+    String.raw`{"sciezka": "C:\\nowy\\Tomasz\\plik.txt"}`,
+    String.raw`Ścieżka C:\Users\nowak\Documents\raport.docx oraz C:\temp\new\Raport2024.txt`,
+    String.raw`console.log("Suma:\n" + total); printf("Wynik:\t%d\n", x);`,
+    String.raw`\textbf{Ważne}: \noindent Umowa zawarta w Warszawie.`,
+    String.raw`{"wzorzec": "\\u0142"}`,
+    String.raw`{"msg": "Uwaga:\nTermin rozprawy 15.03.2024\nSala 12"}`,
+    String.raw`{"opis": "Faktura nr 123/2024\nRazem: 1500 zł\tVAT 23%"}`,
+    String.raw`{"opis": "Patron szkoły:\nJan Paweł II"}`,
+    String.raw`{"opis": "Dziękujemy!\nZespół Parawan"}`,
+    String.raw`{"opis": "Lista:\n- Mleko\n- Chleb\n- Masło"}`,
+    String.raw`{"opis": "Miesiące:\tStyczeń\tLuty\tMarzec"}`,
+    String.raw`{"opis": "Pogoda:\nZima była mroźna\nWiosna przyszła późno"}`,
+    String.raw`{"opis": "Wyrok SN z 12.03.2020\nIII CZP 1/20"}`,
+    // kontekst złożenia/eponimu i etykieta administracyjna widzą ucieczkę jak nową linię
+    String.raw`{"opis": "Uniwersytet Adama\nMickiewicza"}`,
+    String.raw`{"opis": "choroba\nLeśniowskiego-Crohna"}`,
+    String.raw`{"opis": "Powiat:\nPruszkowski"}`,
+    String.raw`regex: /\d{11}/ oraz "\n\n" i '\t' w kodzie`,
+  ]);
+  // login w ścieżce UNC/Windows to nie ucieczka („\h", „\U" nie są ucieczkami JSON) — nadal maskowany
+  expect(redactPII(String.raw`Udział: \\FS01\home$\tkaminski i login: tkaminski`).redacted).toBe(
+    String.raw`Udział: \\FS01\home$\[LOGIN] i login: [LOGIN]`,
+  );
+  expect(redactPII(String.raw`Plik: C:\Users\tkaminski\Desktop, Login: tkaminski`).redacted).toBe(
+    String.raw`Plik: C:\Users\[LOGIN]\Desktop, Login: [LOGIN]`,
+  );
+});
+test('K04: JSON zagnieżdżony w łańcuchu („\\"klucz\\"") — klucze osobowe wewnątrz maskowane', () => {
+  const t = String.raw`{"payload":"{\"imie\":\"Jadwiga\",\"nazwisko\":\"Gżegżółka\",\"miasto\":\"Słupsk\"}"}`;
+  const r = redactPII(t).redacted;
+  expect(r).toBe(String.raw`{"payload":"{\"imie\":\"[IMIĘ I NAZWISKO]\",\"nazwisko\":\"[IMIĘ I NAZWISKO]\",\"miasto\":\"[MIEJSCOWOŚĆ]\"}"}`);
+  expect(JSON.parse(JSON.parse(r).payload)).toEqual({ imie: '[IMIĘ I NAZWISKO]', nazwisko: '[IMIĘ I NAZWISKO]', miasto: '[MIEJSCOWOŚĆ]' });
+  // podwójna ucieczka (JSON w łańcuchu w łańcuchu)
+  expect(redactPII(String.raw`{"a":"{\\\"nazwisko\\\":\\\"Kowalski\\\"}"}`).redacted).toBe(
+    String.raw`{"a":"{\\\"nazwisko\\\":\\\"[IMIĘ I NAZWISKO]\\\"}"}`,
+  );
+  expect(redactPII(String.raw`msg="{\"lastName\":\"Kowalski\",\"firstName\":\"Jan\"}"`).redacted).toBe(
+    String.raw`msg="{\"lastName\":\"[IMIĘ I NAZWISKO]\",\"firstName\":\"[IMIĘ I NAZWISKO]\"}"`,
+  );
+});
+test('K04 pułapki: zagnieżdżony JSON bez danych osobowych i polecenia z „\\"" bez zmian', () => {
+  keep([
+    String.raw`{"payload":"{\"name\":\"Parawan Pro\",\"miasto\":\"brak\",\"status\":\"ok\"}"}`,
+    String.raw`{"payload":"{\"name\":\"Urząd Skarbowy w Słupsku\",\"opis\":\"Spotkanie w Gdańsku\"}"}`,
+    String.raw`{"payload":"{\"imie\":\"\",\"nazwisko\":null,\"miasto\":\"-\"}"}`,
+    String.raw`sed 's/\"nazwisko\":\"[^\"]*\"/X/' plik.json`,
+    String.raw`{"query":"SELECT * FROM t WHERE \"name\" = 'x'"}`,
+    String.raw`{"payload":"{\"name\":\"Ustawa o ochronie danych\",\"opis\":\"Spółka Kowalczyk-Trans Sp. z o.o.\"}"}`,
+    '{"name":"Parawan Pro","miasto":"brak","opis":"Spotkanie w Gdańsku"}',
+  ]);
+});
+
+test('K17: maska w miejscu liczby JSON dostaje cudzysłowy — wynik dalej się parsuje', () => {
+  const cases: [string, string][] = [
+    ['{"telefon": 512345678}', '{"telefon": "[TELEFON]"}'],
+    ['{"pesel": 44051401359}', '{"pesel": "[PESEL]"}'],
+    ['{"nip": 5260250274}', '{"nip": "[NIP]"}'],
+    ['{"id": 85031412347}', '{"id": "[PESEL]"}'],
+    ['{"telefon": [512345678, 601234567]}', '{"telefon": ["[TELEFON]", "[TELEFON]"]}'],
+    ['[601234567, 512345678]', '["[TELEFON]", "[TELEFON]"]'],
+    ['{"klient_id": 7, "pesel": 85031412347, "telefon": 601234567}', '{"klient_id": 7, "pesel": "[PESEL]", "telefon": "[TELEFON]"}'],
+    [
+      '{\n  "klient": {\n    "pesel": 85031412347,\n    "telefon": 601234567\n  }\n}',
+      '{\n  "klient": {\n    "pesel": "[PESEL]",\n    "telefon": "[TELEFON]"\n  }\n}',
+    ],
+    ['{\r\n  "telefon": 512345678\r\n}', '{\r\n  "telefon": "[TELEFON]"\r\n}'],
+    // NDJSON: każdy wiersz to osobny obiekt
+    ['{"telefon": 512345678}\n{"telefon": 601234567}', '{"telefon": "[TELEFON]"}\n{"telefon": "[TELEFON]"}'],
+    // maska wewnątrz łańcucha i zwykła wartość tekstowa — bez dodatkowych cudzysłowów
+    [
+      '{"kwota": 1250.50, "telefon": 601234567, "uwagi": "tel. 601 222 333"}',
+      '{"kwota": 1250.50, "telefon": "[TELEFON]", "uwagi": "tel. [TELEFON]"}',
+    ],
+    ['{"lista": ["Jan Kowalski", 85031412347, "x"]}', '{"lista": ["[IMIĘ I NAZWISKO]", "[PESEL]", "x"]}'],
+  ];
+  for (const [t, want] of cases) {
+    const r = redactPII(t).redacted;
+    expect(r, t).toBe(want);
+    for (const line of r.trim().split(/\r?\n(?=[[{])/)) expect(() => JSON.parse(line), t).not.toThrow();
+    expect(redactPII(r).redacted, t).toBe(r);
+  }
+  // własna maska z cudzysłowem — poprawnie ucieczona
+  expect(redactPII('{"telefon": 512345678}', { masks: { TELEFON: '<"tel">' } }).redacted).toBe('{"telefon": "<\\"tel\\">"}');
+});
+test('K17 pułapki: proza, nie-JSON i wartości w cudzysłowach bez dokładania cudzysłowów', () => {
+  const cases: [string, string][] = [
+    ['{"pesel": "85031412347"}', '{"pesel": "[PESEL]"}'],
+    ["{'telefon': 512345678}", "{'telefon': [TELEFON]}"], // to nie JSON
+    ['Pole "Telefon": 512 345 678', 'Pole "Telefon": [TELEFON]'],
+    ['Lista: [601234567]', 'Lista: [[TELEFON]]'],
+    ['Kontakt: {"telefon": 512345678}', 'Kontakt: {"telefon": [TELEFON]}'], // JSON osadzony w prozie — poza zakresem
+    ['{"opis": "tel. 512345678, dzwonić rano"}', '{"opis": "tel. [TELEFON], dzwonić rano"}'],
+    [String.raw`{"opis": "tel. \"601234567\" w notatce", "id": 7}`, String.raw`{"opis": "tel. \"[TELEFON]\" w notatce", "id": 7}`],
+    ['<Phone>512345678</Phone>', '<Phone>[TELEFON]</Phone>'],
+    ['telefon: 512345678', 'telefon: [TELEFON]'],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
+  keep(['{"telefon": "[TELEFON]"}', '[1, 2, 3]', '{"klient_id": 7, "kwota": 1250.50, "rok": 2024, "aktywny": true, "uwagi": null}']);
+});
