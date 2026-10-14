@@ -170,7 +170,7 @@ function renderOutput(): void {
   if (!lastRedacted) {
     outputEl.innerHTML =
       `<span class="placeholder">Tu pojawi się bezpieczny tekst, np. ${maskHtml('IMIĘ I NAZWISKO')}, ` +
-      `tel. ${maskHtml('TELEFON')}. Wpisz coś po lewej albo kliknij „Wstaw przykład”.</span>`;
+      `tel. ${maskHtml('TELEFON')}. Wpisz coś w polu „Tekst źródłowy” albo kliknij „Wstaw przykład”.</span>`;
     return;
   }
   outputEl.innerHTML = renderAligned(lastInput, lastRedacted, compareMode);
@@ -186,7 +186,7 @@ function analyze(): void {
     lastRedacted = '';
     lastInput = '';
     renderOutput();
-    if (statEl) statEl.textContent = 'Wpisz tekst po lewej, tu pojawią się statystyki.';
+    if (statEl) statEl.textContent = 'Tu pojawią się statystyki maskowania.'; // ten sam napis co w index.html
     if (copyBtn) copyBtn.disabled = true;
     return;
   }

@@ -105,6 +105,7 @@ body {
 }
 
 img { display: block; }
+p { text-wrap: pretty; } /* bez pojedynczego słowa w ostatniej linii akapitu, jak na landingu */
 a { color: var(--acc); text-decoration: none; }
 a:hover { text-decoration: underline; }
 code, kbd { font-family: var(--mono); font-size: .88em; }
@@ -372,6 +373,7 @@ details.card::details-content {
 #hero-sub {
   font-family: var(--sans); font-size: 12.5px; font-weight: 700;
   letter-spacing: .1em; text-transform: uppercase; color: var(--acc); margin-top: 5px;
+  text-wrap: balance; /* na telefonie bez jednego słowa w drugiej linii */
 }
 .ver-chip { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--mut); }
 .hero-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
@@ -398,6 +400,9 @@ details.card::details-content {
 .hero-b { display: flex; align-items: center; gap: 16px 24px; flex-wrap: wrap; }
 .hero-lead { font-size: 18px; color: var(--text); flex: 1 1 320px; }
 .hero-lead strong { color: var(--acc); }
+/* skrót do edytora: tylko gdy karty układają się w jedną kolumnę (≤1080 px, reguła niżej) */
+.skip-editor { display: none; }
+#edytor { scroll-margin-top: 12px; }
 /* callout prywatności w prawej części nagłówka — mocny akcent zaufania, dopasowany do treści */
 .privacy {
   display: flex; align-items: center; gap: 12px;
@@ -427,6 +432,11 @@ details.card::details-content {
   6%, 19%  { border-color: var(--acc); box-shadow: 0 10px 26px rgba(11,61,46,.18); }
   26%      { border-color: var(--line); box-shadow: var(--shadow); }
 }
+/* Kroki świecą po kolei, co 3 s: blask trwa od 6% do 26% z 12 s, więc kolejne się nie nakładają.
+   Kroki to pierwsze cztery <section> w siatce (przed nimi stoi tylko <header>). */
+.step:nth-of-type(2) { animation-delay: 3s; }
+.step:nth-of-type(3) { animation-delay: 6s; }
+.step:nth-of-type(4) { animation-delay: 9s; }
 
 /* ============ LEGENDA ============ */
 .legend .card-h { border-bottom: none; flex-wrap: wrap; gap: 12px 18px; }
@@ -455,7 +465,12 @@ details.card::details-content {
    WEJŚCIE, chowa się za wyśrodkowany parawan i wychodzi w prawą strefę WYJŚCIE. Ruch liczony
    względem środka sceny (left:50% + translateX) — wygląda tak samo niezależnie od szerokości. */
 .demo { overflow: hidden; }
-.demo-head-row { padding: 15px 22px; border-bottom: 1px solid var(--line); }
+.demo-head-row {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 10px 16px;
+  padding: 15px 22px; border-bottom: 1px solid var(--line);
+}
+.demo-head-t { flex: 1 1 260px; min-width: 0; }
+.demo-motion { flex: none; }
 .demo-kick { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-deep); }
 .demo-head-row h2 { font-size: 17px; font-weight: 800; color: var(--acc); margin-top: 3px; }
 .demo-stage { position: relative; height: 300px; overflow: hidden; }
@@ -521,6 +536,12 @@ details.card::details-content {
   62% { opacity: 1; transform: scale(1); }
   72%, 100% { opacity: 0; transform: scale(1); }
 }
+/* „Zatrzymaj animację” (main.ts): kroki przestają świecić, a demo staje w jednym kadrze,
+   pismo z danymi po lewej i zanonimizowane po prawej (zamiast zamrożenia w przypadkowej klatce). */
+:root[data-motion="off"] .step { animation: none; }
+:root[data-motion="off"] .demo-in { animation: none; transform: translateX(-330px); }
+:root[data-motion="off"] .demo-out { animation: none; transform: translateX(330px); }
+:root[data-motion="off"] .demo-badge { animation: none; }
 
 /* ============ EDYTORY ============ */
 .toolbar {
@@ -799,15 +820,12 @@ body.file-drag textarea.editor-ta {
 .kf-c4 { grid-column: 4; grid-row: 2; }
 /* Poniżej ~1240px 4 kolumny (email·telefon·IBAN·karta) nie mieszczą się w jednym wierszu —
    spłaszczamy pas Kontakt+Finanse do naturalnego przepływu (jak w wersji mobilnej), inaczej
-   „Karta płatnicza" wypadałaby poza pas. Powyżej 1240px zostaje zgrany jeden wiersz. */
+   „Karta płatnicza” wypadałaby poza pas. Oba nagłówki zajmują wtedy cały wiersz, także przy
+   dwóch kolumnach (wcześniej „Kontakt” stał w jednej komórce i pas schodził schodkiem).
+   Powyżej 1240px zostaje zgrany jeden wiersz. */
 @media (max-width: 1240px) {
   .mg-h.kf-h-contact, .mg-h.kf-h-fin { grid-column: 1 / -1; grid-row: auto; }
   .kf-c1, .kf-c2, .kf-c3, .kf-c4 { grid-column: auto; grid-row: auto; }
-}
-/* wąsko (mniej niż 3 kolumny): rezygnujemy z jawnych pozycji — Kontakt i Finanse płyną po kolei */
-@media (max-width: 900px) {
-  .mg-h.kf-h-contact, .mg-h.kf-h-fin, .kf-c1, .kf-c2, .kf-c3, .kf-c4 { grid-column: auto; grid-row: auto; }
-  .mg-h.kf-h-fin { grid-column: 1 / -1; }
 }
 
 .tag-opt {
@@ -882,8 +900,16 @@ table .pii { cursor: default; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important; /* bez pętli tysięcy zerowych cykli */
     transition-duration: .01ms !important;
   }
+  html { scroll-behavior: auto; } /* skok do kotwicy (np. „Przejdź do edytora”) bez płynnego przewijania */
+  /* ruchu i tak nie ma, więc przycisk pauzy byłby martwy; demo stoi w tym samym kadrze co po
+     „Zatrzymaj animację” (bez tego pismo zostawało w przypadkowym miejscu, np. za parawanem) */
+  .demo-motion { display: none; }
+  .demo-in { animation: none !important; transform: translateX(-330px); }
+  .demo-out { animation: none !important; transform: translateX(330px); }
+  .demo-badge { animation: none !important; }
 }
 
 /* Tryb wysokiego kontrastu Windows wymusza kolory teł: bez tego przełącznik włączony
@@ -922,6 +948,7 @@ table .pii { cursor: default; }
   .hero .card-h { flex-wrap: wrap; }
   .hero .card-sp { display: none; }
   .privacy { margin-left: 0; width: auto; max-width: none; }
+  .skip-editor { display: inline-flex; }
   .table-wrap { overflow-x: auto; }
   /* Demo: na wąsko chowamy ruchome karty; zostają strefy Wejście/Wyjście, znak i puls „anonimizacja…". */
   .demo-stage { height: 230px; }
@@ -940,10 +967,24 @@ table .pii { cursor: default; }
 @media (max-width: 640px) {
   .g3 { grid-column: span 12; }
   .hero-b { flex-direction: column; align-items: flex-start; }
+  /* w kolumnie flex-basis 320px stawało się wysokością: pod leadem zostawała pusta luka */
+  .hero-lead { flex: none; }
+  .feat-strip { justify-content: flex-start; }
   .privacy { margin-left: 0; }
   .editor, textarea.editor-ta { min-height: 200px; }
-  /* kolumna „Kategoria" duplikuje kolor+ikonę — chowamy, tabela mieści tokeny */
-  th:nth-child(2), td:nth-child(2) { display: none; }
+  /* Tabela „Co wykrywa” jako karty: nazwa i znacznik w jednym wierszu, opis pod nimi na całą
+     szerokość. Kolumna „Kategoria” znika (kolor i ikona mówią to samo), nagłówki zostają
+     tylko dla czytnika ekranu. Bez tego opis ściskał się w wąski słupek, a znaczniki
+     wychodziły poza ekran. */
+  #co-wykrywa thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  #co-wykrywa tbody tr {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: 6px 12px; padding: 10px 14px; border-top: 1px solid var(--line);
+  }
+  #co-wykrywa td { display: block; padding: 0; border: 0; }
+  #co-wykrywa td:nth-child(2) { display: none; }
+  #co-wykrywa td:nth-child(3) { order: 3; flex-basis: 100%; }
+  #co-wykrywa .td-name { white-space: normal; }
 }
 /* telefony: nagłówki kart zawijają się */
 @media (max-width: 480px) {
@@ -954,4 +995,30 @@ table .pii { cursor: default; }
   .card-h > .help { margin-left: auto; }
   /* nagłówek ramki prywatności zawija się zamiast wystawać poza kartę przy 320 px */
   .privacy-t b { white-space: normal; }
+  /* tytuł karty zajmuje miejsce między ikoną a „?”, więc nagłówek nie rozpada się na 3 rzędy;
+     mniejszy kafelek ikony zostawia tytułowi kilka pikseli więcej */
+  .card-h > .ic { width: 40px; height: 40px; }
+  .card-h > .ic .gi { width: 26px; height: 26px; }
+  .card-h > .ic + .card-t { flex: 1 1 0; }
+  /* Rozwijane sekcje mają jeszcze „▸”: obok ikony, „?” i „▸” tytuł miałby ok. 100 px i opis
+     schodziłby w wąski słupek. Ikona, tytuł, „?” i „▸” stoją więc w jednym rzędzie, a opis
+     pod nimi na całą szerokość (nazwę i opis summary dają aria-labelledby/-describedby). */
+  summary.card-h {
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center; gap: 8px 10px; /* przy 320 px „Co maskować” mieści się w jednej linii */
+  }
+  summary.card-h > .card-t { display: contents; }
+  summary.card-h > .card-t > p { grid-column: 1 / -1; margin-top: 0; }
+  summary.card-h > .help { grid-row: 1; grid-column: 3; margin-left: 0; }
+  summary.card-h > .chev { grid-row: 1; grid-column: 4; }
+  .stats .stat-total { order: 1; flex-basis: 100%; }
+  /* „Pobierz” i „Kopiuj” razem w osobnym rzędzie, po połowie (wcześniej „Kopiuj” zostawał sam) */
+  .toolbar > .card-sp { display: block; flex: 0 0 100%; height: 0; }
+  .toolbar #download, .toolbar #copy { flex: 1 1 0; }
+  /* demo: krótkie etykiety stref, inaczej „Wejście” i „Wyjście” nachodzą na siebie */
+  .demo-zone { top: 14px; padding: 6px 11px; letter-spacing: .04em; }
+  .demo-zone-in { left: 14px; }
+  .demo-zone-out { right: 14px; }
+  .demo-zone .dz-x { display: none; }
+  .demo-badge-wrap { top: 48px; } /* plakietka pod etykietami stref, nie na ich krawędzi */
 }

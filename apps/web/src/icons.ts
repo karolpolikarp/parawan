@@ -41,15 +41,20 @@ export const ICONS: Record<string, string> = {
     '<rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="9" cy="9" r="2"/>' +
       '<path d="M6 15.5a3 3 0 0 1 6 0"/><line x1="14" y1="8" x2="18" y2="8"/><line x1="14" y1="12" x2="18" y2="12"/>',
   ),
+  // klucz: dane dostępowe (token, login); główka, trzon i dwa ząbki
+  klucz: svg(
+    '<circle cx="7.5" cy="16.5" r="4.5"/><line x1="10.7" y1="13.3" x2="20.5" y2="3.5"/>' +
+      '<line x1="15.5" y1="8.5" x2="18" y2="11"/><line x1="18.5" y1="5.5" x2="21" y2="8"/>',
+  ),
 
   // ── Finanse ──
   iban: svg('<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/>'),
 
   // ── Kontakt ──
-  login: svg('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/>'),
+  koperta: svg('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/>'),
   telefon: svg('<path d="M6.5 3h3l1.4 4.5-2 1.4a12 12 0 0 0 5.2 5.2l1.4-2 4.5 1.4v3a2 2 0 0 1-2.2 2A16 16 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3z"/>'),
 
-  // ── Adres i czas ──
+  // ── Adres ──
   dom: svg('<path d="M4 11 12 4l8 7"/><path d="M6 10v9a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-9"/><rect x="10" y="14" width="4" height="6"/>'),
   'mapa-pl': svg('<path d="m9 4 6 2 5.2-2v14L15 20l-6-2-5.2 2V6z"/><line x1="9" y1="4" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="20"/>'),
   kalendarz: svg(

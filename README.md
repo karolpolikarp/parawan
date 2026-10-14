@@ -130,8 +130,9 @@ Każda kategoria danych ma swój kolor, ten sam w wyniku, w podsumowaniu i w tab
 
 ## 📋 Co wykrywa
 
-Ponad 20 typów danych w 5 kategoriach, każdy z **walidacją** (suma kontrolna) albo **kotwicą
-kontekstową**, dlatego trafień „na ślepo" jest mało.
+Ponad 20 typów danych w 5 kategoriach. Numery identyfikacyjne sprawdza **suma kontrolna** albo
+**kotwica kontekstowa** (słowo „paszport”, „KRS” obok numeru), a e-mail, kod pocztowy, IP czy MAC
+rozpoznaje charakterystyczny zapis (kolumna „Metoda”).
 
 | Dane | Metoda | Placeholder |
 |---|---|---|

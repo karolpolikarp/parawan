@@ -13,6 +13,19 @@ import {
 import { makeFlash } from './flash';
 import { extractPdfText } from './pdf';
 import { buildMinimalPdf } from './pdf-fixture';
+import {
+  CAT_LABELS,
+  type Cat,
+  CHIP_META,
+  catCountLabel,
+  MASK_GROUPS,
+  type MaskGroup,
+  maskCategory,
+  maskTip,
+  PII_TOKENS,
+  tokenOfCode,
+  WYKRYWA_ROWS,
+} from './pii-meta';
 import { plural } from './plural';
 import { storageGet, storageSet } from './storage';
 import './style.css';
@@ -29,7 +42,9 @@ const findingsCard = $<HTMLElement>('findings');
 const findingsChips = $<HTMLSpanElement>('findings-chips');
 const findingsStatus = $<HTMLSpanElement>('findings-status');
 const statCount = $<HTMLElement>('stat-count');
+const statCountW = $<HTMLElement>('stat-count-w');
 const statCats = $<HTMLElement>('stat-cats');
+const statCatsW = $<HTMLElement>('stat-cats-w');
 const srcMeta = $<HTMLSpanElement>('src-meta');
 const copyBtn = $<HTMLButtonElement>('copy');
 const copyLabel = $<HTMLSpanElement>('copy-label');
@@ -62,118 +77,12 @@ let maskEls: HTMLElement[] = []; // znaczniki w wyniku, w kolejności dokumentu
 let maskIdx = -1; // bieżący znacznik w przeglądaniu (-1 = żaden)
 let maskTabStop: HTMLElement | null = null; // jedyny znacznik w kolejności Tab (roving tabindex)
 
-/* ── JEDNO źródło prawdy o typach PII — z niego wyprowadzamy legendę, znaczniki, chipy
-   i przełączniki (jedna rodzina kolorów i ikon w całej aplikacji). Klucz = TOKEN w [...]. ── */
+/* ── Legenda, tabela „Co wykrywa” i przełączniki „Co maskować” (dane w pii-meta.ts) ── */
 
-type Cat = 'person' | 'contact' | 'ident' | 'fin' | 'place';
-
-interface TokenMeta {
-  cat: Cat; // kategoria wizualna (kolor + pas w legendzie/tabeli)
-  icon: string; // nazwa ikony z icons.ts
-  tip: string; // tooltip znacznika w wyniku: „Kategoria · metoda wykrycia"
-}
-
-/**
- * Metadane prezentacji per token maski (to, co stoi w [...] w wyniku). To JEDYNE miejsce,
- * w którym żyje kategoria i ikona danego typu — chipy „Zamaskowano", przełączniki „Co maskować"
- * i legenda czerpią stąd (żadnej z tych wartości nie powielamy w kilku miejscach).
- */
-const PII_TOKENS: Record<string, TokenMeta> = {
-  // Identyfikatory
-  PESEL: { cat: 'ident', icon: 'pesel', tip: 'Identyfikatory · 11 cyfr, suma kontrolna poprawna' },
-  NIP: { cat: 'ident', icon: 'nip', tip: 'Identyfikatory · 10 cyfr, suma kontrolna poprawna' },
-  REGON: { cat: 'ident', icon: 'dane-id', tip: 'Identyfikatory · suma kontrolna poprawna' },
-  'NR-DOWODU': { cat: 'ident', icon: 'numer-dok', tip: 'Identyfikatory · 3 litery + 6 cyfr, suma kontrolna poprawna' },
-  'NR-PASZPORTU': { cat: 'ident', icon: 'numer-dok', tip: 'Identyfikatory · kontekst „paszport" + 2 litery + 7 cyfr' },
-  KRS: { cat: 'ident', icon: 'dane-id', tip: 'Identyfikatory · kontekst „KRS" + 10 cyfr' },
-  'NR-KSEF': { cat: 'ident', icon: 'numer-dok', tip: 'Identyfikatory · słowo „KSeF" w dokumencie + numer faktury (NIP-data-znaki) z sumą kontrolną NIP-u' },
-  'ZNAK-SPRAWY': { cat: 'ident', icon: 'numer-dok', tip: 'Identyfikatory · znak sprawy/pisma (JRWA) lub sygnatura akt' },
-  'PRAWO-JAZDY': { cat: 'ident', icon: 'numer-dok', tip: 'Identyfikatory · kontekst „prawo jazdy" + numer z cyfrą' },
-  'NR-REJESTRACYJNY': { cat: 'ident', icon: 'numer-dok', tip: 'Identyfikatory · kontekst „rejestracyjny/tablica" + tablica' },
-  VIN: { cat: 'ident', icon: 'dane-id', tip: 'Identyfikatory · 17 znaków bez I/O/Q; kontekst „VIN" lub układ VIN' },
-  IP: { cat: 'ident', icon: 'dane-id', tip: 'Identyfikatory · adres IPv4 (oktety 0–255) lub IPv6' },
-  MAC: { cat: 'ident', icon: 'dane-id', tip: 'Identyfikatory · 6 par hex (00:1A:2B:3C:4D:5E)' },
-  TOKEN: { cat: 'ident', icon: 'login', tip: 'Identyfikatory · token/JWT (eyJ…), może dawać dostęp' },
-  LOGIN: { cat: 'ident', icon: 'login', tip: 'Identyfikatory · kontekst „login/username" + wartość (też w URL i XML/JSON)' },
-  // Finanse
-  'NR-KONTA': { cat: 'fin', icon: 'iban', tip: 'Finanse · IBAN (mod 97) lub kontekst „konto/rachunek”' },
-  'NR-KARTY': { cat: 'fin', icon: 'iban', tip: 'Finanse · kontekst „karta/Visa/Mastercard…" + 13–19 cyfr + suma Luhna' },
-  // Kontakt
-  EMAIL: { cat: 'contact', icon: 'login', tip: 'Kontakt · wzorzec adresu e-mail' },
-  TELEFON: { cat: 'contact', icon: 'telefon', tip: 'Kontakt · 9 cyfr, opcjonalnie +48' },
-  // Adres i czas
-  ADRES: { cat: 'place', icon: 'dom', tip: 'Adres i czas · wzorzec ul./al./os./pl. + nazwa + numer' },
-  'KOD-POCZTOWY': { cat: 'place', icon: 'mapa-pl', tip: 'Adres i czas · wzorzec XX-XXX' },
-  'MIEJSCOWOŚĆ': { cat: 'place', icon: 'mapa-pl', tip: 'Adres i czas · miejscowość po kodzie pocztowym' },
-  'DATA-URODZENIA': { cat: 'person', icon: 'kalendarz', tip: 'Adres i czas · data z kontekstem „ur./urodzony”' },
-  // Osoby
-  'IMIĘ I NAZWISKO': { cat: 'person', icon: 'dane-osobowe', tip: 'Osoby · słownik imion/nazwisk lub wyzwalacz kontekstu' },
-};
-
-/** Kategoria wizualna znacznika po nazwie tokenu (OSOBA-* = osoba; nieznany token → identyfikatory). */
-function maskCategory(name: string): Cat {
-  if (name.startsWith('OSOBA-')) return 'person';
-  return PII_TOKENS[name]?.cat ?? 'ident';
-}
-
-/** Tooltip znacznika w wyniku: kategoria · metoda wykrycia. */
-function maskTip(name: string): string {
-  if (name.startsWith('OSOBA-')) return `Osoby · spójna etykieta tej samej osoby (${name})`;
-  return PII_TOKENS[name]?.tip ?? 'Wykryta dana osobowa';
-}
-
-/* ── Przełączniki „Co maskować" (generowane, z ikonami i kodami znaczników) ── */
-
-interface MaskGroup {
-  key: string;
-  label: string;
-  types: PiiType[];
-  cat: Cat;
-  icon: string;
-  code: string;
-  tip: string;
-  full?: boolean;
-}
-
-// Definicje przełączników „Co maskować" BEZ kategorii i ikony — te wyprowadzamy z PII_TOKENS
-// po tokenie z `code`. Zostają tu dane swoiste dla przełącznika: klucz, etykieta, mapowane
-// typy rdzenia (`types`), kod znacznika i własny (bardziej szczegółowy niż tooltip) opis.
-type MaskGroupDef = Omit<MaskGroup, 'cat' | 'icon'>;
-const MASK_GROUP_DEFS: MaskGroupDef[] = [
-  { key: 'pesel', label: 'PESEL', types: ['PESEL'], code: '[PESEL]', tip: '11 cyfr + walidacja sumy kontrolnej' },
-  { key: 'nip', label: 'NIP', types: ['NIP'], code: '[NIP]', tip: '10 cyfr (także z myślnikami) + suma kontrolna' },
-  { key: 'regon', label: 'REGON', types: ['REGON'], code: '[REGON]', tip: '9 lub 14 cyfr + suma kontrolna' },
-  { key: 'dowod', label: 'Nr dowodu osobistego', types: ['DOWOD'], code: '[NR-DOWODU]', tip: '3 litery + 6 cyfr + suma kontrolna' },
-  { key: 'paszport', label: 'Nr paszportu', types: ['PASZPORT'], code: '[NR-PASZPORTU]', tip: 'Kontekst „paszport" + 2 litery + 7 cyfr' },
-  { key: 'krs', label: 'Numer KRS', types: ['KRS'], code: '[KRS]', tip: 'Kontekst „KRS" + 10 cyfr' },
-  { key: 'ksef', label: 'Numer KSeF', types: ['KSEF'], code: '[NR-KSEF]', tip: 'Słowo „KSeF" gdziekolwiek w dokumencie + numer faktury (NIP-RRRRMMDD-znaki-suma) z sumą kontrolną NIP-u; także stary format 36-znakowy, a etykieta może stać w nagłówku kolumny lub po numerze' },
-  { key: 'znak', label: 'Znak sprawy / pisma', types: ['ZNAK-SPRAWY'], code: '[ZNAK-SPRAWY]', tip: 'Znak sprawy/pisma wg JRWA (ABC-def.123.77.2016) lub sygnatura akt („Sygn. akt II CSK 234/19")' },
-  { key: 'prawojazdy', label: 'Nr prawa jazdy', types: ['PRAWO-JAZDY'], code: '[PRAWO-JAZDY]', tip: 'Kontekst „prawo jazdy" + numer (z cyfrą)' },
-  { key: 'rejestracja', label: 'Nr rejestracyjny', types: ['NR-REJESTRACYJNY'], code: '[NR-REJESTRACYJNY]', tip: 'Kontekst „rejestracyjny/tablica" + tablica (WI1234K)' },
-  { key: 'vin', label: 'VIN', types: ['VIN'], code: '[VIN]', tip: '17 znaków bez I/O/Q; kontekst „VIN/nadwozia" lub wyraźny układ VIN' },
-  { key: 'ip', label: 'Adres IP', types: ['IP'], code: '[IP]', tip: 'IPv4 (oktety 0–255) oraz IPv6' },
-  { key: 'mac', label: 'Adres MAC', types: ['MAC'], code: '[MAC]', tip: '6 par hex (00:1A:2B:3C:4D:5E)' },
-  { key: 'token', label: 'Token / JWT', types: ['TOKEN'], code: '[TOKEN]', tip: 'Token JWT (eyJ…), może dawać dostęp' },
-  { key: 'login', label: 'Login / nazwa użytkownika', types: ['LOGIN'], code: '[LOGIN]', tip: 'Kontekst „login/username/nazwa użytkownika" + wartość; także w parametrach URL (?user=…) i kluczach XML/JSON' },
-  { key: 'konto', label: 'IBAN / nr konta', types: ['IBAN', 'NR-KONTA'], code: '[NR-KONTA]', tip: 'Walidacja mod 97 lub kontekst „konto/rachunek”' },
-  { key: 'karta', label: 'Karta płatnicza', types: ['KARTA'], code: '[NR-KARTY]', tip: 'Kontekst „karta/Visa/Mastercard/Amex…" + 13–19 cyfr, prefiks sieci + suma Luhna' },
-  { key: 'email', label: 'E-mail', types: ['EMAIL'], code: '[EMAIL]', tip: 'Wzorzec adresu e-mail' },
-  { key: 'telefon', label: 'Telefon', types: ['TELEFON'], code: '[TELEFON]', tip: '9 cyfr, opcjonalnie prefiks +48' },
-  { key: 'adres', label: 'Adres', types: ['ADRES'], code: '[ADRES]', tip: 'ul./al./os./pl. + nazwa + numer' },
-  { key: 'kod', label: 'Kod pocztowy', types: ['KOD-POCZTOWY'], code: '[KOD-POCZTOWY]', tip: 'Wzorzec XX-XXX' },
-  { key: 'miejscowosc', label: 'Miejscowość', types: ['MIEJSCOWOSC'], code: '[MIEJSCOWOŚĆ]', tip: 'Miejscowość po kodzie pocztowym (w adresie)' },
-  { key: 'imie', label: 'Imię i nazwisko', types: ['IMIE'], code: '[IMIĘ I NAZWISKO]', tip: 'Słownik ~200 imion i ~230 nazwisk z odmianą + morfologia i wyzwalacze kontekstu; wykrywanie heurystyczne' },
-  { key: 'dataur', label: 'Data urodzenia', types: ['DATA-UR'], code: '[DATA-URODZENIA]', tip: 'Data z kontekstem „ur./urodzony”' },
-];
-
-/** Token wewnątrz [...] z kodu znacznika, np. „[NR-KONTA]" → „NR-KONTA". */
-const tokenOfCode = (code: string): string => code.slice(1, -1);
-
-// Kategoria i ikona każdego przełącznika pochodzą z PII_TOKENS (po tokenie z `code`) — nie
-// duplikujemy ich. Zweryfikowane: dla każdego kodu para (kategoria, ikona) jest tam zdefiniowana.
-const MASK_GROUPS: MaskGroup[] = MASK_GROUP_DEFS.map((g) => {
-  const meta = PII_TOKENS[tokenOfCode(g.code)];
-  return { ...g, cat: meta.cat, icon: meta.icon };
+// Liczby typów w legendzie liczymy z przełączników (w index.html stoją te same jako zapas).
+document.querySelectorAll<HTMLElement>('.legend .lg[data-cat]').forEach((el) => {
+  const out = el.querySelector('.lg-n');
+  if (out) out.textContent = catCountLabel(el.dataset.cat as Cat);
 });
 
 const maskTogglesEl = $<HTMLSpanElement>('mask-toggles');
@@ -182,57 +91,6 @@ const disabledGroups = new Set<string>(
   (storageGet('mask-disabled') ?? '').split(',').filter((k) => MASK_GROUPS.some((g) => g.key === k)),
 );
 
-/** Token znacznika po typie rdzenia (IBAN i NR-KONTA → „NR-KONTA”, IMIE → „IMIĘ I NAZWISKO”). */
-const TYPE_TOKEN: Record<string, string> = Object.fromEntries(
-  MASK_GROUP_DEFS.flatMap((g) => g.types.map((t) => [t, tokenOfCode(g.code)])),
-);
-
-const CAT_LABELS: Record<Cat, string> = {
-  ident: 'Identyfikatory',
-  contact: 'Kontakt',
-  fin: 'Finanse',
-  place: 'Adres',
-  person: 'Dane osobowe',
-};
-
-/* ── Tabela „Co wykrywa" — generowana z jednego źródła (nie ~130 linii statycznego HTML) ── */
-// Krótka etykieta kategorii w pigułce tabeli (inna niż CAT_LABELS: person → „osoby", place → „adres").
-const CATPILL: Record<Cat, string> = {
-  ident: 'identyfikatory',
-  contact: 'kontakt',
-  fin: 'finanse',
-  place: 'adres',
-  person: 'osoby',
-};
-// Opis „jak rozpoznaje" jest SWOISTY dla tabeli (z wyróżnieniem <strong>/<code>, zaufany statyczny
-// HTML) i determinuje KOLEJNOŚĆ wierszy. Nazwa, kategoria, ikona i kod pochodzą z MASK_GROUPS/
-// PII_TOKENS po kodzie znacznika — nie powielamy ich tu.
-const WYKRYWA_ROWS: Array<{ code: string; how: string }> = [
-  { code: '[PESEL]', how: '11 cyfr + <strong>walidacja sumy kontrolnej</strong>' },
-  { code: '[NIP]', how: '10 cyfr (także z myślnikami) + <strong>suma kontrolna</strong>' },
-  { code: '[REGON]', how: '9/14 cyfr + <strong>suma kontrolna</strong>' },
-  { code: '[NR-DOWODU]', how: '3 litery + 6 cyfr + <strong>suma kontrolna</strong>' },
-  { code: '[NR-PASZPORTU]', how: 'kontekst „paszport" + 2 litery + 7 cyfr' },
-  { code: '[KRS]', how: 'kontekst „KRS" + 10 cyfr' },
-  { code: '[NR-KSEF]', how: 'słowo „KSeF" w dokumencie + numer faktury (<code>NIP-RRRRMMDD-…</code>) + <strong>suma kontrolna NIP-u</strong>' },
-  { code: '[ZNAK-SPRAWY]', how: 'znak sprawy/pisma wg JRWA lub sygnatura akt („Sygn. akt II CSK 234/19")' },
-  { code: '[PRAWO-JAZDY]', how: 'kontekst „prawo jazdy" + numer (z cyfrą)' },
-  { code: '[NR-REJESTRACYJNY]', how: 'kontekst „rejestracyjny/tablica/pojazd" + tablica (np. WI1234K)' },
-  { code: '[VIN]', how: '17 znaków bez I/O/Q; kontekst „VIN/nadwozia" lub wyraźny układ VIN' },
-  { code: '[IP]', how: 'IPv4 (oktety 0–255) oraz IPv6' },
-  { code: '[MAC]', how: '6 par hex (00:1A:2B:3C:4D:5E)' },
-  { code: '[TOKEN]', how: 'token JWT (<code>eyJ…</code>), może dawać dostęp' },
-  { code: '[LOGIN]', how: 'kontekst „login/username" + wartość (też w URL i XML/JSON)' },
-  { code: '[NR-KONTA]', how: 'walidacja <strong>mod 97</strong> lub kontekst „konto/rachunek”' },
-  { code: '[NR-KARTY]', how: 'kontekst „karta/Visa/Mastercard…" + 13–19 cyfr, prefiks sieci + <strong>suma Luhna</strong>' },
-  { code: '[EMAIL]', how: 'wzorzec adresu' },
-  { code: '[TELEFON]', how: '9 cyfr, opcjonalnie +48' },
-  { code: '[ADRES]', how: 'ul./al./os./pl. + nazwa + numer' },
-  { code: '[KOD-POCZTOWY]', how: 'XX-XXX' },
-  { code: '[MIEJSCOWOŚĆ]', how: 'miejscowość po kodzie pocztowym lub przy zamieszkaniu (nie w prozie/instytucji)' },
-  { code: '[DATA-URODZENIA]', how: 'data z kontekstem „ur./urodzony”' },
-  { code: '[IMIĘ I NAZWISKO]', how: 'słownik ~200 imion i ~230 nazwisk (z odmianą) + wyzwalacze („nazywam się”, „Pan/Pani”)' },
-];
 const wykrywaBody = document.getElementById('wykrywa-body');
 if (wykrywaBody) {
   const groupByCode = new Map(MASK_GROUPS.map((g) => [g.code, g]));
@@ -242,7 +100,7 @@ if (wykrywaBody) {
     return (
       `<tr><td><span class="td-name"><span class="ic ic-s c-${meta.cat}">` +
       `<i class="gi">${icon(meta.icon)}</i></span>${escapeHtml(name)}</span></td>` +
-      `<td><span class="catpill cp-${meta.cat}">${CATPILL[meta.cat]}</span></td>` +
+      `<td><span class="catpill cp-${meta.cat}">${CAT_LABELS[meta.cat].toLowerCase()}</span></td>` +
       `<td><span class="how">${how}</span></td>` +
       `<td><mark class="pii pii-${meta.cat}">${escapeHtml(code)}</mark></td></tr>`
     );
@@ -292,7 +150,7 @@ function buildRow(g: MaskGroup): HTMLLabelElement {
   return label;
 }
 
-/** Wiersz-tryb „Rozróżniaj osoby" (nie typ danych) — mieszka w grupie „Dane osobowe". */
+/** Wiersz-tryb „Rozróżniaj osoby” (nie typ danych) — mieszka w grupie „Osoby”. */
 function buildModeRow(): HTMLLabelElement {
   const label = document.createElement('label');
   label.className = 'tgr mode';
@@ -359,7 +217,7 @@ function band(...kids: HTMLElement[]): HTMLElement {
 }
 
 // Pasy: Identyfikatory (szeroko) · Kontakt+Finanse (jedna linia, kolumny zgrane) ·
-// Adres (szeroko) · Dane osobowe (szeroko + tryb „Rozróżniaj osoby").
+// Adres (szeroko) · Osoby (szeroko + tryb „Rozróżniaj osoby”).
 maskTogglesEl.append(
   band(catHeader('ident'), ...MASK_GROUPS.filter((g) => g.cat === 'ident').map(buildRow)),
   band(
@@ -374,7 +232,7 @@ maskTogglesEl.append(
   band(catHeader('person'), ...MASK_GROUPS.filter((g) => g.cat === 'person').map(buildRow), buildModeRow()),
 );
 
-/* ── Akcje zbiorcze „Co maskować" + licznik ── */
+/* ── Akcje zbiorcze „Co maskować” + licznik ── */
 const maskCountOn = $<HTMLElement>('mask-count-on');
 const maskOffNote = $<HTMLElement>('mask-off-note');
 const maskOffText = $<HTMLElement>('mask-off-text');
@@ -748,37 +606,9 @@ outputGrip.tabIndex = -1;
 syncGripAria();
 window.addEventListener('resize', () => syncGripAria());
 
-/* ── Pasek „Zamaskowano" (chipy z ikonami, licznik, kategorie) ── */
+/* ── Pasek „Zamaskowano” (chipy z ikonami, licznik, kategorie) ── */
 
-// Chipy „Zamaskowano" per typ rdzenia (finding.type). Krótka etykieta jest swoista dla chipa;
-// kategorię i ikonę bierzemy z PII_TOKENS po tokenie (jedno źródło). Typy spoza tej listy
-// (VIN/IP/MAC/TOKEN/LOGIN/…) dostają w renderFindings generyczny chip zapasowy.
-const CHIP_DEFS: Array<{ type: PiiType; token: string; label: string }> = [
-  { type: 'IMIE', token: 'IMIĘ I NAZWISKO', label: 'imię i nazwisko' },
-  { type: 'PESEL', token: 'PESEL', label: 'PESEL' },
-  { type: 'NIP', token: 'NIP', label: 'NIP' },
-  { type: 'REGON', token: 'REGON', label: 'REGON' },
-  { type: 'DOWOD', token: 'NR-DOWODU', label: 'nr dowodu' },
-  { type: 'PASZPORT', token: 'NR-PASZPORTU', label: 'nr paszportu' },
-  { type: 'KRS', token: 'KRS', label: 'numer KRS' },
-  { type: 'ZNAK-SPRAWY', token: 'ZNAK-SPRAWY', label: 'znak sprawy' },
-  { type: 'LOGIN', token: 'LOGIN', label: 'login' },
-  { type: 'IBAN', token: 'NR-KONTA', label: 'nr konta' },
-  { type: 'NR-KONTA', token: 'NR-KONTA', label: 'nr konta' },
-  { type: 'KARTA', token: 'NR-KARTY', label: 'nr karty' },
-  { type: 'EMAIL', token: 'EMAIL', label: 'e-mail' },
-  { type: 'TELEFON', token: 'TELEFON', label: 'telefon' },
-  { type: 'ADRES', token: 'ADRES', label: 'adres' },
-  { type: 'KOD-POCZTOWY', token: 'KOD-POCZTOWY', label: 'kod pocztowy' },
-  { type: 'MIEJSCOWOSC', token: 'MIEJSCOWOŚĆ', label: 'miejscowość' },
-  { type: 'DATA-UR', token: 'DATA-URODZENIA', label: 'data urodzenia' },
-];
-const CHIP_META: Record<string, { label: string; cat: Cat; icon: string }> = Object.fromEntries(
-  CHIP_DEFS.map(({ type, token, label }) => {
-    const meta = PII_TOKENS[token];
-    return [type, { label, cat: meta.cat, icon: meta.icon }];
-  }),
-);
+// Etykieta, kategoria i ikona chipa: CHIP_META (pii-meta.ts), wpis dla każdego typu rdzenia.
 
 const CHIP_NAV_TIP = 'Przejdź do kolejnego fragmentu tego typu w wyniku';
 
@@ -788,18 +618,26 @@ function renderFindings(found: PiiFinding[]): void {
   const total = found.reduce((s, f) => s + (Number(f.count) || 0), 0);
   const byLabel = new Map<string, { count: number; cat: Cat; icon: string; token: string }>();
   for (const f of found) {
-    const meta = CHIP_META[f.type] ?? { label: String(f.type), cat: 'ident' as Cat, icon: 'dane-id' };
+    // zapas na czas działania (typ spoza CHIP_META mimo typecheck): chip z surowym kodem
+    const meta = CHIP_META[f.type] ?? {
+      label: String(f.type),
+      token: String(f.type),
+      cat: 'ident' as Cat,
+      icon: 'dane-id',
+    };
     const prev = byLabel.get(meta.label);
     byLabel.set(meta.label, {
       count: (prev?.count ?? 0) + (Number(f.count) || 0),
       cat: meta.cat,
       icon: meta.icon,
-      token: TYPE_TOKEN[f.type] ?? String(f.type),
+      token: meta.token,
     });
   }
   const cats = new Set([...byLabel.values()].map((v) => v.cat)).size;
   statCount.textContent = String(total);
+  statCountW.textContent = plural(total, 'wykrycie', 'wykrycia', 'wykryć');
   statCats.textContent = String(cats);
+  statCatsW.textContent = plural(cats, 'kategoria', 'kategorie', 'kategorii');
   const off = maskOffSummary();
   const keptChip = keptMasks
     ? ` <span class="chip chip-hint">w tekście były już znaczniki <span class="x">×${keptMasks}</span></span>`
@@ -818,7 +656,8 @@ function renderFindings(found: PiiFinding[]): void {
   }
   // zwięzły komunikat dla czytnika ekranu (jeden, po debounce — nie zalewa)
   findingsStatus.textContent =
-    `Zamaskowano ${total} ${total === 1 ? 'fragment' : 'fragmentów'} w ${cats} ${cats === 1 ? 'kategorii' : 'kategoriach'}.` +
+    `Zamaskowano ${total} ${plural(total, 'fragment', 'fragmenty', 'fragmentów')} ` +
+    `w ${cats} ${cats === 1 ? 'kategorii' : 'kategoriach'}.` +
     (off ? ` ${off}` : '');
   // Długi tekst nie ma znaczników w wyniku (zwykły tekst), więc chipy są wtedy tylko licznikami.
   const nav = !isTooBig();
@@ -874,7 +713,11 @@ function setResultActions(on: boolean): void {
 
 function updateSrcMeta(text: string): void {
   const lines = text ? text.split('\n').length : 0;
-  srcMeta.textContent = `${lines} wierszy · ${text.length} znaków · plik możesz upuścić w dowolnym miejscu strony`;
+  const chars = text.length;
+  srcMeta.textContent =
+    `${lines.toLocaleString('pl-PL')} ${plural(lines, 'wiersz', 'wiersze', 'wierszy')} · ` +
+    `${chars.toLocaleString('pl-PL')} ${plural(chars, 'znak', 'znaki', 'znaków')} · ` +
+    'plik możesz upuścić w\u00a0dowolnym miejscu strony'; // twarda spacja: „w” nie wisi na końcu linii
 }
 
 function renderResult(redacted: string, found: PiiFinding[]): void {
@@ -908,7 +751,7 @@ function update(): void {
     output.innerHTML =
       '<span class="placeholder">Tu pojawi się zanonimizowany wynik, na przykład ' +
       `${maskHtml('IMIĘ I NAZWISKO')}, tel. ${maskHtml('TELEFON')}.<br><br>` +
-      'Wklej tekst po lewej albo kliknij „Przykład" powyżej.</span>';
+      'Wklej tekst w polu „Tekst źródłowy” albo kliknij „Przykład” powyżej.</span>';
     findingsCard.hidden = true;
     lastRedacted = '';
     keptMasks = 0;
@@ -1290,13 +1133,34 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+/* ── Pauza animacji (WCAG 2.2.2) ── */
+// Demo „Jak to działa” i podświetlanie kroków biegną w pętli. Przycisk zatrzymuje oba ruchy
+// (demo zostaje w kadrze „wejście, parawan, wyjście”), a wybór pamiętamy jak ustawienia.
+// Bez aria-pressed: napis mówi, co zrobi przycisk, więc zmienia się razem ze stanem.
+const motionBtn = $<HTMLButtonElement>('demo-motion');
+
+function setMotion(on: boolean): void {
+  if (on) delete document.documentElement.dataset.motion;
+  else document.documentElement.dataset.motion = 'off';
+  motionBtn.textContent = on ? 'Zatrzymaj animację' : 'Wznów animację';
+}
+
+setMotion(storageGet('motion') !== 'off');
+motionBtn.addEventListener('click', () => {
+  const on = document.documentElement.dataset.motion === 'off';
+  setMotion(on);
+  storageSet('motion', on ? '' : 'off');
+});
+
 /* ── Parametry URL i start ── */
 
 const params = new URLSearchParams(location.search);
 if (params.has('demo')) {
   input.value = EXAMPLE_TEXT;
 } else if (finePointer.matches) {
-  input.focus();
+  // Autofokus bez przewijania: pole leży niżej, a nagłówek z obietnicą prywatności ma zostać
+  // widoczny. Ctrl+V i tak trafia do pola.
+  input.focus({ preventScroll: true });
 }
 
 // ?pdftest — samodiagnostyka ścieżki PDF (fake worker w buildzie single-file)

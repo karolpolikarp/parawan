@@ -75,7 +75,7 @@
         <div class="hero-copy">
           <span class="hero-eyebrow"><span class="dotpulse"></span>Działa lokalnie · nic nie wysyła</span>
           <h1>Usuń dane osobowe z tekstu, <span class="hl">zanim wyjdą z Twojego komputera.</span></h1>
-          <p class="hero-lead">Parawan zasłania polskie dane osobowe: PESEL, NIP, numery kont, e-maile, adresy, nazwiska. Robi to, zanim wkleisz tekst do czatu AI, wrzucisz do tłumacza albo wyślesz dalej.</p>
+          <p class="hero-lead">Parawan zasłania polskie dane osobowe: PESEL, NIP, numery kont, <span class="nw">e-maile</span>, adresy, nazwiska. Robi to, zanim wkleisz tekst do czatu AI, wrzucisz do tłumacza albo wyślesz dalej.</p>
           <div class="hero-cta">
             <a class="btn btn-cta btn-lg" href="https://github.com/karolpolikarp/parawan/releases/latest/download/Parawan.html" target="_blank" rel="noopener noreferrer">
               <i class="gi" data-i="anonimizuj"></i>Pobierz Parawan — jeden plik HTML
@@ -143,7 +143,7 @@
       <div class="sec-head center">
         <span class="kicker">Wypróbuj tutaj</span>
         <h2>Wpisz albo wklej tekst, zobacz wynik na żywo</h2>
-        <p>Ten sam silnik, co w pobieranym pliku, tylko uruchomiony tu, w karcie. Nic nie idzie na zewnątrz. Jeśli chcesz to sprawdzić, otwórz narzędzia deweloperskie (klawisz F12), zakładka „Sieć”: nie zobaczysz <b>ani jednego żądania z Twoim tekstem</b>.</p>
+        <p>Ten sam silnik co w pobieranym pliku, tylko uruchomiony tu, w karcie. Nic nie idzie na zewnątrz. Jeśli chcesz to sprawdzić, otwórz narzędzia deweloperskie (klawisz F12), zakładka „Sieć”: nie zobaczysz <b>ani jednego żądania z Twoim tekstem</b>.</p>
       </div>
 
       <div class="card demo-card">
@@ -169,7 +169,7 @@
         </div>
         <div class="demo-foot">
           <i class="gi" data-i="suma"></i>
-          <span class="demo-stat" id="demo-stat" role="status">Wpisz tekst po lewej, tu pojawią się statystyki.</span>
+          <span class="demo-stat" id="demo-stat" role="status">Tu pojawią się statystyki maskowania.</span>
           <span class="demo-sp"></span>
           <span>Analiza działa na bieżąco, podczas pisania.</span>
         </div>
@@ -252,7 +252,7 @@
       <div class="sec-head center">
         <span class="kicker">Co znika za parawanem</span>
         <h2>24 typy polskich danych w 5 kategoriach</h2>
-        <p>Każdy typ ma własną sumę kontrolną albo kotwicę w kontekście. Dlatego rzadko trafia w coś, co danymi nie jest.</p>
+        <p>PESEL, NIP, REGON, IBAN czy numer dowodu Parawan sprawdza sumą kontrolną. Paszport, KRS albo prawo jazdy maskuje tylko wtedy, gdy obok numeru stoi <span class="nw">słowo-kotwica</span>. <span class="nw">E-mail</span>, kod pocztowy czy adres IP rozpoznaje po charakterystycznym zapisie.</p>
       </div>
 
       <!-- legenda kolorów kategorii (chipy niżej mają te same barwy) -->
@@ -367,7 +367,8 @@
         <span class="kicker">Dlaczego lokalnie</span>
         <h2 id="porownanie-h">Parawan, narzędzie w chmurze czy ręczne czyszczenie?</h2>
       </div>
-      <div class="table-wrap">
+      <!-- Na telefonie tabela przewija się w bok: region z fokusem pozwala przewinąć ją klawiaturą. -->
+      <div class="table-wrap" role="region" tabindex="0" aria-label="Porównanie, tabela">
         <table aria-labelledby="porownanie-h">
           <thead>
             <tr>
@@ -497,7 +498,6 @@
           <a class="btn btn-cta btn-lg" href="https://github.com/karolpolikarp/parawan/releases/latest/download/Parawan.html" target="_blank" rel="noopener noreferrer"><i class="gi" data-i="anonimizuj"></i>Pobierz Parawan</a>
           <a class="btn btn-lg" href="https://github.com/karolpolikarp/parawan" target="_blank" rel="noopener noreferrer"><i class="gi" data-i="szablon"></i>Zobacz kod na GitHubie</a>
         </div>
-        <p class="micro">Bez instalacji · bez konta · bez internetu</p>
       </div>
     </section>
     </main>

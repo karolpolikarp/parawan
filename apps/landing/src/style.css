@@ -112,9 +112,12 @@ kbd {
 h1, h2, h3 { color: var(--acc); letter-spacing: -.01em; text-wrap: balance; }
 p { text-wrap: pretty; }
 /* krótkie bloki: równoważ linie, żeby nie zostawały „sieroty" (pojedyncze słowo w ostatniej linii) */
-.hero-lead, .sec-head p, .problem .a, .promise p, .finalcta p, .finalcta .micro,
+.hero-lead, .sec-head p, .problem .a, .promise p, .finalcta p,
 .bench-desc, .step p, .pillar p, .use p, .caveat p, .split > div > p,
 .privacy-t span, .filebox span, .notdo-cell span { text-wrap: balance; }
+/* słowo z łącznikiem w jednym kawałku („e-/maile” na końcu linii); nie U+2011, bo podzbiór
+   fontu może nie mieć tego glifu */
+.nw { white-space: nowrap; }
 
 .gi { display: inline-block; line-height: 0; flex: none; }
 .gi svg { display: block; width: 100%; height: 100%; }
@@ -183,7 +186,7 @@ p { text-wrap: pretty; }
   color: var(--acc); background: var(--acc-soft); border: 1px solid var(--acc-line);
   border-radius: 999px; padding: 6px 14px; margin-bottom: 22px;
 }
-.hero-eyebrow .dotpulse { width: 8px; height: 8px; border-radius: 50%; background: var(--fin); box-shadow: 0 0 0 0 rgba(18,112,73,.5); animation: pulse 2.4s infinite; }
+.hero-eyebrow .dotpulse { width: 8px; height: 8px; border-radius: 50%; background: var(--fin); box-shadow: 0 0 0 0 rgba(18,112,73,.5); animation: pulse 2.4s 2; } /* dwa impulsy na wejściu, bez pętli (WCAG 2.2.2) */
 @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(18,112,73,.45); } 70% { box-shadow: 0 0 0 8px rgba(18,112,73,0); } 100% { box-shadow: 0 0 0 0 rgba(18,112,73,0); } }
 .hero h1 { font-size: clamp(34px, 5.4vw, 58px); font-weight: 900; letter-spacing: -.03em; line-height: 1.03; }
 .hero h1 .hl { color: var(--gold); }
@@ -218,7 +221,8 @@ p { text-wrap: pretty; }
   border-radius: 4px; pointer-events: none;
   background: linear-gradient(180deg, rgba(185, 121, 31, .26), transparent);
   border-top: 2px solid rgba(185, 121, 31, .7);
-  animation: scan 3.6s cubic-bezier(.5, 0, .5, 1) infinite;
+  /* jeden przebieg po załadowaniu: ruch w pętli bez pauzy łamał WCAG 2.2.2 */
+  animation: scan 3.6s cubic-bezier(.5, 0, .5, 1) 1 forwards;
 }
 @keyframes scan {
   0%   { transform: translateY(0);     opacity: 0; }
@@ -370,6 +374,16 @@ textarea.editor:focus-visible { outline: 2px solid var(--acc); outline-offset: 2
 
 /* ============ TABELE ============ */
 .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-card); background: var(--card); }
+/* Cienie przy krawędzi, za którą tabela ciągnie się dalej. Zasłony w kolorze karty jadą z treścią
+   (local), cienie stoją przy brzegach (scroll): u początku i końca zasłona przykrywa cień. */
+.table-wrap {
+  background:
+    linear-gradient(to right, var(--card) 30%, transparent) left / 40px 100% no-repeat local,
+    linear-gradient(to left, var(--card) 30%, transparent) right / 40px 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgba(11, 61, 46, .16), transparent) left / 12px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgba(11, 61, 46, .16), transparent) right / 12px 100% no-repeat scroll,
+    var(--card);
+}
 table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
 th, td { text-align: left; padding: 14px 18px; border-bottom: 1px solid var(--line); vertical-align: middle; }
 thead th { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--mut-2); background: var(--card-2); }
@@ -449,7 +463,6 @@ p.bench-note { font-size: 12.5px; color: var(--mut-2); margin-top: 10px; line-he
 .finalcta .btn:hover { background: rgba(255,255,255,.16); }
 .finalcta .btn-cta { background: var(--gold-cta); border-color: var(--gold-cta); }
 .finalcta .btn-cta:hover { background: var(--gold-deep); }
-.finalcta .micro { color: rgba(242,245,240,.7); font-size: 13.5px; margin-top: 18px; }
 
 /* trzy kroki startu w końcowym CTA */
 .cta-steps { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 26px; margin-top: 24px; font-family: var(--mono); font-size: 13.5px; color: rgba(242,245,240,.85); }
@@ -531,6 +544,15 @@ p.bench-note { font-size: 12.5px; color: var(--mut-2); margin-top: 10px; line-he
   .trust-item { min-width: 44%; }
   .caveat { flex-direction: column; gap: 12px; }
   .foot-grid { gap: 24px; }
+  /* tabela porównania: ciaśniej, żeby kolumny mieściły się bez przewijania w bok */
+  th, td { padding: 10px 8px; font-size: 13px; }
+  thead th { font-size: 10.5px; letter-spacing: .02em; }
+  /* „Kopiuj wynik” wypełnia rząd zamiast stać sam przy lewej krawędzi */
+  #demo-copy { flex: 1 1 auto; justify-content: center; }
+}
+@media (max-width: 400px) {
+  th, td { padding: 9px 5px; font-size: 12px; }
+  thead th { font-size: 9.5px; letter-spacing: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
