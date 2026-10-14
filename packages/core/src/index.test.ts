@@ -1815,3 +1815,12 @@ test('CRLF: pole formularza w tej samej linii zachowuje windowsowy koniec wiersz
 test('miejscowość z etykietą TERYT po myślniku-wypunktowaniu nadal maskowana', () => {
   expect(redactPII('-Gliwice (miasto)').redacted).toBe('-[MIEJSCOWOŚĆ] (miasto)');
 });
+test('DOWOD — wzór MSWiA ABS123456 i numery z poprawną sumą bez kontekstu', () => {
+  expect(isValidDowod('ABS123456')).toBe(true);
+  expect(isValidDowod('ABS123457')).toBe(false);
+  // numery liczone wagami 7,3,1,9,7,3,1,7,3 — dawniej odrzucane (przesunięte wagi części cyfrowej)
+  for (const nr of ['PHO996589', 'BZF219030', 'FXB481077', 'WVV570316', 'JHU038524']) {
+    expect(isValidDowod(nr), nr).toBe(true);
+    expect(redactPII(`Okazał dokument ${nr} przy odbiorze.`).redacted).toBe('Okazał dokument [NR-DOWODU] przy odbiorze.');
+  }
+});

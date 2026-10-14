@@ -198,14 +198,17 @@ export function isValidIban(raw: string): boolean {
 }
 
 /**
- * Nr dowodu osobistego: 3 litery + 6 cyfr, wagi [7,3,1,9,1,7,3,1,7] (litera A=10…Z=35),
+ * Nr dowodu osobistego: 3 litery + 6 cyfr, wagi [7,3,1,9,7,3,1,7,3] (litera A=10…Z=35),
  * suma ważona WSZYSTKICH 9 znaków (cyfra kontrolna na pozycji 4, waga 9) % 10 == 0.
- * Wektor kontrolny: ABA300000 → ważny (7·10+3·11+1·10+9·3 = 140, 140%10=0).
+ * Wektory kontrolne: ABA300000 (7·10+3·11+1·10+9·3 = 140) oraz wzór z materiałów MSWiA
+ * ABS123456 (70+33+28+9+14+9+4+35+18 = 220). Do v0.46.22 wagi części cyfrowej były
+ * przesunięte ([…,9,1,7,3,1,7]) — ABA300000 to nie wykrywał (same zera), ale ~9 na 10
+ * prawdziwych numerów odpadało, więc dowód bez słowa „dowód" obok wyciekał.
  */
 export function isValidDowod(raw: string): boolean {
   const s = raw.replace(/\s/g, '').toUpperCase();
   if (!/^[A-Z]{3}\d{6}$/.test(s)) return false;
-  const w = [7, 3, 1, 9, 1, 7, 3, 1, 7];
+  const w = [7, 3, 1, 9, 7, 3, 1, 7, 3];
   let sum = 0;
   for (let i = 0; i < 9; i++) {
     const ch = s[i];
@@ -1476,8 +1479,10 @@ function passIdCard(ctx: RedactCtx): void {
     ctx.bump('DOWOD');
     return ctx.M.DOWOD;
   });
-  // (c) Litery mieszane/małe — tylko gdy suma kontrolna się zgadza.
-  ctx.text = ctx.text.replace(/\b[A-Za-z]{3}[\s-]?\d{6}\b/g, (m) => {
+  // (c) Litery mieszane/małe — tylko gdy suma kontrolna się zgadza. Kody walut wykluczone jak
+  // w (b): „PLN 123456" przechodzi sumę (co dziesiąta kwota), a to kwota, nie numer dowodu.
+  ctx.text = ctx.text.replace(/\b([A-Za-z]{3})[\s-]?\d{6}\b/g, (m, letters: string) => {
+    if (CURRENCY_CODES.has(letters.toUpperCase())) return m;
     if (isValidDowod(m)) {
       ctx.bump('DOWOD');
       return ctx.M.DOWOD;

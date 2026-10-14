@@ -153,7 +153,7 @@ function genIbanPl(rng) {
 function genDowod(rng) {
   const letters = Array.from({ length: 3 }, () => String.fromCharCode(65 + randInt(rng, 0, 25))).join('');
   const tail = randDigits(rng, 5);
-  const w = [7, 3, 1, 9, 1, 7, 3, 1, 7];
+  const w = [7, 3, 1, 9, 7, 3, 1, 7, 3]; // jak isValidDowod (wagi poprawione w 0.29.13)
   const chars = letters + '0' + tail; // miejsce kontrolne tymczasowo 0
   let sum = 0;
   for (let i = 0; i < 9; i++) {
