@@ -2824,3 +2824,448 @@ test('b2-fix: czas liniowy w długiej linii bez „\\n" (IP przed kropką, ogon 
     expect(performance.now() - t0, name).toBeLessThan(500);
   }
 });
+
+// ── Audyt, partia b3: nadmaskowanie osób i miejsc (eponimy, nazwy własne, marker zamieszkania) ──
+const N = '[IMIĘ I NAZWISKO]';
+const C = '[MIEJSCOWOŚĆ]';
+const A = '[ADRES]';
+const KOD = '[KOD-POCZTOWY]';
+test('K07: adres bez „ul." przy kodzie nie przechodzi przez nową linię (wiersz podpisu zostaje osobno)', () => {
+  masked([
+    ['Pozdrawiam\nMonika Sadowska\nSzosa Chełmińska 77/9\n87-100 Toruń', `Pozdrawiam\n${N}\n${A}\n${KOD} ${C}`],
+    ['Firma Budex Sp. z o.o.\nPolna 8\n60-101 Poznań', `Firma Budex Sp. z o.o.\n${A}\n${KOD} ${C}`],
+    ['zam. Gdańsk\nHoża 41, 00-681 Warszawa', `zam. ${C}\n${A}, ${KOD} ${C}`],
+    // miasto w osobnym wierszu nad adresem — wiersz zostaje, nazwa w masce
+    ['Warszawa\nHoża 41, 00-681 Warszawa', `${C}\n${A}, ${KOD} ${C}`],
+  ]);
+});
+test('K07 pułapki: adres bez „ul." przy kodzie nadal w masce (numer w następnym wierszu, CRLF, tabulator)', () => {
+  masked([
+    ['Szosa Chełmińska 77/9\n87-100 Toruń', `${A}\n${KOD} ${C}`],
+    ['Szosa Chełmińska\n77/9\n87-100 Toruń', `${A}\n${KOD} ${C}`],
+    ['Szosa Chełmińska 77/9, 87-100 Toruń', `${A}, ${KOD} ${C}`],
+    ['Kwiatowa 12 m. 4\n31-123 Kraków', `${A}\n${KOD} ${C}`],
+    ['Szosa Chełmińska 77/9\r\n87-100 Toruń\r\n', `${A}\r\n${KOD} ${C}\r\n`],
+    ['Stara Wieś 15\t\n87-100 Toruń', `${A}\t\n${KOD} ${C}`],
+    ['Jan Kowalski, Szosa Chełmińska 77 m. 9, 87-100 Toruń', `${N}, ${A}, ${KOD} ${C}`],
+  ]);
+  // nazwa i wiersz, które tylko sąsiadują z adresem, zostają
+  masked([
+    ['Wydział Kontroli\nul. Długa 5', `Wydział Kontroli\n${A}`],
+    ['Jan Turek\nul. Długa 5', `${N}\n${A}`],
+  ]);
+});
+test('K07: numer „domu" będący dniem daty albo rokiem — to data, nie adres', () => {
+  keep([
+    'Marsz wyruszy z placu Piłsudskiego 11 listopada o godz. 12:00.',
+    'Walki przy ul. Okopowej 1944 r. 5 sierpnia trwały długo.',
+    'Spotkanie przy ul. Bitwy Warszawskiej 1920 r. w Warszawie.',
+    'Wydarzenie odbędzie się na Placu Zamkowym 1 maja.',
+    'Remont ul. Puławskiej 2021-2023 trwał długo.',
+    'Remont ul. Długiej 2024 r. przesunięto na wiosnę.',
+    'ul. Kwiatowa 12 maja wybuchł pożar.',
+    'Rondo Dmowskiego 1990 wybudowane.',
+    'Most Grunwaldzki 1910 r. 5 osób przeszło.',
+  ]);
+});
+test('K07 pułapki: ulice z liczebnikiem, silna etykieta i ulica z datą w nazwie dalej w masce', () => {
+  masked([
+    ['Jan Kowalski, zam. ul. 3 Maja 15, 00-001 Warszawa.', `${N}, zam. ${A}, ${KOD} ${C}.`],
+    ['Adres: ul. 11 Listopada 7/2, Kraków.', `Adres: ${A}, ${C}.`],
+    ['Adres: al. 29 Listopada 20, Kraków.', `Adres: ${A}, ${C}.`],
+    ['Spotkanie przy ul. 3 Maja 15.', `Spotkanie przy ${A}.`],
+    ['Adres: ul. Długa 2020.', `Adres: ${A}.`],
+    // po silnej etykiecie dzień przed miesiącem to nadal numer domu
+    ['Adres: ul. Mariacka 20 maja 2023 r. przeprowadzka.', `Adres: ${A} maja 2023 r. przeprowadzka.`],
+    // ulica z datą w nazwie: numer domu stoi po „r." — cały adres w masce
+    ['Badania: ul. Bitwy Warszawskiej 1920 r. 18, 02-366 Warszawa', `Badania: ${A}, ${KOD} ${C}`],
+    ['Adres: ul. Bitwy Warszawskiej 1920 roku 18/4', `Adres: ${A}`],
+    ['ul. Ofiar Grudnia 1970 r. 5, 81-001 Gdynia', `${A}, ${KOD} ${C}`],
+    ['Adres: Al. Bitwy Warszawskiej 1920 r. 7 m. 3', `Adres: ${A}`],
+  ]);
+});
+test('b3 wady poboczne: blok na osiedlu, „et al." w cytowaniu, kod pocztowy przed walutą i jednostką', () => {
+  masked([
+    ['os. Tysiąclecia bl. 4 m. 3', A],
+    ['Adres: os. Kalinowe bl. 12 m. 40, 31-001 Kraków', `Adres: ${A}, ${KOD} ${C}`],
+    ['nr rej. WE 12345, UE 2016/679', 'nr rej. [NR-REJESTRACYJNY], UE 2016/679'],
+  ]);
+  keep([
+    'Smith et al. Nature 2019',
+    'Smith et al. 2019 Nature 12',
+    'Koszt naprawy wyniesie 10-200 PLN brutto.',
+    'Dystans 20-150 km dziennie.',
+    'W wydarzeniu wzięło 30-500 osób.',
+    'Szacunek: 15-250 EUR za sztukę.',
+  ]);
+  // pułapki: prawdziwy kod pocztowy (też przed „m. st.") i wyliczenie tablic zostają maskami
+  masked([
+    ['00-950 Warszawa', `${KOD} ${C}`],
+    ['Kod 00-950 m. st. Warszawa', `Kod ${KOD} m. st. Warszawa`],
+    ['nr rej. WE 12345, WA 6789A', 'nr rej. [NR-REJESTRACYJNY], [NR-REJESTRACYJNY]'],
+    ['Mieszkam na al. Jana Pawła II 12.', `Mieszkam na ${A}.`],
+  ]);
+});
+test('K09: nazwa własna obiektu w mianowniku („Kościół Mariacki") nie jest parą osobową', () => {
+  keep([
+    'Kościół Mariacki w Krakowie pochodzi z XIV wieku.',
+    'Hejnał Mariacki rozbrzmiewa co godzinę.',
+    'Pomnik Grunwaldzki stoi w Krakowie.',
+    'W sierpniu startuje Jarmark Dominikański w Gdańsku.',
+    'Noc Świętojańska to najkrótsza noc roku.',
+    'Ocean Atlantycki jest ogromny.',
+    'Sobór Watykański II zmienił liturgię.',
+    'Puszcza Białowieska jest stara.',
+    'Brama Floriańska jest zabytkiem.',
+    'Traktat Wersalski podpisano w 1919 r.',
+    'Kanał Sueski otwarto.',
+    'Odwiedziliśmy Biebrzański Park Narodowy.',
+  ]);
+});
+test('K09: przysłówek, spójnik albo rzeczownik przed nazwiskiem zostaje — maska obejmuje samo nazwisko', () => {
+  masked([
+    ['Wczoraj Kowalski przyszedł do biura.', `Wczoraj ${N} przyszedł do biura.`],
+    ['Następnie Kowalski podpisał umowę.', `Następnie ${N} podpisał umowę.`],
+    ['Jednak Lewandowski odmówił.', `Jednak ${N} odmówił.`],
+    ['Ale Kowalski nie wiedział.', `Ale ${N} nie wiedział.`],
+    ['Wczoraj Kowalska przyszła.', `Wczoraj ${N} przyszła.`],
+    ['Ponadto Mickiewicz napisał.', `Ponadto ${N} napisał.`],
+    ['Raport Kowalski zawiera błędy.', `Raport ${N} zawiera błędy.`],
+    ['Sąsiad Kowalski zeznał.', `Sąsiad ${N} zeznał.`],
+    ['Aspirant Kowalski przyjął zgłoszenie.', `Aspirant ${N} przyjął zgłoszenie.`],
+    ['wczoraj Raport Kowalski zginął.', `wczoraj Raport ${N} zginął.`],
+  ]);
+});
+test('K09 pułapki: rzadkie imię spoza słownika dalej znika razem z nazwiskiem; role jak dotąd', () => {
+  masked([
+    ['Świętomira Gzowska przyszła na przesłuchanie.', `${N} przyszła na przesłuchanie.`],
+    ['Bożydar Kowalski złożył wniosek.', `${N} złożył wniosek.`],
+    ['Zygmunt Kowalski przyszedł.', `${N} przyszedł.`],
+    ['Kuba Gzowski przyszedł.', `${N} przyszedł.`],
+    ['Nel Gzowska przyszła.', `${N} przyszła.`],
+    ['Prezes Gzowski podpisał uchwałę.', `Prezes ${N} podpisał uchwałę.`],
+    ['Pracownik Kowalski otrzymał premię.', `Pracownik ${N} otrzymał premię.`],
+    ['Zakład Usługowy Kowalski', `Zakład Usługowy ${N}`],
+    ['Bożydar Gzowski Kancelaria Adwokacka', `${N} Kancelaria Adwokacka`],
+    ['Wczoraj Jan Kowalski przyszedł do biura.', `Wczoraj ${N} przyszedł do biura.`],
+  ]);
+  keep(['Wczoraj Anna wróciła z urlopu.', 'Wczoraj Sąd Okręgowy wydał wyrok.', 'Wczoraj Starosta Wołomiński podpisał decyzję.']);
+});
+test('K10: przymiotniki na -nicza i czasowniki „zalicza/oblicza" nie są nazwiskiem', () => {
+  keep([
+    'Kancelaria Komornicza w Zamościu',
+    'Opinię wydała Izba Rolnicza w Lublinie.',
+    'Zalicza się do tego również koszty.',
+    'Oblicza się różnicę.',
+    'Ochotnicza Straż Pożarna w Lipnie',
+    'Zasadnicza Szkoła Zawodowa nr 2',
+    'Kancelaria Prawnicza Lex Sp. z o.o.',
+    'Akademia Górniczo-Hutnicza i Izba Rolnicza w Opolu',
+    'Dąbrowa Górnicza leży na Śląsku.',
+  ]);
+});
+test('K10 pułapki: dopełniacz nazwiska -icz (z samogłoską, -owicz/-ewicz) i kotwice dalej maskują', () => {
+  masked([
+    ['Sprawę Kowalewicza przekazano do sądu.', `Sprawę ${N} przekazano do sądu.`],
+    ['Kancelaria Kowalewicza mieści się przy ul. Długiej.', `Kancelaria ${N} mieści się przy ul. Długiej.`],
+    ['Pełnomocnik Iwanicza złożył zażalenie.', `Pełnomocnik ${N} złożył zażalenie.`],
+    ['Pismo Romanicza wpłynęło.', `Pismo ${N} wpłynęło.`],
+    ['Wniosek Jana Wojnicza wpłynął.', `Wniosek ${N} wpłynął.`],
+    ['Wierzyciel Adam Hutnicz', `Wierzyciel ${N}`],
+    ['Pani Hutnicza złożyła wniosek.', `Pani ${N} złożyła wniosek.`],
+  ]);
+});
+test('K10: przymiotniki relacyjne, zawodowe i parki narodowe na -ski nie są nazwiskiem', () => {
+  keep([
+    'Poselski projekt ustawy trafił do Sejmu.',
+    'Byliśmy w Białowieskim Parku Narodowym.',
+    'Odwiedziliśmy Białowieski Park Narodowy w maju.',
+    'Opieka Pielęgniarska w domu chorego.',
+    'Objęto go Opieką Pielęgniarską.',
+    'Regionalna Dyrekcja Ochrony Środowiska w Gdańsku wydała decyzję.',
+    'Wojewódzki Fundusz Ochrony Środowiska i Gospodarki Wodnej',
+    'Władza Rodzicielska została ograniczona.',
+    // homografy nazwisk przed nazwą parku — chroni prawy kontekst, nie stoplista
+    'Słowiński Park Narodowy jest nad morzem.',
+    'Dyrekcja Wolińskiego Parku Narodowego',
+  ]);
+  masked([
+    ['Praktyka Pielęgniarska Anny Kowalskiej.', `Praktyka Pielęgniarska ${N}.`],
+    // pułapki: homograf parku bez „Parku" i para z imieniem dalej maskowane
+    ['Słowiński złożył wniosek.', `${N} złożył wniosek.`],
+    ['Pan Słowiński złożył wniosek.', `Pan ${N} złożył wniosek.`],
+    ['Jan Poselski złożył wniosek.', `${N} złożył wniosek.`],
+    ['Fiołkowska wygrała przetarg na dostawę mebli.', `${N} wygrała przetarg na dostawę mebli.`],
+  ]);
+});
+test('K10: złożony przymiotnik z łącznikiem („Kujawsko-Pomorski") nie jest nazwiskiem dwuczłonowym', () => {
+  keep([
+    'Kujawsko-Pomorski Oddział Wojewódzki NFZ',
+    'odwołanie do Warmińsko-Mazurskiego Oddziału NFZ',
+    'Pan Wojewoda Kujawsko-Pomorski podpisał.',
+    'Izba Polsko-Niemiecka',
+  ]);
+  masked([
+    ['Maria Skłodowska-Curie', N],
+    ['Jan Bosko-Kowalski', N],
+    ['Bosko-Kowalski złożył wniosek.', `${N} złożył wniosek.`],
+    ['Pan Habdank-Wojewódzki', `Pan ${N}`],
+    ['Zofia Wiśniewska-Mazurska', N],
+    ['Pani Pasko-Nowicka', `Pani ${N}`],
+  ]);
+});
+test('K10: rzeczowniki pospolite wyglądające jak nazwisko („Kaski", „Dziecka", „Kluczyk")', () => {
+  keep([
+    'Kaski ochronne są obowiązkowe na terenie budowy.',
+    'Dyski SSD są szybkie.',
+    'Placki ziemniaczane z cukrem.',
+    'Freski z XV wieku.',
+    '["Kaski","Dyski","Placki"]',
+    'Skierowano do Instytutu Matki i Dziecka w Warszawie.',
+    'Dane Dziecka: brak.',
+    'Konwencja o Prawach Dziecka',
+    'Słowniczyk pojęć znajduje się na końcu.',
+    'Kluczyk do skrzynki zginął.',
+    'Chińczyk i Japończyk rozmawiali.',
+  ]);
+  masked([
+    ['Matka Dziecka: Anna Kowalska', `Matka Dziecka: ${N}`],
+    ['Imię i nazwisko Dziecka: Zofia Nowak', `Imię i nazwisko Dziecka: ${N}`],
+    // pułapki: te same wyrazy jako nazwisko przy kotwicy dalej maskowane
+    ['Pan Kluczyk przyszedł do biura.', `Pan ${N} przyszedł do biura.`],
+    ['Umowę podpisał J. Kluczyk.', `Umowę podpisał ${N}.`],
+    ['J. Kluczyk podpisał umowę.', `J. ${N} podpisał umowę.`],
+    ['Jan Kluczyk przyszedł.', `${N} przyszedł.`],
+    ['Anna Kaska złożyła wniosek.', `${N} złożyła wniosek.`],
+    ['Pani Bielecka przyszła.', `Pani ${N} przyszła.`],
+  ]);
+});
+test('K10: wiersz „Przymiotnik Imię" nie skleja się z osobą z następnego wiersza', () => {
+  masked([['Olimpijska Nadzieja\nRzymska Diana\nWielka Nadzieja', `Olimpijska Nadzieja\n${N}\nWielka Nadzieja`]]);
+  // pułapka: łamanie imienia i nazwiska w prozie dalej domyka osobę
+  masked([['Starosta Jan\nWiśniewski przeprowadził kontrolę.', `Starosta ${N} przeprowadził kontrolę.`]]);
+});
+test('K11: „Pan/Pani" + rola + dopełniacz urzędu albo imię sakralne — bez maski', () => {
+  keep([
+    'Pani Minister Zdrowia podpisała rozporządzenie.',
+    'Pan Dyrektor Departamentu Podatków odpowiedział.',
+    'Pan Prezydent Miasta Krakowa przemówił.',
+    'Pan Komendant Policji przyjął skargę.',
+    'Pan Komendant Główny Policji przyjął.',
+    'Modlimy się do Pana Boga.',
+    'Szanowna Pani Dyrektor Szkoły,',
+    'Pan Marszałek Województwa Mazowieckiego podpisał.',
+    'Pani Kurator Oświaty wydała decyzję.',
+    'Panu Ministrowi Zdrowia przekazano pismo.',
+    'Pan Sołtys Wsi zwołał zebranie.',
+  ]);
+});
+test('K11 pułapki: osoba po roli i homonimy nazwisk dalej maskowane; nowa rola zostaje przed maską', () => {
+  masked([
+    ['Pan Dyrektor Gzik odpowiedział.', `Pan Dyrektor ${N} odpowiedział.`],
+    ['Pani Dyrektor Rodzina odpowiedziała.', `Pani Dyrektor ${N} odpowiedziała.`],
+    ['Pan Minister Ziobro odpowiedział.', `Pan Minister ${N} odpowiedział.`],
+    ['Pani Minister Anna Nowak przemówiła.', `Pani Minister ${N} przemówiła.`],
+    ['Panu Janowi Kowalskiemu przekazano.', `Panu ${N} przekazano.`],
+    ['Pani Anna Nowa złożyła wniosek.', `Pani ${N} złożyła wniosek.`],
+    ['Pan Adam Nowy przyszedł.', `Pan ${N} przyszedł.`],
+    ['Pan Poseł Kowalski złożył interpelację.', `Pan Poseł ${N} złożył interpelację.`],
+  ]);
+});
+test('K20: eponim po rzeczowniku z wielkiej litery i „na moście" — nie osoba', () => {
+  keep([
+    'Odruch Babińskiego dodatni.',
+    'Prątek Kocha w posiewie.',
+    'Założono uprząż Pawlika.',
+    'Objaw Babińskiego ujemny.\nZespół Brudzińskiego ujemny.',
+    'Odczyn Biernackiego 12 mm/h',
+    'Pałeczki Kocha nieobecne.',
+    'Stwierdzono dystrofię Fuchsa.',
+    'Cięcie wzdłuż linii Langera.',
+    'Korek na moście Łazienkowskim od rana.',
+    'Spotkanie przy Moście Grunwaldzkim.',
+    'Na moście Poniatowskiego korek.',
+  ]);
+});
+test('K20 pułapki: osoby obok eponimu, nagłówek w osobnym wierszu i mianownik po „moście" maskowane', () => {
+  masked([
+    ['Pacjent Kowalski zgłosił się na badanie kontrolne.', `Pacjent ${N} zgłosił się na badanie kontrolne.`],
+    ['Zespół\nKowalski\nNowak', `Zespół\n${N}\n${N}`],
+    ['Test\nKowalski', `Test\n${N}`],
+    ['Skala Wiśniewski', N],
+    ['Objaw Kowalska', N],
+    ['Prątki wykryto u Pawlika.', `Prątki wykryto u ${N}.`],
+    ['Dystrofia mięśniowa u Mariusza Kocha.', `Dystrofia mięśniowa u ${N}.`],
+    ['Pacjent Jan Kowalski, odruch Babińskiego dodatni.', `Pacjent ${N}, odruch Babińskiego dodatni.`],
+    ['Na moście Jan Kowalski zatrzymał auto.', `Na moście ${N} zatrzymał auto.`],
+    ['Na moście Kowalski potrącił pieszego.', `Na moście ${N} potrącił pieszego.`],
+    ['Kierowca Kowalski utknął na moście Siekierkowskim.', `Kierowca ${N} utknął na moście Siekierkowskim.`],
+  ]);
+});
+test('K20: patron z tytułem naukowym („im. dra", „im. dr. med."), święty i błogosławiony — nie osoba', () => {
+  keep([
+    'Konsultacja w Szpitalu Specjalistycznym im. dra Alfreda Sokołowskiego w Wałbrzychu.',
+    'Skierowano do Szpitala im. dr. med. Rafała Masztaka.',
+    'Szpital im. prof. dr. hab. Jana Kowalskiego',
+    'Ulica dra Alfreda Sokołowskiego 4',
+    'Szkoła im. A. Mickiewicza w Gdańsku.',
+    'Kościół św. Piotra Apostoła',
+    'Parafia bł. Jerzego Popiełuszki',
+    'PRZY ALEI WŁADYSŁAWA SIKORSKIEGO',
+    'RONDO ROMANA DMOWSKIEGO',
+  ]);
+});
+test('K20 pułapki: zaimek „im" to nie patron; osoba po tytule i po zdaniu z patronem maskowana', () => {
+  masked([
+    ['Pomógł im Jan Kowalski w przeprowadzce.', `Pomógł im ${N} w przeprowadzce.`],
+    ['Przedstawiono im dra Jana Kowalskiego jako nowego ordynatora.', `Przedstawiono im dra ${N} jako nowego ordynatora.`],
+    ['Opowiedział im lek. med. Jan Kowalski o zabiegu.', `Opowiedział im lek. med. ${N} o zabiegu.`],
+    ['Konsultacja u dra Jana Kowalskiego w poradni.', `Konsultacja u dra ${N} w poradni.`],
+    ['Leczący: dr n. med. Jan Kowalski.', `Leczący: dr n. med. ${N}.`],
+    ['Szpital im. dra Alfreda Sokołowskiego. Jan Kowalski został wypisany.', `Szpital im. dra Alfreda Sokołowskiego. ${N} został wypisany.`],
+    ['Szpital im. dra Alfreda Sokołowskiego oraz Jan Kowalski.', `Szpital im. dra Alfreda Sokołowskiego oraz ${N}.`],
+    ['WNIOSKODAWCA JAN KOWALSKI ZAM. PRZY ALEI JANA PAWŁA II', `WNIOSKODAWCA ${N} ZAM. PRZY ALEI JANA PAWŁA II`],
+  ]);
+  // wersaliki bez kotwicy ulicznej przed parą — tytuł zostaje, osoba w masce
+  expect(redactPII('PAN JAN KOWALSKI').redacted).toBe(`PAN ${N}`);
+});
+test('K20: toponim „Kazimierz Dolny" to miejscowość, chyba że stoi przy nim rola lub tytuł', () => {
+  masked([
+    ['Kazimierz Dolny leży nad Wisłą.', 'Kazimierz Dolny leży nad Wisłą.'],
+    ['24-120 Kazimierz Dolny', `${KOD} ${C}`],
+    ['Mieszka w Kazimierzu Dolnym od lat.', `Mieszka w ${C} od lat.`],
+    ['Piotrków Trybunalski to miasto.', 'Piotrków Trybunalski to miasto.'],
+    ['Pan Kazimierz Dolny złożył wniosek.', `Pan ${N} złożył wniosek.`],
+    ['Wnioskodawca: Kazimierz Dolny', `Wnioskodawca: ${N}`],
+    ['Świadek Kazimierz Dolny zeznał.', `Świadek ${N} zeznał.`],
+    ['Zeznania złożył dr Kazimierz Dolny.', `Zeznania złożył dr ${N}.`],
+    ['Kazimierz Nowak złożył wniosek.', `${N} złożył wniosek.`],
+  ]);
+});
+test('K21: marker zamieszkania — formy z ogonkami, „zamieszkuje", koniec wiersza i CRLF', () => {
+  masked([
+    ['Jan Nowak, zam. w Krakowie\nPESEL 85031412347', `${N}, zam. w ${C}\nPESEL [PESEL]`],
+    ['Jan Nowak, zam. w Krakowie\r\nPESEL 85031412347', `${N}, zam. w ${C}\r\nPESEL [PESEL]`],
+    ['Jan Kowalski, zamieszkały w Krakowie\nPESEL 85031212343', `${N}, zamieszkały w ${C}\nPESEL [PESEL]`],
+    ['zam. w Zielonej Górze\nPESEL 85031412347', `zam. w ${C}\nPESEL [PESEL]`],
+    ['z Anną Nowak, zamieszkałą w Krakowie, zwaną dalej Najemcą.', `z ${N}, zamieszkałą w ${C}, zwaną dalej Najemcą.`],
+    ['Pozwana zamieszkuje w Gdańsku od 2015 r.', `Pozwana zamieszkuje w ${C} od 2015 r.`],
+    ['Świadek mieszkający w Poznaniu, przesłuchany.', `Świadek mieszkający w ${C}, przesłuchany.`],
+    ['Powód zamieszkuje w Poznaniu przy ul. Grunwaldzkiej 104/6.', `Powód zamieszkuje w ${C} przy ${A}.`],
+    ['Pozwany zamieszkiwał w Krakowie do 2019 r.', `Pozwany zamieszkiwał w ${C} do 2019 r.`],
+    ['Powód zamieszkuje Poznań.', `Powód zamieszkuje ${C}.`],
+    ['Wnioskodawca, z miejscem zamieszkania w Krakowie, wnosi o zwrot.', `Wnioskodawca, z miejscem zamieszkania w ${C}, wnosi o zwrot.`],
+    ['Pod adresem zameldowania w Krakowie nikt nie odbiera.', `Pod adresem zameldowania w ${C} nikt nie odbiera.`],
+    ['Brak stałego miejsca zamieszkania w Poznaniu uniemożliwia doręczenie.', `Brak stałego miejsca zamieszkania w ${C} uniemożliwia doręczenie.`],
+    // 12g: łamanie wiersza po dacie urodzenia przed małym „w"
+    ['ur. 03.11.1985 r.\nw Sosnowcu\nur. 03.11.1985 r. w Sosnowcu\n', `ur. [DATA-URODZENIA] r.\nw ${C}\nur. [DATA-URODZENIA] r. w ${C}\n`],
+    ['Pani Anna Nowak, urodzona 12.03.1980 r. w Krakowie', `Pani ${N}, urodzona [DATA-URODZENIA] r. w ${C}`],
+  ]);
+});
+test('K21: rzeczowniki i przymiotniki od „mieszkać" nie są markerem zamieszkania', () => {
+  keep([
+    'Zarząd Spółdzielni Mieszkaniowej w Krakowie ogłasza przetarg.',
+    'Mieszkania w Krakowie drożeją najszybciej w kraju.',
+    'Rynek mieszkaniowy w Krakowie zwalnia.',
+    'Zameldowanie w Krakowie jest bezpłatne.',
+    'Budynek mieszkalny w Krakowie wymaga remontu.',
+    'Wydział Spraw Mieszkaniowych w Gdyni wydał decyzję.',
+    'Biuro Mieszkalnictwa w Krakowie przyjmuje wnioski.',
+    'Kupiłem mieszkanie w Krakowie.',
+    'Lokal mieszkalny we Wrocławiu został sprzedany.',
+    'Zamieszkanie w Krakowie było jego marzeniem.',
+    'Spółdzielnia Mieszkaniowa w Krakowie\nzaprasza na zebranie.',
+    'Ceny mieszkań w Krakowie wzrosły o 10%.',
+    'Mieszkańcy w Poznaniu protestowali.',
+    'Zamieszki w Poznaniu w 1956 r. upamiętniono.',
+    'Sąd Okręgowy w Krakowie\nI Wydział Cywilny',
+    'zamieszkały w Areszcie Śledczym\nw Katowicach',
+  ]);
+});
+test('K21 pułapki: czasowniki, imiesłowy, „mieszkaniec" i nowe zdanie po dacie', () => {
+  masked([
+    ['Powód mieszka w Warszawie i pracuje w Krakowie.', `Powód mieszka w ${C} i pracuje w Krakowie.`],
+    ['Mieszkam w Poznaniu od 2010 roku.', `Mieszkam w ${C} od 2010 roku.`],
+    ['Świadkowie mieszkali w Lublinie przez dekadę.', `Świadkowie mieszkali w ${C} przez dekadę.`],
+    ['Uczestnicy zameldowani w Krakowie otrzymają zwrot.', `Uczestnicy zameldowani w ${C} otrzymają zwrot.`],
+    ['Jan Kowalski, mieszkaniec Krakowa, złożył skargę.', `${N}, mieszkaniec ${C}, złożył skargę.`],
+    ['Anna Nowak, mieszkanka Gdańska, złożyła skargę.', `${N}, mieszkanka ${C}, złożyła skargę.`],
+    ['Miejsce zamieszkania: Kraków', `Miejsce zamieszkania: ${C}`],
+    ['zamieszkały w Polsce\nPESEL 85031412347', 'zamieszkały w Polsce\nPESEL [PESEL]'],
+    ['Kowalski ur. 03.11.1985 r.\nW Sosnowcu odbyła się rozprawa.', `${N} ur. [DATA-URODZENIA] r.\nW Sosnowcu odbyła się rozprawa.`],
+  ]);
+});
+test('K22: nazwisko-homonim miasta po imieniu albo „Pan/Pani" przed adresem to osoba, nie miasto', () => {
+  masked([
+    ['1. Jan Turek, ul. Długa 5, 00-001 Warszawa', `1. ${N}, ${A}, ${KOD} ${C}`],
+    ['Wnioskodawca: Jan Turek, ul. Długa 5', `Wnioskodawca: ${N}, ${A}`],
+    ['Jan Maria Turek, ul. Długa 5', `${N}, ${A}`],
+    ['Pan Turek, ul. Długa 5', `Pan ${N}, ${A}`],
+    ['Pani Anna Kalisz, ul. Długa 5', `Pani ${N}, ${A}`],
+    ['Piotr Mielec, ul. Polna 3', `${N}, ${A}`],
+  ]);
+});
+test('K22 pułapki: samo miasto, nazwa instytucji i patron przed adresem dalej dają [MIEJSCOWOŚĆ]', () => {
+  masked([
+    ['Turek, ul. Długa 5', `${C}, ${A}`],
+    ['Warszawa, ul. Marszałkowska 10', `${C}, ${A}`],
+    ['Nowa Sól, ul. Długa 5', `${C}, ${A}`],
+    ['Bielsko-Biała, ul. Długa 5', `${C}, ${A}`],
+    ['Starostwo Powiatowe Turek, ul. Kaliska 59', `Starostwo Powiatowe ${C}, ${A}`],
+    ['Parafia pw. św. Stanisława Kalisz, ul. Polna 3', `Parafia pw. św. Stanisława ${C}, ${A}`],
+    ['Pensjonat Maria Zakopane, ul. Kościeliska 5', `Pensjonat Maria ${C}, ${A}`],
+    ['Pan Jan Kowalski w Gdańsku, ul. Długa 5', `Pan ${N} w ${C}, ${A}`],
+  ]);
+});
+test('K23: generyczny klucz „name"/„osoba" — nazwa produktu i kategoria to nie osoba', () => {
+  keep([
+    '{"sku": "A-107", "name": "Róża pustyni", "price": "45.00"}',
+    '<name>Róża pustyni</name>',
+    '{"sku": "B-2", "name": "Lilia biała", "price": "9.00"}',
+    '<osoba>prawna</osoba>',
+    '{"name":"anna"}',
+  ]);
+  masked([
+    [
+      '{"order": 77, "customer": {"name": "Anna Nowak"}, "items": [{"name": "Róża pnąca", "qty": 2}]}',
+      `{"order": 77, "customer": {"name": "${N}"}, "items": [{"name": "Róża pnąca", "qty": 2}]}`,
+    ],
+  ]);
+});
+test('K23 pułapki: mocne klucze małymi literami, osoba pod „name" i nazwa konta dalej maskowane', () => {
+  masked([
+    ['{"firstName":"pamela","lastName":"nowak"}', `{"firstName":"${N}","lastName":"${N}"}`],
+    ['{"first_name": "róża", "last_name": "pustyni"}', `{"first_name": "${N}", "last_name": "${N}"}`],
+    ['{"fullName": "jan kowalski"}', `{"fullName": "${N}"}`],
+    ['{"id": 2, "name": "jan kowalski"}', `{"id": 2, "name": "${N}"}`],
+    ['{"id": 6, "name": "JAN KOWALSKI"}', `{"id": 6, "name": "${N}"}`],
+    ['{"id": 5, "name": "Anna"}', `{"id": 5, "name": "${N}"}`],
+    ['{"name":"a.kaminska","message":"a.kaminska"}', `{"name":"${N}","message":"a.kaminska"}`],
+    ['<osoba>Jan Kowalski</osoba>', `<osoba>${N}</osoba>`],
+    ['{"person": "Kowalski"}', `{"person": "${N}"}`],
+  ]);
+  expect(redactPII('<osoba>Jan Kowalski</osoba>', { pseudonyms: true }).redacted).toBe('<osoba>[OSOBA-A]</osoba>');
+});
+test('K23: puste oznaczenia („b.d.", „n.d.", „null", „none") w polach i loginie zostają', () => {
+  keep([
+    '{"imie": "b.d.", "nazwisko": "b.d."}\nImię: b.d.',
+    'Imię: b.d',
+    'Imię: B.D.',
+    'Nazwisko: b. d.',
+    'Nazwisko: n.d.',
+    'Imię: null',
+    '<Nazwisko>b.d.</Nazwisko>',
+    '{"user":"null"}',
+    '<Login>none</Login>',
+    'Login: none',
+    'Login: b.d.',
+    'Rodzaj szkody: b.d. (wg zgłoszenia), kwota: b.d.',
+  ]);
+  masked([
+    ['Imię: Jan', `Imię: ${N}`],
+    ['Imię: J.', `Imię: ${N}`],
+    ['Imię i nazwisko: J. Kowalski', `Imię i nazwisko: ${N}`],
+    ['{"user":"jkowalski"}', '{"user":"[LOGIN]"}'],
+    ['Login: j.nowak', 'Login: [LOGIN]'],
+  ]);
+});

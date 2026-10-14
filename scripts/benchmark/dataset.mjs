@@ -765,6 +765,37 @@ export function buildDataset() {
   str('DHCPv6 Client DUID. . . : 00-01-00-01-2A-3B-4C-5D-00-1A-2B-3C-4D-5E', ['00-1A-2B-3C-4D-5E'], ['DHCPv6 Client DUID']);
   str('Login: URZAD\\kadry\nPismo przekazano do działu kadry.', ['URZAD\\kadry'], ['do działu kadry.']);
 
+  // Nadmaskowanie osób i miejsc (audyt, partia b3): nazwy własne, eponimy, urzędy, przymiotniki
+  // i rzeczowniki z końcówką nazwiskową, marker zamieszkania — oraz osoby obok nich, które dalej
+  // muszą zniknąć w całości.
+  neg('Kościół Mariacki w Krakowie pochodzi z XIV wieku, a Puszcza Białowieska jest na liście UNESCO.', ['Kościół Mariacki', 'Puszcza Białowieska']);
+  osp('Wczoraj Kowalski przyszedł do biura. Sąsiad Wiśniewski zeznał, że nic nie słyszał.', ['Kowalski', 'Wiśniewski'], ['Wczoraj', 'Sąsiad']);
+  osr('Świętomira Gzowska przyszła na przesłuchanie.', ['Świętomira', 'Gzowska']);
+  neg('Kancelaria Komornicza w Zamościu, Izba Rolnicza w Lublinie i Ochotnicza Straż Pożarna w Lipnie.', ['Komornicza', 'Rolnicza', 'Ochotnicza']);
+  neg('Akademia Górniczo-Hutnicza i Kujawsko-Pomorski Oddział Wojewódzki NFZ.', ['Górniczo-Hutnicza', 'Kujawsko-Pomorski']);
+  neg('Poselski projekt ustawy trafił do Sejmu. Opieka Pielęgniarska w domu chorego. Władza Rodzicielska została ograniczona.', ['Poselski', 'Opieka Pielęgniarska', 'Władza Rodzicielska']);
+  neg('Regionalna Dyrekcja Ochrony Środowiska w Gdańsku wydała decyzję.', ['Ochrony Środowiska']);
+  neg('Słowiński Park Narodowy leży nad morzem, a Kampinoski Park Narodowy otacza Warszawę.', ['Słowiński', 'Kampinoski']);
+  neg('Kaski ochronne są obowiązkowe. Skierowano do Instytutu Matki i Dziecka w Warszawie.', ['Kaski', 'Dziecka']);
+  osp('Sprawę Kowalewicza przekazano do sądu, a Pan Kluczyk złożył wniosek.', ['Kowalewicza', 'Kluczyk'], ['Sprawę', 'Pan']);
+  neg('Pani Minister Zdrowia podpisała rozporządzenie, a Pan Komendant Policji przyjął skargę.', ['Minister Zdrowia', 'Komendant Policji']);
+  osp('Pani Minister Anna Nowak przemówiła.', ['Anna', 'Nowak'], ['Pani Minister']);
+  neg('Odruch Babińskiego dodatni. Prątek Kocha w posiewie. Korek na moście Łazienkowskim od rana.', ['Babińskiego', 'Kocha', 'Łazienkowskim']);
+  neg('Konsultacja w Szpitalu im. dra Alfreda Sokołowskiego w Wałbrzychu. Kościół św. Piotra Apostoła.', ['Alfreda Sokołowskiego', 'Piotra Apostoła']);
+  osp('Pomógł im Jan Kowalski w przeprowadzce.', ['Jan', 'Kowalski'], ['Pomógł im']);
+  neg('Kazimierz Dolny leży nad Wisłą.', ['Kazimierz Dolny']);
+  osp('Wnioskodawca: Kazimierz Dolny', ['Kazimierz', 'Dolny'], ['Wnioskodawca']);
+  neg('Zarząd Spółdzielni Mieszkaniowej w Krakowie ogłasza przetarg. Mieszkania w Gdańsku drożeją.', ['Krakowie', 'Gdańsku']);
+  str('Jan Nowak, zam. w Krakowie\nPESEL 85031412347', ['Jan', 'Nowak', 'Krakowie', '85031412347'], ['zam. w']);
+  str('z Anną Nowak, zamieszkałą w Łodzi. Pozwana zamieszkuje w Gdańsku od 2015 r.', ['Anną', 'Nowak', 'Łodzi', 'Gdańsku'], ['zamieszkałą w', 'zamieszkuje w']);
+  str('1. Jan Turek, ul. Długa 5, 00-001 Warszawa', ['Jan', 'Turek', 'Długa 5', '00-001', 'Warszawa']);
+  str('Pozdrawiam\nMonika Sadowska\nSzosa Chełmińska 77/9\n87-100 Toruń', ['Monika', 'Sadowska', 'Chełmińska 77/9', '87-100', 'Toruń'], ['Pozdrawiam\n']);
+  neg('Marsz wyruszy z placu Piłsudskiego 11 listopada. Remont ul. Puławskiej 2021-2023 zakończono.', ['placu Piłsudskiego 11 listopada', 'ul. Puławskiej 2021-2023']);
+  str('Badania: ul. Bitwy Warszawskiej 1920 r. 18, 02-366 Warszawa', ['Bitwy Warszawskiej 1920 r. 18', '02-366', 'Warszawa'], ['Badania']);
+  neg('{"sku": "A-107", "name": "Róża pustyni"} oraz <osoba>prawna</osoba>', ['Róża pustyni', 'prawna']);
+  neg('{"imie": "b.d.", "nazwisko": "b.d."}\nLogin: none', ['b.d.', 'none']);
+  neg('Koszt naprawy wyniesie 10-200 PLN brutto. Smith et al. Nature 2019.', ['10-200 PLN', 'et al. Nature 2019']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {
