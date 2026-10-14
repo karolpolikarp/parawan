@@ -311,6 +311,8 @@ textarea.editor:focus-visible { outline: none; border-color: var(--acc-line); bo
 .pii-fin     { color: var(--fin);     border-color: rgba(111,199,155,.5); background: rgba(111,199,155,.10); }
 .pii-place   { color: var(--place);   border-color: rgba(126,166,232,.5); background: rgba(126,166,232,.10); }
 .editor del { color: var(--err); background: rgba(224,114,132,.08); text-decoration: line-through; text-decoration-color: rgba(224,114,132,.65); text-decoration-thickness: 1.5px; border-radius: 4px; padding: 1px 4px; }
+/* oryginał w „Porównaniu” nie daje się zaznaczyć: Ctrl+C bierze sam wynik, bez danych osobowych */
+.editor .orig { -webkit-user-select: none; user-select: none; }
 .demo-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 13px 18px; border-top: 1px solid var(--line); background: var(--card-2); font-size: 13px; color: var(--mut-2); }
 .demo-foot .gi { width: 18px; height: 18px; color: var(--acc); }
 .demo-stat b { color: var(--acc); font-variant-numeric: tabular-nums; }

@@ -58,41 +58,67 @@ function maskHtml(name: string): string {
   return `<mark class="pii pii-${maskCategory(name)}">[${name}]</mark>`;
 }
 
-function highlightMasks(escaped: string): string {
-  return escaped.replace(MASK_TOKEN_RE, (_m, name: string) => maskHtml(name));
+/*
+ * Wyrównanie wyniku z oryginałem (widoki „Wynik” i „Porównanie”). Kopia renderAligned
+ * z apps/web/src/compare.ts, tam są testy i pełny opis: zmieniaj obie naraz.
+ *  - sam odstęp między dwoma znacznikami nie jest kotwicą (trafiałby w spację wewnątrz
+ *    wartości), więc takie znaczniki dostają jeden wspólny przekreślony fragment;
+ *  - przekreślony oryginał siedzi w `.orig` z `user-select: none`, więc zaznaczenie
+ *    i Ctrl+C w „Porównaniu” dają sam wynik, bez danych osobowych;
+ *  - znacznik, który stał już w oryginale, zostaje zwykłym tekstem.
+ */
+const GAP_ONLY = /^[^\S\r\n]+$/; // same odstępy poziome: spacje, tabulatory, twarde spacje
+
+function origHtml(orig: string): string {
+  const lines = escapeHtml(orig).split('\n');
+  return lines
+    .map((line, i) =>
+      line ? `<span class="orig"><del>${line}</del>${i === lines.length - 1 ? ' ' : ''}</span>` : '',
+    )
+    .join('\n');
 }
 
-/**
- * Widok „Porównanie": oryginał przekreślony obok kolorowego znacznika. Diff w O(n):
- * nie-maskowe segmenty wyniku występują w oryginale dosłownie i po kolei.
- */
-function buildCompareHtml(original: string, redacted: string): string {
-  const tokens = redacted.split(MASK_TOKEN_RE);
+function renderAligned(original: string, redacted: string, compare: boolean): string {
+  const parts = redacted.split(MASK_TOKEN_RE); // nieparzyste indeksy to nazwy tokenów
   let html = '';
   let pos = 0;
-  let pending: string[] = [];
+  let group: string[] = [];
 
-  const flush = (gapEnd: number) => {
-    if (pending.length) {
+  const flush = (gapEnd: number): void => {
+    if (group.length) {
       const orig = original.slice(pos, gapEnd);
-      if (orig) html += `<del>${escapeHtml(orig)}</del> `;
-      for (const name of pending) html += maskHtml(name);
-      pending = [];
+      if (compare && orig) html += origHtml(orig);
+      html += group.join('');
+      group = [];
     }
     pos = gapEnd;
   };
 
-  for (let i = 0; i < tokens.length; i++) {
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
     if (i % 2 === 1) {
-      pending.push(tokens[i]);
+      const literal = `[${part}]`;
+      if (!group.length && original.startsWith(literal, pos)) {
+        html += escapeHtml(literal);
+        pos += literal.length;
+      } else {
+        group.push(maskHtml(part));
+      }
       continue;
     }
-    const lit = tokens[i];
-    if (!lit) continue;
-    const idx = original.indexOf(lit, pos);
+    if (!part) continue;
+    if (group.length && i + 1 < parts.length && GAP_ONLY.test(part)) {
+      group.push(escapeHtml(part));
+      continue;
+    }
+    const tail = original.length - part.length;
+    const idx =
+      i === parts.length - 1 && tail >= pos && original.endsWith(part)
+        ? tail
+        : original.indexOf(part, pos);
     flush(idx === -1 ? pos : idx);
-    html += escapeHtml(lit);
-    pos += lit.length;
+    html += escapeHtml(part);
+    pos += part.length;
   }
   flush(original.length);
   return html;
@@ -116,6 +142,7 @@ const copyLabel = $('demo-copy-label');
 
 let compareMode = false;
 let lastRedacted = '';
+let lastInput = ''; // tekst, z którego powstał lastRedacted (do „Porównania”)
 
 /** Polska liczba mnoga: 1 → one; końcówka 2–4 poza 12–14 → few; reszta → many. */
 function plural(n: number, one: string, few: string, many: string): string {
@@ -146,23 +173,28 @@ function renderOutput(): void {
       `tel. ${maskHtml('TELEFON')}. Wpisz coś po lewej albo kliknij „Wstaw przykład”.</span>`;
     return;
   }
-  outputEl.innerHTML = compareMode
-    ? buildCompareHtml(input?.value ?? '', lastRedacted)
-    : highlightMasks(escapeHtml(lastRedacted));
+  outputEl.innerHTML = renderAligned(lastInput, lastRedacted, compareMode);
 }
 
 function analyze(): void {
+  clearTimeout(timer);
+  timer = undefined;
   if (!input) return;
   const text = input.value;
   if (!text.trim()) {
+    if (lastRedacted) resetCopyLabel();
     lastRedacted = '';
+    lastInput = '';
     renderOutput();
     if (statEl) statEl.textContent = 'Wpisz tekst po lewej, tu pojawią się statystyki.';
     if (copyBtn) copyBtn.disabled = true;
     return;
   }
   const { redacted, found } = redactPII(text);
+  // „Skopiowano ✓” dotyczyło poprzedniego wyniku
+  if (redacted !== lastRedacted) resetCopyLabel();
   lastRedacted = redacted;
+  lastInput = text;
   renderOutput();
   renderStats(found);
   if (copyBtn) copyBtn.disabled = false;
@@ -199,19 +231,51 @@ $('demo-clear')?.addEventListener('click', () => {
   input.focus();
 });
 
+/* Kopiowanie. Stała etykieta jest podana z góry: dawniej drugie kliknięcie w ciągu 1,6 s
+   zapamiętywało jako „poprzednią” etykietę już „Skopiowano ✓” i ta zostawała na stałe.
+   Etykieta ma aria-live, więc czytnik ekranu odczyta też potwierdzenie i komunikat błędu. */
+const COPY_LABEL = 'Kopiuj wynik';
+let copyTimer: ReturnType<typeof setTimeout> | undefined;
+
+function flashCopy(text: string, ms: number): void {
+  if (!copyLabel) return;
+  copyLabel.textContent = text;
+  clearTimeout(copyTimer);
+  copyTimer = setTimeout(resetCopyLabel, ms);
+}
+
+function resetCopyLabel(): void {
+  clearTimeout(copyTimer);
+  copyTimer = undefined;
+  if (copyLabel) copyLabel.textContent = COPY_LABEL;
+}
+
 copyBtn?.addEventListener('click', async () => {
+  if (timer !== undefined) analyze(); // tuż po wpisaniu: skopiuj wynik bieżącego tekstu
   if (!lastRedacted) return;
   try {
     await navigator.clipboard.writeText(lastRedacted);
-    if (copyLabel) {
-      const prev = copyLabel.textContent;
-      copyLabel.textContent = 'Skopiowano ✓';
-      setTimeout(() => {
-        if (copyLabel) copyLabel.textContent = prev;
-      }, 1600);
-    }
+    flashCopy('Skopiowano ✓', 1600);
   } catch {
-    // Schowek może być niedostępny (np. file:// w części przeglądarek) — cichy no-op.
+    // Schowek bywa niedostępny (np. file:// w części przeglądarek): stara droga przez
+    // ukryte pole, a gdy i ona zawiedzie, wskazówka zamiast ciszy.
+    const prevFocus = document.activeElement as HTMLElement | null;
+    const ta = document.createElement('textarea');
+    ta.value = lastRedacted;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.append(ta);
+    ta.select();
+    let ok = false;
+    try {
+      ok = document.execCommand('copy');
+    } catch {
+      /* zostaje ok = false */
+    }
+    ta.remove();
+    prevFocus?.focus({ preventScroll: true }); // select() zabrał fokus do usuniętego pola
+    if (ok) flashCopy('Skopiowano ✓', 1600);
+    else flashCopy('Zaznacz wynik i naciśnij Ctrl+C', 4000);
   }
 });
 

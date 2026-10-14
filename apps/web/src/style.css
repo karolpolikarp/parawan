@@ -620,9 +620,23 @@ mark.pii.pii-linked { box-shadow: 0 0 0 2px var(--acc-line); }
   border-radius: 4px;
   padding: 1px 4px;
 }
+/* Oryginał w „Porównaniu” nie daje się zaznaczyć: zaznaczenie, przeciąganie i Ctrl+C
+   biorą sam wynik, bez danych osobowych (odstęp za przekreśleniem też siedzi w środku). */
+.editor .orig { -webkit-user-select: none; user-select: none; }
+
+/* długie przeliczenie: wynik przygasa, dopóki nie ma nowego */
+#output.is-busy { opacity: .55; cursor: progress; }
 
 .warn-note { color: var(--warn); }
 .warn-note a { color: var(--warn); text-decoration: underline; }
+.warn-txt { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+/* typy wyłączone w „Co maskować”: te dane przechodzą jawne, więc ostrzeżenie jest mocniejsze */
+.mask-off { color: var(--err); font-weight: 600; }
+.linklike {
+  border: 0; background: none; padding: 0; margin: 0;
+  font: inherit; color: inherit; text-decoration: underline; cursor: pointer;
+}
+.linklike:hover { text-decoration-thickness: 2px; }
 
 /* Komunikaty pod paskiem narzędzi źródła: błąd (czerwony) i pasek „Cofnij” (neutralny).
    Stoją przy przyciskach, które je wywołują, i nie znikają same (czyści je następna akcja). */

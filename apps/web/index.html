@@ -181,6 +181,8 @@
             id="input"
             class="editor editor-ta"
             spellcheck="false"
+            autocomplete="off"
+            translate="no"
             aria-label="Tekst źródłowy do anonimizacji"
             placeholder="Wklej tekst albo upuść plik (.txt, .md, .csv, .log, .docx, .pdf), anonimizacja dzieje się na bieżąco, podczas pisania.&#10;&#10;Nie wiesz od czego zacząć? Kliknij „Przykład” powyżej."
           ></textarea>
@@ -195,7 +197,7 @@
       <section class="card g6" aria-label="Wynik zanonimizowany">
         <div class="card-h">
           <span class="ic"><i class="gi" data-i="podglad"></i></span>
-          <div class="card-t"><h2 id="output-label">Wynik zanonimizowany</h2><p>kliknij znacznik albo przechodź strzałkami ‹ ›</p></div>
+          <div class="card-t"><h2 id="output-label">Wynik zanonimizowany</h2><p id="output-hint">kliknij znacznik albo przechodź strzałkami ‹ ›</p></div>
           <span class="card-sp"></span>
           <span class="help" data-tip="Kolor znacznika wskazuje kategorię danych, legenda powyżej" data-tip-pos="left" tabindex="0">?</span>
         </div>
@@ -214,12 +216,18 @@
           <button type="button" id="copy" class="btn tbtn btn-acc" data-tip="Kopiuje zanonimizowany tekst do schowka · skrót Ctrl+Enter" data-tip-pos="left" aria-keyshortcuts="Control+Enter"><i class="gi" data-i="kopiuj"></i><span id="copy-label">Kopiuj</span></button>
         </div>
         <div class="card-b">
-          <div id="output" class="editor" role="region" tabindex="0" aria-labelledby="output-label"></div>
+          <div id="output" class="editor" role="region" tabindex="0" aria-labelledby="output-label" translate="no"></div>
           <span id="mask-status" role="status" aria-live="polite" class="vh"></span>
+          <!-- Potwierdzenia akcji (np. „Skopiowano”) dla czytnika ekranu, osobno od nawigacji. -->
+          <p id="sr-status" class="vh" role="status"></p>
         </div>
         <div class="card-f warn-note">
           <i class="gi" data-i="ostrzezenie"></i>
-          <span>Przejrzyj wynik przed udostępnieniem, wykrywanie nazwisk jest heurystyczne. <a href="#ograniczenia">Ograniczenia</a></span>
+          <span class="warn-txt">
+            <!-- Stałe ostrzeżenie o typach wyłączonych w „Co maskować” (wybór jest zapamiętywany). -->
+            <span id="mask-off-note" class="mask-off" hidden><span id="mask-off-text"></span> <button type="button" id="mask-off-reset" class="linklike">Włącz wszystko</button></span>
+            <span>Przejrzyj wynik przed udostępnieniem, wykrywanie nazwisk jest heurystyczne. <a href="#ograniczenia">Ograniczenia</a></span>
+          </span>
         </div>
       </section>
 

@@ -1,4 +1,5 @@
 import { redactPII, type PiiFinding, type PiiType } from 'anonimizator';
+import { escapeHtml, renderAligned } from './compare';
 import { extractDocxText } from './docx';
 import {
   decodeText,
@@ -9,8 +10,11 @@ import {
   MAX_FILE_MB,
   unsupportedFormat,
 } from './files';
+import { makeFlash } from './flash';
 import { extractPdfText } from './pdf';
 import { buildMinimalPdf } from './pdf-fixture';
+import { plural } from './plural';
+import { storageGet, storageSet } from './storage';
 import './style.css';
 
 // Ikony — inline SVG (jedno źródło prawdy, kolor z currentColor). Zero rastrów.
@@ -47,6 +51,8 @@ const maskPrev = $<HTMLButtonElement>('mask-prev');
 const maskNext = $<HTMLButtonElement>('mask-next');
 const maskCount = $<HTMLSpanElement>('mask-count');
 const maskStatus = $<HTMLSpanElement>('mask-status');
+const srStatus = $<HTMLParagraphElement>('sr-status');
+const outputHint = $<HTMLParagraphElement>('output-hint');
 
 let lastRedacted = '';
 let lastInput = '';
@@ -169,8 +175,14 @@ const MASK_GROUPS: MaskGroup[] = MASK_GROUP_DEFS.map((g) => {
 });
 
 const maskTogglesEl = $<HTMLSpanElement>('mask-toggles');
+// Klucze spoza bieżącej listy (np. z dawnej wersji) pomijamy, inaczej zawyżałyby liczniki.
 const disabledGroups = new Set<string>(
-  (localStorage.getItem('mask-disabled') ?? '').split(',').filter(Boolean),
+  (storageGet('mask-disabled') ?? '').split(',').filter((k) => MASK_GROUPS.some((g) => g.key === k)),
+);
+
+/** Token znacznika po typie rdzenia (IBAN i NR-KONTA → „NR-KONTA”, IMIE → „IMIĘ I NAZWISKO”). */
+const TYPE_TOKEN: Record<string, string> = Object.fromEntries(
+  MASK_GROUP_DEFS.flatMap((g) => g.types.map((t) => [t, tokenOfCode(g.code)])),
 );
 
 const CAT_LABELS: Record<Cat, string> = {
@@ -236,7 +248,7 @@ if (wykrywaBody) {
 }
 
 function persistDisabled(): void {
-  localStorage.setItem('mask-disabled', [...disabledGroups].join(','));
+  storageSet('mask-disabled', [...disabledGroups].join(','));
 }
 
 /** Zwarty wiersz jednego typu PII (ikona + nazwa + kod + przełącznik). */
@@ -271,7 +283,7 @@ function buildRow(g: MaskGroup): HTMLLabelElement {
     else disabledGroups.add(g.key);
     persistDisabled();
     updateMaskTotal();
-    update();
+    updateNow();
   });
 
   label.append(ic, t, box);
@@ -362,8 +374,41 @@ maskTogglesEl.append(
 
 /* ── Akcje zbiorcze „Co maskować" + licznik ── */
 const maskCountOn = $<HTMLElement>('mask-count-on');
+const maskOffNote = $<HTMLElement>('mask-off-note');
+const maskOffText = $<HTMLElement>('mask-off-text');
+const maskOffReset = $<HTMLButtonElement>('mask-off-reset');
+
+/** Nazwa typu w środku zdania: „Telefon” → „telefon”, ale skrót zostaje („PESEL”, „IBAN / nr konta”). */
+function inSentence(label: string): string {
+  const first = label.split(/[\s/]/)[0];
+  return first.length > 1 && first === first.toUpperCase()
+    ? label
+    : label[0].toLowerCase() + label.slice(1);
+}
+
+/**
+ * Ostrzeżenie o wyłączonych typach. Wybór „Co maskować” jest zapamiętywany, więc wyłączony
+ * PESEL przechodzi jawny także jutro i w każdej kopii pliku; dlatego ostrzeżenie stoi stale przy
+ * wyniku, a nie tylko w sekcji przełączników. Pusty napis, gdy maskujemy wszystko.
+ */
+function maskOffSummary(): string {
+  const off = MASK_GROUPS.filter((g) => disabledGroups.has(g.key));
+  if (off.length === 0) return '';
+  if (off.length === MASK_GROUPS.length) {
+    return 'Maskowanie jest wyłączone dla wszystkich typów, więc wynik nie ukrywa żadnych danych.';
+  }
+  const what =
+    off.length > 5
+      ? `Nie maskuję ${off.length} ${plural(off.length, 'typu', 'typów', 'typów')} danych.`
+      : `Nie maskuję: ${off.map((g) => inSentence(g.label)).join(', ')}.`;
+  return `${what} Te dane zostaną w wyniku bez zmian.`;
+}
+
 function updateMaskTotal(): void {
   maskCountOn.textContent = String(MASK_GROUPS.length - disabledGroups.size);
+  const note = maskOffSummary();
+  maskOffText.textContent = note;
+  maskOffNote.hidden = !note;
 }
 function syncSwitches(): void {
   maskTogglesEl.querySelectorAll<HTMLInputElement>('.sw[data-key]').forEach((sw) => {
@@ -380,11 +425,18 @@ function bulkMask(mode: 'on' | 'off' | 'invert'): void {
   persistDisabled();
   syncSwitches();
   updateMaskTotal();
-  update();
+  updateNow();
 }
 $<HTMLButtonElement>('mask-all-on').addEventListener('click', () => bulkMask('on'));
 $<HTMLButtonElement>('mask-all-off').addEventListener('click', () => bulkMask('off'));
 $<HTMLButtonElement>('mask-invert').addEventListener('click', () => bulkMask('invert'));
+maskOffReset.addEventListener('click', () => {
+  // Przycisk znika razem z ostrzeżeniem, więc fokus z klawiatury przenosimy na wynik.
+  const hadFocus = document.activeElement === maskOffReset;
+  bulkMask('on');
+  announce('Włączono maskowanie wszystkich typów.');
+  if (hadFocus) output.focus({ preventScroll: true });
+});
 $('mask-count-total').textContent = String(MASK_GROUPS.length);
 updateMaskTotal();
 
@@ -395,22 +447,13 @@ function activeTypes(): PiiType[] | undefined {
 }
 
 const pseudonymsBox = $<HTMLInputElement>('pseudonyms');
-pseudonymsBox.checked = localStorage.getItem('pseudonyms') === '1';
+pseudonymsBox.checked = storageGet('pseudonyms') === '1';
 pseudonymsBox.addEventListener('change', () => {
-  localStorage.setItem('pseudonyms', pseudonymsBox.checked ? '1' : '');
-  update();
+  storageSet('pseudonyms', pseudonymsBox.checked ? '1' : '');
+  updateNow();
 });
 
 /* ── Renderowanie wyniku (numerowane linie, kolorowe znaczniki, tooltips) ── */
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
 
 // Rozpoznaje znaczniki [TOKEN] do podświetlenia/nawigacji w wyniku. Lista tokenów pochodzi
 // z PII_TOKENS (+ dynamiczne OSOBA-A/B…). Żaden token nie zawiera metaznaków regexu, a każdy
@@ -424,11 +467,6 @@ function maskHtml(name: string): string {
   return `<mark class="pii pii-${maskCategory(name)}" data-tip="${escapeHtml(maskTip(name))}" tabindex="0">[${name}]</mark>`;
 }
 
-/** Podświetl znaczniki w zanonimizowanym (zescape'owanym) tekście. */
-function highlightMasks(escaped: string): string {
-  return escaped.replace(MASK_TOKEN_RE, (_m, name: string) => maskHtml(name));
-}
-
 /** Owiń HTML w numerowane linie edytora (.cl / .no). */
 function wrapLines(html: string): string {
   return html
@@ -440,68 +478,74 @@ function wrapLines(html: string): string {
     .join('');
 }
 
-/**
- * Widok „Porównanie": oryginał przekreślony obok kolorowego znacznika (jak recenzja
- * Worda). Diff w O(n): nie-maskowe segmenty wyniku występują w oryginale dosłownie
- * i po kolei — luka między nimi to zamaskowana wartość.
- */
-function buildCompareHtml(original: string, redacted: string): string {
-  const tokens = redacted.split(MASK_TOKEN_RE);
-  let html = '';
-  let pos = 0;
-  let pending: string[] = [];
+// Powyżej tego progu wynik jest zwykłym tekstem: bez podświetleń, nawigacji i „Porównania”
+// (dziesiątki tysięcy znaczników z dymkami zamroziłyby kartę na wiele sekund).
+const HIGHLIGHT_LIMIT = 300_000;
+const isTooBig = (): boolean => lastRedacted.length > HIGHLIGHT_LIMIT;
 
-  const flush = (gapEnd: number) => {
-    if (pending.length) {
-      const orig = original.slice(pos, gapEnd);
-      if (orig) html += `<del>${escapeHtml(orig)}</del> `;
-      for (const name of pending) html += maskHtml(name);
-      pending = [];
-    }
-    pos = gapEnd;
-  };
+// Znaczniki, które stały już w tekście źródłowym (np. wklejono wynik wcześniejszej anonimizacji).
+let keptMasks = 0;
 
-  for (let i = 0; i < tokens.length; i++) {
-    if (i % 2 === 1) {
-      pending.push(tokens[i]);
-      continue;
-    }
-    const lit = tokens[i];
-    if (!lit) continue;
-    const idx = original.indexOf(lit, pos);
-    flush(idx === -1 ? pos : idx);
-    html += escapeHtml(lit);
-    pos += lit.length;
-  }
-  flush(original.length);
-  return html;
+const OUTPUT_HINT = outputHint.textContent ?? '';
+
+/** Podpowiedź pod nagłówkiem wyniku; przy długim tekście wyjaśnia, czemu nie ma podświetleń. */
+function syncOutputHint(): void {
+  const n = lastRedacted.length;
+  outputHint.textContent = isTooBig()
+    ? `długi tekst (${n.toLocaleString('pl-PL')} ${plural(n, 'znak', 'znaki', 'znaków')}): ` +
+      'wynik jest kompletny, ale bez podświetleń i porównania'
+    : OUTPUT_HINT;
 }
 
-const HIGHLIGHT_LIMIT = 300_000;
+function syncViewButtons(): void {
+  viewResultBtn.classList.toggle('on', viewMode === 'result');
+  viewCompareBtn.classList.toggle('on', viewMode === 'compare');
+  viewResultBtn.setAttribute('aria-pressed', String(viewMode === 'result'));
+  viewCompareBtn.setAttribute('aria-pressed', String(viewMode === 'compare'));
+}
 
 function renderOutput(): void {
   if (!lastRedacted) return;
-  output.classList.remove('plain');
-  if (lastRedacted.length > HIGHLIGHT_LIMIT) {
-    output.classList.add('plain');
+  const tooBig = isTooBig();
+  viewCompareBtn.disabled = tooBig;
+  if (tooBig && viewMode === 'compare') {
+    viewMode = 'result';
+    syncViewButtons();
+  }
+  syncOutputHint();
+  output.classList.toggle('plain', tooBig);
+  if (tooBig) {
+    keptMasks = 0;
     output.textContent = lastRedacted;
   } else {
-    const html =
-      viewMode === 'compare'
-        ? buildCompareHtml(lastInput, lastRedacted)
-        : highlightMasks(escapeHtml(lastRedacted));
+    // „Wynik” też idzie przez wyrównanie z oryginałem: dzięki temu znaczniki, które były już
+    // w tekście, nie są liczone ani podświetlane jako nowe wykrycia.
+    const { html, kept } = renderAligned(lastInput, lastRedacted, {
+      tokenRe: MASK_TOKEN_RE,
+      maskHtml,
+      compare: viewMode === 'compare',
+    });
+    keptMasks = kept;
     output.innerHTML = wrapLines(html);
   }
   refreshMaskNav();
 }
 
 function setViewMode(mode: 'result' | 'compare'): void {
+  if (mode === 'compare' && isTooBig()) mode = 'result';
+  const changed = mode !== viewMode;
   viewMode = mode;
-  viewResultBtn.classList.toggle('on', mode === 'result');
-  viewCompareBtn.classList.toggle('on', mode === 'compare');
-  viewResultBtn.setAttribute('aria-pressed', String(mode === 'result'));
-  viewCompareBtn.setAttribute('aria-pressed', String(mode === 'compare'));
+  syncViewButtons();
+  // Długi tekst wygląda tak samo w obu widokach, a ponowny render kosztowałby 1–1,5 s.
+  if (!changed || isTooBig()) return;
+  // Zachowaj pozycję: bieżący znacznik albo (bez przeglądania) proporcjonalne przewinięcie.
+  const prevIdx = maskIdx;
+  const prevN = maskEls.length;
+  const prevMax = output.scrollHeight - output.clientHeight;
+  const ratio = prevMax > 0 ? output.scrollTop / prevMax : 0;
   renderOutput();
+  if (prevIdx >= 0 && maskEls.length === prevN) goToMask(prevIdx);
+  else output.scrollTop = ratio * (output.scrollHeight - output.clientHeight);
 }
 
 viewResultBtn.addEventListener('click', () => setViewMode('result'));
@@ -704,46 +748,82 @@ function renderFindings(found: PiiFinding[]): void {
   findingsCard.hidden = false;
   // koercja licznika do liczby — obrona przed nie-liczbowym count (XSS/NaN)
   const total = found.reduce((s, f) => s + (Number(f.count) || 0), 0);
-  const byLabel = new Map<string, { count: number; cat: Cat; icon: string }>();
+  const byLabel = new Map<string, { count: number; cat: Cat; icon: string; token: string }>();
   for (const f of found) {
     const meta = CHIP_META[f.type] ?? { label: String(f.type), cat: 'ident' as Cat, icon: 'dane-id' };
     const prev = byLabel.get(meta.label);
-    byLabel.set(meta.label, { count: (prev?.count ?? 0) + (Number(f.count) || 0), cat: meta.cat, icon: meta.icon });
+    byLabel.set(meta.label, {
+      count: (prev?.count ?? 0) + (Number(f.count) || 0),
+      cat: meta.cat,
+      icon: meta.icon,
+      token: TYPE_TOKEN[f.type] ?? String(f.type),
+    });
   }
   const cats = new Set([...byLabel.values()].map((v) => v.cat)).size;
   statCount.textContent = String(total);
   statCats.textContent = String(cats);
+  const off = maskOffSummary();
+  const keptChip = keptMasks
+    ? ` <span class="chip chip-hint">w tekście były już znaczniki <span class="x">×${keptMasks}</span></span>`
+    : '';
 
   if (found.length === 0) {
-    const clean = disabledGroups.size > 0
-      ? '<span class="chip chip-hint">nic nie zamaskowano, część typów jest wyłączona w „Co maskować”</span>'
-      : '<span class="chip chip-ok">nie wykryto danych osobowych</span>';
-    findingsChips.innerHTML = clean;
-    findingsStatus.textContent = disabledGroups.size > 0 ? 'Nic nie zamaskowano.' : 'Nie wykryto danych osobowych.';
+    const allOff = disabledGroups.size === MASK_GROUPS.length;
+    const clean = allOff
+      ? '<span class="chip chip-hint">nic nie zamaskowano: maskowanie wszystkich typów jest wyłączone w „Co maskować”</span>'
+      : disabledGroups.size > 0
+        ? '<span class="chip chip-hint">nic nie zamaskowano, część typów jest wyłączona w „Co maskować”</span>'
+        : `<span class="chip chip-ok">nie wykryto ${keptMasks ? 'nowych ' : ''}danych osobowych</span>`;
+    findingsChips.innerHTML = clean + keptChip;
+    findingsStatus.textContent = off ? `Nic nie zamaskowano. ${off}` : 'Nie wykryto danych osobowych.';
     return;
   }
   // zwięzły komunikat dla czytnika ekranu (jeden, po debounce — nie zalewa)
-  findingsStatus.textContent = `Zamaskowano ${total} ${total === 1 ? 'fragment' : 'fragmentów'} w ${cats} ${cats === 1 ? 'kategorii' : 'kategoriach'}.`;
-  findingsChips.innerHTML = [...byLabel.entries()]
-    .map(
-      ([label, v]) =>
-        `<button type="button" class="chip chip-nav ch-${v.cat}" data-cat="${v.cat}" ` +
-        `data-tip="Przejdź do fragmentów tej kategorii w wyniku"><i class="gi">${icon(v.icon)}</i>` +
-        `${escapeHtml(label)} <span class="x">×${v.count}</span></button>`,
-    )
-    .join(' ');
+  findingsStatus.textContent =
+    `Zamaskowano ${total} ${total === 1 ? 'fragment' : 'fragmentów'} w ${cats} ${cats === 1 ? 'kategorii' : 'kategoriach'}.` +
+    (off ? ` ${off}` : '');
+  // Długi tekst nie ma znaczników w wyniku (zwykły tekst), więc chipy są wtedy tylko licznikami.
+  const nav = !isTooBig();
+  findingsChips.innerHTML =
+    [...byLabel.entries()]
+      .map(([label, v]) => {
+        const body = `<i class="gi">${icon(v.icon)}</i>${escapeHtml(label)} <span class="x">×${v.count}</span>`;
+        return nav
+          ? `<button type="button" class="chip chip-nav ch-${v.cat}" data-token="${escapeHtml(v.token)}" ` +
+              `data-tip="Przejdź do kolejnego fragmentu tego typu w wyniku">${body}</button>`
+          : `<span class="chip ch-${v.cat}">${body}</span>`;
+      })
+      .join(' ') + keptChip;
 }
 
-// Klik w chip „Zamaskowano" → skok do kolejnego znacznika tej kategorii w wyniku (cyklicznie).
+/** Przewiń stronę do wyniku, jeśli jest poza ekranem (np. chip kliknięty na telefonie, pod wynikiem). */
+function revealOutput(): void {
+  const r = output.getBoundingClientRect();
+  const visibleH = window.visualViewport?.height ?? window.innerHeight;
+  if (r.top >= 0 && r.bottom <= visibleH) return;
+  const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  output.scrollIntoView({ block: 'nearest', behavior: smooth ? 'smooth' : 'auto' });
+}
+
+// Klik w chip „Zamaskowano” → skok do kolejnego znacznika TEGO typu w wyniku (cyklicznie).
+// Dopasowanie po tokenie, nie po kategorii: „PESEL” nie może prowadzić do [NIP].
 findingsChips.addEventListener('click', (e) => {
   const chip = (e.target as HTMLElement | null)?.closest?.('button.chip-nav') as HTMLElement | null;
-  const cat = chip?.dataset.cat;
-  if (!cat || !maskEls.length) return;
-  const cls = `pii-${cat}`;
+  const token = chip?.dataset.token;
+  if (!token || !maskEls.length) return;
+  const want = `[${token}]`;
+  // W trybie „Rozróżniaj osoby” imię i nazwisko ma w wyniku etykiety [OSOBA-A], [OSOBA-B]…
+  const isPerson = token === 'IMIĘ I NAZWISKO';
+  const match = (el: HTMLElement): boolean =>
+    el.textContent === want || (isPerson && personLabel(el) !== null);
   const n = maskEls.length;
   for (let step = 1; step <= n; step++) {
-    const j = (((maskIdx + step) % n) + n) % n;
-    if (maskEls[j].classList.contains(cls)) { goToMask(j); return; }
+    const j = (maskIdx + step) % n; // maskIdx ≥ -1, więc indeks nie bywa ujemny
+    if (match(maskEls[j])) {
+      revealOutput();
+      goToMask(j);
+      return;
+    }
   }
 });
 
@@ -760,6 +840,8 @@ function updateSrcMeta(text: string): void {
 }
 
 function renderResult(redacted: string, found: PiiFinding[]): void {
+  // Nowy wynik: „Skopiowano ✓” dotyczyło poprzedniego, więc etykieta wraca do „Kopiuj”.
+  if (redacted !== lastRedacted) copyFlash.reset();
   lastRedacted = redacted;
   lastInput = input.value;
   setResultActions(true);
@@ -767,10 +849,23 @@ function renderResult(redacted: string, found: PiiFinding[]): void {
   renderFindings(found);
 }
 
+// Debounce: przy szybkim pisaniu nie odpalaj pełnego pipeline'u (26 przebiegów + przerender)
+// na każdy znak. Licznik znaków/wierszy aktualizujemy NATYCHMIAST (tani), redakcję później.
+let updateTimer: ReturnType<typeof setTimeout> | undefined;
+let updatePending = false; // tekst zmienił się od ostatniego przeliczenia
+let lastUpdateMs = 0; // zmierzony czas ostatniego przeliczenia (redakcja, render, odmalowanie)
+// Przeliczenie dłuższe niż to blokuje kartę zauważalnie: najpierw pokazujemy „Analizuję…”.
+const SLOW_UPDATE_MS = 300;
+
 function update(): void {
+  clearTimeout(updateTimer);
+  updateTimer = undefined;
+  updatePending = false;
+  const t0 = performance.now();
   const text = input.value;
   updateSrcMeta(text);
   if (!text.trim()) {
+    copyFlash.reset();
     output.classList.remove('plain');
     output.innerHTML =
       '<span class="placeholder">Tu pojawi się zanonimizowany wynik, na przykład ' +
@@ -778,10 +873,15 @@ function update(): void {
       'Wklej tekst po lewej albo kliknij „Przykład" powyżej.</span>';
     findingsCard.hidden = true;
     lastRedacted = '';
+    keptMasks = 0;
     maskEls = [];
     maskIdx = -1;
     maskNav.hidden = true; // placeholder zawiera przykładowe znaczniki — nie nawigujemy po nich
+    viewCompareBtn.disabled = false;
+    syncOutputHint();
     setResultActions(false);
+    measureSeq++; // zaległy pomiar długiego tekstu już nie obowiązuje
+    lastUpdateMs = 0;
     return;
   }
   const { redacted, found } = redactPII(text, {
@@ -789,19 +889,73 @@ function update(): void {
     pseudonyms: pseudonymsBox.checked,
   });
   renderResult(redacted, found);
+  measureUpdate(t0);
 }
 
-// Debounce: przy szybkim pisaniu nie odpalaj pełnego pipeline'u (26 przebiegów + przerender)
-// na każdy znak. Licznik znaków/wierszy aktualizujemy NATYCHMIAST (tani), redakcję po ~140 ms.
-let updateTimer: ReturnType<typeof setTimeout> | undefined;
+/**
+ * Koszt przeliczenia liczymy aż do odmalowania: przy długim tekście sam JS to ułamek, a większość
+ * czasu zajmuje układ strony z tysiącami znaczników (osobne zadanie po wstawieniu HTML). Zegar
+ * zatrzymujemy w zadaniu po klatce. Pomiar odrzucamy, jeśli w międzyczasie było nowe przeliczenie.
+ */
+let measureSeq = 0;
+function measureUpdate(t0: number): void {
+  lastUpdateMs = performance.now() - t0;
+  const seq = ++measureSeq;
+  requestAnimationFrame(() =>
+    setTimeout(() => {
+      if (seq === measureSeq) lastUpdateMs = performance.now() - t0;
+    }, 0),
+  );
+}
+
+/** Stan „liczę”: wynik przygasa, a podpowiedź mówi „Analizuję…”, dopóki nie ma nowego wyniku. */
+function setBusy(on: boolean): void {
+  output.classList.toggle('is-busy', on);
+  if (on) {
+    output.setAttribute('aria-busy', 'true');
+    outputHint.textContent = 'Analizuję…';
+  } else {
+    output.removeAttribute('aria-busy');
+    syncOutputHint();
+  }
+}
+
+/**
+ * Przelicz teraz. Przy długim tekście przeliczenie trwa sekundy i blokuje kartę, więc najpierw
+ * pokazujemy „Analizuję…” i dajemy przeglądarce jedną klatkę na odmalowanie, a dopiero potem liczymy.
+ */
+function updateNow(): void {
+  updatePending = true;
+  clearTimeout(updateTimer);
+  if (lastUpdateMs < SLOW_UPDATE_MS) {
+    update();
+    return;
+  }
+  setBusy(true);
+  requestAnimationFrame(() =>
+    setTimeout(() => {
+      if (updatePending) update(); // mogło już przeliczyć np. „Kopiuj”
+      setBusy(false);
+    }, 0),
+  );
+}
+
+/** Przed kopiowaniem i pobraniem: wynik musi odpowiadać temu, co jest w polu w tej chwili. */
+function flushPendingUpdate(): void {
+  if (updatePending) update();
+}
+
 input.addEventListener('input', () => {
   // Własna edycja zamyka komunikaty: stary błąd już nie dotyczy, a „Cofnij” po edycji
   // przywróciłby tekst sprzed niej i skasował to, co właśnie wpisano.
   clearError();
   dismissNote();
   updateSrcMeta(input.value);
+  updatePending = true;
   clearTimeout(updateTimer);
-  updateTimer = setTimeout(update, 140);
+  // Pauza dopasowana do zmierzonego kosztu: krótki tekst po 140 ms, długi dopiero po przerwie
+  // w pisaniu (inaczej każda pauza między słowami zamrażałaby kartę na kilka sekund).
+  updateTimer = setTimeout(updateNow, Math.min(2000, Math.max(140, lastUpdateMs * 1.5)));
 });
 
 /* ── Akcje ── */
@@ -884,18 +1038,24 @@ clearBtn.addEventListener('click', () => {
   replaceSource('', 'Wyczyszczono tekst.');
 });
 
-function flashCopy(text: string): void {
-  const prev = copyLabel.textContent;
-  copyLabel.textContent = text;
-  setTimeout(() => (copyLabel.textContent = prev), 1500);
+/** Komunikat dla czytnika ekranu. Ten sam tekst dwa razy z rzędu też ma zostać odczytany,
+    więc region najpierw czyścimy, a treść wstawiamy chwilę później. */
+function announce(msg: string): void {
+  srStatus.textContent = '';
+  setTimeout(() => (srStatus.textContent = msg), 60);
 }
 
+const copyFlash = makeFlash((t) => (copyLabel.textContent = t), 'Kopiuj');
+
 copyBtn.addEventListener('click', async () => {
+  flushPendingUpdate();
   if (!lastRedacted) return;
   try {
     await navigator.clipboard.writeText(lastRedacted);
-    flashCopy('Skopiowano ✓');
+    copyFlash.show('Skopiowano ✓');
+    announce('Skopiowano wynik do schowka.');
   } catch {
+    const prevFocus = document.activeElement as HTMLElement | null;
     const ta = document.createElement('textarea');
     ta.value = lastRedacted;
     ta.style.position = 'fixed';
@@ -904,12 +1064,23 @@ copyBtn.addEventListener('click', async () => {
     ta.select();
     const ok = document.execCommand('copy');
     ta.remove();
-    flashCopy(ok ? 'Skopiowano ✓' : 'Kopiuj');
-    if (!ok) showError('Kopiowanie zablokowane przez przeglądarkę: zaznacz wynik i naciśnij Ctrl+C.');
+    prevFocus?.focus({ preventScroll: true }); // select() zabrał fokus do usuniętego pola
+    if (ok) {
+      copyFlash.show('Skopiowano ✓');
+      announce('Skopiowano wynik do schowka.');
+    } else {
+      copyFlash.reset();
+      showError(
+        viewMode === 'compare'
+          ? 'Kopiowanie zablokowane przez przeglądarkę: przełącz na widok „Wynik”, zaznacz tekst i naciśnij Ctrl+C.'
+          : 'Kopiowanie zablokowane przez przeglądarkę: zaznacz wynik i naciśnij Ctrl+C.',
+      );
+    }
   }
 });
 
 downloadBtn.addEventListener('click', () => {
+  flushPendingUpdate();
   if (!lastRedacted) return;
   const blob = new Blob([lastRedacted], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob);
@@ -1069,10 +1240,12 @@ window.addEventListener('drop', (e) => {
   if (hasFiles(e)) loadDropped(e.dataTransfer?.files);
 });
 
-// Ctrl/Cmd+Enter — kopiuj wynik
+// Ctrl/Cmd+Enter — kopiuj wynik. Najpierw dokończ odłożone przeliczenie: tuż po wklejeniu do
+// pustego pola przycisk jest jeszcze wyłączony, a click() na wyłączonym nic nie robi.
 document.addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
     e.preventDefault();
+    flushPendingUpdate();
     copyBtn.click();
   }
 });
