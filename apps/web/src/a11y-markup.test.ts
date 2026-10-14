@@ -25,4 +25,8 @@ test('landing: tabela, nagłówki i statystyki demo dla czytnika ekranu', () => 
   expect(landingHtml.match(/<th scope="row" class="cmp-feat">/g)).toHaveLength(7);
   expect(landingHtml).not.toContain('<td class="cmp-feat">');
   expect(landingHtml).toMatch(/<table aria-labelledby="porownanie-h">/);
+  // na telefonie tabela staje się kartami, a nazwę kolumny przy odpowiedzi daje data-label
+  expect(landingHtml.match(/<td data-label="(Parawan|Narzędzie w chmurze|Ręczne czyszczenie)"/g)).toHaveLength(21);
+  // wynik demo przyjmuje fokus: klik w niego i Ctrl+A zaznacza sam wynik, nie całą stronę
+  expect(landingHtml).toMatch(/id="demo-output"[^>]*tabindex="0"/);
 });

@@ -304,6 +304,8 @@ p { text-wrap: pretty; }
   white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;
 }
 textarea.editor { resize: vertical; }
+/* domyślny szary przeglądarki dawał na kremowym tle 4,4:1 (WCAG 1.4.3); --mut też jest za jasny */
+textarea.editor::placeholder { color: var(--mut-2); opacity: 1; }
 /* pełny obrys jak przy innych kontrolkach (sam cień --acc-soft był niewidoczny); promień
    podany jawnie, bo ogólne :focus-visible ustawia 4 px */
 textarea.editor:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; border-radius: var(--r-ctl); }
@@ -572,11 +574,26 @@ p.bench-note { font-size: 12.5px; color: var(--mut-2); margin-top: 10px; line-he
   /* „Kopiuj wynik” wypełnia rząd zamiast stać sam przy lewej krawędzi */
   #demo-copy { flex: 1 1 auto; justify-content: center; }
 }
+/* Tabela porównania na telefonie jako karty: kryterium jako nagłówek, pod nim trzy odpowiedzi
+   z nazwą kolumny (data-label). Cztery kolumny nie mieściły się poniżej ok. 430 px nawet przy
+   12 px czcionki, a przy 320 px ginęło 54 px ostatniej kolumny. Nagłówki kolumn zostają
+   dla czytnika ekranu. */
+@media (max-width: 480px) {
+  .table-wrap :is(table, tbody, tr, th, td) { display: block; }
+  .table-wrap thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .table-wrap tbody tr { padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .table-wrap tbody tr:last-child { border-bottom: none; }
+  .table-wrap tbody th { padding: 0 0 6px; border: 0; font-size: 14.5px; }
+  .table-wrap td {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+    padding: 4px 8px; margin-inline: -8px; border: 0; border-radius: 6px;
+    text-align: right; font-size: 13.5px;
+  }
+  .table-wrap td::before { content: attr(data-label); color: var(--mut-2); text-align: left; }
+}
 @media (max-width: 400px) {
   /* napis nad H1 mieści się w jednym wierszu pigułki także przy 320 px */
   .hero-eyebrow { font-size: 10.5px; letter-spacing: .06em; padding-inline: 12px; }
-  th, td { padding: 9px 5px; font-size: 12px; }
-  thead th { font-size: 9.5px; letter-spacing: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

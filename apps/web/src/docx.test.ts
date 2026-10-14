@@ -139,6 +139,111 @@ test('document.xml deklarujący rozmiar ponad limit odrzucony bez rozpakowywania
   expect(() => extractDocxText(zip)).toThrow(/zbyt duży albo uszkodzony/);
 });
 
+/**
+ * Surowy strumień deflate (stałe kody Huffmana): `prefix`, spacja, `pairs` razy „długość 258,
+ * odległość 1” (każde to 258 spacji) i `suffix`. 13 bitów rozwija się w 258 bajtów, więc kilka MB
+ * pliku daje gigabajt tekstu, bez kompresowania gigabajta w teście.
+ */
+function deflateBomb(prefix: string, pairs: number, suffix: string): Uint8Array {
+  const out = new Uint8Array(Math.ceil((pairs * 13 + (prefix.length + suffix.length + 1) * 8 + 20) / 8) + 1);
+  let bit = 0;
+  const bits = (value: number, n: number): void => {
+    for (let i = 0; i < n; i++, bit++) if ((value >> i) & 1) out[bit >> 3] |= 1 << (bit & 7);
+  };
+  // kody Huffmana idą od najstarszego bitu
+  const code = (value: number, n: number): void => {
+    for (let i = n - 1; i >= 0; i--, bit++) if ((value >> i) & 1) out[bit >> 3] |= 1 << (bit & 7);
+  };
+  const literal = (s: string): void => {
+    for (const ch of strToU8(s)) code(0x30 + ch, 8); // bajty 0–143: 8 bitów
+  };
+  bits(1, 1); // ostatni blok
+  bits(1, 2); // stałe kody Huffmana
+  literal(prefix + ' ');
+  for (let i = 0; i < pairs; i++) {
+    code(0b11000101, 8); // symbol 285: długość 258
+    code(0, 5); // odległość 1
+  }
+  literal(suffix);
+  code(0, 7); // koniec bloku
+  return out.subarray(0, Math.ceil(bit / 8));
+}
+
+/** ZIP z jednym wpisem deflate i rozmiarem po rozpakowaniu podanym wprost (może kłamać). */
+function zipWithDeflated(name: string, data: Uint8Array, originalSize: number): Uint8Array {
+  const nm = strToU8(name);
+  const zip = new Uint8Array(30 + nm.length + data.length + 46 + nm.length + 22);
+  const v = new DataView(zip.buffer);
+  v.setUint32(0, 0x04034b50, true);
+  v.setUint16(8, 8, true);
+  v.setUint32(18, data.length, true);
+  v.setUint32(22, originalSize, true);
+  v.setUint16(26, nm.length, true);
+  zip.set(nm, 30);
+  zip.set(data, 30 + nm.length);
+  const cd = 30 + nm.length + data.length;
+  v.setUint32(cd, 0x02014b50, true);
+  v.setUint16(cd + 10, 8, true);
+  v.setUint32(cd + 20, data.length, true);
+  v.setUint32(cd + 24, originalSize, true);
+  v.setUint16(cd + 28, nm.length, true);
+  zip.set(nm, cd + 46);
+  const end = cd + 46 + nm.length;
+  v.setUint32(end, 0x06054b50, true);
+  v.setUint16(end + 8, 1, true);
+  v.setUint16(end + 10, 1, true);
+  v.setUint32(end + 12, 46 + nm.length, true);
+  v.setUint32(end + 16, cd, true);
+  return zip;
+}
+
+test('document.xml z fałszywym, zaniżonym rozmiarem: rozpakowanie przerwane od razu', () => {
+  const head = '<w:document><w:body><w:p><w:r><w:t>Jan';
+  const tail = 'Kowalski</w:t></w:r></w:p></w:body></w:document>';
+  // uczciwy wpis z ręcznie zbudowanym strumieniem czyta się normalnie
+  const honest = zipWithDeflated(
+    'word/document.xml',
+    deflateBomb(head, 2, tail),
+    head.length + 1 + 2 * 258 + tail.length,
+  );
+  expect(extractDocxText(honest)).toBe(`Jan${' '.repeat(1 + 2 * 258)}Kowalski`);
+  // ok. 1 GB spacji w 6,5 MB, a nagłówek deklaruje tyle, ile przepuszcza filtr proporcji
+  const bomb = deflateBomb(head, 4_000_000, tail);
+  const lying = zipWithDeflated('word/document.xml', bomb, Math.ceil(bomb.length / 1.2) + 1);
+  const t0 = performance.now();
+  expect(() => extractDocxText(lying)).toThrow(/zbyt duży albo uszkodzony/);
+  expect(performance.now() - t0).toBeLessThan(300);
+});
+
+test('wpis zapisany bez kompresji (metoda 0) też jest czytany', () => {
+  const zip = zipSync(
+    { 'word/document.xml': strToU8('<w:p><w:r><w:t>Anna Nowak</w:t></w:r></w:p>') },
+    { level: 0 },
+  );
+  expect(extractDocxText(zip)).toBe('Anna Nowak');
+});
+
+test('tysiące zagnieżdżonych albo niedomkniętych mc:Fallback i w:t: tekst w ułamku sekundy', () => {
+  const K = 60_000;
+  const nested = makeDocx(
+    '<w:p><w:r><w:t>A</w:t></w:r></w:p>' +
+      '<mc:Fallback>'.repeat(K) +
+      '<w:p><w:r><w:t>X</w:t></w:r></w:p>' +
+      '</mc:Fallback>'.repeat(K) +
+      '<w:p><w:r><w:t>B</w:t></w:r></w:p>',
+  );
+  const unclosed = makeDocx(
+    '<w:p><w:r><w:t>A</w:t></w:r></w:p>' +
+      '<mc:Fallback a'.repeat(K) +
+      '<w:t a'.repeat(K) +
+      '<w:p><w:r><w:t>B</w:t></w:r></w:p>',
+  );
+  const t0 = performance.now();
+  expect(extractDocxText(nested)).toBe('A\nB');
+  expect(extractDocxText(unclosed)).toBe('A\nB');
+  expect(performance.now() - t0).toBeLessThan(500);
+});
+
 test('document.xml z rozmiarem zaniżonym względem skompresowanego odrzucony', () => {
   // pseudolosowe cyfry słabo się kompresują: skompresowany wpis ma kilka KB
   let seed = 1;

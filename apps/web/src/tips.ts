@@ -5,7 +5,8 @@
    - zamykanie klawiszem Esc (WCAG 1.4.13),
    - dociśnięcie dymka do krawędzi okna albo edytora (na telefonie wychodził poza ekran),
    - ochrona przed kliknięciem w sam dymek: pseudo-element należy do elementu, więc klik
-     w dymek nad wierszem „Co maskować” przełączałby ten wiersz. */
+     w dymek nad wierszem „Co maskować” przełączałby ten wiersz. Taki klik dostaje element,
+     który dymek zasłania. */
 
 /** Margines dymka od krawędzi okna albo edytora (px). */
 const EDGE = 8;
@@ -37,6 +38,22 @@ export function tipFlipUp(
   const below = bounds.bottom - anchor.bottom;
   const above = anchor.top - bounds.top;
   return below < height && above > below;
+}
+
+/**
+ * Naturalna lewa krawędź dymka (przed dociśnięciem) w układzie okna. `box` to wnętrze elementu,
+ * czyli blok zawierający dymek. Dymek zaczepiony z lewej stoi na `offset` od lewego brzegu
+ * (wyśrodkowany: translateX(-50%), więc cofa się o połowę własnej szerokości), zaczepiony z prawej
+ * kończy się `offset` przed prawym brzegiem. Przesunięcie liczymy z szerokości, a nie z macierzy
+ * transform: po zwężeniu dymka (--tip-max) przeglądarka podawała jeszcze macierz dla starej szerokości.
+ */
+export function tipNaturalLeft(
+  box: { left: number; right: number },
+  width: number,
+  place: { anchor: 'left' | 'right'; offset: number; centered: boolean },
+): number {
+  if (place.anchor === 'right') return box.right - place.offset - width;
+  return box.left + place.offset - (place.centered ? width / 2 : 0);
 }
 
 /** Element, do którego należy dymek pod wskaźnikiem albo fokusem. */
@@ -120,51 +137,88 @@ const px = (v: string): number => Number.parseFloat(v) || 0;
 /** Wymiary dymka (::after) razem z wcięciem i ramką; null, gdy dymek nie jest wyświetlany. */
 function measure(
   el: HTMLElement,
-): { a: CSSStyleDeclaration; w: number; h: number; extraW: number } | null {
+): { a: CSSStyleDeclaration; w: number; h: number; extraW: number; extraH: number } | null {
   const a = getComputedStyle(el, '::after');
   if (a.display === 'none' || a.content === 'none') return null;
   const extraW =
     px(a.paddingLeft) + px(a.paddingRight) + px(a.borderLeftWidth) + px(a.borderRightWidth);
   const extraH =
     px(a.paddingTop) + px(a.paddingBottom) + px(a.borderTopWidth) + px(a.borderBottomWidth);
-  return { a, w: px(a.width) + extraW, h: px(a.height) + extraH, extraW };
+  return { a, w: px(a.width) + extraW, h: px(a.height) + extraH, extraW, extraH };
 }
 
-/**
- * Dociśnij dymek do granic okna (albo edytora, który przycina przewijaną treść) i w edytorze
- * otwórz go w górę, jeśli pod znacznikiem nie ma miejsca. Szerokość dymka znamy dopiero, gdy
- * jest wyświetlany (w spoczynku ma display:none), więc przy pierwszym podejściu bez wymiarów
- * próbujemy jeszcze raz w następnej klatce.
- */
-function placeTip(el: HTMLElement, retry = true): void {
-  el.style.removeProperty('--tip-dx');
-  el.style.removeProperty('--tip-max');
-  delete el.dataset.tipFlip;
-  let m = measure(el);
-  if (!m) {
-    if (retry) requestAnimationFrame(() => placeTip(el, false));
-    return;
-  }
+/** Granice dymka: edytor, który przycina przewijaną treść, a poza nim okno. */
+function tipBounds(el: HTMLElement): {
+  ed: HTMLElement | null;
+  b: { left: number; right: number; top: number; bottom: number };
+} {
   const vw = document.documentElement.clientWidth;
   const ed = el.closest<HTMLElement>('.editor');
   const er = ed?.getBoundingClientRect();
   const b = er
     ? { left: Math.max(er.left, 0), right: Math.min(er.right, vw), top: er.top, bottom: er.bottom }
     : { left: 0, right: vw, top: 0, bottom: window.innerHeight };
-  // Dymek szerszy niż dostępne miejsce: zwęź go (treść się zawinie) i zmierz od nowa.
-  const room = b.right - b.left - 2 * EDGE;
-  if (m.w > room && room > 60) {
-    el.style.setProperty('--tip-max', `${Math.floor(room - m.extraW)}px`);
-    m = measure(el) ?? m;
+  return { ed, b };
+}
+
+/**
+ * Dociśnij dymek do granic okna albo edytora i w edytorze otwórz go w górę, jeśli pod
+ * znacznikiem nie ma miejsca. Zwężenie (--tip-max) liczymy z samego miejsca, bez pomiaru:
+ * Chromium podaje wymiary pseudo-elementu z ostatniej odmalowanej klatki, więc szerokość
+ * zmierzona tuż po zmianie --tip-max była jeszcze stara. Dymek lądował wtedy za prawym brzegiem
+ * edytora, a przy ponownym najechaniu nie był zwężany wcale. Przesunięcie liczymy od razu,
+ * a po odmalowaniu klatki jeszcze raz, już z aktualnych wymiarów. W spoczynku dymek ma
+ * display:none, więc pierwszy pomiar bywa pusty i wtedy liczy się tylko ten drugi.
+ */
+function placeTip(el: HTMLElement): void {
+  el.style.removeProperty('--tip-dx');
+  delete el.dataset.tipFlip;
+  const a = getComputedStyle(el, '::after');
+  if (a.content === 'none') return;
+  const { b } = tipBounds(el);
+  const extraW =
+    px(a.paddingLeft) + px(a.paddingRight) + px(a.borderLeftWidth) + px(a.borderRightWidth);
+  // Mniej miejsca niż domyślne 250 px: dymek dostaje węższy max-width i zawija treść.
+  const cap = Math.floor(b.right - b.left - 2 * EDGE - extraW);
+  if (cap < 250 && cap > 40) el.style.setProperty('--tip-max', `${cap}px`);
+  else el.style.removeProperty('--tip-max');
+  shiftTip(el);
+  requestAnimationFrame(() => setTimeout(() => shiftTip(el), 0));
+}
+
+/** Przesunięcie i kierunek dymka z bieżących wymiarów; nic, gdy dymek nie jest wyświetlany. */
+function shiftTip(el: HTMLElement): void {
+  let m = measure(el);
+  if (!m) return;
+  // Wymiary bywają sprzed zwężenia z placeTip. Szerokość przycinamy wtedy do max-width (treść
+  // była szersza, więc zwężony dymek ma dokładnie tyle), a wysokość szacujemy z liczby linii:
+  // liczy się tylko do wyboru kierunku.
+  const cap = px(el.style.getPropertyValue('--tip-max'));
+  const contentW = m.w - m.extraW;
+  if (cap && contentW > cap + 0.5) {
+    const lh = px(m.a.lineHeight) || 17;
+    const lines = Math.max(1, Math.round((m.h - m.extraH) / lh));
+    m = { ...m, w: cap + m.extraW, h: Math.ceil((lines * contentW) / cap) * lh + m.extraH };
   }
-  // Naturalna lewa krawędź: blok zawierający to wnętrze elementu, do tego left i transform z CSS.
+  const { ed, b } = tipBounds(el);
+  // Naturalna lewa krawędź: blok zawierający to wnętrze elementu (bez ramek), do tego left albo
+  // right z CSS. Wariant data-tip-pos="left" rośnie w lewo od prawego brzegu (right: -6px).
+  // Ramki są symetryczne, a clientWidth elementu w linii (znacznik w wyniku) wynosi 0, więc
+  // prawy brzeg wnętrza liczymy od prostokąta.
   const r = el.getBoundingClientRect();
-  const tf =
-    m.a.transform && m.a.transform !== 'none' ? new DOMMatrixReadOnly(m.a.transform).m41 : 0;
-  const left = r.left + el.clientLeft + px(m.a.left) + tf;
+  const box = { left: r.left + el.clientLeft, right: r.right - el.clientLeft };
+  const left = tipNaturalLeft(
+    box,
+    m.w,
+    el.dataset.tipPos === 'left'
+      ? { anchor: 'right', offset: px(m.a.right), centered: false }
+      : { anchor: 'left', offset: px(m.a.left), centered: m.a.transform !== 'none' },
+  );
   const dx = tipShift(left, m.w, b);
   if (dx) el.style.setProperty('--tip-dx', `${dx}px`);
+  else el.style.removeProperty('--tip-dx');
   if (ed && tipFlipUp(r, m.h, b)) el.dataset.tipFlip = 'up';
+  else delete el.dataset.tipFlip;
 }
 
 /* ── Zamykanie i klik w dymek ── */
@@ -216,11 +270,26 @@ export function initTips(): void {
   // Dymek przyjmuje wskaźnik (WCAG 1.4.13: można na niego najechać), a jako pseudo-element
   // należy do elementu. Klik, dwuklik i przeciągnięcie poza prostokątem samego elementu trafiły
   // więc w dymek i nie mogą uruchomić przycisku, linku, przełącznika ani uchwytu wysokości.
-  const inTip = (e: MouseEvent): boolean => {
+  /** Właściciel dymka, w który trafiło zdarzenie; null, gdy trafiło w sam element albo obok. */
+  const tipHit = (e: MouseEvent): HTMLElement | null => {
     const owner = tipOwner(e.target);
-    if (!owner) return false;
+    if (!owner) return null;
     const r = owner.getBoundingClientRect();
-    return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
+    const outside =
+      e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
+    return outside ? owner : null;
+  };
+  // Klik w dymek trafia w to, co dymek zasłania: wiersz „Co maskować” nad najechanym albo znacznik
+  // w następnej linii wyniku. Wcześniej ginął, a kolejne też, bo dymek dalej wisiał pod kursorem.
+  // Dymek najpierw znika (jak po Esc), inaczej elementFromPoint znalazłby znowu jego właściciela.
+  // Przodka właściciela pomijamy: klik w dymek „?” nie może zwinąć sekcji, w której stoi „?”.
+  const forwardClick = (e: MouseEvent, owner: HTMLElement): void => {
+    dismissed = owner;
+    root.classList.add('tips-off');
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    if (under instanceof HTMLElement && !owner.contains(under) && !under.contains(owner)) {
+      under.click(); // detail 0, więc ten nasłuch go przepuści
+    }
   };
   for (const type of ['click', 'dblclick', 'pointerdown'] as const) {
     document.addEventListener(
@@ -228,9 +297,11 @@ export function initTips(): void {
       (e) => {
         // klik z klawiatury albo click() z kodu nie ma położenia (detail 0)
         if (type !== 'pointerdown' && e.detail === 0) return;
-        if (!inTip(e)) return;
+        const owner = tipHit(e);
+        if (!owner) return;
         if (type !== 'pointerdown') e.preventDefault();
         e.stopPropagation();
+        if (type === 'click') forwardClick(e, owner);
       },
       true,
     );

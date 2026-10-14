@@ -95,6 +95,35 @@ test('dawny znacznik przed nową wartością: tylko nowa wartość jest przekre�
   expect(html.match(/<mark>/g)).toHaveLength(1);
 });
 
+test('dawny znacznik tuż za nową wartością, oddzielony samą spacją, nie jest nowym wykryciem', () => {
+  const original = 'Jan Kowalski [PESEL] i tel. 600 700 800';
+  const { redacted, found } = redactPII(original);
+  expect(redacted).toBe('[IMIĘ I NAZWISKO] [PESEL] i tel. [TELEFON]');
+  const total = found.reduce((s, f) => s + f.count, 0);
+  for (const compare of [false, true]) {
+    const { html, kept } = renderAligned(original, redacted, { tokenRe: TOKEN_RE, maskHtml, compare });
+    expect(kept).toBe(1);
+    // nawigacja (znaczniki <mark>) zgadza się z licznikiem „Zamaskowano”
+    expect(html.match(/<mark>/g)).toHaveLength(2);
+    expect(html.match(/<mark>/g)).toHaveLength(total);
+    expect(html).toContain('</mark> [PESEL] i tel.');
+    if (compare) expect(dels(html)).toEqual(['Jan Kowalski', '600 700 800']);
+    expect(selectable(html)).toBe(redacted);
+  }
+});
+
+test('kilka dawnych znaczników na końcu grupy i nowa wartość tego samego typu przed nimi', () => {
+  // „44051401359 [PESEL]”: nowy PESEL i dawny znacznik PESEL obok siebie
+  const original = 'Dane: Jan Kowalski 44051401359 [PESEL] [TELEFON].';
+  const { redacted } = redactPII(original);
+  expect(redacted).toBe('Dane: [IMIĘ I NAZWISKO] [PESEL] [PESEL] [TELEFON].');
+  const { html, kept } = renderAligned(original, redacted, { tokenRe: TOKEN_RE, maskHtml, compare: true });
+  expect(kept).toBe(2);
+  expect(html.match(/<mark>/g)).toHaveLength(2);
+  expect(dels(html)).toEqual(['Jan Kowalski 44051401359']);
+  expect(selectable(html)).toBe(redacted);
+});
+
 test('widok „Wynik”: ten sam tekst co wynik, bez oryginału', () => {
   const original = 'Jan Kowalski, PESEL 44051401359, tel. 600 700 800 <b>&</b>';
   const { redacted } = redactPII(original);

@@ -166,7 +166,7 @@
           </div>
           <div class="demo-pane">
             <div class="demo-plabel"><span class="d d-out"></span>Wynik zanonimizowany</div>
-            <div id="demo-output" class="editor" role="region" aria-label="Wynik anonimizacji" translate="no"></div>
+            <div id="demo-output" class="editor" role="region" tabindex="0" aria-label="Wynik anonimizacji" translate="no"></div>
           </div>
         </div>
         <div class="demo-foot">
@@ -381,13 +381,13 @@
             </tr>
           </thead>
           <tbody>
-            <tr><th scope="row" class="cmp-feat">Dane opuszczają urządzenie</th><td class="center col-parawan"><span class="yes">nigdy</span></td><td class="center"><span class="no">tak</span></td><td class="center"><span class="yes">nie</span></td></tr>
-            <tr><th scope="row" class="cmp-feat">Wymaga konta / logowania</th><td class="center col-parawan"><span class="yes">nie</span></td><td class="center"><span class="no">zwykle tak</span></td><td class="center"><span class="yes">nie</span></td></tr>
-            <tr><th scope="row" class="cmp-feat">Działa offline</th><td class="center col-parawan"><span class="yes">tak</span></td><td class="center"><span class="no">nie</span></td><td class="center"><span class="yes">tak</span></td></tr>
-            <tr><th scope="row" class="cmp-feat">Ryzyko wycieku / RODO</th><td class="center col-parawan"><span class="yes">minimalne</span></td><td class="center"><span class="mid">podwyższone</span></td><td class="center"><span class="mid">błędy ludzkie</span></td></tr>
-            <tr><th scope="row" class="cmp-feat">Szybkość dla długich pism</th><td class="center col-parawan"><span class="yes">natychmiast</span></td><td class="center"><span class="mid">zależy od sieci</span></td><td class="center"><span class="no">wolno</span></td></tr>
-            <tr><th scope="row" class="cmp-feat">Przechodzi przez blokady IT</th><td class="center col-parawan"><span class="yes">tak</span></td><td class="center"><span class="no">często blokowane</span></td><td class="center"><span class="yes">tak</span></td></tr>
-            <tr><th scope="row" class="cmp-feat">Koszt</th><td class="center col-parawan"><span class="yes">darmowy</span></td><td class="center"><span class="mid">często płatny</span></td><td class="center"><span class="yes">darmowy</span></td></tr>
+            <tr><th scope="row" class="cmp-feat">Dane opuszczają urządzenie</th><td data-label="Parawan" class="center col-parawan"><span class="yes">nigdy</span></td><td data-label="Narzędzie w chmurze" class="center"><span class="no">tak</span></td><td data-label="Ręczne czyszczenie" class="center"><span class="yes">nie</span></td></tr>
+            <tr><th scope="row" class="cmp-feat">Wymaga konta / logowania</th><td data-label="Parawan" class="center col-parawan"><span class="yes">nie</span></td><td data-label="Narzędzie w chmurze" class="center"><span class="no">zwykle tak</span></td><td data-label="Ręczne czyszczenie" class="center"><span class="yes">nie</span></td></tr>
+            <tr><th scope="row" class="cmp-feat">Działa offline</th><td data-label="Parawan" class="center col-parawan"><span class="yes">tak</span></td><td data-label="Narzędzie w chmurze" class="center"><span class="no">nie</span></td><td data-label="Ręczne czyszczenie" class="center"><span class="yes">tak</span></td></tr>
+            <tr><th scope="row" class="cmp-feat">Ryzyko wycieku / RODO</th><td data-label="Parawan" class="center col-parawan"><span class="yes">minimalne</span></td><td data-label="Narzędzie w chmurze" class="center"><span class="mid">podwyższone</span></td><td data-label="Ręczne czyszczenie" class="center"><span class="mid">błędy ludzkie</span></td></tr>
+            <tr><th scope="row" class="cmp-feat">Szybkość dla długich pism</th><td data-label="Parawan" class="center col-parawan"><span class="yes">natychmiast</span></td><td data-label="Narzędzie w chmurze" class="center"><span class="mid">zależy od sieci</span></td><td data-label="Ręczne czyszczenie" class="center"><span class="no">wolno</span></td></tr>
+            <tr><th scope="row" class="cmp-feat">Przechodzi przez blokady IT</th><td data-label="Parawan" class="center col-parawan"><span class="yes">tak</span></td><td data-label="Narzędzie w chmurze" class="center"><span class="no">często blokowane</span></td><td data-label="Ręczne czyszczenie" class="center"><span class="yes">tak</span></td></tr>
+            <tr><th scope="row" class="cmp-feat">Koszt</th><td data-label="Parawan" class="center col-parawan"><span class="yes">darmowy</span></td><td data-label="Narzędzie w chmurze" class="center"><span class="mid">często płatny</span></td><td data-label="Ręczne czyszczenie" class="center"><span class="yes">darmowy</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -465,7 +465,7 @@
         </details>
         <details>
           <summary>Czy dział IT to zablokuje?</summary>
-          <div class="faq-b">Zwykle nie. Parawan to dokument HTML, a nie program do instalacji. Nie jest plikiem <code>.exe</code>, nie potrzebuje uprawnień administratora ani serwera, więc przechodzi przez większość firmowych blokad. Jeśli nowe narzędzia zatwierdza u Ciebie dział IT albo inspektor ochrony danych, pokaż im kod na GitHubie: to jeden plik, który nie łączy się z siecią.</div>
+          <div class="faq-b">Zwykle nie. Parawan to dokument HTML, a nie program do instalacji. Nie jest plikiem <code>.exe</code>, nie potrzebuje uprawnień administratora ani serwera, więc przechodzi przez większość firmowych blokad. Jeśli nowe narzędzia zatwierdza u Ciebie dział IT albo inspektor ochrony danych, pokaż im kod źródłowy na GitHubie i sam plik Parawan.html, który nie łączy się z siecią.</div>
         </details>
         <details>
           <summary>Jakie dokładnie dane wykrywa?</summary>
@@ -534,7 +534,7 @@
         </div>
         <div class="foot-legal">
           <span>Kod: Apache 2.0 · Fonty (Archivo, IBM Plex Mono): SIL OFL 1.1</span>
-          <span>Wersja <span id="ver-foot">…</span> · zbudowane bez żądań do serwerów firm trzecich</span>
+          <span>Wersja <span id="ver-foot">…</span> · strona nie wczytuje niczego z serwerów firm trzecich</span>
         </div>
       </div>
     </footer>

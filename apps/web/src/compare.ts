@@ -53,19 +53,39 @@ function origHtml(orig: string): string {
     .join('\n');
 }
 
+/** Element grupy czekającej na fragment oryginału: znacznik (nazwa tokenu) albo odstęp między znacznikami. */
+type Pending = { mask: string } | { gap: string };
+
 export function renderAligned(original: string, redacted: string, opts: AlignOptions): Aligned {
   const { tokenRe, maskHtml, compare } = opts;
   const parts = redacted.split(tokenRe); // nieparzyste indeksy to nazwy tokenów
   let html = '';
   let kept = 0;
   let pos = 0; // bieżąca pozycja w oryginale
-  let group: string[] = []; // znaczniki (i odstępy między nimi) czekające na swój fragment oryginału
+  let group: Pending[] = []; // znaczniki (i odstępy między nimi) czekające na swój fragment oryginału
 
   const flush = (gapEnd: number): void => {
     if (group.length) {
-      const orig = original.slice(pos, gapEnd);
+      let orig = original.slice(pos, gapEnd);
+      // Znaczniki zastane na końcu grupy: „Jan Kowalski [PESEL] i tel. …” daje „[IMIĘ I NAZWISKO]
+      // [PESEL] i tel. …”, a [PESEL] stał w oryginale tuż za nową wartością, oddzielony samą spacją.
+      // Zdejmujemy je od końca, dopóki wycinek oryginału kończy się odstępem i literałem znacznika;
+      // pierwszy znacznik grupy zostaje, bo to on odpowiada za resztę wycinka.
+      let tail = '';
+      while (group.length >= 3) {
+        const last = group[group.length - 1];
+        const gap = group[group.length - 2];
+        if (!('mask' in last) || !('gap' in gap)) break;
+        const literal = `[${last.mask}]`;
+        const rest = orig.slice(0, orig.length - literal.length - gap.gap.length);
+        if (!rest || orig !== rest + gap.gap + literal) break;
+        tail = escapeHtml(gap.gap) + escapeHtml(literal) + tail;
+        kept++;
+        group.length -= 2;
+        orig = rest;
+      }
       if (compare && orig) html += origHtml(orig);
-      html += group.join('');
+      html += group.map((p) => ('mask' in p ? maskHtml(p.mask) : escapeHtml(p.gap))).join('') + tail;
       group = [];
     }
     pos = gapEnd;
@@ -82,13 +102,13 @@ export function renderAligned(original: string, redacted: string, opts: AlignOpt
         pos += literal.length;
         kept++;
       } else {
-        group.push(maskHtml(part));
+        group.push({ mask: part });
       }
       continue;
     }
     if (!part) continue;
     if (group.length && i + 1 < parts.length && GAP_ONLY.test(part)) {
-      group.push(escapeHtml(part));
+      group.push({ gap: part });
       continue;
     }
     // Ostatni odcinek kończy oryginał, więc szukamy go od końca: „Jan Kowalski ” ma spację

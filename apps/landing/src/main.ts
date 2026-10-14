@@ -58,17 +58,32 @@ function origHtml(orig: string): string {
     .join('\n');
 }
 
+type Pending = { mask: string } | { gap: string };
+
 function renderAligned(original: string, redacted: string, compare: boolean): string {
   const parts = redacted.split(MASK_TOKEN_RE); // nieparzyste indeksy to nazwy tokenów
   let html = '';
   let pos = 0;
-  let group: string[] = [];
+  let group: Pending[] = [];
 
   const flush = (gapEnd: number): void => {
     if (group.length) {
-      const orig = original.slice(pos, gapEnd);
+      let orig = original.slice(pos, gapEnd);
+      // znaczniki zastane na końcu grupy („Jan Kowalski [PESEL]”) zostają zwykłym tekstem
+      let tail = '';
+      while (group.length >= 3) {
+        const last = group[group.length - 1];
+        const gap = group[group.length - 2];
+        if (!('mask' in last) || !('gap' in gap)) break;
+        const literal = `[${last.mask}]`;
+        const rest = orig.slice(0, orig.length - literal.length - gap.gap.length);
+        if (!rest || orig !== rest + gap.gap + literal) break;
+        tail = escapeHtml(gap.gap) + escapeHtml(literal) + tail;
+        group.length -= 2;
+        orig = rest;
+      }
       if (compare && orig) html += origHtml(orig);
-      html += group.join('');
+      html += group.map((p) => ('mask' in p ? maskHtml(p.mask) : escapeHtml(p.gap))).join('') + tail;
       group = [];
     }
     pos = gapEnd;
@@ -82,13 +97,13 @@ function renderAligned(original: string, redacted: string, compare: boolean): st
         html += escapeHtml(literal);
         pos += literal.length;
       } else {
-        group.push(maskHtml(part));
+        group.push({ mask: part });
       }
       continue;
     }
     if (!part) continue;
     if (group.length && i + 1 < parts.length && GAP_ONLY.test(part)) {
-      group.push(escapeHtml(part));
+      group.push({ gap: part });
       continue;
     }
     const tail = original.length - part.length;
@@ -196,6 +211,20 @@ function setView(compare: boolean): void {
 }
 viewResultBtn?.addEventListener('click', () => setView(false));
 viewCompareBtn?.addEventListener('click', () => setView(true));
+
+/* Ctrl+A w wyniku zaznacza sam wynik. Domyślnie zaznaczała całą stronę razem z polem źródła,
+   więc Ctrl+C po kliknięciu w wynik kopiował też oryginalne dane osobowe. Wynik ma tabindex,
+   żeby klik go fokusował i klawisz trafiał tutaj. */
+outputEl?.addEventListener('keydown', (e) => {
+  if (!(e.ctrlKey || e.metaKey) || e.altKey || e.key.toLowerCase() !== 'a') return;
+  e.preventDefault();
+  const sel = getSelection();
+  if (!sel) return;
+  const range = document.createRange();
+  range.selectNodeContents(outputEl);
+  sel.removeAllRanges();
+  sel.addRange(range);
+});
 
 $('demo-example')?.addEventListener('click', () => {
   if (!input) return;

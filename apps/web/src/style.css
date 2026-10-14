@@ -393,7 +393,8 @@ details.card::details-content {
   color: var(--acc); background: var(--card-2); border: 1px solid var(--line);
   border-radius: 999px; padding: 6px 14px;
 }
-.feat-strip li::before { content: "✓"; font-size: 11px; font-weight: 800; color: var(--fin); }
+/* znak to ozdoba: pusty tekst zastępczy po „/” nie wpuszcza go do nazwy pigułki („✓ działa offline”) */
+.feat-strip li::before { content: "✓"; content: "✓" / ""; font-size: 11px; font-weight: 800; color: var(--fin); }
 .feat-strip .feat-solid { color: #f4f6f1; background: var(--acc); border-color: var(--acc); }
 .feat-strip .feat-solid::before { color: #a9c6b4; }
 
@@ -451,7 +452,7 @@ details.card::details-content {
 }
 .lg:hover { border-color: var(--line-2); }
 .lg b { font-size: 14px; font-weight: 600; color: var(--text); }
-.lg-n { font-size: 11.5px; color: var(--mut); }
+.lg-n { font-size: 11.5px; color: var(--mut); white-space: nowrap; } /* „15” nie odrywa się od „typów” */
 .dot { width: 13px; height: 13px; border-radius: 50%; display: inline-block; flex: none;
   box-shadow: 0 0 0 1px rgba(11,61,46,.12), 0 1px 2px rgba(11,61,46,.25); }
 .dot-person  { background: var(--person); }
@@ -868,7 +869,7 @@ table .pii { cursor: default; }
 .caveat .card-h { border-bottom-color: rgba(224, 181, 102, .22); }
 .tips { list-style: none; display: grid; gap: 9px; }
 .tips li { display: flex; gap: 9px; font-size: 13px; color: var(--mut); align-items: baseline; }
-.tips li::before { content: "▪"; color: var(--acc); font-size: 11px; }
+.tips li::before { content: "▪"; content: "▪" / ""; color: var(--acc); font-size: 11px; }
 .tips strong { color: var(--acc); font-weight: 700; }
 
 /* ============ STOPKA ============ */
@@ -925,13 +926,27 @@ table .pii { cursor: default; }
 
 /* Dotyk: dymek stukniętego znacznika zasłaniał kolejne wiersze sprawdzanego wyniku.
    Zamiast niego powód wykrycia pokazuje linia statusu pod wynikiem (#mask-status, goToMask). */
+/* Przycisk i link pokazywały na dotyku dymek dopiero po stuknięciu (lepki :hover i fokus), gdy akcja
+   już się wykonała, a dymek „Przykład” wisiał potem nad nagłówkiem karty. Na dotyku dostają więc
+   dymek tylko przy fokusie z klawiatury. Pigułki, legenda, wiersze „Co maskować” i „?” nadal
+   otwierają go stuknięciem, bo tam dymek jest jedyną drogą do opisu. */
 @media (hover: none) {
   .editor mark.pii::after, .editor mark.pii::before { display: none; }
+  :is(button, a)[data-tip]:not(:focus-visible)::after,
+  :is(button, a)[data-tip]:not(:focus-visible)::before { display: none; }
   #mask-status:not(:empty) {
     position: static !important; display: block;
     width: auto; height: auto; margin: 8px 0 0; clip: auto; overflow: visible;
     white-space: normal; font-size: 13px; line-height: 1.45; color: var(--mut);
   }
+}
+
+/* Wskazówki dla myszy i klawiatury (upuszczanie pliku, Ctrl+Enter) nic nie mówią na telefonie,
+   więc tam znikają; .hint-touch to ich zamiennik. W main.ts ten sam warunek zmienia podpowiedź pola. */
+.hint-touch { display: none; }
+@media (pointer: coarse) and (max-width: 600px) {
+  .hint-desk, .tips li.hint-desk { display: none; }
+  .hint-touch { display: inline; }
 }
 
 @media (pointer: coarse) {
@@ -955,27 +970,20 @@ table .pii { cursor: default; }
   .demo-in, .demo-out { display: none; }
   /* iOS auto-zoomuje pola <16px — także w zakresie tabletowym */
   textarea.editor-ta, .editor { font-size: 16px; }
-  /* legenda pod nagłówkiem, w równych kolumnach zamiast postrzępionego zawijania */
+  /* Legenda pod nagłówkiem: trzy chipy w rzędzie (3 + 2), na telefonie tyle, ile się zmieści.
+     Chipy rosną, więc każdy rząd jest pełny, a nie postrzępiony. Dawna siatka z kolumną 170 px
+     była węższa niż chip „Identyfikatory 15 typów” (ok. 195 px): liczba spadała do drugiej linii
+     albo wychodziła poza chip. */
   .legend .card-h { flex-wrap: wrap; }
-  .legend-items {
-    flex-basis: 100%;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-    justify-content: stretch;
-  }
+  .legend-items { flex-basis: 100%; }
+  .lg { flex: 1 1 30%; }
 }
-@media (max-width: 640px) {
-  .g3 { grid-column: span 12; }
-  .hero-b { flex-direction: column; align-items: flex-start; }
-  /* w kolumnie flex-basis 320px stawało się wysokością: pod leadem zostawała pusta luka */
-  .hero-lead { flex: none; }
-  .feat-strip { justify-content: flex-start; }
-  .privacy { margin-left: 0; }
-  .editor, textarea.editor-ta { min-height: 200px; }
-  /* Tabela „Co wykrywa” jako karty: nazwa i znacznik w jednym wierszu, opis pod nimi na całą
-     szerokość. Kolumna „Kategoria” znika (kolor i ikona mówią to samo), nagłówki zostają
-     tylko dla czytnika ekranu. Bez tego opis ściskał się w wąski słupek, a znaczniki
-     wychodziły poza ekran. */
+/* Tabela „Co wykrywa” jako karty: nazwa i znacznik w jednym wierszu, opis pod nimi na całą
+   szerokość. Kolumna „Kategoria” znika (kolor i ikona mówią to samo), nagłówki zostają
+   tylko dla czytnika ekranu. Bez tego opis ściskał się w wąski słupek, a znaczniki
+   wychodziły poza ekran. Próg 820 px: pełna tabela ma ok. 764 px, więc węższa karta
+   (także telefon trzymany poziomo) przewijałaby ją w bok bez żadnego sygnału. */
+@media (max-width: 820px) {
   #co-wykrywa thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
   #co-wykrywa tbody tr {
     display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
@@ -985,6 +993,15 @@ table .pii { cursor: default; }
   #co-wykrywa td:nth-child(2) { display: none; }
   #co-wykrywa td:nth-child(3) { order: 3; flex-basis: 100%; }
   #co-wykrywa .td-name { white-space: normal; }
+}
+@media (max-width: 640px) {
+  .g3 { grid-column: span 12; }
+  .hero-b { flex-direction: column; align-items: flex-start; }
+  /* w kolumnie flex-basis 320px stawało się wysokością: pod leadem zostawała pusta luka */
+  .hero-lead { flex: none; }
+  .feat-strip { justify-content: flex-start; }
+  .privacy { margin-left: 0; }
+  .editor, textarea.editor-ta { min-height: 200px; }
 }
 /* telefony: nagłówki kart zawijają się */
 @media (max-width: 480px) {
@@ -1021,4 +1038,7 @@ table .pii { cursor: default; }
   .demo-zone-out { right: 14px; }
   .demo-zone .dz-x { display: none; }
   .demo-badge-wrap { top: 48px; } /* plakietka pod etykietami stref, nie na ich krawędzi */
+  /* stopka w kolumnie: zawijane „·” zostawały same na końcach wierszy */
+  .foot .card-b { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .foot .sep { display: none; }
 }

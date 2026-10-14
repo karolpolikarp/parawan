@@ -68,7 +68,7 @@ export function maskCategory(name: string): Cat {
 
 /** Dymek znacznika w wyniku: kategoria · metoda wykrycia. */
 export function maskTip(name: string): string {
-  if (name.startsWith('OSOBA-')) return `${CAT_LABELS.person} · spójna etykieta tej samej osoby (${name})`;
+  if (name.startsWith('OSOBA-')) return `${CAT_LABELS.person} · stały znacznik tej samej osoby (${name})`;
   const meta = PII_TOKENS[name];
   return meta ? `${CAT_LABELS[meta.cat]} · ${meta.tip}` : 'Wykryta dana osobowa';
 }

@@ -154,7 +154,7 @@ function buildRow(g: MaskGroup): HTMLLabelElement {
 function buildModeRow(): HTMLLabelElement {
   const label = document.createElement('label');
   label.className = 'tgr mode';
-  label.dataset.tip = 'Ta sama osoba zachowuje tę samą etykietę w całym dokumencie, przydatne w umowach i pismach';
+  label.dataset.tip = 'Ta sama osoba dostaje ten sam znacznik w całym dokumencie, przydatne w umowach i pismach';
 
   const ic = document.createElement('span');
   ic.className = 'ic ic-s c-person';
@@ -485,6 +485,27 @@ output.addEventListener('click', (e) => {
   if (at !== -1) goToMask(at, false);
 });
 
+// Fokus z klawiatury (Tab na przystanek w wyniku) też ustawia bieżący znacznik. Bez tego licznik
+// pokazywał „0 / N”, a pierwsza strzałka ↓ zostawała na tym samym znaczniku.
+output.addEventListener('focusin', (e) => {
+  const el = (e.target as HTMLElement | null)?.closest?.('mark.pii') as HTMLElement | null;
+  const at = el ? maskEls.indexOf(el) : -1;
+  if (at !== -1 && at !== maskIdx) goToMask(at, false);
+});
+
+// Ctrl+A w wyniku zaznacza sam wynik. Domyślnie zaznaczała całą stronę razem z polem źródła,
+// więc Ctrl+C po kliknięciu w wynik kopiował też oryginalne dane osobowe.
+output.addEventListener('keydown', (e) => {
+  if (!(e.ctrlKey || e.metaKey) || e.altKey || e.key.toLowerCase() !== 'a') return;
+  e.preventDefault();
+  const sel = getSelection();
+  if (!sel) return;
+  const range = document.createRange();
+  range.selectNodeContents(output);
+  sel.removeAllRanges();
+  sel.addRange(range);
+});
+
 // Klawiatura: ↓/→ następny, ↑/← poprzedni — gdy fokus jest w wyniku LUB na strzałkach nawigacji
 // (dzięki temu po kliknięciu ‹/› strzałki nadal działają, mimo że nie fokusujemy znacznika).
 document.addEventListener('keydown', (e) => {
@@ -712,12 +733,12 @@ function setResultActions(on: boolean): void {
 }
 
 function updateSrcMeta(text: string): void {
+  // Dopisek o upuszczaniu pliku stoi obok, w osobnym .hint-desk (na telefonie znika).
   const lines = text ? text.split('\n').length : 0;
   const chars = text.length;
   srcMeta.textContent =
     `${lines.toLocaleString('pl-PL')} ${plural(lines, 'wiersz', 'wiersze', 'wierszy')} · ` +
-    `${chars.toLocaleString('pl-PL')} ${plural(chars, 'znak', 'znaki', 'znaków')} · ` +
-    'plik możesz upuścić w\u00a0dowolnym miejscu strony'; // twarda spacja: „w” nie wisi na końcu linii
+    `${chars.toLocaleString('pl-PL')} ${plural(chars, 'znak', 'znaki', 'znaków')}`;
 }
 
 function renderResult(redacted: string, found: PiiFinding[]): void {
@@ -865,31 +886,67 @@ function clearError(): void {
   appError.textContent = '';
 }
 
-/* Pasek „Cofnij”. „Wyczyść”, „Przykład” i wczytany plik zastępują CAŁY tekst, a przypisanie
-   input.value kasuje historię Ctrl+Z pola. Poprzedni tekst trzymamy więc tutaj, do następnej
-   edycji albo zamknięcia paska. Nie używamy execCommand('insertText'): wymaga fokusu (na
-   dotyku otwiera klawiaturę), przy dużych plikach jest bardzo wolny i jest przestarzały. */
-let undoText: string | null = null;
-
-/** Pokaż informację pod paskiem narzędzi; z `prev` dochodzi przycisk „Cofnij”. */
-function showNote(msg: string, prev: string | null): void {
-  undoText = prev;
-  appNoteText.textContent = msg;
-  appNoteUndo.hidden = prev === null;
-  appNote.hidden = false;
-  appNoteStatus.textContent = msg; // ogłoszenie dla czytnika ekranu
-  revealIfOffscreen(appNote);
-}
-
-function dismissNote(): void {
-  undoText = null;
-  appNote.hidden = true;
-  appNoteStatus.textContent = '';
-}
-
 // Mysz i touchpad: po akcji fokus wraca do pola. Na dotyku nie, bo fokus otwiera klawiaturę
 // ekranową, która zasłania wynik.
 const finePointer = matchMedia('(pointer: fine)');
+
+/* Pasek „Cofnij”. „Wyczyść”, „Przykład” i wczytany plik zastępują CAŁY tekst, a przypisanie
+   input.value kasuje historię Ctrl+Z pola. Poprzedni tekst trzymamy więc tutaj, do następnej
+   edycji albo zamknięcia paska. Nie używamy execCommand('insertText'): wymaga fokusu (na
+   dotyku otwiera klawiaturę), przy dużych plikach jest bardzo wolny i jest przestarzały.
+   Poprzedni tekst to zwykle dane osobowe, a „Wyczyść” na wspólnym komputerze ma je naprawdę
+   usunąć. Dlatego „Cofnij” działa tylko przez chwilę i znika od razu po przejściu do innej
+   karty, zminimalizowaniu okna albo zamknięciu strony. */
+let undoText: string | null = null;
+let noteInfo = ''; // dopisek bez cofania (np. o kodowaniu pliku), zostaje po wygaśnięciu „Cofnij”
+const UNDO_MS = 20_000;
+let undoTimer: ReturnType<typeof setTimeout> | undefined;
+
+/** Pokaż pasek pod narzędziami: `msg` z przyciskiem „Cofnij” (gdy jest `prev`) i dopisek `info`. */
+function showNote(msg: string, prev: string | null, info = ''): void {
+  clearTimeout(undoTimer);
+  undoText = prev;
+  noteInfo = info;
+  const text = [msg, info].filter(Boolean).join(' ');
+  appNoteText.textContent = text;
+  appNoteUndo.hidden = prev === null;
+  appNote.hidden = false;
+  appNoteStatus.textContent = text; // ogłoszenie dla czytnika ekranu
+  revealIfOffscreen(appNote);
+  if (prev !== null) undoTimer = setTimeout(expireUndo, UNDO_MS);
+}
+
+/** Zapomnij poprzedni tekst. Pasek zostaje tylko wtedy, gdy ma jeszcze dopisek do przeczytania. */
+function expireUndo(): void {
+  if (!noteInfo) {
+    dismissNote();
+    return;
+  }
+  clearTimeout(undoTimer);
+  const hadFocus = document.activeElement === appNoteUndo;
+  undoText = null;
+  appNoteUndo.hidden = true;
+  appNoteText.textContent = noteInfo;
+  if (hadFocus) appNoteClose.focus({ preventScroll: true });
+}
+
+function dismissNote(): void {
+  clearTimeout(undoTimer);
+  // przyciski znikają razem z paskiem, więc fokus z nich wraca do pola źródła
+  const hadFocus = appNote.contains(document.activeElement);
+  undoText = null;
+  noteInfo = '';
+  appNote.hidden = true;
+  appNoteStatus.textContent = '';
+  if (hadFocus && finePointer.matches) input.focus({ preventScroll: true });
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && undoText !== null) expireUndo();
+});
+addEventListener('pagehide', () => {
+  if (undoText !== null) expireUndo();
+});
 
 /** Zastąp cały tekst źródła; gdy było co stracić, pokaż pasek „Cofnij”. `info` to dopisek. */
 function replaceSource(text: string, note: string, info = ''): void {
@@ -898,7 +955,7 @@ function replaceSource(text: string, note: string, info = ''): void {
   update();
   if (finePointer.matches) input.focus(); // przed paskiem: przewinięcie do pola nie zasłoni go
   const canUndo = prev.trim() !== '' && prev !== text;
-  if (canUndo || info) showNote([canUndo ? note : '', info].filter(Boolean).join(' '), canUndo ? prev : null);
+  if (canUndo || info) showNote(canUndo ? note : '', canUndo ? prev : null, info);
   else dismissNote();
 }
 
@@ -1182,8 +1239,16 @@ $('app-version-top').textContent = __APP_VERSION__;
 // Podmień wszystkie statyczne <i class="gi" data-i="…"> z index.html na inline SVG.
 hydrateIcons();
 
-// Na dotyku nie ma skrótu klawiszowego, więc dymek „Kopiuj” o nim nie wspomina.
-if (!finePointer.matches) copyBtn.dataset.tip = 'Kopiuje zanonimizowany tekst do schowka';
+// Na dotyku nie ma skrótu klawiszowego, więc dymki „Kopiuj” i kroku 4 o nim nie wspominają
+// (przed initTips: ikona kroku bierze treść dymka jako nazwę dostępną).
+if (!finePointer.matches) {
+  copyBtn.dataset.tip = 'Kopiuje zanonimizowany tekst do schowka';
+  $('step4-tip').dataset.tip = 'Przyciski „Kopiuj” i „Pobierz .txt” stoją nad wynikiem';
+}
+// Na telefonie pliku nie ma skąd upuścić (ten sam warunek co .hint-desk w style.css).
+if (matchMedia('(pointer: coarse) and (max-width: 600px)').matches) {
+  input.placeholder = input.placeholder.replace('albo upuść plik', 'albo wczytaj plik');
+}
 
 // Dymki: opisy dla czytników ekranu, „?” w summary, Esc i dociskanie do krawędzi (tips.ts).
 initTips();

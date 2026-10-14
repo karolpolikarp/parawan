@@ -72,21 +72,21 @@ a nie program do zainstalowania (`.exe`, `.bat`, serwer). To jest cała idea Par
 `Jan Kowalski` → `[IMIĘ I NAZWISKO]`, `44051401359` → `[PESEL]`. Dzięki temu możesz spokojnie
 wysłać treść dalej (do czatu z AI, e-maila, zgłoszenia), nie ujawniając, kogo dotyczy.
 
-**Jak rozpoznaje dane (bez „sztucznej inteligencji").** To **deterministyczne reguły**: te same
-dane zawsze dają ten sam wynik, nic nie „zgaduje" modelem:
+**Jak rozpoznaje dane (bez „sztucznej inteligencji”).** To **deterministyczne reguły**: te same
+dane zawsze dają ten sam wynik, nic nie „zgaduje” modelem:
 
 - 🟤 **PESEL, NIP, REGON, numer konta (IBAN), numer dowodu, numer karty (Luhn)** mają *cyfrę/sumę kontrolną*, wbudowany
   w numer sprawdzian poprawności. Parawan go **przelicza**, więc przypadkowy ciąg cyfr (numer sprawy,
   sygnatura) **nie** zostanie pomylony z PESEL-em. → *mało fałszywych trafień.*
 - 🔵 **E-mail** ma znak `@`, **telefon** to 9 cyfr, oba rozpoznawane po wzorze.
 - 🟣 **Imiona i nazwiska**: po słowniku polskich imion i nazwisk, po końcówkach (`-ski`, `-cki`,
-  `-icz`) oraz po kontekście („Pan…", „zamieszkały w…", nagłówki formularzy).
+  `-icz`) oraz po kontekście („Pan…”, „zamieszkały w…”, nagłówki formularzy).
 - 📍 **Kod pocztowy** to `XX-XXX`, rozpoznawany po wzorze. **Miejscowość** jest maskowana
   w kontekście adresu („ul. Kwiatowa 5, **Warszawa**”), ale **nie** w zwykłym zdaniu („spotkanie
   w Łodzi”) ani w nazwie instytucji („Sąd Okręgowy w Katowicach”), żeby nie zasłaniać za dużo.
 
-**Co możesz sam ustawić.** W panelu „Co maskować" włączasz i wyłączasz poszczególne rodzaje danych.
-Opcja „Rozróżniaj osoby" nadaje tej samej osobie stały znacznik (`[OSOBA-A]`, `[OSOBA-B]`),
+**Co możesz sam ustawić.** W panelu „Co maskować” włączasz i wyłączasz poszczególne rodzaje danych.
+Opcja „Rozróżniaj osoby” nadaje tej samej osobie stały znacznik (`[OSOBA-A]`, `[OSOBA-B]`),
 przydatne w umowach i pismach, gdzie trzeba wiedzieć, kto jest kim, bez podawania nazwisk.
 
 ```text
@@ -108,7 +108,7 @@ Nazywam się [IMIĘ I NAZWISKO], PESEL [PESEL], [ADRES], tel. [TELEFON].
 |---|---|
 | nie wysyła tekstu na serwer ani do internetu | wszystko liczy lokalnie, w przeglądarce |
 | nie ma konta, logowania ani chmury | otwierasz plik i od razu działasz |
-| nie zbiera analityki ani „telemetrii" | zero śledzenia, zero ciasteczek |
+| nie zbiera analityki ani „telemetrii” | zero śledzenia, zero ciasteczek |
 | nie używa modeli AI (w tym pliku) | wyłącznie reguły + słowniki + sumy kontrolne |
 | nie dociąga niczego w tle podczas pracy | plik jest samowystarczalny (fonty, kod, wszystko w środku) |
 
@@ -142,33 +142,33 @@ rozpoznaje charakterystyczny zapis (kolumna „Metoda”).
 
 | Dane | Metoda | Znacznik w tekście |
 |---|---|---|
-| 🟤 PESEL | 11 cyfr + suma kontrolna (lub przy etykiecie „PESEL" mimo złej sumy) | `[PESEL]` |
-| 🟤 NIP | 10 cyfr (też z myślnikami) + suma kontrolna (lub przy etykiecie „NIP") | `[NIP]` |
-| 🟤 REGON | 9/14 cyfr + suma kontrolna (lub przy etykiecie „REGON") | `[REGON]` |
-| 🟢 IBAN / nr konta | mod 97 lub kontekst „konto/rachunek/IBAN" (też format IBAN mimo złej sumy) | `[NR-KONTA]` |
-| 🟢 Karta płatnicza | kontekst „karta/Visa/Mastercard/Amex…" + 13–19 cyfr, prefiks sieci + suma Luhna | `[NR-KARTY]` |
+| 🟤 PESEL | 11 cyfr + suma kontrolna (lub przy etykiecie „PESEL” mimo złej sumy) | `[PESEL]` |
+| 🟤 NIP | 10 cyfr (też z myślnikami) + suma kontrolna (lub przy etykiecie „NIP”) | `[NIP]` |
+| 🟤 REGON | 9/14 cyfr + suma kontrolna (lub przy etykiecie „REGON”) | `[REGON]` |
+| 🟢 IBAN / nr konta | mod 97 lub kontekst „konto/rachunek/IBAN” (też format IBAN mimo złej sumy) | `[NR-KONTA]` |
+| 🟢 Karta płatnicza | kontekst „karta/Visa/Mastercard/Amex…” + 13–19 cyfr, prefiks sieci + suma Luhna | `[NR-KARTY]` |
 | 🟤 Nr dowodu | 3 litery + 6 cyfr (+ suma kontrolna bez kontekstu) | `[NR-DOWODU]` |
-| 🟤 Nr paszportu | kontekst „paszport" + 2 litery + 7 cyfr | `[NR-PASZPORTU]` |
-| 🟤 Numer KRS | kontekst „KRS" + 10 cyfr (też z zerami wiodącymi) | `[KRS]` |
-| 🟤 Numer KSeF | słowo „KSeF" gdziekolwiek w dokumencie + numer faktury `NIP-RRRRMMDD-znaki-suma` (też stary format 36-znakowy) z **sumą kontrolną NIP-u** w pierwszym członie | `[NR-KSEF]` |
-| 🟤 Nr prawa jazdy | kontekst „prawo jazdy" + numer (z cyfrą) | `[PRAWO-JAZDY]` |
-| 🟤 Nr rejestracyjny | kontekst „rejestracyjny/tablica/pojazd" + tablica (np. WI1234K); wyliczenia po przecinku i „oraz/i" z walidacją wyróżnika wojewódzkiego | `[NR-REJESTRACYJNY]` |
-| 🟤 VIN | 17 znaków bez I/O/Q; kontekst „VIN/nadwozia" lub wyraźny układ VIN | `[VIN]` |
-| 🟤 Adres IP | IPv4 (oktety 0–255) oraz IPv6 (numery wersji „1.2.3.4" pomijane) | `[IP]` |
+| 🟤 Nr paszportu | kontekst „paszport” + 2 litery + 7 cyfr | `[NR-PASZPORTU]` |
+| 🟤 Numer KRS | kontekst „KRS” + 10 cyfr (też z zerami wiodącymi) | `[KRS]` |
+| 🟤 Numer KSeF | słowo „KSeF” gdziekolwiek w dokumencie + numer faktury `NIP-RRRRMMDD-znaki-suma` (też stary format 36-znakowy) z **sumą kontrolną NIP-u** w pierwszym członie | `[NR-KSEF]` |
+| 🟤 Nr prawa jazdy | kontekst „prawo jazdy” + numer (z cyfrą) | `[PRAWO-JAZDY]` |
+| 🟤 Nr rejestracyjny | kontekst „rejestracyjny/tablica/pojazd” + tablica (np. WI1234K); wyliczenia po przecinku i „oraz/i” z walidacją wyróżnika wojewódzkiego | `[NR-REJESTRACYJNY]` |
+| 🟤 VIN | 17 znaków bez I/O/Q; kontekst „VIN/nadwozia” lub wyraźny układ VIN | `[VIN]` |
+| 🟤 Adres IP | IPv4 (oktety 0–255) oraz IPv6 (numery wersji „1.2.3.4” pomijane) | `[IP]` |
 | 🟤 Adres MAC | 6 par hex (00:1A:2B:3C:4D:5E) | `[MAC]` |
 | 🟤 Token / JWT | `eyJ…` (base64), może dawać dostęp | `[TOKEN]` |
-| 🟤 Login | kontekst „login/username/nazwa użytkownika" + wartość (też w cudzysłowie) | `[LOGIN]` |
+| 🟤 Login | kontekst „login/username/nazwa użytkownika” + wartość (też w cudzysłowie) | `[LOGIN]` |
 | 🟤 Znak sprawy / pisma | znak wg JRWA (`ABC-def.123.77.2016`) albo sygnatura z kotwicą „Znak sprawy:”, „Znak pisma:”, „Sygn. akt”; cytowane orzecznictwo bez kotwicy zostaje | `[ZNAK-SPRAWY]` |
 | 🔗 URL | całe adresy chronione; wewnątrz maskowane wartości parametrów osobowych (`?user=`, `?email=`, `?token=`…) | wg typu |
 | 🔵 E-mail | wzorzec adresu (w URL-ach także forma `%40`) | `[EMAIL]` |
-| 🔵 Telefon | 9 cyfr, opcjonalnie +48 (też „+48.512.345.678"), nawiasy, kropki z kotwicą; wyliczenia po przecinku i „oraz/i" | `[TELEFON]` |
+| 🔵 Telefon | 9 cyfr, opcjonalnie +48 (też „+48.512.345.678”), nawiasy, kropki z kotwicą; wyliczenia po przecinku i „oraz/i” | `[TELEFON]` |
 | 📍 Kod pocztowy | XX-XXX | `[KOD-POCZTOWY]` |
-| 🟣 Data urodzenia | data z kontekstem „ur./urodzony", cyfrowa i słowna („5 maja 1985") | `[DATA-URODZENIA]` |
-| 📍 Adres | ul./al./os./pl. + nazwa + numer (też „3 Maja", „gen./ks./św.") | `[ADRES]` |
+| 🟣 Data urodzenia | data z kontekstem „ur./urodzony”, cyfrowa i słowna („5 maja 1985”) | `[DATA-URODZENIA]` |
+| 📍 Adres | ul./al./os./pl. + nazwa + numer (też „3 Maja”, „gen./ks./św.”) | `[ADRES]` |
 | 📍 Miejscowość | w adresie i przy zamieszkaniu; **nie** w prozie/instytucji | `[MIEJSCOWOŚĆ]` |
 | 🟣 Imię i nazwisko | słownik imion + nazwisk (z odmianą), **morfologia** (-ski/-cki/-icz/-czyk), kolejność odwrócona, wyzwalacze kontekstu | `[IMIĘ I NAZWISKO]` |
-| 🧩 Pola formularza / XML / JSON | „Nazwisko:", tag `<Surname>`, klucz `"lastName"` jako kotwica, maskowana sama wartość, struktura zostaje | wg typu |
-| 🔎 Błędy OCR | homoglify 0→O / 1→l walidowane słownikiem („J0AN K0WALSKI", „uI. Lip0wa 15") | wg typu |
+| 🧩 Pola formularza / XML / JSON | „Nazwisko:”, tag `<Surname>`, klucz `"lastName"` jako kotwica, maskowana sama wartość, struktura zostaje | wg typu |
+| 🔎 Błędy OCR | homoglify 0→O / 1→l walidowane słownikiem („J0AN K0WALSKI”, „uI. Lip0wa 15”) | wg typu |
 
 ## ⚠️ Ograniczenia (koniecznie przeczytaj)
 
@@ -179,7 +179,7 @@ rozpoznaje charakterystyczny zapis (kolumna „Metoda”).
 
 Wykrywanie **imion i nazwisk warstwą podstawową jest heurystyczne**. Łapie nazwiska ze słownika
 (z odmianą), nazwiska o charakterystycznym polskim sufiksie **morfologicznie** (-ski/-cki/-dzki,
--icz/-wicz, -czyk, także rzadkie i odmienione, np. „Gzowskiego", „Bąkiewiczowi"), pary imię+nazwisko
+-icz/-wicz, -czyk, także rzadkie i odmienione, np. „Gzowskiego”, „Bąkiewiczowi”), pary imię+nazwisko
 i kolejność odwróconą oraz wyzwalacze kontekstu. Poza zasięgiem warstwy offline zostają głównie
 **nazwiska bez polskiego sufiksu, spoza słownika i bez kontekstu** (np. obce: „Popescu”, „Grynberg”).
 Domyka je opcjonalny dodatek AI (osobny projekt, niżej).
@@ -243,7 +243,7 @@ Opcjonalny drugi parametr pozwala wybrać typy i podmienić znaczniki:
 
 ```ts
 redactPII(tekst, { types: ['PESEL', 'EMAIL'] });        // maskuj tylko PESEL i e-mail
-redactPII(tekst, { masks: { PESEL: '[UKRYTO]' } });     // własny znacznik (bez cyfr i „@")
+redactPII(tekst, { masks: { PESEL: '[UKRYTO]' } });     // własny znacznik (bez cyfr i „@”)
 
 // spójna pseudonimizacja: ta sama osoba → ten sam znacznik (także w odmianie)
 redactPII('Kowalski pozwał Nowaka. Kowalskiemu zależy na ugodzie.', { pseudonyms: true });
