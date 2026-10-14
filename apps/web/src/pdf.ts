@@ -10,10 +10,11 @@
 
 import { getDocument, InvalidPDFException, PasswordException } from 'pdfjs-dist/legacy/build/pdf.mjs';
 import * as pdfjsWorker from 'pdfjs-dist/legacy/build/pdf.worker.mjs';
+import { FileReadError } from './files';
 
 (globalThis as { pdfjsWorker?: unknown }).pdfjsWorker = pdfjsWorker;
 
-/** Wyciągnij warstwę tekstową z PDF-a. Rzuca Error z polskim komunikatem. */
+/** Wyciągnij warstwę tekstową z PDF-a. Rzuca FileReadError z polskim komunikatem. */
 export async function extractPdfText(buf: Uint8Array): Promise<string> {
   const task = getDocument({
     data: buf,
@@ -25,12 +26,12 @@ export async function extractPdfText(buf: Uint8Array): Promise<string> {
     doc = await task.promise;
   } catch (err) {
     if (err instanceof PasswordException) {
-      throw new Error('Ten PDF jest zaszyfrowany hasłem — zdejmij hasło i spróbuj ponownie.');
+      throw new FileReadError('Ten PDF jest zabezpieczony hasłem. Zdejmij hasło i spróbuj ponownie.');
     }
     if (err instanceof InvalidPDFException) {
-      throw new Error('Nie udało się odczytać pliku — to nie wygląda na poprawny PDF.');
+      throw new FileReadError('Nie udało się odczytać pliku: to nie wygląda na poprawny PDF.');
     }
-    throw new Error('Nie udało się odczytać PDF-a.');
+    throw new FileReadError('Nie udało się odczytać tego pliku PDF.');
   }
 
   try {
@@ -49,9 +50,9 @@ export async function extractPdfText(buf: Uint8Array): Promise<string> {
     }
     const text = pages.filter(Boolean).join('\n\n').trim();
     if (!text) {
-      throw new Error(
-        'Ten PDF nie zawiera warstwy tekstowej — to prawdopodobnie skan. ' +
-          'OCR nie jest wspierany; wklej tekst ręcznie.',
+      throw new FileReadError(
+        'Ten PDF nie ma warstwy tekstowej, to pewnie skan. Rozpoznawanie tekstu ze skanów ' +
+          '(OCR) nie jest obsługiwane, wklej tekst ręcznie.',
       );
     }
     return text;

@@ -624,13 +624,46 @@ mark.pii.pii-linked { box-shadow: 0 0 0 2px var(--acc-line); }
 .warn-note { color: var(--warn); }
 .warn-note a { color: var(--warn); text-decoration: underline; }
 
-.app-error {
+/* Komunikaty pod paskiem narzędzi źródła: błąd (czerwony) i pasek „Cofnij” (neutralny).
+   Stoją przy przyciskach, które je wywołują, i nie znikają same (czyści je następna akcja). */
+.app-error, .app-note {
+  margin: 12px 16px 0;
   padding: 10px 14px;
-  border: 1px solid rgba(224, 114, 132, .4);
   border-radius: var(--r-ctl);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.app-error {
+  border: 1px solid rgba(224, 114, 132, .4);
   background: rgba(224, 114, 132, .08);
   color: var(--err);
-  font-size: 13px;
+}
+.app-note {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px;
+  padding: 6px 6px 6px 14px;
+  border: 1px solid var(--acc-line);
+  background: var(--acc-soft);
+  color: var(--text);
+}
+#app-note-text { flex: 1 1 220px; min-width: 0; }
+/* przyciski trzymają się razem; na wąskim ekranie schodzą pod tekst, do prawej */
+.note-acts { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.note-x {
+  display: grid; place-items: center;
+  width: 32px; height: 32px; border-radius: 7px;
+  border: 1px solid transparent; background: transparent;
+  color: var(--mut); font-size: 20px; line-height: 1; cursor: pointer;
+}
+.note-x:hover { background: rgba(11, 61, 46, .06); color: var(--text); }
+@media (pointer: coarse) {
+  .note-x { width: 44px; height: 44px; }
+}
+
+/* Przeciąganie PLIKU nad stroną: podświetl pole źródła jako miejsce docelowe
+   (plik można upuścić w dowolnym miejscu, ale trafia właśnie tam). */
+body.file-drag textarea.editor-ta {
+  border-color: var(--acc-line);
+  box-shadow: 0 0 0 3px var(--acc-soft);
 }
 
 /* stan ładowania pliku — animowane kropki */

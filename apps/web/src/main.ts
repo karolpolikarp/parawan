@@ -1,5 +1,14 @@
 import { redactPII, type PiiFinding, type PiiType } from 'anonimizator';
 import { extractDocxText } from './docx';
+import {
+  decodeText,
+  FileReadError,
+  fileExt,
+  looksLikePdf,
+  MAX_FILE_BYTES,
+  MAX_FILE_MB,
+  unsupportedFormat,
+} from './files';
 import { extractPdfText } from './pdf';
 import { buildMinimalPdf } from './pdf-fixture';
 import './style.css';
@@ -28,6 +37,11 @@ const fileInput = $<HTMLInputElement>('file-input');
 const viewResultBtn = $<HTMLButtonElement>('view-result');
 const viewCompareBtn = $<HTMLButtonElement>('view-compare');
 const appError = $<HTMLParagraphElement>('app-error');
+const appNote = $<HTMLDivElement>('app-note');
+const appNoteText = $<HTMLSpanElement>('app-note-text');
+const appNoteUndo = $<HTMLButtonElement>('app-note-undo');
+const appNoteClose = $<HTMLButtonElement>('app-note-close');
+const appNoteStatus = $<HTMLSpanElement>('app-note-status');
 const maskNav = $<HTMLSpanElement>('mask-nav');
 const maskPrev = $<HTMLButtonElement>('mask-prev');
 const maskNext = $<HTMLButtonElement>('mask-next');
@@ -193,7 +207,7 @@ const WYKRYWA_ROWS: Array<{ code: string; how: string }> = [
   { code: '[VIN]', how: '17 znaków bez I/O/Q; kontekst „VIN/nadwozia" lub wyraźny układ VIN' },
   { code: '[IP]', how: 'IPv4 (oktety 0–255) oraz IPv6' },
   { code: '[MAC]', how: '6 par hex (00:1A:2B:3C:4D:5E)' },
-  { code: '[TOKEN]', how: 'token JWT (<code>eyJ…</code>) — może dawać dostęp' },
+  { code: '[TOKEN]', how: 'token JWT (<code>eyJ…</code>), może dawać dostęp' },
   { code: '[LOGIN]', how: 'kontekst „login/username" + wartość (też w URL i XML/JSON)' },
   { code: '[NR-KONTA]', how: 'walidacja <strong>mod 97</strong> lub kontekst „konto/rachunek”' },
   { code: '[NR-KARTY]', how: 'kontekst „karta/Visa/Mastercard…" + 13–19 cyfr, prefiks sieci + <strong>suma Luhna</strong>' },
@@ -781,6 +795,10 @@ function update(): void {
 // na każdy znak. Licznik znaków/wierszy aktualizujemy NATYCHMIAST (tani), redakcję po ~140 ms.
 let updateTimer: ReturnType<typeof setTimeout> | undefined;
 input.addEventListener('input', () => {
+  // Własna edycja zamyka komunikaty: stary błąd już nie dotyczy, a „Cofnij” po edycji
+  // przywróciłby tekst sprzed niej i skasował to, co właśnie wpisano.
+  clearError();
+  dismissNote();
   updateSrcMeta(input.value);
   clearTimeout(updateTimer);
   updateTimer = setTimeout(update, 140);
@@ -788,19 +806,82 @@ input.addEventListener('input', () => {
 
 /* ── Akcje ── */
 
-let errorTimer: ReturnType<typeof setTimeout> | undefined;
+/** Przewiń do elementu, jeśli jest poza ekranem (np. plik upuszczono na samej górze strony). */
+function revealIfOffscreen(el: HTMLElement): void {
+  const r = el.getBoundingClientRect();
+  // Na telefonie widoczna część (visualViewport) bywa niższa niż innerHeight.
+  const visibleH = window.visualViewport?.height ?? window.innerHeight;
+  if (r.top < 0 || r.bottom > visibleH) el.scrollIntoView({ block: 'center' });
+}
 
+// Błąd stoi pod paskiem narzędzi źródła, przy przyciskach, które go wywołują, i NIE znika
+// sam (wcześniej po 8 s, często zanim ktokolwiek go zauważył). Czyści go następna akcja:
+// wczytanie pliku, „Wyczyść”, „Przykład” albo edycja tekstu.
 function showError(msg: string): void {
   appError.textContent = msg;
   appError.hidden = false;
-  clearTimeout(errorTimer);
-  errorTimer = setTimeout(() => (appError.hidden = true), 8000);
+  revealIfOffscreen(appError);
 }
 
-clearBtn.addEventListener('click', () => {
-  input.value = '';
+function clearError(): void {
+  appError.hidden = true;
+  appError.textContent = '';
+}
+
+/* Pasek „Cofnij”. „Wyczyść”, „Przykład” i wczytany plik zastępują CAŁY tekst, a przypisanie
+   input.value kasuje historię Ctrl+Z pola. Poprzedni tekst trzymamy więc tutaj, do następnej
+   edycji albo zamknięcia paska. Nie używamy execCommand('insertText'): wymaga fokusu (na
+   dotyku otwiera klawiaturę), przy dużych plikach jest bardzo wolny i jest przestarzały. */
+let undoText: string | null = null;
+
+/** Pokaż informację pod paskiem narzędzi; z `prev` dochodzi przycisk „Cofnij”. */
+function showNote(msg: string, prev: string | null): void {
+  undoText = prev;
+  appNoteText.textContent = msg;
+  appNoteUndo.hidden = prev === null;
+  appNote.hidden = false;
+  appNoteStatus.textContent = msg; // ogłoszenie dla czytnika ekranu
+  revealIfOffscreen(appNote);
+}
+
+function dismissNote(): void {
+  undoText = null;
+  appNote.hidden = true;
+  appNoteStatus.textContent = '';
+}
+
+// Mysz i touchpad: po akcji fokus wraca do pola. Na dotyku nie, bo fokus otwiera klawiaturę
+// ekranową, która zasłania wynik.
+const finePointer = matchMedia('(pointer: fine)');
+
+/** Zastąp cały tekst źródła; gdy było co stracić, pokaż pasek „Cofnij”. `info` to dopisek. */
+function replaceSource(text: string, note: string, info = ''): void {
+  const prev = input.value;
+  input.value = text;
   update();
-  input.focus();
+  if (finePointer.matches) input.focus(); // przed paskiem: przewinięcie do pola nie zasłoni go
+  const canUndo = prev.trim() !== '' && prev !== text;
+  if (canUndo || info) showNote([canUndo ? note : '', info].filter(Boolean).join(' '), canUndo ? prev : null);
+  else dismissNote();
+}
+
+appNoteUndo.addEventListener('click', () => {
+  if (undoText === null) return;
+  input.value = undoText;
+  dismissNote();
+  clearError();
+  update();
+  appNoteStatus.textContent = 'Przywrócono poprzedni tekst.';
+  if (finePointer.matches) input.focus(); // przycisk znika, więc fokus nie może na nim zostać
+});
+appNoteClose.addEventListener('click', () => {
+  dismissNote();
+  if (finePointer.matches) input.focus();
+});
+
+clearBtn.addEventListener('click', () => {
+  clearError();
+  replaceSource('', 'Wyczyszczono tekst.');
 });
 
 function flashCopy(text: string): void {
@@ -834,7 +915,13 @@ downloadBtn.addEventListener('click', () => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'zanonimizowany.txt';
+  // Znacznik czasu odróżnia kolejne pobrania („zanonimizowany (1).txt” nic nie mówi).
+  // Nazwy wczytanego pliku NIE używamy: „umowa-najmu-Kowalska” przeszłaby jawna.
+  const d = new Date();
+  const p = (n: number): string => String(n).padStart(2, '0');
+  a.download =
+    `zanonimizowany-${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}` +
+    `_${p(d.getHours())}-${p(d.getMinutes())}-${p(d.getSeconds())}.txt`;
   a.click();
   URL.revokeObjectURL(url);
 });
@@ -847,27 +934,27 @@ Nr konta do zwrotu: PL61 1090 1014 0000 0712 1981 2874.
 Sprawę prowadzi pan Bąkiewicz zgodnie z art. 123 456 789 KC.`;
 
 exampleBtn.addEventListener('click', () => {
-  input.value = EXAMPLE_TEXT;
-  update();
-  input.focus();
+  clearError();
+  replaceSource(EXAMPLE_TEXT, 'Wstawiono przykład w miejsce Twojego tekstu.');
 });
 
 loadFileBtn.addEventListener('click', () => fileInput.click());
 
-function loadTextFile(file: File): void {
-  const reader = new FileReader();
-  reader.onload = () => {
-    input.value = String(reader.result ?? '');
-    update();
-  };
-  reader.readAsText(file);
-}
+const EMPTY_FILE = 'Plik jest pusty: nie zawiera tekstu do anonimizacji.';
 
+/**
+ * Wczytaj plik do pola źródła. Pliki tekstowe dekodujemy sami (UTF-8, UTF-16 z BOM albo
+ * Windows-1250), DOCX i PDF mają własne ekstraktory. Przy każdym błędzie pole zostaje
+ * bez zmian, a użytkownik dostaje komunikat po polsku.
+ */
 async function loadAnyFile(file: File): Promise<void> {
-  const isDocx = /\.docx$/i.test(file.name);
-  const isPdf = /\.pdf$/i.test(file.name);
-  if (!isDocx && !isPdf) {
-    loadTextFile(file);
+  clearError();
+  if (file.size === 0) {
+    showError(EMPTY_FILE);
+    return;
+  }
+  if (file.size > MAX_FILE_BYTES) {
+    showError(`Plik jest zbyt duży (limit ${MAX_FILE_MB} MB). Podziel go na mniejsze części.`);
     return;
   }
   loadFileBtn.disabled = true;
@@ -877,12 +964,44 @@ async function loadAnyFile(file: File): Promise<void> {
   output.setAttribute('aria-busy', 'true');
   try {
     const buf = new Uint8Array(await file.arrayBuffer());
-    input.value = isDocx ? extractDocxText(buf) : await extractPdfText(buf);
-    update();
+    const head = buf.subarray(0, 4096);
+    const ext = fileExt(file.name);
+    const isPdf = ext === 'pdf' || looksLikePdf(head);
+    const isDocx = !isPdf && ext === 'docx';
+    let text: string;
+    let info = '';
+    if (isDocx) text = extractDocxText(buf);
+    else if (isPdf) text = await extractPdfText(buf);
+    else {
+      const unsupported = unsupportedFormat(file.name, head);
+      if (unsupported) {
+        showError(unsupported);
+        return;
+      }
+      const decoded = decodeText(buf);
+      text = decoded.text;
+      if (decoded.encoding === 'windows-1250') {
+        info =
+          'Plik był zapisany w kodowaniu Windows-1250 (ANSI), polskie znaki przekonwertowano. ' +
+          'Sprawdź, czy wyglądają poprawnie.';
+      }
+    }
+    if (!text.trim()) {
+      showError(EMPTY_FILE);
+      return;
+    }
+    replaceSource(text, 'Zastąpiono tekst treścią pliku.', info);
+    if (text.includes('\uFFFD')) {
+      showError(
+        'Część znaków w pliku jest nieczytelna, więc maskowanie może być niepełne. Sprawdź wynik.',
+      );
+    }
     // dokumenty najlepiej przegląda się w trybie recenzji
-    setViewMode('compare');
+    if (isDocx || isPdf) setViewMode('compare');
   } catch (err) {
-    showError(err instanceof Error ? err.message : 'Nie udało się odczytać pliku.');
+    // Tylko nasze komunikaty idą na ekran wprost; surowy wyjątek biblioteki (często po
+    // angielsku, np. „Invalid code point”) zastępujemy ogólnym.
+    showError(err instanceof FileReadError ? err.message : 'Nie udało się odczytać pliku.');
   } finally {
     loadFileBtn.disabled = false;
     loadFileBtn.classList.remove('busy');
@@ -898,24 +1017,56 @@ fileInput.addEventListener('change', () => {
   fileInput.value = '';
 });
 
-// drag&drop: na pole i GDZIEKOLWIEK na stronie (domyślna nawigacja = utrata pracy)
+// drag&drop: PLIK na pole i GDZIEKOLWIEK na stronie (domyślna nawigacja = utrata pracy).
+// Przeciągany TEKST (np. zaznaczenie z Worda) obsługuje sama przeglądarka: wstawia go w polu.
+// Dlatego warunek „to plik” stoi i w dragover, i w drop; bez niego Chromium odrzuca tekst.
+const hasFiles = (e: DragEvent): boolean =>
+  !!e.dataTransfer && [...e.dataTransfer.types].includes('Files');
+
+/** Wczytaj pierwszy z upuszczonych plików; o pominiętych powiedz wprost. */
+function loadDropped(files: FileList | null | undefined): void {
+  if (!files?.length) return;
+  const total = files.length;
+  // komunikat dopiero po wczytaniu, bo loadAnyFile na starcie czyści błędy
+  void loadAnyFile(files[0]).then(() => {
+    if (total < 2) return;
+    const msg = `Wczytano tylko jeden z ${total} upuszczonych plików. Pozostałe upuść osobno, po jednym.`;
+    showError(appError.hidden ? msg : `${appError.textContent} ${msg}`);
+  });
+}
+
+// Podświetlenie pola na czas przeciągania pliku nad stroną. dragenter/dragleave przychodzą
+// od każdego mijanego elementu, więc liczymy głębokość, zamiast reagować na pojedyncze zdarzenie.
+let dragDepth = 0;
+function endFileDrag(): void {
+  dragDepth = 0;
+  document.body.classList.remove('file-drag');
+  input.classList.remove('dragover');
+}
+window.addEventListener('dragenter', (e) => {
+  if (!hasFiles(e)) return;
+  dragDepth++;
+  document.body.classList.add('file-drag');
+});
+window.addEventListener('dragleave', (e) => {
+  if (hasFiles(e) && --dragDepth <= 0) endFileDrag();
+});
+
 input.addEventListener('dragover', (e) => {
+  if (!hasFiles(e)) return;
   e.preventDefault();
   input.classList.add('dragover');
 });
 input.addEventListener('dragleave', () => input.classList.remove('dragover'));
-input.addEventListener('drop', (e) => {
+window.addEventListener('dragover', (e) => {
+  if (e.target === input && !hasFiles(e)) return;
   e.preventDefault();
-  e.stopPropagation();
-  input.classList.remove('dragover');
-  const file = e.dataTransfer?.files?.[0];
-  if (file) void loadAnyFile(file);
 });
-window.addEventListener('dragover', (e) => e.preventDefault());
 window.addEventListener('drop', (e) => {
+  if (e.target === input && !hasFiles(e)) return;
   e.preventDefault();
-  const file = e.dataTransfer?.files?.[0];
-  if (file) void loadAnyFile(file);
+  endFileDrag();
+  if (hasFiles(e)) loadDropped(e.dataTransfer?.files);
 });
 
 // Ctrl/Cmd+Enter — kopiuj wynik
@@ -931,7 +1082,7 @@ document.addEventListener('keydown', (e) => {
 const params = new URLSearchParams(location.search);
 if (params.has('demo')) {
   input.value = EXAMPLE_TEXT;
-} else if (matchMedia('(pointer: fine)').matches) {
+} else if (finePointer.matches) {
   input.focus();
 }
 

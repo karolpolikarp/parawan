@@ -158,12 +158,24 @@
           <span class="help" data-tip="Tekst analizowany jest lokalnie w czasie pisania, nic nie wychodzi z przeglądarki" data-tip-pos="left" tabindex="0">?</span>
         </div>
         <div class="toolbar">
-          <button type="button" id="example" class="btn tbtn" data-tip="Wstawia przykładowy tekst z danymi, przetestujesz działanie bez wklejania własnych"><i class="gi" data-i="przyklad"></i><span>Przykład</span></button>
+          <button type="button" id="example" class="btn tbtn" data-tip="Zastępuje tekst przykładem z danymi, przetestujesz działanie bez wklejania własnych"><i class="gi" data-i="przyklad"></i><span>Przykład</span></button>
           <button type="button" id="load-file" class="btn tbtn" data-tip="Otwiera plik TXT, MD, CSV, LOG, DOCX lub PDF z dysku"><i class="gi" data-i="plik-txt"></i><span id="load-file-label">Wczytaj plik</span></button>
           <button type="button" id="clear" class="btn tbtn" data-tip="Usuwa cały tekst z obu paneli"><i class="gi" data-i="wyczysc"></i><span>Wyczyść</span></button>
           <input id="file-input" type="file" accept=".txt,.md,.csv,.log,.docx,.pdf" hidden />
           <span class="hint">TXT · DOCX · PDF</span>
         </div>
+        <!-- Komunikaty tuż pod przyciskami, które je wywołują (w zasięgu wzroku). Błąd zostaje
+             do następnej akcji; pasek „Cofnij” pozwala odzyskać tekst nadpisany przez
+             „Wyczyść”, „Przykład” albo wczytany plik. -->
+        <p id="app-error" class="app-error" role="alert" hidden></p>
+        <div id="app-note" class="app-note" hidden>
+          <span id="app-note-text"></span>
+          <span class="note-acts">
+            <button type="button" id="app-note-undo" class="btn btn-sm">Cofnij</button>
+            <button type="button" id="app-note-close" class="note-x" aria-label="Zamknij komunikat">×</button>
+          </span>
+        </div>
+        <span id="app-note-status" role="status" class="vh"></span>
         <div class="card-b">
           <textarea
             id="input"
@@ -210,8 +222,6 @@
           <span>Przejrzyj wynik przed udostępnieniem, wykrywanie nazwisk jest heurystyczne. <a href="#ograniczenia">Ograniczenia</a></span>
         </div>
       </section>
-
-      <p id="app-error" class="app-error g12" role="alert" hidden></p>
 
       <!-- ══════════ ZAMASKOWANO ══════════ -->
       <!-- Bez aria-live na całej sekcji (przebudowa przy każdym renderze zalewałaby czytnik).
