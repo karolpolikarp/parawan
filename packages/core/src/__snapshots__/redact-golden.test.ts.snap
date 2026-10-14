@@ -17,7 +17,26 @@ exports[`golden: korpus benchmarku — filtr types (tylko strukturalne) 1`] = `
   "neg-102": "P.S. Mróz ma być w nocy, okryj róże.",
   "neg-103": "{"sciezka": "C:\\\\Users\\\\nowak\\\\Documents\\\\raport.docx", "opis": "Linia 1\\nLinia 2"}",
   "neg-104": "P.P.S. Mróz ma być w nocy, a PKO B.P. Wilk to nazwa robocza.",
+  "neg-105": "Ilość
+120
+340
+560
+Razem 1020",
+  "neg-106": "Numer przesyłki: RR123456789PL, faktura FV/2026/123456789, SKU 123456789A.",
+  "neg-107": "Kontakt telefoniczny 03.10.2026 9:45 – brak odpowiedzi.",
+  "neg-108": "Dochody bieżące: 534 210 987,55; wartość: 1 234 567 890; kwota 150 000 000 zł.",
+  "neg-109": "Nr seryjny urządzenia: 512345678
+Numer zamówienia: 302114587
+Infolinia sklepu: 801 300 400",
   "neg-11": "Trybunał Konstytucyjny odroczył ogłoszenie wyroku.",
+  "neg-110": "Rysunki wykonano w programie AutoCAD 2024. Samochód ciężarowy o DMC 3500 kg.",
+  "neg-111": "Opłata za tablice rejestracyjne od 2025 r. wynosi 135,50 zł.",
+  "neg-112": "Login: admin
+Po zalogowaniu do panelu admin zmień domyślne hasło.",
+  "neg-113": "Wymagania opisano w rozdziale 2.1.1.1. Zainstalowano wersję 2.4.1.0 na serwerze.",
+  "neg-114": "Maska podsieci: 255.255.255.0, localhost 127.0.0.1, nasłuch 0.0.0.0",
+  "neg-115": "Serial Number: 4a:3f:22:91:0c:7e:1d:55",
+  "neg-116": "git clone git@github.com:zespol/portal.git",
   "neg-12": "Nowelizacja Kodeksu Cywilnego weszła w życie w maju.",
   "neg-13": "Urząd Skarbowy wezwał spółkę do korekty deklaracji.",
   "neg-14": "Ministerstwo Sprawiedliwości opublikowało projekt ustawy.",
@@ -259,7 +278,20 @@ Sędziowie: SO A.K. Sowa, SO T.J. Mazur (spr.)",
   "str-100": "{"payload":"{\\"imie\\":\\"Jadwiga\\",\\"nazwisko\\":\\"Gżegżółka\\",\\"miasto\\":\\"Słupsk\\"}"}",
   "str-101": "{"klient_id": 7, "pesel": "[PESEL]", "telefon": "[TELEFON]"}",
   "str-102": "tel. [TELEFON] lub [TELEFON], faks [TELEFON]; [TELEFON]",
+  "str-103": "Numery [TELEFON]/[TELEFON] do biura.",
+  "str-104": "Telefon do działu zamówień: [TELEFON], nr zamówienia 302114587.",
+  "str-105": "Ciągnik: nr rej. WGM 12345, DMC 18000 kg, ładowność 24 t.",
+  "str-106": "Przelew na [NR-KONTA] Z OPCJĄ SHA",
+  "str-107": "IBAN: [NR-KONTA], BIC: INGBPLPW",
+  "str-108": "Login: FIRMA\\jkowalski
+Konto założono w domenie FIRMA.",
+  "str-109": "Login: tkaminski
+Zablokowano konto tkaminski.",
   "str-11": "[REGON] to REGON jednostki lokalnej.",
+  "str-110": "Logowanie nastąpiło z adresu IP 83.12.45.67.",
+  "str-111": "IN=eth0 MAC=00:1a:2b:3c:4d:5e:00:11:22:33:44:55:08:00 LEN=60",
+  "str-112": "GET /api/v1/clients?email=[EMAIL]&status=1 200",
+  "str-113": "Sygn. akt: CAN-PST-SWW.7421.1234567.2026.1 — wezwanie.",
   "str-12": "Przelew na rachunek [NR-KONTA] do końca miesiąca.",
   "str-13": "IBAN: [NR-KONTA] (mBank).",
   "str-14": "Numer konta: [NR-KONTA] prowadzony w PKO.",
@@ -369,7 +401,26 @@ exports[`golden: korpus benchmarku — pseudonimizacja osób ([OSOBA-A]…) 1`] 
   "neg-102": "P.S. Mróz ma być w nocy, okryj róże.",
   "neg-103": "{"sciezka": "C:\\\\Users\\\\nowak\\\\Documents\\\\raport.docx", "opis": "Linia 1\\nLinia 2"}",
   "neg-104": "P.P.S. Mróz ma być w nocy, a PKO B.P. Wilk to nazwa robocza.",
+  "neg-105": "Ilość
+120
+340
+560
+Razem 1020",
+  "neg-106": "Numer przesyłki: RR123456789PL, faktura FV/2026/123456789, SKU 123456789A.",
+  "neg-107": "Kontakt telefoniczny 03.10.2026 9:45 – brak odpowiedzi.",
+  "neg-108": "Dochody bieżące: 534 210 987,55; wartość: 1 234 567 890; kwota 150 000 000 zł.",
+  "neg-109": "Nr seryjny urządzenia: 512345678
+Numer zamówienia: 302114587
+Infolinia sklepu: 801 300 400",
   "neg-11": "Trybunał Konstytucyjny odroczył ogłoszenie wyroku.",
+  "neg-110": "Rysunki wykonano w programie AutoCAD 2024. Samochód ciężarowy o DMC 3500 kg.",
+  "neg-111": "Opłata za tablice rejestracyjne od 2025 r. wynosi 135,50 zł.",
+  "neg-112": "Login: [LOGIN]
+Po zalogowaniu do panelu admin zmień domyślne hasło.",
+  "neg-113": "Wymagania opisano w rozdziale 2.1.1.1. Zainstalowano wersję 2.4.1.0 na serwerze.",
+  "neg-114": "Maska podsieci: 255.255.255.0, localhost 127.0.0.1, nasłuch 0.0.0.0",
+  "neg-115": "Serial Number: 4a:3f:22:91:0c:7e:1d:55",
+  "neg-116": "git clone git@github.com:zespol/portal.git",
   "neg-12": "Nowelizacja Kodeksu Cywilnego weszła w życie w maju.",
   "neg-13": "Urząd Skarbowy wezwał spółkę do korekty deklaracji.",
   "neg-14": "Ministerstwo Sprawiedliwości opublikowało projekt ustawy.",
@@ -609,7 +660,20 @@ Sędziowie: SO [OSOBA-B], SO [OSOBA-C] (spr.)",
   "str-100": "{"payload":"{\\"imie\\":\\"[IMIĘ I NAZWISKO]\\",\\"nazwisko\\":\\"[OSOBA-A]\\",\\"miasto\\":\\"[MIEJSCOWOŚĆ]\\"}"}",
   "str-101": "{"klient_id": 7, "pesel": "[PESEL]", "telefon": "[TELEFON]"}",
   "str-102": "tel. [TELEFON] lub [TELEFON], faks [TELEFON]; [TELEFON]",
+  "str-103": "Numery [TELEFON]/[TELEFON] do biura.",
+  "str-104": "Telefon do działu zamówień: [TELEFON], nr zamówienia 302114587.",
+  "str-105": "Ciągnik: nr rej. [NR-REJESTRACYJNY], DMC 18000 kg, ładowność 24 t.",
+  "str-106": "Przelew na [NR-KONTA] Z OPCJĄ SHA",
+  "str-107": "IBAN: [NR-KONTA], BIC: INGBPLPW",
+  "str-108": "Login: [LOGIN]
+Konto założono w domenie FIRMA.",
+  "str-109": "Login: [LOGIN]
+Zablokowano konto [LOGIN].",
   "str-11": "[REGON] to REGON jednostki lokalnej.",
+  "str-110": "Logowanie nastąpiło z adresu IP [IP].",
+  "str-111": "IN=eth0 MAC=[MAC] LEN=60",
+  "str-112": "GET /api/v1/clients?email=[EMAIL]&status=1 200",
+  "str-113": "Sygn. akt: [ZNAK-SPRAWY] — wezwanie.",
   "str-12": "Przelew na rachunek [NR-KONTA] do końca miesiąca.",
   "str-13": "IBAN: [NR-KONTA] (mBank).",
   "str-14": "Numer konta: [NR-KONTA] prowadzony w PKO.",
@@ -719,7 +783,26 @@ exports[`golden: korpus benchmarku — wariant domyślny (wszystkie typy) 1`] = 
   "neg-102": "P.S. Mróz ma być w nocy, okryj róże.",
   "neg-103": "{"sciezka": "C:\\\\Users\\\\nowak\\\\Documents\\\\raport.docx", "opis": "Linia 1\\nLinia 2"}",
   "neg-104": "P.P.S. Mróz ma być w nocy, a PKO B.P. Wilk to nazwa robocza.",
+  "neg-105": "Ilość
+120
+340
+560
+Razem 1020",
+  "neg-106": "Numer przesyłki: RR123456789PL, faktura FV/2026/123456789, SKU 123456789A.",
+  "neg-107": "Kontakt telefoniczny 03.10.2026 9:45 – brak odpowiedzi.",
+  "neg-108": "Dochody bieżące: 534 210 987,55; wartość: 1 234 567 890; kwota 150 000 000 zł.",
+  "neg-109": "Nr seryjny urządzenia: 512345678
+Numer zamówienia: 302114587
+Infolinia sklepu: 801 300 400",
   "neg-11": "Trybunał Konstytucyjny odroczył ogłoszenie wyroku.",
+  "neg-110": "Rysunki wykonano w programie AutoCAD 2024. Samochód ciężarowy o DMC 3500 kg.",
+  "neg-111": "Opłata za tablice rejestracyjne od 2025 r. wynosi 135,50 zł.",
+  "neg-112": "Login: [LOGIN]
+Po zalogowaniu do panelu admin zmień domyślne hasło.",
+  "neg-113": "Wymagania opisano w rozdziale 2.1.1.1. Zainstalowano wersję 2.4.1.0 na serwerze.",
+  "neg-114": "Maska podsieci: 255.255.255.0, localhost 127.0.0.1, nasłuch 0.0.0.0",
+  "neg-115": "Serial Number: 4a:3f:22:91:0c:7e:1d:55",
+  "neg-116": "git clone git@github.com:zespol/portal.git",
   "neg-12": "Nowelizacja Kodeksu Cywilnego weszła w życie w maju.",
   "neg-13": "Urząd Skarbowy wezwał spółkę do korekty deklaracji.",
   "neg-14": "Ministerstwo Sprawiedliwości opublikowało projekt ustawy.",
@@ -959,7 +1042,20 @@ Sędziowie: SO [IMIĘ I NAZWISKO], SO [IMIĘ I NAZWISKO] (spr.)",
   "str-100": "{"payload":"{\\"imie\\":\\"[IMIĘ I NAZWISKO]\\",\\"nazwisko\\":\\"[IMIĘ I NAZWISKO]\\",\\"miasto\\":\\"[MIEJSCOWOŚĆ]\\"}"}",
   "str-101": "{"klient_id": 7, "pesel": "[PESEL]", "telefon": "[TELEFON]"}",
   "str-102": "tel. [TELEFON] lub [TELEFON], faks [TELEFON]; [TELEFON]",
+  "str-103": "Numery [TELEFON]/[TELEFON] do biura.",
+  "str-104": "Telefon do działu zamówień: [TELEFON], nr zamówienia 302114587.",
+  "str-105": "Ciągnik: nr rej. [NR-REJESTRACYJNY], DMC 18000 kg, ładowność 24 t.",
+  "str-106": "Przelew na [NR-KONTA] Z OPCJĄ SHA",
+  "str-107": "IBAN: [NR-KONTA], BIC: INGBPLPW",
+  "str-108": "Login: [LOGIN]
+Konto założono w domenie FIRMA.",
+  "str-109": "Login: [LOGIN]
+Zablokowano konto [LOGIN].",
   "str-11": "[REGON] to REGON jednostki lokalnej.",
+  "str-110": "Logowanie nastąpiło z adresu IP [IP].",
+  "str-111": "IN=eth0 MAC=[MAC] LEN=60",
+  "str-112": "GET /api/v1/clients?email=[EMAIL]&status=1 200",
+  "str-113": "Sygn. akt: [ZNAK-SPRAWY] — wezwanie.",
   "str-12": "Przelew na rachunek [NR-KONTA] do końca miesiąca.",
   "str-13": "IBAN: [NR-KONTA] (mBank).",
   "str-14": "Numer konta: [NR-KONTA] prowadzony w PKO.",
@@ -1101,7 +1197,7 @@ Oddział: kardiologia",
   "sygnatura-akt": "Sygn. akt [ZNAK-SPRAWY] rozpoznano na rozprawie.",
   "telefon-plus48": "Kontakt telefoniczny: [TELEFON] lub [TELEFON].",
   "url-ochrona": "Zobacz https://example.com/user?name=[IMIĘ I NAZWISKO]&email=[EMAIL] w systemie.",
-  "vin-mac-ip": "VIN: [VIN], MAC [MAC], IP 192.168.1.1.",
+  "vin-mac-ip": "VIN: [VIN], MAC [MAC], IP [IP].",
   "xml-json-klucze": "{"firstName":"[IMIĘ I NAZWISKO]","lastName":"[OSOBA-A]","pesel":"[PESEL]"}",
 }
 `;
@@ -1155,7 +1251,7 @@ Oddział: kardiologia",
   "sygnatura-akt": "Sygn. akt [ZNAK-SPRAWY] rozpoznano na rozprawie.",
   "telefon-plus48": "Kontakt telefoniczny: [TELEFON] lub [TELEFON].",
   "url-ochrona": "Zobacz https://example.com/user?name=[IMIĘ I NAZWISKO]&email=[EMAIL] w systemie.",
-  "vin-mac-ip": "VIN: [VIN], MAC [MAC], IP 192.168.1.1.",
+  "vin-mac-ip": "VIN: [VIN], MAC [MAC], IP [IP].",
   "xml-json-klucze": "{"firstName":"[IMIĘ I NAZWISKO]","lastName":"[IMIĘ I NAZWISKO]","pesel":"[PESEL]"}",
 }
 `;

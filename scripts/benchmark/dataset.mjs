@@ -729,6 +729,32 @@ export function buildDataset() {
   neg('P.P.S. Mróz ma być w nocy, a PKO B.P. Wilk to nazwa robocza.', ['P.P.S. Mróz', 'B.P. Wilk']);
   str('tel. 601 222 333 lub 48 602 333 444, faks 22 501 23 45; 48 22 123 45 67', ['601 222 333', '48 602 333 444', '22 501 23 45', '48 22 123 45 67'], ['tel.', 'lub', 'faks']);
 
+  // Nadmaskowanie numerów (audyt, partia b2): liczby w kształcie telefonu, tablicy, IBAN-u, IP
+  // czy MAC, które nimi nie są, oraz prawdziwe wartości, które obok nich nadal muszą zniknąć.
+  neg('Ilość\n120\n340\n560\nRazem 1020', ['120\n340\n560']);
+  neg('Numer przesyłki: RR123456789PL, faktura FV/2026/123456789, SKU 123456789A.', ['RR123456789PL', 'FV/2026/123456789', 'SKU 123456789A']);
+  str('Numery 500600700/501601701 do biura.', ['500600700', '501601701'], ['Numery', 'do biura']);
+  neg('Kontakt telefoniczny 03.10.2026 9:45 – brak odpowiedzi.', ['03.10.2026 9:45']);
+  neg('Dochody bieżące: 534 210 987,55; wartość: 1 234 567 890; kwota 150 000 000 zł.', ['534 210 987,55', '1 234 567 890', '150 000 000 zł']);
+  neg('Nr seryjny urządzenia: 512345678\nNumer zamówienia: 302114587\nInfolinia sklepu: 801 300 400', ['512345678', '302114587', '801 300 400']);
+  str('Telefon do działu zamówień: 512 345 678, nr zamówienia 302114587.', ['512 345 678'], ['działu zamówień', '302114587']);
+  neg('Rysunki wykonano w programie AutoCAD 2024. Samochód ciężarowy o DMC 3500 kg.', ['AutoCAD 2024', 'DMC 3500 kg']);
+  neg('Opłata za tablice rejestracyjne od 2025 r. wynosi 135,50 zł.', ['od 2025 r.']);
+  str('Ciągnik: nr rej. WGM 12345, DMC 18000 kg, ładowność 24 t.', ['WGM 12345'], ['DMC 18000 kg', 'ładowność 24 t']);
+  str('Przelew na DE89 3704 0044 0532 0130 00 Z OPCJĄ SHA', ['DE89 3704 0044 0532 0130 00'], ['Z OPCJĄ SHA']);
+  str('IBAN: PL 92 1050 0099 0000 1234 5678 9013, BIC: INGBPLPW', ['PL 92', '1050 0099 0000 1234 5678 9013'], ['BIC: INGBPLPW']);
+  str('Login: FIRMA\\jkowalski\nKonto założono w domenie FIRMA.', ['jkowalski'], ['w domenie FIRMA.']);
+  str('Login: tkaminski\nZablokowano konto tkaminski.', ['tkaminski'], ['Zablokowano konto']);
+  neg('Login: admin\nPo zalogowaniu do panelu admin zmień domyślne hasło.', ['panelu admin']);
+  str('Logowanie nastąpiło z adresu IP 83.12.45.67.', ['83.12.45.67'], ['Logowanie nastąpiło z adresu IP']);
+  neg('Wymagania opisano w rozdziale 2.1.1.1. Zainstalowano wersję 2.4.1.0 na serwerze.', ['2.1.1.1', '2.4.1.0']);
+  neg('Maska podsieci: 255.255.255.0, localhost 127.0.0.1, nasłuch 0.0.0.0', ['255.255.255.0', '127.0.0.1', '0.0.0.0']);
+  neg('Serial Number: 4a:3f:22:91:0c:7e:1d:55', ['4a:3f:22:91:0c:7e:1d:55']);
+  str('IN=eth0 MAC=00:1a:2b:3c:4d:5e:00:11:22:33:44:55:08:00 LEN=60', ['00:1a:2b:3c:4d:5e', '00:11:22:33:44:55'], ['LEN=60']);
+  neg('git clone git@github.com:zespol/portal.git', ['git@github.com:zespol/portal.git']);
+  str('GET /api/v1/clients?email=jan.kowalski%40example.pl&status=1 200', ['jan.kowalski%40example.pl'], ['&status=1 200']);
+  str('Sygn. akt: CAN-PST-SWW.7421.1234567.2026.1 — wezwanie.', ['CAN-PST-SWW.7421.1234567.2026.1'], ['wezwanie']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {

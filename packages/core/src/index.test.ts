@@ -2278,3 +2278,427 @@ test('K17 pułapki: proza, nie-JSON i wartości w cudzysłowach bez dokładania 
   for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
   keep(['{"telefon": "[TELEFON]"}', '[1, 2, 3]', '{"klient_id": 7, "kwota": 1250.50, "rok": 2024, "aktywny": true, "uwagi": null}']);
 });
+
+// ── Audyt, partia b2: nadmaskowanie numerów (telefon, tablica, IBAN, login, IP, MAC, e-mail, znak) ──
+const masked = (cases: [string, string][], opts?: Parameters<typeof redactPII>[1]): void => {
+  for (const [t, want] of cases) expect(redactPII(t, opts).redacted, t).toBe(want);
+};
+test('K01: kolumna liczb, komórki TSV i wnętrze identyfikatora nie są telefonem', () => {
+  keep([
+    'Ilość\n120\n340\n560\nRazem 1020',
+    '120\t340\t560',
+    'Sale:\n101\n102\n103',
+    'Numer przesyłki: RR123456789PL',
+    'Faktura FV/2026/123456789',
+    'SKU 123456789A',
+    'EE123456789PL',
+    'ZAM-123456789',
+    'ZAM_123456789',
+    'LOT123456789',
+    'sklep/order/123456789/item',
+    'VAT-UE nabywcy: DE811569869',
+    'NL812345678B01',
+    'Kwota 120 340 560 zł',
+  ]);
+});
+test('K01 pułapki: lista numerów, numer po małej literze i kotwica dalej dają [TELEFON]', () => {
+  masked([
+    ['Numery 500600700/501601701', 'Numery [TELEFON]/[TELEFON]'],
+    ['Telefony:\n-500600700\n-501601701', 'Telefony:\n-[TELEFON]\n-[TELEFON]'],
+    ['tel./fax 500600700/501601701', 'tel./fax [TELEFON]/[TELEFON]'],
+    ['dzwoń512345678', 'dzwoń[TELEFON]'],
+    ['Tel500600700', 'Tel[TELEFON]'],
+    ['Proszę dzwonić 512 345 678 po 16.', 'Proszę dzwonić [TELEFON] po 16.'],
+    ['Biuro (22) 123 45 67 czynne.', 'Biuro [TELEFON] czynne.'],
+    ['Kontakt:\n512 345 678\n601 234 567', 'Kontakt:\n[TELEFON]\n[TELEFON]'],
+  ]);
+});
+test('K08: data z godziną po kotwicy telefonu nie jest numerem', () => {
+  keep([
+    'Kontakt telefoniczny 03.10.2026 9:45 – brak odpowiedzi.',
+    'Data i godzina kontaktu: 3.10.2026 10:15',
+    'Ostatni kontakt: 2026-10-14 9:05',
+    'Telefon 3.10.2026 10:15',
+    'Tel. 2026.10.14 9:05',
+    'tel. 12.10.2026 9',
+  ]);
+  masked([
+    ['tel. 512.345.678', 'tel. [TELEFON]'],
+    ['tel. 12.345.67.89', 'tel. [TELEFON]'],
+    ['kom. 512-345-678 oraz 601.234.567', 'kom. [TELEFON] oraz [TELEFON]'],
+    ['Telefon: +48 512 345 678', 'Telefon: [TELEFON]'],
+    ['Kontakt telefoniczny 12.10.2026 9:45 pod numerem 512 345 678', 'Kontakt telefoniczny 12.10.2026 9:45 pod numerem [TELEFON]'],
+  ]);
+});
+test('K26: kwota bez kotwicy — waluta (też twarda spacja), grosze, mnożnik, ogon miliarda', () => {
+  keep([
+    'Kwota: 150\u00A0000\u00A0000\u00A0zł',
+    'Kwota: 150\u00A0000\u00A0000,00\u00A0zł',
+    'Kwota: 150\u202F000\u202F000\u202FPLN',
+    'Dochody bieżące: 534 210 987,55',
+    'Wartość: 1 234 567 890',
+    'Opłata: 123 456 789 pln',
+    'liczba transakcji: 300 000 000 rocznie',
+    'Wartość: 125 450 300 CHF',
+    'Wartość: 125 450 300 euro',
+    'Wartość: 125 450 300 €',
+    'PLN 125 450 300',
+    '€125 450 300',
+    '125 450 300 tys. zł',
+    '125 450 300 mln',
+    'Kwota 125 450 300,5',
+    'Wartość 125 450 300 Kč',
+    '| 600 Transport | 412 345 678,00 | 398 765 432,10 | 96,7 |',
+  ]);
+  // granica waluty: „EUROPA" to nie „EUR" — numer dawniej wyciekał
+  masked([['601 234 567 EUROPA', '[TELEFON] EUROPA']]);
+});
+test('K26 pułapki: CSV, lista po przecinku, godzina, „Złotów" i numer po innej kwocie dalej maskowane', () => {
+  masked([
+    ['Numery 512 345 678,601 234 567', 'Numery [TELEFON],[TELEFON]'],
+    ['Kowalski,Jan,512345678,34', '[IMIĘ I NAZWISKO],Jan,[TELEFON],34'],
+    ['Jan,Kowalski,512 345 678,25,Warszawa', 'Jan,[IMIĘ I NAZWISKO],[TELEFON],25,Warszawa'],
+    ['Numer 512 345 678, 12 osób czeka.', 'Numer [TELEFON], 12 osób czeka.'],
+    ['2024-03-12 14:22 512 345 678', '2024-03-12 14:22 [TELEFON]'],
+    ['tel. 0 512 345 678', 'tel. 0 [TELEFON]'],
+    ['Zadzwoń 600 700 800, zła wiadomość', 'Zadzwoń [TELEFON], zła wiadomość'],
+    ['Kwota 512 345 678\nzł', 'Kwota [TELEFON]\nzł'],
+    ['tel. 500 000 000', 'tel. [TELEFON]'],
+    ['Abonament 49 zł 600 100 200', 'Abonament 49 zł [TELEFON]'],
+    ['601 234 567 Złotów', '[TELEFON] Złotów'],
+    ['Numer: 48 512 345 678', 'Numer: 48 [TELEFON]'],
+    // etykieta identyfikatora przed grupami cyfr: to nie ogon kwoty (PESEL rozbity spacjami — osobna klasa)
+    ['Numer PESEL: 85 110 314 283', 'Numer PESEL: 85 [TELEFON]'],
+  ]);
+});
+test('K27: etykieta numeru seryjnego, zamówienia, zlecenia, faktury i infolinia 800/801 — bez [TELEFON]', () => {
+  keep([
+    'Nr seryjny urządzenia: 512345678\nNumer zamówienia: 302114587',
+    'Numer seryjny urządzenia 512345678',
+    'Zamówienie #302114587',
+    'Nr ogłoszenia 512 778 330.',
+    'S/N: 601 222 333',
+    '(build 512345678)',
+    'Nr zlecenia: 240611123\nKod próbki: 512345678',
+    'Nr faktury: 123456789',
+    'Kod kreskowy: 512345678',
+    'Nr zlecenia 240-611-123',
+    'Numer referencyjny: 512345678',
+    'Infolinia sklepu: 801 300 400',
+    'infolinia 801 234 567, bezpłatna 800 100 200',
+    'Infolinia 801300400 czynna 8-16.',
+  ]);
+});
+test('K27 pułapki: telefon przy słowach „zamówień", „klienta", „pacjenta" i po kotwicy zostaje maską', () => {
+  masked([
+    ['Telefon do działu zamówień: 512 345 678', 'Telefon do działu zamówień: [TELEFON]'],
+    ['Numer: 512345678', 'Numer: [TELEFON]'],
+    ['Nr kontaktowy: 512345678', 'Nr kontaktowy: [TELEFON]'],
+    ['Nr telefonu zleceniodawcy: 512345678', 'Nr telefonu zleceniodawcy: [TELEFON]'],
+    ['ID pacjenta: 512345678', 'ID pacjenta: [TELEFON]'],
+    ['Nr klienta: 512345678', 'Nr klienta: [TELEFON]'],
+    ['Kod próbki: ABC, kontakt 512345678', 'Kod próbki: ABC, kontakt [TELEFON]'],
+    ['Wyrok SN 512 345 678', 'Wyrok SN [TELEFON]'],
+    ['Numer zamówienia: 302114587, tel. 512 345 678', 'Numer zamówienia: 302114587, tel. [TELEFON]'],
+    ['Mój numer: 501 300 400', 'Mój numer: [TELEFON]'],
+    ['REGON: 801300400', 'REGON: [REGON]'],
+    ['Dzwoń 508 001 234.', 'Dzwoń [TELEFON].'],
+    ['Nr zamówień telefonicznych: 512 345 678', 'Nr zamówień telefonicznych: [TELEFON]'],
+  ]);
+});
+test('K12: tablica — doklejone „Auto", skróty techniczne, jednostki, normy i słowa prozy po „rejestracyjny"', () => {
+  keep([
+    'Rysunki wykonano w programie AutoCAD 2024.',
+    'Autodesk AutoCAD LT 2024 – licencja roczna.',
+    'Samochód ciężarowy o DMC 3500 kg.',
+    'Pojazd o DMC3500 kg',
+    'Na tablicy UN 1203 widniał numer materiału.',
+    'Pojazd przewożący materiały UN 1203 musi być oznakowany.',
+    'Samochód w kolorze białym RAL 9003.',
+    'Samochód o mocy wg DIN 70020 wynosi 160 KM.',
+    'Opony samochodu: DOT 3719.',
+    'Pojazd zgodny z normą EN 12195-1 w zakresie mocowania ładunku.',
+    'Pojazd podlega rozporządzeniu WE 1071/2009.',
+    'Przyczepa homologowana wg dyrektywy WE 2007/46.',
+    'Motocykl KTM 1290 Super Duke R.',
+    'Samochód marki Dodge RAM 1500, rok 2020.',
+    'Samochód FSO 1500 sprzedano.',
+    'Opłata za tablice rejestracyjne od 2025 r. wynosi 135,50 zł.',
+    'Wymiana tablic rejestracyjnych do 2027 roku jest bezpłatna.',
+    'Opłata rejestracyjna to 1500 zł.',
+    'Tablice rejestracyjne dla 2000 pojazdów.',
+    'Formularz rejestracyjny NR 2024 dla uczestnika.',
+    'Tablica nr 12345 wisi przy wejściu.',
+  ]);
+  masked([
+    ['Ciągnik: nr rej. WGM 12345, DMC 18000 kg, ładowność 24 t.', 'Ciągnik: nr rej. [NR-REJESTRACYJNY], DMC 18000 kg, ładowność 24 t.'],
+    ['Cysterna nr rej. KR 12345 oraz UN 1203 na tablicy ostrzegawczej.', 'Cysterna nr rej. [NR-REJESTRACYJNY] oraz UN 1203 na tablicy ostrzegawczej.'],
+  ]);
+});
+test('K12 pułapki: prawdziwe tablice po kotwicach i w wyliczeniach maskowane jak dotąd', () => {
+  const R = '[NR-REJESTRACYJNY]';
+  masked([
+    ['Pojazd o nr rej. DMC 3500 zatrzymano.', `Pojazd o nr rej. ${R} zatrzymano.`],
+    ['Zabezpieczono pojazdy: WW 1234A, ZS 4567, WE 123AB, PO 5AB67, KR 8XY90, DW 12345, WGM 1234.', `Zabezpieczono pojazdy: ${R}, ${R}, ${R}, ${R}, ${R}, ${R}, ${R}.`],
+    ['Motocykl ZS 4567 skradziono.', `Motocykl ${R} skradziono.`],
+    ['Samochód marki Toyota WE 12345', `Samochód marki Toyota ${R}`],
+    ['Na parkingu stały też GD 707GG oraz PZE 5U678.', `Na parkingu stały też ${R} oraz ${R}.`],
+    ['Zestaw: ciągnik WGM1234A/WGM5678B wjechał na plac.', `Zestaw: ciągnik ${R}/WGM5678B wjechał na plac.`],
+    ['Samochód: WX 1234A-ZŁY', `Samochód: ${R}-ZŁY`],
+    ['Auto WE 12345 stało przed domem.', `Auto ${R} stało przed domem.`],
+    ['Auto-WE12345 odholowano.', `Auto-${R} odholowano.`],
+    ['Samochód o nr rej. WA 12345 o DMC 3500 kg.', `Samochód o nr rej. ${R} o DMC 3500 kg.`],
+    ['Samochód nr rej. WA 12345, WGM 1234 i ZS 4567.', `Samochód nr rej. ${R}, ${R} i ${R}.`],
+    ['Nr rejestracyjny:\nWI1234K', `Nr rejestracyjny:\n${R}`],
+    ['NR REJ. WA12345', `NR REJ. ${R}`],
+    ['NUMER REJESTRACYJNY: KRA 1234', `NUMER REJESTRACYJNY: ${R}`],
+    ['nr rej. wa12345', `nr rej. ${R}`],
+    ['Pojazd UB 12345 jednostki wojskowej.', `Pojazd ${R} jednostki wojskowej.`],
+    ['Samochód ER 12345 i EL 1234A.', `Samochód ${R} i ${R}.`],
+    ['Pojazd DW 12345, DMC 3500 kg.', `Pojazd ${R}, DMC 3500 kg.`],
+  ]);
+});
+test('K14: IBAN nie połyka wyrazów WERSALIKAMI po numerze; „PL" ze spacją pod maską', () => {
+  const K = '[NR-KONTA]';
+  masked([
+    ['Przelew na DE89 3704 0044 0532 0130 00 Z OPCJĄ SHA', `Przelew na ${K} Z OPCJĄ SHA`],
+    ['PRZELEW NA GB29NWBK60161331926819 Z TYTUŁEM', `PRZELEW NA ${K} Z TYTUŁEM`],
+    ['Przelew na DE89 3704 0044 0532 0130 00 W EUR', `Przelew na ${K} W EUR`],
+    ['PRZELEW NA FR14 2004 1010 0505 0001 3M02 606 Z TYTUŁEM', `PRZELEW NA ${K} Z TYTUŁEM`],
+    ['Przelew na PL61 1090 1014 0000 0712 1981 2874 Z OPCJĄ SHA', `Przelew na ${K} Z OPCJĄ SHA`],
+    ['IBAN: DE89 3704 0044 0532 0130 00 Z OPCJĄ SHA', `IBAN: ${K} Z OPCJĄ SHA`],
+    ['Konto odbiorcy: DE89 3704 0044 0532 0130 00 Z TYTUŁEM ZWROTU', `Konto odbiorcy: ${K} Z TYTUŁEM ZWROTU`],
+    ['Na rachunek GB29 NWBK 6016 1331 9268 19 W GBP.', `Na rachunek ${K} W GBP.`],
+    ['IBAN: PL57 1140 2004 0000 3002 0123 4567 PKO BP', `IBAN: ${K} PKO BP`],
+    ['RACHUNEK PL57 1140 2004 0000 3002 0123 4567 A KWOTA 100 EUR', `RACHUNEK ${K} A KWOTA 100 EUR`],
+    ['IBAN PL57 1140 2004 0000 3002 0123 4567 SWIFT BPKOPLPW', `IBAN ${K} SWIFT BPKOPLPW`],
+    ['IBAN: GB29 NWBK 6016 1331 9268 19 BIC NWBKGB2L', `IBAN: ${K} BIC NWBKGB2L`],
+    ['Konto: PL57 1140 2004 0000 3002 0123 4567 PLN', `Konto: ${K} PLN`],
+    ['Przelew na PL57 1140 2004 0000 3002 0123 4567 PKO BP', `Przelew na ${K} PKO BP`],
+    ['na rachunek nr PL 92 1050 0099 0000 1234 5678 9012', `na rachunek nr ${K}`],
+    ['na rachunek nr PL 92105000990000123456789012', `na rachunek nr ${K}`],
+    // zła suma przy silnej etykiecie: dawniej wyciek całości
+    ['IBAN: PL 92 1050 0099 0000 1234 5678 9013', `IBAN: ${K}`],
+    ['Nr konta: PL 92 1050 0099 0000 1234 5678 9013', `Nr konta: ${K}`],
+    ['Wpłata PL92105000990000123456789012 PLN', `Wpłata ${K} PLN`],
+    ['Konto: PL 92 1050 0099 0000 1234 5678 9012, BIC: INGBPLPW', `Konto: ${K}, BIC: INGBPLPW`],
+    ['{"iban": "PL 92 1050 0099 0000 1234 5678 9012"}', `{"iban": "${K}"}`],
+    // IBAN Seszeli kończy się kodem waluty — to część numeru
+    ['SC18 SSCB 1101 0000 0000 0000 1497 USD', K],
+  ]);
+});
+test('K14 pułapki: nazwa banku, NIP UE, kody i normy WERSALIKAMI bez zmian', () => {
+  masked([
+    ['Rachunek bankowy PKO BP 92 1050 0099 0000 1234 5678 9012', 'Rachunek bankowy PKO BP [NR-KONTA]'],
+    ['Konto w banku Pekao SA 92 1050 0099 0000 1234 5678 9012', 'Konto w banku Pekao SA [NR-KONTA]'],
+    ['NIP UE: PL 5260250274, VAT-UE PL5260250274', 'NIP UE: [NIP], VAT-UE [NIP]'],
+  ]);
+  keep([
+    'Model AB12 CDEF GHIJ KLMN XYZ',
+    'SWIFT BREXPLPWXXX, przelew SEPA W EUR',
+    'Norma PN EN ISO 9001 2015 Z ZAKRESU JAKOŚCI',
+    'PL 2024 roku nie było zmian',
+    'Numer AB12 3456 7890 1234 5 X do zamówienia',
+    'Kod produktu XY12 ABCD EFGH IJKL MNOP Z OKŁADKĄ',
+    'Faktura FV12 3456 7890 1234 W PLN do zapłaty',
+    'Zamówienie ZA20 2400 1234 5678 9 A B C',
+  ]);
+});
+test('K15: login „DOMENA\\użytkownik" maskowany w całości; domena w prozie zostaje', () => {
+  masked([
+    ['Nazwa użytkownika: POLMEX\\mlewandowska\nKonto założono w domenie POLMEX dla działu kadr.', 'Nazwa użytkownika: [LOGIN]\nKonto założono w domenie POLMEX dla działu kadr.'],
+    ['Login: FIRMA\\jkowalski', 'Login: [LOGIN]'],
+    ['Login: CORP\\jkowalski\nFirma CORP zatrudnia 50 osób.', 'Login: [LOGIN]\nFirma CORP zatrudnia 50 osób.'],
+    ['Login: ad.firma.local\\jnowak', 'Login: [LOGIN]'],
+    ['Username: firma\\pwisniewski', 'Username: [LOGIN]'],
+    ['Użytkownik "CORP\\jkowalski" zgłosił problem.', 'Użytkownik "[LOGIN]" zgłosił problem.'],
+    ['{"userName": "FIRMA\\\\akowalski"}', '{"userName": "[LOGIN]"}'],
+    ['<UserName>FIRMA\\mlewandowska</UserName>', '<UserName>[LOGIN]</UserName>'],
+    // propagacja: pełny token i sama nazwa użytkownika — nigdy sama domena
+    ['Login: FIRMA\\jkowalski\nZdarzenie 4624: konto FIRMA\\jkowalski, profil C:\\Users\\jkowalski\\Desktop', 'Login: [LOGIN]\nZdarzenie 4624: konto [LOGIN], profil C:\\Users\\[LOGIN]\\Desktop'],
+  ]);
+  expect(() => JSON.parse(redactPII('{"userName": "FIRMA\\\\akowalski"}').redacted)).not.toThrow();
+});
+test('K15 pułapki: ścieżki, udziały, konta wbudowane Windows i etykiety bez wartości bez zmian', () => {
+  keep([
+    'Na serwerze POLMEX\\SQL01 działa baza kadrowa.',
+    'Ścieżka: C:\\Users\\Public\\Documents',
+    'Udział sieciowy: \\\\POLMEX\\kadry\\raporty',
+    'Domena: POLMEX\nKonto założono w domenie POLMEX dla działu kadr.',
+    'Login: brak',
+    'Login:\nHasło:',
+    'Użytkownik loguje się w formacie DOMENA\\login.',
+    'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    'User: NT AUTHORITY\\SYSTEM',
+    '<UserName>NT AUTHORITY\\SYSTEM</UserName>',
+    'User: BUILTIN\\Administrators',
+    '<UserName>BUILTIN\\Administrators</UserName>',
+    'Wzorzec kodu: \\d{2}-\\d{3}',
+  ]);
+});
+test('K24: konta generyczne nie rozlewają się na prozę; login przed kropką końca zdania maskowany', () => {
+  masked([
+    ['Login: admin\nPo zalogowaniu do panelu admin zmień domyślne hasło.', 'Login: [LOGIN]\nPo zalogowaniu do panelu admin zmień domyślne hasło.'],
+    ['user=root\ncmd=/root/backup.sh', 'user=[LOGIN]\ncmd=/root/backup.sh'],
+    ['Login: test\nŚrodowisko test zostało wyłączone.', 'Login: [LOGIN]\nŚrodowisko test zostało wyłączone.'],
+    ['User: system\nZaktualizuj system przed instalacją.', 'User: [LOGIN]\nZaktualizuj system przed instalacją.'],
+    ['Obraz Dockera: postgres:16-alpine\nuser: postgres', 'Obraz Dockera: postgres:16-alpine\nuser: [LOGIN]'],
+    ['Użytkownik "admin" ma dostęp. Panel admin jest w sieci.', 'Użytkownik "[LOGIN]" ma dostęp. Panel admin jest w sieci.'],
+    ['Login: Admin\nPanel Admin oraz panel admin.', 'Login: [LOGIN]\nPanel Admin oraz panel admin.'],
+    ['Login: tkaminski\nZablokowano konto tkaminski.', 'Login: [LOGIN]\nZablokowano konto [LOGIN].'],
+    ['Login: tkaminski\nProszę poinformować tkaminski. Konto tkaminski odblokowano.', 'Login: [LOGIN]\nProszę poinformować [LOGIN]. Konto [LOGIN] odblokowano.'],
+    [String.raw`Login: tkaminski` + '\n' + String.raw`Zmapowano H: na \\FS01\home$\tkaminski.`, String.raw`Login: [LOGIN]` + '\n' + String.raw`Zmapowano H: na \\FS01\home$\[LOGIN].`],
+    ['Użytkownik "tkaminski" zgłosił problem. Odblokowano tkaminski.', 'Użytkownik "[LOGIN]" zgłosił problem. Odblokowano [LOGIN].'],
+  ]);
+});
+test('K24 pułapki: propagacja osobowych loginów działa; kropka z ciągiem dalej i odmiana blokują', () => {
+  masked([
+    ['Login: jkowalski\nuser=jkowalski\ncmd=/home/jkowalski/backup.sh', 'Login: [LOGIN]\nuser=[LOGIN]\ncmd=/home/[LOGIN]/backup.sh'],
+    ['Login: anna.nowak\nHasło dla anna.nowak wygasło.', 'Login: [LOGIN]\nHasło dla [LOGIN] wygasło.'],
+    ['Login: Jan.Kowalski\nJan.Kowalski zgłosił błąd.', 'Login: [LOGIN]\n[LOGIN] zgłosił błąd.'],
+    ['Login: jkowalski\nNa serwerze jkowalski:x:1000:1000 w /etc/passwd.', 'Login: [LOGIN]\nNa serwerze [LOGIN]:x:1000:1000 w /etc/passwd.'],
+    ['Login: jan.nowak\nKonto jan.nowak.adm też zablokowano.', 'Login: [LOGIN]\nKonto jan.nowak.adm też zablokowano.'],
+    ['Login: tkaminski\nSerwer tkaminski.example.com i plik tkaminski.cfg.', 'Login: [LOGIN]\nSerwer tkaminski.example.com i plik tkaminski.cfg.'],
+    ['Login: test1\nWersja test1.5 gotowa.', 'Login: [LOGIN]\nWersja test1.5 gotowa.'],
+    ['Login: tkaminski\nKontakt z tkaminskim.', 'Login: [LOGIN]\nKontakt z tkaminskim.'],
+    ['Login serwisowy: srv_backup\nZadanie srv_backup uruchomione.', 'Login serwisowy: [LOGIN]\nZadanie [LOGIN] uruchomione.'],
+  ]);
+  keep(['Login:\nSystem operacyjny: Windows 11 Pro\nUwagi: System uruchamia się poprawnie.', 'Zaktualizuj system przed instalacją. Panel admin, tryb demo, użytkownik root.']);
+});
+test('K16: IPv4 przed kropką końca zdania maskowany przy kontekście sieciowym', () => {
+  masked([
+    ['Adres IP klienta: 83.24.115.6.\nLogowanie z adresu 185.23.44.10. Konto zablokowano.', 'Adres IP klienta: [IP].\nLogowanie z adresu [IP]. Konto zablokowano.'],
+    ['Logowanie nastąpiło z adresu IP 83.12.45.67.', 'Logowanie nastąpiło z adresu IP [IP].'],
+    ['Brama domyślna to 10.0.0.1.', 'Brama domyślna to [IP].'],
+    ['Adres serwera: 192.168.1.10.', 'Adres serwera: [IP].'],
+    ['Połączenie z 83.12.45.67.', 'Połączenie z [IP].'],
+    ['Adres IP 83.12.45.67; drugi 83.12.45.68.', 'Adres IP [IP]; drugi [IP].'],
+    ['(źródłowy IP 10.0.0.1.)', '(źródłowy IP [IP].)'],
+    ['Adres IP: 10.0.0.1...', 'Adres IP: [IP]...'],
+    ['IP: 192.168.1.20', 'IP: [IP]'],
+    ['Interfejs 192.168.1.20/24 skonfigurowany.', 'Interfejs [IP]/24 skonfigurowany.'],
+    ['Bramka 10.0.0.1 i host 10.0.0.15', 'Bramka [IP] i host [IP]'],
+    // 9 cyfr z kropkami przy kotwicy telefonu to telefon, nie adres
+    ['Kontakt tel. 22.123.45.67.', 'Kontakt tel. [TELEFON].'],
+  ]);
+});
+test('K16: adresy specjalne (0.0.0.0, pętla, maska, adres sieci, publiczny DNS) i numery wersji bez maski', () => {
+  keep([
+    'Serwer nasłuchuje na 0.0.0.0.',
+    'Maska podsieci: 255.255.255.0, adres nasłuchu 0.0.0.0, localhost 127.0.0.1 (port 3000)',
+    'Zakres 10.0.0.0/24, DNS 8.8.8.8 i 1.1.1.1',
+    '{"host": "0.0.0.0"}',
+    'Nasłuch na 0.0.0.0:8080, maska 255.255.0.0',
+    'Rozgłoszenie 255.255.255.255',
+    'Zainstalowano wersję 2.4.1.0 na serwerze.',
+    'Wdrożono wersję systemu 2.0.1.3.',
+    'Wersja oprogramowania 1.2.3.4 została wdrożona',
+  ]);
+});
+test('K16 pułapki: numeracja konspektu, odwołania, OID, kwoty i daty przed kropką bez zmian', () => {
+  keep([
+    '1.2.3.4. Zakres prac',
+    '  2.1.1.1.\tOpis przedmiotu zamówienia',
+    'Wymagania opisano w rozdziale 2.1.1.1.',
+    'Szczegóły w punkcie 5.3.2.1. Dalsze wymagania poniżej.',
+    'Adres dostawy opisano w punkcie 2.1.1.1.',
+    'Zgodnie z pkt 3.1.2.4. specyfikacji.',
+    'Zob. § 1.2.3.4. regulaminu.',
+    'Załącznik nr 1.2.3.4.',
+    'Aktualizacja do v10.2.0.15.',
+    'Firmware 10.2.0.15.',
+    'Kwota wyniosła 1.100.200.100.',
+    'Identyfikator OID 1.3.6.1.4.1.',
+    'Host: 10.0.0.1.nip.io',
+    'PKD 62.01.Z.',
+    'Data 12.03.2020. była ważna.',
+    'Kod CPV 72.21.10.00. jest wymagany.',
+    'Plik archiwum.1.2.3.4.tar zapisano.',
+  ]);
+});
+test('K25: łańcuch par hex inny niż 6 par (numer seryjny, odcisk klucza, WWN) nie jest MAC ani IP', () => {
+  keep([
+    'Serial Number: 4a:3f:22:91:0c:7e:1d:55',
+    'Odcisk klucza hosta: MD5:16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48',
+    'SHA1 Fingerprint=AB:CD:EF:01:23:45:67:89:AB:CD:EF:01:23:45:67:89:AB:CD:EF:01',
+    'Numer seryjny 4a-3f-22-91-0c-7e-1d-55 w rejestrze.',
+    'HMAC: ab:cd:ef:01:23:45:67:89',
+    'hostname=mac-01 serial 11:22:33:44:55:66:77:88',
+  ]);
+  masked([
+    // pole „MAC=" z logu iptables: dwa adresy i typ ramki — cały łańcuch pod jedną maską
+    ['IN=eth0 OUT= MAC=00:1a:2b:3c:4d:5e:00:11:22:33:44:55:08:00 SRC=83.12.45.67', 'IN=eth0 OUT= MAC=[MAC] SRC=[IP]'],
+    ['MAC: 00:11:22:33:44:55:66', 'MAC: [MAC]'],
+    // identyfikator klienta DHCP: typ sprzętu 01 + MAC; EUI-64 to adres sprzętowy jak MAC
+    ['client-id 01:00:11:22:33:44:55', 'client-id [MAC]'],
+    ['EUI-64: 00:12:4b:00:1c:a1:b2:c3', 'EUI-64: [MAC]'],
+  ]);
+});
+test('K25 pułapki: zwykły MAC, zakres, mieszane separatory, Cisco i IPv6 jak dotąd', () => {
+  masked([
+    ['MAC: 00:1A:2B:3C:4D:5E', 'MAC: [MAC]'],
+    ['Adres MAC 00-1A-2B-3C-4D-5E karty sieciowej.', 'Adres MAC [MAC] karty sieciowej.'],
+    ['host-00-11-22-33-44-55.lan', 'host-[MAC].lan'],
+    ['Zakres 00:11:22:33:44:55-00:11:22:33:44:66', 'Zakres [MAC]-[MAC]'],
+    ['mieszane 00:11-22:33-44:55', 'mieszane [MAC]'],
+    ['Router aabb.ccdd.eeff oraz MAC 0011.2233.4455', 'Router [MAC] oraz MAC [MAC]'],
+    ['IPv6 2001:db8::1 oraz 2001:0db8:85a3:0000:0000:8a2e:0370:7334', 'IPv6 [IP] oraz [IP]'],
+  ]);
+});
+test('K28: adres zdalnego repozytorium „git@host:ścieżka" nie jest e-mailem; „%40" maskowane też poza URL-em', () => {
+  keep([
+    'git remote add origin git@gitlab.firma.pl:zespol-erp/modul-kadry.git',
+    'git clone git@github.com:jkowalski/portal.git',
+    'git clone ssh://git@gitlab.firma.pl/zespol-erp/modul-kadry.git',
+  ]);
+  masked([
+    ['GET /api/v1/clients?email=jan.kowalski%40example.pl&status=1 200', 'GET /api/v1/clients?email=[EMAIL]&status=1 200'],
+    [String.raw`{"callback":"https:\/\/crm.example.pl\/klient?email=jan.kowalski%40example.pl"}`, String.raw`{"callback":"https:\/\/crm.example.pl\/klient?email=[EMAIL]"}`],
+    ['Email: jan.kowalski%40example.pl', 'Email: [EMAIL]'],
+  ]);
+});
+test('K28 pułapki: loginy osób w formie scp, skrzynki funkcyjne i „%" w prozie jak dotąd', () => {
+  masked([
+    ['scp plik.txt jan.kowalski@serwer.firma.pl:/home/jan/', 'scp plik.txt [EMAIL]:/home/jan/'],
+    ['jkowalski@github.com:jkowalski/portal.git', '[EMAIL]:jkowalski/portal.git'],
+    ['anna.git@gmail.com:prywatne', '[EMAIL]:prywatne'],
+    ['Zgłoszenia na git@firma.pl: dział IT.', 'Zgłoszenia na [EMAIL]: dział IT.'],
+    ['Kontakt: biuro@firma.pl, noreply@firma.pl.', 'Kontakt: [EMAIL], [EMAIL].'],
+    ['git clone https://jkowalski@bitbucket.org/zespol/repo.git', 'git clone https://[EMAIL]/zespol/repo.git'],
+  ]);
+  keep([
+    'Stawka VAT wynosi 23%, a marża 40%.',
+    'Kod rabatowy SALE%40OFF obowiązuje do końca miesiąca.',
+    'Wzrost sprzedaży o 12%40 sklepów odnotowało spadek.',
+    'Wynik 95%40.5 punktu.',
+    'raport%402024.pdf',
+    'GET /api/v1/clients?email=&status=1 200',
+  ]);
+});
+test('K29: znak sprawy z numerem po roku maskowany w całości (bez ogona „.1")', () => {
+  masked([
+    ['Sygn. akt: CAN-PST-SWW.7421.1234567.2026.1', 'Sygn. akt: [ZNAK-SPRAWY]'],
+    ['wezwanie CAN-PST-SWW.7421.1234567.2026.1', 'wezwanie [ZNAK-SPRAWY]'],
+    ['GKM.6220.1.2021.2', '[ZNAK-SPRAWY]'],
+    ['Znak sprawy: ZP.271.1.2026.1.PL', 'Znak sprawy: [ZNAK-SPRAWY]'],
+    // pułapki: kropka końca zdania zostaje; data z cyfrą bez symbolu to nie znak; sygnatura sądu jak dotąd
+    ['Znak: ZP.271.1.2026.1. Zamawiający', 'Znak: [ZNAK-SPRAWY]. Zamawiający'],
+    ['Znak: ZP.271.1.2026 z dnia 12.03.2026', 'Znak: [ZNAK-SPRAWY] z dnia 12.03.2026'],
+    ['sygn. akt I C 123/23', 'sygn. akt [ZNAK-SPRAWY]'],
+  ]);
+  keep(['Data: 12.03.2026.1 egzemplarz']);
+});
+test('b2: poprawki są idempotentne i działają z pseudonimizacją', () => {
+  const texts = [
+    'Przelew na DE89 3704 0044 0532 0130 00 Z OPCJĄ SHA',
+    'Login: FIRMA\\jkowalski\nKonto jkowalski.',
+    'IP 83.12.45.67. Serial 4a:3f:22:91:0c:7e:1d:55',
+    'Ciągnik: nr rej. WGM 12345, DMC 18000 kg',
+    'Kwota: 150 000 000 zł, tel. 512 345 678',
+  ];
+  for (const t of texts) {
+    const once = redactPII(t).redacted;
+    expect(redactPII(once).redacted, t).toBe(once);
+    expect(redactPII(t, { pseudonyms: true }).redacted, t).toBe(once);
+  }
+});
