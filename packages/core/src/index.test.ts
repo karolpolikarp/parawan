@@ -3115,6 +3115,28 @@ test('K20: patron z tytułem naukowym („im. dra", „im. dr. med."), święty 
     'RONDO ROMANA DMOWSKIEGO',
   ]);
 });
+test('K20: święty z kontekstem sakralnym („Kościół/parafia/pw./im. św.") to patron, nie osoba', () => {
+  keep([
+    'kościół pw. św. Michała Archanioła',
+    'parafia św. Józefa Oblubieńca w Krakowie',
+    'Kościół św. Antoniego Padewskiego w Poznaniu.',
+    'Parafia św. Jacka w Krakowie',
+    'Szkoła im. św. Jadwigi Królowej',
+    'Szpital im. bł. Alfreda Sokołowskiego.',
+  ]);
+  masked([['Parafia pw. św. Stanisława Kalisz, ul. Polna 3', `Parafia pw. św. Stanisława ${C}, ${A}`]]);
+});
+test('K20 pułapki: „św." bez kontekstu sakralnego to skrót „świadek" — osoba w masce', () => {
+  masked([
+    ['św. Kowalski zeznał.', `św. ${N} zeznał.`],
+    ['Sąd przesłuchał św. Annę Gzowską.', `Sąd przesłuchał św. ${N}.`],
+    ['Zeznania św. Anny Gzowskiej są spójne.', `Zeznania św. ${N} są spójne.`],
+    ['Zeznania św. A. Nowak.', `Zeznania św. ${N}.`],
+    ['Św. Jan Kowalski zeznał.', `Św. ${N} zeznał.`],
+    ['św. Jan Turek, ul. Długa 5', `św. ${N}, ${A}`],
+    ['W dniu przesłuchania św. Gzowska nie stawiła się.', `W dniu przesłuchania św. ${N} nie stawiła się.`],
+  ]);
+});
 test('K20 pułapki: zaimek „im" to nie patron; osoba po tytule i po zdaniu z patronem maskowana', () => {
   masked([
     ['Pomógł im Jan Kowalski w przeprowadzce.', `Pomógł im ${N} w przeprowadzce.`],

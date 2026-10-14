@@ -785,6 +785,8 @@ export function buildDataset() {
   osp('Pomógł im Jan Kowalski w przeprowadzce.', ['Jan', 'Kowalski'], ['Pomógł im']);
   neg('Kazimierz Dolny leży nad Wisłą.', ['Kazimierz Dolny']);
   osp('Wnioskodawca: Kazimierz Dolny', ['Kazimierz', 'Dolny'], ['Wnioskodawca']);
+  // „św." w protokole to skrót „świadek" — patronem jest tylko z kontekstem sakralnym
+  osp('Sąd przesłuchał św. Annę Gzowską. św. Kowalski zeznał, że nic nie widział.', ['Annę', 'Gzowską', 'Kowalski'], ['Sąd przesłuchał św.']);
   neg('Zarząd Spółdzielni Mieszkaniowej w Krakowie ogłasza przetarg. Mieszkania w Gdańsku drożeją.', ['Krakowie', 'Gdańsku']);
   str('Jan Nowak, zam. w Krakowie\nPESEL 85031412347', ['Jan', 'Nowak', 'Krakowie', '85031412347'], ['zam. w']);
   str('z Anną Nowak, zamieszkałą w Łodzi. Pozwana zamieszkuje w Gdańsku od 2015 r.', ['Anną', 'Nowak', 'Łodzi', 'Gdańsku'], ['zamieszkałą w', 'zamieszkuje w']);

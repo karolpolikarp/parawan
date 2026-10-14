@@ -480,11 +480,40 @@ const afterNonPersonContext = (text: string, offset: number, word: string): bool
 };
 /** Czy tuż przed pozycją stoi „im." (patron instytucji: „Szkoła im. A. Mickiewicza") albo
  *  skrót ulicy („ul. Rakowieckiej", „al. Sikorskiego" — patron ULICY, nie osoba), ewentualnie
- *  z inicjałem imienia? prevLowerWord tego nie widzi (kropka po skrócie). Także „św."/„bł." —
- *  święty i błogosławiony („Kościół św. Piotra Apostoła", „parafia bł. Jerzego Popiełuszki") to
+ *  z inicjałem imienia? prevLowerWord tego nie widzi (kropka po skrócie). Także „bł." i „św." —
+ *  błogosławiony i święty („parafia bł. Jerzego Popiełuszki", „Kościół św. Piotra Apostoła") to
  *  patron, nie osoba z dokumentu. Granica Unicode zamiast \b: ASCII \b nie widzi jej przed „ś". */
-const precededByPatron = (t: string, offset: number): boolean =>
-  /(?<![\p{L}\d_])(?:im|ul|al|pl|os|św|bł)\.[ \t]+(?:[A-ZĄĆĘŁŃÓŚŹŻ]\.[ \t]*)?$/iu.test(t.slice(Math.max(0, offset - 12), offset));
+const RE_PATRON_ABBR = /(?<![\p{L}\d_])(?:im|ul|al|pl|os|bł)\.[ \t]+(?:[A-ZĄĆĘŁŃÓŚŹŻ]\.[ \t]*)?$/iu;
+// „św." to w protokołach sądowych także skrót od „świadek" („św. Kowalski zeznał", „Sąd
+// przesłuchał św. Annę Gzowską") — bez kontekstu świadek wyciekał jako „patron". Dlatego święty
+// tylko po rzeczowniku sakralnym albo „pw."/„im." (najwyżej dwa wyrazy przerwy: „Kościół
+// parafialny pw. św. …"), w tej samej linii. Bez kontekstu „św. Antoniego" zostaje w masce —
+// drobne nadmaskowanie zamiast wycieku świadka.
+const SAINT_CONTEXT_WORD =
+  /^(?:kości[oóe]\p{L}*|parafi\p{L}*|bazylik\p{L}*|katedr\p{L}*|kaplic\p{L}*|sanktuari\p{L}*|klasztor\p{L}*|kolegiat\p{L}*|cerk\p{L}*|zgromadzeni\p{L}*|zakon\p{L}*|wezwani\p{L}*|pw\.|im\.)$/iu;
+const RE_SAINT_ABBR = /(?<!\p{L})św\.[ \t]+(?:[A-ZĄĆĘŁŃÓŚŹŻ]\.[ \t]*)?$/iu;
+/** Czy „św." tuż przed pozycją ma kontekst sakralny (najwyżej trzy wyrazy wstecz, ta sama linia)?
+ *  Skan po wyrazach, nie regex z oknem: ten drugi próbował dopasowania od każdej pozycji okna. */
+function saintWithContext(t: string, offset: number, near: string): boolean {
+  const m = RE_SAINT_ABBR.exec(near);
+  if (!m) return false;
+  const at = offset - near.length + m.index;
+  const line = t.slice(Math.max(0, at - 60), at);
+  const words = line.slice(line.lastIndexOf('\n') + 1).split(/[ \t]+/);
+  for (let i = words.length - 1, seen = 0; i >= 0 && seen < 3; i--) {
+    const w = words[i];
+    if (!w) continue;
+    seen++;
+    if (SAINT_CONTEXT_WORD.test(w)) return true;
+    // przecinek, cyfra czy nawias przerywa ciąg nazwy — kontekst dalej w zdaniu już nie liczy się
+    if (!/^[\p{L}.]+$/u.test(w)) return false;
+  }
+  return false;
+}
+const precededByPatron = (t: string, offset: number): boolean => {
+  const near = t.slice(Math.max(0, offset - 12), offset);
+  return RE_PATRON_ABBR.test(near) || saintWithContext(t, offset, near);
+};
 /**
  * Czy para „imię nazwisko" na pozycji `offset` to PATRON ULICY/placu/ronda (eponim), a nie osoba?
  * „ulica Tadeusza Kościuszki", „rondo Jana Pawła II", a także WYLICZENIE „u zbiegu ulic … oraz …"
@@ -2291,7 +2320,9 @@ const RESIDENCE_MARKER =
 // Koniec nazwy miasta w 12f/12g. Także koniec wiersza: regex jest bez flagi „m", więc samo „$"
 // oznaczało koniec CAŁEGO tekstu i „zam. w Krakowie⏎PESEL …" zostawiało miasto jawne.
 const CITY_END = '(?=[ \\t\\r\\n.,;:?!)]|$)';
-const RE_SAINT_BEFORE = /(?<!\p{L})(?:św|bł|im|pw)\.[ \t]*$/iu;
+// „św." osobno: tylko z kontekstem sakralnym (RE_SAINT_CONTEXT), bo bez niego bywa skrótem
+// „świadek" („św. Jan Turek, ul. …" to osoba, nie miasto).
+const RE_SAINT_BEFORE = /(?<!\p{L})(?:bł|im|pw)\.[ \t]*$/iu;
 /**
  * Czy ciąg przed „, ul./[ADRES]" (12d) to OSOBA, której nazwisko jest też nazwą miasta („Jan
  * Turek", „Pani Anna Kalisz", „Jan Maria Turek")? Imię tylko w mianowniku ze słownika — odmiana
@@ -2304,7 +2335,7 @@ function cityRunLooksLikePerson(capRun: string, before: string): boolean {
   const city = lo[lo.length - 1];
   if (!POLISH_CITIES.has(city) || POLISH_FIRST_NAMES.has(city)) return false;
   const isPan = (w: string): boolean => w === 'pan' || w === 'pani' || w === 'panna';
-  if (lo.length === 2) return isPan(lo[0]) || (POLISH_FIRST_NAMES.has(lo[0]) && !RE_SAINT_BEFORE.test(before));
+  if (lo.length === 2) return isPan(lo[0]) || (POLISH_FIRST_NAMES.has(lo[0]) && !RE_SAINT_BEFORE.test(before) && !saintWithContext(before, before.length, before.slice(-12)));
   if (lo.length === 3) return isPan(lo[1]) || (POLISH_FIRST_NAMES.has(lo[1]) && (POLISH_FIRST_NAMES.has(lo[0]) || isPan(lo[0])));
   return false;
 }
@@ -2361,7 +2392,7 @@ function passCity(ctx: RedactCtx): void {
     (m, capRun: string, sep: string, anchor: string, offset: number, str: string) => {
       // „Jan Turek, ul. Długa 5" — nazwisko-homonim miasta (Turek, Kalisz, Lubin, Mielec) po imieniu
       // albo „Pan/Pani" to osoba: maska miasta zostawiała jawne imię. Ciąg oddajemy fazie osób.
-      if (cityRunLooksLikePerson(capRun, str.slice(Math.max(0, offset - 8), offset))) return m;
+      if (cityRunLooksLikePerson(capRun, str.slice(Math.max(0, offset - 80), offset))) return m;
       const r = cityBySuffix(ctx, capRun);
       return r ? `${r.prefix}${ctx.M.MIEJSCOWOSC}${sep}${anchor}` : m;
     },
