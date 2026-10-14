@@ -719,6 +719,15 @@ export function buildDataset() {
   neg(String.raw`{"sciezka": "C:\\Users\\nowak\\Documents\\raport.docx", "opis": "Linia 1\nLinia 2"}`, [String.raw`C:\\Users\\nowak\\Documents`, String.raw`Linia 1\nLinia 2`]);
   // (cudzysłowy wokół masek w miejscu liczb pilnuje snapshot golden — mustKeep musi stać w wejściu)
   str('{"klient_id": 7, "pesel": 85031412347, "telefon": 601234567}', ['85031412347', '601234567'], ['"klient_id": 7']);
+  // Regresje partii b1 wyłapane w weryfikacji: imię nad nazwiskiem po czasowniku podpisu, lista
+  // „Nazwisko Imię" z homografami, łańcuch inicjałów w składzie sądu, firma jednoosobowa,
+  // człon telefonu z prefiksem „48" bez plusa.
+  osp('Sporządził Jan\nKowalski, dnia 3 marca.', ['Jan', 'Kowalski'], ['Sporządził', 'dnia 3 marca']);
+  osp('Lista obecności:\nWilk Bartosz\nSowa Przemysław\nPawlak Wiesław', ['Wilk', 'Bartosz', 'Sowa', 'Przemysław', 'Pawlak', 'Wiesław'], ['Lista obecności:\n']);
+  osp('Przewodniczący: SSO J.M. Wilk\nSędziowie: SO A.K. Sowa, SO T.J. Mazur (spr.)', ['J.M.', 'Wilk', 'A.K.', 'Sowa', 'T.J.', 'Mazur'], ['Przewodniczący: SSO ', 'Sędziowie: SO ', '(spr.)']);
+  osp('Wykonawca: P.H.U. Wilk Tomasz Wilk, NIP w załączeniu.', ['Tomasz', 'Wilk'], ['Wykonawca: P.H.U. ', 'NIP w załączeniu']);
+  neg('P.P.S. Mróz ma być w nocy, a PKO B.P. Wilk to nazwa robocza.', ['P.P.S. Mróz', 'B.P. Wilk']);
+  str('tel. 601 222 333 lub 48 602 333 444, faks 22 501 23 45; 48 22 123 45 67', ['601 222 333', '48 602 333 444', '22 501 23 45', '48 22 123 45 67'], ['tel.', 'lub', 'faks']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

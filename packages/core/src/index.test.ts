@@ -1950,8 +1950,8 @@ test('K05: człony kropkowych skrótów (P.S., S.A., O.O., Sp. J.) nie są inicj
     ['BUDMAX SP. J. Jan Kowalski', 'BUDMAX SP. J. [IMIĘ I NAZWISKO]'],
     ['Budmax Sp. K. Jan Kowalski', 'Budmax Sp. K. [IMIĘ I NAZWISKO]'],
     ['POLSKA GRUPA ENERGETYCZNA S.A.      PAWEŁ GÓRSKI', 'POLSKA GRUPA ENERGETYCZNA S.A.      [IMIĘ I NAZWISKO]'],
-    // dwa inicjały bez spacji: sklejone „J.[…]" znika, oba inicjały zostają przed maską
-    ['J.K. Kowalski podpisał.', 'J.K. [IMIĘ I NAZWISKO] podpisał.'],
+    // dwa inicjały bez spacji to łańcuch inicjałów osoby — w masce w całości (bez sklejonego „J.[…]")
+    ['J.K. Kowalski podpisał.', '[IMIĘ I NAZWISKO] podpisał.'],
   ];
   for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
 });
@@ -2007,15 +2007,130 @@ test('K05 pułapki: prawdziwe inicjały nadal w masce; patroni i skróty bez os�
   ]);
 });
 
+test('K05: łańcuch inicjałów („J.M.") kotwiczy nazwisko-homograf — skład sądu nie zostaje jawny', () => {
+  const t =
+    'Przewodniczący: SSO J.M. Wilk\nSędziowie: SO A.K. Sowa, SO T.J. Mazur (spr.)\nr.pr. P.A. Zając\n' +
+    'Świadek A.B. Kowal zeznał.\nz powództwa E.M. Baran\nW sprawie z wniosku T.K. Wilka';
+  expect(redactPII(t).redacted).toBe(
+    'Przewodniczący: SSO [IMIĘ I NAZWISKO]\nSędziowie: SO [IMIĘ I NAZWISKO], SO [IMIĘ I NAZWISKO] (spr.)\nr.pr. [IMIĘ I NAZWISKO]\n' +
+      'Świadek [IMIĘ I NAZWISKO] zeznał.\nz powództwa [IMIĘ I NAZWISKO]\nW sprawie z wniosku [IMIĘ I NAZWISKO]',
+  );
+  const cases: [string, string][] = [
+    ['Sędziowie:\nJ.M. Wilk', 'Sędziowie:\n[IMIĘ I NAZWISKO]'],
+    ['Zeznał. J.M. Wilk podpisał.', 'Zeznał. [IMIĘ I NAZWISKO] podpisał.'],
+    ['prof. A.B. Nowaka', 'prof. [IMIĘ I NAZWISKO]'],
+  ];
+  for (const [x, want] of cases) expect(redactPII(x).redacted, x).toBe(want);
+  expect(redactPII('SSO J.M. Wilk i SSR J.M. Wilk', { pseudonyms: true }).redacted).toBe('SSO [OSOBA-A] i SSR [OSOBA-A]');
+});
+test('K05: po skrócie formy działalności i „W.P./Ś.P./Sz.P." nazwisko w masce, skrót zostaje', () => {
+  const cases: [string, string][] = [
+    ['3. P.H.U. Wilk Tomasz Wilk', '3. P.H.U. [IMIĘ I NAZWISKO] [IMIĘ I NAZWISKO]'],
+    ['4. F.H. Sowa — Ewa Sowa', '4. F.H. [IMIĘ I NAZWISKO] — [IMIĘ I NAZWISKO]'],
+    ['Prokurent: P.P.H.U. Baran — Adam Baran', 'Prokurent: P.P.H.U. [IMIĘ I NAZWISKO] — [IMIĘ I NAZWISKO]'],
+    ['Faktura od P.H.U. Wilk', 'Faktura od P.H.U. [IMIĘ I NAZWISKO]'],
+    ['Sz.P. Wilk', 'Sz.P. [IMIĘ I NAZWISKO]'],
+    ['Sz. P. Wilk', 'Sz. P. [IMIĘ I NAZWISKO]'],
+    ['W.P. Wilk', 'W.P. [IMIĘ I NAZWISKO]'],
+    ['Ś.P. Wilk', 'Ś.P. [IMIĘ I NAZWISKO]'],
+    ['Ś.P. Jan Kowalski', 'Ś.P. [IMIĘ I NAZWISKO]'],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
+});
+test('K05: tytuł sklejony z inicjałem („Dr.J.") — inicjał w masce, tytuł zostaje', () => {
+  const cases: [string, string][] = [
+    ['Dr.J. Kowalski zeznał.', 'Dr.[IMIĘ I NAZWISKO] zeznał.'],
+    ['Dr.J. Wilk zeznał.', 'Dr.[IMIĘ I NAZWISKO] zeznał.'],
+    ['dr.A. Nowak', 'dr.[IMIĘ I NAZWISKO]'],
+    ['mgr.A. Nowak podpisała.', 'mgr.[IMIĘ I NAZWISKO] podpisała.'],
+    ['prof.J. Nowak', 'prof.[IMIĘ I NAZWISKO]'],
+    ['mec.Ł. Baran', 'mec.[IMIĘ I NAZWISKO]'],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
+});
+test('K05 pułapki łańcucha: skróty z kropkami bez osoby zostają bez zmian', () => {
+  keep([
+    'P.S. Mróz ma być w nocy.',
+    'P.P.S. Mróz ma być w nocy.',
+    'PKO B.P. Wilk',
+    'ORLEN S.A. Wilk',
+    'Dz.U. Lis',
+    'S.C. Mazur',
+    'A.D. Wilk',
+    'BUDMAX SP.J. Wilk',
+    'J.P. Morgan zainwestował w spółkę.',
+    'J.R.R. Tolkien',
+    'm.in. Wilk i Lis',
+    'O.K. Wilk przyjdzie jutro.',
+  ]);
+  expect(redactPII('O.K. Nowak przyszedł.').redacted).toBe('O.K. [IMIĘ I NAZWISKO] przyszedł.');
+  expect(redactPII('Kowalski i Nowak S.C. Jan Kowalski').redacted).toBe(
+    '[IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO] S.C. [IMIĘ I NAZWISKO]',
+  );
+  expect(redactPII('P.P.S. Kowalski').redacted).toBe('P.P.S. [IMIĘ I NAZWISKO]');
+});
+test('K04: punkt wyliczenia po dosłownym „\\n" w JSON-ie zostaje jak po prawdziwej nowej linii', () => {
+  const t = String.raw`{"t":"Postanawia:\nA. Kowalski Jan — świadek\nB. Nowak Anna — świadek"}`;
+  const r = redactPII(t).redacted;
+  expect(r).toBe(String.raw`{"t":"Postanawia:\nA. [IMIĘ I NAZWISKO] — świadek\nB. [IMIĘ I NAZWISKO] — świadek"}`);
+  expect(() => JSON.parse(r)).not.toThrow();
+  // inicjał w środku wiersza (po „\t") nadal wchodzi do maski
+  expect(redactPII(String.raw`{"t":"Świadek:\tA. Kowalski Jan"}`).redacted).toBe(String.raw`{"t":"Świadek:\t[IMIĘ I NAZWISKO]"}`);
+});
+test('K19: człon wyliczenia z prefiksem „48" bez plusa — maskowany cały numer, bez ogona cyfr', () => {
+  const cases: [string, string][] = [
+    ['tel. 601 222 333 lub 48 602 333 444', 'tel. [TELEFON] lub [TELEFON]'],
+    ['tel. 601 222 333 / 48-602-333-444', 'tel. [TELEFON] / [TELEFON]'],
+    ['tel. 601 222 333 / 48 602333444', 'tel. [TELEFON] / [TELEFON]'],
+    ['tel. 601 222 333; 48 22 123 45 67', 'tel. [TELEFON]; [TELEFON]'],
+    ['tel. 512345678, 48 601 234 567', 'tel. [TELEFON], [TELEFON]'],
+    ['tel. 512 345 678 i 48-601-234-567', 'tel. [TELEFON] i [TELEFON]'],
+    // odstępy wokół separatora zostają takie jak w tekście
+    ['tel.  601 222 333  lub   602 333 444', 'tel.  [TELEFON]  lub   [TELEFON]'],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
+});
 test('K06: imię kończące wpis listy „Nazwisko Imię" nie skleja go z osobą z następnego wiersza', () => {
-  expect(redactPII('Sowa Przemysław\nPawlak Wiesław').redacted).toBe('Sowa Przemysław\n[IMIĘ I NAZWISKO]');
-  expect(redactPII('Sowa;Przemysław\nPawlak;Wiesław').redacted).toBe('Sowa;Przemysław\n[IMIĘ I NAZWISKO];Wiesław');
-  expect(redactPII('Obecni: Lis Marek\nNowak Piotr').redacted).toBe('Obecni: Lis Marek\n[IMIĘ I NAZWISKO]');
-  expect(redactPII('Sowa Przemysław\nPawlak Wiesław', { pseudonyms: true }).redacted).toBe('Sowa Przemysław\n[OSOBA-A]');
-  // lista 10 osób zostaje listą 10 wierszy
+  // wpis nad maską to osobna osoba — w masce w całości, wiersze się nie sklejają
+  expect(redactPII('Sowa Przemysław\nPawlak Wiesław').redacted).toBe('[IMIĘ I NAZWISKO]\n[IMIĘ I NAZWISKO]');
+  // komórki CSV/TSV: osobne maski tej samej osoby, liczba kolumn bez zmian
+  expect(redactPII('Sowa;Przemysław\nPawlak;Wiesław').redacted).toBe('[IMIĘ I NAZWISKO];[IMIĘ I NAZWISKO]\n[IMIĘ I NAZWISKO];Wiesław');
+  expect(redactPII('Wróbel\tAnna\nNowak Jan').redacted).toBe('[IMIĘ I NAZWISKO]\t[IMIĘ I NAZWISKO]\n[IMIĘ I NAZWISKO]');
+  expect(redactPII('Obecni: Lis Marek\nNowak Piotr').redacted).toBe('Obecni: [IMIĘ I NAZWISKO]\n[IMIĘ I NAZWISKO]');
+  expect(redactPII('Kowal Jan\nNowak Anna').redacted).toBe('[IMIĘ I NAZWISKO]\n[IMIĘ I NAZWISKO]');
+  expect(redactPII('Sowa Przemysław\nPawlak Wiesław', { pseudonyms: true }).redacted).toBe('[OSOBA-A]\n[OSOBA-B]');
+  expect(redactPII('Sowa;Przemysław\nPawlak;Wiesław', { pseudonyms: true }).redacted).toBe('[OSOBA-A];[OSOBA-A]\n[OSOBA-B];Wiesław');
+  // lista 10 osób zostaje listą 10 wierszy; homografy nad potwierdzoną osobą nie zostają jawne
   const lista =
     'Wróbel Katarzyna\nZając Paweł\nSowa Przemysław\nPawlak Wiesław\nKubiak Renata\nMazur Grzegorz\nSikora Anna\nWilk Bartosz\nNowak Barbara\nLis Jakub';
-  expect(redactPII(lista).redacted.split('\n')).toHaveLength(10);
+  const r = redactPII(lista).redacted;
+  expect(r.split('\n')).toHaveLength(10);
+  for (const w of ['Wróbel', 'Katarzyna', 'Zając', 'Sowa', 'Przemysław', 'Wilk', 'Bartosz']) expect(r, w).not.toContain(w);
+  expect(redactPII(r).redacted).toBe(r); // idempotencja
+});
+test('K06: nagłówek wpisu listy musi być nazwiskiem — czasownik, przyimek czy funkcja nie odsłaniają imienia', () => {
+  const cases: [string, string][] = [
+    ['Sporządził Jan\nKowalski', 'Sporządził [IMIĘ I NAZWISKO]'],
+    ['Od Jana\nKowalskiego', 'Od [IMIĘ I NAZWISKO]'],
+    ['Dla Anny\nNowak', 'Dla [IMIĘ I NAZWISKO]'],
+    ['Przez Jana\nKowalskiego', 'Przez [IMIĘ I NAZWISKO]'],
+    ['Lekarz Anna\nNowak', 'Lekarz [IMIĘ I NAZWISKO]'],
+    ['Wnioskodawczyni Anna\nNowak', 'Wnioskodawczyni [IMIĘ I NAZWISKO]'],
+    ['Pozdrawiam Anna\nKowalska', 'Pozdrawiam [IMIĘ I NAZWISKO]'],
+    ['Kontakt, Jan\nKowalski', 'Kontakt, [IMIĘ I NAZWISKO]'],
+    ['Faktura\tJan\nKowalski', 'Faktura\t[IMIĘ I NAZWISKO]'],
+    ['Odbiorca Anna\nKowalska, ul. Długa 5', 'Odbiorca [IMIĘ I NAZWISKO], [ADRES]'],
+    ['Protokolant: Stażysta Paweł\nNowicki', 'Protokolant: Stażysta [IMIĘ I NAZWISKO]'],
+    ['Sporządził: Technik Jan\nWiśniewski', 'Sporządził: Technik [IMIĘ I NAZWISKO]'],
+    ['Żona Anna\nKowalska, w 1/2 części,', 'Żona [IMIĘ I NAZWISKO], w 1/2 części,'],
+    ['5. Zarządca Piotr\nWiśniewski (spoza wspólnoty)', '5. Zarządca [IMIĘ I NAZWISKO] (spoza wspólnoty)'],
+    ['Powódka Maria\nKowalska, zam. w Krakowie', 'Powódka [IMIĘ I NAZWISKO], zam. w [MIEJSCOWOŚĆ]'],
+    ['Protokolant Anna\nNowak', 'Protokolant [IMIĘ I NAZWISKO]'],
+    // dzień tygodnia z listy homografów to grafik, nie nazwisko
+    ['Środa Anna\nKowalska', 'Środa [IMIĘ I NAZWISKO]'],
+    ['Sołtys Jan\nKowalski', 'Sołtys [IMIĘ I NAZWISKO]'],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
 });
 test('K06 pułapki: łamanie wiersza w prozie i podpisie nadal domyka osobę', () => {
   const cases: [string, string][] = [

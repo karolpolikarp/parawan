@@ -1497,7 +1497,10 @@ function passPhone(ctx: RedactCtx): void {
       // maskuj każdy 9-cyfrowy człon w miejscu — separatory listy i wypełniacze zostają.
       // Człon po wypełniaczu („, kom. 601…") zaczyna się od „. " — kropka należy do skrótu,
       // nie do numeru, więc zostaje przed maską (dawniej wychodziło „kom[TELEFON]").
-      const out = nums.replace(/(?:\+?48[\s.-]{1,3})?(?:[\s\-().]{0,3}\d){9}/g, (seg) => {
+      // Wiodące odstępy wchodzą do segmentu PRZED prefiksem: inaczej segment członu „lub 48 602 333
+      // 444" startował od spacji, prefiks „48" nie mógł zadziałać, okno 9 cyfr obejmowało „48 602
+      // 333 4" i dwie ostatnie cyfry numeru zostawały jawne. Odstępy i tak wracają w `lead`.
+      const out = nums.replace(/\s*(?:\+?48[\s.-]{1,3})?(?:[\s\-().]{0,3}\d){9}/g, (seg) => {
         ctx.bump('TELEFON');
         const lead = seg.match(/^[\s.]*/)?.[0] ?? '';
         return `${lead}${ctx.M.TELEFON}`;
@@ -2019,6 +2022,47 @@ function isHonorificP(t: string, offset: number): boolean {
   return /(?:(?<!\p{L})[Ss][Zz]\.|(?<!\p{L})[SsWw](?:zanown|ielmożn)\p{L}*)[ \t]+$/u.test(t.slice(Math.max(0, offset - 40), offset));
 }
 
+// Łańcuch kropkowy sklejony bez spacji, zakończony wielką literą z kropką: „J.M.", „Dr.J.",
+// „P.H.U.", „Sz.P.". INITIAL_START odcina ostatni człon (stoi po kropce), więc o tym, czy łańcuch
+// kotwiczy osobę, rozstrzyga dotChainKind. Powtórzenia ograniczone ({1,5}, {1,4}) — koszt stały.
+const DOT_CHAIN = `(?<![.\\w${PL_UP}${PL_LO}])((?:[${PL_UP}${PL_LO}]{1,5}\\.){1,4})([${PL_UP}])\\.`;
+// Skróty z dwóch liter, które NIE są inicjałami osoby (P.S. Mróz, ORLEN S.A., PKO B.P., O.K.).
+const DOT_CHAIN_NOT_PERSON = new Set<string>('ps pps sa sc sj sk ska bp us oo ok ad po rp ue mp op'.split(' '));
+// Łańcuchy, po których stoi nazwisko, a sam łańcuch zostaje w tekście: formy działalności
+// jednoosobowej („P.H.U. Wilk" — w nazwie firmy nazwisko właściciela) i „W.P."/„Ś.P." (Pan, świętej pamięci).
+const DOT_CHAIN_KEEP = new Set<string>(
+  ('ph phu pphu phup pphup fh fhu fhup fphu fph puh ppuh fuh pu fu pw ppw zph zphu zpuh zuh pph phpu ' +
+    'fhpu pthu wp śp').split(' '),
+);
+// Tytuł sklejony z inicjałem („Dr.J. Kowalski", „mgr.A. Nowak", „r.pr.J. Nowak") — tytuł zostaje.
+const DOT_TITLES = new Set<string>('dr mgr prof mec inż adw lek med hab ks red płk gen kpt mjr por sierż sędz r pr st apl'.split(' '));
+/**
+ * Rodzaj łańcucha `head` + `ini.` przed nazwiskiem: 'absorb' — dwa inicjały osoby („J.M. Wilk"
+ * → cała maska), 'keepChain' — skrót zostaje, nazwisko w masce („P.H.U. [..]", „Sz.P. [..]"),
+ * 'keepTitle' — tytuł zostaje, inicjał w masce („Dr.[..]"), null — to nie kotwica osoby.
+ */
+function dotChainKind(head: string, ini: string): 'absorb' | 'keepChain' | 'keepTitle' | null {
+  const toks = head.slice(0, -1).split('.');
+  const letters = (toks.join('') + ini).toLowerCase();
+  if (toks.every((x) => x.length === 1 && x !== x.toLowerCase())) {
+    if (DOT_CHAIN_KEEP.has(letters)) return 'keepChain';
+    // trzy i więcej liter to skrót (P.P.S.), nie inicjały; dwie — inicjały, chyba że znany skrót
+    return toks.length === 1 && !DOT_CHAIN_NOT_PERSON.has(letters) ? 'absorb' : null;
+  }
+  if (toks.length === 1 && /^[Ss]z$/.test(toks[0]) && ini === 'P') return 'keepChain'; // „Sz.P." = Szanowny Pan
+  return toks.every((x) => DOT_TITLES.has(x.toLowerCase())) ? 'keepTitle' : null;
+}
+
+/** Czy `w2` po kotwicy inicjału to nazwisko (słownik, końcówka, homograf) w kontekście osobowym? */
+function initialAnchorsSurname(ctx: RedactCtx, w2: string, offset: number): boolean {
+  const wl = w2.toLowerCase();
+  if (LEGAL_ENTITY_WORDS.has(wl) || NON_SURNAME_ADJ.has(wl) || TITLE_WORDS.has(wl) || ROLE_WORDS.has(wl)) return false;
+  if (precededByPatron(ctx.text, offset) || precededByStreetEponym(ctx.text, offset)) return false;
+  const prev = prevLowerWord(ctx.text, offset);
+  if (prev && NON_PERSON_CONTEXT.has(prev)) return false;
+  return !!surnameBase(w2) || looksLikeSurname(w2) || HOMOGRAPH_SURNAMES.has(normalizeSurnameKey(w2));
+}
+
 // (c1a) INICJAŁ + nazwisko („A. Baran", „J. Kowalski"). Inicjał to kotwica OSOBOWA.
 function passPersonInitial(ctx: RedactCtx): void {
   if (!ctx.on('IMIE')) return;
@@ -2026,20 +2070,31 @@ function passPersonInitial(ctx: RedactCtx): void {
     new RegExp(
       // Tanie warunki NAJPIERW (granica + lookahead na „X. "): lookbehindy o zmiennej długości
       // (początek wiersza, koniec zdania) liczą się wtedy tylko tam, gdzie naprawdę stoi inicjał.
-      `${INITIAL_START}(?=[${PL_UP}]\\.[ \\t])(?<!(?:^|\\n)[ \\t]*)(?<!(?<!\\b(?:[Mm]ec|[Pp]rof|[Dd]r|[Mm]gr|[Ii]nż|hab|[Aa]dw|[Kk]s|płk|gen|kpt|mjr|por|sierż|lek|med|[Ss]ędz))[.!?][ \\t]+)[${PL_UP}]\\.[ \\t]+([${PL_UP}][${PL_LO}]+(?:-[${PL_UP}][${PL_LO}]+)?)(?![${PL_UP}${PL_LO}])`,
+      // Początek wiersza to też dosłowna ucieczka „\n"/„\r" z JSON-a (punkt wyliczenia „A.").
+      // „Sz." na liście skrótów: „Sz. P. Wilk" to nagłówek listu, nie koniec zdania.
+      `${INITIAL_START}(?=[${PL_UP}]\\.[ \\t])(?<!(?:^|\\n|\\\\[\\uE00A\\uE00D])[ \\t]*)(?<!(?<!\\b(?:[Mm]ec|[Pp]rof|[Dd]r|[Mm]gr|[Ii]nż|hab|[Aa]dw|[Kk]s|płk|gen|kpt|mjr|por|sierż|lek|med|[Ss]ędz|[Ss]z))[.!?][ \\t]+)[${PL_UP}]\\.[ \\t]+([${PL_UP}][${PL_LO}]+(?:-[${PL_UP}][${PL_LO}]+)?)(?![${PL_UP}${PL_LO}])`,
       'g',
     ),
     (m, w2: string, offset: number) => {
-      const wl = w2.toLowerCase();
-      if (LEGAL_ENTITY_WORDS.has(wl) || NON_SURNAME_ADJ.has(wl) || TITLE_WORDS.has(wl) || ROLE_WORDS.has(wl)) return m;
-      if (precededByPatron(ctx.text, offset) || precededByStreetEponym(ctx.text, offset)) return m;
-      const prev = prevLowerWord(ctx.text, offset);
-      if (prev && NON_PERSON_CONTEXT.has(prev)) return m;
-      if (!surnameBase(w2) && !looksLikeSurname(w2) && !HOMOGRAPH_SURNAMES.has(normalizeSurnameKey(w2))) return m;
+      if (!initialAnchorsSurname(ctx, w2, offset)) return m;
       ctx.bump('IMIE');
       // „Szanowny P. Kowalski" — „P." to „Pan", kotwica osobowa jak inicjał, ale zostaje w tekście
       if (isHonorificP(ctx.text, offset)) return `${m.slice(0, m.length - w2.length)}${ctx.personMask(w2)}`;
       return ctx.personMask(w2);
+    },
+  );
+  // Łańcuch kropkowy przed nazwiskiem („SSO J.M. Wilk", „P.H.U. Wilk", „Dr.J. Wilk"). Bez tego
+  // homograf po dwóch inicjałach zostawał jawny — jedyną jego kotwicą jest inicjał.
+  ctx.text = ctx.text.replace(
+    new RegExp(`${DOT_CHAIN}([ \\t]+)([${PL_UP}][${PL_LO}]+(?:-[${PL_UP}][${PL_LO}]+)?)(?![${PL_UP}${PL_LO}])`, 'g'),
+    (m, head: string, ini: string, sep: string, w2: string, offset: number) => {
+      const kind = dotChainKind(head, ini);
+      if (!kind || !initialAnchorsSurname(ctx, w2, offset)) return m;
+      ctx.bump('IMIE');
+      const mask = ctx.personMask(w2);
+      if (kind === 'absorb') return mask;
+      if (kind === 'keepTitle') return `${head}${mask}`;
+      return `${head}${ini}.${sep}${mask}`;
     },
   );
 }
@@ -2188,30 +2243,86 @@ function passPersonOcrMix(ctx: RedactCtx): void {
 // Początek wpisu listy/tabeli przed imieniem kończącym wiersz: wiersz albo komórka (po ; | ⇥ , :),
 // opcjonalnie numeracja/punktor, JEDEN wyraz z wielkiej litery i odstęp lub separator komórki.
 const RE_LIST_ENTRY_HEAD = new RegExp(
-  `(?:^|[;|\\t,:][ \\t]*)(?:(?:\\d{1,4}[.)]|[-*•–])[ \\t]*)?(${CAP_WORD})(?:[ \\t]*[;|\\t,][ \\t]*|[ \\t]+)$`,
+  `(?:^|[;|\\t,:][ \\t]*)(?:(?:\\d{1,4}[.)]|[-*•–])[ \\t]*)?(${CAP_WORD})([ \\t]*[;|\\t,][ \\t]*|[ \\t]+)$`,
 );
 // Dalszy ciąg zdania za maską w następnym wierszu („…\nKowalski złożył", „…\nKowalski.").
 const RE_PROSE_TAIL = new RegExp(`^(?:[ \\t]+[${PL_LO}]|[.!?…])`);
+// Nazwy dni i miesięcy są na liście homografów nazwisk, ale na początku wiersza to częściej
+// grafik („Środa Anna\nKowalska" = dyżur Anny Kowalskiej) niż nazwisko — tu odpadają; tak samo
+// funkcje sołecka i starościńska.
+const LIST_HEAD_NOT_SURNAME = new Set<string>(
+  ('poniedziałek wtorek środa czwartek piątek sobota niedziela styczeń luty marzec kwiecień maj ' +
+    'czerwiec lipiec sierpień wrzesień październik listopad grudzień sołtys starosta').split(' '),
+);
+/**
+ * Czy wyraz otwierający wiersz to NAZWISKO wpisu „Nazwisko Imię"? Wymagamy dowodu: słownik,
+ * końcówka nazwiskowa albo lista homografów (Sowa, Wilk, Wróbel, Kowal). Sam brak imienia i roli
+ * nie wystarcza — czasowniki podpisu, przyimki i funkcje spoza ROLE_WORDS („Sporządził Jan\n
+ * Kowalski", „Od Jana\nKowalskiego", „Lekarz Anna\nNowak", „Żona Anna\nKowalska") brały się za
+ * nazwisko, imię zostawało jawne obok maski nazwiska.
+ */
+function isListEntrySurname(word: string): boolean {
+  if (isFirstNameLike(word)) return false;
+  return word.split('-').some((part) => {
+    const w = part.toLowerCase();
+    if (TITLE_WORDS.has(w) || ROLE_WORDS.has(w) || LIST_HEAD_NOT_SURNAME.has(w)) return false;
+    if (LEGAL_ENTITY_WORDS.has(w) || NON_SURNAME_ADJ.has(w)) return false;
+    return !!surnameBase(w) || looksLikeSurname(w) || HOMOGRAPH_SURNAMES.has(w);
+  });
+}
 /**
  * Czy imię `t[start, …)` na końcu wiersza DOMYKA wpis listy w szyku „Nazwisko Imię" („Sowa
- * Przemysław", „Sowa;Przemysław", „1. Sowa Przemysław")? Tak, gdy przed nim stoi wyraz z wielkiej
- * litery, który nie jest imieniem, tytułem ani rolą, a za maską w następnym wierszu nie ciągnie się
- * proza. Wtedy maska poniżej to INNA osoba — wciągnięcie imienia sklejało wiersze (lista 10 osób
- * dawała 8 wierszy, rekordy CSV się przesuwały). Łamanie prozy („Starosta Jan\nWiśniewski
- * przeprowadził", „Wnioskodawca Anna\nNowak") nadal domyka osobę. Wiersz dłuższy niż 80 znaków
- * przed imieniem to proza, nie wpis listy (też ogranicza koszt skanu wstecz).
+ * Przemysław", „Sowa;Przemysław", „1. Sowa Przemysław")? Tak, gdy przed nim stoi potwierdzone
+ * nazwisko (isListEntrySurname), a za maską w następnym wierszu nie ciągnie się proza. Wtedy maska
+ * poniżej to INNA osoba — wciągnięcie imienia sklejało wiersze (lista 10 osób dawała 8 wierszy,
+ * rekordy CSV się przesuwały). Łamanie prozy („Starosta Jan\nWiśniewski przeprowadził",
+ * „Wnioskodawca Anna\nNowak", „Sporządził Jan\nKowalski") nadal domyka osobę. Wiersz dłuższy niż
+ * 80 znaków przed imieniem to proza, nie wpis listy (też ogranicza koszt skanu wstecz).
+ * Zwraca początek nazwiska i separator za nim albo null.
  */
-function closesListEntry(t: string, start: number, end: number): boolean {
+function listEntryHead(t: string, start: number, end: number): { at: number; word: string; sep: string } | null {
   let ls = start;
   while (ls > 0 && t[ls - 1] !== '\n') {
-    if (start - ls >= 80) return false;
+    if (start - ls >= 80) return null;
     ls--;
   }
   const mm = RE_LIST_ENTRY_HEAD.exec(t.slice(ls, start));
-  if (!mm) return false;
-  const w = mm[1].toLowerCase();
-  if (isFirstNameLike(mm[1]) || TITLE_WORDS.has(w) || ROLE_WORDS.has(w)) return false;
-  return !RE_PROSE_TAIL.test(t.slice(end, end + 40));
+  if (!mm || !isListEntrySurname(mm[1])) return null;
+  if (RE_PROSE_TAIL.test(t.slice(end, end + 40))) return null;
+  return { at: start - mm[2].length - mm[1].length, word: mm[1], sep: mm[2] };
+}
+const RE_PERSON_MASK_AT_START = /^(?:\[OSOBA-[A-Z]+\]|\[IMIĘ I NAZWISKO\])/;
+const RE_FIRST_NAME_AT_END = new RegExp(`(?<![${PL_UP}${PL_LO}])[${PL_UP}][${PL_LO}]+$`);
+/**
+ * Wpis listy „Nazwisko Imię" nad maską osoby („Sowa Przemysław\n[OSOBA]") to osobna osoba:
+ * strażnik domknięcia nie wciąga jej imienia do maski z następnego wiersza, więc bez tego kroku
+ * zostawała jawna W CAŁOŚCI (homograf w szyku odwróconym — Sowa, Wilk, Kowal — nie ma innej
+ * kotwicy). Idziemy od dołu: zamaskowany wpis staje się kotwicą wiersza nad nim, więc cała lista
+ * homografów nad potwierdzoną osobą maskuje się w jednym przebiegu (i wynik jest idempotentny).
+ * Komórki CSV/TSV („Sowa;Przemysław") dostają osobne maski tej samej osoby — kolumny się nie
+ * przesuwają.
+ */
+function passListEntries(ctx: RedactCtx): void {
+  if (!ctx.text.includes('\n')) return;
+  const lines = ctx.text.split('\n');
+  let changed = false;
+  for (let i = lines.length - 2; i >= 0; i--) {
+    const next = lines[i + 1];
+    const mm = RE_PERSON_MASK_AT_START.exec(next);
+    if (!mm || RE_PROSE_TAIL.test(next.slice(mm[0].length, mm[0].length + 40))) continue;
+    const line = lines[i];
+    const nm = RE_FIRST_NAME_AT_END.exec(line);
+    if (!nm || !isFirstNameLike(nm[0])) continue;
+    // proza za maską sprawdzona wyżej na wierszu i+1, więc koniec „tekstu" = koniec tego wiersza
+    const head = listEntryHead(line, nm.index, line.length);
+    if (!head) continue;
+    const mask = ctx.personMask(head.word);
+    ctx.bump('IMIE');
+    const cell = /[;|\t,]/.test(head.sep);
+    lines[i] = line.slice(0, head.at) + (cell ? `${mask}${head.sep}${mask}` : mask);
+    changed = true;
+  }
+  if (changed) ctx.text = lines.join('\n');
 }
 
 function finalizePersons(ctx: RedactCtx): void {
@@ -2227,23 +2338,37 @@ function finalizePersons(ctx: RedactCtx): void {
         if (!isFirstNameLike(w)) return m;
         // Imię DOMYKA wpis listy („Sowa Przemysław\nPawlak Wiesław") — nie należy do osoby
         // z następnego wiersza; wciągnięcie sklejało wiersze i przesuwało pola CSV.
-        if (sep === '\n' && closesListEntry(t, offset, offset + m.length)) return m;
+        // Sam wpis maskuje passListEntries niżej.
+        if (sep === '\n' && listEntryHead(t, offset, offset + m.length)) return m;
         return mask;
       },
     );
   }
+  passListEntries(ctx);
   // DOMKNIĘCIE: inicjał imienia tuż przed zamaskowaną osobą („mec. J. [OSOBA-B]") wciąga do maski.
   ctx.text = ctx.text.replace(
     new RegExp(`${INITIAL_START}[${PL_UP}]\\.[ \\t]*(\\[OSOBA-[A-Z]+\\]|\\[IMIĘ I NAZWISKO\\])`, 'g'),
     (m, mask: string, offset: number, t: string) => {
-      // na początku wiersza (po samych odstępach) to punkt wyliczenia („A. Jan Kowalski zeznał")
+      // na początku wiersza (po samych odstępach) to punkt wyliczenia („A. Jan Kowalski zeznał");
+      // dosłowna ucieczka „\n" w JSON-ie też zaczyna wiersz (znak PUA z passProtectJsonEscapes)
       let i = offset - 1;
       while (i >= 0 && (t[i] === ' ' || t[i] === '\t')) i--;
-      if (i < 0 || t[i] === '\n') return m;
+      if (i < 0 || t[i] === '\n' || ((t[i] === '\uE00A' || t[i] === '\uE00D') && t[i - 1] === '\\')) return m;
       // „Sp. J." / „Sp. K." — człon formy prawnej spółki (jawna, komandytowa), nie inicjał
       if (/(?<!\p{L})[Ss][Pp]\.$/u.test(t.slice(Math.max(0, i - 3), i + 1))) return m;
       if (isHonorificP(t, offset)) return m; // „Sz. P. [OSOBA-A]" — „P." to „Pan"
       return mask;
+    },
+  );
+  // DOMKNIĘCIE: łańcuch inicjałów przed maską („J.K. [OSOBA-A]" → cała maska, „Dr.J. […]" → „Dr.[…]").
+  // Skróty (P.S., S.A., P.H.U., W.P.) zostają przed maską — rozstrzyga dotChainKind.
+  ctx.text = ctx.text.replace(
+    new RegExp(`${DOT_CHAIN}[ \\t]*(\\[OSOBA-[A-Z]+\\]|\\[IMIĘ I NAZWISKO\\])`, 'g'),
+    (m, head: string, ini: string, mask: string) => {
+      const kind = dotChainKind(head, ini);
+      if (kind === 'absorb') return mask;
+      if (kind === 'keepTitle') return `${head}${mask}`;
+      return m;
     },
   );
   // DOMKNIĘCIE: cząstka obcego nazwiska wieloczłonowego po masce osoby („[OSOBA-F] Van Anh").
