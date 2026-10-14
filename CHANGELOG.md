@@ -16,7 +16,7 @@ i maskuje numer w całości jako `[NR-KSEF]`.
   (`**Nr KSeF:**`, `<td>Nr KSeF</td>`), a pod jedną etykietą stoi wyliczenie kilku numerów.
 - **Oba formaty w obiegu**: 35-znakowy z KSeF 2.0 (`NIP-RRRRMMDD-12 znaków-suma`) i historyczny
   36-znakowy z KSeF 1.0 (część techniczna rozbita 6+6). Schemat FA(3) dopuszcza w pierwszym
-  członie także `M`+9 cyfr i 3 litery+7 cyfr — obsłużone.
+  członie także `M`+9 cyfr (obsłużone) i 3 litery+7 cyfr (wycięte, patrz niżej).
 - **Druga warstwa: losowość części technicznej + suma kontrolna NIP-u + zakres daty.** Kotwica
   dokumentowa jest słabsza niż etykieta tuż przy numerze, a sam kształt (10 cyfr · 8 cyfr ·
   12 znaków hex · 2 znaki) noszą też numery zamówień, inwentarzowe, seryjne, identyfikatory

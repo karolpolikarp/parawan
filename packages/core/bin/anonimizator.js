@@ -26,6 +26,14 @@ Użycie:
 Bez argumentów czyta ze stdin. Nic nie jest wysyłane przez sieć —
 cała redakcja odbywa się lokalnie.`;
 
+// Odmiana liczebnika: 1 wystąpienie, 2–4 (poza 12–14) wystąpienia, reszta wystąpień.
+function plural(n, one, few, many) {
+  if (n === 1) return one;
+  const d = n % 10;
+  const h = n % 100;
+  return d >= 2 && d <= 4 && (h < 12 || h > 14) ? few : many;
+}
+
 const args = process.argv.slice(2);
 const files = [];
 let outPath = null;
@@ -83,6 +91,6 @@ if (!quiet) {
     console.error('Nie wykryto danych osobowych.');
   } else {
     const total = found.reduce((s, f) => s + f.count, 0);
-    console.error(`Zamaskowano ${total} wystąpień: ${describeFindings(found).join(', ')}.`);
+    console.error(`Zamaskowano ${total} ${plural(total, 'wystąpienie', 'wystąpienia', 'wystąpień')}: ${describeFindings(found).join(', ')}.`);
   }
 }

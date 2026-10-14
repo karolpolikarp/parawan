@@ -14,7 +14,7 @@ danych z pięciu grup:
 Pełna lista z metodą wykrywania każdego typu: [tabela „Co wykrywa”](https://github.com/karolpolikarp/parawan#-co-wykrywa).
 
 Tam, gdzie format ma sumę kontrolną (PESEL, NIP, REGON, IBAN, dowód, karta), jest ona
-**walidowana**, więc przypadkowe ciągi cyfr (sygnatury, numery przepisów) nie są maskowane.
+**walidowana**, więc przypadkowe ciągi cyfr (numery przepisów, cytowane sygnatury orzeczeń) nie są maskowane.
 Redakcja jest idempotentna.
 
 Pakietu nie ma jeszcze w rejestrze npm. Do czasu publikacji instalujesz go z repozytorium
