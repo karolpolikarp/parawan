@@ -1780,3 +1780,38 @@ test('REGRESJA: liczba 2-3-2-2 bez kontekstu telefonicznego NIE jest telefonem',
   const t = 'Pozycja 32 774 91 55 w wykazie inwentarza magazynowego.';
   expect(redactPII(t, { pseudonyms: true }).redacted).toBe(t);
 });
+
+// ── Wydajność: żadne wejście nie może zamrozić karty (wzorce kwadratowe, audyt UI 2026-10) ──
+test('czas liniowy na patologicznych wejściach (każde < 500 ms przy ~100 tys. znaków)', () => {
+  const inputs: Record<string, string> = {
+    'litery bez @': 'a'.repeat(100_000),
+    hex: 'abcdef0123'.repeat(10_000),
+    'spacje w wierszu': `x${' '.repeat(100_000)}x`,
+    nawiasy: '('.repeat(50_000),
+    'polskie wersaliki': 'Ż'.repeat(100_000),
+    'cyfry i kropki': '1.1.'.repeat(25_000),
+    'kotwica tablicy': 'rejestracyjny '.repeat(7_000),
+    'łańcuch z myślnikami': 'Abc-'.repeat(25_000),
+    'litera i kropka': 'a.'.repeat(50_000),
+    'znak sprawy': 'AB.'.repeat(30_000),
+  };
+  for (const [name, text] of Object.entries(inputs)) {
+    const t0 = performance.now();
+    redactPII(text);
+    expect(performance.now() - t0, name).toBeLessThan(500);
+  }
+});
+test('e-maile sklejone i w łańcuchu maskowane jak dotąd (szybka ścieżka e-mail)', () => {
+  // myślnik należy do klasy części lokalnej, więc drugi adres pochłania go — tak było zawsze
+  expect(redactPII('jan@x.pl-anna@y.pl').redacted).toBe('[EMAIL][EMAIL]');
+  expect(redactPII('a@b.pl.c@d.pl').redacted).toBe('[EMAIL][EMAIL]');
+  expect(redactPII('Pisz: piotr.wiśniewski@firma.pl, kopia do biuro@firma.pl.').redacted).toBe('Pisz: [EMAIL], kopia do [EMAIL].');
+  expect(redactPII('https://portal.example.com/?email=jan%40example.com&id=7').redacted).toBe('https://portal.example.com/?email=[EMAIL]&id=7');
+});
+test('CRLF: pole formularza w tej samej linii zachowuje windowsowy koniec wiersza', () => {
+  const r = redactPII('Nazwisko: Kowalski\r\nImię: Jan\r\nUwagi: brak\r\n').redacted;
+  expect(r).toBe('Nazwisko: [IMIĘ I NAZWISKO]\r\nImię: [IMIĘ I NAZWISKO]\r\nUwagi: brak\r\n');
+});
+test('miejscowość z etykietą TERYT po myślniku-wypunktowaniu nadal maskowana', () => {
+  expect(redactPII('-Gliwice (miasto)').redacted).toBe('-[MIEJSCOWOŚĆ] (miasto)');
+});

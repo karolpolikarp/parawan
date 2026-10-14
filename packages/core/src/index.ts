@@ -373,6 +373,11 @@ const RE_SURNAME_OBLIQUE =
 
 // Wyraz z wielkiej litery z myślnikami wielokrotnymi (miejscowości: „Kędzierzyn-Koźle") — '*' (nie '?').
 const CAP_CITY = `[${PL_UP}][${PL_LO}]+(?:-[${PL_UP}][${PL_LO}]+)*`;
+// Lewa granica wzorców ZACZYNAJĄCYCH się od CAP_CITY (bez innej kotwicy przed nim): start w środku
+// wyrazu albo łańcucha „Abc-Abc-…" odpada. Bez niej każdy człon łańcucha skanował go do końca
+// (czas kwadratowy, ~5 s na 100 tys. znaków). Sam myślnik przed nazwą (wypunktowanie „-Gliwice")
+// granicy nie blokuje — tylko myślnik doklejony do poprzedniego wyrazu.
+const CITY_START = `(?<![${PL_UP}${PL_LO}]|[${PL_UP}${PL_LO}]-)`;
 /** Escapuje metaznaki regexu w literale (do budowy wzorca z placeholdera maski). */
 const escapeRe = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 /**
@@ -502,6 +507,24 @@ const RE_DATE_VALUE =
   /\d{1,2}[.\-/]\d{1,2}[.\-/]\d{2,4}|\d{4}-\d{2}-\d{2}|\d{1,2}\s+(?:stycznia|lutego|marca|kwietnia|maja|czerwca|lipca|sierpnia|września|października|listopada|grudnia)\s+\d{4}/i;
 /** Zdejmuje numerację („12. ", „3) ") i białe znaki z brzegów — zostaje sama treść etykiety/wartości. */
 const stripFormPrefix = (s: string): string => s.replace(/^[ \t]*\d+[.)][ \t]*/, '').trim();
+/**
+ * Sama etykieta z wiersza formularza: bez wartości po dwukropku i bez końcowej podpowiedzi
+ * w nawiasie („Nazwisko (rodowe): …" → „Nazwisko"). Odpowiednik
+ * `s.replace(/\s*:.*$/, '').replace(/\s*\([^)]*\)\s*$/, '')`, ale LINIOWY: tamte regexy
+ * od każdej pozycji długiego ciągu spacji albo „((((" skanowały wiersz do końca (sekundy na
+ * 100 tys. znaków). Zachowanie identyczne, łącznie z tym, że „.*$" nie przechodzi przez
+ * znaki końca wiersza — liczy się pierwszy dwukropek PO ostatnim z nich.
+ */
+function formLabelOf(s: string): string {
+  const lastTerm = Math.max(s.lastIndexOf('\r'), s.lastIndexOf(' '), s.lastIndexOf(' '));
+  const colon = s.indexOf(':', lastTerm + 1);
+  const base = colon === -1 ? s : s.slice(0, colon).trimEnd();
+  const t = base.trimEnd();
+  if (!t.endsWith(')')) return base;
+  const open = t.indexOf('(', t.lastIndexOf(')', t.length - 2) + 1);
+  if (open === -1 || open > t.length - 2) return base;
+  return t.slice(0, open).trimEnd();
+}
 /** Czy wiersz to etykieta/nagłówek (nie wartość sąsiedniego pola) — chroni pola PUSTE. */
 const isFormLabelLine = (line: string): boolean => {
   const t = stripFormPrefix(line);
@@ -718,6 +741,21 @@ function isFirstNameLike(word: string): boolean {
 const RE_EMAIL = /[A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ._%+-]+@[A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ.-]+\.[A-Za-z]{2,}/g;
 // E-mail zakodowany w URL-u („%40" zamiast „@") — poza URL-em nie występuje.
 const RE_EMAIL_URLENC = /[A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ._%+-]+%40[A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ.-]+\.[A-Za-z]{2,}/g;
+// WYDAJNOŚĆ: RE_EMAIL puszczony wprost po tekście jest KWADRATOWY — w długim ciągu znaków
+// części lokalnej bez „@" (100 tys. liter, cyfr, „Ż", „a.a.a…") każda pozycja startowa skanuje
+// ciąg do końca (5–15 s, karta przeglądarki zamarza). Najpierw szukamy więc ŁAŃCUCHA adresów
+// zaczynającego się na POCZĄTKU ciągu znaków lokalnych (lookbehind: start w środku ciągu
+// odpada), a dopiero wewnątrz znalezionego fragmentu stosujemy RE_EMAIL. Wynik jest identyczny
+// z RE_EMAIL po całym tekście: dopasowanie startujące w środku ciągu zawsze da się przedłużyć
+// w lewo do jego początku, a sklejone adresy („a@b.pl.c@d.pl") obejmuje powtórzenie grupy.
+const RE_EMAIL_CHAIN =
+  /(?<![A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ._%+-])(?:[A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ._%+-]+@[A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ.-]+\.[A-Za-z]{2,})+/g;
+const RE_EMAIL_URLENC_CHAIN =
+  /(?<![A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ._%+-])(?:[A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ._%+-]+%40[A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ.-]+\.[A-Za-z]{2,})+/g;
+/** Maskuje e-maile w czasie liniowym: łańcuch → RE_EMAIL wewnątrz (patrz RE_EMAIL_CHAIN). */
+function replaceEmails(s: string, chain: RegExp, single: RegExp, mask: () => string): string {
+  return s.replace(chain, (m) => m.replace(single, mask));
+}
 /**
  * Parametry query URL-a o kluczach OSOBOWYCH — klucz to mocna kotwica, maskujemy samą
  * wartość wg typu (?user=[LOGIN]&email=[EMAIL]), struktura URL-a zostaje. Klasa wartości
@@ -935,8 +973,8 @@ function passProtectUrls(ctx: RedactCtx): void {
     const trail = trailMatch ? trailMatch[0] : '';
     let url = trail ? raw.slice(0, raw.length - trail.length) : raw;
     if (ctx.on('EMAIL')) {
-      url = url.replace(RE_EMAIL, () => { ctx.bump('EMAIL'); return ctx.M.EMAIL; });
-      url = url.replace(RE_EMAIL_URLENC, () => { ctx.bump('EMAIL'); return ctx.M.EMAIL; });
+      url = replaceEmails(url, RE_EMAIL_CHAIN, RE_EMAIL, maskConst(ctx, 'EMAIL'));
+      url = replaceEmails(url, RE_EMAIL_URLENC_CHAIN, RE_EMAIL_URLENC, maskConst(ctx, 'EMAIL'));
     }
     if (ctx.on('TOKEN')) {
       // JWT w URL-u (fragment „#access_token=eyJ…") — poza URL-em łapie go passTokens,
@@ -966,7 +1004,7 @@ function passProtectUrls(ctx: RedactCtx): void {
 // 1) E-MAIL
 function passEmail(ctx: RedactCtx): void {
   if (!ctx.on('EMAIL')) return;
-  ctx.text = ctx.text.replace(RE_EMAIL, maskConst(ctx, 'EMAIL'));
+  ctx.text = replaceEmails(ctx.text, RE_EMAIL_CHAIN, RE_EMAIL, maskConst(ctx, 'EMAIL'));
 }
 
 // 1a) TOKEN (JWT + sekrety prefiksowe): eyJ<base64url>.… oraz sk_live_/ghp_/github_pat_/xox?-.
@@ -984,9 +1022,11 @@ function passTokens(ctx: RedactCtx): void {
 function passMac(ctx: RedactCtx): void {
   if (!ctx.on('MAC')) return;
   ctx.text = ctx.text.replace(/\b(?:[0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}\b/g, maskConst(ctx, 'MAC'));
-  // MAC w notacji Cisco: „aabb.ccdd.eeff" (3 grupy po 4 hex). Wymagamy ≥1 LITERY hex.
+  // MAC w notacji Cisco: „aabb.ccdd.eeff" (3 grupy po 4 hex). Wymagamy ≥1 LITERY hex — w obrębie
+  // samego adresu (14 znaków), stąd {0,13}: lookahead bez limitu skanował cały ciąg „1.1.1…"
+  // od każdej pozycji (czas kwadratowy, sekundy na 100 tys. znaków).
   ctx.text = ctx.text.replace(
-    /\b(?=[0-9A-Fa-f.]*[A-Fa-f])(?:[0-9A-Fa-f]{4}\.){2}[0-9A-Fa-f]{4}(?![:\w-]|\.\w)/g,
+    /\b(?=[0-9A-Fa-f.]{0,13}[A-Fa-f])(?:[0-9A-Fa-f]{4}\.){2}[0-9A-Fa-f]{4}(?![:\w-]|\.\w)/g,
     maskConst(ctx, 'MAC'),
   );
   // Z SILNĄ etykietą „MAC" maskujemy notację Cisco także CZYSTO CYFROWĄ (etykieta wygrywa).
@@ -1051,7 +1091,8 @@ function passFormFields(ctx: RedactCtx): void {
   const lines = ctx.text.split('\n');
   for (let i = 0; i < lines.length; i++) {
     const bare = stripFormPrefix(lines[i]);
-    const field = FORM_FIELDS.find((f) => f.re.test(bare.replace(/\s*:.*$/, '').replace(/\s*\([^)]*\)\s*$/, '')));
+    const label = formLabelOf(bare); // raz na linię, nie dla każdego pola z FORM_FIELDS
+    const field = FORM_FIELDS.find((f) => f.re.test(label));
     if (!field || !ctx.on(field.type)) continue;
     const colon = bare.match(/:\s*(.+)$/); // „Etykieta: WARTOŚĆ" w tej samej linii
     if (colon) {
@@ -1060,7 +1101,9 @@ function passFormFields(ctx: RedactCtx): void {
       if (field.kind === 'date') continue;
       const val = colon[1].trim();
       if (isValidFormValue(val, field.kind)) {
-        lines[i] = lines[i].replace(new RegExp(`${escapeRe(val)}\\s*$`), field.mask);
+        // Końcowe „\r" (tekst z CRLF dzielimy po „\n") zostaje — inaczej linia z zamaskowanym
+        // polem traciła windowsowy koniec wiersza i plik wychodził z mieszanymi końcami linii.
+        lines[i] = lines[i].replace(new RegExp(`${escapeRe(val)}[^\\S\\r]*(?=\\s*$)`), field.mask);
         ctx.bump(field.type);
       }
       continue;
@@ -1225,7 +1268,9 @@ function passZnakSprawy(ctx: RedactCtx): void {
   const ZNAK_START = `[${PL_UP}]{2,}[0-9]*(?:-[A-Za-z${PL_UP}${PL_LO}0-9]+)*`;
   const ZNAK_MID = `(?:\\.[A-Za-z${PL_UP}${PL_LO}0-9-]+)*?`;
   ctx.text = ctx.text.replace(
-    new RegExp(`(?<![A-Za-z0-9./-])${ZNAK_START}${ZNAK_MID}\\.\\d+\\.(?:19|20)\\d{2}(?:\\.[${PL_UP}]{2,3})?(?!\\d)`, 'g'),
+    // Lookbehind obejmuje też polskie litery: bez nich start w ŚRODKU ciągu „ŻŻŻ…" był dozwolony
+    // i każda pozycja skanowała ciąg do końca (czas kwadratowy, ~8 s na 100 tys. znaków).
+    new RegExp(`(?<![A-Za-z${PL_UP}${PL_LO}0-9./-])${ZNAK_START}${ZNAK_MID}\\.\\d+\\.(?:19|20)\\d{2}(?:\\.[${PL_UP}]{2,3})?(?!\\d)`, 'g'),
     maskConst(ctx, 'ZNAK-SPRAWY'),
   );
   // (b) Z KONTEKSTEM („Znak sprawy:", „Sygn. akt", „Znak:") — słowo zostaje, maskujemy sam znak.
@@ -1480,8 +1525,10 @@ function passDriverLicense(ctx: RedactCtx): void {
 // 9e) NR REJESTRACYJNY (tablica) — z kontekstem oraz z kotwicą pojazdową i wyliczeniem.
 function passPlate(ctx: RedactCtx): void {
   if (!ctx.on('NR-REJESTRACYJNY')) return;
+  // Wypełniacze po kotwicy ograniczone do {0,3}: przy „*" ciąg „rejestracyjny rejestracyjny …"
+  // był od każdego słowa pochłaniany do końca (czas kwadratowy, ~7 s na 100 tys. znaków).
   ctx.text = ctx.text.replace(
-    /\b((?:nr\s+rej\w*|numer\s+rej\w*|rejestracyjn\w*|tablic\w*)(?:\s+(?:nr\.?|numer|pojazdu|rej\w*))*[\s:=.-]*)((?=[A-Z0-9\s-]{0,5}\d)[A-Z]{2,3}[\s-]?[A-Z0-9]{4,5})\b/gi,
+    /\b((?:nr\s+rej\w*|numer\s+rej\w*|rejestracyjn\w*|tablic\w*)(?:\s+(?:nr\.?|numer|pojazdu|rej\w*)){0,3}[\s:=.-]*)((?=[A-Z0-9\s-]{0,5}\d)[A-Z]{2,3}[\s-]?[A-Z0-9]{4,5})\b/gi,
     (_m, pre: string) => {
       ctx.bump('NR-REJESTRACYJNY');
       return `${pre}${ctx.M['NR-REJESTRACYJNY']}`;
@@ -1623,7 +1670,7 @@ function passCity(ctx: RedactCtx): void {
   const TERYT_UNIT =
     `\\([ \\t]*(?:[Mm]iasto(?:[ \\t]+na[ \\t]+prawach[ \\t]+powiatu)?|[Gg]mina(?:[ \\t]+(?:miejska|wiejska|miejsko-wiejska))?|[Ww]ieś|[Oo]sada)[ \\t]*\\)`;
   ctx.text = ctx.text.replace(
-    new RegExp(`(?:(${CAP_CITY})[ \\t]+)?(${CAP_CITY})([ \\t]*${TERYT_UNIT})`, 'g'),
+    new RegExp(`${CITY_START}(?:(${CAP_CITY})[ \\t]+)?(${CAP_CITY})([ \\t]*${TERYT_UNIT})`, 'g'),
     (m, pre: string | undefined, city: string, tag: string) => {
       const cl = city.toLowerCase();
       // ostatni wyraz przed etykietą musi wyglądać na miejscowość, nie na człon nazwy instytucji/roli
@@ -1637,7 +1684,7 @@ function passCity(ctx: RedactCtx): void {
   // 12d) MIEJSCOWOŚĆ przed adresem BEZ kodu pocztowego — „Warszawa, ul. …".
   const ADR = escapeRe(ctx.M.ADRES);
   ctx.text = ctx.text.replace(
-    new RegExp(`((?:${CAP_CITY}[ \\t]+){0,2}${CAP_CITY})([ \\t]*,?[ \\t]+)(${ADR}|ul\\.|al\\.|os\\.|pl\\.)`, 'g'),
+    new RegExp(`${CITY_START}((?:${CAP_CITY}[ \\t]+){0,2}${CAP_CITY})([ \\t]*,?[ \\t]+)(${ADR}|ul\\.|al\\.|os\\.|pl\\.)`, 'g'),
     (m, capRun: string, sep: string, anchor: string) => {
       const r = cityBySuffix(ctx, capRun.split(/\s+/));
       return r ? `${r.prefix ? r.prefix + ' ' : ''}${ctx.M.MIEJSCOWOSC}${sep}${anchor}` : m;
