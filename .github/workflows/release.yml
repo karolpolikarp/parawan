@@ -25,6 +25,9 @@ jobs:
       # Warstwa AI (rzadkie/obce nazwiska) żyje osobno: github.com/karolpolikarp/anonimizator-ai
       - name: Zbuduj aplikację (samowystarczalny HTML)
         run: npm run build -w anonimizator-web
+      # Ten sam strażnik CSP co w ci.yml: wydany plik musi blokować połączenia sieciowe.
+      - name: Strażnik CSP
+        run: grep -q "connect-src 'none'" apps/web/dist/index.html && grep -q "default-src 'none'" apps/web/dist/index.html
       - name: Przygotuj artefakt (plik + instrukcja)
         run: |
           cp apps/web/dist/index.html Parawan.html
@@ -39,6 +42,10 @@ jobs:
 
           Wszystko dzieje się na Twoim komputerze. Aplikacja nie łączy się
           z internetem, możesz wyłączyć Wi-Fi i sprawdzić.
+
+          Dla działu IT: na początku pliku stoi polityka Content-Security-Policy
+          (default-src 'none', connect-src 'none'), więc przeglądarka blokuje
+          zapytania sieciowe ze skryptów i wczytywanie czegokolwiek spoza pliku.
 
           Uwaga: automat bywa niepełny (zwłaszcza rzadkie nazwiska), zawsze przejrzyj
           wynik, zanim go komuś wyślesz.

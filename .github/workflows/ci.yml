@@ -28,6 +28,17 @@ jobs:
       # żeby strona marketingowa nie zgniła przy zmianach w rdzeniu/silniku (live demo importuje redactPII).
       - run: npx tsc -p apps/landing/tsconfig.json
       - run: npm run build -w parawan-landing
+      # Strażnik CSP: oba gotowe pliki muszą nieść politykę z default-src i connect-src 'none'
+      # (wstrzykuje ją plugin parawan-csp w vite.config.ts). Bez niej obietnicy „tekst nie
+      # opuszcza przeglądarki” pilnowałby tylko nasz kod, a nie przeglądarka.
+      - name: Strażnik CSP (web i landing)
+        run: |
+          for f in apps/web/dist/index.html apps/landing/dist/index.html; do
+            grep -q 'http-equiv="Content-Security-Policy"' "$f" \
+              && grep -q "default-src 'none'" "$f" \
+              && grep -q "connect-src 'none'" "$f" \
+              || { echo "::error file=$f::brak Content-Security-Policy z default-src 'none' i connect-src 'none'"; exit 1; }
+          done
       # Bramka regresji detekcji na warstwie deterministycznej (bez modelu ONNX — warstwy NER
       # pominięte fail-safe). Fail przy spadku recall na kategoriach osobowych/strukturalnych
       # lub precyzji poniżej progu. Nie commituje raportu — tylko sprawdza progi.
