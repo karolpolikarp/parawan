@@ -169,7 +169,7 @@
         </div>
         <div class="demo-foot">
           <i class="gi" data-i="suma"></i>
-          <span class="demo-stat" id="demo-stat">Wpisz tekst po lewej, tu pojawią się statystyki.</span>
+          <span class="demo-stat" id="demo-stat" role="status">Wpisz tekst po lewej, tu pojawią się statystyki.</span>
           <span class="demo-sp"></span>
           <span>Analiza działa na bieżąco, podczas pisania.</span>
         </div>
@@ -365,26 +365,26 @@
     <section class="section wrap" aria-label="Porównanie">
       <div class="sec-head center">
         <span class="kicker">Dlaczego lokalnie</span>
-        <h2>Parawan, narzędzie w chmurze czy ręczne czyszczenie?</h2>
+        <h2 id="porownanie-h">Parawan, narzędzie w chmurze czy ręczne czyszczenie?</h2>
       </div>
       <div class="table-wrap">
-        <table>
+        <table aria-labelledby="porownanie-h">
           <thead>
             <tr>
-              <th>Kryterium</th>
-              <th class="center col-parawan">Parawan</th>
-              <th class="center">Narzędzie w chmurze</th>
-              <th class="center">Ręczne czyszczenie</th>
+              <th scope="col">Kryterium</th>
+              <th scope="col" class="center col-parawan">Parawan</th>
+              <th scope="col" class="center">Narzędzie w chmurze</th>
+              <th scope="col" class="center">Ręczne czyszczenie</th>
             </tr>
           </thead>
           <tbody>
-            <tr><td class="cmp-feat">Dane opuszczają urządzenie</td><td class="center col-parawan"><span class="yes">nigdy</span></td><td class="center"><span class="no">tak</span></td><td class="center"><span class="yes">nie</span></td></tr>
-            <tr><td class="cmp-feat">Wymaga konta / logowania</td><td class="center col-parawan"><span class="yes">nie</span></td><td class="center"><span class="no">zwykle tak</span></td><td class="center"><span class="yes">nie</span></td></tr>
-            <tr><td class="cmp-feat">Działa offline</td><td class="center col-parawan"><span class="yes">tak</span></td><td class="center"><span class="no">nie</span></td><td class="center"><span class="yes">tak</span></td></tr>
-            <tr><td class="cmp-feat">Ryzyko wycieku / RODO</td><td class="center col-parawan"><span class="yes">minimalne</span></td><td class="center"><span class="mid">podwyższone</span></td><td class="center"><span class="mid">błędy ludzkie</span></td></tr>
-            <tr><td class="cmp-feat">Szybkość dla długich pism</td><td class="center col-parawan"><span class="yes">natychmiast</span></td><td class="center"><span class="mid">zależy od sieci</span></td><td class="center"><span class="no">wolno</span></td></tr>
-            <tr><td class="cmp-feat">Przechodzi przez blokady IT</td><td class="center col-parawan"><span class="yes">tak</span></td><td class="center"><span class="no">często blokowane</span></td><td class="center"><span class="yes">tak</span></td></tr>
-            <tr><td class="cmp-feat">Koszt</td><td class="center col-parawan"><span class="yes">darmowy</span></td><td class="center"><span class="mid">często płatny</span></td><td class="center"><span class="yes">darmowy</span></td></tr>
+            <tr><th scope="row" class="cmp-feat">Dane opuszczają urządzenie</th><td class="center col-parawan"><span class="yes">nigdy</span></td><td class="center"><span class="no">tak</span></td><td class="center"><span class="yes">nie</span></td></tr>
+            <tr><th scope="row" class="cmp-feat">Wymaga konta / logowania</th><td class="center col-parawan"><span class="yes">nie</span></td><td class="center"><span class="no">zwykle tak</span></td><td class="center"><span class="yes">nie</span></td></tr>
+            <tr><th scope="row" class="cmp-feat">Działa offline</th><td class="center col-parawan"><span class="yes">tak</span></td><td class="center"><span class="no">nie</span></td><td class="center"><span class="yes">tak</span></td></tr>
+            <tr><th scope="row" class="cmp-feat">Ryzyko wycieku / RODO</th><td class="center col-parawan"><span class="yes">minimalne</span></td><td class="center"><span class="mid">podwyższone</span></td><td class="center"><span class="mid">błędy ludzkie</span></td></tr>
+            <tr><th scope="row" class="cmp-feat">Szybkość dla długich pism</th><td class="center col-parawan"><span class="yes">natychmiast</span></td><td class="center"><span class="mid">zależy od sieci</span></td><td class="center"><span class="no">wolno</span></td></tr>
+            <tr><th scope="row" class="cmp-feat">Przechodzi przez blokady IT</th><td class="center col-parawan"><span class="yes">tak</span></td><td class="center"><span class="no">często blokowane</span></td><td class="center"><span class="yes">tak</span></td></tr>
+            <tr><th scope="row" class="cmp-feat">Koszt</th><td class="center col-parawan"><span class="yes">darmowy</span></td><td class="center"><span class="mid">często płatny</span></td><td class="center"><span class="yes">darmowy</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -511,7 +511,7 @@
             <p>„Dane za parawanem” — lokalny anonimizator polskich danych osobowych. Wszystko dzieje się na Twoim komputerze.</p>
           </div>
           <div class="foot-col">
-            <h4>Produkt</h4>
+            <h3>Produkt</h3>
             <a href="https://github.com/karolpolikarp/parawan/releases/latest/download/Parawan.html" target="_blank" rel="noopener noreferrer">Pobierz Parawan.html</a>
             <a href="https://github.com/karolpolikarp/parawan/releases/latest" target="_blank" rel="noopener noreferrer">Wszystkie wydania</a>
             <a href="#demo">Demo na żywo</a>
@@ -519,14 +519,14 @@
             <a href="#faq">FAQ</a>
           </div>
           <div class="foot-col">
-            <h4>Kod</h4>
+            <h3>Kod</h3>
             <a href="https://github.com/karolpolikarp/parawan" target="_blank" rel="noopener noreferrer">GitHub — parawan</a>
             <a href="https://www.npmjs.com/package/anonimizator" target="_blank" rel="noopener noreferrer">npm: <code>anonimizator</code> + CLI</a>
             <a href="https://github.com/karolpolikarp/anonimizator-ai" target="_blank" rel="noopener noreferrer">Rozszerzenie AI (osobne)</a>
             <a href="https://github.com/karolpolikarp/parawan/issues" target="_blank" rel="noopener noreferrer">Zgłoś nietrafione wykrycie</a>
           </div>
           <div class="foot-col">
-            <h4>Autor</h4>
+            <h3>Autor</h3>
             <a href="https://karolwilczynski.com" target="_blank" rel="noopener noreferrer">karolwilczynski.com ↗</a>
           </div>
         </div>

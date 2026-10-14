@@ -16,6 +16,7 @@ import { buildMinimalPdf } from './pdf-fixture';
 import { plural } from './plural';
 import { storageGet, storageSet } from './storage';
 import './style.css';
+import { initTips, tipDescId } from './tips';
 
 // Ikony — inline SVG (jedno źródło prawdy, kolor z currentColor). Zero rastrów.
 import { icon, hydrateIcons } from './icons';
@@ -59,6 +60,7 @@ let lastInput = '';
 let viewMode: 'result' | 'compare' = 'result';
 let maskEls: HTMLElement[] = []; // znaczniki w wyniku, w kolejności dokumentu
 let maskIdx = -1; // bieżący znacznik w przeglądaniu (-1 = żaden)
+let maskTabStop: HTMLElement | null = null; // jedyny znacznik w kolejności Tab (roving tabindex)
 
 /* ── JEDNO źródło prawdy o typach PII — z niego wyprowadzamy legendę, znaczniki, chipy
    i przełączniki (jedna rodzina kolorów i ikon w całej aplikacji). Klucz = TOKEN w [...]. ── */
@@ -463,8 +465,10 @@ const MASK_TOKEN_RE = new RegExp(
   'g',
 );
 
+// tabindex="-1": znaczniki nie są osobnymi przystankami Tab (przy długim piśmie były ich setki).
+// Do kolejności Tab wchodzi tylko bieżący znacznik (roving tabindex: refreshMaskNav, goToMask).
 function maskHtml(name: string): string {
-  return `<mark class="pii pii-${maskCategory(name)}" data-tip="${escapeHtml(maskTip(name))}" tabindex="0">[${name}]</mark>`;
+  return `<mark class="pii pii-${maskCategory(name)}" data-tip="${escapeHtml(maskTip(name))}" tabindex="-1">[${name}]</mark>`;
 }
 
 /** Owiń HTML w numerowane linie edytora (.cl / .no). */
@@ -473,7 +477,7 @@ function wrapLines(html: string): string {
     .split('\n')
     .map(
       (line, i) =>
-        `<div class="cl"><span class="no">${i + 1}</span><span>${line || '&nbsp;'}</span></div>`,
+        `<div class="cl"><span class="no" aria-hidden="true">${i + 1}</span><span>${line || '&nbsp;'}</span></div>`,
     )
     .join('');
 }
@@ -571,6 +575,7 @@ function goToMask(i: number, scroll = true): void {
   maskIdx = ((i % n) + n) % n; // zawijanie na końcach
   for (const el of maskEls) el.classList.remove('pii-active', 'pii-linked');
   const el = maskEls[maskIdx];
+  setMaskTabStop(el); // bieżący znacznik jest jedynym przystankiem Tab w wyniku
   el.classList.add('pii-active');
   const label = personLabel(el); // ta sama osoba → podświetl powiązane wystąpienia
   if (label) for (const o of maskEls) if (o !== el && o.textContent === label) o.classList.add('pii-linked');
@@ -579,17 +584,33 @@ function goToMask(i: number, scroll = true): void {
     const or = output.getBoundingClientRect();
     output.scrollTop += er.top - or.top - (output.clientHeight - er.height) / 2;
   }
-  // NIE fokusujemy znacznika — inaczej sam „powód" (tooltip) wyskakiwałby przy każdym przejściu.
-  // Bieżący znacznik wskazuje pierścień; powód pokazuje się po NAJECHANIU. Czytnik ekranu dostaje
-  // zwięzły komunikat przez #mask-status (aria-live).
-  maskStatus.textContent = `Fragment ${maskIdx + 1} z ${n}: ${el.textContent}.`;
+  // Fokus idzie za bieżącym znacznikiem tylko wtedy, gdy już stał na znaczniku (strzałki na
+  // znaczniku). Z ‹ › ani z pola wyniku go nie przenosimy, inaczej dymek z powodem wyskakiwałby
+  // przy każdym przejściu. Bieżący znacznik wskazuje pierścień.
+  const ae = document.activeElement;
+  if (ae !== el && ae instanceof HTMLElement && ae.matches('mark.pii') && output.contains(ae)) {
+    el.focus({ preventScroll: true });
+  }
+  // Komunikat dla czytnika ekranu (aria-live) z powodem wykrycia. Na dotyku, gdzie dymek
+  // znacznika zasłaniał wynik, ta sama linia jest widoczna pod wynikiem (style.css).
+  maskStatus.textContent = `Fragment ${maskIdx + 1} z ${n}: ${el.textContent} · ${el.dataset.tip ?? ''}`;
   updateMaskCount();
+}
+
+/** Przenieś jedyny przystanek Tab w wyniku na znacznik `el` (roving tabindex). */
+function setMaskTabStop(el: HTMLElement | null): void {
+  if (maskTabStop && maskTabStop !== el) maskTabStop.tabIndex = -1;
+  maskTabStop = el;
+  if (el) el.tabIndex = 0;
 }
 
 /** Po każdym renderze wyniku: zbierz znaczniki, wyzeruj przegląd, pokaż/ukryj nawigację. */
 function refreshMaskNav(): void {
   maskEls = [...output.querySelectorAll<HTMLElement>('mark.pii')];
   maskIdx = -1;
+  maskTabStop = null; // poprzedni wynik zniknął z DOM razem ze swoim znacznikiem
+  setMaskTabStop(maskEls[0] ?? null); // Tab wchodzi do wyniku na pierwszym znaczniku
+  maskStatus.textContent = ''; // stary „Fragment N z M” nie dotyczy nowego wyniku
   maskNav.hidden = maskEls.length === 0;
   updateMaskCount();
 }
@@ -644,14 +665,25 @@ const grips: HTMLElement[] = [];
 const maxEdH = (): number => Math.max(MIN_ED_H, window.innerHeight - 140);
 const clampEdH = (px: number): number => Math.max(MIN_ED_H, Math.min(Math.round(px), maxEdH()));
 
+/** Wartość separatora dla czytnika ekranu: bieżąca wysokość i zakres. Bez aria-valuemax
+    domyślne maksimum to 100, mniej niż wartość, więc czytnik podawał błędny procent. */
+function syncGripAria(h: number = input.offsetHeight): void {
+  const max = String(Math.max(maxEdH(), h));
+  const text = `${h} ${plural(h, 'piksel', 'piksele', 'pikseli')}`;
+  for (const g of grips) {
+    g.setAttribute('aria-valuemax', max);
+    g.setAttribute('aria-valuenow', String(h));
+    g.setAttribute('aria-valuetext', text);
+  }
+}
 function applyEditorHeight(px: number): void {
   const h = clampEdH(px);
   document.documentElement.style.setProperty('--ed-h', `${h}px`);
-  for (const g of grips) g.setAttribute('aria-valuenow', String(h));
+  syncGripAria(h);
 }
 function resetEditorHeight(): void {
   document.documentElement.style.removeProperty('--ed-h');
-  for (const g of grips) g.setAttribute('aria-valuenow', String(input.offsetHeight));
+  syncGripAria();
 }
 
 function makeGrip(): HTMLElement {
@@ -710,7 +742,11 @@ const outputGrip = makeGrip();
 grips.push(inputGrip, outputGrip);
 input.parentElement?.append(inputGrip); // .card-b okna źródła
 output.parentElement?.append(outputGrip); // .card-b okna wyniku
-for (const g of grips) g.setAttribute('aria-valuenow', String(input.offsetHeight));
+// Oba uchwyty sterują tą samą wysokością, więc z klawiatury wystarczy jeden przystanek Tab.
+// Drugi zostaje dla myszy i dotyku.
+outputGrip.tabIndex = -1;
+syncGripAria();
+window.addEventListener('resize', () => syncGripAria());
 
 /* ── Pasek „Zamaskowano" (chipy z ikonami, licznik, kategorie) ── */
 
@@ -743,6 +779,8 @@ const CHIP_META: Record<string, { label: string; cat: Cat; icon: string }> = Obj
     return [type, { label, cat: meta.cat, icon: meta.icon }];
   }),
 );
+
+const CHIP_NAV_TIP = 'Przejdź do kolejnego fragmentu tego typu w wyniku';
 
 function renderFindings(found: PiiFinding[]): void {
   findingsCard.hidden = false;
@@ -790,7 +828,7 @@ function renderFindings(found: PiiFinding[]): void {
         const body = `<i class="gi">${icon(v.icon)}</i>${escapeHtml(label)} <span class="x">×${v.count}</span>`;
         return nav
           ? `<button type="button" class="chip chip-nav ch-${v.cat}" data-token="${escapeHtml(v.token)}" ` +
-              `data-tip="Przejdź do kolejnego fragmentu tego typu w wyniku">${body}</button>`
+              `data-tip="${CHIP_NAV_TIP}" aria-describedby="${tipDescId(CHIP_NAV_TIP)}">${body}</button>`
           : `<span class="chip ch-${v.cat}">${body}</span>`;
       })
       .join(' ') + keptChip;
@@ -876,6 +914,8 @@ function update(): void {
     keptMasks = 0;
     maskEls = [];
     maskIdx = -1;
+    maskTabStop = null;
+    maskStatus.textContent = '';
     maskNav.hidden = true; // placeholder zawiera przykładowe znaczniki — nie nawigujemy po nich
     viewCompareBtn.disabled = false;
     syncOutputHint();
@@ -1278,13 +1318,10 @@ $('app-version-top').textContent = __APP_VERSION__;
 // Podmień wszystkie statyczne <i class="gi" data-i="…"> z index.html na inline SVG.
 hydrateIcons();
 
-// Dostępność: treść podpowiedzi żyje tylko w CSS ::after (niewidoczna dla czytników ekranu).
-// Nadaj statycznym elementom [data-tip] bez własnej nazwy aria-label = treść podpowiedzi.
-document.querySelectorAll<HTMLElement>('[data-tip]').forEach((el) => {
-  if (!el.getAttribute('aria-label') && !el.getAttribute('aria-labelledby') && el.dataset.tip) {
-    el.setAttribute('aria-label', el.dataset.tip);
-    if (el.classList.contains('help')) el.setAttribute('role', 'note');
-  }
-});
+// Na dotyku nie ma skrótu klawiszowego, więc dymek „Kopiuj” o nim nie wspomina.
+if (!finePointer.matches) copyBtn.dataset.tip = 'Kopiuje zanonimizowany tekst do schowka';
+
+// Dymki: opisy dla czytników ekranu, „?” w summary, Esc i dociskanie do krawędzi (tips.ts).
+initTips();
 
 update();

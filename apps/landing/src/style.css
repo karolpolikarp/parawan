@@ -295,7 +295,9 @@ p { text-wrap: pretty; }
   white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;
 }
 textarea.editor { resize: vertical; }
-textarea.editor:focus-visible { outline: none; border-color: var(--acc-line); box-shadow: 0 0 0 3px var(--acc-soft); }
+/* pełny obrys jak przy innych kontrolkach (sam cień --acc-soft był niewidoczny); promień
+   podany jawnie, bo ogólne :focus-visible ustawia 4 px */
+textarea.editor:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; border-radius: var(--r-ctl); }
 #demo-output { overflow-y: auto; max-height: 420px; }
 #demo-output .placeholder { color: var(--mut-2); }
 
@@ -371,7 +373,7 @@ textarea.editor:focus-visible { outline: none; border-color: var(--acc-line); bo
 table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
 th, td { text-align: left; padding: 14px 18px; border-bottom: 1px solid var(--line); vertical-align: middle; }
 thead th { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--mut-2); background: var(--card-2); }
-tbody tr:last-child td { border-bottom: none; }
+tbody tr:last-child > * { border-bottom: none; }
 td.center, th.center { text-align: center; }
 .yes { color: var(--fin); font-weight: 800; }
 .no { color: var(--err); font-weight: 800; }
@@ -432,7 +434,7 @@ p.bench-note { font-size: 12.5px; color: var(--mut-2); margin-top: 10px; line-he
 .faq details { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-ctl); box-shadow: var(--shadow); overflow: hidden; }
 .faq summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 14px; padding: 18px 20px; font-size: 16px; font-weight: 700; color: var(--acc); }
 .faq summary::-webkit-details-marker { display: none; }
-.faq summary::after { content: "+"; margin-left: auto; font-size: 22px; font-weight: 400; color: var(--mut); transition: transform .18s ease; }
+.faq summary::after { content: "+"; content: "+" / ""; margin-left: auto; font-size: 22px; font-weight: 400; color: var(--mut); transition: transform .18s ease; }
 .faq details[open] summary::after { transform: rotate(45deg); }
 .faq summary:hover { background: rgba(11,61,46,.02); }
 .faq .faq-b { padding: 0 20px 20px; font-size: 14.5px; color: var(--mut-2); line-height: 1.65; }
@@ -461,7 +463,7 @@ p.bench-note { font-size: 12.5px; color: var(--mut-2); margin-top: 10px; line-he
 .foot-brand { max-width: 340px; }
 .foot-brand .nav-brand { margin-bottom: 12px; }
 .foot-brand p { font-size: 13.5px; color: var(--mut-2); }
-.foot-col h4 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--mut-2); margin-bottom: 12px; }
+.foot-col h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--mut-2); margin-bottom: 12px; }
 .foot-col a, .foot-col span { display: block; font-size: 14px; color: var(--mut-2); margin-bottom: 8px; }
 .foot-col a:hover { color: var(--acc); }
 .foot-legal { margin-top: 34px; padding-top: 22px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--mut-2); display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: space-between; }

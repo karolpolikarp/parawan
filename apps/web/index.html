@@ -48,13 +48,13 @@
             <li data-tip="Działa bez internetu, możesz rozłączyć sieć i sprawdzić" tabindex="0">100% offline</li>
             <li data-tip="Tekst nie opuszcza przeglądarki, zero wysyłania na serwery" tabindex="0">bezpieczne</li>
             <li data-tip="Kod otwarty na licencji Apache 2.0, możesz go samodzielnie zweryfikować" tabindex="0">open source</li>
-            <li class="feat-solid" data-tip="Wyłącznie reguły, słowniki i sumy kontrolne: zero modeli AI, wyniki przewidywalne" tabindex="0">reguły + sumy kontrolne</li>
+            <li class="feat-solid" data-tip-pos="left" data-tip="Wyłącznie reguły, słowniki i sumy kontrolne: zero modeli AI, wyniki przewidywalne" tabindex="0">reguły + sumy kontrolne</li>
           </ul>
         </div>
       </header>
 
       <!-- ══════════ KROKI 1–4 ══════════ -->
-      <section class="card step g3" aria-label="Krok 1">
+      <section class="card step g3">
         <div class="step-h">
           <span class="ic ic-s" data-tip="Obsługiwane formaty: TXT, MD, CSV, LOG, DOCX, PDF" tabindex="0"><i class="gi" data-i="plik-txt"></i></span>
           <span class="kick">Krok 1</span>
@@ -63,7 +63,7 @@
         <p class="step-d">lub upuść plik (TXT, DOCX, PDF) w dowolnym miejscu strony</p>
       </section>
 
-      <section class="card step g3" aria-label="Krok 2">
+      <section class="card step g3">
         <div class="step-h">
           <span class="ic ic-s" data-tip="Analiza działa na bieżąco, podczas pisania" tabindex="0"><i class="gi" data-i="sprawdz"></i></span>
           <span class="kick">Krok 2</span>
@@ -72,7 +72,7 @@
         <p class="step-d" id="step2-sub">reguły, słowniki i sumy kontrolne, bez AI</p>
       </section>
 
-      <section class="card step g3" aria-label="Krok 3">
+      <section class="card step g3">
         <div class="step-h">
           <span class="ic ic-s" data-tip="Każda kategoria danych ma swój kolor znacznika" tabindex="0"><i class="gi" data-i="maskowanie"></i></span>
           <span class="kick">Krok 3</span>
@@ -81,7 +81,7 @@
         <p class="step-d">kolorowe znaczniki zamiast danych osobowych</p>
       </section>
 
-      <section class="card step g3" aria-label="Krok 4">
+      <section class="card step g3">
         <div class="step-h">
           <span class="ic ic-s" data-tip="Skrót Ctrl+Enter kopiuje wynik do schowka" tabindex="0"><i class="gi" data-i="walidacja"></i></span>
           <span class="kick">Krok 4</span>
@@ -125,6 +125,9 @@
         </div>
       </section>
 
+      <!-- ══════════ NARZĘDZIE (landmark main; display:contents, karty zostają w siatce) ══════════ -->
+      <main class="grid-main">
+
       <!-- ══════════ LEGENDA KATEGORII ══════════ -->
       <section class="card legend g12" aria-label="Legenda kategorii danych">
         <div class="card-h">
@@ -150,7 +153,7 @@
       </section>
 
       <!-- ══════════ TEKST ŹRÓDŁOWY ══════════ -->
-      <section class="card g6" aria-label="Tekst źródłowy">
+      <section class="card g6">
         <div class="card-h">
           <span class="ic"><i class="gi" data-i="szablon"></i></span>
           <div class="card-t"><h2>Tekst źródłowy</h2><p>analiza na bieżąco, podczas pisania</p></div>
@@ -194,7 +197,7 @@
       </section>
 
       <!-- ══════════ WYNIK ══════════ -->
-      <section class="card g6" aria-label="Wynik zanonimizowany">
+      <section class="card g6">
         <div class="card-h">
           <span class="ic"><i class="gi" data-i="podglad"></i></span>
           <div class="card-t"><h2 id="output-label">Wynik zanonimizowany</h2><p id="output-hint">kliknij znacznik albo przechodź strzałkami ‹ ›</p></div>
@@ -208,7 +211,7 @@
           </span>
           <span class="mask-nav" id="mask-nav" role="group" aria-label="Przeglądanie zamaskowanych fragmentów" hidden>
             <button type="button" class="nav-btn" id="mask-prev" data-tip="Poprzedni zamaskowany fragment · ↑" aria-label="Poprzedni zamaskowany fragment">‹</button>
-            <span class="nav-count" id="mask-count" aria-live="polite" data-tip="Przeglądaj po kolei · klik w znacznik też przenosi">0 / 0</span>
+            <span class="nav-count" id="mask-count" data-tip="Przeglądaj po kolei · klik w znacznik też przenosi">0 / 0</span>
             <button type="button" class="nav-btn" id="mask-next" data-tip="Następny zamaskowany fragment · ↓" aria-label="Następny zamaskowany fragment">›</button>
           </span>
           <span class="card-sp"></span>
@@ -250,12 +253,12 @@
 
       <!-- ══════════ CO MASKOWAĆ ══════════ -->
       <details class="card g12" id="co-maskowac" open>
-        <summary class="card-h">
+        <summary class="card-h" aria-labelledby="co-maskowac-h" aria-describedby="co-maskowac-d">
           <span class="ic"><i class="gi" data-i="suwaki"></i></span>
-          <div class="card-t"><h2>Co maskować</h2><p>domyślnie wszystko, odznaczone typy zostaną widoczne w wyniku</p></div>
+          <div class="card-t"><h2 id="co-maskowac-h">Co maskować</h2><p id="co-maskowac-d">domyślnie wszystko, odznaczone typy zostaną widoczne w wyniku</p></div>
           <span class="card-sp"></span>
           <span class="help" data-tip="Zmiany działają natychmiast, wynik przelicza się na bieżąco" data-tip-pos="left" tabindex="0">?</span>
-          <span class="chev">▸</span>
+          <span class="chev" aria-hidden="true">▸</span>
         </summary>
         <div class="card-b">
           <div class="mask-toolbar" role="group" aria-label="Akcje zbiorcze">
@@ -275,12 +278,12 @@
 
       <!-- ══════════ CO WYKRYWA ══════════ -->
       <details class="card g12" id="co-wykrywa">
-        <summary class="card-h">
+        <summary class="card-h" aria-labelledby="co-wykrywa-h" aria-describedby="co-wykrywa-d">
           <span class="ic"><i class="gi" data-i="sprawdz"></i></span>
-          <div class="card-t"><h2>Co wykrywa <span class="tag-opt">szczegóły</span></h2><p>ponad 20 typów danych w 5 kategoriach; każdy z walidacją lub kontekstem</p></div>
+          <div class="card-t"><h2 id="co-wykrywa-h">Co wykrywa <span class="tag-opt">szczegóły</span></h2><p id="co-wykrywa-d">ponad 20 typów danych w 5 kategoriach; każdy z walidacją lub kontekstem</p></div>
           <span class="card-sp"></span>
           <span class="help" data-tip="Suma kontrolna odróżnia prawdziwy numer od przypadkowego ciągu cyfr, stąd mało fałszywych trafień" data-tip-pos="left" tabindex="0">?</span>
-          <span class="chev">▸</span>
+          <span class="chev" aria-hidden="true">▸</span>
         </summary>
         <div class="card-b table-wrap" role="region" tabindex="0" aria-label="Co wykrywa, tabela">
           <table>
@@ -339,6 +342,8 @@
           </ul>
         </div>
       </section>
+
+      </main>
 
       <!-- ══════════ STOPKA ══════════ -->
       <footer class="card foot g12">
