@@ -199,13 +199,24 @@ w osobnym repozytorium: [**anonimizator-ai**](https://github.com/karolpolikarp/a
 
 <br>
 
-Silnik to pakiet npm `anonimizator` (nazwa techniczna pakietu; marka produktu to **Parawan**).
-Zero zależności, działa w Node, Deno, Bun i przeglądarce.
+Silnik to pakiet `anonimizator` w katalogu [`packages/core`](./packages/core) (nazwa techniczna
+pakietu; marka produktu to **Parawan**). Zero zależności, działa w Node, Deno, Bun i przeglądarce.
+
+Pakietu nie ma w rejestrze npm, więc instalujesz go z repozytorium:
+
+```bash
+git clone https://github.com/karolpolikarp/parawan.git
+cd parawan
+npm ci
+npm run build -w anonimizator      # rdzeń → packages/core/dist
+```
 
 ### Biblioteka
 
+We własnym projekcie podepnij zbudowany katalog (ścieżka względem projektu):
+
 ```bash
-npm install anonimizator
+npm install ../parawan/packages/core
 ```
 
 ```ts
@@ -238,11 +249,14 @@ Eksportowane są też walidatory sum kontrolnych: `isValidPesel`, `isValidNip`, 
 
 ### CLI
 
+Po zbudowaniu rdzenia uruchamiasz CLI z katalogu repozytorium. Poza nim nie wpisuj
+`npx anonimizator`: npx szukałby pakietu o tej nazwie w rejestrze npm.
+
 ```bash
-npx anonimizator dokument.txt                  # wynik na stdout, statystyki na stderr
-npx anonimizator dokument.txt --out czysty.txt
-type dokument.txt | npx anonimizator           # Windows
-cat  dokument.txt | npx anonimizator           # Linux/macOS
+node packages/core/bin/anonimizator.js dokument.txt                  # wynik na stdout, statystyki na stderr
+node packages/core/bin/anonimizator.js dokument.txt --out czysty.txt
+type dokument.txt | node packages/core/bin/anonimizator.js           # Windows
+cat  dokument.txt | node packages/core/bin/anonimizator.js           # Linux/macOS
 ```
 
 ### Uruchomienie z kodu
@@ -290,8 +304,9 @@ z RODO, zasada minimalizacji danych). Reguły i testy regresji pochodzą z realn
 **Parawan** is a local-first redactor for Polish PII: PESEL, NIP, REGON, IBAN and national ID numbers
 are validated against their checksums (very few false positives); e-mails, phones, addresses and
 person names are matched heuristically, **no AI, deterministic rules only**. Ships as a
-zero-dependency npm library + CLI (`anonimizator`) and a **single-file offline web app** (grab
-`Parawan.html` from Releases and just double-click it, nothing ever leaves your machine). An optional
+zero-dependency library + CLI (`packages/core`, not published to npm) and a **single-file offline
+web app** (grab `Parawan.html` from Releases and just double-click it, nothing ever leaves your
+machine). An optional
 local-only AI add-on for rare/foreign surnames lives in a separate repo:
 [anonimizator-ai](https://github.com/karolpolikarp/anonimizator-ai). Apache 2.0 licensed.
 

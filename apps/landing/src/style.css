@@ -125,7 +125,9 @@ p { text-wrap: pretty; }
 /* ============ UKŁAD ============ */
 .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
 .wrap-narrow { max-width: 820px; }
-.section { padding: 76px 0; }
+/* Sekcje mają tylko odstęp w pionie. Boczne 24 px daje .wrap: skrót „padding: 76px 0” zerował
+   je w każdej sekcji, więc poniżej 1168 px treść dotykała krawędzi ekranu. */
+.section { padding-block: 76px; }
 .section-tint { background: linear-gradient(180deg, rgba(11,61,46,.035), rgba(11,61,46,.015)); border-block: 1px solid var(--line); }
 
 .kicker {
@@ -176,10 +178,13 @@ p { text-wrap: pretty; }
 .nav-links a:hover { color: var(--acc); text-decoration: none; }
 .nav-cta { display: inline-flex; align-items: center; gap: 16px; }
 .nav-toggle { display: none; }
+.nav-links .nav-dl { display: none; } /* na desktopie „Pobierz plik” jest przyciskiem obok */
 
 /* ============ HERO ============ */
-.hero { padding: 64px 0 40px; }
-.hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 56px; align-items: center; }
+.hero { padding-block: 64px 40px; }
+/* minmax(0, …): kolumna nie rośnie do szerokości najdłuższego słowa ani przycisku (przy 320 px
+   tak właśnie wychodziła poza ekran i ucinała H1) */
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 56px; align-items: center; }
 .hero-eyebrow {
   display: inline-flex; align-items: center; gap: 9px;
   font-family: var(--mono); font-size: 11.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
@@ -255,8 +260,8 @@ p { text-wrap: pretty; }
   border-radius: var(--r-card); box-shadow: var(--shadow);
 }
 .grid { display: grid; gap: 20px; }
-.g-3 { grid-template-columns: repeat(3, 1fr); }
-.g-4 { grid-template-columns: repeat(4, 1fr); }
+.g-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.g-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 
 .ic {
   flex: none; display: grid; place-items: center;
@@ -338,7 +343,7 @@ textarea.editor:focus-visible { outline: 2px solid var(--acc); outline-offset: 2
 .pillar .ic { margin-bottom: 16px; }
 .pillar h3 { font-size: 18px; font-weight: 800; }
 .pillar p { font-size: 14.5px; color: var(--mut-2); margin-top: 9px; }
-.pillar .how { margin-top: 14px; font-family: var(--mono); font-size: 12.5px; color: var(--acc); background: var(--acc-soft); border: 1px solid var(--acc-line); border-radius: 8px; padding: 9px 11px; }
+.pillar .how { margin-top: 14px; font-family: var(--mono); font-size: 12.5px; color: var(--acc); background: var(--acc-soft); border: 1px solid var(--acc-line); border-radius: 8px; padding: 9px 11px; overflow-wrap: anywhere; } /* adres repozytorium łamie się (po „/” dzięki <wbr>) zamiast rozpychać kartę */
 .net-badge { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--fin); background: rgba(18,112,73,.08); border: 1px solid rgba(18,112,73,.30); border-radius: 999px; padding: 7px 14px; align-self: flex-start; }
 .net-badge b { font-weight: 800; font-variant-numeric: tabular-nums; }
 
@@ -398,7 +403,7 @@ th.col-parawan { color: var(--acc); background: rgba(11,61,46,.07); }
 
 /* „Czego NIE robi" */
 .notdo-grid { display: grid; gap: 14px; }
-.notdo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: stretch; }
+.notdo-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: stretch; }
 .notdo-cell { display: flex; gap: 12px; padding: 16px 18px; border-radius: var(--r-ctl); border: 1px solid var(--line); background: var(--card); font-size: 14.5px; }
 .notdo-cell .mk { flex: none; font-size: 17px; font-weight: 900; line-height: 1.5; }
 .notdo-cell.bad { border-color: rgba(192,57,47,.25); background: rgba(192,57,47,.04); }
@@ -408,7 +413,7 @@ th.col-parawan { color: var(--acc); background: rgba(11,61,46,.07); }
 .notdo-cell b { font-weight: 700; }
 
 /* ============ BLOK „BLOKADY FIRMOWE" / feature split ============ */
-.split { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: center; }
+.split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 44px; align-items: center; }
 .split h2 { font-size: clamp(24px, 3.6vw, 34px); font-weight: 900; letter-spacing: -.02em; line-height: 1.1; }
 .split p { font-size: 16px; color: var(--mut-2); margin-top: 16px; }
 .split ul { margin-top: 18px; display: flex; flex-direction: column; gap: 11px; list-style: none; }
@@ -418,7 +423,7 @@ th.col-parawan { color: var(--acc); background: rgba(11,61,46,.07); }
 
 /* panel benchmarku w sekcji „Transparentność" (selektory p.… wygrywają remis specyficzności z .split p) */
 .bench-title { font-size: 22px; font-weight: 900; letter-spacing: -.01em; }
-.bench-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 20px; }
+.bench-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 20px; }
 p.bench-desc { font-size: 13.5px; color: var(--mut-2); margin-top: 16px; line-height: 1.55; }
 p.bench-note { font-size: 12.5px; color: var(--mut-2); margin-top: 10px; line-height: 1.55; }
 .filebox { display: flex; align-items: center; gap: 14px; padding: 16px; border: 1px dashed var(--line-2); border-radius: var(--r-ctl); background: var(--well); }
@@ -522,25 +527,42 @@ p.bench-note { font-size: 12.5px; color: var(--mut-2); margin-top: 10px; line-he
 
 /* ============ RESPONSYWNOŚĆ ============ */
 @media (max-width: 900px) {
-  .hero-grid { grid-template-columns: 1fr; gap: 36px; }
+  .hero-grid { grid-template-columns: minmax(0, 1fr); gap: 36px; }
   .hero-visual { max-width: 460px; }
-  .split, .g-4, .g-3 { grid-template-columns: 1fr 1fr; }
+  .split, .g-4, .g-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .split { gap: 28px; }
   .nav-links { display: none; }
   .nav-links.open { display: flex; position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; align-items: flex-start; gap: 4px; padding: 12px 24px 18px; background: var(--bg); border-bottom: 1px solid var(--line); }
   .nav-links.open a { padding: 8px 0; width: 100%; }
-  .nav-toggle { display: inline-grid; place-items: center; width: 42px; height: 42px; margin-left: auto; border: 1px solid var(--line-2); border-radius: var(--r-ctl); background: var(--card); cursor: pointer; }
+  .nav-links.open .nav-dl { display: block; font-weight: 700; color: var(--gold-deep); }
+  /* linki są schowane, więc to .nav-cta (nie sam przycisk) dosuwamy do prawej krawędzi */
+  .nav-cta { margin-left: auto; }
+  .nav-toggle { display: inline-grid; place-items: center; width: 42px; height: 42px; border: 1px solid var(--line-2); border-radius: var(--r-ctl); background: var(--card); cursor: pointer; }
   .nav-toggle .gi { width: 22px; height: 22px; color: var(--acc); }
   .nav-cta .btn-nav-download { display: none; }
+  /* iOS powiększa stronę po dotknięciu pola z czcionką poniżej 16 px (jak w aplikacji).
+     Nie blokujemy powiększania przez maximum-scale=1, bo to łamie WCAG 1.4.4. */
+  .editor { font-size: 16px; }
 }
 @media (max-width: 620px) {
-  .section { padding: 54px 0; }
-  .hero { padding: 40px 0 28px; }
-  .demo-panes { grid-template-columns: 1fr; }
+  .section { padding-block: 54px; }
+  .hero { padding-block: 40px 28px; }
+  .demo-panes { grid-template-columns: minmax(0, 1fr); }
   .demo-pane + .demo-pane { border-left: none; border-top: 1px solid var(--line); }
-  .g-3, .g-4, .split, .notdo-row { grid-template-columns: 1fr; }
-  .bench-grid { grid-template-columns: 1fr; }
-  .hero-cta .btn { width: 100%; }
+  .g-3, .g-4, .split, .notdo-row { grid-template-columns: minmax(0, 1fr); }
+  .bench-grid { grid-template-columns: minmax(0, 1fr); }
+  /* długi napis „Pobierz Parawan — jeden plik HTML” zawija się zamiast wychodzić poza ekran */
+  .hero-cta .btn {
+    width: 100%; white-space: normal; text-align: center; line-height: 1.25;
+    height: auto; min-height: 54px; padding-block: 12px;
+  }
+  /* plakietka „zanonimizowano” schodzi pod tytuł, gdy obok brakuje miejsca */
+  .hd-head { flex-wrap: wrap; }
+  .hd-title { flex: 1 1 140px; }
+  .finalcta { padding: 44px 20px; }
+  /* kroki 1–2–3 w jednej kolumnie, wyrównane do lewej; blok jako całość stoi na środku.
+     Tekst kroku siedzi w <span>, więc nazwa pliku nie odrywa się jako osobna kolumna. */
+  .cta-steps { flex-direction: column; align-items: flex-start; gap: 10px; width: fit-content; max-width: 100%; margin-inline: auto; text-align: left; }
   .trust-item { min-width: 44%; }
   .caveat { flex-direction: column; gap: 12px; }
   .foot-grid { gap: 24px; }
@@ -551,6 +573,8 @@ p.bench-note { font-size: 12.5px; color: var(--mut-2); margin-top: 10px; line-he
   #demo-copy { flex: 1 1 auto; justify-content: center; }
 }
 @media (max-width: 400px) {
+  /* napis nad H1 mieści się w jednym wierszu pigułki także przy 320 px */
+  .hero-eyebrow { font-size: 10.5px; letter-spacing: .06em; padding-inline: 12px; }
   th, td { padding: 9px 5px; font-size: 12px; }
   thead th { font-size: 9.5px; letter-spacing: 0; }
 }

@@ -58,10 +58,12 @@
           <a href="#bezpieczenstwo">Bezpieczeństwo</a>
           <a href="#faq">FAQ</a>
           <a href="https://github.com/karolpolikarp/parawan" target="_blank" rel="noopener noreferrer">GitHub&nbsp;↗</a>
+          <!-- tylko w menu na telefonie: tam przycisk „Pobierz plik” z paska jest schowany -->
+          <a class="nav-dl" href="https://github.com/karolpolikarp/parawan/releases/latest/download/Parawan.html" target="_blank" rel="noopener noreferrer">Pobierz plik</a>
         </div>
         <div class="nav-cta">
           <a class="btn btn-cta btn-sm btn-nav-download" href="https://github.com/karolpolikarp/parawan/releases/latest/download/Parawan.html" target="_blank" rel="noopener noreferrer">Pobierz plik</a>
-          <button class="nav-toggle" id="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="nav-links"><i class="gi" data-i="suwaki"></i></button>
+          <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="nav-links"><i class="gi" data-i="menu"></i></button>
         </div>
       </div>
     </nav>
@@ -96,7 +98,7 @@
               <span class="hero-mark"><i class="gi" data-i="parawan-mark"></i></span>
               <div class="hd-title">
                 <b>Pismo · po anonimizacji</b>
-                <span>przykładowy wynik · Parawan <span id="ver">…</span></span>
+                <span>przykładowy wynik · <span class="nw">Parawan <span id="ver">…</span></span></span>
               </div>
               <span class="hd-badge"><i class="gi" data-i="walidacja"></i>zanonimizowano</span>
             </div>
@@ -127,7 +129,7 @@
         <div class="trust-item"><span class="trust-num gold">0</span><span class="trust-lbl">instalacji</span></div>
         <div class="trust-item"><span class="trust-num gold">0</span><span class="trust-lbl">kont i haseł</span></div>
         <div class="trust-item"><span class="trust-num">100%</span><span class="trust-lbl">lokalnie / offline</span></div>
-        <div class="trust-item"><span class="trust-num">23</span><span class="trust-lbl">typy danych</span></div>
+        <div class="trust-item"><span class="trust-num">24</span><span class="trust-lbl">typy danych</span></div>
         <div class="trust-item"><span class="trust-num">Apache&nbsp;2.0</span><span class="trust-lbl">open source</span></div>
       </div>
     </section>
@@ -241,8 +243,8 @@
         <div class="card pillar">
           <span class="ic c-person"><i class="gi" data-i="szablon"></i></span>
           <h3>3. Przeczytaj kod</h3>
-          <p>Cały kod jest jawny na GitHubie (Apache 2.0). Jeden plik, możesz go przeczytać w całości. Żadnego ukrytego serwera, żadnych tajemnic.</p>
-          <span class="how"><a href="https://github.com/karolpolikarp/parawan" target="_blank" rel="noopener noreferrer">github.com/karolpolikarp/parawan ↗</a></span>
+          <p>Cały kod jest jawny na GitHubie (Apache 2.0). Całą logikę wykrywania znajdziesz w jednym katalogu (<code>packages/core</code>). Parawan.html powstaje z tego kodu automatycznie, więc możesz zbudować go sam. Żadnego ukrytego serwera, żadnych tajemnic.</p>
+          <span class="how"><a href="https://github.com/karolpolikarp/parawan" target="_blank" rel="noopener noreferrer">github.com/<wbr>karolpolikarp/<wbr>parawan ↗</a></span>
         </div>
       </div>
     </section>
@@ -257,7 +259,7 @@
 
       <!-- legenda kolorów kategorii (chipy niżej mają te same barwy) -->
       <div class="tag-legend">
-        <span class="tl ct-ident">Identyfikatory · 14</span>
+        <span class="tl ct-ident">Identyfikatory · 15</span>
         <span class="tl ct-fin">Finanse · 2</span>
         <span class="tl ct-contact">Kontakt · 2</span>
         <span class="tl ct-place">Adres · 3</span>
@@ -295,7 +297,7 @@
       <!-- notka o sumach kontrolnych — sedno przekazu „precyzja > nadmaskowanie" -->
       <div class="checksum-note">
         <i class="gi" data-i="suma"></i>
-        <span><b>Sumy kontrolne.</b> PESEL, NIP, REGON, IBAN, numer KSeF i numer dowodu Parawan sprawdza matematycznie. Przypadkowy ciąg cyfr (numer przepisu, pozycja z ustawy) nie spełnia sumy, więc zostaje nietknięty.</span>
+        <span><b>Sumy kontrolne.</b> PESEL, NIP, REGON, IBAN, numer dowodu i numer karty Parawan sprawdza matematycznie, a w numerze KSeF sprawdza NIP wystawcy. Przypadkowy ciąg cyfr (numer przepisu, pozycja z ustawy) nie spełnia sumy, więc zostaje nietknięty.</span>
       </div>
     </section>
 
@@ -340,7 +342,7 @@
             <li><i class="gi" data-i="walidacja"></i><span>Bez instalatora i bez praw administratora</span></li>
             <li><i class="gi" data-i="walidacja"></i><span>Otwierasz podwójnym kliknięciem, jak zdjęcie</span></li>
             <li><i class="gi" data-i="walidacja"></i><span>Możesz rozesłać jeden plik całemu zespołowi</span></li>
-            <li><i class="gi" data-i="walidacja"></i><span>Nie trzeba zgody działu bezpieczeństwa, bo nic się nie instaluje</span></li>
+            <li><i class="gi" data-i="walidacja"></i><span>Dział IT sprawdzi jeden plik z jawnym kodem, który nie łączy się z siecią</span></li>
           </ul>
         </div>
         <div class="split-visual">
@@ -354,8 +356,8 @@
           <div class="check-list">
             <div><i class="gi" data-i="walidacja"></i>Nie instaluje się w systemie</div>
             <div><i class="gi" data-i="walidacja"></i>Nie łączy się z internetem</div>
-            <div><i class="gi" data-i="walidacja"></i>Nie zapisuje danych poza kartą przeglądarki</div>
-            <div><i class="gi" data-i="walidacja"></i>Znika bez śladu, gdy zamkniesz kartę</div>
+            <div><i class="gi" data-i="walidacja"></i>Nie zapisuje Twojego tekstu</div>
+            <div><i class="gi" data-i="walidacja"></i>Tekst znika, gdy zamkniesz kartę</div>
           </div>
         </div>
       </div>
@@ -401,7 +403,7 @@
           <ul>
             <li><i class="gi" data-i="regula"></i><span>Silnik deterministyczny: reguły, słowniki i sumy kontrolne, <b>zero modeli AI</b></span></li>
             <li><i class="gi" data-i="suma"></i><span>Sumy kontrolne odróżniają prawdziwy numer od przypadkowego ciągu cyfr</span></li>
-            <li><i class="gi" data-i="szablon"></i><span>Licencja Apache 2.0 · pakiet npm <a href="https://www.npmjs.com/package/anonimizator" target="_blank" rel="noopener noreferrer"><code>anonimizator</code></a> z narzędziem CLI</span></li>
+            <li><i class="gi" data-i="szablon"></i><span>Licencja Apache 2.0 · silnik jako biblioteka TypeScript z narzędziem CLI (<a href="https://github.com/karolpolikarp/parawan/tree/main/packages/core" target="_blank" rel="noopener noreferrer"><code>packages/core</code></a>)</span></li>
           </ul>
         </div>
         <div class="split-visual">
@@ -412,7 +414,7 @@
             <div><div class="trust-num">97,2%</div><div class="trust-lbl">wynik łączny (F1)</div></div>
           </div>
           <p class="bench-desc"><b>Wykrywalność</b> (ang. recall) mówi, ile danych do ukrycia faktycznie zostało zamaskowanych. <b>Trafność</b> (precyzja) to jak rzadko Parawan maskuje coś, co danymi nie jest. <b>F1</b> łączy obie liczby w jedną.</p>
-          <p class="bench-note">Pomiar na deterministycznym zbiorze 309 syntetycznych zdań (rdzeń <code>anonimizator</code> 0.29.11). Metodologia i pełne wyniki: <a href="https://github.com/karolpolikarp/parawan/blob/main/docs/BENCHMARK.md" target="_blank" rel="noopener noreferrer">docs/BENCHMARK.md</a> · <a href="#ograniczenia">zobacz też ograniczenia</a>.</p>
+          <p class="bench-note">Pomiar na deterministycznym zbiorze 319 syntetycznych zdań (rdzeń <code>anonimizator</code> 0.29.12). Metodologia i pełne wyniki: <a href="https://github.com/karolpolikarp/parawan/blob/main/docs/BENCHMARK.md" target="_blank" rel="noopener noreferrer">docs/BENCHMARK.md</a> · <a href="#ograniczenia">zobacz też ograniczenia</a>.</p>
         </div>
       </div>
     </section>
@@ -463,7 +465,7 @@
         </details>
         <details>
           <summary>Czy dział IT to zablokuje?</summary>
-          <div class="faq-b">Zwykle nie. Parawan to dokument HTML, a nie program do instalacji. Nie jest plikiem <code>.exe</code>, nie potrzebuje uprawnień administratora ani serwera, więc przechodzi przez większość firmowych blokad.</div>
+          <div class="faq-b">Zwykle nie. Parawan to dokument HTML, a nie program do instalacji. Nie jest plikiem <code>.exe</code>, nie potrzebuje uprawnień administratora ani serwera, więc przechodzi przez większość firmowych blokad. Jeśli nowe narzędzia zatwierdza u Ciebie dział IT albo inspektor ochrony danych, pokaż im kod na GitHubie: to jeden plik, który nie łączy się z siecią.</div>
         </details>
         <details>
           <summary>Jakie dokładnie dane wykrywa?</summary>
@@ -475,7 +477,7 @@
         </details>
         <details>
           <summary>Co dzieje się z danymi po zamknięciu karty?</summary>
-          <div class="faq-b">Nic nie zostaje. Tekst istnieje tylko w pamięci karty przeglądarki, dopóki jest otwarta. Zamknięcie karty usuwa wszystko. Parawan niczego nie zapisuje na dysku ani w chmurze.</div>
+          <div class="faq-b">Tekst i wynik nie zostają. Istnieją tylko w pamięci karty, dopóki jest otwarta, a zamknięcie karty je usuwa. Parawan nie zapisuje tekstu na dysku ani w chmurze. Przeglądarka pamięta jedynie Twoje ustawienia, na przykład które typy maskować i czy rozróżniać osoby.</div>
         </details>
         <details>
           <summary>Czy używa sztucznej inteligencji?</summary>
@@ -490,9 +492,9 @@
         <h2>Zdejmij dane, zanim tekst gdziekolwiek pojedzie</h2>
         <p>Jeden plik HTML. Pobierasz raz i działasz. Bez konta, bez sieci, bez opłat.</p>
         <ol class="cta-steps" role="list" aria-label="Jak zacząć">
-          <li><b>1</b> Pobierz plik <code>Parawan.html</code></li>
-          <li><b>2</b> Otwórz go podwójnym kliknięciem</li>
-          <li><b>3</b> Wklej tekst i skopiuj bezpieczny wynik</li>
+          <li><b>1</b> <span>Pobierz plik <code>Parawan.html</code></span></li>
+          <li><b>2</b> <span>Otwórz go podwójnym kliknięciem</span></li>
+          <li><b>3</b> <span>Wklej tekst i skopiuj bezpieczny wynik</span></li>
         </ol>
         <div class="hero-cta">
           <a class="btn btn-cta btn-lg" href="https://github.com/karolpolikarp/parawan/releases/latest/download/Parawan.html" target="_blank" rel="noopener noreferrer"><i class="gi" data-i="anonimizuj"></i>Pobierz Parawan</a>
@@ -521,7 +523,7 @@
           <div class="foot-col">
             <h3>Kod</h3>
             <a href="https://github.com/karolpolikarp/parawan" target="_blank" rel="noopener noreferrer">GitHub — parawan</a>
-            <a href="https://www.npmjs.com/package/anonimizator" target="_blank" rel="noopener noreferrer">npm: <code>anonimizator</code> + CLI</a>
+            <a href="https://github.com/karolpolikarp/parawan/tree/main/packages/core" target="_blank" rel="noopener noreferrer">Silnik i CLI: <code>packages/core</code></a>
             <a href="https://github.com/karolpolikarp/anonimizator-ai" target="_blank" rel="noopener noreferrer">Rozszerzenie AI (osobne)</a>
             <a href="https://github.com/karolpolikarp/parawan/issues" target="_blank" rel="noopener noreferrer">Zgłoś nietrafione wykrycie</a>
           </div>

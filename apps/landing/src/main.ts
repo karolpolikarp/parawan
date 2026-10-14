@@ -9,8 +9,10 @@
  * żeby wynik wyglądał identycznie jak w narzędziu (spójność marki).
  */
 import './style.css';
-import { redactPII, type PiiFinding, type PiiType } from 'anonimizator';
+import { redactPII, type PiiFinding } from 'anonimizator';
 import { hydrateIcons } from './icons';
+// Znaczniki i kategorie z jednej listy, zsynchronizowanej z rdzeniem (opis w tokens.ts).
+import { MASK_TOKEN_RE, maskCategory, typeCategory } from './tokens';
 
 const $ =<T extends HTMLElement = HTMLElement>(id: string): T | null =>
   document.getElementById(id) as T | null;
@@ -31,28 +33,6 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
-
-/** Kategoria wizualna znacznika po nazwie tokenu (spójna z legendą aplikacji). */
-type Cat = 'person' | 'contact' | 'ident' | 'fin' | 'place';
-function maskCategory(name: string): Cat {
-  if (name.startsWith('OSOBA-') || name === 'IMIĘ I NAZWISKO' || name === 'DATA-URODZENIA') return 'person';
-  if (name === 'EMAIL' || name === 'TELEFON') return 'contact';
-  if (name === 'NR-KONTA' || name === 'NR-KARTY') return 'fin';
-  if (name === 'ADRES' || name === 'KOD-POCZTOWY' || name === 'MIEJSCOWOŚĆ') return 'place';
-  return 'ident';
-}
-
-/** Kategoria po typie z silnika (do statystyk). */
-function typeCategory(t: PiiType): Cat {
-  if (t === 'IMIE' || t === 'DATA-UR') return 'person';
-  if (t === 'EMAIL' || t === 'TELEFON') return 'contact';
-  if (t === 'IBAN' || t === 'NR-KONTA' || t === 'KARTA') return 'fin';
-  if (t === 'ADRES' || t === 'KOD-POCZTOWY' || t === 'MIEJSCOWOSC') return 'place';
-  return 'ident';
-}
-
-const MASK_TOKEN_RE =
-  /\[(PESEL|NIP|REGON|NR-KONTA|NR-KARTY|NR-DOWODU|NR-PASZPORTU|KRS|NR-KSEF|ZNAK-SPRAWY|PRAWO-JAZDY|NR-REJESTRACYJNY|VIN|IP|MAC|TOKEN|LOGIN|EMAIL|TELEFON|KOD-POCZTOWY|DATA-URODZENIA|ADRES|MIEJSCOWOŚĆ|IMIĘ I NAZWISKO|OSOBA-[A-Z]+)\]/g;
 
 function maskHtml(name: string): string {
   return `<mark class="pii pii-${maskCategory(name)}">[${name}]</mark>`;
@@ -304,18 +284,49 @@ try {
   /* PerformanceObserver niedostępny — licznik pozostaje statyczny. */
 }
 
-/* ── Mobilne menu ── */
-const navToggle = $('nav-toggle');
+/* ── Mobilne menu ──
+   Linki stoją w kodzie przed przyciskiem, więc po otwarciu Tab szedł od razu do treści pod
+   rozwiniętą listą. Dlatego otwarcie przenosi fokus na pierwszy link, a menu zamyka Esc
+   (z powrotem na przycisk), wyjście fokusem z paska, klik obok i przewinięcie strony:
+   otwarta lista nie zostaje nad treścią, którą czyta się dalej. */
+const nav = document.querySelector<HTMLElement>('.nav');
+const navToggle = $<HTMLButtonElement>('nav-toggle');
 const navLinks = $('nav-links');
+const isNavOpen = (): boolean => navLinks?.classList.contains('open') ?? false;
+let navOpenedAtY = 0;
+
+function closeNav(refocus = false): void {
+  if (!isNavOpen()) return;
+  navLinks?.classList.remove('open');
+  navToggle?.setAttribute('aria-expanded', 'false');
+  if (refocus) navToggle?.focus();
+}
+
 navToggle?.addEventListener('click', () => {
   const open = navLinks?.classList.toggle('open') ?? false;
   navToggle.setAttribute('aria-expanded', String(open));
+  if (open) {
+    navOpenedAtY = scrollY;
+    navLinks?.querySelector<HTMLElement>('a')?.focus({ preventScroll: true });
+  }
 });
-navLinks?.querySelectorAll('a').forEach((a) =>
-  a.addEventListener('click', () => {
-    navLinks.classList.remove('open');
-    navToggle?.setAttribute('aria-expanded', 'false');
-  }),
+navLinks?.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => closeNav()));
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && isNavOpen()) closeNav(true);
+});
+nav?.addEventListener('focusout', (e) => {
+  const to = e.relatedTarget as Node | null;
+  if (to && !nav.contains(to)) closeNav();
+});
+document.addEventListener('click', (e) => {
+  if (isNavOpen() && !(e.target as Element | null)?.closest('.nav')) closeNav();
+});
+addEventListener(
+  'scroll',
+  () => {
+    if (isNavOpen() && Math.abs(scrollY - navOpenedAtY) > 60) closeNav();
+  },
+  { passive: true },
 );
 
 /* ── Wejścia sekcji: subtelny fade-up przy wejściu w widok ──

@@ -23,12 +23,8 @@ export const ICONS: Record<string, string> = {
 
   // ── Narzędzia / stany ──
   onoff: svg('<path d="M12 3v8.5"/><path d="M6.8 7.2a8 8 0 1 0 10.4 0"/>'),
-  // suwaki/przełączniki — dobór, co maskować (dwie ścieżki z gałkami)
-  suwaki: svg(
-    '<line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/>' +
-      '<circle cx="15" cy="8" r="2.7" fill="currentColor" stroke="none"/>' +
-      '<circle cx="9" cy="16" r="2.7" fill="currentColor" stroke="none"/>',
-  ),
+  // menu (trzy kreski) — przycisk nawigacji na telefonie; dawne „suwaki” kojarzyły się z ustawieniami
+  menu: svg('<line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/>'),
   podglad: svg('<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.6"/>'),
   maskowanie: svg('<path d="M12 3 5 6v5c0 4.6 3 7.6 7 9 4-1.4 7-4.4 7-9V6z"/><path d="m8.8 12 2.2 2.2 4.2-4.4"/>'),
   przyklad: svg('<path d="M9.5 18h5"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.8 10.6c.6.6 1 1.4 1.1 2.4h5.4c.1-1 .5-1.8 1.1-2.4A6 6 0 0 0 12 3z"/>'),
