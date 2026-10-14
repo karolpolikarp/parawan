@@ -2702,3 +2702,125 @@ test('b2: poprawki są idempotentne i działają z pseudonimizacją', () => {
     expect(redactPII(t, { pseudonyms: true }).redacted, t).toBe(once);
   }
 });
+
+// ── Audyt, partia b2 — regresje wykryte w weryfikacji (wycieki i nadmaskowanie po poprawkach b2) ──
+test('b2-fix K12: po „nr rej." tablica małymi literami z odstępem dalej maskowana; „KM Policji" i „t.j." to nie jednostki', () => {
+  const R = '[NR-REJESTRACYJNY]';
+  masked([
+    ['nr rej. wa 12345', `nr rej. ${R}`],
+    ['Nr rej.: kr 1234a', `Nr rej.: ${R}`],
+    ['nr rejestracyjny: dw 12345', `nr rejestracyjny: ${R}`],
+    ['NR REJ.: wa 12345', `NR REJ.: ${R}`],
+    ['Numer rejestracyjny pojazdu: wx 1234a', `Numer rejestracyjny pojazdu: ${R}`],
+    ['Zatrzymano pojazd nr rej. wa 12345.', `Zatrzymano pojazd nr rej. ${R}.`],
+    ['Pojazd WE 12345 KM Policji przekazano na parking.', `Pojazd ${R} KM Policji przekazano na parking.`],
+    ['Pojazd WE 12345 KM PSP.', `Pojazd ${R} KM PSP.`],
+    ['Pojazd PZ 4567B t.j. Opel Astra.', `Pojazd ${R} t.j. Opel Astra.`],
+  ]);
+  // pułapki: słabe kotwice i „nr" bez zmian, „numer rejestru" to nie tablica, jednostki jak dotąd
+  keep([
+    'Formularz rejestracyjny nr 2024',
+    'Tablice rejestracyjne dla 2000 pojazdów.',
+    'Opłata rejestracyjna to 1500 zł.',
+    'Numer rejestru od 2020 prowadzi starosta.',
+    'Ciągnik o mocy 150 KM.',
+    'ładowność 24 t.',
+  ]);
+});
+test('b2-fix K16: strażnik wersji bez przyimka i bez „konwersji"; wersja, firmware i skróty odwołań przed kropką bez [IP]', () => {
+  masked([
+    ['Wdrożono nową wersję na 10.20.30.40 wieczorem', 'Wdrożono nową wersję na [IP] wieczorem'],
+    ['Pobrano wersję z 10.20.30.41 w nocy.', 'Pobrano wersję z [IP] w nocy.'],
+    ['Nowa wersja od 10.1.2.3 w sieci', 'Nowa wersja od [IP] w sieci'],
+    ['Konwersja adresów 192.168.1.15 nie działa', 'Konwersja adresów [IP] nie działa'],
+    ['Router dokonał konwersji adresu 192.168.10.23 na adres publiczny 83.12.45.67.', 'Router dokonał konwersji adresu [IP] na adres publiczny [IP].'],
+    // linia o aktualizacji, ale adres nazwany wprost — to dalej adres
+    ['Po aktualizacji logowanie z adresu 83.24.115.6.', 'Po aktualizacji logowanie z adresu [IP].'],
+    ['Adres IP serwera po aktualizacji: 83.24.115.6.', 'Adres IP serwera po aktualizacji: [IP].'],
+  ]);
+  keep([
+    'Na serwerze wgrano firmware 4.1.2.10.',
+    'Aktualizacja serwera do 7.0.3.12.',
+    'Serwer działa na Debianie 12.0.1.2.',
+    'Adres serwera to srv01, build 1.0.0.12.',
+    'Wersja klienta: 2.1.0.15.',
+    'Konfiguracja serwera – tab. 2.1.1.4.',
+    'Konfiguracja adresów IP: rozdz. 5.2.1.3.',
+    'Opis interfejsu serwera: rys. 3.2.1.1.',
+    'Parametry hosta: zał. 1.2.3.4.',
+    'Zaktualizowano firmware routera do 1.2.3.4.',
+    'Kernel serwera 5.15.0.91.',
+    'Wersja: 2.1.0.15 (stabilna)',
+  ]);
+});
+test('b2-fix K01: telefon po imieniu, nazwisku lub „SMS/Tel" łączonym „/" lub „-" i po linii „____" dalej maskowany', () => {
+  masked([
+    ['Koordynator: Anna Nowak/601 234 567', 'Koordynator: [IMIĘ I NAZWISKO]/[TELEFON]'],
+    ['Jan Kowalski-601234567', '[IMIĘ I NAZWISKO]-[TELEFON]'],
+    ['córka Anna/603 456 789', 'córka Anna/[TELEFON]'],
+    ['SMS/601 234 567', 'SMS/[TELEFON]'],
+    ['Kontakt/601 234 567', 'Kontakt/[TELEFON]'],
+    ['(koordynator), Tel/607 890 123', '(koordynator), Tel/[TELEFON]'],
+    ['GSM-601 234 567', 'GSM-[TELEFON]'],
+    ['Telefon: ____601 234 567', 'Telefon: ____[TELEFON]'],
+    ['Telefon kontaktowy:______________601234567', 'Telefon kontaktowy:______________[TELEFON]'],
+    ['512345678w godz. 8-16', '[TELEFON]w godz. 8-16'],
+  ]);
+  // pułapki: identyfikatory z łącznikiem, podkreślnikiem i literą po cyfrach bez zmian
+  keep(['WZ/123456789', 'ID-123456789', 'A-123456789', 'produkt-123456789', 'x_123456789', '123456789a', 'abc123456789w']);
+});
+test('b2-fix K26: „ZŁ…" wersalikami i „Gr." po numerze to nie waluta; kwoty w złotych i groszach bez zmian', () => {
+  masked([
+    ['602 345 678 ZŁOTÓW', '[TELEFON] ZŁOTÓW'],
+    ['NOWAK JAN 602 345 678 ZŁOŻYŁ WNIOSEK', 'NOWAK JAN [TELEFON] ZŁOŻYŁ WNIOSEK'],
+    ['601 234 567 złożył wniosek', '[TELEFON] złożył wniosek'],
+    ['602 345 678 Gr. A', '[TELEFON] Gr. A'],
+  ]);
+  keep(['125 450 300 ZŁOTYCH', '125 450 300 ZŁ', '125 450 300 złotych', '125 450 300 gr', 'Kwota: 150 000 000 złotówek', 'Saldo 125 450 300 ZŁOTE']);
+});
+test('b2-fix K24/K15: konta funkcyjne działów („kadry", „magazyn") nie rozlewają się na prozę', () => {
+  masked([
+    ['Login: kadry\nWyślij do kadry.', 'Login: [LOGIN]\nWyślij do kadry.'],
+    ['Login: marketing\nZespół marketing.', 'Login: [LOGIN]\nZespół marketing.'],
+    ['Login: URZAD\\kadry\nPismo przekazano do działu kadry.', 'Login: [LOGIN]\nPismo przekazano do działu kadry.'],
+    ['Użytkownik "FIRMA\\magazyn" ma dostęp. Towar przyjęto na magazyn.', 'Użytkownik "[LOGIN]" ma dostęp. Towar przyjęto na magazyn.'],
+    ['User: PRACA\\ewidencja\nWpisy do ewidencja zostały zaktualizowane.', 'User: [LOGIN]\nWpisy do ewidencja zostały zaktualizowane.'],
+    ['Login: URZAD\\kadry\nRepozytorium: git@gitlab.urzad.local:kadry/ewidencja.git', 'Login: [LOGIN]\nRepozytorium: git@gitlab.urzad.local:kadry/ewidencja.git'],
+    // pułapka: login osoby dalej się propaguje, także przed kropką
+    ['Login: FIRMA\\akowalska\nKonto akowalska.', 'Login: [LOGIN]\nKonto [LOGIN].'],
+  ]);
+});
+test('b2-fix K14: nadmiarowe cyfry po IBAN-ie (literówka) pod maską; kwota za numerem zostaje', () => {
+  const K = '[NR-KONTA]';
+  masked([
+    ['IBAN: DE89 3704 0044 0532 0130 00 12', `IBAN: ${K}`],
+    ['Przelew na DE89 3704 0044 0532 0130 00 12', `Przelew na ${K}`],
+    ['Konto PL61 1090 1014 0000 0712 1981 2874 5', `Konto ${K}`],
+    ['Konto PL61 1090 1014 0000 0712 1981 2875 5', `Konto ${K}`],
+    ['Przelew PL61 1090 1014 0000 0712 1981 2874 1500 zł', `Przelew ${K} 1500 zł`],
+    ['Konto: PL61 1090 1014 0000 0712 1981 2875 15 PLN', `Konto: ${K} 15 PLN`],
+    ['IBAN: DE89 3704 0044 0532 0130 00 12,50 EUR', `IBAN: ${K} 12,50 EUR`],
+  ]);
+});
+test('b2-fix K25: DUID i EUI-64 z adresem karty maskowane w całości; inne łańcuchy bez zmian', () => {
+  masked([
+    ['DUID 00:01:00:01:2a:3b:4c:5d:00:1a:2b:3c:4d:5e', 'DUID [MAC]'],
+    ['DHCPv6 Client DUID. . . . . . . . : 00-01-00-01-2A-3B-4C-5D-00-1A-2B-3C-4D-5E', 'DHCPv6 Client DUID. . . . . . . . : [MAC]'],
+    ['IAID 1234, DUID: 00:01:00:01:2a:3b:4c:5d:00:1a:2b:3c:4d:5e', 'IAID 1234, DUID: [MAC]'],
+    ['Identyfikator 00:03:00:01:00:1a:2b:3c:4d:5e', 'Identyfikator [MAC]'],
+    ['EUI-64 interfejsu: 02:1a:2b:ff:fe:3c:4d:5e', 'EUI-64 interfejsu: [MAC]'],
+    ['Interfejs 02:1a:2b:ff:fe:3c:4d:5e', 'Interfejs [MAC]'],
+  ]);
+  keep(['Łańcuch 00:01:00:02:2a:3b:4c:5d:00:1a:2b:3c:4d:5e', 'HMAC klucza: ab:cd:ef:01:23:45:67:89']);
+});
+test('b2-fix: czas liniowy w długiej linii bez „\\n" (IP przed kropką, ogon miliarda)', () => {
+  const inputs: [string, string][] = [
+    ['IP przed kropką', 'IP 10.1.2.3. '.repeat(32_000)],
+    ['ogon miliarda', '| 1 234 567 890 '.repeat(26_000)],
+  ];
+  for (const [name, text] of inputs) {
+    const t0 = performance.now();
+    redactPII(text);
+    expect(performance.now() - t0, name).toBeLessThan(500);
+  }
+});

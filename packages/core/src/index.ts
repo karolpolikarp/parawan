@@ -525,13 +525,23 @@ const FORM_EMPTY_VALUES = new Set([
  * Nazwy kont TECHNICZNYCH i generycznych (lowercase). Pole „Login: admin" maskujemy jak każde
  * inne, ale tej wartości nie rozlewamy na resztę dokumentu: w prozie to zwykłe słowa („panel
  * admin", „zaktualizuj system", „uruchom test", „sterownik postgres"), a nie dane osoby.
+ * Do tego konta FUNKCYJNE działów („URZAD\kadry", „Login: magazyn"): to zwykłe rzeczowniki,
+ * więc propagacja dawała „przekazano do działu [LOGIN]", „przyjęto na [LOGIN]". Wartość loginu
+ * jest ASCII, stąd zapis bez ogonków („ksiegowosc", „zarzad").
  */
 const GENERIC_LOGINS = new Set<string>(
   (
     'admin administrator root system test tester demo guest gosc gość user users default postgres ' +
     'mysql oracle jenkins nobody daemon operator service serwis support helpdesk backup kiosk public ' +
     'anonymous ubuntu superuser sysadmin www-data ec2-user manager master developer monitor recepcja ' +
-    'biuro sekretariat info office'
+    'biuro sekretariat info office ' +
+    'kadry kadr ksiegowosc ksiegowa ksiegowy marketing sprzedaz handel handlowy kontakt kontakty ' +
+    'faktury faktura fakturowanie rekrutacja sklep noreply no-reply magazyn magazynier ewidencja ' +
+    'kancelaria place zarzad prezes dyrektor kierownik sekretarz logistyka zakupy produkcja obsluga ' +
+    'klient klienci finanse administracja poczta mail email skaner scanner drukarka printer kasa ' +
+    'szkolenia dziekanat rektorat archiwum wsparcie pomoc rejestracja laboratorium apteka przychodnia ' +
+    'portiernia ochrona dyzurny informatyka informatyk technik serwisant inspektor rodo audyt legal ' +
+    'sales finance accounting billing payroll contact orders shop team staff student uczen nauczyciel'
   ).split(' '),
 );
 /** Wbudowane grupy i konta Windows („BUILTIN\Administrators", „NT AUTHORITY\SYSTEM") — nie osoba. */
@@ -944,8 +954,10 @@ const PLATE_VOIV_LETTERS = 'BCDEFGHKLNOPRSTUWZ';
  *  „U…" mają ich 5). „PN" celowo NIE: to Konin. Wstawiany na początku kandydata tablicy. */
 const PLATE_NOT_ACRONYM = '(?!(?:BMW|DMC|DMR|RAL|DIN|DOT|EN|PKD|KTM|RAM|FSO)(?![A-Z])|UN[\\s-]?\\d{4}(?![\\dA-Z]))';
 /** Jednostka zaraz po kandydacie („DMC 3500 kg", „ładowność 24 t", „150 KM") — to parametr,
- *  nie tablica. Tylko odstęp poziomy: jednostka z następnego wiersza nie odbiera maski. */
-const PLATE_NOT_UNIT = '(?![ \\t]*(?:kg|t|ton\\w*|km|kW|KM|mm|cm|zł|PLN|szt)(?![\\wąćęłńóśźż]))';
+ *  nie tablica. Tylko odstęp poziomy: jednostka z następnego wiersza nie odbiera maski.
+ *  „KM Policji/PSP" to komenda miejska, a „t.j." skrót „to jest" — po nich tablica zostaje. */
+const PLATE_NOT_UNIT =
+  '(?![ \\t]*(?:kg|t(?!\\.[a-ząćęłńóśźż])|ton\\w*|km|kW|KM(?![ \\t]+(?:Policji|PSP))|mm|cm|zł|PLN|szt)(?![\\wąćęłńóśźż]))';
 
 // ============================================================================
 // Kontekst redakcji + przebiegi (top-level; orkiestrowane przez redactPII)
@@ -1149,12 +1161,21 @@ function passMac(ctx: RedactCtx): void {
   // 1d:55" dawał „[MAC]:1d:55", a odcisk klucza hosta „MD5:16:27:…" — „MD5:[MAC]:[MAC]:…".
   // Wyjątki: identyfikator klienta DHCP to typ sprzętu „01" (Ethernet) + MAC — 7 par; etykieta
   // „EUI-64" to sprzętowy adres urządzenia tak samo jak MAC (bez „HMAC" — to skrót kryptograficzny).
+  // Identyfikatory z adresem karty w środku też w całości: DUID-LLT (00:01:00:01 + czas + MAC,
+  // 14 par) i DUID-LL (00:03:00:01 + MAC, 10 par) z „ipconfig /all" oraz EUI-64 z „ff:fe" w środku
+  // (MAC rozcięty wstawką) — bez tego łańcuch inny niż 6 par zostawiał cały adres sprzętowy jawny.
+  // Etykieta może mieć jeden wyraz dopowiedzenia („EUI-64 interfejsu:", „DUID. . . :").
   ctx.text = ctx.text.replace(
     /\b[0-9A-Fa-f]{2}([:-])[0-9A-Fa-f]{2}(?:\1[0-9A-Fa-f]{2}){4,}\b/g,
     (m, _sep: string, offset: number) => {
       const pairs = (m.length + 1) / 3;
-      const labeled = /(?<![A-Za-z])(?:mac|eui(?:-?64)?)[\s:=.-]*$/i.test(ctx.text.slice(Math.max(0, offset - 16), offset));
-      if (pairs !== 6 && !(pairs === 7 && m.startsWith('01')) && !labeled) return m;
+      const hex = m.toLowerCase().replace(/[:-]/g, '');
+      const embedsMac =
+        (pairs === 14 && hex.startsWith('00010001')) ||
+        (pairs === 10 && hex.startsWith('00030001')) ||
+        (pairs === 8 && hex.slice(6, 10) === 'fffe');
+      const labeled = /(?<![A-Za-z])(?:mac|eui(?:-?64)?|duid)(?:[ \t]+\p{L}+)?[\s:=.-]*$/iu.test(ctx.text.slice(Math.max(0, offset - 32), offset));
+      if (pairs !== 6 && !(pairs === 7 && m.startsWith('01')) && !embedsMac && !labeled) return m;
       ctx.bump('MAC');
       return ctx.M.MAC;
     },
@@ -1207,10 +1228,7 @@ function passIp(ctx: RedactCtx): void {
     /(?<![\d.])(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)(?!\d|\.\w)/g,
     (m, offset: number) => {
       if (precededByLegalRef(ctx.text, offset)) return m;
-      // Okno 32 znaków, polskie końcówki („wersję", „wersji") i jeden wyraz między słowem
-      // a numerem („wersję systemu 2.0.1.3"). Dawne `wersj\w*` nie łapało „wersję" (\w to ASCII).
-      const before = ctx.text.slice(Math.max(0, offset - 32), offset).toLowerCase();
-      if (/(?:wersj[a-ząćęłńóśźż]*|\bver\.?|\bv\.?)(?:\s+[a-ząćęłńóśźż-]+)?\s*$/.test(before)) return m;
+      if (RE_IPV4_VERSION_BEFORE.test(ctx.text.slice(Math.max(0, offset - 32), offset))) return m;
       if (isNonHostIpv4(m, ctx.text.slice(offset + m.length, offset + m.length + 4))) return m;
       if (ctx.text[offset + m.length] === '.' && !ipv4BeforeDotIsAddress(ctx.text, offset, m)) return m;
       ctx.bump('IP');
@@ -1235,24 +1253,45 @@ function isNonHostIpv4(ip: string, after: string): boolean {
   }
   return o[3] === 0 && /^\/\d{1,2}(?!\d)/.test(after);
 }
+/**
+ * Numer wersji, nie adres: słowo „wersja/ver/v", „firmware", „build", „release", „kernel",
+ * „wydanie" tuż przed liczbą. Okno 32 znaków, polskie końcówki („wersję", „wersji"), dwukropek
+ * etykiety („Wersja klienta: 2.1.0.15") i jeden wyraz pośredni („wersję systemu 2.0.1.3") —
+ * ale nie przyimek ani spójnik: „wdrożono wersję na 10.20.30.40" to host, na który wdrożono.
+ * Lewa granica litery, bo „wersj" siedzi też w „konwersji" i „inwersji" („konwersja adresów
+ * 192.168.1.15" to adres).
+ */
+const RE_IPV4_VERSION_BEFORE =
+  /(?<![\p{L}\d])(?:wersj\p{L}*|ver|v|firmware|build|release|kernel|wydani\p{L}*)\.?(?:\s+(?!(?:na|z|ze|od|do|dla|po|pod|przy|przez|w|we|o|u|i|a|oraz|lub|albo|to|jest|za|nad)(?!\p{L}))\p{L}[\p{L}-]*)?\s*:?\s*$/iu;
 const RE_IPV4_NET_CONTEXT =
   /(?<![\p{L}\d])(?:ip(?:v4)?|adres\p{L}*|host\p{L}*|serwer\p{L}*|bram\p{L}*|gateway|router\p{L}*|dns|połącz\p{L}*|logowa\p{L}*|zalogowa\p{L}*|nasłuch\p{L}*|interfejs\p{L}*|źródłow\p{L}*|docelow\p{L}*|klient\p{L}*|client|from|src|dst)(?![\p{L}\d])/iu;
 const RE_IPV4_STRUCT_WORD =
-  /(?<![\p{L}])(?:(?:rozdzia|podrozdzia|punk|sekcj|częś|tabel|rysun|załącznik|wersj|kwot|wynios|klasyfikac)\p{L}*|pkt|ver|v|zob|patrz|pkwiu|pkd|cpv|oid)[\s:.]*$/iu;
+  /(?<![\p{L}])(?:(?:rozdzia|podrozdzia|punk|sekcj|częś|tabel|rysun|załącznik|wersj|kwot|wynios|klasyfikac)\p{L}*|pkt|rozdz|tab|tabl|rys|zał|p|ver|v|zob|patrz|pkwiu|pkd|cpv|oid)[\s:.]*$/iu;
 const RE_PHONE_WORD = /(?<![\p{L}])(?:tel|telefon\p{L}*|kontakt\p{L}*|stacjonarn\p{L}*|komórk\p{L}*|kom|fax|faks)(?![\p{L}])/iu;
+// Linia o oprogramowaniu: wydanie, aktualizacja, jądro, nazwa systemu. Słowa „serwer", „klient",
+// „host" stoją tu obok numeru wersji („Aktualizacja serwera do 7.0.3.12.", „Kernel serwera
+// 5.15.0.91.", „Serwer działa na Debianie 12.0.1.2.") — sam kontekst sieciowy to za mało.
+const RE_IPV4_SOFTWARE_CONTEXT =
+  /(?<![\p{L}\d])(?:wersj\p{L}*|firmware|build|release|kernel|wydani\p{L}*|z?aktualiz\p{L}*|uaktualni\p{L}*|update\p{L}*|upgrade\p{L}*|patch\p{L}*|debian\p{L}*|ubuntu|centos|fedora|rhel|windows|android|macos|ios|freebsd)(?![\p{L}\d])/iu;
+// …chyba że w linii adres jest nazwany wprost: „IP" albo „adres" („po aktualizacji logowanie
+// z adresu …", „Adres IP serwera po aktualizacji: …").
+const RE_IPV4_ADDRESS_WORD = /(?<![\p{L}\d])(?:ip(?:v4)?|adres\p{L}*)(?![\p{L}\d])/iu;
 /**
  * Czy kandydat na IPv4 stojący PRZED KROPKĄ to adres, a nie numer punktu? Bez tej bramki
  * prosta zmiana granicy maskowała numerację konspektu, odwołania („w punkcie 5.3.2.1.")
  * i kwoty z kropkami — regresja, której benchmark nie widzi. Wymagamy kontekstu sieciowego
  * w tej samej linii; numer sam w linii to nagłówek; 9 cyfr przy słowie „tel." to telefon
- * zapisany z kropkami (przejmie go passPhone).
+ * zapisany z kropkami (przejmie go passPhone); w linii o wersji oprogramowania — tylko adres
+ * nazwany wprost. Linię wyznaczamy w oknie 60 znaków, nie przez lastIndexOf po całym tekście:
+ * w długiej linii bez „\n" (ekstrakcja PDF, zminifikowany log) to był koszt kwadratowy.
  */
 function ipv4BeforeDotIsAddress(full: string, offset: number, m: string): boolean {
-  const lineStart = full.lastIndexOf('\n', offset - 1) + 1;
-  const lead = full.slice(Math.max(lineStart, offset - 60), offset);
-  if (!/\S/.test(full.slice(lineStart, offset))) return false;
-  if (RE_IPV4_STRUCT_WORD.test(full.slice(Math.max(lineStart, offset - 24), offset))) return false;
+  const win = full.slice(Math.max(0, offset - 60), offset);
+  const lead = win.slice(win.lastIndexOf('\n') + 1);
+  if (!/\S/.test(lead)) return false;
+  if (RE_IPV4_STRUCT_WORD.test(lead.slice(-24))) return false;
   if (m.replace(/\D/g, '').length === 9 && RE_PHONE_WORD.test(lead)) return false;
+  if (RE_IPV4_SOFTWARE_CONTEXT.test(lead) && !RE_IPV4_ADDRESS_WORD.test(lead)) return false;
   return RE_IPV4_NET_CONTEXT.test(lead);
 }
 
@@ -1546,13 +1585,28 @@ function ibanCut(m: string): number {
   const t = m.replace(/(?:[ ][A-Z]+)+$/, '');
   return t.replace(/ /g, '').length >= 15 ? t.length : m.length;
 }
+/**
+ * Koniec maski numeru uciętego przez ibanCut. Krótkie grupy z cyfrą tuż za długością kraju to ten
+ * sam numer z literówką albo nadmiarową cyfrą („DE89 … 0130 00 12", „PL61 … 2874 5") — idą pod
+ * maskę razem z nim, inaczej zostaje jawny fragment numeru. Wyrazy z samych liter („PKO BP",
+ * „W EUR") zostają jawne jak dotąd, a grupa, po której stoi waluta albo grosze, to kwota
+ * („PL61 … 2874 1500 zł"), nie ogon numeru. `after` — tekst za dopasowaniem.
+ */
+const RE_IBAN_TAIL = /^(?:[ ](?=[A-Z]{0,3}\d)[A-Z0-9]{1,4}(?![A-Z0-9]))*/;
+const RE_IBAN_AMOUNT_AFTER = new RegExp(`^[ \\t\\u00A0]*(?:,\\d|zł(?:ot\\p{L}*)?|${[...CURRENCY_CODES].join('|')})(?!\\p{L})`, 'iu');
+function ibanMaskEnd(m: string, c: number, after: string): number {
+  const tail = RE_IBAN_TAIL.exec(m.slice(c))?.[0] ?? '';
+  if (tail && RE_IBAN_AMOUNT_AFTER.test(m.slice(c + tail.length) + after)) return c;
+  return c + tail.length;
+}
 function passIban(ctx: RedactCtx): void {
   if (!ctx.on('IBAN')) return;
-  ctx.text = ctx.text.replace(/\b[A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]){11,30}\b/g, (m) => {
+  ctx.text = ctx.text.replace(/\b[A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]){11,30}\b/g, (m, offset: number) => {
     const c = ibanCut(m);
     if (isValidIban(m.slice(0, c))) {
       ctx.bump('IBAN');
-      return ctx.M.IBAN + m.slice(c);
+      const after = ctx.text.slice(offset + m.length, offset + m.length + 8);
+      return ctx.M.IBAN + m.slice(ibanMaskEnd(m, c, after));
     }
     return m;
   });
@@ -1570,16 +1624,18 @@ function passAccount(ctx: RedactCtx): void {
   // BEZ flagi /i: wartość [A-Z0-9] musi być WIELKIMI literami/cyframi (jak realny IBAN). Z /i klasa
   // łapała małe litery następnego słowa („…3152 wpłynęły" → maska zjadała „ wp"). Warianty wielkości
   // liter etykiety wyliczone jawnie; lookahead (?![A-Za-z0-9]) domyka wartość na granicy słowa.
-  // Polski numer ma osobną gałąź o DOKŁADNEJ długości (PL + 26 cyfr), także ze spacją po „PL"
-  // („PL 92 1050 …" — wtedy wzorzec ogólny nie pasował i przy złej sumie numer wyciekał w całości).
+  // Polski numer ma osobną gałąź (PL + 26 cyfr), także ze spacją po „PL" („PL 92 1050 …" — wtedy
+  // wzorzec ogólny nie pasował i przy złej sumie numer wyciekał w całości). Gałąź bierze też do
+  // 4 nadmiarowych cyfr (literówka „… 2874 5"): idą pod maskę razem z numerem (ibanMaskEnd).
   // Wartość ogólna jest zachłanna jak w passIban, więc nadmiar („ PKO BP", „ W EUR", „ SWIFT")
   // odcina ibanCut i oddaje bez zmian. Prawa granica zna polskie litery: bez nich „…Z TYTU|ŁEM"
   // uchodziło za koniec wyrazu i maska zjadała „Z TYTU".
   ctx.text = ctx.text.replace(
-    /\b((?:konto|Konto|KONTO|konta|Konta|rachunek|Rachunek|RACHUNEK|rachunku|Rachunku|nr konta|Nr konta|numer konta|Numer konta|iban|Iban|IBAN)(?:\s+(?:to|o|nr|[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]{3,})){0,3})([\s:=.-]+)(PL[ ]?\d{2}(?:[ ]?\d){24}|[A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]){11,30})(?![A-Za-z0-9ĄĆĘŁŃÓŚŹŻąćęłńóśźż])/g,
-    (_m, kw: string, sep: string, val: string) => {
+    /\b((?:konto|Konto|KONTO|konta|Konta|rachunek|Rachunek|RACHUNEK|rachunku|Rachunku|nr konta|Nr konta|numer konta|Numer konta|iban|Iban|IBAN)(?:\s+(?:to|o|nr|[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]{3,})){0,3})([\s:=.-]+)(PL[ ]?\d{2}(?:[ ]?\d){24}(?:[ ]?\d){0,4}|[A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]){11,30})(?![A-Za-z0-9ĄĆĘŁŃÓŚŹŻąćęłńóśźż])/g,
+    (m, kw: string, sep: string, val: string, offset: number) => {
       ctx.bump('NR-KONTA');
-      return `${kw}${sep}${ctx.M['NR-KONTA']}${val.slice(ibanCut(val))}`;
+      const after = ctx.text.slice(offset + m.length, offset + m.length + 8);
+      return `${kw}${sep}${ctx.M['NR-KONTA']}${val.slice(ibanMaskEnd(val, ibanCut(val), after))}`;
     },
   );
   // (c) NRB BEZ etykiety — 26 cyfr z POPRAWNĄ sumą (walidacja po dodaniu „PL"). Prefiks „PL"/„PL "
@@ -1709,12 +1765,18 @@ const PHONE_CODES = [...CURRENCY_CODES, 'HUF', 'EURO', 'KČ', 'ZL'].join('|');
 // Waluta albo mnożnik PO liczbie (bez względu na wielkość liter, z granicą litery: „601 234 567
 // EUROPA" to nie kwota). Grosze „,50" mogą stać między liczbą a walutą.
 const RE_PHONE_AMOUNT_AFTER = new RegExp(
-  `^${PHONE_GAP}*(?:,\\d{1,2}(?!\\d))?${PHONE_GAP}*(?:(?:${PHONE_CODES}|gr|tys|mln|mld)(?!\\p{L})|[€£]|\\$(?!\\p{L}))`,
+  `^${PHONE_GAP}*(?:,\\d{1,2}(?!\\d))?${PHONE_GAP}*(?:(?:${PHONE_CODES}|tys|mln|mld)(?!\\p{L})|[€£]|\\$(?!\\p{L}))`,
   'iu',
 );
-// „zł" osobno i z rozróżnieniem wielkości liter: małe „zł" jako przedrostek łapie też „złotych",
-// a wersalikowe tylko z granicą — „601 234 567 Złotów" to miasto, nie waluta.
-const RE_PHONE_ZL_AFTER = new RegExp(`^${PHONE_GAP}*(?:,\\d{1,2}(?!\\d))?${PHONE_GAP}*(?:zł|ZŁ|Zł(?!\\p{L}))`, 'u');
+// „zł" i „gr" osobno, z rozróżnieniem wielkości liter i tylko w formach waluty: wyraz zaczynający
+// się od tych liter to nie kwota — „601 234 567 Złotów" i „… ZŁOTÓW" to miasto, „… ZŁOŻYŁ
+// WNIOSEK" i „… złożył" to proza, „… Gr. A" to grupa (flaga „i" brała ją za grosze).
+const RE_PHONE_ZL_AFTER = new RegExp(
+  `^${PHONE_GAP}*(?:,\\d{1,2}(?!\\d))?${PHONE_GAP}*` +
+    '(?:zł(?:ot(?:y|e|ych|ego|emu|ym|ymi|ówk\\p{L}*|ówek))?|ZŁ(?:OT(?:Y|E|YCH|EGO|EMU|YM|YMI|ÓWK\\p{L}*|ÓWEK))?|' +
+    'Zł(?:ot(?:y|e|ych))?|gr(?:osz\\p{L}*)?)(?!\\p{L})',
+  'u',
+);
 // Waluta PRZED liczbą („PLN 125 450 300", „€125 450 300") — ale nie wtedy, gdy kończy INNĄ kwotę
 // („Abonament 49 zł 600 100 200": tu numer stoi po kwocie, a nie jest nią).
 const RE_PHONE_AMOUNT_BEFORE = new RegExp(`(?:(?<![\\p{L}\\d])(?:${PHONE_CODES}|zł)|[€$£])${PHONE_GAP}?$`, 'iu');
@@ -1746,21 +1808,41 @@ function looksLikeAmount(full: string, offset: number, m: string): boolean {
   // grosze „,55" — ale nie w CSV: bez przecinka przed liczbą i bez kolejnego pola po groszach
   if (full[offset - 1] !== ',' && /^,\d{1,2}(?![\d,])/.test(after)) return true;
   if (!before.endsWith(sep) || !RE_PHONE_BILLION_HEAD.test(before)) return false;
-  const lineStart = full.lastIndexOf('\n', offset - 1) + 1;
-  return !RE_PHONE_ID_LABEL.test(full.slice(Math.max(lineStart, offset - 40), offset));
+  // Etykieta w tej samej linii — granicę linii szukamy tylko w oknie (lastIndexOf po całym
+  // tekście był kwadratowy w długiej linii bez „\n").
+  const win = full.slice(Math.max(0, offset - 40), offset);
+  return !RE_PHONE_ID_LABEL.test(win.slice(win.lastIndexOf('\n') + 1));
 }
+// Człon przed „/" lub „-", który nie robi z numeru identyfikatora: wyraz od wielkiej litery
+// (osobno od słów telefonicznych — flaga „i" zrównałaby \p{Lu} z małymi literami).
+const RE_PHONE_JOIN_WORD = /^(?:tel|telefon\p{L}*|kom|komórk\p{L}*|sms|gsm|fax|faks|kontakt\p{L}*|mob|mobile|cell|phone)$/iu;
+const isPersonalJoinPart = (s: string): boolean => /^\p{Lu}\p{Ll}+$/u.test(s) || RE_PHONE_JOIN_WORD.test(s);
 /**
  * Czy 9 cyfr to wnętrze identyfikatora („RR123456789PL", „FV/2026/123456789", „ZAM-123456789",
  * „SKU 123456789A", „DE811569869")? Wtedy maska rozrywała token i zostawiała jawne kawałki.
  * Sprawdzamy w callbacku, nie w lookbehindzie: lookbehind o zmiennej długości jest kwadratowy.
  * Mała litera przed numerem NIE blokuje („Kowalski512345678", „dzwoń512345678" z ekstrakcji
- * PDF to telefon), a „/" i „-" blokują tylko jako łącznik tokenu z literą — „500600700/501601701"
- * i lista „-500600700" to dalej telefony.
+ * PDF to telefon), a „/" i „-" blokują tylko jako łącznik tokenu identyfikatora (niżej) —
+ * „500600700/501601701" i lista „-500600700" to dalej telefony.
  */
 function gluedToIdentifier(full: string, offset: number, len: number): boolean {
   const before = full.slice(Math.max(0, offset - 32), offset);
-  if (/[\p{Lu}_]$/u.test(before) || /\p{L}[\p{L}\d_/-]*[/-]$/u.test(before)) return true;
-  return /^[\p{L}_]/u.test(full.charAt(offset + len));
+  if (/\p{Lu}$/u.test(before)) return true;
+  // „_" po literze lub cyfrze to łącznik identyfikatora („ZAM_123456789"), a ciąg podkreślników
+  // po etykiecie — linia do wypełnienia w formularzu („Telefon: ____601 234 567" to telefon).
+  if (/[\p{L}\d]_+$/u.test(before)) return true;
+  // Token z literą sklejony „/" lub „-" blokuje, gdy któryś jego człon ma cyfrę albo „_" albo jest
+  // skrótem lub słowem małymi literami („FV/2026/", „ZAM-", „sklep/order/"). Imię, nazwisko
+  // i słowo telefoniczne przed numerem osoby nie blokują („Anna Nowak/601 234 567",
+  // „Kowalski-601234567", „Nowak-Kowalska-…", „SMS/601…", „Tel/607…") — tam numer wyciekałby
+  // w całości, a to częsty zapis w pismach („córka Anna/603 456 789").
+  const tok = /[\p{L}\d_/-]*[/-]$/u.exec(before)?.[0] ?? '';
+  if (/\p{L}/u.test(tok) && !tok.split(/[/-]+/).filter(Boolean).every(isPersonalJoinPart)) return true;
+  // Litera albo „_" zaraz po cyfrach („RR123456789PL", „SKU 123456789A"). Wyjątek: jednoliterowy
+  // przyimek doklejony do numeru, który sam zaczyna token („512345678w godz. 8-16").
+  const next = full.charAt(offset + len);
+  if (!/[\p{L}_]/u.test(next)) return false;
+  return !(/[wzoiu]/.test(next) && !/[\p{L}\d_]/u.test(full.charAt(offset + len + 1)) && !/[\p{L}\d]$/u.test(before));
 }
 function passPhone(ctx: RedactCtx): void {
   if (!ctx.on('TELEFON')) return;
@@ -1909,10 +1991,13 @@ function passPlate(ctx: RedactCtx): void {
     /\b((?:nr\s+rej\w*|numer\s+rej\w*|rejestracyjn\w*|tablic\w*)(?:\s+(?:nr\.?|numer|pojazdu|rej\w*)){0,3}[\s:=.-]*)((?=[A-Z0-9\s-]{0,5}\d)[A-Z]{2,3}[\s-]?[A-Z0-9]{4,5})\b/gi,
     (m, pre: string, plate: string) => {
       // Flaga /i jest potrzebna kotwicy („NR REJ.", „Tablica"), ale obejmuje też wyróżnik: słowo
-      // prozy („od 2025", „dla 2000 pojazdów", „to 1500 zł") stawało się tablicą. Wyróżnik małymi
-      // literami przyjmujemy tylko w zapisie sklejonym („nr rej. wa12345"); „nr"/„NR" nigdy nie
-      // jest wyróżnikiem („Tablica nr 12345 wisi przy wejściu").
-      if (/^nr\b/i.test(plate) || (!/^[A-Z]{2,3}(?![a-z])/.test(plate) && /[\s-]/.test(plate))) return m;
+      // prozy („od 2025", „dla 2000 pojazdów", „to 1500 zł") stawało się tablicą — to jednak
+      // zdarza się tylko po słabych kotwicach „tablic…" i „rejestracyjn…". Tam wyróżnik małymi
+      // literami przyjmujemy tylko w zapisie sklejonym („tablica wa12345"); po „nr rej." /
+      // „numer rejestracyjny" stoi wartość pola, więc „nr rej. wa 12345" to tablica. „nr"/„NR"
+      // nigdy nie jest wyróżnikiem („Tablica nr 12345 wisi przy wejściu").
+      const strong = /^(?:nr|numer)\s+rej(?:estracyjn\p{L}*)?(?!\p{L})/iu.test(pre);
+      if (/^nr\b/i.test(plate) || (!strong && !/^[A-Z]{2,3}(?![a-z])/.test(plate) && /[\s-]/.test(plate))) return m;
       // Sama „tablica" bez „rej…" bywa też ostrzegawcza czy informacyjna („Na tablicy UN 1203")
       // — tam skrót techniczny nie jest wyróżnikiem. Przy „nr rej." kotwica wygrywa.
       if (!/rej/i.test(pre) && !RE_PLATE_ACRONYM_HEAD.test(plate)) return m;

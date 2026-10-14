@@ -754,6 +754,16 @@ export function buildDataset() {
   neg('git clone git@github.com:zespol/portal.git', ['git@github.com:zespol/portal.git']);
   str('GET /api/v1/clients?email=jan.kowalski%40example.pl&status=1 200', ['jan.kowalski%40example.pl'], ['&status=1 200']);
   str('Sygn. akt: CAN-PST-SWW.7421.1234567.2026.1 — wezwanie.', ['CAN-PST-SWW.7421.1234567.2026.1'], ['wezwanie']);
+  // Regresje partii b2 wykryte w weryfikacji: numer osoby po nazwisku sklejonym „/" lub „-",
+  // tablica małymi literami po „nr rej.", host po „wersję na", wersja w linii o serwerze,
+  // „ZŁ…" wersalikami po numerze, DUID z adresem karty, konto funkcyjne w prozie.
+  str('Koordynator: Anna Nowak/601 234 567, zastępca Tomasz Zawadzki-604123456.', ['601 234 567', '604123456'], ['Koordynator', 'zastępca']);
+  str('Zatrzymano pojazd nr rej. wa 12345 na parkingu.', ['wa 12345'], ['Zatrzymano pojazd nr rej.', 'na parkingu']);
+  str('Wdrożono nową wersję na 10.20.30.40 wieczorem. Konwersja adresów 192.168.1.15 nie działa.', ['10.20.30.40', '192.168.1.15'], ['nową wersję na', 'Konwersja adresów']);
+  neg('Aktualizacja serwera do 7.0.3.12. Kernel serwera 5.15.0.91. Konfiguracja adresów IP: rozdz. 5.2.1.3.', ['7.0.3.12', '5.15.0.91', '5.2.1.3']);
+  str('NOWAK JAN 602 345 678 ZŁOŻYŁ WNIOSEK', ['602 345 678'], ['ZŁOŻYŁ WNIOSEK']);
+  str('DHCPv6 Client DUID. . . : 00-01-00-01-2A-3B-4C-5D-00-1A-2B-3C-4D-5E', ['00-1A-2B-3C-4D-5E'], ['DHCPv6 Client DUID']);
+  str('Login: URZAD\\kadry\nPismo przekazano do działu kadry.', ['URZAD\\kadry'], ['do działu kadry.']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
