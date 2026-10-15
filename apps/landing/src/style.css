@@ -148,15 +148,14 @@ p { text-wrap: pretty; }
 .btn-sm { height: 36px; padding: 0 12px; font-size: 13.5px; font-weight: 600; }
 
 /* ============ PASEK ============
-   Licznik żądań do sieci wygląda jak odczyt przyrządu: bez kropki, poświaty i animacji. */
+   Licznik żądań do sieci (w punkcie 1 „Jak sprawdzić”) wygląda jak odczyt przyrządu: bez kropki, poświaty i animacji. */
 .pasek { position: sticky; top: 0; z-index: 50; background: var(--bg); border-bottom: 1px solid var(--line-2); }
 .pasek-in { max-width: 1120px; margin: 0 auto; padding: 0 24px; height: 56px; display: flex; align-items: center; gap: 20px; }
 .marka { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; flex: none; }
 .marka .znak { display: block; width: 30px; height: 28px; }
 .znak .gi { display: block; width: 100%; height: 100%; }
 .marka b { font-size: 17px; font-weight: 800; letter-spacing: .01em; text-transform: uppercase; color: var(--acc); }
-.siec { display: inline-flex; align-items: center; gap: 8px; font: 400 12.5px/1 var(--mono); color: var(--mut-2); white-space: nowrap; }
-.siec-kr { display: none; }
+.siec { display: inline-flex; vertical-align: baseline; }
 #net-count {
   display: inline-grid; place-items: center; min-width: 24px; height: 22px; padding: 0 5px;
   border: 1px solid rgba(18, 112, 73, .4); background: rgba(18, 112, 73, .08); border-radius: 4px;
@@ -169,10 +168,15 @@ p { text-wrap: pretty; }
 
 /* ============ PIERWSZY EKRAN: NARZĘDZIE ============ */
 .narzedzie { padding: 36px 0 64px; }
-.narz-glowa { display: grid; grid-template-columns: minmax(0, 1fr) 248px; gap: 48px; align-items: end; }
+/* Nagłówek na całą szerokość, pod nim lead i pobranie obok siebie: bez pustego miejsca nad przyciskiem. */
+.narz-glowa { display: grid; grid-template-columns: minmax(0, 1fr) 248px; column-gap: 48px; align-items: start; }
+.narz-tekst { display: contents; }
+.narz-glowa h1 { grid-column: 1 / -1; text-wrap: balance; }
+.narz-glowa .lede { grid-column: 1; }
+.narz-pobierz { grid-column: 2; margin-top: 18px; }
 .narzedzie h1 {
   font-size: clamp(30px, 1.6vw + 18px, 42px); font-weight: 800; line-height: 1.08;
-  letter-spacing: -.02em; max-width: 30ch;
+  letter-spacing: -.02em; max-width: 44ch;
 }
 .lede { margin-top: 14px; font-size: 17px; line-height: 1.6; color: var(--mut-2); max-width: 66ch; }
 .narz-pobierz .btn { width: 100%; }
@@ -437,7 +441,9 @@ textarea.editor:focus-visible { outline: 2px solid var(--acc); outline-offset: 2
   .pasek-pobierz { margin-left: auto; }
 }
 @media (max-width: 720px) {
-  .narz-glowa { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .narz-glowa { grid-template-columns: minmax(0, 1fr); }
+  .narz-glowa .lede, .narz-pobierz { grid-column: 1; }
+  .narz-pobierz { margin-top: 20px; }
   .narz-pobierz .btn { height: 50px; }
   .dl-tel { display: inline; }
   .demo-panes { grid-template-columns: minmax(0, 1fr); }
@@ -462,15 +468,10 @@ textarea.editor:focus-visible { outline: 2px solid var(--acc); outline-offset: 2
   .stopka-in { flex-direction: column; align-items: flex-start; }
   .stopka-linki { flex-direction: column; gap: 10px; }
 }
-@media (max-width: 600px) {
-  .siec-dl { display: none; }
-  .siec-kr { display: inline; }
-}
 @media (max-width: 480px) {
   .wrap, .pasek-in { padding-left: 20px; padding-right: 20px; }
   .dok-siatka::before { left: 20px; right: 20px; }
   .pasek-in { gap: 12px; }
-  .siec { gap: 6px; }
   .marka { gap: 8px; }
   .marka .znak { width: 26px; height: 24px; }
   .marka b { font-size: 15px; }

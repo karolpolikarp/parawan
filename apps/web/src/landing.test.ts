@@ -142,10 +142,11 @@ test('landing: ikony, pasek i kotwice', () => {
   const used = new Set([...landingHtml.matchAll(/data-i="([^"]+)"/g)].map((m) => m[1]));
   for (const name of used) expect(LANDING_ICONS[name], name).toBeTruthy();
   expect(Object.keys(LANDING_ICONS).sort()).toEqual([...used].sort());
-  // bez menu mobilnego: licznik i pobranie stoją w pasku także na telefonie
+  // bez menu mobilnego: pobranie stoi w pasku także na telefonie; licznik żądań jest w „Jak sprawdzić”
   expect(landingHtml).not.toContain('nav-toggle');
   const nav = block(landingHtml, /<nav class="pasek"[\s\S]*?<\/nav>/, 'pasek <nav class="pasek">');
-  expect(nav).toContain('id="net-count"');
+  expect(nav).not.toContain('id="net-count"');
+  expect(landingHtml.slice(landingHtml.indexOf('id="sprawdz"'))).toContain('id="net-count"');
   expect(nav).toContain(
     'class="btn btn-cta btn-sm pasek-pobierz" href="https://github.com/karolpolikarp/parawan/releases/latest/download/Parawan.html">',
   );

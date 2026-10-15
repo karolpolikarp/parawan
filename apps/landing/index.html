@@ -43,12 +43,11 @@
     </script>
   </head>
   <body>
-    <!-- PASEK: znak, licznik żądań do sieci, linki i pobranie (bez menu mobilnego) -->
+    <!-- PASEK: znak, linki i pobranie (bez menu mobilnego) -->
     <a href="#demo" class="vh">Przejdź do demo</a>
     <nav class="pasek" aria-label="Główna">
       <div class="pasek-in">
         <a href="#top" class="marka" aria-label="Parawan, początek strony"><span class="znak"><i class="gi" data-i="parawan-mark"></i></span><b>Parawan</b></a>
-        <span class="siec" id="net-badge" title="Zasoby pobrane z sieci przez tę stronę od chwili otwarcia"><span class="siec-dl" aria-hidden="true">żądania do sieci od otwarcia strony</span><span class="siec-kr" aria-hidden="true">żądań:</span><span class="vh">Żądania do sieci od otwarcia tej strony: </span><b id="net-count">0</b></span>
         <div class="pasek-linki">
           <a href="#typy">Typy danych</a>
           <a href="#sprawdz">Jak sprawdzić</a>
@@ -226,7 +225,7 @@
           </div>
           <div class="dok-tresc">
             <ol class="kroki">
-              <li><p>Licznik w pasku u góry pokazuje, ile zasobów ta strona pobrała z sieci od otwarcia. Wklej własny tekst i skopiuj wynik, a liczba się nie zmieni. Licznik prowadzi jednak sama strona, więc to tylko podgląd. Mocniejsze są punkty 2, 3 i 4: odłączona sieć, zakładka „Sieć” i reguła, której pilnuje przeglądarka.</p></li>
+              <li><p>Ta strona liczy, ile zasobów pobrała z sieci od otwarcia: <span class="siec" id="net-badge" title="Zasoby pobrane z sieci przez tę stronę od chwili otwarcia"><span class="vh">żądania do sieci od otwarcia tej strony: </span><b id="net-count">0</b></span>. Wklej w demo własny tekst i skopiuj wynik, a liczba się nie zmieni. Licznik prowadzi jednak sama strona, więc to tylko podgląd. Mocniejsze są punkty 2, 3 i 4: odłączona sieć, zakładka „Sieć” i reguła, której pilnuje przeglądarka.</p></li>
               <li><p>Wyłącz Wi-Fi albo wyjmij kabel i otwórz pobrany Parawan.html z dysku. Zasłania tak samo jak przy włączonej sieci. Ta strona też: wczytała się raz, a demo działa dalej bez połączenia.</p></li>
               <li><p>Naciśnij <kbd>F12</kbd>, przejdź do zakładki „Sieć” (Network) i popisz w demo. Nowe wpisy się nie pojawią. Po odświeżeniu zobaczysz wczytanie samej strony, a wpisy zaczynające się od <code>data:</code> to fonty i ikona zapisane w pliku.</p></li>
               <li><p>Na samym początku pliku Parawan.html stoi polityka bezpieczeństwa treści (Content-Security-Policy, w skrócie CSP), czyli reguła, której pilnuje przeglądarka. Na jej podstawie przeglądarka blokuje połączenia nawiązywane przez skrypty (fetch, XHR, WebSocket) i wczytywanie obrazów, fontów, skryptów i stylów spoza pliku. Przy każdym wydaniu automat w repozytorium sprawdza, czy reguła jest na miejscu. W Parawan.html brzmi tak:</p>

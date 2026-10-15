@@ -2,8 +2,8 @@
  * Parawan, landing page. Logika strony:
  *  1) demo z PRAWDZIWYM silnikiem `redactPII` (import z rdzenia, wtapiany do jednego pliku):
  *     anonimizacja liczona w przeglądarce, bez żadnego żądania sieciowego;
- *  2) licznik żądań do sieci w pasku u góry (#net-count), widoczny cały czas, także podczas
- *     pisania w demo; sekcja „Jak sprawdzić” odwołuje się do niego słownie;
+ *  2) licznik żądań do sieci w punkcie 1 sekcji „Jak sprawdzić” (#net-count), aktualny także
+ *     podczas pisania w demo;
  *  3) drobiazgi UI: wersja w metryczce pliku, przełącznik widoku, kopiowanie, hydracja ikon.
  *
  * Renderowanie znaczników i widok „Porównanie" są przeniesione z apps/web/src/main.ts,
@@ -280,7 +280,7 @@ copyBtn?.addEventListener('click', async () => {
   }
 });
 
-/* ── Licznik żądań do sieci w pasku (#net-count). Liczy tylko zasoby o schemacie http(s):
+/* ── Licznik żądań do sieci w „Jak sprawdzić” (#net-count). Liczy tylko zasoby o schemacie http(s):
    wszystko w tym pliku jest inline (data:), więc licznik powinien wynosić 0. Prowadzi go sama
    strona, dlatego „Jak sprawdzić” nazywa go podglądem i odsyła do zakładki „Sieć”. ── */
 function isExternal(url: string): boolean {
