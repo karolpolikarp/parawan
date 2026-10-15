@@ -51,14 +51,14 @@
 
 :root {
   color-scheme: light;
-  --bg:        #efede6;
+  --bg:        #f7f5ef;
   --card:      #ffffff;
   --card-2:    #faf9f4;
   --well:      #faf9f4;
   --line:      #e1ded3;
   --line-2:    #d4cfc1;
   --text:      #17251e;
-  --mut-2:     #566259;
+  --mut-2:     #36423b;
   --acc:       #0b3d2e;   /* leśna zieleń: kolor główny marki */
   --acc-2:     #0e4a38;   /* hover przycisku „Kopiuj wynik” */
   --acc-line:  rgba(11, 61, 46, .30);
@@ -102,7 +102,7 @@ html { scroll-padding-top: 72px; }
 body {
   background: var(--bg);
   color: var(--text);
-  font: 16px/1.6 var(--sans);
+  font: 450 17px/1.6 var(--sans);
   -webkit-font-smoothing: antialiased;
 }
 
