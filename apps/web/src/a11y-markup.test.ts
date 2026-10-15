@@ -17,16 +17,30 @@ test('aplikacja: semantyka strony', () => {
   expect(webHtml.match(/<summary class="card-h" aria-labelledby="/g)).toHaveLength(2);
 });
 
-test('landing: tabela, nagłówki i statystyki demo dla czytnika ekranu', () => {
+test('landing: tabele, nagłówki i statystyki demo dla czytnika ekranu', () => {
   expect(landingHtml).toMatch(/id="demo-stat" role="status"/);
   // po h2 sekcji stopka miała h4 (przeskok poziomu)
   expect(landingHtml).not.toMatch(/<h4/);
-  // pierwsza kolumna porównania to nagłówki wierszy: czytnik poda kryterium przy „nigdy”
-  expect(landingHtml.match(/<th scope="row" class="cmp-feat">/g)).toHaveLength(7);
-  expect(landingHtml).not.toContain('<td class="cmp-feat">');
-  expect(landingHtml).toMatch(/<table aria-labelledby="porownanie-h">/);
-  // na telefonie tabela staje się kartami, a nazwę kolumny przy odpowiedzi daje data-label
-  expect(landingHtml.match(/<td data-label="(Parawan|Narzędzie w chmurze|Ręczne czyszczenie)"/g)).toHaveLength(21);
+  // tabela przykładu zostaje tabelą na każdej szerokości: podpis i nagłówki wierszy
+  const zostalo = landingHtml.match(/<table class="zostalo">[\s\S]*?<\/table>/)?.[0] ?? '';
+  expect(zostalo).toMatch(/<caption>[^<]+<\/caption>/);
+  expect(zostalo.match(/<th scope="row">/g)).toHaveLength(3);
+  // Tabele kategorii i miar zmieniają display na wąskim ekranie, a Safari z VoiceOverem gubi
+  // wtedy semantykę tabeli: jawne role ją trzymają.
+  const kategorie = landingHtml.match(/<table class="kategorie" role="table">[\s\S]*?<\/table>/)?.[0] ?? '';
+  expect(kategorie.match(/role="rowheader"/g)).toHaveLength(5);
+  const miary = landingHtml.match(/<table class="miary" role="table">[\s\S]*?<\/table>/)?.[0] ?? '';
+  expect(miary.match(/<th scope="row" role="rowheader">/g)).toHaveLength(3);
+  expect(miary.match(/<td class="m-val" role="cell">/g)).toHaveLength(3);
+  for (const t of [kategorie, miary]) {
+    expect(t).toContain('<tbody role="rowgroup">');
+    const rows = t.match(/<tr\b[^>]*>/g) ?? [];
+    expect(rows.length).toBeGreaterThan(0);
+    for (const tr of rows) expect(tr).toBe('<tr role="row">');
+  }
+  // metody rozpoznawania mają nagłówki, więc czytnik ekranu przeskakuje między nimi
+  const typy = landingHtml.match(/<section class="dok" id="typy">[\s\S]*?<\/section>/)?.[0] ?? '';
+  expect(typy.match(/<div class="metoda">\s*<div class="m-opis">\s*<h3>/g)).toHaveLength(4);
   // wynik demo przyjmuje fokus: klik w niego i Ctrl+A zaznacza sam wynik, nie całą stronę
   expect(landingHtml).toMatch(/id="demo-output"[^>]*tabindex="0"/);
 });

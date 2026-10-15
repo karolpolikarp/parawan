@@ -1,9 +1,10 @@
 /**
- * Parawan — landing page. Logika strony:
- *  1) live demo z PRAWDZIWYM silnikiem `redactPII` (import z rdzenia, wtapiany do jednego
- *     pliku) — anonimizacja liczona w przeglądarce, bez żadnego żądania sieciowego;
- *  2) licznik żądań do sieci (dowód „0 żądań” z sekcji „Sprawdź sam”);
- *  3) drobiazgi UI: wersja, przełącznik widoku, kopiowanie, mobilne menu, hydracja ikon.
+ * Parawan, landing page. Logika strony:
+ *  1) demo z PRAWDZIWYM silnikiem `redactPII` (import z rdzenia, wtapiany do jednego pliku):
+ *     anonimizacja liczona w przeglądarce, bez żadnego żądania sieciowego;
+ *  2) licznik żądań do sieci w pasku u góry (#net-count), widoczny cały czas, także podczas
+ *     pisania w demo; sekcja „Jak sprawdzić” odwołuje się do niego słownie;
+ *  3) drobiazgi UI: wersja w metryczce pliku, przełącznik widoku, kopiowanie, hydracja ikon.
  *
  * Renderowanie znaczników i widok „Porównanie" są przeniesione z apps/web/src/main.ts,
  * żeby wynik wyglądał identycznie jak w narzędziu (spójność marki).
@@ -11,18 +12,16 @@
 import './style.css';
 import { redactPII, type PiiFinding } from 'anonimizator';
 import { hydrateIcons } from './icons';
-// Znaczniki i kategorie z jednej listy, zsynchronizowanej z rdzeniem (opis w tokens.ts).
-import { MASK_TOKEN_RE, maskCategory, typeCategory } from './tokens';
+// Znaczniki, kategorie i przykład z modułu bez DOM, który sprawdzają testy (opis w tokens.ts).
+import { EXAMPLE_TEXT, MASK_TOKEN_RE, maskCategory, typeCategory } from './tokens';
 
 const $ =<T extends HTMLElement = HTMLElement>(id: string): T | null =>
   document.getElementById(id) as T | null;
 
-/* ── Wersja (z build define) ── */
-const version = typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : 'dev';
-for (const id of ['ver', 'ver-foot']) {
-  const el = $(id);
-  if (el) el.textContent = version;
-}
+/* ── Wersja strony i demo (z build define, apps/landing/package.json). Stoi tylko w metryczce
+   pliku: przy przycisku pobierania obiecywałaby plik, którego przed tagiem jeszcze nie ma. ── */
+const verEl = $('ver-foot');
+if (verEl) verEl.textContent = typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : 'dev';
 
 /* ── Renderowanie wyniku (znaczniki + widok „Porównanie") — przeniesione z aplikacji ── */
 function escapeHtml(s: string): string {
@@ -119,14 +118,7 @@ function renderAligned(original: string, redacted: string, compare: boolean): st
   return html;
 }
 
-/* ── Live demo ── */
-const EXAMPLE_TEXT = `Dzień dobry, nazywam się Anna Kowalska (PESEL 44051401359).
-Mieszkam przy ul. Polnej 12/3, 00-950 Warszawa.
-Proszę o kontakt: anna.kowalska@example.com lub tel. 600 700 800.
-Nr konta do zwrotu: PL61 1090 1014 0000 0712 1981 2874.
-Faktura w KSeF: 5265877635-20250826-0100001AF629-AF.
-Sprawę prowadzi pan Bąkiewicz zgodnie z art. 123 456 789 KC.`;
-
+/* ── Demo ── */
 const input = $<HTMLTextAreaElement>('demo-input');
 const outputEl = $('demo-output');
 const statEl = $('demo-stat');
@@ -156,7 +148,7 @@ function renderStats(found: PiiFinding[]): void {
   }
   const cats = new Set(found.map((f) => typeCategory(f.type))).size;
   statEl.innerHTML =
-    `Zamaskowano <b>${total}</b> ${plural(total, 'fragment', 'fragmenty', 'fragmentów')} ` +
+    `Zasłonięto <b>${total}</b> ${plural(total, 'fragment', 'fragmenty', 'fragmentów')} ` +
     `w <b>${cats}</b> ${cats === 1 ? 'kategorii' : 'kategoriach'}.`;
 }
 
@@ -164,7 +156,7 @@ function renderOutput(): void {
   if (!outputEl) return;
   if (!lastRedacted) {
     outputEl.innerHTML =
-      `<span class="placeholder">Tu pojawi się bezpieczny tekst, np. ${maskHtml('IMIĘ I NAZWISKO')}, ` +
+      `<span class="placeholder">Tu pojawi się wynik, np. ${maskHtml('IMIĘ I NAZWISKO')}, ` +
       `tel. ${maskHtml('TELEFON')}. Wpisz coś w polu „Tekst źródłowy” albo kliknij „Wstaw przykład”.</span>`;
     return;
   }
@@ -181,7 +173,7 @@ function analyze(): void {
     lastRedacted = '';
     lastInput = '';
     renderOutput();
-    if (statEl) statEl.textContent = 'Tu pojawią się statystyki maskowania.'; // ten sam napis co w index.html
+    if (statEl) statEl.textContent = 'Pole „Tekst źródłowy” jest puste.'; // ten sam napis co w index.html
     if (copyBtn) copyBtn.disabled = true;
     return;
   }
@@ -288,9 +280,9 @@ copyBtn?.addEventListener('click', async () => {
   }
 });
 
-/* ── Licznik żądań sieciowych („Sprawdź sam”): dowód, że strona nie łączy się z siecią.
-   Liczymy tylko zasoby o schemacie http(s) — wszystko w tym pliku jest inline (data:),
-   więc licznik powinien wynosić 0. To jest prawda weryfikowalna, nie deklaracja. ── */
+/* ── Licznik żądań do sieci w pasku (#net-count). Liczy tylko zasoby o schemacie http(s):
+   wszystko w tym pliku jest inline (data:), więc licznik powinien wynosić 0. Prowadzi go sama
+   strona, dlatego „Jak sprawdzić” nazywa go podglądem i odsyła do zakładki „Sieć”. ── */
 function isExternal(url: string): boolean {
   return /^https?:\/\//i.test(url);
 }
@@ -311,81 +303,6 @@ try {
   new PerformanceObserver(updateNetCount).observe({ type: 'resource', buffered: true });
 } catch {
   /* PerformanceObserver niedostępny — licznik pozostaje statyczny. */
-}
-
-/* ── Mobilne menu ──
-   Linki stoją w kodzie przed przyciskiem, więc po otwarciu Tab szedł od razu do treści pod
-   rozwiniętą listą. Dlatego otwarcie przenosi fokus na pierwszy link, a menu zamyka Esc
-   (z powrotem na przycisk), wyjście fokusem z paska, klik obok i przewinięcie strony:
-   otwarta lista nie zostaje nad treścią, którą czyta się dalej. */
-const nav = document.querySelector<HTMLElement>('.nav');
-const navToggle = $<HTMLButtonElement>('nav-toggle');
-const navLinks = $('nav-links');
-const isNavOpen = (): boolean => navLinks?.classList.contains('open') ?? false;
-let navOpenedAtY = 0;
-
-function closeNav(refocus = false): void {
-  if (!isNavOpen()) return;
-  navLinks?.classList.remove('open');
-  navToggle?.setAttribute('aria-expanded', 'false');
-  if (refocus) navToggle?.focus();
-}
-
-navToggle?.addEventListener('click', () => {
-  const open = navLinks?.classList.toggle('open') ?? false;
-  navToggle.setAttribute('aria-expanded', String(open));
-  if (open) {
-    navOpenedAtY = scrollY;
-    navLinks?.querySelector<HTMLElement>('a')?.focus({ preventScroll: true });
-  }
-});
-navLinks?.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => closeNav()));
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && isNavOpen()) closeNav(true);
-});
-nav?.addEventListener('focusout', (e) => {
-  const to = e.relatedTarget as Node | null;
-  if (to && !nav.contains(to)) closeNav();
-});
-document.addEventListener('click', (e) => {
-  if (isNavOpen() && !(e.target as Element | null)?.closest('.nav')) closeNav();
-});
-addEventListener(
-  'scroll',
-  () => {
-    if (isNavOpen() && Math.abs(scrollY - navOpenedAtY) > 60) closeNav();
-  },
-  { passive: true },
-);
-
-/* ── Wejścia sekcji: subtelny fade-up przy wejściu w widok ──
-   Pomijamy treść nad zgięciem (żeby nic nie migotało przy starcie) i szanujemy
-   preferencję ograniczenia ruchu (wtedy w ogóle nie ukrywamy elementów). */
-const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
-if (!reduceMotion && 'IntersectionObserver' in window) {
-  const targets = document.querySelectorAll<HTMLElement>(
-    '.sec-head, .grid > .card, .demo-card, .table-wrap, .caveat, .notdo-row, .finalcta',
-  );
-  const io = new IntersectionObserver(
-    (entries, obs) => {
-      for (const e of entries) {
-        if (e.isIntersecting) {
-          e.target.classList.add('is-in');
-          obs.unobserve(e.target);
-        }
-      }
-    },
-    { threshold: 0.12, rootMargin: '0px 0px -6% 0px' },
-  );
-  const vh = window.innerHeight;
-  let i = 0;
-  targets.forEach((el) => {
-    if (el.getBoundingClientRect().top < vh * 0.92) return; // widoczne od razu — zostaw
-    el.classList.add('reveal');
-    el.style.transitionDelay = `${Math.min((i % 4) * 55, 165)}ms`;
-    io.observe(el);
-    i++;
-  });
 }
 
 /* ── Start ── */

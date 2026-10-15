@@ -54,9 +54,11 @@ Release (`.github/workflows/release.yml`, tag `v*`): jeden artefakt — `Parawan
 - **Idempotencja**: placeholdery nie zawierają cyfr ani „@", więc ponowny przebieg ich nie pożre.
 - Nowy typ PII = dodać do `PiiType`, `MASK`, `HUMAN_LABEL` (index.ts), w aplikacji do `PII_TOKENS`,
   `MASK_GROUP_DEFS`, `CHIP_LABELS` i `WYKRYWA_ROWS` (apps/web/src/pii-meta.ts), na landingu do
-  `TYPE_MASK` (apps/landing/src/tokens.ts) i do chmury typów z licznikami (apps/landing/index.html:
-  pasek zaufania, legenda, nagłówek, FAQ, meta description), do tabeli w README, oraz testy
-  (index.test.ts) i przypadki benchmarku (dataset.mjs). Rozjazdy łapią pii-meta.test.ts i landing.test.ts.
+  `TYPE_MASK` (apps/landing/src/tokens.ts) i na stronę (apps/landing/index.html: chip i liczba
+  w tabeli `.kategorie` sekcji `#typy`, nazwa typu w zdaniu właściwego bloku `.metoda`, nagłówek
+  sekcji, meta description i opis w JSON-LD), do tabeli w README, oraz testy (index.test.ts)
+  i przypadki benchmarku (dataset.mjs). Rozjazdy łapią pii-meta.test.ts i landing.test.ts
+  (ten drugi przepuszcza też przez `redactPII` przykład z demo i przykłady z treści landingu).
 
 ## Weryfikacja zmian w detekcji
 

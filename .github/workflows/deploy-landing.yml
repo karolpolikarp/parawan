@@ -36,7 +36,27 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      # Testy landingu żyją w apps/web (landing.test.ts i inne): sprawdzają przykład z demo
+      # i przykłady z treści na prawdziwym silniku. Bez nich strona rozjechana z rdzeniem
+      # (np. po zmianie reguły w packages/core) poszłaby na produkcję mimo czerwonego CI.
+      - run: npm run build -w anonimizator
+      - run: npm run test -w anonimizator-web
       - run: npm run build -w parawan-landing
+      - name: Strażnik CSP (landing)
+        run: |
+          grep -Eq "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'[^\"]*connect-src 'none'" apps/landing/dist/index.html \
+            || { echo "::error::brak Content-Security-Policy z default-src 'none' i connect-src 'none'"; exit 1; }
+      # Strona opisuje CSP w pobieranym pliku i notkę „Dla działu IT” w JAK-UZYC.txt. Gdy najnowsze
+      # wydanie ich nie ma (strona wyprzedza wydanie), deploy staje: najpierw wydaj nową wersję
+      # (tag v*), potem w zakładce Actions „Re-run failed jobs”.
+      - name: Najnowsze wydanie zgodne z opisem na stronie
+        run: |
+          curl -fsSL -o /tmp/Parawan.html https://github.com/karolpolikarp/parawan/releases/latest/download/Parawan.html
+          curl -fsSL -o /tmp/JAK-UZYC.txt https://github.com/karolpolikarp/parawan/releases/latest/download/JAK-UZYC.txt
+          grep -Eq "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'[^\"]*connect-src 'none'" /tmp/Parawan.html \
+            || { echo "::error::najnowsze wydanie Parawan.html nie ma CSP opisanej na stronie, najpierw wydaj nową wersję"; exit 1; }
+          grep -q "Dla działu IT" /tmp/JAK-UZYC.txt \
+            || { echo "::error::najnowsze wydanie JAK-UZYC.txt nie ma notki „Dla działu IT”, najpierw wydaj nową wersję"; exit 1; }
       - uses: actions/upload-pages-artifact@v4
         with:
           path: apps/landing/dist

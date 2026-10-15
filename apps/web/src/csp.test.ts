@@ -42,9 +42,21 @@ test('aplikacja: obrazki wyłącznie z data:, bez plików obok', () => {
 
 test('źródłowe index.html: miejsce na CSP przed pierwszym skryptem, bez polityki na sztywno', () => {
   for (const html of [webHtml, landingHtml]) {
-    expect(html).not.toContain('Content-Security-Policy');
+    // nazwa polityki może paść w treści (landing, „Jak sprawdzić”), ale nie jako meta
+    expect(html).not.toMatch(/http-equiv=["']?Content-Security-Policy/i);
     const charset = html.search(/<meta charset="UTF-8"\s*\/?>/i);
     expect(charset).toBeGreaterThan(0);
     expect(charset).toBeLessThan(html.indexOf('<script'));
   }
+});
+
+test('landing: cytat polityki w „Jak sprawdzić” zgodny z polityką Parawan.html', () => {
+  const pre = landingHtml.match(/<pre class="csp">([\s\S]*?)<\/pre>/)?.[1];
+  expect(pre).toBeTruthy();
+  const quoted = (pre ?? '').replace(/<[^>]+>/g, '');
+  const policy = [...cspFromConfig(webConfig)].map(([d, s]) => [d, ...s].join(' ')).join('; ');
+  expect(quoted).toBe(policy);
+  // wyróżnione na stronie są dwie dyrektywy, o których mówi tekst
+  expect(pre).toContain("<mark>default-src 'none'</mark>");
+  expect(pre).toContain("<mark>connect-src 'none'</mark>");
 });

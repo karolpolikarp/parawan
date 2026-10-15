@@ -52,6 +52,23 @@ export function typeCategory(t: PiiType): Cat {
   return TYPE_MASK[t].cat;
 }
 
+/**
+ * Przykład w demo: wymyślone pismo procesowe. Stoi tutaj, a nie w main.ts, bo test
+ * (apps/web/src/landing.test.ts) przepuszcza go przez redactPII i porównuje wynik z sekcją
+ * „Co się stało z przykładem” w index.html. PESEL, NIP w numerze KSeF i numer konta mają
+ * poprawne sumy kontrolne; numer zamówienia celowo złą i nie dzieli cyfr z PESEL-em,
+ * żeby nie zdradzał zasłoniętego numeru.
+ */
+export const EXAMPLE_TEXT = `Sygn. akt I C 456/23
+Powódka Maria Wiśniewska (PESEL 90031512348),
+zam. ul. Lipowa 15, 31-100 Kraków, tel. 512 345 678,
+e-mail m.wisniewska@example.com.
+Wnosi o zasądzenie 12 500 zł z faktury KSeF 5265877635-20250826-0100001AF629-AF
+płatnej na rachunek PL61 1090 1014 0000 0712 1981 2874.
+Powołuje się na wyrok SN z 12 marca 2019 r. (II CSK 123/18) i art. 471 KC.
+Zamówienie nr 48213307715 złożyła w sklepie pozwanego.
+Właściwy jest Sąd Rejonowy w Katowicach.`;
+
 // Wszystkie znaczniki z listy wyżej plus dynamiczne OSOBA-A/B… (tryb rozróżniania osób).
 // Żaden token nie zawiera metaznaków regexu, a każdy stoi w nawiasach [...], więc wstawiamy
 // je wprost i kolejność alternatyw nie ma znaczenia.
