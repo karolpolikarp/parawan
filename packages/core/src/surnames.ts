@@ -189,6 +189,9 @@ export const NON_SURNAME_ADJ = new Set<string>((
   // po rzeczowniku z wielkiej litery szły jako osoba. Para z imieniem („Jan Poselski") dalej maskuje.
   'pielęgniarski aptekarski felczerski poselski prezydencki senacki prokuratorski strażacki ' +
   'olimpijski piłkarski literacki rodzicielski diabelski ' +
+  // nazwy zakładów usługowych: „Salon Fryzjerski Ewa zaprasza" szło jako osoba, a imię z nazwy
+  // salonu domykało maskę („[IMIĘ I NAZWISKO] zaprasza")
+  'fryzjerski ' +
   // „Ochrony Środowiska" (RDOŚ, WIOŚ, WFOŚiGW): dopełniacz rzeczownika „środowisko" ma końcówkę
   // -ska, a reguła odmiany sprowadza go do „środowiski" — bez wpisu każdy taki urząd dawał osobę
   'środowiski ' +

@@ -827,6 +827,26 @@ export function buildDataset() {
   osp('Pacjent Tadeusz Nowacki trafił na SOR. Objawy Nowackiego nasiliły się w nocy. Mistrz linii Kowalskiego wydał polecenie.', ['Tadeusz', 'Nowacki', 'Nowackiego', 'Kowalskiego'], ['Objawy', 'Mistrz linii']);
   str('ul. Polna 3, 86-170 Nowe Anna Gzik', ['Polna 3', 'Anna', 'Gzik'], []);
   neg('Osoba mieszkająca w Krakowie może złożyć wniosek. Pracownikom zamieszkującym w Gdańsku przysługuje dodatek. Odruch Babińskiego dodatni.', ['Krakowie', 'Gdańsku', 'Babińskiego']);
+  // Wyciek fragmentu (audyt, partia b4): prefiks telefonu, PESEL/NIP/REGON z odstępami, imię po
+  // przecinku i drugie imię za maską, zdrobnienie, imię sklejone kropką, OCR, miasto wielowyrazowe,
+  // zakres i lokal w adresie, konto z twardą spacją, osoba w polu loginu, obce litery w nazwisku.
+  // Fragmenty („55 21", „-43", „öder") osobno w mustMask: jawny ogon to też wyciek.
+  str('Kontakt: tel.: 0048 12 634 55 21, tel./fax (0048) 61 852 33 49, T: +48 (0)22 395 41 00, (+48) 512 345 678.', ['0048 12 634', '55 21', '852 33 49', '(0)22', '395 41 00', '(+48', '512 345 678'], ['Kontakt:', 'tel./fax', 'T:']);
+  str('PESEL: 851 103 142 83, NIP: 5260 2502 74, REGON 012-345-675.', ['851 103 142 83', '142 83', '5260 2502 74', '012-345-675'], ['PESEL:', 'NIP:', 'REGON']);
+  osp('Do: Wiśniewska, Ewa; Sowa, Jakub\nLista obecności:\nKowalska Anna Maria\nNowak Jan Piotr', ['Wiśniewska', 'Ewa', 'Sowa', 'Jakub', 'Kowalska', 'Anna', 'Maria', 'Nowak', 'Jan', 'Piotr'], ['Do:', 'Lista obecności:']);
+  osp('[12:10] Kuba Nowak: siema\nNapisał Kuba Kowalski.', ['Kuba', 'Nowak', 'Kowalski'], ['[12:10]', 'siema', 'Napisał']);
+  neg('Kuba Libre to drink z rumem. Ambasador RP na Kubie złożył wizytę.', ['Kuba Libre', 'na Kubie']);
+  osp('Konto Jan.Kowalski zostało zablokowane. Przeniesiono folder Nowak_Anna do archiwum.', ['Jan.', 'Kowalski', 'Nowak', '_Anna'], ['Konto', 'zablokowane', 'folder', 'archiwum']);
+  osp('Od: J0anna Kowalczyk\nPani ANNA NOWAK-KOWALSKA', ['J0anna', 'Kowalczyk', 'ANNA', 'NOWAK-KOWALSKA'], ['Od:', 'Pani']);
+  neg('CENTRUM ONKOLOGII MARII SKŁODOWSKIEJ-CURIE. SĄD REJONOWY W BIELSKU-BIAŁEJ.', ['MARII SKŁODOWSKIEJ-CURIE', 'BIELSKU-BIAŁEJ']);
+  str('zam. 55-080 Kąty Wrocławskie, a wcześniej zam. w Dąbrowie Górniczej i 66-470 Kostrzyn nad Odrą.', ['55-080', 'Kąty', 'Wrocławskie', 'Dąbrowie', 'Górniczej', 'Kostrzyn', 'nad Odrą'], ['a wcześniej']);
+  str('zam. ul. Hoża 41-43 m. 12, 00-681 Warszawa; korespondencja: ul. Żwirki i Wigury 16/3, Aleje Jerozolimskie 44 lok. 5.', ['Hoża 41', '-43', 'm. 12', 'Żwirki', 'Wigury 16/3', 'Jerozolimskie 44', 'lok. 5'], ['korespondencja:']);
+  neg('Wypadek przy ul. Długiej 5 osób rannych. Mieszkanie 3-pokojowe, m.in. sklepy obok.', ['5 osób rannych', '3-pokojowe', 'm.in. sklepy']);
+  str(`Numer rachunku: ${'57 1140 2004 0000 3002 0123 4567'.replace(/ /g, '\u00A0')}, konto: 57-1140-2004-0000-3002-0123-4567, mikrorachunek podatkowy 52 1010 0071 2221 7743 1005 2400, NIP: 526\u00A0000\u00A012\u00A046.`, ['3002\u00A00123', '3002-0123', '7743 1005 2400', '526\u00A0000'], ['Numer rachunku:', 'mikrorachunek podatkowy', 'NIP:']);
+  neg('Kwota przelewu: 1\u00A0234\u00A0567,89 zł. Konto księgowe 201-01-001-0002-0003-0004-0005-01 (plan kont).', ['1\u00A0234\u00A0567,89 zł', '201-01-001-0002-0003-0004-0005-01']);
+  osp('User: Kowalski Jan\nJan Kowalski zgłosił awarię.', ['Kowalski', 'Jan'], ['User:', 'zgłosił awarię']);
+  osp('Pani Anna Schröder i Jan Müller oraz Pan Dvořák złożyli wniosek.', ['Anna', 'Schröder', 'öder', 'Jan', 'Müller', 'Dvořák'], ['Pani', 'oraz Pan', 'złożyli wniosek']);
+  neg('Spektakl Café Müller wystawiono w Zürichu.', ['Café Müller', 'Zürichu']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

@@ -2360,15 +2360,17 @@ test('K26 pułapki: CSV, lista po przecinku, godzina, „Złotów" i numer po in
     ['Jan,Kowalski,512 345 678,25,Warszawa', 'Jan,[IMIĘ I NAZWISKO],[TELEFON],25,Warszawa'],
     ['Numer 512 345 678, 12 osób czeka.', 'Numer [TELEFON], 12 osób czeka.'],
     ['2024-03-12 14:22 512 345 678', '2024-03-12 14:22 [TELEFON]'],
-    ['tel. 0 512 345 678', 'tel. 0 [TELEFON]'],
+    // zero międzymiastowe po kotwicy należy do numeru (K13), dawniej zostawało jawne przed maską
+    ['tel. 0 512 345 678', 'tel. [TELEFON]'],
     ['Zadzwoń 600 700 800, zła wiadomość', 'Zadzwoń [TELEFON], zła wiadomość'],
     ['Kwota 512 345 678\nzł', 'Kwota [TELEFON]\nzł'],
     ['tel. 500 000 000', 'tel. [TELEFON]'],
     ['Abonament 49 zł 600 100 200', 'Abonament 49 zł [TELEFON]'],
     ['601 234 567 Złotów', '[TELEFON] Złotów'],
     ['Numer: 48 512 345 678', 'Numer: 48 [TELEFON]'],
-    // etykieta identyfikatora przed grupami cyfr: to nie ogon kwoty (PESEL rozbity spacjami — osobna klasa)
-    ['Numer PESEL: 85 110 314 283', 'Numer PESEL: 85 [TELEFON]'],
+    // etykieta identyfikatora przed grupami cyfr: to nie ogon kwoty; PESEL rozbity spacjami bierze
+    // w całości przebieg PESEL-u (K30)
+    ['Numer PESEL: 85 110 314 283', 'Numer PESEL: [PESEL]'],
   ]);
 });
 test('K27: etykieta numeru seryjnego, zamówienia, zlecenia, faktury i infolinia 800/801 — bez [TELEFON]', () => {
@@ -3802,4 +3804,472 @@ test('b3-fix2: „Pan/Pani + rola + urząd" — nazwa placówki w dopełniaczu i
     ['Pismo Pana Dyrektora Szpitala Kowalskiego', `Pismo Pana Dyrektora Szpitala ${N}`],
     ['Pani Minister Zdrowia Kowalska', `Pani Minister Zdrowia ${N}`],
   ]);
+});
+
+// ── Audyt, partia b4: wyciek fragmentu (prefiks telefonu, PESEL z odstępami, domknięcia osób, miasta, konto) ──
+const T = '[TELEFON]';
+test('K13: prefiks kraju 0048, (48), (+48), 48 bez separatora i zero międzymiastowe — numer w całości', () => {
+  masked([
+    ['tel.: 0048 12 634 55 21\ntel. (48) 61 852 33 49', `tel.: ${T}\ntel. ${T}`],
+    ['tel. 22 501 23 45, 0048 22 501 23 46', `tel. ${T}, ${T}`],
+    ['Kontakt: 0048 22 501 23 45', `Kontakt: ${T}`],
+    ['tel. 0048 (61) 852 33 49', `tel. ${T}`],
+    ['tel./fax (0048) 61 852 33 49', `tel./fax ${T}`],
+    ['nr tel. 0048 61-852-33-49.', `nr tel. ${T}.`],
+    ['kontakt 00 48 12 634 55 21', `kontakt ${T}`],
+    ['tel. 48512345678', `tel. ${T}`],
+    ['tel. 512345678, 48601234567', `tel. ${T}, ${T}`],
+    ['tel. 4822 123 45 67', `tel. ${T}`],
+    ['T: +48 (0)22 395 41 00', `T: ${T}`],
+    ['Tel.: +48 (0) 22 395 41 00', `Tel.: ${T}`],
+    ['T: 0048 (0)22 395 41 00', `T: ${T}`],
+    ['Tel. +48 (0)22 395 41 00, +48 (0)22 395 41 01', `Tel. ${T}, ${T}`],
+    ['+48 (0)512 345 678', T],
+    ['tel. (0-61) 852 33 44\ntel./fax (061) 852 33 45', `tel. ${T}\ntel./fax ${T}`],
+    ['tel. 600 100 200, (0-22) 501 23 45', `tel. ${T}, ${T}`],
+  ]);
+});
+test('K13: nawias przed prefiksem należy do numeru, a „nr" przed „+48" nie wyłącza maski', () => {
+  masked([
+    ['(+48) 512 345 678 to mój nowy', `${T} to mój nowy`],
+    ['tel. (+48) 512 345 678', `tel. ${T}`],
+    ['(0048) 512 345 678 x', `${T} x`],
+    ['(+48 22) 654 32 10', T],
+    ['( +48 ) 512 345 678', T],
+    ['(+48) 512 345 678, (+48) 600 100 200', `${T}, ${T}`],
+    ['na nr (+48) 512 345 678.', `na nr ${T}.`],
+    ['Proszę dzwonić pod nr +48 22 501 23 45.', `Proszę dzwonić pod nr ${T}.`],
+    ['pod nr +48501234567.', `pod nr ${T}.`],
+    ['tel. nr +48 22 501 23 45', `tel. nr ${T}`],
+    // numer domknięty w nawiasie — nawias zostaje
+    ['Proszę dzwonić (+48 512 345 678).', `Proszę dzwonić (${T}).`],
+  ]);
+});
+test('K13 pułapki: kierunkowy Radomia, zła długość, „00" po „nr", obce prefiksy i kwoty bez zmian', () => {
+  masked([
+    ['tel. (48) 362 12 34', `tel. ${T}`],
+    ['tel. 48 362 12 34', `tel. ${T}`],
+  ]);
+  keep([
+    'Zamówienie nr 0048512345678 zostało wysłane.',
+    'pod nr 0048 22 501 23 45.',
+    'Faktura nr 48512345678',
+    'kontakt z 48 osobami',
+    'tel. 4851234567',
+    'tel. 485123456789',
+    'tel. 0048 512 345',
+    'faks 0048',
+    'Biuro w Berlinie: +49 (0)30 1234 5678',
+    'London office: +44 (0)20 7946 0958',
+    'Wynik kwartalny: +48 (0) mln zł wobec 2023 r.',
+    'Kwota (48) 512 345 678 zł',
+    'Kod ewidencyjny +48 (0)22 395 41 001 w rejestrze.',
+    'Kontakt: 48 osób, koszt 600 100 200 zł.',
+    'Kontakt: (48) 12 34 56',
+    'Kierunkowy Polski to (+48).',
+    'Zapłacono 512 345 678 zł (+48 zł prowizji).',
+    'Przelew BLIK 48600123456',
+    'Kontakt telefoniczny 12.10.2026 9',
+    'Kontakt 01.10.2026 10:30',
+    '(061) 852 33 45',
+  ]);
+});
+test('K30: PESEL, NIP i REGON z etykietą i odstępami między cyframi — numer w całości', () => {
+  masked([
+    ['PESEL: 851 103 142 83', 'PESEL: [PESEL]'],
+    ['Numer PESEL: 85 110 314 283', 'Numer PESEL: [PESEL]'],
+    ['PESEL: 851-103-142-83', 'PESEL: [PESEL]'],
+    ['PESEL: 851103 14283', 'PESEL: [PESEL]'],
+    ['PESEL 8511 0314 283', 'PESEL [PESEL]'],
+    ['PESEL: 8 5 1 1 0 3 1 4 2 8 3', 'PESEL: [PESEL]'],
+    ['PESEL: |8|5|1|1|0|3|1|4|2|8|3|', 'PESEL: |[PESEL]|'],
+    ['Jan Kowalski, PESEL 851103 14283', `${N}, PESEL [PESEL]`],
+    // grupy z literówką w sumie — silna etykieta wygrywa jak przy zapisie ciągiem
+    ['PESEL: 851 103 142 84', 'PESEL: [PESEL]'],
+    ['NIP: 5 2 6 0 2 5 0 2 7 4', 'NIP: [NIP]'],
+    ['NIP: 5260 2502 74', 'NIP: [NIP]'],
+    ['REGON: 0 1 2 3 4 5 6 7 5', 'REGON: [REGON]'],
+    ['REGON 012-345-675', 'REGON [REGON]'],
+  ]);
+});
+test('K30 pułapki: bez etykiety, wzór z instrukcji, zła długość i liczba po etykiecie bez zmian', () => {
+  masked([
+    ['Jan Kowalski 501 120 345 43', `${N} ${T} 43`],
+    ['PESEL: 85110314283 12 szt.', 'PESEL: [PESEL] 12 szt.'],
+    ['PESEL lub NIP 123 456 32 18', 'PESEL lub NIP [NIP]'],
+  ]);
+  keep([
+    'Faktura nr 851 103 142 83',
+    'Rejestr PESEL obejmuje 38 411 148 osób (stan na 2023 r.).',
+    'Tabela 3: 8 5 1 1 0 3 1 4 2 8 3',
+    'Kod partii 851103 14283 z dnia 03.11.2025.',
+    'Numer PESEL zmieniono 2 razy, w 2019 i 2021 r.',
+    'Pole PESEL: 1 2 3 4 5 6 7 8 9 0 1 (wzór z instrukcji)',
+    'Wnioskodawca nie posiada numeru PESEL, nr sprawy 123 456 78 90 1.',
+    'Nr PESEL 851103 1428 (brakuje cyfry)',
+    'REGON 9 cyfr: 1 2 3 4 5 6 7 8 9',
+  ]);
+});
+test('K33: „Nazwisko, Imię" jako komórka rekordu i drugie imię za maską — osoba w całości', () => {
+  masked([
+    ['"Kowalski, Jan","85031412347"\nNazwisko i imię: Kowalski, Jan', `"${N}","[PESEL]"\nNazwisko i imię: ${N}`],
+    ['1. Nowak, Anna\n2. Wiśniewski, Piotr', `1. ${N}\n2. ${N}`],
+    ['Kowalski,Jan;85031412347', `${N};[PESEL]`],
+    ['<osoba>Kowalski, Jan</osoba>', `<osoba>${N}</osoba>`],
+    ['{"name": "Kowalski, Jan"}', `{"name": "${N}"}`],
+    ['Kowalski, Jan Maria', N],
+    ['To: Grabowski, Rafał <rafal.grabowski@bud-pol.com.pl>\nZgłaszający: Kowalski, Jan', `To: ${N} <[EMAIL]>\nZgłaszający: ${N}`],
+    ['Lista obecności:\nKowalski, Jan\nWiśniewska, Ewa\nNowak, Anna', `Lista obecności:\n${N}\n${N}\n${N}`],
+    ['From: "Lis, Jakub" <j.lis@firma.pl>', `From: "${N}" <[EMAIL]>`],
+    ['Do: Wiśniewska, Ewa; Lis, Jakub; Zając, Piotr', `Do: ${N}; ${N}; ${N}`],
+    ['Kowalska Anna Maria, PESEL 78041212346', `${N}, PESEL [PESEL]`],
+    ['Nowak Jan Piotr', N],
+    ['Pozwany Kowalski Jan Paweł wniósł apelację.', `Pozwany ${N} wniósł apelację.`],
+    ['Lista obecności:\nKowalska Anna Maria\nNowak Jan Piotr\nWiśniewski Tomasz', `Lista obecności:\n${N}\n${N}\n${N}`],
+    ['pozew Kowalskiej Anny Marii', `pozew ${N}`],
+  ]);
+  // pseudonimy: imię po przecinku należy do tej samej osoby, nie dostaje osobnej litery
+  masked([['Do: Wiśniewska, Ewa; Lis, Jakub', 'Do: [OSOBA-A]; [OSOBA-B]']], { pseudonyms: true });
+});
+test('K33 pułapki: proza z przecinkiem, nazwy placówek, miesiące, adresaci-działy i kolumny CSV bez zmian', () => {
+  masked([
+    ['Rozmawiałem z Kowalskim, Marek też był.', `Rozmawiałem z ${N}, Marek też był.`],
+    ['Spotkałem Kowalskiego, Jan był chory.', `Spotkałem ${N}, Jan był chory.`],
+    ['Byli tam Kowalski, Jan i Anna.', `Byli tam ${N}, Jan i Anna.`],
+    ['z Kowalskim, Janem i Anną', `z ${N}, Janem i Anną`],
+    ['Jan Kowalski, Maria i Zofia przyszły później.', `${N}, Maria i Zofia przyszły później.`],
+    ['Jan Kowalski Lech Poznań', `${N} Lech Poznań`],
+    ['Anna Kowalska Jana Pawła II 5', `${N} Jana Pawła II 5`],
+    ['Kowalski Jan Maja 2024', `${N} Maja 2024`],
+    ['1, Kowalski, Jan, 85031412347', `1, ${N}, Jan, [PESEL]`],
+    ['Kowalski,Jan,512345678,34', `${N},Jan,[TELEFON],34`],
+  ]);
+  keep([
+    'Warszawa, Marki, Ząbki',
+    'Kraków, Maja 3',
+    'Kraków, Maj 2024',
+    'Nowy Sącz, Jan Paweł II',
+    'Wojewoda Mazowiecki, Adam przyjął delegację.',
+    'Do: Anna, Marek',
+    'To: Marketing, Ewa',
+    'Do: Sekretariat, Ewa',
+    'Od: Dział Kadr, Ewa',
+    'Do: Urząd Skarbowy, Krystyna',
+    'Szpital Bielański, Marta',
+    'Teatr Słowackiego, Juliusz',
+    'Hotel: Bristol, Wiktoria',
+    'Nazwa: Bank Śląski, Marek',
+    'Kwiaty: Kalina, Róża',
+    'Wysłano: Środa, Maja 2025',
+    'Papież Jan Paweł II odwiedził Polskę.',
+    'Szkoła im. Marii Konopnickiej w Warszawie',
+  ]);
+});
+test('K34: zdrobnienie spoza słownika imion przed potwierdzonym nazwiskiem — osoba w całości', () => {
+  masked([
+    ['Kuba Nowak, Ola Nowak', `${N}, ${N}`],
+    ['Iza Nowak, Ela Kowalska, Ula Wiśniewska, Ala Nowak', `${N}, ${N}, ${N}, ${N}`],
+    ['[12:10] Kuba Nowak: siema', `[12:10] ${N}: siema`],
+    ['Napisał Kuba Kowalski.', `Napisał ${N}.`],
+    ['Kuba Nowak-Lis odpisał.', `${N} odpisał.`],
+    ['Jasiek Wójcik, Mati Kaczmarek, Maks Zieliński', `${N}, ${N}, ${N}`],
+    ['Aga Woźniak i Kaja Jankowska', `${N} i ${N}`],
+  ]);
+  masked([['Kuba Nowak napisał, a potem Nowak zadzwonił.', '[OSOBA-A] napisał, a potem [OSOBA-A] zadzwonił.']], { pseudonyms: true });
+});
+test('K34 pułapki: kraj, drink, skrót „Maks.", homograf bez kotwicy i przymiotnik odmiejscowy bez zmian', () => {
+  masked([
+    ['Na Kubie Nowak spędził urlop.', `Na Kubie ${N} spędził urlop.`],
+    ['Handel z Kubą Nowak prowadził od lat.', `Handel z Kubą ${N} prowadził od lat.`],
+    ['Ambasador RP na Kubie Jan Kowalski', `Ambasador RP na Kubie ${N}`],
+    ['Maks. 5 osób, Nowak pilnuje listy.', `Maks. 5 osób, ${N} pilnuje listy.`],
+    ['Kraj: Kuba\nNowak, kierownik', `Kraj: Kuba\n${N}, kierownik`],
+    ['Kuba, Polska, Nowak', `Kuba, Polska, ${N}`],
+    ['Ola! Nowak przyszedł.', `Ola! ${N} przyszedł.`],
+    // imię za nazwiskiem: szyk „Nazwisko Imię", zdrobnienie stoi przed osobą, nie w niej
+    ['Kierunek: Kuba Nowak Jan, przewodnik', `Kierunek: Kuba ${N}, przewodnik`],
+  ]);
+  keep([
+    'Kuba Libre to drink z rumem.',
+    'Kuba to wyspa na Karaibach.',
+    'Rewolucja na Kubie wybuchła w 1959 r.',
+    '[12:10] Kuba: siema',
+    'Ada to język programowania.',
+    'Jasiek leżał na łóżku.',
+    'Maks Prędkość 50 km/h',
+    'Republika Kuba Socjalistyczna',
+    'Kuba Mazowiecki',
+    'Ola Polska',
+    'Kuba Król Hiszpanii?',
+    'Kuba Lis, Ola Lis',
+    'Ada Zając',
+    'Hawana, Kuba',
+  ]);
+});
+test('K35: imię sklejone z nazwiskiem kropką albo podkreśleniem (konta, katalogi) — osoba w całości', () => {
+  masked([
+    ['Konto Jan.Kowalski zostało zablokowane.\nPrzeniesiono folder Kowalski_Jan do archiwum.', `Konto ${N} zostało zablokowane.\nPrzeniesiono folder ${N} do archiwum.`],
+    ['C:\\Users\\Jan.Kowalski\\AppData', `C:\\Users\\${N}\\AppData`],
+    ['/home/Jan.Kowalski/docs', `/home/${N}/docs`],
+    ['Anna.Nowak', N],
+    ['Nowak_Anna', N],
+    ['Kowalski.Jan', N],
+    ['Plik Kowalski_Jan_umowa.pdf wysłano.', `Plik ${N}_umowa.pdf wysłano.`],
+  ]);
+  masked([['Konto Jan.Kowalski, folder Kowalski_Jan', 'Konto [OSOBA-A], folder [OSOBA-A]']], { pseudonyms: true });
+});
+test('K35 pułapki: nazwy plików, wersji i serwerów oraz kropka końca zdania ze spacją bez zmian', () => {
+  masked([
+    ['Rozmawiałem z Janem. Kowalski przyszedł później.', `Rozmawiałem z Janem. ${N} przyszedł później.`],
+    ['Dzwonił Kowalski. Maja odebrała.', `${N}. Maja odebrała.`],
+  ]);
+  keep([
+    'Plik Raport_Final.docx przeniesiono do archiwum.',
+    'Ścieżka C:\\Users\\Admin\\AppData\\Local zawiera logi.',
+    'Przeniesiono folder Dokumenty_Firma do archiwum.',
+    'Katalog Projekt.Alfa zarchiwizowano.',
+    'Spotkanie przy ul. Jana Pawła II w sprawie remontu.',
+    'Wersja aplikacji Parawan.Web została wydana.',
+    'Plik Umowa_Najmu_2024.pdf podpisano.',
+    'Serwer App.Server.Prod restartowano.',
+    'Grupa AD Kadry_Płace ma dostęp.',
+  ]);
+});
+test('K36: imię z homoglifem OCR przed maską i nazwisko dwuczłonowe WERSALIKAMI — osoba w całości', () => {
+  masked([
+    ['Od: J0anna Kowalczyk\nKrzyszt0f Wiśniewski', `Od: ${N}\n${N}`],
+    ['KaroI Nowak', N],
+    ['DanieI Kowalski', N],
+    ['Kami1 Nowak', N],
+    ['P1otr Nowak', N],
+    ['Mar1a Kowalska', N],
+    ['J0ANNA Kowalczyk', N],
+    ['Pani J0anna Kowalczyk', `Pani ${N}`],
+    ['Pani ANNA NOWAK-KOWALSKA\nPani Anna Nowak-Kowalska', `Pani ${N}\nPani ${N}`],
+    ['Wnioskodawczyni: ANNA NOWAK-KOWALSKA', `Wnioskodawczyni: ${N}`],
+    ['mgr ANNA KOWALSKA-NOWAK', `mgr ${N}`],
+    ['Pan JAN KOWALSKI-WIŚNIEWSKI', `Pan ${N}`],
+    ['STANISŁAW KOWALSKI-WOLSKI', N],
+    ['J0ANNA N0WAK-KOWALSKA', N],
+  ]);
+  // ten sam klucz osoby w zapisie WERSALIKAMI i Titlecase
+  masked([['Pani ANNA NOWAK-KOWALSKA\nPani Anna Nowak-Kowalska', 'Pani [OSOBA-A]\nPani [OSOBA-A]']], { pseudonyms: true });
+});
+test('K36 pułapki: kody z cyframi, nazwy instytucji i miejscowości z łącznikiem bez zmian', () => {
+  masked([
+    ['pozycja A1a Kowalski', `pozycja A1a ${N}`],
+    ['Sala A10 Kowalski', `Sala A10 ${N}`],
+    ['Firma KOW01 Nowak', `Firma KOW01 ${N}`],
+    ['Formularz PIT11 Nowak', `Formularz PIT11 ${N}`],
+    ['Zbi0r Kowalski', `Zbi0r ${N}`],
+    ['profil LinkedIn Nowak', `profil LinkedIn ${N}`],
+    ['Załącznik A10\nKowalski', `Załącznik A10\n${N}`],
+  ]);
+  keep([
+    'UNIWERSYTET MARII CURIE-SKŁODOWSKIEJ W LUBLINIE',
+    'CENTRUM ONKOLOGII MARII SKŁODOWSKIEJ-CURIE',
+    'SZPITAL IM. MARII SKŁODOWSKIEJ-CURIE',
+    'SĄD REJONOWY W BIELSKU-BIAŁEJ',
+    'WSPÓŁPRACA POLSKO-NIEMIECKA',
+    'ROMAN POLSKO-AMERYKAŃSKI',
+    'ADAM MIŃSKI-MAZOWIECKI',
+    'ANNA BIELSKO-BIAŁA',
+    'GMINA KĘDZIERZYN-KOŹLE',
+    'FUNDACJA JANA PAWŁA II',
+    'ROK SZKOLNY 2023-2024',
+    'Roztwór HCl NaOH',
+  ]);
+});
+const M = '[MIEJSCOWOŚĆ]';
+const K = '[KOD-POCZTOWY]';
+test('K37: miejscowość wielowyrazowa po kodzie i w miejscowniku — nazwa w całości', () => {
+  masked([
+    ['ul. Kasztanowa 8, 55-080 Kąty Wrocławskie', `[ADRES], ${K} ${M}`],
+    ['83-000 Pruszcz Gdański', `${K} ${M}`],
+    ['41-100 Siemianowice Śląskie', `${K} ${M}`],
+    ['<AdresL2>05-540 Zalesie Górne</AdresL2>', `<AdresL2>${K} ${M}</AdresL2>`],
+    ['96-321 Żabia Wola', `${K} ${M}`],
+    ['34-130 Kalwaria Zebrzydowska', `${K} ${M}`],
+    ['62-080 Tarnowo Podgórne', `${K} ${M}`],
+    ['zam. 55-080 Kąty Wrocławskie, ul. Fryderyka Chopina 9', `zam. ${K} ${M}, [ADRES]`],
+    ['11-040 Dobre Miasto', `${K} ${M}`],
+    ['66-470 Kostrzyn nad Odrą', `${K} ${M}`],
+    ['26-420 Nowe Miasto nad Pilicą', `${K} ${M}`],
+    ['Stare Babice (gmina wiejska)', `${M} (gmina wiejska)`],
+    ['Jan Nowak, zam. w Dąbrowie Górniczej, wnosi o...', `${N}, zam. w ${M}, wnosi o...`],
+    ['zam. w Piotrkowie Trybunalskim', `zam. w ${M}`],
+    ['zam. w Nowym Dworze Mazowieckim', `zam. w ${M}`],
+    ['zam. w Tomaszowie Mazowieckim', `zam. w ${M}`],
+    ['zam. w Stalowej Woli', `zam. w ${M}`],
+    ['zam. w Białej Podlaskiej', `zam. w ${M}`],
+    ['zamieszkała w Dąbrowie Górniczej.', `zamieszkała w ${M}.`],
+  ]);
+});
+test('K37 pułapki: kraj, region, urząd i osoba po kodzie oraz proza bez kotwicy bez zmian', () => {
+  masked([
+    ['00-950 Warszawa Zarząd Dróg Miejskich', `${K} ${M} Zarząd Dróg Miejskich`],
+    ['00-950 Warszawa Polska', `${K} ${M} Polska`],
+    ['61-001 Poznań Wielkopolska', `${K} ${M} Wielkopolska`],
+    ['80-001 Gdańsk Pomorski Urząd Wojewódzki', `${K} ${M} Pomorski Urząd Wojewódzki`],
+    ['62-800 Kalisz Jan Kowalski', `${K} ${M} ${N}`],
+    ['48-210 Biała Polska', `${K} ${M} Polska`],
+    ['00-950 Warszawa nad Wisłą', `${K} ${M} nad Wisłą`],
+    // przymiotnik z końcówką nazwiskową w nazwie miasta to nie osoba
+    ['Konferencja w Piotrkowie Trybunalskim była udana.', 'Konferencja w Piotrkowie Trybunalskim była udana.'],
+  ]);
+  keep([
+    'Spotkanie odbyło się w Dąbrowie Górniczej w sali.',
+    'Huta Stalowa Wola S.A.',
+    'Z własnej woli zrezygnował',
+  ]);
+});
+test('K32: adres z zakresem numerów, lokalem po przecinku, słowem „lokal", łącznikiem w nazwie i „Aleje"', () => {
+  masked([
+    ['zam. ul. Długa 5, m. 3, 80-827 Gdańsk', `zam. [ADRES], ${K} ${M}`],
+    ['zam. ul. Hoża 41-43 m. 12, 00-681 Warszawa', `zam. [ADRES], ${K} ${M}`],
+    ['ul. Długa 5, lok. 3', '[ADRES]'],
+    ['ul. Długa 5 lokal 3', '[ADRES]'],
+    ['ul. Długa 5 mieszk. 3', '[ADRES]'],
+    ['ul. Hoża 41/43 m. 12', '[ADRES]'],
+    ['ul. Hoża 41–43', '[ADRES]'],
+    ['al. Jerozolimskie 123-125 lok. 7', '[ADRES]'],
+    ['{"adres": "ul. Hoża 41-43 m. 12"}', '{"adres": "[ADRES]"}'],
+    ['Hoża 41-43, 00-681 Warszawa', `[ADRES], ${K} ${M}`],
+    ['Marszałkowska 84/92 lok. 105, 00-514 Warszawa', `[ADRES], ${K} ${M}`],
+    ['ul. Marszałkowska 84/92/105', '[ADRES]'],
+    ['przy ul. Długiej 5/7 m. 3 o pow. 50 m2', 'przy [ADRES] o pow. 50 m2'],
+    ['zamieszkały przy ul. Żwirki i Wigury 16 m. 3 w Warszawie.', `zamieszkały przy [ADRES] w ${M}.`],
+    ['zam. ul. Żwirki i Wigury 16/3, 02-092 Warszawa', `zam. [ADRES], ${K} ${M}`],
+    ['ul. Jana z Kolna 5 w Gdańsku', `[ADRES] w ${M}`],
+    ['ul. Bitwy pod Płowcami 12 w Gdańsku', `[ADRES] w ${M}`],
+    ['ul. Księcia Bolesława z Mazowsza 8 w Płocku', `[ADRES] w ${M}`],
+    ['zam. Aleje Jerozolimskie 44 m. 12 w Warszawie', `zam. [ADRES] w ${M}`],
+    ['zam. w Alejach Jerozolimskich 44', 'zam. w [ADRES]'],
+    ['Ulica: ul. Dolna\nNumer budynku: 21\nNumer lokalu: 7', 'Ulica: [ADRES]\nNumer budynku: [ADRES]\nNumer lokalu: [ADRES]'],
+    ['{"ulica":"ul. Dolna"}', '{"ulica":"[ADRES]"}'],
+    ['<Ulica>ul. Dolna</Ulica>', '<Ulica>[ADRES]</Ulica>'],
+  ]);
+});
+test('K32 pułapki: „m.in.", mieszkanie N-pokojowe, metraż, lata, daty, liczebnik z rzeczownikiem i narzędnik po „z"', () => {
+  masked([
+    ['Spotkanie przy ul. Długiej 5, m.in. 3 sklepy były otwarte.', 'Spotkanie przy [ADRES], m.in. 3 sklepy były otwarte.'],
+    ['Sprzedam mieszkanie przy ul. Długiej 5, mieszkanie 3-pokojowe.', 'Sprzedam mieszkanie przy [ADRES], mieszkanie 3-pokojowe.'],
+    ['Biuro przy ul. Długiej 5 lokal 120 m2', 'Biuro przy [ADRES] lokal 120 m2'],
+    ['Dojazd: ul. Długa 5 - 10 minut pieszo.', 'Dojazd: [ADRES] - 10 minut pieszo.'],
+    ['Szkoła Podstawowa nr 5, 80-827 Gdańsk', `Szkoła Podstawowa nr 5, ${K} ${M}`],
+    ['Spółka Kowalski i Syn 5, 00-001 Warszawa', `Spółka ${N} i [ADRES], ${K} ${M}`],
+    ['Na ul. Długiej z Kowalskim 5 razy rozmawiałem.', `Na ul. Długiej z ${N} 5 razy rozmawiałem.`],
+  ]);
+  keep([
+    'Most Grunwaldzki 1908-1910',
+    'Lotnisko im. Żwirki i Wigury 2 terminale.',
+    'Spotkanie przy ul. Długiej w Gdańsku 12 maja',
+    'Bitwa pod Płowcami 1331 r.',
+    'Uchwała nr XII/123/2020',
+    'Aleje Ujazdowskie 2024 to tytuł wystawy.',
+    'Na Alejach Jerozolimskich 15 tysięcy ludzi.',
+    'Wypadek przy ul. Długiej i Krótkiej 5 osób rannych.',
+    'Rozmawiał przy ul. Długiej 5 minut.',
+    'Ulica była zamknięta przez 3 dni.',
+    'Numer budynku: do ustalenia',
+    'przy ul. Długiej 1-3 maja odbędzie się festyn',
+    'przy ul. Okopowej 1944-1956 działało więzienie',
+  ]);
+});
+test('K38: numer konta i NIP z twardą spacją albo łącznikami oraz etykieta z kwalifikatorem', () => {
+  const nb = (s: string): string => s.replace(/ /g, '\u00A0');
+  masked([
+    [`Numer rachunku: ${nb('57 1140 2004 0000 3002 0123 4567')}`, 'Numer rachunku: [NR-KONTA]'],
+    ['Konto: 57-1140-2004-0000-3002-0123-4567', 'Konto: [NR-KONTA]'],
+    [`IBAN: ${nb('PL57 1140 2004 0000 3002 0123 4567')}`, 'IBAN: [NR-KONTA]'],
+    [`Numer rachunku: ${'57 1140 2004 0000 3002 0123 4567'.replace(/ /g, '\u202F')}`, 'Numer rachunku: [NR-KONTA]'],
+    ['Konto: PL57-1140-2004-0000-3002-0123-4567', 'Konto: [NR-KONTA]'],
+    [`Przelew na ${nb('57 1140 2004 0000 3002 0123 4567')} dziś.`, 'Przelew na [NR-KONTA] dziś.'],
+    ['Przelew na 57-1140-2004-0000-3002-0123-4567 dziś.', 'Przelew na [NR-KONTA] dziś.'],
+    ['Przelew na PL57-1140-2004-0000-3002-0123-4567 dziś.', 'Przelew na [NR-KONTA] dziś.'],
+    [`NIP: ${nb('526 000 12 46')}`, 'NIP: [NIP]'],
+    [`Kontrahent ${nb('526 000 12 46')}`, 'Kontrahent [NIP]'],
+    [`{"konto":"${nb('57 1140 2004 0000 3002 0123 4567')}"}`, '{"konto":"[NR-KONTA]"}'],
+    // zła suma (literówka) przy etykiecie z kwalifikatorem — etykieta wygrywa jak bez kwalifikatora
+    ['wpłata na mikrorachunek podatkowy 52 1010 0071 2221 7743 1005 2400', 'wpłata na mikrorachunek podatkowy [NR-KONTA]'],
+    ['nr rachunku bankowego: 52 1010 0071 2221 7743 1005 2400', 'nr rachunku bankowego: [NR-KONTA]'],
+    ['rachunek VAT 52 1010 0071 2221 7743 1005 2400', 'rachunek VAT [NR-KONTA]'],
+    ['subkonto 52 1010 0071 2221 7743 1005 2400', 'subkonto [NR-KONTA]'],
+    ['Mikrorachunek: PL52 1010 0071 2221 7743 1005 2400', 'Mikrorachunek: [NR-KONTA]'],
+  ]);
+});
+test('K38 pułapki: kwoty z twardą spacją, plan kont, numery zamówień i przesyłek, zła suma bez etykiety', () => {
+  keep([
+    'Kwota przelewu: 1\u00A0234\u00A0567,89 zł z rachunku firmowego.',
+    'Saldo rachunku: 12\u00A0345\u00A0678,90 zł',
+    'Konto księgowe 201-01-001-0002-0003-0004-0005-01 (plan kont).',
+    'Zamówienie 1234-5678-9012-3456-7890-1234-56 zostało wysłane.',
+    'Nr ref. 2024-10-14-0001-0002-0003-0004 w systemie.',
+    'ISBN 978-83-01-12345-6, zamówienie nr 57-1140-2004.',
+    'Seria: 57-1140-2004-0000-3002-0123-4568 (zła suma, bez etykiety).',
+    'Nr przesyłki 00 1234 5678 9012 3456 7890 1234 56 w drodze.',
+    '{"kwota":"1\u00A0200,00"}',
+    'Rachunek podatkowy prowadzi Urząd Skarbowy w Krakowie od 2020 r.',
+    'Mikrorachunek podatkowy wygenerujesz w serwisie podatki.gov.pl.',
+    'Rachunek referencyjny 1234567890123456789012345 (25 cyfr) zostaje.',
+    'Rachunek zysków i strat za lata 2019 2020 2021 2022 2023 2024 porównano.',
+  ]);
+});
+test('K39: imię i nazwisko w polu loginu to osoba, nie login', () => {
+  masked([
+    ['User: Kowalski Jan', `User: ${N}`],
+    ['Username: Nowak Anna', `Username: ${N}`],
+    ['User: Adam Kowalski', `User: ${N}`],
+    ['Login: Kowalski Jan', `Login: ${N}`],
+    ['User = Kowalski Jan', `User = ${N}`],
+    ['User: Kowalski Jan\nJan Kowalski zgłosił awarię.', `User: ${N}\n${N} zgłosił awarię.`],
+  ]);
+});
+test('K39 pułapki: prawdziwe loginy, kolejna etykieta i nazwy kont technicznych bez zmian', () => {
+  masked([
+    ['User: jkowalski', 'User: [LOGIN]'],
+    ['Username: j.kowalski', 'Username: [LOGIN]'],
+    ['User: JKowalski Domain: CORP', 'User: [LOGIN] Domain: CORP'],
+    ['User: Kowalski', 'User: [LOGIN]'],
+    ['User: Adam Status: active', 'User: [LOGIN] Status: active'],
+    ['User: jkowalski (Jan Kowalski)', `User: [LOGIN] (${N})`],
+    ['User: Kowalski Jan.Nowak', `User: [LOGIN] ${N}`],
+  ]);
+});
+test('Obce litery w nazwiskach: osoba w całości, bez jawnej końcówki', () => {
+  masked([
+    ['Anna Schröder', N],
+    ['Jan Müller', N],
+    ['Pan Müller', `Pan ${N}`],
+    ['Pani Schröder złożyła wniosek.', `Pani ${N} złożyła wniosek.`],
+    ['Jan Dvořák, Anna Čapková', `${N}, ${N}`],
+    ['Maria Peña', N],
+    ['Piotr Žižek', N],
+    ['Jan Kowalski-Müller', N],
+    ['A. Kowalski-Müller', `A. ${N}`],
+    ['Lewandowski-Müller złożył wniosek.', `${N} złożył wniosek.`],
+    ['Anna z domu Müller', N],
+    ['Panią Gärtner wezwano.', `Panią ${N} wezwano.`],
+    ['To: Müller Jan', `To: ${N}`],
+    ['Anna i Jan Müller', `${N} i ${N}`],
+  ]);
+  masked([['Pan Müller i Jan Müller', 'Pan [OSOBA-A] i [OSOBA-A]']], { pseudonyms: true });
+});
+test('Obce litery — pułapki: obcy wyraz bez imienia i kotwicy, miasta, tytuł przed nazwiskiem', () => {
+  masked([
+    ['Señor Kowalski', `Señor ${N}`],
+  ]);
+  keep([
+    'Café Müller to spektakl Piny Bausch.',
+    'Müller',
+    'Spotkanie w Zürichu',
+    'Złożono wniosek w München.',
+    'Wysłano do Malmö 5 paczek.',
+    'Champs-Élysées',
+    'Crème brûlée',
+  ]);
+});
+test('K33/K10: nazwa zakładu „Salon Fryzjerski" to nie osoba, imię z nazwy salonu nie domyka maski', () => {
+  keep(['Salon Fryzjerski Ewa zaprasza.', '{"name": "Salon Fryzjerski Ewa"}', 'Gabinet Fryzjerski przyjmuje.']);
+  masked([['Pan Fryzjerski złożył wniosek.', `Pan ${N} złożył wniosek.`]]);
 });
