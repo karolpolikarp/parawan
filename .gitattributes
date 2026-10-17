@@ -1,0 +1,3 @@
+# Fikcyjne pisma do testów: te same bajty na Windows i w CI (bez zamiany LF na CRLF),
+# bo testy porównują tekst i wynik maskowania dokładnie.
+apps/web/src/fixtures/** -text
