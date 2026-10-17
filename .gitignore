@@ -13,3 +13,10 @@ scripts/benchmark/_dl/
 # Wynik reprodukowalnego builda paczki onnx (vendor+model) i zrzut z weryfikacji E2E
 dist-onnx-pack/
 e2e-screenshot.png
+
+# Testy E2E: zrzuty z nieudanych testów oraz stare przeglądarki, kopie z sondą i wyniki prototypów
+# z ręcznych skryptów (scripts/e2e/manual). Binarek przeglądarek nie zatwierdzamy.
+test-results/
+.cache/przegladarki/
+.cache/sonda/
+.cache/poc-docx/

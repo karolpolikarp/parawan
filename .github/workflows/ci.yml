@@ -44,3 +44,39 @@ jobs:
       # lub precyzji poniżej progu. Nie commituje raportu — tylko sprawdza progi.
       - name: Bramka benchmarku (rdzeń)
         run: node scripts/benchmark/run.mjs --check
+
+  # Bramka E2E na gotowym pliku: Chromium otwiera dist/index.html aplikacji i landingu przez
+  # file://, a każdy test kończy się sprawdzeniem zera żądań poza plikiem, zera naruszeń CSP
+  # i zera wyjątków (scripts/e2e). Osobny job na Node 22: Node 20 nie rozwija globów w
+  # node --test i nie ma już wsparcia, a job wyżej (z bramką benchmarku) zostaje bez zmian.
+  e2e:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w anonimizator
+      - run: npm run build -w anonimizator-web
+      - run: npm run build -w parawan-landing
+      - name: Wersja Playwright (klucz cache przeglądarki)
+        id: pw
+        run: echo "version=$(node -p "require('playwright/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+      # Przy trafieniu w cache pobieranie przeglądarki jest pomijane, zostają biblioteki systemowe.
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+      - name: Zrzuty z nieudanych testów
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-zrzuty
+          path: test-results/e2e/
+          if-no-files-found: ignore

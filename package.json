@@ -10,10 +10,12 @@
     "test": "npm run test -w anonimizator && npm run test -w anonimizator-web",
     "dev": "npm run dev -w anonimizator-web",
     "lint": "biome lint",
-    "format": "biome format --write"
+    "format": "biome format --write",
+    "e2e": "node --test \"scripts/e2e/*.test.mjs\""
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.3",
-    "esbuild": "^0.28.1"
+    "esbuild": "^0.28.1",
+    "playwright": "1.61.1"
   }
 }
