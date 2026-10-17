@@ -1,6 +1,6 @@
 # Fikcyjne pisma urzędowe do testów
 
-Realistyczne pisma, na których sprawdzamy Parawana tak, jak użyje go urzędnik: decyzja wójta,
+Realistyczne pisma, na których sprawdzany jest Parawan, tak jak użyje go urzędnik: decyzja wójta,
 odpowiedź na wniosek o informację publiczną, protokół kontroli, krótkie pismo w czterech formatach
 i dziesięć krótkich próbek z badania praktyki anonimizacji (`probki/`). Korzystają z nich testy E2E
 (`scripts/e2e/`), ręczne skrypty (`scripts/e2e/manual/`) i kolejne pakiety planu dla urzędów.

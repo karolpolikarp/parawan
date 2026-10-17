@@ -15,8 +15,9 @@ dist-onnx-pack/
 e2e-screenshot.png
 
 # Testy E2E: zrzuty z nieudanych testów oraz stare przeglądarki, kopie z sondą i wyniki prototypów
-# z ręcznych skryptów (scripts/e2e/manual). Binarek przeglądarek nie zatwierdzamy.
+# z ręcznych skryptów (scripts/e2e/manual). Binarki przeglądarek nie trafiają do repo.
 test-results/
 .cache/przegladarki/
 .cache/sonda/
 .cache/poc-docx/
+.cache/viewports/

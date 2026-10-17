@@ -12,7 +12,7 @@ Fikcyjne pisma, na których pracują, leżą w `apps/web/src/fixtures/urzad/`.
 node scripts/e2e/manual/pobierz-przegladarki.mjs
 ```
 
-Pobiera do `.cache/przegladarki/` (katalog w `.gitignore`, binarek nie zatwierdzamy) snapshoty
+Pobiera do `.cache/przegladarki/` (katalog w `.gitignore`, binarki nie trafiają do repo) snapshoty
 Chromium 90, 109, 111 i 125, Firefoksa ESR 115 i 140 oraz geckodriver 0.36, razem ok. 950 MB.
 Każde archiwum ma przypiętą sumę SHA-256; przy złej sumie plik jest usuwany, a skrypt kończy się
 błędem. Na Windows od razu rozpakowuje archiwa i wypisuje ścieżki do `chrome.exe`, `firefox.exe`
@@ -44,7 +44,7 @@ PARAWAN_CHROMIUM=".cache/przegladarki/chromium-1070054/chrome-win/chrome.exe" np
 | `stary-chromium.mjs` | Otwiera kopię z sondą w starym Chromium przez `--headless --dump-dom` i wypisuje sondę; opcjonalnie robi zrzut. Nie zależy od Playwright, więc działa na każdym snapshocie, także na Chromium 90. Czas na sondę: zmienna `WAIT` w ms. | `node scripts/e2e/manual/stary-chromium.mjs <chrome.exe> "<url kopii>?pdftest" [zrzut.png]` |
 | `ffprobe.mjs` | To samo w Firefoksie dowolnej wersji przez geckodriver: sonda, wersja, początek wyniku, zrzut. | `node scripts/e2e/manual/ffprobe.mjs <firefox.exe> <geckodriver.exe> "<url>" <zrzut.png> [szer] [wys]` |
 | `edge-probe.mjs` | Otwiera adresy w zainstalowanych Edge i Chrome (Playwright, `channel`) i czyta sondę. To przeglądarki, w których urzędnik naprawdę otwiera plik. | `node scripts/e2e/manual/edge-probe.mjs "<url1>" ["<url2>" …]` |
-| `viewports.mjs` | Zrzuty pierwszego ekranu w Edge przy ekranach typowych dla urzędów (1366×768, 1280×720, 1536×864 przy skalowaniu 125%, 1920×1080, powiększenie 125%) i pomiar położenia pola źródła, wyniku i „Kopiuj”. | `node scripts/e2e/manual/viewports.mjs [plik.html] [katalog-zrzutów]` |
+| `viewports.mjs` | Zrzuty pierwszego ekranu w Edge przy ekranach typowych dla urzędów (1366×768, 1280×720, 1536×864 przy skalowaniu 125%, 1920×1080, powiększenie 125%) i pomiar położenia pola źródła, wyniku i „Kopiuj”. | `node scripts/e2e/manual/viewports.mjs [plik.html] [katalog-zrzutów]` (domyślnie `apps/web/dist/index.html` i `.cache/viewports`) |
 | `pdftext.mjs` | Tekst PDF wyciągnięty tym samym pdf.js co w aplikacji, strona po stronie. Przydaje się do sprawdzenia wydruku „Zapisz jako PDF” (czy nie zostało w nim pole źródła). | `node scripts/e2e/manual/pdftext.mjs <plik.pdf> [od] [do]` |
 | `pdfout.mjs` | Pierwsza strona PDF jako jeden napis JSON: widać, gdzie pdf.js łamie wiersze. | `node scripts/e2e/manual/pdfout.mjs <plik.pdf>` |
 | `perf.mjs` | Czas `redactPII` na piśmie 10, 50 i 200 KB; z `--jitless` jak na komputerze z wyłączonym JIT. Wymaga `npm run build -w anonimizator`. | `node [--jitless] scripts/e2e/manual/perf.mjs` |

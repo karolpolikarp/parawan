@@ -2,14 +2,16 @@
 // leżą pole źródła, wynik i „Kopiuj”. Pokazuje, czy urzędnik widzi pole do wklejenia bez
 // przewijania. Pomiar #input przejmie automatyczny test układu (A06: scripts/e2e/uklad.test.mjs).
 // Użycie: node scripts/e2e/manual/viewports.mjs [plik.html] [katalog-zrzutów]
-// Domyślnie apps/web/dist/index.html i bieżący katalog. Bez Edge (np. Linux) użyje Chromium.
+// Domyślnie apps/web/dist/index.html i .cache/viewports (w .gitignore, żeby zrzuty nie trafiły
+// przypadkiem do repo). Bez Edge (np. Linux) użyje Chromium.
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
-const [file = path.join(ROOT, 'apps/web/dist/index.html'), outDir = '.'] = process.argv.slice(2);
+const [file = path.join(ROOT, 'apps/web/dist/index.html'), outDir = path.join(ROOT, '.cache', 'viewports')] =
+  process.argv.slice(2);
 const url = `${pathToFileURL(path.resolve(file)).href}?demo`;
 mkdirSync(outDir, { recursive: true });
 
