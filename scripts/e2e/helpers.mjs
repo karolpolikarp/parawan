@@ -32,6 +32,14 @@ export const EXAMPLE_PESEL = '44051401359';
 export const EXAMPLE_NAME = 'Kowalska';
 
 /**
+ * Pozostałe dane osobowe z przykładu, których nie może być na wydruku (wydruk.test.mjs): adres
+ * e-mail i początek numeru konta (cyfry bez spacji, bo tekst wyciągnięty z PDF bywa inaczej
+ * rozstawiony). demoReady() sprawdza je jak EXAMPLE_PESEL.
+ */
+export const EXAMPLE_EMAIL = 'anna.kowalska@example.com';
+export const EXAMPLE_IBAN_START = 'PL61 1090 1014';
+
+/**
  * Numer PESEL wpisany na stałe w pliki pismo.* z FIXTURES (buduje je
  * scripts/e2e/manual/zbuduj-pisma.mjs). Dziś równy EXAMPLE_PESEL, ale to osobny fakt: zmiana
  * przykładu w aplikacji nie zmienia gotowego pismo.pdf.
@@ -262,8 +270,8 @@ export async function openApp(browser, query = '', opts = {}) {
         { timeout },
       ),
     /**
-     * Czeka na wynik przykładu z ?demo i sprawdza, że w polu źródła stoją EXAMPLE_PESEL
-     * i EXAMPLE_NAME.
+     * Czeka na wynik przykładu z ?demo i sprawdza, że w polu źródła stoją EXAMPLE_PESEL,
+     * EXAMPLE_NAME, EXAMPLE_EMAIL i EXAMPLE_IBAN_START.
      */
     async demoReady() {
       await this.waitForOutput('[PESEL]');
@@ -272,6 +280,8 @@ export async function openApp(browser, query = '', opts = {}) {
       for (const [name, value] of [
         ['EXAMPLE_PESEL', EXAMPLE_PESEL],
         ['EXAMPLE_NAME', EXAMPLE_NAME],
+        ['EXAMPLE_EMAIL', EXAMPLE_EMAIL],
+        ['EXAMPLE_IBAN_START', EXAMPLE_IBAN_START],
       ]) {
         assert.ok(
           input.includes(value),

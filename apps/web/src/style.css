@@ -555,6 +555,17 @@ details.card::details-content {
   min-height: 90px;
 }
 .toolbar .hint { margin-left: auto; font-size: 11.5px; color: var(--mut-2); letter-spacing: .06em; }
+/* Akcje na wyniku. Przy 1366 px pasek wyniku ma ok. 617 px i z przyciskiem druku mieści się
+   w jednym rzędzie tylko tak: etykieta druku w dwóch wierszach, mniejsze odstępy i węższy
+   „Kopiuj”. Wtedy ma też te same 90 px wysokości co pasek źródła, więc okna zaczynają się
+   na jednej linii. Węższy pasek przenosi całą grupę do nowego rzędu (flex: none, bez ściskania). */
+.out-acts { display: flex; align-items: stretch; gap: 6px; margin-left: auto; flex: none; }
+.out-acts .tbtn { justify-content: flex-start; }
+#copy { min-width: 78px; }
+/* 64 px: „zapisz PDF” (ok. 62 px) się mieści, „Drukuj lub zapisz” (ok. 94 px) już nie.
+   Drugi wiersz etykiety odbiera 3 px z odstępów, żeby przycisk nie wydłużał paska ponad 90 px. */
+#print { gap: 3px; padding-bottom: 6px; }
+#print span { white-space: normal; max-width: 64px; text-align: center; }
 
 .editor {
   background: var(--well);
@@ -689,6 +700,8 @@ mark.pii.pii-linked { box-shadow: 0 0 0 2px var(--acc-line); }
 .warn-txt { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 /* typy wyłączone w „Co maskować”: te dane przechodzą jawne, więc ostrzeżenie jest mocniejsze */
 .mask-off { color: var(--err); font-weight: 600; }
+/* prośba o wyłączenie nagłówków druku: rada, nie ostrzeżenie o wyniku, więc spokojniejszy kolor */
+.out-hint { color: var(--mut-2); }
 .linklike {
   border: 0; background: none; padding: 0; margin: 0;
   font: inherit; color: inherit; text-decoration: underline; cursor: pointer;
@@ -1029,9 +1042,10 @@ table .pii { cursor: default; }
   summary.card-h > .help { grid-row: 1; grid-column: 3; margin-left: 0; }
   summary.card-h > .chev { grid-row: 1; grid-column: 4; }
   .stats .stat-total { order: 1; flex-basis: 100%; }
-  /* „Pobierz” i „Kopiuj” razem w osobnym rzędzie, po połowie (wcześniej „Kopiuj” zostawał sam) */
-  .toolbar > .card-sp { display: block; flex: 0 0 100%; height: 0; }
-  .toolbar #download, .toolbar #copy { flex: 1 1 0; }
+  /* akcje na wyniku razem w osobnym rzędzie, po równo (wcześniej „Kopiuj” zostawał sam);
+     przy 320 px „Kopiuj” schodzi niżej na całą szerokość */
+  .out-acts { flex: 1 1 100%; flex-wrap: wrap; margin-left: 0; }
+  .out-acts .tbtn { flex: 1 1 0; }
   /* demo: krótkie etykiety stref, inaczej „Wejście” i „Wyjście” nachodzą na siebie */
   .demo-zone { top: 14px; padding: 6px 11px; letter-spacing: .04em; }
   .demo-zone-in { left: 14px; }
@@ -1042,3 +1056,24 @@ table .pii { cursor: default; }
   .foot .card-b { flex-direction: column; align-items: flex-start; gap: 6px; }
   .foot .sep { display: none; }
 }
+
+/* ============ DRUK ============ */
+/* Bez tych reguł Ctrl+P drukował całą aplikację: pole źródła z jawnymi danymi, w „Porównaniu”
+   przekreślone oryginały, a z wyniku tylko to, co mieściło się w okienku. Na papier idzie więc
+   sam #print-out (main.ts wypełnia go całym wynikiem jako tekstem). Marginesy strony zostają:
+   przy margin: 0 przeglądarka chowa wprawdzie nagłówki i stopki, ale tekst dochodzi do krawędzi
+   na każdej stronie, a Firefox i tak drukuje je po swojemu. O nagłówki prosi .out-hint. */
+.print-out { display: none; }
+@media print {
+  body > :not(#print-out) { display: none !important; }
+  body { background: #fff; padding: 0; }
+  .print-out {
+    display: block;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font: 11pt/1.45 Archivo, Arial, sans-serif;
+    color: #000;
+    background: #fff;
+  }
+}
+@page { size: A4; margin: 18mm 16mm; }

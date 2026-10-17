@@ -2,6 +2,7 @@ import { expect, test } from 'vitest';
 import landingHtml from '../../landing/index.html?raw';
 import landingMain from '../../landing/src/main.ts?raw';
 import webHtml from '../index.html?raw';
+import { ICONS } from './icons';
 import webMain from './main.ts?raw';
 
 // Teksty interfejsu, które łatwo rozjechać z zachowaniem silnika albo z układem strony.
@@ -63,4 +64,74 @@ test('ta sama nazwa funkcji „Rozróżniaj osoby” co w README: znacznik, nie 
 
 test('landing: kod na GitHubie to nie „jeden plik” (jednym plikiem jest Parawan.html)', () => {
   expect(landingHtml).not.toContain('kod na GitHubie: to jeden plik');
+});
+
+/* ── Druk i pobieranie ── */
+
+const PRINT_TIP =
+  'Drukuje sam wynik, bez tekstu źródłowego. PDF zapiszesz w oknie drukowania: ' +
+  '„Zapisz jako PDF” albo „Microsoft Print to PDF”.';
+const PRINT_HINT =
+  'W oknie drukowania odznacz „Nagłówki i stopki”. Inaczej na wydruku znajdzie się ścieżka ' +
+  'pliku z&nbsp;nazwą użytkownika komputera.';
+const PRINT_TIP_LI =
+  '<kbd>Ctrl</kbd>+<kbd>P</kbd> drukuje sam wynik. Plik PDF zapiszesz w&nbsp;oknie drukowania.';
+const PRINT_EMPTY = 'Brak wyniku do wydruku. Wklej tekst w pole „Tekst źródłowy”.';
+
+test('aplikacja: przycisk druku nad wynikiem, obok „Pobierz”, z ikoną drukarki', () => {
+  const acts = webHtml.match(/<span class="out-acts">([\s\S]*?)<\/span>\s*<\/div>/)?.[1] ?? '';
+  const ids = [...acts.matchAll(/<button type="button" id="([\w-]+)"/g)].map((m) => m[1]);
+  expect(ids).toEqual(['print', 'download', 'copy']);
+  expect(acts).toContain(
+    `<button type="button" id="print" class="btn tbtn" data-tip="${PRINT_TIP}">` +
+      '<i class="gi" data-i="drukarka"></i><span>Drukuj lub zapisz PDF</span></button>',
+  );
+  // ikona jak pozostałe: inline SVG w kolorze tekstu przycisku
+  expect(ICONS.drukarka).toMatch(/^<svg [^>]*stroke="currentColor"[^>]*aria-hidden="true">/);
+});
+
+test('aplikacja: prośba o wyłączenie nagłówków druku i wskazówka Ctrl+P', () => {
+  expect(webHtml).toContain(`<p class="out-hint">${PRINT_HINT}</p>`);
+  // dopisek stoi w stopce karty wyniku, pod ostrzeżeniem o przeglądaniu wyniku
+  const foot = webHtml.match(/<div class="card-f warn-note">[\s\S]*?<\/div>\s*<\/div>/)?.[0] ?? '';
+  expect(foot).toContain('class="out-hint"');
+  expect(webHtml).toContain(`<li class="hint-desk"><span>${PRINT_TIP_LI}</span></li>`);
+  expect(webMain).toContain(`const PRINT_EMPTY = '${PRINT_EMPTY}';`);
+});
+
+test('aplikacja: przycisk druku działa jak „Pobierz” i drukuje bieżący wynik', () => {
+  const actions = webMain.match(/function setResultActions[\s\S]*?\n\}/)?.[0] ?? '';
+  expect(actions).toContain('printBtn.disabled = !on;');
+  expect(actions).toContain('downloadBtn.disabled = !on;');
+  const click = webMain.match(/printBtn\.addEventListener\('click', \(\) => \{([\s\S]*?)\n\}\);/)?.[1] ?? '';
+  expect(click.indexOf('flushPendingUpdate();')).toBeGreaterThan(-1);
+  expect(click.indexOf('flushPendingUpdate();')).toBeLessThan(click.indexOf('window.print();'));
+  // Ctrl+P i menu przeglądarki też najpierw kończą odłożone przeliczenie
+  const before = webMain.match(/addEventListener\('beforeprint', \(\) => \{([\s\S]*?)\n\}\);/)?.[1] ?? '';
+  expect(before).toContain('flushPendingUpdate();');
+  expect(before).toContain('document.title = printTitle(new Date());');
+  expect(webMain).toMatch(/addEventListener\('afterprint', /);
+});
+
+test('aplikacja: „Kopiuj”, „Pobierz” i druk biorą tekst tylko z finalText (output.ts)', () => {
+  expect(webMain).toContain('navigator.clipboard.writeText(outputText())');
+  expect(webMain).toContain('ta.value = outputText();');
+  expect(webMain).toContain('downloadFor(outputText(), lastFileExt, new Date())');
+  for (const raw of ['writeText(lastRedacted', 'Blob([lastRedacted', 'ta.value = lastRedacted']) {
+    expect(webMain).not.toContain(raw);
+  }
+  // rozszerzenie pobieranego pliku zależy tylko od wczytanego pliku i wraca do .txt
+  // po „Wyczyść”, „Przykład” i „Cofnij”
+  expect(webMain.match(/setFileExt\(''\)/g)).toHaveLength(3);
+  expect(webMain).toContain("setFileExt(isPdf ? 'pdf' : isDocx ? 'docx' : ext);");
+  expect(webMain).not.toMatch(/file\.name[^;]*download/);
+});
+
+test('teksty o druku: bez wtrąceń „ — ”, „100%” i „nas/nam/nasz”', () => {
+  for (const t of [PRINT_TIP, PRINT_HINT, PRINT_TIP_LI, PRINT_EMPTY, 'Drukuj lub zapisz PDF']) {
+    expect(t).not.toContain(' — ');
+    expect(t).not.toContain('100%');
+    expect(t).not.toMatch(/\b(nas|nam|nasz\w*)\b/i);
+    expect(t).not.toMatch(/w pełni|po prostu/);
+  }
 });

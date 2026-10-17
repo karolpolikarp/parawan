@@ -82,6 +82,13 @@ export const ICONS: Record<string, string> = {
       '<path d="M6 7v13a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>',
   ),
   kopiuj: svg('<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>'),
+  // drukarka: podajnik u góry, korpus i kartka z wydrukiem wychodząca dołem
+  drukarka: svg(
+    '<path d="M7 9V4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v5"/>' +
+      '<path d="M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/>' +
+      '<rect x="7" y="14" width="10" height="7" rx="1"/><line x1="9.5" y1="17.5" x2="14.5" y2="17.5"/>' +
+      dot(17.5, 12, 0.9),
+  ),
   sprawdz: svg('<circle cx="11" cy="11" r="6.2"/><line x1="20" y1="20" x2="15.6" y2="15.6"/>'),
   suma: svg(
     '<rect x="5" y="3" width="14" height="18" rx="2"/><rect x="8" y="6" width="8" height="3" rx="0.6"/>' +

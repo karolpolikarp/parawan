@@ -11,6 +11,7 @@ import {
   unsupportedFormat,
 } from './files';
 import { makeFlash } from './flash';
+import { downloadFor, finalText, printTitle } from './output';
 import { extractPdfText } from './pdf';
 import { buildMinimalPdf } from './pdf-fixture';
 import {
@@ -49,6 +50,9 @@ const srcMeta = $<HTMLSpanElement>('src-meta');
 const copyBtn = $<HTMLButtonElement>('copy');
 const copyLabel = $<HTMLSpanElement>('copy-label');
 const downloadBtn = $<HTMLButtonElement>('download');
+const downloadLabel = $<HTMLSpanElement>('download-label');
+const printBtn = $<HTMLButtonElement>('print');
+const printOut = $<HTMLDivElement>('print-out');
 const clearBtn = $<HTMLButtonElement>('clear');
 const exampleBtn = $<HTMLButtonElement>('example');
 const loadFileBtn = $<HTMLButtonElement>('load-file');
@@ -72,6 +76,8 @@ const outputHint = $<HTMLParagraphElement>('output-hint');
 
 let lastRedacted = '';
 let lastInput = '';
+// Rozszerzenie ostatnio wczytanego pliku (bez nazwy): po .csv „Pobierz” oddaje .csv.
+let lastFileExt = '';
 let viewMode: 'result' | 'compare' = 'result';
 let maskEls: HTMLElement[] = []; // znaczniki w wyniku, w kolejności dokumentu
 let maskIdx = -1; // bieżący znacznik w przeglądaniu (-1 = żaden)
@@ -730,6 +736,26 @@ findingsChips.addEventListener('click', (e) => {
 function setResultActions(on: boolean): void {
   copyBtn.disabled = !on;
   downloadBtn.disabled = !on;
+  printBtn.disabled = !on;
+}
+
+/** Tekst dla „Kopiuj”, „Pobierz” i wydruku; jedno źródło, patrz output.ts. */
+const outputText = (): string => finalText({ redacted: lastRedacted });
+
+const PRINT_EMPTY = 'Brak wyniku do wydruku. Wklej tekst w pole „Tekst źródłowy”.';
+
+/**
+ * Kontener wydruku (#print-out) dostaje cały wynik przy każdym przeliczeniu, niezależnie od
+ * widoku i od HIGHLIGHT_LIMIT. Tylko textContent: tekst wyniku pochodzi od użytkownika, a pole
+ * źródła i przekreślone oryginały (.orig) nie mogą tu trafić żadną drogą.
+ */
+function syncPrintOut(): void {
+  printOut.textContent = lastRedacted ? outputText() : PRINT_EMPTY;
+}
+
+function setFileExt(ext: string): void {
+  lastFileExt = ext;
+  downloadLabel.textContent = ext === 'csv' ? 'Pobierz .csv' : 'Pobierz .txt';
 }
 
 function updateSrcMeta(text: string): void {
@@ -747,6 +773,7 @@ function renderResult(redacted: string, found: PiiFinding[]): void {
   lastRedacted = redacted;
   lastInput = input.value;
   setResultActions(true);
+  syncPrintOut();
   renderOutput();
   renderFindings(found);
 }
@@ -775,6 +802,7 @@ function update(): void {
       'Wklej tekst w polu „Tekst źródłowy” albo kliknij „Przykład” powyżej.</span>';
     findingsCard.hidden = true;
     lastRedacted = '';
+    syncPrintOut();
     keptMasks = 0;
     maskEls = [];
     maskIdx = -1;
@@ -962,6 +990,7 @@ function replaceSource(text: string, note: string, info = ''): void {
 appNoteUndo.addEventListener('click', () => {
   if (undoText === null) return;
   input.value = undoText;
+  setFileExt(''); // przywrócony tekst nie pochodzi z wczytanego pliku
   dismissNote();
   clearError();
   update();
@@ -975,6 +1004,7 @@ appNoteClose.addEventListener('click', () => {
 
 clearBtn.addEventListener('click', () => {
   clearError();
+  setFileExt('');
   replaceSource('', 'Wyczyszczono tekst.');
 });
 
@@ -991,13 +1021,13 @@ copyBtn.addEventListener('click', async () => {
   flushPendingUpdate();
   if (!lastRedacted) return;
   try {
-    await navigator.clipboard.writeText(lastRedacted);
+    await navigator.clipboard.writeText(outputText());
     copyFlash.show('Skopiowano ✓');
     announce('Skopiowano wynik do schowka.');
   } catch {
     const prevFocus = document.activeElement as HTMLElement | null;
     const ta = document.createElement('textarea');
-    ta.value = lastRedacted;
+    ta.value = outputText();
     ta.style.position = 'fixed';
     ta.style.opacity = '0';
     document.body.append(ta);
@@ -1022,19 +1052,39 @@ copyBtn.addEventListener('click', async () => {
 downloadBtn.addEventListener('click', () => {
   flushPendingUpdate();
   if (!lastRedacted) return;
-  const blob = new Blob([lastRedacted], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
+  // Nazwa ze znacznikiem czasu, BOM i windowsowe końce wierszy: output.ts (downloadFor).
+  const file = downloadFor(outputText(), lastFileExt, new Date());
+  const url = URL.createObjectURL(new Blob([file.content], { type: file.type }));
   const a = document.createElement('a');
   a.href = url;
-  // Znacznik czasu odróżnia kolejne pobrania („zanonimizowany (1).txt” nic nie mówi).
-  // Nazwy wczytanego pliku NIE używamy: „umowa-najmu-Kowalska” przeszłaby jawna.
-  const d = new Date();
-  const p = (n: number): string => String(n).padStart(2, '0');
-  a.download =
-    `zanonimizowany-${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}` +
-    `_${p(d.getHours())}-${p(d.getMinutes())}-${p(d.getSeconds())}.txt`;
+  a.download = file.name;
   a.click();
   URL.revokeObjectURL(url);
+});
+
+/* ── Druk ──
+   @media print w style.css chowa całą stronę poza #print-out, więc Ctrl+P, menu przeglądarki
+   i przycisk drukują to samo: cały wynik, bez pola źródła. Przed drukiem kończymy odłożone
+   przeliczenie (tekst wklejony przed chwilą), a tytuł karty, z którego przeglądarka robi nazwę
+   pliku PDF i nagłówek wydruku, na ten czas mówi, co jest na papierze. */
+let titleBeforePrint: string | null = null;
+
+addEventListener('beforeprint', () => {
+  flushPendingUpdate();
+  // Firefox potrafi zgłosić beforeprint drugi raz przed afterprint: pierwotny tytuł zostaje.
+  titleBeforePrint ??= document.title;
+  document.title = printTitle(new Date());
+});
+addEventListener('afterprint', () => {
+  if (titleBeforePrint === null) return;
+  document.title = titleBeforePrint;
+  titleBeforePrint = null;
+});
+
+printBtn.addEventListener('click', () => {
+  flushPendingUpdate();
+  if (!lastRedacted) return;
+  window.print();
 });
 
 // Przykład: maskowanie + strażnik kontekstu (art. 123 456 789 celowo zostaje)
@@ -1046,6 +1096,7 @@ Sprawę prowadzi pan Bąkiewicz zgodnie z art. 123 456 789 KC.`;
 
 exampleBtn.addEventListener('click', () => {
   clearError();
+  setFileExt('');
   replaceSource(EXAMPLE_TEXT, 'Wstawiono przykład w miejsce Twojego tekstu.');
 });
 
@@ -1102,6 +1153,7 @@ async function loadAnyFile(file: File): Promise<void> {
       return;
     }
     replaceSource(text, 'Zastąpiono tekst treścią pliku.', info);
+    setFileExt(isPdf ? 'pdf' : isDocx ? 'docx' : ext);
     if (text.includes('\uFFFD')) {
       showError(
         'Część znaków w pliku jest nieczytelna, więc maskowanie może być niepełne. Sprawdź wynik.',

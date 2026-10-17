@@ -39,6 +39,12 @@ Politykę CSP obu plików `csp.mjs` sprawdza dyrektywa po dyrektywie: dozwolone 
 jako strażnik CSP w `ci.yml`, `release.yml` i `deploy-landing.yml`: `node scripts/e2e/csp.mjs`
 (bez argumentu oba pliki, z `web` albo `landing` jeden).
 
+Druk sprawdza `wydruk.test.mjs` na prawdziwym PDF-ie z Chromium (`page.pdf()` przy emulacji
+druku), a tekst wyciąga z niego `pdfjs-dist` (wersja legacy, ta sama co w aplikacji). Na wydruku
+ma być sam wynik, w całości i w obu widokach („Wynik” i „Porównanie”), bez pola źródła
+i przekreślonych oryginałów. Ten sam plik sprawdza pobrany `.txt` (BOM UTF-8, końce wierszy
+`\r\n`) i `.csv` po wczytaniu pliku `.csv`.
+
 Przy błędzie zrzut całej strony trafia do `test-results/e2e/` (w CI jako artefakt).
 `PARAWAN_CHROMIUM` ze ścieżką do innej binarki Chromium włącza testy starego silnika
 (`skip: LEGACY_SKIP`); stare przeglądarki pobiera `manual/pobierz-przegladarki.mjs`.
@@ -47,10 +53,11 @@ Przy błędzie zrzut całej strony trafia do `test-results/e2e/` (w CI jako arte
 
 - Każdy pakiet, który zmienia zachowanie aplikacji, dopisuje swoje scenariusze do
   `scripts/e2e/*.test.mjs` i otwiera plik przez `withApp()`, więc dostaje kontrolę sieci i CSP.
-- Stałe zależne od przykładu w aplikacji (dziś `EXAMPLE_PESEL` i `EXAMPLE_NAME`), numer
-  z gotowych pism `pismo.*` (`PISMO_PESEL`) i lista kluczy localStorage (`ALLOWED_STORAGE_KEYS`)
-  są w jednym miejscu, w `helpers.mjs`. Scenariusze z `?demo` zaczynają od `app.demoReady()`,
-  który sprawdza, że oba napisy z przykładu naprawdę stoją w polu źródła.
+- Stałe zależne od przykładu w aplikacji (dziś `EXAMPLE_PESEL`, `EXAMPLE_NAME`, `EXAMPLE_EMAIL`
+  i `EXAMPLE_IBAN_START`), numer z gotowych pism `pismo.*` (`PISMO_PESEL`) i lista kluczy
+  localStorage (`ALLOWED_STORAGE_KEYS`) są w jednym miejscu, w `helpers.mjs`. Scenariusze
+  z `?demo` zaczynają od `app.demoReady()`, który sprawdza, że te napisy z przykładu naprawdę
+  stoją w polu źródła.
 - Asercja „numeru nie ma w wyniku” idzie w parze z asercją, że znacznik (np. `[PESEL]`) w nim
   jest. Sama negatywna przechodzi także na pustym wyniku.
 - Testy treści CSS czytają `style.css` przez `node:fs` i zaczynają od asercji, że treść nie jest

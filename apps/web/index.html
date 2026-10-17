@@ -224,9 +224,13 @@
             <span class="nav-count" id="mask-count" data-tip="Przeglądaj po kolei · klik w znacznik też przenosi">0 / 0</span>
             <button type="button" class="nav-btn" id="mask-next" data-tip="Następny zamaskowany fragment · ↓" aria-label="Następny zamaskowany fragment">›</button>
           </span>
-          <span class="card-sp"></span>
-          <button type="button" id="download" class="btn tbtn" data-tip="Zapisuje wynik jako plik tekstowy na dysku"><i class="gi" data-i="plik-txt"></i><span>Pobierz .txt</span></button>
-          <button type="button" id="copy" class="btn tbtn btn-acc" data-tip="Kopiuje zanonimizowany tekst do schowka · skrót Ctrl+Enter" data-tip-pos="left" aria-keyshortcuts="Control+Enter"><i class="gi" data-i="kopiuj"></i><span id="copy-label">Kopiuj</span></button>
+          <!-- Akcje na wyniku trzymają się razem: gdy pasek się zawija, schodzą do nowego rzędu
+               wszystkie trzy, a nie sam „Kopiuj”. -->
+          <span class="out-acts">
+            <button type="button" id="print" class="btn tbtn" data-tip="Drukuje sam wynik, bez tekstu źródłowego. PDF zapiszesz w oknie drukowania: „Zapisz jako PDF” albo „Microsoft Print to PDF”."><i class="gi" data-i="drukarka"></i><span>Drukuj lub zapisz PDF</span></button>
+            <button type="button" id="download" class="btn tbtn" data-tip="Zapisuje wynik jako plik tekstowy na dysku"><i class="gi" data-i="plik-txt"></i><span id="download-label">Pobierz .txt</span></button>
+            <button type="button" id="copy" class="btn tbtn btn-acc" data-tip="Kopiuje zanonimizowany tekst do schowka · skrót Ctrl+Enter" data-tip-pos="left" aria-keyshortcuts="Control+Enter"><i class="gi" data-i="kopiuj"></i><span id="copy-label">Kopiuj</span></button>
+          </span>
         </div>
         <div class="card-b">
           <div id="output" class="editor" role="region" tabindex="0" aria-labelledby="output-label" translate="no"></div>
@@ -236,11 +240,14 @@
         </div>
         <div class="card-f warn-note">
           <i class="gi" data-i="ostrzezenie"></i>
-          <span class="warn-txt">
+          <div class="warn-txt">
             <!-- Stałe ostrzeżenie o typach wyłączonych w „Co maskować” (wybór jest zapamiętywany). -->
             <span id="mask-off-note" class="mask-off" hidden><span id="mask-off-text"></span> <button type="button" id="mask-off-reset" class="linklike">Włącz wszystko</button></span>
             <span>Przejrzyj wynik przed udostępnieniem, wykrywanie nazwisk jest heurystyczne. <a href="#ograniczenia">Ograniczenia</a></span>
-          </span>
+            <!-- Nagłówek i stopkę wydruku dopisuje przeglądarka (tytuł, adres file:///C:/Users/…),
+                 strona nie może ich wyłączyć. Zostaje prośba przy przycisku druku. -->
+            <p class="out-hint">W oknie drukowania odznacz „Nagłówki i stopki”. Inaczej na wydruku znajdzie się ścieżka pliku z&nbsp;nazwą użytkownika komputera.</p>
+          </div>
         </div>
       </section>
 
@@ -346,6 +353,7 @@
         <div class="card-b">
           <ul class="tips">
             <li class="hint-desk"><span><kbd>Ctrl</kbd>+<kbd>Enter</kbd> kopiuje wynik do schowka.</span></li>
+            <li class="hint-desk"><span><kbd>Ctrl</kbd>+<kbd>P</kbd> drukuje sam wynik. Plik PDF zapiszesz w&nbsp;oknie drukowania.</span></li>
             <li class="hint-desk"><span>Plik (TXT, DOCX, PDF) upuść w&nbsp;dowolnym miejscu strony.</span></li>
             <li><span>Strzałkami <kbd>‹</kbd> <kbd>›</kbd> przejdziesz po kolei przez zamaskowane fragmenty.</span></li>
             <li><span>Widok <strong>Porównanie</strong> pokazuje oryginał przekreślony obok znacznika.</span></li>
@@ -368,6 +376,12 @@
       </footer>
 
     </div>
+
+    <!-- Wydruk: przy druku (@media print w style.css) widać tylko ten kontener, a w nim cały
+         wynik jako zwykły tekst. Pole źródła i przekreślone oryginały z „Porównania” nie trafiają
+         na papier, a długi wynik nie urywa się na wysokości okienka. main.ts wypełnia go przy
+         każdym przeliczeniu, wyłącznie przez textContent. -->
+    <div id="print-out" class="print-out" lang="pl" translate="no"></div>
 
     <script type="module" src="/src/main.ts"></script>
   </body>
