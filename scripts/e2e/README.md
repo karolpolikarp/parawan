@@ -19,6 +19,9 @@ Po każdym teście `withApp()` z `helpers.mjs` sprawdza, że:
   każdy inny `file:` też jest błędem, bo plik ma być samowystarczalny) ani próby otwarcia
   WebSocketu,
 - przeglądarka nie zgłosiła naruszenia CSP,
+- w dokumencie nie pojawił się `<meta http-equiv="refresh">`, nawet na chwilę: przenosi on kartę
+  pod dowolny adres (z danymi w adresie), CSP tego nie zatrzymuje, a jego licznik biegnie
+  w czasie rzeczywistym, więc z opóźnieniem dłuższym niż scenariusz nie odpaliłby w teście,
 - nie było wyjątku na stronie ani błędu w konsoli (wyjątek: ostrzeżenie pdf.js o „fake workerze”).
 
 Strona działa na zegarze Playwright: czas płynie normalnie, ale przed sprawdzeniem zegar jest
@@ -44,10 +47,12 @@ Przy błędzie zrzut całej strony trafia do `test-results/e2e/` (w CI jako arte
 
 - Każdy pakiet, który zmienia zachowanie aplikacji, dopisuje swoje scenariusze do
   `scripts/e2e/*.test.mjs` i otwiera plik przez `withApp()`, więc dostaje kontrolę sieci i CSP.
-- Stałe zależne od przykładu w aplikacji (dziś `EXAMPLE_PESEL`), numer z gotowych pism
-  `pismo.*` (`PISMO_PESEL`) i lista kluczy localStorage (`ALLOWED_STORAGE_KEYS`) są w jednym
-  miejscu, w `helpers.mjs`. Scenariusze z `?demo` zaczynają od `app.demoReady()`, który sprawdza,
-  że `EXAMPLE_PESEL` naprawdę stoi w polu źródła.
+- Stałe zależne od przykładu w aplikacji (dziś `EXAMPLE_PESEL` i `EXAMPLE_NAME`), numer
+  z gotowych pism `pismo.*` (`PISMO_PESEL`) i lista kluczy localStorage (`ALLOWED_STORAGE_KEYS`)
+  są w jednym miejscu, w `helpers.mjs`. Scenariusze z `?demo` zaczynają od `app.demoReady()`,
+  który sprawdza, że oba napisy z przykładu naprawdę stoją w polu źródła.
+- Asercja „numeru nie ma w wyniku” idzie w parze z asercją, że znacznik (np. `[PESEL]`) w nim
+  jest. Sama negatywna przechodzi także na pustym wyniku.
 - Testy treści CSS czytają `style.css` przez `node:fs` i zaczynają od asercji, że treść nie jest
   pusta: `import style.css?raw` daje w vitest pusty napis, a `not.toContain` przeszłoby zawsze.
 - Nowe teksty widoczne dla użytkownika przechodzą sprawdzenie tonu: bez wtrąceń „ — ”, bez „100%”,

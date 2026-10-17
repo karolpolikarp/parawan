@@ -1,7 +1,7 @@
 // Test dymny gotowego pliku: start z przykładu, PDF, wczytanie DOCX i PDF, pobranie .txt,
 // pamięć ustawień, rozmiar, landing i działająca CSP. Każdy test przez withApp(), więc po nim
-// sprawdzamy zero żądań poza plikiem, zero naruszeń CSP, zero wyjątków i błędów konsoli, także
-// w dobie po scenariuszu (przewinięty zegar strony).
+// sprawdzamy zero żądań poza plikiem, zero naruszeń CSP, brak meta refresh, zero wyjątków
+// i błędów konsoli, także w dobie po scenariuszu (przewinięty zegar strony).
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -10,6 +10,7 @@ import { strToU8, zipSync } from 'fflate';
 import { CSP_TARGETS, cspProblems, htmlCspProblems } from './csp.mjs';
 import {
   ALLOWED_STORAGE_KEYS,
+  EXAMPLE_NAME,
   EXAMPLE_PESEL,
   FIXTURES,
   LANDING_HTML,
@@ -53,13 +54,17 @@ function makeDocx(paragraphs) {
 /**
  * Po wczytaniu DOCX albo PDF aplikacja sama przechodzi do „Porównania” (oryginał przekreślony
  * obok znacznika). Tekst do skopiowania i pobrania to widok „Wynik”, więc sprawdzamy go tam.
+ * Znacznik [PESEL] musi stać także w tym widoku: testy sprawdzają potem tylko, że numeru w nim
+ * nie ma, a taki warunek spełnia też pusty albo niewyrenderowany wynik.
  */
 async function resultText(app) {
   await app.page.getByRole('button', { name: 'Wynik', exact: true }).click();
   await app.page.waitForFunction(
     () => document.getElementById('view-result')?.getAttribute('aria-pressed') === 'true',
   );
-  return app.output();
+  const out = await app.output();
+  assert.ok(out.includes('[PESEL]'), `widok „Wynik” bez znacznika [PESEL]:\n„${out}”`);
+  return out;
 }
 
 const bytes = (n) => n.toLocaleString('pl-PL');
@@ -127,14 +132,22 @@ test('CSP zatrzymuje próbę wysłania danych (fetch, obrazek)', async (t) => {
   });
 });
 
-test('bramka widzi próbę wysyłki i wyjątek odłożone na później (timer, WebSocket)', async () => {
+test('bramka widzi próbę wysyłki i wyjątek odłożone na później (timer, WebSocket, meta refresh)', async () => {
   // Test samej bramki: scenariusz kończy się w niecałą sekundę, a zdarzenia przychodzą po 5 i 20 s
   // (minuta przewijana krok po kroku) i po 3 godzinach (skok o dobę). Bez przewinięcia zegara
-  // w assertClean() wszystkie wypadłyby po zamknięciu strony.
+  // w assertClean() wszystkie wypadłyby po zamknięciu strony. Meta refresh liczy czas
+  // rzeczywisty, którego przewijanie nie dotyka, więc z godzinnym opóźnieniem nigdy nie odpali
+  // w teście; bramka ma zobaczyć sam znacznik.
   const app = await openApp(browser, '?demo');
   try {
     await app.demoReady();
     await app.page.evaluate(() => {
+      const meta = document.createElement('meta');
+      meta.httpEquiv = 'refresh';
+      meta.content = `3600;url=https://example.com/nawigacja?d=${encodeURIComponent(
+        document.getElementById('input').value.slice(0, 20),
+      )}`;
+      document.head.append(meta);
       setTimeout(() => {
         new Image().src = 'https://example.com/pozniej.png';
       }, 5_000);
@@ -163,6 +176,10 @@ test('bramka widzi próbę wysyłki i wyjątek odłożone na później (timer, W
     assert.ok(
       app.pageErrors.some((m) => m.includes('wyjątek z timera')),
       `bramka nie widzi wyjątku z timera:\n${app.pageErrors.join('\n')}`,
+    );
+    assert.ok(
+      app.refreshes.some((c) => c.includes('example.com/nawigacja')),
+      `bramka nie widzi meta refresh:\n${app.refreshes.join('\n')}`,
     );
   } finally {
     await app.close();
@@ -247,7 +264,7 @@ test('localStorage: tylko znane klucze ustawień, bez treści pisma', async (t) 
     assert.deepEqual(unknown, [], `nieznane klucze w localStorage: ${unknown}`);
     assert.deepEqual(keys.sort(), [...ALLOWED_STORAGE_KEYS].sort(), 'ustawienia nie zostały zapisane');
     const values = Object.values(store).join(' ');
-    assert.ok(!values.includes(EXAMPLE_PESEL) && !values.includes('Kowalska'), 'treść pisma w localStorage');
+    assert.ok(!values.includes(EXAMPLE_PESEL) && !values.includes(EXAMPLE_NAME), 'treść pisma w localStorage');
   }, opts);
 });
 

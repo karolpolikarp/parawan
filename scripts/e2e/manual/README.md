@@ -21,7 +21,7 @@ i `geckodriver.exe`. Opcje: `--katalog <ścieżka>`, `--tylko chromium-1070054,g
 
 | Katalog | Wersja | Po co |
 |---|---|---|
-| `chromium-857947` | Chromium 90.0.4430.0 | poniżej progu: skrypt nie startuje (blok statyczny klasy w pdf.js wymaga Chrome 94), użytkownik ma dostać komunikat zamiast pustej strony |
+| `chromium-857947` | Chromium 90.0.4430.0 | poniżej progu: skrypt nie startuje (blok statyczny klasy w pdf.js wymaga Chrome 94); pokazuje, co widzi urzędnik, gdy Parawan nie ruszył |
 | `chromium-1070054` | Chromium 109.0.5414.0 | ostatni Chrome i Edge dla Windows 7 i 8.1, próg `build.target` |
 | `chromium-1097610` | Chromium 111.0.5563.0 | domyślny cel składni Vite 8; PDF zawodził tu jak w 109 |
 | `chromium-1287751` | Chromium 125.0.6422.0 | pierwsza wersja, którą pdf.js (legacy) wspiera oficjalnie |
@@ -60,8 +60,16 @@ Adres pliku do skryptów to `file:///` i ścieżka z ukośnikami, np.
 1. `npm run build -w anonimizator-web`, potem `node scripts/e2e/manual/mkprobe2.mjs`.
 2. Chromium 109 i 111: `stary-chromium.mjs` z `Parawan-probe.html?pdftest` ma pokazać `[PDF OK]`,
    a `Parawan-pliki.html` zasłonięty PESEL we wszystkich czterech plikach.
-3. Chromium 90: `stary-chromium.mjs` ze zrzutem. Plik nie ruszy, więc na zrzucie ma być komunikat
-   dla użytkownika, a nie pusta strona.
+3. Chromium 90: `stary-chromium.mjs` ze zrzutem oryginalnego pliku, bez sondy, czyli
+   `file:///…/apps/web/dist/index.html?demo` (skrypt wypisze wtedy „brak sondy w DOM”, w tym
+   kroku to normalne). Żółty blok sondy zasłania górę strony, a tam stanie komunikat startowy,
+   więc zrzut z `Parawan-probe.html` go nie pokaże; kopia z sondą przydaje się tu tylko do
+   odczytania błędu (`Uncaught SyntaxError`). Porażka nie wygląda jak pusta strona. Nagłówek,
+   karty kroków i pokaz „Jak to działa” się rysują i strona wygląda na działającą. Zdradzają ją
+   puste kwadraty zamiast ikon i „WERSJA …” przy nazwie, a pola niżej nie reagują. Dopóki
+   aplikacja nie ma komunikatu startowego (pakiet A02), krok potwierdza tylko ten obraz. Od A02 na
+   górze zrzutu ma stać komunikat, że Parawan nie uruchomił się w tej przeglądarce (pojawia się po
+   kilku sekundach, domyślny `WAIT` skryptu na to wystarcza).
 4. Firefox ESR 115 i 140: `ffprobe.mjs` z `Parawan-probe.html?demo` i `?pdftest`.
 5. Edge i Chrome: `edge-probe.mjs` z tymi samymi adresami, potem `viewports.mjs`.
 

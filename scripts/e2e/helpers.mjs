@@ -1,8 +1,9 @@
 // Wspólne narzędzia testów E2E na GOTOWYM pliku. Testy otwierają apps/web/dist/index.html
 // (i landing) przez file://, tak jak urzędnik po dwukrotnym kliknięciu, i po każdym teście
 // sprawdzają obietnicę „tekst nie opuszcza przeglądarki”: zero żądań poza samym dokumentem,
-// zero naruszeń CSP, zero wyjątków i błędów w konsoli. Testy vitest w apps/web sprawdzają
-// moduły osobno; tu sprawdzamy plik po buildzie (inline, CSP z wtyczki, fake worker pdf.js).
+// zero naruszeń CSP, żadnego <meta http-equiv="refresh">, zero wyjątków i błędów w konsoli.
+// Testy vitest w apps/web sprawdzają moduły osobno; tu sprawdzamy plik po buildzie (inline,
+// CSP z wtyczki, fake worker pdf.js).
 //
 // Uruchomienie: npm run e2e (po buildzie web i landingu). Każdy kolejny pakiet aplikacji dopisuje
 // swoje scenariusze do scripts/e2e/*.test.mjs i korzysta z withApp().
@@ -22,6 +23,13 @@ export const FIXTURES = path.join(ROOT, 'apps', 'web', 'src', 'fixtures', 'urzad
  * tutaj; demoReady() sprawdza, że ten numer naprawdę stoi w polu źródła, więc rozjazd wywraca testy.
  */
 export const EXAMPLE_PESEL = '44051401359';
+
+/**
+ * Nazwisko osoby z przykładu, w tej samej formie co w EXAMPLE_TEXT. demoReady() sprawdza je tak
+ * jak EXAMPLE_PESEL: test „bez treści pisma w localStorage” szuka go w zapisanych wartościach,
+ * a po zmianie przykładu szukałby nazwiska, którego w piśmie już nie ma.
+ */
+export const EXAMPLE_NAME = 'Kowalska';
 
 /**
  * Numer PESEL wpisany na stałe w pliki pismo.* z FIXTURES (buduje je
@@ -78,8 +86,8 @@ export function fileSize(file) {
 
 /**
  * Otwiera plik przez file:// w nowym, czystym kontekście (pusty localStorage) i zaczyna
- * nasłuch żądań, WebSocketów, naruszeń CSP, wyjątków i błędów konsoli. Zegar strony to zegar
- * Playwright: czas płynie normalnie, ale assertClean() może go przewinąć.
+ * nasłuch żądań, WebSocketów, naruszeń CSP, znaczników meta refresh, wyjątków i błędów konsoli.
+ * Zegar strony to zegar Playwright: czas płynie normalnie, ale assertClean() może go przewinąć.
  * @param {import('playwright').Browser} browser
  * @param {string} [query] np. '?demo'
  * @param {{ file?: string, viewport?: { width: number, height: number },
@@ -100,6 +108,8 @@ export async function openApp(browser, query = '', opts = {}) {
   /** @type {string[]} */
   const webSockets = [];
   const violations = [];
+  /** @type {string[]} treść atrybutu content każdego <meta http-equiv="refresh"> */
+  const refreshes = [];
   const pageErrors = [];
   const consoleErrors = [];
   const allowed = (u) => {
@@ -139,6 +149,7 @@ export async function openApp(browser, query = '', opts = {}) {
   });
   await context.clock.install();
   await context.exposeFunction('__parawanCsp', (v) => violations.push(v));
+  await context.exposeFunction('__parawanRefresh', (v) => refreshes.push(v));
   await context.addInitScript(() => {
     document.addEventListener('securitypolicyviolation', (e) => {
       window.__parawanCsp({
@@ -146,6 +157,34 @@ export async function openApp(browser, query = '', opts = {}) {
         blocked: e.blockedURI,
         source: `${e.sourceFile}:${e.lineNumber}`,
       });
+    });
+    // <meta http-equiv="refresh" content="N;url=…"> przenosi kartę pod dowolny adres, a w
+    // adresie mogą jechać dane. CSP nie ma dyrektywy, która by to zatrzymała, a licznik
+    // przeglądarki biegnie w czasie rzeczywistym, więc przewijany zegar strony go nie odpala:
+    // przy N dłuższym niż scenariusz nawigacja nie zdąży się wydarzyć w teście. Dlatego liczy
+    // się sam znacznik, zapisany w chwili wstawienia (także statyczny z parsera, wstawiony
+    // i od razu usunięty albo z atrybutem dopisanym później). Aplikacja i landing nie mają
+    // powodu go używać.
+    const isRefresh = (el) =>
+      el.localName === 'meta' && /^\s*refresh\s*$/i.test(el.getAttribute('http-equiv') ?? '');
+    const report = (el) => window.__parawanRefresh(el.getAttribute('content') ?? '');
+    new MutationObserver((records) => {
+      for (const r of records) {
+        if (r.type === 'attributes') {
+          if (isRefresh(r.target)) report(r.target);
+          continue;
+        }
+        for (const n of r.addedNodes) {
+          if (n.nodeType !== Node.ELEMENT_NODE) continue;
+          if (isRefresh(n)) report(n);
+          for (const m of n.querySelectorAll('meta')) if (isRefresh(m)) report(m);
+        }
+      }
+    }).observe(document, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['http-equiv', 'content'],
     });
   });
   const page = await context.newPage();
@@ -168,6 +207,7 @@ export async function openApp(browser, query = '', opts = {}) {
     requests.length +
     webSockets.length +
     violations.length +
+    refreshes.length +
     pageErrors.length +
     consoleErrors.length;
   /** Przewija zegar strony (patrz SETTLE_MS i JUMP_MS wyżej). */
@@ -209,6 +249,7 @@ export async function openApp(browser, query = '', opts = {}) {
     url,
     requests,
     violations,
+    refreshes,
     pageErrors,
     consoleErrors,
     /** Tekst wyniku (#output) w aplikacji. */
@@ -220,15 +261,23 @@ export async function openApp(browser, query = '', opts = {}) {
         needle,
         { timeout },
       ),
-    /** Czeka na wynik przykładu z ?demo i sprawdza, że w polu źródła stoi EXAMPLE_PESEL. */
+    /**
+     * Czeka na wynik przykładu z ?demo i sprawdza, że w polu źródła stoją EXAMPLE_PESEL
+     * i EXAMPLE_NAME.
+     */
     async demoReady() {
       await this.waitForOutput('[PESEL]');
       const input = await page.locator('#input').inputValue();
-      // Bez tego asercja „numeru nie ma w wyniku” przeszłaby zawsze po zmianie przykładu.
-      assert.ok(
-        input.includes(EXAMPLE_PESEL),
-        `w przykładzie (#input) nie ma numeru EXAMPLE_PESEL ${EXAMPLE_PESEL}; zmieniony przykład? popraw helpers.mjs`,
-      );
+      // Bez tego asercje „numeru (nazwiska) nie ma w wyniku” przeszłyby zawsze po zmianie przykładu.
+      for (const [name, value] of [
+        ['EXAMPLE_PESEL', EXAMPLE_PESEL],
+        ['EXAMPLE_NAME', EXAMPLE_NAME],
+      ]) {
+        assert.ok(
+          input.includes(value),
+          `w przykładzie (#input) nie ma ${name} „${value}”; zmieniony przykład? popraw helpers.mjs`,
+        );
+      }
     },
     /**
      * Żądania i próby połączeń spoza pliku, których nie zatrzymała CSP (pusta lista = brak
@@ -258,6 +307,11 @@ export async function openApp(browser, query = '', opts = {}) {
       const out = await this.leakedRequests();
       assert.deepEqual(out, [], `żądania spoza pliku:\n${out.join('\n')}`);
       assert.deepEqual(violations, [], `naruszenia CSP:\n${JSON.stringify(violations, null, 1)}`);
+      assert.deepEqual(
+        refreshes,
+        [],
+        `<meta http-equiv="refresh"> w dokumencie (nawigacja karty po czasie, której CSP nie zatrzyma):\n${refreshes.join('\n')}`,
+      );
       assert.deepEqual(pageErrors, [], `wyjątki na stronie:\n${pageErrors.join('\n')}`);
       assert.deepEqual(consoleErrors, [], `błędy w konsoli:\n${consoleErrors.join('\n')}`);
     },
