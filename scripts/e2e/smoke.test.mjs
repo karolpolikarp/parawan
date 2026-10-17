@@ -3,7 +3,8 @@
 // sprawdzamy zero żądań poza plikiem, zero naruszeń CSP, brak meta refresh, zero wyjątków
 // i błędów konsoli, także w dobie po scenariuszu (przewinięty zegar strony).
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { after, before, test } from 'node:test';
 import { strToU8, zipSync } from 'fflate';
@@ -194,6 +195,86 @@ test('?demo: przykład zamaskowany, numer PESEL nie przechodzi do wyniku', async
   });
 });
 
+/* ── Komunikat startowy: Parawan nie ruszył albo JavaScript jest wyłączony ── */
+
+const BOOT_FAIL_TEXT = 'Parawan nie uruchomił się w tej przeglądarce';
+const NO_JS_TEXT = 'Ta przeglądarka ma wyłączony JavaScript';
+// Pasek pokazuje się po 4 s (animation-delay w index.html); sprawdzamy z zapasem.
+const BOOT_FAIL_AFTER_MS = 4_500;
+
+/** Teksty widocznych komunikatów startowych (.boot-fail; visibility: hidden i 0 px to niewidoczne). */
+const visibleBootFails = (page) => page.locator('.boot-fail:visible').allTextContents();
+
+test('zwykły start: main.ts usuwa pasek „nie uruchomił się” z dokumentu', async (t) => {
+  await withApp(browser, t, '?demo', async (app) => {
+    await app.demoReady();
+    assert.equal(await app.page.locator('#boot-fail').count(), 0, '#boot-fail został w DOM po starcie');
+    assert.deepEqual(await visibleBootFails(app.page), []);
+  });
+});
+
+// Kopia bez <script type="module"> wygląda tak jak plik w silniku, który nie sparsował modułu
+// (Chromium 90 z SyntaxError, tryb Internet Explorera): HTML i CSS są, skryptu nie ma.
+for (const reducedMotion of ['reduce', 'no-preference']) {
+  test(`plik bez działającego skryptu: po 4 s pasek „nie uruchomił się” (reducedMotion: ${reducedMotion})`, async (t) => {
+    const html = readFileSync(WEB_HTML, 'utf8');
+    const modules = html.match(/<script type="module"[^>]*>[\s\S]*?<\/script>/g) ?? [];
+    assert.equal(modules.length, 1, `skryptów modułowych w pliku: ${modules.length}`);
+    const dead = html.replace(modules[0], '');
+    assert.ok(!/<script/i.test(dead), 'w kopii został inny skrypt');
+    const dir = mkdtempSync(path.join(tmpdir(), 'parawan-bez-modulu-'));
+    const file = path.join(dir, 'Parawan.html');
+    writeFileSync(file, dead);
+    try {
+      const started = Date.now();
+      await withApp(
+        browser,
+        t,
+        '',
+        async ({ page }) => {
+          await page.waitForLoadState('load');
+          // Na początku pasek jest ukryty i nie zajmuje miejsca, więc przy zwykłym starcie nie
+          // mignie ani nie przesunie strony, zanim main.ts go usunie.
+          assert.ok(Date.now() - started < 3_000, 'strona wczytywała się dłużej niż 3 s');
+          assert.deepEqual(await visibleBootFails(page), [], 'pasek widoczny od razu, bez opóźnienia');
+          const box = await page.locator('#boot-fail').boundingBox();
+          assert.equal(box?.height ?? 0, 0, `ukryty pasek zajmuje ${box?.height} px`);
+
+          await page.waitForTimeout(Math.max(0, BOOT_FAIL_AFTER_MS - (Date.now() - started)));
+          const shown = await visibleBootFails(page);
+          assert.equal(shown.length, 1, `widocznych komunikatów: ${shown.length}`);
+          assert.ok(shown[0].includes(BOOT_FAIL_TEXT), `inny komunikat: „${shown[0]}”`);
+          const after = await page.locator('#boot-fail').boundingBox();
+          assert.ok((after?.height ?? 0) > 40, `pasek ma ${after?.height} px wysokości`);
+          assert.ok((after?.y ?? 999) < 60, `pasek nie stoi u góry strony (y = ${after?.y})`);
+        },
+        { file, reducedMotion },
+      );
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+}
+
+test('wyłączony JavaScript: jeden komunikat od razu, bez paska po 4 s', async (t) => {
+  await withApp(
+    browser,
+    t,
+    '',
+    async ({ page }) => {
+      await page.waitForLoadState('load');
+      const now = await visibleBootFails(page);
+      assert.equal(now.length, 1, `widocznych komunikatów od razu: ${now.length}`);
+      assert.ok(now[0].includes(NO_JS_TEXT), `inny komunikat: „${now[0]}”`);
+      await page.waitForTimeout(BOOT_FAIL_AFTER_MS);
+      const later = await visibleBootFails(page);
+      assert.deepEqual(later, now, 'po 4 s pojawił się drugi komunikat');
+      assert.equal(await page.locator('#boot-fail').isVisible(), false);
+    },
+    { javaScriptEnabled: false },
+  );
+});
+
 test('?pdftest: pdf.js działa w pliku z dysku', async (t) => {
   await withApp(browser, t, '?pdftest', async ({ page }) => {
     await page.waitForFunction(
@@ -290,6 +371,31 @@ test('stary silnik (PARAWAN_CHROMIUM): ?demo maskuje PESEL', { skip: LEGACY_SKIP
     await withApp(legacy, t, '?demo', async (app) => {
       await app.demoReady();
       assert.ok(!(await app.output()).includes(EXAMPLE_PESEL));
+    });
+  } finally {
+    await legacy.close();
+  }
+});
+
+// Chrome i Edge 109–123 nie mają iteracji ReadableStream, z której korzysta pdf.js 6; łatka
+// w pdf.ts ją dopisuje. Bez niej oba scenariusze kończyły się błędem odczytu PDF.
+test('stary silnik (PARAWAN_CHROMIUM): ?pdftest i wczytany pismo.pdf', { skip: LEGACY_SKIP }, async (t) => {
+  const legacy = await launch({ legacy: true });
+  try {
+    await withApp(legacy, t, '?pdftest', async ({ page }) => {
+      await page.waitForFunction(
+        () => /^\[PDF (OK|FAIL)\]/.test(document.getElementById('input')?.value ?? ''),
+        null,
+        { timeout: 10_000 },
+      );
+      const value = await page.locator('#input').inputValue();
+      assert.ok(value.startsWith('[PDF OK]'), `samodiagnostyka PDF: „${value.slice(0, 200)}”`);
+    });
+    await withApp(legacy, t, '', async (app) => {
+      await app.page.locator('#file-input').setInputFiles(path.join(FIXTURES, 'pismo.pdf'));
+      await app.waitForOutput('[PESEL]');
+      const out = await resultText(app);
+      assert.ok(!out.includes(PISMO_PESEL), `numer PESEL z PDF przeszedł do wyniku:\n${out}`);
     });
   } finally {
     await legacy.close();

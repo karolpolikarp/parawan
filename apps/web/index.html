@@ -11,8 +11,19 @@
       name="description"
       content="Parawan, lokalny anonimizator polskich danych osobowych: PESEL, NIP, REGON, numer konta, dowód, e-mail, telefon, adres, imię i nazwisko. Tekst nie opuszcza Twojej przeglądarki. Działa offline, wyłącznie na regułach i sumach kontrolnych (bez AI)."
     />
+    <!-- Pasek „Parawan nie uruchomił się”: opis na końcu main.ts. -->
+    <style>
+.boot-fail{position:sticky;top:0;z-index:99;max-width:1320px;margin:0 auto}
+.boot-fail p{margin:0 0 16px;padding:14px 16px;border:1px solid #b8901c;border-radius:10px;background:#fff4c2;color:#1a1a1a;font:16px/1.5 Archivo,Arial,sans-serif}
+#boot-fail{overflow:hidden;visibility:hidden;max-height:0;animation:boot-reveal 0s linear 4s forwards}
+@keyframes boot-reveal{to{visibility:visible;max-height:40em}}
+@media (max-height:480px){.boot-fail{position:static}}
+    </style>
+    <noscript><style>#boot-fail{display:none}</style></noscript>
   </head>
   <body>
+    <div id="boot-fail" class="boot-fail" role="alert"><p><strong>Parawan nie uruchomił się w tej przeglądarce, więc pola poniżej nie działają.</strong> Otwórz plik w aktualnym Edge, Chrome albo Firefoksie. Na komputerze służbowym dział IT może blokować skrypty w plikach otwieranych z dysku albo otwierać je w trybie Internet Explorera.</p></div>
+    <noscript><div class="boot-fail boot-fail-now"><p><strong>Ta przeglądarka ma wyłączony JavaScript.</strong> Parawan rozpoznaje dane programem zapisanym w tym pliku, więc bez JavaScriptu nie zadziała. Plik nie łączy się z internetem. Na komputerze służbowym poproś dział IT o zezwolenie na skrypty w plikach otwieranych z dysku.</p></div></noscript>
     <div class="grid">
 
       <!-- ══════════ HERO ══════════ -->

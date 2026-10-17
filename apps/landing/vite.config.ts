@@ -30,6 +30,13 @@ const cspMeta: Plugin = {
   },
 };
 
+// Najstarsze przeglądarki, dla których build obniża składnię JS i CSS, jak w aplikacji
+// (apps/web/vite.config.ts, tam pełne uzasadnienie). 109 to ostatnie Chrome i Edge dla Windows 7,
+// 8.1 i Server 2012 R2, 115 to ostatni Firefox ESR dla Windows 7 i 8.1: strona z demo ma działać
+// tam, gdzie działa Parawan.html. Podniesienie wymaga zmiany DLA-IOD-I-IT.txt i testu na
+// Chromium 109.
+const BUILD_TARGET = ['chrome109', 'edge109', 'firefox115', 'safari16.4'];
+
 // Landing „Parawan" — JEDEN samowystarczalny index.html (JS+CSS+fonty+SVG inline).
 // Świadomie ta sama filozofia co narzędzie (apps/web): strona nie robi ŻADNYCH żądań
 // do serwerów firm trzecich — to weryfikowalna obietnica (DevTools → Network: 0 żądań),
@@ -41,6 +48,8 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? 'dev'),
   },
   build: {
+    target: BUILD_TARGET,
+    cssTarget: BUILD_TARGET,
     // Fonty marki (Archivo ~35 kB/podzbiór, IBM Plex Mono ~15 kB/waga) muszą trafić inline.
     assetsInlineLimit: 262144,
   },

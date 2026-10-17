@@ -36,6 +36,14 @@ const cspMeta: Plugin = {
   },
 };
 
+// Najstarsze przeglądarki, dla których build obniża składnię JS i CSS. 109 to ostatnie Chrome
+// i Edge dla Windows 7, 8.1 i Server 2012 R2, 115 to ostatni Firefox ESR dla Windows 7 i 8.1.
+// Przypięte, bo domyślny cel Vite rośnie z wersją (Vite 8: chrome111, firefox114) i po cichu
+// wyłączyłby te komputery. Podniesienie wymaga zmiany DLA-IOD-I-IT.txt i testu na Chromium 109
+// (scripts/e2e/manual/README.md). Build obniża tylko składnię, a nie API: nowsze API i CSS
+// zatrzymuje strażnik w src/content.test.ts. Ta sama lista: apps/landing/vite.config.ts.
+const BUILD_TARGET = ['chrome109', 'edge109', 'firefox115', 'safari16.4'];
+
 export default defineConfig({
   // JEDEN samowystarczalny index.html (JS+CSS inline). Kluczowe dla użycia z dysku:
   // Chromium blokuje <script type="module"> i <link crossorigin> na file:// (CORS,
@@ -46,6 +54,8 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? 'dev'),
   },
   build: {
+    target: BUILD_TARGET,
+    cssTarget: BUILD_TARGET,
     // WSZYSTKIE assety MUSZĄ być inline (data:) — osobny plik assetu złamałby file://
     // (Chromium blokuje pobocze przy origin null). Limit obejmuje też fonty marki
     // (Archivo ~35 kB/podzbiór, IBM Plex Mono ~15 kB/waga) — stąd zapas 256 kB.

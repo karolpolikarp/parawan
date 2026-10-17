@@ -99,13 +99,18 @@ export function fileSize(file) {
  * @param {import('playwright').Browser} browser
  * @param {string} [query] np. '?demo'
  * @param {{ file?: string, viewport?: { width: number, height: number },
- *   reducedMotion?: 'reduce' | 'no-preference' }} [opts]
+ *   reducedMotion?: 'reduce' | 'no-preference', javaScriptEnabled?: boolean }} [opts]
  */
 export async function openApp(browser, query = '', opts = {}) {
   const file = opts.file ?? WEB_HTML;
   const url = pathToFileURL(file).href + query;
+  // Bez JavaScriptu (zasada GPO blokująca skrypty w plikach z dysku) nie ma timerów strony do
+  // przewijania, a zegar Playwright i nasłuch CSP i meta refresh to skrypty na stronie, więc
+  // zostaje sama kontrola żądań. Wystarcza: bez skryptu tylko HTML i CSS mogą sięgnąć po zasób.
+  const javaScriptEnabled = opts.javaScriptEnabled ?? true;
   const context = await browser.newContext({
     acceptDownloads: true,
+    javaScriptEnabled,
     locale: 'pl-PL',
     reducedMotion: opts.reducedMotion ?? 'reduce',
     viewport: opts.viewport ?? { width: 1366, height: 768 },
@@ -155,7 +160,7 @@ export async function openApp(browser, query = '', opts = {}) {
     webSockets.push(ws.url());
     ws.close();
   });
-  await context.clock.install();
+  if (javaScriptEnabled) await context.clock.install();
   await context.exposeFunction('__parawanCsp', (v) => violations.push(v));
   await context.exposeFunction('__parawanRefresh', (v) => refreshes.push(v));
   await context.addInitScript(() => {
@@ -220,6 +225,7 @@ export async function openApp(browser, query = '', opts = {}) {
     consoleErrors.length;
   /** Przewija zegar strony (patrz SETTLE_MS i JUMP_MS wyżej). */
   const settle = async () => {
+    if (!javaScriptEnabled) return;
     const steps = [
       () => page.clock.runFor(SETTLE_MS),
       () => page.clock.fastForward(JUMP_MS),

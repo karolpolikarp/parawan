@@ -50,6 +50,16 @@ po wczytaniu pliku `.csv` i pasek nad wynikiem: przy 1351 i 1265 px (1366 i 1280
 przewijania Windows, który Playwright chowa) mieści się w jednym rzędzie, ma wysokość paska
 źródła i nie zawija się po „Skopiowano ✓”.
 
+Start w przeglądarce, w której Parawan nie ruszył, sprawdza `smoke.test.mjs` na kopii pliku bez
+`<script type="module">` (tak wygląda Chromium 90, które nie parsuje modułu, i tryb Internet
+Explorera): pasek „Parawan nie uruchomił się…” jest na początku ukryty i nie zajmuje miejsca, a po
+4,5 s jest widoczny, także przy ograniczonym ruchu. Przy zwykłym starcie `main.ts` usuwa go
+z dokumentu. Kontekst z wyłączonym JavaScriptem (`openApp(…, { javaScriptEnabled: false })`,
+wtedy bez przewijania zegara i bez nasłuchu CSP, które działają skryptem na stronie) pokazuje
+jeden komunikat z `<noscript>`, bez paska po 4 s. Z `PARAWAN_CHROMIUM` (Chromium 109 albo 111)
+dochodzi `?pdftest` i wczytany `pismo.pdf`: pdf.js czyta tekst przez `for await` po
+`ReadableStream`, czego Chrome i Edge przed 124 nie mają, i działa tam dzięki łatce w `pdf.ts`.
+
 Przy błędzie zrzut całej strony trafia do `test-results/e2e/` (w CI jako artefakt).
 `PARAWAN_CHROMIUM` ze ścieżką do innej binarki Chromium włącza testy starego silnika
 (`skip: LEGACY_SKIP`); stare przeglądarki pobiera `manual/pobierz-przegladarki.mjs`.
@@ -69,7 +79,10 @@ Przy błędzie zrzut całej strony trafia do `test-results/e2e/` (w CI jako arte
   pusta: `import style.css?raw` daje w vitest pusty napis, a `not.toContain` przeszłoby zawsze.
 - Nowe teksty widoczne dla użytkownika przechodzą sprawdzenie tonu: bez wtrąceń „ — ”, bez „100%”,
   bez „nas”, „nam”, „nasz”.
-- Nowy kod nie używa API ani CSS nowszych niż `build.target` aplikacji.
+- Nowy kod nie używa API ani CSS nowszych niż `build.target` aplikacji (Chrome i Edge 109,
+  Firefox 115, Safari 16.4). Build obniża tylko składnię, więc listę znanych pułapek (`:has(`,
+  `color-mix(`, `toSorted`, `Promise.withResolvers` i inne) pilnuje strażnik w
+  `apps/web/src/content.test.ts`, na plikach, które trafiają do aplikacji i strony.
 - Każde nowe pole tekstowe na dane ma `autocomplete="off"`, `spellcheck="false"`
   i `translate="no"`.
 - Dostępność (axe), klawiatura, wysoki kontrast i stare przeglądarki w CI to osobny zestaw (B03).

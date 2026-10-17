@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { expect, test } from 'vitest';
 import landingHtml from '../../landing/index.html?raw';
 import landingMain from '../../landing/src/main.ts?raw';
@@ -148,3 +149,212 @@ test('teksty o druku: bez wtrąceń „ — ”, „100%” i „nas/nam/nasz”
     expect(t).not.toMatch(/w pełni|po prostu/);
   }
 });
+
+/* ── Start w starszych przeglądarkach urzędowych ── */
+
+/** Plik z repo jako tekst z końcami wierszy \n (checkout na Windows ma \r\n). */
+const repoFile = (url: URL): string => readFileSync(url, 'utf8').replace(/\r\n/g, '\n');
+
+// 109 to ostatnie Chrome i Edge dla Windows 7, 8.1 i Server 2012 R2, 115 to ostatni Firefox ESR
+// dla Windows 7 i 8.1. Ta sama lista musi stać w obu plikach konfiguracji.
+const BUILD_TARGET = ['chrome109', 'edge109', 'firefox115', 'safari16.4'];
+
+for (const [name, rel] of [
+  ['aplikacja', '../vite.config.ts'],
+  ['landing', '../../landing/vite.config.ts'],
+] as const) {
+  test(`${name}: build.target i build.cssTarget przypięte do Chrome i Edge 109, Firefoksa 115 i Safari 16.4`, () => {
+    const cfg = repoFile(new URL(rel, import.meta.url));
+    expect(cfg.length).toBeGreaterThan(0);
+    const list = cfg.match(/\nconst BUILD_TARGET = \[([^\]]*)\];\n/)?.[1] ?? '';
+    expect([...list.matchAll(/'([^']+)'/g)].map((m) => m[1])).toEqual(BUILD_TARGET);
+    const build = cfg.match(/\n {2}build: \{\n([\s\S]*?)\n {2}\},\n/)?.[1] ?? '';
+    expect(build).toMatch(/^ {4}target: BUILD_TARGET,$/m);
+    expect(build).toMatch(/^ {4}cssTarget: BUILD_TARGET,$/m);
+    // uzasadnienie przy liście, bo podniesienie wyłącza Windows 7 i 8.1
+    expect(cfg).toContain('Windows 7');
+    expect(cfg).toContain('DLA-IOD-I-IT.txt');
+  });
+}
+
+const BOOT_FAIL =
+  '<div id="boot-fail" class="boot-fail" role="alert"><p><strong>Parawan nie uruchomił się w tej ' +
+  'przeglądarce, więc pola poniżej nie działają.</strong> Otwórz plik w aktualnym Edge, Chrome albo ' +
+  'Firefoksie. Na komputerze służbowym dział IT może blokować skrypty w plikach otwieranych z dysku ' +
+  'albo otwierać je w trybie Internet Explorera.</p></div>';
+const NO_JS =
+  '<noscript><div class="boot-fail boot-fail-now"><p><strong>Ta przeglądarka ma wyłączony ' +
+  'JavaScript.</strong> Parawan rozpoznaje dane programem zapisanym w tym pliku, więc bez ' +
+  'JavaScriptu nie zadziała. Plik nie łączy się z internetem. Na komputerze służbowym poproś dział ' +
+  'IT o zezwolenie na skrypty w plikach otwieranych z dysku.</p></div></noscript>';
+
+test('aplikacja: pasek „nie uruchomił się” i komunikat bez JavaScriptu na początku strony', () => {
+  const html = webHtml.replace(/\r\n/g, '\n');
+  // pierwsze dziecko <body>, zaraz po nim <noscript>, potem siatka strony
+  expect(html).toContain(`<body>\n    ${BOOT_FAIL}\n    ${NO_JS}\n    <div class="grid">`);
+  // bez JavaScriptu stoi tylko komunikat z <noscript>, bez paska po 4 s
+  const head = html.slice(0, html.indexOf('</head>'));
+  expect(head).toContain('<noscript><style>#boot-fail{display:none}</style></noscript>');
+  // osobny arkusz w <head>: działa także bez zmiennych i reguł ze style.css
+  const css = head.match(/<style>\n([\s\S]*?)\n {4}<\/style>/)?.[1] ?? '';
+  expect(css).not.toBe('');
+  expect(css).not.toContain('var(');
+  expect(css).toMatch(/\.boot-fail p\{[^}]*padding:14px 16px;[^}]*background:#fff4c2;color:#1a1a1a;/);
+  expect(css).toMatch(/#boot-fail\{[^}]*visibility:hidden;max-height:0;animation:boot-reveal 0s linear 4s forwards\}/);
+  expect(css).toContain('@keyframes boot-reveal{to{visibility:visible;max-height:40em}}');
+  // pasek ani komunikat nie trafiają na wydruk (@media print chowa wszystko poza #print-out)
+  expect(webHtml.indexOf(BOOT_FAIL)).toBeLessThan(webHtml.indexOf('<div class="grid">'));
+});
+
+/** Współczynnik kontrastu WCAG dwóch kolorów #rrggbb. */
+function contrast(a: string, b: string): number {
+  const lum = (hex: string): number => {
+    const [r, g, bl] = [1, 3, 5].map((i) => {
+      const c = Number.parseInt(hex.slice(i, i + 2), 16) / 255;
+      return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * bl;
+  };
+  const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+test('aplikacja: tekst paska startowego ma kontrast co najmniej 7:1', () => {
+  expect(contrast('#1a1a1a', '#fff4c2')).toBeGreaterThanOrEqual(7);
+});
+
+test('aplikacja: przy ograniczonym ruchu style.css skraca animacje, ale nie zeruje opóźnienia', () => {
+  const css = repoFile(new URL('./style.css', import.meta.url));
+  expect(css.length).toBeGreaterThan(1000);
+  const reduce = [...css.matchAll(/@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/g)];
+  expect(reduce.length).toBeGreaterThan(0);
+  for (const [block] of reduce) {
+    // reguła dla wszystkich elementów: bez animation-delay i bez skrótu animation, który zeruje
+    // opóźnienie (pasek „nie uruchomił się” czeka przez nie 4 s)
+    const all = block.match(/\*, \*::before, \*::after \{([^}]*)\}/)?.[1] ?? '';
+    expect(all).toContain('animation-duration');
+    expect(all).not.toMatch(/animation-delay|animation:/);
+  }
+});
+
+test('aplikacja: pasek „nie uruchomił się” znika w ostatniej instrukcji startu (main.ts)', () => {
+  const code = webMain.replace(/\r\n/g, '\n');
+  const remove = "document.getElementById('boot-fail')?.remove();";
+  const at = code.indexOf(remove);
+  expect(at).toBeGreaterThan(0);
+  expect(code.indexOf(remove, at + 1)).toBe(-1);
+  // nic po niej, a przed nią (pomijając komentarz) pierwsze przeliczenie update()
+  expect(code.slice(at + remove.length).trim()).toBe('');
+  expect(code.slice(0, at).replace(/(\n\/\/[^\n]*)+\n$/, '').trimEnd()).toMatch(/\nupdate\(\);$/);
+});
+
+test('teksty startowe: bez wtrąceń „ — ”, „100%” i „nas/nam/nasz”', () => {
+  for (const t of [BOOT_FAIL, NO_JS]) {
+    expect(t).not.toContain(' — ');
+    expect(t).not.toContain('100%');
+    expect(t).not.toMatch(/\b(nas|nam|nasz\w*)\b/i);
+    expect(t).not.toMatch(/w pełni|po prostu/);
+  }
+});
+
+/* ── Strażnik: API i CSS nowsze niż build.target ── */
+
+// build.target obniża tylko składnię. Nowe API albo właściwość CSS przechodzą build bez słowa,
+// a w Edge 109 (Windows 7 i 8.1) i Firefoksie ESR 115 kończą się wyjątkiem albo pominiętą regułą.
+// Lista to konstrukcje, których te przeglądarki nie znają, a które łatwo dopisać odruchowo; każda
+// z przykładem, na którym strażnik musi zadziałać. text-wrap zostaje: stare silniki pomijają go
+// bez szkody. Gdy któraś będzie potrzebna, to sygnał do podniesienia BUILD_TARGET (vite.config.ts).
+const NEWER_THAN_TARGET: { re: RegExp; what: string; sample: string }[] = [
+  {
+    re: /:has\(/,
+    what: ':has() (Firefox od 121; 115 pomija całą regułę, a querySelector rzuca wyjątek)',
+    sample: '.card:has(> .x) { display: grid; }',
+  },
+  { re: /\bcolor-mix\(/, what: 'color-mix() (Chrome i Edge od 111)', sample: 'color: color-mix(in srgb, red, blue);' },
+  { re: /\blight-dark\(/, what: 'light-dark() (Chrome od 123, Firefox od 120)', sample: 'color: light-dark(#000, #fff);' },
+  { re: /@starting-style\b/, what: '@starting-style (Chrome od 117, Firefox od 129)', sample: '@starting-style { .x { opacity: 0; } }' },
+  { re: /\b(anchor-name|position-anchor)\s*:/, what: 'pozycjonowanie kotwicą CSS (Chrome od 125)', sample: '.x { anchor-name: --a; }' },
+  { re: /\bfield-sizing\s*:/, what: 'field-sizing (Chrome od 123)', sample: 'textarea { field-sizing: content; }' },
+  { re: /@scope\b/, what: '@scope (Chrome od 118, Firefox od 128)', sample: '@scope (.card) { p { margin: 0; } }' },
+  {
+    re: /:popover-open|\b(show|hide|toggle)Popover\(|\.popover\s*=|<[a-z][^>]*\spopover(target)?\b/i,
+    what: 'popover (Chrome od 114, Firefox od 125)',
+    sample: 'el.showPopover();',
+  },
+  { re: /\bPromise\.withResolvers\b/, what: 'Promise.withResolvers (Chrome od 119)', sample: 'const { promise } = Promise.withResolvers();' },
+  { re: /\b(Object|Map)\.groupBy\b/, what: 'Object.groupBy i Map.groupBy (Chrome od 117)', sample: 'Object.groupBy(rows, (r) => r.type);' },
+  { re: /\.(toSorted|toReversed|toSpliced)\(/, what: 'toSorted, toReversed, toSpliced (Chrome od 110)', sample: 'const s = list.toSorted();' },
+  { re: /\bArray\.fromAsync\b/, what: 'Array.fromAsync (Chrome od 121)', sample: 'await Array.fromAsync(stream);' },
+  { re: /\bIntl\.Segmenter\b/, what: 'Intl.Segmenter (Firefox od 125)', sample: 'new Intl.Segmenter("pl");' },
+  { re: /\bstartViewTransition\b/, what: 'View Transitions (Chrome od 111, Firefox od 144)', sample: 'document.startViewTransition(f);' },
+  {
+    re: /\.(union|intersection|difference|symmetricDifference|isSubsetOf|isSupersetOf|isDisjointFrom)\(/,
+    what: 'metody zbiorów Set (Chrome od 122, Firefox od 127)',
+    sample: 'a.union(b);',
+  },
+];
+
+/** Konstrukcje nowsze niż build.target znalezione w tekście (bez komentarzy). */
+function newerThanTarget(src: string): string[] {
+  const code = src
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[\s;{}(),])\/\/[^\n]*/g, '$1');
+  return NEWER_THAN_TARGET.filter((c) => c.re.test(code)).map((c) => c.what);
+}
+
+/**
+ * Pliki, które trafiają do gotowej strony: index.html i moduł startowy, a od niego każdy import
+ * względny (także style.css) i rdzeń przez alias „anonimizator”. Zależności z node_modules
+ * (pdf.js, fflate) sprawdza test na Chromium 109 (scripts/e2e/manual/README.md).
+ */
+function shippedFiles(html: URL, entry: URL): Map<string, string> {
+  const core = new URL('../../../packages/core/src/index.ts', import.meta.url);
+  const out = new Map<string, string>([[html.href, repoFile(html)]]);
+  const visit = (url: URL): void => {
+    if (out.has(url.href)) return;
+    const src = repoFile(url);
+    out.set(url.href, src);
+    if (!url.pathname.endsWith('.ts')) return;
+    const specs = src.matchAll(
+      /(?:^|[\s;])(?:import|export)\s[^'"`;]*?from\s*['"]([^'"]+)['"]|(?:^|[\s;])import\s*\(?\s*['"]([^'"]+)['"]/g,
+    );
+    for (const m of specs) {
+      const spec = m[1] ?? m[2] ?? '';
+      if (spec === 'anonimizator') visit(core);
+      else if (spec.startsWith('.') && !spec.includes('?')) {
+        if (spec.endsWith('.css')) visit(new URL(spec, url));
+        else if (!/\.\w+$/.test(spec) || spec.endsWith('.js')) visit(new URL(`${spec.replace(/\.js$/, '')}.ts`, url));
+      }
+    }
+  };
+  visit(entry);
+  return out;
+}
+
+test('strażnik nowszych API i CSS: każda konstrukcja z listy zostaje wykryta', () => {
+  for (const c of NEWER_THAN_TARGET) expect(newerThanTarget(c.sample)).toContain(c.what);
+  // dopisane do arkusza aplikacji color-mix( wywraca strażnika
+  const css = repoFile(new URL('./style.css', import.meta.url));
+  expect(css.length).toBeGreaterThan(1000);
+  expect(newerThanTarget(`${css}\n.x { color: color-mix(in srgb, red, blue); }`)).toEqual([
+    'color-mix() (Chrome i Edge od 111)',
+  ]);
+  // komentarze i podobne nazwy nie są alarmem
+  expect(newerThanTarget('/* bez color-mix(, bo Edge 109 */\n// list.toSorted() nie\nconst groupByCode = 1;')).toEqual([]);
+  expect(newerThanTarget('p { text-wrap: pretty; }')).toEqual([]);
+});
+
+for (const [name, html, entry, mustHave] of [
+  ['aplikacja', '../index.html', './main.ts', ['/apps/web/src/style.css', '/apps/web/src/pdf.ts', '/packages/core/src/surnames.ts']],
+  ['landing', '../../landing/index.html', '../../landing/src/main.ts', ['/apps/landing/src/style.css', '/apps/landing/src/tokens.ts', '/packages/core/src/index.ts']],
+] as const) {
+  test(`${name}: kod i CSS strony bez API i CSS nowszych niż Chrome i Edge 109 i Firefox ESR 115`, () => {
+    const files = shippedFiles(new URL(html, import.meta.url), new URL(entry, import.meta.url));
+    for (const p of mustHave) expect([...files.keys()].some((k) => k.endsWith(p))).toBe(true);
+    for (const [file, src] of files) {
+      expect(src.length, file).toBeGreaterThan(0);
+      expect(newerThanTarget(src), file).toEqual([]);
+    }
+  });
+}

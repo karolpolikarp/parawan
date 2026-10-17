@@ -1306,3 +1306,15 @@ if (matchMedia('(pointer: coarse) and (max-width: 600px)').matches) {
 initTips();
 
 update();
+
+// Ostatnia instrukcja startu: pasek „Parawan nie uruchomił się” (#boot-fail w index.html) znika
+// dopiero tutaj. Gdy silnik nie sparsuje modułu (Chromium starsze niż 94, tryb Internet Explorera)
+// albo coś wyżej rzuci wyjątek, pasek zostaje i po 4 s pokazuje się sam, zamiast strony, która
+// wygląda na gotową i nie reaguje. Do tego czasu jest ukryty i nie zajmuje miejsca (max-height: 0),
+// więc przy zwykłym starcie nic nie mignie ani nie przesunie układu. Arkusz paska stoi osobno
+// w <head>, bez zmiennych ze style.css, żeby zadziałał także tam, gdzie główny CSS nie zadziała.
+// Opóźnienie to animation-delay, a reguła prefers-reduced-motion w style.css skraca tylko
+// animation-duration, więc przy ograniczonym ruchu pasek też się pokaże (sprawdza to
+// scripts/e2e/smoke.test.mjs). Bez JavaScriptu zamiast niego stoi komunikat z <noscript>, a drugi
+// <noscript> w <head> chowa pasek, żeby nie było dwóch.
+document.getElementById('boot-fail')?.remove();

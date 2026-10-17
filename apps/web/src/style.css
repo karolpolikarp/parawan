@@ -937,6 +937,8 @@ table .pii { cursor: default; }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* Tylko czas trwania, bez animation-delay i skrótu animation: pasek „Parawan nie uruchomił się”
+     (index.html) czeka 4 s właśnie przez opóźnienie animacji. */
   *, *::before, *::after {
     animation-duration: .01ms !important;
     animation-iteration-count: 1 !important; /* bez pętli tysięcy zerowych cykli */
