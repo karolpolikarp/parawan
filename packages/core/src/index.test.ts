@@ -3546,3 +3546,260 @@ test('b3-fix1: pole „osoba" z jednym wyrazem, pensjonat, złożenia „Polsko-
     ['Na rzecz osoby zamieszkującej w Gdańsku przyznano zasiłek.', `Na rzecz osoby zamieszkującej w ${C} przyznano zasiłek.`],
   ]);
 });
+test('b3-fix2: człon nazwy po „Nowe/Biała" tylko na końcu pola — imię, nazwisko, instytucja i etykieta zostają poza maską miasta', () => {
+  masked([
+    ['ul. Polna 3, 86-170 Nowe Anna Gzik', `${A}, [KOD-POCZTOWY] ${C} ${N}`],
+    ['48-210 Biała Anna Gzik', `[KOD-POCZTOWY] ${C} ${N}`],
+    ['86-170 Nowe Damian Fic', `[KOD-POCZTOWY] ${C} ${N}`],
+    ['86-170 Nowe Kowalska Anna', `[KOD-POCZTOWY] ${C} ${N}`],
+    ['86-170 Nowe Sąd Rejonowy', `[KOD-POCZTOWY] ${C} Sąd Rejonowy`],
+    ['86-170 Nowe Kontakt: 600 100 200', `[KOD-POCZTOWY] ${C} Kontakt: [TELEFON]`],
+    ['86-170 Nowe Godziny otwarcia: 8-16', `[KOD-POCZTOWY] ${C} Godziny otwarcia: 8-16`],
+    ['48-210 Biała Faktura VAT nr 12/2026', `[KOD-POCZTOWY] ${C} Faktura VAT nr 12/2026`],
+    ['77-330 Czarne Konto: PKO BP', `[KOD-POCZTOWY] ${C} Konto: PKO BP`],
+    // pułapki: człon nazwy dalej w masce, także w polu JSON/XML, przed adnotacją TERYT i przed osobą
+    ['ul. Rynek 21, 05-082 Stare Babice', `${A}, [KOD-POCZTOWY] ${C}`],
+    ['05-500 Nowa Iwiczna, ul. Polna 3', `[KOD-POCZTOWY] ${C}, ${A}`],
+    ['05-082 Stare Babice woj. mazowieckie', `[KOD-POCZTOWY] ${C} woj. mazowieckie`],
+    ['{"adres":"ul. Lipowa 3, 05-082 Stare Babice","kod":"05-082"}', `{"adres":"${A}, [KOD-POCZTOWY] ${C}","kod":"[KOD-POCZTOWY]"}`],
+    ['<AdresL2>05-082 Stare Babice</AdresL2>', `<AdresL2>[KOD-POCZTOWY] ${C}</AdresL2>`],
+    ['ul. Rynek 21, 05-082 Stare Babice (gmina wiejska)', `${A}, [KOD-POCZTOWY] ${C} (gmina wiejska)`],
+    ['62-080 Nowa Wieś Tarnowska', `[KOD-POCZTOWY] ${C}`],
+    ['05-082 Stare Babice Kowalski Jan', `[KOD-POCZTOWY] ${C} ${N}`],
+    ['86-170 Nowe Tel. 52 333 44 55', `[KOD-POCZTOWY] ${C} Tel. [TELEFON]`],
+    ['48-210 Biała Polska', `[KOD-POCZTOWY] ${C} Polska`],
+  ]);
+});
+test('b3-fix2: marker zamieszkania w zdaniu ogólnym (ogłoszenie, uchwała, poradnik, statystyka) — miasto jawne', () => {
+  keep([
+    'Osoba mieszkająca w Krakowie może złożyć wniosek.',
+    'Każdy mieszkający w Poznaniu może skorzystać z programu.',
+    'Rodzina mieszkająca w Lublinie otrzyma bon.',
+    'Zamieszkuje w Krakowie ok. 800 tys. osób.',
+    'Mieszkając w Krakowie, można korzystać z karty miejskiej.',
+    'Mieszkając w Gdańsku, warto mieć kartę mieszkańca.',
+    'Pracownikom zamieszkującym w Gdańsku przysługuje dodatek.',
+    'Pacjentom mieszkającym w Gdańsku przysługuje transport.',
+    'Najemcom zamieszkującym w Gdańsku przysługuje zniżka.',
+    'Ukraińcy mieszkający w Lublinie zorganizowali zbiórkę.',
+    'Pracownicy mieszkający w Gdyni mogą dojeżdżać pociągiem.',
+    'Turyści mieszkający w Zakopanem skarżą się na ceny.',
+    'Ci, którzy mieszkają w Krakowie, mogą odebrać kartę.',
+    'Mieszkańcom mieszkającym w Gdyni przysługuje ulga.',
+  ]);
+  // pułapki: konkretna osoba (czas przeszły, strona postępowania, nazwisko) dalej w masce
+  masked([
+    ['Osoba zamieszkująca w Gdańsku złożyła wniosek.', `Osoba zamieszkująca w ${C} złożyła wniosek.`],
+    ['Rodzina mieszkająca w Lublinie zgłosiła się do MOPS.', `Rodzina mieszkająca w ${C} zgłosiła się do MOPS.`],
+    ['T12. Mieszkając w Krakowie, często bywał w teatrze.', `T12. Mieszkając w ${C}, często bywał w teatrze.`],
+    ['Pozwany, mieszkając w Krakowie, nie mógł stawić się.', `Pozwany, mieszkając w ${C}, nie mógł stawić się.`],
+    ['Pozwani mieszkający w Krakowie wnieśli sprzeciw.', `Pozwani mieszkający w ${C} wnieśli sprzeciw.`],
+    ['Powodowie zamieszkujący w Gdańsku wnieśli pozew.', `Powodowie zamieszkujący w ${C} wnieśli pozew.`],
+    ['Zamieszkuje w Krakowie od 2015 r.', `Zamieszkuje w ${C} od 2015 r.`],
+    ['Wnioskodawca mieszkający w Krakowie może odebrać decyzję.', `Wnioskodawca mieszkający w ${C} może odebrać decyzję.`],
+  ]);
+});
+test('b3-fix2: etykieta „Miejsce/Miejscowość/Gmina zamieszkania" bez dwukropka podaje miasto, także imię-toponim', () => {
+  masked([
+    ['Miejsce zamieszkania\tJarosław', `Miejsce zamieszkania\t${C}`],
+    ['Miejsce urodzenia Jarosław', `Miejsce urodzenia ${C}`],
+    ['Miejsce pobytu\tJarosław', `Miejsce pobytu\t${C}`],
+    ['Miejscowość zamieszkania\tKazimierz Dolny', `Miejscowość zamieszkania\t${C}`],
+    ['Gmina zamieszkania Kazimierz Dolny', `Gmina zamieszkania ${C}`],
+    // pułapka: po czasowniku imię dalej zaczyna podmiot
+    ['Pod wskazanym adresem zamieszkuje Jarosław Wilk z konkubiną.', `Pod wskazanym adresem zamieszkuje ${N} z konkubiną.`],
+  ]);
+});
+test('b3-fix2: jeden wyraz pod „osoba"/„person" to osoba, chyba że rola lub kategoria; tytuł i inicjał nie wyłączają maski', () => {
+  masked([
+    ['{"osoba": "Gzik"}', `{"osoba": "${N}"}`],
+    ['<person>Gzik</person>', `<person>${N}</person>`],
+    ['{"person": "Smith"}', `{"person": "${N}"}`],
+    ['{"person": "dr Gzik"}', `{"person": "${N}"}`],
+    ['<osoba>lek. Gzik</osoba>', `<osoba>${N}</osoba>`],
+    ['{"osoba": "GZIK"}', `{"osoba": "${N}"}`],
+    ['{"person": "Fic-Gzik"}', `{"person": "${N}"}`],
+    ['{"osoba": "gzik"}', `{"osoba": "${N}"}`],
+    ['{"klient": {"osoba": "Bednarz", "telefon": "601 234 567"}}', `{"klient": {"osoba": "${N}", "telefon": "[TELEFON]"}}`],
+    ['{"name": "j. kowalski"}', `{"name": "${N}"}`],
+    ['{"name": "dr kowalski"}', `{"name": "${N}"}`],
+    ['<name>a. nowak</name>', `<name>${N}</name>`],
+    ['{"name": "maja gzik"}', `{"name": "${N}"}`],
+    ['{"name": "wiktoria kos"}', `{"name": "${N}"}`],
+    ['{"name": "kasia z księgowości"}', `{"name": "${N}"}`],
+  ]);
+  expect(redactPII('{"osoba": "Gzik"}', { pseudonyms: true }).redacted).toBe('{"osoba": "[OSOBA-A]"}');
+  keep([
+    '<osoba>Pracownik</osoba>',
+    '{"osoba": "Klient"}',
+    '{"person": "Admin"}',
+    '<osoba>Wnioskodawca</osoba>',
+    '<osoba>Prawna</osoba>',
+    '{"person": "fizyczna"}',
+    '{"person": "Osoba Fizyczna"}',
+    '{"osoba": "Tak"}',
+    '{"osoba": "Matka"}',
+    '{"name": "róża pustyni"}',
+    '{"name": "kalina koralowa"}',
+    '{"name": "pola lawendy"}',
+    '{"name":"kalina"}',
+    '<Name>pasta Barbara</Name>',
+  ]);
+});
+test('b3-fix2: po „św." biernik imienia, inicjał i osoba za patronem w mianowniku to osoba', () => {
+  masked([
+    ['W kościele przesłuchano św. Annę Gzik.', `W kościele przesłuchano św. ${N}.`],
+    ['W kościele przesłuchano św. J. Kowalskiego.', `W kościele przesłuchano św. ${N}.`],
+    ['W sprawie kradzieży z kościoła przesłuchano św. Annę Gzowską.', `W sprawie kradzieży z kościoła przesłuchano św. ${N}.`],
+    ['W kościele św. Anny Jan Bednarz zagra koncert kolęd.', `W kościele św. Anny ${N} zagra koncert kolęd.`],
+    ['Organista parafii św. Józefa Marek Sikora zaprasza chętnych do chóru.', `Organista parafii św. Józefa ${N} zaprasza chętnych do chóru.`],
+    ['W kaplicy św. Rocha Teresa Wróbel prowadzi Koło Różańcowe.', `W kaplicy św. Rocha ${N} prowadzi Koło Różańcowe.`],
+    ['W parafii bł. Karoliny Anna Gzik prowadzi chór.', `W parafii bł. Karoliny ${N} prowadzi chór.`],
+    ['W parafii pw. św. Jakuba Anna Gzik prowadzi scholę.', `W parafii pw. św. Jakuba ${N} prowadzi scholę.`],
+    ['Szkoła im. Marii Konopnickiej Anna Nowak dyrektor', `Szkoła im. Marii Konopnickiej ${N} dyrektor`],
+  ]);
+  expect(redactPII('W kościele św. Barbary Anna Gzik i Marek Gzik wezmą ślub.', { pseudonyms: true }).redacted).toBe(
+    'W kościele św. Barbary [OSOBA-A] i [OSOBA-A] wezmą ślub.',
+  );
+  // pułapki: patron w dopełniaczu zostaje
+  keep([
+    'Kościół św. Piotra Apostoła',
+    'Parafia św. Stanisława Kostki',
+    'Parafia pw. św. Jana Pawła II',
+    'Parafia św. Maksymiliana Kolbego w Krakowie',
+    'W kościele św. Anny odbył się koncert.',
+    'Kościół pod wezwaniem św. Jana Chrzciciela',
+    'ul. Marszałka Józefa Piłsudskiego',
+  ]);
+});
+test('b3-fix2: zdrobnienie-nazwisko (Kluczyk, Mieczyk) jest rzeczownikiem tylko przed przyimkiem albo przymiotnikiem', () => {
+  masked([
+    ['Mieczyk nie stawił się na rozprawę.', `${N} nie stawił się na rozprawę.`],
+    ['Kluczyk oświadcza, że zapłaci.', `${N} oświadcza, że zapłaci.`],
+    ['Mieczyk wnosi o oddalenie powództwa.', `${N} wnosi o oddalenie powództwa.`],
+    ['Kluczyk także złożył wniosek.', `${N} także złożył wniosek.`],
+    ['Krzaczyk, wezwany prawidłowo, nie stawił się.', `${N}, wezwany prawidłowo, nie stawił się.`],
+    ['Kluczyk prosi o dostęp.', `${N} prosi o dostęp.`],
+    ['Krzaczyk\nKierownik działu IT', `${N}\nKierownik działu IT`],
+    ['Badanie wykonał lek. Kluczyk.', `Badanie wykonał lek. ${N}.`],
+    ['Konsultacja: dr n. med. Krzaczyk', `Konsultacja: dr n. med. ${N}`],
+    ['Zlecenie wystawił inż. Kluczyk.', `Zlecenie wystawił inż. ${N}.`],
+    ['Kluczyk (magazynier) odebrał towar.', `${N} (magazynier) odebrał towar.`],
+    ['Z poważaniem\nKluczyk', `Z poważaniem\n${N}`],
+    ['Krzaczyk, ur. 12.03.1980 r., zatrudniony od 2010 r.', `${N}, ur. [DATA-URODZENIA] r., zatrudniony od 2010 r.`],
+    ['Kluczyk – magazynier, Nowak – kierowca', `${N} – magazynier, ${N} – kierowca`],
+  ]);
+  keep([
+    'Kluczyk do skrzynki leży w szufladzie.',
+    'Kluczyk zapasowy jest w sejfie.',
+    'Mieczyk ogrodowy kwitnie latem.',
+    'Kluczyk od szafki zginął.',
+    'Chińczyk i Japończyk rozmawiali.',
+    'Słowniczyk pojęć znajduje się na końcu.',
+  ]);
+});
+test('b3-fix2: przymiotnik ze stoplisty z mocną kotwicą osoby to nazwisko w szyku „Nazwisko Imię"', () => {
+  masked([
+    ['Strażacki Jan, ur. 12.03.1980 r.', `${N}, ur. [DATA-URODZENIA] r.`],
+    ['Wnioskodawca: Białowieski Jan', `Wnioskodawca: ${N}`],
+    ['Wnioskodawca: Mazowiecki Jan', `Wnioskodawca: ${N}`],
+    ['1. Poleski Jan\n2. Nowak Anna', `1. ${N}\n2. ${N}`],
+    ['Pan Poselski złożył wniosek.', `Pan ${N} złożył wniosek.`],
+    ['Pan Pielęgniarski przyszedł.', `Pan ${N} przyszedł.`],
+    ['Mazowiecka Maja\nJan Kowalski', `${N}\n${N}`],
+    ['Poznańska Wiktoria\nJan Kowalski', `${N}\n${N}`],
+    ['Gdańska Pola\nAnna Nowak', `${N}\n${N}`],
+  ]);
+  // pułapki: nazwa z imieniem-rzeczownikiem, urząd po roli, przymiotnik w nazwie i „Pani Dziecka"
+  masked([['Olimpijska Nadzieja\nRzymska Diana\nWielka Nadzieja', `Olimpijska Nadzieja\n${N}\nWielka Nadzieja`]]);
+  keep([
+    'Pan Wojewoda Mazowiecki wydał decyzję.',
+    'Pan Wojewoda Kujawsko-Pomorski podpisał.',
+    'Czy u Pani Dziecka występują objawy?',
+    'Poselski projekt ustawy trafił do Sejmu.',
+    'Opieka Pielęgniarska w domu chorego.',
+    'Polski Związek Wędkarski',
+  ]);
+});
+test('b3-fix2: tabulator to granica komórki — przysłówek, pora czy głowa nazwy w sąsiedniej kolumnie nie odsłania nazwiska', () => {
+  masked([
+    ['Tak\tKaczyński\tUrząd Miasta', `Tak\t${N}\tUrząd Miasta`],
+    ['Od\tLisiecki\tUrząd Skarbowy', `Od\t${N}\tUrząd Skarbowy`],
+    ['Rano\tKaczyński\tOddział Chirurgii', `Rano\t${N}\tOddział Chirurgii`],
+    ['2024-05-12\tNoc\tLisiecki\tSOR', `2024-05-12\tNoc\t${N}\tSOR`],
+    ['Pokój\tSiedlecki', `Pokój\t${N}`],
+    ['Brama\tWąsowicz', `Brama\t${N}`],
+    ['Dzień Sosnowski', `Dzień ${N}`],
+    ['Tydzień Gzowski – urlop', `Tydzień ${N} – urlop`],
+    // przymiotnik nieuzgodniony z rodzajem głowy nazwy nie jest jej członem
+    ['Noc Brzozowski spędził w policyjnej celi.', `Noc ${N} spędził w policyjnej celi.`],
+  ]);
+  keep([
+    'Kościół Mariacki w Krakowie pochodzi z XIV wieku.',
+    'Noc Świętojańska to najkrótsza noc roku.',
+    'Brama Floriańska',
+    'Kanał Sueski',
+    'Cmentarz Rakowicki',
+    'Odwiedziliśmy Biebrzański Park Narodowy.',
+    'Dzień Papieski',
+  ]);
+});
+test('b3-fix2: „im" bez kropki po placówce na początku komórki, wartości JSON i wiersza wykazu to patron', () => {
+  keep([
+    'Wykaz:\nSzpital im Mikołaja Kopernika',
+    'Lp.;Nazwa szkoły\n1;Szkoła Podstawowa im Marii Konopnickiej',
+    '{"nazwa": "Szkoła Podstawowa im Marii Konopnickiej"}',
+    '"Gimnazjum im Jana Pawła II";"Lublin"',
+    'Placówki:\nLiceum im Jana Zamoyskiego',
+    'Hospicjum im Jana Pawła II w Katowicach',
+    'Przychodnia im Józefa Strusia',
+    'Dom Pomocy Społecznej im Jana Pawła II',
+    'Klinika im Mikołaja Kopernika',
+    'Sanatorium im Józefa Piłsudskiego',
+  ]);
+  masked([
+    ['Pomógł im Jan Kowalski w przeprowadzce.', `Pomógł im ${N} w przeprowadzce.`],
+    ['Powiedziałem im:\nJan Kowalski przyjdzie jutro.', `Powiedziałem im:\n${N} przyjdzie jutro.`],
+  ]);
+});
+test('b3-fix2: po głowie eponimu wyłącza nazwisko tylko znany eponim — pacjent i pracownik w dopełniaczu w masce', () => {
+  masked([
+    ['Poszkodowany wykonywał pracę na polecenie mistrza linii Kowalskiego.', `Poszkodowany wykonywał pracę na polecenie mistrza linii ${N}.`],
+    ['Wypadek zgłosił brygadziście linii Nowakowi.', `Wypadek zgłosił brygadziście linii ${N}.`],
+    ['Operatorzy Linii Nowaka zgłosili awarię.', `Operatorzy Linii ${N} zgłosili awarię.`],
+    ['Objawy Kowalskiej ustąpiły po leczeniu.', `Objawy ${N} ustąpiły po leczeniu.`],
+    ['Objawy Nowaka nasiliły się w nocy.', `Objawy ${N} nasiliły się w nocy.`],
+    ['Odruch Kowalskiej prawidłowy.', `Odruch ${N} prawidłowy.`],
+    ['Prątki Wąsowicza okazały się wrażliwe na leki.', `Prątki ${N} okazały się wrażliwe na leki.`],
+    ['Szybki odruch Kowalskiego uratował życie dziecka.', `Szybki odruch ${N} uratował życie dziecka.`],
+    ['Stwierdzono, że uprząż Nowaka była zużyta.', `Stwierdzono, że uprząż ${N} była zużyta.`],
+  ]);
+  expect(
+    redactPII('Pacjent Tadeusz Nowacki trafił na SOR. Objawy Nowackiego nasiliły się w nocy.', { pseudonyms: true }).redacted,
+  ).toBe('Pacjent [OSOBA-A] trafił na SOR. Objawy [OSOBA-A] nasiliły się w nocy.');
+  keep([
+    'Odruch Babińskiego dodatni.',
+    'Prątek Kocha w posiewie.',
+    'Założono uprząż Pawlika.',
+    'Objaw Babińskiego ujemny.\nObjaw Brudzińskiego ujemny.',
+    'Odczyn Biernackiego przyspieszony.',
+    'Cięcie wzdłuż linii Langera.',
+    'Stwierdzono dystrofię Fuchsa.',
+    'Objaw Chełmońskiego ujemny.',
+    'Korek na moście Łazienkowskim od rana.',
+  ]);
+});
+test('b3-fix2: „Pan/Pani + rola + urząd" — nazwa placówki w dopełniaczu i miasto po „Miasta" nie są nazwiskiem', () => {
+  keep([
+    'Szanowna Pani Dyrektor Szpitala Grochowskiego,',
+    'Szanowny Pan Dyrektor Szpitala Bielańskiego',
+    'Szanowna Pani Dyrektor Szpitala Narutowicza,',
+    'Pan Burmistrz Miasta Turek przekazał pismo.',
+  ]);
+  masked([
+    ['Szanowna Pani Dyrektor Szkoły Gzowska,', `Szanowna Pani Dyrektor Szkoły ${N},`],
+    ['Pismo do Pani Dyrektor Szkoły Kowalskiej', `Pismo do Pani Dyrektor Szkoły ${N}`],
+    ['Pismo Pana Dyrektora Szpitala Kowalskiego', `Pismo Pana Dyrektora Szpitala ${N}`],
+    ['Pani Minister Zdrowia Kowalska', `Pani Minister Zdrowia ${N}`],
+  ]);
+});

@@ -817,6 +817,16 @@ export function buildDataset() {
   neg('Szkoła Podstawowa nr 3 im Marii Konopnickiej. Linie Langera zachowane. Kościół pod wezwaniem św. Jana Chrzciciela.', ['Marii Konopnickiej', 'Langera', 'Jana Chrzciciela']);
   osp('Na ulicy Jan Kowalski zasłabł. W parku Anna Nowak spacerowała z psem.', ['Jan', 'Kowalski', 'Anna', 'Nowak'], ['Na ulicy', 'W parku']);
   neg('Szpital im. dr Anny Nowak w Lublinie. Polsko-Szwedzka Izba Gospodarcza. Obchody na placu Piłsudskiego 11 Listopada.', ['Anny Nowak', 'Polsko-Szwedzka', 'Piłsudskiego 11 Listopada']);
+  // Regresje partii b3, runda 2: komórka TSV obok nazwiska, zdrobnienie-nazwisko po tytule i bez
+  // czasownika przeszłego, rzadkie nazwisko pod „osoba", osoba za patronem po „św.", pacjent po
+  // głowie eponimu, osoba po mieście-przymiotniku — oraz zdania ogólne i nazwy, które mają zostać.
+  str('Data\tZmiana\tNazwisko\tOddział\n2024-05-12\tNoc\tLisiecki\tSOR\nTak\tKaczyński\tUrząd Miasta', ['Lisiecki', 'Kaczyński'], ['Noc', 'SOR', 'Tak', 'Urząd Miasta']);
+  osp('Badanie wykonał lek. Kluczyk. Mieczyk przebywa na zwolnieniu lekarskim.', ['Kluczyk', 'Mieczyk'], ['Badanie wykonał lek.', 'przebywa na zwolnieniu']);
+  str('{"klient": {"osoba": "Bednarz", "telefon": "601 234 567"}}, <person>Gzik</person>, {"name": "j. kowalski"}', ['Bednarz', 'Gzik', 'kowalski'], ['"osoba"', '<person>']);
+  osp('W kościele św. Anny Jan Bednarz zagra koncert kolęd. W kościele przesłuchano św. Annę Gzowską.', ['Jan', 'Bednarz', 'Annę', 'Gzowską'], ['W kościele św. Anny', 'przesłuchano św.']);
+  osp('Pacjent Tadeusz Nowacki trafił na SOR. Objawy Nowackiego nasiliły się w nocy. Mistrz linii Kowalskiego wydał polecenie.', ['Tadeusz', 'Nowacki', 'Nowackiego', 'Kowalskiego'], ['Objawy', 'Mistrz linii']);
+  str('ul. Polna 3, 86-170 Nowe Anna Gzik', ['Polna 3', 'Anna', 'Gzik'], []);
+  neg('Osoba mieszkająca w Krakowie może złożyć wniosek. Pracownikom zamieszkującym w Gdańsku przysługuje dodatek. Odruch Babińskiego dodatni.', ['Krakowie', 'Gdańsku', 'Babińskiego']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
