@@ -847,6 +847,11 @@ export function buildDataset() {
   osp('User: Kowalski Jan\nJan Kowalski zgłosił awarię.', ['Kowalski', 'Jan'], ['User:', 'zgłosił awarię']);
   osp('Pani Anna Schröder i Jan Müller oraz Pan Dvořák złożyli wniosek.', ['Anna', 'Schröder', 'öder', 'Jan', 'Müller', 'Dvořák'], ['Pani', 'oraz Pan', 'złożyli wniosek']);
   neg('Spektakl Café Müller wystawiono w Zürichu.', ['Café Müller', 'Zürichu']);
+  // Regresje partii b4 po weryfikacji: liczebnik za lokalem i po etykiecie adresu, człon wyliczenia
+  // telefonów z prefiksem po „kom.", nawias przed „+48", zakres i wyliczenie ulic w prozie.
+  str('Pacjent zam. ul. Długa 5 m. 3 lat 45, przywieziony przez ZRM. Zameldowanie: ul. Polna 5 Osoby zameldowane: 3', ['Długa 5', 'm. 3', 'Polna 5'], ['lat 45', 'przywieziony przez ZRM', 'Osoby zameldowane: 3']);
+  str('Pracownik socjalny: tel. 22 501 23 46, kom. 0048 602 333 444; kontakt (+48 512 345 678).', ['22 501 23 46', '0048 602', '333 444', '512 345 678'], ['Pracownik socjalny:', 'kom.', 'kontakt (']);
+  neg('Na ul. Długiej 2-3 osoby czekały. W Alejach Jerozolimskich 2 pasy ruchu zamknięto. Ulica Żwirki i Wigury 2023 remont.', ['2-3 osoby', 'Alejach Jerozolimskich 2 pasy', 'Żwirki i Wigury 2023']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

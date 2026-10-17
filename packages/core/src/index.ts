@@ -2012,6 +2012,13 @@ function loginValueIsPersonPair(val: string, after: string): boolean {
   const surname = (w: string): boolean => !!surnameBase(w) || looksLikeSurname(w);
   return (isFirstNameLike(val) && surname(next)) || (surname(val) && isFirstNameLike(next));
 }
+const RE_NAME_BEFORE_LOGIN_WORD = new RegExp(`(?<![${NM_UP}${NM_LO}])([${PL_UP}][${PL_LO}]+)[ \\t]+$`);
+/** Czy wystąpienie loginu-wyrazu tworzy z sąsiednim wyrazem parę imię+nazwisko (w dowolnym szyku)? */
+function loginWordInPersonPair(t: string, offset: number, v: string): boolean {
+  if (loginValueIsPersonPair(v, t.slice(offset + v.length, offset + v.length + 40))) return true;
+  const prev = RE_NAME_BEFORE_LOGIN_WORD.exec(t.slice(Math.max(0, offset - 40), offset))?.[1];
+  return !!prev && /^[A-Z][a-z]+$/.test(prev) && loginValueIsPersonPair(prev, ` ${v}`);
+}
 // 1d) LOGIN — kotwica „login/username/nazwa użytkownika" + wartość-token, także w NASTĘPNEJ
 // linii. Złapaną wartość maskujemy też w pozostałych wystąpieniach w dokumencie oraz w
 // wariancie w cudzysłowie po „użytkownik/login/konto".
@@ -2064,10 +2071,17 @@ function passLogin(ctx: RedactCtx): void {
   // tkaminski."), kropka z ciągiem dalej tak („jan.nowak.adm", „tkaminski.example.com").
   // Litery spoza ASCII jawnie zakresem Latin-1/Extended zamiast \p{L}: regex budujemy dla każdej
   // wartości, a kompilacja wzorca z flagą „u" jest wielokrotnie droższa (2000 loginów: 0,35 s).
+  // Login zapisany jak imię albo nazwisko („Login: Kowalski") nie rozbija pary osobowej, którą
+  // zostawiliśmy dla FAZY 4: „User: Jan Kowalski" dawało „Jan [LOGIN]" — imię jawne obok maski.
   for (const v of [...loginValues].sort((a, b) => b.length - a.length)) {
+    const word = /^[A-Z][a-z]+$/.test(v);
     ctx.text = ctx.text.replace(
       new RegExp(`(?<![\\w.-])${escapeRe(v)}(?!\\.?[\\w\\u00C0-\\u024F-])`, 'g'),
-      maskConst(ctx, 'LOGIN'),
+      (m: string, offset: number, t: string) => {
+        if (word && loginWordInPersonPair(t, offset, m)) return m;
+        ctx.bump('LOGIN');
+        return ctx.M.LOGIN;
+      },
     );
   }
 }
@@ -2263,6 +2277,11 @@ function passPesel(ctx: RedactCtx): void {
   maskSpacedAfterLabel(ctx, /\b(pesel(?:\s+(?:to|o|nr|[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]{3,})){0,3})([\s:=.-]*[\s:=.|-])(\d(?:[ \t|-]{0,3}\d){10})(?![ \t|-]{0,3}\d)/gi, 'PESEL', isValidPesel);
 }
 
+// Słowa za etykietą, które nie opisują numeru, tylko otwierają INNE pole albo mówią, że numeru nie
+// ma: „PESEL⏎Tel. 48 601 222 333", „REGON brak telefon 601 222 333", „NIP⏎KRS 0000 123 456". Lista
+// słów etykiety przechodziła przez nową linię i wartość następnego pola dostawała maskę numeru.
+const RE_FOREIGN_FIELD_WORD =
+  /^(?:tel\p{L}*|kom|komórk\p{L}*|fax|faks|kontakt\p{L}*|krs|kart[aęyą]?|kont(?:o|a|u|em|cie)|rachun\p{L}*|iban|nrb|dow[oó]d\p{L}*|paszport\p{L}*|pesel|nip|regon|brak|nie)$/iu;
 /**
  * Numer z silną etykietą zapisany z odstępami między cyframi: grupy („PESEL: 851 103 142 83",
  * „NIP 5260 2502 74") albo cyfra po cyfrze w kratkach formularza („PESEL: 8 5 1 1 0 3 1 4 2 8 3",
@@ -2275,6 +2294,9 @@ function passPesel(ctx: RedactCtx): void {
  */
 function maskSpacedAfterLabel(ctx: RedactCtx, re: RegExp, type: PiiType, valid: (d: string) => boolean): void {
   ctx.text = ctx.text.replace(re, (m, kw: string, sep: string, val: string) => {
+    // słowa etykiety tylko w tym samym wierszu i tylko takie, które opisują ten numer
+    // („PESEL pacjenta:", „NIP nabywcy"); pierwsze słowo to sama etykieta
+    if (kw.includes('\n') || kw.split(/\s+/).slice(1).some((w) => RE_FOREIGN_FIELD_WORD.test(w))) return m;
     const core = val.replace(/^PL[- ]?/, ''); // prefiks kraju przed NIP-em
     if (!/[ \t|-]/.test(core)) return m;
     const d = core.replace(/\D/g, '');
@@ -2383,7 +2405,10 @@ const RE_PHONE_ANCHORED = new RegExp(
   String.raw`\b(te[li]\.?|telefon\w{0,4}|kom\.?|komórk[aiwy]|fax|faks|nr te[li]\.?|kontakt\w{0,4})((?:\s+(?:kontaktow\w+|stacjonarn\w+|służbow\w+|komórkow\w+|domow\w+|telefoniczn\w+|pod|numer\w*))*[\s:.=-]*)(${PHONE_CC}(?:[\s\-().]{0,3}\d){9}(?:\s*${PHONE_ENUM_SEP_OLD}${PHONE_ENUM_MEMBER}${PHONE_NOT_AMOUNT}|\s*${PHONE_ENUM_SEP_NEW}${PHONE_ENUM_MEMBER}(?![ \t\-().]{0,3}\d)${PHONE_NOT_AMOUNT})*)(?![.:]?\d)`,
   'gi',
 );
-const RE_PHONE_SEGMENT = new RegExp(String.raw`\s*${PHONE_CC}(?:[\s\-().]{0,3}\d){9}`, 'g');
+// Segment zaczyna się od kropki i odstępów wypełniacza („, tel. 0048 601 …", „kom. 0 602 …"): bez
+// nich skan startował od samej kropki, okno 9 cyfr (które też przepuszcza kropkę) zaczynało się na
+// cyfrach prefiksu, a ogon numeru abonenta zostawał jawny za maską („kom. [TELEFON]3 444").
+const RE_PHONE_SEGMENT = new RegExp(String.raw`[\s.]*${PHONE_CC}(?:[\s\-().]{0,3}\d){9}`, 'g');
 /**
  * Czy cyfry członu to numer: 9 cyfr krajowych, z zerem międzymiastowym 10, a przed nimi
  * ewentualnie kod kraju „48"/„0048" („+48 (0)22 …" daje 12 cyfr z „480").
@@ -2503,10 +2528,13 @@ function passPhone(ctx: RedactCtx): void {
       // Wiodące odstępy wchodzą do segmentu PRZED prefiksem: inaczej segment członu „lub 48 602 333
       // 444" startował od spacji, prefiks „48" nie mógł zadziałać, okno 9 cyfr obejmowało „48 602
       // 333 4" i dwie ostatnie cyfry numeru zostawały jawne. Odstępy i tak wracają w `lead`.
+      // Nawias otwierający prefiks („(+48 512 345 678)") zostaje przed maską, gdy numer domyka go
+      // dopiero za segmentem — jak w trybie (a); inaczej zostawał osierocony „)" za maską.
       const out = nums.replace(RE_PHONE_SEGMENT, (seg) => {
         ctx.bump('TELEFON');
         const lead = seg.match(/^[\s.]*/)?.[0] ?? '';
-        return `${lead}${ctx.M.TELEFON}`;
+        const open = seg[lead.length] === '(' && (seg.match(/\(/g) ?? []).length > (seg.match(/\)/g) ?? []).length;
+        return `${lead}${open ? '(' : ''}${ctx.M.TELEFON}`;
       });
       return `${kw}${sep}${out}`;
     },
@@ -2738,8 +2766,15 @@ const ADDR_UNIT_END = String.raw`(?![-–]?[${PL_LO}${PL_UP}]|\d|[ \t]*(?:m2|m²
 // („lokal 3", „mieszk. 3") i drugi człon („84/92 lok. 105", „84/92/105"). Dawniej znany był jeden
 // człon bez przecinka, więc reszta numeru zostawała jawna za maską („[ADRES] lok. 105"). Drugi człon
 // i warianty nowe tylko w obrębie wiersza: przez nową linię lokal sklejałby się z następnym wpisem.
-const ADDR_UNIT_INLINE = String.raw`(?:[ \t]*(?:\/|m\.?|lok\.?)[ \t]*|[ \t]*,[ \t]*(?:m\.?|lok\.?|lokal|mieszk\.?)[ \t]*|[ \t]+(?:lokal|mieszk\.?)[ \t]*)\d+[A-Za-z]?${ADDR_UNIT_END}`;
-const ADDR_UNIT = String.raw`(?:\s*(?:\/|m\.?|lok\.?)\s*\d+[A-Za-z]?${ADDR_UNIT_END}|${ADDR_UNIT_INLINE})?(?:${ADDR_UNIT_INLINE})?`;
+// Numer po słowie lokalu może mieć własny człon: „m. 3/4", „lok. 2 i 3" (dwa lokale). Dawniej
+// maska kończyła się na pierwszej liczbie, a reszta zostawała jawna za nią („[ADRES]/4", „[ADRES] i 3").
+// „i N" nie przed wyrazem: „m. 3 i 2 dzieci" to lokal i liczebnik.
+const ADDR_UNIT_WORD_NO = String.raw`\d+[A-Za-z]?(?:[ \t]*\/[ \t]*\d{1,3}[A-Za-z]?|[ \t]+i[ \t]+\d{1,3}[A-Za-z]?(?![ \t]+[${PL_LO}]{3}))?`;
+const ADDR_UNIT_INLINE = String.raw`(?:[ \t]*\/[ \t]*\d+[A-Za-z]?|(?:[ \t]*(?:m\.?|lok\.?)[ \t]*|[ \t]*,[ \t]*(?:m\.?|lok\.?|lokal|mieszk\.?)[ \t]*|[ \t]+(?:lokal|mieszk\.?)[ \t]*)${ADDR_UNIT_WORD_NO})${ADDR_UNIT_END}`;
+const ADDR_UNIT = String.raw`(?:\s*(?:\/\s*\d+[A-Za-z]?|(?:m\.?|lok\.?)\s*${ADDR_UNIT_WORD_NO})${ADDR_UNIT_END}|${ADDR_UNIT_INLINE})?(?:${ADDR_UNIT_INLINE})?`;
+// Czy dopasowanie adresu ma człon lokalu („/3", „m. 3", „, lok. 2", „mieszk. 5")? Jawny lokal
+// rozstrzyga, że liczba przed nim to numer domu, a nie liczebnik.
+const RE_ADDR_HAS_UNIT = /\d[A-Za-z]?[ \t]*\/[ \t]*\d|(?<![\p{L}])(?:m\.?|lok\.?|lokal|mieszk\.?)[ \t]*\d/u;
 // Łącznik pisany małą literą przed ostatnim członem nazwy ulicy („Żwirki i Wigury", „Jana z Kolna",
 // „Bitwy pod Płowcami", „Bolesława z Mazowsza") — dawniej przerywał nazwę i adres zostawał jawny
 // albo maska zaczynała się w połowie („ul. Żwirki i [ADRES]"). „z/ze" nie przed narzędnikiem: „na ul.
@@ -2750,8 +2785,24 @@ const ADDR_CONNECTOR = String.raw`(?:[ \t]+(?:i|pod|nad|de|von|van|der|da|di|du|
 const RE_ALEJE_PLURAL = /^alej(?:e|ach)$/i;
 // Liczebnik z rzeczownikiem za nazwą ulicy to ilość, nie numer domu („Na Alejach Jerozolimskich 15
 // tysięcy ludzi", „Wypadek przy ul. Długiej i Krótkiej 5 osób rannych", „przy ul. Długiej 5 minut").
-const RE_QUANTITY_AFTER =
-  /^[ \t]+(?:tys\.|tysi\p{L}*|mln|osób|osoby|ludzi|uczestnik\p{L}*|demonstrant\p{L}*|samochod\p{L}*|pojazd\p{L}*|razy|minut\p{L}*|godzin\p{L}*|sekund\p{L}*|dni|lat|wiek(?:i|ów)|metr\p{L}*|kilometr\p{L}*|km)(?!\p{L})/iu;
+// Tylko małą literą: „Osoby zameldowane:", „Dni pobytu:", „Metraż:", „Pojazd:" to etykiety następnych
+// pól formularza spłaszczonego do jednego wiersza. Nie przed liczbą: „lat 45", „osoby 3" to zapis
+// wieku albo wartość pola. Rzeczowniki spoza miar tylko w liczbie mnogiej („3 sklepy", „7 domów",
+// „2 tramwaje"): forma pojedyncza za prawdziwym adresem bywa jego opisem („ul. Długa 5 sklep
+// spożywczy"), a strażnik oddaje wtedy adres jawny.
+const RE_QUANTITY_AFTER = new RegExp(
+  '^[ \\t]+(?:tys\\.|tysi\\p{Ll}*|mln|osób|osoby|ludzi|uczestnik\\p{Ll}*|demonstrant\\p{Ll}*|samochod\\p{Ll}*|' +
+    'pojazd\\p{Ll}*|razy|minut\\p{Ll}*|godzin\\p{Ll}*|sekund\\p{Ll}*|dni|lat|lata|miesi(?:ące|ęcy)|tygodni(?:e)?|' +
+    'doby|dób|wiek(?:i|ów)|metr\\p{Ll}*|kilometr\\p{Ll}*|km|szt\\.|sztuk|rodzin|dzieci|uczni(?:ów|owie)|' +
+    'pracowni(?:ków|cy)|mieszkańc(?:ów|y)|artyst(?:ów|ki|ek)|biegacz(?:y|e)|kierowc(?:ów|y)|pasażer(?:ów|owie)|' +
+    'rannych|ofiar|gości|widzów|kibiców|sklep(?:y|ów)|dom(?:y|ów)|budynków|bloków|kamienic|mieszkań|' +
+    'pokoje|pokoi|pomnik(?:i|ów)|autobus(?:y|ów)|tramwaj(?:e|ów)|ambasad(?:y)?|pas(?:y|ów)|drzew(?:a)?|' +
+    'klon(?:y|ów)|latar(?:ni|nie)|kawiar(?:ni|nie)|miejsc|punkt(?:y|ów))(?!\\p{L})(?![ \\t]*\\d)',
+  'u',
+);
+// Łącznik w nazwie ulicy („Żwirki i Wigury", „Bitwy pod Płowcami") — sam rok za taką nazwą to data
+// albo wyliczenie ulic, nie numer domu („ul. Długiej i Krótkiej 2026 — harmonogram").
+const RE_ADDR_CONNECTOR_USED = new RegExp(`[ \\t](?:i|pod|nad|de|von|van|der|da|di|du|la|le|z|ze)[ \\t]+[${PL_UP}]`);
 
 // 12) ADRES — ul./al./os./pl. + nazwa + numer (opcjonalnie /mieszkanie). Wysoka precyzja.
 function passAddress(ctx: RedactCtx): void {
@@ -2799,13 +2850,19 @@ function passAddress(ctx: RedactCtx): void {
         ctx.bump('ADRES');
         return `${ctx.M.ADRES}${cut[2]}`;
       };
-      // goła liczba przed rzeczownikiem ilości to liczebnik („przy ul. Długiej 5 osób rannych")
-      if (/[ \t]\d{1,4}$/.test(m) && RE_QUANTITY_AFTER.test(rest)) return beforeDate();
+      // Silna etykieta adresu albo osoba po etykiecie tuż przed nim — wtedy liczba to numer domu.
+      const before = str.slice(Math.max(0, offset - 60), offset);
+      const labeled = RE_STRONG_ADDR_LABEL.test(before.slice(-30)) || labeledPersonBeforeAddr(before);
+      // Goła liczba (albo zakres „2-3") przed rzeczownikiem ilości to liczebnik („przy ul. Długiej 5
+      // osób rannych"). Nie po etykiecie adresu i nie z lokalem: „zam. ul. Długa 5 m. 3 lat 45" to
+      // adres i wiek — dawniej strażnik oddawał wtedy cały adres jawny.
+      if (/[ \t]\d{1,4}(?:[-–]\d{1,4})?$/.test(m) && !labeled && !RE_ADDR_HAS_UNIT.test(m) && RE_QUANTITY_AFTER.test(rest))
+        return beforeDate();
+      if (!labeled && /[ \t](?:19|20)\d{2}$/.test(m) && RE_ADDR_CONNECTOR_USED.test(m)) return m;
       // (też zakres dni: „przy ul. Długiej 1-3 maja" to termin, nie numery domów)
       if (/(?:[ \t]|\d[-–])(?:[1-9]|[12]\d|3[01])$/.test(m) && (RE_MONTH_GEN_AHEAD.test(rest) || RE_MAY_AHEAD.test(rest))) {
         if (RE_HOUSE_NO_BEFORE_DATE.test(m)) return beforeDate();
-        const before = str.slice(Math.max(0, offset - 60), offset);
-        if (!RE_STRONG_ADDR_LABEL.test(before.slice(-30)) && !labeledPersonBeforeAddr(before)) return m;
+        if (!labeled) return m;
       }
       // Rok przed „r. nr 18" to wciąż nazwa ulicy z datą („Bitwy Warszawskiej 1920 r. nr 18") — tam
       // strażnik roku nie działa (maska jak dotąd, zamiast odsłonięcia całego adresu).
@@ -3948,6 +4005,7 @@ function geoSurnameBeforeName(word: string, t: string, start: number): boolean {
   return POLISH_FIRST_NAMES.has(name) && !NOUN_LIKE_FIRST_NAMES.has(name);
 }
 const RE_PERSON_MASK_AT_START = /^(?:\[OSOBA-[A-Z]+\]|\[IMIĘ I NAZWISKO\])/;
+const RE_PERSON_MASK_BEFORE = /(?:\[OSOBA-[A-Z]+\]|\[IMIĘ I NAZWISKO\])[ \t]+$/;
 // Maska osoby i wyraz z wielkiej litery za nią (domknięcia w prawo w finalizePersons). W prawo
 // tylko przez JEDNĄ spację: kilka spacji to zwykle wyrównanie kolumn, a wyraz za nimi — następna.
 const RE_MASK_THEN_NAME = new RegExp(`(\\[OSOBA-[A-Z]+\\]|\\[IMIĘ I NAZWISKO\\]) ([${PL_UP}][${PL_LO}]+)(?![${NM_UP}${NM_LO}-])`, 'g');
@@ -4004,7 +4062,111 @@ function passListEntries(ctx: RedactCtx): void {
   if (changed) ctx.text = lines.join('\n');
 }
 
+interface RawWordLink {
+  prev: string;
+  sep: string;
+  prev2: string;
+  sep2: string;
+  prev3: string;
+  sep3: string;
+  /** Kilkanaście znaków oryginału za wyrazem — do dopasowania wystąpienia, gdy imię się powtarza. */
+  next: string;
+  // oceny liczone raz na wpis: ten sam wpis sprawdza każde wystąpienie imienia w dokumencie
+  prevName?: boolean;
+  prevOblique?: boolean;
+  pair?: boolean;
+}
+const linkPrevIsName = (l: RawWordLink): boolean => (l.prevName ??= isFirstNameLike(l.prev));
+const linkPrevOblique = (l: RawWordLink): boolean => (l.prevOblique ??= isObliqueSurnameForm(l.prev));
+const RE_RAW_WORD = /\p{L}+/gu;
+/**
+ * Wyrazy z wielkiej litery ORYGINALNEGO wejścia z trzema poprzednimi wyrazami i separatorami.
+ * Domknięcia w prawo w finalizePersons widzą już tylko maskę i nie wiedzą, czy zastąpiła samo
+ * nazwisko w szyku rekordu („Kowalski Jan Paweł", „Wiśniewska, Ewa"), parę „Imię Nazwisko"
+ * („Zofia Nowak Antoni", „Rodzice: Jan Kowalski, Anna" — imię za nią to następna osoba), czy
+ * nazwisko w formie zależnej („Według Nowaka Ewa nie przyszła"). Jeden przebieg po tekście,
+ * budowany leniwie dopiero wtedy, gdy jest co domykać.
+ */
+function buildRawWordLinks(raw: string): Map<string, RawWordLink[]> {
+  const map = new Map<string, RawWordLink[]>();
+  // dosłowne ucieczki JSON „\n/\r/\t" jak odstęp: litera ucieczki nie skleja się z wyrazem
+  const src = raw.replace(/\\[nrt]/g, '  ');
+  let p1 = '';
+  let p1Sep = '';
+  let p2 = '';
+  let p2Sep = '';
+  let p3 = '';
+  let lastEnd = -1;
+  for (const mm of src.matchAll(RE_RAW_WORD)) {
+    const w = mm[0];
+    const at = mm.index ?? 0;
+    // długi odstęp to i tak nie separator, który domknięcia rozważają
+    const sep = lastEnd < 0 || at - lastEnd > 8 ? '\n\n' : src.slice(lastEnd, at);
+    if (p1 && RE_CHAR_LU.test(w[0])) {
+      let list = map.get(w);
+      if (!list) map.set(w, (list = []));
+      const next = src.slice(at + w.length, at + w.length + 12);
+      if (list.length < 32) list.push({ prev: p1, sep, prev2: p2, sep2: p1Sep, prev3: p3, sep3: p2Sep, next });
+    }
+    p3 = p2;
+    p2Sep = p1Sep;
+    p2 = p1;
+    p1Sep = sep;
+    p1 = w;
+    lastEnd = at + w.length;
+  }
+  return map;
+}
+/**
+ * Para „Imię Nazwisko" w tej samej komórce: imię tuż przed nazwiskiem, które zastąpiła maska. Nie,
+ * gdy to imię zamyka poprzedni wpis „Nazwisko Imię" („Świadkowie: Kowalski Jan Nowak Piotr" — tam
+ * „Nowak Piotr" to drugi wpis, a „Piotr" należy do niego).
+ */
+function pairBeforeLink(l: RawWordLink): boolean {
+  return (l.pair ??= pairBeforeLinkUncached(l));
+}
+function pairBeforeLinkUncached(l: RawWordLink): boolean {
+  if (l.sep2 !== ' ' || !isFirstNameLike(l.prev2)) return false;
+  if (l.sep3 !== ' ' || isFirstNameLike(l.prev3)) return true;
+  const w3 = l.prev3.toLowerCase();
+  if (TITLE_WORDS.has(w3) || ROLE_WORDS.has(w3)) return true;
+  return !surnameBase(l.prev3) && !looksLikeSurname(l.prev3);
+}
+/**
+ * Wpisy z oryginału, które mogą odpowiadać temu wystąpieniu imienia: zgodne z tekstem za nim aż do
+ * pierwszej maski, cyfry albo znaku technicznego (te przebiegi już podmieniły). Gdy imię pada
+ * w dokumencie kilka razy („Dzieci: Zofia Nowak Antoni" i „Kowalski Antoni Jan"), decyduje wpis
+ * z tego miejsca, a nie pierwszy lepszy. Bez dopasowania — wszystkie wpisy (ostrożnie).
+ */
+function linksAt(all: RawWordLink[], t: string, end: number): RawWordLink[] {
+  if (all.length < 2) return all;
+  const cur = t.slice(end, end + 12).replace(/\\[\uE009\uE00A\uE00D]/g, '  ');
+  const fits = all.filter((l) => {
+    for (let i = 0; i < cur.length; i++) {
+      const c = cur[i];
+      if (c === '[' || (c >= '0' && c <= '9') || c >= '\uE000') return true;
+      if (c !== l.next[i]) return false;
+    }
+    // koniec tekstu za imieniem: w oryginale też musi być koniec
+    return cur.length === 12 || l.next.length <= cur.length;
+  });
+  return fits.length ? fits : all;
+}
+/** Czy komórkę „Nazwisko,Imię" (przecinek bez odstępu) wydziela separator pola inny niż przecinek —
+ *  średnik, „|", tabulator, cudzysłów, znacznik? Sam początek i koniec wiersza tego nie rozstrzyga:
+ *  w „Nazwisko,Imię⏎Kowalski,Jan" przecinek rozdziela dwie kolumny CSV. */
+function cellDelimitedNotByComma(t: string, start: number, end: number): boolean {
+  let i = start - 1;
+  while (i >= 0 && t[i] === ' ') i--;
+  if (i >= 0 && /[;|\t"'„“(<>]/.test(t[i])) return true;
+  let j = end;
+  while (t[j] === ' ') j++;
+  return j < t.length && /[;|\t"'”)<>]/.test(t[j]);
+}
+
 function finalizePersons(ctx: RedactCtx): void {
+  let links: Map<string, RawWordLink[]> | undefined;
+  const rawLinks = (w: string): RawWordLink[] => (links ??= buildRawWordLinks(ctx.raw)).get(w) ?? [];
   // DOMKNIĘCIE W PRAWO, przed domknięciem w lewo: imię za maską w zapisie „Nazwisko Imię" („Kowalska
   // Anna Maria, PESEL …" → dawniej „[..] Maria", „Pozwany Kowalski Jan Paweł" → „Pozwany [..] Jan
   // Paweł"). Tylko przez spację: tabulator zaczyna kolumnę, a nowa linia następny wpis listy.
@@ -4024,16 +4186,37 @@ function finalizePersons(ctx: RedactCtx): void {
       if (RE_PERSON_MASK_AT_START.test(after.replace(/^ +/, ''))) return m;
       // „Maja" przed liczbą to miesiąc („… Maja 2024 r."), nie drugie imię
       if (wl === 'maja' && /^[ \t]+\d/.test(after)) return m;
+      // Drugie imię stoi tylko za szykiem rekordu „Nazwisko Imię" albo za samym nazwiskiem
+      // w mianowniku. Za parą „Imię Nazwisko" to imię następnej osoby albo rzeczownik („Zofia Nowak
+      // Antoni", „Jan Kowalski Nadzieja na poprawę"), a za nazwiskiem w formie zależnej — podmiot
+      // dalszej części zdania („Według Nowaka Ewa nie przyszła"). Dawniej obie osoby szły pod jedną maskę.
+      const foreign = linksAt(rawLinks(w), t, offset + m.length).some(
+        (l) =>
+          l.sep === ' ' &&
+          !linkPrevIsName(l) &&
+          // imię na pewno w mianowniku: „Stanisława", „Aleksandra" bywają dopełniaczem męskiego
+          // imienia i wtedy zgadzają się z nazwiskiem („Wniosek Kowalskiego Stanisława")
+          (pairBeforeLink(l) || (linkPrevOblique(l) && POLISH_FIRST_NAMES.has(wl) && !isFirstNameGenitive(wl))),
+      );
+      if (foreign) return m;
       return mask;
     });
   }
   // DOMKNIĘCIE W PRAWO PRZEZ PRZECINEK, tylko w rekordzie: maska otwiera komórkę, a imię w mianowniku
   // ją zamyka („"[..], Jan","[PESEL]"", „<osoba>[..], Jan</osoba>", „Odbiorca: [..], Jan Maria").
   // W prozie („Rozmawiałem z [..], Marek też był", „Byli tam [..], Jan i Anna") to dwie osoby.
+  // Tylko maska z SAMEGO nazwiska: za parą „Imię Nazwisko" imię po przecinku to następna osoba
+  // („Rodzice: Jan Kowalski, Anna", „DW: Marek Zieliński, Ewa (sekretariat)"). Przecinek bez odstępu
+  // tylko w komórce wydzielonej innym separatorem („Kowalski,Jan;85031412347"): sam wiersz
+  // „Kowalski,Jan" to dwie kolumny CSV, a domknięcie zjadało kolumnę imienia.
   ctx.text = ctx.text.replace(RE_MASK_COMMA_NAME, (m, mask: string, a: string, b: string | undefined, offset: number, t: string) => {
     if (!POLISH_FIRST_NAMES.has(a.toLowerCase()) || (b && !POLISH_FIRST_NAMES.has(b.toLowerCase()))) return m;
     if (institutionLabelBefore(t, offset)) return m;
-    return cellStartsBefore(t, offset) && cellEndsAt(t, offset + m.length) ? mask : m;
+    if (!cellStartsBefore(t, offset) || !cellEndsAt(t, offset + m.length)) return m;
+    if (!/[ \t]/.test(m[mask.length + 1] ?? '') && !cellDelimitedNotByComma(t, offset, offset + m.length)) return m;
+    const commaLinks = linksAt(rawLinks(a), t, offset + m.indexOf(a, mask.length) + a.length);
+    if (commaLinks.some((l) => l.sep[0] === ',' && (linkPrevIsName(l) || pairBeforeLink(l)))) return m;
+    return mask;
   });
   // DOMKNIĘCIE: imię słownikowe tuż przed zamaskowaną osobą (spacja/_/-/JEDNA nowa linia) → do maski.
   // Nowa linia obejmuje „Jan\nWiśniewski" (imię na końcu wiersza, potwierdzone nazwisko w następnym) —
@@ -4048,6 +4231,9 @@ function finalizePersons(ctx: RedactCtx): void {
       new RegExp(`(?<![${NM_UP}${NM_LO}])([${PL_UP}][${PL_LO}]+)([ \\t\\n_.-]|\\\\\\uE009)(\\[OSOBA-[A-Z]+\\]|\\[IMIĘ I NAZWISKO\\])`, 'g'),
       (m, w: string, sep: string, mask: string, offset: number, t: string) => {
         if (!isFirstNameLike(w)) return m;
+        // Kropka bez odstępu bywa też końcem zdania bez spacji (OCR, czat): „z Janem.Kowalski
+        // odpisał" to dwie osoby. Login i katalog profilu mają imię w mianowniku („Jan.Kowalski").
+        if (sep === '.' && !POLISH_FIRST_NAMES.has(w.toLowerCase())) return m;
         // patron w dopełniaczu tuż przed osobą („W kościele św. Anny [OSOBA] zagra", „parafii św.
         // Józefa [OSOBA]") — imię świętego nie należy do osoby za nim
         if (isFirstNameGenitive(w.toLowerCase()) && precededByPatron(t, offset)) return m;
@@ -4055,6 +4241,9 @@ function finalizePersons(ctx: RedactCtx): void {
         // z następnego wiersza; wciągnięcie sklejało wiersze i przesuwało pola CSV.
         // Sam wpis maskuje passListEntries niżej.
         if (sep === '\n' && listEntryHead(t, offset, offset + m.length)) return m;
+        // Imię za maską osoby w swoim wierszu („Dzieci: [..] Antoni⏎Kowalski …") należy do tego
+        // wiersza: domknięcie przez nową linię sklejało go z osobą z następnego.
+        if (sep === '\n' && RE_PERSON_MASK_BEFORE.test(t.slice(Math.max(0, offset - 24), offset))) return m;
         // Wiersz „Przymiotnik Imię" („Wielka Nadzieja", „Olimpijska Nadzieja") to nazwa, nie osoba
         // przełamana w pół — wciągnięcie imienia sklejało go z maską z następnego wiersza.
         if (sep === '\n') {
@@ -4068,7 +4257,17 @@ function finalizePersons(ctx: RedactCtx): void {
   // DOMKNIĘCIE: imię doklejone ZA maską kropką albo podkreśleniem („folder Kowalski_Jan",
   // „Kowalski.Jan") — szyk „Nazwisko_Imię" w nazwach katalogów i kont. Bez odstępu i bez łącznika:
   // spację obsługuje (a3) z walidacją nazwiska, a łącznik należy do nazwiska dwuczłonowego.
-  ctx.text = ctx.text.replace(RE_MASK_GLUED_NAME, (m, mask: string, w: string) => (isFirstNameLike(w) ? mask : m));
+  // Przy kropce, jak w lewo, imię tylko w mianowniku i maska tylko z nazwiska w mianowniku: „z
+  // Kowalskim.Marek potwierdził" i „Jan Kowalski.Marek" to koniec zdania bez spacji i druga osoba.
+  ctx.text = ctx.text.replace(RE_MASK_GLUED_NAME, (m, mask: string, w: string, offset: number, t: string) => {
+    if (!isFirstNameLike(w)) return m;
+    if (m[mask.length] === '.') {
+      if (!POLISH_FIRST_NAMES.has(w.toLowerCase())) return m;
+      const glued = linksAt(rawLinks(w), t, offset + m.length);
+      if (glued.some((l) => l.sep === '.' && (linkPrevOblique(l) || linkPrevIsName(l) || pairBeforeLink(l)))) return m;
+    }
+    return mask;
+  });
   // DOMKNIĘCIE OCR: imię z homoglifem tuż przed maską („J0anna [..]", „KaroI [..]", „Kami1 [..]",
   // „J0ANNA [..]"). Nazwisko maskował przebieg słownikowy albo OCR, a imię z zerem czy wielkim „I"
   // nie przechodziło bramki słownika i zostawało jawne. Słowo co najmniej 4-znakowe (kody „A1a",

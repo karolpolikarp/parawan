@@ -4273,3 +4273,157 @@ test('K33/K10: nazwa zakładu „Salon Fryzjerski" to nie osoba, imię z nazwy s
   keep(['Salon Fryzjerski Ewa zaprasza.', '{"name": "Salon Fryzjerski Ewa"}', 'Gabinet Fryzjerski przyjmuje.']);
   masked([['Pan Fryzjerski złożył wniosek.', `Pan ${N} złożył wniosek.`]]);
 });
+test('Regresje b4 · adres: lokal, etykieta adresu i etykieta pola wielką literą nie robią z numeru liczebnika', () => {
+  masked([
+    ['zam. ul. Długa 5 m. 3 lat 45', 'zam. [ADRES] lat 45'],
+    ['Pacjent Jan Kowalski, zam. ul. Długa 5 m. 3 lat 45, przywieziony przez ZRM.', `Pacjent ${N}, zam. [ADRES] lat 45, przywieziony przez ZRM.`],
+    ['zam. ul. Kwiatowa 12 m. 4 osoby w gospodarstwie domowym: 3.', 'zam. [ADRES] osoby w gospodarstwie domowym: 3.'],
+    ['Jan Kowalski, zam. ul. Lipowa 7 m. 12 razy wzywał policję.', `${N}, zam. [ADRES] razy wzywał policję.`],
+    ['W mieszkaniu przy ul. Długiej 5 m. 3 osoby zatruły się czadem.', 'W mieszkaniu przy [ADRES] osoby zatruły się czadem.'],
+    ['Interwencja: ul. Polna 4 lok. 2 osoby nietrzeźwe.', 'Interwencja: [ADRES] osoby nietrzeźwe.'],
+    ['os. Tysiąclecia bl. 4 m. 3 osoby', '[ADRES] osoby'],
+    ['zam. al. Niepodległości 5 m. 2 dni temu', 'zam. [ADRES] dni temu'],
+    ['zam. ul. Długa 5 lat 45', 'zam. [ADRES] lat 45'],
+    ['Adres zamieszkania: ul. Polna 12 km od Krakowa', 'Adres zamieszkania: [ADRES] km od Krakowa'],
+    ['Adres: ul. Kwiatowa 5 Dni pobytu: 30', 'Adres: [ADRES] Dni pobytu: 30'],
+    ['Zameldowanie: ul. Polna 5 Osoby zameldowane: 3', 'Zameldowanie: [ADRES] Osoby zameldowane: 3'],
+    ['Adres lokalu: ul. Polna 5 m. 3 Metraż: 54 m2', 'Adres lokalu: [ADRES] Metraż: 54 m2'],
+    ['Właściciel: Jan Kowalski, ul. Polna 5 Pojazd: Opel Astra', `Właściciel: ${N}, [ADRES] Pojazd: Opel Astra`],
+    ['zam. ul. Żwirki i Wigury 2023', 'zam. [ADRES]'],
+    // człon numeru lokalu w całości
+    ['ul. Długa 5/7 m. 3/4', '[ADRES]'],
+    ['ul. Długa 5/7 lok. 3/4', '[ADRES]'],
+    ['Siedziba: ul. Długa 5, lok. 2 i 3', 'Siedziba: [ADRES]'],
+    ['ul. Długa 5 m. 3 i 2 dzieci', '[ADRES] i 2 dzieci'],
+  ]);
+});
+test('Regresje b4 · adres: zakres i liczebnik w prozie, wyliczenie ulic, rok za łącznikiem bez zmian', () => {
+  keep([
+    'Na ul. Długiej 2-3 osoby czekały.',
+    'Na ul. Marszałkowskiej 10-15 tysięcy ludzi protestowało.',
+    'Pod ul. Długą 5-10 metrów kabla.',
+    'Remont ul. Długiej 5–7 dni.',
+    'Na ul. Długiej 100-200 osób.',
+    'Ulica Żwirki i Wigury 2023 remont.',
+    'ul. Żwirki i Wigury 2023 – remont nawierzchni zakończony.',
+    'Remont ul. Długiej i Krótkiej 2026 — harmonogram',
+    'Ul. Mickiewicza i Słowackiego 3 sklepy zamknięto.',
+    'Plac Bohaterów Getta i Żydów 3 pomniki.',
+    'Przy ul. Kopernika i Galileusza 7 domów spłonęło.',
+    'Na skrzyżowaniu ul. Polnej i Leśnej 2 autobusy zderzyły się.',
+    'przy ul. Polnej i Leśnej 3 pokoje z kuchnią.',
+    'W Alejach Ujazdowskich 3 ambasady mają siedziby.',
+    'Mieszkał w Alejach Ujazdowskich 3 miesiące.',
+    'W Alejach Jerozolimskich 2 pasy ruchu będą zamknięte.',
+    'W Alejach Najświętszej Maryi Panny 14 kawiarni wystawi ogródki.',
+    'W Alejach Ujazdowskich 15 artystów pokaże prace',
+    'W Alejach Racławickich 12 klonów zostanie wyciętych',
+    'na Alejach Jerozolimskich 2 tramwaje wykoleiły się',
+    'Mieszkańcy ul. Lipowej i Polnej 40 rodzin podpisało petycję.',
+    'Na ul. Długiej i Krótkiej 15 latarni nie świeci.',
+    'Przy ul. Długiej i Krótkiej 3 miesiące potrwa wymiana',
+  ]);
+  // forma pojedyncza za adresem to jego opis, nie liczebnik
+  masked([
+    ['przy ul. Długiej 5 sklep spożywczy', 'przy [ADRES] sklep spożywczy'],
+    ['zamieszkały przy ul. Żwirki i Wigury 16 m. 3 w Warszawie.', 'zamieszkały przy [ADRES] w [MIEJSCOWOŚĆ].'],
+  ]);
+});
+test('Regresje b4 · telefon: człon wyliczenia z prefiksem po „tel."/„kom." w całości, nawias przed „+48" zostaje', () => {
+  masked([
+    ['Tel. 22 501 23 45, tel. 0048 601 222 333.', `Tel. ${T}, tel. ${T}.`],
+    ['tel. 601 222 333, kom. 0048 602 333 444', `tel. ${T}, kom. ${T}`],
+    ['tel. 0048 601 222 333, kom. 48 601 222 333', `tel. ${T}, kom. ${T}`],
+    ['Pracownik socjalny: Iza Nowicka, tel. 22 501 23 46, kom. 0048 602 333 444.', `Pracownik socjalny: ${N}, tel. ${T}, kom. ${T}.`],
+    ['tel. 601 222 333, kom. 0 602 333 444', `tel. ${T}, kom. ${T}`],
+    ['tel. 601 222 333, tel. (48) 602 333 444', `tel. ${T}, tel. ${T}`],
+    ['Telefon kontaktowy: 0 22 501 23 45, kom. 0 601 222 333.', `Telefon kontaktowy: ${T}, kom. ${T}.`],
+    ['tel. 601 222 333, tel. (0-22) 501 23 45', `tel. ${T}, tel. ${T}`],
+    ['Kontakt: tel. 22 654 32 10 lub tel. 0048 600 100 201.', `Kontakt: tel. ${T} lub tel. ${T}.`],
+    ['tel. 600 100 200, kom. 0048600100201', `tel. ${T}, kom. ${T}`],
+    ['tel. 22 654 32 10; tel. 0 22 654 32 11', `tel. ${T}; tel. ${T}`],
+    ['kom. 48 600 100 200, kom. 48600100201', `kom. ${T}, kom. ${T}`],
+    ['tel. (+48 512 345 678)', `tel. (${T})`],
+    ['Proszę o kontakt (+48 512 345 678).', `Proszę o kontakt (${T}).`],
+    ['Kontakt (+48 22 654 32 14 lub +48 600 100 202).', `Kontakt (${T} lub ${T}).`],
+    ['tel. (+48) 512 345 678', `tel. ${T}`],
+  ]);
+  masked([['tel. 601 222 333, kom. 0048 602 333 444', `tel. ${T}, kom. ${T}`]], { pseudonyms: true });
+});
+test('Regresje b4 · PESEL/NIP/REGON z odstępami: etykieta nie przejmuje wartości następnego pola', () => {
+  masked([
+    ['PESEL\nTel. 48 601 222 333', `PESEL\nTel. ${T}`],
+    ['REGON\nTel. 601 222 333', `REGON\nTel. ${T}`],
+    ['Dane płatnika: NIP 526 000 12 46 REGON brak telefon 601 222 333', `Dane płatnika: NIP [NIP] REGON brak telefon ${T}`],
+    ['PESEL: 851 103 142 83\nTel. 601 222 333', `PESEL: [PESEL]\nTel. ${T}`],
+    // słowa opisujące sam numer dalej działają
+    ['PESEL pacjenta: 851 103 142 83', 'PESEL pacjenta: [PESEL]'],
+    ['NIP kontrahenta: 5260 0012 46', 'NIP kontrahenta: [NIP]'],
+    ['REGON spółki: 012 345 675', 'REGON spółki: [REGON]'],
+  ]);
+  keep(['PESEL\nNr karty 1234 5678 901', 'NIP\nKRS 0000 123 456']);
+});
+test('Regresje b4 · osoba: imię za maską pary „Imię Nazwisko" albo nazwiska w formie zależnej to inna osoba', () => {
+  masked([
+    ['Rodzice: Jan Kowalski, Anna', `Rodzice: ${N}, Anna`],
+    ['Świadkowie: Jan Kowalski, Marek (sąsiad)', `Świadkowie: ${N}, Marek (sąsiad)`],
+    ['Do: Jan Kowalski, Anna; Piotr Nowak', `Do: ${N}, Anna; ${N}`],
+    ['DW: Marek Zieliński, Ewa (sekretariat)', `DW: ${N}, Ewa (sekretariat)`],
+    ['Nadawca: Jan Kowalski, Jarosław', `Nadawca: ${N}, Jarosław`],
+    ['Imiona i nazwiska dzieci: Zofia Nowak, Antoni', `Imiona i nazwiska dzieci: ${N}, Antoni`],
+    ['Dzieci: Zofia Nowak Antoni', `Dzieci: ${N} Antoni`],
+    ['Sprawę prowadzi Anna Nowak Ewa przejmie ją w maju.', `Sprawę prowadzi ${N} Ewa przejmie ją w maju.`],
+    ['Pacjent Jan Kowalski Nadzieja na poprawę jest niewielka.', `Pacjent ${N} Nadzieja na poprawę jest niewielka.`],
+    ['Lek. Jan Kowalski Bożena (pielęgniarka)', `Lek. ${N} Bożena (pielęgniarka)`],
+    ['Jan Maria Kowalski Anna przyszła.', `${N} Anna przyszła.`],
+    ['Według Nowaka Ewa nie przyszła na zebranie.', `Według ${N} Ewa nie przyszła na zebranie.`],
+    ['Zamiast Wiśniewskiego Marek pojechał do Gdańska.', `Zamiast ${N} Marek pojechał do Gdańska.`],
+    ['Dzięki Kowalskiemu Adam dostał dostęp.', `Dzięki ${N} Adam dostał dostęp.`],
+    ['Obok Kowalskiej Anna usiadła.', `Obok ${N} Anna usiadła.`],
+    // imię za maską w swoim wierszu nie przechodzi do osoby z następnego
+    ['Dzieci: Zofia Nowak Antoni\nKowalski Antoni Jan, PESEL 78041212346', `Dzieci: ${N} Antoni\n${N}, PESEL [PESEL]`],
+  ]);
+  masked(
+    [['Wyrażam zgodę na informowanie: Jan Kowalski, Maria (żona), Ewa Lis.', 'Wyrażam zgodę na informowanie: [OSOBA-A], Maria (żona), [OSOBA-B].']],
+    { pseudonyms: true },
+  );
+});
+test('Regresje b4 · osoba: szyk rekordu „Nazwisko Imię Imię" i „Nazwisko, Imię" dalej w całości', () => {
+  masked([
+    ['Świadkowie: Kowalski Jan Nowak Piotr', `Świadkowie: ${N} ${N}`],
+    ['Nowak Jan Piotr\nDzieci: Zofia Nowak Piotr', `${N}\nDzieci: ${N} Piotr`],
+    ['Wniosek Kowalskiego Stanisława Jana wpłynął.', `Wniosek ${N} wpłynął.`],
+    ['Wniosek Kowalskiego Aleksandra wpłynął.', `Wniosek ${N} wpłynął.`],
+    ['Odbiorca: Kowalski, Jan Maria', `Odbiorca: ${N}, ${N}`],
+    ['Nazwisko;Imię\nKowalski,Jan;850', `Nazwisko;Imię\n${N};850`],
+    ['"Kowalski,Jan","85031412347"', `"${N}","[PESEL]"`],
+  ]);
+});
+test('Regresje b4 · osoba: CSV „Kowalski,Jan" bez innego separatora to dwie kolumny', () => {
+  masked([
+    ['Nazwisko,Imię\r\nKowalski,Jan\r\nNowak,Ewa\r\n', `Nazwisko,Imię\r\n${N},Jan\r\n${N},Ewa\r\n`],
+    ['nazwisko,imie\nWiśniewska,Anna', `nazwisko,imie\n${N},Anna`],
+    ['Lista: Kowalski,Jan', `Lista: ${N},Jan`],
+  ]);
+});
+test('Regresje b4 · osoba: kropka bez odstępu między zdaniami nie skleja dwóch osób', () => {
+  masked([
+    ['Rozmawiał z Janem.Kowalski odpisał.', `Rozmawiał z Janem.${N} odpisał.`],
+    ['Spotkanie z Anną.Nowak przyszła.', `Spotkanie z Anną.${N} przyszła.`],
+    ['Rozmawiałem z Ewą.Kowalski odmówił podpisu.', `Rozmawiałem z Ewą.${N} odmówił podpisu.`],
+    ['Rozmawiałem z Kowalskim.Marek potwierdził termin.', `Rozmawiałem z ${N}.Marek potwierdził termin.`],
+    ['Zespół Kowalskiego.Roman przyszedł.', `Zespół ${N}.Roman przyszedł.`],
+    // login i katalog profilu bez zmian
+    ['Konto Jan.Kowalski zostało zablokowane.', `Konto ${N} zostało zablokowane.`],
+    ['C:\\Users\\Kowalski.Jan\\AppData', `C:\\Users\\${N}\\AppData`],
+    ['Konto AD: Kowalska.Anna została odblokowana.', `Konto AD: ${N} została odblokowana.`],
+  ]);
+});
+test('Regresje b4 · login: login zapisany jak nazwisko nie rozbija pary osobowej', () => {
+  masked([
+    ['Login: Kowalski\nUser: Jan Kowalski', `Login: [LOGIN]\nUser: ${N}`],
+    ['Login: Kowalski\nJan Kowalski zgłosił awarię.', `Login: [LOGIN]\n${N} zgłosił awarię.`],
+    ['Login: Marek\nMarek Nowak zatwierdził zmianę.', `Login: [LOGIN]\n${N} zatwierdził zmianę.`],
+    ['Login: Adam\nStatus: active\nAdam zalogował się.', 'Login: [LOGIN]\nStatus: active\n[LOGIN] zalogował się.'],
+  ]);
+});
