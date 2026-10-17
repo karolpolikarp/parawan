@@ -202,8 +202,11 @@ test('aplikacja: pasek „nie uruchomił się” i komunikat bez JavaScriptu na 
   expect(css).toMatch(/\.boot-fail p\{[^}]*padding:14px 16px;[^}]*background:#fff4c2;color:#1a1a1a;/);
   expect(css).toMatch(/#boot-fail\{[^}]*visibility:hidden;max-height:0;animation:boot-reveal 0s linear 4s forwards\}/);
   expect(css).toContain('@keyframes boot-reveal{to{visibility:visible;max-height:40em}}');
-  // pasek ani komunikat nie trafiają na wydruk (@media print chowa wszystko poza #print-out)
-  expect(webHtml.indexOf(BOOT_FAIL)).toBeLessThan(webHtml.indexOf('<div class="grid">'));
+  // Na wydruk nie trafiają, bo oba są dziećmi <body> (pierwsza asercja), a @media print w
+  // style.css chowa każde dziecko <body> poza #print-out regułą z !important (pilnuje jej
+  // markup.test.ts). Przebić ją mogłoby tylko !important w tym arkuszu. Sam wydruk paska
+  // sprawdza e2e (emulacja druku w smoke.test.mjs).
+  expect(css).not.toContain('!important');
 });
 
 /** Współczynnik kontrastu WCAG dwóch kolorów #rrggbb. */

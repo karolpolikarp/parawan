@@ -199,11 +199,26 @@ test('?demo: przykład zamaskowany, numer PESEL nie przechodzi do wyniku', async
 
 const BOOT_FAIL_TEXT = 'Parawan nie uruchomił się w tej przeglądarce';
 const NO_JS_TEXT = 'Ta przeglądarka ma wyłączony JavaScript';
-// Pasek pokazuje się po 4 s (animation-delay w index.html); sprawdzamy z zapasem.
+// Pasek pokazuje się po 4 s (animation-delay w index.html).
+const BOOT_FAIL_DELAY_MS = 4_000;
+// Bez JavaScriptu czekamy dłużej niż to opóźnienie, żeby pasek zdążył się pokazać, gdyby miał.
 const BOOT_FAIL_AFTER_MS = 4_500;
 
 /** Teksty widocznych komunikatów startowych (.boot-fail; visibility: hidden i 0 px to niewidoczne). */
 const visibleBootFails = (page) => page.locator('.boot-fail:visible').allTextContents();
+
+/**
+ * Animacja, która odsłania #boot-fail: opóźnienie z CSS i czas, jaki minął od jej startu.
+ * Zegar Playwright (clock.install) podmienia Date i performance.now, ale nie czas animacji CSS.
+ */
+const bootReveal = (page) =>
+  page.evaluate(() => {
+    const anim = document
+      .getElementById('boot-fail')
+      ?.getAnimations()
+      .find((a) => a.animationName === 'boot-reveal');
+    return { delay: anim?.effect?.getTiming().delay ?? null, elapsed: anim?.currentTime ?? null };
+  });
 
 test('zwykły start: main.ts usuwa pasek „nie uruchomił się” z dokumentu', async (t) => {
   await withApp(browser, t, '?demo', async (app) => {
@@ -226,7 +241,6 @@ for (const reducedMotion of ['reduce', 'no-preference']) {
     const file = path.join(dir, 'Parawan.html');
     writeFileSync(file, dead);
     try {
-      const started = Date.now();
       await withApp(
         browser,
         t,
@@ -235,18 +249,40 @@ for (const reducedMotion of ['reduce', 'no-preference']) {
           await page.waitForLoadState('load');
           // Na początku pasek jest ukryty i nie zajmuje miejsca, więc przy zwykłym starcie nie
           // mignie ani nie przesunie strony, zanim main.ts go usunie.
-          assert.ok(Date.now() - started < 3_000, 'strona wczytywała się dłużej niż 3 s');
           assert.deepEqual(await visibleBootFails(page), [], 'pasek widoczny od razu, bez opóźnienia');
           const box = await page.locator('#boot-fail').boundingBox();
           assert.equal(box?.height ?? 0, 0, `ukryty pasek zajmuje ${box?.height} px`);
+          // Czas liczy sama animacja, nie zegar testu: ten obejmował też otwarcie kontekstu i
+          // wczytanie pliku, a przy trzech plikach testów naraz pasek nie zdążał się pokazać
+          // przed sprawdzeniem. Odczyt idzie po sprawdzeniu ukrycia, więc elapsed poniżej
+          // opóźnienia znaczy, że ukrycie sprawdzono przed jego upływem. Przy ograniczonym
+          // ruchu style.css skraca animacje, ale opóźnienie ma zostać.
+          const start = await bootReveal(page);
+          assert.equal(start.delay, BOOT_FAIL_DELAY_MS, `opóźnienie paska: ${start.delay} ms`);
+          assert.ok(
+            start.elapsed !== null && start.elapsed < BOOT_FAIL_DELAY_MS,
+            `ukrycie sprawdzone dopiero ${start.elapsed} ms po starcie animacji`,
+          );
 
-          await page.waitForTimeout(Math.max(0, BOOT_FAIL_AFTER_MS - (Date.now() - started)));
+          await page
+            .locator('#boot-fail')
+            .waitFor({ state: 'visible', timeout: 2 * BOOT_FAIL_DELAY_MS });
+          const { elapsed } = await bootReveal(page);
+          assert.ok(
+            (elapsed ?? 0) >= BOOT_FAIL_DELAY_MS,
+            `pasek pokazał się po ${elapsed} ms, przed końcem opóźnienia`,
+          );
           const shown = await visibleBootFails(page);
           assert.equal(shown.length, 1, `widocznych komunikatów: ${shown.length}`);
           assert.ok(shown[0].includes(BOOT_FAIL_TEXT), `inny komunikat: „${shown[0]}”`);
           const after = await page.locator('#boot-fail').boundingBox();
           assert.ok((after?.height ?? 0) > 40, `pasek ma ${after?.height} px wysokości`);
           assert.ok((after?.y ?? 999) < 60, `pasek nie stoi u góry strony (y = ${after?.y})`);
+
+          // Na papier idzie sam #print-out, więc pasek nie może trafić na wydruk.
+          await page.emulateMedia({ media: 'print' });
+          assert.deepEqual(await visibleBootFails(page), [], 'pasek widoczny na wydruku');
+          await page.emulateMedia({ media: null });
         },
         { file, reducedMotion },
       );
@@ -270,6 +306,9 @@ test('wyłączony JavaScript: jeden komunikat od razu, bez paska po 4 s', async 
       const later = await visibleBootFails(page);
       assert.deepEqual(later, now, 'po 4 s pojawił się drugi komunikat');
       assert.equal(await page.locator('#boot-fail').isVisible(), false);
+      await page.emulateMedia({ media: 'print' });
+      assert.deepEqual(await visibleBootFails(page), [], 'komunikat bez JavaScriptu widoczny na wydruku');
+      await page.emulateMedia({ media: null });
     },
     { javaScriptEnabled: false },
   );
