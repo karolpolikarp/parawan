@@ -1,4 +1,5 @@
 import { expect, test } from 'vitest';
+import { FileReadError } from './files';
 import { extractPdfText } from './pdf';
 import { buildMinimalPdf } from './pdf-fixture';
 
@@ -18,4 +19,11 @@ test('plik niebędący PDF-em odrzucony z polskim komunikatem', async () => {
 test('PDF bez warstwy tekstowej (pusta strona) → komunikat o skanie', async () => {
   const pdf = buildMinimalPdf('');
   await expect(extractPdfText(pdf)).rejects.toThrow(/warstwy tekstowej/);
+});
+
+test('błędy PDF to FileReadError (UI pokazuje je wprost, bez surowych wyjątków)', async () => {
+  await expect(extractPdfText(new TextEncoder().encode('to nie pdf'))).rejects.toBeInstanceOf(
+    FileReadError,
+  );
+  await expect(extractPdfText(buildMinimalPdf(''))).rejects.toBeInstanceOf(FileReadError);
 });

@@ -52,8 +52,13 @@ Release (`.github/workflows/release.yml`, tag `v*`): jeden artefakt — `Parawan
   najdłuższe ciągi cyfr (IBAN 26 → PESEL 11 → NIP 10 → REGON) → krótsze (telefon 9, kod 5). MAC PRZED IPv6.
   W telefonie tryb KOTWICOWY przed prefiksowym „+48" (placeholder nie może przerwać łańcucha wyliczenia).
 - **Idempotencja**: placeholdery nie zawierają cyfr ani „@", więc ponowny przebieg ich nie pożre.
-- Nowy typ PII = dodać do `PiiType`, `MASK`, `HUMAN_LABEL` (index.ts), do `MASK_GROUPS` (apps/web/main.ts),
-  do tabeli w README, oraz testy (index.test.ts) i przypadki benchmarku (dataset.mjs).
+- Nowy typ PII = dodać do `PiiType`, `MASK`, `HUMAN_LABEL` (index.ts), w aplikacji do `PII_TOKENS`,
+  `MASK_GROUP_DEFS`, `CHIP_LABELS` i `WYKRYWA_ROWS` (apps/web/src/pii-meta.ts), na landingu do
+  `TYPE_MASK` (apps/landing/src/tokens.ts) i na stronę (apps/landing/index.html: chip i liczba
+  w tabeli `.kategorie` sekcji `#typy`, nazwa typu w zdaniu właściwego bloku `.metoda`, nagłówek
+  sekcji, meta description i opis w JSON-LD), do tabeli w README, oraz testy (index.test.ts)
+  i przypadki benchmarku (dataset.mjs). Rozjazdy łapią pii-meta.test.ts i landing.test.ts
+  (ten drugi przepuszcza też przez `redactPII` przykład z demo i przykłady z treści landingu).
 
 ## Weryfikacja zmian w detekcji
 

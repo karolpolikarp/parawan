@@ -1,13 +1,41 @@
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import { viteSingleFile } from 'vite-plugin-singlefile';
 import { fileURLToPath } from 'node:url';
+
+// Content-Security-Policy strony, bliźniacza do polityki aplikacji (apps/web/vite.config.ts,
+// tam pełne uzasadnienie). Jedyna różnica to img-src 'self': <link rel="apple-touch-icon">
+// wskazuje plik PNG obok strony (public/), a nie data:. Dyrektywa frame-ancestors w meta jest
+// ignorowana, więc jej tu nie ma.
+const CSP = [
+  "default-src 'none'",
+  "script-src 'unsafe-inline'",
+  "style-src 'unsafe-inline'",
+  "img-src 'self' data:",
+  'font-src data:',
+  "connect-src 'none'",
+  "form-action 'none'",
+  "base-uri 'none'",
+  "object-src 'none'",
+].join('; ');
+
+// Tylko przy buildzie (w źródłowym index.html meta zablokowałaby `vite dev`), tuż po
+// <meta charset>, z dosłownymi apostrofami: szczegóły jak w apps/web/vite.config.ts.
+const cspMeta: Plugin = {
+  name: 'parawan-csp',
+  apply: 'build',
+  transformIndexHtml(html) {
+    const charset = /<meta charset="UTF-8"\s*\/?>/i;
+    if (!charset.test(html)) throw new Error('parawan-csp: w index.html brak <meta charset>, nie ma gdzie wstawić CSP');
+    return html.replace(charset, (m) => `${m}\n    <meta http-equiv="Content-Security-Policy" content="${CSP}" />`);
+  },
+};
 
 // Landing „Parawan" — JEDEN samowystarczalny index.html (JS+CSS+fonty+SVG inline).
 // Świadomie ta sama filozofia co narzędzie (apps/web): strona nie robi ŻADNYCH żądań
 // do serwerów firm trzecich — to weryfikowalna obietnica (DevTools → Network: 0 żądań),
 // a plik działa też z file:// po podwójnym kliknięciu.
 export default defineConfig({
-  plugins: [viteSingleFile()],
+  plugins: [viteSingleFile(), cspMeta],
   base: './',
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? 'dev'),

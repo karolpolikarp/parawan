@@ -52,25 +52,20 @@ const chip = (label, color, bg, border) =>
 const ogHtml = `<!doctype html><html lang="pl"><head><meta charset="utf-8"><style>
 ${fonts}
 *{margin:0;padding:0;box-sizing:border-box}
-body{width:1200px;height:630px;overflow:hidden;font-family:'Archivo',sans-serif;color:#17251e;
-  background:radial-gradient(900px 500px at 18% -10%, rgba(11,61,46,.10), transparent 70%),
-             radial-gradient(700px 420px at 105% 115%, rgba(185,121,31,.10), transparent 70%), #efede6;}
+body{width:1200px;height:630px;overflow:hidden;font-family:'Archivo',sans-serif;color:#17251e;background:#efede6;}
 .card{position:relative;height:100%;padding:64px 72px;display:flex;flex-direction:column;justify-content:space-between}
-.bar{position:absolute;top:0;left:0;right:0;height:8px;background:linear-gradient(90deg,#0b3d2e,#8a5a12)}
 .brand{display:flex;align-items:center;gap:20px}
 .brand .mk{width:74px;height:66px}
-.brand b{font-size:44px;font-weight:900;letter-spacing:-.02em;text-transform:uppercase;color:#0b3d2e}
-h1{font-size:62px;font-weight:900;letter-spacing:-.03em;line-height:1.08;color:#0b3d2e;max-width:1000px}
-h1 .hl{color:#8a5a12}
+.brand b{font-size:44px;font-weight:800;letter-spacing:-.02em;text-transform:uppercase;color:#0b3d2e}
+h1{font-size:62px;font-weight:800;letter-spacing:-.02em;line-height:1.08;color:#0b3d2e;max-width:1000px;text-wrap:balance}
 .chips{display:flex;flex-wrap:wrap;gap:14px}
 .foot{display:flex;align-items:center;gap:16px;font-family:'IBM Plex Mono';font-weight:600;font-size:22px;color:#566259}
 .foot b{color:#0b3d2e}
 .foot .sep{color:#8a5a12}
 </style></head><body>
 <div class="card">
-  <div class="bar"></div>
   <div class="brand"><span class="mk">${parawanMark()}</span><b>Parawan</b></div>
-  <h1>Usuń dane osobowe z&nbsp;tekstu, <span class="hl">zanim wyjdą z&nbsp;Twojego komputera.</span></h1>
+  <h1>Parawan zasłania polskie dane osobowe, zanim wkleisz tekst do czatu AI</h1>
   <div class="chips">
     ${chip('PESEL', '#8a5f00', 'rgba(217,169,73,.12)', 'rgba(217,169,73,.55)')}
     ${chip('IMIĘ I NAZWISKO', '#5b3fa8', 'rgba(165,150,232,.12)', 'rgba(165,150,232,.55)')}
@@ -78,7 +73,7 @@ h1 .hl{color:#8a5a12}
     ${chip('ADRES', '#2f5fc0', 'rgba(126,166,232,.12)', 'rgba(126,166,232,.55)')}
     ${chip('TELEFON', '#0c7288', 'rgba(103,200,220,.12)', 'rgba(103,200,220,.55)')}
   </div>
-  <div class="foot"><b>parawan.karolwilczynski.com</b><span class="sep">·</span>100% lokalnie<span class="sep">·</span>offline<span class="sep">·</span>bez AI<span class="sep">·</span>open source</div>
+  <div class="foot"><b>parawan.karolwilczynski.com</b><span class="sep">·</span>jeden plik HTML, działa bez internetu</div>
 </div>
 </body></html>`;
 

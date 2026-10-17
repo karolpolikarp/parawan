@@ -1,5 +1,32 @@
 # Changelog
 
+## v0.46.23 — 2026-10-15
+
+**Content-Security-Policy w Parawan.html, poprawki aplikacji po audycie UI i nowa strona produktu.**
+
+Silnik wykrywania (`packages/core/src`) bez zmian względem v0.46.22, więc wynik maskowania jest
+taki sam.
+
+- **CSP w gotowym pliku.** Build wstawia na początku Parawan.html politykę `default-src 'none'`
+  i `connect-src 'none'`: przeglądarka blokuje połączenia skryptów i zasoby spoza pliku.
+  Obecność polityki sprawdzają CI i release (wzorzec na samym tagu meta). JAK-UZYC.txt
+  ma notkę dla działu IT.
+- **Import plików.** DOCX o rozmiarze kilku KB nie zamraża już karty (27–35 s → ok. 50 ms).
+  Plik z zaniżonym rozmiarem w nagłówku ZIP jest odrzucany od razu. „Cofnij” działa po
+  „Wyczyść”, „Przykład” i wczytaniu pliku. Lepsze komunikaty o kodowaniu i formatach.
+- **Wynik i porównanie.** Ctrl+A w wyniku zaznacza sam wynik. Znacznik tuż za nową wartością
+  nie liczy się jako nowe wykrycie. Fokus z klawiatury na znaczniku ustawia bieżący fragment.
+- **Dostępność i dymki.** Nazwy dostępne pigułek bez znaków z CSS, Esc zamyka dymki, dymki
+  nie wychodzą poza edytor przy 320 px, klik w obszar dymka trafia w to, co pod nim leży.
+- **Treść aplikacji.** Odmiana liczebników („1 kategoria”, „2 fragmenty”), polskie nazwy
+  wszystkich typów w chipach, „znacznik” zamiast „maska/placeholder”, przycisk zatrzymania
+  animacji. CLI odmienia licznik wystąpień.
+- **Strona produktu przebudowana.** Pierwszy ekran to działające demo. Dalej: co się stało
+  z przykładem, 24 typy i cztery sposoby rozpoznawania z parami „zasłania / zostawia”, jak
+  samemu sprawdzić, że tekst nie wychodzi z karty (licznik żądań, odłączona sieć, zakładka
+  Sieć, cytat CSP), skuteczność z pomiaru razem z prawdziwymi wpadkami, metryczka pliku.
+  Przykłady z treści strony testy przepuszczają przez `redactPII`.
+
 ## v0.46.22 — 2026-07-20
 
 **Nowy typ danych: numer KSeF (Krajowy System e-Faktur).**
@@ -16,7 +43,7 @@ i maskuje numer w całości jako `[NR-KSEF]`.
   (`**Nr KSeF:**`, `<td>Nr KSeF</td>`), a pod jedną etykietą stoi wyliczenie kilku numerów.
 - **Oba formaty w obiegu**: 35-znakowy z KSeF 2.0 (`NIP-RRRRMMDD-12 znaków-suma`) i historyczny
   36-znakowy z KSeF 1.0 (część techniczna rozbita 6+6). Schemat FA(3) dopuszcza w pierwszym
-  członie także `M`+9 cyfr i 3 litery+7 cyfr — obsłużone.
+  członie także `M`+9 cyfr (obsłużone) i 3 litery+7 cyfr (wycięte, patrz niżej).
 - **Druga warstwa: losowość części technicznej + suma kontrolna NIP-u + zakres daty.** Kotwica
   dokumentowa jest słabsza niż etykieta tuż przy numerze, a sam kształt (10 cyfr · 8 cyfr ·
   12 znaków hex · 2 znaki) noszą też numery zamówień, inwentarzowe, seryjne, identyfikatory

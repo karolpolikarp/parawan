@@ -60,13 +60,14 @@
   --line:      #e1ded3;
   --line-2:    #d4cfc1;
   --text:      #17251e;
-  --mut:       #6b7a70;
+  --mut:       #647369; /* 4,75:1 na --well, 5:1 na bieli (WCAG 1.4.3) */
   --mut-2:     #566259; /* ciemniejszy — AA także na --well (audyt kontrastu) */
   --acc:       #0b3d2e; /* leśna zieleń — kolor główny marki */
   --acc-soft:  rgba(11, 61, 46, .08);
   --acc-line:  rgba(11, 61, 46, .30);
-  --gold:      #b9791f; /* bursztyn — akcja główna (Kopiuj), kickery „Krok N" */
-  --gold-2:    #a66c1b;
+  --gold:      #b9791f; /* bursztyn — akcenty dekoracyjne i obwódki (tekst ma za mały kontrast) */
+  --gold-deep: #8a5a12; /* bursztynowy TEKST: 5,9:1 na bieli (kickery „Krok N”, liczniki) */
+  --gold-cta:  #9d6613; /* tło akcji głównej (Kopiuj) z białym napisem: 4,8:1 */
 
   /* kategorie PII — jedna rodzina kolorów, przyciemniona dla kontrastu na jasnym tle */
   --person:  #5b3fa8;
@@ -77,7 +78,7 @@
 
   /* stany — NIEZALEŻNE od kolorów kategorii PII (semantyka kategorii nietykalna) */
   --ok: #127049;
-  --warn: #b9791f;
+  --warn: #8a5a12;
   --err: #c0392f;
   --r-card: 16px;
   --r-ctl:  10px;
@@ -104,6 +105,7 @@ body {
 }
 
 img { display: block; }
+p { text-wrap: pretty; } /* bez pojedynczego słowa w ostatniej linii akapitu, jak na landingu */
 a { color: var(--acc); text-decoration: none; }
 a:hover { text-decoration: underline; }
 code, kbd { font-family: var(--mono); font-size: .88em; }
@@ -124,6 +126,8 @@ kbd {
 .g6  { grid-column: span 6; }
 .g7  { grid-column: span 7; }
 .g12 { grid-column: span 12; }
+/* <main> obejmuje karty narzędzia, ale nie tworzy własnego pudełka: karty dalej leżą w siatce */
+.grid-main { display: contents; }
 
 /* ============ KARTA — wspólny szkielet ============ */
 .card {
@@ -209,62 +213,90 @@ details.card::details-content {
   min-height: 0;
 }
 
-/* ============ TOOLTIPY — czysty CSS [data-tip] ============ */
+/* ============ TOOLTIPY — [data-tip] ============ */
+/* W spoczynku dymek ma display:none: niewidoczny, ale rozłożony dymek poszerzał stronę
+   i na telefonie dawał przewijanie w bok (WCAG 1.4.10). Pojawia się krótką animacją.
+   Dymek otwarty najechaniem przyjmuje wskaźnik, więc da się na niego najechać (WCAG 1.4.13);
+   odstęp od elementu wypełnia przezroczysta ramka-mostek, a widoczny brzeg rysuje cień
+   wewnętrzny. Dymek otwarty fokusem (np. po kliknięciu przełącznika) i każdy dymek na dotyku
+   przepuszcza kliknięcia: inaczej zasłaniałby wiersz albo przycisk pod sobą.
+   tips.ts dociska dymek do krawędzi (--tip-dx, --tip-max), zamyka go klawiszem Esc
+   (klasa .tips-off) i chroni przed kliknięciem w dymek. */
 [data-tip] { position: relative; }
 [data-tip]::after {
   content: attr(data-tip);
+  content: attr(data-tip) / ""; /* treść dymka nie dokleja się do nazwy przycisku (opis dodaje tips.ts) */
+  display: none;
   position: absolute; z-index: 60;
-  left: 50%; bottom: calc(100% + 9px);
-  transform: translate(-50%, 4px);
-  width: max-content; max-width: 250px;
-  background: #1c2b23; color: #f2f5f0;
-  border: 1px solid #33473c; border-radius: 8px;
+  left: 50%; bottom: 100%;
+  transform: translateX(-50%);
+  translate: var(--tip-dx, 0px) 0;
+  width: max-content; max-width: var(--tip-max, min(250px, calc(100vw - 32px)));
+  background: #1c2b23; background-clip: padding-box; color: #f2f5f0;
+  /* promień 17px w pionie od strony mostka: po odjęciu 9 px ramki widoczny róg ma 8 px */
+  border: 0; border-bottom: 9px solid transparent; border-radius: 8px / 8px 8px 17px 17px;
   padding: 7px 10px;
   font: 400 12px/1.45 var(--sans);
   letter-spacing: 0; text-align: left; white-space: normal; text-transform: none;
-  box-shadow: 0 8px 24px rgba(11, 61, 46, .28);
-  opacity: 0; visibility: hidden; pointer-events: none;
-  transition: opacity .13s ease, transform .13s ease;
+  box-shadow: inset 0 0 0 1px #33473c;
+  filter: drop-shadow(0 8px 24px rgba(11, 61, 46, .28)); /* cień tylko pod widocznym dymkiem, bez mostka */
+  pointer-events: none;
 }
 [data-tip]::before {
-  content: ""; position: absolute; z-index: 61;
+  content: ""; display: none; position: absolute; z-index: 61;
   left: 50%; bottom: calc(100% + 5px);
   width: 8px; height: 8px;
-  transform: translate(-50%, 4px) rotate(45deg);
+  transform: translateX(-50%) rotate(45deg);
   background: #1c2b23;
   border-right: 1px solid #33473c; border-bottom: 1px solid #33473c;
-  opacity: 0; visibility: hidden; pointer-events: none;
-  transition: opacity .13s ease, transform .13s ease;
+  pointer-events: none;
 }
 [data-tip]:hover::after,
 [data-tip]:focus-visible::after,
 [data-tip]:focus-within::after {
-  opacity: 1; visibility: visible; transform: translate(-50%, 0);
+  display: block;
+  animation: tip-in .13s ease-out;
 }
 [data-tip]:hover::before,
 [data-tip]:focus-visible::before,
 [data-tip]:focus-within::before {
-  opacity: 1; visibility: visible; transform: translate(-50%, 0) rotate(45deg);
+  display: block;
+  animation: tip-arrow-in .13s ease-out;
 }
+@media (hover: hover) {
+  [data-tip]:hover::after, [data-tip]:hover::before { pointer-events: auto; }
+}
+@keyframes tip-in { from { opacity: 0; translate: var(--tip-dx, 0px) 4px; } }
+@keyframes tip-arrow-in { from { opacity: 0; translate: 0 4px; } }
+/* Esc zamyka widoczny dymek, aż wskaźnik albo fokus przejdzie na inny element */
+:root.tips-off [data-tip]::after, :root.tips-off [data-tip]::before { display: none; }
 
 /* w przewijanych edytorach dymek otwiera się W DÓŁ — overflow nie utnie go u góry */
-.editor [data-tip]::after {
-  bottom: auto; top: calc(100% + 9px);
+.editor [data-tip]::after,
+.hero [data-tip]::after { /* hero leży przy górze dokumentu — dymki też w dół */
+  bottom: auto; top: 100%;
+  border-bottom: 0; border-top: 9px solid transparent; border-radius: 8px / 17px 17px 8px 8px;
 }
-.editor [data-tip]::before {
-  bottom: auto; top: calc(100% + 5px);
-  border: none;
-  border-left: 1px solid var(--line-2); border-top: 1px solid var(--line-2);
-}
-/* hero leży przy górze dokumentu — dymki też w dół */
-.hero [data-tip]::after { bottom: auto; top: calc(100% + 9px); }
+.editor [data-tip]::before,
 .hero [data-tip]::before {
   bottom: auto; top: calc(100% + 5px);
   border: none;
   border-left: 1px solid var(--line-2); border-top: 1px solid var(--line-2);
 }
-[data-tip-pos="left"]::after { left: auto; right: -6px; transform: translate(0, 4px); }
-[data-tip-pos="left"]:hover::after, [data-tip-pos="left"]:focus-visible::after { transform: translate(0, 0); }
+/* znacznik w ostatnich wierszach edytora: pod spodem brak miejsca, więc dymek idzie w górę */
+.editor [data-tip][data-tip-flip="up"]::after {
+  top: auto; bottom: 100%;
+  border-top: 0; border-bottom: 9px solid transparent; border-radius: 8px / 8px 8px 17px 17px;
+}
+.editor [data-tip][data-tip-flip="up"]::before {
+  top: auto; bottom: calc(100% + 5px);
+  border: none;
+  border-right: 1px solid #33473c; border-bottom: 1px solid #33473c;
+}
+/* dymek rośnie w lewo od prawej krawędzi elementu (elementy przy prawym brzegu karty) */
+[data-tip-pos="left"]::after { left: auto; right: -6px; transform: none; }
+/* znak marki stoi przy lewej krawędzi: dymek rośnie w prawo */
+.brand-mark::after { left: -6px; transform: none; }
 
 /* ============ PRZYCISKI / KONTROLKI ============ */
 .btn {
@@ -282,10 +314,10 @@ details.card::details-content {
 .btn:disabled { opacity: .45; cursor: not-allowed; }
 .btn:disabled:hover { background: var(--bg); border-color: var(--line); }
 .btn-acc {
-  background: var(--gold);
-  border-color: var(--gold); color: #f4f6f1;
+  background: var(--gold-cta);
+  border-color: var(--gold-cta); color: #fff; /* #fff, nie krem: przy #f4f6f1 kontrast spada do 4,4:1 */
 }
-.btn-acc:hover { background: var(--gold-2); border-color: var(--gold-2); }
+.btn-acc:hover { background: var(--gold-deep); border-color: var(--gold-deep); }
 .btn-acc:disabled, .btn-acc:disabled:hover { background: var(--card-2); color: var(--mut); border-color: var(--line-2); box-shadow: none; opacity: 1; }
 
 /* duże pionowe ikono-przyciski toolbara (przeszczep z wariantu A) */
@@ -326,6 +358,9 @@ details.card::details-content {
 }
 .sw:checked { background: var(--acc); border-color: var(--acc); }
 .sw:checked::after { left: 18px; background: #fff; }
+/* stan wyłączony: obrys i gałka w --mut, inaczej tor ginie na kremowym tle (1,4:1, WCAG 1.4.11) */
+.sw { border-color: var(--mut); }
+.sw:not(:checked)::after { background: var(--mut); box-shadow: none; }
 
 /* ============ HERO ============ */
 /* Poziomy lockup marki: znak │ PARAWAN + tagline (mono wersaliki), jak w karcie marki. */
@@ -338,6 +373,7 @@ details.card::details-content {
 #hero-sub {
   font-family: var(--sans); font-size: 12.5px; font-weight: 700;
   letter-spacing: .1em; text-transform: uppercase; color: var(--acc); margin-top: 5px;
+  text-wrap: balance; /* na telefonie bez jednego słowa w drugiej linii */
 }
 .ver-chip { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--mut); }
 .hero-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
@@ -357,13 +393,17 @@ details.card::details-content {
   color: var(--acc); background: var(--card-2); border: 1px solid var(--line);
   border-radius: 999px; padding: 6px 14px;
 }
-.feat-strip li::before { content: "✓"; font-size: 11px; font-weight: 800; color: var(--fin); }
+/* znak to ozdoba: pusty tekst zastępczy po „/” nie wpuszcza go do nazwy pigułki („✓ działa offline”) */
+.feat-strip li::before { content: "✓"; content: "✓" / ""; font-size: 11px; font-weight: 800; color: var(--fin); }
 .feat-strip .feat-solid { color: #f4f6f1; background: var(--acc); border-color: var(--acc); }
 .feat-strip .feat-solid::before { color: #a9c6b4; }
 
 .hero-b { display: flex; align-items: center; gap: 16px 24px; flex-wrap: wrap; }
 .hero-lead { font-size: 18px; color: var(--text); flex: 1 1 320px; }
 .hero-lead strong { color: var(--acc); }
+/* skrót do edytora: tylko gdy karty układają się w jedną kolumnę (≤1080 px, reguła niżej) */
+.skip-editor { display: none; }
+#edytor { scroll-margin-top: 12px; }
 /* callout prywatności w prawej części nagłówka — mocny akcent zaufania, dopasowany do treści */
 .privacy {
   display: flex; align-items: center; gap: 12px;
@@ -384,7 +424,7 @@ details.card::details-content {
 .step-h { display: flex; align-items: center; gap: 10px; }
 .step .kick {
   font-family: var(--mono); font-size: 10px; font-weight: 700;
-  letter-spacing: .18em; color: var(--gold); text-transform: uppercase;
+  letter-spacing: .18em; color: var(--gold-deep); text-transform: uppercase;
 }
 .step-t { font-size: 16px; font-weight: 800; color: var(--acc); margin-top: 10px; }
 .step-d { font-size: 12.5px; color: var(--mut); margin-top: 6px; line-height: 1.45; }
@@ -393,6 +433,11 @@ details.card::details-content {
   6%, 19%  { border-color: var(--acc); box-shadow: 0 10px 26px rgba(11,61,46,.18); }
   26%      { border-color: var(--line); box-shadow: var(--shadow); }
 }
+/* Kroki świecą po kolei, co 3 s: blask trwa od 6% do 26% z 12 s, więc kolejne się nie nakładają.
+   Kroki to pierwsze cztery <section> w siatce (przed nimi stoi tylko <header>). */
+.step:nth-of-type(2) { animation-delay: 3s; }
+.step:nth-of-type(3) { animation-delay: 6s; }
+.step:nth-of-type(4) { animation-delay: 9s; }
 
 /* ============ LEGENDA ============ */
 .legend .card-h { border-bottom: none; flex-wrap: wrap; gap: 12px 18px; }
@@ -407,7 +452,7 @@ details.card::details-content {
 }
 .lg:hover { border-color: var(--line-2); }
 .lg b { font-size: 14px; font-weight: 600; color: var(--text); }
-.lg-n { font-size: 11.5px; color: var(--mut); }
+.lg-n { font-size: 11.5px; color: var(--mut); white-space: nowrap; } /* „15” nie odrywa się od „typów” */
 .dot { width: 13px; height: 13px; border-radius: 50%; display: inline-block; flex: none;
   box-shadow: 0 0 0 1px rgba(11,61,46,.12), 0 1px 2px rgba(11,61,46,.25); }
 .dot-person  { background: var(--person); }
@@ -421,8 +466,13 @@ details.card::details-content {
    WEJŚCIE, chowa się za wyśrodkowany parawan i wychodzi w prawą strefę WYJŚCIE. Ruch liczony
    względem środka sceny (left:50% + translateX) — wygląda tak samo niezależnie od szerokości. */
 .demo { overflow: hidden; }
-.demo-head-row { padding: 15px 22px; border-bottom: 1px solid var(--line); }
-.demo-kick { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
+.demo-head-row {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 10px 16px;
+  padding: 15px 22px; border-bottom: 1px solid var(--line);
+}
+.demo-head-t { flex: 1 1 260px; min-width: 0; }
+.demo-motion { flex: none; }
+.demo-kick { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-deep); }
 .demo-head-row h2 { font-size: 17px; font-weight: 800; color: var(--acc); margin-top: 3px; }
 .demo-stage { position: relative; height: 300px; overflow: hidden; }
 /* strefy WEJŚCIE / WYJŚCIE — wyeksponowane etykiety z akcentem, kotwiczą przepływ animacji */
@@ -436,7 +486,7 @@ details.card::details-content {
 .demo-zone::before { content: ""; width: 8px; height: 8px; border-radius: 50%; flex: none; }
 .demo-zone-in  { left: 24px; color: var(--acc); background: var(--acc-soft); border: 1px solid var(--acc-line); }
 .demo-zone-in::before { background: var(--acc); }
-.demo-zone-out { right: 24px; color: var(--gold); background: rgba(185,121,31,.10); border: 1px solid rgba(185,121,31,.35); }
+.demo-zone-out { right: 24px; color: var(--gold-deep); background: rgba(185,121,31,.10); border: 1px solid rgba(185,121,31,.35); }
 .demo-zone-out::before { background: var(--gold); }
 .demo-doc { position: absolute; top: 94px; left: 50%; width: 176px; margin-left: -88px; z-index: 1; will-change: transform, opacity; }
 .demo-in  { animation: demoIn 7s ease-in-out infinite; }
@@ -445,16 +495,16 @@ details.card::details-content {
   background: #fff; border: 2px solid var(--acc); border-radius: 10px;
   padding: 12px 14px; box-shadow: 0 10px 22px rgba(11,61,46,.12);
 }
-.demo-tag { font-family: var(--mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: #9aa79e; }
+.demo-tag { font-family: var(--mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--mut); }
 .demo-name { font-weight: 800; font-size: 13px; margin-top: 6px; }
 .demo-mono { font-family: var(--mono); font-size: 11.5px; margin-top: 3px; }
 .demo-lines { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
 .demo-lines i { height: 4px; border-radius: 2px; background: #dce3de; display: block; }
 .demo-in .demo-name, .demo-in .demo-mono { color: var(--acc); }
-.demo-out .demo-name { color: var(--gold); letter-spacing: .5px; }
-.demo-out .demo-mono { color: var(--gold); }
+.demo-out .demo-name { color: var(--gold-deep); letter-spacing: .5px; }
+.demo-out .demo-mono { color: var(--gold-deep); }
 .demo-out .demo-head { display: flex; justify-content: space-between; }
-.demo-anon { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); font-weight: 700; }
+.demo-anon { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--gold-deep); font-weight: 700; }
 .demo-mark { position: absolute; left: 50%; top: 70px; width: 240px; height: 198px; margin-left: -120px; z-index: 3; }
 .demo-mark .gi { display: block; width: 100%; height: 100%; }
 .demo-badge-wrap { position: absolute; left: 50%; top: 40px; width: 260px; margin-left: -130px; display: flex; justify-content: center; z-index: 4; pointer-events: none; }
@@ -487,6 +537,12 @@ details.card::details-content {
   62% { opacity: 1; transform: scale(1); }
   72%, 100% { opacity: 0; transform: scale(1); }
 }
+/* „Zatrzymaj animację” (main.ts): kroki przestają świecić, a demo staje w jednym kadrze,
+   pismo z danymi po lewej i zanonimizowane po prawej (zamiast zamrożenia w przypadkowej klatce). */
+:root[data-motion="off"] .step { animation: none; }
+:root[data-motion="off"] .demo-in { animation: none; transform: translateX(-330px); }
+:root[data-motion="off"] .demo-out { animation: none; transform: translateX(330px); }
+:root[data-motion="off"] .demo-badge { animation: none; }
 
 /* ============ EDYTORY ============ */
 .toolbar {
@@ -535,18 +591,19 @@ textarea.editor-ta {
   cursor: ns-resize; border-radius: 8px; touch-action: none;
   transition: background .12s ease;
 }
-.ed-grip:hover, .ed-grip:focus-visible { background: var(--acc-soft); outline: none; }
+.ed-grip:hover, .ed-grip:focus-visible { background: var(--acc-soft); }
+.ed-grip:focus-visible { outline: 2px solid var(--acc); outline-offset: 0; }
 .ed-grip-bar {
   width: 44px; height: 4px; border-radius: 999px;
   background: var(--line-2); transition: background .12s ease, width .12s ease;
 }
 .ed-grip:hover .ed-grip-bar, .ed-grip:focus-visible .ed-grip-bar { background: var(--acc-line); width: 56px; }
 body.ed-resizing, body.ed-resizing * { cursor: ns-resize !important; user-select: none !important; }
-textarea.editor-ta:focus {
-  outline: none;
-  border-color: var(--acc-line);
-  box-shadow: 0 0 0 3px var(--acc-soft);
-}
+/* Fokus w polu: pełny obrys w kolorze marki (cień --acc-soft był nie do odróżnienia).
+   outline zamiast cienia działa też w trybie wysokiego kontrastu Windows. */
+textarea.editor-ta:focus { outline: 2px solid var(--acc); outline-offset: 2px; }
+/* Firefox domyślnie przyciemnia placeholder; instrukcja w nim ma mieć pełny kontrast */
+textarea.editor-ta::placeholder { color: var(--mut); opacity: 1; }
 textarea.editor-ta.dragover {
   border-color: var(--acc-line);
   box-shadow: 0 0 0 3px var(--acc-soft);
@@ -557,7 +614,7 @@ textarea.editor-ta.dragover {
 
 .editor.plain { white-space: pre-wrap; padding-left: 14px; }
 
-#output:focus-visible { outline: 2px solid var(--acc-line); outline-offset: 2px; }
+#output:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
 
 /* znaczniki w WYNIKU */
 .pii {
@@ -620,17 +677,64 @@ mark.pii.pii-linked { box-shadow: 0 0 0 2px var(--acc-line); }
   border-radius: 4px;
   padding: 1px 4px;
 }
+/* Oryginał w „Porównaniu” nie daje się zaznaczyć: zaznaczenie, przeciąganie i Ctrl+C
+   biorą sam wynik, bez danych osobowych (odstęp za przekreśleniem też siedzi w środku). */
+.editor .orig { -webkit-user-select: none; user-select: none; }
+
+/* długie przeliczenie: wynik przygasa, dopóki nie ma nowego */
+#output.is-busy { opacity: .55; cursor: progress; }
 
 .warn-note { color: var(--warn); }
 .warn-note a { color: var(--warn); text-decoration: underline; }
+.warn-txt { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+/* typy wyłączone w „Co maskować”: te dane przechodzą jawne, więc ostrzeżenie jest mocniejsze */
+.mask-off { color: var(--err); font-weight: 600; }
+.linklike {
+  border: 0; background: none; padding: 0; margin: 0;
+  font: inherit; color: inherit; text-decoration: underline; cursor: pointer;
+}
+.linklike:hover { text-decoration-thickness: 2px; }
 
-.app-error {
+/* Komunikaty pod paskiem narzędzi źródła: błąd (czerwony) i pasek „Cofnij” (neutralny).
+   Stoją przy przyciskach, które je wywołują, i nie znikają same (czyści je następna akcja). */
+.app-error, .app-note {
+  margin: 12px 16px 0;
   padding: 10px 14px;
-  border: 1px solid rgba(224, 114, 132, .4);
   border-radius: var(--r-ctl);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.app-error {
+  border: 1px solid rgba(224, 114, 132, .4);
   background: rgba(224, 114, 132, .08);
   color: var(--err);
-  font-size: 13px;
+}
+.app-note {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px;
+  padding: 6px 6px 6px 14px;
+  border: 1px solid var(--acc-line);
+  background: var(--acc-soft);
+  color: var(--text);
+}
+#app-note-text { flex: 1 1 220px; min-width: 0; }
+/* przyciski trzymają się razem; na wąskim ekranie schodzą pod tekst, do prawej */
+.note-acts { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.note-x {
+  display: grid; place-items: center;
+  width: 32px; height: 32px; border-radius: 7px;
+  border: 1px solid transparent; background: transparent;
+  color: var(--mut); font-size: 20px; line-height: 1; cursor: pointer;
+}
+.note-x:hover { background: rgba(11, 61, 46, .06); color: var(--text); }
+@media (pointer: coarse) {
+  .note-x { width: 44px; height: 44px; }
+}
+
+/* Przeciąganie PLIKU nad stroną: podświetl pole źródła jako miejsce docelowe
+   (plik można upuścić w dowolnym miejscu, ale trafia właśnie tam). */
+body.file-drag textarea.editor-ta {
+  border-color: var(--acc-line);
+  box-shadow: 0 0 0 3px var(--acc-soft);
 }
 
 /* stan ładowania pliku — animowane kropki */
@@ -678,11 +782,11 @@ mark.pii.pii-linked { box-shadow: 0 0 0 2px var(--acc-line); }
    w jednej linii (nagłówek „Finanse" nad kolumną IBAN) przez jawne pozycje w gridzie. */
 .mask-toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
 .mask-count { font-family: var(--mono); font-size: 12.5px; color: var(--mut); white-space: nowrap; }
-.mask-count b { color: var(--gold); }
+.mask-count b { color: var(--gold-deep); }
 /* mniejszy przycisk akcji (niższy niż domyślny .btn) */
 .btn.btn-sm { height: 32px; padding: 0 12px; font-size: 12.5px; }
 
-.mg-band { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px 16px; align-items: start; }
+.mg-band { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 8px 16px; align-items: start; }
 .mg-band + .mg-band { margin-top: 14px; }
 .mg-h {
   grid-column: 1 / -1;
@@ -705,7 +809,7 @@ mark.pii.pii-linked { box-shadow: 0 0 0 2px var(--acc-line); }
 .tgr.mode { border: 1px dashed var(--line-2); background: var(--card-2); }
 .mode-tag {
   font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase;
-  color: var(--gold); border: 1px solid var(--line-2); border-radius: 999px;
+  color: var(--gold-deep); border: 1px solid var(--line-2); border-radius: 999px;
   padding: 1px 6px; margin-left: 7px; font-weight: 700; vertical-align: middle;
 }
 /* Kontakt (kol. 1–2) + Finanse (kol. 3, nagłówek nad IBAN) w jednej linii, zgrane z pozostałymi pasami */
@@ -717,15 +821,12 @@ mark.pii.pii-linked { box-shadow: 0 0 0 2px var(--acc-line); }
 .kf-c4 { grid-column: 4; grid-row: 2; }
 /* Poniżej ~1240px 4 kolumny (email·telefon·IBAN·karta) nie mieszczą się w jednym wierszu —
    spłaszczamy pas Kontakt+Finanse do naturalnego przepływu (jak w wersji mobilnej), inaczej
-   „Karta płatnicza" wypadałaby poza pas. Powyżej 1240px zostaje zgrany jeden wiersz. */
+   „Karta płatnicza” wypadałaby poza pas. Oba nagłówki zajmują wtedy cały wiersz, także przy
+   dwóch kolumnach (wcześniej „Kontakt” stał w jednej komórce i pas schodził schodkiem).
+   Powyżej 1240px zostaje zgrany jeden wiersz. */
 @media (max-width: 1240px) {
   .mg-h.kf-h-contact, .mg-h.kf-h-fin { grid-column: 1 / -1; grid-row: auto; }
   .kf-c1, .kf-c2, .kf-c3, .kf-c4 { grid-column: auto; grid-row: auto; }
-}
-/* wąsko (mniej niż 3 kolumny): rezygnujemy z jawnych pozycji — Kontakt i Finanse płyną po kolei */
-@media (max-width: 900px) {
-  .mg-h.kf-h-contact, .mg-h.kf-h-fin, .kf-c1, .kf-c2, .kf-c3, .kf-c4 { grid-column: auto; grid-row: auto; }
-  .mg-h.kf-h-fin { grid-column: 1 / -1; }
 }
 
 .tag-opt {
@@ -768,7 +869,7 @@ table .pii { cursor: default; }
 .caveat .card-h { border-bottom-color: rgba(224, 181, 102, .22); }
 .tips { list-style: none; display: grid; gap: 9px; }
 .tips li { display: flex; gap: 9px; font-size: 13px; color: var(--mut); align-items: baseline; }
-.tips li::before { content: "▪"; color: var(--acc); font-size: 11px; }
+.tips li::before { content: "▪"; content: "▪" / ""; color: var(--acc); font-size: 11px; }
 .tips strong { color: var(--acc); font-weight: 700; }
 
 /* ============ STOPKA ============ */
@@ -789,17 +890,63 @@ table .pii { cursor: default; }
   clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
+/* Wskaźnik fokusu w pełnym kolorze marki (--acc-line dawał ok. 1,8:1, WCAG 2.4.7 i 1.4.11).
+   --acc-line zostaje do ramek dekoracyjnych. */
 :is(a, button, summary, select, input, .table-wrap):focus-visible,
 [data-tip][tabindex="0"]:focus-visible {
-  outline: 2px solid var(--acc-line);
+  outline: 2px solid var(--acc);
   outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important; /* bez pętli tysięcy zerowych cykli */
     transition-duration: .01ms !important;
   }
+  html { scroll-behavior: auto; } /* skok do kotwicy (np. „Przejdź do edytora”) bez płynnego przewijania */
+  /* ruchu i tak nie ma, więc przycisk pauzy byłby martwy; demo stoi w tym samym kadrze co po
+     „Zatrzymaj animację” (bez tego pismo zostawało w przypadkowym miejscu, np. za parawanem) */
+  .demo-motion { display: none; }
+  .demo-in { animation: none !important; transform: translateX(-330px); }
+  .demo-out { animation: none !important; transform: translateX(330px); }
+  .demo-badge { animation: none !important; }
+}
+
+/* Tryb wysokiego kontrastu Windows wymusza kolory teł: bez tego przełącznik włączony
+   i wyłączony to dwa jednakowe owale, a wciśnięty segment „Wynik/Porównanie” nie różni się
+   od zwykłego (WCAG 1.4.11). Kolory systemowe zamiast barw marki. */
+@media (forced-colors: active) {
+  .sw { forced-color-adjust: none; background: Canvas; border-color: CanvasText; }
+  .sw::after, .sw:not(:checked)::after { background: CanvasText; box-shadow: none; }
+  .sw:checked { background: Highlight; border-color: Highlight; }
+  .sw:checked::after { background: HighlightText; }
+  .seg .btn.on { forced-color-adjust: none; background: Highlight; border-color: Highlight; color: HighlightText; }
+}
+
+/* Dotyk: dymek stukniętego znacznika zasłaniał kolejne wiersze sprawdzanego wyniku.
+   Zamiast niego powód wykrycia pokazuje linia statusu pod wynikiem (#mask-status, goToMask). */
+/* Przycisk i link pokazywały na dotyku dymek dopiero po stuknięciu (lepki :hover i fokus), gdy akcja
+   już się wykonała, a dymek „Przykład” wisiał potem nad nagłówkiem karty. Na dotyku dostają więc
+   dymek tylko przy fokusie z klawiatury. Pigułki, legenda, wiersze „Co maskować” i „?” nadal
+   otwierają go stuknięciem, bo tam dymek jest jedyną drogą do opisu. */
+@media (hover: none) {
+  .editor mark.pii::after, .editor mark.pii::before { display: none; }
+  :is(button, a)[data-tip]:not(:focus-visible)::after,
+  :is(button, a)[data-tip]:not(:focus-visible)::before { display: none; }
+  #mask-status:not(:empty) {
+    position: static !important; display: block;
+    width: auto; height: auto; margin: 8px 0 0; clip: auto; overflow: visible;
+    white-space: normal; font-size: 13px; line-height: 1.45; color: var(--mut);
+  }
+}
+
+/* Wskazówki dla myszy i klawiatury (upuszczanie pliku, Ctrl+Enter) nic nie mówią na telefonie,
+   więc tam znikają; .hint-touch to ich zamiennik. W main.ts ten sam warunek zmienia podpowiedź pola. */
+.hint-touch { display: none; }
+@media (pointer: coarse) and (max-width: 600px) {
+  .hint-desk, .tips li.hint-desk { display: none; }
+  .hint-touch { display: inline; }
 }
 
 @media (pointer: coarse) {
@@ -816,32 +963,82 @@ table .pii { cursor: default; }
   .hero .card-h { flex-wrap: wrap; }
   .hero .card-sp { display: none; }
   .privacy { margin-left: 0; width: auto; max-width: none; }
+  .skip-editor { display: inline-flex; }
   .table-wrap { overflow-x: auto; }
   /* Demo: na wąsko chowamy ruchome karty; zostają strefy Wejście/Wyjście, znak i puls „anonimizacja…". */
   .demo-stage { height: 230px; }
   .demo-in, .demo-out { display: none; }
   /* iOS auto-zoomuje pola <16px — także w zakresie tabletowym */
   textarea.editor-ta, .editor { font-size: 16px; }
-  /* legenda pod nagłówkiem, w równych kolumnach zamiast postrzępionego zawijania */
+  /* Legenda pod nagłówkiem: trzy chipy w rzędzie (3 + 2), na telefonie tyle, ile się zmieści.
+     Chipy rosną, więc każdy rząd jest pełny, a nie postrzępiony. Dawna siatka z kolumną 170 px
+     była węższa niż chip „Identyfikatory 15 typów” (ok. 195 px): liczba spadała do drugiej linii
+     albo wychodziła poza chip. */
   .legend .card-h { flex-wrap: wrap; }
-  .legend-items {
-    flex-basis: 100%;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-    justify-content: stretch;
+  .legend-items { flex-basis: 100%; }
+  .lg { flex: 1 1 30%; }
+}
+/* Tabela „Co wykrywa” jako karty: nazwa i znacznik w jednym wierszu, opis pod nimi na całą
+   szerokość. Kolumna „Kategoria” znika (kolor i ikona mówią to samo), nagłówki zostają
+   tylko dla czytnika ekranu. Bez tego opis ściskał się w wąski słupek, a znaczniki
+   wychodziły poza ekran. Próg 820 px: pełna tabela ma ok. 764 px, więc węższa karta
+   (także telefon trzymany poziomo) przewijałaby ją w bok bez żadnego sygnału. */
+@media (max-width: 820px) {
+  #co-wykrywa thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  #co-wykrywa tbody tr {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: 6px 12px; padding: 10px 14px; border-top: 1px solid var(--line);
   }
+  #co-wykrywa td { display: block; padding: 0; border: 0; }
+  #co-wykrywa td:nth-child(2) { display: none; }
+  #co-wykrywa td:nth-child(3) { order: 3; flex-basis: 100%; }
+  #co-wykrywa .td-name { white-space: normal; }
 }
 @media (max-width: 640px) {
   .g3 { grid-column: span 12; }
   .hero-b { flex-direction: column; align-items: flex-start; }
+  /* w kolumnie flex-basis 320px stawało się wysokością: pod leadem zostawała pusta luka */
+  .hero-lead { flex: none; }
+  .feat-strip { justify-content: flex-start; }
   .privacy { margin-left: 0; }
   .editor, textarea.editor-ta { min-height: 200px; }
-  /* kolumna „Kategoria" duplikuje kolor+ikonę — chowamy, tabela mieści tokeny */
-  th:nth-child(2), td:nth-child(2) { display: none; }
 }
 /* telefony: nagłówki kart zawijają się */
 @media (max-width: 480px) {
   .card-h { flex-wrap: wrap; min-height: 0; }
-  .grid > .card { min-width: 0; }
+  .grid > .card, .grid-main > .card { min-width: 0; }
   .card-sp { display: none; }
+  /* „?” zostaje przy prawej krawędzi: jego dymek rośnie w lewo i mieści się w oknie */
+  .card-h > .help { margin-left: auto; }
+  /* nagłówek ramki prywatności zawija się zamiast wystawać poza kartę przy 320 px */
+  .privacy-t b { white-space: normal; }
+  /* tytuł karty zajmuje miejsce między ikoną a „?”, więc nagłówek nie rozpada się na 3 rzędy;
+     mniejszy kafelek ikony zostawia tytułowi kilka pikseli więcej */
+  .card-h > .ic { width: 40px; height: 40px; }
+  .card-h > .ic .gi { width: 26px; height: 26px; }
+  .card-h > .ic + .card-t { flex: 1 1 0; }
+  /* Rozwijane sekcje mają jeszcze „▸”: obok ikony, „?” i „▸” tytuł miałby ok. 100 px i opis
+     schodziłby w wąski słupek. Ikona, tytuł, „?” i „▸” stoją więc w jednym rzędzie, a opis
+     pod nimi na całą szerokość (nazwę i opis summary dają aria-labelledby/-describedby). */
+  summary.card-h {
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center; gap: 8px 10px; /* przy 320 px „Co maskować” mieści się w jednej linii */
+  }
+  summary.card-h > .card-t { display: contents; }
+  summary.card-h > .card-t > p { grid-column: 1 / -1; margin-top: 0; }
+  summary.card-h > .help { grid-row: 1; grid-column: 3; margin-left: 0; }
+  summary.card-h > .chev { grid-row: 1; grid-column: 4; }
+  .stats .stat-total { order: 1; flex-basis: 100%; }
+  /* „Pobierz” i „Kopiuj” razem w osobnym rzędzie, po połowie (wcześniej „Kopiuj” zostawał sam) */
+  .toolbar > .card-sp { display: block; flex: 0 0 100%; height: 0; }
+  .toolbar #download, .toolbar #copy { flex: 1 1 0; }
+  /* demo: krótkie etykiety stref, inaczej „Wejście” i „Wyjście” nachodzą na siebie */
+  .demo-zone { top: 14px; padding: 6px 11px; letter-spacing: .04em; }
+  .demo-zone-in { left: 14px; }
+  .demo-zone-out { right: 14px; }
+  .demo-zone .dz-x { display: none; }
+  .demo-badge-wrap { top: 48px; } /* plakietka pod etykietami stref, nie na ich krawędzi */
+  /* stopka w kolumnie: zawijane „·” zostawały same na końcach wierszy */
+  .foot .card-b { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .foot .sep { display: none; }
 }
