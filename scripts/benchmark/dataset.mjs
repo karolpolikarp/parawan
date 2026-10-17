@@ -852,6 +852,13 @@ export function buildDataset() {
   str('Pacjent zam. ul. Długa 5 m. 3 lat 45, przywieziony przez ZRM. Zameldowanie: ul. Polna 5 Osoby zameldowane: 3', ['Długa 5', 'm. 3', 'Polna 5'], ['lat 45', 'przywieziony przez ZRM', 'Osoby zameldowane: 3']);
   str('Pracownik socjalny: tel. 22 501 23 46, kom. 0048 602 333 444; kontakt (+48 512 345 678).', ['22 501 23 46', '0048 602', '333 444', '512 345 678'], ['Pracownik socjalny:', 'kom.', 'kontakt (']);
   neg('Na ul. Długiej 2-3 osoby czekały. W Alejach Jerozolimskich 2 pasy ruchu zamknięto. Ulica Żwirki i Wigury 2023 remont.', ['2-3 osoby', 'Alejach Jerozolimskich 2 pasy', 'Żwirki i Wigury 2023']);
+  // Regresje partii b4, runda 2: skrzyżowanie i „Aleje" z liczebnikiem, godzina za nazwą ulicy,
+  // forma zależna i etykieta pola za numerem domu, imię z homoglifem na końcu wiersza, imię innej
+  // osoby w formie zależnej, rdzeń nazwiska z obcym ogonem, marka auta po „pan".
+  neg('Na skrzyżowaniu ul. Długiej i Polnej 1 osoba zginęła. W Alejach Jerozolimskich 3 wypadki tylko w tym tygodniu. Zbiórka przy ul. Polnej i Leśnej 18:00. Czy jeździ pan Škodą?', ['Długiej i Polnej 1 osoba', 'Alejach Jerozolimskich 3 wypadki', 'Leśnej 18:00', 'pan Škodą']);
+  str('Sprawca odjechał spod posesji przy ul. Polnej 5 samochodem marki Opel. 1. Kowalczyk Joanna ul. Polna 7 dzieci: 2', ['Polnej 5', 'Kowalczyk', 'Joanna', 'Polna 7'], ['samochodem marki Opel', 'dzieci: 2']);
+  osp('Nowak KaroI\nJan Kowalski\nPozwany Zieliński Annie groził.', ['Nowak', 'KaroI', 'Jan', 'Kowalski', 'Zieliński'], ['Pozwany', 'groził']);
+  osp('Kovalčuk Anna, obywatelka Ukrainy. Świadek Bondarčuk zeznał. Pani Ioana Mureșan złożyła wniosek.', ['Kovalčuk', 'čuk', 'Anna', 'Bondarčuk', 'Ioana', 'Mureșan', 'șan'], ['obywatelka Ukrainy', 'Świadek', 'zeznał', 'złożyła wniosek']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

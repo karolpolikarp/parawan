@@ -4427,3 +4427,136 @@ test('Regresje b4 · login: login zapisany jak nazwisko nie rozbija pary osobowe
     ['Login: Adam\nStatus: active\nAdam zalogował się.', 'Login: [LOGIN]\nStatus: active\n[LOGIN] zalogował się.'],
   ]);
 });
+test('Regresje b4 r2 · adres: skrzyżowanie, „Aleje" i łącznik z liczebnikiem w prozie to nie adres', () => {
+  keep([
+    'Na skrzyżowaniu ul. Długiej i Polnej 1 osoba zginęła.',
+    'Na ul. Mickiewicza i Słowackiego 3 zamknięto sklepy.',
+    'Na ul. Długiej i Polnej 3 zatrzymano sprawcę.',
+    'Na skrzyżowaniu al. Róż i Bzów 2 radiowozy stały.',
+    'Na pl. Wolności i Bankowym 2 radiowozy stały.',
+    'Na rogu ul. Mickiewicza i Słowackiego 2 auta osobowe zderzyły się.',
+    'Na rogu ul. Marszałkowskiej i Świętokrzyskiej 2 bankomaty.',
+    'Przy ul. Polnej i Leśnej 20 nowych latarni.',
+    'przy ul. Długiej i Krótkiej 3 nietrzeźwych kierowców',
+    'przy ul. Szkolnej i Kościelnej 2 nowe przystanki',
+    'Spotkajmy się przy ul. Nowy Świat i Chmielnej 15 po południu?',
+    'W rejonie ul. Polnej i Leśnej 3 radiowozy prowadziły poszukiwania.',
+    'W rejonie ul. Polnej i Leśnej 6 interwencji w miesiącu.',
+    'Skrzyżowanie ul. Polnej i Leśnej 3 kolizje',
+    'Na skrzyżowaniu ul. Polnej i Leśnej 2 karetki udzielały pomocy.',
+    'Przy ul. Ozimskiej i Reymonta 4 zastępy straży gasiły pożar.',
+    'Teren przy ul. Leśnej pod Warszawą 12 ha.',
+    'W Alejach Jerozolimskich 3 wypadki tylko w tym tygodniu.',
+    'Na Alejach Jerozolimskich 15 mandatów wystawiono rowerzystom.',
+    'W Alejach Najświętszej Maryi Panny 2 nowe ławki stanęły.',
+    'Na scenie w Alejach Jerozolimskich 2 sceny plenerowe',
+    'Przy Alejach Racławickich 22 wezwania',
+    'W Alejach NMP 12 lokali czeka na najemców',
+    'W Alejach Jerozolimskich 3 wypadki: dwa na przejściu.',
+    'W alejach Zasłużonych 15 grobów odnowiono.',
+    'W alejach Parku Śląskiego 3 rzeźby stanęły.',
+    // godzina za nazwą to nie numer domu
+    'Zbiórka przy ul. Polnej i Leśnej 18:00.',
+    'Zbiórka: Aleje Ujazdowskie 18:00, start marszu.',
+    'Zbiórka przy ul. Polnej 18:00.',
+    // liczebnik przed rzeczownikiem ilości dalej jest liczebnikiem
+    'Wypadek przy ul. Długiej i Krótkiej 5 osób rannych',
+    'Na Alejach Jerozolimskich 15 tysięcy ludzi',
+    'Przy ul. Długiej 5 samochodów zaparkowało.',
+    'przy ul. Długiej 2 metry od krawężnika',
+  ]);
+  // adres osoby z łącznikiem albo w Alejach dalej w całości: po osobie, po etykiecie, z lokalem, przed kontaktem
+  masked([
+    ['Jan Kowalski, ul. Żwirki i Wigury 15 tel. 600 100 200', `${N}, [ADRES] tel. ${T}`],
+    ['Wnioskodawca Jan Kowalski ul. Żwirki i Wigury 15 prosi o zwrot.', `Wnioskodawca ${N} [ADRES] prosi o zwrot.`],
+    ['Jan Wiśniewski, ul. Żwirki i Wigury 15 lok. 3 prosi', `${N}, [ADRES] prosi`],
+    ['Jan Nowak, Aleje Jerozolimskie 44 tel. 600100200', `${N}, [ADRES] tel. ${T}`],
+    ['Jan Nowak mieszka w Alejach Jerozolimskich 44 od lat.', `${N} mieszka w [ADRES] od lat.`],
+    ['Jan Kowalski zam. Aleje Jerozolimskie 44 od lat', `${N} zam. [ADRES] od lat`],
+    ['Nadawca: Jan Nowak Aleje Jerozolimskie 44 kod 00-001', `Nadawca: ${N} [ADRES] kod [KOD-POCZTOWY]`],
+    ['Zamieszkała w alejach Jerozolimskich 44 m. 5', 'Zamieszkała w [ADRES]'],
+    ['Adres: aleje Jerozolimskie 44', 'Adres: [ADRES]'],
+    ['ul. Bitwy pod Płowcami 12 m. 4', '[ADRES]'],
+    ['Ul. Żwirki i Wigury 15, 00-906 Warszawa', '[ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]'],
+    ['Biuro przy ul. Żwirki i Wigury 15 w Warszawie', 'Biuro przy [ADRES] w [MIEJSCOWOŚĆ]'],
+    ['Spotkanie: ul. Polna 5 18:00', 'Spotkanie: [ADRES] 18:00'],
+  ]);
+});
+test('Regresje b4 r2 · adres: „lokal" po spacji przed liczebnikiem to podmiot zdania', () => {
+  masked([
+    ['Przy ul. Długiej 5 lokal 12 lat stał pusty.', 'Przy [ADRES] lokal 12 lat stał pusty.'],
+    ['W kamienicy przy ul. Długiej 5 lokal 2 razy zalała woda.', 'W kamienicy przy [ADRES] lokal 2 razy zalała woda.'],
+    ['Przy ul. Długiej 5 lokal 3 miesiące czekał na najemcę.', 'Przy [ADRES] lokal 3 miesiące czekał na najemcę.'],
+    // lokal jako człon adresu dalej w masce
+    ['ul. Długa 5 lokal 3', '[ADRES]'],
+    ['Jan Kowalski, ul. Długa 5 lokal 3, tel. 600100200', `${N}, [ADRES], tel. ${T}`],
+    ['zam. ul. Długa 5 lokal 3 lat 45', 'zam. [ADRES] lat 45'],
+  ]);
+});
+test('Regresje b4 r2 · adres: forma zależna i etykieta następnego pola nie robią z numeru liczebnika', () => {
+  masked([
+    ['Sprawca odjechał spod posesji przy ul. Polnej 5 samochodem marki Opel.', 'Sprawca odjechał spod posesji przy [ADRES] samochodem marki Opel.'],
+    ['Na miejscu ustalono, że przy ul. Polnej 5 pojazdem kierował Kamil Nowak.', `Na miejscu ustalono, że przy [ADRES] pojazdem kierował ${N}.`],
+    ['Adres lokalu: ul. Ogrodowa 4 metraż: 48 m2', 'Adres lokalu: [ADRES] metraż: 48 m2'],
+    ['Adres lokalu: ul. Ogrodowa 4 pokoje: 3', 'Adres lokalu: [ADRES] pokoje: 3'],
+    ['Adres nieruchomości: ul. Kwiatowa 7 osób zamieszkujących: 4', 'Adres nieruchomości: [ADRES] osób zamieszkujących: 4'],
+    ['Adres do korespondencji: ul. Kwiatowa 7 osób zamieszkujących: 4', 'Adres do korespondencji: [ADRES] osób zamieszkujących: 4'],
+    ['ul. Polna 5 dzieci: 2', '[ADRES] dzieci: 2'],
+    ['1. Kowalczyk Joanna ul. Polna 5 dzieci: 2', `1. ${N} [ADRES] dzieci: 2`],
+    ['Wnioskodawca: Jan Kowalski ul. Polna 5 dzieci: 2', `Wnioskodawca: ${N} [ADRES] dzieci: 2`],
+    ['Lokal przy ul. Ogrodowej 4 pokoje: 3, metraż: 48 m2', 'Lokal przy [ADRES] pokoje: 3, metraż: 48 m2'],
+  ]);
+});
+test('Regresje b4 r2 · osoba: imię z homoglifem OCR zostaje przy osobie ze swojego wiersza', () => {
+  masked([
+    ['Nowak KaroI\nJan Kowalski', `${N}\n${N}`],
+    ['Nowak KaroI\nWiśniewski Jan', `${N}\n${N}`],
+    ['Lewandowski KaroI\nNowak Jan', `${N}\n${N}`],
+    ['Świadkowie: Zieliński Kami1\nNowak Ewa', `Świadkowie: ${N}\n${N}`],
+    ['Dzieci: Nowak J0anna\nNowak Piotr', `Dzieci: ${N}\n${N}`],
+    ['Kowalczyk KaroI', N],
+    // komórka CSV: wiersze się nie sklejają (kolumna imienia jak w „Kowalski,Jan")
+    ['Nowak;KaroI\nWiśniewski;Jan;850314', `${N};KaroI\n${N};Jan;850314`],
+    ['Kowalski;Jan\nNowak;Ewa', `${N};Jan\n${N};Ewa`],
+    // OCR przed maską w tym samym wierszu i imię w wierszu nad nazwiskiem dalej w masce
+    ['J0anna Kowalska złożyła wniosek.', `${N} złożyła wniosek.`],
+    ['KaroI\nKowalski', N],
+  ]);
+  masked([['Nowak KaroI\nJan Kowalski', '[OSOBA-A]\n[OSOBA-B]']], { pseudonyms: true });
+});
+test('Regresje b4 r2 · osoba: imię w formie zależnej za nazwiskiem na -ski/-ska to inna osoba', () => {
+  masked([
+    ['Pozwany Zieliński Annie groził.', `Pozwany ${N} Annie groził.`],
+    ['Świadek Kowalski Annę zna od dziecka.', `Świadek ${N} Annę zna od dziecka.`],
+    ['Kierownik Kamiński Piotrowi przydzielił zadanie.', `Kierownik ${N} Piotrowi przydzielił zadanie.`],
+    ['Biegły Wiśniewski Tomaszem zajmował się sprawą.', `Biegły ${N} Tomaszem zajmował się sprawą.`],
+    // nazwisko bez odmiany w żeńskim, odmienione nazwisko i rekord w mianowniku dalej w jednej masce
+    ['Wezwać Nowak Annę na przesłuchanie.', `Wezwać ${N} na przesłuchanie.`],
+    ['Wniosek Nowak Anny został rozpatrzony.', `Wniosek ${N} został rozpatrzony.`],
+    ['Wniosek Kowalskiego Stanisława', `Wniosek ${N}`],
+    ['Kowalski Jan Paweł, PESEL 85031412347', `${N}, PESEL [PESEL]`],
+  ]);
+});
+test('Regresje b4 r2 · obce litery: rdzeń ze słownika z obcym ogonem, marka po „pan", litery rumuńskie i wietnamskie', () => {
+  masked([
+    ['Kovalčuk Anna, PESEL 85031412347', `${N}, PESEL [PESEL]`],
+    ['Świadek Bondarčuk zeznał.', `Świadek ${N} zeznał.`],
+    ['Matka: Anna Kowalska z domu Bondarčuk', `Matka: ${N} z domu ${N}`],
+    ['Pani Ioana Mureșan złożyła wniosek.', `Pani ${N} złożyła wniosek.`],
+    ['Pani Mureșan przyszła.', `Pani ${N} przyszła.`],
+    ['Pan Kowalski Škodą przyjechał na rozmowę, Pani Nowak Citroënem.', `Pan ${N} Škodą przyjechał na rozmowę, Pani ${N} Citroënem.`],
+    ['Pan Škoda przyszedł.', `Pan ${N} przyszedł.`],
+  ]);
+  keep(['Czy jeździ pan Škodą czy Fiatem?', 'Pan Dyrektor Škodą przyjechał.']);
+  // bez ogona liter za maską: wyraz albo w całości w masce, albo w całości jawny
+  for (const s of ['Pani Lê Thị Hoa złożyła wniosek.', 'Pan Võ Văn Kiệt', 'Pan Nguyễn Văn Hùng — godz. 10:00', 'Pani Đặng Thị Lan']) {
+    expect(redactPII(s).redacted).not.toMatch(/\]\p{L}/u);
+  }
+});
+test('Regresje b4 r2 · osoba: długi wiersz „Do:" (ponad 1000 znaków) dalej jest nagłówkiem', () => {
+  const s = `Do: ${'Kowalski Jan; '.repeat(72)}Sowa Halina`;
+  expect(s.length).toBeGreaterThan(1000);
+  const r = redactPII(s).redacted;
+  expect(r).not.toContain('Halina');
+  expect(r).not.toContain('Jan;');
+});
