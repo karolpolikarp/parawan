@@ -14,9 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      # Node 22 jak job e2e w ci.yml: node --test rozwija wzorzec plików testów dopiero od Node 21.
       - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - run: npm ci
       - run: npm run build -w anonimizator
@@ -30,6 +31,21 @@ jobs:
         run: |
           grep -Eq "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'[^\"]*connect-src 'none'" apps/web/dist/index.html \
             || { echo "::error::brak Content-Security-Policy z default-src 'none' i connect-src 'none'"; exit 1; }
+          node scripts/e2e/csp.mjs web
+      # Tag nie czeka na wynik CI, więc wydawany plik sam przechodzi bramkę E2E z ci.yml (sieć,
+      # CSP, błędy startu, rozmiar). Landing budowany tylko na potrzeby jej testów, do wydania
+      # nie trafia.
+      - run: npm run build -w parawan-landing
+      - run: npx playwright install --with-deps chromium
+      - name: Bramka E2E na wydawanym pliku
+        run: npm run e2e
+      - name: Zrzuty z nieudanych testów
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-zrzuty
+          path: test-results/e2e/
+          if-no-files-found: ignore
       - name: Przygotuj artefakt (plik + instrukcja)
         run: |
           cp apps/web/dist/index.html Parawan.html

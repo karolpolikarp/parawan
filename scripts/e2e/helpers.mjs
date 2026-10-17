@@ -17,8 +17,18 @@ export const WEB_HTML = path.join(ROOT, 'apps', 'web', 'dist', 'index.html');
 export const LANDING_HTML = path.join(ROOT, 'apps', 'landing', 'dist', 'index.html');
 export const FIXTURES = path.join(ROOT, 'apps', 'web', 'src', 'fixtures', 'urzad');
 
-/** Numer PESEL z przykładu w aplikacji (EXAMPLE_TEXT w main.ts). Zmiana przykładu (A06) = zmiana tutaj. */
+/**
+ * Numer PESEL z przykładu w aplikacji (EXAMPLE_TEXT w main.ts). Zmiana przykładu (A06) = zmiana
+ * tutaj; demoReady() sprawdza, że ten numer naprawdę stoi w polu źródła, więc rozjazd wywraca testy.
+ */
 export const EXAMPLE_PESEL = '44051401359';
+
+/**
+ * Numer PESEL wpisany na stałe w pliki pismo.* z FIXTURES (buduje je
+ * scripts/e2e/manual/zbuduj-pisma.mjs). Dziś równy EXAMPLE_PESEL, ale to osobny fakt: zmiana
+ * przykładu w aplikacji nie zmienia gotowego pismo.pdf.
+ */
+export const PISMO_PESEL = '44051401359';
 
 /**
  * Klucze, które aplikacja może zapisać w localStorage (dziś storageSet w main.ts). Każdy nowy
@@ -44,6 +54,17 @@ export const SHOTS_DIR = process.env.PARAWAN_E2E_ZRZUTY || path.join(ROOT, 'test
 // workerze” w głównym wątku (pdf.ts) i ostrzega o tym przy każdym PDF.
 const BENIGN_CONSOLE = [/fake worker/i];
 
+// Scenariusz testu trwa poniżej sekundy, a kod może próbować wysłać dane później: z timera,
+// requestIdleCallback, po debounce, przy „sprawdzaniu nowszej wersji”. assertClean() przewija więc
+// zegar strony: minutę krok po kroku (łańcuchy timerów, debounce, interwały), potem skok o dobę,
+// w którym każdy timer zaplanowany na później odpala raz, jak po powrocie do komputera po
+// przerwie, i znów minutę na to, co z tego wynikło. Dopiero potem czeka QUIET_MS bez nowych
+// zdarzeń, bo zdarzenia sieci, CSP i wyjątków docierają do testu z opóźnieniem.
+const SETTLE_MS = 60_000;
+const JUMP_MS = 24 * 60 * 60_000;
+const QUIET_MS = 300;
+const QUIET_MAX_MS = 5_000;
+
 /** Chromium z Playwright albo, z legacy: true, binarka z PARAWAN_CHROMIUM. */
 export function launch({ legacy = false } = {}) {
   if (legacy && !LEGACY_CHROMIUM) throw new Error('Brak PARAWAN_CHROMIUM');
@@ -57,7 +78,8 @@ export function fileSize(file) {
 
 /**
  * Otwiera plik przez file:// w nowym, czystym kontekście (pusty localStorage) i zaczyna
- * nasłuch żądań, naruszeń CSP, wyjątków i błędów konsoli.
+ * nasłuch żądań, WebSocketów, naruszeń CSP, wyjątków i błędów konsoli. Zegar strony to zegar
+ * Playwright: czas płynie normalnie, ale assertClean() może go przewinąć.
  * @param {import('playwright').Browser} browser
  * @param {string} [query] np. '?demo'
  * @param {{ file?: string, viewport?: { width: number, height: number },
@@ -75,6 +97,8 @@ export async function openApp(browser, query = '', opts = {}) {
   /** @type {import('playwright').Request[]} */
   const requests = [];
   const pending = new Set();
+  /** @type {string[]} */
+  const webSockets = [];
   const violations = [];
   const pageErrors = [];
   const consoleErrors = [];
@@ -95,14 +119,25 @@ export async function openApp(browser, query = '', opts = {}) {
   // żądanie, choć nie wychodzi ono z przeglądarki. Nie liczymy go do wycieków, bo i tak zostawia
   // naruszenie CSP, które wywraca test. Każde inne żądanie, także przerwane przez route niżej,
   // jest błędem.
-  const leaked = () =>
-    requests
+  const leaked = () => [
+    ...requests
       // Chromium podaje wtedy errorText „csp”, starsze wersje „net::ERR_BLOCKED_BY_CSP”.
       .filter((r) => !/^csp$|ERR_BLOCKED_BY_CSP/.test(r.failure()?.errorText ?? ''))
-      .map((r) => `${r.method()} ${r.url()} (${r.failure()?.errorText ?? 'wysłane'})`);
+      .map((r) => `${r.method()} ${r.url()} (${r.failure()?.errorText ?? 'wysłane'})`),
+    ...webSockets.map((u) => `WebSocket ${u} (próba połączenia)`),
+  ];
   // Gdyby CSP zawiodła, żądanie i tak nie wyjdzie z maszyny testowej: zostanie zapisane
   // przez słuchacza wyżej (test padnie), a tu przerwane.
-  await context.route(/^https?:|^wss?:|^ftp:/, (route) => route.abort('blockedbyclient'));
+  await context.route(/^https?:|^ftp:/, (route) => route.abort('blockedbyclient'));
+  // WebSocket nie przechodzi przez route ani zdarzenie request, więc ma osobną pułapkę.
+  // Playwright podmienia wtedy konstruktor WebSocket na stronie: połączenie nie powstaje, zanim
+  // dotrze do CSP, dlatego liczy się każda próba, także taka, którą CSP by zatrzymała. Aplikacja
+  // nie ma powodu otwierać WebSocketu, więc sama próba jest błędem.
+  await context.routeWebSocket(/.*/, (ws) => {
+    webSockets.push(ws.url());
+    ws.close();
+  });
+  await context.clock.install();
   await context.exposeFunction('__parawanCsp', (v) => violations.push(v));
   await context.addInitScript(() => {
     document.addEventListener('securitypolicyviolation', (e) => {
@@ -122,6 +157,52 @@ export async function openApp(browser, query = '', opts = {}) {
   });
   await page.goto(url);
 
+  /** Wyjmuje z listy pasujące elementy i zwraca je, reszta zostaje. */
+  const take = (list, pick) => {
+    const taken = list.filter(pick);
+    const rest = list.filter((x) => !pick(x));
+    list.splice(0, list.length, ...rest);
+    return taken;
+  };
+  const eventCount = () =>
+    requests.length +
+    webSockets.length +
+    violations.length +
+    pageErrors.length +
+    consoleErrors.length;
+  /** Przewija zegar strony (patrz SETTLE_MS i JUMP_MS wyżej). */
+  const settle = async () => {
+    const steps = [
+      () => page.clock.runFor(SETTLE_MS),
+      () => page.clock.fastForward(JUMP_MS),
+      () => page.clock.runFor(SETTLE_MS),
+    ];
+    for (const step of steps) {
+      // Wyjątek z timera odpalonego przy przewijaniu Playwright zwraca z runFor albo fastForward
+      // (tylko pierwszy z kroku), a nie jako pageerror, więc trafia na listę wyjątków tutaj, a
+      // kolejne kroki i tak się wykonają. Ten sam wyjątek w zwykłym biegu zegara Playwright
+      // wypisuje przez console.error, czyli łapie go lista błędów konsoli.
+      await step().catch((e) =>
+        pageErrors.push(`timer strony: ${String(e?.message ?? e).split('\n')[0]}`),
+      );
+    }
+  };
+  /** Czeka, aż przez QUIET_MS nie przyjdzie nic nowego i każde zgłoszone żądanie się zakończy. */
+  const quiet = async () => {
+    let last = eventCount();
+    let quietSince = Date.now();
+    for (const end = Date.now() + QUIET_MAX_MS; Date.now() < end; ) {
+      await page.waitForTimeout(50);
+      const now = eventCount();
+      if (now !== last) {
+        last = now;
+        quietSince = Date.now();
+      } else if (!pending.size && Date.now() - quietSince >= QUIET_MS) {
+        return;
+      }
+    }
+  };
+
   return {
     page,
     context,
@@ -139,19 +220,41 @@ export async function openApp(browser, query = '', opts = {}) {
         needle,
         { timeout },
       ),
-    /** Żądania spoza pliku, które nie zostały zatrzymane przez CSP (pusta lista = brak wycieku). */
+    /** Czeka na wynik przykładu z ?demo i sprawdza, że w polu źródła stoi EXAMPLE_PESEL. */
+    async demoReady() {
+      await this.waitForOutput('[PESEL]');
+      const input = await page.locator('#input').inputValue();
+      // Bez tego asercja „numeru nie ma w wyniku” przeszłaby zawsze po zmianie przykładu.
+      assert.ok(
+        input.includes(EXAMPLE_PESEL),
+        `w przykładzie (#input) nie ma numeru EXAMPLE_PESEL ${EXAMPLE_PESEL}; zmieniony przykład? popraw helpers.mjs`,
+      );
+    },
+    /**
+     * Żądania i próby połączeń spoza pliku, których nie zatrzymała CSP (pusta lista = brak
+     * wycieku). Zdarzenia sieci przychodzą po wyniku page.evaluate, więc najpierw okno ciszy.
+     */
     async leakedRequests() {
-      // Zdarzenia sieci przychodzą po wyniku page.evaluate; czekamy, aż każde zgłoszone żądanie
-      // się zakończy, żeby wiedzieć, czy zatrzymała je CSP.
-      for (let i = 0; i < 40 && pending.size; i++) await page.waitForTimeout(50);
+      await quiet();
       return leaked();
     },
-    /** Zabiera zebrane naruszenia CSP (dla testów, które wywołują je celowo). */
-    takeViolations: () => violations.splice(0),
-    /** Zabiera zebrane błędy konsoli (dla testów, które wywołują je celowo). */
-    takeConsoleErrors: () => consoleErrors.splice(0),
-    /** Asercja po teście: nic nie wyszło z pliku i nic się nie wysypało. */
+    /**
+     * Zabiera zebrane naruszenia CSP (dla testów, które wywołują je celowo). Z filtrem zabiera
+     * tylko pasujące, więc nieoczekiwane naruszenie zostaje dla assertClean().
+     * @param {(v: { directive: string, blocked: string, source: string }) => boolean} [pick]
+     */
+    takeViolations: (pick = () => true) => take(violations, pick),
+    /**
+     * Zabiera zebrane błędy konsoli (dla testów, które wywołują je celowo), z filtrem jak wyżej.
+     * @param {RegExp} [re]
+     */
+    takeConsoleErrors: (re) => take(consoleErrors, (m) => !re || re.test(m)),
+    /**
+     * Asercja po teście: nic nie wyszło z pliku i nic się nie wysypało, także w dobie po
+     * scenariuszu (przewinięty zegar strony).
+     */
     async assertClean() {
+      await settle();
       const out = await this.leakedRequests();
       assert.deepEqual(out, [], `żądania spoza pliku:\n${out.join('\n')}`);
       assert.deepEqual(violations, [], `naruszenia CSP:\n${JSON.stringify(violations, null, 1)}`);

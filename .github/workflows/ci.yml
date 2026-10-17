@@ -33,12 +33,15 @@ jobs:
       # opuszcza przeglądarki” pilnowałby tylko nasz kod, a nie przeglądarka.
       # Jeden wzorzec na samym tagu meta: landing cytuje obie dyrektywy w treści („Jak sprawdzić”),
       # więc osobne grepy po całym pliku przeszłyby nawet bez wstrzykniętej polityki.
+      # Grep nie widzi hosta dopisanego do img-src, font-src czy script-src, a obrazek z treścią
+      # w adresie wysyła dane jak fetch. Dlatego csp.mjs sprawdza każdą dyrektywę osobno.
       - name: Strażnik CSP (web i landing)
         run: |
           for f in apps/web/dist/index.html apps/landing/dist/index.html; do
             grep -Eq "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'[^\"]*connect-src 'none'" "$f" \
               || { echo "::error file=$f::brak Content-Security-Policy z default-src 'none' i connect-src 'none'"; exit 1; }
           done
+          node scripts/e2e/csp.mjs
       # Bramka regresji detekcji na warstwie deterministycznej (bez modelu ONNX — warstwy NER
       # pominięte fail-safe). Fail przy spadku recall na kategoriach osobowych/strukturalnych
       # lub precyzji poniżej progu. Nie commituje raportu — tylko sprawdza progi.

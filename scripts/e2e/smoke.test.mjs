@@ -1,11 +1,13 @@
 // Test dymny gotowego pliku: start z przykładu, PDF, wczytanie DOCX i PDF, pobranie .txt,
 // pamięć ustawień, rozmiar, landing i działająca CSP. Każdy test przez withApp(), więc po nim
-// sprawdzamy zero żądań poza plikiem, zero naruszeń CSP, zero wyjątków i błędów konsoli.
+// sprawdzamy zero żądań poza plikiem, zero naruszeń CSP, zero wyjątków i błędów konsoli, także
+// w dobie po scenariuszu (przewinięty zegar strony).
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { after, before, test } from 'node:test';
 import { strToU8, zipSync } from 'fflate';
+import { CSP_TARGETS, cspProblems, htmlCspProblems } from './csp.mjs';
 import {
   ALLOWED_STORAGE_KEYS,
   EXAMPLE_PESEL,
@@ -13,9 +15,11 @@ import {
   LANDING_HTML,
   LEGACY_SKIP,
   MAX_WEB_BYTES,
+  PISMO_PESEL,
   WEB_HTML,
   fileSize,
   launch,
+  openApp,
   withApp,
 } from './helpers.mjs';
 
@@ -58,20 +62,36 @@ async function resultText(app) {
   return app.output();
 }
 
-test(`plik aplikacji nie przekracza ${MAX_WEB_BYTES} B`, () => {
+const bytes = (n) => n.toLocaleString('pl-PL');
+
+test(`plik aplikacji nie przekracza ${bytes(MAX_WEB_BYTES)} B`, () => {
   const size = fileSize(WEB_HTML);
-  assert.ok(size <= MAX_WEB_BYTES, `apps/web/dist/index.html ma ${size} B, limit ${MAX_WEB_BYTES} B`);
+  assert.ok(size <= MAX_WEB_BYTES, `apps/web/dist/index.html ma ${bytes(size)} B, limit ${bytes(MAX_WEB_BYTES)} B`);
 });
 
-test('gotowy plik niesie CSP z default-src i connect-src none', async (t) => {
-  await withApp(browser, t, '', async ({ page }) => {
-    const csp = await page.evaluate(
-      () => document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content ?? '',
+// Każda dyrektywa osobno: dopisany host w img-src albo font-src przeszedłby test samych napisów
+// default-src i connect-src 'none', a obrazek z treścią pisma w adresie to też wysyłka.
+for (const [name, target] of Object.entries(CSP_TARGETS)) {
+  test(`${name}: CSP bez żadnego źródła spoza pliku`, async (t) => {
+    const fromFile = htmlCspProblems(readFileSync(target.file, 'utf8'), target.extra);
+    assert.deepEqual(fromFile, [], `CSP w pliku ${target.file}:\n${fromFile.join('\n')}`);
+    await withApp(
+      browser,
+      t,
+      '',
+      async ({ page }) => {
+        // To, co przeczytała przeglądarka, a nie tylko tekst pliku.
+        const metas = await page.evaluate(() =>
+          [...document.querySelectorAll('meta[http-equiv="Content-Security-Policy"]')].map((m) => m.content),
+        );
+        assert.equal(metas.length, 1, `tagów meta CSP: ${metas.length}`);
+        const problems = cspProblems(metas[0], target.extra);
+        assert.deepEqual(problems, [], `CSP „${metas[0]}”:\n${problems.join('\n')}`);
+      },
+      { file: target.file },
     );
-    assert.match(csp, /default-src 'none'/, `brak default-src 'none' w CSP: „${csp}”`);
-    assert.match(csp, /connect-src 'none'/, `brak connect-src 'none' w CSP: „${csp}”`);
   });
-});
+}
 
 test('CSP zatrzymuje próbę wysłania danych (fetch, obrazek)', async (t) => {
   await withApp(browser, t, '', async (app) => {
@@ -97,16 +117,61 @@ test('CSP zatrzymuje próbę wysłania danych (fetch, obrazek)', async (t) => {
     const leaked = await app.leakedRequests();
     assert.deepEqual(leaked, [], `żądania spoza pliku:\n${leaked.join('\n')}`);
     // Przeglądarka zgłasza naruszenie obu dyrektyw, więc wiadomo, że to CSP je zatrzymała.
-    const directives = app.takeViolations().map((v) => v.directive);
+    const directives = app.takeViolations((v) => v.blocked.includes('example.com')).map((v) => v.directive);
     assert.ok(directives.includes('connect-src'), `brak naruszenia connect-src: ${directives}`);
     assert.ok(directives.includes('img-src'), `brak naruszenia img-src: ${directives}`);
-    app.takeConsoleErrors(); // „Refused to connect…”: oczekiwane w tym teście
+    // Komunikaty Chromium o zablokowaniu obu żądań przez CSP są w tym teście oczekiwane (brzmienie
+    // zmienia się między wersjami, stały jest adres i wzmianka o CSP). Inne błędy, np. wyjątek
+    // z timera aplikacji, zostają dla assertClean().
+    app.takeConsoleErrors(/example\.com.*Content Security Policy/);
   });
+});
+
+test('bramka widzi próbę wysyłki i wyjątek odłożone na później (timer, WebSocket)', async () => {
+  // Test samej bramki: scenariusz kończy się w niecałą sekundę, a zdarzenia przychodzą po 5 i 20 s
+  // (minuta przewijana krok po kroku) i po 3 godzinach (skok o dobę). Bez przewinięcia zegara
+  // w assertClean() wszystkie wypadłyby po zamknięciu strony.
+  const app = await openApp(browser, '?demo');
+  try {
+    await app.demoReady();
+    await app.page.evaluate(() => {
+      setTimeout(() => {
+        new Image().src = 'https://example.com/pozniej.png';
+      }, 5_000);
+      setTimeout(() => {
+        throw new Error('wyjątek z timera');
+      }, 20_000);
+      setTimeout(
+        () => {
+          new WebSocket('wss://example.com/pozniej');
+        },
+        3 * 60 * 60_000,
+      );
+    });
+    await assert.rejects(() => app.assertClean());
+    // Obrazek zatrzymuje CSP (naruszenie img-src); bez CSP byłby żądaniem na liście wycieków.
+    // Bramka ma go zobaczyć w jednej z tych postaci.
+    const leaked = await app.leakedRequests();
+    const imgSeen =
+      app.violations.some((v) => v.directive === 'img-src' && v.blocked.includes('pozniej.png')) ||
+      leaked.some((l) => l.includes('example.com/pozniej.png'));
+    assert.ok(imgSeen, `bramka nie widzi odroczonego obrazka:\n${JSON.stringify(app.violations)}\n${leaked.join('\n')}`);
+    assert.ok(
+      leaked.some((l) => l.startsWith('WebSocket wss://example.com/pozniej')),
+      `bramka nie widzi WebSocketu:\n${leaked.join('\n')}`,
+    );
+    assert.ok(
+      app.pageErrors.some((m) => m.includes('wyjątek z timera')),
+      `bramka nie widzi wyjątku z timera:\n${app.pageErrors.join('\n')}`,
+    );
+  } finally {
+    await app.close();
+  }
 });
 
 test('?demo: przykład zamaskowany, numer PESEL nie przechodzi do wyniku', async (t) => {
   await withApp(browser, t, '?demo', async (app) => {
-    await app.waitForOutput('[PESEL]');
+    await app.demoReady();
     const out = await app.output();
     assert.ok(!out.includes(EXAMPLE_PESEL), `w wyniku jest numer ${EXAMPLE_PESEL}:\n${out}`);
   });
@@ -144,15 +209,17 @@ test('wczytany PDF (fixtures/urzad/pismo.pdf): PESEL zasłonięty w wyniku', asy
   await withApp(browser, t, '', async (app) => {
     await app.page.locator('#file-input').setInputFiles(path.join(FIXTURES, 'pismo.pdf'));
     await app.waitForOutput('[PESEL]');
-    assert.match(await app.page.locator('#input').inputValue(), /Kowalskiej/);
+    const input = await app.page.locator('#input').inputValue();
+    assert.match(input, /Kowalskiej/);
+    assert.ok(input.includes(PISMO_PESEL), `w tekście z pismo.pdf nie ma numeru PISMO_PESEL ${PISMO_PESEL}`);
     const out = await resultText(app);
-    assert.ok(!out.includes(EXAMPLE_PESEL), `numer PESEL z PDF przeszedł do wyniku:\n${out}`);
+    assert.ok(!out.includes(PISMO_PESEL), `numer PESEL z PDF przeszedł do wyniku:\n${out}`);
   });
 });
 
-test('„Pobierz .txt” zapisuje wynik bez zasłoniętego numeru', async (t) => {
+test('„Pobierz .txt” zapisuje wynik z zasłoniętym numerem PESEL', async (t) => {
   await withApp(browser, t, '?demo', async (app) => {
-    await app.waitForOutput('[PESEL]');
+    await app.demoReady();
     const [download] = await Promise.all([
       app.page.waitForEvent('download'),
       app.page.getByRole('button', { name: 'Pobierz .txt' }).click(),
@@ -169,7 +236,7 @@ test('localStorage: tylko znane klucze ustawień, bez treści pisma', async (t) 
   const opts = { reducedMotion: 'no-preference' };
   await withApp(browser, t, '?demo', async (app) => {
     const { page } = app;
-    await app.waitForOutput('[PESEL]');
+    await app.demoReady();
     // Zmiana każdego zapamiętywanego ustawienia: typ danych, tryb osób, animacja.
     await page.locator('#mask-toggles input[data-key]').first().uncheck();
     await page.locator('#pseudonyms').check();
@@ -204,7 +271,7 @@ test('stary silnik (PARAWAN_CHROMIUM): ?demo maskuje PESEL', { skip: LEGACY_SKIP
   const legacy = await launch({ legacy: true });
   try {
     await withApp(legacy, t, '?demo', async (app) => {
-      await app.waitForOutput('[PESEL]');
+      await app.demoReady();
       assert.ok(!(await app.output()).includes(EXAMPLE_PESEL));
     });
   } finally {
