@@ -118,6 +118,10 @@ function renderAligned(original: string, redacted: string, compare: boolean): st
   return html;
 }
 
+// Formularz wokół pola źródła jest tylko dla autocomplete="off" (index.html). Enter w polu
+// <input> dopisanym kiedyś do takiego formularza nie może go wysłać ani przeładować strony.
+document.addEventListener('submit', (e) => e.preventDefault());
+
 /* ── Demo ── */
 const input = $<HTMLTextAreaElement>('demo-input');
 const outputEl = $('demo-output');

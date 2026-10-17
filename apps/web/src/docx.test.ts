@@ -1,11 +1,17 @@
+import { redactPII } from 'anonimizator';
 import { expect, test } from 'vitest';
 import { zipSync, strToU8 } from 'fflate';
 import { extractDocxText } from './docx';
 import { FileReadError } from './files';
 
+// Przestrzeń nazw WordprocessingML: bez jej deklaracji extractDocxText nie wie, który prefiks
+// niesie tekst, i odrzuca plik (test niżej). Stąd deklaracja w każdym document.xml z testów.
+const W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+const W_STRICT = 'http://purl.oclc.org/ooxml/wordprocessingml/main';
+
 function makeDocx(xmlBody: string): Uint8Array {
   const xml =
-    `<?xml version="1.0"?><w:document xmlns:w="x"><w:body>${xmlBody}</w:body></w:document>`;
+    `<?xml version="1.0"?><w:document xmlns:w="${W}"><w:body>${xmlBody}</w:body></w:document>`;
   return zipSync({
     'word/document.xml': strToU8(xml),
     '[Content_Types].xml': strToU8('<Types/>'),
@@ -125,7 +131,7 @@ function centralEntry(zip: Uint8Array, name: string): DataView {
 
 test('bomba ZIP: rozpakowujemy tylko document.xml, innych wpisów nawet nie dotykamy', () => {
   const zip = zipSync({
-    'word/document.xml': strToU8('<w:p><w:r><w:t>Jan Kowalski</w:t></w:r></w:p>'),
+    'word/document.xml': strToU8(`<w:p xmlns:w="${W}"><w:r><w:t>Jan Kowalski</w:t></w:r></w:p>`),
     'word/media/image1.png': new Uint8Array(4096),
   });
   // Nieznana metoda kompresji: gdyby wpis był rozpakowywany, fflate rzuciłby wyjątek.
@@ -198,7 +204,7 @@ function zipWithDeflated(name: string, data: Uint8Array, originalSize: number): 
 }
 
 test('document.xml z fałszywym, zaniżonym rozmiarem: rozpakowanie przerwane od razu', () => {
-  const head = '<w:document><w:body><w:p><w:r><w:t>Jan';
+  const head = `<w:document xmlns:w="${W}"><w:body><w:p><w:r><w:t>Jan`;
   const tail = 'Kowalski</w:t></w:r></w:p></w:body></w:document>';
   // uczciwy wpis z ręcznie zbudowanym strumieniem czyta się normalnie
   const honest = zipWithDeflated(
@@ -217,7 +223,7 @@ test('document.xml z fałszywym, zaniżonym rozmiarem: rozpakowanie przerwane od
 
 test('wpis zapisany bez kompresji (metoda 0) też jest czytany', () => {
   const zip = zipSync(
-    { 'word/document.xml': strToU8('<w:p><w:r><w:t>Anna Nowak</w:t></w:r></w:p>') },
+    { 'word/document.xml': strToU8(`<w:p xmlns:w="${W}"><w:r><w:t>Anna Nowak</w:t></w:r></w:p>`) },
     { level: 0 },
   );
   expect(extractDocxText(zip)).toBe('Anna Nowak');
@@ -252,4 +258,132 @@ test('document.xml z rozmiarem zaniżonym względem skompresowanego odrzucony', 
   // deklaruje 10 B po rozpakowaniu, choć skompresowany jest dużo większy: deflate tak nie umie
   centralEntry(zip, 'word/document.xml').setUint32(24, 10, true);
   expect(() => extractDocxText(zip)).toThrow(/zbyt duży albo uszkodzony/);
+});
+
+/* ── Granice wierszy, prefiks przestrzeni nazw ── */
+
+test('<w:cr/> to nowy wiersz: „Jan<w:cr/>Kowalski” nie skleja się i nazwisko jest zasłonięte', () => {
+  const docx = makeDocx(
+    '<w:p><w:r><w:t>Wnioskodawca: Jan</w:t><w:cr/><w:t>Kowalski, tel. 600</w:t><w:cr w:clear="all"/>' +
+      '<w:t>700 800</w:t></w:r></w:p>',
+  );
+  const text = extractDocxText(docx);
+  expect(text).toBe('Wnioskodawca: Jan\nKowalski, tel. 600\n700 800');
+  expect(text.split('\n').slice(0, 2)).toEqual(['Wnioskodawca: Jan', 'Kowalski, tel. 600']);
+  // dawniej „JanKowalski” przechodziło do wyniku jawne
+  const { redacted } = redactPII(text);
+  expect(redacted).not.toContain('Kowalski');
+  expect(redacted).toContain('[IMIĘ I NAZWISKO]');
+});
+
+test('pusty akapit <w:p/> daje pusty wiersz, a <w:pPr/> nie jest akapitem', () => {
+  const docx = makeDocx(
+    '<w:p><w:r><w:t>Jan Kowalski</w:t></w:r></w:p><w:p/>' +
+      '<w:p><w:pPr/><w:r><w:t>PESEL 44051401359</w:t></w:r></w:p>',
+  );
+  expect(extractDocxText(docx)).toBe('Jan Kowalski\n\nPESEL 44051401359');
+  // z atrybutami i spacją przed „/>”; kolejne puste akapity zwijają się do jednego pustego wiersza
+  const more = makeDocx(
+    '<w:p><w:r><w:t>A</w:t></w:r></w:p><w:p w:rsidR="00A1" /><w:p /><w:p><w:r><w:t>B</w:t></w:r></w:p>',
+  );
+  expect(extractDocxText(more)).toBe('A\n\nB');
+});
+
+/** Dokument z dowolnym elementem głównym (prefiks, deklaracje). */
+function docxWithRoot(open: string, close: string, body: string): Uint8Array {
+  return zipSync({ 'word/document.xml': strToU8(`<?xml version="1.0"?>${open}${body}${close}`) });
+}
+
+/** Treść z każdym rodzajem znacznika, który tokenizer zamienia na tekst, dla prefiksu `p`. */
+const BODY = (p: string): string =>
+  `<${p}body><${p}p><${p}r><${p}t>Jan Kowalski</${p}t><${p}tab/><${p}t>PESEL 44051401359</${p}t>` +
+  `<${p}br/><${p}t>31</${p}t><${p}noBreakHyphen/><${p}t>042 Kraków</${p}t></${p}r></${p}p>` +
+  `<${p}p/><${p}p><${p}r><${p}t>Anna</${p}t><${p}cr/><${p}t>Nowak</${p}t>` +
+  `<${p}delText>usunięte</${p}delText></${p}r></${p}p></${p}body>`;
+const EXPECTED = 'Jan Kowalski\tPESEL 44051401359\n31-042 Kraków\n\nAnna\nNowak';
+
+test('prefiks ns0: (i każdy inny) daje ten sam tekst co w:', () => {
+  const w = docxWithRoot(`<w:document xmlns:w="${W}">`, '</w:document>', BODY('w:'));
+  expect(extractDocxText(w)).toBe(EXPECTED);
+  const ns0 = docxWithRoot(`<ns0:document xmlns:ns0="${W}">`, '</ns0:document>', BODY('ns0:'));
+  expect(extractDocxText(ns0)).toBe(EXPECTED);
+  // kropka w prefiksie nie może zadziałać w wyrażeniu jak „dowolny znak”
+  const dot = docxWithRoot(`<a.b:document xmlns:a.b="${W}">`, '</a.b:document>', BODY('a.b:'));
+  expect(extractDocxText(dot)).toBe(EXPECTED);
+  // obcy prefiks z tą samą nazwą lokalną (jak DrawingML <a:t>) nie jest tekstem dokumentu
+  const mixed = docxWithRoot(
+    `<x:document xmlns:x="${W}" xmlns:w="urn:inny">`,
+    '</x:document>',
+    BODY('x:').replace('<x:t>Anna</x:t>', '<x:t>Anna</x:t><w:t>obce</w:t>'),
+  );
+  expect(extractDocxText(mixed)).toBe(EXPECTED);
+});
+
+test('przestrzeń domyślna (bez prefiksu) też jest czytana', () => {
+  const docx = docxWithRoot(`<document xmlns="${W}" xmlns:a="urn:drawing">`, '</document>', BODY(''));
+  expect(extractDocxText(docx)).toBe(EXPECTED);
+});
+
+test('ISO 29500 Strict („Ścisły dokument Open XML”) daje ten sam tekst co zwykły .docx', () => {
+  const strict = docxWithRoot(`<w:document xmlns:w="${W_STRICT}">`, '</w:document>', BODY('w:'));
+  expect(extractDocxText(strict)).toBe(EXPECTED);
+  const strictNs0 = docxWithRoot(
+    `<ns0:document xmlns:ns0="${W_STRICT}" xmlns:r="http://purl.oclc.org/ooxml/officeDocument/relationships">`,
+    '</ns0:document>',
+    BODY('ns0:'),
+  );
+  expect(extractDocxText(strictNs0)).toBe(EXPECTED);
+});
+
+test('komentarz przed elementem głównym i deklaracje w kilku wierszach nie przeszkadzają', () => {
+  const docx = docxWithRoot(
+    `<!-- <w:document xmlns:w="urn:zly"> --><w:document\n  xmlns:wp="urn:wp"\n  xmlns:w='${W}'>`,
+    '</w:document>',
+    BODY('w:'),
+  );
+  expect(extractDocxText(docx)).toBe(EXPECTED);
+});
+
+test('bez deklaracji WordprocessingML: komunikat o nietypowej budowie, nie „plik jest pusty”', () => {
+  const msg =
+    'Ten plik .docx ma nietypową budowę i Parawan nie odczyta jego treści. Otwórz go w Wordzie ' +
+    'albo LibreOffice, zapisz ponownie jako .docx i wczytaj jeszcze raz.';
+  const roots: [string, string, string][] = [
+    ['<ns0:document xmlns:ns0="x">', '</ns0:document>', BODY('ns0:')],
+    ['<w:document>', '</w:document>', BODY('w:')],
+    ['<w:document xmlns:w="http://schemas.openxmlformats.org/drawingml/2006/main">', '</w:document>', BODY('w:')],
+    ['', '', ''],
+    ['<!-- niedomknięty komentarz', '', ''],
+  ];
+  for (const root of roots) {
+    const docx = docxWithRoot(...root);
+    expect(() => extractDocxText(docx)).toThrow(FileReadError);
+    expect(() => extractDocxText(docx)).toThrow(msg);
+  }
+});
+
+test('tekst ukryty (w:vanish) trafia do pola źródła, usunięty w śledzonej zmianie (w:delText) nie', () => {
+  const docx = makeDocx(
+    '<w:p><w:r><w:t xml:space="preserve">Jawne </w:t></w:r>' +
+      '<w:r><w:rPr><w:vanish/></w:rPr><w:t>ukryte Jan Kowalski</w:t></w:r></w:p>' +
+      '<w:p><w:del w:id="1" w:author="A"><w:r><w:delText>usunięte Anna Nowak</w:delText></w:r></w:del>' +
+      '<w:ins w:id="2" w:author="A"><w:r><w:t>wstawione</w:t></w:r></w:ins></w:p>',
+  );
+  const text = extractDocxText(docx);
+  expect(text).toBe('Jawne ukryte Jan Kowalski\nwstawione');
+  // ukryty tekst jest sprawdzany jak reszta pola
+  expect(redactPII(text).redacted).not.toContain('Kowalski');
+});
+
+test('tysiące niedomkniętych <w:p i <w:cr: tekst w ułamku sekundy', () => {
+  const K = 60_000;
+  const docx = makeDocx(
+    '<w:p><w:r><w:t>A</w:t></w:r></w:p>' +
+      '<w:p a'.repeat(K) +
+      '<w:cr a'.repeat(K) +
+      '<w:p><w:r><w:t>B</w:t></w:r></w:p>',
+  );
+  const t0 = performance.now();
+  expect(extractDocxText(docx)).toBe('A\nB');
+  expect(performance.now() - t0).toBeLessThan(500);
 });

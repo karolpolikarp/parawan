@@ -36,19 +36,27 @@ after(async () => {
 
 const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
-/** Minimalny DOCX jak z edytora: same akapity w word/document.xml (fflate, jak w docx.test.ts). */
-function makeDocx(paragraphs) {
-  const body = paragraphs
-    .map((p) => `<w:p><w:r><w:t xml:space="preserve">${p}</w:t></w:r></w:p>`)
-    .join('');
+const W_NS = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+const wPara = (text) => `<w:p><w:r><w:t xml:space="preserve">${text}</w:t></w:r></w:p>`;
+/** Część WordprocessingML (nagłówek, komentarze) z deklaracją przestrzeni nazw. */
+const wPart = (root, body) =>
+  strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:${root} xmlns:w="${W_NS}">${body}</w:${root}>`);
+
+/**
+ * Minimalny DOCX jak z edytora: akapity w word/document.xml (fflate, jak w docx.test.ts),
+ * a w `extra` dodatkowe części (nagłówek, komentarze) i surowy XML treści w `bodyXml`.
+ */
+function makeDocx(paragraphs, { extra = {}, bodyXml = '' } = {}) {
+  const body = paragraphs.map(wPara).join('') + bodyXml;
   const xml =
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-    `<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${body}</w:body></w:document>`;
+    `<w:document xmlns:w="${W_NS}"><w:body>${body}</w:body></w:document>`;
   return zipSync({
     '[Content_Types].xml': strToU8(
       '<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>',
     ),
     'word/document.xml': strToU8(xml),
+    ...extra,
   });
 }
 
@@ -339,6 +347,110 @@ test('wczytany DOCX: PESEL zasłonięty w wyniku', async (t) => {
     assert.match(await app.page.locator('#input').inputValue(), /Wierzbickiego/);
     const out = await resultText(app);
     assert.ok(!out.includes('85071412358'), `numer PESEL z DOCX przeszedł do wyniku:\n${out}`);
+    // dokument bez nagłówków, przypisów i komentarzy: bez komunikatu o pominiętych częściach
+    assert.equal(await app.page.locator('#app-note').isVisible(), false, 'komunikat po zwykłym DOCX');
+  });
+});
+
+/** Fikcyjne pismo z nagłówkiem, komentarzem i ukrytym zdaniem (dane zmyślone). */
+const DOCX_Z_CZESCIAMI = () =>
+  makeDocx(
+    ['Wójt Gminy Brzozowa Wola', 'Na wniosek Pana Tomasza Wierzbickiego, PESEL 85071412358, orzekam jak w sentencji.'],
+    {
+      bodyXml:
+        '<w:p><w:r><w:t xml:space="preserve">Uzasadnienie. </w:t></w:r>' +
+        '<w:r><w:rPr><w:vanish/></w:rPr><w:t>Notatka: wnioskodawca dzwonił z numeru 600 700 800.</w:t></w:r></w:p>',
+      extra: {
+        'word/header1.xml': wPart('hdr', wPara('Sprawę prowadzi: Anna Nowak, tel. 29 741 22 10')),
+        'word/comments.xml': wPart(
+          'comments',
+          `<w:comment w:id="0" w:author="Anna Nowak" w:initials="AN">${wPara('Sprawdzić adres wnioskodawcy.')}</w:comment>`,
+        ),
+      },
+    },
+  );
+
+const DOCX_NOTE =
+  'Wczytano treść główną dokumentu. Parawan nie czyta: nagłówków i stopek (1), komentarzy (1). ' +
+  'Przejrzyj je przed publikacją albo publikuj nowy dokument zapisany z wyniku. ' +
+  'Dokument ma ukryty tekst (1 fragment). Jest w polu źródła i został sprawdzony.';
+
+test('DOCX z nagłówkiem i komentarzem: komunikat wylicza pominięte części i ukryty tekst', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    await page
+      .locator('#file-input')
+      .setInputFiles({ name: 'decyzja-czesci.docx', mimeType: DOCX_MIME, buffer: Buffer.from(DOCX_Z_CZESCIAMI()) });
+    await app.waitForOutput('[PESEL]');
+    await page.locator('#app-note').waitFor({ state: 'visible' });
+    assert.equal((await page.locator('#app-note-text').textContent())?.trim(), DOCX_NOTE);
+    // pole było puste, więc nie ma czego cofać; komunikat czyta czytnik ekranu (role="status")
+    assert.equal(await page.locator('#app-note-undo').isVisible(), false, '„Cofnij” przy pustym polu');
+    assert.equal(await page.locator('#app-note-status').getAttribute('role'), 'status');
+    assert.equal((await page.locator('#app-note-status').textContent())?.trim(), DOCX_NOTE);
+    // ukryte zdanie jest w polu i zostało zamaskowane, treść nagłówka i komentarza nie trafia do pola
+    const input = await page.locator('#input').inputValue();
+    assert.match(input, /wnioskodawca dzwonił/);
+    assert.doesNotMatch(input, /Anna Nowak|Sprawdzić adres/);
+    const out = await resultText(app);
+    assert.ok(!out.includes('600 700 800'), `numer z ukrytego tekstu przeszedł do wyniku:\n${out}`);
+  });
+});
+
+// Pole źródła stoi w <form autocomplete="off"> (Chrome i Edge 109 zapisywały inaczej jego treść
+// w plikach sesji). Formularz nie może niczego wysłać ani przeładować strony.
+test('pole źródła w formularzu: Enter i Ctrl+Enter nie wysyłają formularza ani nie przeładowują strony', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const url = page.url();
+    await page.evaluate(() => {
+      window.__parawanSubmits = 0;
+      document.addEventListener('submit', () => window.__parawanSubmits++, true);
+    });
+    await page.locator('#input').click();
+    await page.keyboard.type('Jan Kowalski, PESEL 85071412358');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('drugi wiersz');
+    await page.keyboard.press('Control+Enter');
+    await app.waitForOutput('[PESEL]');
+    assert.equal(await page.evaluate(() => window.__parawanSubmits), 0, 'formularz został wysłany');
+    assert.equal(page.url(), url);
+    assert.equal(await page.locator('#input').inputValue(), 'Jan Kowalski, PESEL 85071412358\ndrugi wiersz');
+    // Wysłanie wprost (jak Enter w polu <input>, gdyby kiedyś stanęło w tym formularzu): main.ts
+    // je zatrzymuje, więc nie ma nawigacji ani naruszenia form-action (sprawdza assertClean).
+    const prevented = await page.evaluate(() => {
+      let flag = null;
+      document.addEventListener('submit', (e) => setTimeout(() => (flag = e.defaultPrevented)), { once: true });
+      document.querySelector('form.ta-form')?.requestSubmit();
+      return new Promise((resolve) => setTimeout(() => resolve(flag), 50));
+    });
+    assert.equal(prevented, true, 'wysłanie formularza nie zostało zatrzymane');
+    assert.equal(page.url(), url);
+    assert.equal(await page.locator('#input').inputValue(), 'Jan Kowalski, PESEL 85071412358\ndrugi wiersz');
+    // pole naprawdę stoi w formularzu; bez niego test nie sprawdzałby niczego
+    assert.equal(await page.locator('form.ta-form[autocomplete="off"] > #input').count(), 1);
+  });
+});
+
+test('DOCX z częściami wczytany na istniejący tekst: „Cofnij” i komunikat, który zostaje po nim', async (t) => {
+  await withApp(browser, t, '?demo', async (app) => {
+    const { page } = app;
+    await app.demoReady();
+    await page
+      .locator('#file-input')
+      .setInputFiles({ name: 'decyzja-czesci.docx', mimeType: DOCX_MIME, buffer: Buffer.from(DOCX_Z_CZESCIAMI()) });
+    await page.locator('#app-note-text').getByText('Parawan nie czyta').waitFor();
+    assert.equal(
+      (await page.locator('#app-note-text').textContent())?.trim(),
+      `Zastąpiono tekst treścią pliku. ${DOCX_NOTE}`,
+    );
+    assert.equal(await page.locator('#app-note-undo').isVisible(), true);
+    // po 20 s „Cofnij” znika, a dopisek o częściach dokumentu zostaje do zamknięcia
+    await page.clock.runFor(21_000);
+    assert.equal(await page.locator('#app-note-undo').isVisible(), false);
+    assert.equal((await page.locator('#app-note-text').textContent())?.trim(), DOCX_NOTE);
+    await page.getByRole('button', { name: 'Zamknij komunikat' }).click();
+    assert.equal(await page.locator('#app-note').isVisible(), false);
   });
 });
 

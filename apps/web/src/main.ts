@@ -1,6 +1,7 @@
 import { redactPII, type PiiFinding, type PiiType } from 'anonimizator';
 import { escapeHtml, renderAligned } from './compare';
 import { extractDocxText } from './docx';
+import { type DocxInventory, docxInventoryNote, inventoryDocx } from './docx-inventory';
 import {
   decodeText,
   FileReadError,
@@ -625,7 +626,7 @@ function makeGrip(): HTMLElement {
 const inputGrip = makeGrip();
 const outputGrip = makeGrip();
 grips.push(inputGrip, outputGrip);
-input.parentElement?.append(inputGrip); // .card-b okna źródła
+input.closest('.card-b')?.append(inputGrip); // .card-b okna źródła (pole stoi w <form>)
 output.parentElement?.append(outputGrip); // .card-b okna wyniku
 // Oba uchwyty sterują tą samą wysokością, więc z klawiatury wystarczy jeden przystanek Tab.
 // Drugi zostaje dla myszy i dotyku.
@@ -877,6 +878,10 @@ function flushPendingUpdate(): void {
   if (updatePending) update();
 }
 
+// Formularz wokół pola źródła jest tylko dla autocomplete="off" (index.html). Enter w polu
+// <input> dopisanym kiedyś do takiego formularza nie może go wysłać ani przeładować strony.
+document.addEventListener('submit', (e) => e.preventDefault());
+
 input.addEventListener('input', () => {
   // Własna edycja zamyka komunikaty: stary błąd już nie dotyczy, a „Cofnij” po edycji
   // przywróciłby tekst sprzed niej i skasował to, co właśnie wpisano.
@@ -1104,6 +1109,15 @@ loadFileBtn.addEventListener('click', () => fileInput.click());
 
 const EMPTY_FILE = 'Plik jest pusty: nie zawiera tekstu do anonimizacji.';
 
+/** Spis części DOCX poza treścią główną albo null, gdy się nie udał (treść i tak wczytujemy). */
+function docxInventory(buf: Uint8Array): DocxInventory | null {
+  try {
+    return inventoryDocx(buf);
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Wczytaj plik do pola źródła. Pliki tekstowe dekodujemy sami (UTF-8, UTF-16 z BOM albo
  * Windows-1250), DOCX i PDF mają własne ekstraktory. Przy każdym błędzie pole zostaje
@@ -1132,8 +1146,10 @@ async function loadAnyFile(file: File): Promise<void> {
     const isDocx = !isPdf && ext === 'docx';
     let text: string;
     let info = '';
-    if (isDocx) text = extractDocxText(buf);
-    else if (isPdf) text = await extractPdfText(buf);
+    if (isDocx) {
+      text = extractDocxText(buf);
+      info = docxInventoryNote(docxInventory(buf));
+    } else if (isPdf) text = await extractPdfText(buf);
     else {
       const unsupported = unsupportedFormat(file.name, head);
       if (unsupported) {

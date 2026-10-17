@@ -601,6 +601,10 @@ details.card::details-content {
 .cl .no { text-align: right; color: var(--mut-2); user-select: none; font-size: 12px; padding-top: 2px; }
 .cl > span:last-child { white-space: pre-wrap; min-width: 0; }
 
+/* Formularz wokół pola źródła jest tylko dla autocomplete="off" (index.html); układu nie
+   zmienia, pole zostaje dzieckiem .card-b w układzie. */
+.ta-form { display: contents; }
+
 /* textarea źródła — ta sama anatomia co .editor, ale edytowalna. Natywny uchwyt wyłączony
    (resize: none) — zastępuje go widoczny, symetryczny uchwyt .ed-grip u dołu obu okien, który
    zmienia wspólną --ed-h, więc oba okna rosną i maleją równocześnie i równo. */

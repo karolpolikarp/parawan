@@ -202,7 +202,9 @@ p { text-wrap: pretty; }
 .demo-panes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .demo-pane { padding: 14px 16px 16px; min-width: 0; display: flex; flex-direction: column; }
 /* w dwóch kolumnach pole źródła sięga tak nisko jak wynik obok (bez pustej bieli pod nim) */
-.demo-pane > .editor { flex: 1 1 auto; }
+.demo-pane > .editor, .demo-pane > .ta-form > .editor { flex: 1 1 auto; }
+/* formularz wokół pola jest tylko dla autocomplete="off" (index.html), pole zostaje elementem flex */
+.ta-form { display: contents; }
 .demo-pane + .demo-pane { border-left: 1px solid var(--line); }
 .demo-plabel {
   font: 600 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase;

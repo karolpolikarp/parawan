@@ -2,19 +2,26 @@
  * Ekstrakcja tekstu z pliku .docx — w całości lokalnie, bez ciężkich zależności.
  *
  * DOCX to ZIP z XML-em w środku; treść dokumentu żyje w `word/document.xml`,
- * a widoczny tekst — w elementach `<w:t>`. Rozpakowujemy maleńkim `fflate` TYLKO ten
- * jeden wpis (z limitem rozmiaru, więc bomba ZIP nie zamrozi karty) i zbieramy tekst runów,
- * wstawiając \n za końce akapitów (`</w:p>`) i `<w:br/>`, \t za `<w:tab/>` oraz zwykły „-”
- * za twardy łącznik `<w:noBreakHyphen/>` (bez niego kod pocztowy „00-950” skleja się
- * w „00950” i przechodzi jawny). Łącznik miękki `<w:softHyphen/>` pomijamy, bo w tekście go
- * nie widać. Pola tekstowe Word zapisuje dwa razy (`mc:Choice` i zapasowo `mc:Fallback`),
- * więc gałęzie `mc:Fallback` usuwamy, żeby treść nie dublowała się w wyniku i licznikach.
+ * a widoczny tekst — w elementach `<w:t>`. Rozpakowujemy (zip.ts) TYLKO ten jeden wpis
+ * (z limitem rozmiaru, więc bomba ZIP nie zamrozi karty) i zbieramy tekst runów,
+ * wstawiając \n za końce akapitów (`</w:p>`), puste akapity (`<w:p/>`), `<w:br/>` i `<w:cr/>`,
+ * \t za `<w:tab/>` oraz zwykły „-” za twardy łącznik `<w:noBreakHyphen/>` (bez niego kod
+ * pocztowy „00-950” skleja się w „00950” i przechodzi jawny). Bez `<w:cr/>` „Jan” i „Kowalski”
+ * z dwóch wierszy sklejały się w „JanKowalski” i nazwisko przechodziło jawne. Łącznik miękki
+ * `<w:softHyphen/>` pomijamy, bo w tekście go nie widać. Pola tekstowe Word zapisuje dwa razy
+ * (`mc:Choice` i zapasowo `mc:Fallback`), więc gałęzie `mc:Fallback` usuwamy, żeby treść nie
+ * dublowała się w wyniku i licznikach.
+ *
+ * Prefiks `w:` to tylko zwyczaj Worda: niektóre generatory piszą `ns0:` albo przestrzeń
+ * domyślną. Prefiks czytamy więc z deklaracji w elemencie głównym.
+ *
  * To świadomie NIE jest pełny konwerter (tabele/format spłaszczają się do tekstu) —
  * do anonimizacji liczy się treść, nie układ.
  */
 
-import { Inflate, strFromU8 } from 'fflate';
+import { strFromU8 } from 'fflate';
 import { FileReadError } from './files';
+import { listZipEntries, readZipEntry, type ZipEntry } from './zip';
 
 const XML_ENTITY: Record<string, string> = {
   amp: '&',
@@ -51,108 +58,107 @@ function includesUtf16(buf: Uint8Array, s: string): boolean {
   return false;
 }
 
-// Górny limit rozpakowanego `word/document.xml`. Zwykłe pismo to kilkadziesiąt-kilkaset KB.
-const MAX_XML_BYTES = 50 * 1024 * 1024;
+// Górny limit rozpakowanej części XML (`word/document.xml`, nagłówka, przypisów).
+// Zwykłe pismo to kilkadziesiąt-kilkaset KB.
+export const MAX_XML_BYTES = 50 * 1024 * 1024;
 
-const NOT_DOCX = 'Nie udało się odczytać pliku. To nie wygląda na poprawny dokument Word (.docx).';
-const TOO_BIG = 'Dokument jest zbyt duży albo uszkodzony, więc nie da się go bezpiecznie wczytać.';
-
-/** Wpis ZIP-a: metoda kompresji, rozmiary z katalogu centralnego i dane skompresowane. */
-interface ZipEntry {
-  method: number;
-  size: number; // skompresowany
-  originalSize: number; // deklarowany po rozpakowaniu
-  data: Uint8Array;
-}
+export const NOT_DOCX = 'Nie udało się odczytać pliku. To nie wygląda na poprawny dokument Word (.docx).';
+const ODD_DOCX =
+  'Ten plik .docx ma nietypową budowę i Parawan nie odczyta jego treści. Otwórz go w Wordzie ' +
+  'albo LibreOffice, zapisz ponownie jako .docx i wczytaj jeszcze raz.';
 
 /**
- * Znajdź wpis `name` przez katalog centralny ZIP-a (także ZIP64), bez rozpakowywania czegokolwiek.
- * Własny odczyt zamiast unzipSync: fflate rozpakowuje do bufora o rozmiarze z nagłówka, a gdy
- * strumień jest dłuższy, dekoduje dalej i po cichu gubi nadmiar, więc plik z zaniżonym rozmiarem
- * (2 MB rozwijające się do 2 GB) zamrażał kartę na kilkanaście sekund.
+ * Przestrzeń nazw WordprocessingML: przejściowa (zwykły .docx) i ścisła ISO 29500 Strict
+ * („Ścisły dokument Open XML” w oknie zapisu Worda). Nazwy elementów są w obu takie same.
  */
-function findZipEntry(buf: Uint8Array, name: string): ZipEntry | null {
-  const v = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
-  const u64 = (at: number): number => v.getUint32(at, true) + v.getUint32(at + 4, true) * 2 ** 32;
-  // koniec katalogu centralnego: ostatnie 22 B pliku plus komentarz do 64 KB
-  let eocd = buf.length - 22;
-  const stop = Math.max(0, eocd - 0xffff);
-  while (eocd >= stop && v.getUint32(eocd, true) !== 0x06054b50) eocd--;
-  if (eocd < stop) throw new FileReadError(NOT_DOCX);
-  let count = v.getUint16(eocd + 10, true);
-  let off = v.getUint32(eocd + 16, true);
-  if ((count === 0xffff || off === 0xffffffff) && eocd >= 20 && v.getUint32(eocd - 20, true) === 0x07064b50) {
-    const z64 = u64(eocd - 12); // lokalizator ZIP64 wskazuje rekord z prawdziwymi wartościami
-    if (z64 + 56 > buf.length || v.getUint32(z64, true) !== 0x06064b50) throw new FileReadError(NOT_DOCX);
-    count = u64(z64 + 32);
-    off = u64(z64 + 48);
-  }
-  const want = new TextEncoder().encode(name);
-  for (let i = 0; i < count; i++) {
-    if (off + 46 > buf.length || v.getUint32(off, true) !== 0x02014b50) throw new FileReadError(NOT_DOCX);
-    const nameLen = v.getUint16(off + 28, true);
-    const extraLen = v.getUint16(off + 30, true);
-    const next = off + 46 + nameLen + extraLen + v.getUint16(off + 32, true);
-    const nm = buf.subarray(off + 46, off + 46 + nameLen);
-    if (nm.length === want.length && nm.every((b, j) => b === want[j])) {
-      let size = v.getUint32(off + 20, true);
-      let originalSize = v.getUint32(off + 24, true);
-      let local = v.getUint32(off + 42, true);
-      // ZIP64: pola 0xFFFFFFFF mają wartość w dodatku 0x0001, po kolei: rozmiar, skompresowany, offset
-      for (let x = off + 46 + nameLen; x + 4 <= off + 46 + nameLen + extraLen; ) {
-        const id = v.getUint16(x, true);
-        const len = v.getUint16(x + 2, true);
-        if (id === 0x0001) {
-          let p = x + 4;
-          if (originalSize === 0xffffffff) {
-            originalSize = u64(p);
-            p += 8;
-          }
-          if (size === 0xffffffff) {
-            size = u64(p);
-            p += 8;
-          }
-          if (local === 0xffffffff) local = u64(p);
-        }
-        x += 4 + len;
-      }
-      if (local + 30 > buf.length || v.getUint32(local, true) !== 0x04034b50) throw new FileReadError(NOT_DOCX);
-      const start = local + 30 + v.getUint16(local + 26, true) + v.getUint16(local + 28, true);
-      if (start + size > buf.length) throw new FileReadError(NOT_DOCX);
-      return { method: v.getUint16(off + 10, true), size, originalSize, data: buf.subarray(start, start + size) };
-    }
-    off = next;
-  }
-  return null;
-}
+const WML_NS = [
+  'http://schemas.openxmlformats.org/wordprocessingml/2006/main',
+  'http://purl.oclc.org/ooxml/wordprocessingml/main',
+];
 
-/**
- * Rozpakuj deflate kawałkami i przerwij, gdy wynik przekroczy `limit`. Kawałek 16 KB rozwija się
- * najwyżej do ok. 16 MB, więc fałszywy rozmiar w nagłówku kosztuje ułamek sekundy, a nie minuty.
- */
-function inflateCapped(data: Uint8Array, limit: number): Uint8Array {
-  const chunks: Uint8Array[] = [];
-  let total = 0;
-  const inflate = new Inflate((chunk) => {
-    total += chunk.length;
-    if (total > limit) throw new FileReadError(TOO_BIG);
-    chunks.push(chunk);
-  });
-  const STEP = 16 * 1024;
+/** Wpisy ZIP-a; każdy błąd budowy pliku to komunikat „to nie jest .docx”. */
+export function docxEntries(buf: Uint8Array): ZipEntry[] {
   try {
-    for (let i = 0; i < data.length || i === 0; i += STEP) {
-      inflate.push(data.subarray(i, i + STEP), i + STEP >= data.length);
-    }
+    return listZipEntries(buf);
   } catch (err) {
     throw err instanceof FileReadError ? err : new FileReadError(NOT_DOCX);
   }
-  const out = new Uint8Array(total);
-  let at = 0;
-  for (const c of chunks) {
-    out.set(c, at);
-    at += c.length;
+}
+
+/** Rozpakowana część XML jako tekst, z limitem `limit` bajtów (domyślnie MAX_XML_BYTES). */
+export function readDocxPart(buf: Uint8Array, entry: ZipEntry, limit = MAX_XML_BYTES): string {
+  try {
+    return strFromU8(readZipEntry(buf, entry, limit));
+  } catch (err) {
+    throw err instanceof FileReadError ? err : new FileReadError(NOT_DOCX);
   }
-  return out;
+}
+
+/**
+ * Prefiks, pod którym część XML deklaruje WordprocessingML w elemencie głównym („w”, „ns0”,
+ * pusty napis dla przestrzeni domyślnej) albo null, gdy deklaracji nie ma. Najpierw prefiks samego
+ * elementu głównego, potem dowolny inny związany z tą przestrzenią. Skan indexOf zamiast wyrażeń
+ * z `[\s\S]*?`: niedomknięty komentarz albo instrukcja nie skanują tekstu wielokrotnie.
+ */
+export function wmlPrefix(xml: string): string | null {
+  let at = 0;
+  for (;;) {
+    at = xml.indexOf('<', at);
+    if (at < 0) return null;
+    // deklaracja XML, komentarz i DOCTYPE przed elementem głównym
+    const close = xml.startsWith('<?', at)
+      ? '?>'
+      : xml.startsWith('<!--', at)
+        ? '-->'
+        : xml.startsWith('<!', at)
+          ? '>'
+          : '';
+    if (!close) break;
+    const end = xml.indexOf(close, at + 2);
+    if (end < 0) return null;
+    at = end + close.length;
+  }
+  const end = xml.indexOf('>', at);
+  if (end < 0) return null;
+  const tag = xml.slice(at + 1, end);
+  const name = tag.match(/^[^\s/>]+/)?.[0] ?? '';
+  const bound = new Map<string, string>();
+  for (const a of tag.matchAll(/\sxmlns(?::([^\s=/>]+))?\s*=\s*(?:"([^"]*)"|'([^']*)')/g)) {
+    bound.set(a[1] ?? '', a[2] ?? a[3] ?? '');
+  }
+  const own = name.includes(':') ? name.slice(0, name.indexOf(':')) : '';
+  if (WML_NS.includes(bound.get(own) ?? '')) return own;
+  for (const [prefix, uri] of bound) if (WML_NS.includes(uri)) return prefix;
+  return null;
+}
+
+/** Nazwa elementu z prefiksem do wyrażenia regularnego: „w:t”, „ns0:t” albo „t”. */
+export function wmlName(prefix: string, local: string): string {
+  return (prefix ? `${prefix.replace(/[.*+?^${}()|[\]\\-]/g, '\\$&')}:` : '') + local;
+}
+
+const tokenizers = new Map<string, RegExp>();
+
+/**
+ * Wyrażenie wyciągające tekst dla danego prefiksu. `[^<>]` i `[^<]` zamiast `[^>]`
+ * i `[\s\S]*?`: niedomknięty znacznik nie skanuje do końca tekstu (koszt kwadratowy), a w <w:t>
+ * i tak nie ma „<” (XML zapisuje go jako &lt;). `(?=[\s/>])` za nazwą, żeby `<w:p/>` nie łapało
+ * `<w:pPr/>`, a `<w:t>` nie łapało `<w:tab/>` ani `<w:delText>` (tekstu usuniętego w śledzonej
+ * zmianie, którego w dokumencie już nie widać).
+ */
+function tokenizer(prefix: string): RegExp {
+  let re = tokenizers.get(prefix);
+  if (!re) {
+    const n = (local: string): string => wmlName(prefix, local);
+    re = new RegExp(
+      `<${n('t')}(?:\\s[^<>]*)?>([^<]*)</${n('t')}>|</${n('p')}>|<${n('p')}(?=[\\s/])[^<>]*/>` +
+        `|<(${n('tab')}|${n('br')}|${n('cr')}|${n('noBreakHyphen')})(?=[\\s/>])[^<>]*/>`,
+      'g',
+    );
+    tokenizers.set(prefix, re);
+  }
+  re.lastIndex = 0;
+  return re;
 }
 
 /**
@@ -187,6 +193,26 @@ function dropFallbacks(xml: string): string {
   return out + xml.slice(depth > 0 ? openAt : keepFrom);
 }
 
+/**
+ * Tekst fragmentu WordprocessingML (całej części albo jednego przypisu) dla danego prefiksu,
+ * bez gałęzi `mc:Fallback`.
+ */
+export function wmlText(xml: string, prefix: string): string {
+  const re = tokenizer(prefix);
+  const parts: string[] = [];
+  const src = dropFallbacks(xml);
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(src)) !== null) {
+    // nazwa bez prefiksu („ns0:tab” → „tab”); bez dwukropka indexOf daje -1, czyli całość
+    const local = m[2]?.slice(m[2].indexOf(':') + 1);
+    if (m[1] !== undefined) parts.push(decodeXmlEntities(m[1]));
+    else if (local === 'tab') parts.push('\t');
+    else if (local === 'noBreakHyphen') parts.push('-');
+    else parts.push('\n'); // </w:p>, <w:p/>, <w:br/> lub <w:cr/>
+  }
+  return parts.join('').replace(/\n{3,}/g, '\n\n').trim();
+}
+
 /** Wyciągnij czysty tekst z zawartości pliku .docx. Rzuca FileReadError dla nie-docx. */
 export function extractDocxText(buf: Uint8Array): string {
   if (OLE_SIGNATURE.every((v, i) => buf[i] === v)) {
@@ -199,37 +225,12 @@ export function extractDocxText(buf: Uint8Array): string {
   }
 
   // Rozpakowujemy wyłącznie treść dokumentu, innych wpisów nawet nie dotykamy.
-  let entry: ZipEntry | null;
-  try {
-    entry = findZipEntry(buf, 'word/document.xml');
-  } catch (err) {
-    throw err instanceof FileReadError ? err : new FileReadError(NOT_DOCX);
-  }
+  const entry = docxEntries(buf).find((e) => e.name === 'word/document.xml');
   if (!entry) throw new FileReadError('Ten plik nie jest dokumentem Word (.docx).');
-  // Wpis deklarujący ogromny rozmiar albo rozmiar niemożliwy przy deflate (skompresowany
-  // większy niż oryginał) odrzucamy od razu. Rozmiarowi z nagłówka i tak nie ufamy:
-  // rozpakowanie przerywamy tuż po jego przekroczeniu.
-  const { method, size, originalSize, data } = entry;
-  if (originalSize > MAX_XML_BYTES || size > MAX_XML_BYTES || size > originalSize * 1.2 + 1024) {
-    throw new FileReadError(TOO_BIG);
-  }
-  let doc: Uint8Array;
-  if (method === 0) doc = data; // zapisany bez kompresji
-  else if (method === 8) doc = inflateCapped(data, Math.min(MAX_XML_BYTES, originalSize + 1024));
-  else throw new FileReadError(NOT_DOCX);
-
-  const xml = dropFallbacks(strFromU8(doc));
-  const parts: string[] = [];
-  // `[^<>]` i `[^<]` zamiast `[^>]` i `[\s\S]*?`: niedomknięty znacznik nie skanuje do końca
-  // tekstu (koszt kwadratowy), a w <w:t> i tak nie ma „<” (XML zapisuje go jako &lt;).
-  const re =
-    /<w:t(?:\s[^<>]*)?>([^<]*)<\/w:t>|<\/w:p>|<w:tab\b[^<>]*\/>|<w:br\b[^<>]*\/>|<w:noBreakHyphen\b[^<>]*\/>/g;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(xml)) !== null) {
-    if (m[1] !== undefined) parts.push(decodeXmlEntities(m[1]));
-    else if (m[0].startsWith('<w:tab')) parts.push('\t');
-    else if (m[0].startsWith('<w:noBreakHyphen')) parts.push('-');
-    else parts.push('\n'); // </w:p> lub <w:br/>
-  }
-  return parts.join('').replace(/\n{3,}/g, '\n\n').trim();
+  const xml = readDocxPart(buf, entry);
+  // Bez deklaracji przestrzeni nazw nie wiadomo, które znaczniki niosą tekst. Dawniej taki plik
+  // dawał mylące „Plik jest pusty”.
+  const prefix = wmlPrefix(xml);
+  if (prefix === null) throw new FileReadError(ODD_DOCX);
+  return wmlText(xml, prefix);
 }

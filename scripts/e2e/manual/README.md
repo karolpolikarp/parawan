@@ -46,6 +46,7 @@ PARAWAN_CHROMIUM=".cache/przegladarki/chromium-1070054/chrome-win/chrome.exe" np
 | `pasek-startowy.mjs` | Pasek „Parawan nie uruchomił się” w danej przeglądarce (Playwright, zwykły zegar): czy jest ukryty od razu, czy po 4,5 s jest widoczny (aplikacja nie ruszyła) albo usunięty przez `main.ts` (ruszyła), do tego wyjątki i błędy konsoli. Działa na snapshotach Chromium 90, 109 i 111 oraz na Edge i Chrome z systemu (`msedge`, `chrome`). `--ograniczony-ruch` emuluje `prefers-reduced-motion: reduce`. | `node scripts/e2e/manual/pasek-startowy.mjs <chrome.exe \| msedge \| chrome> ["<url>"] [zrzut.png] [--ograniczony-ruch]` (domyślnie `apps/web/dist/index.html?demo`) |
 | `ffprobe.mjs` | To samo w Firefoksie dowolnej wersji przez geckodriver: sonda, wersja, początek wyniku, zrzut. | `node scripts/e2e/manual/ffprobe.mjs <firefox.exe> <geckodriver.exe> "<url>" <zrzut.png> [szer] [wys]` |
 | `edge-probe.mjs` | Otwiera adresy w zainstalowanych Edge i Chrome (Playwright, `channel`) i czyta sondę. To przeglądarki, w których urzędnik naprawdę otwiera plik. | `node scripts/e2e/manual/edge-probe.mjs "<url1>" ["<url2>" …]` |
+| `sesja-przegladarki.mjs` | Czy tekst wklejony do pola źródła zostaje w plikach sesji profilu i wraca po ponownym uruchomieniu z przywracaniem sesji. Wkleja fikcyjny PESEL, zamyka przeglądarkę, przeszukuje cały katalog profilu (w Firefoksie także rozpakowane `*.jsonlz4`), uruchamia ją znowu i czyta pole z przywróconej karty. Chromium działa w widocznym oknie, bo bez okna nie zapisuje sesji. Na kopii pliku bez `autocomplete="off"` na polu i na formularzu wypisuje „TEKST ZOSTAJE”, więc widać, że próba coś mierzy. `--plik`, `--pole demo-input --wynik demo-output` sprawdzają stronę produktu. | `node scripts/e2e/manual/sesja-przegladarki.mjs chromium [chrome.exe \| msedge \| chrome]` albo `… firefox <firefox.exe> <geckodriver.exe>` |
 | `viewports.mjs` | Zrzuty pierwszego ekranu w Edge przy ekranach typowych dla urzędów (1366×768, 1280×720, 1536×864 przy skalowaniu 125%, 1920×1080, powiększenie 125%) i pomiar położenia pola źródła, wyniku i „Kopiuj”. | `node scripts/e2e/manual/viewports.mjs [plik.html] [katalog-zrzutów]` (domyślnie `apps/web/dist/index.html` i `.cache/viewports`) |
 | `pdftext.mjs` | Tekst PDF wyciągnięty tym samym pdf.js co w aplikacji, strona po stronie. Przydaje się do sprawdzenia wydruku „Zapisz jako PDF” (czy nie zostało w nim pole źródła). | `node scripts/e2e/manual/pdftext.mjs <plik.pdf> [od] [do]` |
 | `pdfout.mjs` | Pierwsza strona PDF jako jeden napis JSON: widać, gdzie pdf.js łamie wiersze. | `node scripts/e2e/manual/pdfout.mjs <plik.pdf>` |
@@ -73,6 +74,7 @@ Adres pliku do skryptów to `file:///` i ścieżka z ukośnikami, np.
    odczytania błędu.
 4. Firefox ESR 115 i 140: `ffprobe.mjs` z `Parawan-probe.html?demo` i `?pdftest`.
 5. Edge i Chrome: `edge-probe.mjs` z tymi samymi adresami, potem `viewports.mjs`.
+6. Chromium 109, Edge i Firefox ESR 115: `sesja-przegladarki.mjs` ma wypisać „tekst nie zostaje”.
 
 Wyniki i zrzuty zapisuj poza repo. Skrypty łączą się z siecią tylko przy pobieraniu przeglądarek;
 sam Parawan w żadnym z tych sprawdzeń nie ma dostępu do sieci.

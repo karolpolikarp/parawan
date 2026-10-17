@@ -201,15 +201,22 @@
         </div>
         <span id="app-note-status" role="status" class="vh"></span>
         <div class="card-b">
-          <textarea
-            id="input"
-            class="editor editor-ta"
-            spellcheck="false"
-            autocomplete="off"
-            translate="no"
-            aria-label="Tekst źródłowy do anonimizacji"
-            placeholder="Wklej tekst albo upuść plik (.txt, .md, .csv, .log, .docx, .pdf), anonimizacja dzieje się na bieżąco, podczas pisania.&#10;&#10;Nie wiesz, od czego zacząć? Kliknij „Przykład” powyżej."
-          ></textarea>
+          <!-- Chrome i Edge 109 (ostatnie dla Windows 7 i 8.1) pomijają autocomplete="off" na samym
+               <textarea> i przy zamknięciu zapisują jego treść w plikach sesji profilu, a potem ją
+               przywracają. Słuchają za to autocomplete="off" na formularzu. Formularz nie ma
+               action ani przycisku wysyłki, a CSP (form-action 'none') i tak blokuje wysłanie.
+               display: contents, więc układ się nie zmienia. -->
+          <form class="ta-form" autocomplete="off">
+            <textarea
+              id="input"
+              class="editor editor-ta"
+              spellcheck="false"
+              autocomplete="off"
+              translate="no"
+              aria-label="Tekst źródłowy do anonimizacji"
+              placeholder="Wklej tekst albo upuść plik (.txt, .md, .csv, .log, .docx, .pdf), anonimizacja dzieje się na bieżąco, podczas pisania.&#10;&#10;Nie wiesz, od czego zacząć? Kliknij „Przykład” powyżej."
+            ></textarea>
+          </form>
         </div>
         <div class="card-f">
           <i class="gi" data-i="plik-txt"></i>
@@ -370,6 +377,7 @@
             <li class="hint-desk"><span><kbd>Ctrl</kbd>+<kbd>Enter</kbd> kopiuje wynik do schowka.</span></li>
             <li class="hint-desk"><span><kbd>Ctrl</kbd>+<kbd>P</kbd> drukuje sam wynik. Plik PDF zapiszesz w&nbsp;oknie drukowania.</span></li>
             <li class="hint-desk"><span>Plik (TXT, DOCX, PDF) upuść w&nbsp;dowolnym miejscu strony.</span></li>
+            <li class="hint-desk"><span>Plik lepiej wczytać albo upuścić niż kopiować z&nbsp;Worda. Skopiowany oryginał zostaje w&nbsp;historii schowka Windows (<kbd>Win</kbd>+<kbd>V</kbd>).</span></li>
             <li><span>Strzałkami <kbd>‹</kbd> <kbd>›</kbd> przejdziesz po kolei przez zamaskowane fragmenty.</span></li>
             <li><span>Widok <strong>Porównanie</strong> pokazuje oryginał przekreślony obok znacznika.</span></li>
           </ul>

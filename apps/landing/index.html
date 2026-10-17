@@ -88,7 +88,11 @@
             <div class="demo-panes">
               <div class="demo-pane">
                 <div class="demo-plabel">Tekst źródłowy</div>
-                <textarea id="demo-input" class="editor" spellcheck="false" autocomplete="off" translate="no" aria-label="Tekst źródłowy do anonimizacji" placeholder="Wpisz albo wklej tekst z danymi osobowymi…"></textarea>
+                <!-- Chrome i Edge 109 zapisują treść <textarea> w plikach sesji mimo jego autocomplete="off";
+                     słuchają autocomplete="off" na formularzu (bez action, CSP form-action 'none'). -->
+                <form class="ta-form" autocomplete="off">
+                  <textarea id="demo-input" class="editor" spellcheck="false" autocomplete="off" translate="no" aria-label="Tekst źródłowy do anonimizacji" placeholder="Wpisz albo wklej tekst z danymi osobowymi…"></textarea>
+                </form>
               </div>
               <div class="demo-pane">
                 <div class="demo-plabel">Wynik</div>
