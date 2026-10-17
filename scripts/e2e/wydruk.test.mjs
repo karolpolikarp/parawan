@@ -13,6 +13,7 @@ import {
   EXAMPLE_IBAN_START,
   EXAMPLE_NAME,
   EXAMPLE_PESEL,
+  LEGACY_SKIP,
   launch,
   withApp,
 } from './helpers.mjs';
@@ -34,7 +35,7 @@ const squash = (s) => s.replace(/\s+/g, '');
 
 /**
  * Drukuje stronę do PDF tak jak „Zapisz jako PDF” (arkusz @media print, rozmiar i marginesy
- * z @page) i zwraca tekst wszystkich stron.
+ * z @page) i zwraca tekst wszystkich stron oraz nazwy fontów zapisanych w PDF-ie.
  * @param {import('playwright').Page} page
  */
 async function printedText(page) {
@@ -50,14 +51,20 @@ async function printedText(page) {
   });
   const doc = await task.promise;
   let text = '';
+  /** @type {Set<string>} */
+  const fonts = new Set();
   for (let n = 1; n <= doc.numPages; n++) {
-    const content = await (await doc.getPage(n)).getTextContent();
+    const pdfPage = await doc.getPage(n);
+    const content = await pdfPage.getTextContent();
     for (const it of content.items) if ('str' in it) text += it.str + (it.hasEOL ? '\n' : '');
     text += '\n';
+    // Nazwa fontu z PDF-u (np. „AAAAAA+ArialMT”) jest w commonObjs po przejściu operatorów strony.
+    await pdfPage.getOperatorList();
+    for (const id of Object.keys(content.styles)) fonts.add(pdfPage.commonObjs.get(id)?.name ?? id);
   }
   const pages = doc.numPages;
   await task.destroy();
-  return { text, pages };
+  return { text, pages, fonts: [...fonts] };
 }
 
 /** Na wydruku nie ma żadnej danej z przykładu, a jest znacznik w miejscu numeru PESEL. */
@@ -98,10 +105,42 @@ test('?demo, widok „Wynik”: PDF ma sam wynik, bez danych z pola źródła', 
   await withApp(browser, t, '?demo', async (app) => {
     await app.demoReady();
     await setView(app.page, 'Wynik');
-    const { text } = await printedText(app.page);
+    const { text, fonts } = await printedText(app.page);
     assertNoExampleData(text);
     await assertPrintIsResult(app.page, text);
+    // Z wbudowanego, zmiennego Archivo „Zapisz jako PDF” robił PDF bez warstwy tekstu (Firefox)
+    // albo bez ó, ś, ć, ń, ź (Chromium 109–125). Wydruk ma font systemowy.
+    assert.ok(fonts.length > 0, 'w PDF-ie brak fontów');
+    assert.ok(!fonts.some((f) => /archivo/i.test(f)), `font wydruku: ${fonts.join(', ')}`);
   });
+});
+
+// Bieżący Chromium zapisywał tekst poprawnie także z Archivo, więc wadę widać tylko na starym
+// silniku: Chromium 109 i 111 (próg build.target, Windows 7 i 8.1) oraz 125 wstawiały \x00
+// zamiast ó, ś, ć, ń, ź („Dzie\x00 dobry”, „[MIEJSCOWO\x00\x00]”).
+test('stary silnik (PARAWAN_CHROMIUM): PDF ma polskie litery w warstwie tekstu', {
+  skip: LEGACY_SKIP,
+}, async (t) => {
+  const legacy = await launch({ legacy: true });
+  try {
+    await withApp(legacy, t, '?demo', async (app) => {
+      await app.demoReady();
+      for (const view of ['Wynik', 'Porównanie']) {
+        await setView(app.page, view);
+        const { text } = await printedText(app.page);
+        assert.ok(!text.includes('\u0000'), `${view}: znak zerowy w PDF:\n${JSON.stringify(text)}`);
+        const flat = squash(text);
+        assert.ok(
+          flat.includes('Dzieńdobry') && flat.includes('[MIEJSCOWOŚĆ]'),
+          `${view}:\n${text}`,
+        );
+        assertNoExampleData(text);
+        await assertPrintIsResult(app.page, text);
+      }
+    });
+  } finally {
+    await legacy.close();
+  }
 });
 
 test('?demo, widok „Porównanie”: przekreślone oryginały nie trafiają na wydruk', async (t) => {
@@ -292,5 +331,55 @@ test('„Pobierz .txt”: BOM i \\r\\n; po wczytaniu .csv pobiera się .csv', as
       () => document.getElementById('download-label')?.textContent === 'Pobierz .txt',
     );
     assert.match((await download()).name, /\.txt$/);
+  });
+});
+
+// Przycisk druku dołożył do paska wyniku trzecią akcję. Kiedy pasek schodził do drugiego rzędu,
+// miał 166 px zamiast 90 px, a okno wyniku zaczynało się 76 px niżej niż okno źródła: przy 1366 px
+// z paskiem przewijania Windows, przy 1280 px, a po kliknięciu „Kopiuj” (szersze „Skopiowano ✓”)
+// przy każdej szerokości. Playwright chowa pasek przewijania (--hide-scrollbars), więc szerokości
+// są podane bez niego: 1351 = 1366 − 15, 1265 = 1280 − 15.
+test('pasek wyniku w jednym rzędzie i równy paskowi źródła, także po „Skopiowano ✓”', async (t) => {
+  await withApp(browser, t, '?demo', async (app) => {
+    const { page } = app;
+    await app.demoReady();
+    await app.context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    const measure = () =>
+      page.evaluate(() => {
+        const [src, out] = [...document.querySelectorAll('.toolbar')].map((el) =>
+          el.getBoundingClientRect(),
+        );
+        const y = (id) => document.getElementById(id)?.getBoundingClientRect().y ?? NaN;
+        return {
+          heights: [Math.round(src.height), Math.round(out.height)],
+          dy: Math.round(y('output') - y('input')),
+          scroll: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+          label: document.getElementById('copy-label')?.textContent,
+        };
+      });
+    // [szerokość okna bez paska przewijania, dwie kolumny, sprawdzić też „Skopiowano ✓”]
+    for (const [width, twoCols, flash] of [
+      [1214, true, false], // 1229 px z paskiem (1536 × 864 w skali 125%), przed kliknięciem
+      [1905, true, true],
+      [1351, true, true],
+      [1265, true, true],
+      [685, false, true], // jedna kolumna, 700 px z paskiem
+    ]) {
+      await page.setViewportSize({ width, height: 768 });
+      const states = [await measure()];
+      if (flash) {
+        await page.locator('#copy').click();
+        await page.waitForFunction(
+          () => document.getElementById('copy-label')?.textContent === 'Skopiowano ✓',
+        );
+        states.push(await measure());
+      }
+      for (const s of states) {
+        const at = `${width} px, „${s.label}”`;
+        assert.equal(s.heights[1], s.heights[0], `${at}: paski wyniku i źródła ${s.heights}`);
+        if (twoCols) assert.equal(s.dy, 0, `${at}: okno wyniku ${s.dy} px niżej niż okno źródła`);
+        assert.equal(s.scroll, 0, `${at}: poziome przewijanie`);
+      }
+    }
   });
 });

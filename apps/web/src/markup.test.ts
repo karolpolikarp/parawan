@@ -71,6 +71,20 @@ test('aplikacja: przy druku widać tylko #print-out', () => {
   expect(webCss).not.toMatch(/@page[^{]*\{[^}]*margin:\s*0\s*[;}]/);
 });
 
+// Z wbudowanego, zmiennego Archivo „Zapisz jako PDF” robił PDF bez warstwy tekstu (Firefox
+// 115–156) albo z \x00 zamiast ó, ś, ć, ń, ź (Chromium 109–125). Wydruk ma font systemowy.
+test('aplikacja: wydruk fontem systemowym, nie wbudowanym Archivo', () => {
+  expect(webCss.length).toBeGreaterThan(10_000);
+  // bez komentarzy, które o Archivo wspominają
+  const print = (webCss.match(/@media print \{([\s\S]*?)\n\}/)?.[1] ?? '').replace(
+    /\/\*[\s\S]*?\*\//g,
+    '',
+  );
+  const rule = print.match(/\.print-out \{([^}]*)\}/)?.[1] ?? '';
+  expect(rule).toContain('font: 11pt/1.45 Arial, sans-serif;');
+  expect(print).not.toMatch(/Archivo|var\(--sans\)|var\(--mono\)|font-family/);
+});
+
 test('aplikacja: #print-out to dziecko <body> poza .grid, bez tłumacza', () => {
   const gridStart = webHtml.indexOf('<div class="grid">');
   expect(gridStart).toBeGreaterThan(0);
@@ -89,8 +103,16 @@ test('aplikacja: #print-out dostaje tekst wyniku wyłącznie przez textContent',
   expect(v).not.toBe('');
   // jedyny uchwyt do kontenera i jedyne przypisanie: textContent z wyniku albo komunikat
   expect(webMain.match(/['"]#?print-out['"]/g)).toHaveLength(1);
-  const writes = [...webMain.matchAll(new RegExp(`\\b${v}\\.(\\w+)\\s*(=|\\()`, 'g'))];
+  // każde przypisanie, także złożone (+=, ??= …), i każde wywołanie metody na kontenerze
+  const assign = '(?:[-+*/%&|^]|\\*\\*|<<|>>>?|&&|\\|\\||\\?\\?)?=(?!=)';
+  const writes = [...webMain.matchAll(new RegExp(`\\b${v}\\.(\\w+)\\s*(?:${assign}|\\()`, 'g'))];
   expect(writes.map((m) => m[1])).toEqual(['textContent']);
+  // Uchwyt pada tylko w deklaracji i w tym jednym przypisaniu, więc ani alias
+  // (const el = printOut), ani zapis przez nawias (printOut['innerHTML']) nie przejdą bokiem.
+  expect(webMain.match(new RegExp(`\\b${v}\\b`, 'g'))).toHaveLength(2);
+  expect(webMain).not.toMatch(
+    new RegExp(`\\b${v}\\s*(?:\\.|\\[)\\s*['"\`]?(?:innerHTML|outerHTML|insertAdjacentHTML)`),
+  );
   const value = webMain.match(new RegExp(`\\b${v}\\.textContent = ([^;]+);`))?.[1] ?? '';
   expect(value).toBe('lastRedacted ? outputText() : PRINT_EMPTY');
   expect(webMain).toContain('const outputText = (): string => finalText({ redacted: lastRedacted });');

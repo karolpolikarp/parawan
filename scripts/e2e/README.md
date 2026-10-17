@@ -42,8 +42,13 @@ jako strażnik CSP w `ci.yml`, `release.yml` i `deploy-landing.yml`: `node scrip
 Druk sprawdza `wydruk.test.mjs` na prawdziwym PDF-ie z Chromium (`page.pdf()` przy emulacji
 druku), a tekst wyciąga z niego `pdfjs-dist` (wersja legacy, ta sama co w aplikacji). Na wydruku
 ma być sam wynik, w całości i w obu widokach („Wynik” i „Porównanie”), bez pola źródła
-i przekreślonych oryginałów. Ten sam plik sprawdza pobrany `.txt` (BOM UTF-8, końce wierszy
-`\r\n`) i `.csv` po wczytaniu pliku `.csv`.
+i przekreślonych oryginałów. Wydruk ma font systemowy, a nie wbudowany Archivo (test czyta nazwy
+fontów z PDF-u): z Archivo Firefox zapisywał PDF bez warstwy tekstu, a Chromium 109–125 bez
+ó, ś, ć, ń, ź. Z `PARAWAN_CHROMIUM` ten sam wydruk powstaje na starym silniku i musi mieć polskie
+litery w tekście. Ten sam plik sprawdza pobrany `.txt` (BOM UTF-8, końce wierszy `\r\n`), `.csv`
+po wczytaniu pliku `.csv` i pasek nad wynikiem: przy 1351 i 1265 px (1366 i 1280 px z paskiem
+przewijania Windows, który Playwright chowa) mieści się w jednym rzędzie, ma wysokość paska
+źródła i nie zawija się po „Skopiowano ✓”.
 
 Przy błędzie zrzut całej strony trafia do `test-results/e2e/` (w CI jako artefakt).
 `PARAWAN_CHROMIUM` ze ścieżką do innej binarki Chromium włącza testy starego silnika

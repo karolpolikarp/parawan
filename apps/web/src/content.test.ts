@@ -71,9 +71,11 @@ test('landing: kod na GitHubie to nie „jeden plik” (jednym plikiem jest Para
 const PRINT_TIP =
   'Drukuje sam wynik, bez tekstu źródłowego. PDF zapiszesz w oknie drukowania: ' +
   '„Zapisz jako PDF” albo „Microsoft Print to PDF”.';
+// Pole „Nagłówki i stopki” stoi w Chrome, Edge i Firefoksie w zwiniętej sekcji „Więcej ustawień”:
+// kto go nie widzi, drukuje ścieżkę file:///C:/Users/<login>/…, przed którą dopisek ostrzega.
 const PRINT_HINT =
-  'W oknie drukowania odznacz „Nagłówki i stopki”. Inaczej na wydruku znajdzie się ścieżka ' +
-  'pliku z&nbsp;nazwą użytkownika komputera.';
+  'W oknie drukowania rozwiń „Więcej ustawień” i odznacz „Nagłówki i stopki”. Inaczej na ' +
+  'wydruku znajdzie się ścieżka pliku z&nbsp;nazwą użytkownika komputera.';
 const PRINT_TIP_LI =
   '<kbd>Ctrl</kbd>+<kbd>P</kbd> drukuje sam wynik. Plik PDF zapiszesz w&nbsp;oknie drukowania.';
 const PRINT_EMPTY = 'Brak wyniku do wydruku. Wklej tekst w pole „Tekst źródłowy”.';
@@ -92,9 +94,20 @@ test('aplikacja: przycisk druku nad wynikiem, obok „Pobierz”, z ikoną druka
 
 test('aplikacja: prośba o wyłączenie nagłówków druku i wskazówka Ctrl+P', () => {
   expect(webHtml).toContain(`<p class="out-hint">${PRINT_HINT}</p>`);
-  // dopisek stoi w stopce karty wyniku, pod ostrzeżeniem o przeglądaniu wyniku
-  const foot = webHtml.match(/<div class="card-f warn-note">[\s\S]*?<\/div>\s*<\/div>/)?.[0] ?? '';
-  expect(foot).toContain('class="out-hint"');
+  // Dopisek ma własny wiersz stopki karty wyniku, z ikoną drukarki, tuż pod ostrzeżeniem
+  // „Przejrzyj wynik…”. W jednym bloku z ostrzeżeniem trójkąt stawał przy radzie o druku.
+  const warn = webHtml.match(/<div class="card-f warn-note">([\s\S]*?)<\/div>/)?.[1] ?? '';
+  expect(warn).toContain('Przejrzyj wynik przed udostępnieniem');
+  expect(warn).toContain('data-i="ostrzezenie"');
+  expect(warn).not.toContain('out-hint');
+  const after = webHtml.slice(webHtml.indexOf(warn) + warn.length);
+  const note =
+    after.match(
+      /^<\/div>\s*(?:<!--[\s\S]*?-->\s*)?<div class="card-f print-note">([\s\S]*?)<\/div>/,
+    )?.[1] ?? '';
+  expect(note.replace(/\s+</g, '<').trim()).toBe(
+    `<i class="gi" data-i="drukarka"></i><p class="out-hint">${PRINT_HINT}</p>`,
+  );
   expect(webHtml).toContain(`<li class="hint-desk"><span>${PRINT_TIP_LI}</span></li>`);
   expect(webMain).toContain(`const PRINT_EMPTY = '${PRINT_EMPTY}';`);
 });

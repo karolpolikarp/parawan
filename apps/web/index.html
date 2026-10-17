@@ -214,7 +214,7 @@
           <span class="card-sp"></span>
           <span class="help" data-tip="Kolor znacznika wskazuje kategorię danych, legenda powyżej" data-tip-pos="left" tabindex="0">?</span>
         </div>
-        <div class="toolbar">
+        <div class="toolbar toolbar-out">
           <span class="seg" role="group" aria-label="Widok wyniku">
             <button type="button" id="view-result" class="btn on" aria-pressed="true" data-tip="Pokazuje tylko zanonimizowany tekst"><i class="gi" data-i="maskowanie"></i>Wynik</button>
             <button type="button" id="view-compare" class="btn" aria-pressed="false" data-tip="Oryginał przekreślony obok znacznika: widać, co zostało zamienione"><i class="gi" data-i="podglad"></i>Porównanie</button>
@@ -240,14 +240,18 @@
         </div>
         <div class="card-f warn-note">
           <i class="gi" data-i="ostrzezenie"></i>
-          <div class="warn-txt">
+          <span class="warn-txt">
             <!-- Stałe ostrzeżenie o typach wyłączonych w „Co maskować” (wybór jest zapamiętywany). -->
             <span id="mask-off-note" class="mask-off" hidden><span id="mask-off-text"></span> <button type="button" id="mask-off-reset" class="linklike">Włącz wszystko</button></span>
             <span>Przejrzyj wynik przed udostępnieniem, wykrywanie nazwisk jest heurystyczne. <a href="#ograniczenia">Ograniczenia</a></span>
-            <!-- Nagłówek i stopkę wydruku dopisuje przeglądarka (tytuł, adres file:///C:/Users/…),
-                 strona nie może ich wyłączyć. Zostaje prośba przy przycisku druku. -->
-            <p class="out-hint">W oknie drukowania odznacz „Nagłówki i stopki”. Inaczej na wydruku znajdzie się ścieżka pliku z&nbsp;nazwą użytkownika komputera.</p>
-          </div>
+          </span>
+        </div>
+        <!-- Nagłówek i stopkę wydruku dopisuje przeglądarka (tytuł, adres file:///C:/Users/…),
+             strona nie może ich wyłączyć. Zostaje prośba pod wynikiem. Pole „Nagłówki
+             i stopki” jest w Chrome, Edge i Firefoksie w zwiniętej sekcji „Więcej ustawień”. -->
+        <div class="card-f print-note">
+          <i class="gi" data-i="drukarka"></i>
+          <p class="out-hint">W oknie drukowania rozwiń „Więcej ustawień” i odznacz „Nagłówki i stopki”. Inaczej na wydruku znajdzie się ścieżka pliku z&nbsp;nazwą użytkownika komputera.</p>
         </div>
       </section>
 
