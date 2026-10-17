@@ -797,6 +797,26 @@ export function buildDataset() {
   neg('{"sku": "A-107", "name": "Róża pustyni"} oraz <osoba>prawna</osoba>', ['Róża pustyni', 'prawna']);
   neg('{"imie": "b.d.", "nazwisko": "b.d."}\nLogin: none', ['b.d.', 'none']);
   neg('Koszt naprawy wyniesie 10-200 PLN brutto. Smith et al. Nature 2019.', ['10-200 PLN', 'et al. Nature 2019']);
+  // Regresje partii b3 po weryfikacji: osoba po rzeczowniku z wielkiej litery, po tytule za nazwą
+  // ulicy, WERSALIKAMI po kotwicy, po „św.", pod „osoba", zdrobnienie-nazwisko, adres przed datą,
+  // etykieta zamieszkania — oraz zdania ogólne i eponimy, które mają zostać.
+  osp('Kierownik Zespołu Kowalski zatwierdził urlop. Reakcja Wiśniewskiego na wezwanie była natychmiastowa.', ['Kowalski', 'Wiśniewskiego'], ['Kierownik Zespołu', 'Reakcja']);
+  osp('Konflikt na linii Nowak – Zieliński trwał od lat. Kierownik linii Wójcik polecił wyłączenie zasilania.', ['Nowak', 'Zieliński', 'Wójcik'], ['Konflikt na linii', 'Kierownik linii']);
+  osp('Na ul. Długiej lek. Anna Nowak udzieliła pomocy. W parku lek. Jan Kowalski reanimował poszkodowanego.', ['Anna', 'Nowak', 'Jan', 'Kowalski'], ['Na ul. Długiej lek.', 'W parku lek.']);
+  str('Adres: ul. dra Jana Kowalskiego 12/3, Kraków', ['Jana Kowalskiego 12/3', 'Kraków'], ['Adres:']);
+  osp('NA ULICY JAN KOWALSKI ZOSTAŁ POTRĄCONY. KIEROWNIK PLACÓWKI JOLANTA PYREK.', ['JAN', 'KOWALSKI', 'JOLANTA', 'PYREK'], ['NA ULICY', 'KIEROWNIK PLACÓWKI']);
+  osp('Mimo wezwania św. Tomasz Gzik nie stawił się. Pożar kościoła widział św. Kowalski.', ['Tomasz', 'Gzik', 'Kowalski'], ['Mimo wezwania św.', 'Pożar kościoła widział św.']);
+  str('{"osoba": "KOWALSKI JAN"}, <osoba>Wróbel Anna</osoba>, {"id": 7, "name": "anna"}', ['KOWALSKI', 'JAN', 'Wróbel', 'Anna', '"anna"'], ['"osoba"', '"name"']);
+  osp('Na rozprawie świadek Krzaczyk potwierdził, że Kluczyk był obecny. Pełnomocnik Placka wniósł o oddalenie powództwa.', ['Krzaczyk', 'Kluczyk', 'Placka'], ['Na rozprawie świadek', 'Pełnomocnik']);
+  str('Zdarzenie miało miejsce przy ul. Długiej 15 12 lipca 2023 r. Dostawa: ul. Lipowa 12\tMaja Kowalska', ['Długiej 15', 'Lipowa 12', 'Maja', 'Kowalska'], ['12 lipca 2023 r.']);
+  str('Wnioskodawca: Jan Kowalski, miejscowość zamieszkania: Tarnów. Zamieszkanie: Kraków', ['Jan', 'Kowalski', 'Tarnów', 'Kraków'], ['miejscowość zamieszkania:', 'Zamieszkanie:']);
+  neg('Program skierowany jest do osób zamieszkujących w Gdańsku. Rodziny mieszkające w Poznaniu otrzymają dodatek.', ['Gdańsku', 'Poznaniu']);
+  osp('Pod wskazanym adresem zamieszkuje Jarosław Wilk z konkubiną.', ['Jarosław', 'Wilk'], ['Pod wskazanym adresem zamieszkuje']);
+  osp('Sąd zasądził od uczestnika Kazimierza Dolnego koszty.', ['Kazimierza', 'Dolnego'], ['Sąd zasądził od uczestnika']);
+  osp('Wniosek złożyła Pasko-Gzowska. Szanowna Pani Dyrektor Szkoły Kowalska, uprzejmie informuję.', ['Pasko-Gzowska', 'Kowalska'], ['Wniosek złożyła', 'Pani Dyrektor Szkoły']);
+  neg('Szkoła Podstawowa nr 3 im Marii Konopnickiej. Linie Langera zachowane. Kościół pod wezwaniem św. Jana Chrzciciela.', ['Marii Konopnickiej', 'Langera', 'Jana Chrzciciela']);
+  osp('Na ulicy Jan Kowalski zasłabł. W parku Anna Nowak spacerowała z psem.', ['Jan', 'Kowalski', 'Anna', 'Nowak'], ['Na ulicy', 'W parku']);
+  neg('Szpital im. dr Anny Nowak w Lublinie. Polsko-Szwedzka Izba Gospodarcza. Obchody na placu Piłsudskiego 11 Listopada.', ['Anny Nowak', 'Polsko-Szwedzka', 'Piłsudskiego 11 Listopada']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
