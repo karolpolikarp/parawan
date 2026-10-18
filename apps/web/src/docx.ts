@@ -4,10 +4,16 @@
  * DOCX to ZIP z XML-em w środku; treść dokumentu żyje w `word/document.xml`,
  * a widoczny tekst — w elementach `<w:t>`. Rozpakowujemy (zip.ts) TYLKO ten jeden wpis
  * (z limitem rozmiaru, więc bomba ZIP nie zamrozi karty) i zbieramy tekst runów,
- * wstawiając \n za końce akapitów (`</w:p>`), puste akapity (`<w:p/>`), `<w:br/>` i `<w:cr/>`,
- * \t za `<w:tab/>` oraz zwykły „-” za twardy łącznik `<w:noBreakHyphen/>` (bez niego kod
- * pocztowy „00-950” skleja się w „00950” i przechodzi jawny). Bez `<w:cr/>` „Jan” i „Kowalski”
- * z dwóch wierszy sklejały się w „JanKowalski” i nazwisko przechodziło jawne. Łącznik miękki
+ * wstawiając \n za końce akapitów (`</w:p>`), `<w:br/>` i `<w:cr/>`, \t za `<w:tab/>` oraz
+ * zwykły „-” za twardy łącznik `<w:noBreakHyphen/>` (bez niego kod pocztowy „00-950” skleja
+ * się w „00950” i przechodzi jawny). Bez `<w:cr/>` „Jan” i „Kowalski”
+ * z dwóch wierszy sklejały się w „JanKowalski” i nazwisko przechodziło jawne.
+ *
+ * Pusty akapit `<w:p/>` (tak Word zapisuje pusty wiersz i pustą komórkę tabeli) nie daje nic,
+ * a pusta komórka tabeli nie daje nic także wtedy, gdy jej akapit ma formatowanie. Taki akapit
+ * nie rozdziela żadnych wyrazów, tylko dokłada pusty wiersz, a przez pusty wiersz rdzeń nie łączy
+ * imienia z nazwiskiem ani etykiety „Login:” z wartością. Tabela „Jan | (puste drugie imię) |
+ * Kowalski” zostawiała wtedy imię jawne. Łącznik miękki
  * `<w:softHyphen/>` pomijamy, bo w tekście go nie widać. Pola tekstowe Word zapisuje dwa razy
  * (`mc:Choice` i zapasowo `mc:Fallback`), więc gałęzie `mc:Fallback` usuwamy, żeby treść nie
  * dublowała się w wyniku i licznikach.
@@ -142,17 +148,19 @@ const tokenizers = new Map<string, RegExp>();
 /**
  * Wyrażenie wyciągające tekst dla danego prefiksu. `[^<>]` i `[^<]` zamiast `[^>]`
  * i `[\s\S]*?`: niedomknięty znacznik nie skanuje do końca tekstu (koszt kwadratowy), a w <w:t>
- * i tak nie ma „<” (XML zapisuje go jako &lt;). `(?=[\s/>])` za nazwą, żeby `<w:p/>` nie łapało
- * `<w:pPr/>`, a `<w:t>` nie łapało `<w:tab/>` ani `<w:delText>` (tekstu usuniętego w śledzonej
- * zmianie, którego w dokumencie już nie widać).
+ * i tak nie ma „<” (XML zapisuje go jako &lt;). `(?=[\s/>])` za nazwą, żeby `<w:t>` nie łapało
+ * `<w:tab/>` ani `<w:delText>` (tekstu usuniętego w śledzonej zmianie, którego w dokumencie już
+ * nie widać), a `<w:tc>` nie łapało `<w:tcPr>` ani `<w:tcW/>`. Grupy: 1 tekst, 2 znak
+ * specjalny, 3 „/” zamykającego `</w:tc>`, 4 „/” samozamykającego `<w:tc/>`.
  */
 function tokenizer(prefix: string): RegExp {
   let re = tokenizers.get(prefix);
   if (!re) {
     const n = (local: string): string => wmlName(prefix, local);
     re = new RegExp(
-      `<${n('t')}(?:\\s[^<>]*)?>([^<]*)</${n('t')}>|</${n('p')}>|<${n('p')}(?=[\\s/])[^<>]*/>` +
-        `|<(${n('tab')}|${n('br')}|${n('cr')}|${n('noBreakHyphen')})(?=[\\s/>])[^<>]*/>`,
+      `<${n('t')}(?:\\s[^<>]*)?>([^<]*)</${n('t')}>|</${n('p')}>` +
+        `|<(${n('tab')}|${n('br')}|${n('cr')}|${n('noBreakHyphen')})(?=[\\s/>])[^<>]*/>` +
+        `|<(/?)${n('tc')}(?=[\\s/>])[^<>]*?(/?)>`,
       'g',
     );
     tokenizers.set(prefix, re);
@@ -200,15 +208,34 @@ function dropFallbacks(xml: string): string {
 export function wmlText(xml: string, prefix: string): string {
   const re = tokenizer(prefix);
   const parts: string[] = [];
+  // Otwarte komórki tabeli (także zagnieżdżone): gdzie zaczyna się ich wkład i czy mają tekst.
+  const cells: { from: number; text: boolean }[] = [];
   const src = dropFallbacks(xml);
   let m: RegExpExecArray | null;
   while ((m = re.exec(src)) !== null) {
     // nazwa bez prefiksu („ns0:tab” → „tab”); bez dwukropka indexOf daje -1, czyli całość
     const local = m[2]?.slice(m[2].indexOf(':') + 1);
-    if (m[1] !== undefined) parts.push(decodeXmlEntities(m[1]));
-    else if (local === 'tab') parts.push('\t');
-    else if (local === 'noBreakHyphen') parts.push('-');
-    else parts.push('\n'); // </w:p>, <w:p/>, <w:br/> lub <w:cr/>
+    if (m[1] !== undefined) {
+      const t = decodeXmlEntities(m[1]);
+      parts.push(t);
+      if (cells.length && t.trim()) cells[cells.length - 1].text = true;
+    } else if (m[3] !== undefined) {
+      if (m[4]) continue; // <w:tc/> nie ma treści
+      if (!m[3]) {
+        cells.push({ from: parts.length, text: false });
+        continue;
+      }
+      const cell = cells.pop(); // zamknięcie bez otwarcia (uszkodzony XML) pomijamy
+      if (!cell) continue;
+      // Pusta komórka nie daje nawet nowego wiersza. Komórka z tekstem czyni niepustą także
+      // komórkę, w której stoi jej tabela.
+      if (!cell.text) parts.length = cell.from;
+      else if (cells.length) cells[cells.length - 1].text = true;
+    } else if (local === 'tab') parts.push('\t');
+    else if (local === 'noBreakHyphen') {
+      parts.push('-');
+      if (cells.length) cells[cells.length - 1].text = true;
+    } else parts.push('\n'); // </w:p>, <w:br/> lub <w:cr/>
   }
   return parts.join('').replace(/\n{3,}/g, '\n\n').trim();
 }

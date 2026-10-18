@@ -276,17 +276,83 @@ test('<w:cr/> to nowy wiersz: „Jan<w:cr/>Kowalski” nie skleja się i nazwisk
   expect(redacted).toContain('[IMIĘ I NAZWISKO]');
 });
 
-test('pusty akapit <w:p/> daje pusty wiersz, a <w:pPr/> nie jest akapitem', () => {
+test('pusty akapit <w:p/> nie daje pustego wiersza: „Login:” i imię z nazwiskiem zostają połączone', () => {
+  // tak Word 365 zapisuje pusty akapit bez formatowania
+  const empty = '<w:p w14:paraId="637B1930" w14:textId="77777777" w:rsidR="007B5933" w:rsidRDefault="007B5933"/>';
   const docx = makeDocx(
-    '<w:p><w:r><w:t>Jan Kowalski</w:t></w:r></w:p><w:p/>' +
-      '<w:p><w:pPr/><w:r><w:t>PESEL 44051401359</w:t></w:r></w:p>',
+    '<w:p><w:r><w:t>Login:</w:t></w:r></w:p>' +
+      empty +
+      '<w:p><w:r><w:t>pwisniewski</w:t></w:r></w:p>' +
+      '<w:p><w:r><w:t>Wnioskodawca: Jan</w:t></w:r></w:p><w:p />' +
+      '<w:p><w:r><w:t>Kowalski</w:t></w:r></w:p>',
   );
-  expect(extractDocxText(docx)).toBe('Jan Kowalski\n\nPESEL 44051401359');
-  // z atrybutami i spacją przed „/>”; kolejne puste akapity zwijają się do jednego pustego wiersza
-  const more = makeDocx(
-    '<w:p><w:r><w:t>A</w:t></w:r></w:p><w:p w:rsidR="00A1" /><w:p /><w:p><w:r><w:t>B</w:t></w:r></w:p>',
+  const text = extractDocxText(docx);
+  expect(text).toBe('Login:\npwisniewski\nWnioskodawca: Jan\nKowalski');
+  const { redacted } = redactPII(text);
+  expect(redacted).not.toMatch(/pwisniewski|Jan|Kowalski/);
+  expect(redacted).toContain('[LOGIN]');
+});
+
+test('znaczniki samozamykające w akapicie (<w:pPr/>, <w:pStyle/>, <w:proofErr/>) nie łamią wiersza', () => {
+  // Word otacza znacznikiem sprawdzania pisowni wyrazy, których nie zna, czyli zwykle nazwiska
+  const docx = makeDocx(
+    '<w:p><w:pPr><w:pStyle w:val="Tresc"/></w:pPr><w:r><w:t xml:space="preserve">Na wniosek Pana Tomasza </w:t></w:r>' +
+      '<w:proofErr w:type="spellStart"/><w:r><w:t>Wierzbickiego</w:t></w:r><w:proofErr w:type="spellEnd"/>' +
+      '<w:r><w:t xml:space="preserve">, PESEL 85071412358.</w:t></w:r></w:p>',
   );
-  expect(extractDocxText(more)).toBe('A\n\nB');
+  const text = extractDocxText(docx);
+  expect(text).toBe('Na wniosek Pana Tomasza Wierzbickiego, PESEL 85071412358.');
+  expect(redactPII(text).redacted).toBe('Na wniosek Pana [IMIĘ I NAZWISKO], PESEL [PESEL].');
+  const two = makeDocx('<w:p><w:pPr/><w:r><w:t>A</w:t></w:r></w:p><w:p><w:pPr/><w:r><w:t>B</w:t></w:r></w:p>');
+  expect(extractDocxText(two)).toBe('A\nB');
+});
+
+/** Tabela Worda: wiersze z komórkami, każda komórka to akapity (pusty napis = pusta komórka). */
+function table(rows: string[][], emptyCell = '<w:p w:rsidR="00B51272" w:rsidRDefault="00B51272"/>'): string {
+  const cell = (t: string): string =>
+    '<w:tc><w:tcPr><w:tcW w:w="2268" w:type="dxa"/></w:tcPr>' +
+    (t ? `<w:p><w:r><w:t>${t}</w:t></w:r></w:p>` : emptyCell) +
+    '</w:tc>';
+  return `<w:tbl><w:tblPr/>${rows.map((r) => `<w:tr>${r.map(cell).join('')}</w:tr>`).join('')}</w:tbl>`;
+}
+
+test('pusta komórka tabeli nie rozdziela sąsiednich: imię i login z tabeli zasłonięte', () => {
+  const rows = [
+    ['Imię', 'Drugie imię', 'Nazwisko'],
+    ['Jan', '', 'Kowalski'],
+    ['Login:', '', 'jkowalski'],
+  ];
+  const expected = 'Imię\nDrugie imię\nNazwisko\nJan\nKowalski\nLogin:\njkowalski';
+  // pusta komórka jako <w:p/> i jako akapit z formatowaniem (dawniej dawał pusty wiersz)
+  for (const empty of ['<w:p/>', '<w:p><w:pPr><w:jc w:val="center"/><w:rPr><w:b/></w:rPr></w:pPr></w:p>']) {
+    const text = extractDocxText(makeDocx(table(rows, empty)));
+    expect(text, empty).toBe(expected);
+    const { redacted } = redactPII(text);
+    expect(redacted, empty).not.toMatch(/\bJan\b|Kowalski|jkowalski/);
+    expect(redacted, empty).toContain('[LOGIN]');
+  }
+});
+
+test('komórka z samą spacją albo tabulatorem jest pusta, z twardym łącznikiem nie; zagnieżdżona tabela', () => {
+  const docx = makeDocx(
+    '<w:tbl><w:tr>' +
+      '<w:tc><w:p><w:r><w:t>A</w:t></w:r></w:p></w:tc>' +
+      '<w:tc><w:p><w:r><w:t xml:space="preserve">  </w:t><w:tab/></w:r></w:p><w:p/></w:tc>' +
+      '<w:tc><w:p><w:r><w:noBreakHyphen/></w:r></w:p></w:tc>' +
+      // komórka z tabelą w środku: tekst wewnętrznej komórki liczy się też dla zewnętrznej
+      `<w:tc><w:p><w:pPr/></w:p>${table([['', 'B']])}<w:p><w:pPr/></w:p></w:tc>` +
+      `<w:tc>${table([['', '']])}<w:p><w:pPr/></w:p></w:tc>` +
+      '<w:tc/><w:tc><w:tcPr><w:tcW w:w="1"/></w:tcPr><w:p><w:r><w:t>C</w:t></w:r></w:p></w:tc>' +
+      '</w:tr></w:tbl>',
+  );
+  expect(extractDocxText(docx)).toBe('A\n-\n\nB\n\nC');
+});
+
+test('niedomknięta komórka i zamknięcie bez otwarcia nie gubią tekstu', () => {
+  const docx = makeDocx(
+    '</w:tc><w:p><w:r><w:t>A</w:t></w:r></w:p><w:tc><w:p><w:pPr/></w:p><w:p><w:r><w:t>B</w:t></w:r></w:p>',
+  );
+  expect(extractDocxText(docx)).toBe('A\n\nB');
 });
 
 /** Dokument z dowolnym elementem głównym (prefiks, deklaracje). */
@@ -294,13 +360,17 @@ function docxWithRoot(open: string, close: string, body: string): Uint8Array {
   return zipSync({ 'word/document.xml': strToU8(`<?xml version="1.0"?>${open}${body}${close}`) });
 }
 
-/** Treść z każdym rodzajem znacznika, który tokenizer zamienia na tekst, dla prefiksu `p`. */
+/**
+ * Treść z każdym rodzajem znacznika, który tokenizer zamienia na tekst albo pomija, dla prefiksu
+ * `p`. Pusta komórka z formatowanym akapitem zniknie tylko wtedy, gdy `tc` też ma ten prefiks.
+ */
 const BODY = (p: string): string =>
   `<${p}body><${p}p><${p}r><${p}t>Jan Kowalski</${p}t><${p}tab/><${p}t>PESEL 44051401359</${p}t>` +
   `<${p}br/><${p}t>31</${p}t><${p}noBreakHyphen/><${p}t>042 Kraków</${p}t></${p}r></${p}p>` +
-  `<${p}p/><${p}p><${p}r><${p}t>Anna</${p}t><${p}cr/><${p}t>Nowak</${p}t>` +
+  `<${p}p/><${p}tbl><${p}tr><${p}tc><${p}tcPr><${p}tcW ${p}w="1"/></${p}tcPr><${p}p><${p}pPr/></${p}p>` +
+  `</${p}tc></${p}tr></${p}tbl><${p}p><${p}r><${p}t>Anna</${p}t><${p}cr/><${p}t>Nowak</${p}t>` +
   `<${p}delText>usunięte</${p}delText></${p}r></${p}p></${p}body>`;
-const EXPECTED = 'Jan Kowalski\tPESEL 44051401359\n31-042 Kraków\n\nAnna\nNowak';
+const EXPECTED = 'Jan Kowalski\tPESEL 44051401359\n31-042 Kraków\nAnna\nNowak';
 
 test('prefiks ns0: (i każdy inny) daje ten sam tekst co w:', () => {
   const w = docxWithRoot(`<w:document xmlns:w="${W}">`, '</w:document>', BODY('w:'));
@@ -375,12 +445,14 @@ test('tekst ukryty (w:vanish) trafia do pola źródła, usunięty w śledzonej z
   expect(redactPII(text).redacted).not.toContain('Kowalski');
 });
 
-test('tysiące niedomkniętych <w:p i <w:cr: tekst w ułamku sekundy', () => {
+test('tysiące niedomkniętych <w:p, <w:cr i <w:tc oraz otwartych komórek: tekst w ułamku sekundy', () => {
   const K = 60_000;
   const docx = makeDocx(
     '<w:p><w:r><w:t>A</w:t></w:r></w:p>' +
       '<w:p a'.repeat(K) +
       '<w:cr a'.repeat(K) +
+      '<w:tc a'.repeat(K) +
+      '<w:tc>'.repeat(K) +
       '<w:p><w:r><w:t>B</w:t></w:r></w:p>',
   );
   const t0 = performance.now();

@@ -1,7 +1,7 @@
 import { redactPII, type PiiFinding, type PiiType } from 'anonimizator';
 import { escapeHtml, renderAligned } from './compare';
 import { extractDocxText } from './docx';
-import { type DocxInventory, docxInventoryNote, inventoryDocx } from './docx-inventory';
+import { type DocxInventory, docxEmptyBodyError, docxInventoryNote, inventoryDocx } from './docx-inventory';
 import {
   decodeText,
   FileReadError,
@@ -883,10 +883,12 @@ function flushPendingUpdate(): void {
 document.addEventListener('submit', (e) => e.preventDefault());
 
 input.addEventListener('input', () => {
-  // Własna edycja zamyka komunikaty: stary błąd już nie dotyczy, a „Cofnij” po edycji
-  // przywróciłby tekst sprzed niej i skasował to, co właśnie wpisano.
+  // Własna edycja zamyka błąd, bo już nie dotyczy, i „Cofnij”, bo po edycji przywróciłby tekst
+  // sprzed niej i skasował to, co właśnie wpisano. Dopisek o pliku (np. o nagłówkach i stopkach,
+  // których Parawan nie czyta) zostaje do zamknięcia: te części dalej są w oryginale, a fokus po
+  // wczytaniu stoi w polu, więc pierwszy klawisz kasowałby jedyne ostrzeżenie.
   clearError();
-  dismissNote();
+  if (undoText !== null || !noteInfo) expireUndo();
   updateSrcMeta(input.value);
   updatePending = true;
   clearTimeout(updateTimer);
@@ -940,7 +942,9 @@ function showNote(msg: string, prev: string | null, info = ''): void {
   clearTimeout(undoTimer);
   undoText = prev;
   noteInfo = info;
-  const text = [msg, info].filter(Boolean).join(' ');
+  // Dopisek w osobnym wierszu (white-space: pre-line w style.css): ostrzeżenie o pliku nie ginie
+  // w jednym akapicie z „Zastąpiono tekst treścią pliku.”.
+  const text = [msg, info].filter(Boolean).join('\n');
   appNoteText.textContent = text;
   appNoteUndo.hidden = prev === null;
   appNote.hidden = false;
@@ -1146,9 +1150,14 @@ async function loadAnyFile(file: File): Promise<void> {
     const isDocx = !isPdf && ext === 'docx';
     let text: string;
     let info = '';
+    let emptyError = EMPTY_FILE;
     if (isDocx) {
       text = extractDocxText(buf);
-      info = docxInventoryNote(docxInventory(buf));
+      const inv = docxInventory(buf);
+      info = docxInventoryNote(inv);
+      // Skan wklejony jako obraz albo dane tylko w nagłówku: plik nie jest pusty, a „Plik jest
+      // pusty” zachęcałby do uznania go za czysty.
+      emptyError = docxEmptyBodyError(inv) ?? EMPTY_FILE;
     } else if (isPdf) text = await extractPdfText(buf);
     else {
       const unsupported = unsupportedFormat(file.name, head);
@@ -1165,7 +1174,7 @@ async function loadAnyFile(file: File): Promise<void> {
       }
     }
     if (!text.trim()) {
-      showError(EMPTY_FILE);
+      showError(emptyError);
       return;
     }
     replaceSource(text, 'Zastąpiono tekst treścią pliku.', info);

@@ -758,7 +758,9 @@ mark.pii.pii-linked { box-shadow: 0 0 0 2px var(--acc-line); }
   background: var(--acc-soft);
   color: var(--text);
 }
-#app-note-text { flex: 1 1 220px; min-width: 0; }
+/* pre-line: dopisek o pliku i zdanie o ukrytym tekście zaczynają się od nowego wiersza
+   (main.ts i docx-inventory.ts łączą je znakiem „\n”) */
+#app-note-text { flex: 1 1 220px; min-width: 0; white-space: pre-line; }
 /* przyciski trzymają się razem; na wąskim ekranie schodzą pod tekst, do prawej */
 .note-acts { display: flex; align-items: center; gap: 4px; margin-left: auto; }
 .note-x {

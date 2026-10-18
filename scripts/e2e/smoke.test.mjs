@@ -370,9 +370,10 @@ const DOCX_Z_CZESCIAMI = () =>
     },
   );
 
+// Zdanie o ukrytym tekście stoi w osobnym wierszu (white-space: pre-line na #app-note-text).
 const DOCX_NOTE =
   'Wczytano treść główną dokumentu. Parawan nie czyta: nagłówków i stopek (1), komentarzy (1). ' +
-  'Przejrzyj je przed publikacją albo publikuj nowy dokument zapisany z wyniku. ' +
+  'Przejrzyj je przed publikacją albo publikuj nowy dokument zapisany z wyniku.\n' +
   'Dokument ma ukryty tekst (1 fragment). Jest w polu źródła i został sprawdzony.';
 
 test('DOCX z nagłówkiem i komentarzem: komunikat wylicza pominięte części i ukryty tekst', async (t) => {
@@ -394,6 +395,53 @@ test('DOCX z nagłówkiem i komentarzem: komunikat wylicza pominięte części i
     assert.doesNotMatch(input, /Anna Nowak|Sprawdzić adres/);
     const out = await resultText(app);
     assert.ok(!out.includes('600 700 800'), `numer z ukrytego tekstu przeszedł do wyniku:\n${out}`);
+    // ostrzeżenie stoi w dwóch wierszach, nie w jednym akapicie
+    const lines = await page.locator('#app-note-text').evaluate((el) => {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      return new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size;
+    });
+    assert.ok(lines >= 2, `komunikat w ${lines} wierszu`);
+    // Własna edycja zaraz po wczytaniu (fokus jest w polu) nie kasuje ostrzeżenia o częściach pliku:
+    // nagłówek i komentarz dalej są w oryginale.
+    await page.locator('#input').click();
+    await page.keyboard.press('Control+End');
+    await page.keyboard.type(' x');
+    await app.waitForOutput(' x');
+    assert.equal(await page.locator('#app-note').isVisible(), true, 'komunikat zniknął po edycji');
+    assert.equal((await page.locator('#app-note-text').textContent())?.trim(), DOCX_NOTE);
+    await page.getByRole('button', { name: 'Zamknij komunikat' }).click();
+    assert.equal(await page.locator('#app-note').isVisible(), false);
+  });
+});
+
+test('DOCX bez tekstu w treści głównej (skan jako obraz): błąd wylicza części pliku, nie „Plik jest pusty”', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const scan = makeDocx([], {
+      bodyXml: '<w:p/><w:p><w:r><w:drawing/></w:r></w:p><w:p/>',
+      extra: {
+        'word/footer1.xml': wPart('ftr', wPara('Wnioskodawca: Celestyn Stopkowski, PESEL 02270803628')),
+        'word/media/image1.png': new Uint8Array(8),
+      },
+    });
+    await page
+      .locator('#file-input')
+      .setInputFiles({ name: 'skan.docx', mimeType: DOCX_MIME, buffer: Buffer.from(scan) });
+    await page.locator('#app-error').waitFor({ state: 'visible' });
+    assert.equal(
+      (await page.locator('#app-error').textContent())?.trim(),
+      'W treści głównej dokumentu nie ma tekstu. Plik nie jest jednak pusty, Parawan nie czyta w nim: ' +
+        'nagłówków i stopek (1), obrazów (1). Przejrzyj je w Wordzie przed publikacją. Jeśli to skan, ' +
+        'wklej tekst ręcznie, bo rozpoznawanie tekstu ze skanów (OCR) nie jest obsługiwane.',
+    );
+    assert.equal(await page.locator('#app-error').getAttribute('role'), 'alert');
+    assert.equal(await page.locator('#input').inputValue(), '', 'pole źródła zmienione mimo błędu');
+    // naprawdę pusty dokument dalej dostaje zwykły komunikat
+    await page
+      .locator('#file-input')
+      .setInputFiles({ name: 'pusty.docx', mimeType: DOCX_MIME, buffer: Buffer.from(makeDocx([], { bodyXml: '<w:p/>' })) });
+    await page.locator('#app-error').getByText('Plik jest pusty').waitFor();
   });
 });
 
@@ -442,7 +490,7 @@ test('DOCX z częściami wczytany na istniejący tekst: „Cofnij” i komunikat
     await page.locator('#app-note-text').getByText('Parawan nie czyta').waitFor();
     assert.equal(
       (await page.locator('#app-note-text').textContent())?.trim(),
-      `Zastąpiono tekst treścią pliku. ${DOCX_NOTE}`,
+      `Zastąpiono tekst treścią pliku.\n${DOCX_NOTE}`,
     );
     assert.equal(await page.locator('#app-note-undo').isVisible(), true);
     // po 20 s „Cofnij” znika, a dopisek o częściach dokumentu zostaje do zamknięcia
@@ -451,6 +499,20 @@ test('DOCX z częściami wczytany na istniejący tekst: „Cofnij” i komunikat
     assert.equal((await page.locator('#app-note-text').textContent())?.trim(), DOCX_NOTE);
     await page.getByRole('button', { name: 'Zamknij komunikat' }).click();
     assert.equal(await page.locator('#app-note').isVisible(), false);
+    // Edycja zaraz po wczytaniu zabiera „Cofnij” (przywróciłoby tekst sprzed edycji), a dopisek zostaje.
+    // Najpierw zmiana pola: ten sam plik wczytany na identyczny tekst nie ma czego cofać.
+    await page.locator('#input').click();
+    await page.keyboard.press('Control+End');
+    await page.keyboard.type(' y');
+    await page
+      .locator('#file-input')
+      .setInputFiles({ name: 'decyzja-czesci.docx', mimeType: DOCX_MIME, buffer: Buffer.from(DOCX_Z_CZESCIAMI()) });
+    await page.locator('#app-note-undo').waitFor({ state: 'visible' });
+    await page.locator('#input').click();
+    await page.keyboard.press('Control+End');
+    await page.keyboard.type(' x');
+    assert.equal(await page.locator('#app-note-undo').isVisible(), false, '„Cofnij” po edycji');
+    assert.equal((await page.locator('#app-note-text').textContent())?.trim(), DOCX_NOTE);
   });
 });
 
