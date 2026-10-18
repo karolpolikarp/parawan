@@ -42,6 +42,12 @@ jobs:
               || { echo "::error file=$f::brak Content-Security-Policy z default-src 'none' i connect-src 'none'"; exit 1; }
           done
           node scripts/e2e/csp.mjs
+      # WebRTC (RTCPeerConnection) CSP nie obejmuje: połączenie UDP wyszłoby mimo default-src
+      # 'none'. Ten strażnik odrzuca je w tekście obu plików, razem z sendBeacon, EventSource,
+      # WebTransport i workerami (wyjątek: jedno opisane miejsce w pdf.js). Próby w czasie działania
+      # łapie bramka E2E.
+      - name: Strażnik zakazanych API (web i landing)
+        run: node scripts/e2e/zakazane-api.mjs
       # Bramka regresji detekcji na warstwie deterministycznej (bez modelu ONNX — warstwy NER
       # pominięte fail-safe). Fail przy spadku recall na kategoriach osobowych/strukturalnych
       # lub precyzji poniżej progu. Nie commituje raportu — tylko sprawdza progi.

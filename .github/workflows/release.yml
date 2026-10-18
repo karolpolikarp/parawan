@@ -32,6 +32,7 @@ jobs:
           grep -Eq "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'[^\"]*connect-src 'none'" apps/web/dist/index.html \
             || { echo "::error::brak Content-Security-Policy z default-src 'none' i connect-src 'none'"; exit 1; }
           node scripts/e2e/csp.mjs web
+          node scripts/e2e/zakazane-api.mjs web
       # Tag nie czeka na wynik CI, więc wydawany plik sam przechodzi bramkę E2E z ci.yml (sieć,
       # CSP, błędy startu, rozmiar). Landing budowany tylko na potrzeby jej testów, do wydania
       # nie trafia.

@@ -1,14 +1,15 @@
 // Wspólne narzędzia testów E2E na GOTOWYM pliku. Testy otwierają apps/web/dist/index.html
 // (i landing) przez file://, tak jak urzędnik po dwukrotnym kliknięciu, i po każdym teście
 // sprawdzają obietnicę „tekst nie opuszcza przeglądarki”: zero żądań poza samym dokumentem,
-// zero naruszeń CSP, żadnego <meta http-equiv="refresh">, zero wyjątków i błędów w konsoli.
-// Testy vitest w apps/web sprawdzają moduły osobno; tu sprawdzamy plik po buildzie (inline,
-// CSP z wtyczki, fake worker pdf.js).
+// zero prób połączenia WebRTC, zero naruszeń CSP, żadnego <meta http-equiv="refresh">, zero
+// wyjątków i błędów w konsoli, a w pamięci przeglądarki, adresie i tytule karty żadnych danych
+// z wczytanych pism. Testy vitest w apps/web sprawdzają moduły osobno; tu sprawdzamy plik po
+// buildzie (inline, CSP z wtyczki, fake worker pdf.js).
 //
 // Uruchomienie: npm run e2e (po buildzie web i landingu). Każdy kolejny pakiet aplikacji dopisuje
 // swoje scenariusze do scripts/e2e/*.test.mjs i korzysta z withApp().
 import assert from 'node:assert/strict';
-import { mkdirSync, statSync } from 'node:fs';
+import { mkdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
@@ -46,12 +47,50 @@ export const EXAMPLE_IBAN_START = 'PL61 1090 1014';
  */
 export const PISMO_PESEL = '44051401359';
 
+/** Moduł aplikacji z jedyną listą kluczy localStorage (STORAGE_KEYS). */
+export const STORAGE_TS = path.join(ROOT, 'apps', 'web', 'src', 'storage.ts');
+
+/** Klucze z `export const STORAGE_KEYS = [...]` w storage.ts, czytane z tekstu pliku. */
+export function readStorageKeys(src = readFileSync(STORAGE_TS, 'utf8')) {
+  const list = src.match(/^export const STORAGE_KEYS = \[([^\]]*)\]/m)?.[1];
+  const keys = [...(list ?? '').matchAll(/['"]([^'"]+)['"]/g)].map((m) => m[1]);
+  if (!keys.length) throw new Error(`brak listy STORAGE_KEYS w ${STORAGE_TS}`);
+  return keys;
+}
+
 /**
- * Klucze, które aplikacja może zapisać w localStorage (dziś storageSet w main.ts). Każdy nowy
- * klucz to nowa informacja zostawiana na komputerze urzędnika, więc musi trafić tu świadomie.
- * Po A04 lista będzie czytana z apps/web/src/storage.ts.
+ * Klucze, które aplikacja może zapisać w localStorage: lista STORAGE_KEYS z
+ * apps/web/src/storage.ts (storageGet i storageSet przyjmują tylko te). Każdy nowy klucz to nowa
+ * informacja zostawiana na komputerze urzędnika, więc trafia tam świadomie, a assertClean()
+ * odrzuca każdy inny.
  */
-export const ALLOWED_STORAGE_KEYS = ['mask-disabled', 'pseudonyms', 'motion'];
+export const ALLOWED_STORAGE_KEYS = readStorageKeys();
+
+/**
+ * Fikcyjne dane osobowe z pism, które wczytują scenariusze E2E: przykład z aplikacji, pisma
+ * pismo.* z FIXTURES i pisma budowane w testach (DOCX, CSV, tekst przed drukiem). assertClean()
+ * szuka ich po każdym teście w localStorage, sessionStorage, IndexedDB, Cache Storage,
+ * ciasteczkach, adresie, tytule karty, window.name i history.state, bez wielkości liter, spacji
+ * i łączników. Nazwiska jako rdzeń, żeby trafić każdą odmianę. Nowe dane osobowe w scenariuszu
+ * dopisz tutaj.
+ * @type {[string, string][]}
+ */
+export const FICTIONAL_PII = [
+  ['PESEL z przykładu', EXAMPLE_PESEL],
+  ['PESEL z pism pismo.*', PISMO_PESEL],
+  ['nazwisko z przykładu', 'Kowalsk'],
+  ['adres e-mail z przykładu', EXAMPLE_EMAIL],
+  ['numer konta z przykładu', EXAMPLE_IBAN_START],
+  ['telefon z przykładu', '600 700 800'],
+  ['nazwisko prowadzącego z przykładu', 'Bąkiewicz'],
+  ['PESEL z pism DOCX i CSV w testach', '85071412358'],
+  ['nazwisko z pism DOCX i CSV w testach', 'Wierzbick'],
+  ['PESEL ze stopki DOCX w testach', '02270803628'],
+  ['nazwisko ze stopki DOCX w testach', 'Stopkowsk'],
+  ['nazwisko z nagłówka i komentarza DOCX w testach', 'Nowak'],
+  ['nazwisko z testu druku', 'Wiśniewsk'],
+  ['nazwisko z rejestru CSV w testach', 'Zielińsk'],
+];
 
 /** Górna granica rozmiaru pliku aplikacji w bajtach (dziś ok. 2,09 MB; zapas na kolejne pakiety). */
 export const MAX_WEB_BYTES = 2_300_000;
@@ -125,6 +164,8 @@ export async function openApp(browser, query = '', opts = {}) {
   const refreshes = [];
   const pageErrors = [];
   const consoleErrors = [];
+  /** @type {{ api: string, stack: string }[]} każda próba utworzenia połączenia WebRTC */
+  const rtc = [];
   const allowed = (u) => {
     if (/^(data|blob|about):/.test(u)) return true;
     // Sam dokument, dokładnie ten adres. Każdy inny file: (obrazek obok pliku, druga strona)
@@ -163,6 +204,49 @@ export async function openApp(browser, query = '', opts = {}) {
   if (javaScriptEnabled) await context.clock.install();
   await context.exposeFunction('__parawanCsp', (v) => violations.push(v));
   await context.exposeFunction('__parawanRefresh', (v) => refreshes.push(v));
+  await context.exposeFunction('__parawanRtc', (v) => rtc.push(v));
+  // WebRTC to droga, której CSP nie zamyka: connect-src nie obejmuje połączeń ICE (UDP)
+  // ani kanałów danych, a Playwright nie pokazuje ich jako żądań. Numer PESEL wysłany kanałem
+  // danych przeszedłby więc bramkę na zielono. Pułapka podmienia konstruktory przed pierwszym
+  // skryptem strony: każda próba trafia na listę (assertClean() wymaga pustej), a połączenie nie
+  // powstaje, bo konstruktor rzuca wyjątek. Playwright wykonuje ten skrypt w każdej ramce
+  // i w każdym nowym oknie, także w pustej ramce about:blank, zanim strona po nią sięgnie
+  // (sprawdzone na Chromium 149 i 109), więc konstruktor z ramki też jest pułapką. Pilnuje tego
+  // test bramki w smoke.test.mjs, a tekst samego pliku sprawdza dodatkowo zakazane-api.mjs.
+  await context.addInitScript(() => {
+    // Funkcja zgłoszenia zapamiętana przed skryptami strony, żeby nie dało się jej podmienić.
+    const report = window.__parawanRtc;
+    const seen = (api) => {
+      const stack = String(new Error().stack ?? '')
+        .split('\n')
+        .slice(3, 6)
+        .map((s) => s.trim())
+        .join(' | ');
+      report({ api, stack });
+      return new DOMException(`${api}: WebRTC zablokowane przez bramkę E2E`, 'NotAllowedError');
+    };
+    for (const name of ['RTCPeerConnection', 'webkitRTCPeerConnection', 'RTCDataChannel']) {
+      const Orig = window[name];
+      if (typeof Orig !== 'function') continue;
+      const Trap = function () {
+        throw seen(`new ${name}`);
+      };
+      Trap.prototype = Orig.prototype;
+      // RTCPeerConnection.prototype.constructor prowadziłby do prawdziwego konstruktora
+      Object.defineProperty(Orig.prototype, 'constructor', {
+        value: Trap,
+        writable: true,
+        configurable: true,
+      });
+      Object.defineProperty(window, name, { value: Trap, writable: true, configurable: true });
+    }
+    const proto = window.RTCPeerConnection?.prototype;
+    if (typeof proto?.createDataChannel === 'function') {
+      proto.createDataChannel = function () {
+        throw seen('RTCPeerConnection.createDataChannel');
+      };
+    }
+  });
   await context.addInitScript(() => {
     document.addEventListener('securitypolicyviolation', (e) => {
       window.__parawanCsp({
@@ -221,6 +305,7 @@ export async function openApp(browser, query = '', opts = {}) {
     webSockets.length +
     violations.length +
     refreshes.length +
+    rtc.length +
     pageErrors.length +
     consoleErrors.length;
   /** Przewija zegar strony (patrz SETTLE_MS i JUMP_MS wyżej). */
@@ -314,14 +399,43 @@ export async function openApp(browser, query = '', opts = {}) {
      * @param {RegExp} [re]
      */
     takeConsoleErrors: (re) => take(consoleErrors, (m) => !re || re.test(m)),
+    /** Próby utworzenia połączenia WebRTC zapisane przez pułapkę (pusta lista = nie było). */
+    rtc,
+    /** Wszystko, co strona zostawia w pamięci przeglądarki i w karcie (patrz pageTraces). */
+    storageTraces: () => page.evaluate(pageTraces),
+    /**
+     * Problemy ze śladów: dane z FICTIONAL_PII gdziekolwiek i klucze localStorage spoza
+     * ALLOWED_STORAGE_KEYS (pusta lista = w porządku).
+     */
+    async storageProblems() {
+      return tracesProblems(await this.storageTraces());
+    },
     /**
      * Asercja po teście: nic nie wyszło z pliku i nic się nie wysypało, także w dobie po
      * scenariuszu (przewinięty zegar strony).
      */
     async assertClean() {
+      // Ślady sprawdzane dwa razy: zaraz po scenariuszu i po przewinięciu zegara o dobę, bo
+      // zapis odłożony na później albo skasowany przez timer widać tylko w jednej z tych chwil.
+      // Bez JavaScriptu strona nie ma czym ich zostawić.
+      const tracesNow = javaScriptEnabled ? await this.storageProblems() : [];
       await settle();
+      const tracesLater = javaScriptEnabled ? await this.storageProblems() : [];
       const out = await this.leakedRequests();
       assert.deepEqual(out, [], `żądania spoza pliku:\n${out.join('\n')}`);
+      assert.deepEqual(
+        rtc,
+        [],
+        `próby połączenia WebRTC (CSP ich nie zatrzymuje, dane wyszłyby po UDP):\n${rtc
+          .map((r) => `${r.api} (${r.stack})`)
+          .join('\n')}`,
+      );
+      const traces = [...new Set([...tracesNow, ...tracesLater])];
+      assert.deepEqual(
+        traces,
+        [],
+        `dane z pism albo nieznane klucze w pamięci przeglądarki, adresie lub tytule karty:\n${traces.join('\n')}`,
+      );
       assert.deepEqual(violations, [], `naruszenia CSP:\n${JSON.stringify(violations, null, 1)}`);
       assert.deepEqual(
         refreshes,
@@ -333,6 +447,125 @@ export async function openApp(browser, query = '', opts = {}) {
     },
     close: () => context.close(),
   };
+}
+
+/**
+ * Ślady strony w przeglądarce i w karcie (funkcja wykonywana na stronie): klucze i wartości
+ * localStorage i sessionStorage, nazwy i zawartość baz IndexedDB, nazwy i adresy w Cache
+ * Storage, ciasteczka, adres, tytuł karty, window.name i history.state. Pamięć witryny leży na
+ * dysku, a adres, tytuł, nazwa okna i stan historii trafiają do historii i plików sesji
+ * przeglądarki, więc dane z pisma nie mogą być w żadnym z tych miejsc. Błąd odczytu też trafia
+ * do raportu.
+ * @returns {Promise<{ localKeys: string[], items: [string, string][] }>}
+ */
+async function pageTraces() {
+  /** @type {[string, string][]} */
+  const items = [];
+  const add = (where, value) => items.push([where, String(value)]);
+  const json = (v) => {
+    try {
+      return JSON.stringify(v) ?? String(v);
+    } catch {
+      return String(v);
+    }
+  };
+  const req = (r) =>
+    new Promise((resolve, reject) => {
+      r.onsuccess = () => resolve(r.result);
+      r.onerror = () => reject(r.error);
+    });
+  const localKeys = [];
+  for (const [name, get] of [
+    ['localStorage', () => localStorage],
+    ['sessionStorage', () => sessionStorage],
+  ]) {
+    try {
+      const s = get();
+      for (let i = 0; i < s.length; i++) {
+        const k = s.key(i) ?? '';
+        if (name === 'localStorage') localKeys.push(k);
+        add(`${name}, klucz`, k);
+        add(`${name}[${k}]`, s.getItem(k));
+      }
+    } catch (e) {
+      add(`${name}, błąd odczytu`, e);
+    }
+  }
+  try {
+    if (typeof indexedDB?.databases === 'function') {
+      for (const { name } of await indexedDB.databases()) {
+        add('IndexedDB, nazwa bazy', name);
+        const db = await req(indexedDB.open(name));
+        try {
+          for (const store of db.objectStoreNames) {
+            const os = db.transaction(store, 'readonly').objectStore(store);
+            add(`IndexedDB ${name}/${store}, klucze`, json(await req(os.getAllKeys())));
+            add(`IndexedDB ${name}/${store}, wartości`, json(await req(os.getAll())));
+          }
+        } finally {
+          db.close();
+        }
+      }
+    }
+  } catch (e) {
+    add('IndexedDB, błąd odczytu', e);
+  }
+  try {
+    if (globalThis.caches) {
+      for (const name of await caches.keys()) {
+        add('Cache Storage, nazwa', name);
+        for (const r of await (await caches.open(name)).keys()) add(`Cache Storage ${name}`, r.url);
+      }
+    }
+  } catch (e) {
+    // dla file:// Cache Storage bywa niedostępne (SecurityError); wtedy nikt tam nic nie zapisał
+    if (e?.name !== 'SecurityError') add('Cache Storage, błąd odczytu', e);
+  }
+  add('document.cookie', document.cookie);
+  add('adres karty', location.href);
+  add('tytuł karty', document.title);
+  add('window.name', window.name);
+  add('history.state', json(history.state));
+  return { localKeys, items };
+}
+
+/** Bez wielkości liter, białych znaków i łączników: „PL61 1090” i „pl611090” to ten sam numer. */
+const flat = (s) => s.toLowerCase().replace(/[\s -]+/g, '');
+
+/** Napis i jego postać zdekodowana z adresu (%C4%85, „+” jako spacja), bez wielkości liter i spacji. */
+function variants(value) {
+  const out = [value];
+  for (const v of [value, value.replace(/\+/g, ' ')]) {
+    try {
+      out.push(decodeURIComponent(v));
+    } catch {
+      /* zły zapis %, zostaje surowy napis */
+    }
+  }
+  return out.map(flat);
+}
+
+/**
+ * Problemy ze śladów z pageTraces: klucze localStorage spoza ALLOWED_STORAGE_KEYS i dane
+ * z FICTIONAL_PII gdziekolwiek (pusta lista = w porządku).
+ * @param {{ localKeys: string[], items: [string, string][] }} traces
+ */
+export function tracesProblems({ localKeys, items }) {
+  const problems = [];
+  for (const k of localKeys) {
+    if (!ALLOWED_STORAGE_KEYS.includes(k)) {
+      problems.push(`localStorage: klucz „${k}” spoza STORAGE_KEYS (apps/web/src/storage.ts)`);
+    }
+  }
+  for (const [where, value] of items) {
+    const hay = variants(value);
+    for (const [what, needle] of FICTIONAL_PII) {
+      if (hay.some((h) => h.includes(flat(needle)))) {
+        problems.push(`${where}: ${what} „${needle}” w „${value.slice(0, 200)}”`);
+      }
+    }
+  }
+  return problems;
 }
 
 /**

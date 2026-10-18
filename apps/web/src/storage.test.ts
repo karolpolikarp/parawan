@@ -1,5 +1,5 @@
 import { afterEach, expect, test, vi } from 'vitest';
-import { storageGet, storageSet } from './storage';
+import { STORAGE_KEYS, storageGet, storageSet } from './storage';
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -30,6 +30,34 @@ test('pełna pamięć (QuotaExceededError przy zapisie) też nie rzuca', () => {
     },
   });
   expect(storageGet('pseudonyms')).toBe('1');
-  expect(storageGet('brak')).toBeNull();
+  expect(storageGet('motion')).toBeNull();
   expect(() => storageSet('pseudonyms', '')).not.toThrow();
+});
+
+// Moduły aplikacji (bez testów i deklaracji) jako tekst.
+const appModules = Object.entries(
+  import.meta.glob<string>(['./*.ts', '!./*.test.ts', '!./*.d.ts'], {
+    query: '?raw',
+    import: 'default',
+    eager: true,
+  }),
+);
+
+test('pamięć przeglądarki tylko przez storage.ts, z kluczami z listy STORAGE_KEYS', () => {
+  expect(appModules.length).toBeGreaterThan(5);
+  // Bramka E2E czyta listę z tekstu storage.ts, więc lista nie może być pusta ani zduplikowana.
+  expect(STORAGE_KEYS.length).toBeGreaterThan(0);
+  expect(new Set(STORAGE_KEYS).size).toBe(STORAGE_KEYS.length);
+  // Inny moduł z własnym localStorage, sessionStorage, IndexedDB albo ciasteczkiem zostawiałby
+  // dane na komputerze urzędnika z pominięciem listy kluczy.
+  const direct = /\b(?:localStorage|sessionStorage|indexedDB|caches)\b|document\.cookie/;
+  for (const [file, src] of appModules) {
+    if (file === './storage.ts') continue;
+    // bez komentarzy, które opisują zachowanie przeglądarki nazwami tych API
+    const code = src.replace(/\/\*[\s\S]*?\*\/|(^|\s)\/\/[^\n]*/g, '$1');
+    expect(code, `${file} sięga po pamięć przeglądarki z pominięciem storage.ts`).not.toMatch(direct);
+  }
+  // strażnik strażnika: zapis z pominięciem storage.ts zostałby wyłapany
+  expect("sessionStorage.setItem('x', tekst);").toMatch(direct);
+  expect('document.cookie = tekst;').toMatch(direct);
 });

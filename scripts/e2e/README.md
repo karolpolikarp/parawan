@@ -18,6 +18,18 @@ Po każdym teście `withApp()` z `helpers.mjs` sprawdza, że:
 - poza samym dokumentem nie było żadnego żądania (dozwolone tylko `data:`, `blob:` i `about:`;
   każdy inny `file:` też jest błędem, bo plik ma być samowystarczalny) ani próby otwarcia
   WebSocketu,
+- strona ani razu nie próbowała utworzyć połączenia WebRTC (`RTCPeerConnection`,
+  `webkitRTCPeerConnection`, `RTCDataChannel`, `createDataChannel`): CSP go nie obejmuje,
+  a Playwright nie pokazuje go jako żądania, więc kanał danych z numerem PESEL przeszedłby
+  resztę bramki. Pułapka z `helpers.mjs` podmienia konstruktory przed pierwszym skryptem strony
+  (także w ramkach i nowych oknach), zapisuje każdą próbę i rzuca wyjątek, więc połączenie nie
+  powstaje; liczy się sama próba, także złapana przez kod strony,
+- w localStorage są tylko klucze z listy `STORAGE_KEYS` w `apps/web/src/storage.ts` (bramka
+  czyta ją z tekstu tego pliku), a w localStorage, sessionStorage, bazach IndexedDB, Cache
+  Storage, ciasteczkach, adresie i tytule karty, `window.name` i `history.state` nie ma żadnej
+  danej z `FICTIONAL_PII` (PESEL, nazwiska, numer konta, e-mail i telefon z wczytywanych pism),
+  bez względu na wielkość liter, spacje, łączniki i zapis w adresie. Sprawdzenie idzie dwa razy:
+  zaraz po scenariuszu i po przewinięciu zegara o dobę,
 - przeglądarka nie zgłosiła naruszenia CSP,
 - w dokumencie nie pojawił się `<meta http-equiv="refresh">`, nawet na chwilę: przenosi on kartę
   pod dowolny adres (z danymi w adresie), CSP tego nie zatrzymuje, a jego licznik biegnie
@@ -32,6 +44,16 @@ też.
 
 Bramkę uruchamia CI (job `e2e`, po każdym wypchnięciu na `main` i w pull requeście) i wydanie
 (`release.yml`, na tagu `v*`): plik, który trafia do wydania, przechodzi te same testy.
+
+Tekst obu gotowych plików sprawdza `zakazane-api.mjs`: nie może w nim stać `RTCPeerConnection`,
+`RTCDataChannel`, `sendBeacon`, `EventSource`, `WebTransport`, `new Worker(`, `SharedWorker`
+ani `serviceWorker`. Jedyny wyjątek to `new Worker(` w klasie PDFWorker z pdf.js w pliku
+aplikacji, rozpoznawany po napisach pdf.js wokół niego i dozwolony dokładnie raz: `pdf.ts`
+podstawia workera w głównym wątku, więc ta gałąź się nie wykonuje, a gdyby się wykonała, worker
+zatrzyma CSP. Ten sam moduł działa jako strażnik w `ci.yml`, `release.yml` i
+`deploy-landing.yml`: `node scripts/e2e/zakazane-api.mjs` (z `web` albo `landing` jeden plik).
+Napis złożony w czasie działania (np. `window['RTC' + 'PeerConnection']`) przejdzie ten
+strażnik, ale nie pułapkę WebRTC z bramki.
 
 Politykę CSP obu plików `csp.mjs` sprawdza dyrektywa po dyrektywie: dozwolone źródła to tylko
 `'none'`, `'unsafe-inline'` i `data:` (w landingu także `img-src 'self'`), a `default-src`,
@@ -69,10 +91,14 @@ Przy błędzie zrzut całej strony trafia do `test-results/e2e/` (w CI jako arte
 - Każdy pakiet, który zmienia zachowanie aplikacji, dopisuje swoje scenariusze do
   `scripts/e2e/*.test.mjs` i otwiera plik przez `withApp()`, więc dostaje kontrolę sieci i CSP.
 - Stałe zależne od przykładu w aplikacji (dziś `EXAMPLE_PESEL`, `EXAMPLE_NAME`, `EXAMPLE_EMAIL`
-  i `EXAMPLE_IBAN_START`), numer z gotowych pism `pismo.*` (`PISMO_PESEL`) i lista kluczy
-  localStorage (`ALLOWED_STORAGE_KEYS`) są w jednym miejscu, w `helpers.mjs`. Scenariusze
-  z `?demo` zaczynają od `app.demoReady()`, który sprawdza, że te napisy z przykładu naprawdę
-  stoją w polu źródła.
+  i `EXAMPLE_IBAN_START`), numer z gotowych pism `pismo.*` (`PISMO_PESEL`) i lista fikcyjnych
+  danych osobowych, których nie może być w pamięci przeglądarki ani w karcie (`FICTIONAL_PII`),
+  są w jednym miejscu, w `helpers.mjs`. Scenariusz, który wczytuje pismo z nowymi danymi
+  osobowymi, dopisuje je do `FICTIONAL_PII`. Scenariusze z `?demo` zaczynają od
+  `app.demoReady()`, który sprawdza, że te napisy z przykładu naprawdę stoją w polu źródła.
+- Nowy klucz localStorage trafia do `STORAGE_KEYS` w `apps/web/src/storage.ts` (jedyna droga
+  zapisu, `storageGet` i `storageSet` przyjmują tylko klucze z tej listy, a vitest pilnuje, że
+  inne moduły nie sięgają po pamięć przeglądarki same). Bramka czyta tę listę z pliku.
 - Asercja „numeru nie ma w wyniku” idzie w parze z asercją, że znacznik (np. `[PESEL]`) w nim
   jest. Sama negatywna przechodzi także na pustym wyniku.
 - Testy treści CSS czytają `style.css` przez `node:fs` i zaczynają od asercji, że treść nie jest

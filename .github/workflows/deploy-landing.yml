@@ -47,6 +47,7 @@ jobs:
           grep -Eq "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'[^\"]*connect-src 'none'" apps/landing/dist/index.html \
             || { echo "::error::brak Content-Security-Policy z default-src 'none' i connect-src 'none'"; exit 1; }
           node scripts/e2e/csp.mjs landing
+          node scripts/e2e/zakazane-api.mjs landing
       # Strona opisuje CSP w pobieranym pliku i notkę „Dla działu IT” w JAK-UZYC.txt. Gdy najnowsze
       # wydanie ich nie ma (strona wyprzedza wydanie), deploy staje: najpierw wydaj nową wersję
       # (tag v*), potem w zakładce Actions „Re-run failed jobs”.

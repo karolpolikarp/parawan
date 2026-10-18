@@ -195,6 +195,101 @@ test('bramka widzi próbę wysyłki i wyjątek odłożone na później (timer, W
   }
 });
 
+test('bramka widzi próbę połączenia WebRTC: od razu, z timera po dobie, z ramki, ze złapanym wyjątkiem', async () => {
+  // CSP nie obejmuje WebRTC, a Playwright nie zgłasza go jako żądania. Bez pułapki z helpers.mjs
+  // kanał danych z numerem PESEL przeszedłby bramkę na zielono. Kod niżej łapie wyjątek pułapki,
+  // tak jak zrobiłby to kod, który po cichu próbuje i rezygnuje: liczy się sama próba.
+  const app = await openApp(browser, '?demo');
+  try {
+    await app.demoReady();
+    const created = await app.page.evaluate(() => {
+      const attempt = (make) => {
+        try {
+          const pc = make();
+          pc.createDataChannel('dane').onopen = (e) => e.target.send('44051401359');
+          return 'utworzone';
+        } catch {
+          return 'zablokowane';
+        }
+      };
+      setTimeout(() => attempt(() => new webkitRTCPeerConnection()), 5_000);
+      setTimeout(
+        () => {
+          const frame = document.createElement('iframe');
+          document.body.append(frame);
+          attempt(() => new frame.contentWindow.RTCPeerConnection());
+        },
+        3 * 60 * 60_000,
+      );
+      return attempt(() => new RTCPeerConnection({ iceServers: [] }));
+    });
+    assert.equal(created, 'zablokowane', 'pułapka nie zatrzymała RTCPeerConnection');
+    await assert.rejects(() => app.assertClean(), /WebRTC/);
+    assert.deepEqual(
+      app.rtc.map((r) => r.api),
+      ['new RTCPeerConnection', 'new webkitRTCPeerConnection', 'new RTCPeerConnection'],
+      `próby widziane przez bramkę:\n${JSON.stringify(app.rtc, null, 1)}`,
+    );
+  } finally {
+    await app.close();
+  }
+});
+
+test('bramka widzi dane z pisma w pamięci przeglądarki, adresie i tytule karty, także zapisane po dobie', async () => {
+  const app = await openApp(browser, '?demo');
+  try {
+    await app.demoReady();
+    await app.page.evaluate(async () => {
+      const text = document.getElementById('input').value;
+      localStorage.setItem('kopia-pisma', text.slice(0, 80)); // klucz spoza listy, z nazwiskiem
+      // dozwolony klucz z numerem PESEL, skasowany po 10 s: widać go tylko zaraz po scenariuszu
+      localStorage.setItem('pseudonyms', '44051401359');
+      setTimeout(() => localStorage.removeItem('pseudonyms'), 10_000);
+      // zapis po trzech godzinach: widać go tylko po przewinięciu zegara
+      setTimeout(() => sessionStorage.setItem('robocze', 'PL61 1090 1014 0000'), 3 * 60 * 60_000);
+      document.title = 'Decyzja Bąkiewicz';
+      location.hash = `d=${encodeURIComponent('anna.kowalska@example.com')}`;
+      window.name = 'Wierzbicki';
+      history.replaceState({ tel: '600-700-800' }, '');
+      const open = indexedDB.open('parawan-kopia', 1);
+      open.onupgradeneeded = () => open.result.createObjectStore('pisma');
+      const db = await new Promise((resolve) => {
+        open.onsuccess = () => resolve(open.result);
+      });
+      const tx = db.transaction('pisma', 'readwrite');
+      tx.objectStore('pisma').put({ pesel: '85071412358' }, 1);
+      await new Promise((resolve) => {
+        tx.oncomplete = resolve;
+      });
+      db.close();
+    });
+    const now = (await app.storageProblems()).join('\n');
+    for (const where of [
+      'localStorage: klucz „kopia-pisma”',
+      'localStorage[kopia-pisma]: nazwisko z przykładu',
+      'localStorage[pseudonyms]: PESEL z przykładu',
+      'tytuł karty: nazwisko prowadzącego',
+      'adres karty: adres e-mail',
+      'window.name: nazwisko z pism DOCX',
+      'history.state: telefon',
+      'IndexedDB parawan-kopia/pisma, wartości: PESEL z pism DOCX',
+    ]) {
+      assert.ok(now.includes(where), `bramka nie widzi „${where}”:\n${now}`);
+    }
+    assert.ok(!now.includes('sessionStorage'), `zapis po dobie widoczny przed przewinięciem:\n${now}`);
+    // assertClean() sprawdza przed przewinięciem zegara i po nim, więc widzi oba odroczone ślady
+    const err = await app.assertClean().then(
+      () => null,
+      (e) => String(e.message),
+    );
+    assert.ok(err, 'assertClean() przepuścił dane z pisma');
+    assert.match(err, /localStorage\[pseudonyms\]: PESEL/, 'bramka nie widzi zapisu skasowanego po 10 s');
+    assert.match(err, /sessionStorage\[robocze\]: numer konta/, 'bramka nie widzi zapisu po dobie');
+  } finally {
+    await app.close();
+  }
+});
+
 test('?demo: przykład zamaskowany, numer PESEL nie przechodzi do wyniku', async (t) => {
   await withApp(browser, t, '?demo', async (app) => {
     await app.demoReady();
