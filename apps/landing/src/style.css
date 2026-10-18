@@ -167,21 +167,63 @@ p { text-wrap: pretty; }
 .pasek-pobierz { flex: none; }
 
 /* ============ PIERWSZY EKRAN: NARZĘDZIE ============ */
-.narzedzie { padding: 36px 0 64px; }
-/* Nagłówek na całą szerokość, pod nim lead i pobranie obok siebie: bez pustego miejsca nad przyciskiem. */
-.narz-glowa { display: grid; grid-template-columns: minmax(0, 1fr) 248px; column-gap: 48px; align-items: start; }
-.narz-tekst { display: contents; }
-.narz-glowa h1 { grid-column: 1 / -1; text-wrap: balance; }
-.narz-glowa .lede { grid-column: 1; }
-.narz-pobierz { grid-column: 2; margin-top: 18px; }
-.narzedzie h1 {
-  font-size: clamp(30px, 1.6vw + 18px, 42px); font-weight: 800; line-height: 1.08;
-  letter-spacing: -.02em; max-width: 44ch;
+.narzedzie {
+  padding: 36px 0 64px;
 }
-.lede { margin-top: 14px; font-size: 17px; line-height: 1.6; color: var(--mut-2); max-width: 66ch; }
-.narz-pobierz .btn { width: 100%; }
-.dl-meta { margin-top: 10px; font: 400 13px/1.5 var(--sans); color: var(--mut-2); }
-.dl-tel { display: none; }
+
+.narz-glowa {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 248px;
+  column-gap: 48px;
+  align-items: start;
+}
+
+.narz-tekst {
+  display: block;
+  grid-column: 1;
+  min-width: 0;
+}
+
+.narz-glowa h1 {
+  text-wrap: balance;
+}
+
+.narzedzie h1 {
+  font-size: clamp(30px, 1.6vw + 18px, 42px);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -.02em;
+  max-width: 44ch;
+}
+
+.lede {
+  margin-top: 14px;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--mut-2);
+  max-width: 66ch;
+}
+
+.narz-pobierz {
+  grid-column: 2;
+  grid-row: 1;
+  margin-top: 0;
+  min-width: 0;
+}
+
+.narz-pobierz .btn {
+  width: 100%;
+}
+
+.dl-meta {
+  margin-top: 10px;
+  font: 400 13px/1.5 var(--sans);
+  color: var(--mut-2);
+}
+
+.dl-tel {
+  display: none;
+}
 
 .demo-card {
   margin-top: 28px; background: var(--card); border: 1px solid var(--line-2);
