@@ -510,6 +510,6 @@ a.vh:focus-visible {
   font-weight: 700; text-decoration: none; box-shadow: var(--shadow-lg);
 }
 
-/* Znak marki nad nagłówkiem pobierania: wypełnia pusty margines sekcji. */
-#pobierz .znak-duzy{display:inline-flex;width:72px;height:72px;margin-bottom:14px}
-#pobierz .znak-duzy .gi,#pobierz .znak-duzy svg{width:100%;height:100%}
+/* Znak marki nad przyciskiem pobierania w hero: wypełnia puste miejsce nad nim. */
+.narz-pobierz .znak-duzy{display:flex;width:96px;height:96px;margin:0 auto 16px}
+.narz-pobierz .znak-duzy .gi,.narz-pobierz .znak-duzy svg{width:100%;height:100%}
