@@ -1,7 +1,10 @@
 # Buduje decyzja.docx i protokol-kontroli.docx z fikcyjnych pism .txt w apps/web/src/fixtures/urzad.
 # python-docx daje pakiet jak z Worda (style, motyw, ustawienia, customXml, miniatura), a nie
 # minimalny ZIP z samym document.xml, więc testy importu i zapisu DOCX widzą prawdziwe części.
-# Użycie (z katalogu repo): python scripts/e2e/manual/zbuduj-pisma-docx.py
+# Użycie (z katalogu repo): python scripts/e2e/manual/zbuduj-pisma-docx.py [katalog-wyjściowy]
+# Pisma .txt są zawsze czytane z apps/web/src/fixtures/urzad, a gotowe .docx trafiają do katalogu
+# z argumentu (domyślnie ten sam katalog w repo, czyli nadpisanie plików). Dawniej skrypt szukał
+# .txt w katalogu z argumentu i z pustym katalogiem kończył się błędem braku pliku.
 # Wymaga: pip install python-docx (sprawdzone na 1.2.0).
 import sys
 from pathlib import Path
@@ -11,7 +14,9 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Pt
 
 ROOT = Path(__file__).resolve().parents[3]
-F = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "apps" / "web" / "src" / "fixtures" / "urzad"
+SRC = ROOT / "apps" / "web" / "src" / "fixtures" / "urzad"
+F = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else SRC
+F.mkdir(parents=True, exist_ok=True)
 
 
 def nowy_dokument():
@@ -23,7 +28,7 @@ def nowy_dokument():
 
 
 # Protokół: lista obecnych jako prawdziwa tabela Worda (wiersze z tabulatorami w .txt).
-src = (F / "protokol-kontroli.txt").read_text(encoding="utf-8").split("\n")
+src = (SRC / "protokol-kontroli.txt").read_text(encoding="utf-8").split("\n")
 d = nowy_dokument()
 i = 0
 while i < len(src):
@@ -47,7 +52,7 @@ while i < len(src):
 d.save(F / "protokol-kontroli.docx")
 
 # Decyzja: nagłówek urzędu w tabeli dwukolumnowej, jak w typowym szablonie pisma.
-src = (F / "decyzja.txt").read_text(encoding="utf-8").split("\n")
+src = (SRC / "decyzja.txt").read_text(encoding="utf-8").split("\n")
 d = nowy_dokument()
 t = d.add_table(rows=1, cols=2)
 t.cell(0, 0).text = "\n".join(src[0:4])

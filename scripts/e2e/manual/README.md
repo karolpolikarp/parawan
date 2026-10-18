@@ -53,7 +53,7 @@ PARAWAN_CHROMIUM=".cache/przegladarki/chromium-1070054/chrome-win/chrome.exe" np
 | `perf.mjs` | Czas `redactPII` na piśmie 10, 50 i 200 KB; z `--jitless` jak na komputerze z wyłączonym JIT. Wymaga `npm run build -w anonimizator`. | `node [--jitless] scripts/e2e/manual/perf.mjs` |
 | `docx-writeback-poc.mjs` | Prototyp zapisu zanonimizowanego DOCX z zachowaniem formatowania (dla A15): buduje DOCX z nagłówkiem, przypisem, komentarzem, śledzoną zmianą i metadanymi, podmienia tekst w węzłach i szuka wycieków w każdej części. Wymaga zbudowanego rdzenia. | `node scripts/e2e/manual/docx-writeback-poc.mjs [katalog]` (domyślnie `.cache/poc-docx`) |
 | `zbuduj-pisma.mjs` | Buduje `pismo.docx`, `.odt`, `.rtf`, `.pdf` i `decyzja.pdf` w `apps/web/src/fixtures/urzad`. | `node scripts/e2e/manual/zbuduj-pisma.mjs [katalog]` |
-| `zbuduj-pisma-docx.py` | Buduje `decyzja.docx` i `protokol-kontroli.docx` (python-docx). | `python scripts/e2e/manual/zbuduj-pisma-docx.py [katalog]` |
+| `zbuduj-pisma-docx.py` | Buduje `decyzja.docx` i `protokol-kontroli.docx` (python-docx) z `decyzja.txt` i `protokol-kontroli.txt` w `apps/web/src/fixtures/urzad`. Katalog z argumentu dostaje tylko gotowe pliki. | `python scripts/e2e/manual/zbuduj-pisma-docx.py [katalog-wyjściowy]` (domyślnie `apps/web/src/fixtures/urzad`) |
 
 Adres pliku do skryptów to `file:///` i ścieżka z ukośnikami, np.
 `file:///C:/Users/ja/anonimizator/.cache/sonda/Parawan-probe.html?demo`.

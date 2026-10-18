@@ -34,8 +34,10 @@ export const EXAMPLE_NAME = 'Kowalska';
 
 /**
  * Pozostałe dane osobowe z przykładu, których nie może być na wydruku (wydruk.test.mjs): adres
- * e-mail i początek numeru konta (cyfry bez spacji, bo tekst wyciągnięty z PDF bywa inaczej
- * rozstawiony). demoReady() sprawdza je jak EXAMPLE_PESEL.
+ * e-mail i początek numeru konta. Numer stoi tu ze spacjami, tak jak w przykładzie, bo
+ * demoReady() szuka go w polu źródła dosłownie, tak jak EXAMPLE_PESEL. Wydruk porównuje go bez
+ * białych znaków (squash w wydruk.test.mjs), bo tekst wyciągnięty z PDF bywa inaczej rozstawiony,
+ * a assertClean() też pomija spacje i łączniki.
  */
 export const EXAMPLE_EMAIL = 'anna.kowalska@example.com';
 export const EXAMPLE_IBAN_START = 'PL61 1090 1014';
