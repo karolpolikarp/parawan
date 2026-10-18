@@ -4885,3 +4885,200 @@ test('K57: karta płatnicza po „number", „o numerze" i w kluczu zrośniętym
     'cardNumberMasked: ************0366',
   ]);
 });
+
+// ── Partia b5, poprawki po weryfikacji (runda 1) ───────────────────────────────
+test('b5 r1, K43: kod silnika za modelem, temat ogłoszenia na tablicy, skrót z rokiem w wyliczeniu, „numerze rejsu"', () => {
+  keep([
+    'samochodem marki Volkswagen Golf GTI 1800 kierował',
+    'samochód marki Renault Master DCI 2300',
+    'Motocykl marki Suzuki V-Strom DL 1000, rok produkcji 2006.',
+    'motocykl marki Honda Fireblade CBR 1100 XX',
+    'Ogłoszenie na tablicy o PIT 2024 zostało zdjęte.',
+    'Obwieszczenie wywieszono na tablicy pod RPO 2021.',
+    'Informację na tablicy o RPO 2021-2027 zaktualizowano.',
+    'Reklamacja lotu o numerze rejsu LO 3925.',
+    'Lot z numerem rejsu FR 1234 był opóźniony.',
+    'Instytucja wpisana do rejestru pod numerem rejestrowym RIK 12345.',
+    'wpisany do rejestru zabytków pod numerem rejestru KL 12345',
+  ]);
+  masked([
+    ['samochód marki Skoda Octavia TSI 1400 o nr rej. WE 12345', `samochód marki Skoda Octavia TSI 1400 o nr rej. ${RJ}`],
+    ['samochodem marki Toyota Yaris WE 12345 kierowała', `samochodem marki Toyota Yaris ${RJ} kierowała`],
+    ['pojazdem marki Volkswagen Golf GD 4567K', `pojazdem marki Volkswagen Golf ${RJ}`],
+    ['pojazd marki Ford Transit WPI 1234', `pojazd marki Ford Transit ${RJ}`],
+    ['Tablica o numerze WE 12345 wisi na bramie.', `Tablica o numerze ${RJ} wisi na bramie.`],
+    ['Pojazd nr rej. WE 12345; OC 2024 ważne', `Pojazd nr rej. ${RJ}; OC 2024 ważne`],
+    ['nr rej. WE 12345 / PZU 2024', `nr rej. ${RJ} / PZU 2024`],
+    ['nr rej. WE 12345; SN 2020 r. orzekł', `nr rej. ${RJ}; SN 2020 r. orzekł`],
+    ['nr rej. WE 12345 / WGM 1234A', `nr rej. ${RJ} / ${RJ}`],
+    ['pojazd o numerze rejestracyjnym WE 12345', `pojazd o numerze rejestracyjnym ${RJ}`],
+    ['pojazdem o numerze rej. WE 12345', `pojazdem o numerze rej. ${RJ}`],
+    ['pojazd o numerze rejestracji WE 12345', `pojazd o numerze rejestracji ${RJ}`],
+  ]);
+});
+test('b5 r1, K42: „nr" po przymiotniku i liczbie mnogiej to numer sprawy, a odrzucona kotwica „kontakt nr" nie zjada telefonu za nią', () => {
+  keep([
+    'Przyjęto zgłoszenie telefoniczne nr 512345678 dotyczące awarii.',
+    'Zgłoszenie telefoniczne nr 202410001 zarejestrowano w systemie.',
+    'Umowa telefoniczna nr 512345678 z dnia 12.03.2024',
+    'Zakup telefonów nr 512 345 678',
+    'Faktura za telefony nr 512 345 678',
+    'Abonament telefoniczny nr 512 345 678',
+    'Zgłoszenie przyjęto telefonicznie pod nr 512345678.',
+    'Dotyczy kontaktu nr 123456789 w CRM.',
+  ]);
+  masked([
+    ['Kontaktowy nr: 600 700 800, tel. 22 843 21 09', `Kontaktowy nr: ${T}, tel. ${T}`],
+    ['Kontakt nr 512 345 678, tel. 22 843 21 09', `Kontakt nr 512 345 678, tel. ${T}`],
+    ['Podaję kontaktowy nr 600 700 800 oraz tel. 22 843 21 09.', `Podaję kontaktowy nr 600 700 800 oraz tel. ${T}.`],
+    ['Dotyczy kontaktu nr 123456789, tel. 22 843 21 09', `Dotyczy kontaktu nr 123456789, tel. ${T}`],
+    ['Kontakt nr 512 345 678, kontakt nr 22 843 21 09, tel. 22 843 21 08', `Kontakt nr 512 345 678, kontakt nr 22 843 21 09, tel. ${T}`],
+    ['Kontakt nr: 22 843 21 09', `Kontakt nr: ${T}`],
+    ['Telefony: nr 22 843 21 09', `Telefony: nr ${T}`],
+    ['Telefonem nr 600 700 800', `Telefonem nr ${T}`],
+    ['telefonicznie: 22 843 21 09', `telefonicznie: ${T}`],
+    // „Telefony" na początku wiersza to nagłówek listy, a nie towar
+    ['Telefony nr 600 700 800 i 601 702 803', `Telefony nr ${T} i ${T}`],
+  ]);
+  masked([['Kontakt nr 512 345 678, tel. 22 843 21 09', `Kontakt nr 512 345 678, tel. ${T}`]], { pseudonyms: true });
+});
+test('b5 r1, K50: za nazwą organizacji bez roli imię i nazwisko w mianowniku to patron', () => {
+  keep(['Stowarzyszenie Przyjaciół Szkoły Adam Mickiewicz', 'Towarzystwo Miłośników Ziemi Jan Kochanowski']);
+  masked([
+    ['Główny Księgowy Spółki Katarzyna Lis', `Główny Księgowy Spółki ${N}`],
+    ['Prezes Fundacji Rozwoju Adam Nowak', `Prezes Fundacji Rozwoju ${N}`],
+    ['Kierownik Działu Kadr Grzegorz Mazur', `Kierownik Działu Kadr ${N}`],
+  ]);
+});
+test('b5 r1, K49: po „z domu" i „z d." tylko mianownik — przymiotnik, rzeczownik rodzinny i narzędnik to nie nazwisko panieńskie', () => {
+  masked([
+    ['Anna Kowalska z domu Polskiego', `${N} z domu Polskiego`],
+    ['Anna Nowak z domu Pogodnej Jesieni', `${N} z domu Pogodnej Jesieni`],
+    ['Kasia Kowal z domu Babci przyniosła ciasto.', `${N} z domu Babci przyniosła ciasto.`],
+    ['Małoletni Kacper Lis z domu Państwa Wróblów został przeniesiony.', `Małoletni ${N} z domu Państwa Wróblów został przeniesiony.`],
+    ['Pan Józef Mróz z domu Ludowego w Kępicach przywiózł rzeczy.', `Pan ${N} z domu Ludowego w Kępicach przywiózł rzeczy.`],
+    ['Salę udostępniła Halina Grzyb z domu Strażaka w Pęcicach.', `Salę udostępniła ${N} z domu Strażaka w Pęcicach.`],
+    ['Anna Nowak z domu Polonii w Pułtusku.', `${N} z domu Polonii w Pułtusku.`],
+    ['Anna Nowak z domu Matki Bożej', `${N} z domu Matki Bożej`],
+    ['Jan Kowalski z d. Pismem z dnia', `${N} z d. Pismem z dnia`],
+    // inicjał drugiej osoby po „z" nie zostaje jawny obok maski
+    ['Spotkanie Jana Kowalskiego z D. Nowakiem.', `Spotkanie ${N} z ${N}.`],
+    ['Rozmowa z Janem Kowalskim z D. Nowak.', `Rozmowa z ${N} z ${N}.`],
+    ['Anna Kowalska z domu Sikora', `${N} z domu ${N}`],
+    ['Anna Kowalska z domu Gżegżółka', `${N} z domu ${N}`],
+    ['EWELINA KRAWCZYK Z D. MAJEWSKA', `${N} Z D. ${N}`],
+  ]);
+  masked(
+    [
+      ['Spotkanie Jana Kowalskiego z D. Nowakiem.', 'Spotkanie [OSOBA-A] z [OSOBA-B].'],
+      ['Magdalena Kaczmarek (z d. Sikora)', '[OSOBA-A] (z d. [OSOBA-B])'],
+      ['EWELINA KRAWCZYK Z D. MAJEWSKA', '[OSOBA-A] Z D. [OSOBA-B]'],
+    ],
+    { pseudonyms: true },
+  );
+});
+test('b5 r1, K45: nowe etykiety pól — wartość, która nie jest osobą, nagłówek tabeli w następnej linii, interpunkcja i klucz pseudonimu', () => {
+  keep([
+    'Imię i nazwisko ucznia\nKlasa',
+    'Imię i nazwisko opiekuna prawnego\nCzytelny podpis',
+    'Nazwisko i imię pracownika\nWynagrodzenie',
+    'Imiona dziecka\nWiek',
+    'Nazwisko ucznia\nŚrednia',
+    'Imię i nazwisko opiekuna prawnego\nDom Dziecka w Teresinie',
+    'Nazwisko osoby kontaktowej: Prezes Zarządu',
+    'Imię i nazwisko osoby upoważnionej: Sekretarz Gminy',
+    'Imię i nazwisko wnioskodawcy: Gmina Michałowice',
+    'Imię i nazwisko osoby kontaktowej: Dział Kadr',
+    'Imię i nazwisko pełnomocnika: Kancelaria Radcy Prawnego',
+    'Imię i nazwisko wnioskodawcy: wpisać drukowanymi literami',
+    'Imię i nazwisko ojca: nieustalone',
+    'Nazwisko i imię pacjenta: NN',
+    'Imię i nazwisko pacjenta: N.N.',
+    'Imię i nazwisko matki: jak wyżej',
+  ]);
+  masked([
+    ['Imię i nazwisko pacjenta: Jan Kowalski.\nPacjent Jan Kowalski zgłosił się.', `Imię i nazwisko pacjenta: ${N}.\nPacjent ${N} zgłosił się.`],
+    ['Imię i nazwisko pacjenta\nJan Kowalski.', `Imię i nazwisko pacjenta\n${N}.`],
+    ['Imię i nazwisko pełnomocnika: adw. Piotr Zając', `Imię i nazwisko pełnomocnika: adw. ${N}`],
+    ['Lp.\nImię i nazwisko ucznia\nKlasa\nŚrednia\n1.\nJan Kowalski', `Lp.\nImię i nazwisko ucznia\nKlasa\nŚrednia\n1.\n${N}`],
+    ['Imię i nazwisko opiekuna prawnego\nHans Gruber', `Imię i nazwisko opiekuna prawnego\n${N}`],
+    ['Nazwisko i imię pacjenta: Marszałek Anna', `Nazwisko i imię pacjenta: ${N}`],
+    ['Imię i nazwisko pacjenta: jan kowalski', `Imię i nazwisko pacjenta: ${N}`],
+  ]);
+  masked(
+    [
+      ['Imię i nazwisko pacjenta: Jan Kowalski.\nPacjent Jan Kowalski zgłosił się.', 'Imię i nazwisko pacjenta: [OSOBA-A].\nPacjent [OSOBA-A] zgłosił się.'],
+      ['Nazwisko i imię ucznia: Kuba Kowal\nNazwisko i imię dziecka: Kuba Lis', 'Nazwisko i imię ucznia: [OSOBA-A]\nNazwisko i imię dziecka: [OSOBA-B]'],
+      ['Nazwisko i imię pacjenta: Hans Schmidt\nNazwisko i imię opiekuna: Hans Becker', 'Nazwisko i imię pacjenta: [OSOBA-A]\nNazwisko i imię opiekuna: [OSOBA-B]'],
+      ['Imię i nazwisko pacjenta: Bondarenko Olena\nImię i nazwisko opiekuna: Kowal Olena', 'Imię i nazwisko pacjenta: [OSOBA-A]\nImię i nazwisko opiekuna: [OSOBA-B]'],
+      ['Imię i nazwisko pacjenta: Nguyen Van Minh\nImię i nazwisko opiekuna: Tran Van Minh', 'Imię i nazwisko pacjenta: [OSOBA-A]\nImię i nazwisko opiekuna: [OSOBA-B]'],
+      ['Imię i nazwisko pacjenta: Nguyen Thi Hoa\nPani Nguyen zgłosiła się.', 'Imię i nazwisko pacjenta: [OSOBA-A]\nPani [OSOBA-A] zgłosiła się.'],
+      ['Nazwisko i imię pacjenta: Hans Gruber\nPan Gruber przyszedł.', 'Nazwisko i imię pacjenta: [OSOBA-A]\nPan [OSOBA-A] przyszedł.'],
+      ['Imię i nazwisko wnioskodawcy: Mał-\ngorzata Kamińska\nImie i nazwisko: Małgorzata Kamińska', 'Imię i nazwisko wnioskodawcy: [IMIĘ I NAZWISKO]\ngorzata [OSOBA-A]\nImie i nazwisko: [OSOBA-A]'],
+      ['Imię i nazwisko ucznia\nKlasa\nJan Kowalski', 'Imię i nazwisko ucznia\nKlasa\n[OSOBA-A]'],
+    ],
+    { pseudonyms: true },
+  );
+});
+test('b5 r1, K53: data progowa w przepisie („… lub później") i „osobom urodzonym" to nie data osoby', () => {
+  keep([
+    'Kobiecie urodzonej 1 stycznia 1953 r. lub później przysługuje emerytura.',
+    'Art. 15. 1. Świadczenie przysługuje matce lub ojcu dziecka urodzonego 1 stycznia 2016 r. lub później.',
+    'Świadczenie przysługuje rodzicowi dziecka urodzonego w dniu 1 stycznia 2027 r. lub później.',
+    'Zwolnienie przysługuje osobom urodzonym 31 grudnia 1950 r. lub wcześniej.',
+    'Karta Seniora przysługuje osobie urodzonej 31 grudnia 1961 r. lub wcześniej.',
+    'Bon przysługuje dziecku urodzonemu 1 stycznia 2027 r. lub później.',
+    'Dzieciom urodzonym 12.03.2020 przysługuje dodatek.',
+  ]);
+  masked([
+    ['z Janem Kowalskim urodzonym 12.03.1980 r.', `z ${N} urodzonym ${DU} r.`],
+    ['ojcostwa dziecka urodzonego dnia 12 marca 2020 r. w Krakowie', `ojcostwa dziecka urodzonego dnia ${DU} r. w ${C}`],
+    ['urodzona w dniu 12.03.1980 r. w Krakowie', `urodzona w dniu ${DU} r. w ${C}`],
+    // „i później" to dalszy ciąg życiorysu, nie próg
+    ['urodzona 12.03.1953 r. i później zamieszkała w Krakowie', `urodzona ${DU} r. i później zamieszkała w ${C}`],
+  ]);
+});
+test('b5 r1, K54: etykieta pola po kodzie to nie miejscowość, a wieś wielowyrazowa WERSALIKAMI w bloku adresowym dostaje maskę w całości', () => {
+  masked([
+    ['ul. Lipowa 14, 26-900 TELEFON 600700800', `${A}, ${KOD} TELEFON ${T}`],
+    ['ul. Długa 5, 00-001 DATA 12.03.2024', `${A}, ${KOD} DATA 12.03.2024`],
+    ['UL. POLNA 2, 00-950 SKRYTKA POCZTOWA 12', `${A}, ${KOD} SKRYTKA POCZTOWA 12`],
+    ['UL. LIPOWA 14\n26-900 ODBIÓR OSOBISTY', `${A}\n${KOD} ODBIÓR OSOBISTY`],
+    ['UL. LIPOWA 14, 26-900 PACZKOMAT KOZ01M', `${A}, ${KOD} PACZKOMAT KOZ01M`],
+    ['UL. LIPOWA 14, 05-300 STARA WIEŚ', `${A}, ${KOD} ${C}`],
+    ['UL. LIPOWA 14, 05-300 NOWA WIEŚ WIELKA', `${A}, ${KOD} ${C}`],
+    ['UL. LIPOWA 2, 62-530 KAZIMIERZ BISKUPI', `${A}, ${KOD} ${C}`],
+    ['ul. Lipowa 2, 97-320 WOLA KRZYSZTOPORSKA', `${A}, ${KOD} ${C}`],
+    ['UL. LIPOWA 14, 26-900 GŁOWACZÓW TEL. 600 700 800', `${A}, ${KOD} ${C} TEL. ${T}`],
+    ['UL. LIPOWA 14 26-900 GŁOWACZÓW JAN KOWALSKI', `${A} ${KOD} ${C} ${N}`],
+    ['UL. LIPOWA 14, 05-300 STARA WIEŚ JAN KOWALSKI', `${A}, ${KOD} ${C} ${N}`],
+    ['UL. LIPOWA 14, 26-900 GŁOWACZÓW POW. KOZIENICKI', `${A}, ${KOD} ${C} POW. KOZIENICKI`],
+    ['UL. LIPOWA 14, 26-900 KOZIENICE', `${A}, ${KOD} ${C}`],
+  ]);
+});
+test('b5 r1, K55: sklejone „UI." bez etykiety adresu i „os."/„pl." bez spacji to nie skrót ulicy ani patrona', () => {
+  keep(['Zmiana w UI.Panel 2.0', 'UI.Dashboard 10 widgetów', 'Moduł UI.Lista 3 elementy', 'mod.UI.Grid 12']);
+  masked([
+    ['zam. UI.LIP0WA 14', `zam. ${A}`],
+    ['Obecnych 12 os.Halina Grzyb przewodniczyła.', `Obecnych 12 os.${N} przewodniczyła.`],
+    ['Obecnych 12 os. Halina Grzyb przewodniczyła.', `Obecnych 12 os. ${N} przewodniczyła.`],
+    ['Spis na stronie gmina.pl.Halina Grzyb, sekretarz', `Spis na stronie gmina.pl.${N}, sekretarz`],
+    ['ul.Jana Kowalskiego 5', A],
+  ]);
+  masked([['Obecnych 12 os.Halina Grzyb przewodniczyła. Pani Grzyb podziękowała.', 'Obecnych 12 os.[OSOBA-A] przewodniczyła. Pani [OSOBA-A] podziękowała.']], { pseudonyms: true });
+});
+test('b5 r1, K52: „komórka" z kodem jednostki, kraj w drugiej linii adresu i rok przy prawie jazdy', () => {
+  keep([
+    '{"komorka": "120400"}',
+    '<Komorka>120400</Komorka>',
+    '{"nrKomorki": "120400"}',
+    '{"komorka":"01-02-03"}',
+    '{"addressLine2": "Polska", "prawoJazdy": "2010"}',
+    '{"prawoJazdy": "2010-05-12"}',
+  ]);
+  masked([
+    ['{"komorka": "600 700 800"}', `{"komorka": "${T}"}`],
+    ['{"prawoJazdy": "01234/12/1234"}', '{"prawoJazdy": "[PRAWO-JAZDY]"}'],
+    ['{"addressLine1": "Kościuszki 12/3", "addressLine2": "lok. 5"}', `{"addressLine1": "${A}", "addressLine2": "lok. 5"}`],
+  ]);
+});

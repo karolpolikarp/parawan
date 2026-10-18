@@ -70,6 +70,10 @@ Login: none",
   "neg-143": "Na ul. Długiej 2-3 osoby czekały. W Alejach Jerozolimskich 2 pasy ruchu zamknięto. Ulica Żwirki i Wigury 2023 remont.",
   "neg-144": "Na skrzyżowaniu ul. Długiej i Polnej 1 osoba zginęła. W Alejach Jerozolimskich 3 wypadki tylko w tym tygodniu. Zbiórka przy ul. Polnej i Leśnej 18:00. Czy jeździ pan Škodą?",
   "neg-145": "Spółka wyemitowała obligacje serii ABA 123456. Spółka wpisana do rejestru pod nr 123 456 789. Tablica o numerze INW 12345 jest w magazynie. Data urodzenia pacjenta w systemie uzupełniono 14.03.2024. Uczestnicy wyszli z domu KULTURY. Faktura 12-345 VAT. Smith et al.Nature 12.",
+  "neg-146": "Sprzedam samochód marki Skoda Octavia TSI 1400. Ogłoszenie na tablicy o PIT 2024 zdjęto. Przyjęto zgłoszenie telefoniczne nr 512345678. Kobiecie urodzonej 1 stycznia 1953 r. lub później przysługuje emerytura. Lot o numerze rejsu LO 3925 opóźniony. Zmiana w UI.Panel 2.0.
+Imię i nazwisko ucznia
+Klasa
+Imię i nazwisko wnioskodawcy: Gmina Michałowice",
   "neg-15": "Zakład Ubezpieczeń Społecznych wydał decyzję odmowną.",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
@@ -402,6 +406,7 @@ Tak	Kaczyński	Urząd Miasta",
   "str-142": "<etd:ImiePierwsze>Agnieszka</etd:ImiePierwsze><etd:Nazwisko>Gżegżółka</etd:Nazwisko><etd:DataUrodzenia>1985-03-14</etd:DataUrodzenia>
 {"paszport": "EA7654321", "nrTelefonu": "[TELEFON]", "Miejscowość": "Ustka"}",
   "str-143": "Pani Hanny Michalak, urodzonej 12.03.1980 r. w Białymstoku. UL. LIPOWA 14, 26-900 KOZIENICE. zam. ul.Długa 5/3. Card number: 4532 0151 1283 0366.",
+  "str-144": "Kontakt nr 512 345 678, tel. [TELEFON]. Obecnych 12 os.Halina Grzyb przewodniczyła. UL. LIPOWA 14, 05-300 STARA WIEŚ. Anna Nowak z domu Ludowego.",
   "str-15": "Zwrot nastąpi na konto [NR-KONTA] wskazane w umowie.",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
@@ -561,6 +566,10 @@ Login: none",
   "neg-143": "Na ul. Długiej 2-3 osoby czekały. W Alejach Jerozolimskich 2 pasy ruchu zamknięto. Ulica Żwirki i Wigury 2023 remont.",
   "neg-144": "Na skrzyżowaniu ul. Długiej i Polnej 1 osoba zginęła. W Alejach Jerozolimskich 3 wypadki tylko w tym tygodniu. Zbiórka przy ul. Polnej i Leśnej 18:00. Czy jeździ pan Škodą?",
   "neg-145": "Spółka wyemitowała obligacje serii ABA 123456. Spółka wpisana do rejestru pod nr 123 456 789. Tablica o numerze INW 12345 jest w magazynie. Data urodzenia pacjenta w systemie uzupełniono 14.03.2024. Uczestnicy wyszli z domu KULTURY. Faktura [KOD-POCZTOWY] VAT. Smith et al.Nature 12.",
+  "neg-146": "Sprzedam samochód marki Skoda Octavia TSI 1400. Ogłoszenie na tablicy o PIT 2024 zdjęto. Przyjęto zgłoszenie telefoniczne nr 512345678. Kobiecie urodzonej 1 stycznia 1953 r. lub później przysługuje emerytura. Lot o numerze rejsu LO 3925 opóźniony. Zmiana w UI.Panel 2.0.
+Imię i nazwisko ucznia
+Klasa
+Imię i nazwisko wnioskodawcy: Gmina Michałowice",
   "neg-15": "Zakład Ubezpieczeń Społecznych wydał decyzję odmowną.",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
@@ -891,6 +900,7 @@ Tak	[OSOBA-B]	Urząd Miasta",
   "str-142": "<etd:ImiePierwsze>[IMIĘ I NAZWISKO]</etd:ImiePierwsze><etd:Nazwisko>[OSOBA-A]</etd:Nazwisko><etd:DataUrodzenia>[DATA-URODZENIA]</etd:DataUrodzenia>
 {"paszport": "[NR-PASZPORTU]", "nrTelefonu": "[TELEFON]", "Miejscowość": "[MIEJSCOWOŚĆ]"}",
   "str-143": "Pani [OSOBA-A], urodzonej [DATA-URODZENIA] r. w [MIEJSCOWOŚĆ]. [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]. zam. [ADRES]. Card number: [NR-KARTY].",
+  "str-144": "Kontakt nr 512 345 678, tel. [TELEFON]. Obecnych 12 os.[OSOBA-A] przewodniczyła. [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]. [OSOBA-B] z domu Ludowego.",
   "str-15": "Zwrot nastąpi na konto [NR-KONTA] wskazane w umowie.",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
@@ -1050,6 +1060,10 @@ Login: none",
   "neg-143": "Na ul. Długiej 2-3 osoby czekały. W Alejach Jerozolimskich 2 pasy ruchu zamknięto. Ulica Żwirki i Wigury 2023 remont.",
   "neg-144": "Na skrzyżowaniu ul. Długiej i Polnej 1 osoba zginęła. W Alejach Jerozolimskich 3 wypadki tylko w tym tygodniu. Zbiórka przy ul. Polnej i Leśnej 18:00. Czy jeździ pan Škodą?",
   "neg-145": "Spółka wyemitowała obligacje serii ABA 123456. Spółka wpisana do rejestru pod nr 123 456 789. Tablica o numerze INW 12345 jest w magazynie. Data urodzenia pacjenta w systemie uzupełniono 14.03.2024. Uczestnicy wyszli z domu KULTURY. Faktura [KOD-POCZTOWY] VAT. Smith et al.Nature 12.",
+  "neg-146": "Sprzedam samochód marki Skoda Octavia TSI 1400. Ogłoszenie na tablicy o PIT 2024 zdjęto. Przyjęto zgłoszenie telefoniczne nr 512345678. Kobiecie urodzonej 1 stycznia 1953 r. lub później przysługuje emerytura. Lot o numerze rejsu LO 3925 opóźniony. Zmiana w UI.Panel 2.0.
+Imię i nazwisko ucznia
+Klasa
+Imię i nazwisko wnioskodawcy: Gmina Michałowice",
   "neg-15": "Zakład Ubezpieczeń Społecznych wydał decyzję odmowną.",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
@@ -1380,6 +1394,7 @@ Tak	[IMIĘ I NAZWISKO]	Urząd Miasta",
   "str-142": "<etd:ImiePierwsze>[IMIĘ I NAZWISKO]</etd:ImiePierwsze><etd:Nazwisko>[IMIĘ I NAZWISKO]</etd:Nazwisko><etd:DataUrodzenia>[DATA-URODZENIA]</etd:DataUrodzenia>
 {"paszport": "[NR-PASZPORTU]", "nrTelefonu": "[TELEFON]", "Miejscowość": "[MIEJSCOWOŚĆ]"}",
   "str-143": "Pani [IMIĘ I NAZWISKO], urodzonej [DATA-URODZENIA] r. w [MIEJSCOWOŚĆ]. [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]. zam. [ADRES]. Card number: [NR-KARTY].",
+  "str-144": "Kontakt nr 512 345 678, tel. [TELEFON]. Obecnych 12 os.[IMIĘ I NAZWISKO] przewodniczyła. [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]. [IMIĘ I NAZWISKO] z domu Ludowego.",
   "str-15": "Zwrot nastąpi na konto [NR-KONTA] wskazane w umowie.",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",

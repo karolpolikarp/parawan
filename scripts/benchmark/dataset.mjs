@@ -869,6 +869,11 @@ export function buildDataset() {
   osp('Imię i nazwisko pacjenta: Hans Gruber\nAnna Kowalska z domu Sikora\nKierownik Działu Kadr Grzegorz Mazur', ['Hans', 'Gruber', 'Anna', 'Kowalska', 'Sikora', 'Grzegorz', 'Mazur'], ['Imię i nazwisko pacjenta:', 'z domu', 'Kierownik Działu Kadr']);
   str('Pani Hanny Michalak, urodzonej 12.03.1980 r. w Białymstoku. UL. LIPOWA 14, 26-900 KOZIENICE. zam. ul.Długa 5/3. Card number: 4532 0151 1283 0366.', ['Hanny', 'Michalak', '12.03.1980', 'Białymstoku', 'LIPOWA 14', '26-900', 'KOZIENICE', 'Długa 5/3', '4532 0151 1283 0366'], ['urodzonej', 'Card number:']);
   neg('Spółka wyemitowała obligacje serii ABA 123456. Spółka wpisana do rejestru pod nr 123 456 789. Tablica o numerze INW 12345 jest w magazynie. Data urodzenia pacjenta w systemie uzupełniono 14.03.2024. Uczestnicy wyszli z domu KULTURY. Faktura 12-345 VAT. Smith et al.Nature 12.', ['serii ABA 123456', 'pod nr 123 456 789', 'INW 12345', '14.03.2024', 'z domu KULTURY', 'VAT', 'et al.Nature 12']);
+  // Poprawki po weryfikacji partii b5: kod silnika za modelem, temat ogłoszenia na tablicy, numer
+  // zgłoszenia po „telefoniczne nr", próg daty w przepisie, „numer rejsu", nagłówek tabeli pod
+  // etykietą pola, instytucja w polu osoby, rzeczownik po „z domu", notacja „UI.", „12 os.".
+  neg('Sprzedam samochód marki Skoda Octavia TSI 1400. Ogłoszenie na tablicy o PIT 2024 zdjęto. Przyjęto zgłoszenie telefoniczne nr 512345678. Kobiecie urodzonej 1 stycznia 1953 r. lub później przysługuje emerytura. Lot o numerze rejsu LO 3925 opóźniony. Zmiana w UI.Panel 2.0.\nImię i nazwisko ucznia\nKlasa\nImię i nazwisko wnioskodawcy: Gmina Michałowice', ['TSI 1400', 'PIT 2024', '512345678', '1 stycznia 1953', 'LO 3925', 'UI.Panel 2.0', 'Klasa', 'Gmina Michałowice']);
+  str('Kontakt nr 512 345 678, tel. 22 843 21 09. Obecnych 12 os.Halina Grzyb przewodniczyła. UL. LIPOWA 14, 05-300 STARA WIEŚ. Anna Nowak z domu Ludowego.', ['22 843 21 09', 'Halina', 'Grzyb', 'LIPOWA 14', '05-300', 'STARA WIEŚ', 'Anna', 'Nowak'], ['Kontakt nr', 'z domu Ludowego']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
