@@ -184,6 +184,17 @@ export const NON_SURNAME_ADJ = new Set<string>((
   'miejski wiejski wojewódzki marszałkowski morski nadmorski królewski cesarski papieski biskupi diecezjalny ' +
   'boski niebiański ziemski świecki damski męski żeński ludzki dziecięcy ojcowski macierzyński ' +
   'lekarski adwokacki nauczycielski rybacki rycerski sąsiedzki ' +
+  // zawodowe i relacyjne z nazw usług, urzędów i projektów: „Opieka Pielęgniarska", „Poselski
+  // projekt", „Władza Rodzicielska". Żaden nie jest znanym nazwiskiem, a na początku zdania albo
+  // po rzeczowniku z wielkiej litery szły jako osoba. Para z imieniem („Jan Poselski") dalej maskuje.
+  'pielęgniarski aptekarski felczerski poselski prezydencki senacki prokuratorski strażacki ' +
+  'olimpijski piłkarski literacki rodzicielski diabelski ' +
+  // nazwy zakładów usługowych: „Salon Fryzjerski Ewa zaprasza" szło jako osoba, a imię z nazwy
+  // salonu domykało maskę („[IMIĘ I NAZWISKO] zaprasza")
+  'fryzjerski ' +
+  // „Ochrony Środowiska" (RDOŚ, WIOŚ, WFOŚiGW): dopełniacz rzeczownika „środowisko" ma końcówkę
+  // -ska, a reguła odmiany sprowadza go do „środowiski" — bez wpisu każdy taki urząd dawał osobę
+  'środowiski ' +
   // relacyjne (nazwy komitetów/związków/funduszy): „Komitet Obywatelski", „Hufiec Harcerski"
   'obywatelski harcerski sołecki chłopski pański szlachecki żołnierski marynarski kupiecki ' +
   'związkowski ' +
@@ -192,6 +203,9 @@ export const NON_SURNAME_ADJ = new Set<string>((
   'studencki pracowniczy związkowy ' +
   // dalsze regiony / pasma / parki: „Bieszczadzki Park", „Podhalański", „Sądecki"
   'podhalański bieszczadzki karkonoski sądecki gorczański elbląski nadwiślański nadbużański ' +
+  // pozostałe parki narodowe. BEZ homografów nazwisk (słowiński, woliński, magurski) — te chroni
+  // prawy kontekst „… Park Narodowy" w index.ts, a samodzielne „Słowiński" ma zostać maskowane
+  'białowieski biebrzański pieniński kampinoski babiogórski wigierski drawieński poleski narwiański ' +
   'kołobrzeski koszaliński słupski legnicki wałbrzyski jeleniogórski nowosądecki ' +
   // PRZYMIOTNIKI ODMIEJSCOWE od nazw POWIATÓW/regionów/miast („Starosta Wołomiński", „powiat
   // grójecki") — to nazwy jednostek, NIE nazwiska. Lista wygenerowana i zweryfikowana adwersarialnie
@@ -242,9 +256,84 @@ export const NON_SURNAME_ADJ = new Set<string>((
   'błyski przebłyski rozbłyski blaski odblaski odgłoski kioski maski paski laski obcaski ' +
   'deski miski piaski wioski troski kreski łuski pyski piski odpryski wypryski obeliski ' +
   'spiski półmiski meniski kluski pieski noski klocki ' +
+  'kaski dyski placki kiełbaski freski kąski kęski kłoski woski pluski brzaski kołyski ' +
+  // przymiotniki wyznaniowe ze złożeń („Kościół Ewangelicko-Augsburski", „Parafia Rzymsko-Katolicka")
+  'katolicki ewangelicki augsburski ' +
+  // „Dziecka" (Instytut Matki i Dziecka, Rzecznik Praw Dziecka, „Dane Dziecka:") — dopełniacz
+  // rzeczownika z końcówką -cka, który reguła odmiany brała za żeńskie nazwisko na -cka
+  'dziecka ' +
   // wieloznaczny wyraz o końcówce nazwiskowej, który nazwiskiem nie jest (Znicz Pruszków itp.)
   'znicz'
 ).split(/\s+/).filter(Boolean));
+
+/**
+ * Rzeczowniki w liczbie mnogiej z NON_SURNAME_ADJ, które chronimy TYLKO w tej dokładnej formie
+ * („Placki ziemniaczane", „Kłoski zboża"). Reguła odmiany sprowadzała do nich dopełniacz nazwisk
+ * na -ek („Placka", „Kłoska", „Kąska" od Placek, Kłosek, Kąsek), więc „Pełnomocnik Placka wniósł"
+ * zostawało jawne. Bez „kiełbaski/kołyski/kaski": „Kiełbaska", „Kołyska", „Kaska" to rzeczowniki
+ * w mianowniku. Koszt: „Placka nie zjadłem." na początku zdania znów w masce, jak przed partią b3.
+ */
+const NOUN_PLURAL_ONLY = new Set<string>('kąski kęski kłoski woski placki'.split(' '));
+/** Czy sprowadzona reguła odmiany forma bazowa `base` blokuje wyraz jako przymiotnik ze stoplisty? */
+const blocksAsAdjective = (base: string): boolean => NON_SURNAME_ADJ.has(base) && !NOUN_PLURAL_ONLY.has(base);
+
+// Złożenie przymiotnikowe z łącznikiem: człony na -sko/-cko/-dzko + ostatni człon („Kujawsko-
+// Pomorski", „Warmińsko-Mazurskiego", „Polsko-Niemiecka"). Każdy człon kończy się łącznikiem,
+// więc powtórzenie nie cofa się kwadratowo.
+const RE_COMPOUND_ADJ = /^(?:[a-ząćęłńóśźż]+(?:sk|ck|dzk)o-)+[a-ząćęłńóśźż]+$/;
+
+/**
+ * Czy wyraz to złożony przymiotnik regionalny/relacyjny z łącznikiem (Kujawsko-Pomorski Oddział
+ * NFZ, Urząd Warmińsko-Mazurski), a nie nazwisko dwuczłonowe? NON_SURNAME_ADJ zna tylko człony
+ * osobno, więc całość szła jako nazwisko. Ostatni człon musi być ZNANYM przymiotnikiem ze stoplisty
+ * (pomorski, mazurskiego, niemiecka): sam brak w słowniku nazwisk odsłaniał nazwiska dwuczłonowe
+ * z członem na -sko/-cko („Pasko-Gzowska", „Dacko-Brzęczyk", „Lisko-Brzozowska"). Albo pierwsze
+ * człony to typowy początek złożenia (COMPOUND_ADJ_HEADS: „polsko", „kujawsko"), a ostatni nie jest
+ * nazwiskiem ze słownika: stoplista nie zna każdej narodowości („Polsko-Szwedzka Izba",
+ * „Polsko-Kanadyjska Rada"). Świadoma luka: „Śląsko-Dąbrowska" (dąbrowski to częste nazwisko) dalej
+ * wygląda na osobę.
+ */
+export function isCompoundAdjective(word: string): boolean {
+  const w = word.toLowerCase();
+  if (!RE_COMPOUND_ADJ.test(w)) return false;
+  const parts = w.split('-');
+  const last = parts.pop() as string;
+  if (blocksAsAdjective(last)) return true;
+  const rule = ADJ_RULES.find(([re]) => re.test(last));
+  if (rule && blocksAsAdjective(last.replace(rule[0], rule[1]))) return true;
+  return parts.every((p) => COMPOUND_ADJ_HEADS.has(p)) && !surnameBase(last);
+}
+// Pierwsze człony złożeń przymiotnikowych: państwo i województwa („Polsko-Szwedzka", „Kujawsko-
+// Pomorski", „Śląsko-…"), wyznania. Lista zamknięta, bo „pasko", „dacko", „lisko" to człony nazwisk.
+const COMPOUND_ADJ_HEADS = new Set<string>(
+  (
+    'polsko kujawsko warmińsko śląsko dolnośląsko łódzko wrocławsko mazowiecko pomorsko ' +
+    'zachodniopomorsko wielkopolsko małopolsko lubusko lubelsko podlasko podkarpacko opolsko ' +
+    'świętokrzysko rzymsko grecko ewangelicko słowacko czesko niemiecko rosyjsko ukraińsko litewsko ' +
+    'angielsko francusko włosko hiszpańsko europejsko amerykańsko'
+  ).split(/\s+/),
+);
+
+/**
+ * Rzeczowniki pospolite z końcówką -czyk (zdrobnienia i nazwy mieszkańców: Kluczyk, Słowniczyk,
+ * Chińczyk) — wyglądają jak nazwisko, a na początku zdania pisze się je wielką literą. NIE są
+ * w NON_SURNAME_ADJ, bo ta lista wyłącza też kotwice („Pan Kluczyk", „J. Kluczyk" to nazwiska),
+ * tylko w przebiegu samodzielnego nazwiska bez żadnej kotwicy (index.ts, passPersonSoloMorph).
+ */
+export const COMMON_NOUN_LOOKALIKES = new Set<string>((
+  'słowniczyk krzaczyk kluczyk chłopczyk mieczyk ' +
+  'chińczyk japończyk koreańczyk wietnamczyk tajwańczyk europejczyk kanadyjczyk australijczyk ' +
+  'brazylijczyk argentyńczyk chilijczyk kubańczyk irlandczyk islandczyk duńczyk nowozelandczyk ' +
+  'izraelczyk libańczyk syryjczyk irańczyk afgańczyk pakistańczyk nepalczyk'
+).split(/\s+/));
+/**
+ * Zdrobnienia z COMMON_NOUN_LOOKALIKES, które są też prawdziwymi nazwiskami (Kluczyk, Mieczyk,
+ * Krzaczyk). Rzeczownik pospolity pisze się wielką literą tylko na początku zdania, więc w środku
+ * zdania („świadek Krzaczyk potwierdził", „Odebrał: Kluczyk") to nazwisko — index.ts rozstrzyga
+ * po pozycji. Nazwy mieszkańców (Chińczyk) oraz „Chłopczyk" i „Słowniczyk" zostają rzeczownikiem
+ * wszędzie („Chłopczyk bawił się w piaskownicy").
+ */
+export const DIMINUTIVE_LOOKALIKES = new Set<string>('krzaczyk kluczyk mieczyk'.split(' '));
 
 /**
  * Czy wyraz WYGLĄDA na polskie nazwisko po samej morfologii (bez słownika)?
@@ -256,9 +345,17 @@ export function looksLikeSurname(word: string): boolean {
   if (w.length < 5) return false;
   if (!SURNAME_SUFFIX.test(w)) return false;
   if (NON_SURNAME_ADJ.has(w)) return false;
+  // „-icza" to też mianownik żeńskich przymiotników na -niczy (Komornicza, Rolnicza, Ochotnicza,
+  // Górniczo-Hutnicza) i czasowniki „zalicza/oblicza/nalicza". Słowotwórstwo jest produktywne,
+  // więc reguła zamiast listy. Spółgłoska przed „-nicza" odróżnia przymiotnik od dopełniacza
+  // nazwiska z samogłoską (Iwanicza, Romanicza) i od -owicza/-ewicza, które zostają nazwiskami.
+  // Koszt: dopełniacz rzadkiego nazwiska „…nicz" bez kotwicy („Pozew Bartnicza") — z imieniem,
+  // „Pan/Pani" albo rolą dalej jest maskowany.
+  if (/[^aeiouyąęó]nicza$/.test(w) || /^(?:za|ob|na|wy|prze|od|roz|z|do|w|u)licza$/.test(w)) return false;
+  if (isCompoundAdjective(w)) return false;
   // sprowadź odmieniony przymiotnik do bazy -ski i sprawdź stoplistę raz jeszcze
   for (const [re, rep] of ADJ_RULES) {
-    if (re.test(w)) return !NON_SURNAME_ADJ.has(w.replace(re, rep));
+    if (re.test(w)) return !blocksAsAdjective(w.replace(re, rep));
   }
   return true;
 }
@@ -273,8 +370,9 @@ export function looksLikeSurname(word: string): boolean {
 export function isGeoAdjective(word: string): boolean {
   const w = word.toLowerCase();
   if (NON_SURNAME_ADJ.has(w)) return true;
+  if (isCompoundAdjective(w)) return true;
   for (const [re, rep] of ADJ_RULES) {
-    if (re.test(w) && NON_SURNAME_ADJ.has(w.replace(re, rep))) return true;
+    if (re.test(w) && blocksAsAdjective(w.replace(re, rep))) return true;
   }
   return false;
 }

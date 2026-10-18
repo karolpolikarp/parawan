@@ -153,7 +153,7 @@ function genIbanPl(rng) {
 function genDowod(rng) {
   const letters = Array.from({ length: 3 }, () => String.fromCharCode(65 + randInt(rng, 0, 25))).join('');
   const tail = randDigits(rng, 5);
-  const w = [7, 3, 1, 9, 1, 7, 3, 1, 7];
+  const w = [7, 3, 1, 9, 7, 3, 1, 7, 3]; // jak isValidDowod (wagi poprawione w 0.29.13)
   const chars = letters + '0' + tail; // miejsce kontrolne tymczasowo 0
   let sum = 0;
   for (let i = 0; i < 9; i++) {
@@ -700,6 +700,180 @@ export function buildDataset() {
   neg('System KSeF w wersji 2.0 działa od 2026 roku.', ['KSeF']);
   // separatorem numeru KSeF jest TYLKO myślnik — kolumny liczb w raporcie nie są scalane
   neg('Raport KSeF 5265877635 20250826 000000012345 23 w podziale na kanały.', ['20250826 000000012345 23']);
+
+  // Czyste wyjście (audyt, partia b1): tekst POZA maską zostaje co do znaku — odstępy i tabulatory
+  // między kolumnami, zapis etykiety, kropki skrótów, składnia JSON-a. mustKeep z odstępami pilnuje
+  // struktury, której sama detekcja nie mierzy.
+  osp('2024-03-01\tJan Kowalski\tWarszawa\t1250,00', ['Jan', 'Kowalski'], ['\tWarszawa\t1250,00']);
+  osp('Wystawił: Marek Dąbrowski     Odebrał: Ewa Kamińska', ['Marek', 'Dąbrowski', 'Ewa', 'Kamińska'], ['     Odebrał:']);
+  str('kod\tmiasto\tkraj\n00-001\tWarszawa\tPolska', ['00-001', 'Warszawa'], ['\tPolska']);
+  str('krs: 0000123456, regon: 123456785', ['0000123456', '123456785'], ['krs:', 'regon:']);
+  str('Kontakt: tel. 601-222-333 lub 22 501 23 45, faks 12 634 55 22 / 12 634 55 23.', ['601-222-333', '22 501 23 45', '12 634 55 22', '12 634 55 23'], ['Kontakt', 'lub', 'faks']);
+  str('tel. 22 501 23 45, kom. 601 222 333 lub 120 000 000 zł zaliczki', ['22 501 23 45', '601 222 333'], ['kom. ', '120 000 000 zł']);
+  osp('ORLEN S.A. Jan Kowalski — pełnomocnik spółki.', ['Jan', 'Kowalski'], ['ORLEN S.A. ', 'pełnomocnik']);
+  osp('Sz. P. Andrzej Górski — odpowiedź na pismo.', ['Andrzej', 'Górski'], ['Sz. P. ', 'odpowiedź']);
+  osp('Pełnomocnik: mec. Ł. Baran przedłożył pełnomocnictwo.', ['Ł.', 'Baran'], ['Pełnomocnik', 'przedłożył']);
+  neg('P.S. Mróz ma być w nocy, okryj róże.', ['P.S. Mróz']);
+  str(String.raw`{"opis": "Zgłosił:\nKowalski Jan, PESEL:\n85031412347"}`, ['Kowalski', 'Jan', '85031412347'], [String.raw`"Zgłosił:\n`, String.raw`PESEL:\n`]);
+  str(String.raw`{"payload":"{\"imie\":\"Jadwiga\",\"nazwisko\":\"Gżegżółka\",\"miasto\":\"Słupsk\"}"}`, ['Jadwiga', 'Gżegżółka', 'Słupsk'], [String.raw`{\"imie\":\"`]);
+  neg(String.raw`{"sciezka": "C:\\Users\\nowak\\Documents\\raport.docx", "opis": "Linia 1\nLinia 2"}`, [String.raw`C:\\Users\\nowak\\Documents`, String.raw`Linia 1\nLinia 2`]);
+  // (cudzysłowy wokół masek w miejscu liczb pilnuje snapshot golden — mustKeep musi stać w wejściu)
+  str('{"klient_id": 7, "pesel": 85031412347, "telefon": 601234567}', ['85031412347', '601234567'], ['"klient_id": 7']);
+  // Regresje partii b1 wyłapane w weryfikacji: imię nad nazwiskiem po czasowniku podpisu, lista
+  // „Nazwisko Imię" z homografami, łańcuch inicjałów w składzie sądu, firma jednoosobowa,
+  // człon telefonu z prefiksem „48" bez plusa.
+  osp('Sporządził Jan\nKowalski, dnia 3 marca.', ['Jan', 'Kowalski'], ['Sporządził', 'dnia 3 marca']);
+  osp('Lista obecności:\nWilk Bartosz\nSowa Przemysław\nPawlak Wiesław', ['Wilk', 'Bartosz', 'Sowa', 'Przemysław', 'Pawlak', 'Wiesław'], ['Lista obecności:\n']);
+  osp('Przewodniczący: SSO J.M. Wilk\nSędziowie: SO A.K. Sowa, SO T.J. Mazur (spr.)', ['J.M.', 'Wilk', 'A.K.', 'Sowa', 'T.J.', 'Mazur'], ['Przewodniczący: SSO ', 'Sędziowie: SO ', '(spr.)']);
+  osp('Wykonawca: P.H.U. Wilk Tomasz Wilk, NIP w załączeniu.', ['Tomasz', 'Wilk'], ['Wykonawca: P.H.U. ', 'NIP w załączeniu']);
+  neg('P.P.S. Mróz ma być w nocy, a PKO B.P. Wilk to nazwa robocza.', ['P.P.S. Mróz', 'B.P. Wilk']);
+  str('tel. 601 222 333 lub 48 602 333 444, faks 22 501 23 45; 48 22 123 45 67', ['601 222 333', '48 602 333 444', '22 501 23 45', '48 22 123 45 67'], ['tel.', 'lub', 'faks']);
+
+  // Nadmaskowanie numerów (audyt, partia b2): liczby w kształcie telefonu, tablicy, IBAN-u, IP
+  // czy MAC, które nimi nie są, oraz prawdziwe wartości, które obok nich nadal muszą zniknąć.
+  neg('Ilość\n120\n340\n560\nRazem 1020', ['120\n340\n560']);
+  neg('Numer przesyłki: RR123456789PL, faktura FV/2026/123456789, SKU 123456789A.', ['RR123456789PL', 'FV/2026/123456789', 'SKU 123456789A']);
+  str('Numery 500600700/501601701 do biura.', ['500600700', '501601701'], ['Numery', 'do biura']);
+  neg('Kontakt telefoniczny 03.10.2026 9:45 – brak odpowiedzi.', ['03.10.2026 9:45']);
+  neg('Dochody bieżące: 534 210 987,55; wartość: 1 234 567 890; kwota 150 000 000 zł.', ['534 210 987,55', '1 234 567 890', '150 000 000 zł']);
+  neg('Nr seryjny urządzenia: 512345678\nNumer zamówienia: 302114587\nInfolinia sklepu: 801 300 400', ['512345678', '302114587', '801 300 400']);
+  str('Telefon do działu zamówień: 512 345 678, nr zamówienia 302114587.', ['512 345 678'], ['działu zamówień', '302114587']);
+  neg('Rysunki wykonano w programie AutoCAD 2024. Samochód ciężarowy o DMC 3500 kg.', ['AutoCAD 2024', 'DMC 3500 kg']);
+  neg('Opłata za tablice rejestracyjne od 2025 r. wynosi 135,50 zł.', ['od 2025 r.']);
+  str('Ciągnik: nr rej. WGM 12345, DMC 18000 kg, ładowność 24 t.', ['WGM 12345'], ['DMC 18000 kg', 'ładowność 24 t']);
+  str('Przelew na DE89 3704 0044 0532 0130 00 Z OPCJĄ SHA', ['DE89 3704 0044 0532 0130 00'], ['Z OPCJĄ SHA']);
+  str('IBAN: PL 92 1050 0099 0000 1234 5678 9013, BIC: INGBPLPW', ['PL 92', '1050 0099 0000 1234 5678 9013'], ['BIC: INGBPLPW']);
+  str('Login: FIRMA\\jkowalski\nKonto założono w domenie FIRMA.', ['jkowalski'], ['w domenie FIRMA.']);
+  str('Login: tkaminski\nZablokowano konto tkaminski.', ['tkaminski'], ['Zablokowano konto']);
+  neg('Login: admin\nPo zalogowaniu do panelu admin zmień domyślne hasło.', ['panelu admin']);
+  str('Logowanie nastąpiło z adresu IP 83.12.45.67.', ['83.12.45.67'], ['Logowanie nastąpiło z adresu IP']);
+  neg('Wymagania opisano w rozdziale 2.1.1.1. Zainstalowano wersję 2.4.1.0 na serwerze.', ['2.1.1.1', '2.4.1.0']);
+  neg('Maska podsieci: 255.255.255.0, localhost 127.0.0.1, nasłuch 0.0.0.0', ['255.255.255.0', '127.0.0.1', '0.0.0.0']);
+  neg('Serial Number: 4a:3f:22:91:0c:7e:1d:55', ['4a:3f:22:91:0c:7e:1d:55']);
+  str('IN=eth0 MAC=00:1a:2b:3c:4d:5e:00:11:22:33:44:55:08:00 LEN=60', ['00:1a:2b:3c:4d:5e', '00:11:22:33:44:55'], ['LEN=60']);
+  neg('git clone git@github.com:zespol/portal.git', ['git@github.com:zespol/portal.git']);
+  str('GET /api/v1/clients?email=jan.kowalski%40example.pl&status=1 200', ['jan.kowalski%40example.pl'], ['&status=1 200']);
+  str('Sygn. akt: CAN-PST-SWW.7421.1234567.2026.1 — wezwanie.', ['CAN-PST-SWW.7421.1234567.2026.1'], ['wezwanie']);
+  // Regresje partii b2 wykryte w weryfikacji: numer osoby po nazwisku sklejonym „/" lub „-",
+  // tablica małymi literami po „nr rej.", host po „wersję na", wersja w linii o serwerze,
+  // „ZŁ…" wersalikami po numerze, DUID z adresem karty, konto funkcyjne w prozie.
+  str('Koordynator: Anna Nowak/601 234 567, zastępca Tomasz Zawadzki-604123456.', ['601 234 567', '604123456'], ['Koordynator', 'zastępca']);
+  str('Zatrzymano pojazd nr rej. wa 12345 na parkingu.', ['wa 12345'], ['Zatrzymano pojazd nr rej.', 'na parkingu']);
+  str('Wdrożono nową wersję na 10.20.30.40 wieczorem. Konwersja adresów 192.168.1.15 nie działa.', ['10.20.30.40', '192.168.1.15'], ['nową wersję na', 'Konwersja adresów']);
+  neg('Aktualizacja serwera do 7.0.3.12. Kernel serwera 5.15.0.91. Konfiguracja adresów IP: rozdz. 5.2.1.3.', ['7.0.3.12', '5.15.0.91', '5.2.1.3']);
+  str('NOWAK JAN 602 345 678 ZŁOŻYŁ WNIOSEK', ['602 345 678'], ['ZŁOŻYŁ WNIOSEK']);
+  str('DHCPv6 Client DUID. . . : 00-01-00-01-2A-3B-4C-5D-00-1A-2B-3C-4D-5E', ['00-1A-2B-3C-4D-5E'], ['DHCPv6 Client DUID']);
+  str('Login: URZAD\\kadry\nPismo przekazano do działu kadry.', ['URZAD\\kadry'], ['do działu kadry.']);
+
+  // Nadmaskowanie osób i miejsc (audyt, partia b3): nazwy własne, eponimy, urzędy, przymiotniki
+  // i rzeczowniki z końcówką nazwiskową, marker zamieszkania — oraz osoby obok nich, które dalej
+  // muszą zniknąć w całości.
+  neg('Kościół Mariacki w Krakowie pochodzi z XIV wieku, a Puszcza Białowieska jest na liście UNESCO.', ['Kościół Mariacki', 'Puszcza Białowieska']);
+  osp('Wczoraj Kowalski przyszedł do biura. Sąsiad Wiśniewski zeznał, że nic nie słyszał.', ['Kowalski', 'Wiśniewski'], ['Wczoraj', 'Sąsiad']);
+  osr('Świętomira Gzowska przyszła na przesłuchanie.', ['Świętomira', 'Gzowska']);
+  neg('Kancelaria Komornicza w Zamościu, Izba Rolnicza w Lublinie i Ochotnicza Straż Pożarna w Lipnie.', ['Komornicza', 'Rolnicza', 'Ochotnicza']);
+  neg('Akademia Górniczo-Hutnicza i Kujawsko-Pomorski Oddział Wojewódzki NFZ.', ['Górniczo-Hutnicza', 'Kujawsko-Pomorski']);
+  neg('Poselski projekt ustawy trafił do Sejmu. Opieka Pielęgniarska w domu chorego. Władza Rodzicielska została ograniczona.', ['Poselski', 'Opieka Pielęgniarska', 'Władza Rodzicielska']);
+  neg('Regionalna Dyrekcja Ochrony Środowiska w Gdańsku wydała decyzję.', ['Ochrony Środowiska']);
+  neg('Słowiński Park Narodowy leży nad morzem, a Kampinoski Park Narodowy otacza Warszawę.', ['Słowiński', 'Kampinoski']);
+  neg('Kaski ochronne są obowiązkowe. Skierowano do Instytutu Matki i Dziecka w Warszawie.', ['Kaski', 'Dziecka']);
+  osp('Sprawę Kowalewicza przekazano do sądu, a Pan Kluczyk złożył wniosek.', ['Kowalewicza', 'Kluczyk'], ['Sprawę', 'Pan']);
+  neg('Pani Minister Zdrowia podpisała rozporządzenie, a Pan Komendant Policji przyjął skargę.', ['Minister Zdrowia', 'Komendant Policji']);
+  osp('Pani Minister Anna Nowak przemówiła.', ['Anna', 'Nowak'], ['Pani Minister']);
+  neg('Odruch Babińskiego dodatni. Prątek Kocha w posiewie. Korek na moście Łazienkowskim od rana.', ['Babińskiego', 'Kocha', 'Łazienkowskim']);
+  neg('Konsultacja w Szpitalu im. dra Alfreda Sokołowskiego w Wałbrzychu. Kościół św. Piotra Apostoła.', ['Alfreda Sokołowskiego', 'Piotra Apostoła']);
+  osp('Pomógł im Jan Kowalski w przeprowadzce.', ['Jan', 'Kowalski'], ['Pomógł im']);
+  neg('Kazimierz Dolny leży nad Wisłą.', ['Kazimierz Dolny']);
+  osp('Wnioskodawca: Kazimierz Dolny', ['Kazimierz', 'Dolny'], ['Wnioskodawca']);
+  // „św." w protokole to skrót „świadek" — patronem jest tylko z kontekstem sakralnym
+  osp('Sąd przesłuchał św. Annę Gzowską. św. Kowalski zeznał, że nic nie widział.', ['Annę', 'Gzowską', 'Kowalski'], ['Sąd przesłuchał św.']);
+  neg('Zarząd Spółdzielni Mieszkaniowej w Krakowie ogłasza przetarg. Mieszkania w Gdańsku drożeją.', ['Krakowie', 'Gdańsku']);
+  str('Jan Nowak, zam. w Krakowie\nPESEL 85031412347', ['Jan', 'Nowak', 'Krakowie', '85031412347'], ['zam. w']);
+  str('z Anną Nowak, zamieszkałą w Łodzi. Pozwana zamieszkuje w Gdańsku od 2015 r.', ['Anną', 'Nowak', 'Łodzi', 'Gdańsku'], ['zamieszkałą w', 'zamieszkuje w']);
+  str('1. Jan Turek, ul. Długa 5, 00-001 Warszawa', ['Jan', 'Turek', 'Długa 5', '00-001', 'Warszawa']);
+  str('Pozdrawiam\nMonika Sadowska\nSzosa Chełmińska 77/9\n87-100 Toruń', ['Monika', 'Sadowska', 'Chełmińska 77/9', '87-100', 'Toruń'], ['Pozdrawiam\n']);
+  neg('Marsz wyruszy z placu Piłsudskiego 11 listopada. Remont ul. Puławskiej 2021-2023 zakończono.', ['placu Piłsudskiego 11 listopada', 'ul. Puławskiej 2021-2023']);
+  str('Badania: ul. Bitwy Warszawskiej 1920 r. 18, 02-366 Warszawa', ['Bitwy Warszawskiej 1920 r. 18', '02-366', 'Warszawa'], ['Badania']);
+  neg('{"sku": "A-107", "name": "Róża pustyni"} oraz <osoba>prawna</osoba>', ['Róża pustyni', 'prawna']);
+  neg('{"imie": "b.d.", "nazwisko": "b.d."}\nLogin: none', ['b.d.', 'none']);
+  neg('Koszt naprawy wyniesie 10-200 PLN brutto. Smith et al. Nature 2019.', ['10-200 PLN', 'et al. Nature 2019']);
+  // Regresje partii b3 po weryfikacji: osoba po rzeczowniku z wielkiej litery, po tytule za nazwą
+  // ulicy, WERSALIKAMI po kotwicy, po „św.", pod „osoba", zdrobnienie-nazwisko, adres przed datą,
+  // etykieta zamieszkania — oraz zdania ogólne i eponimy, które mają zostać.
+  osp('Kierownik Zespołu Kowalski zatwierdził urlop. Reakcja Wiśniewskiego na wezwanie była natychmiastowa.', ['Kowalski', 'Wiśniewskiego'], ['Kierownik Zespołu', 'Reakcja']);
+  osp('Konflikt na linii Nowak – Zieliński trwał od lat. Kierownik linii Wójcik polecił wyłączenie zasilania.', ['Nowak', 'Zieliński', 'Wójcik'], ['Konflikt na linii', 'Kierownik linii']);
+  osp('Na ul. Długiej lek. Anna Nowak udzieliła pomocy. W parku lek. Jan Kowalski reanimował poszkodowanego.', ['Anna', 'Nowak', 'Jan', 'Kowalski'], ['Na ul. Długiej lek.', 'W parku lek.']);
+  str('Adres: ul. dra Jana Kowalskiego 12/3, Kraków', ['Jana Kowalskiego 12/3', 'Kraków'], ['Adres:']);
+  osp('NA ULICY JAN KOWALSKI ZOSTAŁ POTRĄCONY. KIEROWNIK PLACÓWKI JOLANTA PYREK.', ['JAN', 'KOWALSKI', 'JOLANTA', 'PYREK'], ['NA ULICY', 'KIEROWNIK PLACÓWKI']);
+  osp('Mimo wezwania św. Tomasz Gzik nie stawił się. Pożar kościoła widział św. Kowalski.', ['Tomasz', 'Gzik', 'Kowalski'], ['Mimo wezwania św.', 'Pożar kościoła widział św.']);
+  str('{"osoba": "KOWALSKI JAN"}, <osoba>Wróbel Anna</osoba>, {"id": 7, "name": "anna"}', ['KOWALSKI', 'JAN', 'Wróbel', 'Anna', '"anna"'], ['"osoba"', '"name"']);
+  osp('Na rozprawie świadek Krzaczyk potwierdził, że Kluczyk był obecny. Pełnomocnik Placka wniósł o oddalenie powództwa.', ['Krzaczyk', 'Kluczyk', 'Placka'], ['Na rozprawie świadek', 'Pełnomocnik']);
+  str('Zdarzenie miało miejsce przy ul. Długiej 15 12 lipca 2023 r. Dostawa: ul. Lipowa 12\tMaja Kowalska', ['Długiej 15', 'Lipowa 12', 'Maja', 'Kowalska'], ['12 lipca 2023 r.']);
+  str('Wnioskodawca: Jan Kowalski, miejscowość zamieszkania: Tarnów. Zamieszkanie: Kraków', ['Jan', 'Kowalski', 'Tarnów', 'Kraków'], ['miejscowość zamieszkania:', 'Zamieszkanie:']);
+  neg('Program skierowany jest do osób zamieszkujących w Gdańsku. Rodziny mieszkające w Poznaniu otrzymają dodatek.', ['Gdańsku', 'Poznaniu']);
+  osp('Pod wskazanym adresem zamieszkuje Jarosław Wilk z konkubiną.', ['Jarosław', 'Wilk'], ['Pod wskazanym adresem zamieszkuje']);
+  osp('Sąd zasądził od uczestnika Kazimierza Dolnego koszty.', ['Kazimierza', 'Dolnego'], ['Sąd zasądził od uczestnika']);
+  osp('Wniosek złożyła Pasko-Gzowska. Szanowna Pani Dyrektor Szkoły Kowalska, uprzejmie informuję.', ['Pasko-Gzowska', 'Kowalska'], ['Wniosek złożyła', 'Pani Dyrektor Szkoły']);
+  neg('Szkoła Podstawowa nr 3 im Marii Konopnickiej. Linie Langera zachowane. Kościół pod wezwaniem św. Jana Chrzciciela.', ['Marii Konopnickiej', 'Langera', 'Jana Chrzciciela']);
+  osp('Na ulicy Jan Kowalski zasłabł. W parku Anna Nowak spacerowała z psem.', ['Jan', 'Kowalski', 'Anna', 'Nowak'], ['Na ulicy', 'W parku']);
+  neg('Szpital im. dr Anny Nowak w Lublinie. Polsko-Szwedzka Izba Gospodarcza. Obchody na placu Piłsudskiego 11 Listopada.', ['Anny Nowak', 'Polsko-Szwedzka', 'Piłsudskiego 11 Listopada']);
+  // Regresje partii b3, runda 2: komórka TSV obok nazwiska, zdrobnienie-nazwisko po tytule i bez
+  // czasownika przeszłego, rzadkie nazwisko pod „osoba", osoba za patronem po „św.", pacjent po
+  // głowie eponimu, osoba po mieście-przymiotniku — oraz zdania ogólne i nazwy, które mają zostać.
+  str('Data\tZmiana\tNazwisko\tOddział\n2024-05-12\tNoc\tLisiecki\tSOR\nTak\tKaczyński\tUrząd Miasta', ['Lisiecki', 'Kaczyński'], ['Noc', 'SOR', 'Tak', 'Urząd Miasta']);
+  osp('Badanie wykonał lek. Kluczyk. Mieczyk przebywa na zwolnieniu lekarskim.', ['Kluczyk', 'Mieczyk'], ['Badanie wykonał lek.', 'przebywa na zwolnieniu']);
+  str('{"klient": {"osoba": "Bednarz", "telefon": "601 234 567"}}, <person>Gzik</person>, {"name": "j. kowalski"}', ['Bednarz', 'Gzik', 'kowalski'], ['"osoba"', '<person>']);
+  osp('W kościele św. Anny Jan Bednarz zagra koncert kolęd. W kościele przesłuchano św. Annę Gzowską.', ['Jan', 'Bednarz', 'Annę', 'Gzowską'], ['W kościele św. Anny', 'przesłuchano św.']);
+  osp('Pacjent Tadeusz Nowacki trafił na SOR. Objawy Nowackiego nasiliły się w nocy. Mistrz linii Kowalskiego wydał polecenie.', ['Tadeusz', 'Nowacki', 'Nowackiego', 'Kowalskiego'], ['Objawy', 'Mistrz linii']);
+  str('ul. Polna 3, 86-170 Nowe Anna Gzik', ['Polna 3', 'Anna', 'Gzik'], []);
+  neg('Osoba mieszkająca w Krakowie może złożyć wniosek. Pracownikom zamieszkującym w Gdańsku przysługuje dodatek. Odruch Babińskiego dodatni.', ['Krakowie', 'Gdańsku', 'Babińskiego']);
+  // Wyciek fragmentu (audyt, partia b4): prefiks telefonu, PESEL/NIP/REGON z odstępami, imię po
+  // przecinku i drugie imię za maską, zdrobnienie, imię sklejone kropką, OCR, miasto wielowyrazowe,
+  // zakres i lokal w adresie, konto z twardą spacją, osoba w polu loginu, obce litery w nazwisku.
+  // Fragmenty („55 21", „-43", „öder") osobno w mustMask: jawny ogon to też wyciek.
+  str('Kontakt: tel.: 0048 12 634 55 21, tel./fax (0048) 61 852 33 49, T: +48 (0)22 395 41 00, (+48) 512 345 678.', ['0048 12 634', '55 21', '852 33 49', '(0)22', '395 41 00', '(+48', '512 345 678'], ['Kontakt:', 'tel./fax', 'T:']);
+  str('PESEL: 851 103 142 83, NIP: 5260 2502 74, REGON 012-345-675.', ['851 103 142 83', '142 83', '5260 2502 74', '012-345-675'], ['PESEL:', 'NIP:', 'REGON']);
+  osp('Do: Wiśniewska, Ewa; Sowa, Jakub\nLista obecności:\nKowalska Anna Maria\nNowak Jan Piotr', ['Wiśniewska', 'Ewa', 'Sowa', 'Jakub', 'Kowalska', 'Anna', 'Maria', 'Nowak', 'Jan', 'Piotr'], ['Do:', 'Lista obecności:']);
+  osp('[12:10] Kuba Nowak: siema\nNapisał Kuba Kowalski.', ['Kuba', 'Nowak', 'Kowalski'], ['[12:10]', 'siema', 'Napisał']);
+  neg('Kuba Libre to drink z rumem. Ambasador RP na Kubie złożył wizytę.', ['Kuba Libre', 'na Kubie']);
+  osp('Konto Jan.Kowalski zostało zablokowane. Przeniesiono folder Nowak_Anna do archiwum.', ['Jan.', 'Kowalski', 'Nowak', '_Anna'], ['Konto', 'zablokowane', 'folder', 'archiwum']);
+  osp('Od: J0anna Kowalczyk\nPani ANNA NOWAK-KOWALSKA', ['J0anna', 'Kowalczyk', 'ANNA', 'NOWAK-KOWALSKA'], ['Od:', 'Pani']);
+  neg('CENTRUM ONKOLOGII MARII SKŁODOWSKIEJ-CURIE. SĄD REJONOWY W BIELSKU-BIAŁEJ.', ['MARII SKŁODOWSKIEJ-CURIE', 'BIELSKU-BIAŁEJ']);
+  str('zam. 55-080 Kąty Wrocławskie, a wcześniej zam. w Dąbrowie Górniczej i 66-470 Kostrzyn nad Odrą.', ['55-080', 'Kąty', 'Wrocławskie', 'Dąbrowie', 'Górniczej', 'Kostrzyn', 'nad Odrą'], ['a wcześniej']);
+  str('zam. ul. Hoża 41-43 m. 12, 00-681 Warszawa; korespondencja: ul. Żwirki i Wigury 16/3, Aleje Jerozolimskie 44 lok. 5.', ['Hoża 41', '-43', 'm. 12', 'Żwirki', 'Wigury 16/3', 'Jerozolimskie 44', 'lok. 5'], ['korespondencja:']);
+  neg('Wypadek przy ul. Długiej 5 osób rannych. Mieszkanie 3-pokojowe, m.in. sklepy obok.', ['5 osób rannych', '3-pokojowe', 'm.in. sklepy']);
+  str(`Numer rachunku: ${'57 1140 2004 0000 3002 0123 4567'.replace(/ /g, '\u00A0')}, konto: 57-1140-2004-0000-3002-0123-4567, mikrorachunek podatkowy 52 1010 0071 2221 7743 1005 2400, NIP: 526\u00A0000\u00A012\u00A046.`, ['3002\u00A00123', '3002-0123', '7743 1005 2400', '526\u00A0000'], ['Numer rachunku:', 'mikrorachunek podatkowy', 'NIP:']);
+  neg('Kwota przelewu: 1\u00A0234\u00A0567,89 zł. Konto księgowe 201-01-001-0002-0003-0004-0005-01 (plan kont).', ['1\u00A0234\u00A0567,89 zł', '201-01-001-0002-0003-0004-0005-01']);
+  osp('User: Kowalski Jan\nJan Kowalski zgłosił awarię.', ['Kowalski', 'Jan'], ['User:', 'zgłosił awarię']);
+  osp('Pani Anna Schröder i Jan Müller oraz Pan Dvořák złożyli wniosek.', ['Anna', 'Schröder', 'öder', 'Jan', 'Müller', 'Dvořák'], ['Pani', 'oraz Pan', 'złożyli wniosek']);
+  neg('Spektakl Café Müller wystawiono w Zürichu.', ['Café Müller', 'Zürichu']);
+  // Regresje partii b4 po weryfikacji: liczebnik za lokalem i po etykiecie adresu, człon wyliczenia
+  // telefonów z prefiksem po „kom.", nawias przed „+48", zakres i wyliczenie ulic w prozie.
+  str('Pacjent zam. ul. Długa 5 m. 3 lat 45, przywieziony przez ZRM. Zameldowanie: ul. Polna 5 Osoby zameldowane: 3', ['Długa 5', 'm. 3', 'Polna 5'], ['lat 45', 'przywieziony przez ZRM', 'Osoby zameldowane: 3']);
+  str('Pracownik socjalny: tel. 22 501 23 46, kom. 0048 602 333 444; kontakt (+48 512 345 678).', ['22 501 23 46', '0048 602', '333 444', '512 345 678'], ['Pracownik socjalny:', 'kom.', 'kontakt (']);
+  neg('Na ul. Długiej 2-3 osoby czekały. W Alejach Jerozolimskich 2 pasy ruchu zamknięto. Ulica Żwirki i Wigury 2023 remont.', ['2-3 osoby', 'Alejach Jerozolimskich 2 pasy', 'Żwirki i Wigury 2023']);
+  // Regresje partii b4, runda 2: skrzyżowanie i „Aleje" z liczebnikiem, godzina za nazwą ulicy,
+  // forma zależna i etykieta pola za numerem domu, imię z homoglifem na końcu wiersza, imię innej
+  // osoby w formie zależnej, rdzeń nazwiska z obcym ogonem, marka auta po „pan".
+  neg('Na skrzyżowaniu ul. Długiej i Polnej 1 osoba zginęła. W Alejach Jerozolimskich 3 wypadki tylko w tym tygodniu. Zbiórka przy ul. Polnej i Leśnej 18:00. Czy jeździ pan Škodą?', ['Długiej i Polnej 1 osoba', 'Alejach Jerozolimskich 3 wypadki', 'Leśnej 18:00', 'pan Škodą']);
+  str('Sprawca odjechał spod posesji przy ul. Polnej 5 samochodem marki Opel. 1. Kowalczyk Joanna ul. Polna 7 dzieci: 2', ['Polnej 5', 'Kowalczyk', 'Joanna', 'Polna 7'], ['samochodem marki Opel', 'dzieci: 2']);
+  osp('Nowak KaroI\nJan Kowalski\nPozwany Zieliński Annie groził.', ['Nowak', 'KaroI', 'Jan', 'Kowalski', 'Zieliński'], ['Pozwany', 'groził']);
+  osp('Kovalčuk Anna, obywatelka Ukrainy. Świadek Bondarčuk zeznał. Pani Ioana Mureșan złożyła wniosek.', ['Kovalčuk', 'čuk', 'Anna', 'Bondarčuk', 'Ioana', 'Mureșan', 'șan'], ['obywatelka Ukrainy', 'Świadek', 'zeznał', 'złożyła wniosek']);
+  // Wycieki przy kotwicy (audyt, partia b5): dowód „serii … nr …", telefon po „nr" i etykiecie
+  // z dopełnieniem, tablica po „nr. rej." i modelu, XML z prefiksem i klucze struktur, etykiety pól
+  // z dopełnieniem, nazwisko panieńskie po masce, długi ciąg roli przed osobą, data urodzenia
+  // w formie zależnej, miasto WERSALIKAMI i w CSV, „ul." bez spacji, karta po „number".
+  str('Stawająca, legitymująca się dowodem osobistym serii ABA nr 300000, paszportem serii EA 1234567, tel. nr 724 555 019, tel. stacj. 22 843 21 09.', ['ABA nr 300000', 'EA 1234567', '724 555 019', '22 843 21 09'], ['Stawająca', 'dowodem osobistym serii', 'paszportem serii', 'tel. stacj.']);
+  str('Sprawca kierował pojazdem marki Toyota Yaris WE 12345, ciągnik nr rej. WGM 12345 / WGM 6789P, o nr. rej. SK 77701.', ['WE 12345', 'WGM 12345', 'WGM 6789P', 'SK 77701'], ['marki Toyota Yaris', 'ciągnik nr rej.', 'o nr. rej.']);
+  str('<etd:ImiePierwsze>Agnieszka</etd:ImiePierwsze><etd:Nazwisko>Gżegżółka</etd:Nazwisko><etd:DataUrodzenia>1985-03-14</etd:DataUrodzenia>\n{"paszport": "EA7654321", "nrTelefonu": "22 501 23 45", "Miejscowość": "Ustka"}', ['Agnieszka', 'Gżegżółka', '1985-03-14', 'EA7654321', '22 501 23 45', 'Ustka'], ['<etd:ImiePierwsze>', '"paszport"', '"Miejscowość"']);
+  osp('Imię i nazwisko pacjenta: Hans Gruber\nAnna Kowalska z domu Sikora\nKierownik Działu Kadr Grzegorz Mazur', ['Hans', 'Gruber', 'Anna', 'Kowalska', 'Sikora', 'Grzegorz', 'Mazur'], ['Imię i nazwisko pacjenta:', 'z domu', 'Kierownik Działu Kadr']);
+  str('Pani Hanny Michalak, urodzonej 12.03.1980 r. w Białymstoku. UL. LIPOWA 14, 26-900 KOZIENICE. zam. ul.Długa 5/3. Card number: 4532 0151 1283 0366.', ['Hanny', 'Michalak', '12.03.1980', 'Białymstoku', 'LIPOWA 14', '26-900', 'KOZIENICE', 'Długa 5/3', '4532 0151 1283 0366'], ['urodzonej', 'Card number:']);
+  neg('Spółka wyemitowała obligacje serii ABA 123456. Spółka wpisana do rejestru pod nr 123 456 789. Tablica o numerze INW 12345 jest w magazynie. Data urodzenia pacjenta w systemie uzupełniono 14.03.2024. Uczestnicy wyszli z domu KULTURY. Faktura 12-345 VAT. Smith et al.Nature 12.', ['serii ABA 123456', 'pod nr 123 456 789', 'INW 12345', '14.03.2024', 'z domu KULTURY', 'VAT', 'et al.Nature 12']);
+  // Poprawki po weryfikacji partii b5: kod silnika za modelem, temat ogłoszenia na tablicy, numer
+  // zgłoszenia po „telefoniczne nr", próg daty w przepisie, „numer rejsu", nagłówek tabeli pod
+  // etykietą pola, instytucja w polu osoby, rzeczownik po „z domu", notacja „UI.", „12 os.".
+  neg('Sprzedam samochód marki Skoda Octavia TSI 1400. Ogłoszenie na tablicy o PIT 2024 zdjęto. Przyjęto zgłoszenie telefoniczne nr 512345678. Kobiecie urodzonej 1 stycznia 1953 r. lub później przysługuje emerytura. Lot o numerze rejsu LO 3925 opóźniony. Zmiana w UI.Panel 2.0.\nImię i nazwisko ucznia\nKlasa\nImię i nazwisko wnioskodawcy: Gmina Michałowice', ['TSI 1400', 'PIT 2024', '512345678', '1 stycznia 1953', 'LO 3925', 'UI.Panel 2.0', 'Klasa', 'Gmina Michałowice']);
+  str('Kontakt nr 512 345 678, tel. 22 843 21 09. Obecnych 12 os.Halina Grzyb przewodniczyła. UL. LIPOWA 14, 05-300 STARA WIEŚ. Anna Nowak z domu Ludowego.', ['22 843 21 09', 'Halina', 'Grzyb', 'LIPOWA 14', '05-300', 'STARA WIEŚ', 'Anna', 'Nowak'], ['Kontakt nr', 'z domu Ludowego']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
