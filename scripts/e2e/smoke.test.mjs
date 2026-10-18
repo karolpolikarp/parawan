@@ -511,6 +511,37 @@ test('DOCX z nagłówkiem i komentarzem: komunikat wylicza pominięte części i
   });
 });
 
+test('DOCX z tekstem ukrytym stylem (w:vanish w styles.xml): komunikat o ukrytym tekście, tekst w polu', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    // Run bez w:vanish, ukryty tylko przez styl znaku „Notatka” z word/styles.xml.
+    const docx = makeDocx(['Na wniosek Pana Tomasza Wierzbickiego, PESEL 85071412358, orzekam jak w sentencji.'], {
+      bodyXml:
+        '<w:p><w:r><w:t xml:space="preserve">Uzasadnienie. </w:t></w:r>' +
+        '<w:r><w:rPr><w:rStyle w:val="Notatka"/></w:rPr><w:t>Wnioskodawca dzwonił z numeru 600 700 800.</w:t></w:r></w:p>',
+      extra: {
+        'word/styles.xml': wPart(
+          'styles',
+          '<w:style w:type="character" w:styleId="Notatka"><w:name w:val="Notatka"/><w:rPr><w:vanish/></w:rPr></w:style>',
+        ),
+      },
+    });
+    await page
+      .locator('#file-input')
+      .setInputFiles({ name: 'decyzja-styl.docx', mimeType: DOCX_MIME, buffer: Buffer.from(docx) });
+    await app.waitForOutput('[PESEL]');
+    await page.locator('#app-note').waitFor({ state: 'visible' });
+    assert.equal(
+      (await page.locator('#app-note-text').textContent())?.trim(),
+      'Dokument ma ukryty tekst (1 fragment). W polu źródła i w wyniku widać go jak zwykły tekst. ' +
+        'Usuń go, jeśli nie ma trafić do publikacji.',
+    );
+    assert.match(await page.locator('#input').inputValue(), /Wnioskodawca dzwonił z numeru 600 700 800/);
+    const out = await resultText(app);
+    assert.ok(!out.includes('600 700 800'), `numer z ukrytego tekstu przeszedł do wyniku:\n${out}`);
+  });
+});
+
 test('DOCX bez tekstu w treści głównej (skan jako obraz): błąd wylicza części pliku, nie „Plik jest pusty”', async (t) => {
   await withApp(browser, t, '', async (app) => {
     const { page } = app;
@@ -575,6 +606,48 @@ test('pole źródła w formularzu: Enter i Ctrl+Enter nie wysyłają formularza 
     assert.equal(await page.locator('form.ta-form[autocomplete="off"] > #input').count(), 1);
   });
 });
+
+/** Węzły z rolą „form” w drzewie dostępności Chromium (to, co dostaje czytnik ekranu). */
+async function axForms(page) {
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    const { nodes } = await cdp.send('Accessibility.getFullAXTree');
+    const textboxes = nodes.filter((n) => n.role?.value === 'textbox').length;
+    const forms = nodes.filter((n) => n.role?.value === 'form' && !n.ignored);
+    return { textboxes, forms: forms.map((n) => n.name?.value ?? '') };
+  } finally {
+    await cdp.detach();
+  }
+}
+
+// Formularz wokół pola jest tylko dla autocomplete="off" w Chrome 109. Bez role="none" nowe
+// Chrome i Edge pokazywały go czytnikowi ekranu jako nienazwany punkt orientacyjny „formularz”
+// (Playwright w ariaSnapshot go pomija, więc test czyta drzewo dostępności samej przeglądarki).
+for (const [name, file] of [
+  ['aplikacja', WEB_HTML],
+  ['landing', LANDING_HTML],
+]) {
+  test(`${name}: formularz wokół pola źródła nie jest nienazwanym „form” dla czytnika ekranu`, async (t) => {
+    await withApp(
+      browser,
+      t,
+      '',
+      async ({ page }) => {
+        await page.waitForLoadState('load');
+        const now = await axForms(page);
+        assert.ok(now.textboxes > 0, 'w drzewie dostępności nie ma pola tekstowego');
+        assert.deepEqual(now.forms, [], `węzły „form” w drzewie dostępności: ${now.forms.length}`);
+        // strażnik strażnika: bez roli ten sam formularz pojawia się w drzewie
+        await page.evaluate(() => {
+          for (const f of document.querySelectorAll('form.ta-form')) f.removeAttribute('role');
+        });
+        const without = await axForms(page);
+        assert.equal(without.forms.length, 1, `bez role="none" węzłów „form”: ${without.forms.length}`);
+      },
+      { file },
+    );
+  });
+}
 
 test('DOCX z częściami wczytany na istniejący tekst: „Cofnij” i komunikat, który zostaje po nim', async (t) => {
   await withApp(browser, t, '?demo', async (app) => {

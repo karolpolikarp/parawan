@@ -129,6 +129,115 @@ test('ukryty tekst: sąsiednie runy to jeden fragment, w:val="0" nie ukrywa, ukr
   expect(inventoryDocx(zip).hidden).toBe(2);
 });
 
+/** Część word/styles.xml z podanymi stylami i domyślnymi właściwościami (dane zmyślone). */
+const stylesXml = (body: string, p = 'w'): Uint8Array => part('styles', body, p);
+const style = (type: string, id: string, inner = '', attrs = ''): string =>
+  `<w:style w:type="${type}" w:styleId="${id}"${attrs}><w:name w:val="${id}"/>${inner}</w:style>`;
+const VANISH = '<w:rPr><w:vanish/></w:rPr>';
+
+test('ukryty stylem: styl znaku (w:rStyle) i akapitu (w:pStyle) z w:vanish, tekst jest w polu źródła', () => {
+  const zip = zipSync({
+    'word/document.xml': doc(
+      para('Decyzja w sprawie Tomasza Wierzbickiego.') +
+        '<w:p><w:r><w:t xml:space="preserve">Jawne </w:t></w:r>' +
+        '<w:r><w:rPr><w:rStyle w:val="NotatkaZnak"/></w:rPr><w:t>dzwonił z numeru 600 700 800</w:t></w:r></w:p>' +
+        para('Uzasadnienie.') +
+        '<w:p><w:pPr><w:pStyle w:val="NotatkaWewnetrzna"/></w:pPr>' +
+        '<w:r><w:t>Wnioskodawca: Bronisław Stylowski, PESEL 02270803628</w:t></w:r></w:p>' +
+        para('Pouczenie.'),
+    ),
+    // ZIP z częścią stylów za treścią główną: kolejność wpisów nie ma znaczenia
+    'word/styles.xml': stylesXml(
+      style('paragraph', 'Normalny', '', ' w:default="1"') +
+        style('character', 'NotatkaZnak', VANISH) +
+        style('paragraph', 'NotatkaWewnetrzna', `<w:basedOn w:val="Normalny"/>${VANISH}`),
+    ),
+  });
+  expect(inventoryDocx(zip).hidden).toBe(2);
+  // extractDocxText nie patrzy na formatowanie: ukryte stylem zdania są w polu jak każde inne,
+  // więc zdanie komunikatu „W polu źródła i w wyniku widać go jak zwykły tekst” jest prawdziwe
+  const text = extractDocxText(zip);
+  expect(text).toContain('dzwonił z numeru 600 700 800');
+  expect(text).toContain('Bronisław Stylowski, PESEL 02270803628');
+  expect(docxInventoryNote(inventoryDocx(zip))).toContain(
+    'Dokument ma ukryty tekst (2 fragmenty). W polu źródła i w wyniku widać go jak zwykły tekst.',
+  );
+});
+
+test('ukryty stylem: dziedziczenie w:basedOn, w:val="0" w stylu i w runie, styl domyślny, pętla stylów', () => {
+  const run = (t: string, rPr = ''): string => `<w:r>${rPr ? `<w:rPr>${rPr}</w:rPr>` : ''}<w:t>${t}</w:t></w:r>`;
+  // akapit ze stylem i po nim zwykły akapit, więc każdy ukryty akapit to osobny fragment
+  const p = (style: string, runs: string): string =>
+    `<w:p>${style ? `<w:pPr><w:pStyle w:val="${style}"/></w:pPr>` : ''}${runs}</w:p>${para('jawne')}`;
+  const styles = stylesXml(
+    style('paragraph', 'Baza', VANISH) +
+      style('paragraph', 'Pochodny', '<w:basedOn w:val="Baza"/>') + // dziedziczy ukrycie
+      style('paragraph', 'Odkryty', '<w:basedOn w:val="Baza"/><w:rPr><w:vanish w:val="0"/></w:rPr>') +
+      style('character', 'PetlaA', '<w:basedOn w:val="PetlaB"/>') +
+      style('character', 'PetlaB', '<w:basedOn w:val="PetlaA"/>') +
+      style('table', 'TabelaUkryta', VANISH),
+  );
+  const count = (body: string, s = styles): number =>
+    inventoryDocx(zipSync({ 'word/document.xml': doc(body), 'word/styles.xml': s })).hidden;
+  expect(count(p('Pochodny', run('A')))).toBe(1);
+  expect(count(p('Odkryty', run('B')))).toBe(0);
+  // jawne w:val="0" w runie odkrywa tekst mimo ukrywającego stylu
+  expect(count(p('Pochodny', run('C', '<w:vanish w:val="0"/>')))).toBe(0);
+  // pętla w:basedOn nie zawiesza spisu; nieznany styl i styl tabeli nie ukrywają
+  expect(count(p('', run('D', '<w:rStyle w:val="PetlaA"/>')))).toBe(0);
+  expect(count(p('Nieznany', run('E')) + p('TabelaUkryta', run('F')))).toBe(0);
+  // styl domyślny akapitu z ukryciem: ukryty jest akapit bez w:pStyle
+  const normalHidden = stylesXml(style('paragraph', 'Normalny', VANISH, ' w:default="1"'));
+  expect(count(p('', run('G')), normalHidden)).toBe(1);
+  // domyślne właściwości dokumentu z ukryciem: cały tekst poza jawnym w:val="0"
+  const docDefaults = stylesXml(`<w:docDefaults><w:rPrDefault>${VANISH}</w:rPrDefault></w:docDefaults>`);
+  expect(count(para('H') + run('I', '<w:vanish w:val="0"/>') + para('J'), docDefaults)).toBe(2);
+});
+
+test('ukryty tekst: uszkodzony dokument z dziesiątkami tysięcy niedomkniętych znaczników bez kosztu kwadratowego', () => {
+  const n = 40_000;
+  const body =
+    '<w:p><w:pPr><w:pStyle w:val="Ukryty"/></w:pPr><w:r><w:t>x</w:t>'.repeat(n) +
+    '</w:rPr></w:pPr>'.repeat(n) + // zamknięcia bez otwarcia
+    '</w:r>'.repeat(n) +
+    '<w:r><w:rPr><w:vanish/>'.repeat(n);
+  const zip = zipSync({
+    'word/document.xml': doc(body),
+    'word/styles.xml': stylesXml(style('paragraph', 'Ukryty', VANISH)),
+  });
+  const t0 = performance.now();
+  expect(inventoryDocx(zip).hidden).toBe(1);
+  expect(performance.now() - t0).toBeLessThan(1500);
+});
+
+test('ukryty stylem: dawne formatowanie w śledzonej zmianie i znak akapitu się nie liczą, inny prefiks tak', () => {
+  const styles = stylesXml(style('character', 'Ukryty', VANISH) + style('paragraph', 'UkrytyAkapit', VANISH));
+  const count = (body: string, s = styles): number =>
+    inventoryDocx(zipSync({ 'word/document.xml': doc(body), 'word/styles.xml': s })).hidden;
+  // w:rPrChange i w:pPrChange trzymają formatowanie sprzed zmiany, w:pPr/w:rPr znak końca akapitu
+  expect(
+    count(
+      '<w:p><w:pPr><w:pPrChange w:id="1"><w:pPr><w:pStyle w:val="UkrytyAkapit"/></w:pPr></w:pPrChange>' +
+        '<w:rPr><w:rStyle w:val="Ukryty"/></w:rPr></w:pPr>' +
+        '<w:r><w:rPr><w:b/><w:rPrChange w:id="2"><w:rPr><w:rStyle w:val="Ukryty"/><w:vanish/></w:rPr>' +
+        '</w:rPrChange></w:rPr><w:t>widoczny</w:t></w:r></w:p>',
+    ),
+  ).toBe(0);
+  // ukryty stylem i ukryty wprost obok siebie to jeden fragment
+  expect(
+    count(
+      '<w:p><w:r><w:rPr><w:rStyle w:val="Ukryty"/></w:rPr><w:t>A</w:t></w:r>' +
+        '<w:r><w:rPr><w:vanish/></w:rPr><w:t>B</w:t></w:r></w:p>',
+    ),
+  ).toBe(1);
+  // styles.xml z innym prefiksem niż treść główna
+  const ns0 = strToU8(
+    `<ns0:styles ${ns('ns0')}><ns0:style ns0:type="character" ns0:styleId="Ukryty">` +
+      '<ns0:rPr><ns0:vanish/></ns0:rPr></ns0:style></ns0:styles>',
+  );
+  expect(count('<w:p><w:r><w:rPr><w:rStyle w:val="Ukryty"/></w:rPr><w:t>A</w:t></w:r></w:p>', ns0)).toBe(1);
+});
+
 test('śledzone zmiany: liczą się wstawienia i usunięcia z treścią, nie znaczniki zmian akapitu', () => {
   const zip = zipSync({
     'word/document.xml': doc(
@@ -372,6 +481,8 @@ test('fikcyjne pisma z fixtures/urzad: spis bez wyjątku, liczby nieujemne', () 
     for (const n of Object.values(inv)) expect(n, name).toBeGreaterThanOrEqual(0);
     // python-docx wpisuje sam opis „generated by python-docx”, to nie jest dana do przejrzenia
     expect(inv.properties, name).toBe(0);
+    // pełny zestaw stylów z szablonu Worda (styles.xml z python-docx) nie daje ukrytego tekstu
+    expect(inv.hidden, name).toBe(0);
   }
 });
 

@@ -174,7 +174,7 @@
       </section>
 
       <!-- ══════════ TEKST ŹRÓDŁOWY ══════════ -->
-      <section class="card g6" id="edytor">
+      <section class="card g6 card-ed" id="edytor">
         <div class="card-h">
           <span class="ic"><i class="gi" data-i="szablon"></i></span>
           <div class="card-t"><h2>Tekst źródłowy</h2><p>analiza na bieżąco, podczas pisania</p></div>
@@ -205,8 +205,9 @@
                <textarea> i przy zamknięciu zapisują jego treść w plikach sesji profilu, a potem ją
                przywracają. Słuchają za to autocomplete="off" na formularzu. Formularz nie ma
                action ani przycisku wysyłki, a CSP (form-action 'none') i tak blokuje wysłanie.
-               display: contents, więc układ się nie zmienia. -->
-          <form class="ta-form" autocomplete="off">
+               display: contents, więc układ się nie zmienia. role="none", bo nowe Chrome i Edge
+               pokazywały go czytnikowi ekranu jako nienazwany punkt orientacyjny „formularz”. -->
+          <form class="ta-form" autocomplete="off" role="none">
             <textarea
               id="input"
               class="editor editor-ta"
@@ -225,7 +226,7 @@
       </section>
 
       <!-- ══════════ WYNIK ══════════ -->
-      <section class="card g6">
+      <section class="card g6 card-ed">
         <div class="card-h">
           <span class="ic"><i class="gi" data-i="podglad"></i></span>
           <div class="card-t"><h2 id="output-label">Wynik zanonimizowany</h2><p id="output-hint">kliknij znacznik albo przechodź strzałkami ‹ ›</p></div>

@@ -608,8 +608,10 @@ details.card::details-content {
 /* textarea źródła — ta sama anatomia co .editor, ale edytowalna. Natywny uchwyt wyłączony
    (resize: none) — zastępuje go widoczny, symetryczny uchwyt .ed-grip u dołu obu okien, który
    zmienia wspólną --ed-h, więc oba okna rosną i maleją równocześnie i równo. */
+/* display: block, bo <textarea> jest domyślnie elementem w linii: pod nim zostawał odstęp na
+   dolne wydłużenia liter (8 px), o który okno źródła z uchwytem i stopką stało niżej niż wynik. */
 textarea.editor-ta {
-  width: 100%; resize: none;
+  display: block; width: 100%; resize: none;
   min-height: 220px;
   padding: 13px 14px;
   overflow-y: auto;
@@ -731,6 +733,15 @@ mark.pii.pii-linked { box-shadow: 0 0 0 2px var(--acc-line); }
    a „Przejrzyj wynik…” zostawał bez niego. Wiersz łączy się ze stopką nad nim. */
 .print-note { align-items: flex-start; color: var(--mut-2); }
 .card-f + .card-f { border-top: 0; padding-top: 0; }
+/* Karty źródła i wyniku (.card-ed) stoją od 1081 px obok siebie, a siatka wyrównuje ich
+   wysokość. Stopka wyniku ma dwa wiersze (ostrzeżenie i rada o druku), stopka źródła jeden, więc
+   nadmiar wysokości bierze ostatnia stopka karty, a nie .card-b. Gdy rósł .card-b, nad stopką
+   źródła zostawał pusty pas (ok. 41 px przy 1366 px), a stopki stały na różnych wysokościach.
+   Teraz kreski nad stopkami i ich pierwsze wiersze („5 wierszy · 290 znaków” i „Przejrzyj
+   wynik…”) stoją w jednej linii, a wolne miejsce zostaje pod tekstem stopki. Gdy pasek wyniku
+   schodzi do drugiego rzędu (ok. 1081–1210 px), okno i stopka wyniku są niżej o ten rząd. */
+.card-ed > .card-b { flex: none; }
+.card-ed > .card-f:last-child { flex: 1 0 auto; align-items: flex-start; }
 .linklike {
   border: 0; background: none; padding: 0; margin: 0;
   font: inherit; color: inherit; text-decoration: underline; cursor: pointer;

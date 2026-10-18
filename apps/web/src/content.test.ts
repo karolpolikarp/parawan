@@ -11,7 +11,7 @@ import webMain from './main.ts?raw';
 
 test('aplikacja: skrót „Przejdź do edytora” prowadzi do karty tekstu źródłowego', () => {
   expect(webHtml).toMatch(/<a class="btn skip-editor" href="#edytor">/);
-  expect(webHtml).toMatch(/<section class="card g6" id="edytor">/);
+  expect(webHtml).toMatch(/<section class="card g6 card-ed" id="edytor">/);
 });
 
 test('aplikacja: zapętloną animację da się zatrzymać przyciskiem', () => {

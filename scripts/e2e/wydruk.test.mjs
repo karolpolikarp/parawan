@@ -383,3 +383,51 @@ test('pasek wyniku w jednym rzędzie i równy paskowi źródła, także po „Sk
     }
   });
 });
+
+// Rada o druku dołożyła do stopki wyniku drugi wiersz. Karty stoją od 1081 px obok siebie
+// i mają równą wysokość, a nadmiar w karcie źródła brał .card-b: nad stopką źródła zostawał pusty
+// pas ok. 41 px (1366 px), a stopki stały na różnych wysokościach. Dodatkowe 8 px dokładało
+// <textarea> jako element w linii (odstęp pod linią tekstu), więc okno źródła z uchwytem stało
+// niżej niż wynik. Teraz między uchwytem a stopką w obu kartach jest ten sam odstęp, a przy pasku
+// wyniku w jednym rzędzie stopki zaczynają się na tej samej wysokości.
+test('stopki kart źródła i wyniku na jednej wysokości, bez pustego pasa nad stopką źródła', async (t) => {
+  await withApp(browser, t, '?demo', async (app) => {
+    const { page } = app;
+    await app.demoReady();
+    const measure = () =>
+      page.evaluate(() => {
+        const box = (el) => el.getBoundingClientRect();
+        const card = (id) => document.getElementById(id).closest('.card-ed');
+        const parts = (c) => ({
+          grip: box(c.querySelector('.card-b .ed-grip')).bottom,
+          foot: box(c.querySelector(':scope > .card-f')).top,
+          bottom: box(c).bottom,
+        });
+        return {
+          src: parts(card('input')),
+          out: parts(card('output')),
+          scroll: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        };
+      });
+    // [szerokość bez paska przewijania, pasek wyniku w jednym rzędzie (stopki równo)]
+    for (const [width, aligned] of [
+      [1351, true],
+      [1265, true],
+      [1905, true],
+      [1081, false], // pasek wyniku w dwóch rzędach: wynik niżej o ten rząd
+      [390, false], // jedna kolumna
+    ]) {
+      await page.setViewportSize({ width, height: 800 });
+      const m = await measure();
+      const at = `${width} px`;
+      const gap = (p) => Math.round(p.foot - p.grip);
+      assert.equal(gap(m.src), gap(m.out), `${at}: odstęp nad stopką źródła ${gap(m.src)} px, wyniku ${gap(m.out)} px`);
+      if (aligned) {
+        assert.equal(Math.round(m.src.foot), Math.round(m.out.foot), `${at}: stopki ${m.src.foot} i ${m.out.foot}`);
+        assert.equal(Math.round(m.src.grip), Math.round(m.out.grip), `${at}: uchwyty okien ${m.src.grip} i ${m.out.grip}`);
+        assert.equal(Math.round(m.src.bottom), Math.round(m.out.bottom), `${at}: karty różnej wysokości`);
+      }
+      assert.equal(m.scroll, 0, `${at}: poziome przewijanie`);
+    }
+  });
+});

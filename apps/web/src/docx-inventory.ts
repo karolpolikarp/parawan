@@ -4,7 +4,8 @@
  * fragmenty wstawione z innych plików (`w:altChunk`), właściwości dokumentu i tekst usunięty
  * w śledzonych zmianach zostają w pliku. Bez tego spisu
  * urzędnik sądził, że sprawdził cały dokument, i publikował oryginał z nazwiskiem w stopce albo
- * w komentarzu.
+ * w komentarzu. Spis liczy też tekst ukryty (`w:vanish` w runie albo w stylu z `word/styles.xml`):
+ * Word go nie pokazuje, a w polu źródła i w wyniku stoi jak każdy inny.
  *
  * Same liczby, bez treści: komunikat po wczytaniu mówi, ile czego jest, a nie co tam stoi.
  * Rozpakowujemy tu więcej wpisów ZIP niż przy odczycie treści, więc wszystkie części poza
@@ -38,7 +39,11 @@ export interface DocxInventory {
    * w `word/document.xml` stoi tylko odsyłacz, więc do pola nie trafiają.
    */
   altChunks: number;
-  /** Ciągłe fragmenty tekstu ukrytego (`w:vanish`) w treści głównej. */
+  /**
+   * Ciągłe fragmenty tekstu ukrytego w treści głównej: `w:vanish` w runie albo w stylu znaku,
+   * akapitu lub w domyślnych właściwościach dokumentu (`word/styles.xml`). extractDocxText nie
+   * patrzy na formatowanie, więc ten tekst jest w polu źródła i w wyniku jak każdy inny.
+   */
   hidden: number;
   /** Wstawienia śledzonych zmian z treścią (`<w:ins>…</w:ins>`). */
   insertions: number;
@@ -92,26 +97,201 @@ function countNotes(xml: string, local: 'footnote' | 'endnote'): number {
   return n;
 }
 
-/** Ile ciągłych fragmentów tekstu z `w:vanish` (bez `w:val="0"`) jest w treści głównej. */
-function countHidden(xml: string, prefixes: readonly string[]): number {
-  const vanish = new RegExp(`<${wmlName(prefixes, 'vanish')}(?=[\\s/>])([^<>]*)>`);
+/** Wartość atrybutu (z dowolnym prefiksem) w atrybutach znacznika albo undefined. */
+function attrOf(attrs: string, name: string): string | undefined {
+  return attrs.match(new RegExp(`\\s(?:[^\\s=]+:)?${name}\\s*=\\s*["']([^"']*)["']`))?.[1];
+}
+
+/** `w:val="0"` (także false i off) wyłącza właściwość przełącznikową, np. `w:vanish`. */
+const VAL_OFF = /\s(?:[^\s=]+:)?val\s*=\s*["'](?:0|false|off)["']/;
+
+/**
+ * Ukrycie tekstu stylem: `w:vanish` we właściwościach stylu akapitu albo znaku w
+ * `word/styles.xml` (z dziedziczeniem `w:basedOn`) i w domyślnych właściwościach dokumentu
+ * (`w:docDefaults`). Tak ukrywa się np. styl „Notatka wewnętrzna” albo „Ukryty”: w treści runu
+ * nie ma wtedy żadnego `w:vanish`, a Word tekstu nie pokazuje ani nie drukuje.
+ */
+interface HiddenStyles {
+  /** Styl akapitu i znaku po identyfikatorze: czy ukrywa tekst. */
+  byId: Map<string, boolean>;
+  /** Ukrywa styl domyślny akapitu („Normalny”), czyli akapit bez `w:pStyle`. */
+  paragraphDefault: boolean;
+  /** Ukrywa styl domyślny znaku, czyli run bez `w:rStyle`. */
+  characterDefault: boolean;
+  /** Ukrywają domyślne właściwości dokumentu: cały tekst bez jawnego `w:vanish w:val="0"`. */
+  docDefault: boolean;
+}
+
+const NO_HIDDEN_STYLES: HiddenStyles = {
+  byId: new Map(),
+  paragraphDefault: false,
+  characterDefault: false,
+  docDefault: false,
+};
+
+/**
+ * `w:vanish` w treści `w:rPr`: true, false (`w:val="0"`) albo undefined, gdy go nie ma.
+ * `w:rPrChange` (dawne formatowanie w śledzonej zmianie) stoi na końcu `w:rPr` i się nie liczy.
+ */
+function vanishIn(rPr: string, prefixes: readonly string[]): boolean | undefined {
+  const current = rPr.split(new RegExp(`<${wmlName(prefixes, 'rPrChange')}(?=[\\s/>])`))[0];
+  const v = current.match(new RegExp(`<${wmlName(prefixes, 'vanish')}(?=[\\s/>])([^<>]*)>`));
+  return v ? !VAL_OFF.test(v[1]) : undefined;
+}
+
+/** Pierwszy element `local` w `xml`: jego treść, '' dla samozamykającego, null, gdy go nie ma. */
+function firstBody(xml: string, prefixes: readonly string[], local: string): string | null {
+  const first = elements(xml, wmlName(prefixes, local)).next();
+  return first.done ? null : (first.value.body ?? '');
+}
+
+/** Style ukrywające tekst w `word/styles.xml`. */
+function hiddenStyles(xml: string): HiddenStyles {
+  const prefixes = prefixOf(xml);
+  const basedOnTag = new RegExp(`<${wmlName(prefixes, 'basedOn')}(?=[\\s/>])([^<>]*)>`);
+  const own = new Map<string, { basedOn?: string; vanish?: boolean }>();
+  let paragraphDefault: string | undefined;
+  let characterDefault: string | undefined;
+  for (const { attrs, body } of elements(xml, wmlName(prefixes, 'style'))) {
+    const id = attrOf(attrs, 'styleId');
+    const type = attrOf(attrs, 'type') ?? 'paragraph';
+    // Style tabel i numeracji nie stoją w w:pStyle ani w:rStyle.
+    if (!id || body === null || (type !== 'paragraph' && type !== 'character')) continue;
+    if (/^(?:1|true|on)$/.test(attrOf(attrs, 'default') ?? '')) {
+      if (type === 'paragraph') paragraphDefault = id;
+      else characterDefault = id;
+    }
+    const based = body.match(basedOnTag);
+    const rPr = firstBody(body, prefixes, 'rPr');
+    own.set(id, {
+      basedOn: based ? attrOf(based[1], 'val') : undefined,
+      vanish: rPr === null ? undefined : vanishIn(rPr, prefixes),
+    });
+  }
+  // Styl dziedziczy po w:basedOn to, czego sam nie ustawia; pętla w łańcuchu nie zawiesza karty.
+  const byId = new Map<string, boolean>();
+  for (const id of own.keys()) {
+    const seen = new Set<string>();
+    let at: string | undefined = id;
+    let vanish: boolean | undefined;
+    while (at !== undefined && vanish === undefined && !seen.has(at)) {
+      seen.add(at);
+      vanish = own.get(at)?.vanish;
+      at = own.get(at)?.basedOn;
+    }
+    byId.set(id, vanish ?? false);
+  }
+  const defaults = firstBody(xml, prefixes, 'rPrDefault');
+  const defaultsRPr = defaults === null ? null : firstBody(defaults, prefixes, 'rPr');
+  return {
+    byId,
+    paragraphDefault: paragraphDefault !== undefined && byId.get(paragraphDefault) === true,
+    characterDefault: characterDefault !== undefined && byId.get(characterDefault) === true,
+    docDefault: defaultsRPr !== null && vanishIn(defaultsRPr, prefixes) === true,
+  };
+}
+
+type HiddenCtx =
+  | { kind: 'p'; style: string | null }
+  | { kind: 'r'; style: string | null; direct: boolean | undefined; text: boolean }
+  | { kind: 'pPr' | 'rPr' | 'change' };
+
+const CTX_OF: Record<string, HiddenCtx['kind'] | undefined> = {
+  p: 'p',
+  r: 'r',
+  pPr: 'pPr',
+  rPr: 'rPr',
+  pPrChange: 'change',
+  rPrChange: 'change',
+};
+
+/**
+ * Ile ciągłych fragmentów ukrytego tekstu jest w treści głównej. Run jest ukryty przez `w:vanish`
+ * w swoich właściwościach (`w:val="0"` jawnie odkrywa), a bez niego przez styl znaku (`w:rStyle`),
+ * styl akapitu (`w:pStyle`, bez niego styl domyślny) albo domyślne właściwości dokumentu.
+ * `w:vanish` we właściwościach znaku końca akapitu (`w:pPr/w:rPr`) ukrywa sam znak akapitu i się
+ * nie liczy, tak samo dawne formatowanie w śledzonych zmianach. Word traktuje `w:vanish` w dwóch
+ * stylach naraz (akapitu i znaku) jak przełącznik, który się znosi; tu taki tekst liczy się jako
+ * ukryty, bo fałszywe ostrzeżenie kosztuje mniej niż przeoczone.
+ */
+function countHidden(xml: string, prefixes: readonly string[], styles: HiddenStyles): number {
+  const names = ['p', 'r', 'pPr', 'rPr', 'pPrChange', 'rPrChange', 'pStyle', 'rStyle', 'vanish', 't'];
+  const tag = new RegExp(
+    `<(/?)(${names.map((l) => wmlName(prefixes, l)).join('|')})(?=[\\s/>])([^<>]*)>`,
+    'g',
+  );
   // Tylko początek tekstu: `\s*[^<\s]` nie cofa się kwadratowo przy długim, niedomkniętym <w:t>.
-  const text = new RegExp(`<${wmlName(prefixes, 't')}(?:\\s[^<>]*)?>\\s*[^<\\s]`);
-  // Zamknięcie szukane przez indexOf z nazwą, która naprawdę stoi w otwarciu (prefiksów bywa kilka).
-  const rPr = new RegExp(`<(${wmlName(prefixes, 'rPr')})(?=[\\s/>])`);
+  const textStart = /\s*[^<\s]/y;
+  const styleHidden = (id: string | null, fallback: boolean): boolean =>
+    id !== null && styles.byId.has(id) ? styles.byId.get(id) === true : fallback;
+  // Stos otwartych elementów, osobno otwarte akapity i liczba otwartych elementów każdego
+  // rodzaju: zamknięcie bez otwarcia nie przeszukuje stosu, a uszkodzony plik z tysiącami
+  // niedomkniętych znaczników nie kosztuje kwadratowo.
+  const stack: HiddenCtx[] = [];
+  const paras: Extract<HiddenCtx, { kind: 'p' }>[] = [];
+  const open = new Map<HiddenCtx['kind'], number>();
+  const push = (ctx: HiddenCtx): void => {
+    stack.push(ctx);
+    if (ctx.kind === 'p') paras.push(ctx);
+    open.set(ctx.kind, (open.get(ctx.kind) ?? 0) + 1);
+  };
   let count = 0;
   let prevHidden = false;
-  for (const { body } of elements(xml, wmlName(prefixes, 'r'))) {
+  /** Zdejmuje ze stosu wszystko od pozycji `at`, od góry; run rozstrzyga, póki jego akapit stoi niżej. */
+  const popTo = (at: number): void => {
+    while (stack.length > at) {
+      const ctx = stack[stack.length - 1];
+      if (ctx.kind === 'r') finish(ctx);
+      if (ctx.kind === 'p') paras.pop();
+      open.set(ctx.kind, (open.get(ctx.kind) ?? 1) - 1);
+      stack.pop();
+    }
+  };
+  const finish = (run: Extract<HiddenCtx, { kind: 'r' }>): void => {
     // run bez tekstu (sam tabulator, przypis, usunięcie) nie przerywa ukrytego fragmentu
-    if (body === null || !text.test(body)) continue;
-    const open = rPr.exec(body);
-    const to = open ? body.indexOf(`</${open[1]}>`, open.index) : -1;
-    const props = open && to >= 0 ? body.slice(open.index, to) : '';
-    const v = props.match(vanish);
-    const hidden = !!v && !/\s(?:[^\s=]+:)?val\s*=\s*["'](?:0|false|off)["']/.test(v[1]);
+    if (!run.text) return;
+    const pStyle = paras[paras.length - 1]?.style ?? null;
+    const hidden =
+      run.direct ??
+      (styles.docDefault ||
+        styleHidden(pStyle, styles.paragraphDefault) ||
+        styleHidden(run.style, styles.characterDefault));
     if (hidden && !prevHidden) count++;
     prevHidden = hidden;
+  };
+  let m: RegExpExecArray | null;
+  while ((m = tag.exec(xml)) !== null) {
+    const local = m[2].slice(m[2].indexOf(':') + 1);
+    const kind = CTX_OF[local];
+    if (m[1]) {
+      // zamknięcie: zdejmujemy do pasującego otwarcia (niedomknięte wnętrze też)
+      if (!kind || !open.get(kind)) continue;
+      let at = stack.length - 1;
+      while (stack[at].kind !== kind) at--;
+      popTo(at);
+      continue;
+    }
+    const selfClosing = m[3].endsWith('/');
+    const top = stack[stack.length - 1];
+    const owner = stack[stack.length - 2];
+    if (kind === 'p') {
+      if (!selfClosing) push({ kind: 'p', style: null });
+    } else if (kind === 'r') {
+      if (!selfClosing) push({ kind: 'r', style: null, direct: undefined, text: false });
+    } else if (kind) {
+      if (!selfClosing) push({ kind });
+    } else if (local === 'pStyle') {
+      if (top?.kind === 'pPr' && owner?.kind === 'p') owner.style = attrOf(m[3], 'val') ?? null;
+    } else if (local === 'rStyle' || local === 'vanish') {
+      if (top?.kind !== 'rPr' || owner?.kind !== 'r') continue;
+      if (local === 'rStyle') owner.style = attrOf(m[3], 'val') ?? null;
+      else owner.direct = !VAL_OFF.test(m[3]);
+    } else if (local === 't' && !selfClosing && top?.kind === 'r') {
+      textStart.lastIndex = tag.lastIndex;
+      if (textStart.test(xml)) top.text = true;
+    }
   }
+  popTo(0); // niedomknięte runy na końcu (uszkodzony plik) też się liczą
   return count;
 }
 
@@ -178,6 +358,8 @@ export function inventoryDocx(buf: Uint8Array): DocxInventory {
     deletions: 0,
     properties: 0,
   };
+  let documentEntry: ZipEntry | undefined;
+  let stylesEntry: ZipEntry | undefined;
   for (const e of entries) {
     const name = e.name;
     if (name.endsWith('/')) continue; // katalog
@@ -195,14 +377,18 @@ export function inventoryDocx(buf: Uint8Array): DocxInventory {
       if (DRAWING_TEXT.test(read(e))) inv.diagrams++;
     } else if (name === 'docProps/core.xml') inv.properties += countCoreProperties(read(e));
     else if (name === 'docProps/custom.xml') inv.properties += countCustomProperties(read(e));
-    else if (name === 'word/document.xml') {
-      const xml = readDocxPart(buf, e);
-      const prefixes = prefixOf(xml);
-      inv.hidden = countHidden(xml, prefixes);
-      inv.insertions = countWithBody(xml, prefixes, 'ins');
-      inv.deletions = countWithBody(xml, prefixes, 'del');
-      inv.altChunks = [...elements(xml, wmlName(prefixes, 'altChunk'))].length;
-    }
+    else if (name === 'word/styles.xml') stylesEntry = e;
+    else if (name === 'word/document.xml') documentEntry = e;
+  }
+  // Treść główna na końcu: ukrycie stylem wymaga stylów, a ZIP bywa w dowolnej kolejności.
+  if (documentEntry) {
+    const xml = readDocxPart(buf, documentEntry);
+    const prefixes = prefixOf(xml);
+    const styles = stylesEntry ? hiddenStyles(read(stylesEntry)) : NO_HIDDEN_STYLES;
+    inv.hidden = countHidden(xml, prefixes, styles);
+    inv.insertions = countWithBody(xml, prefixes, 'ins');
+    inv.deletions = countWithBody(xml, prefixes, 'del');
+    inv.altChunks = [...elements(xml, wmlName(prefixes, 'altChunk'))].length;
   }
   return inv;
 }
