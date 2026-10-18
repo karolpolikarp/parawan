@@ -2445,7 +2445,8 @@ test('K12 pułapki: prawdziwe tablice po kotwicach i w wyliczeniach maskowane ja
     ['Motocykl ZS 4567 skradziono.', `Motocykl ${R} skradziono.`],
     ['Samochód marki Toyota WE 12345', `Samochód marki Toyota ${R}`],
     ['Na parkingu stały też GD 707GG oraz PZE 5U678.', `Na parkingu stały też ${R} oraz ${R}.`],
-    ['Zestaw: ciągnik WGM1234A/WGM5678B wjechał na plac.', `Zestaw: ciągnik ${R}/WGM5678B wjechał na plac.`],
+    // K43: ukośnik to separator wyliczenia — druga tablica zestawu nie zostaje jawna
+    ['Zestaw: ciągnik WGM1234A/WGM5678B wjechał na plac.', `Zestaw: ciągnik ${R}/${R} wjechał na plac.`],
     ['Samochód: WX 1234A-ZŁY', `Samochód: ${R}-ZŁY`],
     ['Auto WE 12345 stało przed domem.', `Auto ${R} stało przed domem.`],
     ['Auto-WE12345 odholowano.', `Auto-${R} odholowano.`],
@@ -4559,4 +4560,328 @@ test('Regresje b4 r2 · osoba: długi wiersz „Do:" (ponad 1000 znaków) dalej 
   const r = redactPII(s).redacted;
   expect(r).not.toContain('Halina');
   expect(r).not.toContain('Jan;');
+});
+
+// ── Audyt, partia b5: wycieki przy kotwicy ─────────────────────────────────────
+const DW = '[NR-DOWODU]';
+const PZ = '[NR-PASZPORTU]';
+const RJ = '[NR-REJESTRACYJNY]';
+const DU = '[DATA-URODZENIA]';
+test('K41: dowód i paszport — „serii", „o numerze", seria i numer rozdzielone „nr" albo przecinkiem', () => {
+  masked([
+    ['legitymującym się dowodem osobistym serii ABA 123456', `legitymującym się dowodem osobistym serii ${DW}`],
+    ['dowód osobisty seria ABA nr 300000', `dowód osobisty seria ${DW}`],
+    ['legitymująca się dowodem osobistym serii ABA nr 300000, ważnym do dnia 1 marca 2030 roku', `legitymująca się dowodem osobistym serii ${DW}, ważnym do dnia 1 marca 2030 roku`],
+    ['dowodem osobistym serii ABA numer 300000', `dowodem osobistym serii ${DW}`],
+    ['DOWÓD OSOBISTY SERIA ABA NR 300000', `DOWÓD OSOBISTY SERIA ${DW}`],
+    ['dowód osobisty seria ABA nr. 300000', `dowód osobisty seria ${DW}`],
+    ['dowód osobisty seria ABA, numer 300000', `dowód osobisty seria ${DW}`],
+    ['legitymacja służbowa seria ABA nr 300000', `legitymacja służbowa seria ${DW}`],
+    ['dowodem osobistym o numerze ABA 123456', `dowodem osobistym o numerze ${DW}`],
+    ['paszport seria AB nr 1234567', `paszport seria ${PZ}`],
+    ['paszportem serii EA 1234567', `paszportem serii ${PZ}`],
+  ]);
+  keep([
+    'Spółka wyemitowała obligacje serii ABA 123456 o wartości nominalnej 100 zł.',
+    'akcje imienne serii ABA nr 300000 do 400000',
+    'Dowód wpłaty serii ABC 123456 dołączono do akt.',
+    'dowód rejestracyjny seria DRB nr 123456',
+    'Dowód kasowy KPW nr 123456 z dnia 12.03.2024',
+    'dowód osobisty wydany pod nr 123456',
+    'legitymacja PZW nr 123456',
+    'dowód osobisty seria abc nr 123456',
+    'dowód osobisty seria ABA nr 3000001',
+    'Paszport ważny do 12.03.2030 r.',
+    'Liczba wydanych paszportów: 154321',
+  ]);
+});
+test('K42: telefon po „nr", po etykiecie z dopełnieniem, „komórkę", „dzwonić pod numer" i stopce', () => {
+  masked([
+    ['Proszę o kontakt pod nr 512 345 678.\nDrugi numer: telefon nr 724 555 019.', `Proszę o kontakt pod nr ${T}.\nDrugi numer: telefon nr ${T}.`],
+    ['Tel. kom. nr 600-100-200', `Tel. kom. nr ${T}`],
+    ['Fax nr 22 123 45 67', `Fax nr ${T}`],
+    ['telefon nr 600 700 800 oraz nr 601 702 803', `telefon nr ${T} oraz nr ${T}`],
+    ['Kontakt: nr 600 700 800', `Kontakt: nr ${T}`],
+    ['Telefon pacjenta: 41 344 56 78\ntel. stacj. 22 843 21 09', `Telefon pacjenta: ${T}\ntel. stacj. ${T}`],
+    ['Nr tel. opiekuna: 22 501 23 45', `Nr tel. opiekuna: ${T}`],
+    ['Telefon komórkowy pacjenta: 22 501 23 45', `Telefon komórkowy pacjenta: ${T}`],
+    ['Można też dzwonić pod numer 32 256 77 41.\nna komórkę: 663.112.908', `Można też dzwonić pod numer ${T}.\nna komórkę: ${T}`],
+    ['zadzwoń pod nr 785111222', `zadzwoń pod nr ${T}`],
+    ['Phone: 22 395 41 07\nmob. 501.234.567', `Phone: ${T}\nmob. ${T}`],
+    ['Mobile: 501.234.567 | GSM: 22 395 41 07', `Mobile: ${T} | GSM: ${T}`],
+  ]);
+  keep([
+    'Decyzja nr 123 456 789',
+    'Faktura nr 512 345 678 za usługi telefoniczne.',
+    'Spółka wpisana do rejestru pod nr 123 456 789.',
+    'Reklamacja zarejestrowana pod nr 512345678.',
+    'Dotyczy kontaktu nr 123456789 w CRM.',
+    'Telefon komórkowy nr seryjny 123 456 789.',
+    'Kom. Wyborcza: 32 774 91 55 głosów',
+    'Telefonów było: 32 774 91 55 wg zestawienia',
+    'Telefon\nnr 123 456 789',
+    'Telefon\nLp. 32 774 91 55',
+    'Komórka organizacyjna nr 12 wydała 3 decyzje.',
+    'Dzwonnica nr 123 456 789.',
+    'Dzwonił w sprawie faktury pod numerem 2024/123/456.',
+    'Kupiłem iPhone 15 Pro za 5 999 zł.',
+    'Pasmo GSM 900 MHz, LTE 1800 MHz.',
+    'Moduł GSM SIM800L, nr seryjny 22 395 41 07.',
+    'Mobile: nie dotyczy',
+    'Zgłoszono mobbing 2 razy w 2024 r.',
+    'Telefony: na kwotę 123 456 789 zł.',
+    'tel. godz. 10.30 12.03.2024 r.',
+  ]);
+});
+test('K43: tablica po „nr. rej.", rzeczowniku pojazdu, łączniku, modelu, w komórce tabeli i w wyliczeniu „;"/„/"', () => {
+  masked([
+    ['Ciągnik nr rej. WGM 12345, nr rej. naczepy WGM 6789P', `Ciągnik nr rej. ${RJ}, nr rej. naczepy ${RJ}`],
+    ['numer rejestracyjny auta: WE 12345', `numer rejestracyjny auta: ${RJ}`],
+    ['nr rej. poj. WE 12345', `nr rej. poj. ${RJ}`],
+    ['Sprawca kierował pojazdem marki Kia Sportage o nr. rej. SK 77701.', `Sprawca kierował pojazdem marki Kia Sportage o nr. rej. ${RJ}.`],
+    ['Nr rej.poj. SK 77701', `Nr rej.poj. ${RJ}`],
+    ['NR. REJ. SK 77701', `NR. REJ. ${RJ}`],
+    ['Tablice rejestracyjne o numerze PO 5AB67 pozostają przy pojeździe.', `Tablice rejestracyjne o numerze ${RJ} pozostają przy pojeździe.`],
+    ['numer tablicy sprawcy: WE 123AB', `numer tablicy sprawcy: ${RJ}`],
+    ['o numerach rej. WE 12345 i WE 54321', `o numerach rej. ${RJ} i ${RJ}`],
+    ['pojazdy o nr rej. WE 12345 / WE 54321; WE 99999', `pojazdy o nr rej. ${RJ} / ${RJ}; ${RJ}`],
+    ['samochodem marki Toyota Yaris WE 12345 kierowała', `samochodem marki Toyota Yaris ${RJ} kierowała`],
+    ['pojazdem marki Volkswagen Golf GD 4567K', `pojazdem marki Volkswagen Golf ${RJ}`],
+    ['naczepa WGM 6789P', `naczepa ${RJ}`],
+    ['nr rej. WPI KC27', `nr rej. ${RJ}`],
+    ['| Nr rejestracyjny | WE 12345 |', `| Nr rejestracyjny | ${RJ} |`],
+  ]);
+  keep([
+    'nr rej. naczepy nie został ustalony.',
+    'nr rejestru BDO 000123456',
+    'nr. rejestru ABC 1234/2020',
+    'Komisariat nr. rejonu II, dzielnicowy sierż. sztab.',
+    'Tablica o numerze INW 12345 jest w magazynie.',
+    'Tablica pod tytułem ABC 2020 wisi w holu.',
+    'Tablica rozdzielcza typu TR 2000',
+    'Tablica nad WC12 wisi krzywo.',
+    'pojazdy typu Euro VI PN 2020',
+    'samochodem marki Lexus RX 450h kierowała',
+    'pojazdem marki Toyota Yaris ISO 9001 certyfikat',
+    'samochodem marki Opel Astra GTC 2015 rocznik',
+    '| Kod | Tablica |\n|---|---|\n| AB1234 | informacyjna |',
+    '| Nr rejestracyjny | brak |',
+  ]);
+  masked([
+    ['nr rej. WE 12345 / ISO 9001', `nr rej. ${RJ} / ISO 9001`],
+    ['nr rej. WE 12345; UE 2016/679', `nr rej. ${RJ}; UE 2016/679`],
+    ['Pojazd nr rej. WE 12345;\nSN 2020 r. orzekł', `Pojazd nr rej. ${RJ};\nSN 2020 r. orzekł`],
+  ]);
+});
+test('K44: tag XML z prefiksem przestrzeni nazw i klucze z ogonkami lub spacją', () => {
+  masked([
+    ['<ns2:Imie>Agnieszka</ns2:Imie>\n<etd:Nazwisko>Gżegżółka</etd:Nazwisko>\n<etd:DataUrodzenia>1985-03-14</etd:DataUrodzenia>', `<ns2:Imie>${N}</ns2:Imie>\n<etd:Nazwisko>${N}</etd:Nazwisko>\n<etd:DataUrodzenia>${DU}</etd:DataUrodzenia>`],
+    ['<etd:Ulica>OGRODOWA</etd:Ulica><etd:NrDomu>12</etd:NrDomu><etd:Miejscowosc>TORUŃ</etd:Miejscowosc>', `<etd:Ulica>${A}</etd:Ulica><etd:NrDomu>${A}</etd:NrDomu><etd:Miejscowosc>${C}</etd:Miejscowosc>`],
+    ['{"Imię": "Jolanta", "Miejscowość": "Ustka", "Data urodzenia": "1985-03-14"}', `{"Imię": "${N}", "Miejscowość": "${C}", "Data urodzenia": "${DU}"}`],
+    ['<Miejscowość>Słupsk</Miejscowość>', `<Miejscowość>${C}</Miejscowość>`],
+  ]);
+  keep([
+    '<cac:PartyName><cbc:Name>ACME Sp. z o.o.</cbc:Name></cac:PartyName>',
+    '<cbc:Name>Wiktoria jabłka 1 kg</cbc:Name>',
+    '<xs:element name="Nazwisko" type="xs:string"/>',
+    '<etd:Nazwisko>brak</etd:Nazwisko>',
+    '<a:Nazwisko>KUBIAK</b:Nazwisko>',
+    '<soap:Body><ns2:Status>OK</ns2:Status></soap:Body>',
+    '{"Imię": "brak"}',
+    '{"Data wystawienia": "2024-01-01"}',
+  ]);
+});
+test('K45: etykieta pola z dopełnieniem, bez ogonków i w szyku ZUS', () => {
+  masked([
+    ['Imię i nazwisko dziecka: Zając Oliwia\nNazwisko i imię pacjenta: WILK JADWIGA', `Imię i nazwisko dziecka: ${N}\nNazwisko i imię pacjenta: ${N}`],
+    ['Imię i nazwisko opiekuna prawnego: Hans Gruber', `Imię i nazwisko opiekuna prawnego: ${N}`],
+    ['Imię i nazwisko pacjenta\nWILK JADWIGA', `Imię i nazwisko pacjenta\n${N}`],
+    ['imie: Michał\nnazwisko: Szymański\nmiejscowosc: Wrocław', `imie: ${N}\nnazwisko: ${N}\nmiejscowosc: ${C}`],
+    ['Nazwisko panienskie: Brzęk', `Nazwisko panienskie: ${N}`],
+    ['05. Imię pierwsze: ZOFIA\n06. Imię drugie\nANNA', `05. Imię pierwsze: ${N}\n06. Imię drugie\n${N}`],
+  ]);
+  keep([
+    'Imię i nazwisko pacjenta należy wpisać drukowanymi literami.',
+    'Imię i nazwisko pacjenta: nie dotyczy',
+    'Imię i nazwisko świadczeniodawcy: Przychodnia Zdrowie Sp. z o.o.',
+    'Imię i nazwisko pacjenta lub opiekuna prawnego',
+    'Nazwisko i imię ubezpieczonego\nRozpoznanie',
+    'Imię pierwsze lub drugie należy wpisać wielkimi literami.',
+    'Imię pierwsze:\nImię drugie:\nNazwisko:',
+    'Imie: brak\nMiejscowosc: nie dotyczy',
+    'Miejscowosc i data: Wrocław, 12.03.2024',
+  ]);
+  // w trybie pseudonimów pole z nazwiskiem dostaje etykietę osoby, jak dawniej z przebiegów osób
+  masked(
+    [['Imię i nazwisko pracownika: Jan Kowalski\nPan Kowalski złożył wniosek.', 'Imię i nazwisko pracownika: [OSOBA-A]\nPan [OSOBA-A] złożył wniosek.']],
+    { pseudonyms: true },
+  );
+});
+test('K49: nazwisko panieńskie po masce osoby („z domu", „z d.", WERSALIKI, homograf)', () => {
+  masked([
+    ['EWELINA KRAWCZYK z domu MAJEWSKA', `${N} z domu ${N}`],
+    ['ANNA NOWAK Z DOMU KOWALSKA', `${N} Z DOMU ${N}`],
+    ['EWELINA KRAWCZYK Z D. MAJEWSKA', `${N} Z D. ${N}`],
+    ['Anna Nowak z domu Bąk', `${N} z domu ${N}`],
+    ['Anna Kowalska z domu Sikora\nMagdalena Kaczmarek (z d. Sikora)', `${N} z domu ${N}\n${N} (z d. ${N})`],
+    ['Anna Kowalska, z domu Sikora, ur. 12.03.1980', `${N}, z domu ${N}, ur. ${DU}`],
+    ['Anna z d. Sikora', N],
+  ]);
+  keep(['Uczestnicy wyszli z domu KULTURY', 'Pracuje w Domu Pomocy Społecznej w Krakowie.', 'Pismo z d. 12.03.2024 r. w sprawie lokalu', 'Anna z domu Pomocy Społecznej']);
+  masked([
+    ['JAN KOWALSKI Z DOMU DZIECKA NR 3', `${N} Z DOMU DZIECKA NR 3`],
+    ['JAN KOWALSKI Z DOMU WYSZEDŁ RANO', `${N} Z DOMU WYSZEDŁ RANO`],
+    ['Anna Nowak z Domu Pomocy Społecznej w Krakowie', `${N} z Domu Pomocy Społecznej w Krakowie`],
+    ['Jan Kowalski z domu Kultury odebrał nagrodę.', `${N} z domu Kultury odebrał nagrodę.`],
+    ['Anna Kowalska z Tychów przyjechała.', `${N} z Tychów przyjechała.`],
+  ]);
+});
+test('K50: imię na końcu porcji RE_NAME_SEQ nie odcina nazwiska w długim ciągu wyrazów z wielkiej litery', () => {
+  masked([
+    ['Kierownik Działu Kadr Grzegorz Mazur', `Kierownik Działu Kadr ${N}`],
+    ['Społeczny Inspektor Pracy Mirosław Bąk', `Społeczny Inspektor Pracy ${N}`],
+    ['Starszy Specjalista Działu Kadr Płac Ochrony Danych Ewa Sowa', `Starszy Specjalista Działu Kadr Płac Ochrony Danych ${N}`],
+    ['Przewodniczący: Sędzia Sądu Okręgowego Jan Gzowski', `Przewodniczący: Sędzia Sądu Okręgowego ${N}`],
+    ['Sędzia Sądu Rejonowego Piotr Gwizdała', `Sędzia Sądu Rejonowego ${N}`],
+    ['Kierownik Działu Kadr Anna Maria Kowalska', `Kierownik Działu Kadr ${N}`],
+  ]);
+  keep([
+    'Akademia Wychowania Fizycznego Józefa Piłsudskiego',
+    'Rektor Uniwersytetu Kardynała Stefana Wyszyńskiego',
+    'Dyrektor Szkoły Podstawowej Marii Konopnickiej',
+    'Port Lotniczy Gdańsk Lecha Wałęsy',
+    'Kierownik Działu Kadr Grzegorz',
+    'Kierownik Działu Kadr Grzegorz\nMazur',
+    'Kierownik Działu Kadr Maja Obchody',
+    'Święto Konstytucji Trzeciego Maja Obchody',
+    'Sędzia Sądu Okręgowego Jan Paweł',
+    'Hotel Grand Park Róża Wiatrów',
+  ]);
+});
+test('K52: klucze struktur — dokumenty, tablica, rachunek, złożone klucze telefonu i numerowane pola', () => {
+  masked([
+    ['{"paszport": "EA1234567", "prawo_jazdy": "01234/12/1234"}\n<KRS>0000123456</KRS>', '{"paszport": "[NR-PASZPORTU]", "prawo_jazdy": "[PRAWO-JAZDY]"}\n<KRS>[KRS]</KRS>'],
+    ['{"dowód osobisty":"ABC123450"}', `{"dowód osobisty":"${DW}"}`],
+    ['{"nrRejestracyjny": "WE12345", "marka": "Opel"}', `{"nrRejestracyjny": "${RJ}", "marka": "Opel"}`],
+    ['{"rachunek": "61 1090 1014 0000 0712 1981 2875"}\n<NrRachunku>61109010140000071219812875</NrRachunku>', '{"rachunek": "[NR-KONTA]"}\n<NrRachunku>[NR-KONTA]</NrRachunku>'],
+    ['{"nrTelefonu": "22 501 23 45", "telefonDomowy": "22 501 23 46", "phone2": "512.345.678"}', `{"nrTelefonu": "${T}", "telefonDomowy": "${T}", "phone2": "${T}"}`],
+    ['{"addressLine1": "Kościuszki 12/3", "addressLine2": "43-300 Bielsko-Biała"}', `{"addressLine1": "${A}", "addressLine2": "${KOD} ${C}"}`],
+    ['<ImiePierwsze>Krzysztof</ImiePierwsze>\n<ImieOjca>Henryk</ImieOjca>\n<NazwiskoRodowe>Gżegżółka</NazwiskoRodowe>\n<MiejsceUrodzenia>Sieradz</MiejsceUrodzenia>', `<ImiePierwsze>${N}</ImiePierwsze>\n<ImieOjca>${N}</ImieOjca>\n<NazwiskoRodowe>${N}</NazwiskoRodowe>\n<MiejsceUrodzenia>${C}</MiejsceUrodzenia>`],
+  ]);
+  keep([
+    '{"orderId": "EA1234567", "version": "AB1234567"}',
+    '{"paszport": "brak", "krs": "nie dotyczy", "prawoJazdy": "kat. B"}',
+    '{"plate": "Margherita", "tablica": "PN-EN 1176"}',
+    '{"registrationNumber": "HRB 12345"}',
+    '{"nrRej": "000012345"}',
+    '{"rachunek": "R/2026/001", "konto": "201-01"}',
+    '{"accountNumber": "00000000000000000000000000"}',
+    '<KontoWn>201-2-1-123</KontoWn>',
+    '{"phoneVerifiedAt": "2024-05-12T10:00:00", "telemetryId": "22 501 23 45"}',
+    '{"phoneCountryCode": "48", "phonesTotal": "1 234 567"}',
+    '<TelefonId>2250123</TelefonId>',
+    '{"user1": "active", "name1": "Produkt Premium"}',
+    '{"tel1": "wew. 123", "street1": "brak"}',
+  ]);
+});
+test('K53: data urodzenia po etykiecie z dopełnieniem, z nawiasem formatu, w formie zależnej i przy etykiecie łączonej', () => {
+  masked([
+    ['Data urodzenia pacjenta: 14.03.1958\nData urodzenia dziecka: 02.07.2019\nPacjentka urodzona w dniu 14.03.1958 r.\nData urodz.: 02.07.2019', `Data urodzenia pacjenta: ${DU}\nData urodzenia dziecka: ${DU}\nPacjentka urodzona w dniu ${DU} r.\nData urodz.: ${DU}`],
+    ['8. Data urodzenia (dzień – miesiąc – rok): 15-07-2001', `8. Data urodzenia (dzień – miesiąc – rok): ${DU}`],
+    ['Data urodzenia (DD.MM.RRRR) 15.07.2001', `Data urodzenia (DD.MM.RRRR) ${DU}`],
+    ['Data urodzenia pierwszego dziecka: 03.11.1990', `Data urodzenia pierwszego dziecka: ${DU}`],
+    ['Pani Hanny Michalak, urodzonej 12.03.1980 r. w Krakowie', `Pani ${N}, urodzonej ${DU} r. w ${C}`],
+    ['urodzona w dniu 12.03.1980 r. w Krakowie', `urodzona w dniu ${DU} r. w ${C}`],
+    ['Data i miejsce urodzenia: 12.04.1985, Kielce', `Data i miejsce urodzenia: ${DU}, ${C}`],
+    ['Miejsce i data urodzenia: Kielce, 12.04.1985', `Miejsce i data urodzenia: ${C}, ${DU}`],
+    ['ur 14.02.1993', `ur ${DU}`],
+  ]);
+  keep([
+    'Data przyjęcia pacjenta: 14.03.2024',
+    'Data urodzenia pacjenta w systemie uzupełniono 14.03.2024.',
+    'Data urodzenia (zob. pkt 3) nie jest wymagana do 15.07.2024.',
+    'Data urodzenia w formacie: 01.01.1970',
+    'Data urodzenia pracownika a data zatrudnienia: 01.02.2020',
+    'dotyczy osoby urodzonej po 31.12.1999 r.',
+    'dla dzieci urodzonych 1 stycznia 2016 r. przysługuje dodatek',
+    'Dziecko urodzi się około 12.05.2026.',
+    'Senat UR 14.02.1993 podjął uchwałę.',
+    'Data i miejsce zawarcia umowy: 12.04.2020, Kielce',
+    'Data i miejsce urodzenia Kandydata podaje się w CV.',
+    'Zapraszam na urodziny w sobotę 12.05.2024 o 18:00.',
+  ]);
+});
+test('K54: miasto w formie zależnej spoza słownika, WERSALIKAMI po kodzie i adresie, w wierszu CSV', () => {
+  masked([
+    ['Jan Nowak, zam. w Białymstoku, wnosi o...', `${N}, zam. w ${C}, wnosi o...`],
+    ['zam. w Siedlcach', `zam. w ${C}`],
+    ['UL. LIPOWA 14, 26-900 KOZIENICE', `${A}, ${KOD} ${C}`],
+    ['JAN KOWALSKI / UL. LIPOWA 14 / 26-900 KOZIENICE', `${N} / ${A} / ${KOD} ${C}`],
+    ['UL. LIPOWA 7, KRAKÓW', `${A}, ${C}`],
+    ['33-300 NOWY SĄCZ', `${KOD} ${C}`],
+    ['00-950 WARSZAWA 1', `${KOD} ${C} 1`],
+    ['Nowak;Jan;ul. Długa 5;00-001;Warszawa', `${N};Jan;${A};${KOD};${C}`],
+    ['Adres: ul. Długa 5, 00-001, Warszawa.', `Adres: ${A}, ${KOD}, ${C}.`],
+    ['Nowak;Jan;ul. Długa 5;Warszawa', `${N};Jan;${A};${C}`],
+  ]);
+  keep([
+    'Spotkanie w Białymstoku odbyło się wczoraj.',
+    'Sąd Apelacyjny w Białymstoku oddalił apelację.',
+    'Huta Stalowa Wola S.A. ogłosiła przetarg.',
+    'SĄD REJONOWY W KOZIENICACH',
+    'KOZIENICE, DNIA 12.03.2024 R.',
+    'Koszt naprawy wyniesie 10-200 PLN brutto.',
+    'Spotkanie w Gdańsku, potem Warszawa, Kraków; Poznań.',
+  ]);
+  masked([
+    ['Faktura 12-345 VAT', `Faktura ${KOD} VAT`],
+    ['Partia 11-222 ZUS RCA przekazana.', `Partia ${KOD} ZUS RCA przekazana.`],
+    ['KOD POCZTOWY: 00-001 POCZTA: WARSZAWA', `KOD POCZTOWY: ${KOD} POCZTA: WARSZAWA`],
+    ['00-238 POCZTA WARSZAWA', `${KOD} POCZTA WARSZAWA`],
+    ['kod;kraj\n00-001;Polska', `kod;kraj\n${KOD};Polska`],
+    ['Kody 00-001, 00-002 i 00-003, Warszawa zgłosiła awarię.', `Kody ${KOD}, ${KOD} i ${KOD}, Warszawa zgłosiła awarię.`],
+    ['00-001,Polska Grupa Energetyczna', `${KOD},Polska Grupa Energetyczna`],
+  ]);
+});
+test('K55: „ul." sklejone z nazwą ulicy', () => {
+  masked([
+    ['zam. UL.LIPOWA 14/3', `zam. ${A}`],
+    ['zam. ul.Długa 5/3, 00-950 Warszawa', `zam. ${A}, ${KOD} ${C}`],
+    ['przy ul.Lipowej 14 w Krakowie', `przy ${A} w ${C}`],
+    ['{"adres":"ul.Lipowa 14/3"}', `{"adres":"${A}"}`],
+    ['ul.Jana Kowalskiego 5', A],
+    ['zam. UI.LIP0WA 14', `zam. ${A}`],
+  ]);
+  keep([
+    'Remont ul.Lipowej potrwa do maja.',
+    'ul.Lipowa jest zamknięta od 2020 r.',
+    'Smith et al.Nature 12, 345.',
+    'Pokój dla 2 os.Cena 350 zł za noc.',
+    'Kupiłem to na allegro.pl.W 2020 roku zwróciłem towar.',
+    'os.Exit(1)',
+    'plik: skan_ul.Długa 5.pdf',
+    'Paul.Smith 5',
+    'Mam ul Dadanta 10 ramkowy w pasiece.',
+    'Patronem ul.Jana Kilińskiego jest szewc.',
+  ]);
+});
+test('K57: karta płatnicza po „number", „o numerze" i w kluczu zrośniętym', () => {
+  const NK = '[NR-KARTY]';
+  masked([
+    ['Card number: 4532 0151 1283 0366\n"card_number": "4532015112830366"\nzapłacono kartą o numerze 4532 0151 1283 0366', `Card number: ${NK}\n"card_number": "${NK}"\nzapłacono kartą o numerze ${NK}`],
+    ['karta o nr 4532 0151 1283 0366', `karta o nr ${NK}`],
+    ['{"cardNumber": "4532015112830366"}', `{"cardNumber": "${NK}"}`],
+    ['card_no: 4532015112830366', `card_no: ${NK}`],
+  ]);
+  keep([
+    'IMEI: 356938035643809',
+    'Numer zamówienia: 4532015112830366',
+    'umowa o numerze 4532015112830366',
+    'card number: 4532 0151 1283 0367',
+    'Discard number 4532015112830366',
+    'scorecard number 4532015112830366',
+    'kartą o numerze kończącym się na 0366',
+    'Karta Dużej Rodziny nr 123456',
+    'cardNumberMasked: ************0366',
+  ]);
 });

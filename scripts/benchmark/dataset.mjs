@@ -859,6 +859,16 @@ export function buildDataset() {
   str('Sprawca odjechał spod posesji przy ul. Polnej 5 samochodem marki Opel. 1. Kowalczyk Joanna ul. Polna 7 dzieci: 2', ['Polnej 5', 'Kowalczyk', 'Joanna', 'Polna 7'], ['samochodem marki Opel', 'dzieci: 2']);
   osp('Nowak KaroI\nJan Kowalski\nPozwany Zieliński Annie groził.', ['Nowak', 'KaroI', 'Jan', 'Kowalski', 'Zieliński'], ['Pozwany', 'groził']);
   osp('Kovalčuk Anna, obywatelka Ukrainy. Świadek Bondarčuk zeznał. Pani Ioana Mureșan złożyła wniosek.', ['Kovalčuk', 'čuk', 'Anna', 'Bondarčuk', 'Ioana', 'Mureșan', 'șan'], ['obywatelka Ukrainy', 'Świadek', 'zeznał', 'złożyła wniosek']);
+  // Wycieki przy kotwicy (audyt, partia b5): dowód „serii … nr …", telefon po „nr" i etykiecie
+  // z dopełnieniem, tablica po „nr. rej." i modelu, XML z prefiksem i klucze struktur, etykiety pól
+  // z dopełnieniem, nazwisko panieńskie po masce, długi ciąg roli przed osobą, data urodzenia
+  // w formie zależnej, miasto WERSALIKAMI i w CSV, „ul." bez spacji, karta po „number".
+  str('Stawająca, legitymująca się dowodem osobistym serii ABA nr 300000, paszportem serii EA 1234567, tel. nr 724 555 019, tel. stacj. 22 843 21 09.', ['ABA nr 300000', 'EA 1234567', '724 555 019', '22 843 21 09'], ['Stawająca', 'dowodem osobistym serii', 'paszportem serii', 'tel. stacj.']);
+  str('Sprawca kierował pojazdem marki Toyota Yaris WE 12345, ciągnik nr rej. WGM 12345 / WGM 6789P, o nr. rej. SK 77701.', ['WE 12345', 'WGM 12345', 'WGM 6789P', 'SK 77701'], ['marki Toyota Yaris', 'ciągnik nr rej.', 'o nr. rej.']);
+  str('<etd:ImiePierwsze>Agnieszka</etd:ImiePierwsze><etd:Nazwisko>Gżegżółka</etd:Nazwisko><etd:DataUrodzenia>1985-03-14</etd:DataUrodzenia>\n{"paszport": "EA7654321", "nrTelefonu": "22 501 23 45", "Miejscowość": "Ustka"}', ['Agnieszka', 'Gżegżółka', '1985-03-14', 'EA7654321', '22 501 23 45', 'Ustka'], ['<etd:ImiePierwsze>', '"paszport"', '"Miejscowość"']);
+  osp('Imię i nazwisko pacjenta: Hans Gruber\nAnna Kowalska z domu Sikora\nKierownik Działu Kadr Grzegorz Mazur', ['Hans', 'Gruber', 'Anna', 'Kowalska', 'Sikora', 'Grzegorz', 'Mazur'], ['Imię i nazwisko pacjenta:', 'z domu', 'Kierownik Działu Kadr']);
+  str('Pani Hanny Michalak, urodzonej 12.03.1980 r. w Białymstoku. UL. LIPOWA 14, 26-900 KOZIENICE. zam. ul.Długa 5/3. Card number: 4532 0151 1283 0366.', ['Hanny', 'Michalak', '12.03.1980', 'Białymstoku', 'LIPOWA 14', '26-900', 'KOZIENICE', 'Długa 5/3', '4532 0151 1283 0366'], ['urodzonej', 'Card number:']);
+  neg('Spółka wyemitowała obligacje serii ABA 123456. Spółka wpisana do rejestru pod nr 123 456 789. Tablica o numerze INW 12345 jest w magazynie. Data urodzenia pacjenta w systemie uzupełniono 14.03.2024. Uczestnicy wyszli z domu KULTURY. Faktura 12-345 VAT. Smith et al.Nature 12.', ['serii ABA 123456', 'pod nr 123 456 789', 'INW 12345', '14.03.2024', 'z domu KULTURY', 'VAT', 'et al.Nature 12']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
