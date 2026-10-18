@@ -509,3 +509,7 @@ a.vh:focus-visible {
   border: 2px solid var(--acc); border-radius: var(--r-ctl);
   font-weight: 700; text-decoration: none; box-shadow: var(--shadow-lg);
 }
+
+/* Znak marki nad nagłówkiem pobierania: wypełnia pusty margines sekcji. */
+#pobierz .znak-duzy{display:inline-flex;width:72px;height:72px;margin-bottom:14px}
+#pobierz .znak-duzy .gi,#pobierz .znak-duzy svg{width:100%;height:100%}
