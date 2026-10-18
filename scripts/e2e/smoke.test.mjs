@@ -374,7 +374,8 @@ const DOCX_Z_CZESCIAMI = () =>
 const DOCX_NOTE =
   'Wczytano treść główną dokumentu. Parawan nie czyta: nagłówków i stopek (1), komentarzy (1). ' +
   'Przejrzyj je przed publikacją albo publikuj nowy dokument zapisany z wyniku.\n' +
-  'Dokument ma ukryty tekst (1 fragment). Jest w polu źródła i został sprawdzony.';
+  'Dokument ma ukryty tekst (1 fragment). W polu źródła i w wyniku widać go jak zwykły tekst. ' +
+  'Usuń go, jeśli nie ma trafić do publikacji.';
 
 test('DOCX z nagłówkiem i komentarzem: komunikat wylicza pominięte części i ukryty tekst', async (t) => {
   await withApp(browser, t, '', async (app) => {
@@ -513,6 +514,62 @@ test('DOCX z częściami wczytany na istniejący tekst: „Cofnij” i komunikat
     await page.keyboard.type(' x');
     assert.equal(await page.locator('#app-note-undo').isVisible(), false, '„Cofnij” po edycji');
     assert.equal((await page.locator('#app-note-text').textContent())?.trim(), DOCX_NOTE);
+  });
+});
+
+test('„Cofnij” po „Wyczyść” i „Przykład” przywraca tekst z pliku razem z dopiskiem o jego częściach', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const noteText = async () => (await page.locator('#app-note-text').textContent())?.trim();
+    await page
+      .locator('#file-input')
+      .setInputFiles({ name: 'decyzja-czesci.docx', mimeType: DOCX_MIME, buffer: Buffer.from(DOCX_Z_CZESCIAMI()) });
+    await app.waitForOutput('[PESEL]');
+    assert.equal(await noteText(), DOCX_NOTE);
+    const docxText = await page.locator('#input').inputValue();
+    for (const [button, note] of [
+      ['#clear', 'Wyczyszczono tekst.'],
+      ['#example', 'Wstawiono przykład w miejsce Twojego tekstu.'],
+    ]) {
+      await page.locator(button).click();
+      assert.equal(await noteText(), note, `pasek po ${button}`);
+      await page.getByRole('button', { name: 'Cofnij' }).click();
+      assert.equal(await page.locator('#input').inputValue(), docxText, `tekst po „Cofnij” (${button})`);
+      // ostrzeżenie o nagłówku i komentarzu wraca, bo te części dalej są w oryginale
+      assert.equal(await page.locator('#app-note').isVisible(), true, `dopisek po „Cofnij” (${button})`);
+      assert.equal(await noteText(), DOCX_NOTE);
+      assert.equal(await page.locator('#app-note-undo').isVisible(), false);
+      assert.equal(
+        (await page.locator('#app-note-status').textContent())?.trim(),
+        `Przywrócono poprzedni tekst.\n${DOCX_NOTE}`,
+      );
+    }
+  });
+});
+
+test('opróżnione pole zamyka dopisek o pliku: nie wisi nad nowo wpisanym tekstem', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    await page
+      .locator('#file-input')
+      .setInputFiles({ name: 'decyzja-czesci.docx', mimeType: DOCX_MIME, buffer: Buffer.from(DOCX_Z_CZESCIAMI()) });
+    await app.waitForOutput('[PESEL]');
+    await page.locator('#app-note').waitFor({ state: 'visible' });
+    await page.locator('#input').click();
+    await page.keyboard.press('Control+A');
+    await page.keyboard.press('Delete');
+    assert.equal(await page.locator('#app-note').isVisible(), false, 'dopisek po opróżnieniu pola');
+    assert.equal((await page.locator('#app-note-status').textContent())?.trim(), '');
+    await page.keyboard.type('Inny tekst wklejony z poczty.');
+    assert.equal(await page.locator('#app-note').isVisible(), false, 'dopisek nad nowym tekstem');
+    // dopisek o kodowaniu pliku tak samo
+    const cp1250 = Buffer.from([0x5a, 0x61, 0xbf, 0xf3, 0xb3, 0xe6, 0x20, 0x67, 0xea, 0x9c, 0x6c, 0xb9]);
+    await page.locator('#file-input').setInputFiles({ name: 'ansi.txt', mimeType: 'text/plain', buffer: cp1250 });
+    await page.locator('#app-note-text').getByText('Windows-1250').waitFor();
+    await page.locator('#input').click();
+    await page.keyboard.press('Control+A');
+    await page.keyboard.press('Delete');
+    assert.equal(await page.locator('#app-note').isVisible(), false, 'dopisek o kodowaniu po opróżnieniu pola');
   });
 });
 

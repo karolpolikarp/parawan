@@ -886,9 +886,11 @@ input.addEventListener('input', () => {
   // Własna edycja zamyka błąd, bo już nie dotyczy, i „Cofnij”, bo po edycji przywróciłby tekst
   // sprzed niej i skasował to, co właśnie wpisano. Dopisek o pliku (np. o nagłówkach i stopkach,
   // których Parawan nie czyta) zostaje do zamknięcia: te części dalej są w oryginale, a fokus po
-  // wczytaniu stoi w polu, więc pierwszy klawisz kasowałby jedyne ostrzeżenie.
+  // wczytaniu stoi w polu, więc pierwszy klawisz kasowałby jedyne ostrzeżenie. Puste pole zamyka
+  // także dopisek: z pliku nic już w nim nie ma, a dopisek wisiałby nad nowo wpisanym tekstem.
   clearError();
-  if (undoText !== null || !noteInfo) expireUndo();
+  if (!input.value.trim()) dismissNote();
+  else if (undoText !== null || !noteInfo) expireUndo();
   updateSrcMeta(input.value);
   updatePending = true;
   clearTimeout(updateTimer);
@@ -933,6 +935,9 @@ const finePointer = matchMedia('(pointer: fine)');
    usunąć. Dlatego „Cofnij” działa tylko przez chwilę i znika od razu po przejściu do innej
    karty, zminimalizowaniu okna albo zamknięciu strony. */
 let undoText: string | null = null;
+// Dopisek, który należał do poprzedniego tekstu: „Cofnij” przywraca go razem z nim, bo nagłówki
+// i komentarze przywróconego DOCX dalej są w oryginale.
+let undoInfo = '';
 let noteInfo = ''; // dopisek bez cofania (np. o kodowaniu pliku), zostaje po wygaśnięciu „Cofnij”
 const UNDO_MS = 20_000;
 let undoTimer: ReturnType<typeof setTimeout> | undefined;
@@ -988,22 +993,27 @@ addEventListener('pagehide', () => {
 /** Zastąp cały tekst źródła; gdy było co stracić, pokaż pasek „Cofnij”. `info` to dopisek. */
 function replaceSource(text: string, note: string, info = ''): void {
   const prev = input.value;
+  const prevInfo = noteInfo;
   input.value = text;
   update();
   if (finePointer.matches) input.focus(); // przed paskiem: przewinięcie do pola nie zasłoni go
   const canUndo = prev.trim() !== '' && prev !== text;
   if (canUndo || info) showNote(canUndo ? note : '', canUndo ? prev : null, info);
   else dismissNote();
+  undoInfo = canUndo ? prevInfo : '';
 }
 
 appNoteUndo.addEventListener('click', () => {
   if (undoText === null) return;
+  const info = undoInfo;
   input.value = undoText;
-  setFileExt(''); // przywrócony tekst nie pochodzi z wczytanego pliku
+  setFileExt(''); // pobieranie wraca do .txt jak po „Wyczyść” (rodzaj pliku nie wraca)
   dismissNote();
   clearError();
   update();
-  appNoteStatus.textContent = 'Przywrócono poprzedni tekst.';
+  // Dopisek o pliku wraca razem z jego tekstem, a czytnik ekranu słyszy jedno i drugie.
+  if (info) showNote('', null, info);
+  appNoteStatus.textContent = ['Przywrócono poprzedni tekst.', info].filter(Boolean).join('\n');
   if (finePointer.matches) input.focus(); // przycisk znika, więc fokus nie może na nim zostać
 });
 appNoteClose.addEventListener('click', () => {

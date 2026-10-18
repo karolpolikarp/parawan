@@ -1,7 +1,8 @@
 /**
  * Spis części pliku .docx, których Parawan nie czyta. extractDocxText bierze tylko treść główną
  * (`word/document.xml`), a nagłówki, stopki, przypisy, komentarze, diagramy SmartArt, obrazy,
- * właściwości dokumentu i tekst usunięty w śledzonych zmianach zostają w pliku. Bez tego spisu
+ * fragmenty wstawione z innych plików (`w:altChunk`), właściwości dokumentu i tekst usunięty
+ * w śledzonych zmianach zostają w pliku. Bez tego spisu
  * urzędnik sądził, że sprawdził cały dokument, i publikował oryginał z nazwiskiem w stopce albo
  * w komentarzu.
  *
@@ -11,7 +12,7 @@
  * nagłówków też nie zamrozi karty), a sam `word/document.xml` ten sam limit co w docx.ts.
  */
 
-import { docxEntries, MAX_XML_BYTES, readDocxPart, wmlName, wmlPrefix, wmlText } from './docx';
+import { docxEntries, MAX_XML_BYTES, readDocxPart, wmlName, wmlPrefixes, wmlText } from './docx';
 import { plural } from './plural';
 import type { ZipEntry } from './zip';
 
@@ -31,6 +32,12 @@ export interface DocxInventory {
   images: number;
   /** Pliki w `word/embeddings/` (osadzone arkusze, dokumenty, obiekty OLE). */
   embeddings: number;
+  /**
+   * Fragmenty wstawione z osobnych plików (`w:altChunk` w treści głównej, np. HTML z przycisku
+   * „Pobierz jako Word” albo scalanie korespondencji). Word pokazuje je jak zwykły tekst, ale
+   * w `word/document.xml` stoi tylko odsyłacz, więc do pola nie trafiają.
+   */
+  altChunks: number;
   /** Ciągłe fragmenty tekstu ukrytego (`w:vanish`) w treści głównej. */
   hidden: number;
   /** Wstawienia śledzonych zmian z treścią (`<w:ins>…</w:ins>`). */
@@ -44,8 +51,8 @@ export interface DocxInventory {
   properties: number;
 }
 
-/** Prefiks WordprocessingML części; bez deklaracji zakładamy zwyczajowe „w”. */
-const prefixOf = (xml: string): string => wmlPrefix(xml) ?? 'w';
+/** Prefiksy WordprocessingML części; bez deklaracji zakładamy zwyczajowe „w”. */
+const prefixOf = (xml: string): string[] => wmlPrefixes(xml) ?? ['w'];
 
 /** Dowolny prefiks przed nazwą lokalną (właściwości i DrawingML mają własne przestrzenie nazw). */
 const ANY = '(?:[^\\s<>/:]+:)?';
@@ -76,29 +83,30 @@ function* elements(xml: string, name: string): Generator<{ attrs: string; body: 
 const NOTE_SEPARATORS = new Set(['separator', 'continuationSeparator']);
 
 function countNotes(xml: string, local: 'footnote' | 'endnote'): number {
-  const prefix = prefixOf(xml);
+  const prefixes = prefixOf(xml);
   let n = 0;
-  for (const { attrs, body } of elements(xml, wmlName(prefix, local))) {
+  for (const { attrs, body } of elements(xml, wmlName(prefixes, local))) {
     const type = attrs.match(/\s(?:[^\s=]+:)?type\s*=\s*["']([^"']*)["']/)?.[1] ?? '';
-    if (body !== null && !NOTE_SEPARATORS.has(type) && wmlText(body, prefix) !== '') n++;
+    if (body !== null && !NOTE_SEPARATORS.has(type) && wmlText(body, prefixes) !== '') n++;
   }
   return n;
 }
 
 /** Ile ciągłych fragmentów tekstu z `w:vanish` (bez `w:val="0"`) jest w treści głównej. */
-function countHidden(xml: string, prefix: string): number {
-  const vanish = new RegExp(`<${wmlName(prefix, 'vanish')}(?=[\\s/>])([^<>]*)>`);
+function countHidden(xml: string, prefixes: readonly string[]): number {
+  const vanish = new RegExp(`<${wmlName(prefixes, 'vanish')}(?=[\\s/>])([^<>]*)>`);
   // Tylko początek tekstu: `\s*[^<\s]` nie cofa się kwadratowo przy długim, niedomkniętym <w:t>.
-  const text = new RegExp(`<${wmlName(prefix, 't')}(?:\\s[^<>]*)?>\\s*[^<\\s]`);
-  const raw = prefix ? `${prefix}:rPr` : 'rPr';
+  const text = new RegExp(`<${wmlName(prefixes, 't')}(?:\\s[^<>]*)?>\\s*[^<\\s]`);
+  // Zamknięcie szukane przez indexOf z nazwą, która naprawdę stoi w otwarciu (prefiksów bywa kilka).
+  const rPr = new RegExp(`<(${wmlName(prefixes, 'rPr')})(?=[\\s/>])`);
   let count = 0;
   let prevHidden = false;
-  for (const { body } of elements(xml, wmlName(prefix, 'r'))) {
+  for (const { body } of elements(xml, wmlName(prefixes, 'r'))) {
     // run bez tekstu (sam tabulator, przypis, usunięcie) nie przerywa ukrytego fragmentu
     if (body === null || !text.test(body)) continue;
-    const from = body.indexOf(`<${raw}`);
-    const to = from < 0 ? -1 : body.indexOf(`</${raw}>`, from);
-    const props = to < 0 ? '' : body.slice(from, to);
+    const open = rPr.exec(body);
+    const to = open ? body.indexOf(`</${open[1]}>`, open.index) : -1;
+    const props = open && to >= 0 ? body.slice(open.index, to) : '';
     const v = props.match(vanish);
     const hidden = !!v && !/\s(?:[^\s=]+:)?val\s*=\s*["'](?:0|false|off)["']/.test(v[1]);
     if (hidden && !prevHidden) count++;
@@ -108,9 +116,9 @@ function countHidden(xml: string, prefix: string): number {
 }
 
 /** Ile elementów `local` ma treść (samozamykające znaczniki zmian akapitu się nie liczą). */
-function countWithBody(xml: string, prefix: string, local: string): number {
+function countWithBody(xml: string, prefixes: readonly string[], local: string): number {
   let n = 0;
-  for (const { body } of elements(xml, wmlName(prefix, local))) if (body !== null) n++;
+  for (const { body } of elements(xml, wmlName(prefixes, local))) if (body !== null) n++;
   return n;
 }
 
@@ -164,6 +172,7 @@ export function inventoryDocx(buf: Uint8Array): DocxInventory {
     diagrams: 0,
     images: 0,
     embeddings: 0,
+    altChunks: 0,
     hidden: 0,
     insertions: 0,
     deletions: 0,
@@ -188,10 +197,11 @@ export function inventoryDocx(buf: Uint8Array): DocxInventory {
     else if (name === 'docProps/custom.xml') inv.properties += countCustomProperties(read(e));
     else if (name === 'word/document.xml') {
       const xml = readDocxPart(buf, e);
-      const prefix = prefixOf(xml);
-      inv.hidden = countHidden(xml, prefix);
-      inv.insertions = countWithBody(xml, prefix, 'ins');
-      inv.deletions = countWithBody(xml, prefix, 'del');
+      const prefixes = prefixOf(xml);
+      inv.hidden = countHidden(xml, prefixes);
+      inv.insertions = countWithBody(xml, prefixes, 'ins');
+      inv.deletions = countWithBody(xml, prefixes, 'del');
+      inv.altChunks = [...elements(xml, wmlName(prefixes, 'altChunk'))].length;
     }
   }
   return inv;
@@ -206,11 +216,19 @@ function skippedList(inv: DocxInventory): string[] {
     [inv.diagrams, 'diagramów SmartArt'],
     [inv.images, 'obrazów'],
     [inv.embeddings, 'obiektów osadzonych'],
+    [inv.altChunks, 'fragmentów wstawionych z innych plików'],
     [inv.deletions, 'fragmentów usuniętych w śledzonych zmianach'],
     [inv.properties, 'właściwości dokumentu'],
   ] as const;
   return skipped.filter(([n]) => n > 0).map(([n, what]) => `${what} (${n})`);
 }
+
+// Word przy otwarciu wstawia te fragmenty do treści, a przy zapisie zapisuje je już jako zwykłe
+// akapity (sprawdzone na plikach w stylu html-docx-js i OpenXML SDK), więc jest prosta droga,
+// żeby Parawan je przeczytał.
+const ALT_CHUNK_HINT =
+  ' Wstawione fragmenty wyglądają w Wordzie jak zwykły tekst. Gdy zapiszesz tam dokument ponownie, ' +
+  'Parawan je przeczyta.';
 
 /**
  * Dopisek po wczytaniu DOCX: czego Parawan nie przeczytał (tylko niezerowe pozycje) i w osobnym
@@ -230,13 +248,16 @@ export function docxInventoryNote(inv: DocxInventory | null): string {
   const list = skippedList(inv);
   const out: string[] = [];
   if (list.length) {
-    out.push(`Wczytano treść główną dokumentu. Parawan nie czyta: ${list.join(', ')}. ${review}`);
+    const alt = inv.altChunks > 0 ? ALT_CHUNK_HINT : '';
+    out.push(`Wczytano treść główną dokumentu. Parawan nie czyta: ${list.join(', ')}. ${review}${alt}`);
   }
   if (inv.hidden > 0) {
+    // Nie „został sprawdzony”: to brzmiało jak uspokojenie, a ukryte zdanie stoi w wyniku jak
+    // każde inne i trafi do publikacji, choć w oryginale nikt go nie widział.
     const h = inv.hidden;
     out.push(
       `Dokument ma ukryty tekst (${h} ${plural(h, 'fragment', 'fragmenty', 'fragmentów')}). ` +
-        'Jest w polu źródła i został sprawdzony.',
+        'W polu źródła i w wyniku widać go jak zwykły tekst. Usuń go, jeśli nie ma trafić do publikacji.',
     );
   }
   return out.join('\n');
@@ -261,8 +282,9 @@ export function docxEmptyBodyError(inv: DocxInventory | null): string | null {
     inv.images + inv.embeddings > 0
       ? ' Jeśli to skan, wklej tekst ręcznie, bo rozpoznawanie tekstu ze skanów (OCR) nie jest obsługiwane.'
       : '';
+  const alt = inv.altChunks > 0 ? ALT_CHUNK_HINT : '';
   return (
     `${intro} Plik nie jest jednak pusty, Parawan nie czyta w nim: ${list.join(', ')}. ` +
-    `Przejrzyj je w Wordzie przed publikacją.${scan}`
+    `Przejrzyj je w Wordzie przed publikacją.${alt}${scan}`
   );
 }

@@ -21,6 +21,7 @@ const ZERO: DocxInventory = {
   diagrams: 0,
   images: 0,
   embeddings: 0,
+  altChunks: 0,
   hidden: 0,
   insertions: 0,
   deletions: 0,
@@ -63,6 +64,7 @@ test('pełny fikcyjny DOCX: dokładne liczby, separator przypisu nie liczony', (
     diagrams: 0,
     images: 1,
     embeddings: 0,
+    altChunks: 0,
     hidden: 1,
     insertions: 1,
     deletions: 1,
@@ -171,6 +173,58 @@ test('inny prefiks i ścisły Open XML w częściach dodatkowych', () => {
   const inv = inventoryDocx(zip);
   expect(inv.comments).toBe(2);
   expect(inv.notes).toBe(1);
+});
+
+test('element główny w przestrzeni domyślnej, treść pod w:: ukryty tekst i śledzone zmiany liczone', () => {
+  const xml =
+    `<?xml version="1.0"?><document xmlns="${W}" ${ns()}><w:body>` +
+    '<w:p><w:r><w:rPr><w:vanish/></w:rPr><w:t>ukryte</w:t></w:r><w:r><w:t>jawne</w:t></w:r></w:p>' +
+    '<p><r><rPr><vanish/></rPr><t>też ukryte</t></r></p>' +
+    '<w:p><w:del w:id="1"><w:r><w:delText>usunięte</w:delText></w:r></w:del></w:p></w:body></document>';
+  const inv = inventoryDocx(zipSync({ 'word/document.xml': strToU8(xml) }));
+  expect(inv.hidden).toBe(2);
+  expect(inv.deletions).toBe(1);
+});
+
+/** Pismo w stylu html-docx-js: w document.xml akapit i odsyłacz do fragmentu w osobnym pliku. */
+function altChunkDocx(body: string): Uint8Array {
+  return zipSync({
+    'word/document.xml': doc(body),
+    'word/_rels/document.xml.rels': strToU8(
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+        '<Relationship Id="htmlChunk" Target="/word/afchunk.mht" ' +
+        'Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/aFChunk"/></Relationships>',
+    ),
+    'word/afchunk.mht': strToU8('<p>Wnioskodawca: Bronisław Altchunkowski, PESEL 02270803628</p>'),
+  });
+}
+
+test('fragmenty wstawione z innych plików (w:altChunk): liczone i wymienione w komunikacie', () => {
+  const buf = altChunkDocx(
+    `${para('Decyzja nr 12/2026 w sprawie zasiłku celowego.')}<w:altChunk r:id="htmlChunk"/>` +
+      '<w:altChunk r:id="drugi"><w:altChunkPr><w:matchSrc/></w:altChunkPr></w:altChunk>',
+  );
+  // Word pokazuje treść fragmentu, a do pola trafia tylko akapit z document.xml
+  expect(extractDocxText(buf)).toBe('Decyzja nr 12/2026 w sprawie zasiłku celowego.');
+  const inv = inventoryDocx(buf);
+  expect(inv).toEqual({ ...ZERO, altChunks: 2 });
+  expect(docxInventoryNote(inv)).toBe(
+    'Wczytano treść główną dokumentu. Parawan nie czyta: fragmentów wstawionych z innych plików (2). ' +
+      'Przejrzyj je przed publikacją albo publikuj nowy dokument zapisany z wyniku. Wstawione ' +
+      'fragmenty wyglądają w Wordzie jak zwykły tekst. Gdy zapiszesz tam dokument ponownie, Parawan je przeczyta.',
+  );
+  // <w:altChunkPr> nie jest osobnym fragmentem
+  expect(inventoryDocx(altChunkDocx('<w:altChunkPr/>')).altChunks).toBe(0);
+});
+
+test('sam fragment wstawiony z innego pliku: błąd mówi o nim zamiast „Plik jest pusty”', () => {
+  const buf = altChunkDocx('<w:altChunk r:id="htmlChunk"/>');
+  expect(extractDocxText(buf)).toBe('');
+  expect(docxEmptyBodyError(inventoryDocx(buf))).toBe(
+    'W treści głównej dokumentu nie ma tekstu. Plik nie jest jednak pusty, Parawan nie czyta w nim: ' +
+      'fragmentów wstawionych z innych plików (1). Przejrzyj je w Wordzie przed publikacją. Wstawione ' +
+      'fragmenty wyglądają w Wordzie jak zwykły tekst. Gdy zapiszesz tam dokument ponownie, Parawan je przeczyta.',
+  );
 });
 
 test('limit: części dodatkowe mają razem ten sam limit co document.xml (bomba w wielu nagłówkach)', () => {
@@ -340,14 +394,18 @@ test('komunikat: przykład ze specyfikacji, tylko niezerowe pozycje', () => {
 
 test('komunikat: ukryty tekst w osobnym wierszu, z odmianą liczebnika', () => {
   const hidden = (n: number): string => docxInventoryNote({ ...ZERO, hidden: n });
-  expect(hidden(1)).toBe('Dokument ma ukryty tekst (1 fragment). Jest w polu źródła i został sprawdzony.');
-  expect(hidden(2)).toBe('Dokument ma ukryty tekst (2 fragmenty). Jest w polu źródła i został sprawdzony.');
+  const said = 'W polu źródła i w wyniku widać go jak zwykły tekst. Usuń go, jeśli nie ma trafić do publikacji.';
+  expect(hidden(1)).toBe(`Dokument ma ukryty tekst (1 fragment). ${said}`);
+  expect(hidden(2)).toBe(`Dokument ma ukryty tekst (2 fragmenty). ${said}`);
+  // nie uspokaja: ukryte zdanie trafia do wyniku, a „został sprawdzony” brzmiało jak „jest w porządku”
+  expect(hidden(1)).not.toMatch(/sprawdzon/);
   expect(hidden(5)).toContain('(5 fragmentów)');
   expect(hidden(22)).toContain('(22 fragmenty)');
   expect(docxInventoryNote({ ...ZERO, comments: 1, hidden: 2 })).toBe(
     'Wczytano treść główną dokumentu. Parawan nie czyta: komentarzy (1). Przejrzyj je przed ' +
       'publikacją albo publikuj nowy dokument zapisany z wyniku.\nDokument ma ukryty tekst ' +
-      '(2 fragmenty). Jest w polu źródła i został sprawdzony.',
+      '(2 fragmenty). W polu źródła i w wyniku widać go jak zwykły tekst. Usuń go, jeśli nie ma ' +
+      'trafić do publikacji.',
   );
 });
 
@@ -364,7 +422,15 @@ test('komunikat: nieudany spis to też komunikat, nie cisza', () => {
 });
 
 test('komunikat nie mówi, że reszta jest bezpieczna', () => {
-  const all = docxInventoryNote({ ...ZERO, headersFooters: 1, notes: 1, comments: 1, images: 1, hidden: 1 });
+  const all = docxInventoryNote({
+    ...ZERO,
+    headersFooters: 1,
+    notes: 1,
+    comments: 1,
+    images: 1,
+    altChunks: 1,
+    hidden: 1,
+  });
   expect(all).not.toMatch(/bezpieczn|czyst|w porządku|100%|w pełni|po prostu| — /);
   const empty = docxEmptyBodyError({ ...ZERO, headersFooters: 1, images: 1, properties: 1 });
   expect(empty).not.toMatch(/bezpieczn|czyst|w porządku|100%|w pełni|po prostu| — /);

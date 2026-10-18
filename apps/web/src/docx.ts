@@ -4,22 +4,27 @@
  * DOCX to ZIP z XML-em w środku; treść dokumentu żyje w `word/document.xml`,
  * a widoczny tekst — w elementach `<w:t>`. Rozpakowujemy (zip.ts) TYLKO ten jeden wpis
  * (z limitem rozmiaru, więc bomba ZIP nie zamrozi karty) i zbieramy tekst runów,
- * wstawiając \n za końce akapitów (`</w:p>`), `<w:br/>` i `<w:cr/>`, \t za `<w:tab/>` oraz
- * zwykły „-” za twardy łącznik `<w:noBreakHyphen/>` (bez niego kod pocztowy „00-950” skleja
- * się w „00950” i przechodzi jawny). Bez `<w:cr/>` „Jan” i „Kowalski”
- * z dwóch wierszy sklejały się w „JanKowalski” i nazwisko przechodziło jawne.
+ * wstawiając \n za końce akapitów (`</w:p>`), `<w:br/>` i `<w:cr/>`, \t za `<w:tab/>`
+ * i `<w:ptab/>` oraz zwykły „-” za twardy łącznik `<w:noBreakHyphen/>` (bez niego kod pocztowy
+ * „00-950” skleja się w „00950” i przechodzi jawny). Bez `<w:cr/>` „Jan” i „Kowalski”
+ * z dwóch wierszy sklejały się w „JanKowalski” i nazwisko przechodziło jawne. Te same znaki
+ * zapisane parą `<w:cr></w:cr>` (tak puste elementy wypisują niektóre serializatory XML) to
+ * w XML ten sam element i też łamią wiersz.
  *
  * Pusty akapit `<w:p/>` (tak Word zapisuje pusty wiersz i pustą komórkę tabeli) nie daje nic,
  * a pusta komórka tabeli nie daje nic także wtedy, gdy jej akapit ma formatowanie. Taki akapit
  * nie rozdziela żadnych wyrazów, tylko dokłada pusty wiersz, a przez pusty wiersz rdzeń nie łączy
  * imienia z nazwiskiem ani etykiety „Login:” z wartością. Tabela „Jan | (puste drugie imię) |
- * Kowalski” zostawiała wtedy imię jawne. Łącznik miękki
+ * Kowalski” zostawiała wtedy imię jawne. Wyjątek: pusta komórka między dwiema liczbami daje pusty
+ * wiersz, bo rdzeń łączy grupy cyfr z kolejnych wierszy w numer telefonu, a w tabeli kwot
+ * „340 000 | (pusta zmiana) | 340 000” robił z nich „[TELEFON] 000”. Łącznik miękki
  * `<w:softHyphen/>` pomijamy, bo w tekście go nie widać. Pola tekstowe Word zapisuje dwa razy
  * (`mc:Choice` i zapasowo `mc:Fallback`), więc gałęzie `mc:Fallback` usuwamy, żeby treść nie
  * dublowała się w wyniku i licznikach.
  *
  * Prefiks `w:` to tylko zwyczaj Worda: niektóre generatory piszą `ns0:` albo przestrzeń
- * domyślną. Prefiks czytamy więc z deklaracji w elemencie głównym.
+ * domyślną. Prefiksy czytamy więc z deklaracji w elemencie głównym, wszystkie związane
+ * z WordprocessingML: element główny bywa w przestrzeni domyślnej, a treść pod `w:`.
  *
  * To świadomie NIE jest pełny konwerter (tabele/format spłaszczają się do tekstu) —
  * do anonimizacji liczy się treść, nie układ.
@@ -101,12 +106,14 @@ export function readDocxPart(buf: Uint8Array, entry: ZipEntry, limit = MAX_XML_B
 }
 
 /**
- * Prefiks, pod którym część XML deklaruje WordprocessingML w elemencie głównym („w”, „ns0”,
- * pusty napis dla przestrzeni domyślnej) albo null, gdy deklaracji nie ma. Najpierw prefiks samego
- * elementu głównego, potem dowolny inny związany z tą przestrzenią. Skan indexOf zamiast wyrażeń
- * z `[\s\S]*?`: niedomknięty komentarz albo instrukcja nie skanują tekstu wielokrotnie.
+ * Prefiksy, pod którymi część XML deklaruje WordprocessingML w elemencie głównym („w”, „ns0”,
+ * pusty napis dla przestrzeni domyślnej), albo null, gdy deklaracji nie ma. Wszystkie, nie tylko
+ * prefiks samego elementu głównego: `<document xmlns="…main" xmlns:w="…main">` z treścią pod `w:`
+ * dawał przy jednym prefiksie fałszywe „Plik jest pusty”, a przy treści pisanej raz tak, raz tak
+ * akapity pod `w:` znikały bez słowa. Skan indexOf zamiast wyrażeń z `[\s\S]*?`: niedomknięty
+ * komentarz albo instrukcja nie skanują tekstu wielokrotnie.
  */
-export function wmlPrefix(xml: string): string | null {
+export function wmlPrefixes(xml: string): string[] | null {
   let at = 0;
   for (;;) {
     at = xml.indexOf('<', at);
@@ -127,46 +134,85 @@ export function wmlPrefix(xml: string): string | null {
   const end = xml.indexOf('>', at);
   if (end < 0) return null;
   const tag = xml.slice(at + 1, end);
-  const name = tag.match(/^[^\s/>]+/)?.[0] ?? '';
   const bound = new Map<string, string>();
   for (const a of tag.matchAll(/\sxmlns(?::([^\s=/>]+))?\s*=\s*(?:"([^"]*)"|'([^']*)')/g)) {
     bound.set(a[1] ?? '', a[2] ?? a[3] ?? '');
   }
-  const own = name.includes(':') ? name.slice(0, name.indexOf(':')) : '';
-  if (WML_NS.includes(bound.get(own) ?? '')) return own;
-  for (const [prefix, uri] of bound) if (WML_NS.includes(uri)) return prefix;
-  return null;
+  const prefixes = [...bound].filter(([, uri]) => WML_NS.includes(uri)).map(([prefix]) => prefix);
+  return prefixes.length ? prefixes : null;
 }
 
-/** Nazwa elementu z prefiksem do wyrażenia regularnego: „w:t”, „ns0:t” albo „t”. */
-export function wmlName(prefix: string, local: string): string {
-  return (prefix ? `${prefix.replace(/[.*+?^${}()|[\]\\-]/g, '\\$&')}:` : '') + local;
+/**
+ * Nazwa elementu z prefiksem do wyrażenia regularnego: „(?:w:)t”, „(?:ns0:)t”, „t”, a dla kilku
+ * prefiksów alternatywa, np. „(?:w:)?t” przy przestrzeni domyślnej i `w:` naraz.
+ */
+export function wmlName(prefixes: readonly string[], local: string): string {
+  const named = prefixes
+    .filter((p) => p !== '')
+    .map((p) => `${p.replace(/[.*+?^${}()|[\]\\-]/g, '\\$&')}:`);
+  if (!named.length) return local;
+  return `(?:${named.join('|')})${prefixes.includes('') ? '?' : ''}${local}`;
 }
 
 const tokenizers = new Map<string, RegExp>();
 
 /**
- * Wyrażenie wyciągające tekst dla danego prefiksu. `[^<>]` i `[^<]` zamiast `[^>]`
+ * Wyrażenie wyciągające tekst dla danych prefiksów. `[^<>]` i `[^<]` zamiast `[^>]`
  * i `[\s\S]*?`: niedomknięty znacznik nie skanuje do końca tekstu (koszt kwadratowy), a w <w:t>
  * i tak nie ma „<” (XML zapisuje go jako &lt;). `(?=[\s/>])` za nazwą, żeby `<w:t>` nie łapało
  * `<w:tab/>` ani `<w:delText>` (tekstu usuniętego w śledzonej zmianie, którego w dokumencie już
- * nie widać), a `<w:tc>` nie łapało `<w:tcPr>` ani `<w:tcW/>`. Grupy: 1 tekst, 2 znak
- * specjalny, 3 „/” zamykającego `</w:tc>`, 4 „/” samozamykającego `<w:tc/>`.
+ * nie widać), a `<w:tc>` nie łapało `<w:tcPr>` ani `<w:tcW/>`. Znak specjalny przyjmujemy też
+ * jako pustą parę `<w:br></w:br>` (`\2` to ta sama nazwa z tym samym prefiksem). Grupy: 1 tekst,
+ * 2 znak specjalny, 3 „/” zamykającego `</w:tc>`, 4 „/” samozamykającego `<w:tc/>`.
  */
-function tokenizer(prefix: string): RegExp {
-  let re = tokenizers.get(prefix);
+function tokenizer(prefixes: readonly string[]): RegExp {
+  const key = prefixes.join(' ');
+  let re = tokenizers.get(key);
   if (!re) {
-    const n = (local: string): string => wmlName(prefix, local);
+    const n = (local: string): string => wmlName(prefixes, local);
+    const special = ['tab', 'ptab', 'br', 'cr', 'noBreakHyphen'].map(n).join('|');
     re = new RegExp(
       `<${n('t')}(?:\\s[^<>]*)?>([^<]*)</${n('t')}>|</${n('p')}>` +
-        `|<(${n('tab')}|${n('br')}|${n('cr')}|${n('noBreakHyphen')})(?=[\\s/>])[^<>]*/>` +
+        `|<(${special})(?=[\\s/>])[^<>]*?(?:/>|>\\s*</\\2\\s*>)` +
         `|<(/?)${n('tc')}(?=[\\s/>])[^<>]*?(/?)>`,
       'g',
     );
-    tokenizers.set(prefix, re);
+    tokenizers.set(key, re);
   }
   re.lastIndex = 0;
   return re;
+}
+
+const DIGIT = /[0-9]/;
+
+/**
+ * Pusta komórka tabeli zostawia pusty wiersz tylko między dwiema liczbami (`marks` to pozycje
+ * w `parts`, w których stoi jej „\n”), w pozostałych miejscach znika. Komórka ma same znaki
+ * białe, więc sąsiadów szukamy za nią i przed nią, pomijając znaki białe. Dwa przebiegi zamiast
+ * szukania od każdej komórki: tabela z tysiącami pustych komórek nie kosztuje kwadratowo.
+ */
+function settleEmptyCells(parts: string[], marks: number[]): void {
+  if (!marks.length) return;
+  const mark = new Uint8Array(parts.length);
+  for (const i of marks) mark[i] = 1;
+  const digitAfter = new Uint8Array(parts.length);
+  let next = false;
+  for (let i = parts.length - 1; i >= 0; i--) {
+    if (mark[i]) digitAfter[i] = next ? 1 : 0;
+    else {
+      const t = parts[i].trimStart();
+      if (t) next = DIGIT.test(t[0]);
+    }
+  }
+  let prev = false;
+  for (let i = 0; i < parts.length; i++) {
+    if (mark[i]) {
+      if (!(prev && digitAfter[i])) parts[i] = '';
+    } else {
+      const t = parts[i].trimEnd();
+      if (t) prev = DIGIT.test(t[t.length - 1]);
+    }
+  }
 }
 
 /**
@@ -202,14 +248,16 @@ function dropFallbacks(xml: string): string {
 }
 
 /**
- * Tekst fragmentu WordprocessingML (całej części albo jednego przypisu) dla danego prefiksu,
+ * Tekst fragmentu WordprocessingML (całej części albo jednego przypisu) dla danych prefiksów,
  * bez gałęzi `mc:Fallback`.
  */
-export function wmlText(xml: string, prefix: string): string {
-  const re = tokenizer(prefix);
+export function wmlText(xml: string, prefixes: readonly string[]): string {
+  const re = tokenizer(prefixes);
   const parts: string[] = [];
   // Otwarte komórki tabeli (także zagnieżdżone): gdzie zaczyna się ich wkład i czy mają tekst.
   const cells: { from: number; text: boolean }[] = [];
+  // Pozycje w `parts` po pustych komórkach, rosnąco (o nich rozstrzyga settleEmptyCells).
+  const marks: number[] = [];
   const src = dropFallbacks(xml);
   let m: RegExpExecArray | null;
   while ((m = re.exec(src)) !== null) {
@@ -227,16 +275,22 @@ export function wmlText(xml: string, prefix: string): string {
       }
       const cell = cells.pop(); // zamknięcie bez otwarcia (uszkodzony XML) pomijamy
       if (!cell) continue;
-      // Pusta komórka nie daje nawet nowego wiersza. Komórka z tekstem czyni niepustą także
-      // komórkę, w której stoi jej tabela.
-      if (!cell.text) parts.length = cell.from;
-      else if (cells.length) cells[cells.length - 1].text = true;
-    } else if (local === 'tab') parts.push('\t');
+      if (!cell.text) {
+        // Wkład pustej komórki (z zagnieżdżonymi pustymi komórkami) zastępuje jeden „\n”, który
+        // zostanie tylko między liczbami. Komórka z tekstem czyni niepustą także komórkę,
+        // w której stoi jej tabela.
+        parts.length = cell.from;
+        while (marks.length && marks[marks.length - 1] >= cell.from) marks.pop();
+        marks.push(parts.length);
+        parts.push('\n');
+      } else if (cells.length) cells[cells.length - 1].text = true;
+    } else if (local === 'tab' || local === 'ptab') parts.push('\t');
     else if (local === 'noBreakHyphen') {
       parts.push('-');
       if (cells.length) cells[cells.length - 1].text = true;
     } else parts.push('\n'); // </w:p>, <w:br/> lub <w:cr/>
   }
+  settleEmptyCells(parts, marks);
   return parts.join('').replace(/\n{3,}/g, '\n\n').trim();
 }
 
@@ -257,7 +311,7 @@ export function extractDocxText(buf: Uint8Array): string {
   const xml = readDocxPart(buf, entry);
   // Bez deklaracji przestrzeni nazw nie wiadomo, które znaczniki niosą tekst. Dawniej taki plik
   // dawał mylące „Plik jest pusty”.
-  const prefix = wmlPrefix(xml);
-  if (prefix === null) throw new FileReadError(ODD_DOCX);
-  return wmlText(xml, prefix);
+  const prefixes = wmlPrefixes(xml);
+  if (prefixes === null) throw new FileReadError(ODD_DOCX);
+  return wmlText(xml, prefixes);
 }

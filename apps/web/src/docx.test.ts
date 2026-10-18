@@ -277,7 +277,9 @@ test('<w:cr/> to nowy wiersz: „Jan<w:cr/>Kowalski” nie skleja się i nazwisk
 });
 
 test('pusty akapit <w:p/> nie daje pustego wiersza: „Login:” i imię z nazwiskiem zostają połączone', () => {
-  // tak Word 365 zapisuje pusty akapit bez formatowania
+  // Świadome odstępstwo od pkt 2 specyfikacji A03 („<w:p/> daje \n”): z pustym wierszem rdzeń
+  // zostawia jawne imię („Wnioskodawca: Jan\n\n[IMIĘ I NAZWISKO]”) i nie zasłania loginu.
+  // Tak Word 365 zapisuje pusty akapit bez formatowania:
   const empty = '<w:p w14:paraId="637B1930" w14:textId="77777777" w:rsidR="007B5933" w:rsidRDefault="007B5933"/>';
   const docx = makeDocx(
     '<w:p><w:r><w:t>Login:</w:t></w:r></w:p>' +
@@ -331,6 +333,33 @@ test('pusta komórka tabeli nie rozdziela sąsiednich: imię i login z tabeli za
     expect(redacted, empty).not.toMatch(/\bJan\b|Kowalski|jkowalski/);
     expect(redacted, empty).toContain('[LOGIN]');
   }
+});
+
+test('pusta komórka między dwiema liczbami zostawia pusty wiersz: kwoty z tabeli nie stają się telefonem', () => {
+  // Tak Word zapisuje tabelę budżetową z kolumnami wyrównanymi do prawej (pusta „Zmiana”).
+  const right = '<w:p><w:pPr><w:jc w:val="right"/><w:rPr><w:sz w:val="20"/></w:rPr></w:pPr></w:p>';
+  const rows = [
+    ['Wyszczególnienie', 'Plan', 'Zmiana', 'Plan po zmianach'],
+    ['Dochody bieżące', '340 000', '', '340 000'],
+    ['Wydatki', '512', '', '498'],
+  ];
+  for (const empty of [right, '<w:p/>']) {
+    const text = extractDocxText(makeDocx(table(rows, empty)));
+    expect(text, empty).toBe(
+      'Wyszczególnienie\nPlan\nZmiana\nPlan po zmianach\nDochody bieżące\n340 000\n\n340 000\nWydatki\n512\n\n498',
+    );
+    expect(redactPII(text).redacted, empty).toBe(text);
+  }
+  // Liczba tylko po jednej stronie: komórka znika, więc etykieta zostaje przy wartości.
+  const label = extractDocxText(makeDocx(table([['Telefon:', '', '600 700 800'], ['12', '', 'Kowalski']], right)));
+  expect(label).toBe('Telefon:\n600 700 800\n12\nKowalski');
+  // Zagnieżdżona pusta komórka między liczbami daje jeden pusty wiersz, nie kilka.
+  const nested = makeDocx(
+    `<w:tbl><w:tr><w:tc>${right.replace('</w:p>', '<w:r><w:t>1 200</w:t></w:r></w:p>')}</w:tc>` +
+      `<w:tc>${table([['', '']], right)}${right}</w:tc>` +
+      `<w:tc>${right.replace('</w:p>', '<w:r><w:t>300</w:t></w:r></w:p>')}</w:tc></w:tr></w:tbl>`,
+  );
+  expect(extractDocxText(nested)).toBe('1 200\n\n300');
 });
 
 test('komórka z samą spacją albo tabulatorem jest pusta, z twardym łącznikiem nie; zagnieżdżona tabela', () => {
@@ -392,6 +421,40 @@ test('prefiks ns0: (i każdy inny) daje ten sam tekst co w:', () => {
 test('przestrzeń domyślna (bez prefiksu) też jest czytana', () => {
   const docx = docxWithRoot(`<document xmlns="${W}" xmlns:a="urn:drawing">`, '</document>', BODY(''));
   expect(extractDocxText(docx)).toBe(EXPECTED);
+});
+
+test('element główny w przestrzeni domyślnej, treść pod w: (i pisana raz tak, raz tak) też jest czytana', () => {
+  // dawniej „Plik jest pusty”, a przy treści mieszanej akapity pod w: znikały bez słowa
+  const root = `<document xmlns="${W}" xmlns:w="${W}">`;
+  expect(extractDocxText(docxWithRoot(root, '</document>', BODY('w:')))).toBe(EXPECTED);
+  const mixed = docxWithRoot(
+    root,
+    '</document>',
+    '<body><p><r><t>Decyzja nr 5/2026.</t></r></p>' +
+      '<w:p><w:r><w:t>Strona: Jan Kowalski, PESEL 44051401359</w:t></w:r></w:p></body>',
+  );
+  expect(extractDocxText(mixed)).toBe('Decyzja nr 5/2026.\nStrona: Jan Kowalski, PESEL 44051401359');
+});
+
+test('pusta para <w:cr></w:cr>, <w:br></w:br>, <w:tab></w:tab> i tabulator <w:ptab/> rozdzielają wyrazy', () => {
+  // Tak puste elementy wypisują niektóre serializatory XML; w XML to ten sam element co <w:cr/>.
+  const docx = makeDocx(
+    '<w:p><w:r><w:t>Wnioskodawca: Jan</w:t><w:cr></w:cr><w:t>Kowalski</w:t></w:r></w:p>' +
+      '<w:p><w:r><w:t>Pełnomocnik: Anna</w:t><w:br w:type="textWrapping"></w:br><w:t>Nowak</w:t></w:r></w:p>' +
+      '<w:p><w:r><w:t>Świadek: Piotr</w:t><w:tab>\n</w:tab><w:t>Zieliński</w:t></w:r></w:p>' +
+      '<w:p><w:r><w:t>Strona: Ewa</w:t><w:ptab w:relativeTo="margin" w:alignment="right" w:leader="none"/>' +
+      '<w:t>Wiśniewska</w:t></w:r></w:p>' +
+      '<w:p><w:r><w:t>00</w:t><w:noBreakHyphen></w:noBreakHyphen><w:t>950 Warszawa</w:t></w:r></w:p>',
+  );
+  const text = extractDocxText(docx);
+  expect(text).toBe(
+    'Wnioskodawca: Jan\nKowalski\nPełnomocnik: Anna\nNowak\nŚwiadek: Piotr\tZieliński\n' +
+      'Strona: Ewa\tWiśniewska\n00-950 Warszawa',
+  );
+  expect(redactPII(text).redacted).not.toMatch(/Kowalski|Nowak|Zieliński|Wiśniewska/);
+  // otwarcie bez pustego zamknięcia nie jest znakiem specjalnym, a <w:tabs> nie jest tabulatorem
+  const other = makeDocx('<w:p><w:pPr><w:tabs></w:tabs></w:pPr><w:r><w:t>A</w:t><w:br><w:t>B</w:t></w:br></w:r></w:p>');
+  expect(extractDocxText(other)).toBe('AB');
 });
 
 test('ISO 29500 Strict („Ścisły dokument Open XML”) daje ten sam tekst co zwykły .docx', () => {
@@ -457,5 +520,21 @@ test('tysiące niedomkniętych <w:p, <w:cr i <w:tc oraz otwartych komórek: teks
   );
   const t0 = performance.now();
   expect(extractDocxText(docx)).toBe('A\nB');
+  expect(performance.now() - t0).toBeLessThan(500);
+});
+
+test('tysiące pustych komórek obok siebie i zagnieżdżonych oraz niedomkniętych <w:br>: tekst w ułamku sekundy', () => {
+  const K = 30_000;
+  const cell = '<w:tc><w:p><w:pPr/></w:p></w:tc>';
+  const docx = makeDocx(
+    '<w:p><w:r><w:t>1</w:t></w:r></w:p>' +
+      `<w:tbl><w:tr>${cell.repeat(K)}</w:tr></w:tbl>` +
+      '<w:tc>'.repeat(K) +
+      '</w:tc>'.repeat(K) +
+      '<w:br a'.repeat(K) +
+      '<w:p><w:r><w:t>2</w:t></w:r></w:p>',
+  );
+  const t0 = performance.now();
+  expect(extractDocxText(docx)).toBe('1\n\n2');
   expect(performance.now() - t0).toBeLessThan(500);
 });
