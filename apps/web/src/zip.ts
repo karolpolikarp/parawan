@@ -130,3 +130,83 @@ export function readZipEntry(buf: Uint8Array, entry: ZipEntry, limit: number): U
   if (method === 8) return inflateCapped(data, Math.min(limit, originalSize + 1024));
   throw new Error('nieznana metoda kompresji');
 }
+
+/* ── Zapis ── */
+
+let crcTable: Uint32Array | undefined;
+
+/** CRC-32 (wielomian 0xEDB88320), jak w nagłówkach ZIP. */
+export function crc32(data: Uint8Array): number {
+  if (!crcTable) {
+    crcTable = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) {
+      let c = n;
+      for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+      crcTable[n] = c >>> 0;
+    }
+  }
+  let c = 0xffffffff;
+  for (let i = 0; i < data.length; i++) c = crcTable[(c ^ data[i]) & 0xff] ^ (c >>> 8);
+  return (c ^ 0xffffffff) >>> 0;
+}
+
+// Data 1980-01-01, godzina 00:00 w formacie DOS: ten sam zestaw plików daje te same bajty.
+const DOS_DATE = (0 << 9) | (1 << 5) | 1;
+
+/**
+ * ZIP bez kompresji (metoda 0, STORE) z wpisów [nazwa, treść tekstowa w UTF-8]. Nazwy tylko
+ * ASCII. Bez ZIP64: plik zapisujemy z wyniku, który przeglądarka trzyma w pamięci, więc jest
+ * daleko od 4 GB. Kod deflate z fflate kosztowałby ok. 10 kB w pliku aplikacji, a dokument
+ * z samym tekstem i tak ma najwyżej kilkaset kilobajtów.
+ */
+export function storeZip(entries: Array<[string, string]>): Uint8Array<ArrayBuffer> {
+  const enc = new TextEncoder();
+  const files = entries.map(([name, text]) => {
+    const nameBytes = enc.encode(name);
+    const data = enc.encode(text);
+    return { nameBytes, data, crc: crc32(data) };
+  });
+  const localSize = files.reduce((n, f) => n + 30 + f.nameBytes.length + f.data.length, 0);
+  const centralSize = files.reduce((n, f) => n + 46 + f.nameBytes.length, 0);
+  const out = new Uint8Array(localSize + centralSize + 22);
+  const v = new DataView(out.buffer);
+  // wspólna część nagłówka lokalnego (od pola „wersja potrzebna”) i centralnego (od pola o tej samej nazwie)
+  const common = (at: number, f: (typeof files)[number]): void => {
+    v.setUint16(at, 10, true); // wersja potrzebna do rozpakowania: 1.0 (STORE)
+    v.setUint16(at + 2, 0, true); // flagi
+    v.setUint16(at + 4, 0, true); // metoda: STORE
+    v.setUint16(at + 6, 0, true); // godzina
+    v.setUint16(at + 8, DOS_DATE, true);
+    v.setUint32(at + 10, f.crc, true);
+    v.setUint32(at + 14, f.data.length, true);
+    v.setUint32(at + 18, f.data.length, true);
+    v.setUint16(at + 22, f.nameBytes.length, true);
+    v.setUint16(at + 24, 0, true); // dodatkowe pole
+  };
+  let at = 0;
+  const offsets: number[] = [];
+  for (const f of files) {
+    offsets.push(at);
+    v.setUint32(at, 0x04034b50, true);
+    common(at + 4, f);
+    out.set(f.nameBytes, at + 30);
+    out.set(f.data, at + 30 + f.nameBytes.length);
+    at += 30 + f.nameBytes.length + f.data.length;
+  }
+  const centralStart = at;
+  files.forEach((f, i) => {
+    v.setUint32(at, 0x02014b50, true);
+    v.setUint16(at + 4, 20, true); // wersja programu zapisującego: 2.0, system MS-DOS
+    common(at + 6, f);
+    // komentarz, numer dysku, atrybuty wewnętrzne i zewnętrzne: zera
+    v.setUint32(at + 42, offsets[i], true);
+    out.set(f.nameBytes, at + 46);
+    at += 46 + f.nameBytes.length;
+  });
+  v.setUint32(at, 0x06054b50, true);
+  v.setUint16(at + 8, files.length, true);
+  v.setUint16(at + 10, files.length, true);
+  v.setUint32(at + 12, centralSize, true);
+  v.setUint32(at + 16, centralStart, true);
+  return out;
+}

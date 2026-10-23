@@ -8,6 +8,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { after, before, test } from 'node:test';
+import { strFromU8, unzipSync } from 'fflate';
 import { CSP_TARGETS, cspProblems, htmlCspProblems } from './csp.mjs';
 import {
   ALLOWED_STORAGE_KEYS,
@@ -742,6 +743,121 @@ test('„Pobierz .txt” zapisuje wynik z zasłoniętym numerem PESEL', async (t
     const text = readFileSync(await download.path(), 'utf8');
     assert.ok(text.includes('[PESEL]'), `w pobranym pliku brak [PESEL]:\n${text}`);
     assert.ok(!text.includes(EXAMPLE_PESEL), `w pobranym pliku jest numer ${EXAMPLE_PESEL}`);
+  });
+});
+
+/* ── „Pobierz .docx”: nowy dokument z samego wyniku (apps/web/src/docx-write.ts) ── */
+
+const DOCX_PARTS = [
+  '[Content_Types].xml',
+  '_rels/.rels',
+  'word/document.xml',
+  'word/_rels/document.xml.rels',
+  'word/styles.xml',
+  'word/settings.xml',
+  'docProps/core.xml',
+];
+
+// BOM UTF-8 na początku pobranego .txt, kodem: formatowanie zamienia ucieczkę w źródle na niewidoczny znak.
+const BOM_RE = new RegExp(`^${String.fromCharCode(0xfeff)}`);
+
+/** Kliknij przycisk pobierania i oddaj nazwę oraz bajty pliku. */
+async function download(page, name) {
+  const [file] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name }).click()]);
+  return { name: file.suggestedFilename(), bytes: readFileSync(await file.path()) };
+}
+
+/** Tekst akapitów document.xml (w:t i w:tab), jak go widzi Word. */
+const docxParagraphs = (xml) =>
+  [...xml.matchAll(/<w:p\/>|<w:p>([\s\S]*?)<\/w:p>/g)].map((m) =>
+    (m[1] ?? '')
+      .replace(/<w:tab\/>/g, '\t')
+      .replace(/<w:t xml:space="preserve">([^<]*)<\/w:t>/g, '$1')
+      .replace(/<[^>]+>/g, '')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&amp;/g, '&'),
+  );
+
+test('„Pobierz .docx” po ?demo: siedem części z poprawnym XML, tekst jak w .txt, PESEL zasłonięty', async (t) => {
+  await withApp(browser, t, '?demo', async (app) => {
+    const { page } = app;
+    await app.demoReady();
+    const docx = await download(page, 'Pobierz .docx');
+    assert.match(docx.name, /^zanonimizowany-\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.docx$/);
+    const zip = unzipSync(docx.bytes);
+    assert.deepEqual(Object.keys(zip), DOCX_PARTS);
+    const parts = Object.fromEntries(Object.entries(zip).map(([k, v]) => [k, strFromU8(v)]));
+    // Każda część przez parser XML przeglądarki: błąd składni daje <parsererror> zamiast treści.
+    const errors = await page.evaluate(
+      (all) =>
+        Object.entries(all).flatMap(([name, xml]) => {
+          const doc = new DOMParser().parseFromString(xml, 'application/xml');
+          const err = doc.getElementsByTagName('parsererror')[0];
+          return err ? [`${name}: ${err.textContent}`] : [];
+        }),
+      parts,
+    );
+    assert.deepEqual(errors, []);
+    const body = parts['word/document.xml'];
+    assert.ok(body.includes('[PESEL]'), `w dokumencie brak [PESEL]:\n${body}`);
+    assert.ok(!body.includes(EXAMPLE_PESEL), `w dokumencie jest numer ${EXAMPLE_PESEL}`);
+    assert.ok(!body.includes(EXAMPLE_NAME), `w dokumencie jest nazwisko ${EXAMPLE_NAME}`);
+    for (const [name, xml] of Object.entries(parts)) {
+      assert.ok(!/creator|lastModifiedBy|rsid/i.test(xml), `${name} ma autora albo rsid`);
+    }
+    // treść ta sama co w pobranym .txt (jedno źródło: finalText), wiersz po wierszu
+    const txt = await download(page, 'Pobierz .txt');
+    const lines = txt.bytes.toString('utf8').replace(BOM_RE, '').split('\r\n');
+    assert.deepEqual(docxParagraphs(body), lines);
+    // wynik z przykładu, nie z wczytanego pliku: bez komunikatu o oryginale
+    assert.equal(await page.locator('#app-note').isVisible(), false, 'komunikat po pobraniu przykładu');
+  });
+});
+
+const PUBLISH_NOTE =
+  'Do publikacji użyj nowego pliku. Oryginał ma we właściwościach autora, a często także ' +
+  'komentarze i historię zmian. Przy pierwszym zapisie w Wordzie sprawdź Plik › Informacje › Autor.';
+
+test('wczytany DOCX: po pierwszym pobraniu komunikat o publikacji nowego pliku, raz na sesję', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const docx = makeDocx(['Wójt Gminy Brzozowa Wola', 'Na wniosek Pana Tomasza Wierzbickiego, PESEL 85071412358.']);
+    await page
+      .locator('#file-input')
+      .setInputFiles({ name: 'decyzja-Wierzbicki.docx', mimeType: DOCX_MIME, buffer: Buffer.from(docx) });
+    await app.waitForOutput('[PESEL]');
+    assert.equal(await page.locator('#app-note').isVisible(), false);
+    const file = await download(page, 'Pobierz .docx');
+    // nazwa nigdy z wczytanego pliku: „Wierzbicki” przeszedłby jawny
+    assert.match(file.name, /^zanonimizowany-[\d_-]+\.docx$/);
+    await page.locator('#app-note-text').getByText('Do publikacji użyj nowego pliku').waitFor();
+    assert.equal((await page.locator('#app-note-text').textContent())?.trim(), PUBLISH_NOTE);
+    assert.equal((await page.locator('#app-note-status').textContent())?.trim(), PUBLISH_NOTE);
+    await page.getByRole('button', { name: 'Zamknij komunikat' }).click();
+    await download(page, 'Pobierz .txt');
+    assert.equal(await page.locator('#app-note').isVisible(), false, 'komunikat drugi raz w tej samej sesji');
+  });
+});
+
+test('DOCX z częściami: zdanie o publikacji dochodzi do dopisku o częściach, „Cofnij” zostaje', async (t) => {
+  await withApp(browser, t, '?demo', async (app) => {
+    const { page } = app;
+    await app.demoReady();
+    await page
+      .locator('#file-input')
+      .setInputFiles({ name: 'decyzja-czesci.docx', mimeType: DOCX_MIME, buffer: Buffer.from(DOCX_Z_CZESCIAMI()) });
+    await page.locator('#app-note-text').getByText('Parawan nie czyta').waitFor();
+    await download(page, 'Pobierz .docx');
+    assert.equal(
+      (await page.locator('#app-note-text').textContent())?.trim(),
+      `Zastąpiono tekst treścią pliku.\n${DOCX_NOTE}\n${PUBLISH_NOTE}`,
+    );
+    assert.equal(await page.locator('#app-note-undo').isVisible(), true, '„Cofnij” zniknął po pobraniu');
+    // po 20 s „Cofnij” wygasa, oba dopiski zostają
+    await page.clock.runFor(21_000);
+    assert.equal((await page.locator('#app-note-text').textContent())?.trim(), `${DOCX_NOTE}\n${PUBLISH_NOTE}`);
   });
 });
 

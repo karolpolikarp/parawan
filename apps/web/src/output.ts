@@ -37,6 +37,12 @@ export function printTitle(d: Date): string {
   return `zanonimizowany-${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`;
 }
 
+/** Nazwa pobieranego pliku: zanonimizowany-RRRR-MM-DD_GG-MM-SS.{ext}, nigdy z nazwy wczytanego pliku. */
+export function downloadName(d: Date, ext: string): string {
+  const time = `${p2(d.getHours())}-${p2(d.getMinutes())}-${p2(d.getSeconds())}`;
+  return `${printTitle(d)}_${time}.${ext}`;
+}
+
 export interface DownloadFile {
   name: string;
   type: string;
@@ -51,9 +57,8 @@ export interface DownloadFile {
  */
 export function downloadFor(text: string, sourceExt: string, d: Date): DownloadFile {
   const csv = sourceExt === 'csv';
-  const time = `${p2(d.getHours())}-${p2(d.getMinutes())}-${p2(d.getSeconds())}`;
   return {
-    name: `${printTitle(d)}_${time}.${csv ? 'csv' : 'txt'}`,
+    name: downloadName(d, csv ? 'csv' : 'txt'),
     type: csv ? 'text/csv;charset=utf-8' : 'text/plain;charset=utf-8',
     content: textForDownload(text),
   };

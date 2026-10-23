@@ -84,13 +84,37 @@ const PRINT_EMPTY = 'Brak wyniku do wydruku. Wklej tekst w pole „Tekst źród�
 test('aplikacja: przycisk druku nad wynikiem, obok „Pobierz”, z ikoną drukarki', () => {
   const acts = webHtml.match(/<span class="out-acts">([\s\S]*?)<\/span>\s*<\/div>/)?.[1] ?? '';
   const ids = [...acts.matchAll(/<button type="button" id="([\w-]+)"/g)].map((m) => m[1]);
-  expect(ids).toEqual(['print', 'download', 'copy']);
+  expect(ids).toEqual(['print', 'download', 'download-docx', 'copy']);
   expect(acts).toContain(
     `<button type="button" id="print" class="btn tbtn" data-tip="${PRINT_TIP}">` +
       '<i class="gi" data-i="drukarka"></i><span>Drukuj lub zapisz PDF</span></button>',
   );
   // ikona jak pozostałe: inline SVG w kolorze tekstu przycisku
   expect(ICONS.drukarka).toMatch(/^<svg [^>]*stroke="currentColor"[^>]*aria-hidden="true">/);
+});
+
+// „Pobierz .docx” zapisuje nowy dokument, a nie poprawiony oryginał: dymek mówi, czego w nim
+// nie ma, a dopisek pod wynikiem, że układ i tabele oryginału nie przechodzą.
+const DOCX_TIP =
+  'Zapisuje nowy dokument Word z samym wynikiem. Nie ma w nim autora, komentarzy ani historii zmian oryginału.';
+const DOCX_HINT = 'Układ i tabele oryginału nie są przenoszone, kolumny tabel zostają tabulatorami.';
+
+test('aplikacja: „Pobierz .docx” obok „Pobierz .txt”, z dymkiem, ikoną i dopiskiem o układzie', () => {
+  // Podpis „Pobierz” nad oboma formatami; nazwa przycisku to podpis i rozszerzenie.
+  const pair = webHtml.match(/<span class="dl-pair"[\s\S]*?<\/button>\s*<\/span>\s*<\/span>/)?.[0] ?? '';
+  expect(pair).toContain('role="group" aria-labelledby="dl-cap"');
+  expect(pair).toContain('<span class="dl-cap" id="dl-cap">Pobierz</span>');
+  expect(pair).toContain(
+    '<button type="button" id="download" class="btn dl-btn" aria-labelledby="dl-cap download-label"',
+  );
+  expect(pair).toContain(
+    `<button type="button" id="download-docx" class="btn dl-btn" aria-labelledby="dl-cap download-docx-label" data-tip="${DOCX_TIP}">` +
+      '<i class="gi" data-i="plik-docx"></i><span id="download-docx-label">.docx</span></button>',
+  );
+  expect(ICONS['plik-docx']).toMatch(/^<svg [^>]*stroke="currentColor"[^>]*aria-hidden="true">/);
+  expect(webHtml).toContain(
+    `<div class="card-f print-note">\n          <i class="gi" data-i="plik-docx"></i>\n          <p class="out-hint">${DOCX_HINT}</p>`,
+  );
 });
 
 test('aplikacja: prośba o wyłączenie nagłówków druku i wskazówka Ctrl+P', () => {

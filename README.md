@@ -54,7 +54,8 @@ daty urodzenia oraz imiona i nazwiska na neutralne znaczniki, na przykład `Jan 
 2. Otwórz go **podwójnym kliknięciem**, uruchomi się w przeglądarce, prosto z dysku:
    bez serwera, bez instalacji, bez internetu.
 3. **Wklej tekst** albo **upuść plik** (`.txt`, `.docx`, `.pdf`), po prawej dostajesz wersję
-   zredagowaną do skopiowania. Word i PDF są czytane w całości lokalnie, jak wszystko tutaj.
+   zredagowaną do skopiowania albo pobrania jako `.txt` lub nowy dokument `.docx` (bez autora,
+   komentarzy i historii zmian oryginału). Word i PDF są czytane w całości lokalnie, jak wszystko tutaj.
 
 > [!NOTE]
 > W nagłówku aplikacji jest numer wersji z linkiem „sprawdź nowszą wersję”, jeśli kiedyś coś nie

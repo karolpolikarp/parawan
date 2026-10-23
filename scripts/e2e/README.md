@@ -72,6 +72,15 @@ po wczytaniu pliku `.csv` i pasek nad wynikiem: przy 1351 i 1265 px (1366 i 1280
 przewijania Windows, który Playwright chowa) mieści się w jednym rzędzie, ma wysokość paska
 źródła i nie zawija się po „Skopiowano ✓”.
 
+„Pobierz .docx” sprawdza `smoke.test.mjs`: pobrany plik z `?demo` ma dokładnie siedem części
+(`apps/web/src/docx-write.ts`), każdą z nich parsuje `DOMParser` przeglądarki bez
+`<parsererror>`, nie ma w nich autora ani rsid, a akapity dokumentu to wiersz po wierszu
+pobrany `.txt`. Po pierwszym pobraniu wyniku z wczytanego DOCX albo PDF pasek nad polem źródła
+prosi o publikację nowego pliku, raz na otwarcie aplikacji. Ten sam dokument w LibreOffice
+(`soffice --headless --convert-to txt`) porównuje `libreoffice.test.mjs`; biegnie z
+`PARAWAN_SOFFICE` (job `libreoffice` w `zgodnosc.yml`), bez niej jest pomijany. Word sprawdza
+się ręcznie: `manual/word-docx.ps1`.
+
 Start w przeglądarce, w której Parawan nie ruszył, sprawdza `smoke.test.mjs` na kopii pliku bez
 `<script type="module">` (tak wygląda Chromium 90, które nie parsuje modułu, i tryb Internet
 Explorera): pasek „Parawan nie uruchomił się…” jest na początku ukryty i nie zajmuje miejsca, a po

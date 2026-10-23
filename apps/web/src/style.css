@@ -578,6 +578,19 @@ details.card::details-content {
    mieści się tam w jednym rzędzie ze strzałkami (od ok. 380 px). */
 .toolbar-out { gap: 6px; }
 .toolbar-out .seg .btn { min-width: 0; padding-left: 8px; padding-right: 8px; }
+/* „Pobierz” z dwoma formatami (.txt i .docx): podpis nad dwoma mniejszymi przyciskami, w ramce
+   jak przełącznik widoku. Dwa przyciski w skali .tbtn zabierały ok. 98 px, a przy 1214 px okna
+   (1536 × 864 w skali 125%) pasek ma ok. 12 px zapasu, więc schodził do drugiego rzędu. Grupa
+   jest szersza od samego „Pobierz .txt” o kilka pikseli i mieści się w wysokości paska. */
+.dl-pair {
+  display: flex; flex-direction: column; gap: 1px; padding: 2px;
+  background: var(--well); border: 1px solid var(--line-2); border-radius: var(--r-ctl);
+}
+.dl-cap { font-size: 11.5px; font-weight: 600; line-height: 1.25; color: var(--mut); text-align: center; }
+.dl-btns { display: flex; gap: 2px; flex: 1; }
+.dl-btn { flex: 1 1 0; flex-direction: column; justify-content: center; gap: 3px; height: auto; min-width: 0; padding: 3px 4px; }
+.dl-btn .gi { width: 22px; height: 22px; }
+.dl-btn span { font-size: 12px; font-weight: 600; }
 @media (min-width: 481px) {
   .out-acts { gap: 4px; }
   .out-acts .tbtn { min-width: 0; padding-left: 8px; padding-right: 8px; }
@@ -1113,7 +1126,7 @@ table .pii { cursor: default; }
   /* akcje na wyniku razem w osobnym rzędzie, po równo (wcześniej „Kopiuj” zostawał sam);
      przy 320 px „Kopiuj” schodzi niżej na całą szerokość */
   .out-acts { flex: 1 1 100%; flex-wrap: wrap; margin-left: 0; }
-  .out-acts .tbtn { flex: 1 1 0; }
+  .out-acts .tbtn, .out-acts .dl-pair { flex: 1 1 0; }
   /* demo: krótkie etykiety stref, inaczej „Wejście” i „Wyjście” nachodzą na siebie */
   .demo-zone { top: 14px; padding: 6px 11px; letter-spacing: .04em; }
   .demo-zone-in { left: 14px; }

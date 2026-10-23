@@ -60,6 +60,18 @@ export const PII_TOKENS: Record<string, TokenMeta> = {
   'DATA-URODZENIA': { cat: 'person', icon: 'kalendarz', tip: 'data z kontekstem „ur./urodzony”' },
 };
 
+/**
+ * Znacznik [TOKEN] w wyniku: podświetlenie i nawigacja w aplikacji, pogrubienie w .docx.
+ * Lista tokenów pochodzi z PII_TOKENS (+ dynamiczne OSOBA-A/B…). Żaden token nie zawiera
+ * metaznaków regexu, a każdy jest zakotwiczony nawiasami [...], więc wstawiamy je wprost
+ * i kolejność alternatyw nie ma znaczenia. Flaga g: używać przez split, matchAll albo replace,
+ * które nie zależą od lastIndex po poprzednim wywołaniu (test i exec zależą).
+ */
+export const MASK_TOKEN_RE = new RegExp(
+  `\\[(${[...Object.keys(PII_TOKENS), 'OSOBA-[A-Z]+'].join('|')})\\]`,
+  'g',
+);
+
 /** Kategoria wizualna znacznika po nazwie tokenu (OSOBA-* = osoba; nieznany token → identyfikatory). */
 export function maskCategory(name: string): Cat {
   if (name.startsWith('OSOBA-')) return 'person';

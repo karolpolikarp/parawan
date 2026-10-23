@@ -12,7 +12,8 @@ import {
   unsupportedFormat,
 } from './files';
 import { makeFlash } from './flash';
-import { downloadFor, finalText, printTitle } from './output';
+import { buildDocx, DOCX_MIME } from './docx-write';
+import { downloadFor, downloadName, finalText, printTitle } from './output';
 import { extractPdfText } from './pdf';
 import { buildMinimalPdf } from './pdf-fixture';
 import {
@@ -21,6 +22,7 @@ import {
   CHIP_META,
   catCountLabel,
   MASK_GROUPS,
+  MASK_TOKEN_RE,
   type MaskGroup,
   maskCategory,
   maskTip,
@@ -53,6 +55,7 @@ const copyBtn = $<HTMLButtonElement>('copy');
 const copyLabel = $<HTMLSpanElement>('copy-label');
 const downloadBtn = $<HTMLButtonElement>('download');
 const downloadLabel = $<HTMLSpanElement>('download-label');
+const downloadDocxBtn = $<HTMLButtonElement>('download-docx');
 const printBtn = $<HTMLButtonElement>('print');
 const printOut = $<HTMLDivElement>('print-out');
 const clearBtn = $<HTMLButtonElement>('clear');
@@ -348,14 +351,6 @@ pseudonymsBox.addEventListener('change', () => {
 });
 
 /* ── Renderowanie wyniku (numerowane linie, kolorowe znaczniki, tooltips) ── */
-
-// Rozpoznaje znaczniki [TOKEN] do podświetlenia/nawigacji w wyniku. Lista tokenów pochodzi
-// z PII_TOKENS (+ dynamiczne OSOBA-A/B…). Żaden token nie zawiera metaznaków regexu, a każdy
-// jest zakotwiczony nawiasami [...], więc wstawiamy je wprost i kolejność alternatyw nie ma znaczenia.
-const MASK_TOKEN_RE = new RegExp(
-  `\\[(${[...Object.keys(PII_TOKENS), 'OSOBA-[A-Z]+'].join('|')})\\]`,
-  'g',
-);
 
 // tabindex="-1": znaczniki nie są osobnymi przystankami Tab (przy długim piśmie były ich setki).
 // Do kolejności Tab wchodzi tylko bieżący znacznik (roving tabindex: refreshMaskNav, goToMask).
@@ -764,6 +759,7 @@ findingsChips.addEventListener('click', (e) => {
 function setResultActions(on: boolean): void {
   copyBtn.disabled = !on;
   downloadBtn.disabled = !on;
+  downloadDocxBtn.disabled = !on;
   printBtn.disabled = !on;
 }
 
@@ -783,7 +779,7 @@ function syncPrintOut(): void {
 
 function setFileExt(ext: string): void {
   lastFileExt = ext;
-  downloadLabel.textContent = ext === 'csv' ? 'Pobierz .csv' : 'Pobierz .txt';
+  downloadLabel.textContent = ext === 'csv' ? '.csv' : '.txt'; // nazwa: „Pobierz .csv” (z podpisem grupy)
 }
 
 function updateSrcMeta(text: string): void {
@@ -1105,17 +1101,54 @@ copyBtn.addEventListener('click', async () => {
   }
 });
 
+function saveFile(blob: Blob, name: string): void {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* Po pierwszym pobraniu w sesji, gdy źródłem był wczytany DOCX albo PDF: do BIP ma iść nowy plik.
+   Oryginał poprawiony wklejonym wynikiem dalej ma we właściwościach autora, a często komentarze
+   i historię zmian (tak wyciekło nazwisko autorki zarządzenia z poprawkami). */
+const PUBLISH_NOTE =
+  'Do publikacji użyj nowego pliku. Oryginał ma we właściwościach autora, a często także ' +
+  'komentarze i historię zmian. Przy pierwszym zapisie w Wordzie sprawdź Plik › Informacje › Autor.';
+let publishNoteShown = false;
+
+function notePublishNewFile(): void {
+  if (publishNoteShown || (lastFileExt !== 'docx' && lastFileExt !== 'pdf')) return;
+  publishNoteShown = true;
+  if (appNote.hidden) {
+    showNote('', null, PUBLISH_NOTE);
+    return;
+  }
+  // Pasek już stoi (dopisek o częściach DOCX, „Cofnij”): zdanie dochodzi w nowym wierszu,
+  // a cofanie i jego czas zostają bez zmian.
+  noteInfo = [noteInfo, PUBLISH_NOTE].filter(Boolean).join('\n');
+  appNoteText.textContent = [appNoteText.textContent, PUBLISH_NOTE].filter(Boolean).join('\n');
+  appNoteStatus.textContent = PUBLISH_NOTE;
+  revealIfOffscreen(appNote);
+}
+
 downloadBtn.addEventListener('click', () => {
   flushPendingUpdate();
   if (!lastRedacted) return;
   // Nazwa ze znacznikiem czasu, BOM i windowsowe końce wierszy: output.ts (downloadFor).
   const file = downloadFor(outputText(), lastFileExt, new Date());
-  const url = URL.createObjectURL(new Blob([file.content], { type: file.type }));
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = file.name;
-  a.click();
-  URL.revokeObjectURL(url);
+  saveFile(new Blob([file.content], { type: file.type }), file.name);
+  notePublishNewFile();
+});
+
+// Nowy dokument Worda z samego wyniku (docx-write.ts). Nazwa jak przy .txt, nigdy z nazwy
+// wczytanego pliku.
+downloadDocxBtn.addEventListener('click', () => {
+  flushPendingUpdate();
+  if (!lastRedacted) return;
+  saveFile(new Blob([buildDocx(outputText())], { type: DOCX_MIME }), downloadName(new Date(), 'docx'));
+  notePublishNewFile();
 });
 
 /* ── Druk ──
@@ -1383,7 +1416,7 @@ hydrateIcons();
 // (przed initTips: ikona kroku bierze treść dymka jako nazwę dostępną).
 if (!finePointer.matches) {
   copyBtn.dataset.tip = 'Kopiuje zanonimizowany tekst do schowka';
-  $('step4-tip').dataset.tip = 'Przyciski „Kopiuj” i „Pobierz .txt” stoją nad wynikiem';
+  $('step4-tip').dataset.tip = 'Przyciski „Kopiuj” i „Pobierz” (.txt albo .docx) stoją nad wynikiem';
 }
 // Na telefonie pliku nie ma skąd upuścić (ten sam warunek co .hint-desk w style.css).
 if (matchMedia('(pointer: coarse) and (max-width: 600px)').matches) {

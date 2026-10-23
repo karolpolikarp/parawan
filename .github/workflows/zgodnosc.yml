@@ -3,7 +3,8 @@ name: Zgodność przeglądarek
 # Silniki, na których urzędnik naprawdę otwiera Parawan.html, a których nie sprawdza job e2e
 # w ci.yml (bieżący Chromium na Linuksie): Chromium 109 (próg build.target, ostatni Chrome i Edge
 # dla Windows 7 i 8.1), Edge na Windows z plikiem w katalogu ze spacją i polskimi literami oraz
-# Firefox (Gecko inaczej obsługuje zaznaczenia i CSP). Runner Windows kosztuje więcej minut, więc
+# Firefox (Gecko inaczej obsługuje zaznaczenia i CSP), a do tego LibreOffice czytający pobrany
+# .docx. Runner Windows kosztuje więcej minut, więc
 # workflow nie blokuje pull requestów: biegnie raz w tygodniu, po każdym tagu wydania i na żądanie
 # (gh workflow run zgodnosc.yml). Firefox ESR 115 i starsze Chromium zostają na liście ręcznej
 # (scripts/e2e/manual: pobierz-przegladarki.mjs, stary-chromium.mjs).
@@ -149,5 +150,45 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: zgodnosc-firefox
+          path: test-results/e2e/
+          if-no-files-found: ignore
+
+  # „Pobierz .docx” w drugim programie biurowym: LibreOffice bez okna zamienia pobrany dokument
+  # na tekst, a scripts/e2e/libreoffice.test.mjs porównuje go z pobranym .txt. Lokalnie
+  # LibreOffice zwykle nie ma, a Word sprawdza się ręcznie (scripts/e2e/README.md).
+  libreoffice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w anonimizator
+      - run: npm run build -w anonimizator-web
+      - name: LibreOffice Writer bez interfejsu
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libreoffice-writer-nogui
+          soffice --version
+      - name: Wersja Playwright (klucz cache przeglądarki)
+        id: pw
+        run: echo "version=$(node -p "require('playwright/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+      - run: npx playwright install --with-deps chromium
+      - name: Tekst .docx według LibreOffice
+        env:
+          PARAWAN_SOFFICE: soffice
+        run: node --test scripts/e2e/libreoffice.test.mjs
+      - name: Zrzuty z nieudanych testów
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: zgodnosc-libreoffice
           path: test-results/e2e/
           if-no-files-found: ignore

@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { downloadFor, finalText, printTitle, textForDownload } from './output';
+import { downloadFor, downloadName, finalText, printTitle, textForDownload } from './output';
 
 const BOM = String.fromCharCode(0xfeff);
 const boms = (s: string): number => s.split(BOM).length - 1;
@@ -52,4 +52,8 @@ test('downloadFor: .txt, a po wczytaniu .csv plik .csv; treść przez textForDow
     type: 'text/csv;charset=utf-8',
     content: `${BOM}nr;osoba\r\n1;[IMIĘ I NAZWISKO]`,
   });
+});
+
+test('downloadName: .docx z tą samą nazwą ze znacznikiem czasu co .txt', () => {
+  expect(downloadName(AT, 'docx')).toBe('zanonimizowany-2026-01-07_09-05-03.docx');
 });

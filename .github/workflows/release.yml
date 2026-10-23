@@ -57,7 +57,13 @@ jobs:
 
           1. Otwórz plik Parawan.html podwójnym kliknięciem (uruchomi się w przeglądarce).
           2. Wklej tekst albo upuść plik (.txt, .docx lub .pdf) na lewe pole.
-          3. Po prawej masz wersję z zamaskowanymi danymi, kliknij „Kopiuj".
+          3. Po prawej masz wersję z zamaskowanymi danymi, kliknij „Kopiuj"
+             albo pobierz ją jako plik (.txt lub .docx).
+
+          Do publikacji (np. w BIP) użyj nowego dokumentu z „Pobierz .docx", a nie
+          oryginału z wklejonym wynikiem: oryginał ma we właściwościach autora,
+          a często także komentarze i historię zmian. Przy pierwszym zapisie
+          w Wordzie sprawdź Plik › Informacje › Autor.
 
           Wszystko dzieje się na Twoim komputerze. Aplikacja nie łączy się
           z internetem, możesz wyłączyć Wi-Fi i sprawdzić.

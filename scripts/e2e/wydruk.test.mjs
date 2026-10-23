@@ -314,10 +314,8 @@ test('„Pobierz .txt”: BOM i \\r\\n; po wczytaniu .csv pobiera się .csv', as
       mimeType: 'text/csv',
       buffer: Buffer.from(csv),
     });
-    // etykieta zmienia się po wczytaniu i przeliczeniu tekstu z pliku
-    await page.waitForFunction(
-      () => document.getElementById('download-label')?.textContent === 'Pobierz .csv',
-    );
+    // etykieta (podpis grupy „Pobierz” i rozszerzenie) zmienia się po wczytaniu i przeliczeniu tekstu z pliku
+    await page.getByRole('button', { name: 'Pobierz .csv', exact: true }).waitFor();
     const fromCsv = await download();
     assert.match(fromCsv.name, /^zanonimizowany-\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.csv$/);
     assert.ok(!fromCsv.name.includes('rejestr'), 'nazwa wczytanego pliku w nazwie pobranego');
@@ -327,9 +325,7 @@ test('„Pobierz .txt”: BOM i \\r\\n; po wczytaniu .csv pobiera się .csv', as
 
     // „Przykład” zastępuje tekst z pliku, więc pobranie wraca do .txt
     await page.locator('#example').click();
-    await page.waitForFunction(
-      () => document.getElementById('download-label')?.textContent === 'Pobierz .txt',
-    );
+    await page.getByRole('button', { name: 'Pobierz .txt', exact: true }).waitFor();
     assert.match((await download()).name, /\.txt$/);
   });
 });

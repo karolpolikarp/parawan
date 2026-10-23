@@ -257,7 +257,16 @@
                wszystkie trzy, a nie sam „Kopiuj”. -->
           <span class="out-acts">
             <button type="button" id="print" class="btn tbtn" data-tip="Drukuje sam wynik, bez tekstu źródłowego. PDF zapiszesz w oknie drukowania: „Zapisz jako PDF” albo „Microsoft Print to PDF”."><i class="gi" data-i="drukarka"></i><span>Drukuj lub zapisz PDF</span></button>
-            <button type="button" id="download" class="btn tbtn" data-tip="Zapisuje wynik jako plik tekstowy na dysku"><i class="gi" data-i="plik-txt"></i><span id="download-label">Pobierz .txt</span></button>
+            <!-- Oba formaty pod jednym podpisem „Pobierz”: dwa pełne przyciski nie mieszczą się
+                 w jednym rzędzie paska przy 1214–1351 px (patrz .dl-pair w style.css). Nazwa
+                 przycisku dla czytnika ekranu to podpis i rozszerzenie, np. „Pobierz .docx”. -->
+            <span class="dl-pair" role="group" aria-labelledby="dl-cap">
+              <span class="dl-cap" id="dl-cap">Pobierz</span>
+              <span class="dl-btns">
+                <button type="button" id="download" class="btn dl-btn" aria-labelledby="dl-cap download-label" data-tip="Zapisuje wynik jako plik tekstowy na dysku"><i class="gi" data-i="plik-txt"></i><span id="download-label">.txt</span></button>
+                <button type="button" id="download-docx" class="btn dl-btn" aria-labelledby="dl-cap download-docx-label" data-tip="Zapisuje nowy dokument Word z samym wynikiem. Nie ma w nim autora, komentarzy ani historii zmian oryginału."><i class="gi" data-i="plik-docx"></i><span id="download-docx-label">.docx</span></button>
+              </span>
+            </span>
             <button type="button" id="copy" class="btn tbtn btn-acc" data-tip="Kopiuje zanonimizowany tekst do schowka · skrót Ctrl+Enter" data-tip-pos="left" aria-keyshortcuts="Control+Enter"><i class="gi" data-i="kopiuj"></i><span id="copy-label">Kopiuj</span></button>
           </span>
         </div>
@@ -281,6 +290,12 @@
         <div class="card-f print-note">
           <i class="gi" data-i="drukarka"></i>
           <p class="out-hint">W oknie drukowania rozwiń „Więcej ustawień” i odznacz „Nagłówki i stopki”. Inaczej na wydruku znajdzie się ścieżka pliku z&nbsp;nazwą użytkownika komputera.</p>
+        </div>
+        <!-- „Pobierz .docx” buduje nowy dokument z samego wyniku (docx-write.ts), a nie kopię
+             oryginału: kto oczekuje układu pisma, dowiaduje się tego przed pobraniem. -->
+        <div class="card-f print-note">
+          <i class="gi" data-i="plik-docx"></i>
+          <p class="out-hint">Układ i tabele oryginału nie są przenoszone, kolumny tabel zostają tabulatorami.</p>
         </div>
       </section>
 

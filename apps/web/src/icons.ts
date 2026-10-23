@@ -76,6 +76,11 @@ export const ICONS: Record<string, string> = {
     '<path d="M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7z"/><path d="M14 3v4h4"/>' +
       '<line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="12.5" y2="17"/>',
   ),
+  // dokument Worda: kartka z zagiętym rogiem i literą W
+  'plik-docx': svg(
+    '<path d="M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7z"/><path d="M14 3v4h4"/>' +
+      '<path d="m8.6 11.5 1.3 5.5 2.1-4.2 2.1 4.2 1.3-5.5"/>',
+  ),
   wyczysc: svg('<path d="m15.5 5 3.5 3.5a2 2 0 0 1 0 2.8L12 18.3H7l-2.5-2.5a2 2 0 0 1 0-2.8L12.7 5a2 2 0 0 1 2.8 0z"/><line x1="9" y1="10" x2="14" y2="15"/><line x1="7" y1="21" x2="20" y2="21"/>'),
   kosz: svg(
     '<path d="M4 7h16"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>' +
