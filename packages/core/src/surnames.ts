@@ -141,6 +141,25 @@ export function surnameBase(word: string): string | null {
   return null;
 }
 
+/**
+ * Indeks słownika bez ogonków („kaminski", „wozniak") — loginy, ścieżki profili i nazwy kont
+ * są ASCII, więc „jkaminski" nie trafiał w „kamiński". Budowany leniwie przy pierwszym użyciu:
+ * zwykły tekst bez loginów nie płaci za kopię słownika.
+ */
+let asciiSurnames: Set<string> | null = null;
+const foldAscii = (s: string): string => s.replace(/[ąćęłńóśźż]/g, (c) => 'acelnoszz'['ąćęłńóśźż'.indexOf(c)]);
+/**
+ * Czy wyraz z samych liter ASCII to mianownik nazwiska ze słownika (też forma żeńska -ska/-cka/-dzka),
+ * zapisany bez polskich znaków. Bez reszty odmiany: login to forma słownikowa, nie przypadek zależny.
+ */
+export function isAsciiSurname(word: string): boolean {
+  const w = word.toLowerCase();
+  if (w.length < 4 || /[^a-z]/.test(w)) return false;
+  asciiSurnames ??= new Set([...SURNAMES].map(foldAscii));
+  if (asciiSurnames.has(w)) return true;
+  return /(?:sk|ck|dzk)a$/.test(w) && asciiSurnames.has(`${w.slice(0, -1)}i`);
+}
+
 // ============================================================================
 // Morfologiczny rozpoznawacz nazwisk (poza słownikiem) — recall dla rzadkich nazwisk
 // ============================================================================

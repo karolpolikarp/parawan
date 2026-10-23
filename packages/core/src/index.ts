@@ -26,6 +26,7 @@ import {
   normalizeSurnameKey,
   surnameBase,
   looksLikeSurname,
+  isAsciiSurname,
   isGeoAdjective,
   isCompoundAdjective,
   NON_SURNAME_ADJ,
@@ -952,6 +953,42 @@ const GENERIC_LOGINS = new Set<string>(
     'sales finance accounting billing payroll contact orders shop team staff student uczen nauczyciel'
   ).split(' '),
 );
+/**
+ * Konta systemowe i katalogi, które w ścieżce profilu (C:\Users\…, /home/…), udziale domowym
+ * i logu sshd/sudo stoją na miejscu użytkownika, a osobą nie są (lowercase). Uzupełnia
+ * GENERIC_LOGINS: „Public", „Default User", „WDAGUtilityAccount", katalogi współdzielone
+ * („/home/www", „/Users/Shared") i zastępniki z dokumentacji („/home/username/").
+ */
+const SYSTEM_ACCOUNTS = new Set<string>(
+  (
+    'public default defaultuser defaultuser0 default.migrated allusers wdagutilityaccount defaultapppool ' +
+    'localservice networkservice systemprofile shared share git deploy deployer ansible vagrant centos ' +
+    'debian fedora pi node app apps runner gitlab-runner docker www html http httpd nginx apache ftp ' +
+    'sftp sshd mail data storage media backups lost+found tmp temp home users projects projekty ' +
+    'username yourname youruser uzytkownik nazwauzytkownika login user1 sync bin sys halt shutdown ' +
+    'adm lp news uucp games nfsnobody polkitd chrony dbus postfix redis elasticsearch kibana grafana ' +
+    'prometheus zabbix nagios tomcat wildfly jboss hadoop spark kafka zookeeper azureuser opc ' +
+    'cloud-user rocky almalinux alpine kali'
+  ).split(' '),
+);
+const isSystemAccount = (v: string): boolean => {
+  const l = v.toLowerCase();
+  return GENERIC_LOGINS.has(l) || SYSTEM_ACCOUNTS.has(l) || /^(?:systemd-|_)/.test(l);
+};
+/**
+ * Czy login z kotwicy POŚREDNIEJ (parametr URL-a, klucz JSON/XML, ścieżka profilu, udział
+ * domowy, log sshd) wolno rozlać na resztę dokumentu? Tam pod kluczem stoi też „system",
+ * „v2.1" czy nazwa katalogu, a propagacja zwykłego wyrazu maskowałaby prozę („system restart").
+ * Rozlewamy tylko to, co ma kształt uchwytu: kropka, podkreślnik albo cyfra („a.kaminska",
+ * „jan_nowak", „adam1986") albo nazwisko ze słownika po odcięciu inicjału („jkowalski", „anowak").
+ */
+function isPropagatableLogin(v: string): boolean {
+  if (v.length < 4 || (v.match(/[A-Za-z]/g) ?? []).length < 3 || isSystemAccount(v)) return false;
+  if (/^[A-Za-z][A-Za-z0-9]*[._][A-Za-z0-9._]*[A-Za-z0-9]$|^[A-Za-z]{3,}[0-9]{1,6}$/.test(v)) return true;
+  return /^[A-Za-z]+$/.test(v) && (isAsciiSurname(v.slice(1)) || isAsciiSurname(v.slice(2)));
+}
+/** Konta usług w dzienniku zdarzeń Windows („SubjectUserName" = „SYSTEM", „DWM-1", „UMFD-0"). */
+const RE_WELL_KNOWN_ACCOUNT = /^(?:SYSTEM|DWM-\d+|UMFD-\d+)$/;
 /** Wbudowane grupy i konta Windows („BUILTIN\Administrators", „NT AUTHORITY\SYSTEM") — nie osoba. */
 const RE_BUILTIN_ACCOUNT = /^(?:BUILTIN|NT[ ]AUTHORITY|NT[ ]SERVICE)\\/i;
 /** Nazwa użytkownika z zapisu „DOMENA\użytkownik" (w JSON-ie ukośnik bywa podwojony). */
@@ -1452,6 +1489,20 @@ const URL_PARAM_RULES: Array<{ re: RegExp; type: PiiType }> = [
   { re: /([?&#](?:token|api_?key|secret|auth|access_?token)=)([^&#\s\[\]]+)/gi, type: 'TOKEN' },
   { re: /([?&#](?:ksef(?:_?number)?|nr_?ksef|numer_?ksef)=)([^&#\s\[\]]+)/gi, type: 'KSEF' },
 ];
+/**
+ * Segmenty ścieżki, które z samej budowy adresu są identyfikatorem osoby: profil LinkedIn
+ * („/in/joanna-pietrzak-hr", „/pub/joanna-pietrzak/12/345/678"), osobisty OneDrive
+ * („firma-my.sharepoint.com/personal/jan_kowalski_firma_pl" — to zawsze UPN użytkownika)
+ * i numeryczny profil Facebooka („profile.php?id=…"). Strony firm, szkół i ofert
+ * („/company/", „/school/", „/jobs/") oraz witryny zespołów („firma.sharepoint.com/sites/")
+ * mają inną ścieżkę i zostają. Gołe „github.com/x", „facebook.com/x" — bez reguły: tam ten sam
+ * kształt ma organizacja, projekt i podstrona serwisu.
+ */
+const URL_PROFILE_PATH_RULES: RegExp[] = [
+  /(\blinkedin\.com\/(?:in|pub)\/)([^/?#\s[\]]+(?:\/[0-9a-z]{1,3}(?=[/?#]|$)){0,3})/gi,
+  /(-my\.sharepoint\.com\/personal\/)([^/?#\s[\]]+)/gi,
+  /(\bfacebook\.com\/profile\.php\?(?:[^#\s]*?&)?id=)(\d+)/gi,
+];
 
 // ── Klucze strukturalne XML/JSON ──────────────────────────────────────────────
 // Tag „<Surname>" / klucz „"lastName"" to kotwica strukturalna jak etykieta formularza —
@@ -1485,6 +1536,8 @@ const STRUCT_KEYS = new Map<string, StructKind>(Object.entries({
   postalcode: 'postal', postcode: 'postal', zipcode: 'postal', zip: 'postal', kodpocztowy: 'postal',
   birthdate: 'birth', dateofbirth: 'birth', dob: 'birth', dataurodzenia: 'birth',
   login: 'login', username: 'login', user: 'login', userid: 'login',
+  // Active Directory i dziennik zdarzeń Windows („"sAMAccountName"", „<Data Name="TargetUserName">")
+  samaccountname: 'login', targetusername: 'login', subjectusername: 'login',
   pesel: 'pesel', nip: 'nip', regon: 'regon',
   // Dokumenty i rejestry: w prozie „paszport: EA1234567" jest maskowany, a pod kluczem
   // („"paszport": "EA1234567"", „<KRS>…</KRS>") wyciekał — separator przebiegów prozy nie zna
@@ -1671,6 +1724,9 @@ interface RedactCtx {
   protectedUrls: string[];
   /** Czy passProtectJsonEscapes podmienił ucieczki „\n/\r/\t" (wtedy trzeba je przywrócić). */
   jsonEscapes: boolean;
+  /** Loginy z kotwic poza etykietą „Login:" (parametr URL-a, klucz JSON/XML, ścieżka profilu,
+   *  udział domowy, log sshd) — passLogin rozlewa je na resztę dokumentu i na zapamiętane URL-e. */
+  loginSeeds: Set<string>;
 }
 
 // Sentinel URL: znaki z Prywatnego Obszaru Użytku (U+E000/U+E001) — bez cyfr, „@" i liter
@@ -1762,12 +1818,17 @@ function passProtectJsonEscapes(ctx: RedactCtx): void {
 // PESEL gryzły fragmenty URL-a. Najpierw maskujemy PII WEWNĄTRZ (e-maile, wartości parametrów
 // ?user=/?email=…), potem podmieniamy URL na sentinel U+E000<litery>U+E001 i przywracamy na
 // końcu (finalizePersons). Drugi przebieg jest idempotentny: klasy wartości wykluczają „[".
+// Adres profilu bywa wklejony bez schematu („pl.linkedin.com/in/…" w stopce CV) — dla tych kilku
+// hostów z regułą profilu (URL_PROFILE_PATH_RULES) to też adres. Lewa granica bez kropki, „@"
+// i ukośnika: „jan@linkedin.com/…" to e-mail, a „x.pl/linkedin.com/…" część innej ścieżki.
+const RE_URL_PROTECT =
+  /(?:\b(?:https?:\/\/|www\.)|(?<![\w.@/-])(?:[a-z0-9-]+\.)?(?=linkedin\.com\/(?:in|pub)\/|facebook\.com\/profile\.php\?|[a-z0-9-]+-my\.sharepoint\.com\/personal\/))[^\s<>"'„”()\uE009\uE00A\uE00D]+/g;
 function passProtectUrls(ctx: RedactCtx): void {
   // Kotwica KSeF liczona RAZ: to skan całego wejścia, a wewnątrz callbacku wykonywałby się
   // dla każdego adresu z osobna (dokument z tysiącami linków rósł kwadratowo — 3,7 s na 1 MB).
   const ksefInUrls = ctx.on('KSEF') && hasKsefAnchor(ctx);
   // Podmieniona ucieczka „\n/\t" kończy adres (w JSON-ie „…/x\nKowalski Jan" nazwisko nie należy do URL-a).
-  ctx.text = ctx.text.replace(/\b(?:https?:\/\/|www\.)[^\s<>"'„”()\uE009\uE00A\uE00D]+/g, (raw) => {
+  ctx.text = ctx.text.replace(RE_URL_PROTECT, (raw) => {
     const trailMatch = raw.match(/[.,;:!?\]]+$/); // interpunkcja zdania nie należy do URL-a
     const trail = trailMatch ? trailMatch[0] : '';
     let url = trail ? raw.slice(0, raw.length - trail.length) : raw;
@@ -1786,9 +1847,19 @@ function passProtectUrls(ctx: RedactCtx): void {
     if (ksefInUrls) {
       url = url.replace(RE_KSEF_VALUE, maskKsefMatch(ctx));
     }
+    if (ctx.on('LOGIN')) {
+      for (const re of URL_PROFILE_PATH_RULES) {
+        url = url.replace(re, (_pm, key: string) => {
+          ctx.bump('LOGIN');
+          return `${key}${ctx.M.LOGIN}`;
+        });
+      }
+    }
     for (const rule of URL_PARAM_RULES) {
       if (!ctx.on(rule.type)) continue;
-      url = url.replace(rule.re, (_pm, key: string) => {
+      url = url.replace(rule.re, (_pm, key: string, val: string) => {
+        // „?user=a.kaminska" to ten sam login co „Konto a.kaminska zablokowane" w treści
+        if (rule.type === 'LOGIN' && !val.includes('%') && isPropagatableLogin(val)) ctx.loginSeeds.add(val);
         ctx.bump(rule.type);
         return `${key}${ctx.M[rule.type]}`;
       });
@@ -2420,6 +2491,7 @@ function lowercaseNameLooksLikePerson(words: string[]): boolean {
 // Rola albo rzeczownik, który jest też częstym nazwiskiem („Marszałek", „Wójt", „Dziadek", „Koło")
 // — pod kluczem „osoba"/„person" wartość z wielkiej litery to wtedy nazwisko, nie rola.
 const ROLE_HOMOGRAPH_SURNAMES = new Set<string>('marszałek wójt dziadek dziekan komornik król starosta koło kowal'.split(' '));
+const RE_EVENT_DATA_NAME = /\sName\s*=\s*["']([\p{L}_][\p{L}\p{N}_.-]{0,40})["']/u;
 function passStructured(ctx: RedactCtx): void {
   const structMask = (kind: StructKind, value: string, key = ''): string | null => {
     const v = value.trim();
@@ -2485,7 +2557,12 @@ function passStructured(ctx: RedactCtx): void {
         // Zapis Windows/AD „DOMENA\użytkownik" (w JSON-ie „\\") maskujemy w całości — dawniej
         // cała wartość wyciekała. Wbudowane konta systemowe zostają.
         if (!/^(?:[A-Za-z][A-Za-z0-9.-]{0,62}\\{1,2})?[A-Za-z][A-Za-z0-9._@-]{1,63}$/.test(v)) return null;
-        if (RE_BUILTIN_ACCOUNT.test(v)) return null;
+        if (RE_BUILTIN_ACCOUNT.test(v) || RE_WELL_KNOWN_ACCOUNT.test(v)) return null;
+        // ta sama wartość pada zwykle w treści obok („Konto a.kaminska zablokowane", „/home/jwozniak")
+        if (ctx.on('LOGIN')) {
+          const user = loginUserPart(v);
+          if (isPropagatableLogin(user)) ctx.loginSeeds.add(user);
+        }
         break;
       case 'email':
         if (!/\S(?:@|%40|\(at\))\S/i.test(v)) return null;
@@ -2554,9 +2631,13 @@ function passStructured(ctx: RedactCtx): void {
   ctx.text = ctx.text.replace(
     /(<((?:[\p{L}_][\p{L}\p{N}_.-]{0,20}:)?[\p{L}_][\p{L}\p{N}_.-]{0,40})(?:\s[^<>]*)?>)([^<>\r\n]{1,70})(<\/\s*\2\s*>)/gu,
     (m, open: string, tag: string, value: string, close: string) => {
-      const kind = structKindOf(tag.slice(tag.indexOf(':') + 1), value);
+      // Dziennik zdarzeń Windows: nazwą pola jest atrybut („<Data Name="TargetUserName">tnowicki</Data>"),
+      // a sam tag „Data" niczego nie mówi.
+      const local = tag.slice(tag.indexOf(':') + 1);
+      const key = /^data$/i.test(local) ? (RE_EVENT_DATA_NAME.exec(open)?.[1] ?? local) : local;
+      const kind = structKindOf(key, value);
       if (!kind) return m;
-      const mask = structMask(kind, value, tag);
+      const mask = structMask(kind, value, key);
       return mask === null ? m : `${open}${mask}${close}`;
     },
   );
@@ -2596,6 +2677,93 @@ function loginWordInPersonPair(t: string, offset: number, v: string): boolean {
   const prev = RE_NAME_BEFORE_LOGIN_WORD.exec(t.slice(Math.max(0, offset - 40), offset))?.[1];
   return !!prev && /^[A-Z][a-z]+$/.test(prev) && loginValueIsPersonPair(prev, ` ${v}`);
 }
+/** Wartość pod „Alias:" w kształcie nazwy hosta („www.firma.pl", „mail.urzad.gov.pl"). */
+const RE_DOMAIN_LIKE = /\.(?:pl|com|net|org|eu|gov|edu|info|biz|io|local|lan|intra|corp|de|uk)$/i;
+/** Stan konta zamiast jego nazwy („Konto AD: zablokowane", „Konto LDAP: aktywne"). */
+const LOGIN_STATE_WORDS = new Set<string>(
+  (
+    'aktywne aktywny nieaktywne nieaktywny zablokowane zablokowany odblokowane odblokowany wygasle ' +
+    'utworzone usuniete zawieszone tak nie brak enabled disabled locked unlocked active inactive ' +
+    'expired none ok'
+  ).split(' '),
+);
+// Ścieżka profilu użytkownika: „C:\Users\tkaminski\…", „/home/jkowalski/…", „/Users/anowak/…".
+// Segment po katalogu profili to zawsze nazwa konta. Lewa granica „/home" bez litery, kropki
+// i ukośnika — „firma.pl/home/news" to podstrona serwisu, nie katalog domowy. Prawa granica:
+// separator ścieżki, koniec tokenu albo kropka kończąca zdanie. Segment, po którym stoi spacja
+// i wielka litera, to początek nazwy z odstępem („C:\Users\Tomasz Kamiński", „All Users") —
+// osobę maskuje FAZA 4. Plik wprost w katalogu domowym („/home/index.html") to nie konto.
+const PROFILE_SEG = String.raw`([A-Za-z0-9][A-Za-z0-9._-]{0,62}[A-Za-z0-9])(?=[\\/\s"'”,;:)\]}<>]|\.(?:\s|$)|$)`;
+const RE_CAP_WORD_AHEAD = /^[ \t]+\p{Lu}/u;
+const RE_DOTTED_PERSON = /^[A-Z][a-z]+(?:[._][A-Z][a-z]+)+$/;
+const RE_PROFILE_PATH = new RegExp(
+  String.raw`((?<![\p{L}\p{N}_])[A-Za-z]:(?:\\{1,2}|/)(?:Users|Użytkownicy|Documents and Settings)(?:\\{1,2}|/)|(?<![\p{L}\p{N}_./~-])/(?:home|Users)/)` +
+    PROFILE_SEG,
+  'gu',
+);
+// Udział z katalogami domowymi: „\\FS01\home$\tkaminski", „\\srv\profiles$\jkowalski.V6".
+// Kolejki drukarek („\\PRINT01\AdamK") nie mają takiej kotwicy i zostają.
+const RE_UNC_HOME = new RegExp(
+  String.raw`((?<![\p{L}\p{N}_\\])\\{2,4}[A-Za-z0-9][A-Za-z0-9.-]{0,62}\\{1,2}(?:home|homes|users|profiles|redirect)\$?\\{1,2})` +
+    PROFILE_SEG,
+  'giu',
+);
+// Stałe formaty logów sshd, PAM i sudo: „Accepted publickey for jkowalski from", „Invalid user
+// anowak from", „session opened for user jkowalski(uid=1001)", „sudo:  jkowalski : TTY=".
+const LOG_USER = '([A-Za-z_][A-Za-z0-9._-]{0,31})';
+const RE_LOG_USER: RegExp[] = [
+  new RegExp(
+    String.raw`(\b(?:(?:Accepted|Failed)[ \t]+(?:password|publickey|keyboard-interactive(?:/pam)?|gssapi-with-mic|gssapi-keyex|hostbased|none)[ \t]+for(?:[ \t]+invalid[ \t]+user)?|Invalid[ \t]+user|(?:Connection[ \t]+closed[ \t]+by|Disconnected[ \t]+from)[ \t]+(?:authenticating|invalid)[ \t]+user)[ \t]+)` +
+      `${LOG_USER}(?=[ \\t]+(?:from|port)[ \\t])`,
+    'g',
+  ),
+  new RegExp(String.raw`(\bsession[ \t]+(?:opened|closed)[ \t]+for[ \t]+user[ \t]+)${LOG_USER}(?=\(|[ \t]|$)`, 'gm'),
+  new RegExp(String.raw`(\bsudo:[ \t]+)${LOG_USER}(?=[ \t]+:[ \t])`, 'g'),
+];
+/** Plik wprost w katalogu domowym („/home/index.html"), nie konto. */
+const RE_FILE_EXT = /\.(?:html?|php|aspx?|jsp|txt|log|sh|conf|cfg|ini|json|xml|zip|tar|gz)$/i;
+/**
+ * Loginy z kotwic budowy tekstu (ścieżka profilu, udział domowy, log sshd/sudo) — maskowany
+ * cały segment, konta systemowe zostają. Wartość dopisujemy do propagacji tylko przez bramkę
+ * isPropagatableLogin: „/home/projekty" czy „sudo: deploy" to katalog i konto usługi.
+ */
+function maskAnchoredLogins(ctx: RedactCtx): void {
+  const mask = (m: string, pre: string, seg: string, offset: number, t: string): string => {
+    if (isSystemAccount(seg) || RE_FILE_EXT.test(seg)) return m;
+    if (RE_CAP_WORD_AHEAD.test(t.slice(offset + m.length, offset + m.length + 3))) return m;
+    // „C:\Users\Jan.Kowalski" — imię i nazwisko sklejone kropką maskuje w całości FAZA 4 (K35)
+    if (RE_DOTTED_PERSON.test(seg)) return m;
+    // „jkowalski.V6" — sufiks wersji profilu Windows nie należy do nazwy konta
+    const user = seg.replace(/\.V\d$/i, '');
+    if (isPropagatableLogin(user)) ctx.loginSeeds.add(user);
+    ctx.bump('LOGIN');
+    return `${pre}${ctx.M.LOGIN}`;
+  };
+  if (/[\\/]/.test(ctx.text)) {
+    ctx.text = ctx.text.replace(RE_PROFILE_PATH, mask);
+    if (ctx.text.includes('\\\\')) ctx.text = ctx.text.replace(RE_UNC_HOME, mask);
+  }
+  for (const re of RE_LOG_USER) ctx.text = ctx.text.replace(re, mask);
+}
+/**
+ * Znany login w zapamiętanym URL-u — wyłącznie CAŁY segment ścieżki albo wartość parametru
+ * („github.com/tkaminski", „/display/~jnowak82", „/user/dmichalska?x=1"); część segmentu
+ * („/dmichalskaneous/") i nazwa hosta zostają.
+ */
+function maskLoginsInUrls(ctx: RedactCtx, values: Iterable<string>): void {
+  const known = new Set<string>();
+  for (const v of values) known.add(v.toLowerCase());
+  if (!known.size) return;
+  ctx.protectedUrls = ctx.protectedUrls.map((url) => {
+    const head = /^(?:[a-z][a-z0-9+.-]*:\/\/)?[^/?#]*/i.exec(url)?.[0] ?? '';
+    const path = url.slice(head.length).replace(/(?<=[/~=])[^/?#&=~\s[\]]+(?=[/?#&]|$)/g, (seg) => {
+      if (!known.has(seg.toLowerCase())) return seg;
+      ctx.bump('LOGIN');
+      return ctx.M.LOGIN;
+    });
+    return head + path;
+  });
+}
 // 1d) LOGIN — kotwica „login/username/nazwa użytkownika" + wartość-token, także w NASTĘPNEJ
 // linii. Złapaną wartość maskujemy też w pozostałych wystąpieniach w dokumencie oraz w
 // wariancie w cudzysłowie po „użytkownik/login/konto".
@@ -2612,17 +2780,22 @@ function passLogin(ctx: RedactCtx): void {
     }
   };
   ctx.text = ctx.text.replace(
-    /((?:\b[Ll]ogin\w{0,3}|\b[Uu]ser(?:name)?|\b[Nn]azwa\s+użytkownika|\b[Ii]dentyfikator\s+użytkownika)(?:\s+(?:użytkownika|administratora|operatora|serwisow\w+|techniczn\w+|w\s+systemie|systemow\w+|domenow\w+|sieciow\w+))?[ \t]*[:=][ \t]*\n?[ \t]*)(["„'«]?)((?:[A-Za-z][A-Za-z0-9.-]{0,62}\\{1,2})?[A-Za-z][A-Za-z0-9._-]{1,62}[A-Za-z0-9])(?!\.?[\p{L}\p{N}_-]|\\)(["”'»]?)/gu,
+    /((?:\b[Ll]ogin\w{0,3}|\b[Uu]ser(?:name)?|\b[Nn]azwa\s+użytkownika|\b[Ii]dentyfikator\s+użytkownika|\b[Uu]ser[ \t]+[Nn]ame|\b[Ss][Aa][Mm][Aa]ccount[Nn]ame|\b[Kk]onto[ \t]+(?:AD|LDAP|domenowe|w[ \t]+domenie)|\b[Aa]lias)(?:\s+(?:użytkownika|administratora|operatora|serwisow\w+|techniczn\w+|w\s+systemie|systemow\w+|domenow\w+|sieciow\w+))?[ \t]*[:=][ \t]*\n?[ \t]*)(["„'«]?)((?:[A-Za-z][A-Za-z0-9.-]{0,62}\\{1,2})?[A-Za-z][A-Za-z0-9._-]{1,62}[A-Za-z0-9])(?!\.?[\p{L}\p{N}_-]|\\)(["”'»]?)/gu,
     (m, kw: string, q1: string, val: string, q2: string, offset: number) => {
       if (q1 && !q2) return m; // niedomknięty cudzysłów — to nie wartość pola
       // wartość nie może być kolejną etykietą („Login:\nHasło:") ani pustym oznaczeniem
       if (!q2 && ctx.text[offset + m.length] === ':') return m;
+      // „Alias" i „Konto AD" to etykiety słabsze niż „Login": alias bywa nazwą hosta („Alias:
+      // www.firma.pl" w DNS), a pod kontem stoi też jego stan („Konto AD: zablokowane"). Wartość
+      // musi więc wypełniać resztę wiersza, nie wyglądać na domenę ani na stan konta.
+      const weak = /^(?:[Aa]lias|[Kk]onto)/.test(kw);
       // wartość w NASTĘPNEJ linii musi wypełniać ją w całości
-      if (kw.includes('\n')) {
+      if (kw.includes('\n') || weak) {
         const lineEnd = ctx.text.indexOf('\n', offset + kw.length);
         const rest = ctx.text.slice(offset + m.length, lineEnd === -1 ? ctx.text.length : lineEnd);
         if (!/^[\s.,;]*$/.test(rest)) return m;
       }
+      if (weak && (RE_DOMAIN_LIKE.test(val) || LOGIN_STATE_WORDS.has(val.toLowerCase()))) return m;
       const user = loginUserPart(val).toLowerCase();
       if (isEmptyFormValue(user) || FORM_LABEL_WORDS.has(user) || RE_BUILTIN_ACCOUNT.test(val)) return m;
       // „User: Kowalski Jan", „Username: Adam Kowalski" — w polu stoi osoba, nie login. Dawniej
@@ -2650,6 +2823,8 @@ function passLogin(ctx: RedactCtx): void {
   // wartości, a kompilacja wzorca z flagą „u" jest wielokrotnie droższa (2000 loginów: 0,35 s).
   // Login zapisany jak imię albo nazwisko („Login: Kowalski") nie rozbija pary osobowej, którą
   // zostawiliśmy dla FAZY 4: „User: Jan Kowalski" dawało „Jan [LOGIN]" — imię jawne obok maski.
+  maskAnchoredLogins(ctx);
+  for (const v of ctx.loginSeeds) loginValues.add(v);
   for (const v of [...loginValues].sort((a, b) => b.length - a.length)) {
     const word = /^[A-Z][a-z]+$/.test(v);
     ctx.text = ctx.text.replace(
@@ -2661,6 +2836,7 @@ function passLogin(ctx: RedactCtx): void {
       },
     );
   }
+  if (ctx.protectedUrls.length) maskLoginsInUrls(ctx, loginValues);
 }
 
 // 1e) NUMER KSeF — biegnie PRZED passZnakSprawy (kształt numeru pasuje do wzorca znaku sprawy
@@ -5975,7 +6151,7 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
     return `[OSOBA-${label}]`;
   };
 
-  const ctx: RedactCtx = { text: input, raw: input, on, bump, M, personMask, pseudonyms: !!personLabels, maskedSurnames, protectedUrls: [], jsonEscapes: false };
+  const ctx: RedactCtx = { text: input, raw: input, on, bump, M, personMask, pseudonyms: !!personLabels, maskedSurnames, protectedUrls: [], jsonEscapes: false, loginSeeds: new Set() };
 
   // Kolejność MA znaczenie: przebiegi czytają placeholdery poprzednich, a kolejność pierwszego
   // bump danego typu wyznacza kolejność listy `found`. Sekwencja = dawna kolejność fizyczna 1:1.

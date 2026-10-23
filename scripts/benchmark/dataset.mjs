@@ -716,7 +716,7 @@ export function buildDataset() {
   neg('P.S. Mróz ma być w nocy, okryj róże.', ['P.S. Mróz']);
   str(String.raw`{"opis": "Zgłosił:\nKowalski Jan, PESEL:\n85031412347"}`, ['Kowalski', 'Jan', '85031412347'], [String.raw`"Zgłosił:\n`, String.raw`PESEL:\n`]);
   str(String.raw`{"payload":"{\"imie\":\"Jadwiga\",\"nazwisko\":\"Gżegżółka\",\"miasto\":\"Słupsk\"}"}`, ['Jadwiga', 'Gżegżółka', 'Słupsk'], [String.raw`{\"imie\":\"`]);
-  neg(String.raw`{"sciezka": "C:\\Users\\nowak\\Documents\\raport.docx", "opis": "Linia 1\nLinia 2"}`, [String.raw`C:\\Users\\nowak\\Documents`, String.raw`Linia 1\nLinia 2`]);
+  neg(String.raw`{"sciezka": "C:\\Users\\Public\\nowe\\raport.docx", "opis": "Linia 1\nLinia 2"}`, [String.raw`C:\\Users\\Public\\nowe`, String.raw`Linia 1\nLinia 2`]);
   // (cudzysłowy wokół masek w miejscu liczb pilnuje snapshot golden — mustKeep musi stać w wejściu)
   str('{"klient_id": 7, "pesel": 85031412347, "telefon": 601234567}', ['85031412347', '601234567'], ['"klient_id": 7']);
   // Regresje partii b1 wyłapane w weryfikacji: imię nad nazwiskiem po czasowniku podpisu, lista
@@ -897,6 +897,12 @@ export function buildDataset() {
   // pomieszczenie lub hala po adresie, zabytek przy czasowniku i statystyka zostają jawne.
   str('Imię i nazwisko pacjenta:\nYuki Tanaka\nImię i nazwisko ucznia: Jan Nowy\nOpiekuje się bratem niepełnosprawnym urodzonym 12.03.1990 r.\nMaria Nowak z domu Wrona Wypisana 12.10.', ['Yuki Tanaka', 'Jan Nowy', '12.03.1990', 'Maria Nowak', 'Wrona'], ['Imię i nazwisko pacjenta:', 'urodzonym', 'Wypisana']);
   neg('Gabinet przy ul. Szpitalnej 5 m. 3 i Sali 12 jest czynny. Lokalizacje: ul. Leśna 7 oraz Hala 3. Kościół Mariacki odwiedził w niedzielę biskup. Mieszka w Sopocie 500 cudzoziemców.', ['Sali 12', 'Hala 3', 'Mariacki', 'Sopocie']);
+  // b6: loginy w środowisku firmowym — ścieżka profilu, udział domowy, atrybut AD, log sshd,
+  // profil w URL-u i propagacja loginu z klucza JSON. Konta systemowe i strony firm zostają.
+  str(String.raw`Plik: C:\Users\tkaminski\Desktop\a.txt, udział \\FS01\home$\anowak, katalog /home/jkowalski/projekty`, ['tkaminski', 'anowak', 'jkowalski'], ['C:\\Users\\', '\\\\FS01\\home$\\', '/home/', '/projekty']);
+  str('sAMAccountName: kwisniewski\nAccepted publickey for mzielinski from bastion.local port 22 ssh2\nsudo:  pnowicki : TTY=pts/0', ['kwisniewski', 'mzielinski', 'pnowicki'], ['sAMAccountName:', 'Accepted publickey for', 'from bastion.local', 'TTY=pts/0']);
+  str('{"user":"a.kaminska","message":"Konto a.kaminska zablokowane"}\nLinkedIn: https://www.linkedin.com/in/joanna-pietrzak-hr/', ['a.kaminska', 'joanna-pietrzak-hr'], ['"message":"Konto', 'https://www.linkedin.com/in/']);
+  neg(String.raw`Ścieżka: /home/ubuntu/app oraz C:\Users\Public\Desktop. Accepted password for root from bastion.local port 22 ssh2. Strona https://www.linkedin.com/company/baltic-solutions oraz Konto AD: zablokowane. Alias: www.firma.pl`, ['/home/ubuntu/app', String.raw`C:\Users\Public`, 'for root from', 'company/baltic-solutions', 'Konto AD: zablokowane', 'Alias: www.firma.pl']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

@@ -2178,9 +2178,9 @@ test('K04: dosłowne ucieczki „\\n"/„\\t" w JSON-ie nie sklejają się z dan
 });
 test('K04 pułapki: ścieżki Windows, kod źródłowy i ucieczki bez danych zostają bez zmian', () => {
   keep([
-    String.raw`{"sciezka": "C:\\Users\\nowak\\Documents\\raport.docx"}`,
+    String.raw`{"sciezka": "C:\\Users\\Public\\nowe\\raport.docx"}`,
     String.raw`{"sciezka": "C:\\nowy\\Tomasz\\plik.txt"}`,
-    String.raw`Ścieżka C:\Users\nowak\Documents\raport.docx oraz C:\temp\new\Raport2024.txt`,
+    String.raw`Ścieżka C:\Users\Public\nowe\raport.docx oraz C:\temp\new\Raport2024.txt`,
     String.raw`console.log("Suma:\n" + total); printf("Wynik:\t%d\n", x);`,
     String.raw`\textbf{Ważne}: \noindent Umowa zawarta w Warszawie.`,
     String.raw`{"wzorzec": "\\u0142"}`,
@@ -2662,7 +2662,7 @@ test('K28: adres zdalnego repozytorium „git@host:ścieżka" nie jest e-mailem;
 });
 test('K28 pułapki: loginy osób w formie scp, skrzynki funkcyjne i „%" w prozie jak dotąd', () => {
   masked([
-    ['scp plik.txt jan.kowalski@serwer.firma.pl:/home/jan/', 'scp plik.txt [EMAIL]:/home/jan/'],
+    ['scp plik.txt jan.kowalski@serwer.firma.pl:/home/jan/', 'scp plik.txt [EMAIL]:/home/[LOGIN]/'],
     ['jkowalski@github.com:jkowalski/portal.git', '[EMAIL]:jkowalski/portal.git'],
     ['anna.git@gmail.com:prywatne', '[EMAIL]:prywatne'],
     ['Zgłoszenia na git@firma.pl: dział IT.', 'Zgłoszenia na [EMAIL]: dział IT.'],
@@ -5655,4 +5655,136 @@ test('Resztki, poprawki po weryfikacji (runda 2) · drugi adres tylko w kształc
     'W bloku zamieszkuje w Pruszkowie 120 rodzin.',
   ]);
   masked([['Świadek Jan Kabacki zeznał. Las Kabacki zamknięto.', 'Świadek [OSOBA-A] zeznał. Las Kabacki zamknięto.']], { pseudonyms: true });
+});
+
+// ── Etap b6: loginy w środowisku firmowym (ścieżki, udziały, AD, logi, profile w URL-ach) ──
+const LG = '[LOGIN]';
+test('b6 §8 p.1, K59: znany login maskowany w całym segmencie zapamiętanego URL-a i w treści', () => {
+  masked([
+    [
+      'Login: tkaminski\nRepo: https://github.com/tkaminski oraz https://gitlab.firma.pl/tkaminski/projekt-x i https://wiki.firma.pl/display/~tkaminski',
+      `Login: ${LG}\nRepo: https://github.com/${LG} oraz https://gitlab.firma.pl/${LG}/projekt-x i https://wiki.firma.pl/display/~${LG}`,
+    ],
+    ['Login: dmichalska\nProfil: https://bank.pl/user/dmichalska?x=1', `Login: ${LG}\nProfil: https://bank.pl/user/${LG}?x=1`],
+    // parametr URL-a i klucz JSON/XML to kotwice — wartość wraca w treści
+    ['https://portal.pl/login?user=a.kaminska\nKonto a.kaminska zablokowane', `https://portal.pl/login?user=${LG}\nKonto ${LG} zablokowane`],
+    ['{"user":"a.kaminska","message":"Konto a.kaminska zablokowane"}', `{"user":"${LG}","message":"Konto ${LG} zablokowane"}`],
+    ['<user>jkowalski2</user><message>Konto jkowalski2 zablokowane</message>', `<user>${LG}</user><message>Konto ${LG} zablokowane</message>`],
+    ['{"username": "jwozniak", "homeDir": "/home/jwozniak"}', `{"username": "${LG}", "homeDir": "/home/${LG}"}`],
+  ]);
+  // pułapki: część segmentu, host, konta generyczne i wartości bez kształtu uchwytu zostają
+  keep([
+    'Dokumentacja: https://docs.firma.pl/api/v2/user/endpoints oraz https://firma.pl/dmichalskaneous/x',
+    'Repozytorium https://github.com/microsoft/vscode oraz https://github.com/apache/kafka.',
+  ]);
+  masked([
+    ['Login: dmichalska\nhttps://firma.pl/dmichalskaneous/x', `Login: ${LG}\nhttps://firma.pl/dmichalskaneous/x`],
+    ['Login: admin\nPanel: https://serwer.firma.pl/admin/panel', `Login: ${LG}\nPanel: https://serwer.firma.pl/admin/panel`],
+    ['{"user":"system","message":"system restart"}', `{"user":"${LG}","message":"system restart"}`],
+    ['{"user":"v2.1","message":"wersja v2.1"}', `{"user":"${LG}","message":"wersja v2.1"}`],
+    ['{"user":"Marek","comment":"Marek Nowak zgłosił awarię"}', `{"user":"${LG}","comment":"[IMIĘ I NAZWISKO] zgłosił awarię"}`],
+    ['{"user":"projekty","note":"Katalog projekty jest pełny"}', `{"user":"${LG}","note":"Katalog projekty jest pełny"}`],
+  ]);
+});
+test('b6 §8 p.2: profile LinkedIn, osobisty OneDrive i numeryczny profil Facebooka', () => {
+  masked([
+    ['LinkedIn: https://www.linkedin.com/in/joanna-pietrzak-hr/', `LinkedIn: https://www.linkedin.com/in/${LG}/`],
+    ['https://www.linkedin.com/pub/joanna-pietrzak/12/345/678', `https://www.linkedin.com/pub/${LG}`],
+    // bez schematu (stopka CV)
+    ['Profil: pl.linkedin.com/in/joannapietrzak?trk=public_profile', `Profil: pl.linkedin.com/in/${LG}?trk=public_profile`],
+    ['linkedin.com/in/beata-kruk-12345', `linkedin.com/in/${LG}`],
+    [
+      'OneDrive: https://firma-my.sharepoint.com/personal/krzysztof_jablonski_firma_pl/Documents/raport.docx',
+      `OneDrive: https://firma-my.sharepoint.com/personal/${LG}/Documents/raport.docx`,
+    ],
+    ['mój fb: https://www.facebook.com/profile.php?id=100012345678901&ref=x', `mój fb: https://www.facebook.com/profile.php?id=${LG}&ref=x`],
+  ]);
+  keep([
+    'Strona firmy https://www.linkedin.com/company/baltic-solutions-sp-z-o-o oraz https://www.linkedin.com/jobs/view/123',
+    'Uczelnia: https://www.linkedin.com/school/uniwersytet-warszawski/',
+    'Dokumenty: https://firma.sharepoint.com/sites/Logistyka/Shared%20Documents',
+    'Witryna działu https://firma.sharepoint.com/sites/Logistyka/SitePages/Home.aspx',
+    'Zespół https://github.com/orgs/firma/teams/backend i ustawienia https://github.com/settings/profile',
+    'Ustawienia https://bank.pl/user/settings oraz https://app.pl/users/sign_in',
+    'Strona: linkedin.com/company/firma',
+  ]);
+});
+test('b6 §8 p.3: ścieżka profilu użytkownika (Windows, Linux, macOS) — segment jako [LOGIN]', () => {
+  masked([
+    [String.raw`Plik: C:\Users\tkaminski\Desktop\a.txt`, String.raw`Plik: C:\Users\[LOGIN]\Desktop\a.txt`],
+    [String.raw`Ścieżka C:\Users\nowak\Documents\raport.docx`, String.raw`Ścieżka C:\Users\[LOGIN]\Documents\raport.docx`],
+    [String.raw`{"sciezka": "C:\\Users\\mzajac\\Documents\\raport.docx"}`, String.raw`{"sciezka": "C:\\Users\\[LOGIN]\\Documents\\raport.docx"}`],
+    ['Katalog: /home/jkowalski/projekty', `Katalog: /home/${LG}/projekty`],
+    ['Ścieżka: /home/jkowalski/.ssh/id_rsa i /Users/anowak/Library', `Ścieżka: /home/${LG}/.ssh/id_rsa i /Users/${LG}/Library`],
+    ['<home>/home/jwozniak</home>', `<home>/home/${LG}</home>`],
+    // wartość ze ścieżki rozlewa się na treść, gdy ma kształt uchwytu
+    ['Katalog /home/jkowalski/x. Właściciel: jkowalski.', `Katalog /home/${LG}/x. Właściciel: ${LG}.`],
+  ]);
+  keep([
+    String.raw`Ścieżka: /home/ubuntu/app oraz /root/.bashrc oraz C:\Users\Public\Desktop oraz C:\Users\Administrator`,
+    String.raw`Plik: C:\Users\All Users\x oraz C:\Users\Default User\y oraz C:\Users\WDAGUtilityAccount\z`,
+    'Profil: /Users/Shared/Dokumenty, kopia w /home/backup/2024 oraz /home/www/strona',
+    'Wejdź na firma.pl/home/aktualnosci albo /home/index.html',
+    String.raw`Binarka w /usr/bin/ssh oraz C:\Program Files\Git\bin`,
+    'Katalog /home/projekty/raport. Projekty zamknięto.',
+  ]);
+  // imię i nazwisko w nazwie katalogu maskuje FAZA 4 w całości
+  masked([
+    [String.raw`Plik: C:\Users\Tomasz Kamiński\Documents\raport.docx`, String.raw`Plik: C:\Users\[IMIĘ I NAZWISKO]\Documents\raport.docx`],
+    [String.raw`C:\Users\Jan.Kowalski\AppData`, String.raw`C:\Users\[IMIĘ I NAZWISKO]\AppData`],
+  ]);
+});
+test('b6 §8 p.4: udział z katalogami domowymi (home$, users$, profiles$, redirect$)', () => {
+  masked([
+    [String.raw`Udział: \\FS01\home$\tkaminski`, String.raw`Udział: \\FS01\home$\[LOGIN]`],
+    [String.raw`\\FS01\users$\anowak\Dokumenty i \\srv\profiles$\jkowalski.V6`, String.raw`\\FS01\users$\[LOGIN]\Dokumenty i \\srv\profiles$\[LOGIN]`],
+    [String.raw`Przekierowanie: \\srv\redirect$\mzajac\Pulpit`, String.raw`Przekierowanie: \\srv\redirect$\[LOGIN]\Pulpit`],
+  ]);
+  keep([String.raw`Drukarka: \\PRINT01\AdamK`, String.raw`Udział: \\FS01\home$\Public`, String.raw`Udział: \\FS01\Dzial\Kadry`]);
+});
+test('b6 §8 p.6: etykieta „Alias" — wartość wypełnia wiersz, bez domen i stanów', () => {
+  masked([
+    ['Alias: adam1986', `Alias: ${LG}`],
+    ['Alias:\nadam1986', `Alias:\n${LG}`],
+  ]);
+  keep(["alias ll='ls -la'", 'Alias: brak', 'Alias: www.firma.pl', 'Alias: mail.urzad.gov.pl', 'Alias: adam1986 i inne nazwy']);
+});
+test('b6 §8 p.7: etykiety kont AD/LDAP i klucze dziennika zdarzeń', () => {
+  masked([
+    ['sAMAccountName: jkowalski', `sAMAccountName: ${LG}`],
+    ['Konto AD: jkowalski\nKonto domenowe: anowak\nKonto LDAP: pzielinski', `Konto AD: ${LG}\nKonto domenowe: ${LG}\nKonto LDAP: ${LG}`],
+    ['User name: pzielinski', `User name: ${LG}`],
+    ['<Data Name="TargetUserName">tnowicki</Data>', `<Data Name="TargetUserName">${LG}</Data>`],
+    ['"sAMAccountName": "kwisniewski", "targetUserName": "anowak"', `"sAMAccountName": "${LG}", "targetUserName": "${LG}"`],
+    ['<sAMAccountName>kwisniewski</sAMAccountName>', `<sAMAccountName>${LG}</sAMAccountName>`],
+    // znany login z atrybutu AD rozlewa się na resztę zgłoszenia
+    ['sAMAccountName: jkowalski\nUżytkownik jkowalski zgłosił awarię.', `sAMAccountName: ${LG}\nUżytkownik ${LG} zgłosił awarię.`],
+  ]);
+  keep([
+    'Konto AD: zablokowane',
+    'Konto AD: aktywne do 2026-12-31',
+    'Konto domenowe: tak',
+    'Konto domenowe zostało zablokowane.',
+    '<Data Name="SubjectUserName">SYSTEM</Data><Data Name="SubjectUserName">DWM-1</Data>',
+    '<Data Name="IpPort">51322</Data><Data Name="LogonType">3</Data>',
+  ]);
+  masked([['User name: Jan Kowalski', 'User name: [IMIĘ I NAZWISKO]']]);
+});
+test('b6 §8 p.8: logi sshd, PAM i sudo — użytkownik jako [LOGIN], konta systemowe zostają', () => {
+  masked([
+    ['Accepted publickey for jkowalski from 10.20.1.45 port 51322 ssh2', `Accepted publickey for ${LG} from [IP] port 51322 ssh2`],
+    ['Failed password for invalid user anowak from bastion.local port 22 ssh2', `Failed password for invalid user ${LG} from bastion.local port 22 ssh2`],
+    ['Invalid user anowak from bastion.local port 22', `Invalid user ${LG} from bastion.local port 22`],
+    ['pam_unix(sshd:session): session opened for user jkowalski(uid=1001) by (uid=0)', `pam_unix(sshd:session): session opened for user ${LG}(uid=1001) by (uid=0)`],
+    ['sudo:  jkowalski : TTY=pts/0 ; PWD=/home/jkowalski ; USER=root ; COMMAND=/usr/bin/apt update', `sudo:  ${LG} : TTY=pts/0 ; PWD=/home/${LG} ; USER=root ; COMMAND=/usr/bin/apt update`],
+  ]);
+  keep([
+    'Accepted password for root from bastion.local port 22 ssh2',
+    'Accepted publickey for git from bastion.local port 22 ssh2\nAccepted publickey for deploy from bastion.local port 22 ssh2',
+    'Invalid user admin from bastion.local port 22\nFailed password for invalid user ubuntu from bastion.local port 22 ssh2',
+    'session opened for user www-data(uid=33) by (uid=0)',
+    'sudo:  root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/usr/bin/apt update',
+    'sudo: unable to resolve host',
+    'Czekaliśmy na odpowiedź for weeks from the vendor. Accepted offers for children from parents.',
+  ]);
 });

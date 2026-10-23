@@ -15,7 +15,7 @@ exports[`golden: korpus benchmarku — filtr types (tylko strukturalne) 1`] = `
   "neg-100": "System KSeF w wersji 2.0 działa od 2026 roku.",
   "neg-101": "Raport KSeF [NIP] 20250826 000000012345 23 w podziale na kanały.",
   "neg-102": "P.S. Mróz ma być w nocy, okryj róże.",
-  "neg-103": "{"sciezka": "C:\\\\Users\\\\nowak\\\\Documents\\\\raport.docx", "opis": "Linia 1\\nLinia 2"}",
+  "neg-103": "{"sciezka": "C:\\\\Users\\\\Public\\\\nowe\\\\raport.docx", "opis": "Linia 1\\nLinia 2"}",
   "neg-104": "P.P.S. Mróz ma być w nocy, a PKO B.P. Wilk to nazwa robocza.",
   "neg-105": "Ilość
 120
@@ -82,6 +82,7 @@ Kościół       Mariacki     Kraków
 Cystoskopia: trójkąt Pawlika bez zmian. Pismo zarejestrowano pod numerem rejestracji RPW 12345/2026.",
   "neg-15": "Zakład Ubezpieczeń Społecznych wydał decyzję odmowną.",
   "neg-150": "Gabinet przy ul. Szpitalnej 5 m. 3 i Sali 12 jest czynny. Lokalizacje: ul. Leśna 7 oraz Hala 3. Kościół Mariacki odwiedził w niedzielę biskup. Mieszka w Sopocie 500 cudzoziemców.",
+  "neg-151": "Ścieżka: /home/ubuntu/app oraz C:\\Users\\Public\\Desktop. Accepted password for root from bastion.local port 22 ssh2. Strona https://www.linkedin.com/company/baltic-solutions oraz Konto AD: zablokowane. Alias: www.firma.pl",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
@@ -427,7 +428,13 @@ Yuki Tanaka
 Imię i nazwisko ucznia: Jan Nowy
 Opiekuje się bratem niepełnosprawnym urodzonym 12.03.1990 r.
 Maria Nowak z domu Wrona Wypisana 12.10.",
+  "str-149": "Plik: C:\\Users\\tkaminski\\Desktop\\a.txt, udział \\\\FS01\\home$\\anowak, katalog /home/jkowalski/projekty",
   "str-15": "Zwrot nastąpi na konto [NR-KONTA] wskazane w umowie.",
+  "str-150": "sAMAccountName: kwisniewski
+Accepted publickey for mzielinski from bastion.local port 22 ssh2
+sudo:  pnowicki : TTY=pts/0",
+  "str-151": "{"user":"a.kaminska","message":"Konto a.kaminska zablokowane"}
+LinkedIn: https://www.linkedin.com/in/joanna-pietrzak-hr/",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
@@ -531,7 +538,7 @@ exports[`golden: korpus benchmarku — pseudonimizacja osób ([OSOBA-A]…) 1`] 
   "neg-100": "System KSeF w wersji 2.0 działa od 2026 roku.",
   "neg-101": "Raport KSeF [NIP] 20250826 000000012345 23 w podziale na kanały.",
   "neg-102": "P.S. Mróz ma być w nocy, okryj róże.",
-  "neg-103": "{"sciezka": "C:\\\\Users\\\\nowak\\\\Documents\\\\raport.docx", "opis": "Linia 1\\nLinia 2"}",
+  "neg-103": "{"sciezka": "C:\\\\Users\\\\Public\\\\nowe\\\\raport.docx", "opis": "Linia 1\\nLinia 2"}",
   "neg-104": "P.P.S. Mróz ma być w nocy, a PKO B.P. Wilk to nazwa robocza.",
   "neg-105": "Ilość
 120
@@ -598,6 +605,7 @@ Kościół       Mariacki     Kraków
 Cystoskopia: trójkąt Pawlika bez zmian. Pismo zarejestrowano pod numerem rejestracji RPW 12345/2026.",
   "neg-15": "Zakład Ubezpieczeń Społecznych wydał decyzję odmowną.",
   "neg-150": "Gabinet przy [ADRES] i Sali 12 jest czynny. Lokalizacje: [ADRES] oraz Hala 3. Kościół Mariacki odwiedził w niedzielę biskup. Mieszka w Sopocie 500 cudzoziemców.",
+  "neg-151": "Ścieżka: /home/ubuntu/app oraz C:\\Users\\Public\\Desktop. Accepted password for root from bastion.local port 22 ssh2. Strona https://www.linkedin.com/company/baltic-solutions oraz Konto AD: zablokowane. Alias: www.firma.pl",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
@@ -941,7 +949,13 @@ Zam. [ADRES] i [ADRES]",
 Imię i nazwisko ucznia: [OSOBA-B]
 Opiekuje się bratem niepełnosprawnym urodzonym [DATA-URODZENIA] r.
 [OSOBA-C] z domu [OSOBA-D] Wypisana 12.10.",
+  "str-149": "Plik: C:\\Users\\[LOGIN]\\Desktop\\a.txt, udział \\\\FS01\\home$\\[LOGIN], katalog /home/[LOGIN]/projekty",
   "str-15": "Zwrot nastąpi na konto [NR-KONTA] wskazane w umowie.",
+  "str-150": "sAMAccountName: [LOGIN]
+Accepted publickey for [LOGIN] from bastion.local port 22 ssh2
+sudo:  [LOGIN] : TTY=pts/0",
+  "str-151": "{"user":"[LOGIN]","message":"Konto [LOGIN] zablokowane"}
+LinkedIn: https://www.linkedin.com/in/[LOGIN]/",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
@@ -1045,7 +1059,7 @@ exports[`golden: korpus benchmarku — wariant domyślny (wszystkie typy) 1`] = 
   "neg-100": "System KSeF w wersji 2.0 działa od 2026 roku.",
   "neg-101": "Raport KSeF [NIP] 20250826 000000012345 23 w podziale na kanały.",
   "neg-102": "P.S. Mróz ma być w nocy, okryj róże.",
-  "neg-103": "{"sciezka": "C:\\\\Users\\\\nowak\\\\Documents\\\\raport.docx", "opis": "Linia 1\\nLinia 2"}",
+  "neg-103": "{"sciezka": "C:\\\\Users\\\\Public\\\\nowe\\\\raport.docx", "opis": "Linia 1\\nLinia 2"}",
   "neg-104": "P.P.S. Mróz ma być w nocy, a PKO B.P. Wilk to nazwa robocza.",
   "neg-105": "Ilość
 120
@@ -1112,6 +1126,7 @@ Kościół       Mariacki     Kraków
 Cystoskopia: trójkąt Pawlika bez zmian. Pismo zarejestrowano pod numerem rejestracji RPW 12345/2026.",
   "neg-15": "Zakład Ubezpieczeń Społecznych wydał decyzję odmowną.",
   "neg-150": "Gabinet przy [ADRES] i Sali 12 jest czynny. Lokalizacje: [ADRES] oraz Hala 3. Kościół Mariacki odwiedził w niedzielę biskup. Mieszka w Sopocie 500 cudzoziemców.",
+  "neg-151": "Ścieżka: /home/ubuntu/app oraz C:\\Users\\Public\\Desktop. Accepted password for root from bastion.local port 22 ssh2. Strona https://www.linkedin.com/company/baltic-solutions oraz Konto AD: zablokowane. Alias: www.firma.pl",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
@@ -1455,7 +1470,13 @@ Zam. [ADRES] i [ADRES]",
 Imię i nazwisko ucznia: [IMIĘ I NAZWISKO]
 Opiekuje się bratem niepełnosprawnym urodzonym [DATA-URODZENIA] r.
 [IMIĘ I NAZWISKO] z domu [IMIĘ I NAZWISKO] Wypisana 12.10.",
+  "str-149": "Plik: C:\\Users\\[LOGIN]\\Desktop\\a.txt, udział \\\\FS01\\home$\\[LOGIN], katalog /home/[LOGIN]/projekty",
   "str-15": "Zwrot nastąpi na konto [NR-KONTA] wskazane w umowie.",
+  "str-150": "sAMAccountName: [LOGIN]
+Accepted publickey for [LOGIN] from bastion.local port 22 ssh2
+sudo:  [LOGIN] : TTY=pts/0",
+  "str-151": "{"user":"[LOGIN]","message":"Konto [LOGIN] zablokowane"}
+LinkedIn: https://www.linkedin.com/in/[LOGIN]/",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
