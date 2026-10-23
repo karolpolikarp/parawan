@@ -56,19 +56,19 @@ export const EXAMPLE_IBAN_START = 'PL61 1090 1014';
  */
 export const PISMO_PESEL = '44051401359';
 
-/** Moduł aplikacji z jedyną listą kluczy localStorage (STORAGE_KEYS). */
+/** Moduł aplikacji z jedyną listą kluczy localStorage (ALLOWED_KEYS). */
 export const STORAGE_TS = path.join(ROOT, 'apps', 'web', 'src', 'storage.ts');
 
-/** Klucze z `export const STORAGE_KEYS = [...]` w storage.ts, czytane z tekstu pliku. */
+/** Klucze z `export const ALLOWED_KEYS = [...]` w storage.ts, czytane z tekstu pliku. */
 export function readStorageKeys(src = readFileSync(STORAGE_TS, 'utf8')) {
-  const list = src.match(/^export const STORAGE_KEYS = \[([^\]]*)\]/m)?.[1];
+  const list = src.match(/^export const ALLOWED_KEYS = \[([^\]]*)\]/m)?.[1];
   const keys = [...(list ?? '').matchAll(/['"]([^'"]+)['"]/g)].map((m) => m[1]);
-  if (!keys.length) throw new Error(`brak listy STORAGE_KEYS w ${STORAGE_TS}`);
+  if (!keys.length) throw new Error(`brak listy ALLOWED_KEYS w ${STORAGE_TS}`);
   return keys;
 }
 
 /**
- * Klucze, które aplikacja może zapisać w localStorage: lista STORAGE_KEYS z
+ * Klucze, które aplikacja może zapisać w localStorage: lista ALLOWED_KEYS z
  * apps/web/src/storage.ts (storageGet i storageSet przyjmują tylko te). Każdy nowy klucz to nowa
  * informacja zostawiana na komputerze urzędnika, więc trafia tam świadomie, a assertClean()
  * odrzuca każdy inny.
@@ -186,12 +186,16 @@ export function fileSize(file) {
  * Zegar strony to zegar Playwright: czas płynie normalnie, ale assertClean() może go przewinąć.
  * @param {import('playwright').Browser} browser
  * @param {string} [query] np. '?demo'
- * @param {{ file?: string, viewport?: { width: number, height: number },
- *   reducedMotion?: 'reduce' | 'no-preference', javaScriptEnabled?: boolean }} [opts]
+ * `address` podaje plik pod adresem http(s) przez page.route, bez prawdziwej sieci (kopia na stronie
+ * produktu, intranet urzędu). `prepare` dostaje kontekst, zanim ruszy nasłuch i otworzy się plik:
+ * np. obca strona z dysku, która zapisuje coś w localStorage wspólnym dla plików file://.
+ * @param {{ file?: string, address?: string, viewport?: { width: number, height: number },
+ *   reducedMotion?: 'reduce' | 'no-preference', javaScriptEnabled?: boolean,
+ *   prepare?: (context: import('playwright').BrowserContext) => Promise<void> }} [opts]
  */
 export async function openApp(browser, query = '', opts = {}) {
   const file = opts.file ?? WEB_HTML;
-  const url = pathToFileURL(file).href + query;
+  const url = (opts.address ?? pathToFileURL(file).href) + query;
   // Bez JavaScriptu (zasada GPO blokująca skrypty w plikach z dysku) nie ma timerów strony do
   // przewijania, a zegar Playwright i nasłuch CSP i meta refresh to skrypty na stronie, więc
   // zostaje sama kontrola żądań. Wystarcza: bez skryptu tylko HTML i CSS mogą sięgnąć po zasób.
@@ -203,6 +207,7 @@ export async function openApp(browser, query = '', opts = {}) {
     reducedMotion: opts.reducedMotion ?? 'reduce',
     viewport: opts.viewport ?? { width: 1366, height: 768 },
   });
+  if (opts.prepare) await opts.prepare(context);
   /** @type {import('playwright').Request[]} */
   const requests = [];
   const pending = new Set();
@@ -242,6 +247,15 @@ export async function openApp(browser, query = '', opts = {}) {
   // Gdyby CSP zawiodła, żądanie i tak nie wyjdzie z maszyny testowej: zostanie zapisane
   // przez słuchacza wyżej (test padnie), a tu przerwane.
   await context.route(/^https?:|^ftp:/, (route) => route.abort('blockedbyclient'));
+  // Sam dokument pod adresem http(s): treść pliku z dysku, bez wyjścia do sieci. Route
+  // zarejestrowany później ma pierwszeństwo, więc każdy inny adres dalej jest przerywany.
+  if (opts.address) {
+    const body = readFileSync(file);
+    await context.route(
+      (u) => u.href.split('#')[0] === url,
+      (route) => route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body }),
+    );
+  }
   // WebSocket nie przechodzi przez route ani zdarzenie request, więc ma osobną pułapkę.
   // Playwright podmienia wtedy konstruktor WebSocket na stronie: połączenie nie powstaje, zanim
   // dotrze do CSP, dlatego liczy się każda próba, także taka, którą CSP by zatrzymała. Aplikacja
@@ -603,7 +617,7 @@ export function tracesProblems({ localKeys, items }) {
   const problems = [];
   for (const k of localKeys) {
     if (!ALLOWED_STORAGE_KEYS.includes(k)) {
-      problems.push(`localStorage: klucz „${k}” spoza STORAGE_KEYS (apps/web/src/storage.ts)`);
+      problems.push(`localStorage: klucz „${k}” spoza ALLOWED_KEYS (apps/web/src/storage.ts)`);
     }
   }
   for (const [where, value] of items) {

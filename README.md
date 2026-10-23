@@ -123,6 +123,12 @@ Nazywam się [IMIĘ I NAZWISKO], PESEL [PESEL], [ADRES], tel. [TELEFON].
    blokuje zapytania sieciowe ze skryptów i wczytywanie czegokolwiek spoza pliku. Dział IT
    sprawdzi to w źródle strony.
 
+**Co zostaje na komputerze.** W pamięci przeglądarki Parawan trzyma tylko ustawienia (wyłączone
+typy danych, tryb osób, animację), nigdy treść pism ani dane osobowe, a zapamiętane ustawienie,
+które zmniejsza zasłanianie, widać przy wyniku razem z tym, czego dotyczy. Listy z danymi
+osobowymi, np. nazwiska do zasłaniania zawsze, istnieją tylko w otwartej karcie i przechodzą do
+następnej sesji wyłącznie przez plik, który sam zapisujesz i wczytujesz.
+
 ## 🎨 Kolory znaczników
 
 Każda kategoria danych ma swój kolor, ten sam w wyniku i w podsumowaniu, a w tabeli niżej swój znak

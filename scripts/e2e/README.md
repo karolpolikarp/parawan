@@ -24,7 +24,7 @@ Po każdym teście `withApp()` z `helpers.mjs` sprawdza, że:
   resztę bramki. Pułapka z `helpers.mjs` podmienia konstruktory przed pierwszym skryptem strony
   (także w ramkach i nowych oknach), zapisuje każdą próbę i rzuca wyjątek, więc połączenie nie
   powstaje; liczy się sama próba, także złapana przez kod strony,
-- w localStorage są tylko klucze z listy `STORAGE_KEYS` w `apps/web/src/storage.ts` (bramka
+- w localStorage są tylko klucze z listy `ALLOWED_KEYS` w `apps/web/src/storage.ts` (bramka
   czyta ją z tekstu tego pliku), a w localStorage, sessionStorage, bazach IndexedDB, Cache
   Storage, ciasteczkach, adresie i tytule karty, `window.name` i `history.state` nie ma żadnej
   danej z `FICTIONAL_PII` (PESEL, nazwiska, numer konta, e-mail i telefon z wczytywanych pism),
@@ -124,9 +124,14 @@ Przy błędzie zrzut całej strony trafia do `test-results/e2e/` (w CI jako arte
   są w jednym miejscu, w `helpers.mjs`. Scenariusz, który wczytuje pismo z nowymi danymi
   osobowymi, dopisuje je do `FICTIONAL_PII`. Scenariusze z `?demo` zaczynają od
   `app.demoReady()`, który sprawdza, że te napisy z przykładu naprawdę stoją w polu źródła.
-- Nowy klucz localStorage trafia do `STORAGE_KEYS` w `apps/web/src/storage.ts` (jedyna droga
+- Nowy klucz localStorage trafia do `ALLOWED_KEYS` w `apps/web/src/storage.ts` (jedyna droga
   zapisu, `storageGet` i `storageSet` przyjmują tylko klucze z tej listy, a vitest pilnuje, że
   inne moduły nie sięgają po pamięć przeglądarki same). Bramka czyta tę listę z pliku.
+  Ustawienie, które zmniejsza zasłanianie, po odczycie z pamięci musi być widoczne przy wyniku
+  (reguły w komentarzu w `storage.ts`); scenariusz zapisu przez obcy plik z dysku jest
+  w `smoke.test.mjs` (opcja `prepare` w `withApp()` dostaje kontekst przed otwarciem pliku).
+- Kopię pod adresem http(s) (strona produktu, intranet urzędu) daje opcja `address` w `withApp()`:
+  plik z dysku podany przez `page.route`, bez prawdziwej sieci.
 - Asercja „numeru nie ma w wyniku” idzie w parze z asercją, że znacznik (np. `[PESEL]`) w nim
   jest. Sama negatywna przechodzi także na pustym wyniku.
 - Testy treści CSS czytają `style.css` przez `node:fs` i zaczynają od asercji, że treść nie jest

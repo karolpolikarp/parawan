@@ -173,6 +173,13 @@
         </div>
       </section>
 
+      <!-- Kopia otwarta ze strony produktu (lista hostów w web-copy.ts). Plik z dysku i kopia
+           w intranecie urzędu paska nie pokazują. -->
+      <p id="web-copy" class="web-copy g12" role="note" hidden>
+        <i class="gi" data-i="ostrzezenie"></i>
+        <span>Ten Parawan działa ze strony internetowej. Prawdziwe pisma otwieraj w pliku pobranym na dysk, bo do karty z adresem internetowym mają dostęp rozszerzenia przeglądarki.</span>
+      </p>
+
       <!-- ══════════ TEKST ŹRÓDŁOWY ══════════ -->
       <section class="card g6 card-ed" id="edytor">
         <div class="card-h">
@@ -196,6 +203,7 @@
           <span id="app-note-text"></span>
           <span class="note-acts">
             <button type="button" id="app-note-undo" class="btn btn-sm">Cofnij</button>
+            <button type="button" id="app-note-mask-on" class="btn btn-sm" hidden>Włącz wszystko</button>
             <button type="button" id="app-note-close" class="note-x" aria-label="Zamknij komunikat">×</button>
           </span>
         </div>

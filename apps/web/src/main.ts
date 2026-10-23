@@ -30,6 +30,7 @@ import {
 } from './pii-meta';
 import { plural } from './plural';
 import { storageGet, storageSet } from './storage';
+import { isProductCopy } from './web-copy';
 import './style.css';
 import { initTips, tipDescId } from './tips';
 
@@ -65,6 +66,7 @@ const appError = $<HTMLParagraphElement>('app-error');
 const appNote = $<HTMLDivElement>('app-note');
 const appNoteText = $<HTMLSpanElement>('app-note-text');
 const appNoteUndo = $<HTMLButtonElement>('app-note-undo');
+const appNoteMaskOn = $<HTMLButtonElement>('app-note-mask-on');
 const appNoteClose = $<HTMLButtonElement>('app-note-close');
 const appNoteStatus = $<HTMLSpanElement>('app-note-status');
 const maskNav = $<HTMLSpanElement>('mask-nav');
@@ -97,6 +99,11 @@ const maskTogglesEl = $<HTMLSpanElement>('mask-toggles');
 const disabledGroups = new Set<string>(
   (storageGet('mask-disabled') ?? '').split(',').filter((k) => MASK_GROUPS.some((g) => g.key === k)),
 );
+// Wyłączenie wczytane z pamięci przy starcie. W Chromium localStorage jest wspólny dla
+// wszystkich plików z dysku, więc mógł je zapisać obcy plik .html, a nie urzędnik (storage.ts,
+// reguła b). Pokazujemy je raz, w pasku nad polem źródła, zanim ktoś wklei pismo.
+const storedOff = disabledGroups.size > 0;
+let storedOffNote = false; // pasek o zapamiętanym wyłączeniu stoi na ekranie
 
 const wykrywaBody = document.getElementById('wykrywa-body');
 if (wykrywaBody) {
@@ -276,6 +283,20 @@ function updateMaskTotal(): void {
   const note = maskOffSummary();
   maskOffText.textContent = note;
   maskOffNote.hidden = !note;
+  // Po włączeniu wszystkiego przełącznikami pasek o zapamiętanym wyłączeniu jest już nieaktualny.
+  if (storedOffNote && disabledGroups.size === 0) dismissNote();
+}
+
+/** Treść paska o wyłączeniu wczytanym z pamięci: skąd, ile typów i które. */
+function storedOffMessage(): string {
+  const off = MASK_GROUPS.filter((g) => disabledGroups.has(g.key));
+  const n = off.length;
+  if (n === MASK_GROUPS.length) {
+    return `Zapamiętane ustawienie z „Co maskować”: nie zasłaniam żadnego z ${n} typów danych. Wynik pokaże tekst bez zmian.`;
+  }
+  const count = n === 1 ? 'jednego typu' : `${n} typów`;
+  const names = n <= 6 ? ` (${off.map((g) => inSentence(g.label)).join(', ')})` : '';
+  return `Zapamiętane ustawienie z „Co maskować”: nie zasłaniam ${count} danych${names}. Te dane zostaną w wyniku bez zmian.`;
 }
 function syncSwitches(): void {
   maskTogglesEl.querySelectorAll<HTMLInputElement>('.sw[data-key]').forEach((sw) => {
@@ -303,6 +324,12 @@ maskOffReset.addEventListener('click', () => {
   bulkMask('on');
   announce('Włączono maskowanie wszystkich typów.');
   if (hadFocus) output.focus({ preventScroll: true });
+});
+// Ta sama akcja w pasku o zapamiętanym wyłączeniu; pasek znika razem z wyłączeniem
+// (updateMaskTotal), a fokus wraca do pola źródła (dismissNote).
+appNoteMaskOn.addEventListener('click', () => {
+  bulkMask('on');
+  announce('Włączono maskowanie wszystkich typów.');
 });
 $('mask-count-total').textContent = String(MASK_GROUPS.length);
 updateMaskTotal();
@@ -888,8 +915,12 @@ input.addEventListener('input', () => {
   // których Parawan nie czyta) zostaje do zamknięcia: te części dalej są w oryginale, a fokus po
   // wczytaniu stoi w polu, więc pierwszy klawisz kasowałby jedyne ostrzeżenie. Puste pole zamyka
   // także dopisek: z pliku nic już w nim nie ma, a dopisek wisiałby nad nowo wpisanym tekstem.
+  // Pasek o zapamiętanym wyłączeniu zostaje: urzędnik wkleja pismo zaraz po otwarciu pliku
+  // (fokus stoi w polu), a pierwszy Ctrl+V nie może zamknąć ostrzeżenia, którego nie przeczytał.
   clearError();
-  if (!input.value.trim()) dismissNote();
+  if (storedOffNote) {
+    /* zostaje do zamknięcia, „Włącz wszystko” albo następnego komunikatu */
+  } else if (!input.value.trim()) dismissNote();
   else if (undoText !== null || !noteInfo) expireUndo();
   updateSrcMeta(input.value);
   updatePending = true;
@@ -952,6 +983,8 @@ function showNote(msg: string, prev: string | null, info = ''): void {
   const text = [msg, info].filter(Boolean).join('\n');
   appNoteText.textContent = text;
   appNoteUndo.hidden = prev === null;
+  appNoteMaskOn.hidden = true;
+  storedOffNote = false;
   appNote.hidden = false;
   appNoteStatus.textContent = text; // ogłoszenie dla czytnika ekranu
   revealIfOffscreen(appNote);
@@ -978,6 +1011,8 @@ function dismissNote(): void {
   const hadFocus = appNote.contains(document.activeElement);
   undoText = null;
   noteInfo = '';
+  storedOffNote = false;
+  appNoteMaskOn.hidden = true;
   appNote.hidden = true;
   appNoteStatus.textContent = '';
   if (hadFocus && finePointer.matches) input.focus({ preventScroll: true });
@@ -1320,6 +1355,21 @@ if (params.has('pdftest')) {
       update();
     });
 }
+
+// Raz na otwarcie pliku: zapamiętane wyłączenie widać, zanim ktoś wklei tekst. Bez przewijania
+// do paska, bo stoi pod przyciskami pola źródła, a strona dopiero się otwiera.
+if (storedOff && disabledGroups.size > 0) {
+  const msg = storedOffMessage();
+  appNoteText.textContent = msg;
+  appNoteUndo.hidden = true;
+  appNoteMaskOn.hidden = false;
+  appNote.hidden = false;
+  appNoteStatus.textContent = msg;
+  storedOffNote = true;
+}
+
+// Kopia otwarta ze strony produktu dostaje stały pasek nad edytorem (web-copy.ts).
+if (isProductCopy(location.hostname)) $('web-copy').hidden = false;
 
 $('app-version-top').textContent = __APP_VERSION__;
 

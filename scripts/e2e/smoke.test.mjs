@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { after, before, test } from 'node:test';
 import { CSP_TARGETS, cspProblems, htmlCspProblems } from './csp.mjs';
 import {
@@ -761,6 +762,92 @@ test('localStorage: tylko znane klucze ustawień, bez treści pisma', async (t) 
     assert.ok(!values.includes(EXAMPLE_PESEL) && !values.includes(EXAMPLE_NAME), 'treść pisma w localStorage');
   }, opts);
 });
+
+// W Chromium localStorage jest wspólny dla wszystkich plików z dysku, więc dowolny plik .html
+// (np. załącznik otwarty z Pobranych) może wyłączyć zasłanianie PESEL-u. Parawan pokazuje takie
+// zapamiętane wyłączenie od razu po otwarciu, zanim ktoś wklei pismo (storage.ts, reguła b).
+test('obcy plik z dysku zapisuje mask-disabled=pesel: komunikat przed wklejeniem, „Włącz wszystko” go zdejmuje', async (t) => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'parawan-obcy-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const foreign = path.join(dir, 'a.html');
+  writeFileSync(
+    foreign,
+    "<!doctype html><meta charset=utf-8><title>a</title><script>localStorage.setItem('mask-disabled', 'pesel')</script>",
+  );
+  const prepare = async (context) => {
+    const other = await context.newPage();
+    await other.goto(pathToFileURL(foreign).href);
+    assert.equal(await other.evaluate(() => localStorage.getItem('mask-disabled')), 'pesel');
+    await other.close();
+  };
+  await withApp(
+    browser,
+    t,
+    '',
+    async (app) => {
+      const { page } = app;
+      const note = page.locator('#app-note');
+      await note.waitFor({ state: 'visible' });
+      assert.equal(await page.locator('#input').inputValue(), '', 'pole źródła nie jest puste');
+      const text = await page.locator('#app-note-text').innerText();
+      assert.match(text, /Zapamiętane ustawienie.*nie zasłaniam jednego typu danych \(PESEL\)/);
+      assert.match(text, /Te dane zostaną w wyniku bez zmian\./);
+      const status = await page.locator('#app-note-status').textContent();
+      assert.equal(status, text, 'czytnik ekranu nie dostał komunikatu');
+      // Wklejone pismo nie zamyka ostrzeżenia, a numer naprawdę zostaje jawny.
+      await page.locator('#input').fill(`Wnioskodawca PESEL ${EXAMPLE_PESEL}.`);
+      await app.waitForOutput(EXAMPLE_PESEL);
+      assert.ok(await note.isVisible(), 'wklejenie tekstu zamknęło komunikat');
+      await page.getByRole('button', { name: 'Włącz wszystko' }).first().click();
+      await note.waitFor({ state: 'hidden' });
+      await app.waitForOutput('[PESEL]');
+      assert.ok(!(await app.output()).includes(EXAMPLE_PESEL), 'numer PESEL dalej w wyniku');
+      const stored = await page.evaluate(() => localStorage.getItem('mask-disabled'));
+      assert.ok(!stored, `mask-disabled po „Włącz wszystko”: „${stored}”`);
+      // Wyczyść, żeby bramka po teście nie widziała numeru w polu (to nie pamięć, ale porządek).
+      await page.locator('#clear').click();
+    },
+    { prepare },
+  );
+});
+
+test('zwykły start: bez komunikatu o zapamiętanym wyłączeniu i bez paska kopii ze strony', async (t) => {
+  await withApp(browser, t, '', async ({ page }) => {
+    await page.locator('#output').waitFor();
+    assert.equal(await page.locator('#app-note').isVisible(), false, 'komunikat bez zapamiętanego wyłączenia');
+    assert.equal(await page.locator('#web-copy').isVisible(), false, 'pasek kopii ze strony na file://');
+  });
+});
+
+// Kopia otwarta wprost ze strony produktu działa jak strona WWW (rozszerzenia czytają kartę),
+// więc dostaje stały pasek. Plik podany przez page.route, bez prawdziwej sieci.
+for (const [address, shown] of [
+  ['https://parawan.karolwilczynski.com/pobierz/Parawan.html', true],
+  ['https://karolpolikarp.github.io/parawan/Parawan.html', true],
+  ['http://intranet.urzad.local/', false],
+]) {
+  test(`pasek kopii ze strony: ${address} ${shown ? 'pokazuje' : 'nie pokazuje'}`, async (t) => {
+    await withApp(
+      browser,
+      t,
+      '',
+      async ({ page }) => {
+        assert.equal(new URL(page.url()).hostname, new URL(address).hostname);
+        await page.locator('#output').waitFor();
+        const bar = page.locator('#web-copy');
+        assert.equal(await bar.isVisible(), shown);
+        if (shown) {
+          assert.match(await bar.innerText(), /Prawdziwe pisma otwieraj w pliku pobranym na dysk/);
+          // nad edytorem: pasek kończy się nad kartą pola źródła
+          const barBox = await bar.boundingBox();
+          const edBox = await page.locator('#edytor').boundingBox();
+          assert.ok(barBox && edBox && barBox.y + barBox.height <= edBox.y, 'pasek nie stoi nad edytorem');
+        }
+      },
+      { address },
+    );
+  });
+}
 
 test('landing z dysku ładuje się bez żądań i błędów', async (t) => {
   await withApp(

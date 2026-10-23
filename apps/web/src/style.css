@@ -769,6 +769,19 @@ mark.pii.pii-linked { box-shadow: 0 0 0 2px var(--acc-line); }
   background: var(--acc-soft);
   color: var(--text);
 }
+/* Pasek kopii otwartej ze strony produktu: stały, nad kartami edytora, w kolorze ostrzeżenia. */
+.web-copy {
+  display: flex; align-items: flex-start; gap: 10px;
+  margin: 0;
+  padding: 12px 16px;
+  border: 1px solid rgba(138, 90, 18, .35);
+  border-radius: var(--r-ctl);
+  background: rgba(138, 90, 18, .07);
+  color: var(--warn);
+  font-size: 14px; font-weight: 600; line-height: 1.45;
+}
+.web-copy[hidden] { display: none; }
+.web-copy .gi { width: 20px; height: 20px; margin-top: 1px; }
 /* pre-line: dopisek o pliku i zdanie o ukrytym tekście zaczynają się od nowego wiersza
    (main.ts i docx-inventory.ts łączą je znakiem „\n”) */
 #app-note-text { flex: 1 1 220px; min-width: 0; white-space: pre-line; }

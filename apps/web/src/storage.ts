@@ -11,9 +11,22 @@
  * tu świadomie. Bramka E2E (scripts/e2e/helpers.mjs) czyta tę listę z tekstu tego pliku i po
  * każdym teście odrzuca każdy inny klucz, więc lista zostaje w jednym wierszu niżej, jako napisy
  * w nawiasach kwadratowych.
+ *
+ * W Chromium localStorage jest wspólny dla wszystkich plików otwartych z dysku (file://), więc
+ * każdy inny plik .html, np. załącznik otwarty z Pobranych, może tu zapisać, co zechce. Reguły
+ * dla każdego pakietu, który dokłada ustawienie:
+ * (a) żadnej treści pism ani danych osobowych w localStorage, tylko ustawienia;
+ * (b) ustawienie, które zmniejsza zasłanianie (wyłączone typy, lista „Zostaw jawne”, profil BIP),
+ *     po odczycie z pamięci jest zawsze widoczne przy wyniku, z liczbą pozycji i sposobem
+ *     wyłączenia, bo mógł je zapisać obcy plik;
+ * (c) listy z danymi osobowymi („Zawsze zasłaniaj”) żyją tylko w pamięci karty, a przechodzą
+ *     między sesjami przez zapis i wczytanie pliku, który wybiera użytkownik;
+ * (d) nowy klucz to wpis w ALLOWED_KEYS i w docs/wydanie/DLA-IOD-I-IT.txt.
+ * storage.test.ts pilnuje, żeby każde wywołanie storageGet i storageSet w aplikacji miało klucz
+ * z tej listy wpisany wprost, a tsc odrzuca każdy inny napis.
  */
-export const STORAGE_KEYS = ['mask-disabled', 'pseudonyms', 'motion'] as const;
-export type StorageKey = (typeof STORAGE_KEYS)[number];
+export const ALLOWED_KEYS = ['mask-disabled', 'pseudonyms', 'motion'] as const;
+export type StorageKey = (typeof ALLOWED_KEYS)[number];
 
 export function storageGet(key: StorageKey): string | null {
   try {

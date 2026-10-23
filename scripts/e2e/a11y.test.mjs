@@ -136,6 +136,17 @@ const SCANS = [
     prepare: async (app) => app.demoReady(),
   },
   {
+    // A04: pasek kopii ze strony produktu i komunikat o zapamiętanym wyłączeniu naraz
+    gdzie: 'aplikacja ze strony produktu, zapamiętane wyłączenie PESEL',
+    query: '',
+    address: 'https://parawan.karolwilczynski.com/pobierz/Parawan.html',
+    context: (context) => context.addInitScript(() => localStorage.setItem('mask-disabled', 'pesel')),
+    prepare: async ({ page }) => {
+      await page.locator('#app-note').waitFor({ state: 'visible' });
+      await page.locator('#web-copy').waitFor({ state: 'visible' });
+    },
+  },
+  {
     gdzie: 'landing, rozwinięte <details>',
     query: '',
     file: LANDING_HTML,
@@ -159,7 +170,7 @@ for (const scan of SCANS) {
         await scan.prepare(app);
         assertNoNewViolations(scan.gdzie, await axeScan(app.page));
       },
-      { file: scan.file, viewport: scan.viewport },
+      { file: scan.file, viewport: scan.viewport, address: scan.address, prepare: scan.context },
     );
   });
 }
