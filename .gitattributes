@@ -1,3 +1,19 @@
+# Końce wierszy LF w repozytorium i w każdej kopii roboczej, także na Windows z domyślnym
+# core.autocrlf=true. Bez tego build na Windows wkleja do Parawan.html teksty z CRLF i daje inną
+# sumę SHA-256 niż wydanie, choć kod jest ten sam. Z tym plikiem budowa z tagu na dowolnym
+# systemie daje plik identyczny bit w bit z wydaniem (DLA-IOD-I-IT.txt, „Budowa z kodu”).
+* text=auto eol=lf
+
+# Pliki binarne: bez zamiany końców wierszy i bez łatek tekstowych w diffie.
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff2 binary
+*.pdf binary
+*.docx binary
+*.odt binary
+*.zip binary
+
 # Fikcyjne pisma do testów: te same bajty na Windows i w CI (bez zamiany LF na CRLF),
 # bo testy porównują tekst i wynik maskowania dokładnie.
 apps/web/src/fixtures/** -text
