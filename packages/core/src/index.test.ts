@@ -5154,7 +5154,7 @@ test('Resztki b5 · tablica: kod silnika z pojemnością, rejestracja pisma, pow
     'Samochód osobowy marki Volkswagen Golf TDI 1896 cm3, rok produkcji 2003.',
     'samochód marki Renault Clio DCI 1461',
     'Wniosek zarejestrowano pod numerem rejestracji RPW 12345/2026.',
-    '{\"nr_rej\": \"UM 1234\", \"nrRej\": \"ZP 2026\"}',
+    '{"nr_rej": "UM 1234", "nrRej": "ZP 2026"}',
   ]);
   masked([
     ['samochód marki Peugeot Boxer HDI 2198, nr rej. WLI 23C4', `samochód marki Peugeot Boxer HDI 2198, nr rej. ${RJ}`],
@@ -5162,8 +5162,8 @@ test('Resztki b5 · tablica: kod silnika z pojemnością, rejestracja pisma, pow
     ['pojazd o numerze rejestracyjnym WPI 12345', `pojazd o numerze rejestracyjnym ${RJ}`],
     ['nr rej. WPI 12345, WPI 2019', `nr rej. ${RJ}, ${RJ}`],
     ['nr rej. WPI 12345, OC 2024', `nr rej. ${RJ}, OC 2024`],
-    ['{\"nr_rej\": \"WPI 12345\"}', `{\"nr_rej\": \"${RJ}\"}`],
-    ['{\"nrRejestracyjny\": \"WPI 12345\"}', `{\"nrRejestracyjny\": \"${RJ}\"}`],
+    ['{"nr_rej": "WPI 12345"}', `{"nr_rej": "${RJ}"}`],
+    ['{"nrRejestracyjny": "WPI 12345"}', `{"nrRejestracyjny": "${RJ}"}`],
   ]);
 });
 test('Resztki b5 · telefon: numer inwentarzowy po „nr inw.", kwota w komórce arkusza i w zestawieniu kosztów', () => {
@@ -5307,4 +5307,186 @@ test('Resztki b4 · pseudonim po „Pan/Pani" z nazwiska, nie z imienia, członu
     ],
     { pseudonyms: true },
   );
+});
+test('Resztki b3 · zamieszkanie: zdanie ogólne z przydawką albo okolicznikiem przed markerem, mała liczba osób to skład gospodarstwa', () => {
+  keep([
+    'Obywatele Ukrainy mieszkający w Lublinie mogą złożyć wniosek.',
+    'Pracownicy sezonowi mieszkający w Poznaniu otrzymają dodatek.',
+    'Seniorzy samotnie mieszkający w Łodzi otrzymają pomoc.',
+    'Polacy coraz częściej mieszkają w Warszawie.',
+    'Osoba niepełnosprawna mieszkająca w Krakowie może złożyć wniosek.',
+    'Rodzina wielodzietna mieszkająca w Lublinie otrzyma bon.',
+    'Ludzie mieszkają w Warszawie coraz dłużej.',
+    'Ludzie mieszkający w Warszawie płacą więcej.',
+    'Młodzi ludzie coraz częściej mieszkają w Warszawie.',
+    'Ludzie mieszkający w Kutnie narzekają na smog.',
+    'Zamieszkuje w Krakowie ok. 800 tys. osób.',
+  ]);
+  masked([
+    ['Pozwani mieszkają w Lublinie.', `Pozwani mieszkają w ${C}.`],
+    ['Wnioskodawcy mieszkają w Lublinie.', `Wnioskodawcy mieszkają w ${C}.`],
+    ['Jego rodzice mieszkają w Lublinie.', `Jego rodzice mieszkają w ${C}.`],
+    ['Dzieci wnioskodawczyni mieszkają w Lublinie.', `Dzieci wnioskodawczyni mieszkają w ${C}.`],
+    ['Wnioskodawczyni zamieszkała w Gdańsku 3 osoby na utrzymaniu.', `Wnioskodawczyni zamieszkała w ${C} 3 osoby na utrzymaniu.`],
+    ['zam. Gdańsk 3 osoby', `zam. ${C} 3 osoby`],
+    ['Miejsce zamieszkania: Gdańsk 4 osoby', `Miejsce zamieszkania: ${C} 4 osoby`],
+    ['zam. w Lublinie 2 osoby w domu', `zam. w ${C} 2 osoby w domu`],
+    ['Mieszka w Sopocie 3 dzieci', `Mieszka w ${C} 3 dzieci`],
+    ['Z wnioskodawczynią mieszka w Lublinie 3 dzieci.', `Z wnioskodawczynią mieszka w ${C} 3 dzieci.`],
+  ]);
+});
+test('Resztki b3 · głowa nazwy i przymiotnik-nazwisko: czasownik osobowy, osoba znana z pisma, grafik dyżurów i kolumny wyrównane spacjami', () => {
+  keep([
+    'Noc Świętojańska odbędzie się w sobotę.',
+    'Pokój Westfalski podpisano w 1648 r.',
+    'Las Kabacki zamknięto dla ruchu.',
+    'Puszcza Białowieska jest piękna.',
+  ]);
+  masked([
+    ['Noc Brzozowska spędziła w celi.', `Noc ${N} spędziła w celi.`],
+    ['Noc Brzozowska spędziła na oddziale.', `Noc ${N} spędziła na oddziale.`],
+    ['Rano  Sosnowska  Oddział Wewnętrzny', `Rano  ${N}  Oddział Wewnętrzny`],
+    ['Tak  Gzowski  Urząd Miasta', `Tak  ${N}  Urząd Miasta`],
+    ['Dzień   Lisiecki   Oddział Pediatrii', `Dzień   ${N}   Oddział Pediatrii`],
+    ['Noc      Brzozowska', `Noc      ${N}`],
+    ['12.06  Noc  Wąsowska  OIOM', `12.06  Noc  ${N}  OIOM`],
+    ['Pacjentka Anna Lisiecka przyjęta. Noc Lisiecka przespała spokojnie.', `Pacjentka ${N} przyjęta. Noc ${N} przespała spokojnie.`],
+    ['Grafik: Dzień Lisiecka, Noc Brzozowska', `Grafik: Dzień ${N}, Noc ${N}`],
+    ['12.05.2024 Noc Gzowska SOR', `12.05.2024 Noc ${N} SOR`],
+    ['Noc Gzowska spędziła w szpitalu.', `Noc ${N} spędziła w szpitalu.`],
+    ['Pokój Lisiecki opuścił o 10:00.', `Pokój ${N} opuścił o 10:00.`],
+    ['Zamek Brzozowski wymienił sam.', `Zamek ${N} wymienił sam.`],
+    ['Las Gzowski sprzedał w 2019 r.', `Las ${N} sprzedał w 2019 r.`],
+    ['Kościół Mariacki odwiedził Zygmunt Kowalski.', `Kościół Mariacki odwiedził ${N}.`],
+  ]);
+  masked(
+    [
+      ['Pacjentka Anna Lisiecka przyjęta. Noc Lisiecka przespała spokojnie.', 'Pacjentka [OSOBA-A] przyjęta. Noc [OSOBA-A] przespała spokojnie.'],
+    ],
+    { pseudonyms: true },
+  );
+});
+test('Resztki b3 · nazwisko właściciela przed formą firmy, nazwisko dwuczłonowe po roli z urzędem, nazwa szpitala po „Pana"', () => {
+  keep([
+    'Do Pana Dyrektora Szpitala Bielańskiego',
+    'Odwiedziliśmy Biebrzański Park Narodowy.',
+  ]);
+  masked([
+    ['Również Brzozowski Spółka Jawna złożyła ofertę.', `Również ${N} Spółka Jawna złożyła ofertę.`],
+    ['Potem Lisiecki Kancelaria Adwokacka odpisała.', `Potem ${N} Kancelaria Adwokacka odpisała.`],
+    ['Dziś Gzowski Zakład Usługowy otworzył punkt.', `Dziś ${N} Zakład Usługowy otworzył punkt.`],
+    ['Szanowna Pani Dyrektor Szkoły Kowalska-Nowak', `Szanowna Pani Dyrektor Szkoły ${N}`],
+    ['Pan Komendant Policji Kowalski-Nowak', `Pan Komendant Policji ${N}`],
+    ['Do Pani Dyrektor Przedszkola Lewandowska-Wójcik', `Do Pani Dyrektor Przedszkola ${N}`],
+  ]);
+});
+test('Resztki b3 · zdrobnienie-nazwisko w notatce kadrowej i pielęgniarskiej, rzeczownik przy przedmiocie', () => {
+  keep([
+    'Kluczyk do skrzynki leży na biurku.',
+    'Mieczyk ogrodowy kwitnie w lipcu.',
+    'Kluczyk w zamku się zaciął.',
+  ]);
+  masked([
+    ['Mieczyk zatrudniony od 01.02.2010 r. na stanowisku magazyniera.', `${N} zatrudniony od 01.02.2010 r. na stanowisku magazyniera.`],
+    ['Kluczyk z działu kadr potwierdził nieobecność.', `${N} z działu kadr potwierdził nieobecność.`],
+    ['Mieczyk przytomny, w kontakcie logicznym.', `${N} przytomny, w kontakcie logicznym.`],
+    ['Kluczyk na zwolnieniu lekarskim do piątku.', `${N} na zwolnieniu lekarskim do piątku.`],
+    ['Krzaczyk od 2015 r. pracuje w firmie.', `${N} od 2015 r. pracuje w firmie.`],
+  ]);
+});
+test('Resztki b3 · wartość pod „name"/„osoba": imię i nazwisko małymi literami, rola będąca nazwiskiem', () => {
+  keep([
+    '{"name": "kalina koralowa"}',
+    '{"name": "róża pustyni"}',
+    '{"osoba": "Sędzia"}',
+  ]);
+  masked([
+    ['{"name": "ewa pietka"}', `{"name": "${N}"}`],
+    ['<osoba>jan wolny</osoba>', `<osoba>${N}</osoba>`],
+    ['<name>joanna kępka</name>', `<name>${N}</name>`],
+    ['{"name": "marek siwko"}', `{"name": "${N}"}`],
+    ['{"osoba": "ewa pietka"}', `{"osoba": "${N}"}`],
+    ['{"osoba": "ewa dudka"}', `{"osoba": "${N}"}`],
+    ['<osoba>jan sitko</osoba>', `<osoba>${N}</osoba>`],
+    ['{"name": "jan sitko"}', `{"name": "${N}"}`],
+    ['{"name": "anna rybka"}', `{"name": "${N}"}`],
+    ['{"osoba": "Marszałek"}', `{"osoba": "${N}"}`],
+    ['<osoba>Marszałek</osoba>', `<osoba>${N}</osoba>`],
+    ['{"osoba": "Dziadek"}', `{"osoba": "${N}"}`],
+    ['{"osoba": "Wójt"}', `{"osoba": "${N}"}`],
+  ]);
+});
+test('Resztki b3 · strona postępowania i komórka CSV wygrywają ze stoplistą przymiotników i nazw mieszkańców', () => {
+  keep([
+    'Poleski Park Narodowy jest otwarty.',
+    'Senacki projekt ustawy trafił do Sejmu.',
+    'Strażacki sprzęt kupiono w maju.',
+    'Kazimierz Dolny leży nad Wisłą.',
+  ]);
+  masked([
+    ['Świadek Poleski zeznał, że nic nie widział.', `Świadek ${N} zeznał, że nic nie widział.`],
+    ['Pozwany Poleski nie stawił się.', `Pozwany ${N} nie stawił się.`],
+    ['1;Poleski Marek;ul. Leśna 7;Włodawa', `1;${N};${A};Włodawa`],
+    ['Wnioskodawca: Kazimierz Dolny, ul. Polna 3', `Wnioskodawca: ${N}, ${A}`],
+    ['Postępowanie wobec dłużnika Bartnicza.', `Postępowanie wobec dłużnika ${N}.`],
+    ['1\tAnna\tWarszawa\tul. Długa 5', `1\tAnna\t${C}\t${A}`],
+    ['2;Poleski;Adam;Kraków', `2;${N};Adam;Kraków`],
+    ['4;Duńczyk;Piotr;Kraków', `4;${N};Piotr;Kraków`],
+    ['Świadek Strażacki zeznał', `Świadek ${N} zeznał`],
+  ]);
+});
+test('Resztki b3 · „św." jako świadek: samo nazwisko, czynność procesowa, osoba za patronem; patron w całości', () => {
+  keep([
+    'Parafia pw. św. Rafała Kalinowskiego w Krakowie',
+    'W kaplicy św. Rocha odprawiono mszę.',
+    'Kościół św. Jana Chrzciciela',
+    'Przy figurze Pana Jezusa Frasobliwego stał krzyż.',
+    'Kościół św. Antoniego Padewskiego w Poznaniu.',
+  ]);
+  masked([
+    ['W kaplicy przesłuchano św. Jana Kowalskiego.', `W kaplicy przesłuchano św. ${N}.`],
+    ['Zdarzenie w kaplicy szpitalnej. Przesłuchano św. Jana Kowalskiego.', `Zdarzenie w kaplicy szpitalnej. Przesłuchano św. ${N}.`],
+    ['W kaplicy św. Rocha Bednarz poświęcił bramę.', `W kaplicy św. Rocha ${N} poświęcił bramę.`],
+    ['Do kościoła wraz ze św. Kowalskim wszedł sprawca.', `Do kościoła wraz ze św. ${N} wszedł sprawca.`],
+    ['W kościele zeznania św. Nowaka.', `W kościele zeznania św. ${N}.`],
+    ['Kradzież w kaplicy potwierdził podpis św. Kowalskiego.', `Kradzież w kaplicy potwierdził podpis św. ${N}.`],
+    ['Parafia wezwała św. Wiśniewskiego.', `Parafia wezwała św. ${N}.`],
+    ['Przy kościele Pana Jezusa Gzik rozdawał opłatki.', `Przy kościele Pana Jezusa ${N} rozdawał opłatki.`],
+    ['W kaplicy św. Rocha Teresa Wróbel prowadzi Koło Różańcowe.', `W kaplicy św. Rocha ${N} prowadzi Koło Różańcowe.`],
+  ]);
+});
+test('Resztki b3 · eponim tylko z właściwą głową, nazwisko osoby z pisma wygrywa z patronem mostu', () => {
+  keep([
+    'Objaw Babińskiego dodatni.',
+    'Prątki Kocha wykryto w plwocinie.',
+    'Most Gzowskiego otwarto.',
+    'Korek na moście Łazienkowskim od rana.',
+  ]);
+  masked([
+    ['Zgłoszenie od kierownika linii Pawlika.', `Zgłoszenie od kierownika linii ${N}.`],
+    ['Zgłoszenie od kierownika linii Leśniowskiego.', `Zgłoszenie od kierownika linii ${N}.`],
+    ['Wniosek operatora linii Babińskiego.', `Wniosek operatora linii ${N}.`],
+    ['Pismo mistrza linii Kocha.', `Pismo mistrza linii ${N}.`],
+    ['Pacjent Jan Pawlik przyjęty na oddział. Objawy Pawlika ustąpiły po leczeniu.', `Pacjent ${N} przyjęty na oddział. Objawy ${N} ustąpiły po leczeniu.`],
+    ['Jan Gzowski uciekał przed policją. Na moście Gzowskiego zatrzymał patrol.', `${N} uciekał przed policją. Na moście ${N} zatrzymał patrol.`],
+    ['Pacjent Babiński odwołał wizytę. Odruch Babińskiego dodatni.', `Pacjent ${N} odwołał wizytę. Odruch Babińskiego dodatni.`],
+  ]);
+});
+test('Resztki b3 · patron po gołym „im" przy obiekcie i skrócie placówki, etykieta faktury za miejscowością', () => {
+  keep([
+    'Kierownik Oddziału im Józefa Babińskiego potwierdził przyjęcie.',
+    'ZSO im Jana Kochanowskiego',
+    'III LO im Adama Mickiewicza',
+    'MOPS im Haliny Nowak',
+    'Park im Marii Konopnickiej',
+    'Rondo im Romana Dmowskiego',
+    'Kopalnia Soli im Jana Pawła II',
+  ]);
+  masked([
+    ['48-210 Biała   Razem do zapłaty: 120,00 zł', `${KOD} ${C}   Razem do zapłaty: 120,00 zł`],
+    ['86-170 Nowe   Sposób płatności: przelew', `${KOD} ${C}   Sposób płatności: przelew`],
+    ['86-170 Nowe Termin płatności: 14 dni', `${KOD} ${C} Termin płatności: 14 dni`],
+    ['89-320 Wysoka Wartość netto: 340,00', `${KOD} ${C} Wartość netto: 340,00`],
+    ['Pomógł im Jan Kowalski.', `Pomógł im ${N}.`],
+  ]);
 });

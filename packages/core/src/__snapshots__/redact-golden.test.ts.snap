@@ -75,6 +75,7 @@ Imię i nazwisko ucznia
 Klasa
 Imię i nazwisko wnioskodawcy: Gmina Michałowice",
   "neg-147": "Prezes Klubu Sportowego Lech Poznań zwołał zebranie. Pełnomocnik Zarządu Spółki Marek Trans Sp. z o.o. Imię i nazwisko opiekuna prawnego: Powiatowe Centrum Pomocy Rodzinie. Spotkanie w domu Pod Lipami. Samochód marki Volkswagen Golf TDI 1896 cm3. Telefon nr inw. 012345678 – zużyty. W komórce 123 456 789 zł. Przebudowa ul. Polnej i Leśnej 250 000,00 zł.",
+  "neg-148": "Obywatele Ukrainy mieszkający w Lublinie mogą złożyć wniosek. Ludzie mieszkają w Warszawie coraz dłużej. Kluczyk do skrzynki leży na biurku. Odruch Babińskiego dodatni. ZSO im Jana Kochanowskiego. Parafia pw. św. Rafała Kalinowskiego w Krakowie.",
   "neg-15": "Zakład Ubezpieczeń Społecznych wydał decyzję odmowną.",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
@@ -283,6 +284,7 @@ Pozwany Zieliński Annie groził.",
   "os-p-72": "Imię i nazwisko pacjenta: Hans Gruber
 Anna Kowalska z domu Sikora
 Kierownik Działu Kadr Grzegorz Mazur",
+  "os-p-73": "Świadek Poleski zeznał. Mieczyk zatrudniony od 01.02.2010 r. Szanowna Pani Dyrektor Szkoły Kowalska-Nowak. Grafik: Dzień Lisiecka, Noc Brzozowska. Do kościoła wraz ze św. Kowalskim wszedł sprawca.",
   "os-r-01": "Marek Bąkiewicz podpisał protokół odbioru.",
   "os-r-02": "Alicja Krzemieniecka złożyła wniosek o urlop.",
   "os-r-03": "Tadeusz Gzowski wynajął magazyn pod miastem.",
@@ -410,6 +412,7 @@ Tak	Kaczyński	Urząd Miasta",
   "str-144": "Kontakt nr 512 345 678, tel. [TELEFON]. Obecnych 12 os.Halina Grzyb przewodniczyła. UL. LIPOWA 14, 05-300 STARA WIEŚ. Anna Nowak z domu Ludowego.",
   "str-145": "Jan Kowalski, ul. Leśna 3 osoby. Lokale przy ul. Polnej 5 i Leśnej 7. Najem: ul. Rynek 7, lokal 32,4 m2. Świadek Kowalczyk-Müller zeznała.
 04. Ulica: Warszawska  05. Nr domu: 31",
+  "str-146": "Wnioskodawczyni zamieszkała w Gdańsku 3 osoby na utrzymaniu. 86-170 Nowe   Sposób płatności: przelew",
   "str-15": "Zwrot nastąpi na konto [NR-KONTA] wskazane w umowie.",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
@@ -574,6 +577,7 @@ Imię i nazwisko ucznia
 Klasa
 Imię i nazwisko wnioskodawcy: Gmina Michałowice",
   "neg-147": "Prezes Klubu Sportowego Lech Poznań zwołał zebranie. Pełnomocnik Zarządu Spółki Marek Trans Sp. z o.o. Imię i nazwisko opiekuna prawnego: Powiatowe Centrum Pomocy Rodzinie. Spotkanie w domu Pod Lipami. Samochód marki Volkswagen Golf TDI 1896 cm3. Telefon nr inw. 012345678 – zużyty. W komórce 123 456 789 zł. Przebudowa ul. Polnej i Leśnej 250 000,00 zł.",
+  "neg-148": "Obywatele Ukrainy mieszkający w Lublinie mogą złożyć wniosek. Ludzie mieszkają w Warszawie coraz dłużej. Kluczyk do skrzynki leży na biurku. Odruch Babińskiego dodatni. ZSO im Jana Kochanowskiego. Parafia pw. św. Rafała Kalinowskiego w Krakowie.",
   "neg-15": "Zakład Ubezpieczeń Społecznych wydał decyzję odmowną.",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
@@ -780,6 +784,7 @@ Pozwany [OSOBA-C] Annie groził.",
   "os-p-72": "Imię i nazwisko pacjenta: [OSOBA-A]
 [OSOBA-B] z domu [OSOBA-C]
 Kierownik Działu Kadr [OSOBA-D]",
+  "os-p-73": "Świadek [OSOBA-A] zeznał. [OSOBA-B] zatrudniony od 01.02.2010 r. Szanowna Pani Dyrektor Szkoły [OSOBA-C]. Grafik: Dzień [OSOBA-D], Noc [OSOBA-E]. Do kościoła wraz ze św. [OSOBA-F] wszedł sprawca.",
   "os-r-01": "[OSOBA-A] podpisał protokół odbioru.",
   "os-r-02": "[OSOBA-A] złożyła wniosek o urlop.",
   "os-r-03": "[OSOBA-A] wynajął magazyn pod miastem.",
@@ -907,6 +912,7 @@ Tak	[OSOBA-B]	Urząd Miasta",
   "str-144": "Kontakt nr 512 345 678, tel. [TELEFON]. Obecnych 12 os.[OSOBA-A] przewodniczyła. [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]. [OSOBA-B] z domu Ludowego.",
   "str-145": "[OSOBA-A], [ADRES] osoby. Lokale przy [ADRES] i Leśnej 7. Najem: [ADRES], lokal 32,4 m2. Świadek [OSOBA-B] zeznała.
 04. Ulica: [ADRES]  05. Nr domu: [ADRES]",
+  "str-146": "Wnioskodawczyni zamieszkała w [MIEJSCOWOŚĆ] 3 osoby na utrzymaniu. [KOD-POCZTOWY] [MIEJSCOWOŚĆ]   Sposób płatności: przelew",
   "str-15": "Zwrot nastąpi na konto [NR-KONTA] wskazane w umowie.",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
@@ -1071,6 +1077,7 @@ Imię i nazwisko ucznia
 Klasa
 Imię i nazwisko wnioskodawcy: Gmina Michałowice",
   "neg-147": "Prezes Klubu Sportowego Lech Poznań zwołał zebranie. Pełnomocnik Zarządu Spółki Marek Trans Sp. z o.o. Imię i nazwisko opiekuna prawnego: Powiatowe Centrum Pomocy Rodzinie. Spotkanie w domu Pod Lipami. Samochód marki Volkswagen Golf TDI 1896 cm3. Telefon nr inw. 012345678 – zużyty. W komórce 123 456 789 zł. Przebudowa ul. Polnej i Leśnej 250 000,00 zł.",
+  "neg-148": "Obywatele Ukrainy mieszkający w Lublinie mogą złożyć wniosek. Ludzie mieszkają w Warszawie coraz dłużej. Kluczyk do skrzynki leży na biurku. Odruch Babińskiego dodatni. ZSO im Jana Kochanowskiego. Parafia pw. św. Rafała Kalinowskiego w Krakowie.",
   "neg-15": "Zakład Ubezpieczeń Społecznych wydał decyzję odmowną.",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
@@ -1277,6 +1284,7 @@ Pozwany [IMIĘ I NAZWISKO] Annie groził.",
   "os-p-72": "Imię i nazwisko pacjenta: [IMIĘ I NAZWISKO]
 [IMIĘ I NAZWISKO] z domu [IMIĘ I NAZWISKO]
 Kierownik Działu Kadr [IMIĘ I NAZWISKO]",
+  "os-p-73": "Świadek [IMIĘ I NAZWISKO] zeznał. [IMIĘ I NAZWISKO] zatrudniony od 01.02.2010 r. Szanowna Pani Dyrektor Szkoły [IMIĘ I NAZWISKO]. Grafik: Dzień [IMIĘ I NAZWISKO], Noc [IMIĘ I NAZWISKO]. Do kościoła wraz ze św. [IMIĘ I NAZWISKO] wszedł sprawca.",
   "os-r-01": "[IMIĘ I NAZWISKO] podpisał protokół odbioru.",
   "os-r-02": "[IMIĘ I NAZWISKO] złożyła wniosek o urlop.",
   "os-r-03": "[IMIĘ I NAZWISKO] wynajął magazyn pod miastem.",
@@ -1404,6 +1412,7 @@ Tak	[IMIĘ I NAZWISKO]	Urząd Miasta",
   "str-144": "Kontakt nr 512 345 678, tel. [TELEFON]. Obecnych 12 os.[IMIĘ I NAZWISKO] przewodniczyła. [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]. [IMIĘ I NAZWISKO] z domu Ludowego.",
   "str-145": "[IMIĘ I NAZWISKO], [ADRES] osoby. Lokale przy [ADRES] i Leśnej 7. Najem: [ADRES], lokal 32,4 m2. Świadek [IMIĘ I NAZWISKO] zeznała.
 04. Ulica: [ADRES]  05. Nr domu: [ADRES]",
+  "str-146": "Wnioskodawczyni zamieszkała w [MIEJSCOWOŚĆ] 3 osoby na utrzymaniu. [KOD-POCZTOWY] [MIEJSCOWOŚĆ]   Sposób płatności: przelew",
   "str-15": "Zwrot nastąpi na konto [NR-KONTA] wskazane w umowie.",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
