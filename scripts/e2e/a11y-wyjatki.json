@@ -1,0 +1,4 @@
+{
+  "opis": "Zastane naruszenia axe (serious, critical), których B03 nie poprawił od razu. Każdy wpis: skan (gdzie), reguła, selektor węzła z raportu axe, pakiet, który je usunie, i powód. a11y.test.mjs pada przy naruszeniu spoza listy i przy wpisie, którego axe już nie zgłasza, więc lista może tylko maleć.",
+  "wyjatki": []
+}

@@ -30,8 +30,10 @@ i `geckodriver.exe`. Opcje: `--katalog <ścieżka>`, `--tylko chromium-1070054,g
 | `geckodriver` | 0.36.0 | sterowanie Firefoksem dla `ffprobe.mjs` |
 
 Test dymny bramki na starym silniku: zmienna `PARAWAN_CHROMIUM` ze ścieżką do `chrome.exe`
-włącza testy, które bez niej są pomijane (Playwright 1.61 steruje Chromium 109 i 111: przykład,
-`?pdftest` i wczytany `pismo.pdf`):
+włącza testy, które bez niej są pomijane (Playwright 1.61 steruje Chromium 109 i 111:
+`legacy.test.mjs` z przykładem, `?pdftest`, wczytanym `pismo.pdf` i upuszczonym DOCX oraz wydruk
+z `wydruk.test.mjs`). To samo na Linuksie robi job `chromium-109` w
+`.github/workflows/zgodnosc.yml`:
 
 ```bash
 PARAWAN_CHROMIUM=".cache/przegladarki/chromium-1070054/chrome-win/chrome.exe" npm run e2e

@@ -817,7 +817,8 @@ body.file-drag textarea.editor-ta {
 .chip-nav:hover { box-shadow: 0 2px 7px rgba(11, 61, 46, .13); }
 .chip-nav:active { transform: translateY(1px); }
 .chip .gi { width: 18px; height: 18px; }
-.chip .x { font-family: var(--mono); font-weight: 700; font-size: 11.5px; opacity: .85; }
+/* bez przezroczystości: przy .85 licznik „×1” w kolorze typu miał na tle pigułki 3,9–4,3:1 (WCAG 1.4.3) */
+.chip .x { font-family: var(--mono); font-weight: 700; font-size: 11.5px; }
 .ch-person  { color: var(--person);  border-color: rgba(165,150,232,.42); background: rgba(165,150,232,.08); }
 .ch-contact { color: var(--contact); border-color: rgba(103,200,220,.42); background: rgba(103,200,220,.08); }
 .ch-ident   { color: var(--ident);   border-color: rgba(217,169,73,.42);  background: rgba(217,169,73,.08); }

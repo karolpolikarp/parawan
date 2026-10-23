@@ -78,9 +78,37 @@ Explorera): pasek „Parawan nie uruchomił się…” jest na początku ukryty 
 4,5 s jest widoczny, także przy ograniczonym ruchu. Przy zwykłym starcie `main.ts` usuwa go
 z dokumentu. Kontekst z wyłączonym JavaScriptem (`openApp(…, { javaScriptEnabled: false })`,
 wtedy bez przewijania zegara i bez nasłuchu CSP, które działają skryptem na stronie) pokazuje
-jeden komunikat z `<noscript>`, bez paska po 4 s. Z `PARAWAN_CHROMIUM` (Chromium 109 albo 111)
-dochodzi `?pdftest` i wczytany `pismo.pdf`: pdf.js czyta tekst przez `for await` po
-`ReadableStream`, czego Chrome i Edge przed 124 nie mają, i działa tam dzięki łatce w `pdf.ts`.
+jeden komunikat z `<noscript>`, bez paska po 4 s.
+
+Stary silnik sprawdza `legacy.test.mjs`, tylko z `PARAWAN_CHROMIUM` (bez niej wszystkie testy są
+pomijane): przykład z `?demo`, `?pdftest` z wynikiem „[PDF OK]”, wczytany `pismo.pdf` i DOCX
+upuszczony na pole źródła. pdf.js czyta tekst przez `for await` po `ReadableStream`, czego Chrome
+i Edge przed 124 nie mają, i działa tam dzięki łatce w `pdf.ts`. `PARAWAN_CHROMIUM_WERSJA=109`
+dodatkowo sprawdza, że binarka to naprawdę ta wersja.
+
+Dostępność sprawdza `a11y.test.mjs`. axe-core (wersja dokładna w `package.json`, reguły
+`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`) biegnie na pustej aplikacji, po `?demo`, w widoku
+„Porównanie”, z rozwiniętymi `<details>`, na telefonie 390×844 i na landingu. Źródło axe trafia
+na stronę przez `page.evaluate`, więc CSP pliku go nie blokuje i bramka z `withApp()` działa jak
+w innych testach. Naruszenie o wadze serious albo critical wywraca test, chyba że ma wpis
+w `a11y-wyjatki.json` (skan, reguła, selektor, pakiet, który je usunie, powód). Wpis, którego axe
+już nie zgłasza, też wywraca test, więc lista może tylko maleć. Raport axe z nieudanego skanu
+trafia jako JSON do `test-results/e2e/`. Test-sprawdzian dopisuje na chwilę przycisk bez nazwy
+i wymaga, żeby axe go zgłosił. Poza axe: obieg Tab od początku strony przez pole źródła,
+nawigację po znacznikach i „Kopiuj” wraca na początek bez pułapki, a każdy przystanek ma widoczny
+obrys; w trybie wysokiego kontrastu Windows (`forcedColors: 'active'`) znaczniki mają ramkę,
+a fokus na znaczniku obrys; odstępy tekstu z WCAG 1.4.12 i okno 683×384 (powiększenie 200%) nie
+dają poziomego przewijania ani przycisków wystających z pasków. Zrzuty do oceny wzrokiem
+(fokus, wysoki kontrast, odstępy, powiększenie) zapisuje do `test-results/e2e/a11y/` albo do
+katalogu z `PARAWAN_A11Y_ZRZUTY`.
+
+Inne przeglądarki: `PARAWAN_PRZEGLADARKA=msedge` (Edge z systemu) albo `firefox` (Firefox
+z Playwright, `npx playwright install firefox`) zmienia przeglądarkę testów, a
+`PARAWAN_WEB_HTML` i `PARAWAN_LANDING_HTML` wskazują kopię plików w innym katalogu. Tak biegnie
+`.github/workflows/zgodnosc.yml` (raz w tygodniu, po tagu `v*` i na żądanie, bez blokowania PR):
+Chromium 109 ze snapshotu (`legacy.test.mjs` i wydruk), Edge na Windows na kopii w katalogu
+„Narzędzia urzędu” i Firefox (`smoke.test.mjs`). W Firefoksie test drzewa dostępności formularza
+jest pomijany, bo czyta je przez CDP. `wydruk.test.mjs` i `a11y.test.mjs` są dla Chromium.
 
 Przy błędzie zrzut całej strony trafia do `test-results/e2e/` (w CI jako artefakt).
 `PARAWAN_CHROMIUM` ze ścieżką do innej binarki Chromium włącza testy starego silnika
@@ -111,7 +139,9 @@ Przy błędzie zrzut całej strony trafia do `test-results/e2e/` (w CI jako arte
   `apps/web/src/content.test.ts`, na plikach, które trafiają do aplikacji i strony.
 - Każde nowe pole tekstowe na dane ma `autocomplete="off"`, `spellcheck="false"`
   i `translate="no"`.
-- Dostępność (axe), klawiatura, wysoki kontrast i stare przeglądarki w CI to osobny zestaw (B03).
+- Nowy element interaktywny ma nazwę dostępną i widoczny fokus; `a11y.test.mjs` (axe, obieg Tab)
+  to wyłapie. Wyjątku w `a11y-wyjatki.json` nie dopisuje się, żeby przejść bramkę: lista służy
+  tylko zastanym naruszeniom i może tylko maleć.
 
 Fikcyjne pisma do testów: `apps/web/src/fixtures/urzad/`. Ręczne sprawdzenia w Edge, starym
 Chromium i Firefoksie ESR: `scripts/e2e/manual/README.md`.

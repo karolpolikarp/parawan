@@ -7,21 +7,25 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { after, before, test } from 'node:test';
-import { strToU8, zipSync } from 'fflate';
 import { CSP_TARGETS, cspProblems, htmlCspProblems } from './csp.mjs';
 import {
   ALLOWED_STORAGE_KEYS,
+  BROWSER,
+  DOCX_MIME,
   EXAMPLE_NAME,
   EXAMPLE_PESEL,
   FIXTURES,
   LANDING_HTML,
-  LEGACY_SKIP,
   MAX_WEB_BYTES,
   PISMO_PESEL,
   WEB_HTML,
   fileSize,
   launch,
+  makeDocx,
   openApp,
+  resultText,
+  wPara,
+  wPart,
   withApp,
 } from './helpers.mjs';
 
@@ -33,48 +37,6 @@ before(async () => {
 after(async () => {
   await browser?.close();
 });
-
-const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-
-const W_NS = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
-const wPara = (text) => `<w:p><w:r><w:t xml:space="preserve">${text}</w:t></w:r></w:p>`;
-/** Część WordprocessingML (nagłówek, komentarze) z deklaracją przestrzeni nazw. */
-const wPart = (root, body) =>
-  strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:${root} xmlns:w="${W_NS}">${body}</w:${root}>`);
-
-/**
- * Minimalny DOCX jak z edytora: akapity w word/document.xml (fflate, jak w docx.test.ts),
- * a w `extra` dodatkowe części (nagłówek, komentarze) i surowy XML treści w `bodyXml`.
- */
-function makeDocx(paragraphs, { extra = {}, bodyXml = '' } = {}) {
-  const body = paragraphs.map(wPara).join('') + bodyXml;
-  const xml =
-    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-    `<w:document xmlns:w="${W_NS}"><w:body>${body}</w:body></w:document>`;
-  return zipSync({
-    '[Content_Types].xml': strToU8(
-      '<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>',
-    ),
-    'word/document.xml': strToU8(xml),
-    ...extra,
-  });
-}
-
-/**
- * Po wczytaniu DOCX albo PDF aplikacja sama przechodzi do „Porównania” (oryginał przekreślony
- * obok znacznika). Tekst do skopiowania i pobrania to widok „Wynik”, więc sprawdzamy go tam.
- * Znacznik [PESEL] musi stać także w tym widoku: testy sprawdzają potem tylko, że numeru w nim
- * nie ma, a taki warunek spełnia też pusty albo niewyrenderowany wynik.
- */
-async function resultText(app) {
-  await app.page.getByRole('button', { name: 'Wynik', exact: true }).click();
-  await app.page.waitForFunction(
-    () => document.getElementById('view-result')?.getAttribute('aria-pressed') === 'true',
-  );
-  const out = await app.output();
-  assert.ok(out.includes('[PESEL]'), `widok „Wynik” bez znacznika [PESEL]:\n„${out}”`);
-  return out;
-}
 
 const bytes = (n) => n.toLocaleString('pl-PL');
 
@@ -134,10 +96,11 @@ test('CSP zatrzymuje próbę wysłania danych (fetch, obrazek)', async (t) => {
     const directives = app.takeViolations((v) => v.blocked.includes('example.com')).map((v) => v.directive);
     assert.ok(directives.includes('connect-src'), `brak naruszenia connect-src: ${directives}`);
     assert.ok(directives.includes('img-src'), `brak naruszenia img-src: ${directives}`);
-    // Komunikaty Chromium o zablokowaniu obu żądań przez CSP są w tym teście oczekiwane (brzmienie
-    // zmienia się między wersjami, stały jest adres i wzmianka o CSP). Inne błędy, np. wyjątek
-    // z timera aplikacji, zostają dla assertClean().
-    app.takeConsoleErrors(/example\.com.*Content Security Policy/);
+    // Komunikaty przeglądarki o zablokowaniu obu żądań przez CSP są w tym teście oczekiwane
+    // (brzmienie zmienia się między wersjami i przeglądarkami, Firefox pisze „Content-Security-Policy”
+    // przed adresem, stały jest adres i wzmianka o CSP). Inne błędy, np. wyjątek z timera
+    // aplikacji, zostają dla assertClean().
+    app.takeConsoleErrors(/example\.com.*Content.Security.Policy|Content.Security.Policy.*example\.com/);
   });
 });
 
@@ -212,7 +175,10 @@ test('bramka widzi próbę połączenia WebRTC: od razu, z timera po dobie, z ra
           return 'zablokowane';
         }
       };
-      setTimeout(() => attempt(() => new webkitRTCPeerConnection()), 5_000);
+      // webkitRTCPeerConnection jest tylko w Chromium; w Firefoksie ta sama próba idzie przez
+      // RTCPeerConnection (job firefox w zgodnosc.yml)
+      const Webkit = window.webkitRTCPeerConnection ?? RTCPeerConnection;
+      setTimeout(() => attempt(() => new Webkit()), 5_000);
       setTimeout(
         () => {
           const frame = document.createElement('iframe');
@@ -221,13 +187,20 @@ test('bramka widzi próbę połączenia WebRTC: od razu, z timera po dobie, z ra
         },
         3 * 60 * 60_000,
       );
-      return attempt(() => new RTCPeerConnection({ iceServers: [] }));
+      return {
+        now: attempt(() => new RTCPeerConnection({ iceServers: [] })),
+        webkit: typeof window.webkitRTCPeerConnection === 'function',
+      };
     });
-    assert.equal(created, 'zablokowane', 'pułapka nie zatrzymała RTCPeerConnection');
+    assert.equal(created.now, 'zablokowane', 'pułapka nie zatrzymała RTCPeerConnection');
     await assert.rejects(() => app.assertClean(), /WebRTC/);
     assert.deepEqual(
       app.rtc.map((r) => r.api),
-      ['new RTCPeerConnection', 'new webkitRTCPeerConnection', 'new RTCPeerConnection'],
+      [
+        'new RTCPeerConnection',
+        created.webkit ? 'new webkitRTCPeerConnection' : 'new RTCPeerConnection',
+        'new RTCPeerConnection',
+      ],
       `próby widziane przez bramkę:\n${JSON.stringify(app.rtc, null, 1)}`,
     );
   } finally {
@@ -627,7 +600,9 @@ for (const [name, file] of [
   ['aplikacja', WEB_HTML],
   ['landing', LANDING_HTML],
 ]) {
-  test(`${name}: formularz wokół pola źródła nie jest nienazwanym „form” dla czytnika ekranu`, async (t) => {
+  // Drzewo dostępności czytane przez CDP, którego Playwright nie daje w Firefoksie.
+  const skip = BROWSER === 'firefox' ? 'drzewo dostępności przez CDP jest tylko w Chromium' : false;
+  test(`${name}: formularz wokół pola źródła nie jest nienazwanym „form” dla czytnika ekranu`, { skip }, async (t) => {
     await withApp(
       browser,
       t,
@@ -801,41 +776,4 @@ test('landing z dysku ładuje się bez żądań i błędów', async (t) => {
     },
     { file: LANDING_HTML },
   );
-});
-
-test('stary silnik (PARAWAN_CHROMIUM): ?demo maskuje PESEL', { skip: LEGACY_SKIP }, async (t) => {
-  const legacy = await launch({ legacy: true });
-  try {
-    await withApp(legacy, t, '?demo', async (app) => {
-      await app.demoReady();
-      assert.ok(!(await app.output()).includes(EXAMPLE_PESEL));
-    });
-  } finally {
-    await legacy.close();
-  }
-});
-
-// Chrome i Edge 109–123 nie mają iteracji ReadableStream, z której korzysta pdf.js 6; łatka
-// w pdf.ts ją dopisuje. Bez niej oba scenariusze kończyły się błędem odczytu PDF.
-test('stary silnik (PARAWAN_CHROMIUM): ?pdftest i wczytany pismo.pdf', { skip: LEGACY_SKIP }, async (t) => {
-  const legacy = await launch({ legacy: true });
-  try {
-    await withApp(legacy, t, '?pdftest', async ({ page }) => {
-      await page.waitForFunction(
-        () => /^\[PDF (OK|FAIL)\]/.test(document.getElementById('input')?.value ?? ''),
-        null,
-        { timeout: 10_000 },
-      );
-      const value = await page.locator('#input').inputValue();
-      assert.ok(value.startsWith('[PDF OK]'), `samodiagnostyka PDF: „${value.slice(0, 200)}”`);
-    });
-    await withApp(legacy, t, '', async (app) => {
-      await app.page.locator('#file-input').setInputFiles(path.join(FIXTURES, 'pismo.pdf'));
-      await app.waitForOutput('[PESEL]');
-      const out = await resultText(app);
-      assert.ok(!out.includes(PISMO_PESEL), `numer PESEL z PDF przeszedł do wyniku:\n${out}`);
-    });
-  } finally {
-    await legacy.close();
-  }
 });

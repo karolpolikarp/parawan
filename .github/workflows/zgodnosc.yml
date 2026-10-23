@@ -1,0 +1,153 @@
+name: Zgodność przeglądarek
+
+# Silniki, na których urzędnik naprawdę otwiera Parawan.html, a których nie sprawdza job e2e
+# w ci.yml (bieżący Chromium na Linuksie): Chromium 109 (próg build.target, ostatni Chrome i Edge
+# dla Windows 7 i 8.1), Edge na Windows z plikiem w katalogu ze spacją i polskimi literami oraz
+# Firefox (Gecko inaczej obsługuje zaznaczenia i CSP). Runner Windows kosztuje więcej minut, więc
+# workflow nie blokuje pull requestów: biegnie raz w tygodniu, po każdym tagu wydania i na żądanie
+# (gh workflow run zgodnosc.yml). Firefox ESR 115 i starsze Chromium zostają na liście ręcznej
+# (scripts/e2e/manual: pobierz-przegladarki.mjs, stary-chromium.mjs).
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 4 * * 1'
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  # Snapshot Chromium z gałęzi 109 (Linux_x64, rewizja 1070057: V8 10.9, „Chromium 109.0.5414.0”;
+  # Windowsowy 1070054 z pobierz-przegladarki.mjs to ta sama wersja, snapshotu 1070054 dla Linuksa
+  # nie ma). Suma archiwum sprawdzona przed rozpakowaniem, wersja binarki przed testami.
+  chromium-109:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      REWIZJA: '1070057'
+      SHA256: fad802c7bd923d6115748559ead2ade90d8f644888108aa00222d8fbd0d83812
+      KATALOG: ${{ github.workspace }}/.cache/przegladarki/chromium-linux-1070057
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w anonimizator
+      - run: npm run build -w anonimizator-web
+      - name: Wersja Playwright (klucz cache przeglądarki)
+        id: pw
+        run: echo "version=$(node -p "require('playwright/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+      # Bieżący Chromium potrzebuje wydruk.test.mjs (before), a --with-deps dokłada biblioteki
+      # systemowe (libnss3 i inne), bez których snapshot 109 nie startuje.
+      - run: npx playwright install --with-deps chromium
+      - uses: actions/cache@v6
+        id: c109
+        with:
+          path: ${{ env.KATALOG }}
+          key: chromium-linux-${{ env.REWIZJA }}-${{ env.SHA256 }}
+      - name: Pobranie snapshotu Chromium 109
+        if: steps.c109.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p "$KATALOG"
+          curl -fsSL --retry 3 -o "$KATALOG/chrome-linux.zip" \
+            "https://commondatastorage.googleapis.com/chromium-browser-snapshots/Linux_x64/$REWIZJA/chrome-linux.zip"
+          echo "$SHA256  $KATALOG/chrome-linux.zip" | sha256sum -c -
+          unzip -q "$KATALOG/chrome-linux.zip" -d "$KATALOG"
+          rm "$KATALOG/chrome-linux.zip"
+      - name: Wersja binarki
+        run: |
+          v="$("$KATALOG/chrome-linux/chrome" --version)"
+          echo "$v"
+          case "$v" in "Chromium 109."*) ;; *) echo "::error::oczekiwano Chromium 109, jest: $v"; exit 1 ;; esac
+      - name: Testy starego silnika (?demo, ?pdftest, DOCX, PDF, wydruk)
+        env:
+          PARAWAN_CHROMIUM: ${{ env.KATALOG }}/chrome-linux/chrome
+          PARAWAN_CHROMIUM_WERSJA: '109'
+        run: node --test --test-name-pattern="stary silnik" scripts/e2e/legacy.test.mjs scripts/e2e/wydruk.test.mjs
+      - name: Zrzuty z nieudanych testów
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: zgodnosc-chromium-109
+          path: test-results/e2e/
+          if-no-files-found: ignore
+
+  # Edge preinstalowany na runnerze Windows (Playwright channel msedge). Test dymny na kopii obu
+  # plików w katalogu ze spacją i polskimi literami, jak u urzędnika, który zapisał plik w
+  # „Narzędzia urzędu” (adres file:// z %20 i zakodowanym „ę”).
+  edge-windows:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w anonimizator
+      - run: npm run build -w anonimizator-web
+      - run: npm run build -w parawan-landing
+      - name: Kopia plików w „Narzędzia urzędu”
+        shell: pwsh
+        run: |
+          $dir = Join-Path $env:RUNNER_TEMP 'Narzędzia urzędu'
+          New-Item -ItemType Directory -Force $dir | Out-Null
+          Copy-Item apps/web/dist/index.html (Join-Path $dir 'Parawan.html')
+          Copy-Item apps/landing/dist/index.html (Join-Path $dir 'Parawan strona.html')
+          "PARAWAN_WEB_HTML=$(Join-Path $dir 'Parawan.html')" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+          "PARAWAN_LANDING_HTML=$(Join-Path $dir 'Parawan strona.html')" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+      - name: Test dymny w Edge
+        env:
+          PARAWAN_PRZEGLADARKA: msedge
+        run: node --test scripts/e2e/smoke.test.mjs
+      - name: Zrzuty z nieudanych testów
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: zgodnosc-edge-windows
+          path: test-results/e2e/
+          if-no-files-found: ignore
+
+  # Firefox z Playwright to łatany Gecko w bieżącej wersji, nie ESR 115 z części urzędów
+  # (ten zostaje na liście ręcznej), ale łapie różnice silnika: CSP, zaznaczenia, pdf.js.
+  firefox:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w anonimizator
+      - run: npm run build -w anonimizator-web
+      - run: npm run build -w parawan-landing
+      - name: Wersja Playwright (klucz cache przeglądarki)
+        id: pw
+        run: echo "version=$(node -p "require('playwright/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-firefox-${{ runner.os }}-${{ steps.pw.outputs.version }}
+      - run: npx playwright install --with-deps firefox
+      - name: Test dymny w Firefoksie
+        env:
+          PARAWAN_PRZEGLADARKA: firefox
+        run: node --test scripts/e2e/smoke.test.mjs
+      - name: Zrzuty z nieudanych testów
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: zgodnosc-firefox
+          path: test-results/e2e/
+          if-no-files-found: ignore

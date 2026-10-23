@@ -12,11 +12,18 @@ import assert from 'node:assert/strict';
 import { mkdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { chromium } from 'playwright';
+import { strToU8, zipSync } from 'fflate';
+import { chromium, firefox } from 'playwright';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-export const WEB_HTML = path.join(ROOT, 'apps', 'web', 'dist', 'index.html');
-export const LANDING_HTML = path.join(ROOT, 'apps', 'landing', 'dist', 'index.html');
+/**
+ * Gotowe pliki. PARAWAN_WEB_HTML i PARAWAN_LANDING_HTML wskazują ich kopię w innym miejscu:
+ * job edge-windows w zgodnosc.yml otwiera je z katalogu ze spacją i polskimi literami, jak
+ * plik zapisany przez urzędnika w „Narzędzia urzędu” (adres file:// z %20 i %C4%99).
+ */
+export const WEB_HTML = process.env.PARAWAN_WEB_HTML || path.join(ROOT, 'apps', 'web', 'dist', 'index.html');
+export const LANDING_HTML =
+  process.env.PARAWAN_LANDING_HTML || path.join(ROOT, 'apps', 'landing', 'dist', 'index.html');
 export const FIXTURES = path.join(ROOT, 'apps', 'web', 'src', 'fixtures', 'urzad');
 
 /**
@@ -122,10 +129,50 @@ const JUMP_MS = 24 * 60 * 60_000;
 const QUIET_MS = 300;
 const QUIET_MAX_MS = 5_000;
 
-/** Chromium z Playwright albo, z legacy: true, binarka z PARAWAN_CHROMIUM. */
+/**
+ * Przeglądarka testów: domyślnie Chromium z Playwright. PARAWAN_PRZEGLADARKA=msedge bierze Edge
+ * zainstalowany w systemie (job edge-windows w zgodnosc.yml), =firefox Firefoksa z Playwright
+ * (łatany Gecko, nie ESR 115, który zostaje na liście ręcznej).
+ */
+export const BROWSER = process.env.PARAWAN_PRZEGLADARKA || 'chromium';
+if (!['chromium', 'msedge', 'firefox'].includes(BROWSER)) {
+  throw new Error(`PARAWAN_PRZEGLADARKA=${BROWSER}: dozwolone chromium, msedge, firefox`);
+}
+
+/** Przeglądarka z BROWSER albo, z legacy: true, binarka Chromium z PARAWAN_CHROMIUM. */
 export function launch({ legacy = false } = {}) {
-  if (legacy && !LEGACY_CHROMIUM) throw new Error('Brak PARAWAN_CHROMIUM');
-  return chromium.launch(legacy ? { executablePath: LEGACY_CHROMIUM } : {});
+  if (legacy) {
+    if (!LEGACY_CHROMIUM) throw new Error('Brak PARAWAN_CHROMIUM');
+    return chromium.launch({ executablePath: LEGACY_CHROMIUM });
+  }
+  if (BROWSER === 'firefox') return firefox.launch();
+  return chromium.launch(BROWSER === 'msedge' ? { channel: 'msedge' } : {});
+}
+
+export const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
+const W_NS = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+export const wPara = (text) => `<w:p><w:r><w:t xml:space="preserve">${text}</w:t></w:r></w:p>`;
+/** Część WordprocessingML (nagłówek, komentarze) z deklaracją przestrzeni nazw. */
+export const wPart = (root, body) =>
+  strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:${root} xmlns:w="${W_NS}">${body}</w:${root}>`);
+
+/**
+ * Minimalny DOCX jak z edytora: akapity w word/document.xml (fflate, jak w docx.test.ts),
+ * a w `extra` dodatkowe części (nagłówek, komentarze) i surowy XML treści w `bodyXml`.
+ */
+export function makeDocx(paragraphs, { extra = {}, bodyXml = '' } = {}) {
+  const body = paragraphs.map(wPara).join('') + bodyXml;
+  const xml =
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    `<w:document xmlns:w="${W_NS}"><w:body>${body}</w:body></w:document>`;
+  return zipSync({
+    '[Content_Types].xml': strToU8(
+      '<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>',
+    ),
+    'word/document.xml': strToU8(xml),
+    ...extra,
+  });
 }
 
 /** Rozmiar pliku w bajtach. */
@@ -597,4 +644,20 @@ export async function withApp(browser, t, query, fn, opts) {
   } finally {
     await app.close();
   }
+}
+
+/**
+ * Po wczytaniu DOCX albo PDF aplikacja sama przechodzi do „Porównania” (oryginał przekreślony
+ * obok znacznika). Tekst do skopiowania i pobrania to widok „Wynik”, więc sprawdzamy go tam.
+ * Znacznik [PESEL] musi stać także w tym widoku: testy sprawdzają potem tylko, że numeru w nim
+ * nie ma, a taki warunek spełnia też pusty albo niewyrenderowany wynik.
+ */
+export async function resultText(app) {
+  await app.page.getByRole('button', { name: 'Wynik', exact: true }).click();
+  await app.page.waitForFunction(
+    () => document.getElementById('view-result')?.getAttribute('aria-pressed') === 'true',
+  );
+  const out = await app.output();
+  assert.ok(out.includes('[PESEL]'), `widok „Wynik” bez znacznika [PESEL]:\n„${out}”`);
+  return out;
 }

@@ -56,7 +56,10 @@ jobs:
 
   # Bramka E2E na gotowym pliku: Chromium otwiera dist/index.html aplikacji i landingu przez
   # file://, a każdy test kończy się sprawdzeniem zera żądań poza plikiem, zera naruszeń CSP
-  # i zera wyjątków (scripts/e2e). Osobny job na Node 22: Node 20 nie rozwija globów w
+  # i zera wyjątków (scripts/e2e). Tu biegnie też dostępność (a11y.test.mjs: axe WCAG 2.1 AA
+  # z listą wyjątków, która może tylko maleć, klawiatura, wysoki kontrast, odstępy tekstu,
+  # powiększenie 200%). Stare i inne silniki sprawdza osobno zgodnosc.yml, bez blokowania PR.
+  # Osobny job na Node 22: Node 20 nie rozwija globów w
   # node --test i nie ma już wsparcia, a job wyżej (z bramką benchmarku) zostaje bez zmian.
   e2e:
     needs: test
