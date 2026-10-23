@@ -769,6 +769,16 @@ mark.pii.pii-linked { box-shadow: 0 0 0 2px var(--acc-line); }
   background: var(--acc-soft);
   color: var(--text);
 }
+/* Wariant ostrzeżenia: zapamiętane wyłączenie typu danych zostawia go jawnym w wyniku, więc pasek
+   ma kolor i ikonę ostrzeżenia jak #web-copy, a nie neutralny wygląd paska „Cofnij”. */
+.app-note-ic { display: none; width: 18px; height: 18px; }
+.app-note.is-warn {
+  border-color: rgba(138, 90, 18, .35);
+  background: rgba(138, 90, 18, .07);
+  color: var(--warn);
+  font-weight: 600;
+}
+.app-note.is-warn .app-note-ic { display: inline-block; }
 /* Pasek kopii otwartej ze strony produktu: stały, nad kartami edytora, w kolorze ostrzeżenia. */
 .web-copy {
   display: flex; align-items: flex-start; gap: 10px;

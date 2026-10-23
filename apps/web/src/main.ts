@@ -985,6 +985,7 @@ function showNote(msg: string, prev: string | null, info = ''): void {
   appNoteUndo.hidden = prev === null;
   appNoteMaskOn.hidden = true;
   storedOffNote = false;
+  appNote.classList.remove('is-warn');
   appNote.hidden = false;
   appNoteStatus.textContent = text; // ogłoszenie dla czytnika ekranu
   revealIfOffscreen(appNote);
@@ -1013,6 +1014,7 @@ function dismissNote(): void {
   noteInfo = '';
   storedOffNote = false;
   appNoteMaskOn.hidden = true;
+  appNote.classList.remove('is-warn');
   appNote.hidden = true;
   appNoteStatus.textContent = '';
   if (hadFocus && finePointer.matches) input.focus({ preventScroll: true });
@@ -1363,6 +1365,7 @@ if (storedOff && disabledGroups.size > 0) {
   appNoteText.textContent = msg;
   appNoteUndo.hidden = true;
   appNoteMaskOn.hidden = false;
+  appNote.classList.add('is-warn'); // kolor i ikona ostrzeżenia: te dane zostaną jawne w wyniku
   appNote.hidden = false;
   appNoteStatus.textContent = msg;
   storedOffNote = true;

@@ -124,10 +124,9 @@ Nazywam się [IMIĘ I NAZWISKO], PESEL [PESEL], [ADRES], tel. [TELEFON].
    sprawdzi to w źródle strony.
 
 **Co zostaje na komputerze.** W pamięci przeglądarki Parawan trzyma tylko ustawienia (wyłączone
-typy danych, tryb osób, animację), nigdy treść pism ani dane osobowe, a zapamiętane ustawienie,
-które zmniejsza zasłanianie, widać przy wyniku razem z tym, czego dotyczy. Listy z danymi
-osobowymi, np. nazwiska do zasłaniania zawsze, istnieją tylko w otwartej karcie i przechodzą do
-następnej sesji wyłącznie przez plik, który sam zapisujesz i wczytujesz.
+typy danych, rozróżnianie osób, animację), nigdy treść pism ani dane osobowe. Zapamiętane
+ustawienie, które zmniejsza zasłanianie, widać po otwarciu pliku i przy wyniku razem z tym,
+czego dotyczy.
 
 ## 🎨 Kolory znaczników
 

@@ -455,6 +455,8 @@ test('DOCX z nagłówkiem i komentarzem: komunikat wylicza pominięte części i
     await app.waitForOutput('[PESEL]');
     await page.locator('#app-note').waitFor({ state: 'visible' });
     assert.equal((await page.locator('#app-note-text').textContent())?.trim(), DOCX_NOTE);
+    // zwykły komunikat zostaje neutralny: ikona ostrzeżenia tylko przy zapamiętanym wyłączeniu
+    assert.equal(await page.locator('#app-note .app-note-ic').isVisible(), false, 'ikona ostrzeżenia przy DOCX');
     // pole było puste, więc nie ma czego cofać; komunikat czyta czytnik ekranu (role="status")
     assert.equal(await page.locator('#app-note-undo').isVisible(), false, '„Cofnij” przy pustym polu');
     assert.equal(await page.locator('#app-note-status').getAttribute('role'), 'status');
@@ -794,6 +796,9 @@ test('obcy plik z dysku zapisuje mask-disabled=pesel: komunikat przed wklejeniem
       assert.match(text, /Te dane zostaną w wyniku bez zmian\./);
       const status = await page.locator('#app-note-status').textContent();
       assert.equal(status, text, 'czytnik ekranu nie dostał komunikatu');
+      // wygląd ostrzeżenia (kolor --warn i ikona), nie neutralnego paska „Cofnij”
+      assert.ok(await note.evaluate((el) => el.classList.contains('is-warn')), 'pasek bez wariantu ostrzeżenia');
+      assert.ok(await note.locator('.app-note-ic svg').isVisible(), 'pasek bez ikony ostrzeżenia');
       // Wklejone pismo nie zamyka ostrzeżenia, a numer naprawdę zostaje jawny.
       await page.locator('#input').fill(`Wnioskodawca PESEL ${EXAMPLE_PESEL}.`);
       await app.waitForOutput(EXAMPLE_PESEL);
