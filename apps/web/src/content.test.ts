@@ -205,7 +205,8 @@ const BOOT_FAIL =
   '<div id="boot-fail" class="boot-fail" role="alert"><p><strong>Parawan nie uruchomił się w tej ' +
   'przeglądarce, więc pola poniżej nie działają.</strong> Otwórz plik w aktualnym Edge, Chrome albo ' +
   'Firefoksie. Na komputerze służbowym dział IT może blokować skrypty w plikach otwieranych z dysku ' +
-  'albo otwierać je w trybie Internet Explorera.</p></div>';
+  'albo otwierać je w trybie Internet Explorera. Opis dla działu IT jest w pliku DLA-IOD-I-IT.txt ' +
+  'z wydania.</p></div>';
 const NO_JS =
   '<noscript><div class="boot-fail boot-fail-now"><p><strong>Ta przeglądarka ma wyłączony ' +
   'JavaScript.</strong> Parawan rozpoznaje dane programem zapisanym w tym pliku, więc bez ' +

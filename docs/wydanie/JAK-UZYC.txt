@@ -1,0 +1,49 @@
+PARAWAN {{WERSJA}} ({{DATA}}): jak zacząć
+
+Parawan zasłania dane osobowe w tekście, np. PESEL, adres i nazwisko. Działa
+w przeglądarce na tym komputerze i nie łączy się z internetem.
+
+1. Otwórz Parawan.html podwójnym kliknięciem. Dodaj go do zakładek
+   przeglądarki (Ctrl+D), następnym razem otworzysz go jednym kliknięciem.
+2. Kliknij „Wczytaj plik” albo upuść plik na stronę (.txt, .md, .csv, .log,
+   .docx, .pdf). Możesz też wkleić tekst. Wczytany plik nie przechodzi przez
+   schowek, więc oryginał nie zostaje w historii schowka Windows.
+3. Przejrzyj wynik. Strzałkami ‹ › przejdziesz po zasłoniętych fragmentach,
+   a widok „Porównanie” pokaże, co było pod znacznikiem.
+4. Kliknij „Kopiuj”, „Pobierz .txt”, „Pobierz .docx” albo „Drukuj lub zapisz
+   PDF”. Przy druku rozwiń w oknie drukowania „Więcej ustawień” i odznacz
+   „Nagłówki i stopki”, inaczej na kartce znajdzie się ścieżka pliku
+   z nazwą użytkownika komputera.
+
+Zanim opublikujesz pismo w BIP
+- Publikuj nowy plik z Parawana, a nie poprawiony oryginał. Oryginał ma we
+  właściwościach autora, a często także komentarze i historię zmian.
+  Przy pierwszym zapisie w Wordzie sprawdź Plik › Informacje › Autor.
+- Nazwa publikowanego pliku nie powinna zawierać nazwisk.
+- Przejrzyj każdy znacznik. W tej wersji Parawan zasłania też nazwiska
+  urzędników pod pismem. Jeśli mają zostać jawne, przywróć je w wyniku.
+- Numer księgi wieczystej i numer działki zostają. Usuń je sam, jeśli
+  urząd ich nie publikuje.
+- PDF do BIP zrób z pobranego pliku .docx: w Wordzie Plik › Zapisz jako ›
+  PDF, a w opcjach zaznacz „Znaczniki struktury dokumentu ułatwień
+  dostępu”. Wtedy PDF ma strukturę i język dla czytnika ekranu.
+- Na karcie z Parawanem nie używaj asystenta AI wbudowanego w przeglądarkę.
+
+Ograniczenia
+Parawan rozpoznaje dane regułami i może coś przepuścić, najczęściej rzadkie
+nazwisko bez imienia obok albo numer w nietypowym zapisie. Nie czyta skanów:
+PDF musi mieć warstwę tekstu, a z EZD lepiej pobrać wersję DOCX. Z pliku
+Word czyta treść główną, bez nagłówków, stopek i przypisów. Wynik zawsze
+czyta człowiek.
+
+Dla działu IT i inspektora ochrony danych: plik DLA-IOD-I-IT.txt obok
+opisuje, gdzie są przetwarzane dane, co zostaje na komputerze, jak
+sprawdzić sumę SHA-256 i które zasady przeglądarki blokują Parawana.
+Parawan.html blokuje połączenia sieciowe polityką Content-Security-Policy
+zapisaną na początku pliku:
+  {{CSP}}
+
+Plik Parawan.html: {{ROZMIAR}} bajtów, SHA-256:
+  {{SHA256}}
+Strona: https://parawan.karolwilczynski.com
+Kod:    https://github.com/karolpolikarp/parawan

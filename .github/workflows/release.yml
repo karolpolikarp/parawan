@@ -1,17 +1,36 @@
 name: Release
 
-# Tag `v*` (np. v0.1.0) → buduje samowystarczalny plik HTML i dołącza do GitHub Release.
-# Jeden plik gotowy do użycia offline: pobierz i otwórz podwójnym kliknięciem.
+# Tag `v*` (np. v0.46.25) buduje samowystarczalny Parawan.html i publikuje wydanie: plik,
+# JAK-UZYC.txt, DLA-IOD-I-IT.txt i SHA256SUMS.txt z opisem z CHANGELOG.md, plus atestację
+# pochodzenia pliku (gh attestation verify). Teksty wydania żyją w docs/wydanie/, a wypełnia je
+# scripts/release/render-docs.mjs, więc test widzi je przed wydaniem.
+#
+# Ręczne uruchomienie (gh workflow run release.yml --ref main -f dry_run=true) robi build,
+# bramkę i pliki wydania, wypisuje sumy i niczego nie publikuje: kroki atestacji i wydania
+# biegną tylko przy tagu. workflow_dispatch działa dla pliku obecnego na gałęzi domyślnej, więc
+# przed scaleniem render-docs sprawdzają testy w ci.yml.
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Próba: build i pliki wydania bez publikacji'
+        type: boolean
+        default: true
 
+# id-token i attestations: atestacja pochodzenia (actions/attest-build-provenance).
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      # publikacja wyłącznie z tagu; ręczne uruchomienie jest zawsze próbą
+      PUBLIKUJ: ${{ startsWith(github.ref, 'refs/tags/v') && !inputs.dry_run }}
     steps:
       - uses: actions/checkout@v7
       # Node 22 jak job e2e w ci.yml: node --test rozwija wzorzec plików testów dopiero od Node 21.
@@ -33,6 +52,21 @@ jobs:
             || { echo "::error::brak Content-Security-Policy z default-src 'none' i connect-src 'none'"; exit 1; }
           node scripts/e2e/csp.mjs web
           node scripts/e2e/zakazane-api.mjs web
+      # DLA-IOD-I-IT.txt obiecuje, że budowa z tagu daje plik o tej samej sumie. Drugi build
+      # z tego samego drzewa musi więc dać identyczne bajty, inaczej obietnica jest pusta.
+      - name: Strażnik powtarzalności (drugi build, ta sama suma)
+        run: |
+          pierwszy="$(sha256sum apps/web/dist/index.html | cut -d' ' -f1)"
+          cp apps/web/dist/index.html "$RUNNER_TEMP/pierwszy.html"
+          npm run build -w anonimizator-web
+          drugi="$(sha256sum apps/web/dist/index.html | cut -d' ' -f1)"
+          echo "pierwszy build: $pierwszy"
+          echo "drugi build:    $drugi"
+          if [ "$pierwszy" != "$drugi" ]; then
+            cmp "$RUNNER_TEMP/pierwszy.html" apps/web/dist/index.html | head -5 || true
+            echo "::error::build nie jest powtarzalny: dwa buildy z tego samego commita dają różne pliki"
+            exit 1
+          fi
       # Tag nie czeka na wynik CI, więc wydawany plik sam przechodzi bramkę E2E z ci.yml (sieć,
       # CSP, błędy startu, rozmiar). Landing budowany tylko na potrzeby jej testów, do wydania
       # nie trafia.
@@ -47,49 +81,43 @@ jobs:
           name: e2e-zrzuty
           path: test-results/e2e/
           if-no-files-found: ignore
-      - name: Przygotuj artefakt (plik + instrukcja)
+      # Wersja z apps/web/package.json, data z commita, suma i CSP z gotowego pliku. Przy tagu
+      # brak sekcji wersji w CHANGELOG.md albo linii „Pilność:” zatrzymuje wydanie; próba
+      # wstawia wtedy zaślepkę.
+      - name: Pliki wydania (render-docs)
         run: |
-          cp apps/web/dist/index.html Parawan.html
-          cat > JAK-UZYC.txt <<'EOF'
-          PARAWAN: jak zacząć (30 sekund)
-
-          „Dane za parawanem", lokalny anonimizator polskich danych osobowych.
-
-          1. Otwórz plik Parawan.html podwójnym kliknięciem (uruchomi się w przeglądarce).
-          2. Wklej tekst albo upuść plik (.txt, .docx lub .pdf) na lewe pole.
-          3. Po prawej masz wersję z zamaskowanymi danymi, kliknij „Kopiuj"
-             albo pobierz ją jako plik (.txt lub .docx).
-
-          Do publikacji (np. w BIP) użyj nowego dokumentu z „Pobierz .docx", a nie
-          oryginału z wklejonym wynikiem: oryginał ma we właściwościach autora,
-          a często także komentarze i historię zmian. Przy pierwszym zapisie
-          w Wordzie sprawdź Plik › Informacje › Autor.
-
-          Wszystko dzieje się na Twoim komputerze. Aplikacja nie łączy się
-          z internetem, możesz wyłączyć Wi-Fi i sprawdzić.
-
-          Dla działu IT: na początku pliku stoi polityka Content-Security-Policy
-          (default-src 'none', connect-src 'none'), więc przeglądarka blokuje
-          zapytania sieciowe ze skryptów i wczytywanie czegokolwiek spoza pliku.
-
-          Uwaga: automat bywa niepełny (zwłaszcza rzadkie nazwiska), zawsze przejrzyj
-          wynik, zanim go komuś wyślesz.
-
-          Kod źródłowy:
-          https://github.com/karolpolikarp/parawan
-          EOF
-      - uses: softprops/action-gh-release@v3
+          if [ "$PUBLIKUJ" = "true" ]; then proba=""; else proba="--proba"; fi
+          node scripts/release/render-docs.mjs apps/web/dist/index.html wydanie $proba
+          cd wydanie && sha256sum -c SHA256SUMS.txt
+      - name: Sumy i opis wydania
+        run: |
+          {
+            echo '### Sumy SHA-256'
+            echo '```'
+            cat wydanie/SHA256SUMS.txt
+            echo '```'
+            echo
+            cat wydanie/release-notes.md
+          } >> "$GITHUB_STEP_SUMMARY"
+          cat wydanie/SHA256SUMS.txt
+      - name: Pliki wydania do pobrania z przebiegu
+        uses: actions/upload-artifact@v7
+        with:
+          name: pliki-wydania
+          path: wydanie/
+      # Atestacja działa tylko w repozytorium projektu (w forku nie ma do niej uprawnień).
+      - name: Atestacja pochodzenia Parawan.html
+        if: startsWith(github.ref, 'refs/tags/v') && !inputs.dry_run && github.repository == 'karolpolikarp/parawan'
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: wydanie/Parawan.html
+      - name: Wydanie na GitHubie
+        if: startsWith(github.ref, 'refs/tags/v') && !inputs.dry_run
+        uses: softprops/action-gh-release@v3
         with:
           files: |
-            Parawan.html
-            JAK-UZYC.txt
-          body: |
-            ### `Parawan.html`: jeden plik, zero instalacji
-
-            **Parawan**, „Dane za parawanem". Pobierz i otwórz podwójnym kliknięciem, działa nawet
-            na komputerach z blokadami firmowymi (nie wymaga `.bat` ani serwera).
-            Anonimizacja regułami, słownikami i sumami kontrolnymi, w całości offline, **bez AI**
-            (możesz wyłączyć internet i sprawdzić).
-
-            Potrzebujesz wyższego wykrywania rzadkich/obcych nazwisk? Opcjonalny dodatek
-            (local-only): [anonimizator-ai](https://github.com/karolpolikarp/anonimizator-ai).
+            wydanie/Parawan.html
+            wydanie/JAK-UZYC.txt
+            wydanie/DLA-IOD-I-IT.txt
+            wydanie/SHA256SUMS.txt
+          body_path: wydanie/release-notes.md

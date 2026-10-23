@@ -24,6 +24,15 @@ jobs:
       - run: npx tsc -p apps/web/tsconfig.json
       - run: npm run test -w anonimizator-web
       - run: npm run build -w anonimizator-web
+      # Pliki wydania (JAK-UZYC.txt, DLA-IOD-I-IT.txt, SHA256SUMS.txt, opis) z szablonów
+      # w docs/wydanie/. Ręczna próba release.yml działa dopiero po scaleniu na main, więc skrypt
+      # sprawdzamy tutaj: testy i przebieg na właśnie zbudowanym pliku (--proba, bo wpis
+      # w CHANGELOG nowej wersji powstaje dopiero przed tagiem).
+      - name: Pliki wydania (render-docs)
+        run: |
+          node --test scripts/release/render-docs.test.mjs
+          node scripts/release/render-docs.mjs apps/web/dist/index.html "$RUNNER_TEMP/wydanie" --proba
+          cd "$RUNNER_TEMP/wydanie" && sha256sum -c SHA256SUMS.txt
       # Landing (parawan.karolwilczynski.com) — typecheck jak w apps/web + build jednoplikowy,
       # żeby strona marketingowa nie zgniła przy zmianach w rdzeniu/silniku (live demo importuje redactPII).
       - run: npx tsc -p apps/landing/tsconfig.json

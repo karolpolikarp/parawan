@@ -1,0 +1,174 @@
+PARAWAN {{WERSJA}}: informacja dla inspektora ochrony danych i działu IT
+Wydanie z {{DATA}}
+
+PLIK
+  Nazwa:     Parawan.html
+  Rozmiar:   {{ROZMIAR}} bajtów
+  SHA-256:   {{SHA256}}
+  Kod:       https://github.com/karolpolikarp/parawan (tag v{{WERSJA}})
+  Licencja:  Apache 2.0, bez opłat i bez gwarancji
+  Autor:     Karol Wilczyński, osoba fizyczna
+
+GDZIE SĄ PRZETWARZANE DANE
+  Tekst wklejony albo wczytany z pliku przetwarza przeglądarka na komputerze
+  pracownika, w pamięci otwartej karty. Parawan nie ma serwera, konta ani
+  telemetrii. Autor nie otrzymuje żadnych danych i nie ma dostępu do
+  komputerów urzędu. Parawan.html nie łączy się z żadnym serwisem.
+  Połączenia blokuje polityka bezpieczeństwa treści (Content-Security-Policy)
+  zapisana na początku pliku. Dosłownie:
+    {{CSP}}
+  Co znaczą jej dyrektywy:
+    default-src 'none'          nic spoza pliku, chyba że niżej jest wyjątek
+    script-src 'unsafe-inline'  tylko skrypt zapisany w samym pliku
+    style-src 'unsafe-inline'   tylko style zapisane w pliku
+    img-src data:               obrazki tylko wbudowane w plik
+    font-src data:              czcionki tylko wbudowane w plik
+    connect-src 'none'          bez zapytań skryptu (fetch, XHR, WebSocket)
+    form-action 'none'          żadnego wysyłania formularzy
+    base-uri 'none'             bez podmiany adresu bazowego
+    object-src 'none'           bez wtyczek i obiektów osadzonych
+  Można to sprawdzić, odłączając sieć: Parawan działa tak samo.
+
+CO ZOSTAJE NA KOMPUTERZE
+  W pamięci przeglądarki (localStorage) Parawan zapisuje tylko te klucze,
+  bez treści pism:
+    mask-disabled  typy danych odznaczone w „Co maskować”
+    pseudonyms     włączony tryb „Rozróżniaj osoby”
+    motion         zatrzymana animacja przykładu
+  Chrome i Edge dzielą tę pamięć między wszystkie pliki otwierane z dysku,
+  więc inny plik .html mógłby tam coś zapisać. Dlatego zapamiętane
+  wyłączenie zasłaniania Parawan pokazuje przy starcie, zanim pracownik
+  cokolwiek wklei.
+
+  Wynik trafia do schowka albo do pliku tylko po kliknięciu „Kopiuj”,
+  „Pobierz .txt”, „Pobierz .docx” albo „Drukuj lub zapisz PDF”. Nazwa
+  pobranego pliku to data i godzina, bez nazwy pliku źródłowego. Plik .docx
+  powstaje od nowa z samego wyniku: nie ma w nim autora, komentarzy ani
+  historii zmian oryginału.
+
+  Po zamknięciu karty tekst i wynik znikają. Tekst wklejony do Parawana nie
+  trafia do plików sesji przeglądarki i nie wraca po jej ponownym
+  uruchomieniu, także przy włączonym przywracaniu kart. Sprawdzone na nowych
+  profilach: Chrome i Edge 109, Chromium 149, Edge 155, Firefox ESR 115
+  i 140. Do wersji 0.46.23 Chrome i Edge 109 zapisywały treść pola w plikach
+  sesji profilu; od wersji 0.46.24 nie. Sprawdzenie nie obejmuje historii
+  schowka Windows (Win+V), pliku stronicowania ani zrzutów pamięci.
+
+  Rozszerzenia Edge i Chrome nie mają domyślnie dostępu do plików otwieranych
+  z dysku (file://). Historia schowka Windows przechowuje to, co pracownik sam
+  skopiował, także oryginał z Worda. Wczytanie albo upuszczenie pliku omija
+  schowek.
+
+USŁUGI PRZEGLĄDARKI, KTÓRYCH CSP NIE OBEJMUJE
+  CSP ogranicza stronę, a nie przeglądarkę. Usługi w chmurze, które
+  przeglądarka uruchamia sama, wyłącza się zasadami grupy:
+  - Tłumaczenie całej strony: pola z tekstem mają translate=no, a całą
+    usługę wyłącza zasada TranslateEnabled (Edge i Chrome).
+  - Rozszerzone sprawdzanie pisowni: pola mają spellcheck=false. W Edge
+    usługę Microsoft Editor wyłącza MicrosoftEditorProofingEnabled,
+    w Chrome usługę Google SpellCheckServiceEnabled.
+  - Asystent AI z dostępem do treści karty: w Edge zasady CopilotPageContext
+    i EdgeEntraCopilotPageContext (w UE dostęp jest domyślnie wyłączony),
+    w Chrome GeminiSettings. Na karcie z Parawanem nie należy używać
+    asystenta przeglądarki.
+  - Synchronizacja schowka między urządzeniami: zasada Windows
+    AllowCrossDeviceClipboard, a historia schowka: AllowClipboardHistory.
+
+CZEGO PARAWAN NIE ZROBI
+  Zastępuje identyfikatory znacznikami, np. [PESEL]. Czy wynik jest anonimowy
+  w rozumieniu motywu 26 RODO, zależy od reszty treści (opis zdarzenia,
+  stanowisko, nazwa małej miejscowości). Ocenia to pracownik, który czyta
+  wynik. Tryb „Rozróżniaj osoby” zamienia osoby na [OSOBA-A], [OSOBA-B],
+  więc wynik w tym trybie to dane spseudonimizowane.
+
+  Rozpoznaje dane regułami, słownikami i sumami kontrolnymi, bez sztucznej
+  inteligencji. Może przepuścić nazwisko spoza słownika, gdy obok nie ma
+  imienia ani słów Pan czy Pani, numer w nietypowym zapisie, numer księgi
+  wieczystej i numer działki. Nie czyta skanów (PDF musi mieć warstwę
+  tekstu). Z pliku Word czyta treść główną, bez nagłówków, stopek,
+  przypisów i komentarzy, i mówi po wczytaniu, co pominął.
+
+  Zasłania też dane, które w BIP zwykle zostają jawne, np. nazwiska
+  urzędników pod pismem i znak sprawy. Nie zmienia oryginalnego pliku.
+
+  W pomiarze na 319 wymyślonych zdaniach zniknęło 276 z 291 fragmentów,
+  które miały zniknąć (94,8%), i zostało 350 z 351, które miały zostać
+  (99,7%). Metodologia: docs/BENCHMARK.md w repozytorium.
+
+DO OCENY INSPEKTORA OCHRONY DANYCH
+  Z opisu wynika, że autor nie przetwarza danych w imieniu urzędu i nie jest
+  ich odbiorcą. Czy potrzebna jest umowa powierzenia, wpis w rejestrze
+  czynności albo ocena skutków, rozstrzyga inspektor ochrony danych.
+
+WYMAGANIA
+  Edge i Chrome od wersji 109, Firefox od 115 (także ESR), Safari od 16.4.
+  Bez instalacji i bez uprawnień administratora. Działa z udziału sieciowego
+  (UNC) i z plikiem oznaczonym jako pobrany z internetu. Nie działa
+  w Internet Explorerze ani w trybie IE przeglądarki Edge: wtedy pokazuje
+  komunikat, że się nie uruchomił. Firefox ze Snapa (Ubuntu) nie czyta
+  plików spoza katalogu domowego. AppLocker obejmuje pliki .exe, .com, .msi,
+  .ps1, .bat, .cmd, .vbs, .js, .dll i .appx; plik .html otwiera
+  przeglądarka, którą urząd już dopuszcza.
+
+WDROŻENIE
+  1. Sprawdź sumę pliku i porównaj ją z sumą wyżej:
+       PowerShell:      Get-FileHash .\Parawan.html -Algorithm SHA256
+       Wiersz poleceń:  certutil -hashfile Parawan.html SHA256
+       GitHub CLI:      gh attestation verify Parawan.html
+                          --repo karolpolikarp/parawan
+  2. Połóż jedną kopię tylko do odczytu na dysku sieciowym, np.
+     \\serwer\narzedzia\Parawan.html.
+  3. Dodaj pracownikom skrót albo zakładkę (w Edge zasada ManagedFavorites).
+  4. Aktualizacja to podmiana tego jednego pliku po sprawdzeniu sumy.
+
+ZASADY PRZEGLĄDARKI, KTÓRE BLOKUJĄ ALBO OGRANICZAJĄ PARAWANA
+  - URLBlocklist z wpisem dla file:// blokuje plik. Wyjątek dla jednej
+    ścieżki daje URLAllowlist albo plik w intranecie urzędu.
+  - JavaScript wyłączony zasadą DefaultJavaScriptSetting albo
+    JavaScriptBlockedForUrls dla file:///* zatrzymuje Parawana. Ścieżkę
+    pliku dopuszcza JavaScriptAllowedForUrls, można też położyć plik
+    w intranecie.
+  - Nie dodawaj pliku do listy witryn trybu Internet Explorera
+    (InternetExplorerIntegrationSiteList).
+  - DownloadRestrictions = 3 wyłącza tylko zapis wyniku do pliku. Kopiowanie
+    i druk działają.
+  - Tryb zwiększonych zabezpieczeń Edge w wariancie ścisłym
+    (EnhanceSecurityMode = 2) wyłącza kompilację JIT. Parawan działa, ale
+    200 KB tekstu analizuje około sekundy zamiast 0,1 s.
+  - Microsoft Purview DLP może blokować kopiowanie z Worda tekstu z numerem
+    PESEL. Wtedy wystarczy wczytać plik zamiast kopiować.
+  - Skany: przy PDF bez warstwy tekstu lepiej pobrać z EZD wersję DOCX.
+
+BUDOWA Z KODU
+  Plik można zbudować samemu i porównać sumę z wydaniem:
+    git clone --branch v{{WERSJA}} -c core.autocrlf=false
+      https://github.com/karolpolikarp/parawan
+    npm ci
+    npm run build -w anonimizator-web
+  Gotowy plik leży w apps/web/dist/index.html i ma tę samą sumę SHA-256.
+  Wydanie powstaje w GitHub Actions z tagu, a atestację pochodzenia
+  sprawdza polecenie gh attestation verify z punktu Wdrożenie.
+
+AKTUALIZACJE I BŁĘDY BEZPIECZEŃSTWA
+  Plik sam się nie aktualizuje i nie sprawdza wersji przez sieć.
+  Lista wydań: https://github.com/karolpolikarp/parawan/releases
+  Kanał Atom:  https://github.com/karolpolikarp/parawan/releases.atom
+  Opis każdego wydania podaje pilność: zwykła, zalecana albo pilna. Pilna
+  znaczy, że po poprawce Parawan zasłania coś, co wcześniej przepuszczał.
+  Zgłaszanie błędów bezpieczeństwa: SECURITY.md w repozytorium.
+
+DOSTĘPNOŚĆ
+  Przy każdej zmianie interfejs sprawdza automat axe-core (WCAG 2.1 A i AA),
+  a test w przeglądarce obsługę klawiaturą, tryb dużego kontrastu i
+  powiększenie 200%. Czytnik ekranu jest sprawdzany ręcznie przy wydaniu.
+
+WPIS DO EWIDENCJI OPROGRAMOWANIA (KRI § 19 ust. 2 pkt 2)
+  Nazwa:        Parawan
+  Wersja:       {{WERSJA}}
+  Producent:    Karol Wilczyński (osoba fizyczna)
+  Licencja:     Apache 2.0
+  Plik:         Parawan.html
+  SHA-256:
+    {{SHA256}}
+  Lokalizacja:  ..............................................
+  Data wpisu:   ..................  Odpowiada: ...................
