@@ -5001,7 +5001,9 @@ test('b5 r1, K45: nowe etykiety pól — wartość, która nie jest osobą, nag�
     ['Imię i nazwisko pacjenta\nJan Kowalski.', `Imię i nazwisko pacjenta\n${N}.`],
     ['Imię i nazwisko pełnomocnika: adw. Piotr Zając', `Imię i nazwisko pełnomocnika: adw. ${N}`],
     ['Lp.\nImię i nazwisko ucznia\nKlasa\nŚrednia\n1.\nJan Kowalski', `Lp.\nImię i nazwisko ucznia\nKlasa\nŚrednia\n1.\n${N}`],
-    ['Imię i nazwisko opiekuna prawnego\nHans Gruber', `Imię i nazwisko opiekuna prawnego\n${N}`],
+    // runda 2: wartość z następnej linii musi mieć imię albo nazwisko ze słownika („Hans Gruber"
+    // w następnym wierszu zostaje jawny jak przed partią — patrz test „b5 r2, K45")
+    ['Imię i nazwisko opiekuna prawnego\nAnna Gruber', `Imię i nazwisko opiekuna prawnego\n${N}`],
     ['Nazwisko i imię pacjenta: Marszałek Anna', `Nazwisko i imię pacjenta: ${N}`],
     ['Imię i nazwisko pacjenta: jan kowalski', `Imię i nazwisko pacjenta: ${N}`],
   ]);
@@ -5081,4 +5083,120 @@ test('b5 r1, K52: „komórka" z kodem jednostki, kraj w drugiej linii adresu i 
     ['{"prawoJazdy": "01234/12/1234"}', '{"prawoJazdy": "[PRAWO-JAZDY]"}'],
     ['{"addressLine1": "Kościuszki 12/3", "addressLine2": "lok. 5"}', `{"addressLine1": "${A}", "addressLine2": "lok. 5"}`],
   ]);
+});
+test('Resztki b5 · osoba po roli: nazwa klubu z miastem, firma z imieniem, forma prawna i patron instytucji z przymiotnikiem zostają jawne', () => {
+  keep([
+    'Prezes Klubu Sportowego Lech Poznań zwołał zebranie.',
+    'Prezes Klubu Sportowego Lech Poznań przesłał pismo.',
+    'Pełnomocnik Zarządu Spółki Marek Trans Sp. z o.o.',
+    'Pełnomocnik Zarządu Spółki Agata Meble S.A.',
+    'Prezes Zarządu Firmy Adam Sp. z o.o.',
+    'Dyrektor Handlowy Firmy Marek Sp. z o.o.',
+    'Gminny Ośrodek Kultury Stefan Żeromski organizuje konkurs.',
+    'Miejski Dom Kultury Adam Mickiewicz zaprasza.',
+  ]);
+  masked([
+    ['Prezes Zarządu Spółki Lech Poznań S.A. Piotr Rutkowski podpisał umowę.', `Prezes Zarządu Spółki Lech Poznań S.A. ${N} podpisał umowę.`],
+    ['Prezes Zarządu Spółki Marek Nowak podpisał.', `Prezes Zarządu Spółki ${N} podpisał.`],
+    ['Dyrektor Gminnego Ośrodka Kultury Jan Kowalski zaprasza.', `Dyrektor Gminnego Ośrodka Kultury ${N} zaprasza.`],
+  ]);
+});
+test('Resztki b5 · etykieta pola z dopełnieniem: instytucja, rola, forma prawna i nagłówek kolumny w następnej linii to nie osoba', () => {
+  keep([
+    'Imię i nazwisko opiekuna prawnego: Powiatowe Centrum Pomocy Rodzinie',
+    'Imię i nazwisko opiekuna prawnego: Gminny Ośrodek Pomocy Społecznej',
+    'Imię i nazwisko opiekuna prawnego: Rodzina Zastępcza',
+    'Imię i nazwisko opiekuna prawnego: Matka',
+    'Imię i nazwisko osoby kontaktowej: Recepcja',
+    'Imię i nazwisko opiekuna prawnego: Miejski Ośrodek Pomocy Społecznej',
+    'Imię i nazwisko wnioskodawcy: PGE Dystrybucja S.A.',
+    'Imię i nazwisko ubezpieczonego: ZUS Oddział Siedlce',
+    'Imię i nazwisko wnioskodawcy: Wspólnota Mieszkaniowa',
+    'Imię i nazwisko wnioskodawcy: Gazeta Wyborcza',
+    'Imię i nazwisko wnioskodawcy: Ochotnicza Straż Pożarna',
+    'Imię i nazwisko pracownika: Kierowca',
+    'LP.\nIMIĘ I NAZWISKO UCZNIA\nPODPIS RODZICA',
+    'Imię i nazwisko ucznia\nGRUPA WIEKOWA',
+    'Imię i nazwisko ucznia\nWychowawca Klasy',
+    'Imię i nazwisko pacjenta\nLekarz Prowadzący\nRozpoznanie',
+    'Imię i nazwisko dziecka\nGrupa Przedszkolna',
+  ]);
+  masked([
+    ['Imię i nazwisko opiekuna prawnego: Anna Kowalska', `Imię i nazwisko opiekuna prawnego: ${N}`],
+    ['Imię i nazwisko opiekuna prawnego: Ziółkowska Brygida', `Imię i nazwisko opiekuna prawnego: ${N}`],
+    ['Imię i nazwisko ucznia\nJan Kowalski', `Imię i nazwisko ucznia\n${N}`],
+    ['Imię i nazwisko ucznia\nAnna Zając', `Imię i nazwisko ucznia\n${N}`],
+    ['Imię i nazwisko pełnomocnika: Kancelaria Piotr Zając', `Imię i nazwisko pełnomocnika: Kancelaria ${N}`],
+  ]);
+});
+test('Resztki b5 · „z domu" przed nazwą placówki i przyimkiem, „z d." nie blokuje inicjału innej osoby', () => {
+  masked([
+    ['Jan Nowak z domu Ronalda McDonalda', `${N} z domu Ronalda McDonalda`],
+    ['Jan Nowak z domu Wczasów Dziecięcych', `${N} z domu Wczasów Dziecięcych`],
+    ['Spotkanie prowadziła Halina Grzyb z domu Pod Lipami w Wiśle.', `Spotkanie prowadziła ${N} z domu Pod Lipami w Wiśle.`],
+    ['Jan Kowalski z domu Caritas w Radomiu.', `${N} z domu Caritas w Radomiu.`],
+    ['Anna Nowak z domu Kowalska', `${N} z domu ${N}`],
+    ['Anna Nowak z d. Kos. Rozmowa Jana Kowalskiego z D. Nowakiem.', `${N} z d. ${N}. Rozmowa ${N} z ${N}.`],
+    ['EWELINA KRAWCZYK Z D. MAJEWSKA', `${N} Z D. ${N}`],
+  ]);
+});
+test('Resztki b5 · miejscowość WERSALIKAMI po kodzie: ogon tylko z członów nazwy, bez przejścia przez tabulator', () => {
+  masked([
+    ['UL. DĘBOWA 7, 26-900 GŁOWACZÓW KOWAL-ZAJĄC ANNA', `${A}, ${KOD} ${C} KOWAL-ZAJĄC ANNA`],
+    ['UL. POLNA 5, 26-910 MAGNUSZEW ZAMELDOWANY OD 2010 R.', `${A}, ${KOD} ${C} ZAMELDOWANY OD 2010 R.`],
+    ['JAN KOWALSKI\tUL. POLNA 3\t08-110 GROCHÓWKA\tOBRĘB 0007\tDZ. 45/6', `${N}\t${A}\t${KOD} ${C}\tOBRĘB 0007\tDZ. 45/6`],
+    ['UL. POLNA 3, 05-300 STARA WIEŚ', `${A}, ${KOD} ${C}`],
+    ['UL. POLNA 3, 26-900 GŁOWACZÓW KOWALSKI JAN', `${A}, ${KOD} ${C} KOWALSKI JAN`],
+  ]);
+});
+test('Resztki b5 · tablica: kod silnika z pojemnością, rejestracja pisma, powiat z rokiem w wyliczeniu i rejestr umów pod „nrRej"', () => {
+  keep([
+    'Samochód osobowy marki Volkswagen Golf TDI 1896 cm3, rok produkcji 2003.',
+    'samochód marki Renault Clio DCI 1461',
+    'Wniosek zarejestrowano pod numerem rejestracji RPW 12345/2026.',
+    '{\"nr_rej\": \"UM 1234\", \"nrRej\": \"ZP 2026\"}',
+  ]);
+  masked([
+    ['samochód marki Peugeot Boxer HDI 2198, nr rej. WLI 23C4', `samochód marki Peugeot Boxer HDI 2198, nr rej. ${RJ}`],
+    ['samochód marki Opel Astra WPI 12345', `samochód marki Opel Astra ${RJ}`],
+    ['pojazd o numerze rejestracyjnym WPI 12345', `pojazd o numerze rejestracyjnym ${RJ}`],
+    ['nr rej. WPI 12345, WPI 2019', `nr rej. ${RJ}, ${RJ}`],
+    ['nr rej. WPI 12345, OC 2024', `nr rej. ${RJ}, OC 2024`],
+    ['{\"nr_rej\": \"WPI 12345\"}', `{\"nr_rej\": \"${RJ}\"}`],
+    ['{\"nrRejestracyjny\": \"WPI 12345\"}', `{\"nrRejestracyjny\": \"${RJ}\"}`],
+  ]);
+});
+test('Resztki b5 · telefon: numer inwentarzowy po „nr inw.", kwota w komórce arkusza i w zestawieniu kosztów', () => {
+  keep([
+    'Telefon nr inw. 012345678 – zużyty',
+    'Fax nr fabr. 12 345 67 89',
+    'W komórce 123 456 789 zł',
+    'Usługi telefoniczne: 123 456 789 zł',
+  ]);
+  masked([
+    ['Telefon nr 600 700 800', `Telefon nr ${T}`],
+    ['Telefon nr inw. 600 700 800', `Telefon nr inw. ${T}`],
+    ['Proszę dzwonić na komórkę 600 700 800.', `Proszę dzwonić na komórkę ${T}.`],
+    ['Usługi telefoniczne: 600 700 800', `Usługi telefoniczne: ${T}`],
+  ]);
+});
+test('Resztki b5 · próg „i później" w przepisie, celownik „ubezpieczonym" i patron po sklejonym „im."', () => {
+  keep([
+    'Emerytura przysługuje ubezpieczonym urodzonym 1 stycznia 1949 r.',
+    'Matce urodzonej 1 stycznia 2004 r. i później przysługuje dodatek.',
+    'kobiecie urodzonej 1 stycznia 1953 r. i później.',
+    'Szkoła Podstawowa im.Henryka Sienkiewicza w Siedlcach.',
+  ]);
+  masked([
+    ['Anna Nowak urodzona 12.03.1953 r. i później zamieszkała w Radomiu.', `${N} urodzona ${DU} r. i później zamieszkała w ${C}.`],
+    ['Anna Nowak, urodzonej 1 stycznia 1953 r. w Radomiu', `${N}, urodzonej ${DU} r. w ${C}`],
+  ]);
+});
+test('Resztki b5 · wiersz tabeli z brakami „NA" po etykiecie telefonu liczy się liniowo', () => {
+  for (const kw of ['Telefon', 'Kontakt', 'tel.', 'Fax']) {
+    const text = kw + '      NA'.repeat(16);
+    const t0 = performance.now();
+    expect(redactPII(text).redacted).toBe(text);
+    expect(performance.now() - t0).toBeLessThan(500);
+  }
 });
