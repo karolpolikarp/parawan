@@ -861,6 +861,61 @@ test('DOCX z częściami: zdanie o publikacji dochodzi do dopisku o częściach,
   });
 });
 
+test('wczytany PDF: po pierwszym pobraniu ten sam komunikat o publikacji nowego pliku', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    await page.locator('#file-input').setInputFiles(path.join(FIXTURES, 'pismo.pdf'));
+    await app.waitForOutput('[PESEL]');
+    await download(page, 'Pobierz .txt');
+    await page.locator('#app-note-text').getByText('Do publikacji użyj nowego pliku').waitFor();
+    assert.equal((await page.locator('#app-note-status').textContent())?.trim(), PUBLISH_NOTE);
+  });
+});
+
+test('wczytany DOCX w jednej kolumnie (390 px): pobranie nie przewija strony do paska', async (t) => {
+  await withApp(
+    browser,
+    t,
+    '',
+    async (app) => {
+      const { page } = app;
+      const docx = makeDocx(['Na wniosek Pana Tomasza Wierzbickiego, PESEL 85071412358.']);
+      await page.locator('#file-input').setInputFiles({ name: 'w.docx', mimeType: DOCX_MIME, buffer: Buffer.from(docx) });
+      await app.waitForOutput('[PESEL]');
+      const btn = page.locator('#download-docx');
+      await btn.scrollIntoViewIfNeeded();
+      await btn.focus();
+      const top = () => page.evaluate(() => document.getElementById('download-docx')?.getBoundingClientRect().top ?? 0);
+      const before = await top();
+      await Promise.all([page.waitForEvent('download'), page.keyboard.press('Enter')]);
+      await page.locator('#app-note-status').getByText('Do publikacji użyj nowego pliku').waitFor({ state: 'attached' });
+      // Pasek pojawia się nad przyciskiem, więc scrollY rośnie (zakotwiczenie przewijania), ale
+      // przycisk zostaje w tym samym miejscu ekranu. Skok do paska przesuwał go o setki pikseli.
+      const after = await top();
+      assert.ok(Math.abs(after - before) < 30, `przycisk przesunął się z ${before} na ${after} px`);
+      assert.equal(await page.evaluate(() => document.activeElement?.id), 'download-docx');
+      assert.ok(await btn.isVisible(), 'przycisk pobierania zniknął z ekranu');
+    },
+    { viewport: { width: 390, height: 844 } },
+  );
+});
+
+test('„Pobierz .txt” i „Pobierz .docx”: dymek jest opisem przycisku dla czytnika ekranu', async (t) => {
+  await withApp(browser, t, '?demo', async (app) => {
+    const { page } = app;
+    await app.demoReady();
+    for (const id of ['download', 'download-docx']) {
+      const desc = await page.evaluate((id) => {
+        const el = document.getElementById(id);
+        const ref = el?.getAttribute('aria-describedby');
+        return { tip: el?.dataset.tip, text: ref ? document.getElementById(ref)?.textContent : null };
+      }, id);
+      assert.ok(desc.tip, `#${id} bez dymka`);
+      assert.equal(desc.text, desc.tip, `#${id}: opis dla czytnika inny niż dymek`);
+    }
+  });
+});
+
 test('localStorage: tylko znane klucze ustawień, bez treści pisma', async (t) => {
   // Bez reducedMotion: przy ograniczonym ruchu przycisk pauzy animacji jest ukryty.
   const opts = { reducedMotion: 'no-preference' };

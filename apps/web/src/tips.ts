@@ -96,7 +96,15 @@ const FOCUSABLE = 'a, button, input, select, textarea, [tabindex]';
 export function labelTips(root: ParentNode = document): void {
   root.querySelectorAll<HTMLElement>('[data-tip]').forEach((el) => {
     const tip = el.dataset.tip;
-    if (!tip || el.hasAttribute('aria-label') || el.hasAttribute('aria-labelledby')) return;
+    if (!tip || el.hasAttribute('aria-label')) return;
+    // Nazwa ułożona z kilku elementów (aria-labelledby, np. „Pobierz” + „.docx”) zostaje,
+    // ale dymek nadal trafia do opisu: przy .docx to jedyne miejsce ze zdaniem o autorze.
+    if (el.hasAttribute('aria-labelledby')) {
+      if (el.matches(FOCUSABLE) && !el.hasAttribute('aria-describedby')) {
+        el.setAttribute('aria-describedby', tipDescId(tip));
+      }
+      return;
+    }
     const target = el.matches(FOCUSABLE) ? el : (el.querySelector<HTMLElement>(FOCUSABLE) ?? el);
     const isHelp = el.classList.contains('help');
     if (target === el && (isHelp || !el.textContent?.trim())) {

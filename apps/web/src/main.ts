@@ -970,7 +970,7 @@ const UNDO_MS = 20_000;
 let undoTimer: ReturnType<typeof setTimeout> | undefined;
 
 /** Pokaż pasek pod narzędziami: `msg` z przyciskiem „Cofnij” (gdy jest `prev`) i dopisek `info`. */
-function showNote(msg: string, prev: string | null, info = ''): void {
+function showNote(msg: string, prev: string | null, info = '', reveal = true): void {
   clearTimeout(undoTimer);
   undoText = prev;
   noteInfo = info;
@@ -984,7 +984,7 @@ function showNote(msg: string, prev: string | null, info = ''): void {
   appNote.classList.remove('is-warn');
   appNote.hidden = false;
   appNoteStatus.textContent = text; // ogłoszenie dla czytnika ekranu
-  revealIfOffscreen(appNote);
+  if (reveal) revealIfOffscreen(appNote);
   if (prev !== null) undoTimer = setTimeout(expireUndo, UNDO_MS);
 }
 
@@ -1118,11 +1118,14 @@ const PUBLISH_NOTE =
   'komentarze i historię zmian. Przy pierwszym zapisie w Wordzie sprawdź Plik › Informacje › Autor.';
 let publishNoteShown = false;
 
+// Bez przewijania do paska: w jednej kolumnie (telefon, powiększenie 150%) stoi on w karcie
+// źródła, setki pikseli nad przyciskiem pobierania, i skok zabierałby fokus z ekranu. Czytnik
+// dostaje zdanie przez #app-note-status, a pasek czeka nad tekstem źródłowym.
 function notePublishNewFile(): void {
   if (publishNoteShown || (lastFileExt !== 'docx' && lastFileExt !== 'pdf')) return;
   publishNoteShown = true;
   if (appNote.hidden) {
-    showNote('', null, PUBLISH_NOTE);
+    showNote('', null, PUBLISH_NOTE, false);
     return;
   }
   // Pasek już stoi (dopisek o częściach DOCX, „Cofnij”): zdanie dochodzi w nowym wierszu,
@@ -1130,7 +1133,6 @@ function notePublishNewFile(): void {
   noteInfo = [noteInfo, PUBLISH_NOTE].filter(Boolean).join('\n');
   appNoteText.textContent = [appNoteText.textContent, PUBLISH_NOTE].filter(Boolean).join('\n');
   appNoteStatus.textContent = PUBLISH_NOTE;
-  revealIfOffscreen(appNote);
 }
 
 downloadBtn.addEventListener('click', () => {
