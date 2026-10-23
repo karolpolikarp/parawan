@@ -5577,3 +5577,82 @@ test('Resztki, poprawki po weryfikacji · nazwa obiektu w szyku odwróconym, św
     ['12.05.2024 Noc Gzowska SOR', `12.05.2024 Noc ${N} SOR`],
   ]);
 });
+test('Resztki, poprawki po weryfikacji (runda 2) · obce imię i nazwisko z następnej linii, homograf instytucji jako nazwisko', () => {
+  masked([
+    ['Imię i nazwisko pacjenta:\nYuki Tanaka', `Imię i nazwisko pacjenta:\n${N}`],
+    ['Imię i nazwisko wnioskodawcy\nAliaksandr Lukashuk', `Imię i nazwisko wnioskodawcy\n${N}`],
+    ['Imię i nazwisko ucznia\nThanh Hoa Tran', `Imię i nazwisko ucznia\n${N}`],
+    ['Imię i nazwisko dziecka\nAmir Rahimov', `Imię i nazwisko dziecka\n${N}`],
+    ['Imię i nazwisko pacjenta: Min-jun Park', `Imię i nazwisko pacjenta: ${N}`],
+    ['Imię i nazwisko pacjenta: SEO-YEON PARK', `Imię i nazwisko pacjenta: ${N}`],
+    ['Imię i nazwisko wnioskodawcy: Anna Koło', `Imię i nazwisko wnioskodawcy: ${N}`],
+    ['Imię i nazwisko ucznia: Jan Nowy', `Imię i nazwisko ucznia: ${N}`],
+    ['Imię i nazwisko pełnomocnika: Adam Bank', `Imię i nazwisko pełnomocnika: ${N}`],
+  ]);
+  keep([
+    'LP.\nIMIĘ I NAZWISKO UCZNIA\nPODPIS RODZICA',
+    'Imię i nazwisko ucznia\nWychowawca Klasy',
+    'Imię i nazwisko ucznia\nRok Urodzenia',
+    'Imię i nazwisko pacjenta\nLekarz Prowadzący\nRozpoznanie',
+    'Imię i nazwisko dziecka\nGrupa Przedszkolna',
+    'Imię i nazwisko ucznia\nGRUPA WIEKOWA',
+    'Imię i nazwisko pacjenta\nGodzina Przyjęcia',
+    'Imię i nazwisko ucznia\nKlasa',
+    'Imię i nazwisko wnioskodawcy: Bank Pekao',
+    'Imię i nazwisko wnioskodawcy: Koło Gospodyń Wiejskich',
+    'Imię i nazwisko wnioskodawcy: Park Wodny',
+    'Imię i nazwisko wnioskodawcy: Anna Bank Spółdzielczy',
+  ]);
+});
+test('Resztki, poprawki po weryfikacji (runda 2) · data urodzenia w narzędniku bez przyimka, nazwisko panieńskie przed imiesłowem', () => {
+  masked([
+    ['Opiekuje się bratem niepełnosprawnym urodzonym 12.03.1990 r.', 'Opiekuje się bratem niepełnosprawnym urodzonym [DATA-URODZENIA] r.'],
+    ['Umowa z Janem Nowakiem, ubezpieczonym urodzonym 3.05.1980 r.', `Umowa z ${N}, ubezpieczonym urodzonym [DATA-URODZENIA] r.`],
+    ['Kurator dla małoletniego, będącego ubezwłasnowolnionym urodzonym 5.06.2001 r.', 'Kurator dla małoletniego, będącego ubezwłasnowolnionym urodzonym [DATA-URODZENIA] r.'],
+    ['zajmowała się poszkodowanym urodzonym 1.02.1950 r.', 'zajmowała się poszkodowanym urodzonym [DATA-URODZENIA] r.'],
+    ['Maria Nowak z domu Wrona Wypisana 12.10.', `${N} z domu ${N} Wypisana 12.10.`],
+    ['Pani Anna Nowak z domu Wrona Zatrudniona jest od 2010 r.', `Pani ${N} z domu ${N} Zatrudniona jest od 2010 r.`],
+    ['Matka: Ewa Nowak z domu Zielona Zmarła 2015.', `Matka: ${N} z domu ${N} Zmarła 2015.`],
+  ]);
+  keep([
+    'Emerytura przysługuje ubezpieczonym urodzonym 1 stycznia 1949 r.',
+    'Prawo mają uprawnionym urodzonym 1.01.1950 r.',
+    'Świadczenie przysługuje osobom urodzonym 1.01.1950 r.',
+  ]);
+  expect(redactPII('Anna Kowalska z domu Sue Ryder').redacted).toBe(`${N} z domu Sue Ryder`);
+});
+test('Resztki, poprawki po weryfikacji (runda 2) · drugi adres tylko w kształcie ulicy, nazwa obiektu przy czasowniku, statystyka, etykiety Title Case', () => {
+  masked([
+    ['Mieszka przy ul. Polnej 5 m. 2 i Sadowej 9.', `Mieszka przy ${A} i ${A}.`],
+    ['ul. Polna 5 i Mickiewicza 7', `${A} i ${A}`],
+    ['ul. Polna 5 oraz Armii Krajowej 12', `${A} oraz ${A}`],
+    ['Ulica: Długa 5 Telefon Komórkowy: 501 222 333', `Ulica: ${A} Telefon Komórkowy: ${T}`],
+    ['Ulica: Lipowa 3 Wymiar Etatu: 1/1', `Ulica: ${A} Wymiar Etatu: 1/1`],
+    ['Ulica: Długa 5 Osoba Do Kontaktu: Anna Lis', `Ulica: ${A} Osoba Do Kontaktu: ${N}`],
+    ['Ulica: Długa 5 Obywatelstwo Polskie: tak', `Ulica: ${A} Obywatelstwo Polskie: tak`],
+    ['Pozwany Jan Kaliski. Dworzec Kaliski zamknięto.', `Pozwany ${N}. Dworzec Kaliski zamknięto.`],
+    ['Pacjentka Anna Lisiecka przyjęta. Noc Lisiecka przespała spokojnie.', `Pacjentka ${N} przyjęta. Noc ${N} przespała spokojnie.`],
+    ['Pokój Lisiecki opuścił o 10:00.', `Pokój ${N} opuścił o 10:00.`],
+    ['Z wnioskodawczynią mieszka w Lublinie 3 dzieci.', `Z wnioskodawczynią mieszka w ${M} 3 dzieci.`],
+  ]);
+  for (const [t, kept] of [
+    ['Lokalizacje: ul. Leśna 7 oraz Hala 3.', 'oraz Hala 3.'],
+    ['serwer przy ul. Polnej 5 oraz Windows 10', 'oraz Windows 10'],
+    ['Gabinet przy ul. Szpitalnej 5 m. 3 i Sali 12 jest czynny.', 'i Sali 12 jest'],
+    ['ul. Kwiatowej 7 i Rozdział 3 umowy', 'i Rozdział 3 umowy'],
+    ['Pociągi odjeżdżają z dworca przy ul. Dworcowej 3 i Peronu 2.', 'i Peronu 2.'],
+    ['Biuro przy ul. Polnej 5 i Wisła 1 liga.', 'i Wisła 1 liga'],
+    ['ul. Polnej 5 i Grudnia 2020', 'i Grudnia 2020'],
+  ] as const)
+    expect(redactPII(t).redacted).toContain(kept);
+  keep([
+    'Kościół Mariacki kupił w 2020 r. nowy dzwon.',
+    'Cmentarz Powązkowski odwiedził wczoraj prezydent.',
+    'Kościół Mariacki odwiedził w niedzielę.',
+    'Ogród Saski odwiedził.',
+    'Klasztor Benedyktyński opuścił w lipcu o. Szymon.',
+    'Mieszka w Sopocie 500 cudzoziemców.',
+    'W bloku zamieszkuje w Pruszkowie 120 rodzin.',
+  ]);
+  masked([['Świadek Jan Kabacki zeznał. Las Kabacki zamknięto.', 'Świadek [OSOBA-A] zeznał. Las Kabacki zamknięto.']], { pseudonyms: true });
+});

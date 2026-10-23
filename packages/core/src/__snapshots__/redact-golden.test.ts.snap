@@ -81,6 +81,7 @@ Imię i nazwisko wnioskodawcy: Gmina Michałowice",
 Kościół       Mariacki     Kraków
 Cystoskopia: trójkąt Pawlika bez zmian. Pismo zarejestrowano pod numerem rejestracji RPW 12345/2026.",
   "neg-15": "Zakład Ubezpieczeń Społecznych wydał decyzję odmowną.",
+  "neg-150": "Gabinet przy ul. Szpitalnej 5 m. 3 i Sali 12 jest czynny. Lokalizacje: ul. Leśna 7 oraz Hala 3. Kościół Mariacki odwiedził w niedzielę biskup. Mieszka w Sopocie 500 cudzoziemców.",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
@@ -421,6 +422,11 @@ Tak	Kaczyński	Urząd Miasta",
 Imię i nazwisko pacjenta: Oksana Petrowa
 Joanna Kos z domu Sikora Zam. Sosnowiec
 Zam. ul. Długa 5 i Krótka 7",
+  "str-148": "Imię i nazwisko pacjenta:
+Yuki Tanaka
+Imię i nazwisko ucznia: Jan Nowy
+Opiekuje się bratem niepełnosprawnym urodzonym 12.03.1990 r.
+Maria Nowak z domu Wrona Wypisana 12.10.",
   "str-15": "Zwrot nastąpi na konto [NR-KONTA] wskazane w umowie.",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
@@ -591,6 +597,7 @@ Imię i nazwisko wnioskodawcy: Gmina Michałowice",
 Kościół       Mariacki     Kraków
 Cystoskopia: trójkąt Pawlika bez zmian. Pismo zarejestrowano pod numerem rejestracji RPW 12345/2026.",
   "neg-15": "Zakład Ubezpieczeń Społecznych wydał decyzję odmowną.",
+  "neg-150": "Gabinet przy [ADRES] i Sali 12 jest czynny. Lokalizacje: [ADRES] oraz Hala 3. Kościół Mariacki odwiedził w niedzielę biskup. Mieszka w Sopocie 500 cudzoziemców.",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
@@ -929,6 +936,11 @@ Tak	[OSOBA-B]	Urząd Miasta",
 Imię i nazwisko pacjenta: [OSOBA-B]
 [OSOBA-C] z domu [OSOBA-D] Zam. [MIEJSCOWOŚĆ]
 Zam. [ADRES] i [ADRES]",
+  "str-148": "Imię i nazwisko pacjenta:
+[OSOBA-A]
+Imię i nazwisko ucznia: [OSOBA-B]
+Opiekuje się bratem niepełnosprawnym urodzonym [DATA-URODZENIA] r.
+[OSOBA-C] z domu [OSOBA-D] Wypisana 12.10.",
   "str-15": "Zwrot nastąpi na konto [NR-KONTA] wskazane w umowie.",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
@@ -1099,6 +1111,7 @@ Imię i nazwisko wnioskodawcy: Gmina Michałowice",
 Kościół       Mariacki     Kraków
 Cystoskopia: trójkąt Pawlika bez zmian. Pismo zarejestrowano pod numerem rejestracji RPW 12345/2026.",
   "neg-15": "Zakład Ubezpieczeń Społecznych wydał decyzję odmowną.",
+  "neg-150": "Gabinet przy [ADRES] i Sali 12 jest czynny. Lokalizacje: [ADRES] oraz Hala 3. Kościół Mariacki odwiedził w niedzielę biskup. Mieszka w Sopocie 500 cudzoziemców.",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
@@ -1437,6 +1450,11 @@ Tak	[IMIĘ I NAZWISKO]	Urząd Miasta",
 Imię i nazwisko pacjenta: [IMIĘ I NAZWISKO]
 [IMIĘ I NAZWISKO] z domu [IMIĘ I NAZWISKO] Zam. [MIEJSCOWOŚĆ]
 Zam. [ADRES] i [ADRES]",
+  "str-148": "Imię i nazwisko pacjenta:
+[IMIĘ I NAZWISKO]
+Imię i nazwisko ucznia: [IMIĘ I NAZWISKO]
+Opiekuje się bratem niepełnosprawnym urodzonym [DATA-URODZENIA] r.
+[IMIĘ I NAZWISKO] z domu [IMIĘ I NAZWISKO] Wypisana 12.10.",
   "str-15": "Zwrot nastąpi na konto [NR-KONTA] wskazane w umowie.",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",

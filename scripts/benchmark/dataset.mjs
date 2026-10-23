@@ -892,6 +892,11 @@ export function buildDataset() {
   // tabela wyrównana spacjami, eponim anatomiczny i rejestracja pisma zostają jawne.
   str('Prezes Zarządu Spółki Anna Wrona podpisała umowę. Sąd ustanowił opiekuna nad ubezwłasnowolnionym urodzonym 12.03.1950 r. Pojazd pod numerem rejestracji WX 12345.\nImię i nazwisko pacjenta: Oksana Petrowa\nJoanna Kos z domu Sikora Zam. Sosnowiec\nZam. ul. Długa 5 i Krótka 7', ['Anna Wrona', '12.03.1950', 'WX 12345', 'Oksana Petrowa', 'Joanna Kos', 'Sikora', 'Sosnowiec', 'Długa 5', 'Krótka 7'], ['Prezes Zarządu Spółki', 'opiekuna nad ubezwłasnowolnionym', 'Imię i nazwisko pacjenta:']);
   neg('Cmentarz Rakowicki odwiedził oskarżony w dniu 1 listopada. Kościół Mariacki kupił nowe wyposażenie.\n21.06 Noc Świętojańska\nKościół       Mariacki     Kraków\nCystoskopia: trójkąt Pawlika bez zmian. Pismo zarejestrowano pod numerem rejestracji RPW 12345/2026.', ['Rakowicki', 'Mariacki', 'Noc Świętojańska', 'Pawlika', 'RPW 12345/2026']);
+  // Poprawki po weryfikacji etapu resztki (runda 2): obce imię i nazwisko z następnej linii, nazwisko
+  // będące wyrazem instytucji, data urodzenia w narzędniku, nazwisko panieńskie przed imiesłowem;
+  // pomieszczenie lub hala po adresie, zabytek przy czasowniku i statystyka zostają jawne.
+  str('Imię i nazwisko pacjenta:\nYuki Tanaka\nImię i nazwisko ucznia: Jan Nowy\nOpiekuje się bratem niepełnosprawnym urodzonym 12.03.1990 r.\nMaria Nowak z domu Wrona Wypisana 12.10.', ['Yuki Tanaka', 'Jan Nowy', '12.03.1990', 'Maria Nowak', 'Wrona'], ['Imię i nazwisko pacjenta:', 'urodzonym', 'Wypisana']);
+  neg('Gabinet przy ul. Szpitalnej 5 m. 3 i Sali 12 jest czynny. Lokalizacje: ul. Leśna 7 oraz Hala 3. Kościół Mariacki odwiedził w niedzielę biskup. Mieszka w Sopocie 500 cudzoziemców.', ['Sali 12', 'Hala 3', 'Mariacki', 'Sopocie']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

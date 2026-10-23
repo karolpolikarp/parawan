@@ -1172,13 +1172,26 @@ const RE_SHIFT_LIST_BEFORE = /(?<!\p{L})(?:Dzień|Rano|Wieczorem|Popołudnie)[ \
 const RE_DATE_LINE_HEAD_BEFORE = /(?:^|\n)[ \t]*\d{1,2}[.:]\d{2}(?:[.:]\d{2,4})?[ \t]+$/;
 const RE_WARD_ABBR_AFTER = /^[ \t]+\p{Lu}{2,5}(?![\p{L}])/u;
 const NOC_EVENT_ADJ = new Set<string>('świętojańska kupalna sylwestrowa kryształowa muzealna wigilijna listopadowa'.split(' '));
+// Głowy, które w piśmie bywają zwykłym dopełnieniem czynności osoby (noc w celi, pokój w hotelu,
+// zamek w drzwiach, las na sprzedaż), a nie nazwą zabytku czy miejsca.
+const PERSON_PAIR_OBJECT_HEADS = new Set<string>('noc pokój zamek las'.split(' '));
+const RE_IMPERSONAL_AFTER_PAIR = /^[ \t]+\p{Ll}{3,}(?:no|to)(?!\p{L})/u;
 /** Czy para „Głowa nazwy + przymiotnik uzgodniony" to mimo uzgodnienia osoba (patrz wyżej)? */
 function properNamePairIsPerson(ctx: RedactCtx, t: string, offset: number, m: string, w1l: string, w2: string): boolean {
-  // nazwisko osoby rozpoznanej już w piśmie („Pacjentka Anna Lisiecka przyjęta. Noc Lisiecka …")
-  if (ctx.maskedSurnames.has(normalizeSurnameKey(w2))) return true;
   const after = t.slice(offset + m.length, offset + m.length + 30);
-  // …chyba że podmiot stoi za czasownikiem („Kościół Mariacki odwiedził Zygmunt Kowalski")
-  if (RE_PERSON_PAST_VERB_AFTER.test(after) && RE_PERSON_VERB_COMPLEMENT.test(after) && !isGeoAdjective(w2)) return true;
+  // forma bezosobowa za parą to zawsze obiekt („Dworzec Kaliski zamknięto", „Las Kabacki ogrodzono"),
+  // także gdy w piśmie występuje osoba o tym nazwisku („Pozwany Jan Kaliski")
+  if (RE_IMPERSONAL_AFTER_PAIR.test(after)) return false;
+  const roomHead = PERSON_PAIR_OBJECT_HEADS.has(w1l);
+  // nazwisko osoby rozpoznanej już w piśmie („Pacjentka Anna Lisiecka przyjęta. Noc Lisiecka …");
+  // przymiotnik od nazwy miejscowości przy obiekcie zostaje nazwą („Dworzec Kaliski", „Las Kabacki")
+  if (ctx.maskedSurnames.has(normalizeSurnameKey(w2)) && (roomHead || !isGeoAdjective(w2))) return true;
+  // …albo podmiot za czasownikiem osobowym („Noc Brzozowska spędziła w celi", „Pokój Lisiecki
+  // opuścił o 10:00"). Tylko przy głowie, która bywa dopełnieniem czynności osoby: przy kościele,
+  // cmentarzu, klasztorze czy jarmarku podmiot w szyku odwróconym stoi za okolicznikiem („Kościół
+  // Mariacki odwiedził w niedzielę biskup", „Cmentarz Powązkowski odwiedził wczoraj prezydent")
+  // albo jest domyślny („Ogród Saski odwiedził.").
+  if (roomHead && RE_PERSON_PAST_VERB_AFTER.test(after) && RE_PERSON_VERB_COMPLEMENT.test(after) && !isGeoAdjective(w2)) return true;
   // nazwa święta albo imprezy, nie dyżur („21.06 Noc Świętojańska", „Noc Kupalna SOR")
   if (w1l !== 'noc' || NOC_EVENT_ADJ.has(w2.toLowerCase())) return false;
   const before = t.slice(Math.max(0, offset - 40), offset);
@@ -2034,6 +2047,21 @@ const FORM_NOT_PERSON_ANY = new Set<string>(
 // Spółgłoska przed „-na/-ne/-ny" („Pożarna", „Gminny"), bo imię obce w tym kształcie („Svitlana",
 // „Oksana") ma przed nią samogłoskę.
 const RE_FORM_INSTITUTION_ADJ = /(?:ow[aey]|owej|owego|[^aeiouyąęó]n[aey]|nej|nego|cz[aey]|czej|ych)$/u;
+// Imię dwuczłonowe z łącznikiem w transkrypcji koreańskiej i wietnamskiej („Min-jun", „Seo-yeon").
+const RE_HYPHEN_GIVEN_NAME = /^\p{Lu}\p{Ll}+-\p{L}\p{Ll}+$|^\p{Lu}{2,}-\p{Lu}{2,}$/u;
+// Słownictwo nagłówków kolumn tabeli z PDF (komórka pod komórką, zapis bez ogonków).
+const NEXT_LINE_HEADER_WORDS = new Set<string>(
+  (
+    'podpis podpisy grupa ocena ocen godzina rodzaj srednia rok lekarz wychowawca klasa klasy data ' +
+    'numer termin uwagi wynik wyniki miejsce adres telefon stanowisko kwota liczba status typ opis ' +
+    'rozpoznanie zawod plec wiek rodzica rodzicow opiekuna ucznia pacjenta dziecka imie nazwisko lp ' +
+    'semestr przedmiot frekwencja oddzial sala pokoj godziny dzien'
+  ).split(' '),
+);
+// Imiesłów i rzeczownik odczasownikowy („Prowadzący", „Przyjęcia", „Urodzenia", „Zatrudnienie").
+const RE_NEXT_LINE_HEADER_MORPH = /(?:ący|ąca|ące|[eęa]nia|ęcia|enie|anie|ości|ość)$/u;
+const nextLineHeaderWord = (w: string): boolean =>
+  NEXT_LINE_HEADER_WORDS.has(foldPl(w)) || RE_NEXT_LINE_HEADER_MORPH.test(w) || RE_FORM_INSTITUTION_ADJ.test(w);
 // Forma prawna w wartości („PGE Dystrybucja S.A.", „Trans Sp. z o.o.", „Bud S.C.").
 const RE_FORM_LEGAL_FORM = /(?:^|[ \t])(?:S\.?A|SA|Sp|sp|S\.?C|Sp\.?[ \t]?[jkJK])\.?(?=[ \t]|$)/u;
 /**
@@ -2077,11 +2105,24 @@ function gatedPersonValue(val: string, nextLine: boolean): { lead: string; core:
       .toLowerCase()
       .split('-')
       .some((p) => FORM_NOT_PERSON_ANY.has(foldPl(p)) || (LEGAL_ENTITY_WORDS.has(p) && !isConfirmedSurname(w)));
-  if (ws.some(notPerson) || RE_FORM_LEGAL_FORM.test(core)) return null;
+  // Nazwisko-homograf wyrazu instytucji na końcu, za samym imieniem („Anna Koło", „Jan Nowy",
+  // „Adam Bank", koreańskie „Min-jun Park", „SEO-YEON PARK"): imię przed nim rozstrzyga osobę.
+  // Wyrazy z FORM_NOT_PERSON_ANY („Ośrodek", „Gmina") odrzucają dalej, bo nie bywają nazwiskami.
+  const homographSurnameAt = (w: string, i: number): boolean =>
+    i === ws.length - 1 &&
+    i > 0 &&
+    i <= 2 &&
+    !w.split('-').some((p) => FORM_NOT_PERSON_ANY.has(foldPl(p.toLowerCase()))) &&
+    ws.slice(0, i).every((g) => isFirstNameLike(g) || RE_HYPHEN_GIVEN_NAME.test(g));
+  if (ws.some((w, i) => notPerson(w) && !homographSurnameAt(w, i)) || RE_FORM_LEGAL_FORM.test(core)) return null;
   if (!RE_PROPER_WORDS.test(core)) return lowercaseNameLooksLikePerson(ws) ? { lead, core, tail } : null;
   const proven = ws.some((w) => isFirstNameLike(w) || isConfirmedSurname(w));
   if (!proven) {
-    if (nextLine) return null;
+    // Wartość z następnej linii bez słownika: obce imię i nazwisko („Yuki Tanaka", „Amir Rahimov",
+    // „Thanh Hoa Tran") wygląda tak samo jak nagłówek kolumny, więc odsiewamy nagłówek po jego
+    // słownictwie i polskiej morfologii („Podpis Rodzica", „Godzina Przyjęcia", „Lekarz Prowadzący",
+    // „Grupa Wiekowa"). Pojedynczy wyraz („Klasa") dalej wymaga słownika.
+    if (nextLine && (ws.length < 2 || ws.some((w) => nextLineHeaderWord(w.toLowerCase())))) return null;
     // bez imienia i nazwiska ze słownika: skrót WERSALIKAMI w wartości pisanej zwykle („PGE …",
     // „ZUS …") albo przymiotnik instytucji („Wspólnota Mieszkaniowa") to nie osoba
     if (core !== core.toUpperCase() && ws.some((w) => /^\p{Lu}{2,4}$/u.test(w))) return null;
@@ -2102,8 +2143,11 @@ const RE_NEXT_FIELD_LABEL = /[ \t]+\p{Lu}[\p{L}.]*(?:[ \t]+\p{L}+\.?){0,2}[ \t]*
 const RE_FLAT_FIELD_NO_END = /(?:^|[ \t]+)\d{1,2}[.)]$/;
 const RE_FLAT_FORM_NUMBERED = /^[ \t]*\d{1,2}[.)][ \t]/;
 // Wyraz otwierający etykietę wielowyrazową („Nr domu:", „Kod pocztowy:", „Data urodzenia:") — przed
-// nim stoi jeszcze wartość poprzedniego pola, nie etykieta.
-const RE_FLAT_LABEL_OPENER = /^(?:nr|numer|kod|data|adres|miejsce|imię|imie|nazwisko)\.?$/i;
+// nim stoi jeszcze wartość poprzedniego pola, nie etykieta. Także rzeczowniki z etykiet kadrowych
+// i finansowych pisanych Wielkimi Literami w każdym wyrazie („Telefon Komórkowy:", „Wymiar Etatu:",
+// „Wynagrodzenie Brutto:", „Osoba Do Kontaktu:", „Dowód Osobisty:", „Okres Zatrudnienia:").
+const RE_FLAT_LABEL_OPENER =
+  /^(?:nr|numer|kod|data|adres|miejsce|imię|imie|nazwisko|telefon|tel|wymiar|wynagrodzenie|wykształcenie|osoba|do|obywatelstwo|dowód|okres|kwota|stan|stopień|rodzaj|seria|stanowisko|wysokość|forma)\.?$/i;
 /**
  * Etykieta następnego pola zaczyna się od OSTATNIEGO wyrazu z wielkiej litery przed dwukropkiem:
  * w „Długa 5 Kraków Tel:" etykietą jest „Tel:", a „Kraków" należy jeszcze do wartości (dawniej
@@ -3459,10 +3503,17 @@ const RE_BIRTH_PLURAL_DATIVE_BEFORE = /\p{L}om[ \t]+$/u;
 // ubezwłasnowolnionym urodzonym 12.03.1950 r.", „orzeczenie o ubezpieczonym urodzonym …" (liczba
 // mnoga miałaby „-ymi"/„-ych").
 const RE_BIRTH_ADJ_DATIVE_BEFORE = /(?:^|[^\p{L}])(?:(\p{L}+)[ \t]+)?\p{Ll}{3,}(?:on|an|n|t)ym[ \t]+$/u;
+const RE_BIRTH_SINGULAR_BEFORE_ADJ =
+  /^(?:z|ze|nad|pod|przed|za|o|po|przy|w|we|na|wobec|się|jako|jest|był|była|został|została|będącego|będącej|będącym|będący|będąca|\p{L}{2,}i?em)$/iu;
 function birthPluralDativeBefore(before: string): boolean {
   if (RE_BIRTH_PLURAL_DATIVE_BEFORE.test(before)) return true;
   const m = RE_BIRTH_ADJ_DATIVE_BEFORE.exec(before);
-  return !!m && !/^(?:z|ze|nad|pod|przed|za|o|po|przy|w|we|na|wobec)$/i.test(m[1] ?? '');
+  if (!m) return false;
+  // Narzędnik liczby pojedynczej bez przyimka: po rzeczowniku w narzędniku („bratem niepełnosprawnym
+  // urodzonym …"), po „się" („opiekuje się poszkodowanym …"), po „będącego/jest/jako" i w dopowiedzeniu
+  // po przecinku („z Janem Nowakiem, ubezpieczonym urodzonym …").
+  if (m[1] === undefined) return !/,[ \t]*\p{Ll}+[ \t]+$/u.test(before);
+  return !RE_BIRTH_SINGULAR_BEFORE_ADJ.test(m[1]);
 }
 function passBirthDate(ctx: RedactCtx): void {
   if (!ctx.on('DATA-UR')) return;
@@ -3643,6 +3694,35 @@ const RE_PROSE_AFTER_WEAK = new RegExp(
 const RE_SPACE_UNIT_TAIL = /(?<=\d[A-Za-z]?)[ \t]+lokal[ \t]*\d+[A-Za-z]?$/;
 
 // 12) ADRES — ul./al./os./pl. + nazwa + numer (opcjonalnie /mieszkanie). Wysoka precyzja.
+
+// Drugi człon wyliczenia za maską adresu bez skrótu „ul." musi mieć kształt nazwy ulicy: przymiotnik
+// („Leśnej", „Krótka", „Lipowa", „Armii Krajowej") albo patron w dopełniaczu („Mickiewicza",
+// „Kościuszki", „Słowackiego"). Rzeczownik pospolity z numerem to część budynku, odwołanie do pisma
+// albo wersja programu („i Sali 12", „oraz Hala 3", „i Rozdział 3 umowy", „oraz Windows 10"), a miesiąc
+// to data („i Grudnia 2020"). Rzeczowniki na „-a/-i/-y" mają kształt dopełniacza patrona, więc
+// odsiewa je lista.
+const RE_SECOND_STREET_SHAPE = /(?:[aiy]|ego|ej)$/u;
+const SECOND_STREET_NOT = new Set<string>(
+  (
+    'hala hali sala sali klatka klatki strona strony stronie liga ligi wisła grupa grupy strefa strefy ' +
+    'faza fazy klasa klasy wersja wersji tura tury runda rundy edycja edycji pozycja pozycji kolumna ' +
+    'kolumny kasa kasy bramka bramki linia linii szafa szafy sekcja sekcji kwatera kwatery działka ' +
+    'działki lekcja lekcji godzina godziny tabela tabeli faktura faktury umowa umowy uchwała uchwały ' +
+    'ustawa ustawy decyzja decyzji opcja opcji kabina kabiny kondygnacja kondygnacji brama bramy ' +
+    'kategoria kategorii sesja sesji komórka komórki trasa trasy zmiana zmiany scena sceny cena ceny ' +
+    'aneksu etapu budynku pokoju magazynu pawilonu peronu gabinetu osiedla rozdziału lokalu bloku ' +
+    'segmentu boksu punktu ustępu załącznika stanowiska wejścia piętra rewiru wydziału oddziału ' +
+    'stycznia lutego marca kwietnia maja czerwca lipca sierpnia września października listopada grudnia'
+  ).split(' '),
+);
+function secondStreetShape(street: string): boolean {
+  const ws = street
+    .split(/[ \t]+/)
+    .filter((w) => /^\p{L}/u.test(w))
+    .map((w) => w.toLowerCase());
+  if (ws.some((w) => SECOND_STREET_NOT.has(w))) return false;
+  return ws.some((w) => RE_SECOND_STREET_SHAPE.test(w));
+}
 function passAddress(ctx: RedactCtx): void {
   if (!ctx.on('ADRES')) return;
   ctx.text = ctx.text.replace(
@@ -3791,6 +3871,7 @@ function passAddress(ctx: RedactCtx): void {
       const rest = str.slice(offset + m.length, offset + m.length + 24);
       if (RE_NUMERIC_TAIL_AFTER.test(rest) || RE_TIME_AFTER.test(rest) || RE_MONTH_GEN_AHEAD.test(rest) || RE_MAY_AHEAD.test(rest)) return m;
       if (quantityAfter(m, rest)) return m;
+      if (!secondStreetShape(m.slice(lead.length))) return m;
       ctx.bump('ADRES');
       return `${lead}${ctx.M.ADRES}`;
     },
@@ -3923,8 +4004,9 @@ function populationAfter(after: string): boolean {
   if (!m) return false;
   if (/tys|mln|milion/.test(m[0])) return true;
   const n = Number(/\d[\d\s.]*/.exec(m[0])?.[0].replace(/[^\d]/g, '') ?? '0');
-  // od 100 tylko z kwalifikatorem przed liczbą („ponad 300 rodzin", „ok. 500 osób")
-  return n >= 1000 || (n >= 100 && /^[ \t]+\p{L}/u.test(m[0]));
+  // od 100 w górę to statystyka także bez kwalifikatora („Mieszka w Sopocie 500 cudzoziemców",
+  // „… w Pruszkowie 120 rodzin"): gospodarstwo domowe takiej liczby nie ma
+  return n >= 100;
 }
 // Między podmiotem zbiorowym a markerem bywa przydawka albo okolicznik („Obywatele Ukrainy
 // mieszkający w …", „Pracownicy sezonowi mieszkający …", „Polacy coraz częściej mieszkają …",
@@ -5321,10 +5403,11 @@ const maidenNotSurname = (w: string): boolean => MAIDEN_NOT_SURNAME.has(w) || RE
 // „Wczasów Dziecięcych", „Sue Ryder", „Aniołów Stróżów"), a nie nazwisko panieńskie.
 const RE_MAIDEN_NAME_CONTINUES = new RegExp(`^ [${PL_UP}][${PL_LO}]`);
 // …chyba że ten wyraz to już następne pole spłaszczonego formularza albo zdania: skrót z kropką
-// („Zam.", „Ur."), etykieta z dwukropkiem („Imię ojca:"), imiesłów („Legitymująca się") albo
-// czasownik w czasie przeszłym z wielkiej litery w tekście bez kropek („Zamieszkała w Radomiu").
+// („Zam.", „Ur."), etykieta z dwukropkiem („Imię ojca:"), imiesłów czynny albo bierny („Legitymująca
+// się", „Wypisana 12.10.", „Zatrudniona jest", „Przyjęta") albo czasownik w czasie przeszłym z wielkiej
+// litery w tekście bez kropek („Zamieszkała w Radomiu", „Zmarła 2015.").
 const RE_MAIDEN_NEXT_FIELD = new RegExp(
-  `^ (?:[${PL_UP}][${PL_LO}]{0,3}\\.(?![${PL_LO}${PL_UP}])|[${PL_UP}][${PL_LO}]*(?:[ \\t]+[${PL_LO}]+){0,2}[ \\t]*:|[${PL_UP}][${PL_LO}]+(?:ąc(?:a|y|e)|[${PL_LO}]{3}ła)(?![${PL_LO}]))`,
+  `^ (?:[${PL_UP}][${PL_LO}]{0,3}\\.(?![${PL_LO}${PL_UP}])|[${PL_UP}][${PL_LO}]*(?:[ \\t]+[${PL_LO}]+){0,2}[ \\t]*:|[${PL_UP}][${PL_LO}]+(?:ąc(?:a|y|e)|[${PL_LO}]{3}ła|[${PL_LO}](?:an|on|ęt|it|yt)[aey])(?![${PL_LO}])|Zmarł[ay]?(?![${PL_LO}]))`,
 );
 // Wielkie „D." skrótu „Z D." przed nazwiskiem panieńskim zamienione na znak PUA do domknięcia inicjałów
 // w finalizePersons: inaczej „D." szło do maski jako inicjał imienia. Znacznik stoi przy samym
