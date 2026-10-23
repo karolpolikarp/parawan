@@ -5200,3 +5200,111 @@ test('Resztki b5 · wiersz tabeli z brakami „NA" po etykiecie telefonu liczy s
     expect(performance.now() - t0).toBeLessThan(500);
   }
 });
+test('Resztki b4 · adres: niezgodny liczebnik, osoba przed adresem, „miejsc.", łącznik po numerze i metraż lokalu', () => {
+  keep([
+    'Na ul. Polnej 5 osób zostało rannych.',
+    'Remont ul. Polnej 3 lata trwał.',
+    'Parking ul. Polna 5 miejsc postojowych',
+    'Przebudowa ul. Polnej i Leśnej 250 000,00 zł.',
+    'Remont chodnika przy ul. Szkolnej i Kościelnej 15 000 zł.',
+    'Odcinek ul. Jana z Kolna 1 500 000 zł',
+    'Modernizacja w Alejach Lipowych 3 500,00 zł',
+    'Rejon I: ul. Polna i Leśna 12.01.2026, 09.02.2026',
+    'Rejon III: Aleje Lipowe 14.01.2026',
+    'ul. Żwirki i Wigury 12.05.2026 r. zamknięcie',
+    'Droga gminna ul. Polna i Leśna 1,25 km.',
+    '1\t123456P\tul. Polna i Leśna\t1,25\tgminna',
+    'Aleje Lipowe 0,8 km',
+    'Remont ul. Polnej i Leśnej 15%',
+    'Mieszkał w Alejach Ujazdowskich 3 miesiące.',
+  ]);
+  masked([
+    ['Przy ul. Polnej 15 mieszkańcy skarżą się na hałas.', `Przy ${A} mieszkańcy skarżą się na hałas.`],
+    ['W mieszkaniu przy ul. Leśnej 8 pokoje są zawilgocone.', `W mieszkaniu przy ${A} pokoje są zawilgocone.`],
+    ['Przy ul. Polnej 5 osoby bezdomne nocują na klatce.', `Przy ${A} osoby bezdomne nocują na klatce.`],
+    ['Przy ul. Polnej 5 pracownicy MOPS stwierdzili zaniedbania.', `Przy ${A} pracownicy MOPS stwierdzili zaniedbania.`],
+    ['Wnioskodawczyni mieszka przy ul. Lipowej 12 dzieci uczęszczają do szkoły nr 5.', `Wnioskodawczyni mieszka przy ${A} dzieci uczęszczają do szkoły nr 5.`],
+    ['Lokale przy ul. Polnej 5 i Leśnej 7 są własnością Jana Kowalskiego.', `Lokale przy ${A} i Leśnej 7 są własnością ${N}.`],
+    ['Mieszkam przy ul. Polnej i Leśnej 12.', `Mieszkam przy ${A}.`],
+    ['Mieszkam przy ul. 3 Maja 5.', `Mieszkam przy ${A}.`],
+    ['Jan Kowalski, ul. Polna 5 miejsc. Warszawa', `${N}, ${A} miejsc. Warszawa`],
+    ['Najem lokalu przy ul. Rynek 5 lokal 38,5 m2.', `Najem lokalu przy ${A} lokal 38,5 m2.`],
+    ['ul. Rynek 7, lokal 32,4 m2, parter', `${A}, lokal 32,4 m2, parter`],
+    ['ul. Rynek 7, lok. 32,4 m2', `${A}, lok. 32,4 m2`],
+    ['ul. Rynek 7, lokal 3', `${A}`],
+    ['ul. Długa 5 m. 3, 80-827 Gdańsk', `${A}, ${KOD} ${C}`],
+    ['Jan Kowalski, ul. Leśna 3 osoby.', `${N}, ${A} osoby.`],
+    ['Anna Nowak ul. Polna 5 osób', `${N} ${A} osób`],
+    ['Dłużnik Jan Kowalski, ul. Leśna 12 miesięcy zalega z czynszem', `Dłużnik ${N}, ${A} miesięcy zalega z czynszem`],
+  ]);
+});
+test('Resztki b4 · adres ze słabym prefiksem: kwota, data, ułamek i procent za nazwą ulic to nie numer domu', () => {
+  keep([
+    'Przebudowa ul. Polnej i Leśnej 250 000,00 zł.',
+    'Remont chodnika przy ul. Szkolnej i Kościelnej 15 000 zł.',
+    'Odcinek ul. Jana z Kolna 1 500 000 zł',
+    'Modernizacja w Alejach Lipowych 3 500,00 zł',
+    'Rejon I: ul. Polna i Leśna 12.01.2026, 09.02.2026',
+    'Rejon III: Aleje Lipowe 14.01.2026',
+    'ul. Żwirki i Wigury 12.05.2026 r. zamknięcie',
+    'Droga gminna ul. Polna i Leśna 1,25 km.',
+    '1\t123456P\tul. Polna i Leśna\t1,25\tgminna',
+    'Aleje Lipowe 0,8 km',
+    'Remont ul. Polnej i Leśnej 15%',
+  ]);
+});
+test('Resztki b4 · formularz spłaszczony do wiersza: każde pole adresowe osobno, etykiety następnych pól zostają', () => {
+  keep([
+    '17. Ulica:  18. Nr domu:  19.',
+  ]);
+  masked([
+    ['Numer budynku: 7 PESEL: 85031412347', `Numer budynku: ${A} PESEL: [PESEL]`],
+    ['Numer budynku: 12 Data: 2026-10-15', `Numer budynku: ${A} Data: 2026-10-15`],
+    ['Numer budynku: 7 Telefon: 601222333', `Numer budynku: ${A} Telefon: ${T}`],
+    ['Numer budynku: 7', `Numer budynku: ${A}`],
+    ['04. Ulica: Warszawska  05. Nr domu: 31  06. Nr lokalu: 4', `04. Ulica: ${A}  05. Nr domu: ${A}  06. Nr lokalu: ${A}`],
+  ]);
+});
+test('Resztki b4 · nazwisko dwuczłonowe z obcym drugim członem w całości pod maską', () => {
+  keep([
+    'Województwo Kujawsko-Pomorskie ogłosiło konkurs.',
+    'Choroba Leśniowskiego-Crohna w wywiadzie.',
+  ]);
+  masked([
+    ['Świadek Kowalczyk-Müller zeznała.', `Świadek ${N} zeznała.`],
+    ['Pozwany Kowalczyk-Müller nie stawił się.', `Pozwany ${N} nie stawił się.`],
+    ['Wezwano Zielińską-Šimek na rozprawę.', `Wezwano ${N} na rozprawę.`],
+  ]);
+});
+test('Resztki b4 · imię z końca wiersza po przecinku za całą osobą należy do nazwiska z następnego wiersza', () => {
+  masked([
+    ['Świadkowie: Anna Nowak, Jan\nKowalski', `Świadkowie: ${N}, ${N}`],
+    ['Członkowie rodziny: Maria Kowalska, Zofia\nKowalska, Piotr Kowalski.', `Członkowie rodziny: ${N}, ${N}, ${N}.`],
+    ['W imieniu pozwanego: Anna Nowak; Piotr\nWiśniewski', `W imieniu pozwanego: ${N}; ${N}`],
+    ['Świadkowie: Nowak Anna, Jan\nKowalski', `Świadkowie: ${N}, ${N}`],
+    ['Kowalski;Jan\nNowak', `${N};Jan\n${N}`],
+    ['Dzieci: Zofia Nowak Antoni\nPawlak', `Dzieci: ${N} Antoni\n${N}`],
+  ]);
+});
+test('Resztki b4 · pseudonim po „Pan/Pani" z nazwiska, nie z imienia, członu środkowego ani marki', () => {
+  masked([
+    ['Pan Lis Citroëna nie oddał', `Pan ${N} Citroëna nie oddał`],
+    ['Pan Nguyen Van W Warszawie był', `Pan ${N} W Warszawie był`],
+  ]);
+  masked(
+    [
+      ['Pani Schröder Anna i Pani Müller Anna złożyły wnioski.', 'Pani [OSOBA-A] i Pani [OSOBA-B] złożyły wnioski.'],
+      ['Pani Schröder Anna zeznała. Pani Schröder podpisała.', 'Pani [OSOBA-A] zeznała. Pani [OSOBA-A] podpisała.'],
+      ['Pani Kowalska Anna i Pani Nowak Anna złożyły wnioski.', 'Pani [OSOBA-A] i Pani [OSOBA-B] złożyły wnioski.'],
+      ['Pan Jan Kowalski zeznał. Pan Kowalski podpisał.', 'Pan [OSOBA-A] zeznał. Pan [OSOBA-A] podpisał.'],
+      ['Pan Nguyễn Văn Hùng i Pan Trần Văn Nam podpisali umowę.', 'Pan [OSOBA-A] i Pan [OSOBA-B] podpisali umowę.'],
+      ['Pan Nguyễn Văn Hùng zeznał. Pan Nguyễn odmówił podpisu.', 'Pan [OSOBA-A] zeznał. Pan [OSOBA-A] odmówił podpisu.'],
+      ['Pan Nagy László zeznał. Pan Nagy podpisał protokół.', 'Pan [OSOBA-A] zeznał. Pan [OSOBA-A] podpisał protokół.'],
+      ['Pani Kovács Éva i Pani Szabó Éva złożyły wnioski.', 'Pani [OSOBA-A] i Pani [OSOBA-B] złożyły wnioski.'],
+      ['Pan Nowak Škoda\nPan Lis Škoda', 'Pan [OSOBA-A] Škoda\nPan [OSOBA-B] Škoda'],
+      ['Czy Pan Nowak Škodę sprzedał? Pan Nowak odmówił odpowiedzi.', 'Czy Pan [OSOBA-A] Škodę sprzedał? Pan [OSOBA-A] odmówił odpowiedzi.'],
+      ['Pani Mróz Müllerowi przekazała dokumenty. Pani Mróz podpisała.', 'Pani [OSOBA-A] Müllerowi przekazała dokumenty. Pani [OSOBA-A] podpisała.'],
+    ],
+    { pseudonyms: true },
+  );
+});

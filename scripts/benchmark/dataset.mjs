@@ -874,6 +874,11 @@ export function buildDataset() {
   // etykietą pola, instytucja w polu osoby, rzeczownik po „z domu", notacja „UI.", „12 os.".
   neg('Sprzedam samochód marki Skoda Octavia TSI 1400. Ogłoszenie na tablicy o PIT 2024 zdjęto. Przyjęto zgłoszenie telefoniczne nr 512345678. Kobiecie urodzonej 1 stycznia 1953 r. lub później przysługuje emerytura. Lot o numerze rejsu LO 3925 opóźniony. Zmiana w UI.Panel 2.0.\nImię i nazwisko ucznia\nKlasa\nImię i nazwisko wnioskodawcy: Gmina Michałowice', ['TSI 1400', 'PIT 2024', '512345678', '1 stycznia 1953', 'LO 3925', 'UI.Panel 2.0', 'Klasa', 'Gmina Michałowice']);
   str('Kontakt nr 512 345 678, tel. 22 843 21 09. Obecnych 12 os.Halina Grzyb przewodniczyła. UL. LIPOWA 14, 05-300 STARA WIEŚ. Anna Nowak z domu Ludowego.', ['22 843 21 09', 'Halina', 'Grzyb', 'LIPOWA 14', '05-300', 'STARA WIEŚ', 'Anna', 'Nowak'], ['Kontakt nr', 'z domu Ludowego']);
+  // Resztki b4–b5: nazwa klubu i firmy po roli, instytucja w polu osoby, placówka po „z domu",
+  // kod silnika, numer inwentarzowy, kwota w komórce arkusza; adres po osobie przed liczebnikiem,
+  // łącznik po numerze domu, metraż lokalu, kwota za nazwą ulic, pole „Ulica" w wierszu formularza.
+  neg('Prezes Klubu Sportowego Lech Poznań zwołał zebranie. Pełnomocnik Zarządu Spółki Marek Trans Sp. z o.o. Imię i nazwisko opiekuna prawnego: Powiatowe Centrum Pomocy Rodzinie. Spotkanie w domu Pod Lipami. Samochód marki Volkswagen Golf TDI 1896 cm3. Telefon nr inw. 012345678 – zużyty. W komórce 123 456 789 zł. Przebudowa ul. Polnej i Leśnej 250 000,00 zł.', ['Lech Poznań', 'Marek Trans', 'Powiatowe Centrum Pomocy Rodzinie', 'Pod Lipami', 'TDI 1896', '012345678', '123 456 789', 'Polnej i Leśnej 250 000,00']);
+  str('Jan Kowalski, ul. Leśna 3 osoby. Lokale przy ul. Polnej 5 i Leśnej 7. Najem: ul. Rynek 7, lokal 32,4 m2. Świadek Kowalczyk-Müller zeznała.\n04. Ulica: Warszawska  05. Nr domu: 31', ['Jan Kowalski', 'Leśna 3', 'Polnej 5', 'Rynek 7', 'Kowalczyk-Müller', 'Warszawska'], ['osoby', 'lokal 32,4 m2', 'Świadek', 'Nr domu:']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
