@@ -76,6 +76,10 @@ Klasa
 Imię i nazwisko wnioskodawcy: Gmina Michałowice",
   "neg-147": "Prezes Klubu Sportowego Lech Poznań zwołał zebranie. Pełnomocnik Zarządu Spółki Marek Trans Sp. z o.o. Imię i nazwisko opiekuna prawnego: Powiatowe Centrum Pomocy Rodzinie. Spotkanie w domu Pod Lipami. Samochód marki Volkswagen Golf TDI 1896 cm3. Telefon nr inw. 012345678 – zużyty. W komórce 123 456 789 zł. Przebudowa ul. Polnej i Leśnej 250 000,00 zł.",
   "neg-148": "Obywatele Ukrainy mieszkający w Lublinie mogą złożyć wniosek. Ludzie mieszkają w Warszawie coraz dłużej. Kluczyk do skrzynki leży na biurku. Odruch Babińskiego dodatni. ZSO im Jana Kochanowskiego. Parafia pw. św. Rafała Kalinowskiego w Krakowie.",
+  "neg-149": "Cmentarz Rakowicki odwiedził oskarżony w dniu 1 listopada. Kościół Mariacki kupił nowe wyposażenie.
+21.06 Noc Świętojańska
+Kościół       Mariacki     Kraków
+Cystoskopia: trójkąt Pawlika bez zmian. Pismo zarejestrowano pod numerem rejestracji RPW 12345/2026.",
   "neg-15": "Zakład Ubezpieczeń Społecznych wydał decyzję odmowną.",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
@@ -413,6 +417,10 @@ Tak	Kaczyński	Urząd Miasta",
   "str-145": "Jan Kowalski, ul. Leśna 3 osoby. Lokale przy ul. Polnej 5 i Leśnej 7. Najem: ul. Rynek 7, lokal 32,4 m2. Świadek Kowalczyk-Müller zeznała.
 04. Ulica: Warszawska  05. Nr domu: 31",
   "str-146": "Wnioskodawczyni zamieszkała w Gdańsku 3 osoby na utrzymaniu. 86-170 Nowe   Sposób płatności: przelew",
+  "str-147": "Prezes Zarządu Spółki Anna Wrona podpisała umowę. Sąd ustanowił opiekuna nad ubezwłasnowolnionym urodzonym 12.03.1950 r. Pojazd pod numerem rejestracji WX 12345.
+Imię i nazwisko pacjenta: Oksana Petrowa
+Joanna Kos z domu Sikora Zam. Sosnowiec
+Zam. ul. Długa 5 i Krótka 7",
   "str-15": "Zwrot nastąpi na konto [NR-KONTA] wskazane w umowie.",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
@@ -578,6 +586,10 @@ Klasa
 Imię i nazwisko wnioskodawcy: Gmina Michałowice",
   "neg-147": "Prezes Klubu Sportowego Lech Poznań zwołał zebranie. Pełnomocnik Zarządu Spółki Marek Trans Sp. z o.o. Imię i nazwisko opiekuna prawnego: Powiatowe Centrum Pomocy Rodzinie. Spotkanie w domu Pod Lipami. Samochód marki Volkswagen Golf TDI 1896 cm3. Telefon nr inw. 012345678 – zużyty. W komórce 123 456 789 zł. Przebudowa ul. Polnej i Leśnej 250 000,00 zł.",
   "neg-148": "Obywatele Ukrainy mieszkający w Lublinie mogą złożyć wniosek. Ludzie mieszkają w Warszawie coraz dłużej. Kluczyk do skrzynki leży na biurku. Odruch Babińskiego dodatni. ZSO im Jana Kochanowskiego. Parafia pw. św. Rafała Kalinowskiego w Krakowie.",
+  "neg-149": "Cmentarz Rakowicki odwiedził oskarżony w dniu 1 listopada. Kościół Mariacki kupił nowe wyposażenie.
+21.06 Noc Świętojańska
+Kościół       Mariacki     Kraków
+Cystoskopia: trójkąt Pawlika bez zmian. Pismo zarejestrowano pod numerem rejestracji RPW 12345/2026.",
   "neg-15": "Zakład Ubezpieczeń Społecznych wydał decyzję odmowną.",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
@@ -910,9 +922,13 @@ Tak	[OSOBA-B]	Urząd Miasta",
 {"paszport": "[NR-PASZPORTU]", "nrTelefonu": "[TELEFON]", "Miejscowość": "[MIEJSCOWOŚĆ]"}",
   "str-143": "Pani [OSOBA-A], urodzonej [DATA-URODZENIA] r. w [MIEJSCOWOŚĆ]. [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]. zam. [ADRES]. Card number: [NR-KARTY].",
   "str-144": "Kontakt nr 512 345 678, tel. [TELEFON]. Obecnych 12 os.[OSOBA-A] przewodniczyła. [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]. [OSOBA-B] z domu Ludowego.",
-  "str-145": "[OSOBA-A], [ADRES] osoby. Lokale przy [ADRES] i Leśnej 7. Najem: [ADRES], lokal 32,4 m2. Świadek [OSOBA-B] zeznała.
+  "str-145": "[OSOBA-A], [ADRES] osoby. Lokale przy [ADRES] i [ADRES]. Najem: [ADRES], lokal 32,4 m2. Świadek [OSOBA-B] zeznała.
 04. Ulica: [ADRES]  05. Nr domu: [ADRES]",
   "str-146": "Wnioskodawczyni zamieszkała w [MIEJSCOWOŚĆ] 3 osoby na utrzymaniu. [KOD-POCZTOWY] [MIEJSCOWOŚĆ]   Sposób płatności: przelew",
+  "str-147": "Prezes Zarządu Spółki [OSOBA-A] podpisała umowę. Sąd ustanowił opiekuna nad ubezwłasnowolnionym urodzonym [DATA-URODZENIA] r. Pojazd pod numerem rejestracji [NR-REJESTRACYJNY].
+Imię i nazwisko pacjenta: [OSOBA-B]
+[OSOBA-C] z domu [OSOBA-D] Zam. [MIEJSCOWOŚĆ]
+Zam. [ADRES] i [ADRES]",
   "str-15": "Zwrot nastąpi na konto [NR-KONTA] wskazane w umowie.",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
@@ -1078,6 +1094,10 @@ Klasa
 Imię i nazwisko wnioskodawcy: Gmina Michałowice",
   "neg-147": "Prezes Klubu Sportowego Lech Poznań zwołał zebranie. Pełnomocnik Zarządu Spółki Marek Trans Sp. z o.o. Imię i nazwisko opiekuna prawnego: Powiatowe Centrum Pomocy Rodzinie. Spotkanie w domu Pod Lipami. Samochód marki Volkswagen Golf TDI 1896 cm3. Telefon nr inw. 012345678 – zużyty. W komórce 123 456 789 zł. Przebudowa ul. Polnej i Leśnej 250 000,00 zł.",
   "neg-148": "Obywatele Ukrainy mieszkający w Lublinie mogą złożyć wniosek. Ludzie mieszkają w Warszawie coraz dłużej. Kluczyk do skrzynki leży na biurku. Odruch Babińskiego dodatni. ZSO im Jana Kochanowskiego. Parafia pw. św. Rafała Kalinowskiego w Krakowie.",
+  "neg-149": "Cmentarz Rakowicki odwiedził oskarżony w dniu 1 listopada. Kościół Mariacki kupił nowe wyposażenie.
+21.06 Noc Świętojańska
+Kościół       Mariacki     Kraków
+Cystoskopia: trójkąt Pawlika bez zmian. Pismo zarejestrowano pod numerem rejestracji RPW 12345/2026.",
   "neg-15": "Zakład Ubezpieczeń Społecznych wydał decyzję odmowną.",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
@@ -1410,9 +1430,13 @@ Tak	[IMIĘ I NAZWISKO]	Urząd Miasta",
 {"paszport": "[NR-PASZPORTU]", "nrTelefonu": "[TELEFON]", "Miejscowość": "[MIEJSCOWOŚĆ]"}",
   "str-143": "Pani [IMIĘ I NAZWISKO], urodzonej [DATA-URODZENIA] r. w [MIEJSCOWOŚĆ]. [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]. zam. [ADRES]. Card number: [NR-KARTY].",
   "str-144": "Kontakt nr 512 345 678, tel. [TELEFON]. Obecnych 12 os.[IMIĘ I NAZWISKO] przewodniczyła. [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]. [IMIĘ I NAZWISKO] z domu Ludowego.",
-  "str-145": "[IMIĘ I NAZWISKO], [ADRES] osoby. Lokale przy [ADRES] i Leśnej 7. Najem: [ADRES], lokal 32,4 m2. Świadek [IMIĘ I NAZWISKO] zeznała.
+  "str-145": "[IMIĘ I NAZWISKO], [ADRES] osoby. Lokale przy [ADRES] i [ADRES]. Najem: [ADRES], lokal 32,4 m2. Świadek [IMIĘ I NAZWISKO] zeznała.
 04. Ulica: [ADRES]  05. Nr domu: [ADRES]",
   "str-146": "Wnioskodawczyni zamieszkała w [MIEJSCOWOŚĆ] 3 osoby na utrzymaniu. [KOD-POCZTOWY] [MIEJSCOWOŚĆ]   Sposób płatności: przelew",
+  "str-147": "Prezes Zarządu Spółki [IMIĘ I NAZWISKO] podpisała umowę. Sąd ustanowił opiekuna nad ubezwłasnowolnionym urodzonym [DATA-URODZENIA] r. Pojazd pod numerem rejestracji [NR-REJESTRACYJNY].
+Imię i nazwisko pacjenta: [IMIĘ I NAZWISKO]
+[IMIĘ I NAZWISKO] z domu [IMIĘ I NAZWISKO] Zam. [MIEJSCOWOŚĆ]
+Zam. [ADRES] i [ADRES]",
   "str-15": "Zwrot nastąpi na konto [NR-KONTA] wskazane w umowie.",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",

@@ -5224,7 +5224,7 @@ test('Resztki b4 · adres: niezgodny liczebnik, osoba przed adresem, „miejsc."
     ['Przy ul. Polnej 5 osoby bezdomne nocują na klatce.', `Przy ${A} osoby bezdomne nocują na klatce.`],
     ['Przy ul. Polnej 5 pracownicy MOPS stwierdzili zaniedbania.', `Przy ${A} pracownicy MOPS stwierdzili zaniedbania.`],
     ['Wnioskodawczyni mieszka przy ul. Lipowej 12 dzieci uczęszczają do szkoły nr 5.', `Wnioskodawczyni mieszka przy ${A} dzieci uczęszczają do szkoły nr 5.`],
-    ['Lokale przy ul. Polnej 5 i Leśnej 7 są własnością Jana Kowalskiego.', `Lokale przy ${A} i Leśnej 7 są własnością ${N}.`],
+    ['Lokale przy ul. Polnej 5 i Leśnej 7 są własnością Jana Kowalskiego.', `Lokale przy ${A} i ${A} są własnością ${N}.`],
     ['Mieszkam przy ul. Polnej i Leśnej 12.', `Mieszkam przy ${A}.`],
     ['Mieszkam przy ul. 3 Maja 5.', `Mieszkam przy ${A}.`],
     ['Jan Kowalski, ul. Polna 5 miejsc. Warszawa', `${N}, ${A} miejsc. Warszawa`],
@@ -5488,5 +5488,92 @@ test('Resztki b3 · patron po gołym „im" przy obiekcie i skrócie placówki, 
     ['86-170 Nowe Termin płatności: 14 dni', `${KOD} ${C} Termin płatności: 14 dni`],
     ['89-320 Wysoka Wartość netto: 340,00', `${KOD} ${C} Wartość netto: 340,00`],
     ['Pomógł im Jan Kowalski.', `Pomógł im ${N}.`],
+  ]);
+});
+test('Resztki, poprawki po weryfikacji · osoba po roli i instytucji, data urodzenia po przyimku, tablica „numerem rejestracji"', () => {
+  masked([
+    ['Prezes Zarządu Spółki Anna Wrona', `Prezes Zarządu Spółki ${N}`],
+    ['Dyrektor Oddziału Banku Marek Sikora', `Dyrektor Oddziału Banku ${N}`],
+    ['Pełnomocnik Zarządu Spółki Marek Sroka podpisał umowę.', `Pełnomocnik Zarządu Spółki ${N} podpisał umowę.`],
+    ['Za Zarząd: Prezes Zarządu Spółki Anna Wrona, Członek Zarządu Jan Kos', `Za Zarząd: Prezes Zarządu Spółki ${N}, Członek Zarządu ${N}`],
+    ['Sąd ustanowił opiekuna nad ubezwłasnowolnionym urodzonym 12.03.1950 r. w Kielcach.', `Sąd ustanowił opiekuna nad ubezwłasnowolnionym urodzonym ${DU} r. w ${M}.`],
+    ['Orzeczenie wydano o ubezpieczonym urodzonym 3.03.1960 r.', `Orzeczenie wydano o ubezpieczonym urodzonym ${DU} r.`],
+    ['Sprawa toczy się przed skazanym urodzonym 3.03.1980 r.', `Sprawa toczy się przed skazanym urodzonym ${DU} r.`],
+    ['o numerze rejestracji WX 12345', `o numerze rejestracji ${RJ}`],
+    ['W numerach rejestracji WX 12345 i WY 54321 błąd.', `W numerach rejestracji ${RJ} i ${RJ} błąd.`],
+    ['Auto (numerem rejestracji GD 1234A) zaparkowano', `Auto (numerem rejestracji ${RJ}) zaparkowano`],
+    ['{"nrRejestracyjny": "RPO 2024"}', `{"nrRejestracyjny": "${RJ}"}`],
+    ['{"nr_rej": "PIT 2024"}', `{"nr_rej": "${RJ}"}`],
+  ]);
+  keep([
+    'Pełnomocnik Zarządu Spółki Marek Trans Sp. z o.o.',
+    'Prezes Zarządu Spółki Adam Bud',
+    'Emerytura przysługuje ubezpieczonym urodzonym 1 stycznia 1949 r.',
+    'Pismo pod numerem rejestracji RPW 12345/2026 wpłynęło.',
+    '{"tablica": "ZP 2026"}',
+    'Na tablicy pod RPO 2021 widniał wpis.',
+  ]);
+});
+test('Resztki, poprawki po weryfikacji · nazwisko na „-owa" pod etykietą, nazwisko panieńskie przed polem, formularz w wierszu', () => {
+  masked([
+    ['Imię i nazwisko pacjenta: Oksana Petrowa', `Imię i nazwisko pacjenta: ${N}`],
+    ['Imię i nazwisko świadka: Dilnoza Karimowa', `Imię i nazwisko świadka: ${N}`],
+    ['Joanna Kos z domu Wrona Zam. Sosnowiec', `${N} z domu ${N} Zam. ${M}`],
+    ['Anna Kowalska z domu Sikora Imię ojca: Jan', `${N} z domu ${N} Imię ojca: Jan`],
+    ['Stawiła się Anna Kowalska z domu Gzik Legitymująca się dowodem', `Stawiła się ${N} z domu ${N} Legitymująca się dowodem`],
+    ['Ulica: Krótka 7. Piętro: 2', `Ulica: ${A} Piętro: 2`],
+    ['Ulica: Długa 5 Kraków Tel: 600123456', `Ulica: ${A} Tel: ${T}`],
+    ['Ulica: Krótka Nr domu: 7 Miejscowość: Mysiadło', `Ulica: ${A} Nr domu: ${A} Miejscowość: ${M}`],
+    ['04. Ulica: Warszawska  05. Nr domu: 31  06. Nr lokalu: 4', `04. Ulica: ${A}  05. Nr domu: ${A}  06. Nr lokalu: ${A}`],
+  ]);
+  keep([
+    'Imię i nazwisko wnioskodawcy: Grupa Inicjatywna',
+    'Imię i nazwisko opiekuna prawnego: Powiatowe Centrum Pomocy Rodzinie',
+  ]);
+  expect(redactPII('Jan Kowalski z domu Dziecka Nr 3 wyszedł').redacted).toBe(`${N} z domu Dziecka Nr 3 wyszedł`);
+  expect(redactPII('Anna Kowalska z domu Ronalda McDonalda.').redacted).toBe(`${N} z domu Ronalda McDonalda.`);
+});
+test('Resztki, poprawki po weryfikacji · drugi adres w wyliczeniu, miasto przy adresie, telefon przed kwotą, wiersze CSV', () => {
+  masked([
+    ['Lokale przy ul. Polnej 5 i Leśnej 7.', `Lokale przy ${A} i ${A}.`],
+    ['Zam. ul. Długa 5 i Krótka 7', `Zam. ${A} i ${A}`],
+    ['Dłużnik Jan Kowalski, zam. ul. Polnej 5 i Leśnej 7, nie stawił się.', `Dłużnik ${N}, zam. ${A} i ${A}, nie stawił się.`],
+    ['Ludzie mieszkający w Krakowie przy ul. Długiej 5 skarżą się.', `Ludzie mieszkający w ${M} przy ${A} skarżą się.`],
+    ['komórka: 603 456 789 zł 30,00', `komórka: ${T} zł 30,00`],
+    ['Kowalski;Jan\nNowak;Anna\nObecni: Ewa Lis, Jan\nWójcik', `${N};Jan\n${N};Anna\nObecni: ${N}, ${N}`],
+  ]);
+  masked([['Kowalski;Jan\nNowak;Anna\nObecni: Ewa Lis, Jan\nWójcik', '[OSOBA-A];Jan\n[OSOBA-B];Anna\nObecni: [OSOBA-C], [OSOBA-D]']], { pseudonyms: true });
+  keep([
+    'Przy ul. Polnej i Leśnej 7 dzieci bawi się na podwórku.',
+    'Ludzie mieszkający w Krakowie skarżą się na smog.',
+    'W komórce 123 456 789 zł',
+  ]);
+  for (const [t, kept] of [
+    ['Przy ul. Polnej 5 i Leśnej 7 dzieci bawi się na podwórku.', 'i Leśnej 7 dzieci'],
+    ['Remont ul. Polnej 5 i Leśnej 15 000 zł.', 'i Leśnej 15 000 zł'],
+    ['Spotkanie przy ul. Polnej 5 i Leśnej 18:00.', 'i Leśnej 18:00'],
+  ] as const)
+    expect(redactPII(t).redacted).toContain(kept);
+});
+test('Resztki, poprawki po weryfikacji · nazwa obiektu w szyku odwróconym, święto, tabela wyrównana spacjami, eponim', () => {
+  keep([
+    'Cmentarz Rakowicki odwiedził oskarżony w dniu 1 listopada.',
+    'Kościół Mariacki odwiedził prezydent.',
+    'Kościół Mariacki opuściła para młoda.',
+    'Kościół Mariacki kupił nowe wyposażenie.',
+    'Jarmark Dominikański odwiedził milion turystów.',
+    '21.06 Noc Świętojańska',
+    'Noc Świętojańska SOR',
+    'Kościół   Mariacki',
+    'Kościół       Mariacki     Kraków',
+    'Wycieczka:  Kościół  Mariacki,  Sukiennice.',
+    'Cystoskopia: trójkąt Pawlika bez zmian.',
+  ]);
+  masked([
+    ['Noc Brzozowska spędziła w celi.', `Noc ${N} spędziła w celi.`],
+    ['Zamek Brzozowski kupił wczoraj.', `Zamek ${N} kupił wczoraj.`],
+    ['Kościół Mariacki odwiedził Zygmunt Kowalski.', `Kościół Mariacki odwiedził ${N}.`],
+    ['Noc      Brzozowska', `Noc      ${N}`],
+    ['12.05.2024 Noc Gzowska SOR', `12.05.2024 Noc ${N} SOR`],
   ]);
 });

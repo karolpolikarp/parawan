@@ -878,7 +878,7 @@ export function buildDataset() {
   // kod silnika, numer inwentarzowy, kwota w komórce arkusza; adres po osobie przed liczebnikiem,
   // łącznik po numerze domu, metraż lokalu, kwota za nazwą ulic, pole „Ulica" w wierszu formularza.
   neg('Prezes Klubu Sportowego Lech Poznań zwołał zebranie. Pełnomocnik Zarządu Spółki Marek Trans Sp. z o.o. Imię i nazwisko opiekuna prawnego: Powiatowe Centrum Pomocy Rodzinie. Spotkanie w domu Pod Lipami. Samochód marki Volkswagen Golf TDI 1896 cm3. Telefon nr inw. 012345678 – zużyty. W komórce 123 456 789 zł. Przebudowa ul. Polnej i Leśnej 250 000,00 zł.', ['Lech Poznań', 'Marek Trans', 'Powiatowe Centrum Pomocy Rodzinie', 'Pod Lipami', 'TDI 1896', '012345678', '123 456 789', 'Polnej i Leśnej 250 000,00']);
-  str('Jan Kowalski, ul. Leśna 3 osoby. Lokale przy ul. Polnej 5 i Leśnej 7. Najem: ul. Rynek 7, lokal 32,4 m2. Świadek Kowalczyk-Müller zeznała.\n04. Ulica: Warszawska  05. Nr domu: 31', ['Jan Kowalski', 'Leśna 3', 'Polnej 5', 'Rynek 7', 'Kowalczyk-Müller', 'Warszawska'], ['osoby', 'lokal 32,4 m2', 'Świadek', 'Nr domu:']);
+  str('Jan Kowalski, ul. Leśna 3 osoby. Lokale przy ul. Polnej 5 i Leśnej 7. Najem: ul. Rynek 7, lokal 32,4 m2. Świadek Kowalczyk-Müller zeznała.\n04. Ulica: Warszawska  05. Nr domu: 31', ['Jan Kowalski', 'Leśna 3', 'Polnej 5', 'Leśnej 7', 'Rynek 7', 'Kowalczyk-Müller', 'Warszawska'], ['osoby', 'lokal 32,4 m2', 'Świadek', 'Nr domu:']);
   // Resztki b3: zdanie ogólne z przydawką przed „mieszkający", rzeczownik przy przedmiocie, eponim
   // i patron (także po gołym „im" przy skrócie szkoły); nazwisko po stronie postępowania mimo
   // stoplisty, zdrobnienie w notatce kadrowej, nazwisko dwuczłonowe po roli z urzędem, grafik
@@ -886,6 +886,12 @@ export function buildDataset() {
   neg('Obywatele Ukrainy mieszkający w Lublinie mogą złożyć wniosek. Ludzie mieszkają w Warszawie coraz dłużej. Kluczyk do skrzynki leży na biurku. Odruch Babińskiego dodatni. ZSO im Jana Kochanowskiego. Parafia pw. św. Rafała Kalinowskiego w Krakowie.', ['Lublinie', 'Warszawie', 'Kluczyk', 'Babińskiego', 'Jana Kochanowskiego', 'Rafała Kalinowskiego']);
   osp('Świadek Poleski zeznał. Mieczyk zatrudniony od 01.02.2010 r. Szanowna Pani Dyrektor Szkoły Kowalska-Nowak. Grafik: Dzień Lisiecka, Noc Brzozowska. Do kościoła wraz ze św. Kowalskim wszedł sprawca.', ['Poleski', 'Mieczyk', 'Kowalska-Nowak', 'Lisiecka', 'Brzozowska', 'Kowalskim'], ['Świadek', 'zatrudniony', 'Dyrektor Szkoły', 'Grafik: Dzień', 'wszedł sprawca']);
   str('Wnioskodawczyni zamieszkała w Gdańsku 3 osoby na utrzymaniu. 86-170 Nowe   Sposób płatności: przelew', ['Gdańsku', '86-170', 'Nowe'], ['3 osoby', 'Sposób płatności']);
+  // Resztki, poprawki po weryfikacji: członek zarządu po „Spółki", data urodzenia po przyimku,
+  // „numerem rejestracji", nazwisko na „-owa" pod etykietą, nazwisko panieńskie przed polem
+  // formularza, drugi adres w wyliczeniu; nazwa obiektu w szyku odwróconym, święto w harmonogramie,
+  // tabela wyrównana spacjami, eponim anatomiczny i rejestracja pisma zostają jawne.
+  str('Prezes Zarządu Spółki Anna Wrona podpisała umowę. Sąd ustanowił opiekuna nad ubezwłasnowolnionym urodzonym 12.03.1950 r. Pojazd pod numerem rejestracji WX 12345.\nImię i nazwisko pacjenta: Oksana Petrowa\nJoanna Kos z domu Sikora Zam. Sosnowiec\nZam. ul. Długa 5 i Krótka 7', ['Anna Wrona', '12.03.1950', 'WX 12345', 'Oksana Petrowa', 'Joanna Kos', 'Sikora', 'Sosnowiec', 'Długa 5', 'Krótka 7'], ['Prezes Zarządu Spółki', 'opiekuna nad ubezwłasnowolnionym', 'Imię i nazwisko pacjenta:']);
+  neg('Cmentarz Rakowicki odwiedził oskarżony w dniu 1 listopada. Kościół Mariacki kupił nowe wyposażenie.\n21.06 Noc Świętojańska\nKościół       Mariacki     Kraków\nCystoskopia: trójkąt Pawlika bez zmian. Pismo zarejestrowano pod numerem rejestracji RPW 12345/2026.', ['Rakowicki', 'Mariacki', 'Noc Świętojańska', 'Pawlika', 'RPW 12345/2026']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
