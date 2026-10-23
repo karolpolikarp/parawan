@@ -147,7 +147,8 @@ export function surnameBase(word: string): string | null {
  * zwykły tekst bez loginów nie płaci za kopię słownika.
  */
 let asciiSurnames: Set<string> | null = null;
-const foldAscii = (s: string): string => s.replace(/[ąćęłńóśźż]/g, (c) => 'acelnoszz'['ąćęłńóśźż'.indexOf(c)]);
+/** Zapis bez polskich znaków, tak jak w loginach i nazwach katalogów („kamiński" → „kaminski"). */
+export const foldAscii = (s: string): string => s.replace(/[ąćęłńóśźż]/g, (c) => 'acelnoszz'['ąćęłńóśźż'.indexOf(c)]);
 /**
  * Czy wyraz z samych liter ASCII to mianownik nazwiska ze słownika (też forma żeńska -ska/-cka/-dzka),
  * zapisany bez polskich znaków. Bez reszty odmiany: login to forma słownikowa, nie przypadek zależny.

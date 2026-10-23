@@ -903,6 +903,10 @@ export function buildDataset() {
   str('sAMAccountName: kwisniewski\nAccepted publickey for mzielinski from bastion.local port 22 ssh2\nsudo:  pnowicki : TTY=pts/0', ['kwisniewski', 'mzielinski', 'pnowicki'], ['sAMAccountName:', 'Accepted publickey for', 'from bastion.local', 'TTY=pts/0']);
   str('{"user":"a.kaminska","message":"Konto a.kaminska zablokowane"}\nLinkedIn: https://www.linkedin.com/in/joanna-pietrzak-hr/', ['a.kaminska', 'joanna-pietrzak-hr'], ['"message":"Konto', 'https://www.linkedin.com/in/']);
   neg(String.raw`Ścieżka: /home/ubuntu/app oraz C:\Users\Public\Desktop. Accepted password for root from bastion.local port 22 ssh2. Strona https://www.linkedin.com/company/baltic-solutions oraz Konto AD: zablokowane. Alias: www.firma.pl`, ['/home/ubuntu/app', String.raw`C:\Users\Public`, 'for root from', 'company/baltic-solutions', 'Konto AD: zablokowane', 'Alias: www.firma.pl']);
+  // b6 fix1: słaba etykieta ze zwykłym wyrazem, trasa serwisu, konto wbudowane — bez propagacji na prozę
+  neg('Konto AD: nadane\nUprawnienia zostały nadane.\nAlias: intranet\nSerwer intranet działa.\n"GET /Users/Edit/15 HTTP/1.1" 200\nUser name: Administrator', ['zostały nadane', 'Serwer intranet', '/Users/Edit/15', 'User name: Administrator']);
+  // b6 fix1: adres profilu bez schematu nie połyka sklejonego telefonu
+  str('linkedin.com/in/anowak/;501-234-567', ['anowak', '501-234-567'], ['linkedin.com/in/', '/;']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

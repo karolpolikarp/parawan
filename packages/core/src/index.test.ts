@@ -5788,3 +5788,112 @@ test('b6 §8 p.8: logi sshd, PAM i sudo — użytkownik jako [LOGIN], konta syst
     'Czekaliśmy na odpowiedź for weeks from the vendor. Accepted offers for children from parents.',
   ]);
 });
+
+// ── Etap b6: poprawki po weryfikacji (runda 1) ──
+test('b6 fix1: słaba etykieta „Alias"/„Konto AD" bierze tylko uchwyt osoby i nie rozlewa zwykłych wyrazów', () => {
+  keep([
+    'Konto AD: nadane\nUprawnienia zostały nadane.',
+    'Konto domenowe: zmienione\nHasło zostało zmienione.',
+    'Konto w domenie: posiada\nPracownik posiada uprawnienia.',
+    'Konto AD: jest\nLaptop jest wydany.',
+    'Konto LDAP: utworzono\nKonto w domenie: oczekuje\nWniosek utworzono, akceptacja oczekuje.',
+    'Alias: rada\nSesję zwołuje rada gminy.',
+    'Alias: zamowienia\nWszystkie zamowienia publiczne.',
+    'Alias: intranet\nSerwer intranet obsługuje wnioski.',
+    'Alias: Matrix\nFilm Matrix powraca.',
+    'Alias: Wakacje\nCel: Wakacje 2027 w Grecji',
+    'Alias: DNS-01',
+    'Alias: sekretariat\nSekretariat przyjmuje wnioski.',
+    '    alias: pamiec\n# pamiec podręczna',
+    'alias: wnioski_2026\nIndeks wnioski_2026 zawiera dane.',
+  ]);
+  // nazwisko pod słabą etykietą maskuje FAZA 4 jako osobę, bez rozbijania par
+  masked([
+    ['Alias: Nowak\nPani Nowak złożyła reklamację.', 'Alias: [IMIĘ I NAZWISKO]\nPani [IMIĘ I NAZWISKO] złożyła reklamację.'],
+    ['Ustalono, że Marek Kowal ma\nAlias: Kowal\nSprawę prowadzi Jan Kowal.', 'Ustalono, że [IMIĘ I NAZWISKO] ma\nAlias: Kowal\nSprawę prowadzi [IMIĘ I NAZWISKO].'],
+    ['Konto AD: Kowalska\nPani Kowalska zgłosiła problem.', 'Konto AD: [IMIĘ I NAZWISKO]\nPani [IMIĘ I NAZWISKO] zgłosiła problem.'],
+  ]);
+  masked([['Alias: Kowalski\nPan Jan Kowalski został przeniesiony. Kowalski zacznie 1.11.', 'Alias: [OSOBA-A]\nPan [OSOBA-A] został przeniesiony. [OSOBA-A] zacznie 1.11.']], { pseudonyms: true });
+  // uchwyt osoby dalej maskowany i rozlewany
+  masked([
+    ['Konto AD: a.nowak\nUżytkownik a.nowak zgłosił.', `Konto AD: ${LG}\nUżytkownik ${LG} zgłosił.`],
+    ['Alias: jkowalski\nKonto jkowalski aktywne.', `Alias: ${LG}\nKonto ${LG} aktywne.`],
+    [String.raw`Konto AD: FIRMA\jkowalski`, `Konto AD: ${LG}`],
+  ]);
+});
+test('b6 fix1: konta wbudowane i zastępniki pod „User name", „sAMAccountName" i w dzienniku zdarzeń zostają', () => {
+  keep([
+    'User name: Administrator',
+    'User name: unknown\nBłąd: unknown device.',
+    'sAMAccountName: krbtgt\nsAMAccountName: Guest',
+    '<Data Name="TargetUserName">Administrator</Data><Data Name="TargetUserName">krbtgt</Data>',
+    '<Data Name="TargetUserName">recepcja2</Data>\nStanowisko recepcja2 w przychodni.',
+    '{"samaccountname":"faktury01","opis":"Konto faktury01 obsługuje wysyłkę faktur."}',
+  ]);
+  masked([
+    ['User name: anowak\nanowak zalogował się.', `User name: ${LG}\n${LG} zalogował się.`],
+    // osoba WIELKIMI literami w polu loginu — cała para, bez jawnego imienia
+    ['User name: ZIELINSKA KATARZYNA', `User name: ${LG}`],
+    ['Login: ZIELINSKA KATARZYNA', `Login: ${LG}`],
+  ]);
+  // nazwisko w atrybucie i w polu „Name" dostaje etykietę osoby spójną z resztą dokumentu
+  masked(
+    [
+      ['<Data Name="TargetUserName">Lewandowski</Data> Lewandowski', '<Data Name="TargetUserName">[OSOBA-A]</Data> [OSOBA-A]'],
+      ['<Data Name="Name">Kowalski</Data> Kowalski', '<Data Name="Name">[OSOBA-A]</Data> [OSOBA-A]'],
+    ],
+    { pseudonyms: true },
+  );
+});
+test('b6 fix1: propagacja i URL-e tylko dla uchwytu osoby (konta usług i działów zostają w prozie)', () => {
+  masked([
+    ['{"user": "batch01"}\nZadanie batch01 wykonuje import.', `{"user": "${LG}"}\nZadanie batch01 wykonuje import.`],
+    ['{"user": "web_app"}\nAplikacja web_app łączy się z bazą.', `{"user": "${LG}"}\nAplikacja web_app łączy się z bazą.`],
+    ['{"userid": "eod2024"}\nW systemie eod2024 zapisano.', `{"userid": "${LG}"}\nW systemie eod2024 zapisano.`],
+    ['Login: projekty\nhttps://intranet.urzad.pl/projekty/plan.pdf', `Login: ${LG}\nhttps://intranet.urzad.pl/projekty/plan.pdf`],
+    ['Login: wroclaw\nPanel: https://portal.firma.pl/oddzialy/wroclaw/raporty', `Login: ${LG}\nPanel: https://portal.firma.pl/oddzialy/wroclaw/raporty`],
+    ['Kopie z /home/kadry_archiwum/ idą na NAS.\nFolder kadry_archiwum zawiera akta.', `Kopie z /home/${LG}/ idą na NAS.\nFolder kadry_archiwum zawiera akta.`],
+    // uchwyt osoby rozlewa się dalej
+    ['{"user":"jan_nowak"}\njan_nowak zalogował się', `{"user":"${LG}"}\n${LG} zalogował się`],
+    ['{"user":"adam1986"}\nadam1986 pisze', `{"user":"${LG}"}\n${LG} pisze`],
+  ]);
+});
+test('b6 fix1: trasy serwisu, katalogi działu i nazwy z ataku pod „/home", „/Users", udziałem i „Invalid user" zostają', () => {
+  keep([
+    '"GET /Users/Edit/15 HTTP/1.1" 200',
+    'GET /home/dashboard',
+    '| GET | /Users/me | profil |',
+    'Trasa /home/regulamin. Strona /home/aktualnosci nie działa.',
+    '/Users/Profile oraz /Users/import oraz /Users/active',
+    '/home/vscode/.cache i /home/linuxbrew/.linuxbrew i /home/minecraft/server i /home/steam/logs',
+    '/Users/Szablony/x i /home/twojlogin/ i /Users/twojanazwa/',
+    String.raw`Profil C:\Users\Biblioteka\Desktop jest wspólny, C:\Users\MSSQLSERVER\x`,
+    String.raw`Udziały \\FS01\home$\Wspolny\ i \\fs01\profiles$\Meldunki\ oraz \\fs01\home\Wnioski800 i \\FS01\users\Skany`,
+    'sshd[1]: Invalid user test1 from bastion.local port 4013',
+    'Failed password for invalid user admin123 from bastion.local port 22 ssh2',
+  ]);
+  masked([
+    ['Katalog /home/mzajac/projekty', `Katalog /home/${LG}/projekty`],
+    [String.raw`\\srv\home$\mzajac\Pulpit`, String.raw`\\srv\home$\[LOGIN]\Pulpit`],
+    [String.raw`C:\Users\Tomasz\Desktop i C:\Users\u12345\Desktop`, String.raw`C:\Users\[LOGIN]\Desktop i C:\Users\[LOGIN]\Desktop`],
+    ['Accepted password for kpw from bastion.local port 22 ssh2', `Accepted password for ${LG} from bastion.local port 22 ssh2`],
+    // imię i nazwisko małymi literami w nazwie katalogu — w całości jako osoba, bez fragmentu
+    [String.raw`Plik: C:\Users\ewa nowak\Desktop\a.pdf`, String.raw`Plik: C:\Users\[IMIĘ I NAZWISKO]\Desktop\a.pdf`],
+  ]);
+  masked(
+    [[String.raw`Załącznik: C:\Users\Kowalska\Pictures\a.jpg; Pani Kowalska`, String.raw`Załącznik: C:\Users\[OSOBA-A]\Pictures\a.jpg; Pani [OSOBA-A]`]],
+    { pseudonyms: true },
+  );
+});
+test('b6 fix1: adres profilu bez schematu kończy się na profilu — sklejone numery dalej maskowane', () => {
+  masked([
+    ['linkedin.com/in/anowak/;501-234-567', `linkedin.com/in/${LG}/;[TELEFON]`],
+    ['pl.linkedin.com/in/anna-nowak/,tel:501234567', `pl.linkedin.com/in/${LG}/,tel:[TELEFON]`],
+    ['pl.linkedin.com/in/joannapietrzak?trk=public_profile|tel:600123456', `pl.linkedin.com/in/${LG}?trk=public_profile|tel:[TELEFON]`],
+    [
+      'Skan: firma-my.sharepoint.com/personal/anna_nowak_firma_pl/Documents/PESEL_85010112345.pdf',
+      `Skan: firma-my.sharepoint.com/personal/${LG}/Documents/PESEL_[PESEL].pdf`,
+    ],
+    ['facebook.com/profile.php?id=100012345678,PESEL:85010112345,tel:600123456', `facebook.com/profile.php?id=${LG},PESEL:[PESEL],tel:[TELEFON]`],
+  ]);
+});

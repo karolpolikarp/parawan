@@ -83,6 +83,12 @@ Cystoskopia: trójkąt Pawlika bez zmian. Pismo zarejestrowano pod numerem rejes
   "neg-15": "Zakład Ubezpieczeń Społecznych wydał decyzję odmowną.",
   "neg-150": "Gabinet przy ul. Szpitalnej 5 m. 3 i Sali 12 jest czynny. Lokalizacje: ul. Leśna 7 oraz Hala 3. Kościół Mariacki odwiedził w niedzielę biskup. Mieszka w Sopocie 500 cudzoziemców.",
   "neg-151": "Ścieżka: /home/ubuntu/app oraz C:\\Users\\Public\\Desktop. Accepted password for root from bastion.local port 22 ssh2. Strona https://www.linkedin.com/company/baltic-solutions oraz Konto AD: zablokowane. Alias: www.firma.pl",
+  "neg-152": "Konto AD: nadane
+Uprawnienia zostały nadane.
+Alias: intranet
+Serwer intranet działa.
+"GET /Users/Edit/15 HTTP/1.1" 200
+User name: Administrator",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
@@ -435,6 +441,7 @@ Accepted publickey for mzielinski from bastion.local port 22 ssh2
 sudo:  pnowicki : TTY=pts/0",
   "str-151": "{"user":"a.kaminska","message":"Konto a.kaminska zablokowane"}
 LinkedIn: https://www.linkedin.com/in/joanna-pietrzak-hr/",
+  "str-152": "linkedin.com/in/anowak/;[TELEFON]",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
@@ -606,6 +613,12 @@ Cystoskopia: trójkąt Pawlika bez zmian. Pismo zarejestrowano pod numerem rejes
   "neg-15": "Zakład Ubezpieczeń Społecznych wydał decyzję odmowną.",
   "neg-150": "Gabinet przy [ADRES] i Sali 12 jest czynny. Lokalizacje: [ADRES] oraz Hala 3. Kościół Mariacki odwiedził w niedzielę biskup. Mieszka w Sopocie 500 cudzoziemców.",
   "neg-151": "Ścieżka: /home/ubuntu/app oraz C:\\Users\\Public\\Desktop. Accepted password for root from bastion.local port 22 ssh2. Strona https://www.linkedin.com/company/baltic-solutions oraz Konto AD: zablokowane. Alias: www.firma.pl",
+  "neg-152": "Konto AD: nadane
+Uprawnienia zostały nadane.
+Alias: intranet
+Serwer intranet działa.
+"GET /Users/Edit/15 HTTP/1.1" 200
+User name: Administrator",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
@@ -956,6 +969,7 @@ Accepted publickey for [LOGIN] from bastion.local port 22 ssh2
 sudo:  [LOGIN] : TTY=pts/0",
   "str-151": "{"user":"[LOGIN]","message":"Konto [LOGIN] zablokowane"}
 LinkedIn: https://www.linkedin.com/in/[LOGIN]/",
+  "str-152": "linkedin.com/in/[LOGIN]/;[TELEFON]",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
@@ -1127,6 +1141,12 @@ Cystoskopia: trójkąt Pawlika bez zmian. Pismo zarejestrowano pod numerem rejes
   "neg-15": "Zakład Ubezpieczeń Społecznych wydał decyzję odmowną.",
   "neg-150": "Gabinet przy [ADRES] i Sali 12 jest czynny. Lokalizacje: [ADRES] oraz Hala 3. Kościół Mariacki odwiedził w niedzielę biskup. Mieszka w Sopocie 500 cudzoziemców.",
   "neg-151": "Ścieżka: /home/ubuntu/app oraz C:\\Users\\Public\\Desktop. Accepted password for root from bastion.local port 22 ssh2. Strona https://www.linkedin.com/company/baltic-solutions oraz Konto AD: zablokowane. Alias: www.firma.pl",
+  "neg-152": "Konto AD: nadane
+Uprawnienia zostały nadane.
+Alias: intranet
+Serwer intranet działa.
+"GET /Users/Edit/15 HTTP/1.1" 200
+User name: Administrator",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
@@ -1477,6 +1497,7 @@ Accepted publickey for [LOGIN] from bastion.local port 22 ssh2
 sudo:  [LOGIN] : TTY=pts/0",
   "str-151": "{"user":"[LOGIN]","message":"Konto [LOGIN] zablokowane"}
 LinkedIn: https://www.linkedin.com/in/[LOGIN]/",
+  "str-152": "linkedin.com/in/[LOGIN]/;[TELEFON]",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
