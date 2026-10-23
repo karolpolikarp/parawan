@@ -3,7 +3,7 @@ Wydanie z {{DATA}}
 
 PLIK
   Nazwa:     Parawan.html
-  Rozmiar:   {{ROZMIAR}} bajtów
+  Rozmiar:   {{ROZMIAR}} B
   SHA-256:   {{SHA256}}
   Kod:       https://github.com/karolpolikarp/parawan (tag v{{WERSJA}})
   Licencja:  Apache 2.0, bez opłat i bez gwarancji
@@ -49,10 +49,10 @@ CO ZOSTAJE NA KOMPUTERZE
   Po zamknięciu karty tekst i wynik znikają. Tekst wklejony do Parawana nie
   trafia do plików sesji przeglądarki i nie wraca po jej ponownym
   uruchomieniu, także przy włączonym przywracaniu kart. Sprawdzone na nowych
-  profilach: Chrome i Edge 109, Chromium 149, Edge 155, Firefox ESR 115
-  i 140. Do wersji 0.46.23 Chrome i Edge 109 zapisywały treść pola w plikach
-  sesji profilu; od wersji 0.46.24 nie. Sprawdzenie nie obejmuje historii
-  schowka Windows (Win+V), pliku stronicowania ani zrzutów pamięci.
+  profilach: Chromium 109 (silnik Chrome i Edge 109), Chromium 149, Edge 155,
+  Firefox ESR 115 i 140. Do wersji 0.46.23 Chromium 109 zapisywał treść pola
+  w plikach sesji profilu; od wersji 0.46.24 nie. Sprawdzenie nie obejmuje
+  historii schowka Windows (Win+V), pliku stronicowania ani zrzutów pamięci.
 
   Rozszerzenia Edge i Chrome nie mają domyślnie dostępu do plików otwieranych
   z dysku (file://). Historia schowka Windows przechowuje to, co pracownik sam
@@ -114,8 +114,8 @@ WDROŻENIE
   1. Sprawdź sumę pliku i porównaj ją z sumą wyżej:
        PowerShell:      Get-FileHash .\Parawan.html -Algorithm SHA256
        Wiersz poleceń:  certutil -hashfile Parawan.html SHA256
-       GitHub CLI:      gh attestation verify Parawan.html
-                          --repo karolpolikarp/parawan
+     Pochodzenie pliku sprawdza polecenie GitHub CLI:
+       gh attestation verify Parawan.html --repo karolpolikarp/parawan
   2. Połóż jedną kopię tylko do odczytu na dysku sieciowym, np.
      \\serwer\narzedzia\Parawan.html.
   3. Dodaj pracownikom skrót albo zakładkę (w Edge zasada ManagedFavorites).
@@ -140,9 +140,11 @@ ZASADY PRZEGLĄDARKI, KTÓRE BLOKUJĄ ALBO OGRANICZAJĄ PARAWANA
   - Skany: przy PDF bez warstwy tekstu lepiej pobrać z EZD wersję DOCX.
 
 BUDOWA Z KODU
-  Plik można zbudować samemu i porównać sumę z wydaniem:
-    git clone --branch v{{WERSJA}} -c core.autocrlf=false
-      https://github.com/karolpolikarp/parawan
+  Plik można zbudować samemu i porównać sumę z wydaniem. Każdy wiersz to
+  osobne polecenie:
+    git clone -c core.autocrlf=false https://github.com/karolpolikarp/parawan
+    cd parawan
+    git checkout v{{WERSJA}}
     npm ci
     npm run build -w anonimizator-web
   Gotowy plik leży w apps/web/dist/index.html i ma tę samą sumę SHA-256.
@@ -154,7 +156,8 @@ AKTUALIZACJE I BŁĘDY BEZPIECZEŃSTWA
   Lista wydań: https://github.com/karolpolikarp/parawan/releases
   Kanał Atom:  https://github.com/karolpolikarp/parawan/releases.atom
   Opis każdego wydania podaje pilność: zwykła, zalecana albo pilna. Pilna
-  znaczy, że po poprawce Parawan zasłania coś, co wcześniej przepuszczał.
+  znaczy, że poprawka zamyka wyciek danych: Parawan zasłania coś, co
+  wcześniej przepuszczał, albo tekst mógł opuścić kartę przeglądarki.
   Zgłaszanie błędów bezpieczeństwa: SECURITY.md w repozytorium.
 
 DOSTĘPNOŚĆ

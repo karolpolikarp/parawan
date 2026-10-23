@@ -43,7 +43,8 @@ w `release.yml` z szablonów w `docs/wydanie/` (`scripts/release/render-docs.mjs
    ```
 
 5. `CHANGELOG.md`: sekcja `## vX.Y.Z — RRRR-MM-DD` z linią `Pilność: zwykła`, `zalecana`
-   albo `pilna` (pilna: po poprawce Parawan zasłania coś, co wcześniej przepuszczał). Najpierw
+   albo `pilna` (pilna: poprawka zamyka wyciek danych, czyli Parawan zasłania coś, co wcześniej przepuszczał,
+   albo tekst mógł opuścić kartę). Najpierw
    to, co zmienia się dla urzędnika, potem szczegóły. Bez tej linii `render-docs.mjs`
    zatrzymuje wydanie.
 6. Wersja w `apps/web/package.json` (i w `packages/core/package.json`, jeśli zmienia się rdzeń).

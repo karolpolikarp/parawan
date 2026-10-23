@@ -25,8 +25,9 @@ Zgłoś go publicznie w Issues, także na zmyślonym przykładzie.
 
 Projekt prowadzi jedna osoba prywatna, bez gwarantowanego terminu odpowiedzi.
 Poprawka bezpieczeństwa wychodzi jako nowe wydanie, a jego opis podaje
-pilność aktualizacji: zwykła, zalecana albo pilna. Pilna znaczy, że po poprawce
-Parawan zasłania coś, co wcześniej przepuszczał.
+pilność aktualizacji: zwykła, zalecana albo pilna. Pilna znaczy, że poprawka
+zamyka wyciek danych: Parawan zasłania coś, co wcześniej przepuszczał, albo tekst
+mógł opuścić kartę przeglądarki.
 
 ## Sprawdzenie pliku
 

@@ -31,11 +31,15 @@ export const URGENCY = {
   zwykła: 'zwykła. Zaktualizuj plik, kiedy będzie wygodnie.',
   zalecana: 'zalecana. Warto podmienić plik przy najbliższej okazji.',
   pilna:
-    'pilna. Po tej poprawce Parawan zasłania coś, co wcześniej przepuszczał. ' +
+    'pilna. Ta poprawka zamyka wyciek danych: Parawan zasłania coś, co wcześniej ' +
+    'przepuszczał, albo tekst mógł opuścić kartę przeglądarki. ' +
     'Podmień plik jak najszybciej.',
 };
 
 export class RenderError extends Error {}
+
+/** Liczba z odstępami co trzy cyfry (2 181 362), łatwiejsza do porównania wzrokiem. */
+export const groupDigits = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 
 export const sha256 = (buf) => createHash('sha256').update(buf).digest('hex');
 
@@ -123,8 +127,8 @@ export function releaseNotes({ version, hash, section, urgency }) {
     '- Wiersz poleceń Windows: `certutil -hashfile Parawan.html SHA256`',
     '- Linux albo Git Bash, w katalogu z pobranymi plikami: `sha256sum -c SHA256SUMS.txt`',
     '- Pochodzenie z GitHub Actions: `gh attestation verify Parawan.html --repo karolpolikarp/parawan`',
-    `- Budowa z kodu: \`git clone --branch v${version} -c core.autocrlf=false ` +
-      'https://github.com/karolpolikarp/parawan`, `npm ci`, `npm run build -w anonimizator-web`; ' +
+    '- Budowa z kodu: `git clone -c core.autocrlf=false https://github.com/karolpolikarp/parawan`, ' +
+      `\`cd parawan\`, \`git checkout v${version}\`, \`npm ci\`, \`npm run build -w anonimizator-web\`; ` +
       'plik `apps/web/dist/index.html` ma tę samą sumę.',
     '',
     '## Co się zmieniło',
@@ -176,7 +180,13 @@ export function renderRelease(opts) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new RenderError(`zła data „${date}”`);
   const csp = cspFromHtml(html);
   const hash = sha256(htmlBuf);
-  const fields = { WERSJA: version, DATA: date, SHA256: hash, ROZMIAR: htmlBuf.length, CSP: csp };
+  const fields = {
+    WERSJA: version,
+    DATA: date,
+    SHA256: hash,
+    ROZMIAR: groupDigits(htmlBuf.length),
+    CSP: csp,
+  };
 
   const changelog = readFileSync(opts.changelog ?? path.join(ROOT, 'CHANGELOG.md'), 'utf8');
   let section;
@@ -255,7 +265,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   try {
     const r = renderRelease(parseArgs(process.argv.slice(2)));
     console.log(`Parawan ${r.version} (${r.date}), pilność: ${r.urgency}`);
-    console.log(`SHA-256 Parawan.html: ${r.hash} (${r.size} bajtów)`);
+    console.log(`SHA-256 Parawan.html: ${r.hash} (rozmiar ${groupDigits(r.size)} B)`);
     process.stdout.write(r.sums);
   } catch (e) {
     console.error(`render-docs: ${e instanceof RenderError ? e.message : e}`);

@@ -206,7 +206,21 @@ test('JAK-UZYC.txt: notka „Dla działu IT” (sprawdza ją deploy-landing) i o
   expect(jak).toContain('Nagłówki i stopki');
 });
 
-test('pasek #boot-fail odsyła dział IT do DLA-IOD-I-IT.txt', () => {
+test('pasek #boot-fail odsyła dział IT do DLA-IOD-I-IT.txt z adresem, skąd go wziąć', () => {
+  // ze strony produktu pobiera się sam Parawan.html, więc pasek musi podać adres wydań
   const bar = webHtml.match(/<div id="boot-fail"[\s\S]*?<\/div>/)?.[0] ?? '';
-  expect(bar).toContain('Opis dla działu IT jest w pliku DLA-IOD-I-IT.txt z wydania.');
+  expect(bar).toContain('DLA-IOD-I-IT.txt na github.com/karolpolikarp/parawan/<wbr>releases.');
+});
+
+test('polecenia w DLA-IOD-I-IT.txt nie są łamane w środku', () => {
+  const lines = dla.split('\n').map((l) => l.trim());
+  expect(lines).toContain('gh attestation verify Parawan.html --repo karolpolikarp/parawan');
+  expect(lines).toContain(
+    'git clone -c core.autocrlf=false https://github.com/karolpolikarp/parawan',
+  );
+  expect(lines).toContain('cd parawan');
+  // wiersz z poleceniem nie kończy się na samym poleceniu bez argumentów ani na opcji
+  for (const l of lines.filter((x) => /^(gh|git|npm|certutil|Get-FileHash) /.test(x))) {
+    expect(l, l).not.toMatch(/(verify Parawan\.html|autocrlf=false|\s--?[a-z]+)$/);
+  }
 });

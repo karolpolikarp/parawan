@@ -11,6 +11,7 @@ import path from 'node:path';
 import { after, test } from 'node:test';
 import {
   changelogSection,
+  groupDigits,
   RenderError,
   releaseNotes,
   renderRelease,
@@ -104,14 +105,34 @@ test('pliki .txt: BOM, CRLF, pola wypełnione, polskie litery w UTF-8', () => {
     assert.ok(!text.includes('{{'), `${name}: niewypełnione pole`);
     assert.ok(text.includes('PARAWAN 9.9.9'), name);
     assert.ok(text.includes(hash), `${name}: suma pliku`);
-    assert.ok(text.includes(String(Buffer.byteLength(HTML))), `${name}: rozmiar`);
+    assert.ok(text.includes(`${groupDigits(Buffer.byteLength(HTML))} B`), `${name}: rozmiar`);
     assert.ok(text.includes("connect-src 'none'"), `${name}: CSP z pliku`);
     assert.ok(text.includes('ą') || text.includes('ł'), `${name}: polskie litery`);
     for (const line of text.split('\r\n')) assert.ok([...line].length <= 78, line);
   }
   const dla = readFileSync(path.join(out, 'DLA-IOD-I-IT.txt'), 'utf8');
   assert.ok(dla.includes('Wydanie z 2026-11-01'));
-  assert.ok(dla.includes('git clone --branch v9.9.9'));
+  // polecenia do wklejenia: każde w jednym wierszu, po git clone wejście do katalogu i tag
+  const lines = dla.split('\r\n').map((l) => l.trim());
+  assert.ok(lines.includes('gh attestation verify Parawan.html --repo karolpolikarp/parawan'));
+  const clone = lines.indexOf(
+    'git clone -c core.autocrlf=false https://github.com/karolpolikarp/parawan',
+  );
+  assert.ok(clone > 0, 'git clone z adresem w jednym wierszu');
+  assert.deepEqual(lines.slice(clone + 1, clone + 5), [
+    'cd parawan',
+    'git checkout v9.9.9',
+    'npm ci',
+    'npm run build -w anonimizator-web',
+  ]);
+  const notes = readFileSync(path.join(out, 'release-notes.md'), 'utf8');
+  assert.ok(notes.includes('`cd parawan`, `git checkout v9.9.9`, `npm ci`'));
+});
+
+test('rozmiar pliku z odstępami co trzy cyfry', () => {
+  assert.equal(groupDigits(2181362), '2 181 362');
+  assert.equal(groupDigits(999), '999');
+  assert.equal(groupDigits(1000), '1 000');
 });
 
 test('opis wydania: właściwa sekcja CHANGELOG i pilność, bez „blokad firmowych”', () => {

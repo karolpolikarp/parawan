@@ -33,8 +33,8 @@ Ograniczenia
 Parawan rozpoznaje dane regułami i może coś przepuścić, najczęściej rzadkie
 nazwisko bez imienia obok albo numer w nietypowym zapisie. Nie czyta skanów:
 PDF musi mieć warstwę tekstu, a z EZD lepiej pobrać wersję DOCX. Z pliku
-Word czyta treść główną, bez nagłówków, stopek i przypisów. Wynik zawsze
-czyta człowiek.
+Word czyta treść główną, bez nagłówków, stopek i przypisów. Dlatego przed
+publikacją przeczytaj cały wynik.
 
 Dla działu IT i inspektora ochrony danych: plik DLA-IOD-I-IT.txt obok
 opisuje, gdzie są przetwarzane dane, co zostaje na komputerze, jak
@@ -43,7 +43,7 @@ Parawan.html blokuje połączenia sieciowe polityką Content-Security-Policy
 zapisaną na początku pliku:
   {{CSP}}
 
-Plik Parawan.html: {{ROZMIAR}} bajtów, SHA-256:
+Plik Parawan.html, rozmiar {{ROZMIAR}} B, SHA-256:
   {{SHA256}}
 Strona: https://parawan.karolwilczynski.com
 Kod:    https://github.com/karolpolikarp/parawan

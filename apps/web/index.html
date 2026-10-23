@@ -14,7 +14,7 @@
     <!-- Pasek „Parawan nie uruchomił się”: opis na końcu main.ts. -->
     <style>
 .boot-fail{position:sticky;top:0;z-index:99;max-width:1320px;margin:0 auto}
-.boot-fail p{margin:0 0 16px;padding:14px 16px;border:1px solid #b8901c;border-radius:10px;background:#fff4c2;color:#1a1a1a;font:16px/1.5 Archivo,Arial,sans-serif}
+.boot-fail p{margin:0 0 16px;padding:14px 16px;border:1px solid #b8901c;border-radius:10px;background:#fff4c2;color:#1a1a1a;font:16px/1.5 Archivo,Arial,sans-serif;overflow-wrap:break-word}
 #boot-fail{overflow:hidden;visibility:hidden;max-height:0;animation:boot-reveal 0s linear 4s forwards}
 @keyframes boot-reveal{to{visibility:visible;max-height:40em}}
 @media (max-height:480px){.boot-fail{position:static}}
@@ -22,7 +22,7 @@
     <noscript><style>#boot-fail{display:none}</style></noscript>
   </head>
   <body>
-    <div id="boot-fail" class="boot-fail" role="alert"><p><strong>Parawan nie uruchomił się w tej przeglądarce, więc pola poniżej nie działają.</strong> Otwórz plik w aktualnym Edge, Chrome albo Firefoksie. Na komputerze służbowym dział IT może blokować skrypty w plikach otwieranych z dysku albo otwierać je w trybie Internet Explorera. Opis dla działu IT jest w pliku DLA-IOD-I-IT.txt z wydania.</p></div>
+    <div id="boot-fail" class="boot-fail" role="alert"><p><strong>Parawan nie uruchomił się w tej przeglądarce, więc pola poniżej nie działają.</strong> Otwórz plik w aktualnym Edge, Chrome albo Firefoksie. Na komputerze służbowym dział IT może blokować skrypty w plikach otwieranych z dysku albo otwierać je w trybie Internet Explorera. Opis dla działu IT: plik DLA-IOD-I-IT.txt na github.com/karolpolikarp/parawan/<wbr>releases.</p></div>
     <noscript><div class="boot-fail boot-fail-now"><p><strong>Ta przeglądarka ma wyłączony JavaScript.</strong> Parawan rozpoznaje dane programem zapisanym w tym pliku, więc bez JavaScriptu nie zadziała. Plik nie łączy się z internetem. Na komputerze służbowym poproś dział IT o zezwolenie na skrypty w plikach otwieranych z dysku.</p></div></noscript>
     <div class="grid">
 
