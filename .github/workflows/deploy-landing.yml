@@ -1,8 +1,17 @@
 name: Deploy landing (GitHub Pages)
 
-# Publikuje landing page Parawana (apps/landing → jeden plik index.html) na GitHub Pages
-# pod domeną parawan.karolwilczynski.com. Odpala się przy zmianach w landingu lub w rdzeniu
-# (live demo importuje silnik z packages/core), oraz ręcznie z zakładki Actions.
+# Publikuje stronę produktu (apps/landing → jeden plik index.html) na GitHub Pages pod domeną
+# parawan.karolwilczynski.com, razem z kopią plików najnowszego wydania w /pobierz/
+# (Parawan.html, JAK-UZYC.txt, DLA-IOD-I-IT.txt, SHA256SUMS.txt). Filtr WWW urzędu może blokować
+# github.com, więc przyciski pobierania prowadzą do kopii na domenie, a GitHub jest obok.
+#
+# Kiedy rusza:
+#  - po udanym wydaniu (workflow_run po „Release” z tagu): wydanie tworzone GITHUB_TOKEN-em nie
+#    uruchamia zdarzenia release, a demo na stronie ma zmieniać silnik razem z wydanym plikiem.
+#    workflow_run uruchamia ten plik w wersji z main i buduje stronę z main;
+#  - po pushu w apps/landing (bez packages/core: nowa reguła w rdzeniu trafia na stronę dopiero
+#    z wydaniem, inaczej demo pokazywałoby zachowanie, którego plik u ludzi jeszcze nie ma);
+#  - ręcznie z zakładki Actions (proba_zlej_sumy: próba, że sprawdzenie kopii wywraca job).
 #
 # Wymagana jednorazowa konfiguracja w repo: Settings → Pages → Source: „GitHub Actions".
 # Domena (CNAME) jest w apps/landing/public/CNAME i trafia do artefaktu przy buildzie.
@@ -12,9 +21,16 @@ on:
     branches: [main]
     paths:
       - 'apps/landing/**'
-      - 'packages/core/**'
       - '.github/workflows/deploy-landing.yml'
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
   workflow_dispatch:
+    inputs:
+      proba_zlej_sumy:
+        description: 'Próba: sprawdzenie kopii po deployu z celowo złą sumą (job ma się wywrócić)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -28,19 +44,65 @@ concurrency:
 
 jobs:
   build:
+    # Po „Release” tylko wtedy, gdy wydanie z tagu się udało (ręczna próba release.yml niczego
+    # nie publikuje, więc strony nie rusza).
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
+    outputs:
+      sha256: ${{ steps.wydanie.outputs.sha256 }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - run: npm ci
       # Testy landingu żyją w apps/web (landing.test.ts i inne): sprawdzają przykład z demo
       # i przykłady z treści na prawdziwym silniku. Bez nich strona rozjechana z rdzeniem
-      # (np. po zmianie reguły w packages/core) poszłaby na produkcję mimo czerwonego CI.
+      # poszłaby na produkcję mimo czerwonego CI.
       - run: npm run build -w anonimizator
       - run: npm run test -w anonimizator-web
+      # Strona opisuje CSP pobieranego pliku, notkę „Dla działu IT” w JAK-UZYC.txt i plik
+      # DLA-IOD-I-IT.txt, podaje sumę SHA-256 i kopię pliku na domenie. Wszystko z najnowszego
+      # wydania, sprawdzone sumami z SHA256SUMS.txt i digestem z API. Gdy wydanie ich nie ma
+      # (strona wyprzedza wydanie), deploy staje: najpierw wydaj nową wersję (tag v*), potem
+      # w zakładce Actions „Re-run failed jobs”.
+      - name: Najnowsze wydanie zgodne z opisem na stronie
+        id: wydanie
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          tag="$(gh api "repos/$REPO/releases/latest" --jq .tag_name)"
+          echo "najnowsze wydanie: $tag"
+          dir="$RUNNER_TEMP/wydanie"
+          mkdir -p "$dir"
+          for f in Parawan.html JAK-UZYC.txt DLA-IOD-I-IT.txt SHA256SUMS.txt; do
+            curl -fsSL -o "$dir/$f" "https://github.com/$REPO/releases/download/$tag/$f" \
+              || { echo "::error::wydanie $tag nie ma pliku $f, najpierw wydaj nową wersję"; exit 1; }
+          done
+          (cd "$dir" && sha256sum -c SHA256SUMS.txt) \
+            || { echo "::error::pliki wydania $tag nie zgadzają się z SHA256SUMS.txt"; exit 1; }
+          grep -Eq "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'[^\"]*connect-src 'none'" "$dir/Parawan.html" \
+            || { echo "::error::najnowsze wydanie Parawan.html nie ma CSP opisanej na stronie, najpierw wydaj nową wersję"; exit 1; }
+          grep -q "Dla działu IT" "$dir/JAK-UZYC.txt" \
+            || { echo "::error::najnowsze wydanie JAK-UZYC.txt nie ma notki „Dla działu IT”, najpierw wydaj nową wersję"; exit 1; }
+          grep -q "informacja dla inspektora ochrony danych i działu IT" "$dir/DLA-IOD-I-IT.txt" \
+            || { echo "::error::najnowsze wydanie nie ma DLA-IOD-I-IT.txt opisanego na stronie, najpierw wydaj nową wersję"; exit 1; }
+          sha="$(sha256sum "$dir/Parawan.html" | cut -d' ' -f1)"
+          # Digest zasobu z API wydań (GitHub liczy go sam przy wysyłce pliku).
+          digest="$(gh api "repos/$REPO/releases/latest" --jq '.assets[] | select(.name == "Parawan.html") | .digest // ""')"
+          if [ -n "$digest" ] && [ "$digest" != "sha256:$sha" ]; then
+            echo "::error::digest Parawan.html z API ($digest) różni się od sumy pobranego pliku ($sha)"
+            exit 1
+          fi
+          echo "Parawan.html $tag: SHA-256 $sha (digest z API: ${digest:-brak})"
+          echo "PARAWAN_SHA256=$sha" >> "$GITHUB_ENV"
+          echo "PARAWAN_VERSION=${tag#v}" >> "$GITHUB_ENV"
+          echo "sha256=$sha" >> "$GITHUB_OUTPUT"
+      # PARAWAN_SHA256 i PARAWAN_VERSION wstawia plugin parawan-wydanie (apps/landing/vite.config.ts).
       - run: npm run build -w parawan-landing
       - name: Strażnik CSP (landing)
         run: |
@@ -48,17 +110,21 @@ jobs:
             || { echo "::error::brak Content-Security-Policy z default-src 'none' i connect-src 'none'"; exit 1; }
           node scripts/e2e/csp.mjs landing
           node scripts/e2e/zakazane-api.mjs landing
-      # Strona opisuje CSP w pobieranym pliku i notkę „Dla działu IT” w JAK-UZYC.txt. Gdy najnowsze
-      # wydanie ich nie ma (strona wyprzedza wydanie), deploy staje: najpierw wydaj nową wersję
-      # (tag v*), potem w zakładce Actions „Re-run failed jobs”.
-      - name: Najnowsze wydanie zgodne z opisem na stronie
+      - name: Kopia plików wydania w /pobierz/
         run: |
-          curl -fsSL -o /tmp/Parawan.html https://github.com/karolpolikarp/parawan/releases/latest/download/Parawan.html
-          curl -fsSL -o /tmp/JAK-UZYC.txt https://github.com/karolpolikarp/parawan/releases/latest/download/JAK-UZYC.txt
-          grep -Eq "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'[^\"]*connect-src 'none'" /tmp/Parawan.html \
-            || { echo "::error::najnowsze wydanie Parawan.html nie ma CSP opisanej na stronie, najpierw wydaj nową wersję"; exit 1; }
-          grep -q "Dla działu IT" /tmp/JAK-UZYC.txt \
-            || { echo "::error::najnowsze wydanie JAK-UZYC.txt nie ma notki „Dla działu IT”, najpierw wydaj nową wersję"; exit 1; }
+          mkdir -p apps/landing/dist/pobierz
+          cp "$RUNNER_TEMP"/wydanie/{Parawan.html,JAK-UZYC.txt,DLA-IOD-I-IT.txt,SHA256SUMS.txt} apps/landing/dist/pobierz/
+          (cd apps/landing/dist/pobierz && sha256sum -c SHA256SUMS.txt)
+      # Suma na stronie (metryczka #pobierz i sekcja #dla-iod) to suma pliku, który leży obok,
+      # i żadna inna.
+      - name: Suma na stronie równa sumie kopii
+        run: |
+          sha="$(sha256sum apps/landing/dist/pobierz/Parawan.html | cut -d' ' -f1)"
+          wszystkie="$(grep -o '<code class="suma" translate="no">[0-9a-f]*</code>' apps/landing/dist/index.html | wc -l)"
+          zgodne="$(grep -o "<code class=\"suma\" translate=\"no\">$sha</code>" apps/landing/dist/index.html | wc -l)"
+          echo "sumy na stronie: $wszystkie, zgodne z kopią: $zgodne"
+          [ "$wszystkie" = "2" ] && [ "$zgodne" = "2" ] \
+            || { echo "::error::strona podaje inną sumę niż kopia Parawan.html ($sha)"; exit 1; }
       - uses: actions/upload-pages-artifact@v4
         with:
           path: apps/landing/dist
@@ -72,3 +138,20 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+      # Domena idzie przez Cloudflare, którego funkcje strefy (np. Email Address Obfuscation)
+      # przepisują HTML. Wtedy kopia na domenie nie jest plikiem z wydania, więc job kończy się
+      # błędem: wyłącz funkcję strefy albo zrezygnuj z kopii. Pierwsza próba od razu, potem co
+      # minutę przez 10 minut, bo pamięć podręczna Pages i Cloudflare podaje chwilę starą wersję.
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts/release
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - name: Kopia na domenie to plik z wydania
+        env:
+          SHA256: ${{ needs.build.outputs.sha256 }}
+          ZLA_SUMA: ${{ inputs.proba_zlej_sumy && '--zla-suma' || '' }}
+        run: |
+          node scripts/release/kopia-na-domenie.mjs https://parawan.karolwilczynski.com/pobierz/Parawan.html \
+            --sha256 "$SHA256" --proby 11 --odstep 60 $ZLA_SUMA

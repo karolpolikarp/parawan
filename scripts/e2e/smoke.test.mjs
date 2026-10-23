@@ -1040,3 +1040,34 @@ test('landing z dysku ładuje się bez żądań i błędów', async (t) => {
     { file: LANDING_HTML },
   );
 });
+
+// L01: sekcje pobierania i „Dla IOD i IT” mieszczą się w szerokości ekranu na laptopie i telefonie
+// (pełna suma SHA-256 i nazwy zasad GPO to długie ciągi bez spacji).
+for (const viewport of [
+  { width: 1366, height: 768 },
+  { width: 390, height: 844 },
+]) {
+  test(`landing ${viewport.width}×${viewport.height}: bez przewijania w poziomie, #dla-iod w pasku`, async (t) => {
+    await withApp(
+      browser,
+      t,
+      '',
+      async ({ page }) => {
+        await page.waitForLoadState('load');
+        const { scroll, client, iod, links } = await page.evaluate(() => ({
+          scroll: document.documentElement.scrollWidth,
+          client: document.documentElement.clientWidth,
+          iod: !!document.querySelector('section#dla-iod .metryczka-iod'),
+          links: [...document.querySelectorAll('a[download]')].map((a) => a.getAttribute('href')),
+        }));
+        assert.ok(scroll <= client, `przewijanie w poziomie: ${scroll} > ${client}`);
+        assert.ok(iod, 'brak sekcji #dla-iod z metryczką');
+        assert.ok(
+          links.includes('pobierz/Parawan.html'),
+          `przyciski pobierania: ${links.join(', ')}`,
+        );
+      },
+      { file: LANDING_HTML, viewport },
+    );
+  });
+}

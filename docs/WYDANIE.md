@@ -89,7 +89,15 @@ w `release.yml` z szablonów w `docs/wydanie/` (`scripts/release/render-docs.mjs
    gh attestation verify Parawan.html --repo karolpolikarp/parawan
    ```
 
-3. Strona produktu: `gh workflow run deploy-landing.yml` (wydanie utworzone przez
-   `GITHUB_TOKEN` nie uruchamia innych workflowów). Krok „Najnowsze wydanie zgodne z opisem
-   na stronie” sprawdza CSP w Parawan.html i notkę „Dla działu IT” w JAK-UZYC.txt.
+3. Strona produktu: po udanym „Release” z tagu deploy-landing.yml rusza sam (workflow_run,
+   bo wydanie utworzone przez `GITHUB_TOKEN` nie uruchamia zdarzenia release). Sprawdź przebieg:
+   `gh run list --workflow deploy-landing.yml -L 1`. Krok „Najnowsze wydanie zgodne z opisem na
+   stronie” pobiera cztery pliki wydania, sprawdza SHA256SUMS.txt, digest z API, CSP
+   w Parawan.html, notkę „Dla działu IT” i DLA-IOD-I-IT.txt, a build wstawia sumę na stronę.
+   Po deployu krok „Kopia na domenie to plik z wydania” porównuje sumę
+   `https://parawan.karolwilczynski.com/pobierz/Parawan.html` z wydaniem (do 10 minut prób).
+   Gdy padnie przy HTTP 200, Cloudflare przepisuje HTML: wyłącz funkcję strefy (np. Email Address
+   Obfuscation) albo zrezygnuj z kopii na domenie. Ręcznie: `gh workflow run deploy-landing.yml`,
+   a próba, że sprawdzenie działa: `gh workflow run deploy-landing.yml -f proba_zlej_sumy=true`
+   (job ma się wywrócić; potem zwykłe uruchomienie).
 4. Pamięć projektu: stan wydania.

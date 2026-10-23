@@ -225,6 +225,10 @@ p { text-wrap: pretty; }
   display: none;
 }
 
+/* „albo z GitHuba”: drugi adres tego samego pliku, gdy filtr WWW nie przepuszcza domeny strony */
+.dl-alt { margin-top: 8px; text-align: center; font-size: 13.5px; }
+.dl-gh { font-size: 14px; white-space: nowrap; }
+
 .demo-card {
   margin-top: 28px; background: var(--card); border: 1px solid var(--line-2);
   border-radius: 12px; box-shadow: var(--shadow-lg); overflow: hidden;
@@ -391,6 +395,8 @@ textarea.editor:focus-visible { outline: 2px solid var(--acc); outline-offset: 2
 .kroki li > * { grid-column: 2; }
 .kroki p { font-size: 15.5px; line-height: 1.6; color: var(--mut-2); }
 .kroki pre + p { margin-top: 10px; }
+.polecenia { white-space: pre; overflow-x: auto; overflow-wrap: normal; }
+.kroki-pod { margin-top: 6px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 15.5px; line-height: 1.6; color: var(--text); font-weight: 600; max-width: 60ch; }
 .csp {
   margin-top: 12px; padding: 12px 14px; background: var(--card-2);
   border: 1px solid var(--line-2); border-radius: 8px;
@@ -447,7 +453,23 @@ textarea.editor:focus-visible { outline: 2px solid var(--acc); outline-offset: 2
 }
 .metryczka dd { font-size: 15px; line-height: 1.5; color: var(--text); }
 .metryczka .pii { font-size: 12px; }
-.akcje { margin-top: 22px; }
+.akcje { margin-top: 22px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; }
+/* pełna suma do zaznaczenia jednym kliknięciem i skopiowania; łamie się w dowolnym miejscu */
+.suma {
+  display: block; font-size: 13px; line-height: 1.55; overflow-wrap: anywhere; word-break: break-all;
+  -webkit-user-select: all; user-select: all;
+}
+.suma-wer, .suma-pod { display: block; margin-top: 4px; font-size: 13.5px; line-height: 1.5; color: var(--mut-2); }
+.suma-pod code { white-space: nowrap; }
+
+/* ── Dla IOD i działu IT: ta sama metryczka, szersza kolumna pytań ── */
+.metryczka-iod { grid-template-columns: 200px minmax(0, 1fr); }
+.metryczka-iod dd { max-width: 68ch; }
+.metryczka-iod code { overflow-wrap: anywhere; }
+.zasady { margin-top: 6px; padding-left: 18px; }
+.zasady li { margin-top: 3px; }
+.iod-pobierz { display: flex; flex-wrap: wrap; gap: 4px 14px; font-weight: 600; }
+.iod-pobierz .dl-gh { font-weight: 400; }
 .firma h3 { font: 800 19px/1.25 var(--sans); color: var(--acc); }
 .firma p { margin-top: 10px; font-size: 15px; line-height: 1.6; color: var(--mut-2); }
 
@@ -506,7 +528,7 @@ textarea.editor:focus-visible { outline: 2px solid var(--acc); outline-offset: 2
   .miary th, .miary td { display: block; width: auto; padding: 0; }
   .miary .m-val { padding: 0; font-size: 28px; }
   .miary .m-opis { grid-column: 1 / -1; padding-top: 6px; }
-  .metryczka { grid-template-columns: minmax(0, 1fr); }
+  .metryczka, .metryczka-iod { grid-template-columns: minmax(0, 1fr); }
   .metryczka dd, .metryczka dt:first-of-type + dd { border-top: 0; padding-top: 2px; }
   .akcje .btn { width: 100%; }
   .stopka-in { flex-direction: column; align-items: flex-start; }
@@ -534,6 +556,28 @@ textarea.editor:focus-visible { outline: 2px solid var(--acc); outline-offset: 2
   .demo-bar .btn-sm { padding: 0 10px; }
   .demo-bar .seg { flex: 1 1 auto; }
   .seg .sbtn { flex: 1 1 auto; }
+}
+
+/* ============ WYDRUK ============
+   Ctrl+P drukuje samą sekcję „Dla inspektora ochrony danych i działu IT”: do teczki
+   z wnioskiem o zgodę, czarny tekst na białym, bez paska, demo, przycisków i stopki. */
+@media print {
+  @page { size: A4; margin: 16mm 16mm 18mm; }
+  body { background: #fff; color: #000; font-size: 11pt; line-height: 1.45; }
+  body > a.vh, .pasek, .stopka, main > :not(#dla-iod), .iod-pobierz, .iod-druk { display: none !important; }
+  #dla-iod .wrap { max-width: none; padding: 0; }
+  #dla-iod .dok-siatka { display: block; padding: 0; }
+  #dla-iod .dok-siatka::before { display: none; }
+  #dla-iod .dok-bok { position: static; margin-bottom: 10pt; }
+  #dla-iod h2 { color: #000; font-size: 16pt; }
+  #dla-iod p, #dla-iod dd, #dla-iod dt, #dla-iod li { color: #000; }
+  #dla-iod a { color: #000; text-decoration: none; }
+  #dla-iod code { background: none; padding: 0; color: #000; }
+  .metryczka-iod { grid-template-columns: 44mm minmax(0, 1fr); }
+  .metryczka-iod dt, .metryczka-iod dd { padding: 5pt 0; border-top: 0.5pt solid #000; break-inside: avoid; }
+  .metryczka-iod dt { font-size: 8pt; letter-spacing: .04em; }
+  .metryczka-iod dd { font-size: 10pt; line-height: 1.4; max-width: none; }
+  .metryczka-iod dt:first-of-type, .metryczka-iod dt:first-of-type + dd { border-top-color: #000; }
 }
 
 @media (prefers-reduced-motion: reduce) {

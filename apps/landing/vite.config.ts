@@ -1,6 +1,7 @@
 import { defineConfig, type Plugin } from 'vite';
 import { viteSingleFile } from 'vite-plugin-singlefile';
 import { fileURLToPath } from 'node:url';
+import { wstawWydanie, wydanieZEnv } from './src/wydanie';
 
 // Content-Security-Policy strony, bliźniacza do polityki aplikacji (apps/web/vite.config.ts,
 // tam pełne uzasadnienie). Jedyna różnica to img-src 'self': <link rel="apple-touch-icon">
@@ -30,6 +31,17 @@ const cspMeta: Plugin = {
   },
 };
 
+// Suma SHA-256 i wersja najnowszego wydania w metryczce #pobierz i w punkcie 5 „Jak sprawdzić”.
+// Podaje je deploy-landing.yml (PARAWAN_SHA256, PARAWAN_VERSION) po sprawdzeniu SHA256SUMS.txt;
+// lokalnie strona odsyła do strony wydania. Szczegóły w src/wydanie.ts.
+const wydanieMeta: Plugin = {
+  name: 'parawan-wydanie',
+  apply: 'build',
+  transformIndexHtml(html) {
+    return wstawWydanie(html, wydanieZEnv(process.env));
+  },
+};
+
 // Najstarsze przeglądarki, dla których build obniża składnię JS i CSS, jak w aplikacji
 // (apps/web/vite.config.ts, tam pełne uzasadnienie). 109 to ostatnie Chrome i Edge dla Windows 7,
 // 8.1 i Server 2012 R2, 115 to ostatni Firefox ESR dla Windows 7 i 8.1: strona z demo ma działać
@@ -42,7 +54,7 @@ const BUILD_TARGET = ['chrome109', 'edge109', 'firefox115', 'safari16.4'];
 // do serwerów firm trzecich — to weryfikowalna obietnica (DevTools → Network: 0 żądań),
 // a plik działa też z file:// po podwójnym kliknięciu.
 export default defineConfig({
-  plugins: [viteSingleFile(), cspMeta],
+  plugins: [viteSingleFile(), cspMeta, wydanieMeta],
   base: './',
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? 'dev'),

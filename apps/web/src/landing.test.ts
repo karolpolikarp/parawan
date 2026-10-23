@@ -1,11 +1,16 @@
+import { readFileSync } from 'node:fs';
 import { redactPII } from 'anonimizator';
 import { expect, test } from 'vitest';
 import benchmarkMd from '../../../docs/BENCHMARK.md?raw';
+import dlaRaw from '../../../docs/wydanie/DLA-IOD-I-IT.txt?raw';
 import coreSrc from '../../../packages/core/src/index.ts?raw';
 import landingHtmlRaw from '../../landing/index.html?raw';
+import landingConfig from '../../landing/vite.config.ts?raw';
 import { ICONS as LANDING_ICONS } from '../../landing/src/icons';
 import { EXAMPLE_TEXT, MASK_TOKEN_RE, maskCategory, TYPE_MASK, typeCategory } from '../../landing/src/tokens';
+import { MARKERS, SUMA_BRAK, wstawWydanie, wydanieZEnv } from '../../landing/src/wydanie';
 import { PII_TOKENS } from './pii-meta';
+import { ALLOWED_KEYS } from './storage';
 
 // Landing nie ma własnych testów: pilnujemy go stąd, jak w a11y-markup.test.ts. Liczby, znaczniki
 // i przykłady na stronie łatwo rozjechać z rdzeniem (nowy typ PII, nowy pomiar benchmarku, zmiana
@@ -135,6 +140,7 @@ test('landing: obietnice zgodne z tym, jak działa Parawan', () => {
   // pobranie w nowej karcie zostawia pustą kartę (Firefox, Safari na iOS)
   expect(landingHtml).toMatch(/releases\/latest\/download\/Parawan\.html"/);
   expect(landingHtml).not.toMatch(/releases\/latest\/download\/Parawan\.html"[^>]*target=/);
+  expect(landingHtml).not.toMatch(/href="pobierz\/[^"]*"[^>]*target=/);
 });
 
 test('landing: ikony, pasek i kotwice', () => {
@@ -147,9 +153,8 @@ test('landing: ikony, pasek i kotwice', () => {
   const nav = block(landingHtml, /<nav class="pasek"[\s\S]*?<\/nav>/, 'pasek <nav class="pasek">');
   expect(nav).not.toContain('id="net-count"');
   expect(landingHtml.slice(landingHtml.indexOf('id="sprawdz"'))).toContain('id="net-count"');
-  expect(nav).toContain(
-    'class="btn btn-cta btn-sm pasek-pobierz" href="https://github.com/karolpolikarp/parawan/releases/latest/download/Parawan.html">',
-  );
+  expect(nav).toContain('class="btn btn-cta btn-sm pasek-pobierz" href="pobierz/Parawan.html" download>');
+  expect(nav).toContain('<a href="#dla-iod">Dla IOD i IT</a>');
   // każdy link wewnętrzny ma cel na stronie
   const ids = new Set([...landingHtml.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]));
   const anchors = [...new Set([...landingHtml.matchAll(/href="#([^"]+)"/g)].map((m) => m[1]))];
@@ -267,4 +272,252 @@ test('landing: twarde spacje po jednoliterowych wyrazach i przed „MB”', () =
   expect(single).toEqual([]);
   const mb = [...text.matchAll(/\d MB/g)].map((m) => around(m.index ?? 0));
   expect(mb).toEqual([]);
+});
+
+
+
+// ── L01: „Dla IOD i działu IT”, suma SHA-256, pobieranie z domeny, uczciwe ograniczenia ──
+
+// vitest podaje arkusze CSS z ?raw puste, więc style strony czytamy z dysku
+const landingStyle = readFileSync(
+  new URL('../../landing/src/style.css', import.meta.url),
+  'utf8',
+).replace(/\r\n/g, '\n');
+const dla = dlaRaw.replace(/\r\n/g, '\n');
+const iodSection = block(
+  landingHtml,
+  /<section class="dok" id="dla-iod">[\s\S]*?<\/section>/,
+  'sekcja #dla-iod',
+);
+const pobierzSection = block(
+  landingHtml,
+  /<section class="dok" id="pobierz">[\s\S]*?<\/section>/,
+  'sekcja #pobierz',
+);
+
+/** Pary „etykieta → treść” z dl.metryczka (treść bez tagów, ze zwiniętymi odstępami). */
+function metryczka(html: string): Map<string, string> {
+  const dl = block(html, /<dl class="metryczka[^"]*">[\s\S]*?<\/dl>/, 'dl.metryczka');
+  return new Map(
+    [...dl.matchAll(/<dt>([^<]+)<\/dt><dd>([\s\S]*?)<\/dd>/g)].map((m) => [
+      m[1],
+      textOf(m[2]).replace(/\s+/g, ' ').trim(),
+    ]),
+  );
+}
+
+test('landing: sekcja „Dla inspektora ochrony danych i działu IT” po #pobierz', () => {
+  expect(landingHtml.indexOf('id="dla-iod"')).toBeGreaterThan(landingHtml.indexOf('id="pobierz"'));
+  expect(iodSection).toContain('<div class="wrap dok-siatka">');
+  expect(iodSection).toContain('<h2>Dla inspektora ochrony danych i działu IT</h2>');
+  expect(iodSection).toContain(
+    '<p>Najważniejsze fakty na jednej stronie. Pełna wersja jest w pliku DLA-IOD-I-IT.txt w każdym wydaniu.</p>',
+  );
+  // bez kart, pigułek i panelu CTA
+  expect(iodSection).not.toMatch(/class="[^"]*\b(btn|chip-t|demo-card)\b/);
+  expect(iodSection).toContain(
+    '<a href="pobierz/DLA-IOD-I-IT.txt" download>Pobierz DLA-IOD-I-IT.txt</a>',
+  );
+  expect([...metryczka(iodSection).keys()]).toEqual([
+    'Gdzie są przetwarzane dane',
+    'Czy autor ma dostęp do danych',
+    'Co zostaje na komputerze',
+    'Anonimizacja czy pseudonimizacja',
+    'Czego Parawan nie rozpozna',
+    'Czego nie obejmuje CSP pliku',
+    'Jak sprawdzić plik',
+    'Jak wdrożyć w urzędzie',
+    'Skąd wiadomo o aktualizacji',
+    'Przeglądarki',
+    'Dostępność',
+  ]);
+});
+
+test('landing: #dla-iod zgodne z DLA-IOD-I-IT.txt, ALLOWED_KEYS i docs/BENCHMARK.md', () => {
+  const rows = metryczka(iodSection);
+  // klucze pamięci przeglądarki wymienione na stronie to dokładnie lista z storage.ts
+  const keys = [...iodSection.matchAll(/<code class="klucz">([^<]+)<\/code>/g)].map((m) => m[1]);
+  expect([...keys].sort()).toEqual([...ALLOWED_KEYS].sort());
+  for (const k of keys) expect(dla, k).toMatch(new RegExp(`^ {4}${k} {2,}`, 'm'));
+  // zasady grupy i polecenia z sekcji stoją też w pliku dla IOD
+  const codes = [...iodSection.matchAll(/<code>([A-Z][A-Za-z]+)<\/code>/g)].map((m) => m[1]);
+  expect(codes.length).toBeGreaterThanOrEqual(9);
+  for (const c of codes) expect(dla, c).toContain(c);
+  for (const c of [
+    'gh attestation verify Parawan.html --repo karolpolikarp/parawan',
+    'releases.atom',
+  ]) {
+    expect(iodSection, c).toContain(c);
+    expect(dla, c).toContain(c);
+  }
+  // liczby z pomiaru jak w BENCHMARK.md i w DLA-IOD-I-IT.txt
+  const sentences = benchmarkMd.match(/Zbiór ewaluacyjny:\*\* (\d+) syntetycznych zdań/)?.[1];
+  const row = benchmarkMd.match(
+    /\| T0\+T1 core \| [\d.]+% \((\d+)\/(\d+)\) \| [\d.]+% \((\d+)\/(\d+)\) \|/,
+  );
+  expect(sentences && row).toBeTruthy();
+  const [, hit, mustMask, kept, mustKeep] = row ?? [];
+  const pomiar = `W pomiarze na ${sentences} wymyślonych zdaniach zniknęło ${hit} z ${mustMask} fragmentów, które miały zniknąć, i zostało ${kept} z ${mustKeep}, które miały zostać.`;
+  expect(rows.get('Czego Parawan nie rozpozna')).toContain(pomiar);
+  expect(dla.replace(/\s+/g, ' ')).toContain(
+    `W pomiarze na ${sentences} wymyślonych zdaniach zniknęło ${hit} z ${mustMask} fragmentów`,
+  );
+  // pseudonimizacja, motyw 26 RODO i decyzja inspektora jak w pliku
+  expect(rows.get('Anonimizacja czy pseudonimizacja')).toContain('motywu 26 RODO');
+  expect(rows.get('Czy autor ma dostęp do danych')).toContain(
+    'rozstrzyga inspektor ochrony danych',
+  );
+  expect(dla.replace(/\s+/g, ' ')).toContain('rozstrzyga inspektor ochrony danych');
+});
+
+test('landing: przeglądarki i suma SHA-256 w #pobierz', () => {
+  const pobierz = metryczka(pobierzSection);
+  const iod = metryczka(iodSection);
+  const browsers =
+    'Edge i Chrome od wersji 109, Firefox od 115, także ESR, Safari od 16.4. Internet Explorer i tryb IE w Edge nie wystarczą.';
+  expect(pobierz.get('Przeglądarki')).toBe(browsers);
+  expect(iod.get('Przeglądarki')).toBe(browsers);
+  // te same wersje co build.target strony (i aplikacji, pilnuje tego release-docs.test.ts)
+  const target = landingConfig.match(/\nconst BUILD_TARGET = \[([^\]]*)\];/)?.[1] ?? '';
+  expect(target).toContain("'chrome109', 'edge109', 'firefox115', 'safari16.4'");
+  expect(dla).toContain('Edge i Chrome od wersji 109, Firefox od 115 (także ESR), Safari od 16.4.');
+  // suma: znacznik dla builda i polecenia do sprawdzenia
+  expect(pobierzSection).toContain('<dt>Suma SHA-256</dt><dd><!--PARAWAN:SUMA-->');
+  expect(pobierz.get('Suma SHA-256')).toContain(
+    'Sprawdzisz ją w PowerShellu: Get-FileHash .\\Parawan.html albo w wierszu poleceń: certutil -hashfile Parawan.html SHA256',
+  );
+  expect(landingStyle).toMatch(/\.suma \{[^}]*user-select: all/);
+  expect(pobierz.get('Aktualizacje')).toContain('kanale Atom');
+  expect(pobierzSection).toContain('href="https://github.com/karolpolikarp/parawan/releases.atom"');
+  expect(pobierz.get('Wynik')).toMatch(/skopiowania.*\.txt lub \.docx.*wydruku, także do PDF/);
+  expect(pobierz.get('Pochodzenie')).toMatch(
+    /JakiePrawo\.pl.*Parawan\.html nie łączy się z tym serwisem\.$/,
+  );
+});
+
+test('landing: przyciski pobierania prowadzą do kopii na domenie, obok GitHub', () => {
+  const ctas = [
+    ...landingHtml.matchAll(/<a class="btn btn-cta[^"]*" href="([^"]+)"( download)?>/g),
+  ];
+  expect(ctas.length).toBe(3);
+  for (const [, href, dl] of ctas) {
+    expect(href).toBe('pobierz/Parawan.html');
+    expect(dl).toBe(' download');
+  }
+  // przy dużych przyciskach (pierwszy ekran i #pobierz) mniejszy odsyłacz do tego samego pliku na GitHubie
+  const gh = [
+    ...landingHtml.matchAll(
+      /<a (?:class="dl-gh" )?href="https:\/\/github\.com\/karolpolikarp\/parawan\/releases\/latest\/download\/([^"]+)">albo z GitHuba<\/a>/g,
+    ),
+  ].map((m) => m[1]);
+  expect(gh).toEqual(['Parawan.html', 'Parawan.html', 'DLA-IOD-I-IT.txt']);
+});
+
+test('landing: build wstawia sumę i tag z wydania, a bez nich odsyła do strony wydania', () => {
+  for (const marker of Object.values(MARKERS)) expect(landingHtmlRaw.split(marker)).toHaveLength(2);
+  expect(wydanieZEnv({})).toBeNull();
+  const sha = 'ab'.repeat(32);
+  const w = wydanieZEnv({ PARAWAN_SHA256: sha.toUpperCase(), PARAWAN_VERSION: 'v0.46.25' });
+  expect(w).toEqual({ sha256: sha, version: '0.46.25' });
+  const out = wstawWydanie(landingHtmlRaw, w);
+  expect(out.split(`<code class="suma" translate="no">${sha}</code>`)).toHaveLength(3);
+  expect(out).toContain('git checkout v0.46.25\n');
+  expect(out).not.toContain('<!--PARAWAN:');
+  const local = wstawWydanie(landingHtmlRaw, null);
+  expect(local.split(SUMA_BRAK)).toHaveLength(3);
+  expect(textOf(SUMA_BRAK)).toBe('Suma jest podana na stronie wydania.');
+  expect(local).not.toContain('<!--PARAWAN:');
+  // obcięta suma albo sama wersja zatrzymują build zamiast zostawić stronę z błędną sumą
+  expect(() => wydanieZEnv({ PARAWAN_SHA256: sha.slice(1), PARAWAN_VERSION: '0.46.25' })).toThrow();
+  expect(() => wydanieZEnv({ PARAWAN_VERSION: '0.46.25' })).toThrow();
+  expect(() => wydanieZEnv({ PARAWAN_SHA256: sha, PARAWAN_VERSION: 'latest' })).toThrow();
+  expect(() => wstawWydanie('<html></html>', null)).toThrow(/PARAWAN:SUMA/);
+  expect(landingConfig).toMatch(/plugins: \[[^\]]*wydanieMeta/);
+});
+
+test('landing: „Jak sprawdzić” zachęca do zmyślonego tekstu i buduje z tagu', () => {
+  const sprawdz = block(
+    landingHtml,
+    /<section class="dok" id="sprawdz">[\s\S]*?<\/section>/,
+    'sekcja #sprawdz',
+  );
+  expect(sprawdz).toContain('Wklej w demo dowolny tekst, najlepiej zmyślony, i skopiuj wynik');
+  expect(sprawdz).not.toContain('własny tekst');
+  expect(sprawdz).toContain(
+    '<p class="kroki-pod">Prawdziwe pisma otwieraj w pobranym pliku. Strona w internecie służy do wypróbowania.</p>',
+  );
+  // polecenia budowy na stronie to te same wiersze co w DLA-IOD-I-IT.txt (tag zamiast {{WERSJA}})
+  const pre = block(
+    sprawdz,
+    /<pre class="csp polecenia"><code>[\s\S]*?<\/code><\/pre>/,
+    'pre.polecenia',
+  );
+  const onPage = textOf(pre.replace(MARKERS.tag, 'v{{WERSJA}}')).split('\n');
+  const inDla = (dla.match(/BUDOWA Z KODU\n[\s\S]*?\n((?: {4}\S.*\n)+)/)?.[1] ?? '')
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
+  expect(inDla.length).toBe(5);
+  expect(onPage).toEqual(inDla);
+  expect(sprawdz).toContain('Suma wyjdzie taka sama jak przy pliku z wydania.');
+});
+
+test('landing: blok dla firm i urzędów, nagłówki zostają', () => {
+  const firma = block(landingHtml, /<div class="firma">[\s\S]*?<\/div>/, 'div.firma');
+  expect(firma).toContain('<h3>Przechodzi tam, gdzie „program” się nie przeciśnie</h3>');
+  expect(textOf(firma)).toContain(
+    'Parawan.html nie wymaga instalacji ani uprawnień administratora, więc dział IT może go dopuścić bez wdrażania programu. Najprościej położyć jedną kopię tylko do odczytu na dysku sieciowym i dodać skrót albo zakładkę. Aktualizacja to podmiana tego jednego pliku po sprawdzeniu sumy.',
+  );
+  expect(textOf(firma)).toContain(
+    'Czy wolno go używać w pracy, decyduje Twój urząd. Inspektorowi ochrony danych i działowi IT wyślij plik DLA-IOD-I-IT.txt z wydania. Część skrzynek blokuje załączniki .html, więc sam Parawan wysyłaj jako link.',
+  );
+  expect(landingHtml).toContain('<p><b>Bez ściemy.</b> ');
+});
+
+test('landing: ograniczenia dla urzędu zgodne z silnikiem', () => {
+  const granice = block(landingHtml, /<ul class="granice">[\s\S]*?<\/ul>/, 'ul.granice');
+  const claims: [onPage: string, input: string, output: string][] = [
+    [
+      'Imię i nazwisko urzędnika, który podpisał pismo, znika tak samo jak dane strony.',
+      'Z up. Burmistrza\nJan Kowalski\nKierownik Referatu',
+      'Z up. Burmistrza\n[IMIĘ I NAZWISKO]\nKierownik Referatu',
+    ],
+    // D01 (typ NR-KW) usuwa to zdanie, a ten test przypomni o tym, gdy numer zacznie znikać
+    [
+      'Numer księgi wieczystej i numer działki zostają w tekście.',
+      'Księga wieczysta nr KR1P/00012345/0, działka nr 245/7.',
+      'Księga wieczysta nr KR1P/00012345/0, działka nr 245/7.',
+    ],
+  ];
+  for (const [onPage, input, output] of claims) {
+    expect(granice, onPage).toContain(onPage);
+    expect(redacted(input), input).toBe(output);
+  }
+  expect(granice).toContain('W BIP zwykle trzeba je zostawić jawne.');
+  expect(granice).toContain(
+    'Parawan nie zmienia oryginalnego pliku. Autor we właściwościach, komentarze i historia zmian zostają w oryginale, więc publikuj nowy dokument z wyniku.',
+  );
+  expect(iodSection).toContain('numeru księgi wieczystej, numeru działki');
+});
+
+test('landing: wydruk to sama sekcja #dla-iod', () => {
+  const print = landingStyle.match(/@media print \{([\s\S]*?)\n\}/)?.[1] ?? '';
+  expect(print).toMatch(/main > :not\(#dla-iod\)/);
+  expect(print).toMatch(/\.pasek/);
+  expect(print).toMatch(/\.iod-pobierz/);
+  expect(print).toMatch(/color: #000/);
+});
+
+test('landing: ton nowych fragmentów bez wtrąceń i bez „nas”', () => {
+  const fragments = [
+    iodSection,
+    pobierzSection,
+    block(landingHtml, /<ul class="granice">[\s\S]*?<\/ul>/, 'ul.granice'),
+    block(landingHtml, /<p class="kroki-pod">[\s\S]*?<\/p>/, 'p.kroki-pod'),
+  ].map((f) => textOf(f.replace(/<!--[\s\S]*?-->/g, '')));
+  for (const f of fragments) {
+    expect(f).not.toContain(' — ');
+    expect(f).not.toMatch(/(^|[^\p{L}])(nas|nam|nasz\p{L}*|nami)(?!\p{L})/iu);
+    expect(f).not.toMatch(/100%|w pełni|po prostu/i);
+  }
 });

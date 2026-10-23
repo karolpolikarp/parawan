@@ -13,6 +13,7 @@ import {
   EXAMPLE_IBAN_START,
   EXAMPLE_NAME,
   EXAMPLE_PESEL,
+  LANDING_HTML,
   LEGACY_SKIP,
   launch,
   withApp,
@@ -426,4 +427,41 @@ test('stopki kart źródła i wyniku na jednej wysokości, bez pustego pasa nad 
       assert.equal(m.scroll, 0, `${at}: poziome przewijanie`);
     }
   });
+});
+
+// L01: Ctrl+P na stronie produktu drukuje samą sekcję „Dla inspektora ochrony danych i działu IT”,
+// do teczki z wnioskiem o zgodę. Najwyżej dwie strony A4, bez demo, paska i przycisków.
+test('landing: wydruk to sama sekcja #dla-iod, najwyżej 2 strony A4, bez demo', async (t) => {
+  await withApp(
+    browser,
+    t,
+    '',
+    async ({ page }) => {
+      await page.waitForLoadState('load');
+      const { text, pages } = await printedText(page);
+      assert.ok(pages >= 1 && pages <= 2, `wydruk #dla-iod ma ${pages} stron A4`);
+      // etykiety metryczki są pisane wersalikami (text-transform), więc porównujemy bez wielkości liter
+      const flat = squash(text).toLowerCase();
+      const has = (s) => flat.includes(squash(s).toLowerCase());
+      for (const want of [
+        'Dla inspektora ochrony danych i działu IT',
+        'Gdzie są przetwarzane dane',
+        'Dostępność',
+      ]) {
+        assert.ok(has(want), `na wydruku brak „${want}”:\n${text}`);
+      }
+      for (const ui of [
+        'Tekst źródłowy',
+        'Wstaw przykład',
+        'Kopiuj wynik',
+        'Pobierz Parawan.html',
+        'albo z GitHuba',
+        'Typy danych',
+        'Co się stało z przykładem',
+      ]) {
+        assert.ok(!has(ui), `na wydruku jest „${ui}”:\n${text}`);
+      }
+    },
+    { file: LANDING_HTML },
+  );
 });

@@ -31,6 +31,7 @@ jobs:
       - name: Pliki wydania (render-docs)
         run: |
           node --test scripts/release/render-docs.test.mjs
+          node --test scripts/release/kopia-na-domenie.test.mjs
           node scripts/release/render-docs.mjs apps/web/dist/index.html "$RUNNER_TEMP/wydanie" --proba
           cd "$RUNNER_TEMP/wydanie" && sha256sum -c SHA256SUMS.txt
       # Landing (parawan.karolwilczynski.com) — typecheck jak w apps/web + build jednoplikowy,

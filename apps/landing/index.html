@@ -52,9 +52,10 @@
           <a href="#typy">Typy danych</a>
           <a href="#sprawdz">Jak sprawdzić</a>
           <a href="#ograniczenia">Ograniczenia</a>
+          <a href="#dla-iod">Dla IOD i IT</a>
           <a href="https://github.com/karolpolikarp/parawan" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
         </div>
-        <a class="btn btn-cta btn-sm pasek-pobierz" href="https://github.com/karolpolikarp/parawan/releases/latest/download/Parawan.html">Pobierz</a>
+        <a class="btn btn-cta btn-sm pasek-pobierz" href="pobierz/Parawan.html" download>Pobierz</a>
       </div>
     </nav>
     <span id="top"></span>
@@ -70,7 +71,8 @@
             </div>
             <div class="narz-pobierz">
               <span class="znak znak-duzy" aria-hidden="true"><i class="gi" data-i="parawan-mark"></i></span>
-              <a class="btn btn-cta btn-lg" href="https://github.com/karolpolikarp/parawan/releases/latest/download/Parawan.html">Pobierz Parawan.html</a>
+              <a class="btn btn-cta btn-lg" href="pobierz/Parawan.html" download>Pobierz Parawan.html</a>
+              <p class="dl-alt"><a href="https://github.com/karolpolikarp/parawan/releases/latest/download/Parawan.html">albo z GitHuba</a></p>
               <p class="dl-meta">Jeden plik HTML, około 2 MB, do otwarcia w przeglądarce na komputerze.<span class="dl-tel"> Na telefonie wypróbujesz Parawan w oknie poniżej.</span></p>
             </div>
           </div>
@@ -231,14 +233,21 @@
           </div>
           <div class="dok-tresc">
             <ol class="kroki">
-              <li><p>Ta strona liczy, ile zasobów pobrała z sieci od otwarcia: <span class="siec" id="net-badge" title="Zasoby pobrane z sieci przez tę stronę od chwili otwarcia"><span class="vh">żądania do sieci od otwarcia tej strony: </span><b id="net-count">0</b></span>. Wklej w demo własny tekst i skopiuj wynik, a liczba się nie zmieni. Licznik prowadzi jednak sama strona, więc to tylko podgląd. Mocniejsze są punkty 2, 3 i 4: odłączona sieć, zakładka „Sieć” i reguła, której pilnuje przeglądarka.</p></li>
+              <li><p>Ta strona liczy, ile zasobów pobrała z sieci od otwarcia: <span class="siec" id="net-badge" title="Zasoby pobrane z sieci przez tę stronę od chwili otwarcia"><span class="vh">żądania do sieci od otwarcia tej strony: </span><b id="net-count">0</b></span>. Wklej w demo dowolny tekst, najlepiej zmyślony, i skopiuj wynik, a liczba się nie zmieni. Licznik prowadzi jednak sama strona, więc to tylko podgląd. Mocniejsze są punkty 2, 3 i 4: odłączona sieć, zakładka „Sieć” i reguła, której pilnuje przeglądarka.</p></li>
               <li><p>Wyłącz Wi-Fi albo wyjmij kabel i otwórz pobrany Parawan.html z dysku. Zasłania tak samo jak przy włączonej sieci. Ta strona też: wczytała się raz, a demo działa dalej bez połączenia.</p></li>
               <li><p>Naciśnij <kbd>F12</kbd>, przejdź do zakładki „Sieć” (Network) i popisz w demo. Nowe wpisy się nie pojawią. Po odświeżeniu zobaczysz wczytanie samej strony, a wpisy zaczynające się od <code>data:</code> to fonty i ikona zapisane w pliku.</p></li>
               <li><p>Na samym początku pliku Parawan.html stoi polityka bezpieczeństwa treści (Content-Security-Policy, w skrócie CSP), czyli reguła, której pilnuje przeglądarka. Na jej podstawie przeglądarka blokuje połączenia nawiązywane przez skrypty (fetch, XHR, WebSocket) i wczytywanie obrazów, fontów, skryptów i stylów spoza pliku. Przy każdym wydaniu automat w repozytorium sprawdza, czy reguła jest na miejscu. W Parawan.html brzmi tak:</p>
                 <pre class="csp"><code><span class="nw"><mark>default-src 'none'</mark></span>; <span class="nw">script-src 'unsafe-inline'</span>; <span class="nw">style-src 'unsafe-inline'</span>; <span class="nw">img-src data:</span>; <span class="nw">font-src data:</span>; <span class="nw"><mark>connect-src 'none'</mark></span>; <span class="nw">form-action 'none'</span>; <span class="nw">base-uri 'none'</span>; <span class="nw">object-src 'none'</span></code></pre>
                 <p>Podejrzysz ją w źródle pliku (<kbd>Ctrl</kbd>+<kbd>U</kbd>). Ta strona ma bliźniaczą regułę.</p></li>
-              <li><p>Parawan.html to zminifikowany kod, więc do czytania są źródła. Logika wykrywania leży w katalogu <a href="https://github.com/karolpolikarp/parawan/tree/main/packages/core" target="_blank" rel="noopener noreferrer"><code>packages/core</code></a>: TypeScript bez zależności, z testami. Automat buduje Parawan.html z całego repozytorium (interfejs w <code>apps/web</code>, silnik w <code>packages/core</code>). Zbudujesz go też sam: <code>npm ci</code>, potem <code>npm run build</code>. Wynik trafia do <code>apps/web/dist/index.html</code>.</p></li>
+              <li><p>Parawan.html to zminifikowany kod, więc do czytania są źródła. Logika wykrywania leży w katalogu <a href="https://github.com/karolpolikarp/parawan/tree/main/packages/core" target="_blank" rel="noopener noreferrer"><code>packages/core</code></a>: TypeScript bez zależności, z testami. Automat buduje Parawan.html z całego repozytorium (interfejs w <code>apps/web</code>, silnik w <code>packages/core</code>), zawsze z tagu wydania. Zbudujesz go też sam. Każdy wiersz to osobne polecenie:</p>
+                <pre class="csp polecenia"><code>git clone -c core.autocrlf=false https://github.com/karolpolikarp/parawan
+cd parawan
+git checkout <!--PARAWAN:TAG-->
+npm ci
+npm run build -w anonimizator-web</code></pre>
+                <p>Wynik trafia do <code>apps/web/dist/index.html</code>. Suma wyjdzie taka sama jak przy pliku z wydania.</p></li>
             </ol>
+            <p class="kroki-pod">Prawdziwe pisma otwieraj w pobranym pliku. Strona w internecie służy do wypróbowania.</p>
           </div>
         </div>
       </section>
@@ -274,6 +283,9 @@
                 <li>Numer zapisany w nietypowy sposób może przejść.</li>
                 <li>Parawan nie rozpoznaje tekstu na obrazach (OCR), więc nie odczyta skanu bez warstwy tekstowej.</li>
                 <li>Z pliku .docx Parawan czyta treść główną. Nagłówki, stopki, przypisy i komentarze pomija, więc w wyniku ich nie będzie. Z PDF-a wychodzi sam tekst, bez formatowania i obrazków.</li>
+                <li>Imię i nazwisko urzędnika, który podpisał pismo, znika tak samo jak dane strony. W BIP zwykle trzeba je zostawić jawne.</li>
+                <li>Numer księgi wieczystej i numer działki zostają w tekście.</li>
+                <li>Parawan nie zmienia oryginalnego pliku. Autor we właściwościach, komentarze i historia zmian zostają w oryginale, więc publikuj nowy dokument z wyniku.</li>
               </ul>
             </div>
 
@@ -293,21 +305,60 @@
             <div>
               <dl class="metryczka">
                 <dt>Plik</dt><dd>Parawan.html, około 2 MB. Dwuklik otwiera go w przeglądarce na Windowsie, macOS albo Linuksie.</dd>
-                <dt>Wersja</dt><dd>Ta strona i demo: <span id="ver-foot">…</span>. Pobrany plik sam się nie aktualizuje. Nowe wersje są na <a href="https://github.com/karolpolikarp/parawan/releases" target="_blank" rel="noopener noreferrer">liście wydań</a>, a opis zmian w pliku <a href="https://github.com/karolpolikarp/parawan/blob/main/CHANGELOG.md" target="_blank" rel="noopener noreferrer">CHANGELOG.md</a>.</dd>
+                <dt>Suma SHA-256</dt><dd><!--PARAWAN:SUMA--><span class="suma-pod">Sprawdzisz ją w PowerShellu: <code>Get-FileHash .\Parawan.html</code> albo w wierszu poleceń: <code>certutil -hashfile Parawan.html SHA256</code></span></dd>
+                <dt>Przeglądarki</dt><dd>Edge i Chrome od wersji 109, Firefox od 115, także ESR, Safari od 16.4. Internet Explorer i tryb IE w Edge nie wystarczą.</dd>
                 <dt>Wejście</dt><dd>Wklejony tekst albo plik .txt, .docx, .pdf, .md, .csv lub .log, czytany w przeglądarce.</dd>
-                <dt>Wynik</dt><dd>Tekst ze znacznikami do skopiowania (<kbd>Ctrl</kbd>+<kbd>Enter</kbd>) albo zapisania jako .txt lub .docx.</dd>
+                <dt>Wynik</dt><dd>Tekst ze znacznikami do skopiowania (<kbd>Ctrl</kbd>+<kbd>Enter</kbd>), zapisania jako .txt lub .docx albo wydruku, także do PDF.</dd>
                 <dt>Ustawienia</dt><dd>Wybór danych do zasłonięcia. Tryb „Rozróżniaj osoby” daje każdej osobie stały znacznik: <mark class="pii pii-person">[OSOBA-A]</mark>, <mark class="pii pii-person">[OSOBA-B]</mark>.</dd>
                 <dt>Po zamknięciu karty</dt><dd>Tekst i wynik znikają. Przeglądarka pamięta jedynie Twoje ustawienia.</dd>
+                <dt>Wersja</dt><dd>Ta strona i demo: <span id="ver-foot">…</span>. Opis zmian jest w pliku <a href="https://github.com/karolpolikarp/parawan/blob/main/CHANGELOG.md" target="_blank" rel="noopener noreferrer">CHANGELOG.md</a>.</dd>
+                <dt>Aktualizacje</dt><dd>Pobrany plik sam się nie aktualizuje i nie sprawdza wersji przez sieć. Nowe wersje są na <a href="https://github.com/karolpolikarp/parawan/releases" target="_blank" rel="noopener noreferrer">liście wydań</a> i w <a href="https://github.com/karolpolikarp/parawan/releases.atom" target="_blank" rel="noopener noreferrer">kanale Atom</a>, który dodasz do czytnika kanałów albo do Outlooka.</dd>
                 <dt>Licencja</dt><dd>Apache 2.0, bezpłatnie.</dd>
-                <dt>Pochodzenie</dt><dd>Silnik wydzielono z serwisu JakiePrawo.pl, gdzie zasłania dane w pytaniach, zanim trafią do modelu językowego.</dd>
+                <dt>Pochodzenie</dt><dd>Silnik wydzielono z serwisu JakiePrawo.pl, gdzie zasłania dane w pytaniach, zanim trafią do modelu językowego. Parawan.html nie łączy się z tym serwisem.</dd>
               </dl>
-              <p class="akcje"><a class="btn btn-cta btn-lg" href="https://github.com/karolpolikarp/parawan/releases/latest/download/Parawan.html">Pobierz Parawan.html</a></p>
+              <p class="akcje"><a class="btn btn-cta btn-lg" href="pobierz/Parawan.html" download>Pobierz Parawan.html</a> <a class="dl-gh" href="https://github.com/karolpolikarp/parawan/releases/latest/download/Parawan.html">albo z GitHuba</a></p>
             </div>
             <div class="firma">
               <h3>Przechodzi tam, gdzie „program” się nie przeciśnie</h3>
-              <p>Parawan.html to strona zapisana na dysku, którą otwiera przeglądarka. Instalacja i prawa administratora nie są potrzebne, więc zwykle działa także na zablokowanych komputerach w firmach i urzędach. Plik położysz na dysku sieciowym albo w intranecie. Część firmowych skrzynek blokuje załączniki .html, więc mailem lepiej wysłać link do wydania.</p>
-              <p>Czy wolno go używać w pracy, decyduje Twoja organizacja. Jeśli nowe narzędzia zatwierdza u Ciebie dział IT albo inspektor ochrony danych, wyślij im link do kodu i do wydania. Regułę CSP znajdą w pierwszych linijkach pliku, a w kodzie dwie dołączone biblioteki open source: pdf.js do PDF-ów i fflate do plików .docx. W każdym wydaniu leży też JAK-UZYC.txt, krótka instrukcja dla pracowników z notką dla działu IT.</p>
+              <p>Parawan.html to strona zapisana na dysku, którą otwiera przeglądarka, więc zwykle działa także na zablokowanych komputerach w firmach i urzędach.</p>
+              <p>Parawan.html nie wymaga instalacji ani uprawnień administratora, więc dział IT może go dopuścić bez wdrażania programu. Najprościej położyć jedną kopię tylko do odczytu na dysku sieciowym i dodać skrót albo zakładkę. Aktualizacja to podmiana tego jednego pliku po sprawdzeniu sumy.</p>
+              <p>Czy wolno go używać w pracy, decyduje Twój urząd. Inspektorowi ochrony danych i działowi IT wyślij plik <a href="pobierz/DLA-IOD-I-IT.txt" download>DLA-IOD-I-IT.txt</a> z wydania. Część skrzynek blokuje załączniki .html, więc sam Parawan wysyłaj jako link.</p>
+              <p>Regułę CSP znajdziesz w pierwszych linijkach pliku, a w kodzie dwie dołączone biblioteki open source: pdf.js do PDF-ów i fflate do plików .docx. Pracownikom wystarczy krótka instrukcja <a href="pobierz/JAK-UZYC.txt" download>JAK-UZYC.txt</a> z tego samego wydania.</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════ DLA IOD I DZIAŁU IT (treść zgodna z docs/wydanie/DLA-IOD-I-IT.txt; wydruk: sama ta sekcja) ══════════ -->
+      <section class="dok" id="dla-iod">
+        <div class="wrap dok-siatka">
+          <div class="dok-bok">
+            <h2>Dla inspektora ochrony danych i działu IT</h2>
+            <p>Najważniejsze fakty na jednej stronie. Pełna wersja jest w pliku DLA-IOD-I-IT.txt w każdym wydaniu.</p>
+            <p class="iod-pobierz"><a href="pobierz/DLA-IOD-I-IT.txt" download>Pobierz DLA-IOD-I-IT.txt</a> <a class="dl-gh" href="https://github.com/karolpolikarp/parawan/releases/latest/download/DLA-IOD-I-IT.txt">albo z GitHuba</a></p>
+            <p class="iod-druk">Wydruk tej strony (<kbd>Ctrl</kbd>+<kbd>P</kbd>) obejmuje samą tę sekcję.</p>
+          </div>
+          <div class="dok-tresc">
+            <dl class="metryczka metryczka-iod">
+              <dt>Gdzie są przetwarzane dane</dt><dd>W przeglądarce na komputerze pracownika, w pamięci otwartej karty. Parawan nie ma serwera, konta ani telemetrii. Parawan.html nie łączy się z żadnym serwisem, a połączenia blokuje reguła CSP zapisana na początku pliku (punkt 4 w „<a href="#sprawdz">Jak sprawdzić</a>”).</dd>
+              <dt>Czy autor ma dostęp do danych</dt><dd>Nie. Autor nie otrzymuje żadnych danych i nie ma dostępu do komputerów urzędu. Czy potrzebna jest umowa powierzenia, wpis w rejestrze czynności albo ocena skutków, rozstrzyga inspektor ochrony danych.</dd>
+              <dt>Co zostaje na komputerze</dt><dd>W pamięci przeglądarki (localStorage) tylko ustawienia, bez treści pism: <code class="klucz">mask-disabled</code> to typy odznaczone w „Co maskować”, <code class="klucz">pseudonyms</code> to tryb „Rozróżniaj osoby”, a <code class="klucz">motion</code> to zatrzymana animacja przykładu. Zapamiętane wyłączenie zasłaniania Parawan pokazuje przy starcie. Wynik trafia do schowka albo do pliku tylko po kliknięciu, a po zamknięciu karty tekst i wynik znikają.</dd>
+              <dt>Anonimizacja czy pseudonimizacja</dt><dd>Parawan zastępuje identyfikatory znacznikami, np. <code>[PESEL]</code>. Czy wynik jest anonimowy w rozumieniu motywu 26 RODO, zależy od reszty treści (opis zdarzenia, stanowisko, nazwa małej miejscowości) i ocenia to pracownik, który czyta wynik. W trybie „Rozróżniaj osoby” wynik to dane spseudonimizowane.</dd>
+              <dt>Czego Parawan nie rozpozna</dt><dd>Nazwiska spoza słownika, gdy obok nie ma imienia ani słów Pan czy Pani, numeru w nietypowym zapisie, numeru księgi wieczystej, numeru działki i tekstu na skanach. W pomiarze na 319 wymyślonych zdaniach zniknęło 276 z 291 fragmentów, które miały zniknąć, i zostało 350 z 351, które miały zostać.</dd>
+              <dt>Czego nie obejmuje CSP pliku</dt><dd>CSP ogranicza stronę, a nie przeglądarkę. Pola z tekstem mają <code>translate="no"</code> i <code>spellcheck="false"</code>, a usługi w chmurze, które przeglądarka uruchamia sama, wyłączają zasady grupy:
+                <ul class="zasady">
+                  <li>tłumaczenie strony: <code>TranslateEnabled</code> (Edge i Chrome);</li>
+                  <li>rozszerzona pisownia: <code>MicrosoftEditorProofingEnabled</code> w Edge, <code>SpellCheckServiceEnabled</code> w Chrome;</li>
+                  <li>asystent AI z dostępem do treści karty: <code>CopilotPageContext</code> i <code>EdgeEntraCopilotPageContext</code> w Edge, <code>GeminiSettings</code> w Chrome;</li>
+                  <li>schowek: <code>AllowCrossDeviceClipboard</code> i <code>AllowClipboardHistory</code> w Windows.</li>
+                </ul>
+              </dd>
+              <dt>Jak sprawdzić plik</dt><dd><!--PARAWAN:SUMA-IOD--><span class="suma-pod">Sprawdzisz ją poleceniem <code>Get-FileHash</code> albo <code>certutil</code>, jak w metryczce pliku wyżej.</span> Pochodzenie potwierdza atestacja: <code>gh attestation verify Parawan.html --repo karolpolikarp/parawan</code>. Plik zbudowany samemu z tagu wydania (punkt 5 w „<a href="#sprawdz">Jak sprawdzić</a>”) ma tę samą sumę.</dd>
+              <dt>Jak wdrożyć w urzędzie</dt><dd>Jedna kopia tylko do odczytu na dysku sieciowym, np. <code>\\serwer\narzedzia\Parawan.html</code>, i skrót albo zakładka dla pracowników (w Edge zasada <code>ManagedFavorites</code>). Bez instalacji i bez uprawnień administratora. Pliku nie dodawaj do listy witryn trybu Internet Explorera. Zasady, które blokują plik z dysku, i wyjątki dla nich opisuje DLA-IOD-I-IT.txt.</dd>
+              <dt>Skąd wiadomo o aktualizacji</dt><dd>Plik sam się nie aktualizuje. Nowe wydania pokazuje kanał Atom <a href="https://github.com/karolpolikarp/parawan/releases.atom" target="_blank" rel="noopener noreferrer">github.com/karolpolikarp/parawan/releases.atom</a>. Opis każdego wydania podaje pilność: zwykła, zalecana albo pilna. Pilna znaczy, że poprawka zamyka wyciek danych.</dd>
+              <dt>Przeglądarki</dt><dd>Edge i Chrome od wersji 109, Firefox od 115, także ESR, Safari od 16.4. Internet Explorer i tryb IE w Edge nie wystarczą.</dd>
+              <dt>Dostępność</dt><dd>Przy każdej zmianie interfejs sprawdza automat axe-core (WCAG 2.1 A i AA), a test w przeglądarce obsługę klawiaturą, tryb dużego kontrastu i powiększenie 200%. Czytnik ekranu jest sprawdzany ręcznie przy wydaniu.</dd>
+            </dl>
           </div>
         </div>
       </section>
