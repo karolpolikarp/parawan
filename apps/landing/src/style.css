@@ -175,7 +175,7 @@ p { text-wrap: pretty; }
   display: grid;
   grid-template-columns: minmax(0, 1fr) 248px;
   column-gap: 48px;
-  align-items: start;
+  align-items: center;
 }
 
 .narz-tekst {
@@ -553,5 +553,5 @@ a.vh:focus-visible {
 }
 
 /* Znak marki nad przyciskiem pobierania w hero: wypełnia puste miejsce nad nim. */
-.narz-pobierz .znak-duzy{display:flex;width:96px;height:96px;margin:0 auto 16px}
+.narz-pobierz .znak-duzy{display:flex;width:96px;height:96px;margin:0 auto 14px}
 .narz-pobierz .znak-duzy .gi,.narz-pobierz .znak-duzy svg{width:100%;height:100%}
