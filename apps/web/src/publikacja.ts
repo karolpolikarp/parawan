@@ -20,6 +20,24 @@ import { countTokens, type Span } from './spans';
 /** Miejsce na dane, których urzędnik jeszcze nie wpisał. */
 export const MISSING = '[uzupełnij]';
 
+/**
+ * Czy zmiana pola źródła z `before` na `after` to inne pismo, a nie poprawka w tym samym. Służy
+ * natywnemu cofaniu i ponawianiu (Ctrl+Z, Ctrl+Y), które w Firefoksie potrafi jednym ruchem wrócić
+ * do całego poprzedniego pisma. Bez wspólnego początku i końca zostaje mniej niż połowa któregoś
+ * tekstu: wtedy karta pisma ma zniknąć. Wyjątkowo zeruje kartę także po cofnięciu dużego wklejenia
+ * do krótkiego tekstu, ale to lepsze niż znak sprawy i adnotacja z innego pisma.
+ */
+export function isOtherDocument(before: string, after: string): boolean {
+  if (before === after) return false;
+  if (!before.trim() || !after.trim()) return true;
+  const max = Math.min(before.length, after.length);
+  let p = 0;
+  while (p < max && before[p] === after[p]) p++;
+  let s = 0;
+  while (s < max - p && before[before.length - 1 - s] === after[after.length - 1 - s]) s++;
+  return (before.length - p - s) * 2 > before.length || (after.length - p - s) * 2 > after.length;
+}
+
 /** Podstawy prawne z listy w karcie. `interest` decyduje o zdaniu „w interesie…”. */
 export interface Basis {
   key: string;

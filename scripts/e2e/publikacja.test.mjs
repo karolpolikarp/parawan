@@ -495,3 +495,51 @@ test('„Kopiuj adnotację” kopiuje treść pola; „Przywróć wzór” wraca
     assert.equal(await page.evaluate(() => document.activeElement?.id), 'pub-adnotacja');
   });
 });
+
+// Poprawka po weryfikacji A08, runda 3: natywne Ctrl+Z w polu źródła. Firefox trzyma osobny stos
+// cofania dla pola i jednym ruchem wraca do pisma sprzed wklejenia; karta wypełniona dla nowego
+// pisma nie może przejść na poprzednie. Test uruchamia Firefoksa niezależnie od PARAWAN_PRZEGLADARKA,
+// bo w Chromium stos cofania jest wspólny dla dokumentu i Ctrl+Z cofa najpierw edycję w karcie.
+test('Firefox: Ctrl+Z w polu źródła wraca do poprzedniego pisma i zeruje kartę nowego', async (t) => {
+  const { firefox } = await import('playwright');
+  let ff;
+  try {
+    ff = await firefox.launch();
+  } catch {
+    t.skip('brak Firefoksa z Playwright (npx playwright install firefox)');
+    return;
+  }
+  try {
+    await withApp(ff, t, '', async (app) => {
+      const { page } = app;
+      const A = 'Wnioskodawca: Tomasz Wierzbicki, PESEL 85071412358, zam. ul. Lipowa 5, 00-001 Warszawa.';
+      const B = 'Skarżąca: Barbara Zielińska, PESEL 44051401359, tel. 600 700 800.';
+      await page.locator('#input').click();
+      await page.keyboard.insertText(A);
+      await page.keyboard.press('Control+A');
+      await page.keyboard.insertText(B);
+      await openCard(page);
+      await page.locator('#pub-znak').fill('OR.1431.7.2026 Zielińska');
+      await page.locator('#pub-adnotacja').press('End');
+      await page.locator('#pub-adnotacja').pressSequentially(' Dotyczy wniosku Barbary Zielińskiej.');
+      await page.locator('#pub-append').check();
+      await page.locator('#input').click();
+      await page.keyboard.press('Control+Z');
+      assert.equal(await page.locator('#input').inputValue(), A, 'Ctrl+Z nie wrócił do pisma A');
+      assert.equal(await page.locator('#pub-znak').inputValue(), '');
+      assert.equal(await page.locator('#pub-append').isChecked(), false);
+      assert.ok(!(await page.locator('#pub-adnotacja').inputValue()).includes('Zielińsk'));
+      assert.ok(!(await page.locator('#print-annex').textContent())?.includes('Zielińsk'), 'druk');
+      // Ctrl+Z po literówce w tym samym piśmie nie rusza karty
+      await page.locator('#pub-znak').fill('OR.1431.8.2026');
+      await page.locator('#input').click();
+      await page.keyboard.press('End');
+      await page.keyboard.insertText('x');
+      await page.keyboard.press('Control+Z');
+      assert.equal(await page.locator('#input').inputValue(), A);
+      assert.equal(await page.locator('#pub-znak').inputValue(), 'OR.1431.8.2026', 'karta wyzerowana po cofnięciu literówki');
+    });
+  } finally {
+    await ff.close();
+  }
+});

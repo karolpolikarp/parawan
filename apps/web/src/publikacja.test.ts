@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { redactPII } from 'anonimizator';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { GENITIVE_LABEL, PII_TOKENS } from './pii-meta';
 import {
   BASES,
@@ -11,6 +11,7 @@ import {
   countByToken,
   countFromFindings,
   formatDate,
+  isOtherDocument,
   MISSING,
   OTHER_BASIS,
   type ProtocolInput,
@@ -329,4 +330,26 @@ test('adnotacja i protokół nie zawierają podciągu dłuższego niż 3 znaki s
 test('protokół: wiersze ręcznej korekty z liczbą fragmentów', () => {
   expect(correctionLines(1, 0)).toEqual(['Zostawiono jawne ręcznie: 1 fragment.', 'Zasłonięto ręcznie: 0 fragmentów.']);
   expect(correctionLines(2, 5)).toEqual(['Zostawiono jawne ręcznie: 2 fragmenty.', 'Zasłonięto ręcznie: 5 fragmentów.']);
+});
+
+describe('isOtherDocument: natywne Ctrl+Z i inne pismo', () => {
+  const A = 'Wnioskodawca: Tomasz Wierzbicki, PESEL 85071412358, wnosi o wydanie zezwolenia.';
+  const B = 'Skarżąca: Barbara Zielińska, PESEL 44051401359, wnosi skargę na bezczynność.';
+  test('podmiana całego tekstu to inne pismo, w obie strony', () => {
+    expect(isOtherDocument(B, A)).toBe(true);
+    expect(isOtherDocument(A, B)).toBe(true);
+    expect(isOtherDocument(A, '')).toBe(true);
+    expect(isOtherDocument('', A)).toBe(true);
+  });
+  test('cofnięcie literówki albo dopisku to dalej to samo pismo', () => {
+    expect(isOtherDocument(A, A)).toBe(false);
+    expect(isOtherDocument(A.replace('zezwolenia', 'zezwolnia'), A)).toBe(false);
+    expect(isOtherDocument(`${A} Uzasadnienie w załączniku.`, A)).toBe(false);
+    expect(isOtherDocument(A, `Pismo z poprawką. ${A}`)).toBe(false);
+  });
+  test('wspólny nagłówek i stopka z tego samego szablonu nie ukrywają innego pisma', () => {
+    const head = 'WÓJT GMINY BRZOZOWA WOLA\n';
+    const foot = '\nSprawę prowadzi: referat ochrony środowiska.';
+    expect(isOtherDocument(head + A + foot, head + B + foot)).toBe(true);
+  });
 });

@@ -65,6 +65,7 @@ import {
   countByToken,
   countFromFindings,
   formatDate,
+  isOtherDocument,
   OTHER_BASIS,
   type PublicationFields,
   type SourceKind,
@@ -1579,15 +1580,22 @@ document.addEventListener('submit', (e) => e.preventDefault());
 // Tekst wstawiony w puste pole albo w miejsce całego tekstu (wklejenie, upuszczenie, pisanie po
 // zaznaczeniu wszystkiego) to nowe pismo, tak samo jak opróżnione pole: karta „Adnotacja
 // i protokół” nie może przenieść do niego znaku sprawy, ręcznej adnotacji ani „Dołącz”.
+// Natywne cofanie i ponawianie (Ctrl+Z w polu) też może podmienić całe pismo: Firefox trzyma osobny
+// stos cofania dla pola i wraca jednym ruchem do pisma sprzed wklejenia, a karta wypełniona dla
+// nowego pisma przeszłaby wtedy na poprzednie. Tekst sprzed takiej zmiany porównuje isOtherDocument.
 let newDocument = false;
+let historyBefore: string | null = null;
 input.addEventListener('beforeinput', (e) => {
   const whole = !input.value.trim() || (input.selectionStart === 0 && input.selectionEnd === input.value.length);
   newDocument = whole && e.inputType.startsWith('insert');
+  historyBefore = e.inputType.startsWith('history') ? input.value : null;
 });
 
 input.addEventListener('input', () => {
-  if (newDocument || !input.value.trim()) resetDocumentPublication();
+  if (newDocument || !input.value.trim() || (historyBefore !== null && isOtherDocument(historyBefore, input.value)))
+    resetDocumentPublication();
   newDocument = false;
+  historyBefore = null;
   // Własna edycja zamyka błąd, bo już nie dotyczy, i „Cofnij”, bo po edycji przywróciłby tekst
   // sprzed niej i skasował to, co właśnie wpisano. Dopisek o pliku (np. o nagłówkach i stopkach,
   // których Parawan nie czyta) zostaje do zamknięcia: te części dalej są w oryginale, a fokus po
