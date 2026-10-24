@@ -147,6 +147,21 @@ let corrected: Corrected = { spans: [], kept: [], effects: [], by: [] };
 // Cała lista, a nie „zdejmij ostatni wpis”: po „Cofnij zasłonięcie” decyzja znika ze środka listy
 // i Ctrl+Z musi ją przywrócić na jej miejsce, zamiast zdjąć inną, wcześniejszą poprawkę.
 let undoSteps: Decision[][] = [];
+// Poprawki pism, z których pole przeszło na inne pismo (wklejenie w miejsce całego tekstu,
+// opróżnienie pola, plik, „Przykład”). Natywne Ctrl+Z i Ctrl+Y w polu albo „Cofnij” na pasku wracają
+// do takiego pisma: dostaje ono z powrotem własne poprawki, a nie poprawki pisma, z którego wrócono.
+// „Zostaw jawne wszędzie” dla inspektora w jednym piśmie nie może odsłonić wnioskodawcy o tym
+// samym nazwisku w drugim. Tylko w pamięci karty, tak jak tekst do „Cofnij” na pasku.
+interface StashedCorrections {
+  text: string;
+  decisions: Decision[];
+  undoSteps: Decision[][];
+}
+let docStash: StashedCorrections[] = [];
+const DOC_STASH_LIMIT = 8;
+// Tekst, do którego odnoszą się poprawki wzięte z docStash. renderResult przesuwa je od niego,
+// a nie od lastInput, który dotyczy pisma sprzed cofnięcia.
+let restoredText: string | null = null;
 
 /* ── Legenda, tabela „Co wykrywa” i przełączniki „Co maskować” (dane w pii-meta.ts) ── */
 
@@ -1108,6 +1123,40 @@ function undoLast(): void {
   correctionsChanged(restored ? 'Przywrócono cofniętą ręczną poprawkę.' : 'Cofnięto ręczną poprawkę.');
 }
 
+/** Odkłada poprawki bieżącego pisma (lastInput) na wypadek powrotu do niego. */
+function stashCorrections(): void {
+  if (!lastInput.trim()) return;
+  // „Wyczyść” zeruje kartę dwa razy (clearPublication, potem replaceSource): drugie wywołanie
+  // nie może nadpisać poprawek odłożonych przy pierwszym pustą listą.
+  if (!decisions.length && !undoSteps.length && docStash.some((e) => e.text === lastInput)) return;
+  docStash = docStash.filter((e) => e.text !== lastInput);
+  docStash.push({ text: lastInput, decisions: decisions.slice(), undoSteps: undoSteps.slice() });
+  if (docStash.length > DOC_STASH_LIMIT) docStash.shift();
+}
+
+/**
+ * Pole wróciło do pisma `text`, z którego wcześniej przeszło na inne: poprawki bieżącego pisma
+ * idą na bok, a wracają te, które `text` miał. Bez takiego pisma w docStash nic się nie zmienia.
+ */
+function swapCorrections(text: string): boolean {
+  const i = docStash.findIndex((e) => e.text === text);
+  if (i === -1) return false;
+  const [entry] = docStash.splice(i, 1);
+  const had = decisions.length > 0;
+  stashCorrections();
+  clearCorrections();
+  decisions = entry.decisions;
+  undoSteps = entry.undoSteps;
+  restoredText = text;
+  if (had || decisions.length) {
+    fixNote = decisions.length
+      ? 'Tekst źródłowy wrócił do wcześniejszego pisma razem z jego ręcznymi poprawkami.'
+      : 'Tekst źródłowy wrócił do wcześniejszego pisma. Ręczne poprawki drugiego pisma go nie dotyczą.';
+    announce(fixNote);
+  }
+  return true;
+}
+
 /** Wyczyść, Przykład, plik i nowe pismo: poprawki dotyczyły poprzedniego tekstu. */
 function clearCorrections(): void {
   decisions = [];
@@ -1498,12 +1547,17 @@ function renderResult(redacted: string, found: PiiFinding[]): void {
     closeForm(false);
     announce('Tekst źródłowy się zmienił. Zaznacz fragment jeszcze raz.');
   }
-  if (decisions.length && lastInput && input.value !== lastInput) {
-    const moved = shiftDecisions(lastInput, input.value, decisions);
+  const base = restoredText ?? lastInput;
+  restoredText = null;
+  if (base && input.value !== base) {
+    // Listy do Ctrl+Z przesuwają się razem z tekstem tak samo jak bieżąca, także gdy bieżąca jest
+    // pusta (po „Usuń wszystkie” albo „Zasłoń ponownie”): inaczej Ctrl+Z w wyniku przywróciłby
+    // decyzję „tutaj” na starych pozycjach i odsłonił daną, o której urzędnik nie decydował.
+    undoSteps = undoSteps.map((list) => shiftDecisions(base, input.value, list).decisions);
+  }
+  if (decisions.length && base && input.value !== base) {
+    const moved = shiftDecisions(base, input.value, decisions);
     decisions = moved.decisions;
-    // Listy do Ctrl+Z przesuwają się razem z tekstem tak samo jak bieżąca.
-    const [from, to] = [lastInput, input.value];
-    undoSteps = undoSteps.map((list) => shiftDecisions(from, to, list).decisions);
     if (moved.dropped) {
       fixNote =
         `Po zmianie tekstu źródłowego odrzucono ${moved.dropped} ` +
@@ -1554,6 +1608,7 @@ function update(): void {
       'Wklej tekst w polu „Tekst źródłowy” albo kliknij „Przykład” powyżej.</span>';
     findingsCard.hidden = true;
     lastRedacted = '';
+    lastInput = ''; // poprawki pisma odłożyło już stashCorrections, a puste pole nie ma do czego ich przesuwać
     lastSpans = null;
     lastFound = [];
     reviewed.clear();
@@ -1653,14 +1708,22 @@ input.addEventListener('beforeinput', (e) => {
   const whole = !input.value.trim() || (input.selectionStart === 0 && input.selectionEnd === input.value.length);
   newDocument = whole && e.inputType.startsWith('insert');
   historyBefore = e.inputType.startsWith('history') ? input.value : null;
+  // Poprawki odnoszą się do lastInput. Przed zmianą, która może podmienić całe pismo, wynik musi
+  // dotyczyć tekstu z pola, żeby stashCorrections odłożyło poprawki pod właściwym tekstem.
+  if ((whole || historyBefore !== null) && updatePending) update();
 });
 
 input.addEventListener('input', () => {
   // Przy cofaniu i ponawianiu zeruje się sama karta. Ręczne poprawki przesuwa albo odrzuca
   // (z komunikatem) renderResult, jak przy zwykłej edycji: Ctrl+Z po usunięciu dużego fragmentu
   // nie może po cichu zdjąć zasłonięcia z części pisma, której nikt nie ruszał.
+  // Przy powrocie do pisma, z którego pole przeszło wcześniej na inne, wracają poprawki tamtego pisma.
+  let swapped = false;
   if (newDocument || !input.value.trim()) resetDocumentPublication();
-  else if (historyBefore !== null && isOtherDocument(historyBefore, input.value)) resetDocumentPublication(true);
+  else if (historyBefore !== null && isOtherDocument(historyBefore, input.value)) {
+    resetDocumentPublication(true);
+    swapped = swapCorrections(input.value);
+  }
   newDocument = false;
   historyBefore = null;
   // Własna edycja zamyka błąd, bo już nie dotyczy, i „Cofnij”, bo po edycji przywróciłby tekst
@@ -1681,6 +1744,9 @@ input.addEventListener('input', () => {
   // Pauza dopasowana do zmierzonego kosztu: krótki tekst po 140 ms, długi dopiero po przerwie
   // w pisaniu (inaczej każda pauza między słowami zamrażałaby kartę na kilka sekund).
   updateTimer = setTimeout(updateNow, Math.min(2000, Math.max(140, lastUpdateMs * 1.5)));
+  // Poprawki z docStash dotyczą już nowego tekstu, a zakresy jeszcze starego: od razu przeliczamy,
+  // żeby żadne kliknięcie w wynik nie trafiło między jedno a drugie.
+  if (swapped) update();
 });
 
 /* ── Akcje ── */
@@ -1783,7 +1849,12 @@ addEventListener('pagehide', () => {
 /** Zastąp cały tekst źródła; gdy było co stracić, pokaż pasek „Cofnij”. `info` to dopisek. */
 function replaceSource(text: string, note: string, info = ''): void {
   const prev = input.value;
-  if (prev !== text) resetDocumentPublication();
+  if (prev !== text) {
+    // Natywne Ctrl+Z nie sięga sprzed podmiany wartości, więc zostają tylko poprawki do „Cofnij”.
+    flushPendingUpdate();
+    docStash = docStash.filter((e) => e.text === prev);
+    resetDocumentPublication();
+  }
   const prevInfo = noteInfo;
   input.value = text;
   update();
@@ -1799,7 +1870,11 @@ appNoteUndo.addEventListener('click', () => {
   const info = undoInfo;
   // Przywrócone pismo to inne pismo niż bieżące (jak w replaceSource): karta wypełniona dla
   // cofanego tekstu nie może przejść na poprzedni.
-  if (input.value !== undoText) resetDocumentPublication();
+  if (input.value !== undoText) {
+    flushPendingUpdate();
+    // Pismo wraca razem ze swoimi ręcznymi poprawkami (np. zasłoniętą ręcznie księgą wieczystą).
+    resetDocumentPublication(swapCorrections(undoText));
+  }
   input.value = undoText;
   setFileExt(''); // pobieranie wraca do .txt jak po „Wyczyść” (rodzaj pliku nie wraca)
   dismissNote();
@@ -2085,7 +2160,11 @@ function syncOtherBasis(): void {
  * karcie dopisałoby ją do nowego wyniku. Organ, osoba, podstawa i data zostają.
  */
 function resetDocumentPublication(keepCorrections = false): void {
-  if (!keepCorrections) clearCorrections(); // ręczne poprawki dotyczyły poprzedniego pisma
+  // Ręczne poprawki dotyczyły poprzedniego pisma: idą na bok do docStash, gdyby pole do niego wróciło.
+  if (!keepCorrections) {
+    stashCorrections();
+    clearCorrections();
+  }
   pubZnak.value = '';
   for (const el of [pubAppend, ...pubChecks]) el.checked = false;
   allReviewed = false;
@@ -2100,6 +2179,7 @@ function resetDocumentPublication(keepCorrections = false): void {
  * jest pusta. Zapamiętany organ i osoba wracają, jeśli „Pamiętaj” jest zaznaczone.
  */
 function clearPublication(): void {
+  flushPendingUpdate(); // poprawki odkłada resetDocumentPublication pod tekstem z pola
   const kept = pubRemember.checked ? readRemembered() : null;
   pubOrgan.value = kept?.organ ?? '';
   pubOsoba.value = kept?.osoba ?? '';

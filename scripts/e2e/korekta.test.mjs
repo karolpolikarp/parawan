@@ -694,3 +694,112 @@ test('natywne Ctrl+Z w polu źródła po usunięciu dużego fragmentu nie zdejmu
     );
   });
 });
+
+// Poprawki po weryfikacji domknięcia, runda 3: poprawki należą do pisma, w którym je podjęto.
+// Natywne Ctrl+Z i Ctrl+Y w polu wracają do pisma razem z jego poprawkami, a stos do Ctrl+Z
+// w wyniku przesuwa się z edycją źródła także wtedy, gdy bieżąca lista poprawek jest pusta.
+const outText = (page) => page.locator('#output').textContent().then((t) => t ?? '');
+
+test('natywne Ctrl+Z do poprzedniego pisma nie przenosi na nie „Zostaw jawne wszędzie”, a Ctrl+Y je przywraca', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const A = 'Wnioskodawca Jan Kowalski, PESEL 44051401359, wnosi o wydanie decyzji. Pan Jan Kowalski mieszka przy ul. Lipowej 4.';
+    const B = 'Sprawę prowadzi inspektor Jan Kowalski. Kontakt z inspektorem Jan Kowalski w pokoju 12. Zatwierdził Jan Kowalski.';
+    const ta = page.locator('#input');
+    await ta.click();
+    await page.keyboard.insertText(A);
+    await app.waitForOutput('[PESEL]');
+    await ta.click();
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.insertText(B);
+    await app.waitForOutput('pokoju 12');
+    await page.locator('#output mark.pii').first().click();
+    await page.locator('#fix-keep-all').click();
+    await page.waitForFunction(() => !document.querySelector('#output mark.pii:not(.pii-kept)'));
+    await ta.focus();
+    await page.keyboard.press('ControlOrMeta+z');
+    assert.equal(await ta.inputValue(), A, 'Ctrl+Z nie wrócił do pisma A');
+    await app.waitForOutput('[PESEL]');
+    for (const text of [await outText(page), (await printed(page)) ?? ''])
+      assert.ok(!text.includes('Kowalski'), 'wnioskodawca jawny w piśmie A');
+    assert.equal(
+      await page.locator('#fix-note').innerText(),
+      'Tekst źródłowy wrócił do wcześniejszego pisma. Ręczne poprawki drugiego pisma go nie dotyczą.',
+    );
+    // Ctrl+Y wraca do pisma B razem z jego „Zostaw jawne wszędzie”
+    await page.keyboard.press(BROWSER === 'firefox' ? 'ControlOrMeta+Shift+z' : 'ControlOrMeta+y');
+    assert.equal(await ta.inputValue(), B, 'Ctrl+Y nie wrócił do pisma B');
+    await app.waitForOutput('pokoju 12');
+    assert.equal(((await outText(page)).match(/Jan Kowalski/g) ?? []).length, 3);
+  });
+});
+
+test('Ctrl+A, Delete i Ctrl+Z w polu źródła przywracają tekst razem z ręcznym zasłonięciem', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const text = `Decyzja w sprawie działki, księga wieczysta nr ${KW}, wnioskodawca Jan Kowalski, PESEL 44051401359.\nUzasadnienie jest krótkie.`;
+    const ta = page.locator('#input');
+    await ta.click();
+    await page.keyboard.insertText(text);
+    await app.waitForOutput('[PESEL]');
+    await selectInOutput(page, KW);
+    await page.locator('#fix-sel-out').click();
+    await page.locator('#fix-apply').click();
+    await app.waitForOutput('[DANE]');
+    await ta.focus();
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.press('Delete');
+    await page.waitForFunction(() => !!document.querySelector('#output .placeholder'));
+    await page.keyboard.press('ControlOrMeta+z');
+    assert.equal(await ta.inputValue(), text, 'Ctrl+Z nie przywrócił tekstu');
+    await app.waitForOutput('[DANE]');
+    for (const out of [await outText(page), (await printed(page)) ?? ''])
+      assert.ok(!out.includes('00045123'), 'księga wieczysta jawna');
+    assert.equal(await page.locator('#fix-sum').textContent(), 'Ręczne poprawki: przywrócono 0, zasłonięto 1');
+  });
+});
+
+test('„Wyczyść” i „Cofnij” na pasku przywracają tekst razem z ręcznym zasłonięciem', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    await paste(page, `Księga wieczysta ${KW}. Wnioskodawca Jan Kowalski, PESEL 44051401359.`);
+    await maskFromSource(page, KW);
+    await app.waitForOutput('[DANE]');
+    await page.locator('#clear').click();
+    await page.waitForFunction(() => !!document.querySelector('#output .placeholder'));
+    await page.locator('#app-note-undo').click();
+    await app.waitForOutput('[DANE]');
+    for (const out of [await outText(page), (await printed(page)) ?? ''])
+      assert.ok(!out.includes('00045123'), 'księga wieczysta jawna po „Cofnij”');
+  });
+});
+
+test('Ctrl+Z w wyniku po „Usuń wszystkie” i edycji źródła przywraca poprawkę na przesuniętym miejscu', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const T = 'Świadek Adam Nowak zeznał. Świadek Ewa Lis zeznała. Świadek Jan Kot zeznał. Wnioskodawca PESEL 44051401359.';
+    await paste(page, T);
+    await page.locator('#output mark.pii').nth(1).click();
+    assert.equal(await page.locator('#fix-bar-val').textContent(), 'Ewa Lis');
+    await page.locator('#fix-keep').click();
+    await app.waitForOutput('Ewa Lis');
+    await page.locator('#fix-clear').click();
+    await page.waitForFunction(() => !(document.getElementById('output')?.textContent ?? '').includes('Ewa Lis'));
+    // usunięcie początku pisma: „Jan Kot” staje tam, gdzie wcześniej stała „Ewa Lis”
+    const d = T.indexOf('Jan Kot') - T.indexOf('Ewa Lis');
+    const ta = page.locator('#input');
+    await ta.evaluate((el, d) => {
+      /** @type {HTMLTextAreaElement} */ (el).focus();
+      /** @type {HTMLTextAreaElement} */ (el).setSelectionRange(0, d);
+    }, d);
+    await page.keyboard.press('Delete');
+    await page.waitForFunction(
+      () => ((document.getElementById('output')?.textContent ?? '').match(/\[IMIĘ I NAZWISKO\]/g) ?? []).length === 2,
+    );
+    await page.locator('#output mark.pii').first().focus();
+    await page.keyboard.press('ControlOrMeta+z');
+    await app.waitForOutput('Ewa Lis');
+    for (const out of [await outText(page), (await printed(page)) ?? ''])
+      assert.ok(!out.includes('Jan Kot'), 'Ctrl+Z odsłonił osobę, o której nikt nie decydował');
+  });
+});
