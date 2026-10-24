@@ -542,7 +542,7 @@ realistycznych pismach urzędowych — zero nowych nad/niedomaskowań z powyższ
 
 Rdzeń `anonimizator` 0.29.7 → 0.29.8, aplikacja web 0.46.16 → 0.46.17, landing 0.46.16 → 0.46.17.
 
-## v0.46.16 — 2026-07-15
+## v0.46.16 — 2026-07-16
 
 **Rdzeń: imię/nazwisko WERSALIKAMI po tytule lub roli.** Domknięcie luki zapowiedzianej w v0.46.15:
 zapis w całości WIELKIMI literami po tytule/roli („SSO JAN KOWALSKI", „PANEM MARKIEM WIŚNIEWSKIM",
@@ -864,8 +864,11 @@ Aplikacja web 0.45.2 → 0.46.0. Rdzeń `anonimizator` bez zmian (0.29.1).
 **Warstwa AI wydzielona do osobnego repozytorium — główny produkt to jeden plik HTML.**
 
 Powód: edycja „pełna / AI" była myląca i w praktyce nieużywalna (wymagała pobrania modelu
-z release'u `models-fastpdn-onnx-v1`, który nigdy nie powstał). Zgodnie z decyzją: rozdział
-na dwa repozytoria.
+z release'u `models-fastpdn-onnx-v1`). Zgodnie z decyzją: rozdział na dwa repozytoria.
+
+Sprostowanie (2026-10-25): pierwotny wpis mówił, że release `models-fastpdn-onnx-v1` „nigdy
+nie powstał”. Release istnieje od 2026-07-04 i ma dwa pliki (`fastpdn-onnx-int8.zip`,
+`anonimizator-onnx-pack.zip`).
 
 - **To repo produkuje jeden artefakt: `Anonimizator.html`** (deterministyka — reguły, słowniki,
   sumy kontrolne, w całości offline). Koniec dwóch edycji i przełącznika `VITE_EDITION`.

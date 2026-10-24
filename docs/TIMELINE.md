@@ -14,7 +14,7 @@ lokalnym autora (+02:00), daty wydań na GitHubie przeliczone na ten sam czas.
 | Autorzy | 234 commity autora (43 jako „Karol”, do 2026-07-06 i sporadycznie później, oraz 191 pod pełnym imieniem i nazwiskiem), 12 commitów Dependabota |
 | Commity scalające | 5 (`31e721e`, `1837bfd`, `3d0812b`, `a3242f8`, `24b6aec`) |
 | Wersje aplikacji | 84 numery od v0.1.0 do v0.46.25 |
-| Tagi | 78 (77 wersji + `models-fastpdn-onnx-v1`); 7 wersji czeka na tag, patrz niżej |
+| Tagi | 85 (84 wersje + `models-fastpdn-onnx-v1`); 7 tagów dodano wstecznie 2026-10-25, patrz niżej |
 | Wydania na GitHubie | 78 (77 wersji + paczka modelu ONNX) |
 | Dni z pracą autora | 21 |
 | Najdłuższy przestój autora | prawie 86 dni (85 d 23 h): od `df58365` (2026-07-20 20:19) do `45ce1cf` (2026-10-14 19:07). Licząc commity Dependabota, najdłuższa przerwa to 54 dni (`b4c632e` → `45ce1cf`) |
@@ -53,7 +53,7 @@ z 2026-07-17 (`330bf8e`, `06250b4`, `17ce2e6`) powstały jeszcze przed przerwą.
 - Strona produktu: GitHub Pages z domeną `parawan.karolwilczynski.com`, ostatnie udane wdrożenie
   2026-10-24 23:21 (`72efa8b`), 30 uruchomień `deploy-landing.yml` w historii.
 
-## Wersje bez tagu albo bez wpisu w CHANGELOG
+## Wersje uzupełnione wstecznie (tag albo wpis w CHANGELOG)
 
 Podział wersji: wersja trwa od commita, który podbija `version` w `apps/web/package.json`,
 do commita przed następnym podbiciem. Tag stoi na ostatnim commicie zakresu.
@@ -62,13 +62,13 @@ do commita przed następnym podbiciem. Tag stoi na ostatnim commicie zakresu.
 |---|---|---|---|
 | v0.17.0 | 2026-07-06 | `f05a550` | wpis w CHANGELOG odtworzony w tej rundzie porządków (tag i Release były) |
 | v0.40.0 | 2026-07-09 | `25cfd7e..4def736` | wpis w CHANGELOG odtworzony w tej rundzie (tag i Release były) |
-| v0.41.0 | 2026-07-09 | `b28e414` | tag do założenia |
-| v0.42.0 | 2026-07-11 | `12cdfae..753e61e` (6 commitów) | tag do założenia |
-| v0.46.11 | 2026-07-14 | `4dff7d5` | tag do założenia |
-| v0.46.14 | 2026-07-15 | `90c8912` | tag do założenia |
-| v0.46.15 | 2026-07-15 | `47940e9` | tag do założenia |
-| v0.46.17 | 2026-07-16 | `07f219d` | tag do założenia |
-| v0.46.21 | 2026-07-19 | `05b2509..3026e7d` (8 commitów) | wpis odtworzony w tej rundzie, tag do założenia |
+| v0.41.0 | 2026-07-09 | `b28e414` | tag dodany 2026-10-25 |
+| v0.42.0 | 2026-07-11 | `12cdfae..753e61e` (6 commitów) | tag dodany 2026-10-25 |
+| v0.46.11 | 2026-07-14 | `4dff7d5` | tag dodany 2026-10-25 |
+| v0.46.14 | 2026-07-15 | `90c8912` | tag dodany 2026-10-25 |
+| v0.46.15 | 2026-07-15 | `47940e9` | tag dodany 2026-10-25 |
+| v0.46.17 | 2026-07-16 | `07f219d` | tag dodany 2026-10-25 |
+| v0.46.21 | 2026-07-19 | `05b2509..3026e7d` (8 commitów) | wpis odtworzony, tag dodany 2026-10-25 |
 
 ## Okres 1: start i seria szybkich wydań (2026-07-03 → 2026-07-05)
 
@@ -152,13 +152,13 @@ do commita przed następnym podbiciem. Tag stoi na ostatnim commicie zakresu.
   razem o 10:27.
 - **2026-07-14 10:50, pierwsze udane wdrożenie strony na GitHub Pages** (uruchomienie
   `deploy-landing.yml` na `c383f0c`; pierwsze, o 10:27, zakończyło się błędem).
-- **2026-07-14, v0.46.11 (`4dff7d5`):** przepisane teksty strony. Tagu brak.
+- **2026-07-14, v0.46.11 (`4dff7d5`):** przepisane teksty strony. Tag dodany wstecznie.
 - **2026-07-14, v0.46.12 i v0.46.13 (`0b607a9`, `1426796`):** karta płatnicza jako 23. typ PII.
 - **2026-07-15, v0.46.14 i v0.46.15 (`90c8912`, `47940e9`):** animowany hero na stronie,
-  imiona i nazwiska niezależne od wielkości liter w kontekście. Obie bez tagu.
+  imiona i nazwiska niezależne od wielkości liter w kontekście. Tagi obu dodane wstecznie.
 - **2026-07-16, v0.46.16 → v0.46.20 (`e0ab9a8` → `8ef4b60`):** cztery rundy poprawek po audytach
   (petycja do urzędu marszałkowskiego, eponimy uliczne, PESEL po łączniku, REGON wielowyrazowy).
-  v0.46.17 (`07f219d`) bez tagu.
+  Tag v0.46.17 (`07f219d`) dodany wstecznie.
 - **2026-07-17:** Dependabot otwiera PR #15, #16, #17 (akcje GitHub) i #18 (grupa npm). #15 do #17
   nie są zmergowane, #18 zamknięto bez merge'a 2026-08-07, kilka sekund przed otwarciem #19.
 - **2026-07-18 → 19, v0.46.21 (`05b2509..3026e7d`, 8 commitów):** audyt treści strony pod SEO

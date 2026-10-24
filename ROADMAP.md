@@ -27,22 +27,19 @@ Docelowo v0.46.26, rdzeń 0.29.14 (0.29.13 ma silnik z v0.46.24 i tryb `--jsonl`
    i [IMIĘ I NAZWISKO] dodatek.` (odtworzone dziś). To druga klasa wysoka z listy znanych
    regresji v0.46.24. Źródło: CHANGELOG.md, v0.46.24, „Znane regresje”.
 
-3. **CLI `--jsonl`: jeden zły wiersz kończy proces mostu, brak testów CLI**
+3. **CLI: brak testów `bin/anonimizator.js`**
    rdzeń 0.29.14 · S
-   `JSON.parse(linia)` stoi bez obsługi błędu, więc wiersz, który nie jest poprawnym JSON-em,
-   zabija proces trwały, z którego korzysta wywołujący. Żaden test ani workflow nie uruchamia
-   `bin/anonimizator.js`. Wystarczy odpowiedź `{"id":null,"error":…}` dla złego wiersza i test
-   dymny obu trybów. Ma sens tylko wtedy, gdy CLI zostaje w rdzeniu (pozycja 4).
-   Źródło: fa5edef (`packages/core/bin/anonimizator.js:93`).
+   Zły wiersz w `--jsonl` nie kończy już procesu (odpowiedź `{"id", "error"}`, poprawione
+   w [Unreleased]), ale żaden test ani workflow nie uruchamia CLI. Wystarczy test dymny obu
+   trybów: zwykłego (stdin → stdout) i `--jsonl` z poprawnym i złym wierszem.
+   Źródło: fa5edef, `packages/core/bin/anonimizator.js`.
 
 4. **Decyzja o paczce npm `anonimizator` 0.29.13**
    rdzeń 0.29.13 · S
    Paczki nie ma w rejestrze (`npm view anonimizator` zwraca 404), README każe instalować
    z katalogu (README.md:235), a `package.json` ma już `prepublishOnly`. Trzeba wybrać: opublikować
    (wtedy także nazwa i lista `files`) albo zostać przy instalacji z repo i zapisać to wprost.
-   Trwa przy tym niezatwierdzona zmiana, która usuwa z rdzenia `bin/anonimizator.js`
-   i `LICENSE`, choć `package.json` dalej deklaruje `bin`. Decyzja o paczce zależy od jej wyniku:
-   npm sam dołącza LICENSE z katalogu paczki, więc bez tego pliku paczka wyjdzie bez licencji.
+   `LICENSE` musi zostać w `packages/core`: npm dołącza ją do paczki sam, z katalogu paczki.
    Źródło: fa5edef, packages/core/package.json, README.md:235.
 
 5. **Zaległe aktualizacje zależności z Dependabota**
