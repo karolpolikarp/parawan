@@ -15,7 +15,7 @@ exports[`golden: korpus benchmarku — filtr types (tylko strukturalne) 1`] = `
   "neg-100": "System KSeF w wersji 2.0 działa od 2026 roku.",
   "neg-101": "Raport KSeF [NIP] 20250826 000000012345 23 w podziale na kanały.",
   "neg-102": "P.S. Mróz ma być w nocy, okryj róże.",
-  "neg-103": "{"sciezka": "C:\\\\Users\\\\nowak\\\\Documents\\\\raport.docx", "opis": "Linia 1\\nLinia 2"}",
+  "neg-103": "{"sciezka": "C:\\\\Users\\\\Public\\\\nowe\\\\raport.docx", "opis": "Linia 1\\nLinia 2"}",
   "neg-104": "P.P.S. Mróz ma być w nocy, a PKO B.P. Wilk to nazwa robocza.",
   "neg-105": "Ilość
 120
@@ -74,8 +74,42 @@ Login: none",
 Imię i nazwisko ucznia
 Klasa
 Imię i nazwisko wnioskodawcy: Gmina Michałowice",
+  "neg-147": "Prezes Klubu Sportowego Lech Poznań zwołał zebranie. Pełnomocnik Zarządu Spółki Marek Trans Sp. z o.o. Imię i nazwisko opiekuna prawnego: Powiatowe Centrum Pomocy Rodzinie. Spotkanie w domu Pod Lipami. Samochód marki Volkswagen Golf TDI 1896 cm3. Telefon nr inw. 012345678 – zużyty. W komórce 123 456 789 zł. Przebudowa ul. Polnej i Leśnej 250 000,00 zł.",
+  "neg-148": "Obywatele Ukrainy mieszkający w Lublinie mogą złożyć wniosek. Ludzie mieszkają w Warszawie coraz dłużej. Kluczyk do skrzynki leży na biurku. Odruch Babińskiego dodatni. ZSO im Jana Kochanowskiego. Parafia pw. św. Rafała Kalinowskiego w Krakowie.",
+  "neg-149": "Cmentarz Rakowicki odwiedził oskarżony w dniu 1 listopada. Kościół Mariacki kupił nowe wyposażenie.
+21.06 Noc Świętojańska
+Kościół       Mariacki     Kraków
+Cystoskopia: trójkąt Pawlika bez zmian. Pismo zarejestrowano pod numerem rejestracji RPW 12345/2026.",
   "neg-15": "Zakład Ubezpieczeń Społecznych wydał decyzję odmowną.",
+  "neg-150": "Gabinet przy ul. Szpitalnej 5 m. 3 i Sali 12 jest czynny. Lokalizacje: ul. Leśna 7 oraz Hala 3. Kościół Mariacki odwiedził w niedzielę biskup. Mieszka w Sopocie 500 cudzoziemców.",
+  "neg-151": "Ścieżka: /home/ubuntu/app oraz C:\\Users\\Public\\Desktop. Accepted password for root from bastion.local port 22 ssh2. Strona https://www.linkedin.com/company/baltic-solutions oraz Konto AD: zablokowane. Alias: www.firma.pl",
+  "neg-152": "Konto AD: nadane
+Uprawnienia zostały nadane.
+Alias: intranet
+Serwer intranet działa.
+"GET /Users/Edit/15 HTTP/1.1" 200
+User name: Administrator",
+  "neg-153": "Pole sAMAccountName: jest obowiązkowe. Plik w C:\\Users\\pielegniarki\\Desktop i /home/wnioski/przychodzace. Zastąp C:\\Users\\nazwa_uzytkownika swoim loginem. session opened for user cron by (uid=0)",
+  "neg-154": "city,population
+Kraków,800000
+id,name,category
+1,Zając,zabawka
+imie,nazwisko
+Dzień dobry, przesyłam listę.",
+  "neg-155": "Imię i nazwisko	Lokal	Telefon
+Ulica	Adama	Mickiewicza
+Maj	Anna
+Sąd Rejonowy	Wydział Cywilny",
+  "neg-156": "UNIWERSYTET ADAMA MICKIEWICZA W POZNANIU. ULICA KOŚCIUSZKI TADEUSZA. KRÓL JAN III SOBIESKI. PIĄTEK 3 MAJA. ANNA STAROSTA. Kot Anny spał. Świadek Jehowy odmówił. Biuro na II p. Pokój 304.",
+  "neg-157": "Kościół św. Jerzego Męczennika. Katedra Świętego Jerzego. Marka Toyota zdobyła nagrodę. Walka z korupcją trwa. Ewangelia wg sw. Lukasza. Jezus, syn Józefa i Maryi, nauczał.",
+  "neg-158": "Nr zam. 45/2024 z dnia 12.03.2024. zam. Kawa 3 opakowania. Adres: Sala 5. Dziecko urodzi się około 12.05.2026. Login SSO: Okta. Login VPN: tak. <xs:element name="Nazwisko"/> <Podmiot osoba="prawna"/> Liczba pojazdów według GUS 2023 wzrosła.",
+  "neg-159": "Powód Kruk S.A. z siedzibą we Wrocławiu wniósł pozew. Pozwany Wilk Sp. z o.o. nie stawił się. Cudzoziemiec zam. w Sudanie. Jeżeli dziecko urodziło się 1 czerwca 2026 r., wniosek należy złożyć w terminie. Autem LPG 2010 dojechano. Zakup pojazdów: GBA 2023 r. Adres zamieszkania: Rubryka 7.",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
+  "neg-160": "Sygn. akt I C 123/24 dotyczy działki 245/7 i lokalu 12/3 z umowy 12/2026/ZP.",
+  "neg-161": "Wpis do księgi wieczystej nastąpi w kw. 2026. Zamówienie nr AB1C/12345678/0, kod AB1C/12345678/7.",
+  "neg-162": "Wzór numeru księgi wieczystej: XXXX/XXXXXXXX/X. Nieruchomość KR1P/00234567/1 w zestawieniu.",
+  "neg-163": "Szpital Specjalistyczny im. dr. Wilka w Krakowie. Szkoła im. Ks. Jerzego Popiełuszki. Kościół pw. bł. ks. Jerzego Popiełuszki. Parafia pw. bł. Józefa Kowalskiego.",
+  "neg-164": "Odbiorca: Szkoła Podstawowa nr 12 im. Jana Pawła II",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
   "neg-19": "Rzecznik Praw Obywatelskich zabrał głos w debacie.",
@@ -194,6 +228,7 @@ Imię i nazwisko wnioskodawcy: Gmina Michałowice",
   "os-o-33": "Na ulicy spotkałem wczoraj Jana Kowalskiego.",
   "os-o-34": "Jan
 Wiśniewski złożył wniosek do urzędu.",
+  "os-o-35": "z powództwa Pawła Kowalskiego przeciwko Agacie Nowak, z udziałem Jerzego Nowaka i Henrykiem Lisem",
   "os-p-01": "Pozwany Jan Kowalski nie stawił się na rozprawie.",
   "os-p-02": "Powódka Anna Nowak wniosła o zasądzenie kosztów.",
   "os-p-03": "Świadek Piotr Wiśniewski zeznał, że widział zdarzenie.",
@@ -282,6 +317,8 @@ Pozwany Zieliński Annie groził.",
   "os-p-72": "Imię i nazwisko pacjenta: Hans Gruber
 Anna Kowalska z domu Sikora
 Kierownik Działu Kadr Grzegorz Mazur",
+  "os-p-73": "Świadek Poleski zeznał. Mieczyk zatrudniony od 01.02.2010 r. Szanowna Pani Dyrektor Szkoły Kowalska-Nowak. Grafik: Dzień Lisiecka, Noc Brzozowska. Do kościoła wraz ze św. Kowalskim wszedł sprawca.",
+  "os-p-74": "Michal Nowak napisal, ze Lukasz Wisniewski bedzie o 18. Krzysztof Wróbel, syn Józefa i Marii, stawił się.",
   "os-r-01": "Marek Bąkiewicz podpisał protokół odbioru.",
   "os-r-02": "Alicja Krzemieniecka złożyła wniosek o urlop.",
   "os-r-03": "Tadeusz Gzowski wynajął magazyn pod miastem.",
@@ -307,6 +344,14 @@ Kierownik Działu Kadr Grzegorz Mazur",
   "os-r-23": "Dorota Sajkowska-Mróz podpisała aneks.",
   "os-r-24": "opinia Rzepeckiej-Gil była druzgocąca",
   "os-r-25": "Świętomira Gzowska przyszła na przesłuchanie.",
+  "os-r-26": "Nazwisko	Imię	Stanowisko
+Wróbel	Henryk	Kierowca
+Mazur	Grzegorz	Kierownik",
+  "os-r-27": "Wnioskodawca: KOWALSKI JAN
+Lista obecności: NOWAK PIOTR, WÓJCIK MARIA
+POWÓD: MAREK DUDA
+Pacjent: KOWALSKA Anna",
+  "os-r-28": "Konsultował dr Mróz. Prokurator Baran nie oponuje. Pacjent: Wilk Jadwiga. Współpracuje z zespołem p. Wróbla.",
   "os-rn-01": "list od Achtelika leżał tydzień na biurku",
   "os-rn-02": "sprawę Fąfary umorzono w drugiej instancji",
   "os-rn-03": "zeznania Gągały spisano protokolarnie",
@@ -407,8 +452,57 @@ Tak	Kaczyński	Urząd Miasta",
 {"paszport": "EA7654321", "nrTelefonu": "[TELEFON]", "Miejscowość": "Ustka"}",
   "str-143": "Pani Hanny Michalak, urodzonej 12.03.1980 r. w Białymstoku. UL. LIPOWA 14, 26-900 KOZIENICE. zam. ul.Długa 5/3. Card number: 4532 0151 1283 0366.",
   "str-144": "Kontakt nr 512 345 678, tel. [TELEFON]. Obecnych 12 os.Halina Grzyb przewodniczyła. UL. LIPOWA 14, 05-300 STARA WIEŚ. Anna Nowak z domu Ludowego.",
+  "str-145": "Jan Kowalski, ul. Leśna 3 osoby. Lokale przy ul. Polnej 5 i Leśnej 7. Najem: ul. Rynek 7, lokal 32,4 m2. Świadek Kowalczyk-Müller zeznała.
+04. Ulica: Warszawska  05. Nr domu: 31",
+  "str-146": "Wnioskodawczyni zamieszkała w Gdańsku 3 osoby na utrzymaniu. 86-170 Nowe   Sposób płatności: przelew",
+  "str-147": "Prezes Zarządu Spółki Anna Wrona podpisała umowę. Sąd ustanowił opiekuna nad ubezwłasnowolnionym urodzonym 12.03.1950 r. Pojazd pod numerem rejestracji WX 12345.
+Imię i nazwisko pacjenta: Oksana Petrowa
+Joanna Kos z domu Sikora Zam. Sosnowiec
+Zam. ul. Długa 5 i Krótka 7",
+  "str-148": "Imię i nazwisko pacjenta:
+Yuki Tanaka
+Imię i nazwisko ucznia: Jan Nowy
+Opiekuje się bratem niepełnosprawnym urodzonym 12.03.1990 r.
+Maria Nowak z domu Wrona Wypisana 12.10.",
+  "str-149": "Plik: C:\\Users\\tkaminski\\Desktop\\a.txt, udział \\\\FS01\\home$\\anowak, katalog /home/jkowalski/projekty",
   "str-15": "Zwrot nastąpi na konto [NR-KONTA] wskazane w umowie.",
+  "str-150": "sAMAccountName: kwisniewski
+Accepted publickey for mzielinski from bastion.local port 22 ssh2
+sudo:  pnowicki : TTY=pts/0",
+  "str-151": "{"user":"a.kaminska","message":"Konto a.kaminska zablokowane"}
+LinkedIn: https://www.linkedin.com/in/joanna-pietrzak-hr/",
+  "str-152": "linkedin.com/in/anowak/;[TELEFON]",
+  "str-153": "FB: facebook.com/profile.php?id=100004567890123.Tel.[TELEFON]
+User name: Anna Zając
+User: TOMASZ JANKOWSKI
+Wnioskodawca: JANKOWSKI TOMASZ",
+  "str-154": "imie;nazwisko;pesel;data_urodzenia;miejscowosc
+Jan;Kos;[PESEL];1990-05-30;Biała Podlaska",
+  "str-155": "Lp.;Nr rejestracyjny;Marka
+1;WI 4821F;Skoda
+| Imię | Nazwisko |
+|---|---|
+| Magdalena | Zając |",
+  "str-156": "Adres zamieszkania: Lipowa 14/3, Gdańsk
+Tomasz Wróblewski, zam. Rynek 15 m. 3 w Krakowie
+urodziłam się 12.05.1990 w Łodzi
+Login AD: wkozlowski
+TEL;TYPE=WORK:[TELEFON]
+<Osoba imie="Anna" nazwisko="Gzik" miasto="Kalisz"/>",
+  "str-157": "Wykaz pojazdów: WE 12345, GD 2345A. Kierujący autem WE 6789P zbiegł. Jan Kowalski, zam. w Świdniku, zeznaje.",
+  "str-158": "Strony: Anna Kowalska – Jana Pawła II 5. Adres: Kazimierza Wielkiego 12
+Imię;Nazwisko;Miasto
+Wakat;-;Warszawa
+Jan;Kowalski;Kraków",
+  "str-159": "Nieruchomość objęta księgą wieczystą KW nr KR1P/00234567/6 prowadzoną przez Sąd Rejonowy.",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
+  "str-160": "działka nr ewid. 123/4, obręb 0005 Brzozowa Wola, KW OS1W/00012345/6.",
+  "str-161": "Lokal w budynku na nieruchomości WA2M/00512345/3, księgi lokalowej brak.",
+  "str-162": "Nieruchomości objęte KW nr KR1P/00234567/6, KR1P/00234567/1 oraz WA2M/00512345/0.",
+  "str-163": "W razie pytań proszę dzwonić pod [TELEFON] wieczorem.
+Login: mazur
+Na zakończenie orkiestra zagrała mazur.",
+  "str-164": "Zgłaszająca mieszka przy ul. Grochowskiej 17. Od 3 lat skarży się na hałas. Anna Lis, córka Piotra Pawła i Anny Marii.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
   "str-19": "sms na [TELEFON] nie doszedł",
@@ -511,7 +605,7 @@ exports[`golden: korpus benchmarku — pseudonimizacja osób ([OSOBA-A]…) 1`] 
   "neg-100": "System KSeF w wersji 2.0 działa od 2026 roku.",
   "neg-101": "Raport KSeF [NIP] 20250826 000000012345 23 w podziale na kanały.",
   "neg-102": "P.S. Mróz ma być w nocy, okryj róże.",
-  "neg-103": "{"sciezka": "C:\\\\Users\\\\nowak\\\\Documents\\\\raport.docx", "opis": "Linia 1\\nLinia 2"}",
+  "neg-103": "{"sciezka": "C:\\\\Users\\\\Public\\\\nowe\\\\raport.docx", "opis": "Linia 1\\nLinia 2"}",
   "neg-104": "P.P.S. Mróz ma być w nocy, a PKO B.P. Wilk to nazwa robocza.",
   "neg-105": "Ilość
 120
@@ -570,8 +664,42 @@ Login: none",
 Imię i nazwisko ucznia
 Klasa
 Imię i nazwisko wnioskodawcy: Gmina Michałowice",
+  "neg-147": "Prezes Klubu Sportowego Lech Poznań zwołał zebranie. Pełnomocnik Zarządu Spółki Marek Trans Sp. z o.o. Imię i nazwisko opiekuna prawnego: Powiatowe Centrum Pomocy Rodzinie. Spotkanie w domu Pod Lipami. Samochód marki Volkswagen Golf TDI 1896 cm3. Telefon nr inw. 012345678 – zużyty. W komórce 123 456 789 zł. Przebudowa ul. Polnej i Leśnej 250 000,00 zł.",
+  "neg-148": "Obywatele Ukrainy mieszkający w Lublinie mogą złożyć wniosek. Ludzie mieszkają w Warszawie coraz dłużej. Kluczyk do skrzynki leży na biurku. Odruch Babińskiego dodatni. ZSO im Jana Kochanowskiego. Parafia pw. św. Rafała Kalinowskiego w Krakowie.",
+  "neg-149": "Cmentarz Rakowicki odwiedził oskarżony w dniu 1 listopada. Kościół Mariacki kupił nowe wyposażenie.
+21.06 Noc Świętojańska
+Kościół       Mariacki     Kraków
+Cystoskopia: trójkąt Pawlika bez zmian. Pismo zarejestrowano pod numerem rejestracji RPW 12345/2026.",
   "neg-15": "Zakład Ubezpieczeń Społecznych wydał decyzję odmowną.",
+  "neg-150": "Gabinet przy [ADRES] i Sali 12 jest czynny. Lokalizacje: [ADRES] oraz Hala 3. Kościół Mariacki odwiedził w niedzielę biskup. Mieszka w Sopocie 500 cudzoziemców.",
+  "neg-151": "Ścieżka: /home/ubuntu/app oraz C:\\Users\\Public\\Desktop. Accepted password for root from bastion.local port 22 ssh2. Strona https://www.linkedin.com/company/baltic-solutions oraz Konto AD: zablokowane. Alias: www.firma.pl",
+  "neg-152": "Konto AD: nadane
+Uprawnienia zostały nadane.
+Alias: intranet
+Serwer intranet działa.
+"GET /Users/Edit/15 HTTP/1.1" 200
+User name: Administrator",
+  "neg-153": "Pole sAMAccountName: jest obowiązkowe. Plik w C:\\Users\\pielegniarki\\Desktop i /home/wnioski/przychodzace. Zastąp C:\\Users\\nazwa_uzytkownika swoim loginem. session opened for user cron by (uid=0)",
+  "neg-154": "city,population
+Kraków,800000
+id,name,category
+1,Zając,zabawka
+imie,nazwisko
+Dzień dobry, przesyłam listę.",
+  "neg-155": "Imię i nazwisko	Lokal	Telefon
+Ulica	Adama	Mickiewicza
+Maj	Anna
+Sąd Rejonowy	Wydział Cywilny",
+  "neg-156": "UNIWERSYTET ADAMA MICKIEWICZA W POZNANIU. ULICA KOŚCIUSZKI TADEUSZA. KRÓL JAN III SOBIESKI. PIĄTEK 3 MAJA. ANNA STAROSTA. Kot Anny spał. Świadek Jehowy odmówił. Biuro na II p. Pokój 304.",
+  "neg-157": "Kościół św. Jerzego Męczennika. Katedra Świętego Jerzego. Marka Toyota zdobyła nagrodę. Walka z korupcją trwa. Ewangelia wg sw. Lukasza. Jezus, syn Józefa i Maryi, nauczał.",
+  "neg-158": "Nr zam. 45/2024 z dnia 12.03.2024. zam. Kawa 3 opakowania. Adres: Sala 5. Dziecko urodzi się około 12.05.2026. Login SSO: Okta. Login VPN: tak. <xs:element name="Nazwisko"/> <Podmiot osoba="prawna"/> Liczba pojazdów według GUS 2023 wzrosła.",
+  "neg-159": "Powód Kruk S.A. z siedzibą we Wrocławiu wniósł pozew. Pozwany Wilk Sp. z o.o. nie stawił się. Cudzoziemiec zam. w Sudanie. Jeżeli dziecko urodziło się 1 czerwca 2026 r., wniosek należy złożyć w terminie. Autem LPG 2010 dojechano. Zakup pojazdów: GBA 2023 r. Adres zamieszkania: Rubryka 7.",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
+  "neg-160": "Sygn. akt [ZNAK-SPRAWY] dotyczy działki 245/7 i lokalu 12/3 z umowy 12/2026/ZP.",
+  "neg-161": "Wpis do księgi wieczystej nastąpi w kw. 2026. Zamówienie nr AB1C/12345678/0, kod AB1C/12345678/7.",
+  "neg-162": "Wzór numeru księgi wieczystej: XXXX/XXXXXXXX/X. Nieruchomość KR1P/00234567/1 w zestawieniu.",
+  "neg-163": "Szpital Specjalistyczny im. dr. Wilka w Krakowie. Szkoła im. Ks. Jerzego Popiełuszki. Kościół pw. bł. ks. Jerzego Popiełuszki. Parafia pw. bł. Józefa Kowalskiego.",
+  "neg-164": "Odbiorca: Szkoła Podstawowa nr 12 im. Jana Pawła II",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
   "neg-19": "Rzecznik Praw Obywatelskich zabrał głos w debacie.",
@@ -689,6 +817,7 @@ Imię i nazwisko wnioskodawcy: Gmina Michałowice",
   "os-o-32": "Decyzję wysłano do [OSOBA-A].",
   "os-o-33": "Na ulicy spotkałem wczoraj [OSOBA-A].",
   "os-o-34": "[OSOBA-A] złożył wniosek do urzędu.",
+  "os-o-35": "z powództwa [OSOBA-A] przeciwko [OSOBA-B], z udziałem [OSOBA-B] i [OSOBA-C]",
   "os-p-01": "Pozwany [OSOBA-A] nie stawił się na rozprawie.",
   "os-p-02": "Powódka [OSOBA-A] wniosła o zasądzenie kosztów.",
   "os-p-03": "Świadek [OSOBA-A] zeznał, że widział zdarzenie.",
@@ -776,6 +905,8 @@ Pozwany [OSOBA-C] Annie groził.",
   "os-p-72": "Imię i nazwisko pacjenta: [OSOBA-A]
 [OSOBA-B] z domu [OSOBA-C]
 Kierownik Działu Kadr [OSOBA-D]",
+  "os-p-73": "Świadek [OSOBA-A] zeznał. [OSOBA-B] zatrudniony od 01.02.2010 r. Szanowna Pani Dyrektor Szkoły [OSOBA-C]. Grafik: Dzień [OSOBA-D], Noc [OSOBA-E]. Do kościoła wraz ze św. [OSOBA-F] wszedł sprawca.",
+  "os-p-74": "[OSOBA-A] napisal, ze [OSOBA-B] bedzie o 18. [OSOBA-C], syn [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO], stawił się.",
   "os-r-01": "[OSOBA-A] podpisał protokół odbioru.",
   "os-r-02": "[OSOBA-A] złożyła wniosek o urlop.",
   "os-r-03": "[OSOBA-A] wynajął magazyn pod miastem.",
@@ -801,6 +932,14 @@ Kierownik Działu Kadr [OSOBA-D]",
   "os-r-23": "[OSOBA-A] podpisała aneks.",
   "os-r-24": "opinia [OSOBA-A] była druzgocąca",
   "os-r-25": "[OSOBA-A] przyszła na przesłuchanie.",
+  "os-r-26": "Nazwisko	Imię	Stanowisko
+[OSOBA-A]	[OSOBA-A]	Kierowca
+[OSOBA-B]	[OSOBA-B]	Kierownik",
+  "os-r-27": "Wnioskodawca: [OSOBA-A]
+Lista obecności: [OSOBA-B], [OSOBA-C]
+POWÓD: [OSOBA-D]
+Pacjent: [OSOBA-A]",
+  "os-r-28": "Konsultował dr [OSOBA-A]. Prokurator [OSOBA-B] nie oponuje. Pacjent: [OSOBA-C]. Współpracuje z zespołem p. [OSOBA-D].",
   "os-rn-01": "list od Achtelika leżał tydzień na biurku",
   "os-rn-02": "sprawę Fąfary umorzono w drugiej instancji",
   "os-rn-03": "zeznania Gągały spisano protokolarnie",
@@ -862,7 +1001,7 @@ Zablokowano konto [LOGIN].",
   "str-114": "Koordynator: [OSOBA-A]/[TELEFON], zastępca [OSOBA-B]-[TELEFON].",
   "str-115": "Zatrzymano pojazd nr rej. [NR-REJESTRACYJNY] na parkingu.",
   "str-116": "Wdrożono nową wersję na [IP] wieczorem. Konwersja adresów [IP] nie działa.",
-  "str-117": "NOWAK JAN [TELEFON] ZŁOŻYŁ WNIOSEK",
+  "str-117": "[OSOBA-A] [TELEFON] ZŁOŻYŁ WNIOSEK",
   "str-118": "DHCPv6 Client DUID. . . : [MAC]",
   "str-119": "Login: [LOGIN]
 Pismo przekazano do działu kadry.",
@@ -901,8 +1040,57 @@ Tak	[OSOBA-B]	Urząd Miasta",
 {"paszport": "[NR-PASZPORTU]", "nrTelefonu": "[TELEFON]", "Miejscowość": "[MIEJSCOWOŚĆ]"}",
   "str-143": "Pani [OSOBA-A], urodzonej [DATA-URODZENIA] r. w [MIEJSCOWOŚĆ]. [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]. zam. [ADRES]. Card number: [NR-KARTY].",
   "str-144": "Kontakt nr 512 345 678, tel. [TELEFON]. Obecnych 12 os.[OSOBA-A] przewodniczyła. [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]. [OSOBA-B] z domu Ludowego.",
+  "str-145": "[OSOBA-A], [ADRES] osoby. Lokale przy [ADRES] i [ADRES]. Najem: [ADRES], lokal 32,4 m2. Świadek [OSOBA-B] zeznała.
+04. Ulica: [ADRES]  05. Nr domu: [ADRES]",
+  "str-146": "Wnioskodawczyni zamieszkała w [MIEJSCOWOŚĆ] 3 osoby na utrzymaniu. [KOD-POCZTOWY] [MIEJSCOWOŚĆ]   Sposób płatności: przelew",
+  "str-147": "Prezes Zarządu Spółki [OSOBA-A] podpisała umowę. Sąd ustanowił opiekuna nad ubezwłasnowolnionym urodzonym [DATA-URODZENIA] r. Pojazd pod numerem rejestracji [NR-REJESTRACYJNY].
+Imię i nazwisko pacjenta: [OSOBA-B]
+[OSOBA-C] z domu [OSOBA-D] Zam. [MIEJSCOWOŚĆ]
+Zam. [ADRES] i [ADRES]",
+  "str-148": "Imię i nazwisko pacjenta:
+[OSOBA-A]
+Imię i nazwisko ucznia: [OSOBA-B]
+Opiekuje się bratem niepełnosprawnym urodzonym [DATA-URODZENIA] r.
+[OSOBA-C] z domu [OSOBA-D] Wypisana 12.10.",
+  "str-149": "Plik: C:\\Users\\[LOGIN]\\Desktop\\a.txt, udział \\\\FS01\\home$\\[LOGIN], katalog /home/[LOGIN]/projekty",
   "str-15": "Zwrot nastąpi na konto [NR-KONTA] wskazane w umowie.",
+  "str-150": "sAMAccountName: [LOGIN]
+Accepted publickey for [LOGIN] from bastion.local port 22 ssh2
+sudo:  [LOGIN] : TTY=pts/0",
+  "str-151": "{"user":"[LOGIN]","message":"Konto [LOGIN] zablokowane"}
+LinkedIn: https://www.linkedin.com/in/[LOGIN]/",
+  "str-152": "linkedin.com/in/[LOGIN]/;[TELEFON]",
+  "str-153": "FB: facebook.com/profile.php?id=[LOGIN].Tel.[TELEFON]
+User name: [OSOBA-A]
+User: [OSOBA-B]
+Wnioskodawca: [OSOBA-B]",
+  "str-154": "imie;nazwisko;pesel;data_urodzenia;miejscowosc
+[OSOBA-A];[OSOBA-A];[PESEL];[DATA-URODZENIA];[MIEJSCOWOŚĆ]",
+  "str-155": "Lp.;Nr rejestracyjny;Marka
+1;[NR-REJESTRACYJNY];Skoda
+| Imię | Nazwisko |
+|---|---|
+| [OSOBA-A] | [OSOBA-A] |",
+  "str-156": "Adres zamieszkania: [ADRES], [MIEJSCOWOŚĆ]
+[OSOBA-A], zam. [ADRES] w [MIEJSCOWOŚĆ]
+urodziłam się [DATA-URODZENIA] w [MIEJSCOWOŚĆ]
+Login AD: [LOGIN]
+TEL;TYPE=WORK:[TELEFON]
+<Osoba imie="[IMIĘ I NAZWISKO]" nazwisko="[OSOBA-B]" miasto="[MIEJSCOWOŚĆ]"/>",
+  "str-157": "Wykaz pojazdów: [NR-REJESTRACYJNY], [NR-REJESTRACYJNY]. Kierujący autem [NR-REJESTRACYJNY] zbiegł. [OSOBA-A], zam. w [MIEJSCOWOŚĆ], zeznaje.",
+  "str-158": "Strony: [OSOBA-A] – [ADRES]. Adres: [ADRES]
+Imię;Nazwisko;Miasto
+Wakat;-;Warszawa
+[OSOBA-A];[OSOBA-A];[MIEJSCOWOŚĆ]",
+  "str-159": "Nieruchomość objęta księgą wieczystą KW nr [NR-KW] prowadzoną przez Sąd Rejonowy.",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
+  "str-160": "działka nr ewid. 123/4, obręb 0005 Brzozowa Wola, KW [NR-KW].",
+  "str-161": "Lokal w budynku na nieruchomości [NR-KW], księgi lokalowej brak.",
+  "str-162": "Nieruchomości objęte KW nr [NR-KW], [NR-KW] oraz [NR-KW].",
+  "str-163": "W razie pytań proszę dzwonić pod [TELEFON] wieczorem.
+Login: [LOGIN]
+Na zakończenie orkiestra zagrała mazur.",
+  "str-164": "Zgłaszająca mieszka przy [ADRES]. Od 3 lat skarży się na hałas. [OSOBA-A], córka [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO].",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
   "str-19": "sms na [TELEFON] nie doszedł",
@@ -1005,7 +1193,7 @@ exports[`golden: korpus benchmarku — wariant domyślny (wszystkie typy) 1`] = 
   "neg-100": "System KSeF w wersji 2.0 działa od 2026 roku.",
   "neg-101": "Raport KSeF [NIP] 20250826 000000012345 23 w podziale na kanały.",
   "neg-102": "P.S. Mróz ma być w nocy, okryj róże.",
-  "neg-103": "{"sciezka": "C:\\\\Users\\\\nowak\\\\Documents\\\\raport.docx", "opis": "Linia 1\\nLinia 2"}",
+  "neg-103": "{"sciezka": "C:\\\\Users\\\\Public\\\\nowe\\\\raport.docx", "opis": "Linia 1\\nLinia 2"}",
   "neg-104": "P.P.S. Mróz ma być w nocy, a PKO B.P. Wilk to nazwa robocza.",
   "neg-105": "Ilość
 120
@@ -1064,8 +1252,42 @@ Login: none",
 Imię i nazwisko ucznia
 Klasa
 Imię i nazwisko wnioskodawcy: Gmina Michałowice",
+  "neg-147": "Prezes Klubu Sportowego Lech Poznań zwołał zebranie. Pełnomocnik Zarządu Spółki Marek Trans Sp. z o.o. Imię i nazwisko opiekuna prawnego: Powiatowe Centrum Pomocy Rodzinie. Spotkanie w domu Pod Lipami. Samochód marki Volkswagen Golf TDI 1896 cm3. Telefon nr inw. 012345678 – zużyty. W komórce 123 456 789 zł. Przebudowa ul. Polnej i Leśnej 250 000,00 zł.",
+  "neg-148": "Obywatele Ukrainy mieszkający w Lublinie mogą złożyć wniosek. Ludzie mieszkają w Warszawie coraz dłużej. Kluczyk do skrzynki leży na biurku. Odruch Babińskiego dodatni. ZSO im Jana Kochanowskiego. Parafia pw. św. Rafała Kalinowskiego w Krakowie.",
+  "neg-149": "Cmentarz Rakowicki odwiedził oskarżony w dniu 1 listopada. Kościół Mariacki kupił nowe wyposażenie.
+21.06 Noc Świętojańska
+Kościół       Mariacki     Kraków
+Cystoskopia: trójkąt Pawlika bez zmian. Pismo zarejestrowano pod numerem rejestracji RPW 12345/2026.",
   "neg-15": "Zakład Ubezpieczeń Społecznych wydał decyzję odmowną.",
+  "neg-150": "Gabinet przy [ADRES] i Sali 12 jest czynny. Lokalizacje: [ADRES] oraz Hala 3. Kościół Mariacki odwiedził w niedzielę biskup. Mieszka w Sopocie 500 cudzoziemców.",
+  "neg-151": "Ścieżka: /home/ubuntu/app oraz C:\\Users\\Public\\Desktop. Accepted password for root from bastion.local port 22 ssh2. Strona https://www.linkedin.com/company/baltic-solutions oraz Konto AD: zablokowane. Alias: www.firma.pl",
+  "neg-152": "Konto AD: nadane
+Uprawnienia zostały nadane.
+Alias: intranet
+Serwer intranet działa.
+"GET /Users/Edit/15 HTTP/1.1" 200
+User name: Administrator",
+  "neg-153": "Pole sAMAccountName: jest obowiązkowe. Plik w C:\\Users\\pielegniarki\\Desktop i /home/wnioski/przychodzace. Zastąp C:\\Users\\nazwa_uzytkownika swoim loginem. session opened for user cron by (uid=0)",
+  "neg-154": "city,population
+Kraków,800000
+id,name,category
+1,Zając,zabawka
+imie,nazwisko
+Dzień dobry, przesyłam listę.",
+  "neg-155": "Imię i nazwisko	Lokal	Telefon
+Ulica	Adama	Mickiewicza
+Maj	Anna
+Sąd Rejonowy	Wydział Cywilny",
+  "neg-156": "UNIWERSYTET ADAMA MICKIEWICZA W POZNANIU. ULICA KOŚCIUSZKI TADEUSZA. KRÓL JAN III SOBIESKI. PIĄTEK 3 MAJA. ANNA STAROSTA. Kot Anny spał. Świadek Jehowy odmówił. Biuro na II p. Pokój 304.",
+  "neg-157": "Kościół św. Jerzego Męczennika. Katedra Świętego Jerzego. Marka Toyota zdobyła nagrodę. Walka z korupcją trwa. Ewangelia wg sw. Lukasza. Jezus, syn Józefa i Maryi, nauczał.",
+  "neg-158": "Nr zam. 45/2024 z dnia 12.03.2024. zam. Kawa 3 opakowania. Adres: Sala 5. Dziecko urodzi się około 12.05.2026. Login SSO: Okta. Login VPN: tak. <xs:element name="Nazwisko"/> <Podmiot osoba="prawna"/> Liczba pojazdów według GUS 2023 wzrosła.",
+  "neg-159": "Powód Kruk S.A. z siedzibą we Wrocławiu wniósł pozew. Pozwany Wilk Sp. z o.o. nie stawił się. Cudzoziemiec zam. w Sudanie. Jeżeli dziecko urodziło się 1 czerwca 2026 r., wniosek należy złożyć w terminie. Autem LPG 2010 dojechano. Zakup pojazdów: GBA 2023 r. Adres zamieszkania: Rubryka 7.",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
+  "neg-160": "Sygn. akt [ZNAK-SPRAWY] dotyczy działki 245/7 i lokalu 12/3 z umowy 12/2026/ZP.",
+  "neg-161": "Wpis do księgi wieczystej nastąpi w kw. 2026. Zamówienie nr AB1C/12345678/0, kod AB1C/12345678/7.",
+  "neg-162": "Wzór numeru księgi wieczystej: XXXX/XXXXXXXX/X. Nieruchomość KR1P/00234567/1 w zestawieniu.",
+  "neg-163": "Szpital Specjalistyczny im. dr. Wilka w Krakowie. Szkoła im. Ks. Jerzego Popiełuszki. Kościół pw. bł. ks. Jerzego Popiełuszki. Parafia pw. bł. Józefa Kowalskiego.",
+  "neg-164": "Odbiorca: Szkoła Podstawowa nr 12 im. Jana Pawła II",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
   "neg-19": "Rzecznik Praw Obywatelskich zabrał głos w debacie.",
@@ -1183,6 +1405,7 @@ Imię i nazwisko wnioskodawcy: Gmina Michałowice",
   "os-o-32": "Decyzję wysłano do [IMIĘ I NAZWISKO].",
   "os-o-33": "Na ulicy spotkałem wczoraj [IMIĘ I NAZWISKO].",
   "os-o-34": "[IMIĘ I NAZWISKO] złożył wniosek do urzędu.",
+  "os-o-35": "z powództwa [IMIĘ I NAZWISKO] przeciwko [IMIĘ I NAZWISKO], z udziałem [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO]",
   "os-p-01": "Pozwany [IMIĘ I NAZWISKO] nie stawił się na rozprawie.",
   "os-p-02": "Powódka [IMIĘ I NAZWISKO] wniosła o zasądzenie kosztów.",
   "os-p-03": "Świadek [IMIĘ I NAZWISKO] zeznał, że widział zdarzenie.",
@@ -1270,6 +1493,8 @@ Pozwany [IMIĘ I NAZWISKO] Annie groził.",
   "os-p-72": "Imię i nazwisko pacjenta: [IMIĘ I NAZWISKO]
 [IMIĘ I NAZWISKO] z domu [IMIĘ I NAZWISKO]
 Kierownik Działu Kadr [IMIĘ I NAZWISKO]",
+  "os-p-73": "Świadek [IMIĘ I NAZWISKO] zeznał. [IMIĘ I NAZWISKO] zatrudniony od 01.02.2010 r. Szanowna Pani Dyrektor Szkoły [IMIĘ I NAZWISKO]. Grafik: Dzień [IMIĘ I NAZWISKO], Noc [IMIĘ I NAZWISKO]. Do kościoła wraz ze św. [IMIĘ I NAZWISKO] wszedł sprawca.",
+  "os-p-74": "[IMIĘ I NAZWISKO] napisal, ze [IMIĘ I NAZWISKO] bedzie o 18. [IMIĘ I NAZWISKO], syn [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO], stawił się.",
   "os-r-01": "[IMIĘ I NAZWISKO] podpisał protokół odbioru.",
   "os-r-02": "[IMIĘ I NAZWISKO] złożyła wniosek o urlop.",
   "os-r-03": "[IMIĘ I NAZWISKO] wynajął magazyn pod miastem.",
@@ -1295,6 +1520,14 @@ Kierownik Działu Kadr [IMIĘ I NAZWISKO]",
   "os-r-23": "[IMIĘ I NAZWISKO] podpisała aneks.",
   "os-r-24": "opinia [IMIĘ I NAZWISKO] była druzgocąca",
   "os-r-25": "[IMIĘ I NAZWISKO] przyszła na przesłuchanie.",
+  "os-r-26": "Nazwisko	Imię	Stanowisko
+[IMIĘ I NAZWISKO]	[IMIĘ I NAZWISKO]	Kierowca
+[IMIĘ I NAZWISKO]	[IMIĘ I NAZWISKO]	Kierownik",
+  "os-r-27": "Wnioskodawca: [IMIĘ I NAZWISKO]
+Lista obecności: [IMIĘ I NAZWISKO], [IMIĘ I NAZWISKO]
+POWÓD: [IMIĘ I NAZWISKO]
+Pacjent: [IMIĘ I NAZWISKO]",
+  "os-r-28": "Konsultował dr [IMIĘ I NAZWISKO]. Prokurator [IMIĘ I NAZWISKO] nie oponuje. Pacjent: [IMIĘ I NAZWISKO]. Współpracuje z zespołem p. [IMIĘ I NAZWISKO].",
   "os-rn-01": "list od Achtelika leżał tydzień na biurku",
   "os-rn-02": "sprawę Fąfary umorzono w drugiej instancji",
   "os-rn-03": "zeznania Gągały spisano protokolarnie",
@@ -1356,7 +1589,7 @@ Zablokowano konto [LOGIN].",
   "str-114": "Koordynator: [IMIĘ I NAZWISKO]/[TELEFON], zastępca [IMIĘ I NAZWISKO]-[TELEFON].",
   "str-115": "Zatrzymano pojazd nr rej. [NR-REJESTRACYJNY] na parkingu.",
   "str-116": "Wdrożono nową wersję na [IP] wieczorem. Konwersja adresów [IP] nie działa.",
-  "str-117": "NOWAK JAN [TELEFON] ZŁOŻYŁ WNIOSEK",
+  "str-117": "[IMIĘ I NAZWISKO] [TELEFON] ZŁOŻYŁ WNIOSEK",
   "str-118": "DHCPv6 Client DUID. . . : [MAC]",
   "str-119": "Login: [LOGIN]
 Pismo przekazano do działu kadry.",
@@ -1395,8 +1628,57 @@ Tak	[IMIĘ I NAZWISKO]	Urząd Miasta",
 {"paszport": "[NR-PASZPORTU]", "nrTelefonu": "[TELEFON]", "Miejscowość": "[MIEJSCOWOŚĆ]"}",
   "str-143": "Pani [IMIĘ I NAZWISKO], urodzonej [DATA-URODZENIA] r. w [MIEJSCOWOŚĆ]. [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]. zam. [ADRES]. Card number: [NR-KARTY].",
   "str-144": "Kontakt nr 512 345 678, tel. [TELEFON]. Obecnych 12 os.[IMIĘ I NAZWISKO] przewodniczyła. [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]. [IMIĘ I NAZWISKO] z domu Ludowego.",
+  "str-145": "[IMIĘ I NAZWISKO], [ADRES] osoby. Lokale przy [ADRES] i [ADRES]. Najem: [ADRES], lokal 32,4 m2. Świadek [IMIĘ I NAZWISKO] zeznała.
+04. Ulica: [ADRES]  05. Nr domu: [ADRES]",
+  "str-146": "Wnioskodawczyni zamieszkała w [MIEJSCOWOŚĆ] 3 osoby na utrzymaniu. [KOD-POCZTOWY] [MIEJSCOWOŚĆ]   Sposób płatności: przelew",
+  "str-147": "Prezes Zarządu Spółki [IMIĘ I NAZWISKO] podpisała umowę. Sąd ustanowił opiekuna nad ubezwłasnowolnionym urodzonym [DATA-URODZENIA] r. Pojazd pod numerem rejestracji [NR-REJESTRACYJNY].
+Imię i nazwisko pacjenta: [IMIĘ I NAZWISKO]
+[IMIĘ I NAZWISKO] z domu [IMIĘ I NAZWISKO] Zam. [MIEJSCOWOŚĆ]
+Zam. [ADRES] i [ADRES]",
+  "str-148": "Imię i nazwisko pacjenta:
+[IMIĘ I NAZWISKO]
+Imię i nazwisko ucznia: [IMIĘ I NAZWISKO]
+Opiekuje się bratem niepełnosprawnym urodzonym [DATA-URODZENIA] r.
+[IMIĘ I NAZWISKO] z domu [IMIĘ I NAZWISKO] Wypisana 12.10.",
+  "str-149": "Plik: C:\\Users\\[LOGIN]\\Desktop\\a.txt, udział \\\\FS01\\home$\\[LOGIN], katalog /home/[LOGIN]/projekty",
   "str-15": "Zwrot nastąpi na konto [NR-KONTA] wskazane w umowie.",
+  "str-150": "sAMAccountName: [LOGIN]
+Accepted publickey for [LOGIN] from bastion.local port 22 ssh2
+sudo:  [LOGIN] : TTY=pts/0",
+  "str-151": "{"user":"[LOGIN]","message":"Konto [LOGIN] zablokowane"}
+LinkedIn: https://www.linkedin.com/in/[LOGIN]/",
+  "str-152": "linkedin.com/in/[LOGIN]/;[TELEFON]",
+  "str-153": "FB: facebook.com/profile.php?id=[LOGIN].Tel.[TELEFON]
+User name: [IMIĘ I NAZWISKO]
+User: [IMIĘ I NAZWISKO]
+Wnioskodawca: [IMIĘ I NAZWISKO]",
+  "str-154": "imie;nazwisko;pesel;data_urodzenia;miejscowosc
+[IMIĘ I NAZWISKO];[IMIĘ I NAZWISKO];[PESEL];[DATA-URODZENIA];[MIEJSCOWOŚĆ]",
+  "str-155": "Lp.;Nr rejestracyjny;Marka
+1;[NR-REJESTRACYJNY];Skoda
+| Imię | Nazwisko |
+|---|---|
+| [IMIĘ I NAZWISKO] | [IMIĘ I NAZWISKO] |",
+  "str-156": "Adres zamieszkania: [ADRES], [MIEJSCOWOŚĆ]
+[IMIĘ I NAZWISKO], zam. [ADRES] w [MIEJSCOWOŚĆ]
+urodziłam się [DATA-URODZENIA] w [MIEJSCOWOŚĆ]
+Login AD: [LOGIN]
+TEL;TYPE=WORK:[TELEFON]
+<Osoba imie="[IMIĘ I NAZWISKO]" nazwisko="[IMIĘ I NAZWISKO]" miasto="[MIEJSCOWOŚĆ]"/>",
+  "str-157": "Wykaz pojazdów: [NR-REJESTRACYJNY], [NR-REJESTRACYJNY]. Kierujący autem [NR-REJESTRACYJNY] zbiegł. [IMIĘ I NAZWISKO], zam. w [MIEJSCOWOŚĆ], zeznaje.",
+  "str-158": "Strony: [IMIĘ I NAZWISKO] – [ADRES]. Adres: [ADRES]
+Imię;Nazwisko;Miasto
+Wakat;-;Warszawa
+[IMIĘ I NAZWISKO];[IMIĘ I NAZWISKO];[MIEJSCOWOŚĆ]",
+  "str-159": "Nieruchomość objęta księgą wieczystą KW nr [NR-KW] prowadzoną przez Sąd Rejonowy.",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
+  "str-160": "działka nr ewid. 123/4, obręb 0005 Brzozowa Wola, KW [NR-KW].",
+  "str-161": "Lokal w budynku na nieruchomości [NR-KW], księgi lokalowej brak.",
+  "str-162": "Nieruchomości objęte KW nr [NR-KW], [NR-KW] oraz [NR-KW].",
+  "str-163": "W razie pytań proszę dzwonić pod [TELEFON] wieczorem.
+Login: [LOGIN]
+Na zakończenie orkiestra zagrała mazur.",
+  "str-164": "Zgłaszająca mieszka przy [ADRES]. Od 3 lat skarży się na hałas. [IMIĘ I NAZWISKO], córka [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO].",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
   "str-19": "sms na [TELEFON] nie doszedł",

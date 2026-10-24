@@ -23,6 +23,20 @@ const DECYZJA = readFileSync(path.join(FIXTURES, 'decyzja.txt'), 'utf8');
 const KW = 'OS1W/00045123/6';
 const squash = (s) => s.replace(/\s+/g, '');
 
+/**
+ * Wyłącza w „Co maskować” typ „Nr księgi wieczystej”. Od v0.46.24 silnik sam zasłania numer
+ * księgi, a te testy potrzebują numeru, który automat przepuścił i urzędnik zasłania ręcznie.
+ * @param {import('playwright').Page} page
+ */
+async function kwJawny(page) {
+  await page.evaluate(() => {
+    const box = /** @type {HTMLInputElement | null} */ (document.querySelector('#mask-toggles input[data-key="kw"]'));
+    if (!box) throw new Error('brak przełącznika „Nr księgi wieczystej”');
+    box.checked = false;
+    box.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+}
+
 /** Wkleja tekst w pole źródła i czeka na wynik. @param {import('playwright').Page} page */
 async function paste(page, text, needle = '[PESEL]') {
   await page.locator('#input').fill(text);
@@ -175,6 +189,7 @@ test('„Zostaw jawne wszędzie” pokazuje formy, które odsłoni, i obejmuje t
 test('„Zasłoń zaznaczenie” w wyniku: numer księgi wieczystej jako [DANE] w wyniku, .txt i druku', async (t) => {
   await withApp(browser, t, '', async (app) => {
     const { page } = app;
+    await kwJawny(page);
     await paste(page, DECYZJA);
     const keysBefore = await page.evaluate(() => Object.keys(localStorage).sort());
     // zaznaczenie środka numeru: zasłonięty ma być cały numer z ukośnikami
@@ -325,6 +340,7 @@ test('„Zostaw jawne” nie odsłania PESEL-u dopisanego potem tuż za nazwiski
 test('ręczne zasłonięcie, którego nie da się nałożyć na długi tekst, wstrzymuje kopiowanie, pliki i druk', async (t) => {
   await withApp(browser, t, '', async (app) => {
     const { page } = app;
+    await kwJawny(page);
     await paste(page, DECYZJA);
     await selectInOutput(page, KW);
     await page.locator('#fix-sel-out').click();
@@ -351,6 +367,7 @@ test('ręczne zasłonięcie, którego nie da się nałożyć na długi tekst, ws
 test('po „Wyczyść” w DOM nie zostaje nic z poprzedniego pisma', async (t) => {
   await withApp(browser, t, '', async (app) => {
     const { page } = app;
+    await kwJawny(page);
     await paste(page, DECYZJA);
     await page.locator('#output .cl', { hasText: '/-/' }).locator('mark.pii').click();
     await page.locator('#fix-keep').click();
@@ -395,6 +412,7 @@ async function openFormFromSource(page, needle) {
 test('edycja źródła przy otwartym wierszu „Zasłoń” nie zasłania przesuniętych pozycji', async (t) => {
   await withApp(browser, t, '', async (app) => {
     const { page } = app;
+    await kwJawny(page);
     await paste(page, DECYZJA);
     // edycja i od razu „Zasłoń”, zanim wynik się przeliczy (zegar strony stoi)
     await openFormFromSource(page, KW);
@@ -447,6 +465,7 @@ test('po „Zostaw jawne” na drugim znaczniku grupy pasek zostaje na tym samym
 test('„Cofnij zasłonięcie” na fragmencie zasłoniętym ręcznie zamyka pasek zamiast przejść na inną osobę', async (t) => {
   await withApp(browser, t, '', async (app) => {
     const { page } = app;
+    await kwJawny(page);
     await paste(page, DECYZJA);
     await selectInOutput(page, KW);
     await page.locator('#fix-sel-out').click();
@@ -584,6 +603,7 @@ test('„Cofnij zasłonięcie wszędzie” na zakresach, które wchłonęły PES
 test('Ctrl+Z w wyniku po „Cofnij zasłonięcie” przywraca to zasłonięcie, a nie zdejmuje wcześniejszego', async (t) => {
   await withApp(browser, t, '', async (app) => {
     const { page } = app;
+    await kwJawny(page);
     await paste(
       page,
       `Księga wieczysta ${KW} dla działki 245/7. Wnioskodawca Jan Kowalski, PESEL 44051401359.`,
@@ -714,6 +734,7 @@ const fixNote = (page) => page.locator('#fix-note').innerText();
 test('zasłonięcie „wszędzie” przetrwa usunięcie dużego fragmentu i Ctrl+Z w polu źródła', async (t) => {
   await withApp(browser, t, '', async (app) => {
     const { page } = app;
+    await kwJawny(page);
     const head = `Decyzja w sprawie działki, księga wieczysta nr ${KW}, wnioskodawca Jan Kowalski, PESEL 44051401359.\n`;
     const tail = Array.from(
       { length: 12 },
@@ -772,6 +793,7 @@ test('Ctrl+Z i Ctrl+Y w polu nie przenoszą ani nie przywracają „Zostaw jawne
 test('Ctrl+A, Delete i Ctrl+Z w polu: „wszędzie” wraca jako reguła, a „tutaj” trzeba zrobić od nowa (zgłoszenie: jedno miejsce)', async (t) => {
   await withApp(browser, t, '', async (app) => {
     const { page } = app;
+    await kwJawny(page);
     const A = `Decyzja w sprawie działki, księga wieczysta nr ${KW}, wnioskodawca Jan Kowalski, PESEL 44051401359.\nUzasadnienie jest krótkie.`;
     const B = 'Notatka służbowa: wnioskodawca Adam Nowak, PESEL 85071412358, stawił się osobiście w urzędzie.';
     const ta = page.locator('#input');
@@ -816,6 +838,7 @@ test('Ctrl+A, Delete i Ctrl+Z w polu: „wszędzie” wraca jako reguła, a „t
 test('„Cofnij” na pasku po „Wyczyść” przywraca tekst bez ręcznych poprawek i mówi o tym', async (t) => {
   await withApp(browser, t, '', async (app) => {
     const { page } = app;
+    await kwJawny(page);
     await paste(page, `Księga wieczysta ${KW}. Wnioskodawca Jan Kowalski, PESEL 44051401359.`);
     await maskFromSource(page, KW);
     await app.waitForOutput('[DANE]');
@@ -1014,6 +1037,7 @@ test('Ctrl+Z w wyniku po „Zasłoń ponownie” i edycji źródła nie odsłani
 test('Ctrl+Z i Ctrl+Y w polu: zasłonięcie „wszędzie” działa w każdej wersji pisma, bez miejsca zostaje na liście (zgłoszenie: Ctrl+Y)', async (t) => {
   await withApp(browser, t, '', async (app) => {
     const { page } = app;
+    await kwJawny(page);
     const A = 'Pismo pierwsze. Wnioskodawca Jan Kowalski, PESEL 44051401359, mieszka w Radomiu.';
     const B = `Zupełnie inne pismo o księdze wieczystej ${KW} dotyczące Adama Nowaka, PESEL 85071412358, i działki.`;
     const ta = page.locator('#input');
@@ -1072,6 +1096,7 @@ test('Ctrl+Z i Ctrl+Y w wyniku bez poprawek do cofnięcia nie zmieniają tekstu 
 test('„Zasłoń wszędzie” na numerze KW: litera doklejona do numeru nie odsłania go (zgłoszenie: doklejona litera)', async (t) => {
   await withApp(browser, t, '', async (app) => {
     const { page } = app;
+    await kwJawny(page);
     const T = `Decyzja nr 14/2024 w sprawie działki, księga wieczysta nr ${KW}.\nUzasadnienie jest krótkie.`;
     const ta = page.locator('#input');
     await ta.click();

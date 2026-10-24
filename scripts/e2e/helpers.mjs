@@ -109,8 +109,8 @@ export const FICTIONAL_PII = [
   ['numer księgi wieczystej z decyzji w testach korekty', 'OS1W/00045123'],
 ];
 
-/** Górna granica rozmiaru pliku aplikacji w bajtach (dziś ok. 2,09 MB; zapas na kolejne pakiety). */
-export const MAX_WEB_BYTES = 2_300_000;
+/** Górna granica rozmiaru pliku aplikacji w bajtach (dziś ok. 2,32 MB po silniku z v0.46.24; zapas na kolejne pakiety). */
+export const MAX_WEB_BYTES = 2_400_000;
 
 /**
  * Ścieżka do innej binarki Chromium (np. snapshot 109 z pobierz-przegladarki.mjs). Testy

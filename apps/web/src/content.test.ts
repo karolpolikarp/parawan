@@ -102,12 +102,12 @@ test('aplikacja: liczba „—” w widocznej treści nie rośnie (dziś zero)',
   expect(text.match(/—/g) ?? []).toHaveLength(0);
 });
 
-test('aplikacja: karta „Ograniczenia” opisuje urzędnika, księgę wieczystą, działkę i metadane pliku', () => {
+test('aplikacja: karta „Ograniczenia” opisuje urzędnika, działkę i metadane pliku', () => {
   const card = webHtml.match(/<section class="card g4 caveat" id="ograniczenia"[\s\S]*?<\/section>/)?.[0] ?? '';
   expect(card).not.toBe('');
   for (const li of [
     'Nazwisko urzędnika pod pismem jest zasłaniane tak samo jak dane strony. Zostawisz je jawne przyciskiem „Zostaw jawne” po kliknięciu znacznika.',
-    'Numer księgi wieczystej i&nbsp;numer działki zostają w&nbsp;tekście. Zasłonisz je, zaznaczając fragment i&nbsp;wybierając „Zasłoń zaznaczenie”.',
+    'Numer działki zostaje w&nbsp;tekście. Zasłonisz go, zaznaczając fragment i&nbsp;wybierając „Zasłoń zaznaczenie”.',
     'Właściwości pliku (autor), komentarze i&nbsp;historia zmian zostają w&nbsp;oryginale. Publikuj plik zapisany z&nbsp;Parawana.',
   ]) {
     expect(card).toContain(`<li>${li}</li>`);

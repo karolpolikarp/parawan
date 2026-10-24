@@ -146,15 +146,17 @@ describe('„Zostaw jawne”', () => {
 });
 
 describe('„Zasłoń zaznaczenie”', () => {
-  test('numer księgi wieczystej jako [DANE] i redactPII wyniku zostawia [DANE]', () => {
+  // numer księgi wieczystej silnik zasłania sam (NR-KW), więc ręcznie zasłaniamy numer działki
+  test('numer działki jako [DANE] i redactPII wyniku zostawia [DANE]', () => {
     const { spans } = auto(DECYZJA);
-    const kw = at(DECYZJA, 'OS1W/00045123/6');
-    const out = final(DECYZJA, spans, [{ kind: 'mask', scope: 'here', ...kw, token: 'DANE' }]);
-    expect(out).toContain('(księga wieczysta nr [DANE])');
+    const dz = at(DECYZJA, '245/7');
+    const out = final(DECYZJA, spans, [{ kind: 'mask', scope: 'here', ...dz, token: 'DANE' }]);
+    expect(out).toContain('na działce o nr ewid. [DANE], obręb');
+    expect(out).toContain('(księga wieczysta nr [NR-KW])');
     expect(out).not.toContain('00045123');
     const again = redactPII(out).redacted;
     expect(again.match(/\[DANE\]/g)?.length).toBe(1);
-    expect(again).toContain('(księga wieczysta nr [DANE])');
+    expect(again).toContain('na działce o nr ewid. [DANE], obręb');
   });
 
   test('zaznaczenie zahaczające o znacznik rozszerza się na cały zakres', () => {

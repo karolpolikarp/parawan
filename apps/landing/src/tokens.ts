@@ -19,6 +19,7 @@ export const TYPE_MASK: Record<PiiType, { token: string; cat: Cat }> = {
   PASZPORT: { token: 'NR-PASZPORTU', cat: 'ident' },
   KRS: { token: 'KRS', cat: 'ident' },
   KSEF: { token: 'NR-KSEF', cat: 'ident' },
+  KW: { token: 'NR-KW', cat: 'ident' },
   'ZNAK-SPRAWY': { token: 'ZNAK-SPRAWY', cat: 'ident' },
   'PRAWO-JAZDY': { token: 'PRAWO-JAZDY', cat: 'ident' },
   'NR-REJESTRACYJNY': { token: 'NR-REJESTRACYJNY', cat: 'ident' },

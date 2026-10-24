@@ -83,17 +83,17 @@ CZEGO PARAWAN NIE ZROBI
 
   Rozpoznaje dane regułami, słownikami i sumami kontrolnymi, bez sztucznej
   inteligencji. Może przepuścić nazwisko spoza słownika, gdy obok nie ma
-  imienia ani słów Pan czy Pani, numer w nietypowym zapisie, numer księgi
-  wieczystej i numer działki. Nie czyta skanów (PDF musi mieć warstwę
-  tekstu). Z pliku Word czyta treść główną, bez nagłówków, stopek,
-  przypisów i komentarzy, i mówi po wczytaniu, co pominął.
+  imienia ani słów Pan czy Pani, numer w nietypowym zapisie i numer
+  działki. Nie czyta skanów (PDF musi mieć warstwę tekstu). Z pliku Word
+  czyta treść główną, bez nagłówków, stopek, przypisów i komentarzy,
+  i mówi po wczytaniu, co pominął.
 
   Zasłania też dane, które w BIP zwykle zostają jawne, np. nazwiska
   urzędników pod pismem i znak sprawy. Nie zmienia oryginalnego pliku.
 
-  W pomiarze na 319 wymyślonych zdaniach zniknęło 276 z 291 fragmentów,
-  które miały zniknąć (94,8%), i zostało 350 z 351, które miały zostać
-  (99,7%). Metodologia: docs/BENCHMARK.md w repozytorium.
+  W pomiarze na 496 wymyślonych zdaniach zniknęło 668 z 683 fragmentów,
+  które miały zniknąć (97,8%), i zostało 773 z 774, które miały zostać
+  (99,9%). Metodologia: docs/BENCHMARK.md w repozytorium.
 
 DO OCENY INSPEKTORA OCHRONY DANYCH
   Z opisu wynika, że autor nie przetwarza danych w imieniu urzędu i nie jest

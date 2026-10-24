@@ -716,7 +716,7 @@ export function buildDataset() {
   neg('P.S. Mróz ma być w nocy, okryj róże.', ['P.S. Mróz']);
   str(String.raw`{"opis": "Zgłosił:\nKowalski Jan, PESEL:\n85031412347"}`, ['Kowalski', 'Jan', '85031412347'], [String.raw`"Zgłosił:\n`, String.raw`PESEL:\n`]);
   str(String.raw`{"payload":"{\"imie\":\"Jadwiga\",\"nazwisko\":\"Gżegżółka\",\"miasto\":\"Słupsk\"}"}`, ['Jadwiga', 'Gżegżółka', 'Słupsk'], [String.raw`{\"imie\":\"`]);
-  neg(String.raw`{"sciezka": "C:\\Users\\nowak\\Documents\\raport.docx", "opis": "Linia 1\nLinia 2"}`, [String.raw`C:\\Users\\nowak\\Documents`, String.raw`Linia 1\nLinia 2`]);
+  neg(String.raw`{"sciezka": "C:\\Users\\Public\\nowe\\raport.docx", "opis": "Linia 1\nLinia 2"}`, [String.raw`C:\\Users\\Public\\nowe`, String.raw`Linia 1\nLinia 2`]);
   // (cudzysłowy wokół masek w miejscu liczb pilnuje snapshot golden — mustKeep musi stać w wejściu)
   str('{"klient_id": 7, "pesel": 85031412347, "telefon": 601234567}', ['85031412347', '601234567'], ['"klient_id": 7']);
   // Regresje partii b1 wyłapane w weryfikacji: imię nad nazwiskiem po czasowniku podpisu, lista
@@ -874,6 +874,85 @@ export function buildDataset() {
   // etykietą pola, instytucja w polu osoby, rzeczownik po „z domu", notacja „UI.", „12 os.".
   neg('Sprzedam samochód marki Skoda Octavia TSI 1400. Ogłoszenie na tablicy o PIT 2024 zdjęto. Przyjęto zgłoszenie telefoniczne nr 512345678. Kobiecie urodzonej 1 stycznia 1953 r. lub później przysługuje emerytura. Lot o numerze rejsu LO 3925 opóźniony. Zmiana w UI.Panel 2.0.\nImię i nazwisko ucznia\nKlasa\nImię i nazwisko wnioskodawcy: Gmina Michałowice', ['TSI 1400', 'PIT 2024', '512345678', '1 stycznia 1953', 'LO 3925', 'UI.Panel 2.0', 'Klasa', 'Gmina Michałowice']);
   str('Kontakt nr 512 345 678, tel. 22 843 21 09. Obecnych 12 os.Halina Grzyb przewodniczyła. UL. LIPOWA 14, 05-300 STARA WIEŚ. Anna Nowak z domu Ludowego.', ['22 843 21 09', 'Halina', 'Grzyb', 'LIPOWA 14', '05-300', 'STARA WIEŚ', 'Anna', 'Nowak'], ['Kontakt nr', 'z domu Ludowego']);
+  // Resztki b4–b5: nazwa klubu i firmy po roli, instytucja w polu osoby, placówka po „z domu",
+  // kod silnika, numer inwentarzowy, kwota w komórce arkusza; adres po osobie przed liczebnikiem,
+  // łącznik po numerze domu, metraż lokalu, kwota za nazwą ulic, pole „Ulica" w wierszu formularza.
+  neg('Prezes Klubu Sportowego Lech Poznań zwołał zebranie. Pełnomocnik Zarządu Spółki Marek Trans Sp. z o.o. Imię i nazwisko opiekuna prawnego: Powiatowe Centrum Pomocy Rodzinie. Spotkanie w domu Pod Lipami. Samochód marki Volkswagen Golf TDI 1896 cm3. Telefon nr inw. 012345678 – zużyty. W komórce 123 456 789 zł. Przebudowa ul. Polnej i Leśnej 250 000,00 zł.', ['Lech Poznań', 'Marek Trans', 'Powiatowe Centrum Pomocy Rodzinie', 'Pod Lipami', 'TDI 1896', '012345678', '123 456 789', 'Polnej i Leśnej 250 000,00']);
+  str('Jan Kowalski, ul. Leśna 3 osoby. Lokale przy ul. Polnej 5 i Leśnej 7. Najem: ul. Rynek 7, lokal 32,4 m2. Świadek Kowalczyk-Müller zeznała.\n04. Ulica: Warszawska  05. Nr domu: 31', ['Jan Kowalski', 'Leśna 3', 'Polnej 5', 'Leśnej 7', 'Rynek 7', 'Kowalczyk-Müller', 'Warszawska'], ['osoby', 'lokal 32,4 m2', 'Świadek', 'Nr domu:']);
+  // Resztki b3: zdanie ogólne z przydawką przed „mieszkający", rzeczownik przy przedmiocie, eponim
+  // i patron (także po gołym „im" przy skrócie szkoły); nazwisko po stronie postępowania mimo
+  // stoplisty, zdrobnienie w notatce kadrowej, nazwisko dwuczłonowe po roli z urzędem, grafik
+  // dyżurów, „św." jako świadek, mała liczba osób za miastem zamieszkania.
+  neg('Obywatele Ukrainy mieszkający w Lublinie mogą złożyć wniosek. Ludzie mieszkają w Warszawie coraz dłużej. Kluczyk do skrzynki leży na biurku. Odruch Babińskiego dodatni. ZSO im Jana Kochanowskiego. Parafia pw. św. Rafała Kalinowskiego w Krakowie.', ['Lublinie', 'Warszawie', 'Kluczyk', 'Babińskiego', 'Jana Kochanowskiego', 'Rafała Kalinowskiego']);
+  osp('Świadek Poleski zeznał. Mieczyk zatrudniony od 01.02.2010 r. Szanowna Pani Dyrektor Szkoły Kowalska-Nowak. Grafik: Dzień Lisiecka, Noc Brzozowska. Do kościoła wraz ze św. Kowalskim wszedł sprawca.', ['Poleski', 'Mieczyk', 'Kowalska-Nowak', 'Lisiecka', 'Brzozowska', 'Kowalskim'], ['Świadek', 'zatrudniony', 'Dyrektor Szkoły', 'Grafik: Dzień', 'wszedł sprawca']);
+  str('Wnioskodawczyni zamieszkała w Gdańsku 3 osoby na utrzymaniu. 86-170 Nowe   Sposób płatności: przelew', ['Gdańsku', '86-170', 'Nowe'], ['3 osoby', 'Sposób płatności']);
+  // Resztki, poprawki po weryfikacji: członek zarządu po „Spółki", data urodzenia po przyimku,
+  // „numerem rejestracji", nazwisko na „-owa" pod etykietą, nazwisko panieńskie przed polem
+  // formularza, drugi adres w wyliczeniu; nazwa obiektu w szyku odwróconym, święto w harmonogramie,
+  // tabela wyrównana spacjami, eponim anatomiczny i rejestracja pisma zostają jawne.
+  str('Prezes Zarządu Spółki Anna Wrona podpisała umowę. Sąd ustanowił opiekuna nad ubezwłasnowolnionym urodzonym 12.03.1950 r. Pojazd pod numerem rejestracji WX 12345.\nImię i nazwisko pacjenta: Oksana Petrowa\nJoanna Kos z domu Sikora Zam. Sosnowiec\nZam. ul. Długa 5 i Krótka 7', ['Anna Wrona', '12.03.1950', 'WX 12345', 'Oksana Petrowa', 'Joanna Kos', 'Sikora', 'Sosnowiec', 'Długa 5', 'Krótka 7'], ['Prezes Zarządu Spółki', 'opiekuna nad ubezwłasnowolnionym', 'Imię i nazwisko pacjenta:']);
+  neg('Cmentarz Rakowicki odwiedził oskarżony w dniu 1 listopada. Kościół Mariacki kupił nowe wyposażenie.\n21.06 Noc Świętojańska\nKościół       Mariacki     Kraków\nCystoskopia: trójkąt Pawlika bez zmian. Pismo zarejestrowano pod numerem rejestracji RPW 12345/2026.', ['Rakowicki', 'Mariacki', 'Noc Świętojańska', 'Pawlika', 'RPW 12345/2026']);
+  // Poprawki po weryfikacji etapu resztki (runda 2): obce imię i nazwisko z następnej linii, nazwisko
+  // będące wyrazem instytucji, data urodzenia w narzędniku, nazwisko panieńskie przed imiesłowem;
+  // pomieszczenie lub hala po adresie, zabytek przy czasowniku i statystyka zostają jawne.
+  str('Imię i nazwisko pacjenta:\nYuki Tanaka\nImię i nazwisko ucznia: Jan Nowy\nOpiekuje się bratem niepełnosprawnym urodzonym 12.03.1990 r.\nMaria Nowak z domu Wrona Wypisana 12.10.', ['Yuki Tanaka', 'Jan Nowy', '12.03.1990', 'Maria Nowak', 'Wrona'], ['Imię i nazwisko pacjenta:', 'urodzonym', 'Wypisana']);
+  neg('Gabinet przy ul. Szpitalnej 5 m. 3 i Sali 12 jest czynny. Lokalizacje: ul. Leśna 7 oraz Hala 3. Kościół Mariacki odwiedził w niedzielę biskup. Mieszka w Sopocie 500 cudzoziemców.', ['Sali 12', 'Hala 3', 'Mariacki', 'Sopocie']);
+  // b6: loginy w środowisku firmowym — ścieżka profilu, udział domowy, atrybut AD, log sshd,
+  // profil w URL-u i propagacja loginu z klucza JSON. Konta systemowe i strony firm zostają.
+  str(String.raw`Plik: C:\Users\tkaminski\Desktop\a.txt, udział \\FS01\home$\anowak, katalog /home/jkowalski/projekty`, ['tkaminski', 'anowak', 'jkowalski'], ['C:\\Users\\', '\\\\FS01\\home$\\', '/home/', '/projekty']);
+  str('sAMAccountName: kwisniewski\nAccepted publickey for mzielinski from bastion.local port 22 ssh2\nsudo:  pnowicki : TTY=pts/0', ['kwisniewski', 'mzielinski', 'pnowicki'], ['sAMAccountName:', 'Accepted publickey for', 'from bastion.local', 'TTY=pts/0']);
+  str('{"user":"a.kaminska","message":"Konto a.kaminska zablokowane"}\nLinkedIn: https://www.linkedin.com/in/joanna-pietrzak-hr/', ['a.kaminska', 'joanna-pietrzak-hr'], ['"message":"Konto', 'https://www.linkedin.com/in/']);
+  neg(String.raw`Ścieżka: /home/ubuntu/app oraz C:\Users\Public\Desktop. Accepted password for root from bastion.local port 22 ssh2. Strona https://www.linkedin.com/company/baltic-solutions oraz Konto AD: zablokowane. Alias: www.firma.pl`, ['/home/ubuntu/app', String.raw`C:\Users\Public`, 'for root from', 'company/baltic-solutions', 'Konto AD: zablokowane', 'Alias: www.firma.pl']);
+  // b6 fix1: słaba etykieta ze zwykłym wyrazem, trasa serwisu, konto wbudowane — bez propagacji na prozę
+  neg('Konto AD: nadane\nUprawnienia zostały nadane.\nAlias: intranet\nSerwer intranet działa.\n"GET /Users/Edit/15 HTTP/1.1" 200\nUser name: Administrator', ['zostały nadane', 'Serwer intranet', '/Users/Edit/15', 'User name: Administrator']);
+  // b6 fix1: adres profilu bez schematu nie połyka sklejonego telefonu
+  str('linkedin.com/in/anowak/;501-234-567', ['anowak', '501-234-567'], ['linkedin.com/in/', '/;']);
+  // b6 fix2: adres profilu bez schematu nie wciąga doklejonych danych, osoba w polu „User name"
+  // w całości (także WIELKIMI literami w odwrotnym szyku); instrukcja i katalogi działów zostają.
+  str('FB: facebook.com/profile.php?id=100004567890123.Tel.501234567\nUser name: Anna Zając\nUser: TOMASZ JANKOWSKI\nWnioskodawca: JANKOWSKI TOMASZ', ['100004567890123', '501234567', 'Anna Zając', 'TOMASZ JANKOWSKI', 'JANKOWSKI TOMASZ'], ['facebook.com/profile.php?id=', '.Tel.', 'User name:', 'Wnioskodawca:']);
+  neg(String.raw`Pole sAMAccountName: jest obowiązkowe. Plik w C:\Users\pielegniarki\Desktop i /home/wnioski/przychodzace. Zastąp C:\Users\nazwa_uzytkownika swoim loginem. session opened for user cron by (uid=0)`, ['jest obowiązkowe', 'pielegniarki', '/home/wnioski/', 'nazwa_uzytkownika', 'user cron']);
+
+  // ── b7: nagłówek tabeli jako kotwica, TSV, WERSALIKI, homografy, odmiana imion, adres po etykiecie ──
+  // K61: wiersze pod nagłówkiem CSV/TSV/Markdown; nagłówek bez kolumny osoby zostaje nietknięty
+  str('imie;nazwisko;pesel;data_urodzenia;miejscowosc\nJan;Kos;90053024683;1990-05-30;Biała Podlaska', ['Jan;', 'Kos', '1990-05-30', 'Biała Podlaska'], ['imie;nazwisko;pesel']);
+  str('Lp.;Nr rejestracyjny;Marka\n1;WI 4821F;Skoda\n| Imię | Nazwisko |\n|---|---|\n| Magdalena | Zając |', ['WI 4821F', 'Magdalena', 'Zając'], ['Lp.;Nr rejestracyjny;Marka', ';Skoda']);
+  neg('city,population\nKraków,800000\nid,name,category\n1,Zając,zabawka\nimie,nazwisko\nDzień dobry, przesyłam listę.', ['Kraków,800000', '1,Zając,zabawka', 'Dzień dobry, przesyłam listę.']);
+  // K03: komórki TSV dostają osobne maski, kolumna stanowiska i nagłówek zostają
+  osr('Nazwisko\tImię\tStanowisko\nWróbel\tHenryk\tKierowca\nMazur\tGrzegorz\tKierownik', ['Wróbel', 'Henryk', 'Mazur', 'Grzegorz'], ['Nazwisko\tImię\tStanowisko', 'Kierowca', 'Kierownik']);
+  neg('Imię i nazwisko\tLokal\tTelefon\nUlica\tAdama\tMickiewicza\nMaj\tAnna\nSąd Rejonowy\tWydział Cywilny', ['Lokal\tTelefon', 'Adama\tMickiewicza', 'Maj\tAnna', 'Wydział Cywilny']);
+  // K47/K48: WERSALIKI w szyku odwróconym i nazwiska-homografy przy kotwicy osoby
+  osr('Wnioskodawca: KOWALSKI JAN\nLista obecności: NOWAK PIOTR, WÓJCIK MARIA\nPOWÓD: MAREK DUDA\nPacjent: KOWALSKA Anna', ['KOWALSKI JAN', 'NOWAK PIOTR', 'WÓJCIK MARIA', 'MAREK DUDA', 'KOWALSKA Anna'], ['Wnioskodawca:', 'POWÓD:']);
+  osr('Konsultował dr Mróz. Prokurator Baran nie oponuje. Pacjent: Wilk Jadwiga. Współpracuje z zespołem p. Wróbla.', ['Mróz', 'Baran', 'Wilk Jadwiga', 'Wróbla'], ['Konsultował dr', 'Prokurator', 'nie oponuje']);
+  neg('UNIWERSYTET ADAMA MICKIEWICZA W POZNANIU. ULICA KOŚCIUSZKI TADEUSZA. KRÓL JAN III SOBIESKI. PIĄTEK 3 MAJA. ANNA STAROSTA. Kot Anny spał. Świadek Jehowy odmówił. Biuro na II p. Pokój 304.', ['ADAMA MICKIEWICZA', 'KOŚCIUSZKI TADEUSZA', 'JAN III SOBIESKI', 'ANNA STAROSTA', 'Kot Anny', 'Świadek Jehowy', 'II p. Pokój']);
+  // K31/K51/K67: odmiana imion, zapis bez ogonków, imiona rodziców
+  oso('z powództwa Pawła Kowalskiego przeciwko Agacie Nowak, z udziałem Jerzego Nowaka i Henrykiem Lisem', ['Pawła Kowalskiego', 'Agacie Nowak', 'Jerzego Nowaka', 'Henrykiem Lisem'], ['z powództwa', 'przeciwko']);
+  osp('Michal Nowak napisal, ze Lukasz Wisniewski bedzie o 18. Krzysztof Wróbel, syn Józefa i Marii, stawił się.', ['Michal Nowak', 'Lukasz Wisniewski', 'Krzysztof Wróbel', 'Józefa', 'Marii'], ['napisal', 'syn', 'stawił się']);
+  neg('Kościół św. Jerzego Męczennika. Katedra Świętego Jerzego. Marka Toyota zdobyła nagrodę. Walka z korupcją trwa. Ewangelia wg sw. Lukasza. Jezus, syn Józefa i Maryi, nauczał.', ['Jerzego Męczennika', 'Świętego Jerzego', 'Marka Toyota', 'Walka z', 'sw. Lukasza', 'syn Józefa i Maryi']);
+  // K56/K53/K58/K60: adres bez „ul.", forma „urodziłam się", login z kwalifikatorem, vCard i atrybuty XML
+  str('Adres zamieszkania: Lipowa 14/3, Gdańsk\nTomasz Wróblewski, zam. Rynek 15 m. 3 w Krakowie\nurodziłam się 12.05.1990 w Łodzi\nLogin AD: wkozlowski\nTEL;TYPE=WORK:22 123 45 67\n<Osoba imie="Anna" nazwisko="Gzik" miasto="Kalisz"/>', ['Lipowa 14/3', 'Rynek 15 m. 3', '12.05.1990', 'wkozlowski', '22 123 45 67', '"Anna"', '"Gzik"', '"Kalisz"'], ['Adres zamieszkania:', 'Login AD:', 'TEL;TYPE=WORK:']);
+  neg('Nr zam. 45/2024 z dnia 12.03.2024. zam. Kawa 3 opakowania. Adres: Sala 5. Dziecko urodzi się około 12.05.2026. Login SSO: Okta. Login VPN: tak. <xs:element name="Nazwisko"/> <Podmiot osoba="prawna"/> Liczba pojazdów według GUS 2023 wzrosła.', ['Nr zam. 45/2024', 'Kawa 3 opakowania', 'Sala 5', '12.05.2026', 'Okta', 'VPN: tak', 'name="Nazwisko"', 'osoba="prawna"', 'GUS 2023']);
+  // b5: kotwica pojazdowa w odmianie i miejscownik miejscowości spoza słownika po „zam. w"
+  str('Wykaz pojazdów: WE 12345, GD 2345A. Kierujący autem WE 6789P zbiegł. Jan Kowalski, zam. w Świdniku, zeznaje.', ['WE 12345', 'GD 2345A', 'WE 6789P', 'Świdniku'], ['Wykaz pojazdów:', 'Kierujący autem', 'zeznaje']);
+  // b7 r2: spółka po roli procesowej, państwo po „zam. w", pouczenie z „urodził się", rocznik po kotwicy
+  // pojazdowej, odsyłacz formularza; ulica z patronem po etykiecie i za osobą dalej jest adresem
+  neg('Powód Kruk S.A. z siedzibą we Wrocławiu wniósł pozew. Pozwany Wilk Sp. z o.o. nie stawił się. Cudzoziemiec zam. w Sudanie. Jeżeli dziecko urodziło się 1 czerwca 2026 r., wniosek należy złożyć w terminie. Autem LPG 2010 dojechano. Zakup pojazdów: GBA 2023 r. Adres zamieszkania: Rubryka 7.', ['Kruk S.A.', 'Wilk Sp. z o.o.', 'Sudanie', '1 czerwca 2026', 'LPG 2010', 'GBA 2023', 'Rubryka 7']);
+  str('Strony: Anna Kowalska – Jana Pawła II 5. Adres: Kazimierza Wielkiego 12\nImię;Nazwisko;Miasto\nWakat;-;Warszawa\nJan;Kowalski;Kraków', ['Anna Kowalska', 'Jana Pawła II 5', 'Kazimierza Wielkiego 12', 'Jan;Kowalski', ';Kraków'], ['Strony:', 'Wakat;-;Warszawa', 'Imię;Nazwisko;Miasto']);
+
+  // K63 — numer księgi wieczystej (numery zmyślone). Po kotwicy „KW"/„księga wieczysta" także przy
+  // złej cyfrze kontrolnej, bez kotwicy tylko z poprawną sumą i znanym kodem sądu.
+  str('Nieruchomość objęta księgą wieczystą KW nr KR1P/00234567/6 prowadzoną przez Sąd Rejonowy.', ['KR1P/00234567/6'], ['księgą wieczystą KW nr', 'prowadzoną']);
+  str('działka nr ewid. 123/4, obręb 0005 Brzozowa Wola, KW OS1W/00012345/6.', ['OS1W/00012345/6'], ['123/4', 'obręb 0005']);
+  str('Lokal w budynku na nieruchomości WA2M/00512345/3, księgi lokalowej brak.', ['WA2M/00512345/3'], ['Lokal w budynku']);
+  str('Nieruchomości objęte KW nr KR1P/00234567/6, KR1P/00234567/1 oraz WA2M/00512345/0.', ['KR1P/00234567/6', 'KR1P/00234567/1', 'WA2M/00512345/0'], ['Nieruchomości objęte KW nr']);
+  neg('Sygn. akt I C 123/24 dotyczy działki 245/7 i lokalu 12/3 z umowy 12/2026/ZP.', ['245/7', '12/3', '12/2026/ZP']);
+  neg('Wpis do księgi wieczystej nastąpi w kw. 2026. Zamówienie nr AB1C/12345678/0, kod AB1C/12345678/7.', ['księgi wieczystej', 'kw. 2026', 'AB1C/12345678/0', 'AB1C/12345678/7']);
+  neg('Wzór numeru księgi wieczystej: XXXX/XXXXXXXX/X. Nieruchomość KR1P/00234567/1 w zestawieniu.', ['XXXX/XXXXXXXX/X', 'KR1P/00234567/1']);
+  // audyt końcowy r1: telefon złamany w wierszu po „dzwonić pod", login-wyraz bez rozlewania, patron z tytułem
+  str('W razie pytań proszę dzwonić pod 512 345\n678 wieczorem.\nLogin: mazur\nNa zakończenie orkiestra zagrała mazur.', ['512 345\n678', 'Login: mazur'], ['proszę dzwonić pod', 'zagrała mazur']);
+  neg('Szpital Specjalistyczny im. dr. Wilka w Krakowie. Szkoła im. Ks. Jerzego Popiełuszki. Kościół pw. bł. ks. Jerzego Popiełuszki. Parafia pw. bł. Józefa Kowalskiego.', ['im. dr. Wilka', 'Ks. Jerzego Popiełuszki', 'bł. ks. Jerzego Popiełuszki', 'bł. Józefa Kowalskiego']);
+  // audyt końcowy r2: adres kończy się na kropce za numerem domu, drugie imię rodzica w tej samej masce
+  str('Zgłaszająca mieszka przy ul. Grochowskiej 17. Od 3 lat skarży się na hałas. Anna Lis, córka Piotra Pawła i Anny Marii.', ['ul. Grochowskiej 17', 'Anna Lis', 'Piotra Pawła', 'Anny Marii'], ['Od 3 lat skarży się']);
+  neg('Odbiorca: Szkoła Podstawowa nr 12 im. Jana Pawła II', ['im. Jana Pawła II']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

@@ -11,7 +11,8 @@ w przeglądarce na tym komputerze i nie łączy się z internetem.
 3. Przejrzyj wynik. Strzałkami ‹ › przejdziesz po zasłoniętych fragmentach,
    a widok „Porównanie” pokaże, co było pod znacznikiem.
 4. Kliknij „Kopiuj”, „Pobierz .txt”, „Pobierz .docx” albo „Drukuj lub zapisz
-   PDF”. Przy druku rozwiń w oknie drukowania „Więcej ustawień” i odznacz
+   PDF”. Wydruk, także z Ctrl+P, obejmuje sam wynik, bez tekstu źródłowego.
+   Przy druku rozwiń w oknie drukowania „Więcej ustawień” i odznacz
    „Nagłówki i stopki”, inaczej na kartce znajdzie się ścieżka pliku
    z nazwą użytkownika komputera.
 
@@ -22,8 +23,7 @@ Zanim opublikujesz pismo w BIP
 - Nazwa publikowanego pliku nie powinna zawierać nazwisk.
 - Przejrzyj każdy znacznik. W tej wersji Parawan zasłania też nazwiska
   urzędników pod pismem. Jeśli mają zostać jawne, przywróć je w wyniku.
-- Numer księgi wieczystej i numer działki zostają. Usuń je sam, jeśli
-  urząd ich nie publikuje.
+- Numer działki zostaje. Usuń go sam, jeśli urząd go nie publikuje.
 - PDF do BIP zrób z pobranego pliku .docx: w Wordzie Plik › Zapisz jako ›
   PDF, a w opcjach zaznacz „Znaczniki struktury dokumentu ułatwień
   dostępu”. Wtedy PDF ma strukturę i język dla czytnika ekranu.

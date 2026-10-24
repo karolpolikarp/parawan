@@ -157,20 +157,21 @@ rozpoznaje charakterystyczny zapis (kolumna „Metoda”).
 | 🟤 Nr paszportu | kontekst „paszport” + 2 litery + 7 cyfr | `[NR-PASZPORTU]` |
 | 🟤 Numer KRS | kontekst „KRS” + 10 cyfr (też z zerami wiodącymi) | `[KRS]` |
 | 🟤 Numer KSeF | słowo „KSeF” gdziekolwiek w dokumencie + numer faktury `NIP-RRRRMMDD-znaki-suma` (też stary format 36-znakowy) z **sumą kontrolną NIP-u** w pierwszym członie | `[NR-KSEF]` |
+| 🟤 Nr księgi wieczystej | kod wydziału + 8 cyfr + cyfra kontrolna (`AB1C/12345678/9`, wagi 1-3-7) z poprawną sumą i znanym kodem sądu; po słowach „KW”, „Kw nr”, „księga wieczysta” także mimo złej sumy, z wyliczeniem kolejnych numerów | `[NR-KW]` |
 | 🟤 Nr prawa jazdy | kontekst „prawo jazdy” + numer (z cyfrą) | `[PRAWO-JAZDY]` |
 | 🟤 Nr rejestracyjny | kontekst „rejestracyjny/tablica/pojazd” + tablica (np. WI1234K); wyliczenia po przecinku i „oraz/i” z walidacją wyróżnika wojewódzkiego | `[NR-REJESTRACYJNY]` |
 | 🟤 VIN | 17 znaków bez I/O/Q; kontekst „VIN/nadwozia” lub wyraźny układ VIN | `[VIN]` |
-| 🟤 Adres IP | IPv4 (oktety 0–255) oraz IPv6 (numery wersji „1.2.3.4” pomijane) | `[IP]` |
+| 🟤 Adres IP | IPv4 (oktety 0–255) oraz IPv6 (numery wersji „1.2.3.4” i adresy specjalne: 127.0.0.1, 0.0.0.0, maski, adres sieci, publiczne DNS pomijane) | `[IP]` |
 | 🟤 Adres MAC | 6 par hex (00:1A:2B:3C:4D:5E) | `[MAC]` |
 | 🟤 Token / JWT | `eyJ…` (base64), może dawać dostęp | `[TOKEN]` |
-| 🟤 Login | kontekst „login/username/nazwa użytkownika” + wartość (też w cudzysłowie) | `[LOGIN]` |
+| 🟤 Login | kontekst „login/username/nazwa użytkownika/konto AD” + wartość (też w cudzysłowie i w zapisie DOMENA\login), katalog domowy w ścieżce (`C:\Users\…`, `/home/…`), logi sshd; konta systemowe zostają | `[LOGIN]` |
 | 🟤 Znak sprawy / pisma | znak wg JRWA (`ABC-def.123.77.2016`) albo sygnatura z kotwicą „Znak sprawy:”, „Znak pisma:”, „Sygn. akt”; cytowane orzecznictwo bez kotwicy zostaje | `[ZNAK-SPRAWY]` |
 | 🔗 URL | całe adresy chronione; wewnątrz maskowane wartości parametrów osobowych (`?user=`, `?email=`, `?token=`…) | wg typu |
 | 🔵 E-mail | wzorzec adresu (w URL-ach także forma `%40`) | `[EMAIL]` |
 | 🔵 Telefon | 9 cyfr, opcjonalnie +48 (też „+48.512.345.678”), nawiasy, kropki z kotwicą; wyliczenia po przecinku i „oraz/i” | `[TELEFON]` |
 | 📍 Kod pocztowy | XX-XXX | `[KOD-POCZTOWY]` |
 | 🟣 Data urodzenia | data z kontekstem „ur./urodzony”, cyfrowa i słowna („5 maja 1985”) | `[DATA-URODZENIA]` |
-| 📍 Adres | ul./al./os./pl. + nazwa + numer (też „3 Maja”, „gen./ks./św.”) | `[ADRES]` |
+| 📍 Adres | ul./al./os./pl. + nazwa + numer (też „3 Maja”, „gen./ks./św.”); bez „ul.” po etykiecie zamieszkania („Adres zamieszkania: Lipowa 14/3”) | `[ADRES]` |
 | 📍 Miejscowość | w adresie i przy zamieszkaniu; **nie** w prozie/instytucji | `[MIEJSCOWOŚĆ]` |
 | 🟣 Imię i nazwisko | słownik imion + nazwisk (z odmianą), **morfologia** (-ski/-cki/-icz/-czyk), kolejność odwrócona, wyzwalacze kontekstu | `[IMIĘ I NAZWISKO]` |
 | 🧩 Pola formularza / XML / JSON | „Nazwisko:”, tag `<Surname>`, klucz `"lastName"` jako kotwica, maskowana sama wartość, struktura zostaje | wg typu |
@@ -192,7 +193,7 @@ Domyka je opcjonalny dodatek AI (osobny projekt, niżej).
 
 > [!NOTE]
 > Benchmark warstwy offline (deterministyczny zbiór, [`docs/BENCHMARK.md`](docs/BENCHMARK.md)):
-> **recall 94,8%, precyzja-proxy 99,7%, F1 97,2%** (rdzeń, bez NER). Wycieki pochodzą z celowo
+> **recall 97,8%, precyzja-proxy 99,9%, F1 98,8%** (rdzeń, bez NER). Wycieki pochodzą z celowo
 > trudnej kategorii rzadkich i obcych nazwisk bez kontekstu, którą domyka dodatek AI.
 > W pozostałych kategoriach recall wynosi 100%.
 
@@ -257,7 +258,8 @@ redactPII('Kowalski pozwał Nowaka. Kowalskiemu zależy na ugodzie.', { pseudony
 ```
 
 Eksportowane są też walidatory sum kontrolnych: `isValidPesel`, `isValidNip`, `isValidRegon9`,
-`isValidRegon14`, `isValidIban`, `isValidDowod`, `isValidCard` (Luhn).
+`isValidRegon14`, `isValidIban`, `isValidDowod`, `isValidCard` (Luhn),
+`isValidKw` (księga wieczysta).
 
 > `found` zawiera wyłącznie typ i liczbę wystąpień (**nigdy oryginalne wartości**), więc można go
 > bezpiecznie logować.

@@ -492,11 +492,11 @@ test('landing: ograniczenia dla urzędu zgodne z silnikiem', () => {
       'Z up. Burmistrza\nJan Kowalski\nKierownik Referatu',
       'Z up. Burmistrza\n[IMIĘ I NAZWISKO]\nKierownik Referatu',
     ],
-    // D01 (typ NR-KW) usuwa to zdanie, a ten test przypomni o tym, gdy numer zacznie znikać
+    // numer księgi wieczystej zasłania typ NR-KW (v0.46.24), numer działki zostaje
     [
-      'Numer księgi wieczystej i numer działki zostają w tekście.',
+      'Numer działki zostaje w tekście.',
       'Księga wieczysta nr KR1P/00012345/0, działka nr 245/7.',
-      'Księga wieczysta nr KR1P/00012345/0, działka nr 245/7.',
+      'Księga wieczysta nr [NR-KW], działka nr 245/7.',
     ],
   ];
   for (const [onPage, input, output] of claims) {
@@ -507,7 +507,8 @@ test('landing: ograniczenia dla urzędu zgodne z silnikiem', () => {
   expect(granice).toContain(
     'Parawan nie zmienia oryginalnego pliku. Autor we właściwościach, komentarze i historia zmian zostają w oryginale, więc publikuj nowy dokument z wyniku.',
   );
-  expect(iodSection).toContain('numeru księgi wieczystej, numeru działki');
+  expect(iodSection).toContain('numeru w nietypowym zapisie, numeru działki');
+  expect(iodSection).not.toContain('numeru księgi wieczystej');
 });
 
 test('landing: wydruk to sama sekcja #dla-iod', () => {
