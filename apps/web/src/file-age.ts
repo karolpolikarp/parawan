@@ -8,7 +8,7 @@
 /** Po ilu dniach odsyłacz do wydań zmienia się w ostrzeżenie. */
 export const STALE_AFTER_DAYS = 180;
 
-export const STALE_NOTE = 'Ten plik ma ponad pół roku. Sprawdź, czy jest nowsza wersja';
+export const STALE_NOTE = 'Plik ma ponad pół roku, sprawdź nowszą wersję';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 

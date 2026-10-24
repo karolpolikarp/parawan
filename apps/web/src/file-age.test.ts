@@ -15,7 +15,7 @@ test('wiek pliku: 179 dni bez notki, 181 z notką', () => {
   expect(fileAgeNote('2026-10-17', after('2026-10-17', 180))).toBeNull();
   expect(fileAgeNote('2026-10-17', after('2026-10-17', 181))).toBe(STALE_NOTE);
   expect(fileAgeNote('2026-10-17', after('2026-10-17', 800))).toBe(STALE_NOTE);
-  expect(STALE_NOTE).toBe('Ten plik ma ponad pół roku. Sprawdź, czy jest nowsza wersja');
+  expect(STALE_NOTE).toBe('Plik ma ponad pół roku, sprawdź nowszą wersję');
 });
 
 test('wiek pliku: data z przyszłości, „dev” i zła data bez notki', () => {
