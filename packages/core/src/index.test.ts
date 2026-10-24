@@ -6112,7 +6112,10 @@ test('b6 fix2: „Imię.Nazwisko" i nazwisko pod etykietą konta zostają osobą
 test('b6 fix2: para WIELKIMI literami z pola loginu maskowana też w odwrotnym szyku', () => {
   masked([
     ['Login: JANKOWSKI\nUser: TOMASZ JANKOWSKI\nJANKOWSKI TOMASZ', 'Login: [LOGIN]\nUser: [IMIĘ I NAZWISKO]\n[IMIĘ I NAZWISKO]'],
-    ['User: TOMASZ JANKOWSKI\nTOMASZ zgłosił się osobiście.', 'User: [IMIĘ I NAZWISKO]\n[IMIĘ I NAZWISKO] zgłosił się osobiście.'],
+    // samo imię z pola loginu nie jest rozlewane (świadomy koszt: „PARAFIA: ŚW. JAN", „MAJ 2025"
+    // i inne wersaliki-homonimy niszczyły daty i nagłówki), samo nazwisko tak
+    ['User: TOMASZ JANKOWSKI\nTOMASZ zgłosił się osobiście.', 'User: [IMIĘ I NAZWISKO]\nTOMASZ zgłosił się osobiście.'],
+    ['User: TOMASZ JANKOWSKI\nJANKOWSKI zgłosił się osobiście.', 'User: [IMIĘ I NAZWISKO]\n[IMIĘ I NAZWISKO] zgłosił się osobiście.'],
     ['Login: ANNA NOWAK\nWnioskodawca: NOWAK ANNA', 'Login: [IMIĘ I NAZWISKO]\nWnioskodawca: [IMIĘ I NAZWISKO]'],
   ]);
   // pułapka: pojedynczy wyraz w ciągu wielkich liter obok innego to może być inna osoba,
@@ -6882,5 +6885,309 @@ test('audyt końcowy r2: drugie imię rodzica w tej samej masce', () => {
   masked([
     ['Anna i Jan Kowalscy', `${N} i ${N}`],
     ['Jan i Anna Maria', `${N} i ${N}`],
+  ]);
+});
+
+// ── Regresje przed wydaniem (runda 1): wynik nie gorszy niż v0.46.22 ──
+const P = { pseudonyms: true } as const;
+const KW = '[NR-KW]';
+test('fix1: para WERSALIKAMI po przyimku albo roli w dopełniaczu to osoba, nazwa z patronem zostaje', () => {
+  const cases: [string, string, string][] = [
+    ['01.10.2026 | PRZELEW WYCHODZĄCY TYTUŁ: ALIMENTY DLA ZUZANNY WOLSKIEJ | -800,00', `01.10.2026 | PRZELEW WYCHODZĄCY TYTUŁ: ALIMENTY DLA ${N} | -800,00`, '01.10.2026 | PRZELEW WYCHODZĄCY TYTUŁ: ALIMENTY DLA [OSOBA-A] | -800,00'],
+    ['PRZELEW TYTUŁ: CZYNSZ ZA LOKAL OD ANNY KOWALSKIEJ', `PRZELEW TYTUŁ: CZYNSZ ZA LOKAL OD ${N}`, 'PRZELEW TYTUŁ: CZYNSZ ZA LOKAL OD [OSOBA-A]'],
+    ['WYCIĄG DLA KRZYSZTOFA WOLSKIEGO', `WYCIĄG DLA ${N}`, 'WYCIĄG DLA [OSOBA-A]'],
+    ['Tytuł: WYPŁATA DLA ANNY KOWALSKIEJ', `Tytuł: WYPŁATA DLA ${N}`, 'Tytuł: WYPŁATA DLA [OSOBA-A]'],
+    ['KARTA PACJENTA ANNY KOWALSKIEJ', `KARTA PACJENTA ${N}`, 'KARTA PACJENTA [OSOBA-A]'],
+    ['ŚWIADECTWO PRACY ADAMA NOWAKA', `ŚWIADECTWO PRACY ${N}`, 'ŚWIADECTWO PRACY [OSOBA-A]'],
+    ['HISTORIA CHOROBY ANNY KOWALSKIEJ', `HISTORIA CHOROBY ${N}`, 'HISTORIA CHOROBY [OSOBA-A]'],
+    ['PROTOKÓŁ PRZESŁUCHANIA JANA KOWALSKIEGO', `PROTOKÓŁ PRZESŁUCHANIA ${N}`, 'PROTOKÓŁ PRZESŁUCHANIA [OSOBA-A]'],
+  ];
+  masked(cases.map(([t, w]) => [t, w]));
+  masked(cases.map(([t, , w]) => [t, w]), P);
+  // pułapki: nazwa obiektu z patronem
+  keep(['UNIWERSYTET ADAMA MICKIEWICZA', 'STADION KAZIMIERZA GÓRSKIEGO', 'KOPIEC JÓZEFA PIŁSUDSKIEGO', 'FUNDACJA JOLANTY KWAŚNIEWSKIEJ', 'ZESPÓŁ SZKÓŁ JANA KOWALSKIEGO']);
+});
+test('fix1: kilka pól „Etykieta: wartość" w wierszu rozdzielonym TAB-em — każde osobno', () => {
+  masked([
+    ['Imię: Jan\tNazwisko: Kowalski', `Imię: ${N}\tNazwisko: ${N}`],
+    ['Imię ojca: Józef\tImię matki: Maria', `Imię ojca: ${N}\tImię matki: ${N}`],
+    ['Imię: Jan\tUwagi: brak', `Imię: ${N}\tUwagi: brak`],
+    [
+      'Imię: Wiesław\tNazwisko: Grzelak\tPESEL: 71010198768\nImię ojca: Kazimierz\tImię matki: Danuta\tNazwisko rodowe matki: Lipa',
+      `Imię: ${N}\tNazwisko: ${N}\tPESEL: [PESEL]\nImię ojca: ${N}\tImię matki: ${N}\tNazwisko rodowe matki: ${N}`,
+    ],
+  ]);
+  masked([['Imię: Jan\tUwagi: brak', `Imię: ${N}\tUwagi: brak`]], P);
+  // pole z nazwiskiem w trybie pseudonimów zostaje spójne z prozą
+  masked([['Imię i nazwisko: Jan Kowalski\tLokal: 12\nPan Jan Kowalski wnosi.', 'Imię i nazwisko: [OSOBA-A]\tLokal: 12\nPan [OSOBA-A] wnosi.']], P);
+  // pułapka: wiersz TSV z jedną etykietą to dane tabeli
+  masked([['Nazwisko:\tGzowski\tKadry', `Nazwisko:\t${N}\tKadry`]]);
+});
+test('fix1: klucz pseudonimu z pola „Nazwisko i imię" to nazwisko, nie imię', () => {
+  masked(
+    [
+      ['Nazwisko i imię;Uwagi\nDomański Witold;-\nLipińska Aleksandra;zastępuje ją Witold Domański', 'Nazwisko i imię;Uwagi\n[OSOBA-A];-\n[OSOBA-B];zastępuje ją [OSOBA-A]'],
+      ['"Nazwisko i imię","Przełożony"\n"Domański Witold","-"\n"Lipińska Aleksandra","Domański Witold"', '"Nazwisko i imię","Przełożony"\n"[OSOBA-A]","-"\n"[OSOBA-B]","[OSOBA-A]"'],
+      ['Nazwisko i imię;Okręg\nKowalski Jan;1\nNowak Jan;2', 'Nazwisko i imię;Okręg\n[OSOBA-A];1\n[OSOBA-B];2'],
+      ['Nazwisko i imię;Okręg\nKowalski Jan;1\nradny Jan Kowalski', 'Nazwisko i imię;Okręg\n[OSOBA-A];1\nradny [OSOBA-A]'],
+      ['Imię i nazwisko;Uwagi\nWitold Domański;-\nAleksandra Lipińska;zastępuje ją Witold Domański', 'Imię i nazwisko;Uwagi\n[OSOBA-A];-\n[OSOBA-B];zastępuje ją [OSOBA-A]'],
+      ['Nazwisko i imię;Uwagi\nKowalska Anna Maria;-\nAnna Kowalska przyszła.', 'Nazwisko i imię;Uwagi\n[OSOBA-A];-\n[OSOBA-A] przyszła.'],
+    ],
+    P,
+  );
+});
+test('fix1: tablica rejestracyjna — małe litery po „rejestracyjne", litera w numerze, kotwica pojedyncza z rokiem', () => {
+  masked([
+    ['tablice rejestracyjne wa 12345', 'tablice rejestracyjne [NR-REJESTRACYJNY]'],
+    ['Pojazd o numerze rejestracji KR 5A123/2022', 'Pojazd o numerze rejestracji [NR-REJESTRACYJNY]/2022'],
+    ['Sprawca uciekł samochodem WA 2015.', 'Sprawca uciekł samochodem [NR-REJESTRACYJNY].'],
+    ['Sprawca uciekł motocyklem KR 1999.', 'Sprawca uciekł motocyklem [NR-REJESTRACYJNY].'],
+  ]);
+  keep([
+    'tablice rejestracyjne to 12345 sztuk',
+    'tablice rejestracyjne do 2025',
+    'zarejestrowano pod numerem rejestracji RPW 12345/2026',
+    'dla pojazdów PN 2020',
+    'dyrektywa dotycząca pojazdu WE 2007 ustanawia ramy.',
+  ]);
+});
+test('fix1: data urodzenia w życiorysie z „i później" zostaje maską, próg w przepisie jawny', () => {
+  const D = '[DATA-URODZENIA]';
+  masked([
+    ['Jan Kowalski urodzony 14.03.1958 r. i później podlegał ubezpieczeniu.', `${N} urodzony ${D} r. i później podlegał ubezpieczeniu.`],
+    ['Anna Nowak, urodzona 12.03.1960 r. i wcześniej ma ustalone prawo do renty', `${N}, urodzona ${D} r. i wcześniej ma ustalone prawo do renty`],
+    ['Kowalski Jan, ur. 01.02.1950 i później należał do OFE', `${N}, ur. ${D} i później należał do OFE`],
+    ['Anna Nowak, urodzona 12.03.1960 r. i później otrzymuje zasiłek', `${N}, urodzona ${D} r. i później otrzymuje zasiłek`],
+  ]);
+  keep([
+    'Kobiecie urodzonej 1 stycznia 1953 r. lub później przysługuje',
+    'Matce urodzonej 1 stycznia 1953 r. i później przysługuje dodatek',
+    'Osoba urodzona 1.01.1960 r. lub później',
+  ]);
+});
+test('fix1: kolejne pola spłaszczonego adresu — lokal i miasto, piętro jawne', () => {
+  masked([
+    ['Ulica: Długa 5 M.: 3', 'Ulica: [ADRES] M.: [ADRES]'],
+    ['Ulica: Długa 5 Lokal: 5', 'Ulica: [ADRES] Lokal: [ADRES]'],
+    ['Ulica: Długa 5 Mieszkanie: 4', 'Ulica: [ADRES] Mieszkanie: [ADRES]'],
+    ['Ulica: Krótka 7. Piętro: 2', 'Ulica: [ADRES] Piętro: 2'],
+    ['Ulica: Długa 5 Miasto: Warszawa', 'Ulica: [ADRES] Miasto: [MIEJSCOWOŚĆ]'],
+    ['Ulica: Długa 5 Poczta: Opole', 'Ulica: [ADRES] Poczta: [MIEJSCOWOŚĆ]'],
+  ]);
+  masked([['Ulica: Kwiatowa 5 Imię i nazwisko: Jan Kowalski\nPan Jan Kowalski wnosi o zasiłek.', 'Ulica: [ADRES] Imię i nazwisko: [OSOBA-A]\nPan [OSOBA-A] wnosi o zasiłek.']], P);
+  // pułapka: samodzielne etykiety to nie kotwica
+  keep(['Miasto: Warszawa', 'Lokal: 5']);
+});
+test('fix1: obce imię za nazwiskiem po tytule należy do maski, marka zostaje', () => {
+  masked([
+    ['Pan Nowak Bjørn zgłosił się.', `Pan ${N} zgłosił się.`],
+    ['Pani Nowak Ayşe przyjęta na oddział.', `Pani ${N} przyjęta na oddział.`],
+    ['Pan Kaczmarek Thắng przyjęty.', `Pan ${N} przyjęty.`],
+    ['Kierowca Pan Jan Kowalski Škoda zgłosił się', `Kierowca Pan ${N} Škoda zgłosił się`],
+  ]);
+  masked([['Pan Nowak Bjørn zgłosił się. Pan Nowak wrócił.', 'Pan [OSOBA-A] zgłosił się. Pan [OSOBA-A] wrócił.']], P);
+});
+test('fix1: drugi adres w wyliczeniu — pomieszczenie jawne, biernik ulicy po „na ul." maskowany', () => {
+  masked([
+    ['Najemca użytkuje lokal przy ul. Długiej 5 oraz Kościuszki 3.', 'Najemca użytkuje lokal przy [ADRES] oraz [ADRES].'],
+    ['Ekipa przejdzie na ul. Słoneczną 2 i Kwiatową 14.', 'Ekipa przejdzie na [ADRES] i [ADRES].'],
+    ['Ekipa przejdzie na ul. Długą 5 i Krótką 3.', 'Ekipa przejdzie na [ADRES] i [ADRES].'],
+  ]);
+  for (const r of ['Piwnicy 3', 'Szkoły 3', 'Przychodni 2', 'Apteki 4', 'Kamienicy 2', 'Hurtowni 1'])
+    masked([[`Najemca użytkuje lokal przy ul. Długiej 5 oraz ${r}.`, `Najemca użytkuje lokal przy [ADRES] oraz ${r}.`]]);
+  masked([['Spotkanie z ul. Długą 5 i Salą 3.', 'Spotkanie z [ADRES] i Salą 3.']]);
+});
+test('fix1: wartość pola osoby — otczestwo, samo nazwisko, szyk paszportowy, homograf za obcym imieniem', () => {
+  for (const t of [
+    'Imię i nazwisko pacjenta: Nodira Karimovna Yusupova',
+    'Imię i nazwisko pacjentki: Gulnara Iwanowna Sadykowa',
+    'Nazwisko pacjenta: Iwanowa',
+    'Nazwisko ucznia: Wieczna',
+    'Nazwisko i imię pracownika: WANG Xiaoming',
+    'Imię i nazwisko pracownika: Thi Lan HO',
+    'Nazwisko i imię pracownika: DOAN Van Hung',
+    'Imię i nazwisko pracownika: Jisoo Park',
+    'Imię i nazwisko pacjenta: Minho Park',
+    'Imię i nazwisko pacjenta: Bożydar Rada',
+  ])
+    masked([[t, `${t.slice(0, t.indexOf(':') + 1)} ${N}`]]);
+  keep([
+    'Nazwisko i imię pracownika: PGE Dystrybucja S.A.',
+    'Imię i nazwisko pacjenta: ZUS Oddział Siedlce',
+    'Nazwisko i imię pracownika: BGK Nieruchomości',
+    'Imię i nazwisko pacjenta: Wodny Park',
+    'Imię i nazwisko pacjenta: Miejska Rada',
+    'Nazwisko pacjenta: Wspólnota Mieszkaniowa',
+    'Imię i nazwisko ucznia:\nGrupa Wiekowa',
+  ]);
+});
+test('fix1: nazwisko panieńskie-homograf albo przed wyrazem pospolitym maskowane, ciąg nazwy domu jawny', () => {
+  masked([
+    ['Anna Nowak z domu Mazur Wdowa po Janie.', `${N} z domu ${N} Wdowa po Janie.`],
+    ['Anna Kos z domu Wrona Telefon 601 234 567', `${N} z domu ${N} Telefon [TELEFON]`],
+    ['Anna Nowak z domu Sowa Zamężna', `${N} z domu ${N} Zamężna`],
+    ['Anna Nowak z domu Kot Nauczycielka', `${N} z domu ${N} Nauczycielka`],
+    ['Pacjentka Anna Kowalska z domu Pstrąg Emerytka, lat 72.', `Pacjentka ${N} z domu ${N} Emerytka, lat 72.`],
+    ['Anna Kowalska z d. Bździuch Szpital Wojewódzki w Radomiu', `${N} z d. ${N} Szpital Wojewódzki w Radomiu`],
+    ['Anna Kowalska z d. Ćwiertnia Lekarz rodzinny', `${N} z d. ${N} Lekarz rodzinny`],
+  ]);
+  masked([
+    ['Jan Nowak z domu Ronalda McDonalda', `${N} z domu Ronalda McDonalda`],
+    ['Jan Nowak z domu Wczasów Dziecięcych', `${N} z domu Wczasów Dziecięcych`],
+    ['Anna Kowalska z domu Sue Ryder', `${N} z domu Sue Ryder`],
+    ['Anna Kowalska z domu Aniołów Stróżów', `${N} z domu Aniołów Stróżów`],
+  ]);
+});
+test('fix1: wielowyrazowa miejscowość WERSALIKAMI po kodzie w całości', () => {
+  for (const c of ['STARY TARG', 'STAROGARD GDAŃSKI', 'LIDZBARK WARMIŃSKI', 'STARA KAMIENICA', 'WÓLKA KOSOWSKA'])
+    masked([[`UL. POLNA 5, 34-400 ${c}`, '[ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]']]);
+  masked([
+    ['UL. POLNA 5, 26-900 GŁOWACZÓW KOWALSKI JAN', `[ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ] ${N}`],
+    ['UL. POLNA 5, 26-900 OPATÓW POWIAT OPATOWSKI', '[ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ] POWIAT OPATOWSKI'],
+    ['UL. POLNA 5, 26-900 STARA WIEŚ\tOBRĘB 0007', '[ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]\tOBRĘB 0007'],
+  ]);
+});
+test('fix1: „urodzonym" po przyimku i rzeczowniku w liczbie pojedynczej to osoba', () => {
+  masked([
+    ['Opinia o pracowniku zatrudnionym urodzonym 05.06.1975 r. w Radomiu.', 'Opinia o pracowniku zatrudnionym urodzonym [DATA-URODZENIA] r. w [MIEJSCOWOŚĆ].'],
+    ['Informacja o pacjencie hospitalizowanym urodzonym 05.06.1948 r.', 'Informacja o pacjencie hospitalizowanym urodzonym [DATA-URODZENIA] r.'],
+    ['Opieka nad synem Kubą przysposobionym urodzonym 12.02.2015 r.', 'Opieka nad synem Kubą przysposobionym urodzonym [DATA-URODZENIA] r.'],
+  ]);
+  keep(['Emerytura przysługuje ubezpieczonym urodzonym 1 stycznia 1949 r.']);
+});
+test('fix1: obiekt z przymiotnikiem i podmiotem w szyku odwróconym to nazwa, nie osoba', () => {
+  keep(['Las Bielański odwiedził w sobotę wojewoda.', 'Zamek Grodziecki kupił w 2020 r. inwestor.', 'Las Kabacki odwiedził wojewoda.']);
+  masked([['Pokój Lisiecki opuścił o 10:00.', `Pokój ${N} opuścił o 10:00.`]]);
+});
+test('fix1: osoba z pola loginu WERSALIKAMI — rozlewane samo nazwisko, nie imię ani homonim', () => {
+  masked([
+    ['Login: ANNA PIĄTEK\nZEBRANIE W PIĄTEK O 17:00', `Login: ${N}\nZEBRANIE W PIĄTEK O 17:00`],
+    ['User name: ADAM LIPIEC\nTermin: LIPIEC 2025', `User name: ${N}\nTermin: LIPIEC 2025`],
+    ['User: KAROL MAJ\nDATA: 12 MAJ 2026', `User: ${N}\nDATA: 12 MAJ 2026`],
+    ['User: ROBERT KOWAL\nZawód: KOWAL', `User: ${N}\nZawód: KOWAL`],
+    ['Login: MAREK ZIMA\nOKRES: ZIMA 2026', `Login: ${N}\nOKRES: ZIMA 2026`],
+    ['Login: JAN KOWALSKI\nPARAFIA: ŚW. JAN\nKOWALSKI', `Login: ${N}\nPARAFIA: ŚW. JAN\n${N}`],
+    ['Login: KOWALCZYK MAREK\nWNIOSKODAWCA KOWALCZYK ZGŁOSIŁ AWARIĘ', `Login: ${N}\nWNIOSKODAWCA ${N} ZGŁOSIŁ AWARIĘ`],
+    ['Wydruk z systemu EWOPIS\nLogin: MAJ ANNA\nHARMONOGRAM ODBIORU ODPADÓW\nMAJ 2025\nCZERWIEC 2025', `Wydruk z systemu EWOPIS\nLogin: ${N}\nHARMONOGRAM ODBIORU ODPADÓW\nMAJ 2025\nCZERWIEC 2025`],
+    ['User name: ZIELINSKA KATARZYNA\nZIELINSKA', `User name: ${N}\n${N}`],
+  ]);
+  masked([['Login: KOWALCZYK MAREK\nWNIOSKODAWCA KOWALCZYK ZGŁOSIŁ AWARIĘ', 'Login: [OSOBA-A]\nWNIOSKODAWCA [OSOBA-A] ZGŁOSIŁ AWARIĘ']], P);
+  keep(['Login: GMINA LUBIEŃ\n§ 1. LUBIEŃ']);
+});
+test('fix1: konta działów i ról w ścieżce profilu zostają jawne', () => {
+  keep([
+    'Zapisz w C:\\Users\\geodezja\\Pulpit   |   Skany z C:\\Users\\swietlica i C:\\Users\\uczniowie   |   Folder \\\\fs01\\home$\\mops\\skany',
+    'Pliki działu: C:\\Users\\geodezja\\Desktop\nPliki: C:\\Users\\nauczyciele\\Desktop i C:\\Users\\sekretarka\\Pulpit',
+    'Skany zapisuj w C:\\Users\\gops\\Desktop\\wnioski oraz \\\\srv\\users$\\podatki\\2025',
+  ]);
+  masked([['C:\\Users\\jkowalski\\Desktop', 'C:\\Users\\[LOGIN]\\Desktop']]);
+});
+test('fix1: imię z końca wiersza nie skleja się z prefiksem mówcy w następnym', () => {
+  masked([
+    ['Malgorzata Wozniak: czesc, tu Gosia\nPawel Krol: siema', `${N}: czesc, tu Gosia\n${N}: siema`],
+    ['Ewa Nowak: hej, tu Gosia\nAnna Lis: siema', `${N}: hej, tu Gosia\n${N}: siema`],
+    ['Pozdrawiam\nAnna\nJan Kowalski: ok', `Pozdrawiam\nAnna\n${N}: ok`],
+    ['Jan\nWiśniewski', N],
+  ]);
+});
+test('fix1: tabela z nagłówkiem — proza pod tabelą, wiersz biura, podmiot państwowy i papież jawne', () => {
+  masked([
+    ['Imię;Nazwisko\nAnna;Kowal\nWyjazd w maju; szczegóły wkrótce', `Imię;Nazwisko\n${N};${N}\nWyjazd w maju; szczegóły wkrótce`],
+    ['Imię;Nazwisko\nAnna;Kowal\nSilny mróz; zajęcia odwołane', `Imię;Nazwisko\n${N};${N}\nSilny mróz; zajęcia odwołane`],
+    ['Imię\tNazwisko\nAnna\tKowal\nSpotkanie w maju\tobecność obowiązkowa', `Imię\tNazwisko\n${N}\t${N}\nSpotkanie w maju\tobecność obowiązkowa`],
+    ['imie;nazwisko\nanna;kowalska', `imie;nazwisko\n${N};${N}`],
+    ['Imię i nazwisko;Stanowisko;Telefon\nJan Kowalski;-;601 234 567', `Imię i nazwisko;Stanowisko;Telefon\n${N};-;[TELEFON]`],
+    ['Nazwisko i imię;Uwagi\nNowak z d. Kowalska Anna;-', `Nazwisko i imię;Uwagi\n${N} z d. ${N};-`],
+  ]);
+  keep([
+    'Imię i nazwisko;Stanowisko;Telefon\nSekretariat Wójta;-;41 378 00 10\nCentrala;-;41 378 00 00',
+    'Imię i nazwisko;Miejscowość;Telefon\nDyżur radnych w Urzędzie;Zalesie;41 378 00 10',
+    'Imię i nazwisko,Funkcja\nJan Paweł II,Patron',
+    '<strona nazwisko="Skarb Państwa"/>',
+    '<strona fullName="Lasy Państwowe" typ="X"/>',
+  ]);
+});
+test('fix1: atrybuty XML tagu instytucji jawne, adres pod osobą maskowany', () => {
+  keep([
+    '<Urzad nazwa="Urząd Skarbowy" ulica="Postępu 16" miasto="Warszawa" telefon="22 278 90 00"/>',
+    '<szkola patron="Jan Paweł II" miasto="Kraków"/>',
+    '<Sad nazwa="Sąd Rejonowy w Kaliszu" miasto="Kalisz"/>',
+  ]);
+  masked([['<Osoba imie="Jan" nazwisko="Kowalski"><Adres ulica="Długa 5" miasto="Kraków"/></Osoba>', `<Osoba imie="${N}" nazwisko="${N}"><Adres ulica="[ADRES]" miasto="[MIEJSCOWOŚĆ]"/></Osoba>`]]);
+});
+test('fix1: ulica z patronem — tytuł, trzy człony, łącznik, „przy" po etykiecie zamieszkania', () => {
+  masked([
+    ['Adres: Marii Skłodowskiej-Curie 5', 'Adres: [ADRES]'],
+    ['Jan Kowalski zamieszkały przy Kardynała Stefana Wyszyńskiego 12', `${N} zamieszkały przy [ADRES]`],
+    ['Jan Kowalski – Stanisława Ignacego Witkiewicza 5', `${N} – [ADRES]`],
+    ['Jan Kowalski, Stanisława Ignacego Witkiewicza 5, Busko-Zdrój', `${N}, [ADRES], [MIEJSCOWOŚĆ]`],
+    ['Adres: Marszałka Józefa Piłsudskiego 5', 'Adres: [ADRES]'],
+    ['Lokal położony przy Kazimierza Wielkiego 12 w Krakowie.', 'Lokal położony przy [ADRES] w [MIEJSCOWOŚĆ].'],
+    ['Panią Stefanią Nowak, zamieszkałą przy Jana Pawła II 12 w Krakowie.', `Panią ${N}, zamieszkałą przy [ADRES] w [MIEJSCOWOŚĆ].`],
+    ['Pozwana zamieszkuje przy Tadeusza Kościuszki 5 w Kielcach.', 'Pozwana zamieszkuje przy [ADRES] w [MIEJSCOWOŚĆ].'],
+    ['Anna Kowalska Jana Pawła II 5', `${N} [ADRES]`],
+  ]);
+  keep(['Urząd Gminy przy Jana Pawła II 5 w Kielcach']);
+});
+test('fix1: urodzenie w regule, pouczeniu i biogramie patrona jawne, strona decyzji nie', () => {
+  keep([
+    'Uczeń, który urodził się 1 września 2019 r., zostaje przyjęty.',
+    'Senior, który urodził się 1 stycznia 1946 r., otrzyma Złotą Kartę.',
+    'Pouczenie: kto urodził się w Opolu, składa wniosek do USC w Opolu.',
+  ]);
+  masked([
+    ['Patronka szkoły. Irena Sendlerowa urodziła się 15 lutego 1910 r. w Warszawie.', `Patronka szkoły. ${N} urodziła się 15 lutego 1910 r. w Warszawie.`],
+    ['Maria Skłodowska-Curie urodziła się w Warszawie w 1867 r.', `${N} urodziła się w Warszawie w 1867 r.`],
+    ['Wnioskodawca, który urodził się 1 stycznia 1946 r. w Kielcach, wnosi o', 'Wnioskodawca, który urodził się [DATA-URODZENIA] r. w [MIEJSCOWOŚĆ], wnosi o'],
+    ['Patron: Jan Kowalski\nJan Kowalski urodził się 3 maja 1971 r. w Kielcach.', `Patron: ${N}\n${N} urodził się [DATA-URODZENIA] r. w [MIEJSCOWOŚĆ].`],
+  ]);
+});
+test('fix1: para z liczbą i rzeczownikiem albo udziałem to osoba, nie ulica', () => {
+  masked([
+    ['Głosowało na Tomasza Mazura 12 radnych.', `Głosowało na ${N} 12 radnych.`],
+    ['Głosowało na Adama Barana 12 radnych.', `Głosowało na ${N} 12 radnych.`],
+    ['Udział Marii Lis 1/4 w nieruchomości.', `Udział ${N} 1/4 w nieruchomości.`],
+    ['Udział Ewy Sowy 2/3.', `Udział ${N} 2/3.`],
+    ['Przyznano Piotrowi Kosowi 18 punktów.', `Przyznano ${N} 18 punktów.`],
+    ['Przyznano Marii Lis 2 tygodnie urlopu.', `Przyznano ${N} 2 tygodnie urlopu.`],
+    ['Ignacego Łukasiewicza 5, Kraków', '[ADRES], [MIEJSCOWOŚĆ]'],
+  ]);
+});
+test('fix1: homograf-nazwisko z formą prawną albo „z siedzibą" to firma; święty bez ogonków; odsyłacz po etykiecie adresu', () => {
+  keep([
+    'Powód Kruk SA z siedzibą we Wrocławiu wniósł pozew o zapłatę.',
+    'Pozwany Wilk Trans wniósł sprzeciw.',
+    'Powód Kruk z siedzibą we Wrocławiu',
+    'Kosciol Swietego Michala Archaniola w Krakowie.',
+    'Sw. Lukasz Ewangelista.',
+    'Swiety Michal Archaniol.',
+    'Adres zamieszkania: Paragraf 2.',
+    'Adres zamieszkania: Karta 15.',
+    'Adres zamieszkania: Tom 2.',
+  ]);
+  masked([
+    ['Powód Kowalski z siedzibą we Wrocławiu', `Powód ${N} z siedzibą we Wrocławiu`],
+    ['Adres zamieszkania: Kartuska 5.', 'Adres zamieszkania: [ADRES].'],
+  ]);
+});
+test('fix1: numer KW — kotwica przez łamanie wiersza tylko jako etykieta, wyliczenie tylko z kotwicy i na znany sąd', () => {
+  keep([
+    'Załączniki do KW\nZP1A/12345678/0 – kod produktu',
+    'agregat;20;KW\nZZ9Z/20261024/1;sprawny',
+    'Pismo przekazano do KW.\nZZ9Z/20261024/1 - nr przesyłki.',
+    '| Rejestr | KW |\n| Id | ZZ9Z/20261024/1 |',
+    'Pompa ciepła, nr seryjny PO1A/20261015/0.',
+    'Faktura nr PL1A/12345678/0 z 12.10.2026.',
+    'FV PO1A/20261015/0',
+    'Nr umowy: KA1F/00001234/3',
+  ]);
+  masked([
+    ['KW nr KR1P/00234567/6, FV1A/12345678/9', `KW nr ${KW}, FV1A/12345678/9`],
+    ['KR1P/00234567/6;ZZ9Z/20261024/1;OK', `${KW};ZZ9Z/20261024/1;OK`],
+    ['Nr KW: KR1P/00234567/6\nZZ9Z/20261024/1 – nr zlecenia', `Nr KW: ${KW}\nZZ9Z/20261024/1 – nr zlecenia`],
+    ['WA1M/00512345/6 i AB1C/12345678/5 szt.', `${KW} i AB1C/12345678/5 szt.`],
+    ['Nr KW\nKR1P/00234567/6', `Nr KW\n${KW}`],
+    ['umowa sprzedaży nieruchomości KR1P/00234567/6', `umowa sprzedaży nieruchomości ${KW}`],
+    ['Przedmiot umowy: KR1P/00234567/6', `Przedmiot umowy: ${KW}`],
   ]);
 });
