@@ -13,6 +13,10 @@ updates:
       # i zielonym zgodnosc.yml (job chromium-109). Poprawki 6.1.x przychodzą dalej.
       - dependency-name: "pdfjs-dist"
         update-types: ["version-update:semver-minor", "version-update:semver-major"]
+      # Vitest 5 wymaga Node 22.12+, a job rdzenia w ci.yml stoi na Node 20; zmiana główna
+      # narzędzia pod golden-master to osobna praca (ROADMAP, pozycje 6 i 27).
+      - dependency-name: "vitest"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
