@@ -6483,7 +6483,9 @@ test('b7 K56: ulica z patronem w dopełniaczu i numerem bez „ul." przy miejsco
     ['Anna Kowalska, Jana Pawła II 5', `${N}, ${A}`],
     ['Ignacego Łukasiewicza 5, 35-001 Rzeszów', `${A}, ${KOD} ${C}`],
   ]);
-  keep(['rondo Jana Pawła II w Krakowie', 'Wyrok z dnia 12 maja, Kraków', 'Na Jana Pawła II 5 mieszka Jan.']);
+  keep(['rondo Jana Pawła II w Krakowie', 'Wyrok z dnia 12 maja, Kraków']);
+  // patron z numerem domu bez pewnej kotwicy adresu nie zostaje jawny: maska osoby jak w v0.46.23
+  masked([['Na Jana Pawła II 5 mieszka Jan.', `Na ${N} II 5 mieszka Jan.`]]);
   masked([['Pismo Jerzego Nowaka 12 maja wpłynęło.', `Pismo ${N} 12 maja wpłynęło.`]]);
 });
 test('b7 regresje: przeniesienie wyrazu tylko, gdy początek z ogonem tworzy nazwisko albo miasto', () => {
@@ -7355,9 +7357,10 @@ test('fix2: data urodzenia w życiorysie z „lub później", wersaliki przy prz
     ['Sw. Piotr Wyznawca zeznal.', `Sw. ${N} zeznal.`],
     ['Sw. Maria Meczennik.', `Sw. ${N}.`],
   ]);
+  // ulica z patronem i numerem na kopercie to adres, nie jawny tekst (inwariant patrona z numerem)
+  masked([['DO ADAMA MICKIEWICZA 5', 'DO [ADRES]']]);
   keep([
     'Kobieta urodzona 1 stycznia 1953 r. lub później nabywa prawo.',
-    'DO ADAMA MICKIEWICZA 5',
     'PRZEBUDOWA SKRZYŻOWANIA PRZY ADAMA MICKIEWICZA',
     'REMONT DROGI OD ADAMA MICKIEWICZA DO TADEUSZA KOŚCIUSZKI',
     'TRASA ROWEROWA OD ADAMA MICKIEWICZA DO JANA PAWŁA II',
@@ -7458,9 +7461,9 @@ test('fix3: WERSALIKI — dokument przed dopełniaczem, przymiotnik prywatności
     ['12.03 PRZELEW OD ANNY KOWALSKIEJ 500,00', `12.03 PRZELEW OD ${N} 500,00`],
   ]);
   masked([['PRZELEW OD ANNY KOWALSKIEJ 500 ZŁ', 'PRZELEW OD [OSOBA-A] 500 ZŁ']], { pseudonyms: true });
-  // pułapki: ulica z patronem na kopercie, szkoła z patronem za dokumentem, nazwy obiektów
+  // ulica z patronem na kopercie to [ADRES]; pułapki: szkoła z patronem za dokumentem, nazwy obiektów
+  masked([['DO ADAMA MICKIEWICZA 5\nKRAKÓW', 'DO [ADRES]\n[MIEJSCOWOŚĆ]']]);
   keep([
-    'DO ADAMA MICKIEWICZA 5',
     'HISTORIA SZKOŁY JANA KOCHANOWSKIEGO',
     'UNIWERSYTET ADAMA MICKIEWICZA',
     'FUNDACJA JOLANTY KWAŚNIEWSKIEJ',
@@ -7687,8 +7690,137 @@ test('dom2-fix3: ulica „Jana Pawła II" z numerem w wierszu z rolą, bez lokal
     'Nagroda Jana Pawła II 2023.',
     'Fundacja Jana Pawła II 5, Rzym',
     'Kościół Jana Pawła II 2',
-    'Na Jana Pawła II 5 mieszka Jan.',
     'ipAddress="Jana Pawła II 5/2"',
     'Urząd Gminy, Jana Pawła II 5/2, Lubień',
+  ]);
+});
+test('dom3: inwariant ulicy z patronem — para z numerem domu to [ADRES] albo osoba, nigdy jawna', () => {
+  // I1: z lokalem „m./lok./lokal" adres powstaje w każdym otoczeniu, także w prozie bez etykiety
+  masked([
+    ['Lokator Adama Mickiewicza 30 m. 2 zalega z czynszem.', `Lokator ${A} zalega z czynszem.`],
+    ['Najemca lokalu Stefana Batorego 12 lok. 4 zalega z czynszem.', `Najemca lokalu ${A} zalega z czynszem.`],
+    ['Zamienię mieszkanie komunalne Tadeusza Kościuszki 5 m. 3 na mniejsze.', `Zamienię mieszkanie komunalne ${A} na mniejsze.`],
+    ['Budynek Marii Konopnickiej 30 m. 2 – zalanie', `Budynek ${A} – zalanie`],
+    ['Konstantego Ildefonsa Gałczyńskiego 4 lokal 2', A],
+    [
+      'Świadek zamieszkuje pod adresem Tadeusza Kościuszki 5 m. 3 w Krakowie od 2019 r.\nLokator Tadeusza Kościuszki 5 m. 3 (powód Jan Nowak) twierdzi.',
+      `Świadek zamieszkuje pod adresem ${A} w [MIEJSCOWOŚĆ] od 2019 r.\nLokator ${A} (powód ${N}) twierdzi.`,
+    ],
+    ['Jan Nowak\nTadeusza Kościuszki 5 m. 3 Kraków', `${N}\n${A} Kraków`],
+    ['PRZELEW DO: JAN NOWAK Tadeusza Kościuszki 5 m. 3 KRAKÓW', `PRZELEW DO: ${N} ${A} KRAKÓW`],
+    ['Kraków, Jana Pawła II 12-14', `[MIEJSCOWOŚĆ], ${A}`],
+    ['Anna Kowalska Jana Pawła II 5', `${N} ${A}`],
+    // bez pewnej kotwicy adresu para zostaje osobą, numer jak dawniej (fallback z v0.46.23)
+    ['Tadeusza Kościuszki 30 w Krakowie.', `${N} 30 w Krakowie.`],
+    ['Lokator Kazimierza Wielkiego 14 w Krakowie zgłosił hałas.', `Lokator ${N} 14 w Krakowie zgłosił hałas.`],
+    ['Treny Jana Kochanowskiego II 3.', `Treny ${N} II 3.`],
+    ['Ranking: Kazimierza Wielkiego III 2;', `Ranking: ${N} III 2;`],
+    ['mieszkająca w Lubniu, Adama Mickiewicza 5 razy odwiedzała', `mieszkająca w Lubniu, ${N} 5 razy odwiedzała`],
+    // WERSALIKI: „PRZY" z numerem domu to adres, bez numeru ulica zostaje jawna
+    ['DOM PRZY STANISŁAWA WYSPIAŃSKIEGO 5.', `DOM PRZY ${A}.`],
+    ['PROTOKÓŁ SPORZĄDZONO W LOKALU PRZY JANA KOWALSKIEGO 5/2.', `PROTOKÓŁ SPORZĄDZONO W LOKALU PRZY ${A}.`],
+    ['MIESZKANIE PRZY ADAMA MICKIEWICZA 5 M. 2', `MIESZKANIE PRZY ${A}`],
+    ['W LOKALU PRZY JANA PAWŁA II 30/2 W GORLICACH', `W LOKALU PRZY ${A} W GORLICACH`],
+    ['NAJEMCA LOKALU ADAMA MICKIEWICZA 30/2.', `NAJEMCA LOKALU ${N} 30/2.`],
+    // I2: numer z sąsiedniej komórki nie jest numerem domu; nagłówek „Ulica" albo etykieta adresu
+    // w poprzedniej komórce czynią z samej komórki ulicy adres, a numer zostaje w swojej kolumnie
+    ['Ulica\tNr\nJana Pawła II\t12', `Ulica\tNr\n${A}\t12`],
+    ['Ulica;Nr\nJana Pawła II;12\nTadeusza Kościuszki;5', `Ulica;Nr\n${A};12\n${A};5`],
+    ['Adres:\tJana Pawła II\t12', `Adres:\t${A}\t12`],
+    ['Lp\tLaureat\tNagroda\tPunkty\n1\tAnna Nowak\tJana Pawła II\t98', `Lp\tLaureat\tNagroda\tPunkty\n1\t${N}\tJana Pawła II\t98`],
+    // I3: rola, etykieta albo tytuł przed parą wygrywa z hipotezą ulicy i „dwóch imion"
+    ['CZYNNOŚCI DOKONANO PRZY UDZIALE JANA NOWAKA.', `CZYNNOŚCI DOKONANO PRZY UDZIALE ${N}.`],
+    ['PRZY UDZIALE ANNY KOWALSKIEJ.', `PRZY UDZIALE ${N}.`],
+    ['PRZY POMOCY JANA NOWAKA.', `PRZY POMOCY ${N}.`],
+    ['PRZY ASYŚCIE JANA NOWAKA.', `PRZY ASYŚCIE ${N}.`],
+    ['PRZY OBECNOŚCI JANA NOWAKA', `PRZY OBECNOŚCI ${N}`],
+    ['OGLĘDZIN DOKONANO PRZY UDZIALE JANA NOWAKA I ANNY LIS.', `OGLĘDZIN DOKONANO PRZY UDZIALE ${N} I ${N}.`],
+    ['PRZY UDZIALE WŁAŚCICIELA JANA NOWAKA', `PRZY UDZIALE WŁAŚCICIELA ${N}`],
+    ['Świadek: Marek Pawła, zam. Lubień 12', `Świadek: ${N}, zam. Lubień 12`],
+    ['Pracownik: Ewa Pawła, PESEL 90010112345', `Pracownik: ${N}, PESEL [PESEL]`],
+    ['p. Robert Pawła przygotuje akademię.', `p. ${N} przygotuje akademię.`],
+    ['Dyrektor szkoły: mgr Andrzej Pawła', `Dyrektor szkoły: mgr ${N}`],
+    ['Dyrektor szkoły: mgr Andrzej Jana Pawła', `Dyrektor szkoły: mgr ${N}`],
+  ]);
+  masked([['Lokator Adama Mickiewicza 30 m. 2 zalega z czynszem.', 'Lokator [ADRES] zalega z czynszem.']], { pseudonyms: true });
+  // I4 i pułapki: odsyłacz, wizyta, rocznica, obiekt z patronem, krotność, egzemplarze, komórki TSV
+  keep([
+    'Wizyty Jana Pawła II 8.',
+    'Rocznica Śmierci Jana Pawła II 2.',
+    'Pomnik Jana Pawła II 3, Kraków',
+    'Kaplica Jana Pawła II 3, Kraków',
+    'Doręczyć: Jana Pawła II 5 egz.',
+    'Encyklika Jana Pawła II 3.',
+    'SP nr 1\tJana Pawła II\t12',
+    'Szkoła\tPatron\tKlasy\nSP nr 1\tJana Pawła II\t12',
+    'Jana Pawła II\t12',
+    'SP nr 1;Jana Pawła II;12',
+    'Kierownik: Jan Pawła II',
+    'Dom Kultury przy Jana Pawła II 5 zaprasza.',
+    'MIESZKANIE PRZY ADAMA MICKIEWICZA',
+    'Jaroslaw Rynek 5 to adres urzedu',
+    'Jarosław Rynek 5 to adres urzędu',
+  ]);
+  // I1 na siatce: patron z numerem domu nigdy nie zostaje jawny w całości
+  for (const p of ['Adama Mickiewicza', 'Tadeusza Kościuszki', 'Stefana Batorego', 'Marii Konopnickiej', 'Jana Kowalskiego']) {
+    for (const pre of ['', 'Lokator ', 'Budynek ', 'Kraków, ', 'Jan Nowak\n', 'Mieszkańcy ', 'Spotkanie przy ']) {
+      for (const end of [' 30 m. 2 zalega z czynszem.', ' 30 lok. 2', ' 30 w Krakowie.', ' 30/2.', ' 30 m. 3 (powód Jan Nowak)', ' 14, Kraków']) {
+        const t = pre + p + end;
+        expect(redactPII(t).redacted, t).not.toContain(p);
+        // WERSALIKAMI bez kotwicy tylko z lokalem (para WERSALIKAMI spoza słownika nazwisk nie jest osobą)
+        if (/ (?:m|lok)\. /.test(end)) expect(redactPII(t.toUpperCase()).redacted, t.toUpperCase()).not.toContain(p.toUpperCase());
+      }
+    }
+  }
+});
+test('dom3: patron z liczbą rzymską bez kotwicy — maska osoby jak w v0.46.23, odsyłacze i jednostki jawne', () => {
+  masked([
+    // I1: adres bez pewnej kotwicy — para dostaje maskę osoby, liczba rzymska i numer zostają
+    ['Jana Pawła II 5/2 Kraków', `${N} II 5/2 Kraków`],
+    ['Jana Pawła II 12 Lubień', `${N} II 12 Lubień`],
+    ['Anna Nowak, Jana Pawła II 5/2 Kraków', `${N}, ${N} II 5/2 Kraków`],
+    ['Doręczono w dniu 3 listopada Jana Pawła II 5/2', `Doręczono w dniu 3 listopada ${N} II 5/2`],
+    ['Lista mieszkańców bloku Jana Pawła II 14:', `Lista mieszkańców bloku ${N} II 14:`],
+    ['Jana Pawła 12/4', `${N} 12/4`],
+    // kotwica: tabela z kreską, „nr", „m 2" bez kropki, ukośnik ze spacjami, skrót ulicy przed „nr"
+    ['Adam Nowak|Jana Pawła II 5|Kraków', `${N}|${A}|Kraków`],
+    ['| Adam Nowak | Jana Pawła II 5/2 | Kraków |', `| ${N} | ${A} | Kraków |`],
+    ['Lubień, Jana Pawła II nr 5', `Lubień, ${A}`],
+    ['Jana Pawła II, nr 5, Kraków', `${A}, [MIEJSCOWOŚĆ]`],
+    ['Lokator Adama Mickiewicza 30 m 2 zalega.', `Lokator ${A} zalega.`],
+    ['al. Jana Pawła II nr 5', A],
+    ['mieszka przy al. Jana Pawła II nr 5', `mieszka przy ${A}`],
+    ['Mieszka Na Jana Pawła II 30/2', `Mieszka Na ${A}`],
+    ['Pod Adresem Jana Pawła II 5/2', `Pod Adresem ${A}`],
+    ['Przy Jana Pawła II 14 w Kielcach mieszka wnioskodawca.', `Przy ${A} w [MIEJSCOWOŚĆ] mieszka wnioskodawca.`],
+    ['Adres:\tJana Pawła II 14\tMiejsc.:\tKielce', `Adres:\t${A}\tMiejsc.:\tKielce`],
+    ['Miejsce szkolenia: Kraków, Jana Pawła II 41 (budynek B), sala 12', `Miejsce szkolenia: [MIEJSCOWOŚĆ], ${A} (budynek B), sala 12`],
+    // tabulator to granica komórki — głowa nazwy albo wyraz uliczny z sąsiedniej kolumny nie robi z osoby patrona
+    ['Logistyka\tPlac\tKowalczyk Anna', `Logistyka\tPlac\t${N}`],
+    ['Nagroda\tJana Lisa\tKraków', `Nagroda\t${N}\tKraków`],
+    // pisma kadrowe WERSALIKAMI przed osobą
+    ['WYPOWIEDZENIE UMOWY JANA KOWALSKIEGO', `WYPOWIEDZENIE UMOWY ${N}`],
+    ['LISTA PŁAC JANA NOWAKA', `LISTA PŁAC ${N}`],
+    ['LIST MOTYWACYJNY JANA NOWAKA', `LIST MOTYWACYJNY ${N}`],
+    // ulica z „im." (także sklejonym) to adres, nie patron instytucji
+    ['ul. im. Henryka Sienkiewicza 5', A],
+    ['Szkoła im. Marii Konopnickiej, ul. im.Henryka Sienkiewicza 5.', `Szkoła im. Marii Konopnickiej, ${A}.`],
+    // rzecznik z dopełniaczem urzędu przed nazwiskiem; osoba za patronem świętym
+    ['Pani Rzecznik Praw Dziecka Gzowska wystąpiła.', `Pani Rzecznik Praw Dziecka ${N} wystąpiła.`],
+    ['Proboszcz parafii św. Wojciecha Brzęczek zaprasza na odpust.', `Proboszcz parafii św. Wojciecha ${N} zaprasza na odpust.`],
+    ['Po mszy w kaplicy św. Rocha Bednarz, miejscowy kowal, poświęcił bramę.', `Po mszy w kaplicy św. Rocha ${N}, miejscowy kowal, poświęcił bramę.`],
+  ]);
+  keep(['Szkoła im. Henryka Sienkiewicza 5, Kraków', 'Parafia św. Rocha Kraków zaprasza.', 'Pan Rzecznik Praw Obywatelskich odpowiedział.']);
+  // odsyłacze, obiekty, jednostki i nazwy ulic bez numeru domu zostają jawne
+  keep([
+    'Kazanie Jana Pawła II 5.',
+    'Przystanek Jana Pawła II 3',
+    'Rondo Jana Pawła II 2 km od centrum',
+    'Na Alei Jana Pawła II 5 minut piechotą.',
+    'Pomnik Jana Pawła II 3 m wysokości.',
+    'Pomnik Tadeusza Kościuszki 1, Kraków.',
+    'Urząd Gminy przy Jana Pawła II 5 informuje.',
+    'UNIWERSYTET ADAMA MICKIEWICZA',
+    'Pontyfikat Jana Pawła II 26 lat',
   ]);
 });
