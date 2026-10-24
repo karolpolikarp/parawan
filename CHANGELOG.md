@@ -23,7 +23,8 @@ działają na GitHubie od chwili wypchnięcia tagów.
   linie są pomijane, `--osoby` działa jak w zwykłym trybie. Z `--bez-tekstu` odpowiedź zawiera
   tylko `id` i listę znalezisk z liczbą wystąpień, bez zredagowanego tekstu. Starsze wydania
   odrzucają nieznaną opcję kodem wyjścia 2, więc program po drugiej stronie może w ten sposób
-  sprawdzić, czy wersja zna ten tryb. Rdzeń `anonimizator` 0.29.12 → 0.29.13 (jeszcze
+  sprawdzić, czy wersja zna ten tryb. Wiersz, który nie jest poprawnym JSON-em albo ma `text`
+  innego typu niż napis, dostaje odpowiedź `{"id", "error"}` zamiast zakończenia procesu. Rdzeń `anonimizator` 0.29.12 → 0.29.13 (jeszcze
   nieopublikowany w npm) zawiera silnik z v0.46.24 i eksport `isValidKw`. Aplikacja bez zmian.
   (fa5edef)
 

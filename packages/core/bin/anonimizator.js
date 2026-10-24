@@ -90,10 +90,20 @@ if (jsonl) {
   const rl = createInterface({ input: process.stdin, terminal: false });
   rl.on('line', (linia) => {
     if (!linia.trim()) return;
-    const { id, text } = JSON.parse(linia);
-    const { redacted, found } = redactPII(text ?? '', { pseudonyms });
-    const odpowiedz = bezTekstu ? { id, found } : { id, redacted, found };
-    process.stdout.write(JSON.stringify(odpowiedz) + '\n');
+    // Zly wiersz nie moze zabic procesu trwalego: odpowiadamy linia z "error" (kolejnosc
+    // odpowiedzi zostaje 1:1 z wejsciem), a id oddajemy, jesli dalo sie je odczytac.
+    let id = null;
+    try {
+      const wejscie = JSON.parse(linia);
+      id = wejscie?.id ?? null;
+      const text = wejscie?.text ?? '';
+      if (typeof text !== 'string') throw new TypeError('pole "text" musi być napisem');
+      const { redacted, found } = redactPII(text, { pseudonyms });
+      const odpowiedz = bezTekstu ? { id, found } : { id, redacted, found };
+      process.stdout.write(JSON.stringify(odpowiedz) + '\n');
+    } catch (err) {
+      process.stdout.write(JSON.stringify({ id, error: err.message }) + '\n');
+    }
   });
   rl.on('close', () => process.exit(0));
   // Skrypt konczy sie razem z zamknieciem stdin (most zamyka je jawnie po stronie
