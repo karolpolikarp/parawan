@@ -533,3 +533,164 @@ test('„Cofnij zasłonięcie” w jednym z kilku miejsc „wszędzie”: stopka
     await page.waitForFunction(() => ((document.getElementById('output')?.textContent ?? '').match(/\[DANE\]/g) ?? []).length === 3);
   });
 });
+
+// Poprawki po weryfikacji domknięcia, runda 2: „wszędzie” na fragmencie zasłoniętym ręcznie cofa
+// zasłonięcia zamiast odsłaniać automat, Ctrl+Z w wyniku cofa ostatnią czynność, a na liście nie
+// zostaje „Cofnięto zasłonięcie” bez zasłonięcia, którego dotyczyło.
+
+/** Zasłania `needle` z pola źródła jako „Inne dane”, w jednym miejscu albo wszędzie. */
+async function maskFromSource(page, needle, all = false) {
+  await openFormFromSource(page, needle);
+  if (all) await page.locator('#fix-all').check();
+  await page.locator('#fix-token').selectOption('DANE');
+  await page.locator('#fix-apply').click();
+  await page.locator('#fix-form').waitFor({ state: 'hidden' });
+}
+
+const countIn = (page, needle) =>
+  page.evaluate(
+    (n) => (document.getElementById('output')?.textContent ?? '').split(n).length - 1,
+    needle,
+  );
+
+test('„Cofnij zasłonięcie wszędzie” na zakresach, które wchłonęły PESEL: [PESEL] w wyniku, pliku i druku', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const pesel = '85071412358';
+    await paste(
+      page,
+      `Wniosek Pana Tomasza, PESEL ${pesel}, złożony dnia 3 maja.\nPonownie: PESEL ${pesel}, złożony dnia 3 maja.`,
+    );
+    await maskFromSource(page, `${pesel}, złożony`, true);
+    await app.waitForOutput('PESEL [DANE] dnia');
+    assert.equal(await countIn(page, '[DANE]'), 2);
+    await page.locator('#output mark.pii', { hasText: '[DANE]' }).first().click();
+    assert.equal(
+      await page.locator('#fix-keep-all').innerText(),
+      'Cofnij zasłonięcie wszędzie (2)',
+    );
+    await page.locator('#fix-keep-all').click();
+    await page.waitForFunction(
+      () => !(document.getElementById('output')?.textContent ?? '').includes('[DANE]'),
+    );
+    assert.equal(await countIn(page, '[PESEL], złożony'), 2);
+    for (const [where, text] of [
+      ['wynik', await app.output()],
+      ['druk', (await printed(page)) ?? ''],
+      ['.txt', await downloadTxt(page)],
+    ]) {
+      assert.ok(!squash(text).includes(pesel), `${where}: PESEL jawny`);
+    }
+    // jedna poprawka objęła oba miejsca, więc zniknęła z listy
+    assert.equal(await page.locator('#fix-foot').isHidden(), true);
+  });
+});
+
+test('Ctrl+Z w wyniku po „Cofnij zasłonięcie” przywraca to zasłonięcie, a nie zdejmuje wcześniejszego', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    await paste(
+      page,
+      `Księga wieczysta ${KW} dla działki 245/7. Wnioskodawca Jan Kowalski, PESEL 44051401359.`,
+    );
+    await maskFromSource(page, KW);
+    await maskFromSource(page, '245/7');
+    await page.waitForFunction(
+      () =>
+        ((document.getElementById('output')?.textContent ?? '').match(/\[DANE\]/g) ?? []).length ===
+        2,
+    );
+    await page.locator('#output mark.pii', { hasText: '[DANE]' }).nth(1).click();
+    assert.equal(await page.locator('#fix-bar-val').textContent(), '245/7');
+    await page.locator('#fix-keep').click();
+    await app.waitForOutput('działki 245/7');
+    await page.locator('#output mark.pii').first().focus();
+    await page.keyboard.press('Control+z');
+    await page.waitForFunction(
+      () =>
+        ((document.getElementById('output')?.textContent ?? '').match(/\[DANE\]/g) ?? []).length ===
+        2,
+    );
+    for (const text of [await app.output(), (await printed(page)) ?? '']) {
+      assert.ok(!text.includes('00045123'), 'księga wieczysta jawna');
+      assert.ok(!text.includes('245/7'), 'działka jawna po Ctrl+Z');
+    }
+    // następne Ctrl+Z cofa zasłonięcie działki, księga zostaje zasłonięta
+    await page.locator('#output mark.pii').first().focus();
+    await page.keyboard.press('Control+z');
+    await app.waitForOutput('działki 245/7');
+    assert.ok(!(await app.output()).includes('00045123'), 'księga wieczysta jawna');
+  });
+});
+
+test('cofnięcie z listy zasłonięcia „wszędzie” zdejmuje też „Cofnięto zasłonięcie” w jednym z jego miejsc', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    await paste(page, DECYZJA);
+    await maskFromSource(page, '245/7', true);
+    await page.waitForFunction(
+      () =>
+        ((document.getElementById('output')?.textContent ?? '').match(/\[DANE\]/g) ?? []).length ===
+        3,
+    );
+    await page.locator('#output mark.pii', { hasText: '[DANE]' }).nth(1).click();
+    await page.locator('#fix-keep').click();
+    await page.waitForFunction(
+      () =>
+        ((document.getElementById('output')?.textContent ?? '').match(/\[DANE\]/g) ?? []).length ===
+        2,
+    );
+    await page.locator('#fix-show').click();
+    assert.equal(await page.locator('#fix-list li').count(), 2);
+    await page.locator('#fix-list button[data-i="0"]').click();
+    await page.waitForFunction(
+      () => !(document.getElementById('output')?.textContent ?? '').includes('[DANE]'),
+    );
+    // lista pusta: nie podaje czynności, która nic już nie robi
+    assert.equal(await page.locator('#fix-foot').isHidden(), true);
+    // „Cofnij ostatnią” przywraca obie poprawki
+    await page.locator('#output').focus();
+    await page.keyboard.press('Control+z');
+    await page.waitForFunction(
+      () =>
+        ((document.getElementById('output')?.textContent ?? '').match(/\[DANE\]/g) ?? []).length ===
+        2,
+    );
+  });
+});
+
+test('natywne Ctrl+Z w polu źródła po usunięciu dużego fragmentu nie zdejmuje zasłonięcia z reszty pisma', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const head = `Decyzja w sprawie działki, księga wieczysta nr ${KW}, wnioskodawca Jan Kowalski, PESEL 44051401359.\n`;
+    const tail = Array.from(
+      { length: 12 },
+      (_, i) =>
+        `Akapit uzasadnienia numer ${i + 1} opisuje przebieg postępowania i ustalenia organu w tej sprawie.`,
+    ).join('\n');
+    await paste(page, head + tail);
+    await selectInOutput(page, KW);
+    await page.locator('#fix-sel-out').click();
+    await page.locator('#fix-apply').click();
+    await app.waitForOutput('[DANE]');
+    const ta = page.locator('#input');
+    await ta.focus();
+    await ta.evaluate(
+      (el, n) => /** @type {HTMLTextAreaElement} */ (el).setSelectionRange(n, el.value.length),
+      head.length,
+    );
+    await page.keyboard.press('Delete');
+    await page.waitForFunction(
+      () => !(document.getElementById('output')?.textContent ?? '').includes('numer 12'),
+    );
+    await page.keyboard.press('Control+z');
+    assert.equal(await ta.inputValue(), head + tail, 'Ctrl+Z nie przywrócił tekstu');
+    await app.waitForOutput('numer 12');
+    for (const text of [await app.output(), (await printed(page)) ?? ''])
+      assert.ok(!text.includes('00045123'), 'księga wieczysta jawna');
+    assert.equal(
+      await page.locator('#fix-sum').textContent(),
+      'Ręczne poprawki: przywrócono 0, zasłonięto 1',
+    );
+  });
+});

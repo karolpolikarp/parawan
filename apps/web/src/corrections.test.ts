@@ -303,6 +303,25 @@ describe('„Cofnij zasłonięcie” (unmask)', () => {
     expect(final(text, spans, [a, b, unmaskAt(text, spans, [a, b])])).toBe(final(text, spans, [a]));
   });
 
+  test('„Cofnij zasłonięcie wszędzie” na zakresach, które wchłonęły PESEL: wraca [PESEL] w każdym miejscu', () => {
+    const t = 'Wniosek, PESEL 85071412358, złożony dnia 3 maja.\nPonownie: PESEL 85071412358, złożony dnia 3 maja.';
+    const { spans, redacted } = auto(t);
+    expect(redacted.match(/\[PESEL\]/g)).toHaveLength(2);
+    const mask: Decision = { kind: 'mask', scope: 'all', text: '85071412358, złożony', token: 'DANE' };
+    const manual = applyCorrections(t, spans, [mask]).spans.filter((s) => s.source === 'manual');
+    expect(manual).toHaveLength(2);
+    const forms = [formOf(t, manual[0])];
+    const unmaskAll: Decision = { kind: 'unmask', scope: 'same', key: spanKey(t, manual[0]), label: '', forms };
+    const r = applyCorrections(t, spans, [mask, unmaskAll]);
+    expect(applySpans(t, r.spans)).toBe(redacted);
+    expect(r.kept).toEqual([]);
+    expect(r.effects).toEqual([2, 2]);
+    // zakresu automatu o tym samym kluczu nie odsłania: działa tylko na zasłonięcia ręczne
+    const pesel = spans.find((s) => s.tokens[0] === 'PESEL') as Span;
+    const onAuto: Decision = { kind: 'unmask', scope: 'same', key: spanKey(t, pesel), label: '', forms: [formOf(t, pesel)] };
+    expect(applyCorrections(t, spans, [onAuto]).effects).toEqual([0]);
+  });
+
   test('numer decyzji zasłonięcia przy każdym zakresie ręcznym (by), -1 przy automacie', () => {
     const { spans } = auto(text);
     const r = applyCorrections(text, spans, [{ kind: 'mask', scope: 'all', text: 'maja', token: 'DANE' }]);

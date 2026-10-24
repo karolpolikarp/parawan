@@ -143,6 +143,10 @@ const reviewed = new Set<number>();
 // w localStorage (zawierają fragmenty pisma). `corrected` to ich wynik dla bieżących zakresów.
 let decisions: Decision[] = [];
 let corrected: Corrected = { spans: [], kept: [], effects: [], by: [] };
+// Lista decyzji sprzed każdej czynności (Ctrl+Z w wyniku i „Cofnij ostatnią” wracają do niej).
+// Cała lista, a nie „zdejmij ostatni wpis”: po „Cofnij zasłonięcie” decyzja znika ze środka listy
+// i Ctrl+Z musi ją przywrócić na jej miejsce, zamiast zdjąć inną, wcześniejszą poprawkę.
+let undoSteps: Decision[][] = [];
 
 /* ── Legenda, tabela „Co wykrywa” i przełączniki „Co maskować” (dane w pii-meta.ts) ── */
 
@@ -615,10 +619,10 @@ output.addEventListener('keydown', (e) => {
     openBar(true);
     return;
   }
-  // Ctrl+Z w wyniku cofa ostatnią ręczną poprawkę (pole wyniku nie ma własnej historii edycji).
-  if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'z' && decisions.length) {
+  // Ctrl+Z w wyniku cofa ostatnią czynność na poprawkach (pole wyniku nie ma własnej historii edycji).
+  if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'z' && undoSteps.length) {
     e.preventDefault();
-    undoDecision(decisions.length - 1);
+    undoLast();
     return;
   }
   if (!(e.ctrlKey || e.metaKey) || e.altKey || e.key.toLowerCase() !== 'a') return;
@@ -990,14 +994,15 @@ function syncBar(): void {
       ? ''
       : `Ten znacznik obejmuje ${n} ${plural(n, 'daną', 'dane', 'danych')}: ${span.tokens.map(tokenLabel).join(', ')}. ` +
         `„Zostaw jawne” odsłoni ${n === 2 ? 'obie' : 'wszystkie'}.`;
-  const same = kept ? [] : sameAs(span);
+  // Na fragmencie zasłoniętym ręcznie „wszędzie” dotyczy tylko zasłonięć ręcznych tej samej danej.
+  const same = kept ? [] : sameAs(span).filter((s) => !manual || s.source === 'manual');
   fixKeep.hidden = kept;
   fixKeep.textContent = manual ? 'Cofnij zasłonięcie' : 'Zostaw jawne';
   fixRemask.hidden = !kept;
   fixKeepAll.hidden = same.length < 2;
   fixBarForms.hidden = same.length < 2;
   if (same.length >= 2) {
-    fixKeepAll.textContent = `Zostaw jawne wszędzie (${same.length})`;
+    fixKeepAll.textContent = `${manual ? 'Cofnij zasłonięcie wszędzie' : 'Zostaw jawne wszędzie'} (${same.length})`;
     const forms = [...new Set(same.map((s) => origOf(s.start, s.end)))];
     fixBarForms.textContent = `Obejmie: ${forms.slice(0, 8).join(', ')}${forms.length > 8 ? '…' : ''}`;
   }
@@ -1069,16 +1074,44 @@ function addDecision(d: Decision): number {
   return corrected.effects[corrected.effects.length - 1] ?? 0;
 }
 
+/** Zapamiętuje listę decyzji przed czynnością urzędnika, do Ctrl+Z i „Cofnij ostatnią”. */
+function remember(): void {
+  undoSteps.push(decisions.slice());
+  if (undoSteps.length > 200) undoSteps.shift();
+}
+
 function undoDecision(i: number, target?: { start: number; end: number }): void {
   if (!decisions[i]) return;
+  remember();
   decisions.splice(i, 1);
+  // „Cofnięto zasłonięcie” bez zasłonięcia, które cofało, nic już nie robi, a na liście
+  // poprawek wyglądałoby na czynność, która dalej obowiązuje.
+  if (lastSpans) {
+    for (;;) {
+      recomputeCorrections();
+      const orphan = decisions.findIndex((d, k) => d.kind === 'unmask' && !corrected.effects[k]);
+      if (orphan === -1) break;
+      decisions.splice(orphan, 1);
+    }
+  }
   fixNote = '';
   correctionsChanged('Cofnięto ręczną poprawkę.', target);
+}
+
+/** Ctrl+Z w wyniku i „Cofnij ostatnią”: lista decyzji wraca do stanu sprzed ostatniej czynności. */
+function undoLast(): void {
+  const prev = undoSteps.pop();
+  if (!prev) return;
+  const restored = prev.length >= decisions.length;
+  decisions = prev;
+  fixNote = '';
+  correctionsChanged(restored ? 'Przywrócono cofniętą ręczną poprawkę.' : 'Cofnięto ręczną poprawkę.');
 }
 
 /** Wyczyść, Przykład, plik i nowe pismo: poprawki dotyczyły poprzedniego tekstu. */
 function clearCorrections(): void {
   decisions = [];
+  undoSteps = [];
   fixNote = '';
   barOpen = false;
   closeForm(false);
@@ -1105,22 +1138,43 @@ fixKeep.addEventListener('click', () => {
     const d = decisions[by];
     if (d && (d.scope === 'here' || corrected.effects[by] === 1)) undoDecision(by, span);
     else {
+      remember();
       addDecision({ kind: 'unmask', scope: 'here', start: span.start, end: span.end });
       correctionsChanged(`Cofnięto zasłonięcie w tym miejscu.`, span);
     }
     return;
   }
+  remember();
   addDecision({ kind: 'keep', scope: 'here', start: span.start, end: span.end });
   correctionsChanged(`Zostawiono jawne: ${fragmentsWord(span.tokens.length)}.`, span);
 });
 fixKeepAll.addEventListener('click', () => {
   const frag = currentFrag();
   if (!frag || frag.kept) return;
-  const label = origOf(frag.span.start, frag.span.end);
+  const { span } = frag;
+  const label = origOf(span.start, span.end);
+  const same = sameAs(span).filter((s) => span.source !== 'manual' || s.source === 'manual');
   // Formy z paska („Obejmie: …”) z tej chwili: osoba dopisana później nie wyjdzie jawna po cichu.
-  const forms = [...new Set(sameAs(frag.span).map((s) => formOf(lastInput, s)))];
-  const n = addDecision({ kind: 'keep', scope: 'same', key: spanKey(lastInput, frag.span), label, forms });
-  correctionsChanged(`Zostawiono jawne: ${fragmentsWord(n)}.`, frag.span);
+  const forms = [...new Set(same.map((s) => formOf(lastInput, s)))];
+  const key = spanKey(lastInput, span);
+  if (span.source === 'manual') {
+    // Na fragmencie zasłoniętym ręcznie „wszędzie” cofa te zasłonięcia, jak „Cofnij zasłonięcie”
+    // w każdym miejscu: PESEL zasłonięty przez automat i wchłonięty przez zaznaczenie zostaje
+    // zasłonięty. Gdy wszystkie miejsca pochodzą z jednej poprawki, wystarczy zdjąć ją z listy.
+    const bys = new Set(same.map((s) => corrected.by[corrected.spans.indexOf(s)] ?? -1));
+    const [by] = [...bys];
+    if (bys.size === 1 && by >= 0 && corrected.effects[by] === same.length) {
+      undoDecision(by, span);
+      return;
+    }
+    remember();
+    const n = addDecision({ kind: 'unmask', scope: 'same', key, label, forms });
+    correctionsChanged(`Cofnięto zasłonięcie: ${placesWord(n)}.`, span);
+    return;
+  }
+  remember();
+  const n = addDecision({ kind: 'keep', scope: 'same', key, label, forms });
+  correctionsChanged(`Zostawiono jawne: ${fragmentsWord(n)}.`, span);
 });
 fixRemask.addEventListener('click', () => {
   const frag = currentFrag();
@@ -1128,6 +1182,7 @@ fixRemask.addEventListener('click', () => {
   const { start, end } = frag.span;
   // Tuż po „Zostaw jawne” tego samego miejsca wystarczy zdjąć tamtą decyzję.
   const last = decisions[decisions.length - 1];
+  remember();
   if (last?.kind === 'keep' && last.scope === 'here' && last.start === start && last.end === end) decisions.pop();
   else addDecision({ kind: 'mask', scope: 'here', start, end, token: frag.span.tokens[0] });
   fixNote = '';
@@ -1260,6 +1315,7 @@ fixApply.addEventListener('click', () => {
   if (fixForm.hidden || !fixAvailable() || lastInput !== formInput) return;
   const token = fixToken.value;
   let n = 0;
+  remember();
   if (fixAll.checked && !fixAll.disabled) n = addDecision({ kind: 'mask', scope: 'all', text: formText, token });
   else for (const [start, end] of formRanges) n += addDecision({ kind: 'mask', scope: 'here', start, end, token });
   // Z wyniku fokus idzie na nowy znacznik: przycisk „Zasłoń zaznaczenie” zaraz się wyłączy.
@@ -1273,7 +1329,11 @@ fixApply.addEventListener('click', () => {
 /** Wpis listy poprawek: co zrobiono, z wartością (tylko na ekranie) i liczbą miejsc. */
 function decisionText(d: Decision, n: number): string {
   const where = `, ${placesWord(n)}`;
-  if (d.kind === 'unmask') return `Cofnięto zasłonięcie w jednym miejscu: ${origOf(d.start, d.end)}`;
+  if (d.kind === 'unmask') {
+    return d.scope === 'here'
+      ? `Cofnięto zasłonięcie w jednym miejscu: ${origOf(d.start, d.end)}`
+      : `Cofnięto zasłonięcie wszędzie: ${d.label}${where}`;
+  }
   if (d.kind === 'keep') {
     return d.scope === 'here'
       ? `Zostawiono jawne: ${origOf(d.start, d.end)}`
@@ -1345,8 +1405,9 @@ fixShow.addEventListener('click', () => {
   fixShow.textContent = open ? 'Ukryj' : 'Pokaż';
   if (open) renderFixList();
 });
-$<HTMLButtonElement>('fix-undo').addEventListener('click', () => undoDecision(decisions.length - 1));
+$<HTMLButtonElement>('fix-undo').addEventListener('click', undoLast);
 $<HTMLButtonElement>('fix-clear').addEventListener('click', () => {
+  remember();
   decisions = [];
   fixNote = '';
   correctionsChanged('Usunięto wszystkie ręczne poprawki.');
@@ -1440,6 +1501,9 @@ function renderResult(redacted: string, found: PiiFinding[]): void {
   if (decisions.length && lastInput && input.value !== lastInput) {
     const moved = shiftDecisions(lastInput, input.value, decisions);
     decisions = moved.decisions;
+    // Listy do Ctrl+Z przesuwają się razem z tekstem tak samo jak bieżąca.
+    const [from, to] = [lastInput, input.value];
+    undoSteps = undoSteps.map((list) => shiftDecisions(from, to, list).decisions);
     if (moved.dropped) {
       fixNote =
         `Po zmianie tekstu źródłowego odrzucono ${moved.dropped} ` +
@@ -1592,8 +1656,11 @@ input.addEventListener('beforeinput', (e) => {
 });
 
 input.addEventListener('input', () => {
-  if (newDocument || !input.value.trim() || (historyBefore !== null && isOtherDocument(historyBefore, input.value)))
-    resetDocumentPublication();
+  // Przy cofaniu i ponawianiu zeruje się sama karta. Ręczne poprawki przesuwa albo odrzuca
+  // (z komunikatem) renderResult, jak przy zwykłej edycji: Ctrl+Z po usunięciu dużego fragmentu
+  // nie może po cichu zdjąć zasłonięcia z części pisma, której nikt nie ruszał.
+  if (newDocument || !input.value.trim()) resetDocumentPublication();
+  else if (historyBefore !== null && isOtherDocument(historyBefore, input.value)) resetDocumentPublication(true);
   newDocument = false;
   historyBefore = null;
   // Własna edycja zamyka błąd, bo już nie dotyczy, i „Cofnij”, bo po edycji przywróciłby tekst
@@ -2017,8 +2084,8 @@ function syncOtherBasis(): void {
  * poprzedniego pisma, znika. Ręczna adnotacja mogła zawierać jego dane, a „Dołącz” przy zwiniętej
  * karcie dopisałoby ją do nowego wyniku. Organ, osoba, podstawa i data zostają.
  */
-function resetDocumentPublication(): void {
-  clearCorrections(); // ręczne poprawki dotyczyły poprzedniego pisma
+function resetDocumentPublication(keepCorrections = false): void {
+  if (!keepCorrections) clearCorrections(); // ręczne poprawki dotyczyły poprzedniego pisma
   pubZnak.value = '';
   for (const el of [pubAppend, ...pubChecks]) el.checked = false;
   allReviewed = false;

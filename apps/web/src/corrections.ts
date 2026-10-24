@@ -27,7 +27,12 @@ export type Decision =
    * Cofnij ręczne zasłonięcie w [start, end): miejsce wraca do stanu sprzed niego, więc to, co
    * zasłaniał automat (PESEL wchłonięty przez zaznaczenie), dalej jest zasłonięte.
    */
-  | { kind: 'unmask'; scope: 'here'; start: number; end: number };
+  | { kind: 'unmask'; scope: 'here'; start: number; end: number }
+  /**
+   * Cofnij ręczne zasłonięcia o tym samym kluczu (spanKey) i w formach z chwili decyzji, tak jak
+   * unmask „tutaj” w każdym z tych miejsc. Zakresów automatu nie odsłania.
+   */
+  | { kind: 'unmask'; scope: 'same'; key: string; label: string; forms: string[] };
 
 /** Tokeny do wyboru przy „Zasłoń zaznaczenie”, w kolejności listy. */
 export const MANUAL_TOKENS: readonly { token: string; label: string }[] = [
@@ -181,6 +186,13 @@ export function applyCorrections(original: string, autoSpans: Span[], decisions:
   const effects: number[] = [];
   /** Zakresy automatyczne wchłonięte w `c` (także przez wchłonięte zakresy ręczne). */
   const autoOf = (c: Cover): number[] => (c.by < 0 ? [c.ai] : c.under.flatMap(autoOf));
+  /** Zdejmuje zakres ręczny: wraca to, co wchłonął, i odsłonięcia automatu sprzed niego. */
+  const release = (c: Cover): void => {
+    cover = cover.filter((x) => x !== c).concat(c.under.filter((u) => !c.wasKept.includes(u.ai)));
+    for (const k of c.wasKept) kept.add(k);
+  };
+  const sameAs = (c: Cover, key: string, forms: string[]): boolean =>
+    spanKey(original, c) === key && forms.includes(formOf(original, c));
   const keepAll = (pick: (c: Cover) => boolean): number => {
     const hit = cover.filter(pick);
     if (!hit.length) return 0;
@@ -218,14 +230,17 @@ export function applyCorrections(original: string, autoSpans: Span[], decisions:
       n =
         d.scope === 'here'
           ? keepAll((c) => inside(c, d.start, d.end))
-          : keepAll((c) => spanKey(original, c) === d.key && d.forms.includes(formOf(original, c)));
+          : keepAll((c) => sameAs(c, d.key, d.forms));
     } else if (d.kind === 'unmask') {
-      // Zakres ręczny w miejscu decyzji albo szerszy od niego (po ponownym włączeniu typu urósł).
-      for (const c of cover.filter((c) => c.by >= 0 && (inside(c, d.start, d.end) || inside(d, c.start, c.end)))) {
-        cover = cover.filter((x) => x !== c).concat(c.under.filter((u) => !c.wasKept.includes(u.ai)));
-        for (const k of c.wasKept) kept.add(k);
-        n++;
-      }
+      // „Tutaj”: zakres ręczny w miejscu decyzji albo szerszy od niego (po ponownym włączeniu typu
+      // urósł). „Wszędzie”: każdy zakres ręczny tej samej danej w formach z chwili decyzji.
+      const hit = cover.filter(
+        (c) =>
+          c.by >= 0 &&
+          (d.scope === 'same' ? sameAs(c, d.key, d.forms) : inside(c, d.start, d.end) || inside(d, c.start, c.end)),
+      );
+      for (const c of hit) release(c);
+      n = hit.length;
     } else {
       const ranges = d.scope === 'here' ? [[d.start, d.end] as [number, number]] : findOccurrences(original, d.text, d.token);
       for (const [a, b] of ranges) if (maskAt(a, b, d.token, i)) n++;
