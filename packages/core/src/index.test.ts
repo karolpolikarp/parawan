@@ -6314,7 +6314,7 @@ test('b7 K31: imiona w odmianie (ruchome e, -iem, przymiotnikowa, zdrobnienia, o
     'Sobór św. Jerzego Zwycięzcy.',
     'Fundacja Jerzego Owsiaka.',
     'Pomnik Jerzego Waszyngtona stoi w parku.',
-    'Jerzego Waszyngtona 12/4',
+    'Jerzego Waszyngtona 12',
     'Szkoła im. Jerzego Kukuczki',
     'Ewangelia według św. Marka',
     'Marka Toyota zdobyła nagrodę.',
@@ -7189,5 +7189,180 @@ test('fix1: numer KW — kotwica przez łamanie wiersza tylko jako etykieta, wyl
     ['Nr KW\nKR1P/00234567/6', `Nr KW\n${KW}`],
     ['umowa sprzedaży nieruchomości KR1P/00234567/6', `umowa sprzedaży nieruchomości ${KW}`],
     ['Przedmiot umowy: KR1P/00234567/6', `Przedmiot umowy: ${KW}`],
+  ]);
+});
+test('fix2: udział i głos na końcu wiersza, celownik, ulica z patronem — tytuł, lokal, dalszy ciąg zdania', () => {
+  masked([
+    ['Udział Marii Lis 1/4', `Udział ${N} 1/4`],
+    ['Spadek przypada Marii Lis 1/2', `Spadek przypada ${N} 1/2`],
+    ['Udział Marii Lis 1/4\nUdział Jana Lisa 3/4', `Udział ${N} 1/4\nUdział ${N} 3/4`],
+    ['Udział Marii Lis 1/4; Jana Lisa 3/4', `Udział ${N} 1/4; ${N} 3/4`],
+    ['Udział Tomasza Mazura 1/3', `Udział ${N} 1/3`],
+    ['Piotrowi Kosowi 18', `${N} 18`],
+    ['Głosowało na Tomasza Mazura 12', `Głosowało na ${N} 12`],
+    ['Na Tomasza Mazura 12\nNa Annę Nowak 3', `Na ${N} 12\nNa ${N} 3`],
+    ['Tomasza Mazura 12/3', '[ADRES]'],
+    ['Tomasza Mazura 12 m. 3', '[ADRES]'],
+    ['Jerzego Waszyngtona 12/4', '[ADRES]'],
+    ['Wnioskodawca zamieszkały przy Jana Pawła II 14 zwrócił się o zezwolenie.', 'Wnioskodawca zamieszkały przy [ADRES] zwrócił się o zezwolenie.'],
+    ['Wnioskodawczyni mieszka przy Jana Pawła II 14 od 2010 roku.', 'Wnioskodawczyni mieszka przy [ADRES] od 2010 roku.'],
+    ['Mieszkańcy Jana Pawła II 5 zgłosili awarię.', 'Mieszkańcy [ADRES] zgłosili awarię.'],
+    ['Do Pani Anny Lis, Marszałka Józefa Piłsudskiego 5 m. 3 w Kielcach.', `Do Pani ${N}, [ADRES] w [MIEJSCOWOŚĆ].`],
+    ['Do Pana Jana Lisa, Generała Władysława Andersa 3 w Kielcach.', `Do Pana ${N}, [ADRES] w [MIEJSCOWOŚĆ].`],
+    ['Pod adresem Marszałka Józefa Piłsudskiego 5 w Kielcach mieszka Jan Lis.', `Pod adresem [ADRES] w [MIEJSCOWOŚĆ] mieszka ${N}.`],
+    // tytuł bez numeru domu to dalej osoba, nie adres
+    ['Odznaczenie Generała Władysława Andersa.', `Odznaczenie Generała ${N}.`],
+  ]);
+  keep(['Urząd Gminy przy Jana Pawła II 5 informuje.', 'Szkoła Podstawowa przy Jana Pawła II 12 ogłasza nabór.', 'Jerzego Waszyngtona 12']);
+});
+test('fix2: formularz z TAB-em — etykieta i wartość w osobnych komórkach, pseudonim samego nazwiska, wiersz danych pod nagłówkiem', () => {
+  masked([
+    ['Imię:\tAdam\tNazwisko:\tNowak', `Imię:\t${N}\tNazwisko:\t${N}`],
+    ['Imię ucznia:\tAdam\tNazwisko ucznia:\tNowak', `Imię ucznia:\t${N}\tNazwisko ucznia:\t${N}`],
+    ['Imię ojca:\tPiotr\tImię matki:\tEwa', `Imię ojca:\t${N}\tImię matki:\t${N}`],
+    ['Imię:\tAnna\tNazwisko:\tNowak\tPESEL:\t71010198768', `Imię:\t${N}\tNazwisko:\t${N}\tPESEL:\t[PESEL]`],
+    ['Nazwisko:\tMiejscowość:\nKowalski\tRadom', `Nazwisko:\tMiejscowość:\n${N}\tRadom`],
+    // wiersz TSV z danymi i jedną etykietą zostaje bez podziału
+    ['Nazwisko:\tGzowski\tKadry', `Nazwisko:\t${N}\tKadry`],
+  ]);
+  masked(
+    [
+      ['Imię: Jan\tNazwisko: Kowalski\nPan Jan Kowalski wnosi.', `Imię: ${N}\tNazwisko: [OSOBA-A]\nPan [OSOBA-A] wnosi.`],
+      ['Nazwisko: Kowalski\tUwagi: brak\nPan Kowalski przyszedł.', 'Nazwisko: [OSOBA-A]\tUwagi: brak\nPan [OSOBA-A] przyszedł.'],
+      ['Imię: Jan;\tNazwisko: Kowalski', 'Imię: Jan;\tNazwisko: [OSOBA-A]'],
+      ['Imię:\tAdam\tNazwisko:\tNowak', `Imię:\t${N}\tNazwisko:\t[OSOBA-A]`],
+    ],
+    { pseudonyms: true },
+  );
+});
+test('fix2: tabela z nagłówkiem — proza małymi literami i WERSALIKAMI, kalendarz, urząd w kolumnie osoby, klucz pseudonimu', () => {
+  for (const p of [
+    'wyjazd w maju; szczegóły wkrótce',
+    'zebranie w piątek; obecność obowiązkowa',
+    'silny mróz; zajęcia odwołane',
+    'WYJAZD W MAJU; SZCZEGÓŁY WKRÓTCE',
+    'Uwaga; wyjazd w maju',
+    'Dzień Matki; maj',
+  ])
+    expect(redactPII(`Imię;Nazwisko\nAnna;Kowal\n${p}`).redacted, p).toBe(`Imię;Nazwisko\n${N};${N}\n${p}`);
+  expect(redactPII('Imię\tNazwisko\nAnna\tKowal\nspotkanie w maju\tobecność obowiązkowa').redacted).toBe(
+    `Imię\tNazwisko\n${N}\t${N}\nspotkanie w maju\tobecność obowiązkowa`,
+  );
+  keep(['Lp.;Imię i nazwisko;Adres;Podpis\n3;Sołtys;Lubień 1;', 'Lp.;Imię i nazwisko;Adres;Podpis\n8;Ławnik;Lubień 2;']);
+  masked([
+    ['Imię i nazwisko;Telefon\nSołtys;600100200', 'Imię i nazwisko;Telefon\nSołtys;[TELEFON]'],
+    ['Imię i nazwisko;Telefon\nJan Sołtys;600100200', `Imię i nazwisko;Telefon\n${N};[TELEFON]`],
+    ['Imię;Nazwisko\nanna;kowal', `Imię;Nazwisko\n${N};${N}`],
+  ]);
+  // klucz pseudonimu przy kolumnie „imię naprzód": nazwisko-homograf imienia, nie obce imię
+  masked(
+    [
+      ['{"imieNazwisko": "Iryna Roman"}\n{"imieNazwisko": "Iryna Marek"}', '{"imieNazwisko": "[OSOBA-A]"}\n{"imieNazwisko": "[OSOBA-B]"}'],
+      ['{"imieNazwisko": "Iryna Roman"}\nPani Roman podpisała.', '{"imieNazwisko": "[OSOBA-A]"}\nPani [OSOBA-A] podpisała.'],
+      ['Imię i nazwisko;PESEL\nNodira Adam;71010198768\nNodira Marek;71010198768', 'Imię i nazwisko;PESEL\n[OSOBA-A];[PESEL]\n[OSOBA-B];[PESEL]'],
+      ['{"imieNazwisko": "Kowalski Jan"}\nPan Kowalski', '{"imieNazwisko": "[OSOBA-A]"}\nPan [OSOBA-A]'],
+    ],
+    { pseudonyms: true },
+  );
+});
+test('fix2: login WERSALIKAMI nie rozlewa się na ulicę ani nazwę klubu; konto-homograf nazwiska w ścieżce profilu', () => {
+  masked([
+    ['Login: ANNA ZIELIŃSKA\nUL. ZIELIŃSKA 5', `Login: ${N}\n[ADRES]`],
+    ['Login: ANNA GÓRSKA\nUL. GÓRSKA 5', `Login: ${N}\n[ADRES]`],
+    ['User: JAN GÓRSKI\nKLUB GÓRSKI', `User: ${N}\nKLUB GÓRSKI`],
+    ['User: JAN KOWALCZYK\nWNIOSKODAWCA KOWALCZYK', `User: ${N}\nWNIOSKODAWCA ${N}`],
+    ['Login: soltys\nC:\\Users\\soltys\\Desktop', 'Login: [LOGIN]\nC:\\Users\\[LOGIN]\\Desktop'],
+    ['Login: wozny\nPliki w C:\\Users\\wozny\\Dokumenty', 'Login: [LOGIN]\nPliki w C:\\Users\\[LOGIN]\\Dokumenty'],
+    ['Login: kasjer\nC:\\Users\\kasjer\\Desktop', 'Login: [LOGIN]\nC:\\Users\\[LOGIN]\\Desktop'],
+    ['Login: opiekun\nC:\\Users\\opiekun\\Desktop', 'Login: [LOGIN]\nC:\\Users\\[LOGIN]\\Desktop'],
+  ]);
+});
+test('fix2: imię i samo nazwisko złamane przez wiersz przed dwukropkiem to jedna osoba; mówca z pełną parą — nie', () => {
+  masked([
+    ['Świadek: Jan\nKowalski: nie stawił się', `Świadek: ${N}: nie stawił się`],
+    ['Sporządziła: Anna\nNowak: główna księgowa', `Sporządziła: ${N}: główna księgowa`],
+    ['Z poważaniem Marek\nZieliński: kierownik referatu', `Z poważaniem ${N}: kierownik referatu`],
+    ['Barbara\nKowalska: hej', `${N}: hej`],
+    // pełna para mówcy w następnym wierszu: imię z końca poprzedniego to inna osoba
+    ['Pozdrawiam\nAnna\nJan Kowalski: ok', `Pozdrawiam\nAnna\n${N}: ok`],
+    ['tu Gosia\nJan Kowalski: ok', `tu Gosia\n${N}: ok`],
+  ]);
+});
+test('fix2: pole osoby — firma, bank i obiekt jawne; imię koreańskie, słowiańskie i szyk paszportowy maskowane', () => {
+  keep([
+    'Imię i nazwisko pracownika: Aqua Park',
+    'Imię i nazwisko pracownika: Energy Park',
+    'Imię i nazwisko pracownika: Business Park',
+    'Imię i nazwisko pracownika: Millennium Bank',
+    'Imię i nazwisko pracownika: Gospodyń Koło',
+    'Imię i nazwisko pełnomocnika: Alior Bank',
+    'Imię i nazwisko pełnomocnika: Santander Bank',
+    'Imię i nazwisko wnioskodawcy: Hotel ABC',
+    'Imię i nazwisko wnioskodawcy: BNP Paribas',
+    'Imię i nazwisko wnioskodawcy: ERGO Hestia',
+    'Imię i nazwisko wnioskodawcy: DHL Parcel',
+    'Imię i nazwisko wnioskodawcy: AXA Ubezpieczenia',
+    'Nazwisko dziecka: Wspólne',
+    'Nazwisko małżonka: Dotychczasowe',
+    'Nazwisko pacjenta: Utajnione',
+    'Nazwisko dziecka: Ojcowskie',
+    'Nazwisko dziecka: Matczyne',
+  ]);
+  masked([
+    ['Imię i nazwisko pracownika: Jisoo Park', `Imię i nazwisko pracownika: ${N}`],
+    ['Imię i nazwisko pacjenta: Seo-yeon Park', `Imię i nazwisko pacjenta: ${N}`],
+    ['Imię i nazwisko pacjenta: Bożydar Rada', `Imię i nazwisko pacjenta: ${N}`],
+    ['Imię i nazwisko pacjenta: WANG Xiaoming', `Imię i nazwisko pacjenta: ${N}`],
+    ['Imię i nazwisko pacjenta: Thi Lan HO', `Imię i nazwisko pacjenta: ${N}`],
+    ['Imię i nazwisko pacjenta: DOAN Van Hung', `Imię i nazwisko pacjenta: ${N}`],
+    ['Nazwisko pacjenta: Iwanowa', `Nazwisko pacjenta: ${N}`],
+    ['Nazwisko ucznia: Wieczna', `Nazwisko ucznia: ${N}`],
+  ]);
+});
+test('fix2: tablica przy pojeździe, wyróżnik od wielkiej litery i PT, przymiotnik typu pojazdu', () => {
+  const R = '[NR-REJESTRACYJNY]';
+  masked([
+    ['Pojazd o numerze rejestracji KR 12345/2022', `Pojazd o numerze rejestracji ${R}/2022`],
+    ['tablice rejestracyjne Wa 12345', `tablice rejestracyjne ${R}`],
+    ['tablice rejestracyjne pt 12345', `tablice rejestracyjne ${R}`],
+    ['Skradziono samochód osobowy WPI 2019 z parkingu.', `Skradziono samochód osobowy ${R} z parkingu.`],
+    ['Sprawca odjechał samochodem ciężarowym KRA 2015.', `Sprawca odjechał samochodem ciężarowym ${R}.`],
+    ['Pojazd dostawczy SBE 2020 zatrzymano.', `Pojazd dostawczy ${R} zatrzymano.`],
+    ['Samochód osobowy SK 2018 skradziony.', `Samochód osobowy ${R} skradziony.`],
+  ]);
+  keep([
+    'zarejestrowano pod numerem rejestracji RPW 12345/2026',
+    'tablice rejestracyjne Do 2025',
+    'tablice rejestracyjne to 12345 sztuk',
+    'Samochody osobowe KIA 2019 zakupiono.',
+    'dla pojazdów PN 2020',
+  ]);
+});
+test('fix2: data urodzenia w życiorysie z „lub później", wersaliki przy przyimku i w aktach osoby, świadek „Sw."', () => {
+  masked([
+    ['Jan Kowalski urodzony 14.03.1958 r. lub później podlegał', `${N} urodzony [DATA-URODZENIA] r. lub później podlegał`],
+    ['AKTA OSOBOWE ANNY KOWALSKIEJ', `AKTA OSOBOWE ${N}`],
+    ['DOKUMENTACJA MEDYCZNA ANNY KOWALSKIEJ', `DOKUMENTACJA MEDYCZNA ${N}`],
+    ['DANE OSOBOWE PIOTRA ZIELIŃSKIEGO', `DANE OSOBOWE ${N}`],
+    ['TECZKA OSOBOWA EWY ZIELIŃSKIEJ', `TECZKA OSOBOWA ${N}`],
+    ['WNIOSEK URLOPOWY JANA NOWAKA', `WNIOSEK URLOPOWY ${N}`],
+    ['KARTA INFORMACYJNA PIOTRA NOWAKA', `KARTA INFORMACYJNA ${N}`],
+    ['CZYNSZ OD ANNY KOWALSKIEJ', `CZYNSZ OD ${N}`],
+    ['PRZELEW OD ANNY KOWALSKIEJ DO JANA NOWAKA', `PRZELEW OD ${N} DO ${N}`],
+    ['Sw. Jan Apostol zeznal, ze widzial sprawce.', `Sw. ${N} zeznal, ze widzial sprawce.`],
+    ['Sw. Adam Pustelnik zeznal.', `Sw. ${N} zeznal.`],
+    ['Sw. Piotr Wyznawca zeznal.', `Sw. ${N} zeznal.`],
+    ['Sw. Maria Meczennik.', `Sw. ${N}.`],
+  ]);
+  keep([
+    'Kobieta urodzona 1 stycznia 1953 r. lub później nabywa prawo.',
+    'DO ADAMA MICKIEWICZA 5',
+    'PRZEBUDOWA SKRZYŻOWANIA PRZY ADAMA MICKIEWICZA',
+    'REMONT DROGI OD ADAMA MICKIEWICZA DO TADEUSZA KOŚCIUSZKI',
+    'TRASA ROWEROWA OD ADAMA MICKIEWICZA DO JANA PAWŁA II',
+    'SZKOŁA PODSTAWOWA JANA KOCHANOWSKIEGO',
+    'HISTORIA SZKOŁY JANA KOCHANOWSKIEGO',
+    'Sw. Lukasz Ewangelista.',
+    'Kościół Sw. Jana Apostoła',
   ]);
 });
