@@ -6741,3 +6741,100 @@ test('b7 regresje r2: ulica z patronem i numerem po etykiecie, „przy" i osobie
     'Szkoła Podstawowa im. Jana Pawła II 3, Kraków',
   ]);
 });
+test('audyt końcowy r1: „dzwonić pod" bez „numer" to kotwica telefonu także przez łamanie wiersza', () => {
+  masked([
+    ['proszę dzwonić pod 512 345\n678 wieczorem', 'proszę dzwonić pod [TELEFON] wieczorem'],
+    ['proszę dzwonić pod 512\n345 678', 'proszę dzwonić pod [TELEFON]'],
+    ['zadzwoń na 22 123 45 67', 'zadzwoń na [TELEFON]'],
+  ]);
+  keep(['Dzwonił w sprawie faktury 512 345\n678.', 'Dzwonnica pod 512\n345 678']);
+});
+test('audyt końcowy r1: login będący zwykłym wyrazem nie rozlewa się na prozę', () => {
+  masked([
+    ['Login: mazur\nPodczas uroczystości orkiestra zagrała mazur.', 'Login: [LOGIN]\nPodczas uroczystości orkiestra zagrała mazur.'],
+    [
+      'Imię i nazwisko: Adam Wilk\nLogin AD: wilk\nUwaga: kamera nagrała, jak wilk przechodzi przez ogrodzenie.',
+      `Imię i nazwisko: ${N}\nLogin AD: [LOGIN]\nUwaga: kamera nagrała, jak wilk przechodzi przez ogrodzenie.`,
+    ],
+    ['Login AD: zima\nW tym roku zima przyszła wcześnie.', 'Login AD: [LOGIN]\nW tym roku zima przyszła wcześnie.'],
+    // uchwyt osoby i token z domeną nadal rozlewamy
+    ['Login: jkowalski\nKonto jkowalski zablokowano.', 'Login: [LOGIN]\nKonto [LOGIN] zablokowano.'],
+    ['Login: FIRMA\wilk\nKonto FIRMA\wilk i wilk w lesie.', 'Login: [LOGIN]\nKonto [LOGIN] i wilk w lesie.'],
+    ['Login: kasia_n\nkasia_n zgłosiła awarię.', 'Login: [LOGIN]\n[LOGIN] zgłosiła awarię.'],
+  ]);
+});
+test('audyt końcowy r1: patron z tytułem po „im." i „ul." to nie osoba z pisma', () => {
+  keep([
+    'Szpital Specjalistyczny im. dr. Wilka w Krakowie.',
+    'Leczony w Szpitalu im. prof. Mazura w Bydgoszczy.',
+    'Poradnia im. dr Sowy',
+    'Centrum Onkologii im. prof. Lisa.',
+    'Ośrodek im. prof. dr hab. Wilka.',
+  ]);
+  masked([['Pacjenta zbadał dr Wilk.', `Pacjenta zbadał dr ${N}.`]]);
+  // patron nie dostaje pseudonimu pracownika o tym samym nazwisku
+  const r = redactPII('Szpital im. dr. Wilka w Pucku. Ratownik Marek Wilk otrzymał premię.', { pseudonyms: true });
+  expect(r.redacted).toBe('Szpital im. dr. Wilka w Pucku. Ratownik [OSOBA-A] otrzymał premię.');
+});
+test('audyt końcowy r1: patron z „Ks." wielką literą i z tytułem duchownym po głowie nazwy', () => {
+  keep([
+    'Budynek przy ul. Ks. Jerzego Popiełuszki.',
+    'Szkoła im. Ks. Jerzego Popiełuszki w Mszczonowie.',
+    'Rondo Ks. Jerzego Popiełuszki',
+    'Budynek przy ul. Ks. Józefa Tischnera.',
+    'ul. Gen. Józefa Bema',
+    'Parafia pw. ks. Jerzego Popiełuszki.',
+    'Radni dyskutowali o placu przy kościele pw. bł. ks. Jerzego Popiełuszki.',
+    'Nazwanie skweru imieniem ks. Jerzego Popiełuszki.',
+    'Muzeum ks. Jerzego Popiełuszki',
+    'Sanktuarium bł. ks. Jerzego Popiełuszki',
+    'Kult ks. Jerzego Popiełuszki rośnie.',
+  ]);
+  masked([
+    ['Byłem u ks. Jerzego Kuźmy.', `Byłem u ks. ${N}.`],
+    ['Na ul. Długiej Dr Jan Kowalski zasłabł.', `Na ul. Długiej Dr ${N} zasłabł.`],
+    [
+      'Proboszcz parafii pw. ks. Jerzego Popiełuszki ks. Jan Kowalski odprawił mszę.',
+      `Proboszcz parafii pw. ks. Jerzego Popiełuszki ks. ${N} odprawił mszę.`,
+    ],
+  ]);
+});
+test('audyt końcowy r1: patron po „bł." w całości jawny, bez maski samego nazwiska', () => {
+  keep([
+    'Parafia pw. bł. Józefa Kowalskiego w Krakowie.',
+    'Kościół bł. Jana Nowaka',
+    'Relikwie bł. Józefa Kowalskiego przeniesiono.',
+    'W kościele bł. Anny Kowalskiej odbyła się msza.',
+  ]);
+  masked([['Wczoraj bł. Jan Kowalski', `Wczoraj bł. ${N}`]]);
+});
+test('audyt końcowy r1: pole formularza w wierszu zachowuje przecinek przed następną etykietą', () => {
+  masked([
+    ['Ulica: Lipowa, Nr domu: 3, Nr lokalu: brak, Miejscowość: Lublin', `Ulica: ${A}, Nr domu: ${A}, Nr lokalu: brak, Miejscowość: ${C}`],
+    ['Ulica: Lipowa; Nr domu: 3', `Ulica: ${A}; Nr domu: ${A}`],
+    ['Ulica: Krótka Nr domu: 7 Miejscowość: Mysiadło', `Ulica: ${A} Nr domu: ${A} Miejscowość: ${C}`],
+  ]);
+});
+test('audyt końcowy r1: odpowiedź w pustym polu miejscowości WERSALIKAMI to nie miasto', () => {
+  masked([
+    ['ADRES ZAMIESZKANIA: UL. POLNA 3, 31-616 BRAK', 'ADRES ZAMIESZKANIA: [ADRES], [KOD-POCZTOWY] BRAK'],
+    ['ADRES ZAMIESZKANIA: UL. POLNA 3, 31-616 JAK WYŻEJ', 'ADRES ZAMIESZKANIA: [ADRES], [KOD-POCZTOWY] JAK WYŻEJ'],
+    ['ADRES ZAMIESZKANIA: UL. POLNA 3, 31-616 ODDZIAŁ ZUS', 'ADRES ZAMIESZKANIA: [ADRES], [KOD-POCZTOWY] ODDZIAŁ ZUS'],
+    ['ADRES ZAMIESZKANIA: UL. POLNA 3, 31-616 ZAMELDOWANY OD 2010', 'ADRES ZAMIESZKANIA: [ADRES], [KOD-POCZTOWY] ZAMELDOWANY OD 2010'],
+    ['ADRES ZAMIESZKANIA: UL. POLNA 3, 31-616 KRAKÓW', `ADRES ZAMIESZKANIA: [ADRES], [KOD-POCZTOWY] ${C}`],
+  ]);
+});
+test('audyt końcowy r1: etykieta jednostki po przeniesieniu nie sklei się z miastem', () => {
+  masked([
+    ['Adres: ul. Polna 3, 05-074 Halinów-\npowiat miński', `Adres: ${A}, [KOD-POCZTOWY] ${C}-\npowiat miński`],
+    ['Kaczyn 12, 26-050 Zagnańsk-\ngmina Zagnańsk', `${A}, [KOD-POCZTOWY] ${C}-\ngmina Zagnańsk`],
+    ['02-511 Warsza-\nwa', `[KOD-POCZTOWY] ${C}`],
+  ]);
+});
+test('audyt końcowy r1: imię matki w dopełniaczu spoza słownika maskowane razem z imieniem ojca', () => {
+  masked([
+    ['Anna Nowak, córka Henryka i Marianny, PESEL 62093011114.', `${N}, córka [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO], PESEL [PESEL].`],
+    ['Jan Kowalski, syn Władysława i Marianny, PESEL 62093011114.', `${N}, syn [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO], PESEL [PESEL].`],
+  ]);
+  keep(['Jezus, syn Józefa i Maryi, nauczał.']);
+});

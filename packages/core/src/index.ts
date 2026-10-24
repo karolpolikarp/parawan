@@ -713,7 +713,8 @@ const RE_SAINT_PROCEDURAL_WORD =
 // „św." i imię w dopełniaczu tuż przed nazwiskiem („Parafia pw. św. Rafała Kalinowskiego") — patron
 // w całości, także dla przebiegów samego nazwiska (dawniej „św. Rafała [IMIĘ I NAZWISKO]").
 const RE_SAINT_GIVEN_BEFORE = /(?<!\p{L})[sś]w\.[ \t]+(\p{Lu}\p{Ll}+)[ \t]+$/u;
-const RE_SAINT_INITIAL = /(?<!\p{L})[sś]w\.[ \t]+[A-ZĄĆĘŁŃÓŚŹŻ]\.[ \t]*$/iu;
+const RE_BLESSED_GIVEN_BEFORE = /(?<!\p{L})bł\.[ \t]+(\p{Lu}\p{Ll}+)[ \t]+$/u;
+const RE_SAINT_INITIAL =/(?<!\p{L})[sś]w\.[ \t]+[A-ZĄĆĘŁŃÓŚŹŻ]\.[ \t]*$/iu;
 /** Czy „św." tuż przed pozycją ma kontekst sakralny (najwyżej trzy wyrazy wstecz, ta sama linia)?
  *  Skan po wyrazach, nie regex z oknem: ten drugi próbował dopasowania od każdej pozycji okna. */
 function saintWithContext(t: string, offset: number, near: string): boolean {
@@ -749,6 +750,18 @@ const precededByPatron = (t: string, offset: number): boolean => {
   // Święty to imię (w dopełniaczu albo znana postać po imieniu); samo nazwisko po „św." („wraz ze
   // św. Kowalskim", „podpis św. Kowalskiego") to świadek, także obok kaplicy czy kościoła.
   if (RE_PATRON_ABBR.test(near)) return true;
+  // „bł." z imieniem w dopełniaczu tuż przed nazwiskiem („Kościół bł. Jana Nowaka", „Parafia pw.
+  // bł. Józefa Kowalskiego") — patron w całości, jak przy „św.". Para była chroniona, ale nazwisko
+  // ze słownika maskował potem przebieg samego nazwiska i zostawało „bł. Józefa [..]". „bł." nie
+  // jest skrótem świadka, więc kontekst sakralny nie jest potrzebny; osoba w mianowniku za nim tak.
+  const bl = RE_BLESSED_GIVEN_BEFORE.exec(t.slice(Math.max(0, offset - 30), offset));
+  if (bl) {
+    const bw = bl[1].toLowerCase();
+    if ((isFirstNameGenitive(bw) || egoNameGenitive(bw)) && !nominativePersonAhead(t, offset, true)) {
+      const w = (/^\p{L}+/u.exec(t.slice(offset, offset + 30))?.[0] ?? '').toLowerCase();
+      if (/(?:[aeiouyąę]|ej)$/.test(w) && !/(?:sk|ck|dzk)i$/.test(w)) return true;
+    }
+  }
   if (saintWithContext(t, offset, near)) {
     return !RE_SAINT_INITIAL.test(near) && !nominativePersonAhead(t, offset, true) && saintNameAt(t, offset);
   }
@@ -797,7 +810,13 @@ const STREET_ANCHOR_SRC =
   `[Ii]m(?=\\.)|[Uu]l|[Aa]l|[Pp]l|[Oo]s)`;
 // Rangi i tytuły w nazwie patrona: „ul. gen. Andersa", „al. ks. Popiełuszki", „im. dra Alfreda
 // Sokołowskiego", „im. dr. med. Rafała Masztaka", „im. prof. dr. hab. …", „dr n. med." („n." = nauk).
-const STREET_RANK = `(?:gen|pułk|płk|ppłk|mjr|kpt|por|ks|św|bł|bp|abp|kard|marsz|prof|doc|dra|dr|hab|med|lek|n|inż|hr)\\.?`;
+// Pierwsza litera rangi także wielka („ul. Ks. Jerzego Popiełuszki", „Rondo Gen. Józefa Bema",
+// „im. Ks. Jana Twardowskiego"): tak piszą nazwy ulic i szkół urzędy, a strażnik patrona znał
+// tylko zapis małą literą i patron szedł do maski jako osoba.
+const STREET_RANK = `(?:${'gen pułk płk ppłk mjr kpt por ks św bł bp abp kard marsz prof doc dra dr hab med lek n inż hr'
+  .split(' ')
+  .map((r) => `[${r[0].toUpperCase()}${r[0]}]${r.slice(1)}`)
+  .join('|')})\\.?`;
 // ZACHOWAWCZO: strażnik uznaje patrona TYLKO bezpośrednio po kotwicy, w JEDNEJ LINII, przez ciąg
 // nazw własnych i RANG/skrótów tytułów („ul. gen. Andersa", „al. ks. Popiełuszki"). ŚWIADOMIE BEZ
 // mostkowania spójników „oraz/i", przecinka, nowej linii i kropki w tokenie nazwy — każdy z nich
@@ -2486,7 +2505,9 @@ function maskFlatFormFields(ctx: RedactCtx, field: FormField, val: string, numbe
   for (let k = 0; k < segs.length; k++) {
     const { label: lb, value } = segs[k];
     const f = k === 0 ? field : FORM_FIELDS.find((ff) => ff.re.test(formLabelOf(stripFormPrefix(lb.replace(/:[ \t]*$/, '')))));
-    const vt = value.trim();
+    // Przecinek albo średnik przed etykietą następnego pola („Ulica: Lipowa, Nr domu: 3, Nr lokalu:
+    // brak") rozdziela pola, nie należy do wartości: maska zjadała go tylko przy zamaskowanych polach.
+    const vt = value.trim().replace(/[ \t]*[,;]$/, '');
     if (f && !f.gated && f.kind !== 'date' && ctx.on(f.type) && vt && isValidFormValue(vt, f.kind)) {
       const lead = /^[ \t]*/.exec(value)?.[0] ?? '';
       out += `${lb}${lead}${f.mask}${value.slice(lead.length + vt.length)}`;
@@ -3344,7 +3365,14 @@ function passLogin(ctx: RedactCtx): void {
       // Pod nowszymi etykietami rozlewamy tylko uchwyt osoby: samo imię („User name: Tomasz")
       // rozbijało pary w prozie („Zgłasza: [LOGIN] Wróbel"), a zwykły wyraz („Nowa", „Lato")
       // znikał z każdego zdania. W samym polu maska zostaje.
-      if (!medium || isPropagatableLogin(loginUserPart(val))) remember(val);
+      // Zwykły wyraz małymi literami („Login: mazur", „Login AD: wilk", „zima", „zamek") to też
+      // rzeczownik z prozy: rozlany na dokument dawał „orkiestra zagrała [LOGIN]", „jak [LOGIN]
+      // przechodzi przez ogrodzenie". Taki login rozlewamy tylko jako uchwyt osoby („jkowalski"),
+      // a w zapisie z domeną („FIRMA\wilk") sam cały token.
+      const acct = loginUserPart(val);
+      if (!medium && /^[a-z]+$/.test(acct) && !isPropagatableLogin(acct)) {
+        if (acct !== val) loginValues.add(val);
+      } else if (!medium || isPropagatableLogin(acct)) remember(val);
       ctx.bump('LOGIN');
       return `${kw}${q1}${ctx.M.LOGIN}${q2}`;
     },
@@ -3898,7 +3926,9 @@ const PHONE_NOT_AMOUNT = String.raw`(?![ \t]*(?:,\d{2})?[ \t]*(?:zł|PLN|EUR|USD
 // Pozostałe: odmiana „komórkę/komórce/komórką/komórkowy", „telefonicznie", stopki („Phone:",
 // „Mobile:", „mob.", „GSM:" — granica \b odcina „iPhone" i „mobbing") i czasownik z „pod/na
 // numer" („dzwonić pod numer …", „zadzwoń pod nr …"); sam czasownik nie wystarcza („Dzwonił
-// w sprawie faktury …"), a „dzwo[nń]\w*" łapałoby „Dzwonnica nr 123 456 789".
+// w sprawie faktury …"), a „dzwo[nń]\w*" łapałoby „Dzwonnica nr 123 456 789". Samo „pod/na" bez
+// „numer" też jest kotwicą („proszę dzwonić pod 512 345⏎678"): numer złamany w wierszu wyciekał
+// w całości, bo fallback 3-3-3 celowo nie przechodzi przez nową linię.
 // Skróty z wykazów sprzętu („Telefon nr inw. 012345678 – zużyty", „Fax nr fabr. 12 345 67 89",
 // „nr ewid.", „nr ser.") nie są przerwą w etykiecie telefonu: za nimi stoi numer składnika majątku.
 const PHONE_GAP_WORD = String.raw`(?!(?:inw|ewid|fabr|ser|kat|poz|szt|egz|lp)\.)[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]{2,15}`;
@@ -3909,7 +3939,7 @@ const PHONE_ANCHOR =
   '(?:tel(?:;[A-Za-z-]{1,20}(?:=[A-Za-z0-9,-]{1,40})?){1,4}(?=:))|' +
   String.raw`(?:te[li]\.?|telefon(?:u|y|em|ie)?|nr te[li]\.?|fax|faks)(?:(?:[ \t]+${PHONE_GAP_WORD}\.?)?[ \t]+${PHONE_GAP_WORD}(?:\.|[ \t]*(?=:)))?` +
   String.raw`|telefon(?:\w|[ąćęłńóśźż]){0,6}|kom\.?|komór(?:k(?:\w|[ąćęłńóśźż]){1,5}|ce)|kontakt\w{0,4}|(?:tele)?phone|mobile|mob\.?|gsm` +
-  String.raw`|(?:za|od|prze)?dzwo(?:ni(?:ć|li|ły|my|cie|sz|ą|ę|ł[a-ząęó]*)?|ń(?:cie)?)[ \t]+(?:pod|na)[ \t]+(?:numer\w*|nr\.?)`;
+  String.raw`|(?:za|od|prze)?dzwo(?:ni(?:ć|li|ły|my|cie|sz|ą|ę|ł[a-ząęó]*)?|ń(?:cie)?)[ \t]+(?:pod|na)(?:[ \t]+(?:numer\w*|nr\.?))?`;
 // Wypełniacz „nr"/„na" tylko w tej samej linii („tel. nr 600 700 800", „Kontakt: nr …", „Tel. na …"):
 // „Telefon⏎nr 123 456 789" to nagłówek nad numerem czegoś innego. Po samym „kontakt" bez dwukropka
 // „nr" odrzuca callback — „Dotyczy kontaktu nr 123456789 w CRM" to identyfikator rekordu.
@@ -5201,7 +5231,11 @@ const CAPS_CITY_STOP = new Set<string>(
     // etykiety kolejnego pola w jednowierszowym formularzu z OCR („26-900 TELEFON 600700800", „00-001
     // DATA 12.03.2024") i dopiski pocztowe („SKRYTKA POCZTOWA 12", „ODBIÓR OSOBISTY", „PACZKOMAT …")
     'telefon kom email e-mail mail data dnia skrytka paczkomat odbiór odbior priorytet polecony ' +
-    'obywatelstwo adres kontakt numer podpis uwagi pl pow gm'
+    'obywatelstwo adres kontakt numer podpis uwagi pl pow gm ' +
+    // odpowiedź w pustym polu miejscowości i dalszy ciąg wiersza („31-616 BRAK", „JAK WYŻEJ",
+    // „ODDZIAŁ ZUS", „ZAMELDOWANY OD 2010", „OBSZAR WIEJSKI", „TERYT 2604")
+    'brak tak nie jak sprawdzono nieaktualny nieaktualne nieaktualna zameldowany zameldowana ' +
+    'zamieszkały zamieszkała oddział obszar osiedle teryt'
   ).split(' '),
 );
 // Człony nazwy wielowyrazowej miejscowości WERSALIKAMI (12c-caps w bloku adresowym bez słownika):
@@ -5723,7 +5757,13 @@ const PATRON_GEN_HEADS = new Set<string>([
   ...PROPER_NAME_HEADS,
   ...ORG_HEAD_WORDS,
   ...'pomnika pomniku order orderu krzyż krzyża medal medalu imienia im fundacji szkoły akademii uniwersytetu instytutu'.split(' '),
+  // „pod wezwaniem" i nadanie imienia („Parafia pw. ks. Jerzego Popiełuszki", „Nazwanie skweru
+  // imieniem Jerzego …", „Kult bł. Jerzego …") — za nimi stoi zawsze patron
+  ...'pw imieniem kult kultu kultem'.split(' '),
 ]);
+// Tytuły duchowne między głową nazwy a imieniem patrona („Muzeum ks. Jerzego Popiełuszki",
+// „Sanktuarium bł. ks. Jerzego …", „kościele pw. bł. ks. …"): głową jest wyraz przed nimi.
+const RE_CLERIC_RANKS_TAIL = /(?:(?<!\p{L})(?:ks|bł|św|sw|bp|abp|kard|o)\.[ \t]*)+$/iu;
 // „Świętego", „Błogosławionej" przed imieniem. Skrótu „św." tu nie ma: bywa „świadkiem" („Sąd
 // przesłuchał św. Annę …"), a rozstrzyga go precededByPatron z kontekstem sakralnym.
 const RE_SAINT_WORD_BEFORE = /(?:^|[^\p{L}])(?:[Śś]więt|[Bb]łogosławion)\p{L}*[ \t]+$/u;
@@ -5745,6 +5785,11 @@ function patronFirstNameAt(t: string, offset: number, m: string, parts: string[]
   if (POLISH_FIRST_NAMES.has(sw) && !isFirstNameGenitive(sw)) return false;
   const prev = /(\p{L}+)\.?[ \t]+$/u.exec(before)?.[1]?.toLowerCase();
   if (prev && PATRON_GEN_HEADS.has(prev)) return true;
+  const ranks = RE_CLERIC_RANKS_TAIL.exec(before);
+  if (ranks) {
+    const head = /(\p{L}+)\.?[ \t]+$/u.exec(before.slice(0, ranks.index))?.[1]?.toLowerCase();
+    if (head && PATRON_GEN_HEADS.has(head)) return true;
+  }
   return RE_HOUSE_NO_AFTER.test(t.slice(offset + m.length, offset + m.length + 40));
 }
 /**
@@ -5890,7 +5935,10 @@ function passPersonPairs(ctx: RedactCtx): void {
           if (
             words.length >= 2 &&
             !isFirstNameLike(last) &&
+            // „-ej" to dopełniacz żeński patronki („W kościele bł. Anny Kowalskiej odbyła się
+            // msza"), nie mianownik podmiotu
             /(?:[^aeiouyąęó]|(?:sk|ck|dzk)i)$/.test(ll) &&
+            !/ej$/.test(ll) &&
             RE_PAST_VERB_AFTER.test(ctx.text.slice(offset + m.length, offset + m.length + 24))
           ) {
             ctx.bump('IMIE');
@@ -6467,6 +6515,12 @@ const RE_HOMOGRAPH_ANCHOR = new RegExp(
 );
 const RE_HOMOGRAPH_FIRM_AFTER =
   /^(?:[ \t]+\p{Lu}[\p{L}-]*){0,3}[ \t]*(?:S\.?A\.|[Ss][Pp]\.[ \t]*(?:z[ \t]*o\.[ \t]*o\.|[jkp]\.|komandytowa|jawna|akcyjna|partnerska)|[Ss]półk\p{L}*|i[ \t]+(?:Wspólnicy|Partnerzy|Syn(?:owie)?)(?!\p{L})|Towarzystw\p{L}*|Ubezpiecze\p{L}*|Logistics|Transport|Group|Holding|Polska(?!\p{L}))/u;
+// Skrót patrona („im.", „imienia", „ul.", „al.", „pl.") z ewentualnymi wcześniejszymi tytułami tuż
+// przed kotwicą homografu („im. prof. " przed „dr hab. Wilka").
+const RE_PATRON_BEFORE_TITLE = new RegExp(
+  `(?<![\\p{L}\\d])(?:(?:im|ul|al|pl)\\.|imienia)(?:[ \\t]+${STREET_RANK})*[ \\t]+$`,
+  'iu',
+);
 function passPersonHomographAnchor(ctx: RedactCtx): void {
   if (!ctx.on('IMIE')) return;
   ctx.text = ctx.text.replace(RE_HOMOGRAPH_ANCHOR, (m, w: string, offset: number, t: string) => {
@@ -6475,6 +6529,10 @@ function passPersonHomographAnchor(ctx: RedactCtx): void {
     // Strona procesowa bywa spółką („Powód Kruk S.A.", „Pozwany Wilk Sp. z o.o.", „Pozwana Wrona
     // i Wspólnicy Sp. k.", „Pozwana Sowa Ubezpieczenia S.A.") — homograf jest wtedy nazwą firmy.
     if (RE_HOMOGRAPH_FIRM_AFTER.test(t.slice(offset + m.length, offset + m.length + 80))) return m;
+    // Patron instytucji albo ulicy z tytułem („Szpital im. dr. Wilka", „Centrum Onkologii im.
+    // prof. Lisa", „Ośrodek im. prof. dr hab. Wilka", „ul. dr. Mazura") — homograf w nazwie to nie
+    // osoba z pisma. W trybie pseudonimów patron dostawał etykietę pracownika o tym samym nazwisku.
+    if (RE_PATRON_BEFORE_TITLE.test(t.slice(Math.max(0, offset - 40), offset))) return m;
     ctx.bump('IMIE');
     return `${m.slice(0, m.length - w.length)}${ctx.personMask(hb)}`;
   });
@@ -6784,7 +6842,12 @@ function passPersonParents(ctx: RedactCtx): void {
     RE_PARENTS_AFTER_MASK,
     (m, mask: string, sep: string, kin: string, sp: string, a: string, mid: string | undefined, b: string | undefined) => {
       const abbr = kin.endsWith('.');
-      if (!isFirstNameLike(a) || (b !== undefined && !isFirstNameLike(b))) {
+      // Imię matki spoza słownika w dopełniaczu po „i" („córka Henryka i Marianny", „syn Jana
+      // i Leokadii") — para imion rodziców w całości: dawniej maska obejmowała tylko ojca, a matka
+      // zostawała jawna obok rozpoznanej danej.
+      const motherGen =
+        b !== undefined && /^[ \t]+i[ \t]+$/.test(mid ?? '') && /^\p{Lu}\p{Ll}+[iy]$/u.test(b) && !surnameBase(b) && !looksLikeSurname(b);
+      if (!isFirstNameLike(a) || (b !== undefined && !isFirstNameLike(b) && !motherGen)) {
         // drugi wyraz to nie imię („syn Józefa, Kowalski …") — zostaje jawny, pierwszy rozstrzyga sam
         if (abbr || !isFirstNameLike(a)) return m;
         b = undefined;
@@ -7263,6 +7326,8 @@ const RE_MASK_HYPHEN_TAIL = new RegExp(
   `(\\[OSOBA-[A-Z]+\\]|\\[IMIĘ I NAZWISKO\\]|\\[MIEJSCOWOŚĆ\\])-\\r?\\n[ \\t]*([${PL_LO}]{2,14}|[${PL_UP}]{2,14})(?![${PL_UP}${PL_LO}0-9-])`,
   'g',
 );
+const RE_ADMIN_UNIT_WORD =
+  /^(?:powiat\p{Ll}*|gmin\p{Ll}*|gm|woj|województw\p{Ll}*|wieś|wsi|miasto|miasta|poczta|osiedle|sołectwo|obręb|dzielnica|kod|ul|ulica|tel|kraj)$/u;
 // Wyrazy przeniesione do następnego wiersza w oryginale: ogon (małymi literami) → początki sprzed
 // łącznika. Maska zastąpiła już początek w `text`, więc o całym wyrazie rozstrzyga oryginał.
 const RE_RAW_HYPHEN_SPLIT = new RegExp(
@@ -7385,7 +7450,10 @@ function finalizePersons(ctx: RedactCtx): void {
       const lo = tail.toLowerCase();
       const ok = ((heads ??= rawHyphenHeads(ctx.raw)).get(lo) ?? []).some((h) => {
         const joined = h + lo;
-        if (mask === '[MIEJSCOWOŚĆ]') return POLISH_CITIES.has(joined) || !POLISH_CITIES.has(h);
+        // Etykieta jednostki w następnym wierszu („Halinów-⏎powiat miński", „Zagnańsk-⏎gmina
+        // Zagnańsk") to nie ogon nazwy: miasto spoza słownika przyjmowało każdy ogon i maska
+        // zjadała nową linię razem z „powiat".
+        if (mask === '[MIEJSCOWOŚĆ]') return POLISH_CITIES.has(joined) || (!POLISH_CITIES.has(h) && !RE_ADMIN_UNIT_WORD.test(lo));
         return !!surnameBase(joined) || (looksLikeSurname(joined) && !surnameBase(h));
       });
       return ok ? mask : m;

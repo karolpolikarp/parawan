@@ -947,6 +947,9 @@ export function buildDataset() {
   neg('Sygn. akt I C 123/24 dotyczy działki 245/7 i lokalu 12/3 z umowy 12/2026/ZP.', ['245/7', '12/3', '12/2026/ZP']);
   neg('Wpis do księgi wieczystej nastąpi w kw. 2026. Zamówienie nr AB1C/12345678/0, kod AB1C/12345678/7.', ['księgi wieczystej', 'kw. 2026', 'AB1C/12345678/0', 'AB1C/12345678/7']);
   neg('Wzór numeru księgi wieczystej: XXXX/XXXXXXXX/X. Nieruchomość KR1P/00234567/1 w zestawieniu.', ['XXXX/XXXXXXXX/X', 'KR1P/00234567/1']);
+  // audyt końcowy r1: telefon złamany w wierszu po „dzwonić pod", login-wyraz bez rozlewania, patron z tytułem
+  str('W razie pytań proszę dzwonić pod 512 345\n678 wieczorem.\nLogin: mazur\nNa zakończenie orkiestra zagrała mazur.', ['512 345\n678', 'Login: mazur'], ['proszę dzwonić pod', 'zagrała mazur']);
+  neg('Szpital Specjalistyczny im. dr. Wilka w Krakowie. Szkoła im. Ks. Jerzego Popiełuszki. Kościół pw. bł. ks. Jerzego Popiełuszki. Parafia pw. bł. Józefa Kowalskiego.', ['im. dr. Wilka', 'Ks. Jerzego Popiełuszki', 'bł. ks. Jerzego Popiełuszki', 'bł. Józefa Kowalskiego']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
