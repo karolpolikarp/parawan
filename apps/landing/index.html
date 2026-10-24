@@ -334,7 +334,7 @@ npm run build -w anonimizator-web</code></pre>
         <div class="wrap dok-siatka">
           <div class="dok-bok">
             <h2>Dla inspektora ochrony danych i działu IT</h2>
-            <p>Najważniejsze fakty na jednej stronie. Pełna wersja jest w pliku DLA-IOD-I-IT.txt w każdym wydaniu.</p>
+            <p>Skrót opisu z pliku DLA-IOD-I-IT.txt, który jest w każdym wydaniu.</p>
             <p class="iod-pobierz"><a href="pobierz/DLA-IOD-I-IT.txt" download>Pobierz DLA-IOD-I-IT.txt</a> <a class="dl-gh" href="https://github.com/karolpolikarp/parawan/releases/latest/download/DLA-IOD-I-IT.txt">albo z GitHuba</a></p>
             <p class="iod-druk">Wydruk tej strony (<kbd>Ctrl</kbd>+<kbd>P</kbd>) obejmuje samą tę sekcję.</p>
           </div>
@@ -353,11 +353,11 @@ npm run build -w anonimizator-web</code></pre>
                   <li>schowek: <code>AllowCrossDeviceClipboard</code> i <code>AllowClipboardHistory</code> w Windows.</li>
                 </ul>
               </dd>
-              <dt>Jak sprawdzić plik</dt><dd><!--PARAWAN:SUMA-IOD--><span class="suma-pod">Sprawdzisz ją w PowerShellu: <code><span class="nw">Get-FileHash</span> .\Parawan.html</code> albo w wierszu poleceń: <code>certutil <span class="nw">-hashfile</span> Parawan.html SHA256</code></span> Pochodzenie potwierdza atestacja: <code>gh attestation verify Parawan.html <span class="nw">--repo</span> karolpolikarp/parawan</code>. Plik zbudowany samemu z tagu wydania ma tę samą sumę: repozytorium klonujesz z <code>-c core.autocrlf=false</code>, przechodzisz na tag wydania, a potem uruchamiasz <code>npm ci</code> i <code>npm run build -w anonimizator-web</code><span class="tylko-ekran"> (wszystkie polecenia są w punkcie 5 w „<a href="#sprawdz">Jak sprawdzić</a>”)</span>.</dd>
+              <dt>Jak sprawdzić plik</dt><dd><!--PARAWAN:SUMA-IOD--><span class="suma-pod">Sumę SHA-256 sprawdzisz w PowerShellu: <code><span class="nw">Get-FileHash</span> .\Parawan.html</code> albo w wierszu poleceń: <code>certutil <span class="nw">-hashfile</span> Parawan.html SHA256</code></span> Pochodzenie potwierdza atestacja: <code>gh attestation verify Parawan.html <span class="nw">--repo</span> karolpolikarp/parawan</code>. Plik zbudowany samemu z tagu wydania ma tę samą sumę: repozytorium klonujesz z <code>-c core.autocrlf=false</code>, przechodzisz na tag wydania, a potem uruchamiasz <code>npm ci</code> i <code>npm run build -w anonimizator-web</code><span class="tylko-ekran"> (wszystkie polecenia są w punkcie 5 w „<a href="#sprawdz">Jak sprawdzić</a>”)</span>.</dd>
               <dt>Jak wdrożyć w urzędzie</dt><dd>Jedna kopia tylko do odczytu na dysku sieciowym, np. <code>\\serwer\narzedzia\Parawan.html</code>, i skrót albo zakładka dla pracowników (w Edge zasada <code>ManagedFavorites</code>). Bez instalacji i bez uprawnień administratora. Pliku nie dodawaj do listy witryn trybu Internet Explorera. Zasady, które blokują plik z dysku, i wyjątki dla nich opisuje DLA-IOD-I-IT.txt.</dd>
               <dt>Skąd wiadomo o aktualizacji</dt><dd>Plik sam się nie aktualizuje. Nowe wydania pokazuje kanał Atom <a href="https://github.com/karolpolikarp/parawan/releases.atom" target="_blank" rel="noopener noreferrer">github.com/karolpolikarp/parawan/releases.atom</a>. Opis każdego wydania podaje pilność: zwykła, zalecana albo pilna. Pilna znaczy, że poprawka zamyka wyciek danych.</dd>
               <dt>Przeglądarki</dt><dd>Edge i Chrome od wersji 109, Firefox od 115, także ESR, Safari od 16.4. Internet Explorer i tryb IE w Edge nie wystarczą.</dd>
-              <dt>Dostępność</dt><dd>Przy każdej zmianie interfejs sprawdza automat axe-core (WCAG 2.1 A i AA), a test w przeglądarce obsługę klawiaturą, tryb dużego kontrastu i powiększenie 200%. Czytnik ekranu jest sprawdzany ręcznie przy wydaniu.</dd>
+              <dt>Dostępność</dt><dd>Automat axe-core sprawdza interfejs przy każdej zmianie (WCAG 2.1 A i AA), a test w przeglądarce obsługę klawiaturą, tryb dużego kontrastu i powiększenie 200%. Czytnik ekranu jest sprawdzany ręcznie przy wydaniu.</dd>
             </dl>
           </div>
         </div>

@@ -330,7 +330,8 @@ const NO_JS =
   '<noscript><div class="boot-fail boot-fail-now"><p><strong>Ta przeglądarka ma wyłączony ' +
   'JavaScript.</strong> Parawan rozpoznaje dane programem zapisanym w tym pliku, więc bez ' +
   'JavaScriptu nie zadziała. Plik nie łączy się z internetem. Na komputerze służbowym poproś dział ' +
-  'IT o zezwolenie na skrypty w plikach otwieranych z dysku.</p></div></noscript>';
+  'IT o zezwolenie na skrypty w plikach otwieranych z dysku. Opis dla działu IT: plik DLA-IOD-I-IT.txt ' +
+  'na github.com/karolpolikarp/parawan/<wbr>releases.</p></div></noscript>';
 
 test('aplikacja: pasek „nie uruchomił się” i komunikat bez JavaScriptu na początku strony', () => {
   const html = webHtml.replace(/\r\n/g, '\n');

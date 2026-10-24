@@ -160,9 +160,9 @@ AKTUALIZACJE I BŁĘDY BEZPIECZEŃSTWA
   Zgłaszanie błędów bezpieczeństwa: SECURITY.md w repozytorium.
 
 DOSTĘPNOŚĆ
-  Przy każdej zmianie interfejs sprawdza automat axe-core (WCAG 2.1 A i AA),
-  a test w przeglądarce obsługę klawiaturą, tryb dużego kontrastu i
-  powiększenie 200%. Czytnik ekranu jest sprawdzany ręcznie przy wydaniu.
+  Automat axe-core sprawdza interfejs przy każdej zmianie (WCAG 2.1 A i AA),
+  a test w przeglądarce obsługę klawiaturą, tryb dużego kontrastu
+  i powiększenie 200%. Czytnik ekranu jest sprawdzany ręcznie przy wydaniu.
 
 WPIS DO EWIDENCJI OPROGRAMOWANIA (KRI § 19 ust. 2 pkt 2)
   Nazwa:        Parawan

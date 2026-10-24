@@ -311,7 +311,7 @@ test('landing: sekcja „Dla inspektora ochrony danych i działu IT” po #pobie
   expect(iodSection).toContain('<div class="wrap dok-siatka">');
   expect(iodSection).toContain('<h2>Dla inspektora ochrony danych i działu IT</h2>');
   expect(iodSection).toContain(
-    '<p>Najważniejsze fakty na jednej stronie. Pełna wersja jest w pliku DLA-IOD-I-IT.txt w każdym wydaniu.</p>',
+    '<p>Skrót opisu z pliku DLA-IOD-I-IT.txt, który jest w każdym wydaniu.</p>',
   );
   // bez kart, pigułek i panelu CTA
   expect(iodSection).not.toMatch(/class="[^"]*\b(btn|chip-t|demo-card)\b/);
