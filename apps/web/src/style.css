@@ -396,7 +396,7 @@ details.card::details-content {
   display: flex; align-items: center; gap: 12px; flex: none;
   padding: 10px 14px; border-radius: var(--r-ctl);
   border: 1px solid var(--acc-line); background: var(--acc-soft);
-  color: var(--acc); max-width: 400px;
+  color: var(--acc); max-width: 460px; /* 400 px łamało opis na 3 wiersze z fontami Linuksa (CI) */
 }
 .privacy-t b { white-space: nowrap; } /* nagłówek w jednej linii */
 .privacy .gi { width: 28px; height: 28px; flex: none; }
