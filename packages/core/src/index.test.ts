@@ -8156,3 +8156,97 @@ test('dom4-fix1: pułapki — skrzyżowanie w prozie prasowej, nazwisko „Wakat
   keep(['Na rogu Tadeusza Kościuszki 12 i Romualda Traugutta 3 powstanie rondo.']);
   masked([['Imię;Nazwisko\nAnna;Wakat', 'Imię;Nazwisko\n[IMIĘ I NAZWISKO];Wakat']], { pseudonyms: true });
 });
+test('dom4-fix2: formularz z TAB-em — pseudonim nazwiska wiersza tylko dla tej samej osoby', () => {
+  const ps = { pseudonyms: true };
+  masked(
+    [
+      // rola tuż przed „Nazwisko" to ta sama osoba; dalsza rola (opiekunka, świadek) to inna osoba
+      ['Uczeń\tKacper\tNazwisko\tLis\tOpiekunka\tEwa', `Uczeń\t[OSOBA-A]\tNazwisko\t[OSOBA-A]\tOpiekunka\t${N}`],
+      [
+        'Pacjent:\tJan\tNazwisko:\tKowal\tOpiekun:\tAnna\tTelefon:\t600100200',
+        `Pacjent:\t[OSOBA-A]\tNazwisko:\t[OSOBA-A]\tOpiekun:\t${N}\tTelefon:\t[TELEFON]`,
+      ],
+      ['Imię\tJan\tNazwisko\tNowak\tŚwiadek\tPaweł', `Imię\t[OSOBA-A]\tNazwisko\t[OSOBA-A]\tŚwiadek\t${N}`],
+      // kolumny „Imię matki", „Imię ojca" to inne osoby niż syn z kolumny „Nazwisko"
+      [
+        'Nazwisko\tImię\tImię matki\tImię ojca\nKowalski\tJan\tAnna\tPiotr',
+        `Nazwisko\tImię\tImię matki\tImię ojca\n[OSOBA-A]\t[OSOBA-A]\t${N}\t${N}`,
+      ],
+    ],
+    ps,
+  );
+  // pułapka: imię w kolumnie „Imię" dalej dostaje pseudonim osoby z wiersza
+  masked([['Nazwisko\tImię\nAdamczyk\tJulia', 'Nazwisko\tImię\n[OSOBA-A]\t[OSOBA-A]']], ps);
+});
+test('dom4-fix2: formularz z TAB-em — role ze zgłoszeń szkód i pism komorniczych, para dwóch imion', () => {
+  for (const ps of [false, true]) {
+    const P = ps ? '[OSOBA-A]' : N;
+    masked(
+      [
+        ['Kierujący\tPaweł\tNazwisko\tNowak', `Kierujący\t${P}\tNazwisko\t${P}`],
+        ['Najemca\tAnna\tNazwisko\tWójcik', `Najemca\t${P}\tNazwisko\t${P}`],
+        ['Poszkodowany\tMarek\tNazwisko\tLis', `Poszkodowany\t${P}\tNazwisko\t${P}`],
+        ['Dłużnik\tTomasz\tNazwisko\tKowal', `Dłużnik\t${P}\tNazwisko\t${P}`],
+        ['Sprawca\tAdam\tNazwisko\tNowak', `Sprawca\t${P}\tNazwisko\t${P}`],
+        ['Uczestnik:\tMarek Paweł\tAdres:\tul. Polna 8, Radom', `Uczestnik:\t${P}\tAdres:\t[ADRES], [MIEJSCOWOŚĆ]`],
+        ['Wnioskodawca:\tPaweł Marek\tTelefon:\t600111222', `Wnioskodawca:\t${P}\tTelefon:\t[TELEFON]`],
+      ],
+      { pseudonyms: ps },
+    );
+  }
+  masked([
+    ['Świadek\tJan\tZastępca\tMarek', `Świadek\t${N}\tZastępca\t${N}`],
+    ['Wnioskodawca\tJan\tUczestnik\tPiotr', `Wnioskodawca\t${N}\tUczestnik\t${N}`],
+    ['Kierownik\tJan\tZastępca\tMarek Nowak', `Kierownik\t${N}\tZastępca\t${N}`],
+    ['Imię\tJan\tNazwisko\tNowak\nŚwiadek\tAnna\tZastępca\tEwa', `Imię\t${N}\tNazwisko\t${N}\nŚwiadek\t${N}\tZastępca\t${N}`],
+    ['Kierownik\tJan\tTelefon\t600111222', `Kierownik\t${N}\tTelefon\t[TELEFON]`],
+  ]);
+  // pułapki: rola małą literą to wartość pola, rola bez imienia za nią nie jest osobą
+  keep(['Funkcja\tzastępca\tDział\tkadry', 'Zastępca\tdyrektora\tPokój\t12']);
+});
+test('dom4-fix2: wyliczenie osób — wspólne nazwisko w liczbie mnogiej, kobiece nazwisko-homograf', () => {
+  masked([
+    ['Sąd wezwał Annę Marię i Jana Kowalskich.', `Sąd wezwał ${N} i ${N}.`],
+    ['Pełnomocnik Marii Anny i Jana Wiśniewskich', `Pełnomocnik ${N} i ${N}`],
+    ['Darowizna na rzecz Zofii Marii i Tadeusza Wójcików', `Darowizna na rzecz ${N} i ${N}`],
+    ['Doręczyć Annie Marii i Janowi Kowalskim', `Doręczyć ${N} i ${N}`],
+    ['z Anną Marią i Janem Kowalskimi', `z ${N} i ${N}`],
+    ['Akt notarialny z udziałem Krystyny Ewy i Stanisława Mazurów', `Akt notarialny z udziałem ${N} i ${N}`],
+    ['Ugoda zawarta z Anną Marek i Tomaszem Pawłem.', `Ugoda zawarta z ${N} i ${N}.`],
+  ]);
+  masked([['Sąd wezwał Annę Marię i Jana Kowalskich.', 'Sąd wezwał [OSOBA-A] i [OSOBA-A].']], { pseudonyms: true });
+  // pułapki: dwie osoby nie sklejają się w jeden pseudonim, dwa imiona bez nazwiska zostają
+  masked([['Ugoda zawarta z Anną Marek i Tomaszem Pawłem.', 'Ugoda zawarta z [OSOBA-A] i [OSOBA-B].']], { pseudonyms: true });
+  masked([['Ugoda z Tomaszem Markiem i Janem Kowalskim.', 'Ugoda z [OSOBA-A] i [OSOBA-B].']], { pseudonyms: true });
+  keep(['Z Anną Marek pojechał do Krakowa.']);
+});
+test('dom4-fix2: ogłoszenie WERSALIKAMI — osoba za rzeczownikiem grafiku i za salą z numerem', () => {
+  masked([
+    ['W PONIEDZIAŁEK URLOP JANA NOWAKA', `W PONIEDZIAŁEK URLOP ${N}`],
+    ['DZIŚ DYŻUR ANNY KOWALSKIEJ', `DZIŚ DYŻUR ${N}`],
+    ['W SOBOTĘ ZASTĘPSTWO ANNY KOWALSKIEJ', `W SOBOTĘ ZASTĘPSTWO ${N}`],
+    ['W PIĄTEK GABINET ANNY KOWALSKIEJ NIECZYNNY', `W PIĄTEK GABINET ${N} NIECZYNNY`],
+    ['W ZASTĘPSTWIE DYŻUR ANNY KOWALSKIEJ', `W ZASTĘPSTWIE DYŻUR ${N}`],
+    ['W SOBOTĘ KIOSK JANA NOWAKA 12 KRAKÓW', `W SOBOTĘ KIOSK ${N} 12 KRAKÓW`],
+    ['NA ROGU STOI KIOSK JANA NOWAKA 5 DNI W TYGODNIU', `NA ROGU STOI KIOSK ${N} 5 DNI W TYGODNIU`],
+    ['W SOBOTĘ SALA JANA NOWAKA 12 KRAKÓW', `W SOBOTĘ SALA ${N} 12 KRAKÓW`],
+    ['ZEBRANIE W SOBOTĘ: SALA JANA NOWAKA 12', `ZEBRANIE W SOBOTĘ: SALA ${N} 12`],
+  ]);
+  masked([
+    ['SALA JANA NOWAKA 12 KRAKÓW', `SALA ${N} 12 KRAKÓW`],
+    ['WNIOSEK O URLOP ANNY KOWALSKIEJ', `WNIOSEK O URLOP ${N}`],
+  ]);
+  // pułapki: postać historyczna, papież, wynik meczu i sama nazwa obiektu z numerem zostają
+  keep([
+    'SALA ADAMA MICKIEWICZA 12',
+    'W SOBOTĘ SALA ADAMA MICKIEWICZA 12',
+    'AULA JANA KOCHANOWSKIEGO 3',
+    'AULA JANA PAWŁA II 3',
+    'MECZ O PUCHAR JANA NOWAKA 3:1',
+    'UNIWERSYTET ADAMA MICKIEWICZA',
+    'SALA ADAMA NOWAKA 12',
+    'SALA JANA NOWAKA 12 W SZKOLE',
+    'NAGRODA ADAMA NOWAKA 12',
+    'STADION KAZIMIERZA GÓRSKIEGO 15 TYS. MIEJSC',
+  ]);
+});
