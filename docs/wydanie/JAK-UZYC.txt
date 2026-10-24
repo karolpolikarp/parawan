@@ -4,7 +4,7 @@ Parawan zasłania dane osobowe w tekście, np. PESEL, adres i nazwisko. Działa
 w przeglądarce na tym komputerze i nie łączy się z internetem.
 
 1. Otwórz Parawan.html podwójnym kliknięciem. Dodaj go do zakładek
-   przeglądarki (Ctrl+D), następnym razem otworzysz go jednym kliknięciem.
+   przeglądarki (Ctrl+D), a następnym razem otworzysz go jednym kliknięciem.
 2. Kliknij „Wczytaj plik” albo upuść plik na stronę (.txt, .md, .csv, .log,
    .docx, .pdf). Możesz też wkleić tekst. Wczytany plik nie przechodzi przez
    schowek, więc oryginał nie zostaje w historii schowka Windows.
@@ -22,7 +22,8 @@ Zanim opublikujesz pismo w BIP
   Przy pierwszym zapisie w Wordzie sprawdź Plik › Informacje › Autor.
 - Nazwa publikowanego pliku nie powinna zawierać nazwisk.
 - Przejrzyj każdy znacznik. W tej wersji Parawan zasłania też nazwiska
-  urzędników pod pismem. Jeśli mają zostać jawne, przywróć je w wyniku.
+  urzędników pod pismem. Jeśli mają zostać jawne, kliknij znacznik
+  w wyniku i wybierz „Zostaw jawne”.
 - Numer działki zostaje. Usuń go sam, jeśli urząd go nie publikuje.
 - PDF do BIP zrób z pobranego pliku .docx: w Wordzie Plik › Zapisz jako ›
   PDF, a w opcjach zaznacz „Znaczniki struktury dokumentu ułatwień

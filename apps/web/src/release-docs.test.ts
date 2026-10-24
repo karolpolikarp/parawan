@@ -183,7 +183,7 @@ test('liczby z pomiaru w DLA-IOD-I-IT.txt zgodne z docs/BENCHMARK.md', () => {
   expect(sentences && row).toBeTruthy();
   const [, recall, hit, mustMask, precision, kept, mustKeep] = row ?? [];
   const flat = dla.replace(/\s+/g, ' ');
-  expect(flat).toContain(`W pomiarze na ${sentences} wymyślonych zdaniach`);
+  expect(flat).toContain(`W pomiarze na ${sentences} syntetycznych zdaniach`);
   expect(flat).toContain(
     `zniknęło ${hit} z ${mustMask} fragmentów, które miały zniknąć (${recall.replace('.', ',')}%)`,
   );

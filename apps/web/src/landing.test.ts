@@ -357,10 +357,10 @@ test('landing: #dla-iod zgodne z DLA-IOD-I-IT.txt, ALLOWED_KEYS i docs/BENCHMARK
   );
   expect(sentences && row).toBeTruthy();
   const [, hit, mustMask, kept, mustKeep] = row ?? [];
-  const pomiar = `W pomiarze na ${sentences} wymyślonych zdaniach zniknęło ${hit} z ${mustMask} fragmentów, które miały zniknąć, i zostało ${kept} z ${mustKeep}, które miały zostać.`;
+  const pomiar = `W pomiarze na ${sentences} syntetycznych zdaniach zniknęło ${hit} z ${mustMask} fragmentów, które miały zniknąć, i zostało ${kept} z ${mustKeep}, które miały zostać.`;
   expect(rows.get('Czego Parawan nie rozpozna')).toContain(pomiar);
   expect(dla.replace(/\s+/g, ' ')).toContain(
-    `W pomiarze na ${sentences} wymyślonych zdaniach zniknęło ${hit} z ${mustMask} fragmentów`,
+    `W pomiarze na ${sentences} syntetycznych zdaniach zniknęło ${hit} z ${mustMask} fragmentów`,
   );
   // pseudonimizacja, motyw 26 RODO i decyzja inspektora jak w pliku
   expect(rows.get('Anonimizacja czy pseudonimizacja')).toContain('motywu 26 RODO');
@@ -507,7 +507,7 @@ test('landing: ograniczenia dla urzędu zgodne z silnikiem', () => {
   expect(granice).toContain(
     'Parawan nie zmienia oryginalnego pliku. Autor we właściwościach, komentarze i historia zmian zostają w oryginale, więc publikuj nowy dokument z wyniku.',
   );
-  expect(iodSection).toContain('numeru w nietypowym zapisie, numeru działki');
+  expect(iodSection).toContain('numeru w nietypowym zapisie i tekstu na skanach. Numeru działki celowo nie zasłania.');
   expect(iodSection).not.toContain('numeru księgi wieczystej');
 });
 

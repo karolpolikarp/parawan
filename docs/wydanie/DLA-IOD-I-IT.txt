@@ -15,7 +15,7 @@ GDZIE SĄ PRZETWARZANE DANE
   telemetrii. Autor nie otrzymuje żadnych danych i nie ma dostępu do
   komputerów urzędu. Parawan.html nie łączy się z żadnym serwisem.
   Połączenia blokuje polityka bezpieczeństwa treści (Content-Security-Policy)
-  zapisana na początku pliku. Dosłownie:
+  zapisana na początku pliku. Jej pełna treść:
     {{CSP}}
   Co znaczą jej dyrektywy:
     default-src 'none'          nic spoza pliku, chyba że niżej jest wyjątek
@@ -83,15 +83,15 @@ CZEGO PARAWAN NIE ZROBI
 
   Rozpoznaje dane regułami, słownikami i sumami kontrolnymi, bez sztucznej
   inteligencji. Może przepuścić nazwisko spoza słownika, gdy obok nie ma
-  imienia ani słów Pan czy Pani, numer w nietypowym zapisie i numer
-  działki. Nie czyta skanów (PDF musi mieć warstwę tekstu). Z pliku Word
-  czyta treść główną, bez nagłówków, stopek, przypisów i komentarzy,
-  i mówi po wczytaniu, co pominął.
+  imienia ani słów Pan czy Pani, albo numer w nietypowym zapisie. Numeru
+  działki celowo nie zasłania. Nie czyta skanów (PDF musi mieć warstwę
+  tekstu). Z pliku Word czyta treść główną, bez nagłówków, stopek,
+  przypisów i komentarzy, i mówi po wczytaniu, co pominął.
 
   Zasłania też dane, które w BIP zwykle zostają jawne, np. nazwiska
   urzędników pod pismem i znak sprawy. Nie zmienia oryginalnego pliku.
 
-  W pomiarze na 496 wymyślonych zdaniach zniknęło 668 z 683 fragmentów,
+  W pomiarze na 496 syntetycznych zdaniach zniknęło 668 z 683 fragmentów,
   które miały zniknąć (97,8%), i zostało 773 z 774, które miały zostać
   (99,9%). Metodologia: docs/BENCHMARK.md w repozytorium.
 
@@ -121,7 +121,7 @@ WDROŻENIE
   3. Dodaj pracownikom skrót albo zakładkę (w Edge zasada ManagedFavorites).
   4. Aktualizacja to podmiana tego jednego pliku po sprawdzeniu sumy.
 
-ZASADY PRZEGLĄDARKI, KTÓRE BLOKUJĄ ALBO OGRANICZAJĄ PARAWANA
+ZASADY I NARZĘDZIA, KTÓRE BLOKUJĄ ALBO OGRANICZAJĄ PARAWANA
   - URLBlocklist z wpisem dla file:// blokuje plik. Wyjątek dla jednej
     ścieżki daje URLAllowlist albo plik w intranecie urzędu.
   - JavaScript wyłączony zasadą DefaultJavaScriptSetting albo
@@ -137,7 +137,6 @@ ZASADY PRZEGLĄDARKI, KTÓRE BLOKUJĄ ALBO OGRANICZAJĄ PARAWANA
     200 KB tekstu analizuje około sekundy zamiast 0,1 s.
   - Microsoft Purview DLP może blokować kopiowanie z Worda tekstu z numerem
     PESEL. Wtedy wystarczy wczytać plik zamiast kopiować.
-  - Skany: przy PDF bez warstwy tekstu lepiej pobrać z EZD wersję DOCX.
 
 BUDOWA Z KODU
   Plik można zbudować samemu i porównać sumę z wydaniem. Każdy wiersz to
