@@ -59,6 +59,11 @@ jobs:
           2. Wklej tekst albo upuść plik (.txt, .docx lub .pdf) na lewe pole.
           3. Po prawej masz wersję z zamaskowanymi danymi, kliknij „Kopiuj".
 
+          Wydruk: Ctrl+P albo przycisk „Drukuj lub zapisz PDF" drukuje sam wynik,
+          bez tekstu źródłowego. W oknie drukowania rozwiń „Więcej ustawień"
+          i odznacz „Nagłówki i stopki", inaczej przeglądarka dopisze na kartce
+          ścieżkę pliku, a w niej zwykle nazwę użytkownika.
+
           Wszystko dzieje się na Twoim komputerze. Aplikacja nie łączy się
           z internetem, możesz wyłączyć Wi-Fi i sprawdzić.
 

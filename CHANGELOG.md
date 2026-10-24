@@ -1,5 +1,168 @@
 # Changelog
 
+## v0.46.24 — 2026-10-24
+
+**Wydruk samego wyniku, DOCX bez sklejania wierszy, PDF w starszym Edge i Chrome, przebudowany silnik wykrywania i nowy typ danych: numer księgi wieczystej.**
+
+Aktualizacja pilna: wydruk z poprzednich wersji ujawniał dane z pola źródła, a DOCX z końcem
+wiersza zapisanym znakiem `<w:cr/>` przepuszczał nazwisko.
+
+Silnik wykrywania zmienił się mocno, więc ten sam tekst da inny wynik niż w v0.46.23. Przed
+wydaniem porównano jego wyniki z v0.46.23 na 23 646 dokumentach (bilans i znane regresje na końcu
+wpisu).
+W przykładach `⇥` oznacza tabulator, a `⏎` koniec wiersza.
+
+Aplikacja i strona produktu:
+
+- **Druk i PDF.** Ctrl+P i nowy przycisk „Drukuj lub zapisz PDF” drukują sam zanonimizowany wynik,
+  cały, w obu widokach. Wcześniej na papier trafiała strona aplikacji razem z polem „Tekst
+  źródłowy” (jawny PESEL, nazwisko, konto), w „Porównaniu” także przekreślone oryginały, a z wyniku
+  tylko to, co mieściło się w okienku. PDF z okna drukowania ma prawdziwy tekst z polskimi
+  literami. Pod wynikiem jest podpowiedź, gdzie wyłączyć „Nagłówki i stopki”, bo przeglądarka
+  dopisuje tam ścieżkę pliku z nazwą użytkownika komputera.
+- **Pobieranie.** Plik .txt ma BOM UTF-8 i końce wierszy Windows, więc Word i Notatnik otwierają go
+  bez pytania o kodowanie. Rejestr wczytany z .csv wraca jako .csv, który Excel otwiera z polskimi
+  literami.
+- **DOCX.** Koniec wiersza zapisany jako `<w:cr/>` (i kilka rzadszych zapisów tabulatora i łamania)
+  nie skleja już „Jan” z „Kowalski” w „JanKowalski” (takie sklejenie zostawało jawne). Pusta
+  komórka tabeli nie rozrywa imienia i nazwiska. Pliki z innym prefiksem przestrzeni nazw
+  i „Ścisły dokument Open XML” wczytują się jak zwykłe. Po wczytaniu Parawan wylicza, czego w pliku nie przeczytał: nagłówki
+  i stopki, przypisy, komentarze, obrazy, obiekty osadzone, fragmenty wstawione z innych plików,
+  usunięcia ze śledzonych zmian. Osobno ostrzega o ukrytym tekście, także ukrytym przez styl
+  (np. cały styl „Notatka wewnętrzna”), bo taki tekst trafia do wyniku jak każdy inny.
+- **Starsze przeglądarki.** PDF wczytuje się w Edge i Chrome 109–123 (Windows 7, 8.1, Server 2012
+  R2, przeglądarki wstrzymane przez dział IT); wcześniej każdy PDF kończył się „Nie udało się
+  odczytać pliku.”. Gdy Parawan w ogóle nie ruszy (bardzo stary silnik, tryb Internet Explorera),
+  po 4 s pojawia się żółty pasek z wyjaśnieniem. Cel buildu jest przypięty: Chrome i Edge 109,
+  Firefox 115, Safari 16.4.
+- **Sesja przeglądarki.** W Chrome i Edge 109 tekst z pola źródła trafiał do plików sesji profilu
+  i wracał po ponownym uruchomieniu z przywracaniem kart. Teraz nie trafia. We „Wskazówkach” rada:
+  plik lepiej wczytać niż kopiować z Worda, bo kopia zostaje w historii schowka Windows.
+- **Bramka testów na gotowym pliku.** `npm run e2e` (Playwright) otwiera Parawan.html i stronę
+  produktu z dysku, wczytuje fikcyjne pisma DOCX i PDF, drukuje do PDF i pobiera wynik. Sprawdza,
+  że żadna dana nie przechodzi, przeglądarka nie wysłała ani jednego żądania (także odłożonego
+  w czasie, przez WebSocket i WebRTC), CSP jest kompletna, a w pamięci przeglądarki, adresie
+  i tytule karty nie zostaje treść pisma. Ta sama bramka działa w CI i przed publikacją wydania.
+  Fikcyjne pisma urzędowe leżą w `apps/web/src/fixtures/urzad/`.
+- **Strona produktu.** Znak marki nad przyciskiem pobierania, jaśniejsze tło i ciemniejszy tekst
+  pomocniczy, numer księgi wieczystej w spisie typów (25 zamiast 24).
+
+Wykrywanie:
+
+- **Tekst poza maską zostaje taki jak w oryginale.** Tabulatory, wyrównanie spacjami, kropki
+  skrótów i wielkość liter w etykietach się nie zmieniają, więc TSV nie traci kolumn, a JSON
+  dalej się wczytuje. `2024-03-01⇥Jan Kowalski⇥Warszawa` dawało
+  `2024-03-01⇥[IMIĘ I NAZWISKO] Warszawa`, teraz `2024-03-01⇥[IMIĘ I NAZWISKO]⇥Warszawa`.
+  `ORLEN S.A. Jan Kowalski` dawało `ORLEN S.[IMIĘ I NAZWISKO]`, teraz
+  `ORLEN S.A. [IMIĘ I NAZWISKO]`. W poprawnym JSON-ie maska w miejscu liczby dostaje cudzysłowy:
+  `{"telefon": "[TELEFON]"}`. Drugi numer po „lub” (`tel. 601-222-333 lub 22 501 23 45`) też
+  znika.
+- **Liczby, które tylko wyglądały na dane.** Kwoty, numery przesyłek, zamówień i seryjne, normy,
+  wersje programów i kolumny liczb nie dostają już maski telefonu, tablicy, IP ani MAC.
+  `Rysunki wykonano w programie AutoCAD 2024.` dawało `Auto[NR-REJESTRACYJNY]`,
+  `Dochody bieżące: 534 210 987,55` dawało `[TELEFON],55`, `Przesyłka RR123456789PL` dawało
+  `RR[TELEFON]PL`, a `wersję 2.4.1.0` dawało `wersję [IP]`. Teraz zostają bez zmian. Adresy
+  specjalne (`127.0.0.1`, maska `255.255.255.0`, `8.8.8.8`) też zostają, a `git@github.com:…`
+  nie jest już e-mailem. W drugą stronę: `Przelew na DE89 3704 0044 0532 0130 00 Z OPCJĄ SHA`
+  był jawny, teraz daje `Przelew na [NR-KONTA] Z OPCJĄ SHA`, a IP na końcu zdania
+  (`z adresu IP 83.12.45.67.`) dostaje maskę.
+- **Nazwy własne, urzędy i patroni.** `Kościół Mariacki w Krakowie`, `Odruch Babińskiego`,
+  `Uniwersytet Adama Mickiewicza w Poznaniu` i `Pani Minister Zdrowia podpisała rozporządzenie.`
+  zostają bez maski osoby. Wyraz przed nazwiskiem nie znika: `Wczoraj Kowalski przyszedł`
+  daje `Wczoraj [IMIĘ I NAZWISKO] przyszedł`, a `Dzień Lisiecka, Noc Brzozowska` w grafiku
+  dyżurów daje `Dzień [IMIĘ I NAZWISKO], Noc [IMIĘ I NAZWISKO]`. Zaimek „im” nie jest skrótem
+  patrona: `Pomógł im Jan Kowalski` był jawny, teraz daje `Pomógł im [IMIĘ I NAZWISKO]`.
+- **Dane rozpoznane tylko w części.** Ogon numeru, imię obok maski, przymiotnik w nazwie miasta
+  czy numer lokalu zostawały jawne. `tel.: 0048 12 634 55 21` dawało `tel.: [TELEFON] 55 21`,
+  `PESEL: 851 103 142 83` dawało `PESEL: [TELEFON] 83`, `55-080 Kąty Wrocławskie` dawało
+  `[KOD-POCZTOWY] [MIEJSCOWOŚĆ] Wrocławskie`, `Anną Schröder` dawało `[IMIĘ I NAZWISKO]öder`,
+  a `Kuba Nowak, Ola Nowak` zostawiało oba zdrobnienia. Teraz każda z tych danych jest pod jedną
+  maską, tak samo `zam. ul. Hoża 41-43 m. 12` i `ul. Żwirki i Wigury 16/3`. Liczba za ulicą,
+  która nie jest numerem domu, zostaje: `Wypadek przy ul. Długiej 5 osób rannych.`
+- **Dane obok wyraźnej kotwicy.** Odmiana, skrót z kropką albo dodatkowe słowo między etykietą
+  a wartością przepuszczały daną w całości. Teraz `dowodem osobistym serii ABA nr 300000` daje
+  `serii [NR-DOWODU]`, `kontakt pod nr 512 345 678` daje `pod nr [TELEFON]`,
+  `Telefon pacjenta: 41 344 56 78` daje `Telefon pacjenta: [TELEFON]`, a
+  `EWELINA KRAWCZYK z domu MAJEWSKA` maskuje też nazwisko panieńskie. Suma kontrolna dowodu liczy
+  się poprawnymi wagami: wcześniej ponad 8 na 10 prawdziwych numerów jej nie przechodziło, więc `okazał dokument PHO996589` był jawny. Adres
+  przed zdaniem, które zaczyna się od liczby, nie zjada go już:
+  `Mieszka przy ul. Polnej 3. Od 2 lat choruje.` dawało `Mieszka przy [ADRES] lat choruje.`.
+- **Tabele, formularze, wersaliki i odmiana.** Wiersze pod nagłówkiem tabeli z kolumną osoby
+  dostają maskę w każdej komórce (`imie;nazwisko;pesel⏎Jan;Kos;…` maskowało tylko PESEL). Pola
+  w jednym wierszu z TAB-em maskują się pole po polu: `Imię: Jan⇥Nazwisko: Kowalski⇥PESEL: …`
+  dawało `Imię: [IMIĘ I NAZWISKO]: [IMIĘ I NAZWISKO]⇥…` (etykieta znikała), teraz
+  `Imię: [IMIĘ I NAZWISKO]⇥Nazwisko: [IMIĘ I NAZWISKO]⇥…`. Imiona w odmianie i bez ogonków
+  wchodzą do maski (`z powództwa Pawła Kowalskiego przeciwko Agacie Nowak`,
+  `z Lukaszem Wisniewskim`), tak samo wersaliki (`Pani Anna KOWALSKA`,
+  `Lista obecności: NOWAK PIOTR, WÓJCIK MARIA`, `Nadawca: JAN SIKORA`) i imiona rodziców
+  (`Jan Kowalski, syn Józefa i Marii` daje
+  `[IMIĘ I NAZWISKO], syn [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO]`). Adres bez „ul.” po
+  etykiecie zamieszkania: `Adres zamieszkania: Lipowa 14/3, Gdańsk` daje
+  `Adres zamieszkania: [ADRES], [MIEJSCOWOŚĆ]`, a `urodziłam się 12.05.1990 w Łodzi` daje
+  `urodziłam się [DATA-URODZENIA] w [MIEJSCOWOŚĆ]`.
+- **Loginy i ścieżki.** Maskę `[LOGIN]` dostaje teraz katalog domowy w ścieżce
+  (`C:\Users\[LOGIN]\Desktop`, `\\FS01\home$\[LOGIN]`), konto AD (`Konto AD: [LOGIN]`), zapis
+  domenowy (`Login: FIRMA\jkowalski` daje `Login: [LOGIN]`), login w logach sshd
+  (`Accepted publickey for [LOGIN] from [IP]`) i profil w adresie. Login z pola znika też
+  w reszcie dokumentu, np. w linku (`https://github.com/[LOGIN]`) i w zwykłym zdaniu
+  (`Zablokowano konto [LOGIN].`). Login, który jest zwykłym słowem (`Login: mazur`), dostaje
+  maskę tylko w polu. Konta systemowe i działów (`/home/ubuntu`, `C:\Users\geodezja`) zostają
+  jawne.
+- **Nowy typ: numer księgi wieczystej `[NR-KW]`.** Taki numer prowadzi przez publiczną
+  przeglądarkę ksiąg wprost do właściciela nieruchomości. Po słowach „KW”, „Kw nr”, „księga
+  wieczysta”, „księgi wieczystej”, „księdze wieczystej” i „księgą wieczystą” numer znika także
+  z błędną cyfrą kontrolną: `objętej księgą wieczystą KW nr KR1P/00234567/6` daje
+  `objętej księgą wieczystą KW nr [NR-KW]`, `w księdze wieczystej KR1P/00234567/1` daje
+  `w księdze wieczystej [NR-KW]`, a wyliczenie
+  `KW nr KR1P/00234567/6, KR1P/00234567/1 oraz WA2M/00512345/0` daje
+  `KW nr [NR-KW], [NR-KW] oraz [NR-KW]`. Bez słowa obok numer musi mieć poprawną cyfrę
+  kontrolną i kod znanego sądu (`nieruchomość [NR-KW] położona w Krakowie`). Działa też
+  w kolumnie „Nr KW”, w XML i JSON oraz w linku do przeglądarki ksiąg.
+  `Zamówienie nr AB1C/12345678/0` i `kw. 2026` zostają. W aplikacji jest osobny przełącznik
+  „Nr księgi wieczystej” w grupie Identyfikatory.
+- **Wydajność.** Długi ciąg bez spacji (wklejony blok base64, łańcuch kropek) zamrażał kartę:
+  50 000 znaków `a.a.a.…` liczyło się 1,5 s, a 100 000 znaków 7 s. Teraz to milisekundy.
+- **Znane regresje.** Bilans względem v0.46.23 objął 5911 pism z korpusu audytu i benchmarku
+  oraz 17 735 tekstów pisanych pod atak (warianty pułapek i dawnych regresji), w trybie zwykłych
+  masek i z pseudonimami, wiersz po wierszu. Lepiej wypada około 43,7 tys. miejsc (32 tys.
+  domkniętych wycieków, 11,7 tys. zdjętych nadmaskowań), gorzej 334: 170 nowych wycieków lub
+  jawnych fragmentów i 164 nowe nadmaskowania. Z tych 334 tylko 10 pochodzi z korpusu zwykłych
+  pism, reszta z tekstów pod atak. Liczby dla tekstów pod atak to ekstrapolacja z ręcznie
+  sprawdzonej próbki 300 różnych wierszy. Klasy:
+  - formularz z TAB-em, w którym rola stoi jako etykieta: `Powód:⇥Jan⇥Nazwisko:⇥Nowak` daje
+    `Powód:⇥Jan⇥Nazwisko:⇥[IMIĘ I NAZWISKO]`, czyli imię jest jawne (v0.46.23 maskowało obie
+    wartości, choć gubiło etykietę „Nazwisko”). Tak samo przy Oskarżonym i Kupującym oraz
+    w układach `Status⇥Poszkodowany⇥Imię⇥Jan⇥…` i `Funkcja⇥Świadek⇥Imię⇥Jan⇥…`. W części
+    formularzy z Dłużnikiem jawne zostaje imię tam, gdzie v0.46.23 zostawiało nazwisko.
+    Bez zmian względem v0.46.23, ale z pełnym wyciekiem: `Rola⇥Poszkodowany⇥Imię⇥Ewa⇥Nazwisko⇥Lis`
+    zostawia całą osobę jawną;
+  - pierwsza osoba w wyliczeniu w celowniku: `Przyznano Piotrowi Janowi i Annie Nowak dodatek.`
+    daje `Przyznano Piotrowi Janowi i [IMIĘ I NAZWISKO] dodatek.`, a w
+    `Doręczono Barbarze Annie i Zbigniewowi Pawlakom.` jawne zostaje samo „Annie”. Podobnie
+    `dla Jana Pawła i Marka Nowaków` daje `dla Jana Pawła i [IMIĘ I NAZWISKO]`;
+  - dwa imiona bez nazwiska brane za osobę: `Annie Paweł i Ola kupili kwiaty` daje
+    `[IMIĘ I NAZWISKO] i Ola kupili kwiaty`;
+  - postać historyczna albo patron WERSALIKAMI przy nazwie obiektu i w zapisie mieszanym:
+    `GABINET JÓZEFA PIŁSUDSKIEGO W BELWEDERZE` daje `GABINET [IMIĘ I NAZWISKO] W BELWEDERZE`,
+    a `Janusz KORCZAK prowadził sierociniec.` daje `[IMIĘ I NAZWISKO] prowadził sierociniec.`;
+  - spójność pseudonimów, bez wycieku: przy `Imiona⇥Jan Stanisław⇥Nazwisko⇥Kowalski` imiona
+    dostają maskę ogólną, a nazwisko `[OSOBA-A]`.
+- **Świadome koszty.** Kilka rzeczy maskowanych w v0.46.23 celowo przestaje być maskowanych.
+  Nazwisko, które jest też przymiotnikiem albo nazwą miejsca, zostaje jawne nawet przy kotwicy
+  osoby (`Poselski złożył wniosek.`, `Wnioskodawca: Kampinoski`, `Kazimierz Dolny złożył
+  wniosek.`), bo maskowanie zabierało nazwy urzędów i miejscowości. Jawne zostaje też rzadkie
+  nazwisko na „-nicz” w dopełniaczu bez imienia (`Pozew Bartnicza`) i infolinia
+  (`Infolinia 800 123 456`). Zagraniczny numer VAT UE (`DE811569869`) nie dostaje już maski, bo
+  dawne `DE[TELEFON]` było przypadkowym kawałkiem telefonu. Telefon bez kotwicy złamany wierszem
+  (`pod 512 345⏎678`) przestał być maskowany, bo kolumny liczb nie są już telefonem. Z kotwicą
+  (`dzwonić pod`, `tel.`) dalej znika. Samo imię bez nazwiska zostaje jawne jak wcześniej, a model
+  po marce (`samochód marki Honda CB 650R`) dalej dostaje `[NR-REJESTRACYJNY]`, bo ma kształt
+  tablicy.
+
+687 testów rdzenia przechodzi. Bramka benchmarku bez regresji na zbiorze rozszerzonym z 319 do 496
+przypadków (recall 97,8%, precyzja 99,9%). Te liczby są też na stronie produktu i w README.
+Golden-master zaktualizowany razem ze zmianami zachowania. Web i landing 0.46.23 → 0.46.24.
+
 ## v0.46.23 — 2026-10-15
 
 **Content-Security-Policy w Parawan.html, poprawki aplikacji po audycie UI i nowa strona produktu.**
