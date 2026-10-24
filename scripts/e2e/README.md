@@ -114,6 +114,18 @@ Enter na znaczniku), Ctrl+Z, przesunięcie poprawek po edycji źródła i „Wyc
 localStorage po korektach są te same co przed nimi. Zaznaczenie prawdziwą myszą w Firefoksie ESR
 sprawdza ręcznie `manual/korekta-zaznaczenie.mjs`.
 
+`korekta-fuzz.test.mjs` składa losowe ciągi czynności (wklejanie pism, pisanie i usuwanie w jednym
+miejscu, Ctrl+A z innym pismem, natywne Ctrl+Z i Ctrl+Y w polu i w wyniku, „Zasłoń zaznaczenie”,
+„Zostaw jawne” i „Cofnij zasłonięcie” tu i wszędzie, „Wyczyść”, „Cofnij” na pasku) w Chromium
+i Firefoksie. Po każdym kroku porównuje wynik, druk, schowek i .txt z modelem: dana wykryta
+w bieżącym tekście jest zasłonięta, chyba że „Zostaw jawne” podjęto na tym samym tekście (albo
+na tekście, z którego bieżący powstał samym pisaniem obok), a ręczne zasłonięcie nie znika bez
+decyzji. Przed losowymi biegną ciągi z wcześniejszych błędów (`REGRESSIONS`). Domyślnie 30 ciągów
+z losowym ziarnem; błąd podaje ziarno i skrócony ciąg kroków.
+Długi przebieg: `PARAWAN_FUZZ_N=1000 PARAWAN_FUZZ_WSZYSTKIE=1 PARAWAN_FUZZ_RAPORT=raport.txt`,
+powtórzenie: `PARAWAN_FUZZ_SEED=…` albo `PARAWAN_FUZZ_KROKI_JSON='[…]'` (opis zmiennych na górze pliku).
+Brak Firefoksa z Playwright (jak w CI, które instaluje tylko Chromium) pomija jego część.
+
 Dostępność sprawdza `a11y.test.mjs`. axe-core (wersja dokładna w `package.json`, reguły
 `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`) biegnie na pustej aplikacji, po `?demo`, w widoku
 „Porównanie”, z rozwiniętymi `<details>`, na telefonie 390×844 i na landingu. Źródło axe trafia

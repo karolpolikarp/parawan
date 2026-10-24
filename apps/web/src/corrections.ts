@@ -15,10 +15,11 @@ export type Decision =
   /** Odsłoń zakresy leżące w całości w [start, end) oryginału (szerszy zakres zostaje zasłonięty). */
   | { kind: 'keep'; scope: 'here'; start: number; end: number }
   /**
-   * Odsłoń zakresy o tym samym kluczu (spanKey), ale tylko w formach z listy z chwili decyzji
-   * (formOf): osoba dopisana później z innym imieniem nie wychodzi jawna bez wiedzy urzędnika.
+   * „Zostaw jawne wszędzie”: miejsca tej samej osoby albo danej z chwili decyzji, każde jak keep
+   * „tutaj”. Pozycje, a nie klucz: osoba dopisana później albo wklejona z innego pisma nie wychodzi
+   * jawna bez wiedzy urzędnika.
    */
-  | { kind: 'keep'; scope: 'same'; key: string; label: string; forms: string[] }
+  | { kind: 'keep'; scope: 'same'; label: string; ranges: [number, number][] }
   /** Zasłoń [start, end) oryginału znacznikiem [token]. */
   | { kind: 'mask'; scope: 'here'; start: number; end: number; token: string }
   /** Zasłoń każde wystąpienie tekstu (bez wielkości liter, na granicach wyrazów). */
@@ -28,11 +29,8 @@ export type Decision =
    * zasłaniał automat (PESEL wchłonięty przez zaznaczenie), dalej jest zasłonięte.
    */
   | { kind: 'unmask'; scope: 'here'; start: number; end: number }
-  /**
-   * Cofnij ręczne zasłonięcia o tym samym kluczu (spanKey) i w formach z chwili decyzji, tak jak
-   * unmask „tutaj” w każdym z tych miejsc. Zakresów automatu nie odsłania.
-   */
-  | { kind: 'unmask'; scope: 'same'; key: string; label: string; forms: string[] };
+  /** Cofnij ręczne zasłonięcia w miejscach z chwili decyzji, jak unmask „tutaj” w każdym z nich. */
+  | { kind: 'unmask'; scope: 'same'; label: string; ranges: [number, number][] };
 
 /** Tokeny do wyboru przy „Zasłoń zaznaczenie”, w kolejności listy. */
 export const MANUAL_TOKENS: readonly { token: string; label: string }[] = [
@@ -102,10 +100,6 @@ export function spanKey(original: string, span: Pick<Span, 'start' | 'end' | 'to
   // Zakres grupowy („[IMIĘ I NAZWISKO] [PESEL]”) łączy się tylko z taką samą grupą.
   return `${span.tokens.map((t) => (isPerson(t) ? 'P' : t)).join('+')}:${text.toLowerCase().replace(/\s+/g, ' ').trim()}`;
 }
-
-/** Forma zakresu do listy decyzji „wszędzie”: tekst oryginału bez wielkości liter i nadmiaru odstępów. */
-export const formOf = (original: string, span: { start: number; end: number }): string =>
-  original.slice(span.start, span.end).toLowerCase().replace(/\s+/g, ' ').trim();
 
 const escapeRe = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -184,20 +178,24 @@ export function applyCorrections(original: string, autoSpans: Span[], decisions:
   let cover: Cover[] = autoSpans.map((_, i) => autoCover(i));
   const kept = new Set<number>();
   const effects: number[] = [];
-  /** Zakresy automatyczne wchłonięte w `c` (także przez wchłonięte zakresy ręczne). */
-  const autoOf = (c: Cover): number[] => (c.by < 0 ? [c.ai] : c.under.flatMap(autoOf));
   /** Zdejmuje zakres ręczny: wraca to, co wchłonął, i odsłonięcia automatu sprzed niego. */
   const release = (c: Cover): void => {
     cover = cover.filter((x) => x !== c).concat(c.under.filter((u) => !c.wasKept.includes(u.ai)));
     for (const k of c.wasKept) kept.add(k);
   };
-  const sameAs = (c: Cover, key: string, forms: string[]): boolean =>
-    spanKey(original, c) === key && forms.includes(formOf(original, c));
-  const keepAll = (pick: (c: Cover) => boolean): number => {
-    const hit = cover.filter(pick);
-    if (!hit.length) return 0;
-    for (const c of hit) for (const i of autoOf(c)) kept.add(i);
-    cover = cover.filter((c) => !hit.includes(c));
+  /**
+   * „Zostaw jawne” zdejmuje zakresy leżące w całości w którymś z miejsc decyzji. Zakres ręczny tylko
+   * zdejmuje, jak „Cofnij zasłonięcie”: to, co wchłonął z automatu, wraca zasłonięte.
+   */
+  const keepAll = (ranges: [number, number][]): number => {
+    const hit = cover.filter((c) => ranges.some(([a, b]) => inside(c, a, b)));
+    for (const c of hit) {
+      if (c.by >= 0) release(c);
+      else {
+        kept.add(c.ai);
+        cover = cover.filter((x) => x !== c);
+      }
+    }
     return hit.length;
   };
   const maskAt = (a: number, b: number, token: string, by: number): boolean => {
@@ -227,17 +225,12 @@ export function applyCorrections(original: string, autoSpans: Span[], decisions:
   decisions.forEach((d, i) => {
     let n = 0;
     if (d.kind === 'keep') {
-      n =
-        d.scope === 'here'
-          ? keepAll((c) => inside(c, d.start, d.end))
-          : keepAll((c) => sameAs(c, d.key, d.forms));
+      n = keepAll(d.scope === 'here' ? [[d.start, d.end]] : d.ranges);
     } else if (d.kind === 'unmask') {
-      // „Tutaj”: zakres ręczny w miejscu decyzji albo szerszy od niego (po ponownym włączeniu typu
-      // urósł). „Wszędzie”: każdy zakres ręczny tej samej danej w formach z chwili decyzji.
+      // Zakres ręczny w miejscu decyzji albo szerszy od niego (po ponownym włączeniu typu urósł).
+      const ranges = d.scope === 'here' ? [[d.start, d.end]] : d.ranges;
       const hit = cover.filter(
-        (c) =>
-          c.by >= 0 &&
-          (d.scope === 'same' ? sameAs(c, d.key, d.forms) : inside(c, d.start, d.end) || inside(d, c.start, c.end)),
+        (c) => c.by >= 0 && ranges.some(([a, b]) => inside(c, a, b) || inside({ start: a, end: b }, c.start, c.end)),
       );
       for (const c of hit) release(c);
       n = hit.length;
@@ -321,17 +314,27 @@ export function defaultToken(text: string): string {
 }
 
 /**
- * Decyzje po edycji tekstu źródłowego. Zmieniony fragment wyznacza wspólny początek i koniec
- * starego i nowego tekstu; decyzje „tutaj” przed nim zostają, za nim przesuwają się o różnicę
- * długości, a nachodzące na niego albo przyklejone do niego są odrzucane (nie wiadomo, czego dotyczą). Decyzje „wszędzie”
- * i „ta sama osoba” nie mają pozycji, więc zostają zawsze.
+ * Decyzje po zmianie tekstu źródłowego. Zmieniony fragment wyznacza wspólny początek i koniec
+ * starego i nowego tekstu; miejsca przed nim zostają, za nim przesuwają się o różnicę długości.
+ *
+ * `sure` mówi, czy zmianę da się pewnie zmapować przesunięciem (pisanie albo usuwanie w jednym
+ * miejscu). Wtedy decyzja odsłaniająca nachodząca na zmieniony fragment albo przyklejona do niego
+ * odpada, a „Zostaw jawne wszędzie” traci tylko dotknięte miejsca. Przy zmianie niepewnej (cofanie
+ * w polu, wklejenie w miejsce całości, zmiana większości tekstu) odpadają wszystkie decyzje
+ * odsłaniające: obowiązują tylko w tekście, w którym je podjęto.
+ *
+ * Zasłonięcie „tutaj” zostaje, dopóki jego tekst stoi w tym miejscu (przed przesunięciem albo po
+ * nim); litery doklejone do niego wchodzą do zakresu („Lis” → „Lisowski”), bo lepiej zasłonić
+ * więcej niż zostawić „owski” jawne. Zasłonięcie „wszędzie” zostaje przy pewnej zmianie zawsze,
+ * a przy niepewnej, gdy jego tekst występuje w nowym tekście.
  */
 export function shiftDecisions(
   before: string,
   after: string,
   decisions: Decision[],
-): { decisions: Decision[]; dropped: number } {
-  if (before === after || !decisions.length) return { decisions, dropped: 0 };
+  sure = true,
+): { decisions: Decision[]; dropped: number; reveals: number } {
+  if (before === after || !decisions.length) return { decisions, dropped: 0, reveals: 0 };
   const max = Math.min(before.length, after.length);
   let p = 0;
   while (p < max && before[p] === after[p]) p++;
@@ -344,16 +347,52 @@ export function shiftDecisions(
   // „Lisowski” zostawiłby „owski” jawne. Przecinek albo spacja na styku zakresu nie ruszają.
   const gluedEnd = isWordChar(before[p - 1]) && isWordChar(after[p]);
   const gluedStart = isWordChar(before[oldEnd]) && isWordChar(after[newEnd - 1]);
+  /** Miejsce [a, b) po zmianie albo null, gdy zmiana go dotknęła. */
+  const move = (a: number, b: number): [number, number] | null => {
+    if (b < p || (b === p && !gluedEnd)) return [a, b];
+    if (a > oldEnd || (a === oldEnd && !gluedStart)) return [a + delta, b + delta];
+    return null;
+  };
+  /** Zasłonięcie: tekst stoi dalej przed przesunięciem albo po nim, rozszerzony do całych wyrazów. */
+  const follow = (a: number, b: number): [number, number] | null => {
+    const text = before.slice(a, b);
+    for (const x of [a, a + delta]) {
+      if (x < 0 || after.slice(x, x + text.length) !== text) continue;
+      let e = x + text.length;
+      let y = x;
+      while (y > 0 && isWordChar(after[y - 1]) && isWordChar(after[y])) y--;
+      while (e < after.length && isWordChar(after[e]) && isWordChar(after[e - 1])) e++;
+      return [y, e];
+    }
+    return null;
+  };
   const out: Decision[] = [];
   let dropped = 0;
+  let reveals = 0;
   for (const d of decisions) {
-    if (d.scope !== 'here') out.push(d);
-    else if (d.end < p || (d.end === p && !gluedEnd)) out.push(d);
-    else if (d.start > oldEnd || (d.start === oldEnd && !gluedStart))
-      out.push({ ...d, start: d.start + delta, end: d.end + delta });
-    else dropped++;
+    let next: Decision | null = null;
+    if (d.kind === 'mask') {
+      if (d.scope === 'all') next = sure || findOccurrences(after, d.text, d.token).length ? d : null;
+      else {
+        const r = move(d.start, d.end) ?? follow(d.start, d.end);
+        next = r && { ...d, start: r[0], end: r[1] };
+      }
+    } else if (sure) {
+      if (d.scope === 'here') {
+        const r = move(d.start, d.end);
+        next = r && { ...d, start: r[0], end: r[1] };
+      } else {
+        const ranges = d.ranges.map(([a, b]) => move(a, b)).filter((r): r is [number, number] => !!r);
+        next = ranges.length ? { ...d, ranges } : null;
+      }
+    }
+    if (next) out.push(next);
+    else {
+      dropped++;
+      if (d.kind !== 'mask') reveals++;
+    }
   }
-  return { decisions: out, dropped };
+  return { decisions: out, dropped, reveals };
 }
 
 /** Liczby do stopki i protokołu: odsłonięte znaczniki i fragmenty zasłonięte ręcznie. */

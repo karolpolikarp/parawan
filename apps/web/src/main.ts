@@ -7,7 +7,6 @@ import {
   type Decision,
   defaultToken,
   findOccurrences,
-  formOf,
   lineRanges,
   MANUAL_TOKENS,
   shiftDecisions,
@@ -147,21 +146,15 @@ let corrected: Corrected = { spans: [], kept: [], effects: [], by: [] };
 // Cała lista, a nie „zdejmij ostatni wpis”: po „Cofnij zasłonięcie” decyzja znika ze środka listy
 // i Ctrl+Z musi ją przywrócić na jej miejsce, zamiast zdjąć inną, wcześniejszą poprawkę.
 let undoSteps: Decision[][] = [];
-// Poprawki pism, z których pole przeszło na inne pismo (wklejenie w miejsce całego tekstu,
-// opróżnienie pola, plik, „Przykład”). Natywne Ctrl+Z i Ctrl+Y w polu albo „Cofnij” na pasku wracają
-// do takiego pisma: dostaje ono z powrotem własne poprawki, a nie poprawki pisma, z którego wrócono.
-// „Zostaw jawne wszędzie” dla inspektora w jednym piśmie nie może odsłonić wnioskodawcy o tym
-// samym nazwisku w drugim. Tylko w pamięci karty, tak jak tekst do „Cofnij” na pasku.
-interface StashedCorrections {
-  text: string;
-  decisions: Decision[];
-  undoSteps: Decision[][];
-}
-let docStash: StashedCorrections[] = [];
-const DOC_STASH_LIMIT = 8;
-// Tekst, do którego odnoszą się poprawki wzięte z docStash. renderResult przesuwa je od niego,
-// a nie od lastInput, który dotyczy pisma sprzed cofnięcia.
-let restoredText: string | null = null;
+// Zmiana źródła od ostatniego przeliczenia, której nie da się zmapować przesunięciem: natywne
+// cofanie albo ponawianie w polu ('history'), wklejenie w miejsce całego tekstu ('unsure') albo
+// podmiana całego tekstu przez „Wyczyść”, „Przykład”, plik i „Cofnij” na pasku ('replaced', poprawki
+// ustawia wtedy sama podmiana). followSource rozstrzyga przy przeliczeniu, co z poprawkami.
+let sourceChange: 'none' | 'unsure' | 'history' | 'replaced' = 'none';
+// Poprawki tekstu sprzed ostatniej niepewnej zmiany. Wracają tylko wtedy, gdy natywne cofanie albo
+// ponawianie przywróci DOKŁADNIE ten tekst (Ctrl+A, Delete, Ctrl+Z). Jedno miejsce, nie stos:
+// każda następna niepewna zmiana je nadpisuje, więc poprawki nie przechodzą na inne pismo.
+let parked: { text: string; decisions: Decision[] } | null = null;
 
 /* ── Legenda, tabela „Co wykrywa” i przełączniki „Co maskować” (dane w pii-meta.ts) ── */
 
@@ -635,9 +628,12 @@ output.addEventListener('keydown', (e) => {
     return;
   }
   // Ctrl+Z w wyniku cofa ostatnią czynność na poprawkach (pole wyniku nie ma własnej historii edycji).
-  if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'z' && undoSteps.length) {
+  // Bez czynności do cofnięcia, a także przy Ctrl+Y i Ctrl+Shift+Z, skrót też nie idzie dalej:
+  // Chromium cofnąłby wtedy historię pola źródła i zmienił pismo z poziomu wyniku.
+  const key = e.key.toLowerCase();
+  if ((e.ctrlKey || e.metaKey) && !e.altKey && (key === 'z' || key === 'y')) {
     e.preventDefault();
-    undoLast();
+    if (key === 'z' && !e.shiftKey) undoLast();
     return;
   }
   if (!(e.ctrlKey || e.metaKey) || e.altKey || e.key.toLowerCase() !== 'a') return;
@@ -1123,38 +1119,57 @@ function undoLast(): void {
   correctionsChanged(restored ? 'Przywrócono cofniętą ręczną poprawkę.' : 'Cofnięto ręczną poprawkę.');
 }
 
-/** Odkłada poprawki bieżącego pisma (lastInput) na wypadek powrotu do niego. */
-function stashCorrections(): void {
-  if (!lastInput.trim()) return;
-  // „Wyczyść” zeruje kartę dwa razy (clearPublication, potem replaceSource): drugie wywołanie
-  // nie może nadpisać poprawek odłożonych przy pierwszym pustą listą.
-  if (!decisions.length && !undoSteps.length && docStash.some((e) => e.text === lastInput)) return;
-  docStash = docStash.filter((e) => e.text !== lastInput);
-  docStash.push({ text: lastInput, decisions: decisions.slice(), undoSteps: undoSteps.slice() });
-  if (docStash.length > DOC_STASH_LIMIT) docStash.shift();
-}
-
 /**
- * Pole wróciło do pisma `text`, z którego wcześniej przeszło na inne: poprawki bieżącego pisma
- * idą na bok, a wracają te, które `text` miał. Bez takiego pisma w docStash nic się nie zmienia.
+ * Źródło zmieniło się z lastInput na `next`: poprawki idą za tekstem (shiftDecisions). Zmiana pewna
+ * (pisanie, usuwanie, wklejenie fragmentu w jednym miejscu) przesuwa poprawki i stos do Ctrl+Z
+ * w wyniku. Zmiana niepewna zdejmuje decyzje odsłaniające i stos, a zasłonięcia zostają tam, gdzie
+ * ich tekst dalej stoi. Natywne cofanie do dokładnie tego tekstu, z którego wyszła poprzednia
+ * niepewna zmiana, przywraca jego poprawki.
  */
-function swapCorrections(text: string): boolean {
-  const i = docStash.findIndex((e) => e.text === text);
-  if (i === -1) return false;
-  const [entry] = docStash.splice(i, 1);
-  const had = decisions.length > 0;
-  stashCorrections();
-  clearCorrections();
-  decisions = entry.decisions;
-  undoSteps = entry.undoSteps;
-  restoredText = text;
-  if (had || decisions.length) {
-    fixNote = decisions.length
-      ? 'Tekst źródłowy wrócił do wcześniejszego pisma razem z jego ręcznymi poprawkami.'
-      : 'Tekst źródłowy wrócił do wcześniejszego pisma. Ręczne poprawki drugiego pisma go nie dotyczą.';
-    announce(fixNote);
+function followSource(next: string): void {
+  const base = lastInput;
+  const change = sourceChange;
+  sourceChange = 'none';
+  if (change === 'replaced' || next === base) return;
+  if (change === 'none' && !isOtherDocument(base, next)) {
+    undoSteps = undoSteps.map((list) => shiftDecisions(base, next, list).decisions);
+    const moved = shiftDecisions(base, next, decisions);
+    decisions = moved.decisions;
+    if (moved.dropped) {
+      fixNote =
+        `Po zmianie tekstu źródłowego odrzucono ${moved.dropped} ` +
+        `${plural(moved.dropped, 'ręczną poprawkę', 'ręczne poprawki', 'ręcznych poprawek')}.`;
+      announce(fixNote);
+    }
+    return;
   }
-  return true;
+  const back = change === 'history' && parked?.text === next ? parked.decisions.slice() : null;
+  // Puste pole nie ma poprawek, więc tekst sprzed opróżnienia dalej czeka na Ctrl+Z.
+  if (decisions.length) parked = { text: base, decisions: decisions.slice() };
+  else if (base.trim()) parked = null;
+  undoSteps = [];
+  if (back) {
+    decisions = back;
+    fixNote = 'Tekst źródłowy wrócił do wcześniejszej wersji razem z jej ręcznymi poprawkami.';
+    announce(fixNote);
+    return;
+  }
+  const moved = shiftDecisions(base, next, decisions, false);
+  decisions = moved.decisions;
+  const masks = moved.dropped - moved.reveals;
+  const parts = [];
+  if (moved.reveals)
+    parts.push(
+      `Zmieniono pismo: cofnięto ${moved.reveals} ` +
+        `${plural(moved.reveals, 'decyzję', 'decyzje', 'decyzji')} o pozostawieniu jawnych danych.`,
+    );
+  if (masks)
+    parts.push(
+      `Odrzucono ${masks} ${plural(masks, 'ręczne zasłonięcie', 'ręczne zasłonięcia', 'ręcznych zasłonięć')}, ` +
+        `${plural(masks, 'którego', 'których', 'których')} tekstu nie ma już w tym miejscu.`,
+    );
+  fixNote = next.trim() ? parts.join(' ') : '';
+  if (fixNote) announce(fixNote);
 }
 
 /** Wyczyść, Przykład, plik i nowe pismo: poprawki dotyczyły poprzedniego tekstu. */
@@ -1203,9 +1218,8 @@ fixKeepAll.addEventListener('click', () => {
   const { span } = frag;
   const label = origOf(span.start, span.end);
   const same = sameAs(span).filter((s) => span.source !== 'manual' || s.source === 'manual');
-  // Formy z paska („Obejmie: …”) z tej chwili: osoba dopisana później nie wyjdzie jawna po cichu.
-  const forms = [...new Set(same.map((s) => formOf(lastInput, s)))];
-  const key = spanKey(lastInput, span);
+  // Miejsca z paska („Obejmie: …”) z tej chwili: osoba dopisana później nie wyjdzie jawna po cichu.
+  const ranges = same.map((s): [number, number] => [s.start, s.end]);
   if (span.source === 'manual') {
     // Na fragmencie zasłoniętym ręcznie „wszędzie” cofa te zasłonięcia, jak „Cofnij zasłonięcie”
     // w każdym miejscu: PESEL zasłonięty przez automat i wchłonięty przez zaznaczenie zostaje
@@ -1217,12 +1231,12 @@ fixKeepAll.addEventListener('click', () => {
       return;
     }
     remember();
-    const n = addDecision({ kind: 'unmask', scope: 'same', key, label, forms });
+    const n = addDecision({ kind: 'unmask', scope: 'same', label, ranges });
     correctionsChanged(`Cofnięto zasłonięcie: ${placesWord(n)}.`, span);
     return;
   }
   remember();
-  const n = addDecision({ kind: 'keep', scope: 'same', key, label, forms });
+  const n = addDecision({ kind: 'keep', scope: 'same', label, ranges });
   correctionsChanged(`Zostawiono jawne: ${fragmentsWord(n)}.`, span);
 });
 fixRemask.addEventListener('click', () => {
@@ -1541,30 +1555,13 @@ function renderResult(redacted: string, found: PiiFinding[]): void {
   if (redacted !== lastRedacted) copyFlash.reset();
   // Przegląd dotyczy dokładnie tego wyniku: po każdej zmianie tekstu albo wyniku liczy się od zera.
   if (redacted !== lastRedacted || input.value !== lastInput) reviewed.clear();
-  // Edycja źródła: poprawki „tutaj” przesuwają się razem z tekstem albo odpadają (corrections.ts).
+  // Edycja źródła: poprawki idą za tekstem albo odpadają (followSource).
   // Otwarty wiersz „Zasłoń” trzyma pozycje w starym tekście: po edycji zasłoniłby co innego.
   if (!fixForm.hidden && input.value !== lastInput) {
     closeForm(false);
     announce('Tekst źródłowy się zmienił. Zaznacz fragment jeszcze raz.');
   }
-  const base = restoredText ?? lastInput;
-  restoredText = null;
-  if (base && input.value !== base) {
-    // Listy do Ctrl+Z przesuwają się razem z tekstem tak samo jak bieżąca, także gdy bieżąca jest
-    // pusta (po „Usuń wszystkie” albo „Zasłoń ponownie”): inaczej Ctrl+Z w wyniku przywróciłby
-    // decyzję „tutaj” na starych pozycjach i odsłonił daną, o której urzędnik nie decydował.
-    undoSteps = undoSteps.map((list) => shiftDecisions(base, input.value, list).decisions);
-  }
-  if (decisions.length && base && input.value !== base) {
-    const moved = shiftDecisions(base, input.value, decisions);
-    decisions = moved.decisions;
-    if (moved.dropped) {
-      fixNote =
-        `Po zmianie tekstu źródłowego odrzucono ${moved.dropped} ` +
-        `${plural(moved.dropped, 'ręczną poprawkę', 'ręczne poprawki', 'ręcznych poprawek')}.`;
-      announce(fixNote);
-    }
-  }
+  followSource(input.value);
   lastRedacted = redacted;
   lastInput = input.value;
   lastFound = found;
@@ -1608,7 +1605,8 @@ function update(): void {
       'Wklej tekst w polu „Tekst źródłowy” albo kliknij „Przykład” powyżej.</span>';
     findingsCard.hidden = true;
     lastRedacted = '';
-    lastInput = ''; // poprawki pisma odłożyło już stashCorrections, a puste pole nie ma do czego ich przesuwać
+    followSource(''); // poprawki pisma czekają w `parked` na Ctrl+Z w polu
+    lastInput = '';
     lastSpans = null;
     lastFound = [];
     reviewed.clear();
@@ -1708,22 +1706,24 @@ input.addEventListener('beforeinput', (e) => {
   const whole = !input.value.trim() || (input.selectionStart === 0 && input.selectionEnd === input.value.length);
   newDocument = whole && e.inputType.startsWith('insert');
   historyBefore = e.inputType.startsWith('history') ? input.value : null;
-  // Poprawki odnoszą się do lastInput. Przed zmianą, która może podmienić całe pismo, wynik musi
-  // dotyczyć tekstu z pola, żeby stashCorrections odłożyło poprawki pod właściwym tekstem.
-  if ((whole || historyBefore !== null) && updatePending) update();
+  // Poprawki odnoszą się do lastInput, a followSource porównuje go z polem przy przeliczeniu.
+  // Zaległą zmianę przeliczamy przed następną, żeby każda szła osobno: niepewna (cofanie,
+  // wklejenie w miejsce całości) nie zlewa się z pisaniem, a dwie edycje w różnych miejscach nie
+  // dają jednego dużego zmienionego fragmentu, który zdjąłby poprawki między nimi. Przy długim
+  // tekście z poprawkami nie przeliczamy co klawisz: zlany fragment najwyżej zdejmie więcej.
+  const fast = (decisions.length > 0 || undoSteps.length > 0) && lastUpdateMs < SLOW_UPDATE_MS;
+  if (updatePending && (whole || historyBefore !== null || sourceChange !== 'none' || fast)) update();
 });
 
-input.addEventListener('input', () => {
-  // Przy cofaniu i ponawianiu zeruje się sama karta. Ręczne poprawki przesuwa albo odrzuca
-  // (z komunikatem) renderResult, jak przy zwykłej edycji: Ctrl+Z po usunięciu dużego fragmentu
-  // nie może po cichu zdjąć zasłonięcia z części pisma, której nikt nie ruszał.
-  // Przy powrocie do pisma, z którego pole przeszło wcześniej na inne, wracają poprawki tamtego pisma.
-  let swapped = false;
+input.addEventListener('input', (e) => {
+  // Natywne cofanie i ponawianie w polu oraz wklejenie w miejsce całości to zmiany, których nie da
+  // się pewnie zmapować przesunięciem: followSource zdejmie przy nich decyzje odsłaniające.
+  const history = (e as InputEvent).inputType?.startsWith('history') ?? false;
+  if (history) sourceChange = 'history';
+  else if (newDocument && sourceChange === 'none') sourceChange = 'unsure';
+  // Karta zeruje się przy nowym piśmie i przy cofaniu, które podmienia większość tekstu.
   if (newDocument || !input.value.trim()) resetDocumentPublication();
-  else if (historyBefore !== null && isOtherDocument(historyBefore, input.value)) {
-    resetDocumentPublication(true);
-    swapped = swapCorrections(input.value);
-  }
+  else if (historyBefore !== null && isOtherDocument(historyBefore, input.value)) resetDocumentPublication();
   newDocument = false;
   historyBefore = null;
   // Własna edycja zamyka błąd, bo już nie dotyczy, i „Cofnij”, bo po edycji przywróciłby tekst
@@ -1744,9 +1744,9 @@ input.addEventListener('input', () => {
   // Pauza dopasowana do zmierzonego kosztu: krótki tekst po 140 ms, długi dopiero po przerwie
   // w pisaniu (inaczej każda pauza między słowami zamrażałaby kartę na kilka sekund).
   updateTimer = setTimeout(updateNow, Math.min(2000, Math.max(140, lastUpdateMs * 1.5)));
-  // Poprawki z docStash dotyczą już nowego tekstu, a zakresy jeszcze starego: od razu przeliczamy,
-  // żeby żadne kliknięcie w wynik nie trafiło między jedno a drugie.
-  if (swapped) update();
+  // Cofanie przeliczamy od razu: powrót do tekstu z `parked` liczy się tylko przy tym samym tekście,
+  // a wynik nie może wisieć na starym tekście, gdy poprawki już się zmieniły.
+  if (history) update();
 });
 
 /* ── Akcje ── */
@@ -1785,6 +1785,8 @@ const finePointer = matchMedia('(pointer: fine)');
    usunąć. Dlatego „Cofnij” działa tylko przez chwilę i znika od razu po przejściu do innej
    karty, zminimalizowaniu okna albo zamknięciu strony. */
 let undoText: string | null = null;
+// Ręczne poprawki tekstu z undoText: wracają z nim i giną razem z nim.
+let undoDecisions: Decision[] = [];
 // Dopisek, który należał do poprzedniego tekstu: „Cofnij” przywraca go razem z nim, bo nagłówki
 // i komentarze przywróconego DOCX dalej są w oryginale.
 let undoInfo = '';
@@ -1796,6 +1798,7 @@ let undoTimer: ReturnType<typeof setTimeout> | undefined;
 function showNote(msg: string, prev: string | null, info = '', reveal = true): void {
   clearTimeout(undoTimer);
   undoText = prev;
+  if (prev === null) undoDecisions = [];
   noteInfo = info;
   // Dopisek w osobnym wierszu (white-space: pre-line w style.css): ostrzeżenie o pliku nie ginie
   // w jednym akapicie z „Zastąpiono tekst treścią pliku.”.
@@ -1820,6 +1823,7 @@ function expireUndo(): void {
   clearTimeout(undoTimer);
   const hadFocus = document.activeElement === appNoteUndo;
   undoText = null;
+  undoDecisions = [];
   appNoteUndo.hidden = true;
   appNoteText.textContent = noteInfo;
   if (hadFocus) appNoteClose.focus({ preventScroll: true });
@@ -1830,6 +1834,7 @@ function dismissNote(): void {
   // przyciski znikają razem z paskiem, więc fokus z nich wraca do pola źródła
   const hadFocus = appNote.contains(document.activeElement);
   undoText = null;
+  undoDecisions = [];
   noteInfo = '';
   storedOffNote = false;
   appNoteMaskOn.hidden = true;
@@ -1850,9 +1855,13 @@ addEventListener('pagehide', () => {
 function replaceSource(text: string, note: string, info = ''): void {
   const prev = input.value;
   if (prev !== text) {
-    // Natywne Ctrl+Z nie sięga sprzed podmiany wartości, więc zostają tylko poprawki do „Cofnij”.
+    // Natywne Ctrl+Z nie sięga sprzed podmiany wartości, więc poprawki czekają tylko na „Cofnij”
+    // na pasku i giną razem z nim.
     flushPendingUpdate();
-    docStash = docStash.filter((e) => e.text === prev);
+    undoDecisions = prev.trim() ? decisions.slice() : [];
+    parked = null;
+    clearCorrections();
+    sourceChange = 'replaced';
     resetDocumentPublication();
   }
   const prevInfo = noteInfo;
@@ -1870,10 +1879,16 @@ appNoteUndo.addEventListener('click', () => {
   const info = undoInfo;
   // Przywrócone pismo to inne pismo niż bieżące (jak w replaceSource): karta wypełniona dla
   // cofanego tekstu nie może przejść na poprzedni.
+  const back = undoDecisions;
   if (input.value !== undoText) {
     flushPendingUpdate();
-    // Pismo wraca razem ze swoimi ręcznymi poprawkami (np. zasłoniętą ręcznie księgą wieczystą).
-    resetDocumentPublication(swapCorrections(undoText));
+    parked = null;
+    clearCorrections();
+    sourceChange = 'replaced';
+    resetDocumentPublication();
+    // Pismo wraca razem ze swoimi ręcznymi poprawkami (np. zasłoniętą ręcznie księgą wieczystą):
+    // to dokładnie ten tekst, na którym je podjęto.
+    decisions = back;
   }
   input.value = undoText;
   setFileExt(''); // pobieranie wraca do .txt jak po „Wyczyść” (rodzaj pliku nie wraca)
@@ -2159,12 +2174,7 @@ function syncOtherBasis(): void {
  * poprzedniego pisma, znika. Ręczna adnotacja mogła zawierać jego dane, a „Dołącz” przy zwiniętej
  * karcie dopisałoby ją do nowego wyniku. Organ, osoba, podstawa i data zostają.
  */
-function resetDocumentPublication(keepCorrections = false): void {
-  // Ręczne poprawki dotyczyły poprzedniego pisma: idą na bok do docStash, gdyby pole do niego wróciło.
-  if (!keepCorrections) {
-    stashCorrections();
-    clearCorrections();
-  }
+function resetDocumentPublication(): void {
   pubZnak.value = '';
   for (const el of [pubAppend, ...pubChecks]) el.checked = false;
   allReviewed = false;
@@ -2179,7 +2189,7 @@ function resetDocumentPublication(keepCorrections = false): void {
  * jest pusta. Zapamiętany organ i osoba wracają, jeśli „Pamiętaj” jest zaznaczone.
  */
 function clearPublication(): void {
-  flushPendingUpdate(); // poprawki odkłada resetDocumentPublication pod tekstem z pola
+  flushPendingUpdate(); // poprawki „Cofnij” na pasku bierze replaceSource z tekstem z pola
   const kept = pubRemember.checked ? readRemembered() : null;
   pubOrgan.value = kept?.organ ?? '';
   pubOsoba.value = kept?.osoba ?? '';

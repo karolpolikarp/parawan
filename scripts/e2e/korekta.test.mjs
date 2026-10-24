@@ -724,7 +724,7 @@ test('natywne Ctrl+Z do poprzedniego pisma nie przenosi na nie „Zostaw jawne w
       assert.ok(!text.includes('Kowalski'), 'wnioskodawca jawny w piśmie A');
     assert.equal(
       await page.locator('#fix-note').innerText(),
-      'Tekst źródłowy wrócił do wcześniejszego pisma. Ręczne poprawki drugiego pisma go nie dotyczą.',
+      'Zmieniono pismo: cofnięto 1 decyzję o pozostawieniu jawnych danych.',
     );
     // Ctrl+Y wraca do pisma B razem z jego „Zostaw jawne wszędzie”
     await page.keyboard.press(BROWSER === 'firefox' ? 'ControlOrMeta+Shift+z' : 'ControlOrMeta+y');
@@ -801,5 +801,298 @@ test('Ctrl+Z w wyniku po „Usuń wszystkie” i edycji źródła przywraca popr
     await app.waitForOutput('Ewa Lis');
     for (const out of [await outText(page), (await printed(page)) ?? ''])
       assert.ok(!out.includes('Jan Kot'), 'Ctrl+Z odsłonił osobę, o której nikt nie decydował');
+  });
+});
+
+// Przeprojektowanie po fuzzerze (zasada fail-closed): decyzja odsłaniająca obowiązuje tylko w tekście,
+// w którym ją podjęto, a zmiana źródła, której nie da się zmapować przesunięciem (Ctrl+Z i Ctrl+Y
+// w polu, wklejenie w miejsce całości, zmiana większości tekstu), ją zdejmuje. Wraca tylko przy
+// powrocie dokładnie do tego tekstu. Zasłonięcia zostają tam, gdzie ich tekst dalej stoi.
+// Każdy test odtwarza zgłoszenie z rund weryfikacji domknięcia.
+
+/** Ctrl+A i wpisanie tekstu w pole źródła, jak wklejenie innego pisma. */
+async function pasteOver(page, text) {
+  const ta = page.locator('#input');
+  await ta.focus();
+  await page.keyboard.press('ControlOrMeta+a');
+  await page.keyboard.insertText(text);
+  await page.waitForFunction((t) => /** @type {HTMLTextAreaElement} */ (document.getElementById('input')).value === t, text);
+}
+
+/** Czeka, aż wynik dotyczy tekstu z pola (przerwa przed przeliczeniem minęła). */
+async function settled(page) {
+  await page.waitForTimeout(300);
+  await page.waitForFunction(() => !document.getElementById('output')?.hasAttribute('aria-busy'));
+}
+
+const redo = BROWSER === 'firefox' ? 'ControlOrMeta+Shift+z' : 'ControlOrMeta+y';
+
+/** Wynik na ekranie, druk i pobrany .txt: żaden nie może zawierać `needle`. */
+async function assertHidden(page, needle, what) {
+  for (const [where, text] of [
+    ['wynik', await outText(page)],
+    ['druk', (await printed(page)) ?? ''],
+    ['.txt', await downloadTxt(page)],
+  ]) {
+    assert.ok(!text.includes(needle), `${where}: ${what} jawne:\n${text}`);
+  }
+}
+
+test('Ctrl+Z przez wiele pism do pierwszego nie przenosi na nie „Zostaw jawne wszędzie” (zgłoszenie: dziesięć pism)', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const tematy = ['drogi gminnej', 'oświetlenia', 'wycinki drzew', 'podatku', 'opłaty śmieciowej', 'dowozu dzieci', 'remontu szkoły', 'planu miejscowego'];
+    const docs = [
+      'Skarżący Jan Kowalski, zam. w Brzozowej Woli, prosi o interwencję w sprawie hałasu.',
+      'Sprawę prowadzi inspektor Jan Kowalski. Pismo podpisał Jan Kowalski, inspektor.',
+      ...tematy.map((x, i) => `Notatka nr ${i + 2} w sprawie ${x}. Przyjął referent Adam Zieliński w pokoju ${i + 2}.`),
+    ];
+    const ta = page.locator('#input');
+    await ta.click();
+    await page.keyboard.insertText(docs[0]);
+    await app.waitForOutput('Skarżący');
+    await settled(page);
+    for (let i = 1; i < docs.length; i++) {
+      await pasteOver(page, docs[i]);
+      await settled(page);
+      if (i === 1) {
+        await page.locator('#output mark.pii').first().click();
+        await page.locator('#fix-keep-all').click();
+        await page.waitForFunction(() => !document.querySelector('#output mark.pii:not(.pii-kept)'));
+      }
+    }
+    for (let i = docs.length - 1; i > 0; i--) {
+      await ta.focus();
+      await page.keyboard.press('ControlOrMeta+z');
+      await settled(page);
+    }
+    assert.equal(await ta.inputValue(), docs[0], 'Ctrl+Z nie wrócił do pierwszego pisma');
+    await assertHidden(page, 'Kowalski', 'nazwisko skarżącego');
+  });
+});
+
+test('ponownie wstawione pismo nie dostaje przy Ctrl+Z dawnego „Zostaw jawne wszędzie” (zgłoszenia: repaste, stale)', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const A = 'Sprawę prowadzi inspektor Jan Kowalski. Pismo podpisał Jan Kowalski, inspektor.';
+    const C = 'Notatka w sprawie oświetlenia ulicy. Przyjął referent Adam Zieliński w pokoju 4.';
+    const ta = page.locator('#input');
+    await ta.click();
+    await page.keyboard.insertText(A);
+    await app.waitForOutput('Sprawę');
+    await settled(page);
+    await page.locator('#output mark.pii').first().click();
+    await page.locator('#fix-keep-all').click();
+    await app.waitForOutput('Jan Kowalski');
+    // wariant 1: Ctrl+A, Delete, to samo pismo od nowa, inne pismo i Ctrl+Z
+    await ta.focus();
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.press('Delete');
+    await page.waitForFunction(() => !!document.querySelector('#output .placeholder'));
+    await page.keyboard.insertText(A);
+    await settled(page);
+    await pasteOver(page, C);
+    await settled(page);
+    await ta.focus();
+    await page.keyboard.press('ControlOrMeta+z');
+    await settled(page);
+    assert.equal(await ta.inputValue(), A);
+    await assertHidden(page, 'Kowalski', 'inspektor z dawnej decyzji');
+    // wariant 2: „Wyczyść”, to samo pismo od nowa, Ctrl+A, Delete i Ctrl+Z
+    await page.locator('#output mark.pii').nth(1).click();
+    await page.locator('#fix-keep-all').click();
+    await app.waitForOutput('Jan Kowalski');
+    await page.locator('#clear').click();
+    await page.waitForFunction(() => !!document.querySelector('#output .placeholder'));
+    await ta.click();
+    await page.keyboard.insertText(A);
+    await settled(page);
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.press('Delete');
+    await page.waitForFunction(() => !!document.querySelector('#output .placeholder'));
+    await page.keyboard.press('ControlOrMeta+z');
+    await settled(page);
+    assert.equal(await ta.inputValue(), A);
+    await assertHidden(page, 'Kowalski', 'inspektor z decyzji sprzed „Wyczyść”');
+  });
+});
+
+test('Ctrl+Z do pisma z tego samego wzoru nie odsłania wnioskodawcy decyzją z drugiego pisma (zgłoszenie: wzór)', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const body =
+      ' Na podstawie art. 104 Kodeksu postępowania administracyjnego, po rozpatrzeniu wniosku o wydanie decyzji o warunkach' +
+      ' zabudowy dla inwestycji polegającej na budowie budynku mieszkalnego jednorodzinnego na działce nr 123/4 w obrębie' +
+      ' Zalesie, orzeka się jak w sentencji. Od decyzji służy odwołanie w terminie 14 dni od dnia doręczenia.';
+    const A = `Sprawę prowadzi inspektor Anna Nowak. Wnioskodawca: Jan Kot, PESEL 44051401359.${body}`;
+    const B = `Sprawę prowadzi inspektor Jan Kot, kontakt: inspektor Jan Kot. Wnioskodawca: Ewa Lis, PESEL 02070803628.${body}`;
+    const ta = page.locator('#input');
+    await ta.click();
+    await page.keyboard.insertText(A);
+    await app.waitForOutput('[PESEL]');
+    await pasteOver(page, B);
+    await settled(page);
+    await page.locator('#output mark.pii').first().click();
+    assert.equal(await page.locator('#fix-bar-val').textContent(), 'Jan Kot');
+    await page.locator('#fix-keep-all').click();
+    await app.waitForOutput('inspektor Jan Kot');
+    await ta.focus();
+    await page.keyboard.press('ControlOrMeta+z');
+    await settled(page);
+    assert.equal(await ta.inputValue(), A);
+    await assertHidden(page, 'Jan Kot', 'wnioskodawca');
+    assert.equal(
+      await page.locator('#fix-note').innerText(),
+      'Zmieniono pismo: cofnięto 1 decyzję o pozostawieniu jawnych danych.',
+    );
+  });
+});
+
+test('podmiana prawie całego pisma bez Ctrl+A i Ctrl+Z nie przenosi „Zostaw jawne wszędzie” (zgłoszenie: nagłówek)', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const H = 'Urząd Gminy Zalesie\n';
+    const A = `${H}Wnioskodawca: Jan Kot, PESEL 44051401359, wnosi o wydanie zaświadczenia o niezaleganiu w podatkach.`;
+    const B = 'Pismo przygotował inspektor Jan Kot. Kontakt: inspektor Jan Kot, pokój 12, telefon wewnętrzny 44.';
+    const ta = page.locator('#input');
+    await ta.click();
+    await page.keyboard.insertText(A);
+    await app.waitForOutput('[PESEL]');
+    await ta.evaluate((el, n) => {
+      /** @type {HTMLTextAreaElement} */ (el).focus();
+      /** @type {HTMLTextAreaElement} */ (el).setSelectionRange(n, /** @type {HTMLTextAreaElement} */ (el).value.length);
+    }, H.length);
+    await page.keyboard.insertText(B);
+    await app.waitForOutput('pokój 12');
+    await settled(page);
+    await page.locator('#output mark.pii').first().click();
+    await page.locator('#fix-keep-all').click();
+    await app.waitForOutput('inspektor Jan Kot');
+    await ta.focus();
+    await page.keyboard.press('ControlOrMeta+z');
+    await settled(page);
+    assert.equal(await ta.inputValue(), A);
+    await assertHidden(page, 'Jan Kot', 'wnioskodawca');
+  });
+});
+
+test('ręczne zasłonięcie w ponownie wstawionym piśmie przetrwa usunięcie większości tekstu i Ctrl+Z (zgłoszenie: stary wpis)', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const A =
+      'Decyzja w sprawie działki. Wnioskodawca Jan Kowalski, PESEL 44051401359, wnosi o wydanie decyzji o warunkach zabudowy' +
+      ' dla działki przy ul. Lipowej 4 w Olsztynie. Uzasadnienie jest krótkie i dotyczy wyłącznie spraw technicznych.\n' +
+      `Księga wieczysta nr ${KW}.`;
+    const B = 'Sprawę prowadzi inspektor Jan Kowalski. Kontakt z inspektorem Jan Kowalski w pokoju 12.';
+    const ta = page.locator('#input');
+    for (const via of ['wyczysc', 'wklej']) {
+      await page.locator('#clear').click();
+      await ta.click();
+      await page.keyboard.insertText(A);
+      await app.waitForOutput('[PESEL]');
+      if (via === 'wyczysc') {
+        await page.locator('#clear').click();
+        await page.waitForFunction(() => !!document.querySelector('#output .placeholder'));
+        await ta.click();
+        await page.keyboard.insertText(A);
+      } else {
+        await pasteOver(page, B);
+        await settled(page);
+        await pasteOver(page, A);
+      }
+      await settled(page);
+      await selectInOutput(page, KW);
+      await page.locator('#fix-sel-out').click();
+      await page.locator('#fix-apply').click();
+      await app.waitForOutput('[DANE]');
+      const cut = Math.floor(A.length * 0.7);
+      await ta.evaluate((el, d) => {
+        /** @type {HTMLTextAreaElement} */ (el).focus();
+        /** @type {HTMLTextAreaElement} */ (el).setSelectionRange(0, d);
+      }, cut);
+      await page.keyboard.press('Delete');
+      await settled(page);
+      assert.ok((await outText(page)).includes('[DANE]'), `${via}: zasłonięcie zniknęło po usunięciu początku`);
+      await page.keyboard.press('ControlOrMeta+z');
+      await settled(page);
+      assert.equal(await ta.inputValue(), A);
+      await assertHidden(page, '00045123', `${via}: księga wieczysta`);
+    }
+  });
+});
+
+test('Ctrl+Z w wyniku po „Zasłoń ponownie” i edycji źródła nie odsłania innej danej (zgłoszenie: stary stos)', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const T = 'Pismo przygotowano w Wydziale Spraw Obywatelskich urzędu.\nWniosek podpisał Sławomir Kędzierski, PESEL 44051401359.\nKoniec.';
+    await paste(page, T);
+    await page.locator('#output mark.pii', { hasText: '[IMIĘ I NAZWISKO]' }).first().click();
+    await page.locator('#fix-keep').click();
+    await page.locator('#output mark.pii-kept').first().click();
+    await page.locator('#fix-remask').click();
+    await page.waitForFunction(() => !document.querySelector('#output mark.pii-kept'));
+    const cut = ' w Wydziale Spraw Obyw';
+    const a = T.indexOf(cut);
+    const ta = page.locator('#input');
+    await ta.focus();
+    await ta.evaluate((el, [a, b]) => /** @type {HTMLTextAreaElement} */ (el).setSelectionRange(a, b), [a, a + cut.length]);
+    await page.keyboard.press('Delete');
+    await settled(page);
+    await page.locator('#output').focus();
+    await page.keyboard.press('ControlOrMeta+z');
+    await settled(page);
+    await assertHidden(page, '44051401359', 'PESEL');
+  });
+});
+
+test('Ctrl+Z i Ctrl+Y w polu wracają do pisma razem z jego ręcznym zasłonięciem (zgłoszenie: Ctrl+Y)', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const A = 'Pismo pierwsze. Wnioskodawca Jan Kowalski, PESEL 44051401359, mieszka w Radomiu.';
+    const B = `Zupełnie inne pismo o księdze wieczystej ${KW} dotyczące Adama Nowaka, PESEL 85071412358, i działki.`;
+    const ta = page.locator('#input');
+    await ta.click();
+    await page.keyboard.insertText(A);
+    await app.waitForOutput('[PESEL]');
+    await pasteOver(page, B);
+    await app.waitForOutput('Zupełnie');
+    await settled(page);
+    await maskFromSource(page, KW);
+    await app.waitForOutput('[DANE]');
+    await ta.focus();
+    await page.keyboard.press('ControlOrMeta+z');
+    await settled(page);
+    assert.equal(await ta.inputValue(), A);
+    await page.keyboard.press(redo);
+    await settled(page);
+    assert.equal(await ta.inputValue(), B);
+    await assertHidden(page, '00045123', 'księga wieczysta po Ctrl+Y');
+  });
+});
+
+test('Ctrl+Z i Ctrl+Y w wyniku bez poprawek do cofnięcia nie zmieniają tekstu źródłowego', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const A = 'Wnioskodawca Jan Kowalski, PESEL 44051401359, wnosi o wydanie decyzji.';
+    const ta = page.locator('#input');
+    await ta.click();
+    await page.keyboard.insertText(A);
+    await app.waitForOutput('[PESEL]');
+    await ta.evaluate((el) => /** @type {HTMLTextAreaElement} */ (el).setSelectionRange(0, 0));
+    await page.keyboard.insertText('Pismo. ');
+    await settled(page);
+    await page.locator('#output').focus();
+    await page.keyboard.press('ControlOrMeta+z');
+    await settled(page);
+    assert.equal(await ta.inputValue(), `Pismo. ${A}`, 'Ctrl+Z w wyniku zmienił pole źródła');
+    // Ctrl+Z w polu cofa wpisanie, a Ctrl+Y w wyniku nie może go ponowić
+    await ta.focus();
+    await page.keyboard.press('ControlOrMeta+z');
+    await settled(page);
+    assert.equal(await ta.inputValue(), A);
+    await page.locator('#output').focus();
+    await page.keyboard.press(redo);
+    await settled(page);
+    assert.equal(await ta.inputValue(), A, 'Ctrl+Y w wyniku zmienił pole źródła');
   });
 });
