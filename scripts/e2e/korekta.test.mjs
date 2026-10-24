@@ -1466,3 +1466,117 @@ test('Ctrl+X i Ctrl+V wiersza z regułą „wszędzie”: po wklejeniu tekst zn�
     assert.equal(await fixNote(page), '');
   });
 });
+
+/** Otwiera „Zasłoń zaznaczenie” na pierwszym `needle` w polu źródła i zasłania wszystkie wystąpienia jako `token`. */
+async function maskAllFromSource(page, needle, token) {
+  await openFormFromSource(page, needle);
+  await page.locator('#fix-all').check();
+  await page.locator('#fix-token').selectOption(token);
+  const n = (await page.locator('#fix-all-n').textContent()) ?? '';
+  await page.locator('#fix-apply').click();
+  await page.locator('#fix-form').waitFor({ state: 'hidden' });
+  return n;
+}
+
+test('„Zasłoń wszędzie” łapie tę samą daną z podwójną spacją, tabulatorem i twardą spacją (runda 2: spacje)', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const ta = page.locator('#input');
+    const T =
+      'Wniosek złożyła Zenobia Trzmielewska-Bór, zam. w gminie.\nPełnomocnik Zenobia  Trzmielewska-Bór podpisała.\n' +
+      'Kopia dla Zenobia\u00A0Trzmielewska-Bór.\nOdbiór: Zenobia\tTrzmielewska-Bór.';
+    await ta.click();
+    await page.keyboard.insertText(T);
+    await app.waitForOutput('Odbiór');
+    assert.equal(await ta.inputValue(), T, 'pole źródła nie przyjęło twardej spacji albo tabulatora');
+    const n = await maskAllFromSource(page, 'Zenobia Trzmielewska-Bór', 'IMIĘ I NAZWISKO');
+    assert.match(n, /4 miejsca/);
+    await settled(page);
+    await assertHidden(page, 'Trzmielewska', 'drugi zapis tej samej osoby');
+    // osiedle z podwójną spacją w tym samym piśmie
+    await pasteOver(page, 'Wniosek dotyczy osiedla Zielone Wzgórze.\nMieszkańcy osiedla Zielone Wzgórze oraz Zielone  Wzgórze piszą.');
+    await app.waitForOutput('Mieszkańcy');
+    await maskAllFromSource(page, 'Zielone Wzgórze', 'DANE');
+    await settled(page);
+    await assertHidden(page, 'Wzgórze', 'osiedle z podwójną spacją');
+  });
+});
+
+test('osoba „wszędzie” zasłania odmienione nazwisko całym wyrazem, bez jawnej końcówki (runda 2: odmiana)', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const T = 'Notatka służbowa.\nŚwiadek Trzmielak zeznał krótko.\nDokument Trzmielaka oraz pismo Trzmielakowi doręczono.\nKoniec.';
+    await page.locator('#input').click();
+    await page.keyboard.insertText(T);
+    await app.waitForOutput('Koniec');
+    await maskAllFromSource(page, 'Trzmielak', 'IMIĘ I NAZWISKO');
+    await settled(page);
+    assert.ok(
+      (await outText(page)).includes('Dokument [IMIĘ I NAZWISKO] oraz pismo [IMIĘ I NAZWISKO] doręczono.'),
+      `jawna końcówka nazwiska:\n${await outText(page)}`,
+    );
+    await assertHidden(page, 'Trzmielak', 'odmienione nazwisko');
+  });
+});
+
+test('reguła „wszędzie” bez miejsca nie ogłasza drugi raz starego „cofnięto N” (runda 2: komunikat)', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const T = 'Wniosek dotyczy działki. Kod: Trzmielowa-Zagroda-77QX. Pan Sławomir Kędzierski, PESEL 44051401359.';
+    const ta = page.locator('#input');
+    const status = () => page.locator('#sr-status').textContent().then((s) => s ?? '');
+    await ta.click();
+    await page.keyboard.insertText(T);
+    await app.waitForOutput('[PESEL]');
+    await maskAllFromSource(page, 'Zagroda', 'DANE');
+    await app.waitForOutput('[DANE]');
+    await page.locator('#output mark.pii', { hasText: '[PESEL]' }).first().click();
+    await page.locator('#fix-keep').click();
+    await app.waitForOutput('44051401359');
+    // dopisek zdejmuje „Zostaw jawne”: jeden komunikat z „cofnięto 1”
+    await ta.focus();
+    await page.keyboard.press('ControlOrMeta+End');
+    await page.keyboard.insertText(' x');
+    await settled(page);
+    await page.waitForTimeout(100);
+    assert.match(await status(), /cofnięto 1/);
+    // literówka w zasłoniętym ciągu dwa razy tam i z powrotem: tylko notka o 0 miejsc
+    const r = T.indexOf('Zagroda') + 3;
+    for (let k = 0; k < 2; k++) {
+      await selectInSource(page, r, r + 1);
+      await page.keyboard.insertText('x');
+      await settled(page);
+      await page.waitForTimeout(100);
+      const s = await status();
+      assert.match(s, /0 miejsc/);
+      assert.doesNotMatch(s, /cofnięto/, `stare „cofnięto” ogłoszone ponownie: ${s}`);
+      await selectInSource(page, r, r + 1);
+      await page.keyboard.insertText('r');
+      await settled(page);
+      await assertHidden(page, 'Zagroda', 'reguła po powrocie tekstu');
+    }
+  });
+});
+
+test('Ctrl+Z w pustym polu karty nie cofa wpisu z innego pola karty (runda 2: karta)', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    await page.locator('#input').click();
+    await page.keyboard.insertText(DECYZJA);
+    await app.waitForOutput('[PESEL]');
+    await openCard(page);
+    await page.locator('#pub-zatw').fill('Jan Zając');
+    await page.locator('#pub-organ').focus();
+    for (let i = 0; i < 2; i++) {
+      await page.keyboard.press('ControlOrMeta+z');
+      await page.waitForTimeout(80);
+    }
+    assert.equal(await page.locator('#pub-zatw').inputValue(), 'Jan Zając', 'Ctrl+Z w polu „Organ” wyczyścił „Zatwierdził(a)”');
+    assert.equal(await page.locator('#input').inputValue(), DECYZJA, 'Ctrl+Z w karcie zmienił pole źródła');
+    // w samym polu „Zatwierdził(a)” Ctrl+Z dalej działa
+    await page.locator('#pub-zatw').focus();
+    await page.keyboard.press('ControlOrMeta+z');
+    await page.waitForTimeout(80);
+    assert.equal(await page.locator('#pub-zatw').inputValue(), '');
+  });
+});

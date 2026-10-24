@@ -920,6 +920,9 @@ if (srcHead && outHead && 'ResizeObserver' in window) {
 fixSelOut.setAttribute('aria-describedby', tipDescId(fixSelOut.dataset.tip ?? ''));
 let barOpen = false;
 let dropNote = ''; // komunikat o poprawkach zdjętych po zmianie pisma (sourceEdited)
+// Komunikat ogłoszony przy tej właśnie zmianie pisma; przy następnej zmianie bez zdjętych poprawek
+// jest pusty, żeby stare „cofnięto N” nie padało drugi raz razem z notką o 0 miejscach.
+let dropAnnounced = '';
 let formRanges: [number, number][] = [];
 let formText = '';
 let formInput = ''; // tekst źródła z chwili otwarcia wiersza: formRanges to pozycje w nim
@@ -1131,7 +1134,14 @@ document.addEventListener('keydown', (e) => {
 // albo Ctrl+Y w polu źródła trafia na wpis w innym polu (np. „Znak sprawy”), krok przechodzi, ale
 // pole wraca do swojej wartości, a fokus do pola źródła: skrót w polu źródła nie zmienia karty
 // (inaczej Ctrl+Y po wyzerowaniu karty dopisywał znak sprawy drugi raz). Urzędnik dostaje komunikat.
+// Skrót w jednym polu karty nie zmienia innego pola karty (pusty „Organ” cofałby wpis z pola
+// „Zatwierdził(a)”): taki krok też blokujemy i zostaje do Ctrl+Z w polu, którego dotyczy.
 let historyKeyTarget: EventTarget | null = null;
+/** Nazwa pola z jego etykiety, bez dopisku „opcjonalnie”. */
+function fieldName(el: EventTarget | null): string | undefined {
+  const label = el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement ? el.labels?.[0] : undefined;
+  return (label?.querySelector(':scope > span') ?? label)?.firstChild?.textContent?.trim() || undefined;
+}
 let keepField: { el: HTMLInputElement | HTMLTextAreaElement; value: string } | null = null;
 document.addEventListener(
   'keydown',
@@ -1155,11 +1165,20 @@ document.addEventListener(
       return;
     }
     const field = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement ? e.target : null;
-    if (from !== input || !field) return;
-    keepField = { el: field, value: field.value };
-    const label = field.labels?.[0];
-    const name = (label?.querySelector(':scope > span') ?? label)?.firstChild?.textContent?.trim();
+    if (!field) return;
     const what = e.inputType === 'historyUndo' ? 'cofnąć' : 'ponowić';
+    if (from !== input) {
+      e.preventDefault();
+      const own = fieldName(from);
+      const other = fieldName(field);
+      announce(
+        `Skrót ${own ? `w polu „${own}”` : 'w tym polu'} nie zmienia innych pól. ` +
+          `Ostatnią zmianę ${other ? `w polu „${other}”` : 'w innym polu'} możesz ${what} w tamtym polu.`,
+      );
+      return;
+    }
+    keepField = { el: field, value: field.value };
+    const name = fieldName(field);
     const where = name ? `w polu „${name}”, które zostaje` : 'w karcie pisma, która zostaje';
     announce(`Skrót trafił na wpis ${where} bez zmian. Naciśnij go jeszcze raz, żeby ${what} zmianę w tekście źródłowym.`);
   },
@@ -1188,6 +1207,7 @@ document.addEventListener(
  */
 function sourceEdited(): boolean {
   undoSteps = [];
+  dropAnnounced = '';
   const { decisions: rules, dropped } = afterSourceEdit(decisions);
   if (!dropped) return false;
   decisions = rules;
@@ -1200,7 +1220,8 @@ function sourceEdited(): boolean {
     closeForm(false);
     parts.push('Zaznacz fragment jeszcze raz.');
   }
-  announce(parts.join(' '));
+  dropAnnounced = parts.join(' ');
+  announce(dropAnnounced);
   return true;
 }
 
@@ -1628,7 +1649,9 @@ function renderResult(redacted: string, found: PiiFinding[]): void {
   syncPrintOut();
   syncFix();
   // Reguła „wszędzie” straciła ostatnie miejsce: komunikat raz, przy zmianie, a notka zostaje.
-  if (rulesWithoutPlace(lastInput, decisions) > zeroBefore) announce(fixNoteText());
+  // Ten sam komunikat aria-live co przy zdjęciu poprawek, gdy zdarzyło się przy tej samej zmianie.
+  if (rulesWithoutPlace(lastInput, decisions) > zeroBefore) announce([dropAnnounced, zeroRulesNote()].filter(Boolean).join(' '));
+  dropAnnounced = '';
 }
 
 // Debounce: przy szybkim pisaniu nie odpalaj pełnego pipeline'u (26 przebiegów + przerender)

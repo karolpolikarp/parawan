@@ -77,6 +77,8 @@ const DOCS = [
   'Skarga z dnia 3 maja 2024 r.\nSkarżący Jan Kowalski, zam. ul. Lipowa 5, 00-950 Warszawa, PESEL 44051401359, wnosi o rozpatrzenie sprawy.\nSkarżący Jan Kowalski wskazuje, że czeka na odpowiedź urzędu.',
 ];
 const DOC_NAMES = ['A1', 'A2', 'B', 'C', 'C2'];
+/** Pola karty pisma (A08), w których fuzzer pisze i naciska Ctrl+Z. */
+const CARD = { znak: '#pub-znak', organ: '#pub-organ', zatw: '#pub-zatw', adnotacja: '#pub-adnotacja' };
 const TYPED = [' uwaga ', ' por. ', ' i ', ' zob. akta '];
 
 /*
@@ -144,6 +146,8 @@ const REGRESSIONS = [
   [{ a: 'wklej', doc: 2 }, { a: 'znacznik', at: 0.2, co: 'tu' }, { a: 'pisz', at: 0.9, s: ' uwaga ' }, { a: 'cofnijPole' }],
   // Ctrl+Z w polach karty działa tylko na nich
   [{ a: 'wklej', doc: 0 }, { a: 'karta' }, { a: 'wklej', doc: 3 }, { a: 'karta' }, { a: 'cofnijKarta', n: 3, pole: 'organ' }, { a: 'cofnijKarta', n: 3, pole: 'znak' }],
+  // Ctrl+Z w pustym polu karty cofał w Chromium wpis z innego pola karty (runda 2)
+  [{ a: 'wklej', doc: 0 }, { a: 'kartaPole', pole: 'zatw', v: 'Jan Zając' }, { a: 'cofnijKarta', n: 2, pole: 'organ' }],
 ];
 
 /* ── Generator z ziarnem ── */
@@ -184,6 +188,7 @@ const WEIGHTS = [
   ['ponowPoleS', 1],
   ['karta', 2],
   ['cofnijKarta', 2],
+  ['kartaPole', 1],
   ['srodek', 3],
   ['enter', 2],
   ['dwuklik', 2],
@@ -218,7 +223,9 @@ function generate(seed, len = STEPS) {
       case 'cofnijPoleN':
         return { a, n: 2 + pick(3) };
       case 'cofnijKarta':
-        return { a, n: 1 + pick(3), pole: ['znak', 'organ', 'adnotacja'][pick(3)] };
+        return { a, n: 1 + pick(3), pole: ['znak', 'organ', 'zatw', 'adnotacja'][pick(4)] };
+      case 'kartaPole':
+        return { a, pole: ['organ', 'zatw'][pick(2)], v: ['Jan Zając', 'Wójt Gminy Brzozowa Wola'][pick(2)] };
       case 'srodek':
         return { a, at: r(), pos: r(), s: ['x', 'a', ' ', '-'][pick(4)], zamien: r() < 0.5 };
       case 'enter':
@@ -272,6 +279,8 @@ function describe(s) {
       return `Ctrl+Z w polu ×${s.n}`;
     case 'cofnijKarta':
       return `Ctrl+Z w polu karty „${s.pole ?? 'znak'}” ×${s.n}`;
+    case 'kartaPole':
+      return `wpisz „${s.v}” w pole karty „${s.pole}”`;
     case 'srodek':
       return `${s.zamien ? 'zamień znak' : 'wpisz'} „${s.s}” w środku zakresu pod znacznikiem @${f2(s.at)}/${f2(s.pos)}`;
     case 'enter':
@@ -765,14 +774,33 @@ async function perform(page, step, browserName) {
       return 'source';
     }
     case 'cofnijKarta': {
-      const sel = { znak: '#pub-znak', organ: '#pub-organ', adnotacja: '#pub-adnotacja' }[step.pole ?? 'znak'];
+      const sel = CARD[step.pole ?? 'znak'];
       if (!(await visible(page, sel))) return null;
+      // Ctrl+Z w jednym polu karty nie zmienia pozostałych (Chromium ma jedną historię na kartę).
+      // Adnotację pomijamy: jej wzór słusznie idzie za cofniętym polem.
+      const others = Object.entries(CARD).filter(([p, s]) => s !== sel && p !== 'adnotacja');
+      const before = await Promise.all(others.map(([, s]) => page.locator(s).inputValue()));
       for (let k = 0; k < step.n; k++) {
         await page.locator(sel).focus();
         await page.keyboard.press('ControlOrMeta+z');
         await page.waitForTimeout(80);
       }
+      const after = await Promise.all(others.map(([, s]) => page.locator(s).inputValue()));
+      step._err = others.flatMap(([p], k) =>
+        after[k] === before[k] ? [] : [`karta: Ctrl+Z w polu „${step.pole ?? 'znak'}” zmienił pole „${p}” z „${before[k]}” na „${after[k]}”`],
+      );
       return 'karta-cofnij';
+    }
+    case 'kartaPole': {
+      const ok = await page.evaluate(() => {
+        const d = document.getElementById('publikacja');
+        if (!d || d.hidden) return false;
+        d.open = true;
+        return true;
+      });
+      if (!ok || !(await visible(page, CARD[step.pole]))) return null;
+      await page.locator(CARD[step.pole]).fill(step.v);
+      return 'karta';
     }
     case 'ponowPoleS':
       await ta.focus();
@@ -941,7 +969,7 @@ const listedRules = (page) =>
   });
 
 const RESETS = new Set(['wyczysc', 'cofnijPasek']);
-const OUTSIDE = new Set(['cofnijWynik', 'ponowWynik', 'ponowWynikS', 'paskiemZ', 'cofnijOstatnia', 'usunPoprawki', 'karta', 'cofnijKarta']);
+const OUTSIDE = new Set(['cofnijWynik', 'ponowWynik', 'ponowWynikS', 'paskiemZ', 'cofnijOstatnia', 'usunPoprawki', 'karta', 'kartaPole', 'cofnijKarta']);
 const FIELD_HISTORY = new Set(['cofnijPole', 'ponowPole', 'cofnijPoleN', 'ponowPoleS']);
 
 /**
@@ -998,7 +1026,8 @@ async function runSequence(browser, browserName, steps, { clean = false } = {}) 
       const resetStep = !!kind && RESETS.has(step.a);
       const seq = [src, ...(step._mids ?? []), next];
       const changed = seq.some((t, k) => k > 0 && t !== seq[k - 1]);
-      const outs = await channels(page); if (process.env.DBG) console.log("DBG", JSON.stringify(outs[0]?.[1]));
+      const outs = await channels(page);
+      if (step._err?.length) errors.push(...step._err);
       const result = outs[0]?.[1] ?? null;
       const cov1 = result === null ? new Uint8Array(next.length) : coverage(next, result);
       if (changed || resetStep) model.sourceChanged();

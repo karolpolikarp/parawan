@@ -105,17 +105,19 @@ const escapeRe = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 /**
  * Wystąpienia tekstu reguły „Zasłoń wszędzie”: dokładny ciąg bez wielkości liter, także w środku
- * dłuższego wyrazu („KR1P/00012345/9a”) i nachodzące na siebie. Odstępy muszą być takie same jak
- * w regule, więc ciąg rozdzielony enterem przestaje być wystąpieniem (znacznik nie przechodzi
- * przez koniec wiersza). Osoba zapisana wielką literą łapie tylko zapis wielką literą („malec”
- * w zdaniu to nie nazwisko „Malec”). Jednowyrazowa osoba łapie też formy o tym samym kluczu
- * nazwiska pisane wielką literą („Anną” łapie „Anny”).
+ * dłuższego wyrazu („KR1P/00012345/9a”) i nachodzące na siebie. Odstęp w regule łapie dowolny
+ * odstęp w wierszu: podwójną spację, tabulator i twardą spację (U+00A0) z Worda. Ciąg rozdzielony
+ * enterem nie jest wystąpieniem (znacznik nie przechodzi przez koniec wiersza). Osoba zapisana
+ * wielką literą łapie tylko zapis wielką literą („malec” w zdaniu to nie nazwisko „Malec”).
+ * Jednowyrazowa osoba łapie też formy o tym samym kluczu nazwiska pisane wielką literą („Anną”
+ * łapie „Anny”), zawsze całym wyrazem: dosłowne „Trzmielak” w „Trzmielakowi” zostawiłoby jawną
+ * końcówkę.
  */
 export function findOccurrences(original: string, text: string, token: string): [number, number][] {
   const needle = text.trim();
   if (!needle) return [];
   const found = new Map<number, number>();
-  const re = new RegExp(escapeRe(needle), 'giu');
+  const re = new RegExp(needle.split(/[^\S\r\n]+/).map(escapeRe).join(String.raw`[^\S\r\n]+`), 'giu');
   for (let m = re.exec(original); m; m = re.exec(original)) {
     const a = m.index;
     re.lastIndex = a + 1;
@@ -128,7 +130,7 @@ export function findOccurrences(original: string, text: string, token: string): 
       const w = m[0];
       if (w.length >= 3 && startsUpper(w) && surnameKey(w.toLowerCase()) === key) {
         const a = m.index ?? 0;
-        if (!found.has(a)) found.set(a, a + w.length);
+        found.set(a, Math.max(found.get(a) ?? 0, a + w.length));
       }
     }
   }

@@ -200,6 +200,26 @@ describe('„Zasłoń zaznaczenie”', () => {
     expect(forms).not.toContain('malec');
   });
 
+  test('odstęp w regule łapie podwójną spację, tabulator i twardą spację, ale nie enter (runda 2)', () => {
+    const text =
+      'Wniosek złożyła Zenobia Trzmielewska-Bór, zam. w gminie.\nPełnomocnik Zenobia  Trzmielewska-Bór podpisała.\n' +
+      'Kopia dla Zenobia Trzmielewska-Bór.\nOdbiór: Zenobia\tTrzmielewska-Bór.\nKoniec: Zenobia\nTrzmielewska-Bór.';
+    expect(findOccurrences(text, 'Zenobia Trzmielewska-Bór', 'IMIĘ I NAZWISKO')).toHaveLength(4);
+    const t2 = 'Wniosek dotyczy osiedla Zielone Wzgórze.\nMieszkańcy osiedla Zielone Wzgórze oraz Zielone  Wzgórze piszą.';
+    const out = final(t2, [], [{ kind: 'mask', scope: 'all', text: 'Zielone Wzgórze', token: 'DANE' }]);
+    expect(out).not.toContain('Zielone');
+    // twarda spacja w samej regule pasuje do zwykłej spacji w piśmie
+    expect(findOccurrences('ul. Lipowa 5', 'ul. Lipowa', 'DANE')).toEqual([[0, 10]]);
+  });
+
+  test('osoba „wszędzie” zasłania odmienione nazwisko całym wyrazem, bez jawnej końcówki (runda 2)', () => {
+    const text = 'Notatka służbowa.\nŚwiadek Trzmielak zeznał krótko.\nDokument Trzmielaka oraz pismo Trzmielakowi doręczono.\nKoniec.';
+    const forms = findOccurrences(text, 'Trzmielak', 'IMIĘ I NAZWISKO').map(([a, b]) => text.slice(a, b));
+    expect(forms).toEqual(['Trzmielak', 'Trzmielaka', 'Trzmielakowi']);
+    const out = final(text, [], [{ kind: 'mask', scope: 'all', text: 'Trzmielak', token: 'IMIĘ I NAZWISKO' }]);
+    expect(out).toContain('Dokument [IMIĘ I NAZWISKO] oraz pismo [IMIĘ I NAZWISKO] doręczono.');
+  });
+
   test('„z żoną Anną”: [IMIĘ I NAZWISKO] wszędzie, „Annasz” bez „Anną” zostaje', () => {
     const text = 'Przyszedł z żoną Anną. Pani Annasz czekała. Anną zajmie się sekretariat.';
     const out = final(text, [], [{ kind: 'mask', scope: 'all', text: 'Anną', token: 'IMIĘ I NAZWISKO' }]);
