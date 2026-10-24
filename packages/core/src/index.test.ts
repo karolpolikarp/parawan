@@ -7630,3 +7630,65 @@ test('dom2-fix2: ulica „Jana Pawła II" pod etykietą WERSALIKAMI, w kluczu z 
     expect(r.split('[ADRES]').length - 1, t).toBe(t.includes('ul. Wiejska') ? 1 : 0);
   }
 });
+
+test('dom2-fix3: ulica „Jana Pawła II" z numerem w wierszu z rolą, bez lokalu, po etykiecie WERSALIKAMI i z myślnikiem; osoba z ułamkiem właściwym w wykazie', () => {
+  const M = '[MIEJSCOWOŚĆ]';
+  masked([
+    // rola w innej komórce wiersza nie wyłącza adresu
+    ['Współwłaściciel;Adam Nowak;Jana Pawła II 5/2;Kraków', `Współwłaściciel;${N};[ADRES];${M}`],
+    ['Spadkobierca\tAdam Nowak\tJana Pawła II 5/2\tLubień', `Spadkobierca\t${N}\t[ADRES]\tLubień`],
+    ['"Nagroda";"Adam Nowak";"Jana Pawła II 5/2";"Kraków"', `"Nagroda";"${N}";"[ADRES]";"Kraków"`],
+    // numer bez lokalu w CSV
+    ['Halyna Roman,hroman,,Jana Pawła II 5,Lubień', 'Halyna Roman,hroman,,[ADRES],Lubień'],
+    ['"Halyna Roman";"hroman";"";"Jana Pawła II 5";"Lubień"', '"Halyna Roman";"hroman";"";"[ADRES]";"Lubień"'],
+    ['Halyna Roman,hroman,,Jana Pawła II 5a,Lubień', 'Halyna Roman,hroman,,[ADRES],Lubień'],
+    ['Halyna Roman, hroman, , Jana Pawła II 5/2, Lubień', 'Halyna Roman, hroman, , [ADRES], Lubień'],
+    // miejscowość przed ulicą: bez lokalu, dwuwyrazowa, WERSALIKAMI, po osobie, z kodem w nawiasie
+    ['Lubień, Jana Pawła II 30', 'Lubień, [ADRES]'],
+    ['Nowy Targ, Jana Pawła II 30/2', `${M}, [ADRES]`],
+    ['KRAKÓW, Jana Pawła II 30/2', 'KRAKÓW, [ADRES]'],
+    ['Anna Nowak, Lubień, Jana Pawła II 5/2', `${N}, Lubień, [ADRES]`],
+    ['zamieszkała w Lubniu (34-500), Jana Pawła II 30/2', 'zamieszkała w Lubniu ([KOD-POCZTOWY]), [ADRES]'],
+    ['Kraków, Jana Pawła II 30/2 - lokal powódki.', `${M}, [ADRES] - lokal powódki.`],
+    ['Halina Rój, Kraków, Jana Pawła II 14/3 (parter)', `${N}, ${M}, [ADRES] (parter)`],
+    // koperta i stopka: bez miejscowości pod ulicą, adresat WERSALIKAMI
+    ['Jan Nowak\nJana Pawła II 5/2', `${N}\n[ADRES]`],
+    ['Anna Nowak\nJana Pawła II 5/2\ntel. 601 234 567', `${N}\n[ADRES]\ntel. [TELEFON]`],
+    ['JAN KOWALSKI\nJana Pawła II 5/2\nLubień', `${N}\n[ADRES]\nLubień`],
+    // etykiety bez kropki, z myślnikiem, WERSALIKAMI i z imiesłowem
+    ['ZAM: Jana Pawła II 5/2', 'ZAM: [ADRES]'],
+    ['Zamieszkały - Jana Pawła II 5/2', 'Zamieszkały - [ADRES]'],
+    ['Adres do doręczeń - Jana Pawła II 5/2', 'Adres do doręczeń - [ADRES]'],
+    ['Doręczyć: Jana Pawła II 5/2', 'Doręczyć: [ADRES]'],
+    ['LOKAL POŁOŻONY PRZY Jana Pawła II 5/2', 'LOKAL POŁOŻONY PRZY [ADRES]'],
+    ['ZNAJDUJĄCEJ SIĘ PRZY Jana Pawła II 5/2', 'ZNAJDUJĄCEJ SIĘ PRZY [ADRES]'],
+    ['PRZY Jana Pawła II 5/2', 'PRZY [ADRES]'],
+    ['POD ADRESEM Jana Pawła II 5/2', 'POD ADRESEM [ADRES]'],
+    ['mieszkająca w Lubniu, Jana Pawła II 30/2', 'mieszkająca w Lubniu, [ADRES]'],
+    // osoba z ułamkiem właściwym (udział, ocena, wynik) zostaje osobą, liczba i miejscowość zostają
+    ['Spadkobiercy:\nKraków, Adama Nowaka 1/2\nLublin, Ewy Nowak 1/2', `Spadkobiercy:\nKraków, ${N} 1/2\nLublin, ${N} 1/2`],
+    ['PROTOKÓŁ GŁOSOWANIA\nKraków, Jana Kowalskiego 12\nRadom, Anny Nowak 7', `PROTOKÓŁ GŁOSOWANIA\nKraków, ${N} 12\nRadom, ${N} 7`],
+    ['Wyniki egzaminu\nRadom, Jana Kochanowskiego 3/5', `Wyniki egzaminu\nRadom, ${N} 3/5`],
+    ['Udział;Miasto\nJana Kowalskiego 1/2;Kraków', `Udział;Miasto\n${N} 1/2;Kraków`],
+    ['Lp,Uczeń,Ocena,Miejscowość\n1,Jana Nowaka 4/5,Kraków', `Lp,Uczeń,Ocena,Miejscowość\n1,${N} 4/5,Kraków`],
+    ['okręg,kandydat,wynik,miasto\n3,Tomasza Mazura 12/40,Kraków', `okręg,kandydat,wynik,miasto\n3,${N} 12/40,Kraków`],
+    ['"Anny Kowalskiej 1/2","Kraków"', `"${N} 1/2","Kraków"`],
+  ]);
+  for (const t of ['Współwłaściciel;Adam Nowak;Jana Pawła II 5/2;Kraków', 'Anna Nowak\nJana Pawła II 5/2\ntel. 601 234 567', 'LOKAL POŁOŻONY PRZY Jana Pawła II 5/2']) {
+    expect(redactPII(t, { pseudonyms: true }).redacted).toContain('[ADRES]');
+  }
+  // pułapki: papież i jego pisma, rok, zakres, instytucja, dalszy ciąg zdania
+  keep([
+    'Encyklika Jana Pawła II 3.',
+    'rozdz. Jana Pawła II 4, s. 12',
+    'Zob. przemówienia Jana Pawła II 5-7.',
+    'w latach Jana Pawła II 1978-2005',
+    'Homilia Jana Pawła II 2 czerwca 1979 r.',
+    'Nagroda Jana Pawła II 2023.',
+    'Fundacja Jana Pawła II 5, Rzym',
+    'Kościół Jana Pawła II 2',
+    'Na Jana Pawła II 5 mieszka Jan.',
+    'ipAddress="Jana Pawła II 5/2"',
+    'Urząd Gminy, Jana Pawła II 5/2, Lubień',
+  ]);
+});

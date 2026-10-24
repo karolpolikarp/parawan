@@ -5377,6 +5377,21 @@ const RE_PATRON_STREET_NO_LOOSE = new RegExp(
   String.raw`${PATRON_STREET_SRC}(?=[ \t]+\p{Ll})(?![ \t]+(?:stycznia|lutego|marca|kwietnia|maja|czerwca|lipca|sierpnia|września|października|listopada|grudnia|r\.|roku|lat|lata|zł|osób|os\.)(?!\p{L}))`,
   'gu',
 );
+// Patron z liczbą rzymską i numerem domu („Jana Pawła II 5/2", „Jana Pawła II 30") to nazwa ulicy:
+// żywa osoba nie nosi liczby rzymskiej, a papież nie ma numeru domu. Od kiedy „Jana Pawła" przestało
+// być parą osoby, taka ulica bez kotwicy adresu zostawała jawna w całości (wiersz CSV z rolą
+// „Współwłaściciel", koperta z telefonem pod ulicą, „Nowy Targ, …", „KRAKÓW, …", myślnik
+// albo nawias za numerem). Za numerem koniec wiersza albo zdania, separator albo „w Mieście" — nie
+// dalszy ciąg zdania („Na Jana Pawła II 5 mieszka Jan", „pontyfikat Jana Pawła II 26 lat").
+const RE_PATRON_STREET_ROMAN = new RegExp(
+  PATRON_STREET_HEAD_SRC.replace(String.raw`(?:[ \t]+[IVX]{1,4})?`, String.raw`[ \t]+[IVX]{1,4}`) +
+    PATRON_STREET_NUM_SRC +
+    String.raw`(?![\p{L}\p{N}/])(?=[ \t]*(?:[,;:)(\-–—"]|\.(?!\d)|\r?\n|$)|[ \t]+we?[ \t]+\p{Lu})`,
+  'gu',
+);
+// Pismo albo odsyłacz tuż przed patronem z liczbą rzymską („Encyklika Jana Pawła II 3.") — patrz street().
+const RE_PATRON_ROMAN_REF_BEFORE =
+  /(?<!\p{L})(?:encyklik\p{L}*|adhortacj\p{L}*|homili\p{L}*|przemówie\p{L}*|katechez\p{L}*|nauczani\p{L}*|pism\p{L}*|dzieł\p{L}*|list\p{L}*|pielgrzymk\p{L}*|pontyfikat\p{L}*|rozdz\p{L}*|tom\p{L}*|t|s|str|poz|art|pkt|nr|cyt|zob|por)\.?[ \t]+$/iu;
 const RE_PATRON_STREET_TITLE_HEAD = new RegExp(String.raw`^(?:${PATRON_STREET_TITLES})[ \t]`, 'u');
 // Numer lokalu w dopasowaniu („Tomasza Mazura 12/3", „… 12 m. 3") — kształt adresu sam w sobie.
 // Rok po ukośniku („12/2020") to sygnatura albo numer pisma.
@@ -5385,21 +5400,28 @@ const RE_PATRON_STREET_TITLE_HEAD = new RegExp(String.raw`^(?:${PATRON_STREET_TI
 // i „lok." wskazują go zawsze.
 const RE_PATRON_STREET_FLAT = /[ \t]\d{1,4}[a-zA-Z]?[ \t]*(?:m\.|lok\.)[ \t]*\d{1,3}[a-zA-Z]?$/;
 const RE_PATRON_STREET_SLASH = /[ \t]\d{1,4}[a-zA-Z]?\/(?!(?:19|20)\d\d(?!\d))\d{1,4}[a-zA-Z]?$/;
+// Lokal „m./lok." albo ułamek niewłaściwy („30/2", „14/3") — udział, ocena czy wynik osoby to
+// ułamek właściwy („1/2", „4/5", „12/40"), więc numerator większy od mianownika to numer lokalu.
+function patronStreetFlatNo(m: string): boolean {
+  if (RE_PATRON_STREET_FLAT.test(m)) return true;
+  const f = /[ \t](\d{1,4})[a-zA-Z]?\/(\d{1,4})[a-zA-Z]?$/.exec(m);
+  return !!f && RE_PATRON_STREET_SLASH.test(m) && +f[1] > +f[2];
+}
 // Etykieta adresu albo zamieszkania tuż przed ulicą („Adres: Jana Pawła II 5", „zamieszkały przy
 // Kazimierza Wielkiego 5 w Zalesiu") sama wskazuje adres — bez niej ulica zostawała jawna.
 // Rdzenie zamiast wyliczonych końcówek („zamieszkałą przy", „zamieszkuje przy", „położony przy",
 // „usytuowany przy", „znajdującej się przy") i „pod adresem".
 const RE_PATRON_STREET_RESIDENCE =
-  /(?<!\p{L})(?:[Zz]am\.|ZAM\.|(?:[Zz]a)?[Mm]ieszk\p{L}*|(?:ZA)?MIESZK\p{Lu}*|[Zz]ameldowan\p{L}*|ZAMELDOWAN\p{Lu}*|[Pp]ołożon\p{L}*|[Uu]sytuowan\p{L}*|[Zz]najduj\p{L}*(?:[ \t]+się)?)(?:[ \t]*:)?(?:[ \t]+(?:przy|PRZY))?[ \t]*$|(?<!\p{L})[Pp]od[ \t]+adresem[ \t]*:?[ \t]*$|(?<!\p{L})(?:[Zz]a)?[Mm]ieszk(?:a|am|asz|amy|acie|ają|ał\p{L}*|uj\p{L}*)[ \t]+na[ \t]+$|(?<!\p{L})(?:(?:[Zz]a|ZA)?(?:[Mm]ieszk(?:a|am|ają|ał\p{L}*|uj\p{L}*)|MIESZK(?:A|AM|AJĄ|AŁ\p{Lu}*|UJ\p{Lu}*))|[Zz]amieszk\p{L}*|ZAMIESZK\p{Lu}*|[Zz]am\.|ZAM\.)[ \t]+(?:we?|WE?)[ \t]+\p{Lu}\p{L}+(?:[ \t-]\p{Lu}\p{L}+)?[ \t]*,[ \t]*$/u;
+  /(?<!\p{L})(?:[Zz]am(?:\.|(?=[ \t]*:))|ZAM(?:\.|(?=[ \t]*:))|(?:[Zz]a)?[Mm]ieszk\p{L}*|(?:ZA)?MIESZK\p{Lu}*|[Zz]ameldowan\p{L}*|ZAMELDOWAN\p{Lu}*|[Pp]ołożon\p{L}*|POŁOŻON\p{Lu}*|[Uu]sytuowan\p{L}*|USYTUOWAN\p{Lu}*|[Zz]najduj\p{L}*(?:[ \t]+się)?|ZNAJDUJ\p{Lu}*(?:[ \t]+SIĘ)?)(?:[ \t]*:|[ \t]+[-–—])?(?:[ \t]+(?:przy|PRZY))?[ \t]*$|(?<!\p{L})(?:[Pp]od[ \t]+adresem|POD[ \t]+ADRESEM)[ \t]*:?[ \t]*$|(?<!\p{L})(?:[Zz]a)?[Mm]ieszk(?:a|am|asz|amy|acie|ają|ał\p{L}*|uj\p{L}*)[ \t]+na[ \t]+$|(?<!\p{L})(?:(?:[Zz]a|ZA)?(?:[Mm]ieszk(?:a|am|ają|ając\p{L}*|ał\p{L}*|uj\p{L}*)|MIESZK(?:A|AM|AJĄ|AJĄC\p{Lu}*|AŁ\p{Lu}*|UJ\p{Lu}*))|[Zz]amieszk\p{L}*|ZAMIESZK\p{Lu}*|[Zz]am\.|ZAM\.)[ \t]+(?:we?|WE?)[ \t]+\p{Lu}\p{L}+(?:[ \t-]\p{Lu}\p{L}+)?[ \t]*,[ \t]*$/u;
 // Przedostatnia alternatywa: „mieszka na Jana Pawła II 30/2" — tylko czasownik i imiesłów, bo
 // „mieszkanie na Jana Kowalskiego 1/2" to przepisanie udziału na osobę, nie adres. Ostatnia:
 // miejscowość po „zamieszkały w" i przecinek przed ulicą („zamieszkały w Lubniu, Jana Pawła II
 // 30/2"). Etykiety także WERSALIKAMI („ZAM.", „ZAMIESZKAŁY:") — w nagłówkach pism i protokołach
 // ulica z patronem zostawała jawna.
-// Etykieta także WERSALIKAMI („ADRES DO DORĘCZEŃ:"), z numerem pola („Adres 2:") i sama
-// „Korespondencja:".
+// Etykieta także WERSALIKAMI („ADRES DO DORĘCZEŃ:"), z numerem pola („Adres 2:"), z myślnikiem
+// zamiast dwukropka („Adres do doręczeń - ") i sama „Korespondencja:" albo „Doręczyć:".
 const RE_PATRON_STREET_LABEL =
-  /(?<!\p{L})(?:(?:[Aa]dres\p{L}*|ADRES\p{Lu}*|[Kk]orespondencj\p{Ll}*|KORESPONDENCJ\p{Lu}*)(?:[ \t]+(?:\p{Ll}+|\p{Lu}+|\d{1,2})){0,3}[ \t]*:)[ \t]*$/u;
+  /(?<!\p{L})(?:(?:[Aa]dres\p{L}*|ADRES\p{Lu}*|[Kk]orespondencj\p{Ll}*|KORESPONDENCJ\p{Lu}*|[Dd]oręczyć|DORĘCZYĆ)(?:[ \t]+(?:\p{Ll}+|\p{Lu}+|\d{1,2})){0,3}(?:[ \t]*:|[ \t]+[-–—]))[ \t]*$/u;
 // Klucz adresu w logu albo JSON-ie tuż przed wartością, z miejscowością przed ulicą w tej samej
 // wartości („street="Jana Pawła II 5/2"", „adres=Jana Pawła II 5/2", „"partyAddress":"Lubień, Jana
 // Pawła II 30/2""). Pod kluczem spoza STRUCT_KEYS („partyAddress") i w zapisie klucz=wartość
@@ -5419,20 +5441,20 @@ const patronStreetKeyBefore = (before: string): boolean => {
 // Goły przecinek bez odstępu za nim („Halyna Roman,hroman,,Jana Pawła II 5/2,Lubień") też, ale
 // tylko w wierszu, który wygląda na CSV: co najmniej dwa takie przecinki i żadnego „, " jak w prozie.
 // Za „miejscowość" uchodzi też komórka z kodem pocztowym (eksport AD/CRM: Street, PostalCode, City).
-// Wiersz z udziałem, oceną czy nagrodą („"Udział";"Adama Nowaka 1/2";"Kraków"",
-// „Współwłaściciel⇥Adama Nowaka 1/2⇥Kraków") to osoba z ułamkiem, nie adres — patrz RE_PATRON_CELL_NOT.
+// Osoba z udziałem, oceną czy wynikiem („"Udział";"Adama Nowaka 1/2";"Kraków"", „1,Jana Nowaka 4/5,
+// Kraków" pod nagłówkiem „Ocena") ma ułamek właściwy, więc nie przechodzi — patrz patronStreetFlatNo.
+// Rola w innej komórce wiersza („Współwłaściciel;Adam Nowak;…") niczego tu nie przesądza.
 const RE_PATRON_CELL_BEFORE = /(?:(?:^|[\r\n\t;,])"|[\t;]|^|[\r\n])$/;
 const RE_PATRON_CELL_AFTER = /^(?:"(?=[\t;,]|\r?\n|$)|(?=[\t;]))/;
 const RE_PATRON_CELL_PLACE = /^"?\p{Lu}\p{Ll}+(?:[ -]\p{Lu}\p{Ll}+)?"?$/u;
 const RE_PATRON_CELL_POSTAL = /^"?(?:\d{2}-\d{3}|\[KOD-POCZTOWY\])"?$/;
-// Komórka, która czyni z wiersza wykaz udziałów, ocen albo nagród, a nie książkę adresową.
+// Słowo udziału, oceny albo nagrody na miejscu miejscowości (patrz patronStreetCityLead).
 const RE_PATRON_CELL_NOT =
   /^(?:udzia\p{L}*|współwłaściciel\p{L}*|właściciel\p{L}*|spadk\p{L}*|nagrod\p{L}*|wyróżnieni\p{L}*|ocen\p{L}*|wynik\p{L}*|punkt\p{L}*|głos\p{L}*|stypend\p{L}*|część|części)$/iu;
 function patronStreetCell(before: string, tail: string): boolean {
   const lineStart = before.lastIndexOf('\n') + 1;
   const lineEnd = tail.search(/\r?\n|$/);
   const line = before.slice(lineStart) + '\u0000' + tail.slice(0, lineEnd);
-  if (line.split(/[\t;,]/).some((c) => RE_PATRON_CELL_NOT.test(c.replace(/["\u0000]/g, '').trim()))) return false;
   let pre = RE_PATRON_CELL_BEFORE.exec(before)?.[0];
   let post = RE_PATRON_CELL_AFTER.exec(tail)?.[0];
   if ((line.match(/,(?![ \t])/g)?.length ?? 0) >= 2 && !/,[ \t]/.test(line)) {
@@ -5460,14 +5482,17 @@ function patronStreetEnvelope(before: string, tail: string): boolean {
 // Miejscowość na początku wiersza i przecinek przed ulicą („Lubień, Jana Pawła II 30/2") — ze
 // słownika albo z numerem lokalu w ulicy; bez udziału, oceny czy imienia przed przecinkiem.
 const RE_PATRON_CITY_LEAD = /(?:^|[\r\n])[ \t]*(\p{Lu}\p{Ll}+(?:[ -]\p{Lu}\p{Ll}+)?)[ \t]*,[ \t]*$/u;
+// Bez liczby rzymskiej (tę rozstrzyga RE_PATRON_STREET_ROMAN) tylko z lokalem „m./lok." albo
+// z ułamkiem niewłaściwym („30/2"): „Lublin, Adama Nowaka 1/2" pod „Spadkobiercy:" i „Kraków,
+// Jana Kowalskiego 12" w protokole głosowania to osoba z udziałem albo liczbą głosów.
 function patronStreetCityLead(before: string, m: string): boolean {
   const c = RE_PATRON_CITY_LEAD.exec(before)?.[1];
   if (!c || isFirstNameLike(c.split(/[ -]/)[0]) || RE_PATRON_CELL_NOT.test(c)) return false;
-  return POLISH_CITIES.has(c.toLowerCase()) || RE_PATRON_STREET_SLASH.test(m) || RE_PATRON_STREET_FLAT.test(m);
+  return patronStreetFlatNo(m);
 }
 // Samo „przy" przed ulicą z numerem („Nieruchomość przy Tadeusza Kościuszki 5") — o ile przed nim
 // nie stoi instytucja („Urząd Gminy przy Jana Pawła II 5" to siedziba urzędu).
-const RE_PATRON_STREET_PRZY = /(?<!\p{L})przy[ \t]+$/u;
+const RE_PATRON_STREET_PRZY = /(?<!\p{L})(?:przy|PRZY)[ \t]+$/u;
 // Osoba, a za nią myślnik, średnik albo nawias z adresem („Anna Kowalska – Jana Pawła II 5",
 // „Jan Nowak (Jana Pawła II 5)").
 const RE_PATRON_STREET_PERSON_SEP = /[ \t]*(?:[–—;(]|[ \t]-)[ \t]*$/u;
@@ -5478,7 +5503,7 @@ function institutionBeforeAddr(before: string): boolean {
   const ws = before.replace(/[ \t]*,[ \t]*$/, '').split(/[ \t]+/).slice(-4);
   return ws.some((w) => {
     const l = w.toLowerCase().replace(/[^\p{L}]/gu, '');
-    return LEGAL_ENTITY_WORDS.has(l) || ORG_HEAD_WORDS.has(l) || /^(?:urzęd|starostw|szkol|szkoł|parafi|kości|sąd|komend|ośrod)/.test(l);
+    return (LEGAL_ENTITY_WORDS.has(l) && !ADDR_PLACE_ADJ_OK.has(l)) || ORG_HEAD_WORDS.has(l) || /^(?:urzęd|starostw|szkol|szkoł|parafi|kości|sąd|komend|ośrod)/.test(l);
   });
 }
 function patronStreetWithNumber(ctx: RedactCtx): void {
@@ -5486,7 +5511,7 @@ function patronStreetWithNumber(ctx: RedactCtx): void {
   const reEnum = new RegExp(String.raw`${escapeRe(ctx.M.ADRES)}[ \t]*(?:,|i|oraz)[ \t]+$`, 'u');
   // `mode`: „loose" — za numerem dalszy ciąg zdania małą literą; „ctx" — dowolny ciąg, ale tylko
   // po etykiecie adresu, zamieszkania albo „przy".
-  const street = (m: string, w1: string, wMid: string | undefined, w2: string, offset: number, t: string, mode: '' | 'loose' | 'ctx' = ''): string | null => {
+  const street = (m: string, w1: string, wMid: string | undefined, w2: string, offset: number, t: string, mode: '' | 'loose' | 'ctx' | 'roman' = ''): string | null => {
     const loose = mode !== '';
     const a = w1.toLowerCase();
     const b = w2.toLowerCase().split('-')[0];
@@ -5509,11 +5534,22 @@ function patronStreetWithNumber(ctx: RedactCtx): void {
       RE_PATRON_STREET_LABEL.test(before) ||
       RE_PATRON_STREET_RESIDENCE.test(before) ||
       patronStreetKeyBefore(before) ||
-      ((RE_PATRON_STREET_SLASH.test(m) || RE_PATRON_STREET_FLAT.test(m)) && patronStreetCell(before, t.slice(offset + m.length, offset + m.length + 50))) ||
+      (patronStreetFlatNo(m) && patronStreetCell(before, t.slice(offset + m.length, offset + m.length + 50))) ||
       (mode === '' && (patronStreetEnvelope(before, t.slice(offset + m.length, offset + m.length + 50)) || patronStreetCityLead(before, m))) ||
       (RE_PATRON_STREET_PRZY.test(before) && !institutionBeforeAddr(before.replace(RE_PATRON_STREET_PRZY, ''))) ||
       reEnum.test(before)
     ) {
+      ctx.bump('ADRES');
+      return ctx.M.ADRES;
+    }
+    // Patron z liczbą rzymską — patrz RE_PATRON_STREET_ROMAN; bez instytucji przed nim („Parafia
+    // Jana Pawła II 5") i bez klucza adresu IP czy adresata.
+    // Zakres i rok („Jana Pawła II 5-7", „… 1978-2005") oraz odsyłacz do pism patrona („Encyklika
+    // Jana Pawła II 3.", „rozdz. Jana Pawła II 4, s. 12") to nie numer domu.
+    if (mode === 'roman') {
+      const k = RE_PATRON_STREET_KEY.exec(before)?.[1];
+      if ((k && RE_PATRON_STREET_KEY_NOT.test(k)) || institutionBeforeAddr(before)) return null;
+      if (/[ \t]\d{1,4}[a-zA-Z]?-|(?<!\d)(?:1[89]|20)\d\d(?!\d)/.test(m) || RE_PATRON_ROMAN_REF_BEFORE.test(before)) return null;
       ctx.bump('ADRES');
       return ctx.M.ADRES;
     }
@@ -5527,6 +5563,9 @@ function patronStreetWithNumber(ctx: RedactCtx): void {
       ctx.bump('ADRES');
       return ctx.M.ADRES;
     }
+    // Ułamek właściwy przed gołym przecinkiem CSV („1,Jana Nowaka 4/5,Kraków" pod nagłówkiem „Ocena")
+    // to ocena, wynik albo udział osoby — patrz houseNoAddressTail.
+    if (RE_PATRON_STREET_SLASH.test(m) && !patronStreetFlatNo(m) && /^,(?![ \t])/.test(tail)) return null;
     const after = RE_ADDR_CITY_AFTER.exec(tail);
     // Kod pocztowy za przecinkiem bywa już maską („…14, [KOD-POCZTOWY] Busko"), a etykieta
     // zamieszkania tuż przed ulicą („zam. Jana Pawła II 14, Busko") sama wskazuje adres.
@@ -5568,6 +5607,7 @@ function patronStreetWithNumber(ctx: RedactCtx): void {
   for (const [re, mode] of [
     [RE_PATRON_STREET_NO_LOOSE, 'loose'],
     [RE_PATRON_STREET_NO_CTX, 'ctx'],
+    [RE_PATRON_STREET_ROMAN, 'roman'],
   ] as const) {
     ctx.text = ctx.text.replace(re, (m, w1: string, wMid: string | undefined, w2: string, offset: number, t: string) => {
       const r = street(m, w1, wMid, w2, offset, t, mode);
@@ -6568,6 +6608,10 @@ function houseNoAddressTail(after: string): boolean {
   const mm = /^[ \t]+\d{1,4}[a-zA-Z]?(?:\/\d{1,4}[a-zA-Z]?)?/.exec(after);
   if (!mm) return false;
   const rest = after.slice(mm[0].length);
+  // Ułamek właściwy przed gołym przecinkiem CSV („1,Jana Nowaka 4/5,Kraków" pod nagłówkiem „Ocena",
+  // „3,Tomasza Mazura 12/40,Kraków") to ocena, wynik albo udział osoby, nie numer lokalu.
+  const fr = /(\d{1,4})[a-zA-Z]?\/(\d{1,4})/.exec(mm[0]);
+  if (fr && +fr[1] <= +fr[2] && /^,(?![ \t])/.test(rest)) return false;
   if (/^[ \t]+(?:we?[ \t]+\p{Lu}|m\.|lok\.|lokal|mieszk|(?:to|jest)[ \t]+adres)/u.test(rest)) return true;
   if (/^[ \t]*(?:,[ \t]*|\r?\n[ \t]*)(?:\d{2}-\d{3}|\[KOD-POCZTOWY\]|\[MIEJSCOWOŚĆ\])/u.test(rest)) return true;
   const city = /^[ \t]*,[ \t]*(\p{Lu}\p{Ll}+(?:[ \t-]\p{Lu}\p{Ll}+)?)/u.exec(rest);
