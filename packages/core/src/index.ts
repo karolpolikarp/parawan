@@ -973,16 +973,31 @@ const SYSTEM_ACCOUNTS = new Set<string>(
     // wbudowane konta Windows i SQL Server, kontenery deweloperskie, serwery gier, zastępniki
     'krbtgt defaultaccount sqlserveragent mssqlserver mssqlfdlauncher vscode codespace codespaces ' +
     'linuxbrew steam minecraft twojlogin twojanazwa twojanazwauzytkownika yourusername ' +
-    'unknown nobody anonymous null undefined'
+    'unknown nobody anonymous null undefined ' +
+    // konta usług z dystrybucji Linuksa i popularnych aplikacji („session opened for user cron")
+    'cron syslog proxy gdm lightdm sddm rtkit man list irc gnats messagebus avahi colord pulse saned ' +
+    'whoopsie usbmux geoclue uuidd tss tcpdump dnsmasq landscape pollinate splunk bitnami odoo ' +
+    'asterisk freeswitch zimbra mongodb memcached rabbitmq couchdb solr sonar nexus ldap openldap ' +
+    'named bind squid clamav amavis dovecot exim vmail opendkim ' +
+    // wspólne konta i katalogi działów w przychodni, szpitalu i urzędzie („C:\Users\pielegniarki",
+    // „/home/dokumenty/2025") — to nie osoba, a maska w ścieżce psuje sens instrukcji
+    'skany skan pracownia rtg usg ekg dokumenty dokument oddzial gabinet pielegniarki pielegniarka ' +
+    'lekarz lekarze pacjenci pacjent wyniki szpital pracownicy pracownik wnioski zbiory biblioteka ' +
+    'promocja aktualnosci szkola budzet mapa start praca raporty druki pisma umowy skrzynka wspolny ' +
+    'wspolne dzial referat wydzial urzad gmina starostwo komputer stanowisko'
   ).split(' '),
 );
+const isListedAccount = (l: string): boolean => GENERIC_LOGINS.has(l) || SYSTEM_ACCOUNTS.has(l);
 // Sufiks numeru nie zmienia charakteru konta: „faktury01", „recepcja2", „system2" to dalej
-// skrzynki i konta działów, nie osoby.
+// skrzynki i konta działów, nie osoby. Zastępnik z instrukcji bywa pisany z separatorem
+// („nazwa_uzytkownika", „twoja-nazwa", „twoj_login"), więc porównujemy też bez niego.
 const isSystemAccount = (v: string): boolean => {
   const l = v.toLowerCase();
-  if (GENERIC_LOGINS.has(l) || SYSTEM_ACCOUNTS.has(l) || /^(?:systemd-|_)/.test(l)) return true;
+  if (isListedAccount(l) || /^(?:systemd-|_)/.test(l)) return true;
   const base = l.replace(/[._-]?[0-9]+$/, '');
-  return base !== l && (GENERIC_LOGINS.has(base) || SYSTEM_ACCOUNTS.has(base));
+  if (base !== l && isListedAccount(base)) return true;
+  const joined = base.replace(/[._-]/g, '');
+  return joined !== base && isListedAccount(joined);
 };
 /** Imiona bez polskich znaków („lukasz", „malgorzata") — indeks leniwy, jak isAsciiSurname. */
 let asciiFirstNames: Set<string> | null = null;
@@ -995,8 +1010,34 @@ const isAsciiFirstName = (w: string): boolean => {
  * („jan", „nowak", „jkowalski", „kaminska")? To odróżnia konto osoby od konta działu
  * czy usługi zapisanego tym samym kształtem („batch01", „web_app", „kadry_archiwum").
  */
+/** Imię i nazwisko sklejone kropką albo podkreślnikiem („Jan.Kowalski", „Anna_Nowak"). */
+const RE_DOTTED_PERSON = /^[A-Z][a-z]+(?:[._][A-Z][a-z]+)+$/;
+// Nazwisko-homonim („Zając", „Kowal", „Wróbel") słownik nazwisk pomija, bo sam wyraz to zwykłe
+// słowo. Po inicjale („mzajac", „tkowal", „awrobel") to już kształt loginu, nie wyraz z prozy.
+// Bez nazw miesięcy i dni („pmarzec", „wsobota" to nie konto).
+let asciiHomographs: Set<string> | null = null;
+const isInitialHomograph = (p: string): boolean => {
+  asciiHomographs ??= new Set(
+    [...HOMOGRAPH_SURNAMES]
+      .filter((h) => !/^(?:piątek|sobota|niedziela|środa|kwiecień|maj|marzec|styczeń|grudzień|lipiec|sierpień)$/.test(h))
+      .map(foldAscii)
+      .filter((h) => h.length >= 4),
+  );
+  return asciiHomographs.has(p.slice(1).toLowerCase());
+};
+// Imię sklejone z nazwiskiem bez separatora („annanowak", „tomaszkaminski") — typowe konto
+// profilu, które samo w sobie nie jest ani imieniem, ani nazwiskiem.
+const isJoinedFullName = (p: string): boolean => {
+  for (let i = 3; i <= p.length - 4; i++) {
+    if (isAsciiFirstName(p.slice(0, i)) && isAsciiSurname(p.slice(i))) return true;
+  }
+  return false;
+};
 const isNameishPart = (p: string): boolean =>
-  (p.length >= 3 && isAsciiFirstName(p)) || isAsciiSurname(p) || (p.length >= 5 && (isAsciiSurname(p.slice(1)) || isAsciiSurname(p.slice(2))));
+  (p.length >= 3 && isAsciiFirstName(p)) ||
+  isAsciiSurname(p) ||
+  (p.length >= 5 && (isAsciiSurname(p.slice(1)) || isAsciiSurname(p.slice(2)) || isInitialHomograph(p))) ||
+  (p.length >= 7 && p.length <= 40 && isJoinedFullName(p));
 /**
  * Czy login z kotwicy POŚREDNIEJ (parametr URL-a, klucz JSON/XML, ścieżka profilu, udział
  * domowy, log sshd, słabsza etykieta) wolno rozlać na resztę dokumentu? Tam pod kluczem stoi
@@ -1007,6 +1048,9 @@ const isNameishPart = (p: string): boolean =>
  */
 function isPropagatableLogin(v: string): boolean {
   if (v.length < 4 || (v.match(/[A-Za-z]/g) ?? []).length < 3 || isSystemAccount(v)) return false;
+  // „Jan.Kowalski" to imię i nazwisko sklejone kropką — maskuje je w całości FAZA 4 z etykietą
+  // osoby; jako login rozlany na prozę zabierał osobie pseudonim („zlecił [LOGIN]" obok [OSOBA-A]).
+  if (RE_DOTTED_PERSON.test(v)) return false;
   if (/^[A-Za-z][A-Za-z0-9]*[._][A-Za-z0-9._]*[A-Za-z0-9]$|^[A-Za-z]{3,}[0-9]{1,6}$/.test(v)) {
     return (v.match(/[A-Za-z]+/g) ?? []).some(isNameishPart);
   }
@@ -1863,7 +1907,14 @@ function passProtectJsonEscapes(ctx: RedactCtx): void {
 // parametry bez „,;|"). W stopce CV i w polu z OCR sklejone z nim „;501-234-567", „,PESEL:…"
 // czy „/Documents/PESEL_….pdf" trafiały do chronionego adresu i wychodziły jawne.
 const URL_BARE_SEG = String.raw`[^/?#\s<>"'„”()[\],;|]+`;
-const URL_BARE_QUERY = String.raw`\?[^#\s<>"'„”()[\],;|]*`;
+// Z parametrów tylko te znane z linków tych serwisów („?trk=…&originalSubdomain=pl",
+// „?id=…&sk=about"), a kropka w wartości tylko przed małą literą. Doklejone bez spacji
+// „.Anna Nowak", „.Tel.501234567", „&Anna=Nowak" czy „?iban=PL61…" wchodziły do chronionego
+// adresu i zostawały jawne; teraz adres kończy się przed nimi i resztę czytają zwykłe przebiegi.
+const URL_BARE_PARAM =
+  '(?:id|sk|ref|refid|fref|hc_ref|__tn__|mibextid|rdid|trk|trkInfo|locale|originalSubdomain|lipi|utm_[a-z]+)' +
+  String.raw`=[A-Za-z0-9_%+~-]*(?:\.[a-z][A-Za-z0-9_%+~-]*)*`;
+const URL_BARE_QUERY = String.raw`\?${URL_BARE_PARAM}(?:&${URL_BARE_PARAM})*`;
 const RE_URL_PROTECT = new RegExp(
   String.raw`\b(?:https?:\/\/|www\.)[^\s<>"'„”()]+|(?<![\w.@/-])(?:[a-z0-9-]+\.)?(?:` +
     String.raw`linkedin\.com\/(?:in|pub)\/${URL_BARE_SEG}(?:\/[0-9a-z]{1,3}(?=[/?#\s]|$)){0,3}\/?(?:${URL_BARE_QUERY})?|` +
@@ -2758,7 +2809,6 @@ const PROFILE_SEG = String.raw`([A-Za-z0-9][A-Za-z0-9._-]{0,62}[A-Za-z0-9])(?=[\
 // Też małymi literami, gdy nazwa z odstępem ciągnie się do separatora („C:\Users\ewa nowak\…").
 // Najwyżej dwa odstępy: szersza luka to kolumna wydruku („\\fs01\home$\tkaminski    Microsoft…").
 const RE_CAP_WORD_AHEAD = /^[ \t]{1,2}(?:\p{Lu}|\p{Ll}{2,30}[\\/])/u;
-const RE_DOTTED_PERSON = /^[A-Z][a-z]+(?:[._][A-Z][a-z]+)+$/;
 const RE_PROFILE_PATH = new RegExp(
   String.raw`((?<![\p{L}\p{N}_])[A-Za-z]:(?:\\{1,2}|/)(?:Users|Użytkownicy|Documents and Settings)(?:\\{1,2}|/)|(?<![\p{L}\p{N}_./~-])/(?:home|Users)/)` +
     PROFILE_SEG,
@@ -2783,15 +2833,6 @@ const RE_LOG_USER: RegExp[] = [
   new RegExp(String.raw`(\bsession[ \t]+(?:opened|closed)[ \t]+for[ \t]+user[ \t]+)${LOG_USER}(?=\(|[ \t]|$)`, 'gm'),
   new RegExp(String.raw`(\bsudo:[ \t]+)${LOG_USER}(?=[ \t]+:[ \t])`, 'g'),
 ];
-/** Czy ścieżka stoi w wierszu żądania HTTP („GET /home/x/1 HTTP/1.1", log dostępu, opis API)? */
-const RE_HTTP_METHOD = /\b(?:GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)\b/;
-function inHttpRequest(t: string, offset: number): boolean {
-  // okno ograniczone z obu stron (nie lastIndexOf po całym tekście — dokument z tysiącami ścieżek)
-  const before = t.slice(Math.max(0, offset - 80), offset);
-  const after = t.slice(offset, offset + 80);
-  const line = before.slice(before.lastIndexOf('\n') + 1) + after.split('\n', 1)[0];
-  return RE_HTTP_METHOD.test(line) || /\bHTTP\/\d/.test(line);
-}
 /** Plik wprost w katalogu domowym („/home/index.html"), nie konto. */
 const RE_FILE_EXT = /\.(?:html?|php|aspx?|jsp|txt|log|sh|conf|cfg|ini|json|xml|zip|tar|gz)$/i;
 /**
@@ -2815,16 +2856,17 @@ function maskAnchoredLogins(ctx: RedactCtx): void {
     //   profil albo katalog działu („Biblioteka", „Meldunki", „Wnioski800");
     // - „/home/", „/Users/" i udział bez „$" bywają trasą serwisu i katalogiem działu
     //   („GET /Users/Edit/15", „/home/dashboard", „\\fs01\home\Skany"), a „Invalid user" niesie
-    //   nazwę ze słownika ataku („test1") — tu tylko imię, nazwisko albo uchwyt z nim; konto
-    //   małymi literami dopuszczamy jeszcze w ścieżce z dalszym członem poza żądaniem HTTP.
+    //   nazwę ze słownika ataku („test1") — tu tylko imię, nazwisko albo uchwyt z nim. Dawniej
+    //   dopuszczaliśmy jeszcze dowolny wyraz małymi literami z dalszym członem ścieżki, ale
+    //   w pismach o stronie gminy i w instrukcjach to katalog albo sekcja serwisu
+    //   („/home/wnioski/przychodzace", „/home/aktualnosci/2024", „/Users/promocja/plakaty").
     const attempt = !path && /nvalid/.test(pre);
     const sure = path && (/^[A-Za-z]:/.test(pre) || pre.includes('$'));
     const capWord = /^[A-Z][a-z]+[0-9]*$/.test(user);
     if (sure) {
       if (capWord && !(user.match(/[A-Za-z]+/g) ?? []).some(isNameishPart)) return m;
     } else if ((path || attempt) && !isPersonalSegment(user)) {
-      const deeper = path && !capWord && t[offset + m.length] === '/' && !inHttpRequest(t, offset);
-      if (!deeper) return m;
+      return m;
     }
     // samo nazwisko z wielkiej litery („C:\Users\Kowalska") zostaje dla FAZY 4 i jej etykiety osoby
     if (/^[A-Z][a-z]+$/.test(user) && isAsciiSurname(user) && !isAsciiFirstName(user)) return m;
@@ -2876,10 +2918,29 @@ function passLogin(ctx: RedactCtx): void {
   };
   // „User name: ZIELINSKA KATARZYNA" — osoba WIELKIMI literami w polu loginu. Główny wzorzec brał
   // pierwszy wyraz i zostawiał imię jawne obok maski („[LOGIN] KATARZYNA"); maskujemy całą parę.
+  // To osoba, nie login: maska osoby (w trybie pseudonimów ta sama [OSOBA-X] co „Adam Nowak"
+  // obok). Parę zapamiętujemy w obu szykach, bo te same dane wracają w dokumencie
+  // nazwiskiem naprzód („JANKOWSKI TOMASZ"), czego FAZA 4 WIELKIMI literami nie łapie.
+  const capsPersons = new Map<string, string>();
   ctx.text = ctx.text.replace(RE_LOGIN_CAPS_PERSON, (m, kw: string, val: string) => {
-    if (!val.split(/[ \t]+/).some((w) => isNameishPart(foldAscii(w.toLowerCase())))) return m;
-    ctx.bump('LOGIN');
-    return `${kw}${ctx.M.LOGIN}`;
+    const words = val.split(/[ \t]+/);
+    const folded = words.map((w) => foldAscii(w.toLowerCase()));
+    if (!folded.some(isNameishPart)) return m;
+    // kluczem osoby jest nazwisko: wyraz, który nie jest imieniem (domyślnie ostatni)
+    let si = words.length - 1;
+    if (isAsciiFirstName(folded[si]) && !isAsciiFirstName(folded[0])) si = 0;
+    const surname = words[si];
+    if (!ctx.on('IMIE')) {
+      ctx.bump('LOGIN');
+      return `${kw}${ctx.M.LOGIN}`;
+    }
+    ctx.bump('IMIE');
+    capsPersons.set(words.join(' '), surname);
+    if (words.length === 2) {
+      capsPersons.set(`${words[1]} ${words[0]}`, surname);
+      for (const w of words) if (w.length >= 3) capsPersons.set(w, surname);
+    }
+    return `${kw}${ctx.personMask(surname)}`;
   });
   ctx.text = ctx.text.replace(
     /((?:\b[Ll]ogin\w{0,3}|\b[Uu]ser(?:name)?|\b[Nn]azwa\s+użytkownika|\b[Ii]dentyfikator\s+użytkownika|\b[Uu]ser[ \t]+[Nn]ame|\b[Ss][Aa][Mm][Aa]ccount[Nn]ame|\b[Kk]onto[ \t]+(?:AD|LDAP|domenowe|w[ \t]+domenie)|\bAlias)(?:\s+(?:użytkownika|administratora|operatora|serwisow\w+|techniczn\w+|w\s+systemie|systemow\w+|domenow\w+|sieciow\w+))?[ \t]*[:=][ \t]*\n?[ \t]*)(["„'«]?)((?:[A-Za-z][A-Za-z0-9.-]{0,62}\\{1,2})?[A-Za-z][A-Za-z0-9._-]{1,62}[A-Za-z0-9])(?!\.?[\p{L}\p{N}_-]|\\)(["”'»]?)/gu,
@@ -2906,14 +2967,31 @@ function passLogin(ctx: RedactCtx): void {
       if (weak && !isPropagatableLogin(loginUserPart(val))) return m;
       // Atrybut AD i pole raportu awarii: konto wbudowane albo zastępnik („Administrator",
       // „krbtgt", „unknown") to nie osoba, a „unknown" rozlewało się na „unknown device".
-      if (/^(?:[Uu]ser[ \t]+[Nn]ame|[Ss][Aa][Mm])/.test(kw) && isSystemAccount(loginUserPart(val))) return m;
+      const medium = /^(?:[Uu]ser[ \t]+[Nn]ame|[Ss][Aa][Mm])/.test(kw);
+      if (medium) {
+        const account = loginUserPart(val);
+        if (isSystemAccount(account)) return m;
+        // „User name:" i „sAMAccountName:" stoją też w instrukcjach („Pole sAMAccountName: jest
+        // obowiązkowe", „W polu User name: wpisz swój login") i przed imieniem z nazwiskiem
+        // („User name: Anna Zając"). Wartość z kolejnym wyrazem po spacji to nie login: dawniej
+        // pierwszy wyraz szedł jako [LOGIN], nazwisko zostawało jawne, a „jest" czy „wpisz"
+        // znikały z całej prozy. Osobę maskuje wtedy w całości FAZA 4.
+        if (/^ {1,2}[\p{L}\p{N}]/u.test(ctx.text.slice(offset + m.length, offset + m.length + 3))) return m;
+        // Imię i nazwisko sklejone kropką albo samo nazwisko z wielkiej litery („Jan.Kowalski",
+        // „Nowak") zostają dla FAZY 4, jak pod kluczem samaccountname — osoba zachowuje etykietę.
+        if (RE_DOTTED_PERSON.test(account)) return m;
+        if (/^[A-Z][a-z]+$/.test(account) && isAsciiSurname(account) && !isAsciiFirstName(account)) return m;
+      }
       const user = loginUserPart(val).toLowerCase();
       if (isEmptyFormValue(user) || FORM_LABEL_WORDS.has(user) || RE_BUILTIN_ACCOUNT.test(val)) return m;
       // „User: Kowalski Jan", „Username: Adam Kowalski" — w polu stoi osoba, nie login. Dawniej
       // pierwszy wyraz szedł jako [LOGIN], drugi zostawał jawny, a propagacja rozbijała tę samą parę
       // w prozie („Jan [LOGIN] zgłosił awarię"). Parę maskuje w całości FAZA 4.
       if (!q1 && !kw.includes('\n') && loginValueIsPersonPair(val, ctx.text.slice(offset + m.length, offset + m.length + 40))) return m;
-      remember(val);
+      // Pod nowszymi etykietami rozlewamy tylko uchwyt osoby: samo imię („User name: Tomasz")
+      // rozbijało pary w prozie („Zgłasza: [LOGIN] Wróbel"), a zwykły wyraz („Nowa", „Lato")
+      // znikał z każdego zdania. W samym polu maska zostaje.
+      if (!medium || isPropagatableLogin(loginUserPart(val))) remember(val);
       ctx.bump('LOGIN');
       return `${kw}${q1}${ctx.M.LOGIN}${q2}`;
     },
@@ -2934,6 +3012,34 @@ function passLogin(ctx: RedactCtx): void {
   // wartości, a kompilacja wzorca z flagą „u" jest wielokrotnie droższa (2000 loginów: 0,35 s).
   // Login zapisany jak imię albo nazwisko („Login: Kowalski") nie rozbija pary osobowej, którą
   // zostawiliśmy dla FAZY 4: „User: Jan Kowalski" dawało „Jan [LOGIN]" — imię jawne obok maski.
+  // Ta sama osoba z pola loginu w innym miejscu dokumentu, WIELKIMI literami: para w dowolnym
+  // szyku („JANKOWSKI TOMASZ"), a pojedynczy wyraz tylko wtedy, gdy stoi sam — w ciągu wielkich
+  // liter obok innego wyrazu to może być inna osoba („TOMASZ WRÓBEL"). Jeden skan ciągów
+  // wielkich liter z odczytem z mapy, nie regex na każdą osobę.
+  if (capsPersons.size) {
+    const reCapsRun = new RegExp(`(?<![${PL_UP}${PL_LO}\\w\\[])[${PL_UP}]{2,}(?:[ \\t]+[${PL_UP}]{2,})*(?![${PL_UP}${PL_LO}\\w\\]])`, 'g');
+    ctx.text = ctx.text.replace(reCapsRun, (run: string) => {
+      const ws = run.split(/([ \t]+)/);
+      const words = ws.filter((_w, i) => i % 2 === 0);
+      if (words.length === 1) {
+        const sur = capsPersons.get(run);
+        if (!sur) return run;
+        ctx.bump('IMIE');
+        return ctx.personMask(sur);
+      }
+      const out: string[] = [];
+      for (let i = 0; i < words.length; i++) {
+        const sur = i + 1 < words.length ? capsPersons.get(`${words[i]} ${words[i + 1]}`) : undefined;
+        if (sur) {
+          ctx.bump('IMIE');
+          out.push(ctx.personMask(sur));
+          i++;
+        } else out.push(words[i]);
+        if (i + 1 < words.length) out.push(ws[2 * i + 1]);
+      }
+      return out.join('');
+    });
+  }
   maskAnchoredLogins(ctx);
   for (const v of ctx.loginSeeds) loginValues.add(v);
   for (const v of [...loginValues].sort((a, b) => b.length - a.length)) {

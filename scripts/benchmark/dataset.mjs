@@ -907,6 +907,10 @@ export function buildDataset() {
   neg('Konto AD: nadane\nUprawnienia zostały nadane.\nAlias: intranet\nSerwer intranet działa.\n"GET /Users/Edit/15 HTTP/1.1" 200\nUser name: Administrator', ['zostały nadane', 'Serwer intranet', '/Users/Edit/15', 'User name: Administrator']);
   // b6 fix1: adres profilu bez schematu nie połyka sklejonego telefonu
   str('linkedin.com/in/anowak/;501-234-567', ['anowak', '501-234-567'], ['linkedin.com/in/', '/;']);
+  // b6 fix2: adres profilu bez schematu nie wciąga doklejonych danych, osoba w polu „User name"
+  // w całości (także WIELKIMI literami w odwrotnym szyku); instrukcja i katalogi działów zostają.
+  str('FB: facebook.com/profile.php?id=100004567890123.Tel.501234567\nUser name: Anna Zając\nUser: TOMASZ JANKOWSKI\nWnioskodawca: JANKOWSKI TOMASZ', ['100004567890123', '501234567', 'Anna Zając', 'TOMASZ JANKOWSKI', 'JANKOWSKI TOMASZ'], ['facebook.com/profile.php?id=', '.Tel.', 'User name:', 'Wnioskodawca:']);
+  neg(String.raw`Pole sAMAccountName: jest obowiązkowe. Plik w C:\Users\pielegniarki\Desktop i /home/wnioski/przychodzace. Zastąp C:\Users\nazwa_uzytkownika swoim loginem. session opened for user cron by (uid=0)`, ['jest obowiązkowe', 'pielegniarki', '/home/wnioski/', 'nazwa_uzytkownika', 'user cron']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

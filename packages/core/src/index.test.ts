@@ -5832,9 +5832,9 @@ test('b6 fix1: konta wbudowane i zastępniki pod „User name", „sAMAccountNam
   ]);
   masked([
     ['User name: anowak\nanowak zalogował się.', `User name: ${LG}\n${LG} zalogował się.`],
-    // osoba WIELKIMI literami w polu loginu — cała para, bez jawnego imienia
-    ['User name: ZIELINSKA KATARZYNA', `User name: ${LG}`],
-    ['Login: ZIELINSKA KATARZYNA', `Login: ${LG}`],
+    // osoba WIELKIMI literami w polu loginu — cała para jako osoba, bez jawnego imienia (fix2)
+    ['User name: ZIELINSKA KATARZYNA', 'User name: [IMIĘ I NAZWISKO]'],
+    ['Login: ZIELINSKA KATARZYNA', 'Login: [IMIĘ I NAZWISKO]'],
   ]);
   // nazwisko w atrybucie i w polu „Name" dostaje etykietę osoby spójną z resztą dokumentu
   masked(
@@ -5852,7 +5852,6 @@ test('b6 fix1: propagacja i URL-e tylko dla uchwytu osoby (konta usług i dział
     ['{"userid": "eod2024"}\nW systemie eod2024 zapisano.', `{"userid": "${LG}"}\nW systemie eod2024 zapisano.`],
     ['Login: projekty\nhttps://intranet.urzad.pl/projekty/plan.pdf', `Login: ${LG}\nhttps://intranet.urzad.pl/projekty/plan.pdf`],
     ['Login: wroclaw\nPanel: https://portal.firma.pl/oddzialy/wroclaw/raporty', `Login: ${LG}\nPanel: https://portal.firma.pl/oddzialy/wroclaw/raporty`],
-    ['Kopie z /home/kadry_archiwum/ idą na NAS.\nFolder kadry_archiwum zawiera akta.', `Kopie z /home/${LG}/ idą na NAS.\nFolder kadry_archiwum zawiera akta.`],
     // uchwyt osoby rozlewa się dalej
     ['{"user":"jan_nowak"}\njan_nowak zalogował się', `{"user":"${LG}"}\n${LG} zalogował się`],
     ['{"user":"adam1986"}\nadam1986 pisze', `{"user":"${LG}"}\n${LG} pisze`],
@@ -5867,6 +5866,8 @@ test('b6 fix1: trasy serwisu, katalogi działu i nazwy z ataku pod „/home", �
     '/Users/Profile oraz /Users/import oraz /Users/active',
     '/home/vscode/.cache i /home/linuxbrew/.linuxbrew i /home/minecraft/server i /home/steam/logs',
     '/Users/Szablony/x i /home/twojlogin/ i /Users/twojanazwa/',
+    // fix2: katalog działu pod „/home/" z dalszym członem to nie konto osoby
+    'Kopie z /home/kadry_archiwum/ idą na NAS.\nFolder kadry_archiwum zawiera akta.',
     String.raw`Profil C:\Users\Biblioteka\Desktop jest wspólny, C:\Users\MSSQLSERVER\x`,
     String.raw`Udziały \\FS01\home$\Wspolny\ i \\fs01\profiles$\Meldunki\ oraz \\fs01\home\Wnioski800 i \\FS01\users\Skany`,
     'sshd[1]: Invalid user test1 from bastion.local port 4013',
@@ -5895,5 +5896,88 @@ test('b6 fix1: adres profilu bez schematu kończy się na profilu — sklejone n
       `Skan: firma-my.sharepoint.com/personal/${LG}/Documents/PESEL_[PESEL].pdf`,
     ],
     ['facebook.com/profile.php?id=100012345678,PESEL:85010112345,tel:600123456', `facebook.com/profile.php?id=${LG},PESEL:[PESEL],tel:[TELEFON]`],
+  ]);
+});
+test('b6 fix2: adres profilu bez schematu nie wciąga doklejonych danych w parametrach', () => {
+  masked([
+    ['facebook.com/profile.php?id=100004567890123.Anna Nowak dzwoniła.', `facebook.com/profile.php?id=${LG}.[IMIĘ I NAZWISKO] dzwoniła.`],
+    ['FB: facebook.com/profile.php?id=100004567890123.Tel.501234567', `FB: facebook.com/profile.php?id=${LG}.Tel.[TELEFON]`],
+    ['linkedin.com/in/anowak?locale=pl.Tel.501234567', `linkedin.com/in/${LG}?locale=pl.Tel.[TELEFON]`],
+    ['linkedin.com/in/anowak?trk=public&Anna=Nowak', `linkedin.com/in/${LG}?trk=public&Anna=[IMIĘ I NAZWISKO]`],
+    ['linkedin.com/in/jan.kowalski?iban=PL61109010140000071219812874', `linkedin.com/in/${LG}?iban=[NR-KONTA]`],
+    // znane parametry serwisu zostają częścią adresu
+    ['pl.linkedin.com/in/jan-kowalski-12345?trk=public_profile&originalSubdomain=pl', `pl.linkedin.com/in/${LG}?trk=public_profile&originalSubdomain=pl`],
+  ]);
+});
+test('b6 fix2: „Imię.Nazwisko" i nazwisko pod etykietą konta zostają osobą z pseudonimem', () => {
+  masked(
+    [
+      [
+        '{"user":"Jan.Kowalski","akcja":"wydruk"}\nWydruk zlecił Jan.Kowalski, a zatwierdził Jan Kowalski.',
+        '{"user":"[LOGIN]","akcja":"wydruk"}\nWydruk zlecił [OSOBA-A], a zatwierdził [OSOBA-A].',
+      ],
+      ['Pracownik: Jan Kowalski\nAlias: Jan.Kowalski', 'Pracownik: [OSOBA-A]\nAlias: [OSOBA-A]'],
+      ['User name: Jan.Kowalski\nJan Kowalski', 'User name: [OSOBA-A]\n[OSOBA-A]'],
+      ['User name: Nowak\nPani Nowak zgłosiła awarię.', 'User name: [OSOBA-A]\nPani [OSOBA-A] zgłosiła awarię.'],
+      ['sAMAccountName: Nowak\nPan Nowak zgłosił awarię.', 'sAMAccountName: [OSOBA-A]\nPan [OSOBA-A] zgłosił awarię.'],
+      // osoba WIELKIMI literami w polu loginu dostaje tę samą etykietę co w treści
+      ['Pracownik: Adam Nowak\nUser name: ADAM NOWAK\n', 'Pracownik: [OSOBA-A]\nUser name: [OSOBA-A]\n'],
+      ['User name: SYLWIA KRAWCZYK\nSylwia Krawczyk zgłosiła awarię.', 'User name: [OSOBA-A]\n[OSOBA-A] zgłosiła awarię.'],
+    ],
+    { pseudonyms: true },
+  );
+});
+test('b6 fix2: para WIELKIMI literami z pola loginu maskowana też w odwrotnym szyku', () => {
+  masked([
+    ['Login: JANKOWSKI\nUser: TOMASZ JANKOWSKI\nJANKOWSKI TOMASZ', 'Login: [LOGIN]\nUser: [IMIĘ I NAZWISKO]\n[IMIĘ I NAZWISKO]'],
+    ['User: TOMASZ JANKOWSKI\nTOMASZ zgłosił się osobiście.', 'User: [IMIĘ I NAZWISKO]\n[IMIĘ I NAZWISKO] zgłosił się osobiście.'],
+    ['Login: ANNA NOWAK\nWnioskodawca: NOWAK ANNA', 'Login: [IMIĘ I NAZWISKO]\nWnioskodawca: [IMIĘ I NAZWISKO]'],
+  ]);
+  // pułapka: pojedynczy wyraz w ciągu wielkich liter obok innego to może być inna osoba,
+  // a placeholdery z nawiasem nie są danymi
+  keep(['Kontakt: TOMASZ WRÓBEL [LOGIN]', 'ZAŁĄCZNIK NR 2']);
+});
+test('b6 fix2: „User name" i „sAMAccountName" nie rozbijają osób i nie rozlewają zwykłych wyrazów', () => {
+  masked([
+    ['User name: Tomasz\nZgłasza: Tomasz Wróbel, Referat Inwestycji.', `User name: ${LG}\nZgłasza: [IMIĘ I NAZWISKO], Referat Inwestycji.`],
+    ['User name: Katarzyna\nKatarzyna Lis prosi o kontakt.', `User name: ${LG}\n[IMIĘ I NAZWISKO] prosi o kontakt.`],
+    ['sAMAccountName: Tomasz\nZgłasza: Tomasz Wróbel.', `sAMAccountName: ${LG}\nZgłasza: [IMIĘ I NAZWISKO].`],
+    ['Zgłoszenie\nUser name: Nowa\nNowa drukarka nie działa. Nowa skrzynka.', `Zgłoszenie\nUser name: ${LG}\nNowa drukarka nie działa. Nowa skrzynka.`],
+    ['User name: Lato\nLato w tym roku było upalne.', `User name: ${LG}\nLato w tym roku było upalne.`],
+    ['sAMAccountName: kowal\nkowal pracował', `sAMAccountName: ${LG}\nkowal pracował`],
+    // imię z nazwiskiem w polu — w całości osoba, bez jawnego nazwiska
+    ['User name: Anna Zając', 'User name: [IMIĘ I NAZWISKO]'],
+    ['User name: Jan Kowal', 'User name: [IMIĘ I NAZWISKO]'],
+    ['User name: Tomasz Zima, tel. 501 234 567', 'User name: [IMIĘ I NAZWISKO], tel. [TELEFON]'],
+    ['sAMAccountName: Dawid Kowal', 'sAMAccountName: [IMIĘ I NAZWISKO]'],
+    // uchwyt osoby dalej się rozlewa
+    ['User name: jkowalski\nKonto jkowalski zablokowane.', `User name: ${LG}\nKonto ${LG} zablokowane.`],
+    ['sAMAccountName: a.kaminska\nPani a.kaminska', `sAMAccountName: ${LG}\nPani ${LG}`],
+  ]);
+  // etykieta w instrukcji, po której stoi zdanie, a nie wartość
+  keep([
+    'Pole sAMAccountName: jest obowiązkowe. Wniosek jest rozpatrywany w 7 dni.',
+    'W polu User name: wpisz swój login. W polu Password wpisz hasło. Pamiętaj: wpisz je.',
+  ]);
+});
+test('b6 fix2: katalogi działów, sekcje serwisu, zastępniki i konta usług w ścieżkach i logach zostają', () => {
+  keep([
+    'Plik zapisano w /home/dokumenty/2025/raport.pdf',
+    String.raw`Ścieżka: C:\Users\pielegniarki\Desktop\raport.docx`,
+    String.raw`\\fs01\home$\pacjenci\x.doc C:\Users\skany\a C:\Users\lekarz\a C:\Users\rtg\a C:\Users\gabinet3\a`,
+    'Wnioski trafiają do katalogu /home/wnioski/przychodzace.',
+    'Strona /home/aktualnosci/2024 i [Biblioteka](/home/biblioteka/zbiory) oraz /Users/promocja/Festyn2024/plakaty',
+    'Ekran /home/start/panel, /home/sezon/zima/raport i /home/wiosna2024/foto',
+    String.raw`1. Zapisz plik w C:\Users\nazwa_uzytkownika\Documents\EZD.`,
+    '2. Na komputerach Mac użyj /Users/twoja_nazwa/Documents, a na serwerze /home/twoj_login/.',
+    'session opened for user cron by (uid=0)',
+    'Accepted publickey for splunk from bastion.local port 22 ssh2',
+  ]);
+  masked([
+    // inicjał z nazwiskiem-homonimem to kształt loginu
+    ['Katalog /home/mzajac/projekty i /home/tkowal/x', `Katalog /home/${LG}/projekty i /home/${LG}/x`],
+    // imię sklejone z nazwiskiem bez separatora
+    ['Plik: /Users/annanowak/Documents/umowa.pdf', `Plik: /Users/${LG}/Documents/umowa.pdf`],
+    [String.raw`C:\Users\tkaminski\Desktop /home/jkowalski/x /home/adam/projekty`, String.raw`C:\Users\[LOGIN]\Desktop /home/[LOGIN]/x /home/[LOGIN]/projekty`],
   ]);
 });

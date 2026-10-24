@@ -89,6 +89,7 @@ Alias: intranet
 Serwer intranet działa.
 "GET /Users/Edit/15 HTTP/1.1" 200
 User name: Administrator",
+  "neg-153": "Pole sAMAccountName: jest obowiązkowe. Plik w C:\\Users\\pielegniarki\\Desktop i /home/wnioski/przychodzace. Zastąp C:\\Users\\nazwa_uzytkownika swoim loginem. session opened for user cron by (uid=0)",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
@@ -442,6 +443,10 @@ sudo:  pnowicki : TTY=pts/0",
   "str-151": "{"user":"a.kaminska","message":"Konto a.kaminska zablokowane"}
 LinkedIn: https://www.linkedin.com/in/joanna-pietrzak-hr/",
   "str-152": "linkedin.com/in/anowak/;[TELEFON]",
+  "str-153": "FB: facebook.com/profile.php?id=100004567890123.Tel.[TELEFON]
+User name: Anna Zając
+User: TOMASZ JANKOWSKI
+Wnioskodawca: JANKOWSKI TOMASZ",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
@@ -619,6 +624,7 @@ Alias: intranet
 Serwer intranet działa.
 "GET /Users/Edit/15 HTTP/1.1" 200
 User name: Administrator",
+  "neg-153": "Pole sAMAccountName: jest obowiązkowe. Plik w C:\\Users\\pielegniarki\\Desktop i /home/wnioski/przychodzace. Zastąp C:\\Users\\nazwa_uzytkownika swoim loginem. session opened for user cron by (uid=0)",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
@@ -970,6 +976,10 @@ sudo:  [LOGIN] : TTY=pts/0",
   "str-151": "{"user":"[LOGIN]","message":"Konto [LOGIN] zablokowane"}
 LinkedIn: https://www.linkedin.com/in/[LOGIN]/",
   "str-152": "linkedin.com/in/[LOGIN]/;[TELEFON]",
+  "str-153": "FB: facebook.com/profile.php?id=[LOGIN].Tel.[TELEFON]
+User name: [OSOBA-A]
+User: [OSOBA-B]
+Wnioskodawca: [OSOBA-B]",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
@@ -1147,6 +1157,7 @@ Alias: intranet
 Serwer intranet działa.
 "GET /Users/Edit/15 HTTP/1.1" 200
 User name: Administrator",
+  "neg-153": "Pole sAMAccountName: jest obowiązkowe. Plik w C:\\Users\\pielegniarki\\Desktop i /home/wnioski/przychodzace. Zastąp C:\\Users\\nazwa_uzytkownika swoim loginem. session opened for user cron by (uid=0)",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
@@ -1498,6 +1509,10 @@ sudo:  [LOGIN] : TTY=pts/0",
   "str-151": "{"user":"[LOGIN]","message":"Konto [LOGIN] zablokowane"}
 LinkedIn: https://www.linkedin.com/in/[LOGIN]/",
   "str-152": "linkedin.com/in/[LOGIN]/;[TELEFON]",
+  "str-153": "FB: facebook.com/profile.php?id=[LOGIN].Tel.[TELEFON]
+User name: [IMIĘ I NAZWISKO]
+User: [IMIĘ I NAZWISKO]
+Wnioskodawca: [IMIĘ I NAZWISKO]",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
