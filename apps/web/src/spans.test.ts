@@ -115,6 +115,31 @@ test('dawny znacznik w środku grupy dzieli ją na dwa zakresy i nie liczy się 
   }
 });
 
+test('dwa jednakowe znaczniki w grupie przy jednym zastanym: null zamiast cudzej wartości w zakresie', () => {
+  const original = 'Tel. 600 700 800 a@b.pl [EMAIL] 44051401359';
+  const { redacted } = redactPII(original);
+  expect(redacted).toBe('Tel. [TELEFON] [EMAIL] [EMAIL] [PESEL]');
+  expect(alignSpans(original, redacted)).toBeNull();
+  // dwa zastane i dwa znaczniki w wyniku: przypisanie jednoznaczne
+  const two = 'Jan Kowalski [EMAIL] [EMAIL] 600 700 800';
+  const a = alignSpans(two, '[IMIĘ I NAZWISKO] [EMAIL] [EMAIL] [TELEFON]');
+  expect(a?.kept).toBe(2);
+  expect(a?.spans.map((s) => two.slice(s.start, s.end))).toEqual(['Jan Kowalski', '600 700 800']);
+});
+
+test('wklejka tabeli (grupy po trzy znaczniki) wyrównuje się w czasie liniowym', () => {
+  const row = 'Jan Kowalski\t44051401359\t600 700 123\n';
+  const masked = '[IMIĘ I NAZWISKO]\t[PESEL]\t[TELEFON]\n';
+  const small = alignSpans(row.repeat(2000), masked.repeat(2000));
+  const t0 = performance.now();
+  const big = alignSpans(row.repeat(40000), masked.repeat(40000));
+  const ms = performance.now() - t0;
+  expect(small?.spans).toHaveLength(2000);
+  expect(big?.spans).toHaveLength(40000);
+  // kwadratowo 40 000 wierszy to kilka sekund; liniowo dziesiątki milisekund
+  expect(ms).toBeLessThan(1500);
+});
+
 test('tryb ścisły odmawia zamiast zgadywać', () => {
   // odcinek wyniku, którego nie ma w oryginale (np. zamieniony odstęp)
   expect(alignSpans('Jan Kowalski\tmieszka tu', '[IMIĘ I NAZWISKO] mieszka tu')).toBeNull();

@@ -125,35 +125,36 @@ export function alignSpans(
     // „[TELEFON] [EMAIL] [PESEL]”): jeśli oryginał zawiera dosłownie odstęp, znacznik i odstęp
     // z wyniku, grupa dzieli się tam na dwa zakresy, a znacznik zostaje tekstem oryginału.
     // Inaczej liczyłby się jako nowe wykrycie (chip typu, którego rdzeń w tekście nie znalazł).
+    // Kolejny zastany znacznik tuż za poprzednim nie ma odstępu przed sobą (lead = '') i musi
+    // stać dokładnie na początku reszty fragmentu.
     let segStart = pos;
     let seg: Pending[] = [];
     for (let k = 0; k < group.length; k++) {
       const p = group[k];
       const prev = group[k - 1];
       const next = group[k + 1];
-      if ('mask' in p && next && 'gap' in next && k + 2 < group.length) {
+      // odstęp przed znacznikiem siedzi już na końcu seg
+      const lead = !seg.length ? '' : 'gap' in prev ? prev.gap : null;
+      if ('mask' in p && k + 2 < group.length && 'gap' in next && lead !== null) {
         const lit = `[${p.mask}]`;
-        if (seg.length && prev && 'gap' in prev) {
-          // odstęp przed znacznikiem siedzi już na końcu seg
-          const needle = prev.gap + lit + next.gap;
-          const f = original.indexOf(needle, segStart + 1);
-          if (f !== -1 && f + needle.length < end) {
-            pushSpan(segStart, f, seg);
-            kept++;
-            segStart = f + needle.length;
-            seg = [];
-            k++; // odstęp za znacznikiem należy do tekstu oryginału
-            continue;
-          }
-        } else if (!seg.length && original.startsWith(lit + next.gap, segStart)) {
-          // kolejny zastany znacznik tuż za poprzednim
-          const after = segStart + lit.length + next.gap.length;
-          if (after < end) {
-            kept++;
-            segStart = after;
-            k++;
-            continue;
-          }
+        const needle = lead + lit + next.gap;
+        // Szukamy tylko we fragmencie grupy: skan do końca dokumentu przy każdej grupie dawał
+        // czas kwadratowy (wklejka tabeli z Excela, wiersz po wierszu).
+        const from = segStart + (lead ? 1 : 0);
+        const w = original.slice(from, end);
+        const f = w.indexOf(needle);
+        if (f !== -1 && (lead || !f) && f + needle.length < w.length) {
+          // Ile znaczników tej nazwy zostało w grupie, tyle takich napisów musi mieć fragment.
+          // Inaczej nie wiadomo, który znacznik jest zastany („[TELEFON] [EMAIL] [EMAIL]”
+          // przy jednym „[EMAIL]” w oryginale), a zakres z cudzą wartością jest gorszy niż null.
+          if (w.split(lit).length !== group.slice(k, -1).filter((x) => (x as { mask?: string }).mask === p.mask).length + 1)
+            return false;
+          if (seg.length) pushSpan(segStart, from + f, seg);
+          kept++;
+          segStart = from + f + needle.length;
+          seg = [];
+          k++; // odstęp za znacznikiem należy do tekstu oryginału
+          continue;
         }
       }
       seg.push(p);
@@ -236,49 +237,35 @@ export interface SpansHtmlOptions {
   maskHtml: (name: string) => string;
   /** true = widok „Porównanie” (oryginał przekreślony przed znacznikiem). */
   compare: boolean;
-  /**
-   * true (domyślnie): tekst oryginału w <span data-o="pozycja">, znacznik z data-s="indeks
-   * zakresu". Pozycje służą przeliczeniu zaznaczenia w wyniku na miejsca w oryginale.
-   */
-  positions?: boolean;
 }
 
 /** Tekst oryginału od pozycji at, pocięty na wiersze: każdy kawałek z własną pozycją. */
-function textHtml(text: string, at: number, positions: boolean): string {
-  if (!positions) return escapeHtml(text);
-  let o = at;
-  return text
-    .split('\n')
-    .map((line) => {
-      const s = line ? `<span data-o="${o}">${escapeHtml(line)}</span>` : '';
-      o += line.length + 1;
-      return s;
-    })
-    .join('\n');
-}
+const textHtml = (text: string, at: number): string =>
+  text.replace(/[^\n]+/g, (line, i: number) => `<span data-o="${at + i}">${escapeHtml(line)}</span>`);
 
 /**
- * HTML wyniku z zakresów, ten sam co z renderAligned (klasy .orig i del, podział na wiersze);
- * z positions dochodzą data-o i data-s. data-s wstawiamy do pierwszego znacznika HTML z maskHtml.
+ * HTML wyniku z zakresów, ten sam co z renderAligned (klasy .orig i del, podział na wiersze),
+ * a do tego tekst oryginału w <span data-o="pozycja"> i znacznik z data-s="indeks zakresu"
+ * (wstawiamy go do pierwszego znacznika HTML z maskHtml). Pozycje służą przeliczeniu zaznaczenia
+ * w wyniku na miejsca w oryginale; renderAligned (compare.ts) je zdejmuje.
  */
 export function renderSpansHtml(original: string, spans: Span[], opts: SpansHtmlOptions): string {
-  const { maskHtml, compare, positions = true } = opts;
+  const { maskHtml, compare } = opts;
   let html = '';
   let pos = 0;
   spans.forEach((s, i) => {
-    html += textHtml(original.slice(pos, s.start), pos, positions);
+    html += textHtml(original.slice(pos, s.start), pos);
     if (compare) html += origHtml(original.slice(s.start, s.end));
     const q = s.quoted ? '&quot;' : '';
     html += s.tokens
       .map((t, k) => {
-        const m = maskHtml(t);
-        const tagged = positions ? m.replace(/^<[a-z]+/i, `$& data-s="${i}"`) : m;
-        return (k ? escapeHtml(s.gaps[k - 1]) : '') + q + tagged + q;
+        const m = maskHtml(t).replace(/^<[a-z]+/i, `$& data-s="${i}"`);
+        return (k ? escapeHtml(s.gaps[k - 1]) : '') + q + m + q;
       })
       .join('');
     pos = s.end;
   });
-  return html + textHtml(original.slice(pos), pos, positions);
+  return html + textHtml(original.slice(pos), pos);
 }
 
 /** Liczba znaczników po nazwie tokenu; pseudonimy [OSOBA-A] liczą się jako imię i nazwisko. */

@@ -90,7 +90,6 @@ let lastInput = '';
 // Zakresy oryginał–znacznik bieżącego wyniku (spans.ts); null = wynik nie pasuje do oryginału
 // co do znaku, więc wszystko, co z zakresów korzysta, jest wyłączone.
 let lastSpans: Span[] | null = null;
-let lastKept = 0; // znaczniki zastane w oryginale, wg alignSpans
 // Rozszerzenie ostatnio wczytanego pliku (bez nazwy): po .csv „Pobierz” oddaje .csv.
 let lastFileExt = '';
 let viewMode: 'result' | 'compare' = 'result';
@@ -261,6 +260,8 @@ maskTogglesEl.append(
 /* ── Akcje zbiorcze „Co maskować” + licznik ── */
 const maskCountOn = $<HTMLElement>('mask-count-on');
 const maskOffNote = $<HTMLElement>('mask-off-note');
+// Komunikat pod wynikiem, którego nie da się dopasować do oryginału co do znaku (spans.ts, tryb
+// ścisły). Opis w kodzie, a nie w komentarzu HTML: komentarze z index.html trafiają do pliku.
 const spansNote = $<HTMLElement>('spans-note');
 const maskOffText = $<HTMLElement>('mask-off-text');
 const maskOffReset = $<HTMLButtonElement>('mask-off-reset');
@@ -424,14 +425,11 @@ function renderOutput(): void {
     // Bez zakresów zostaje dawna heurystyka, wyłącznie do podglądu (pod wynikiem stoi wtedy
     // #spans-note). Z zakresami tekst oryginału ma data-o, a znacznik data-s (indeks zakresu).
     const compare = viewMode === 'compare';
-    if (lastSpans) {
-      keptMasks = lastKept;
-      output.innerHTML = wrapLines(renderSpansHtml(lastInput, lastSpans, { maskHtml, compare }));
-    } else {
-      const { html, kept } = guessAligned(lastInput, lastRedacted, { tokenRe: MASK_TOKEN_RE, maskHtml, compare });
-      keptMasks = kept;
-      output.innerHTML = wrapLines(html);
-    }
+    const { html, kept } = lastSpans
+      ? { html: renderSpansHtml(lastInput, lastSpans, { maskHtml, compare }), kept: keptMasks }
+      : guessAligned(lastInput, lastRedacted, { tokenRe: MASK_TOKEN_RE, maskHtml, compare });
+    keptMasks = kept;
+    output.innerHTML = wrapLines(html);
   }
   refreshMaskNav();
 }
@@ -700,10 +698,8 @@ function renderFindings(found: PiiFinding[], tokens: Map<string, number> | null)
     add(meta, tokens ? 0 : Number(f.count) || 0);
   }
   if (tokens) {
-    for (const [token, n] of tokens) {
-      const meta = CHIP_BY_TOKEN[token] ?? { label: token.toLowerCase(), token, cat: maskCategory(token), icon: 'dane-id' };
-      add(meta, n);
-    }
+    // każdy token z MASK_TOKEN_RE ma chip (pilnuje pii-meta.test.ts)
+    for (const [token, n] of tokens) if (CHIP_BY_TOKEN[token]) add(CHIP_BY_TOKEN[token], n);
     for (const [label, v] of byLabel) if (!v.count) byLabel.delete(label);
   }
   const total = [...byLabel.values()].reduce((s, v) => s + v.count, 0);
@@ -820,9 +816,10 @@ function renderResult(redacted: string, found: PiiFinding[]): void {
   if (redacted !== lastRedacted) copyFlash.reset();
   lastRedacted = redacted;
   lastInput = input.value;
-  const aligned = alignSpans(lastInput, redacted);
+  // Ponad HIGHLIGHT_LIMIT nie ma podświetleń ani porównania: zakresy kosztowałyby czas przy każdej edycji.
+  const aligned = isTooBig() ? null : alignSpans(lastInput, redacted);
   lastSpans = aligned?.spans ?? null;
-  lastKept = aligned?.kept ?? 0;
+  keptMasks = aligned?.kept ?? 0; // z zakresami renderOutput go nie zmienia
   // Przy długim tekście i tak nie ma podświetleń ani porównania, więc komunikat nic by nie dodał.
   spansNote.hidden = !!lastSpans || isTooBig();
   setResultActions(true);

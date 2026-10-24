@@ -33,7 +33,10 @@ export function renderAligned(original: string, redacted: string, opts: AlignOpt
   const { tokenRe, maskHtml, compare } = opts;
   const strict = alignSpans(original, redacted, tokenRe);
   if (strict) {
-    const html = renderSpansHtml(original, strict.spans, { maskHtml, compare, positions: false });
+    // bez pozycji data-o i data-s: landing i compare.test.ts znają tylko dawny HTML
+    const html = renderSpansHtml(original, strict.spans, { maskHtml, compare })
+      .replace(/<span data-o="\d+">([^<]*)<\/span>/g, '$1')
+      .replace(/ data-s="\d+"/g, '');
     return { html, kept: strict.kept };
   }
   return guessAligned(original, redacted, opts);

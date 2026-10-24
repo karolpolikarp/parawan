@@ -4,6 +4,7 @@ import { ICONS } from './icons';
 import {
   CAT_LABELS,
   type Cat,
+  CHIP_BY_TOKEN,
   CHIP_META,
   catCountLabel,
   MASK_GROUP_DEFS,
@@ -35,6 +36,14 @@ test('chipy: wpis dla każdego typu z przełączników, z tokenem i ikoną', () 
     expect(PII_TOKENS[chip.token], type).toBeDefined();
     expect(ICONS[chip.icon], type).toBeTruthy();
   }
+});
+
+// Chipy z zakresów (main.ts, renderFindings) liczą znaczniki po nazwie tokenu, a token bez
+// wpisu w CHIP_BY_TOKEN nie dałby chipa. MASK_TOKEN_RE łapie wyłącznie klucze PII_TOKENS
+// (plus [OSOBA-X], liczone jako imię i nazwisko), więc każdy z nich musi mieć chip.
+test('chipy: każdy token z PII_TOKENS ma chip po nazwie tokenu', () => {
+  for (const token of [...Object.keys(PII_TOKENS), 'IMIĘ I NAZWISKO'])
+    expect(CHIP_BY_TOKEN[token], token).toBeDefined();
 });
 
 test('chipy: skróty zostają skrótami, reszta po polsku małą literą', () => {
