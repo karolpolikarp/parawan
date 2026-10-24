@@ -1042,10 +1042,13 @@ test('landing z dysku ładuje się bez żądań i błędów', async (t) => {
 });
 
 // L01: sekcje pobierania i „Dla IOD i IT” mieszczą się w szerokości ekranu na laptopie i telefonie
-// (pełna suma SHA-256 i nazwy zasad GPO to długie ciągi bez spacji).
+// (pełna suma SHA-256 i nazwy zasad GPO to długie ciągi bez spacji). 320 px to próg WCAG 1.4.10.
+// Lokalny build nie zna wydania i zamiast sumy ma odsyłacz do strony wydania, więc test wstawia
+// w oba miejsca to samo, co wstawia deploy (src/wydanie.ts): 64 znaki bez spacji w code.suma.
 for (const viewport of [
   { width: 1366, height: 768 },
   { width: 390, height: 844 },
+  { width: 320, height: 640 },
 ]) {
   test(`landing ${viewport.width}×${viewport.height}: bez przewijania w poziomie, #dla-iod w pasku`, async (t) => {
     await withApp(
@@ -1054,13 +1057,30 @@ for (const viewport of [
       '',
       async ({ page }) => {
         await page.waitForLoadState('load');
-        const { scroll, client, iod, links } = await page.evaluate(() => ({
+        const sumy = await page.evaluate(() => {
+          let n = 0;
+          for (const dd of document.querySelectorAll('.metryczka dd')) {
+            const brak = /^Suma jest podana na <a [^>]*>stronie wydania<\/a>\./;
+            if (!brak.test(dd.innerHTML)) continue;
+            dd.innerHTML = dd.innerHTML.replace(
+              brak,
+              `<code class="suma" translate="no">${'ab'.repeat(32)}</code><span class="suma-wer">Parawan.html w wersji 0.0.0.</span>`,
+            );
+            n++;
+          }
+          return n;
+        });
+        assert.equal(sumy, 2, 'suma SHA-256 ma stać w #pobierz i w #dla-iod');
+        const { scroll, client, iod, links, polecenia } = await page.evaluate(() => ({
           scroll: document.documentElement.scrollWidth,
           client: document.documentElement.clientWidth,
           iod: !!document.querySelector('section#dla-iod .metryczka-iod'),
           links: [...document.querySelectorAll('a[download]')].map((a) => a.getAttribute('href')),
+          polecenia: getComputedStyle(document.querySelector('.polecenia')).whiteSpace,
         }));
         assert.ok(scroll <= client, `przewijanie w poziomie: ${scroll} > ${client}`);
+        // jeden wiersz to jedno polecenie: na wąskim ekranie blok przewija się sam, nie łamie adresu
+        assert.equal(polecenia, 'pre');
         assert.ok(iod, 'brak sekcji #dla-iod z metryczką');
         assert.ok(
           links.includes('pobierz/Parawan.html'),

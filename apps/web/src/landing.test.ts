@@ -449,9 +449,11 @@ test('landing: „Jak sprawdzić” zachęca do zmyślonego tekstu i buduje z ta
   // polecenia budowy na stronie to te same wiersze co w DLA-IOD-I-IT.txt (tag zamiast {{WERSJA}})
   const pre = block(
     sprawdz,
-    /<pre class="csp polecenia"><code>[\s\S]*?<\/code><\/pre>/,
+    /<pre class="csp polecenia"[^>]*><code>[\s\S]*?<\/code><\/pre>/,
     'pre.polecenia',
   );
+  // na wąskim ekranie blok przewija się w poziomie, więc musi przyjąć fokus z klawiatury
+  expect(pre).toMatch(/^<pre class="csp polecenia" tabindex="0" role="region" aria-label="Polecenia budowy">/);
   const onPage = textOf(pre.replace(MARKERS.tag, 'v{{WERSJA}}')).split('\n');
   const inDla = (dla.match(/BUDOWA Z KODU\n[\s\S]*?\n((?: {4}\S.*\n)+)/)?.[1] ?? '')
     .split('\n')
@@ -506,6 +508,15 @@ test('landing: wydruk to sama sekcja #dla-iod', () => {
   expect(print).toMatch(/\.pasek/);
   expect(print).toMatch(/\.iod-pobierz/);
   expect(print).toMatch(/color: #000/);
+  // kartka w teczce IOD jest samodzielna: pełne polecenia sumy, a odsyłacze do innych sekcji
+  // strony stoją tylko w .tylko-ekran, którego wydruk nie pokazuje
+  expect(print).toMatch(/\.tylko-ekran \{ display: none; \}/);
+  expect(iodSection).toContain('<code>certutil -hashfile Parawan.html SHA256</code>');
+  expect(iodSection).toContain('<code>Get-FileHash .\\Parawan.html</code>');
+  expect(iodSection).not.toContain('wyżej');
+  const bezEkranu = iodSection.replace(/<span class="tylko-ekran">[\s\S]*?<\/span>/g, '');
+  expect(bezEkranu).not.toMatch(/href="#(?!dla-iod)/);
+  expect(textOf(bezEkranu)).not.toMatch(/punkt\S* \d/);
 });
 
 test('landing: ton nowych fragmentów bez wtrąceń i bez „nas”', () => {

@@ -395,7 +395,6 @@ textarea.editor:focus-visible { outline: 2px solid var(--acc); outline-offset: 2
 .kroki li > * { grid-column: 2; }
 .kroki p { font-size: 15.5px; line-height: 1.6; color: var(--mut-2); }
 .kroki pre + p { margin-top: 10px; }
-.polecenia { white-space: pre; overflow-x: auto; overflow-wrap: normal; }
 .kroki-pod { margin-top: 6px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 15.5px; line-height: 1.6; color: var(--text); font-weight: 600; max-width: 60ch; }
 .csp {
   margin-top: 12px; padding: 12px 14px; background: var(--card-2);
@@ -404,6 +403,9 @@ textarea.editor:focus-visible { outline: 2px solid var(--acc); outline-offset: 2
   white-space: pre-wrap; overflow-wrap: anywhere;
 }
 .csp code { font-size: 1em; }
+/* polecenia budowy: jeden wiersz to jedno polecenie, więc na wąskim ekranie przewijanie w poziomie
+   zamiast łamania adresu (podwójna klasa, bo .csp ma pre-wrap i tę samą wagę) */
+.csp.polecenia { white-space: pre; overflow-x: auto; overflow-wrap: normal; }
 .csp mark { background: rgba(185, 121, 31, .16); color: var(--gold-deep); font-weight: 700; padding: 0 2px; border-radius: 3px; }
 
 /* ── Skuteczność i ograniczenia ── */
@@ -465,7 +467,7 @@ textarea.editor:focus-visible { outline: 2px solid var(--acc); outline-offset: 2
 /* ── Dla IOD i działu IT: ta sama metryczka, szersza kolumna pytań ── */
 .metryczka-iod { grid-template-columns: 200px minmax(0, 1fr); }
 .metryczka-iod dd { max-width: 68ch; }
-.metryczka-iod code { overflow-wrap: anywhere; }
+.metryczka-iod code, .metryczka-iod a { overflow-wrap: anywhere; }
 .zasady { margin-top: 6px; padding-left: 18px; }
 .zasady li { margin-top: 3px; }
 .iod-pobierz { display: flex; flex-wrap: wrap; gap: 4px 14px; font-weight: 600; }
@@ -575,7 +577,9 @@ textarea.editor:focus-visible { outline: 2px solid var(--acc); outline-offset: 2
   #dla-iod code { background: none; padding: 0; color: #000; }
   .metryczka-iod { grid-template-columns: 44mm minmax(0, 1fr); }
   .metryczka-iod dt, .metryczka-iod dd { padding: 5pt 0; border-top: 0.5pt solid #000; break-inside: avoid; }
-  .metryczka-iod dt { font-size: 8pt; letter-spacing: .04em; }
+  .metryczka-iod dt { padding-right: 8pt; font-size: 8pt; letter-spacing: .04em; }
+  /* odsyłacze do „Jak sprawdzić”: tej sekcji nie ma na kartce */
+  .tylko-ekran { display: none; }
   .metryczka-iod dd { font-size: 10pt; line-height: 1.4; max-width: none; }
   .metryczka-iod dt:first-of-type, .metryczka-iod dt:first-of-type + dd { border-top-color: #000; }
 }
