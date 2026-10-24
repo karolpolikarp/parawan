@@ -202,7 +202,7 @@ test('protokół: wiersze z metadanych, bez nazwy pliku, z miejscem na wiersze k
   expect(pasted).toContain('Przejrzano znaczniki: przegląd niedostępny');
   expect(pasted).toContain(`Suma SHA-256 tekstu wyniku (UTF-8, końce wierszy LF): ${'ab'.repeat(32)}`);
   expect(pasted).toContain('Zatwierdził(a): Adam Wrona.');
-  expect(buildProtocol({ ...PROTOCOL, counts: new Map() })).toContain('Zasłonięto: żadnego fragmentu.');
+  expect(buildProtocol({ ...PROTOCOL, counts: new Map() })).toContain('Nie zasłonięto żadnego fragmentu.');
   expect(buildProtocol({ ...PROTOCOL, counts: counts([['EMAIL', 1]]) })).toContain(
     'Zasłonięto: 1 fragment w 1 rodzaju danych: e-mail (1).',
   );

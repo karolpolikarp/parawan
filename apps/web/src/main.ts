@@ -922,6 +922,7 @@ function update(): void {
     viewCompareBtn.disabled = false;
     syncOutputHint();
     setResultActions(false);
+    resetDocumentPublication(); // puste pole: następny tekst to już inne pismo
     syncPublication();
     measureSeq++; // zaległy pomiar długiego tekstu już nie obowiązuje
     lastUpdateMs = 0;
@@ -992,7 +993,18 @@ function flushPendingUpdate(): void {
 // <input> dopisanym kiedyś do takiego formularza nie może go wysłać ani przeładować strony.
 document.addEventListener('submit', (e) => e.preventDefault());
 
+// Tekst wstawiony w puste pole albo w miejsce całego tekstu (wklejenie, upuszczenie, pisanie po
+// zaznaczeniu wszystkiego) to nowe pismo, tak samo jak opróżnione pole: karta „Adnotacja
+// i protokół” nie może przenieść do niego znaku sprawy, ręcznej adnotacji ani „Dołącz”.
+let newDocument = false;
+input.addEventListener('beforeinput', (e) => {
+  const whole = !input.value.trim() || (input.selectionStart === 0 && input.selectionEnd === input.value.length);
+  newDocument = whole && e.inputType.startsWith('insert');
+});
+
 input.addEventListener('input', () => {
+  if (newDocument || !input.value.trim()) resetDocumentPublication();
+  newDocument = false;
   // Własna edycja zamyka błąd, bo już nie dotyczy, i „Cofnij”, bo po edycji przywróciłby tekst
   // sprzed niej i skasował to, co właśnie wpisano. Dopisek o pliku (np. o nagłówkach i stopkach,
   // których Parawan nie czyta) zostaje do zamknięcia: te części dalej są w oryginale, a fokus po
@@ -1113,6 +1125,7 @@ addEventListener('pagehide', () => {
 /** Zastąp cały tekst źródła; gdy było co stracić, pokaż pasek „Cofnij”. `info` to dopisek. */
 function replaceSource(text: string, note: string, info = ''): void {
   const prev = input.value;
+  if (prev !== text) resetDocumentPublication();
   const prevInfo = noteInfo;
   input.value = text;
   update();
@@ -1371,14 +1384,18 @@ function annexChanged(): void {
 
 const REMEMBER_MAX = 200;
 
-/** Zapamiętany organ i osoba. Wartość mógł zapisać obcy plik, więc tylko krótkie napisy. */
+/**
+ * Zapamiętany organ i osoba. Wartość mógł zapisać obcy plik, więc tylko krótkie napisy, a „Pamiętaj”
+ * włącza się tylko przy znaczniku z zaznaczenia pola i przy niepustym organie albo osobie.
+ */
 function readRemembered(): { organ: string; osoba: string } | null {
   try {
     const v = JSON.parse(storageGet('adnotacja') ?? 'null') as unknown;
     if (!v || typeof v !== 'object') return null;
-    const { organ, osoba } = v as Record<string, unknown>;
-    const str = (x: unknown): string => (typeof x === 'string' ? x.slice(0, REMEMBER_MAX) : '');
-    return { organ: str(organ), osoba: str(osoba) };
+    const { organ, osoba, pamietaj } = v as Record<string, unknown>;
+    const str = (x: unknown): string => (typeof x === 'string' ? x.slice(0, REMEMBER_MAX).trim() : '');
+    const kept = { organ: str(organ), osoba: str(osoba) };
+    return pamietaj === true && (kept.organ || kept.osoba) ? kept : null;
   } catch {
     return null;
   }
@@ -1386,13 +1403,31 @@ function readRemembered(): { organ: string; osoba: string } | null {
 
 function saveRemembered(): void {
   if (!pubRemember.checked) return;
-  storageSet('adnotacja', JSON.stringify({ organ: pubOrgan.value.trim(), osoba: pubOsoba.value.trim() }));
+  storageSet(
+    'adnotacja',
+    JSON.stringify({ pamietaj: true, organ: pubOrgan.value.trim(), osoba: pubOsoba.value.trim() }),
+  );
 }
 
 function syncOtherBasis(): void {
   const other = pubBasis.value === OTHER_BASIS;
   pubOther.hidden = !other;
   pubOtherLabel.hidden = !other;
+}
+
+/**
+ * Nowe pismo w polu źródła (plik, wklejenie w miejsce całego tekstu, puste pole): to, co dotyczy
+ * poprzedniego pisma, znika. Ręczna adnotacja mogła zawierać jego dane, a „Dołącz” przy zwiniętej
+ * karcie dopisałoby ją do nowego wyniku. Organ, osoba, podstawa i data zostają.
+ */
+function resetDocumentPublication(): void {
+  pubZnak.value = '';
+  for (const el of [pubAppend, ...pubChecks]) el.checked = false;
+  allReviewed = false;
+  annEdited = false;
+  refreshAnnotation();
+  copyFlash.reset();
+  syncPrintOut(); // druk i „Kopiuj” bez adnotacji jeszcze przed odłożonym przeliczeniem
 }
 
 /**
@@ -1403,14 +1438,12 @@ function clearPublication(): void {
   const kept = pubRemember.checked ? readRemembered() : null;
   pubOrgan.value = kept?.organ ?? '';
   pubOsoba.value = kept?.osoba ?? '';
-  for (const el of [pubZatw, pubOther, pubZnak]) el.value = '';
+  for (const el of [pubZatw, pubOther]) el.value = '';
   pubBasis.value = BASES[0].key;
   syncOtherBasis();
   pubDate.value = formatDate(new Date());
-  for (const el of [pubCounts, pubAppend, pubSha, ...pubChecks]) el.checked = false;
-  allReviewed = false;
-  annEdited = false;
-  refreshAnnotation();
+  for (const el of [pubCounts, pubSha]) el.checked = false;
+  resetDocumentPublication();
 }
 
 for (const el of [pubOrgan, pubOsoba, pubZatw, pubOther, pubDate]) {

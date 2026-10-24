@@ -341,7 +341,7 @@ test('pola karty: „Wyczyść” i „Przykład” czyszczą, „Pamiętaj” z
     await page.locator('#pub-remember').check();
     await fill();
     const stored = JSON.parse((await page.evaluate(() => localStorage.getItem('adnotacja'))) ?? 'null');
-    assert.deepEqual(stored, { organ: 'Wójt Gminy Testowo', osoba: 'Anna Testowa, inspektor' });
+    assert.deepEqual(stored, { pamietaj: true, organ: 'Wójt Gminy Testowo', osoba: 'Anna Testowa, inspektor' });
     await page.reload();
     await page.locator('#example').click();
     await openCard(page);
@@ -357,6 +357,84 @@ test('pola karty: „Wyczyść” i „Przykład” czyszczą, „Pamiętaj” z
     await openCard(page);
     await page.locator('#pub-remember').uncheck();
     assert.equal(await page.evaluate(() => localStorage.getItem('adnotacja')), null);
+  });
+});
+
+test('nowe pismo w polu źródła: znak sprawy, ręczna adnotacja i „Dołącz” nie przechodzą z poprzedniego', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const A = 'Wnioskodawca Jan Kowalski, PESEL 85071412358, zam. ul. Lipowa 5, 00-001 Warszawa.';
+    const B = 'Pismo B: Maria Nowak, tel. 600 700 800.';
+    const prepareA = async () => {
+      await page.locator('#input').fill(A);
+      await openCard(page);
+      await page.locator('#pub-znak').fill('GK.6220.1.2026');
+      await page.locator('#pub-adnotacja').press('End');
+      await page.locator('#pub-adnotacja').pressSequentially(' Dotyczy wniosku Jana Kowalskiego.');
+      await page.locator('#pub-append').check();
+      await page.locator('#publikacja .pub-check input').nth(1).check();
+    };
+    const assertFresh = async (what) => {
+      await page.locator('#publikacja').waitFor({ state: 'visible' });
+      // wzór adnotacji odświeża się po odłożonym przeliczeniu wyniku
+      await page
+        .waitForFunction(() => !/PESEL/.test(/** @type {HTMLTextAreaElement} */ (document.getElementById('pub-adnotacja')).value), null, { timeout: 3000 })
+        .catch(() => {});
+      const ann = await page.locator('#pub-adnotacja').inputValue();
+      assert.ok(!ann.includes('Kowalsk'), `${what}: ${ann}`);
+      assert.ok(!ann.includes('PESEL'), `${what}: zakres z pisma A: ${ann}`);
+      assert.equal(await page.locator('#pub-znak').inputValue(), '', what);
+      assert.equal(await page.locator('#pub-append').isChecked(), false, what);
+      assert.equal(await page.locator('#pub-reset-ann').isVisible(), false, what);
+      const lista = await page.locator('#publikacja .pub-check input').evaluateAll((els) =>
+        els.map((el) => /** @type {HTMLInputElement} */ (el).checked),
+      );
+      assert.deepEqual(lista, [false, false, false, false, false], what);
+      assert.ok(!(await page.locator('#print-annex').textContent())?.includes('Kowalsk'), `${what}: druk`);
+    };
+
+    // pisanie w miejsce całego tekstu (fill zaznacza wszystko i wstawia)
+    await prepareA();
+    await page.locator('#input').fill(B);
+    await assertFresh('po zastąpieniu tekstu');
+    // ręcznie opróżnione pole, potem kolejne pismo
+    await prepareA();
+    await page.locator('#input').fill('');
+    await page.locator('#input').pressSequentially('Pismo C: Ewa Lis.');
+    await assertFresh('po opróżnieniu pola');
+    // dopisanie do tego samego pisma nie rusza karty
+    await prepareA();
+    await page.locator('#input').press('End');
+    await page.locator('#input').pressSequentially(' Dopisek.');
+    assert.equal(await page.locator('#pub-znak').inputValue(), 'GK.6220.1.2026');
+    assert.equal(await page.locator('#pub-append').isChecked(), true);
+    // wklejenie w miejsce całego tekstu
+    if (BROWSER === 'chromium') {
+      await app.context.grantPermissions(['clipboard-read', 'clipboard-write']);
+      await page.evaluate((b) => navigator.clipboard.writeText(b), B);
+      await page.locator('#input').focus();
+      await page.keyboard.press('ControlOrMeta+A');
+      await page.keyboard.press('ControlOrMeta+V');
+      assert.equal(await page.locator('#input').inputValue(), B);
+      await assertFresh('po wklejeniu');
+    }
+  });
+});
+
+test('„Pamiętaj” nie włącza się od samego klucza zapisanego przez obcy plik', async (t) => {
+  await withApp(browser, t, '?demo', async (app) => {
+    const { page } = app;
+    for (const v of ['{}', '{"organ":"Obcy organ","osoba":"Ktoś"}', '{"pamietaj":true,"organ":"","osoba":" "}']) {
+      await page.evaluate((x) => localStorage.setItem('adnotacja', x), v);
+      await page.reload();
+      await page.locator('#example').click();
+      await openCard(page);
+      assert.equal(await page.locator('#pub-remember').isChecked(), false, v);
+      assert.equal(await page.locator('#pub-organ').inputValue(), '', v);
+      await page.locator('#pub-osoba').fill('Anna Urzędniczka');
+      assert.equal(await page.evaluate(() => localStorage.getItem('adnotacja')), v, `${v}: zapis bez zgody`);
+    }
+    await page.evaluate(() => localStorage.removeItem('adnotacja'));
   });
 });
 

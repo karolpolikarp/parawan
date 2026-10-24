@@ -192,7 +192,7 @@ export function buildProtocol(p: ProtocolInput): string {
   const list = items.map(([token, n]) => `${CHIP_BY_TOKEN[token]?.label ?? token} (${n})`).join(', ');
   const masked = total
     ? `Zasłonięto: ${fragments(total)} w ${kinds} ${kinds === 1 ? 'rodzaju' : 'rodzajach'} danych: ${list}.`
-    : 'Zasłonięto: żadnego fragmentu.';
+    : 'Nie zasłonięto żadnego fragmentu.';
   const file = p.source === 'wklejony' ? '' : ' Nazwy pliku nie zapisano.';
   const reviewed =
     p.reviewed === null

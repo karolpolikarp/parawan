@@ -24,7 +24,9 @@
  * (d) nowy klucz to wpis w ALLOWED_KEYS i w docs/wydanie/DLA-IOD-I-IT.txt;
  * (e) wyjątek od (a): klucz 'adnotacja' trzyma organ i osobę z karty „Adnotacja i protokół”
  *     (imię i nazwisko pracownika), ale tylko po zaznaczeniu „Pamiętaj organ i osobę na tym
- *     komputerze”, a odznaczenie go usuwa. Bez zgody pola żyją tylko w pamięci karty.
+ *     komputerze”, a odznaczenie go usuwa. Bez zgody pola żyją tylko w pamięci karty. Wartość
+ *     niesie znacznik „pamietaj”, a sama obecność klucza (np. „{}” od obcego pliku) nie włącza
+ *     „Pamiętaj” przy starcie.
  * storage.test.ts pilnuje, żeby każde wywołanie storageGet, storageSet i storageRemove miało klucz
  * z tej listy wpisany wprost, a tsc odrzuca każdy inny napis.
  */

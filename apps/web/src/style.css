@@ -912,6 +912,8 @@ select.inp { padding-right: 6px; }
 .chk { display: flex; align-items: flex-start; gap: 9px; font-size: 13.5px; line-height: 1.45; cursor: pointer; }
 .chk input { flex: none; width: 17px; height: 17px; margin-top: 1px; accent-color: var(--acc); cursor: pointer; }
 .chk-inline { display: inline-flex; }
+/* W kolumnie flex etykieta nie rozciąga się na całą szerokość: dymek i kliknięcie tylko nad polem i tekstem */
+.pub-col > .chk, .pub-check .chk { align-self: flex-start; }
 .pub-check { display: flex; flex-direction: column; gap: 9px; margin-top: 6px; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--r-ctl); background: var(--well); }
 .pub-check legend { padding: 0 6px; margin-left: -6px; }
 /* licznik przeglądu pod nagłówkiem wyniku: zielony, gdy przejrzano wszystkie znaczniki */
