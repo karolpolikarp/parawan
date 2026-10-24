@@ -2120,6 +2120,10 @@ const RE_URL_PROTECT = new RegExp(
     String.raw`facebook\.com\/profile\.php${URL_BARE_QUERY}|[a-z0-9-]+-my\.sharepoint\.com\/personal\/${URL_BARE_SEG})`,
   'g',
 );
+const RE_URL_PARAM_PERSON = new RegExp(
+  `([?&#][A-Za-z_]{1,30}=)(?=([${PL_UP}][${PL_LO}]+)[._+])([${PL_UP}][${PL_LO}]+(?:[._+][${PL_UP}][${PL_LO}]+){1,2})(?=[&#]|$)`,
+  'g',
+);
 function passProtectUrls(ctx: RedactCtx): void {
   // Kotwica KSeF liczona RAZ: to skan całego wejścia, a wewnątrz callbacku wykonywałby się
   // dla każdego adresu z osobna (dokument z tysiącami linków rósł kwadratowo — 3,7 s na 1 MB).
@@ -2164,6 +2168,18 @@ function passProtectUrls(ctx: RedactCtx): void {
         if (rule.type === 'LOGIN' && !val.includes('%') && isPropagatableLogin(val)) ctx.loginSeeds.add(val);
         ctx.bump(rule.type);
         return `${key}${ctx.M[rule.type]}`;
+      });
+    }
+    // Imię i nazwisko sklejone podkreślnikiem, kropką albo plusem w wartości DOWOLNEGO parametru
+    // („profile.php?ref=Anna_Nowak", „?from=Jan.Kowalski"): adres jest chroniony przed przebiegami
+    // osób, więc takie imię wychodziło jawne. Kotwicą jest imię ze słownika i drugi człon od
+    // wielkiej litery, cała wartość parametru (nie fragment wyrazu).
+    if (ctx.on('IMIE')) {
+      url = url.replace(RE_URL_PARAM_PERSON, (pm, key: string, first: string, val: string) => {
+        if (!POLISH_FIRST_NAMES.has(first.toLowerCase())) return pm;
+        ctx.bump('IMIE');
+        // w trybie pseudonimów ta sama osoba co w treści („Anna Nowak" → [OSOBA-A])
+        return `${key}${ctx.personMask(val.split(/[._+]/).pop() ?? val)}`;
       });
     }
     const sentinel = `${URL_SENTINEL_OPEN}${indexToLetters(ctx.protectedUrls.length)}${URL_SENTINEL_CLOSE}`;
@@ -4259,7 +4275,9 @@ function passPesel(ctx: RedactCtx): void {
     'PESEL',
   );
   // (c) z etykietą i ODSTĘPAMI między cyframi („851 103 142 83", „851103 14283", kratki formularza).
-  maskSpacedAfterLabel(ctx, /\b(pesel(?:\s+(?:to|o|nr|[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]{3,})){0,3})([\s:=.-]*[\s:=.|-])(\d(?:[ \t|-]{0,3}\d){10})(?![ \t|-]{0,3}\d)/gi, 'PESEL', isValidPesel);
+  // Grupy mogą przejść przez JEDNO łamanie wiersza („PESEL 851 103⏎142 83" z zawiniętej kolumny),
+  // ale tylko z poprawną sumą (pilnuje maskSpacedAfterLabel): ogon w nowej linii bywa innym polem.
+  maskSpacedAfterLabel(ctx, /\b(pesel(?:\s+(?:to|o|nr|[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]{3,})){0,3})([\s:=.-]*[\s:=.|-])(\d(?:(?:[ \t|-]{0,3}|[ \t]*\r?\n[ \t]*)\d){10})(?![ \t|-]{0,3}\d)/gi, 'PESEL', isValidPesel);
 }
 
 // Słowa za etykietą, które nie opisują numeru, tylko otwierają INNE pole albo mówią, że numeru nie
@@ -4278,14 +4296,22 @@ const RE_FOREIGN_FIELD_WORD =
  * Bez etykiety nic się nie zmienia: „Jan Kowalski 501 120 345 43" to telefon i wiek, nie PESEL.
  */
 function maskSpacedAfterLabel(ctx: RedactCtx, re: RegExp, type: PiiType, valid: (d: string) => boolean): void {
-  ctx.text = ctx.text.replace(re, (m, kw: string, sep: string, val: string) => {
+  ctx.text = ctx.text.replace(re, (m, kw: string, sep: string, val: string, off: number, str: string) => {
     // słowa etykiety tylko w tym samym wierszu i tylko takie, które opisują ten numer
     // („PESEL pacjenta:", „NIP nabywcy"); pierwsze słowo to sama etykieta
     if (kw.includes('\n') || kw.split(/\s+/).slice(1).some((w) => RE_FOREIGN_FIELD_WORD.test(w))) return m;
     const core = val.replace(/^PL[- ]?/, ''); // prefiks kraju przed NIP-em
-    if (!/[ \t|-]/.test(core)) return m;
+    if (!/[ \t|\n-]/.test(core)) return m;
     const d = core.replace(/\D/g, '');
-    const grouped = /^\d{2,}(?:[ -]\d{2,})+$/.test(core);
+    // Łamanie wiersza w środku numeru: najwyżej jedno. Z poprawną sumą zawsze, z literówką tylko
+    // grupy, które w nowej linii same domykają wiersz („PESEL: 851 103⏎142 84"), a nie początek
+    // innego pola z liczbą.
+    if (core.includes('\n')) {
+      if ((core.match(/\n/g) || []).length > 1) return m;
+      const tailEnds = /^[ \t]*(?:\r?\n|$)/.test(str.slice(off + m.length));
+      if (!valid(d) && !tailEnds) return m;
+    }
+    const grouped = /^\d{2,}(?:(?:[ -]|[ \t]*\r?\n[ \t]*)\d{2,})+$/.test(core);
     if (!grouped && !valid(d)) return m;
     ctx.bump(type);
     return `${kw}${sep}${ctx.M[type]}`;
@@ -4531,6 +4557,8 @@ function looksLikeAmount(full: string, offset: number, m: string): boolean {
 // Człon przed „/" lub „-", który nie robi z numeru identyfikatora: wyraz od wielkiej litery
 // (osobno od słów telefonicznych — flaga „i" zrównałaby \p{Lu} z małymi literami).
 const RE_PHONE_JOIN_WORD = /^(?:tel|telefon\p{L}*|kom|komórk\p{L}*|sms|gsm|fax|faks|kontakt\p{L}*|mob|mobile|cell|phone)$/iu;
+// Prefiksy numerów komórkowych w Polsce (9 cyfr bez kierunkowego kraju).
+const RE_PL_MOBILE_PREFIX = /^(?:45|5[0137]|6[069]|7[2389]|88)\d{7}$/;
 const isPersonalJoinPart = (s: string): boolean => /^\p{Lu}\p{Ll}+$/u.test(s) || RE_PHONE_JOIN_WORD.test(s);
 /**
  * Czy 9 cyfr to wnętrze identyfikatora („RR123456789PL", „FV/2026/123456789", „ZAM-123456789",
@@ -4545,7 +4573,16 @@ function gluedToIdentifier(full: string, offset: number, len: number): boolean {
   if (/\p{Lu}$/u.test(before)) return true;
   // „_" po literze lub cyfrze to łącznik identyfikatora („ZAM_123456789"), a ciąg podkreślników
   // po etykiecie — linia do wypełnienia w formularzu („Telefon: ____601 234 567" to telefon).
-  if (/[\p{L}\d]_+$/u.test(before)) return true;
+  // Wyjątek: człon przed „_" jest słowem telefonicznym („kontakt_tel_600111222") albo zwykłym
+  // wyrazem w nazwie pliku, a numer ma prefiks komórkowy („dok_600111222.pdf",
+  // „Wniosek_…_tel_600111222.pdf"). Kod wersalikami albo z cyfrą („ZAM_…", „x_123456789") dalej blokuje.
+  const us = /([\p{L}\d]+)_+$/u.exec(before);
+  if (us) {
+    const d = full.slice(offset, offset + len).replace(/\D/g, '').replace(/^(?:00)?48(?=\d{9}$)/, '');
+    const phoneWord = RE_PHONE_JOIN_WORD.test(us[1]);
+    const fileWord = /^(?:\p{Ll}{2,}|\p{Lu}\p{Ll}+)$/u.test(us[1]) && RE_PL_MOBILE_PREFIX.test(d);
+    if (!phoneWord && !fileWord) return true;
+  }
   // Token z literą sklejony „/" lub „-" blokuje, gdy któryś jego człon ma cyfrę albo „_" albo jest
   // skrótem lub słowem małymi literami („FV/2026/", „ZAM-", „sklep/order/"). Imię, nazwisko
   // i słowo telefoniczne przed numerem osoby nie blokują („Anna Nowak/601 234 567",
@@ -5121,6 +5158,16 @@ function passBirthDate(ctx: RedactCtx): void {
 const RE_MONTH_GEN_AHEAD =
   /^[ \t]+(?:stycznia|lutego|marca|kwietnia|czerwca|lipca|sierpnia|września|października|listopada|grudnia)(?!\p{L})/iu;
 const RE_MAY_AHEAD = /^[ \t]+(?:maja(?!\p{L})|(?:Maja|MAJA)(?!\p{L})(?![ \t]+\p{Lu}))/u;
+// Ciąg za liczbą po „Miejscowość Rynek N": data, okres, ilość albo lokal („5 maja", „5 lat temu",
+// „12 m. 4") — wtedy liczba nie jest gołym numerem urzędu na rynku, a para może być osobą.
+function rynekNoNotHouse(rest: string): boolean {
+  return (
+    RE_MONTH_GEN_AHEAD.test(rest) ||
+    RE_MAY_AHEAD.test(rest) ||
+    RE_QUANTITY_AFTER.test(rest) ||
+    /^[ \t]*(?:\/|[,.]?[ \t]*(?:m|lok|mieszk)\.?[ \t]*\d|lat(?!\p{L})|lata(?!\p{L})|r\.|rok)/u.test(rest)
+  );
+}
 // Silna etykieta adresu przed „ul. …" — po niej niejednoznaczny numer zostaje numerem domu. Też
 // „zamieszkały przy ul. …" i etykieta z dopowiedzeniem przed dwukropkiem („Adres lokalu:", „Adres
 // nieruchomości:", „Adres do korespondencji:") — bez niej strażnik ilości oddawał taki adres jawny.
@@ -5172,6 +5219,11 @@ function labeledPersonBeforeAddr(before: string): boolean {
 // Numer domu przed dniem albo rokiem daty („ul. Długiej 15 12 lipca", „ul. Polna 15 1998 r.",
 // „ul. Długa 5⇥2024-05-12") — adres kończy się na numerze domu, a dzień/rok zostaje za maską.
 const RE_HOUSE_NO_BEFORE_DATE = /^(.*[ \t]\d+[A-Za-z]?)([ \t]+\d{1,4})$/;
+// Numer domu przed PEŁNĄ datą z godziną („ul. Krótka 8 2024-05-12 10:20", „… 8 12.05.2024 10:20"):
+// data wchodzi w człon nazwy, a godzina staje się „numerem domu", więc cięcie po dniu albo roku
+// nie trafiało i strażnik godziny oddawał cały adres jawny.
+const RE_HOUSE_NO_BEFORE_DATETIME =
+  /^(.*[ \t]\d+[A-Za-z]?(?:\/\d+[A-Za-z]?)?)([ \t]+(?:(?:19|20)\d{2}-\d{2}-\d{2}|\d{1,2}\.\d{1,2}\.(?:19|20)\d{2})(?:[ \t]+\d{1,2})?)$/;
 // Numer domu po wyrazie nazwy, a za nim kropka i wielka litera następnego zdania.
 const RE_HOUSE_NO_SENTENCE_END = new RegExp(`(?<=[${PL_LO}])[ \\t]+\\d{1,4}[A-Za-z]?(?=\\.[ \\t]+[${PL_UP}][${PL_LO}])`);
 // Numer domu, także zakres bez odstępów („Hoża 41-43", „41–43"). Pierwszy człon zakresu najwyżej
@@ -5200,7 +5252,8 @@ const RE_ADDR_HAS_UNIT = /\d[A-Za-z]?[ \t]*\/[ \t]*\d|(?<![\p{L}])(?:m\.?|lok\.?
 // Długiej z Kowalskim 5 razy" to osoba, nie człon nazwy. Nie po członie-liczbie: w „Lokale przy ul.
 // Polnej 5 i Leśnej 7" liczba to numer domu pierwszego adresu, a nazwa „Polnej 5 i Leśnej" przez
 // strażnik prozy oddawała oba adresy jawne. Nazwa z liczbą na początku („3 Maja") kończy się literą.
-const ADDR_CONNECTOR = String.raw`(?:(?<!\d)[ \t]+(?:i|pod|nad|de|von|van|der|da|di|du|la|le|(?:z|ze)(?![ \t]+[${PL_UP}][${PL_LO}${PL_UP}]*(?:em|ą|ami|im|ym|imi|ymi)(?![${PL_LO}])))[ \t]+[${PL_UP}][${PL_LO}${PL_UP}.-]*)?`;
+// Tak samo numer z literą („ul. Polnej 5a i Pawilonie 4"): „5a" to numer domu, nie człon nazwy.
+const ADDR_CONNECTOR = String.raw`(?:(?<!\d[A-Za-z]?)[ \t]+(?:i|pod|nad|de|von|van|der|da|di|du|la|le|(?:z|ze)(?![ \t]+[${PL_UP}][${PL_LO}${PL_UP}]*(?:em|ą|ami|im|ym|imi|ymi)(?![${PL_LO}])))[ \t]+[${PL_UP}][${PL_LO}${PL_UP}.-]*)?`;
 // Liczba mnoga „Aleje/Alejach" to częściej nazwa (wystawy, imprezy) niż skrót adresu: sam rok za
 // nią to nie numer domu („Aleje Ujazdowskie 2024 to tytuł wystawy").
 const RE_ALEJE_PLURAL = /^alej(?:e|ach)$/i;
@@ -5240,11 +5293,20 @@ const RE_QUANTITY_NOM_PL = new RegExp(
   'u',
 );
 const RE_TIME_QUANTITY_AFTER = /^[ \t]+(?:minut|godzin|sekund|dni|dob|dób|lat(?!\p{L})|lata|miesi|tygodni|wiek|razy)/u;
+// Rzeczownik z orzeczeniem w liczbie mnogiej tuż za nim („ul. Kwiatowej 7 dzieci nie mają pokoju",
+// „ul. Polnej 5 dzieci bawiły się") to podmiot w mianowniku, a nie dopełniacz po liczebniku: po
+// liczebniku od pięciu orzeczenie stoi w liczbie pojedynczej („7 dzieci nie ma", „5 dzieci
+// bawiło się"). Liczba przed nim to więc numer domu. Nie dla miar czasu: „przy ul. Polnej 7 lat
+// mieszkali" to okres, a orzeczenie należy do innego podmiotu.
+const RE_PLURAL_VERB_AFTER_NOUN = /^[ \t]+\p{Ll}+[ \t]+(?:nie[ \t]+)?(?:są|\p{Ll}{2,}(?:ją|ą|ły|li))(?!\p{L})/u;
 function quantityAfter(m: string, rest: string): boolean {
   if (!RE_QUANTITY_AFTER.test(rest)) return false;
-  if (!RE_QUANTITY_NOM_PL.test(rest)) return true;
   const n = Number(/(\d+)\D*$/.exec(m)?.[1] ?? '0');
-  return n % 10 >= 2 && n % 10 <= 4 && !(n % 100 >= 12 && n % 100 <= 14);
+  const few = n % 10 >= 2 && n % 10 <= 4 && !(n % 100 >= 12 && n % 100 <= 14);
+  // (po 2–4 liczba mnoga orzeczenia jest zgodna z liczebnikiem: „3 osoby mieszkają")
+  if (!few && n > 1 && RE_PLURAL_VERB_AFTER_NOUN.test(rest) && !RE_TIME_QUANTITY_AFTER.test(rest)) return false;
+  if (!RE_QUANTITY_NOM_PL.test(rest)) return true;
+  return few;
 }
 // Rzeczownik z dwukropkiem i wartością za nim (do trzech wyrazów przed dwukropkiem) to etykieta
 // NASTĘPNEGO pola formularza spłaszczonego do wiersza („ul. Polna 5 dzieci: 2", „ul. Kwiatowa 7 osób
@@ -5367,7 +5429,9 @@ const PATRON_STREET_TITLES =
 // z sąsiedniej komórki („SP nr 1⇥Jana Pawła II⇥12" — liczba klas, „…⇥Jana Pawła II⇥98" — punkty)
 // to nie numer domu. Lokal „m."/„lok." także WERSALIKAMI („5 M. 2").
 const PATRON_STREET_HEAD_SRC = String.raw`(?<![\p{L}\p{N}])(?:(?<!\.)|(?<=(?<!\p{L})im\.))(?:(?:${PATRON_STREET_TITLES}) +)?(\p{Lu}\p{Ll}+)(?: +(\p{Lu}\p{Ll}+))? +(\p{Lu}\p{Ll}+(?:-\p{Lu}\p{Ll}+)?)(?: +[IVX]{1,4})?`;
-const PATRON_STREET_NUM_SRC = String.raw` +\d{1,4}[a-zA-Z]?(?: ?[/-] ?\d{1,4}[a-zA-Z]?)?(?: *(?:[mM]\.?(?= *\d)|[lL][oO][kK]\.|[lL]okal(?:u)?|LOKAL(?:U)?) *\d{1,3}[a-zA-Z]?)?`;
+// Liczba przed jednostką powierzchni („Mieszkanie Jana Nowaka 48 m2", „Działka … 1200 m2", „… 2 ha")
+// to metraż, nie numer domu, a „m" bez kropki to lokal tylko ze spacją przed numerem („30 m 2").
+const PATRON_STREET_NUM_SRC = String.raw` +\d{1,4}[a-zA-Z]?(?: ?[/-] ?\d{1,4}[a-zA-Z]?)?(?: *(?:[mM]\.(?= *\d)|[mM](?= +\d)|[lL][oO][kK]\.|[lL]okal(?:u)?|LOKAL(?:U)?) *\d{1,3}[a-zA-Z]?)?(?! *(?:[mM]2|[mM]²|[mM][kK][wW]|[mM]\.? ?[kK][wW]\.?|ha)(?![\p{L}\p{N}]))`;
 const PATRON_STREET_SRC = PATRON_STREET_HEAD_SRC + PATRON_STREET_NUM_SRC;
 // Po etykiecie adresu, zamieszkania albo „przy" ulica z numerem w dowolnym otoczeniu: miasto
 // wielką literą, kod pocztowy, „nr"/„pod nr", myślnik czy imię kolejnej osoby za numerem
@@ -5406,7 +5470,9 @@ const RE_PATRON_STREET_ROMAN = new RegExp(
   PATRON_STREET_HEAD_SRC.replace('(?: +[IVX]{1,4})?', ' +[IVX]{1,4}') +
     String.raw`(?:,? +(?:pod +)?nr\.?)?` +
     PATRON_STREET_NUM_SRC +
-    String.raw`(?![\p{L}\p{N}/])(?=\t| *(?:[,;:)(\-–—"|]|\.(?!\d)|\r?\n|$)|[ \t]+we?[ \t]+\p{Lu})`,
+    // (albo miejscowość tuż za numerem w tej samej komórce: „;Jana Pawła II 30/2 Kraków;" — sprawdza
+    // ją street0 w słowniku miejscowości)
+    String.raw`(?![\p{L}\p{N}/])(?=\t| *(?:[,;:)(\-–—"|]|\.(?!\d)|\r?\n|$)|[ \t]+we?[ \t]+\p{Lu}| +\p{Lu}\p{Ll}+(?:[ -]\p{Lu}\p{Ll}+)? *(?:[,;|\t]|\r?\n|$))`,
   'gu',
 );
 // Przed patronem z liczbą rzymską bez kotwicy adresu tylko początek wiersza albo komórki,
@@ -5427,7 +5493,8 @@ const RE_PATRON_STREET_TITLE_HEAD = new RegExp(String.raw`^(?:${PATRON_STREET_TI
 // Sam ukośnik („Jana Lisa 3/4", „Ocena Tomasza Mazura 3/5", „Zeszyty … 5/1") wygląda tak samo
 // jak udział, ocena czy odsyłacz, więc wskazuje adres dopiero z miejscowością za numerem; „m."
 // i „lok." wskazują go zawsze (w każdym trybie, także w prozie bez etykiety — patrz street()).
-const RE_PATRON_STREET_FLAT = /[ \t]\d{1,4}[a-zA-Z]?[ \t]*(?:m\.?|lok\.|lokalu?)[ \t]*\d{1,3}[a-zA-Z]?$/i;
+// „m" bez kropki tylko z odstępem przed numerem lokalu: „48 m2", „1200 m2" to powierzchnia, nie lokal.
+const RE_PATRON_STREET_FLAT = /[ \t]\d{1,4}[a-zA-Z]?[ \t]*(?:m\.[ \t]*|m[ \t]+|lok\.[ \t]*|lokalu?[ \t]*)\d{1,3}[a-zA-Z]?$/i;
 const RE_PATRON_STREET_SLASH = /[ \t]\d{1,4}[a-zA-Z]?\/(?!(?:19|20)\d\d(?!\d))\d{1,4}[a-zA-Z]?$/;
 // Lokal „m./lok." albo ułamek niewłaściwy („30/2", „14/3") — udział, ocena czy wynik osoby to
 // ułamek właściwy („1/2", „4/5", „12/40"), więc numerator większy od mianownika to numer lokalu.
@@ -5566,13 +5633,23 @@ const RE_PATRON_STREET_PERSON_SEP = /[ \t]*(?:[–—;(]|[ \t]-)[ \t]*$/u;
 const RE_PATRON_STREET_SAINT_BEFORE = /(?<!\p{L})(?:św|bł|ks|abp|bp)\.[ \t]*$|(?<!\p{L})święt\p{L}*[ \t]+$/iu;
 // Sam „dom" tuż przed ulicą („DOM PRZY STANISŁAWA WYSPIAŃSKIEGO 5", „dom przy …") to budynek, nie
 // instytucja jak „Dom Kultury przy …".
+const RE_PUBLIC_FACILITY_WORD =
+  /^(?:aptek\p{L}*|przychodni\p{L}*|hal[aięą]|sal[aięą]|parking\p{L}*|stadion\p{L}*|basen\p{L}*|boisk\p{L}*|kin[oaie]|kinie|poczt\p{L}*|bibliotek\p{L}*|muze\p{L}*|szpital\p{L}*|klinik\p{L}*|hospicj\p{L}*|przedszkol\p{L}*|żłob\p{L}*|liceum|gimnazj\p{L}*|hotel\p{L}*|dworz?c\p{L}*|targowisk\p{L}*|pawilon\p{L}*|cmentarz\p{L}*|kaplic\p{L}*|plebani\p{L}*|remiz\p{L}*|pływalni\p{L}*|lodowisk\p{L}*|zdrowia)$/u;
 function institutionBeforeAddr(before: string): boolean {
   const ws = before.replace(/[ \t]*,[ \t]*$/, '').split(/[ \t]+/).slice(-4);
   const lastIdx = ws[ws.length - 1] === '' ? ws.length - 2 : ws.length - 1;
   return ws.some((w, i) => {
     const l = w.toLowerCase().replace(/[^\p{L}]/gu, '');
     if (l === 'dom' && i === lastIdx) return false;
-    return (LEGAL_ENTITY_WORDS.has(l) && !ADDR_PLACE_ADJ_OK.has(l)) || ORG_HEAD_WORDS.has(l) || /^(?:urzęd|starostw|szkol(?!eni)|szkoł|parafi|kości|sąd|komend|ośrod)/.test(l);
+    return (
+      (LEGAL_ENTITY_WORDS.has(l) && !ADDR_PLACE_ADJ_OK.has(l)) ||
+      ORG_HEAD_WORDS.has(l) ||
+      /^(?:urzęd|starostw|szkol(?!eni)|szkoł|parafi|kości|sąd|komend|ośrod)/.test(l) ||
+      // obiekt publiczny („APTEKA PRZY TADEUSZA KOŚCIUSZKI 12", „Hala sportowa przy …", „Parking
+      // przy Jana Pawła II 30") — adres obiektu, nie osoby. Tylko goły wyraz w tym samym wierszu:
+      // „(sala gimnastyczna)⏎Miejsce szkolenia: Kraków, …" to dopisek do poprzedniego adresu.
+      (RE_PUBLIC_FACILITY_WORD.test(l) && /^\p{L}+$/u.test(w) && !ws.slice(i + 1).some((x) => x.includes('\n')))
+    );
   });
 }
 function patronStreetWithNumber(ctx: RedactCtx): void {
@@ -5641,6 +5718,9 @@ function patronStreetWithNumber(ctx: RedactCtx): void {
     // („Jana Pawła 12/4"), których przebieg osób nie bierze. Dostają maskę osoby jak w v0.46.23,
     // a liczba rzymska i numer zostają.
     if (mode === 'roman' || mode === 'fallback') {
+      // wyraz z wielkiej litery za numerem tylko jako miejscowość ze słownika
+      const cityAfter = mode === 'roman' ? /^ +(\p{Lu}\p{Ll}+(?:[ -]\p{Lu}\p{Ll}+)?) *(?:[,;|\t]|\r?\n|$)/u.exec(tail) : null;
+      if (cityAfter && !POLISH_CITIES.has(cityAfter[1].toLowerCase())) return null;
       const k = RE_PATRON_STREET_KEY.exec(before)?.[1];
       if ((k && RE_PATRON_STREET_KEY_NOT.test(k)) || institutionBeforeAddr(before)) return null;
       if (/(?<!\d)(?:1[89]|20)\d\d(?!\d)/.test(m)) return null;
@@ -5812,7 +5892,7 @@ function passAddress(ctx: RedactCtx): void {
       // Gdy przed dniem/rokiem stoi jeszcze numer domu, maskujemy adres bez daty — dawniej
       // strażnik oddawał całe dopasowanie i jawny zostawał cały adres.
       const beforeDate = (): string => {
-        const cut = RE_HOUSE_NO_BEFORE_DATE.exec(m);
+        const cut = RE_HOUSE_NO_BEFORE_DATETIME.exec(m) ?? RE_HOUSE_NO_BEFORE_DATE.exec(m);
         if (!cut) return m;
         ctx.bump('ADRES');
         return `${ctx.M.ADRES}${cut[2]}`;
@@ -6928,6 +7008,13 @@ function passPersonPairs(ctx: RedactCtx): void {
     // przed parą wygrywa z odczytem „dwa imiona" — to osoba. Bez kotwicy (i z liczbą rzymską za
     // parą: „Nagroda: Jan Pawła II") para zostaje jak dawniej. Drugie imię w dopełniaczu pośrodku
     // („mgr Andrzej Jana Pawła") też.
+    // Imię w MIANOWNIKU z dopełniaczem bez liczby rzymskiej za parą („Jan Pawła mieszka", „syn Piotr
+    // Pawła", „Ja, Krzysztof Pawła,") to osoba także bez kotwicy: dwa imiona stałyby w tym samym
+    // przypadku („Jan Paweł"), a papieża zawsze wyróżnia „II". Tak samo imię w bierniku, celowniku,
+    // narzędniku albo miejscowniku przed dopełniaczem („świadka Zofię Pawła", „po Janie Pawła",
+    // „z Janem Pawła") — niezgodność przypadków robi z drugiego członu nazwisko. Imię w dopełniaczu
+    // („wierzyciela Jana Pawła", „z powództwa Piotra Pawła") tylko z rolą przed parą, bo „Jana
+    // Pawła" bywa też dwojgiem imion albo patronem.
     if (k >= words.length && (k - start === 2 || (k - start === 3 && isFirstNameGenitive(words[start + 1].toLowerCase())))) {
       const f = words[start].toLowerCase();
       const g = words[k - 1].toLowerCase();
@@ -6941,10 +7028,17 @@ function passPersonPairs(ctx: RedactCtx): void {
         ) ||
         (!!prev?.[2] && prev[1].length >= 2) ||
         personSlotBefore(ctx.text, at);
+      const nomF = POLISH_FIRST_NAMES.has(f) && !isFirstNameGenitive(f);
+      const genF = isFirstNameGenitive(f);
+      const obliqueF = k - start === 2 && !nomF && !genF && !POLISH_FIRST_NAMES.has(f) && isFirstNameLike(f);
+      const roleGen =
+        !!prevTok && (CAPS_ROLE_OBLIQUE.has(prevTok) || prevTok === 'powództwa' || prevTok === 'wniosku' || prevTok === 'rzecz');
+      // Wyraz z wielkiej litery tuż za parą to nazwisko („Prezesa Zarządu Jana Kazimierza Nowaka"):
+      // para to wtedy dwa imiona, a osobę maskuje dalszy przebieg w całości, nie po kawałku.
+      const capAfter = /^ +\p{Lu}/u.test(ctx.text.slice(offset + m.length, offset + m.length + 3));
       if (
-        anchored &&
-        POLISH_FIRST_NAMES.has(f) &&
-        !isFirstNameGenitive(f) &&
+        !capAfter &&
+        (nomF || obliqueF || (genF && (anchored || roleGen))) &&
         isMaleFirstNameGenitive(g) &&
         !POLISH_FIRST_NAMES.has(g) &&
         !/^[ \t]+[IVX]{1,4}(?!\p{L})/u.test(ctx.text.slice(offset + m.length, offset + m.length + 8))
@@ -6958,8 +7052,29 @@ function passPersonPairs(ctx: RedactCtx): void {
     const surname = words[k];
     // „Sp" to skrót formy prawnej („Kierownik Sklepu Ewa Sp. z o.o.") — maska zjadała go razem z imieniem
     if (LEGAL_ENTITY_WORDS.has(surname.toLowerCase()) || /^sp$/i.test(surname)) return m;
-    // Miejscowość z rynkiem i numerem („Jaroslaw Rynek 5 to adres urzędu") — adres, nie osoba.
-    if (k === words.length - 1 && /^rynek$|^rynku$/i.test(surname) && /^[ \t]+\d/.test(ctx.text.slice(offset + m.length, offset + m.length + 6))) return m;
+    // Miejscowość z rynkiem i numerem („Jarosław Rynek 5 to adres urzędu") — adres, nie osoba. Tylko
+    // gdy pierwszy wyraz jest nazwą miejscowości, para stoi sama (bez roli, tytułu ani etykiety
+    // przed nią: „Świadek Anna Rynek 5" to osoba), a za nią po spacji (nie tabulatorze: liczba
+    // z sąsiedniej kolumny to nie numer domu) stoi goły numer domu, a nie data, okres czy lokal.
+    // Rynek to też nazwisko: w każdym innym układzie para idzie dalej jako osoba.
+    if (
+      k === words.length - 1 &&
+      k - 1 === start &&
+      /^(?:rynek|rynku)$/i.test(surname) &&
+      // (miejscowość albo wyraz spoza słownika imion, np. zapis bez znaków diakrytycznych „Jaroslaw")
+      (POLISH_CITIES.has(words[k - 1].toLowerCase()) || !POLISH_FIRST_NAMES.has(words[k - 1].toLowerCase())) &&
+      /^ +\d{1,3}[A-Za-z]?(?=[ \t]*(?:[,.;)]|$|[ \t]\p{Ll}))/u.test(ctx.text.slice(offset + m.length, offset + m.length + 12)) &&
+      !rynekNoNotHouse(ctx.text.slice(offset + m.length, offset + m.length + 40).replace(/^ +\d{1,3}[A-Za-z]?/, ''))
+    ) {
+      const at = offset + parts.slice(0, 2 * start).join('').length;
+      const prev = /(\p{L}+)\.?[ \t]*(:?)[ \t]*$/u.exec(ctx.text.slice(Math.max(0, at - 30), at));
+      const pt = prev?.[1]?.toLowerCase();
+      const anchored =
+        (!!pt && (ROLE_WORDS.has(pt) || TITLE_WORDS.has(pt) || PARTY_ROLE_WORDS.has(pt) || RE_TOPONYM_PERSON_ROLE.test(pt))) ||
+        !!prev?.[2] ||
+        personSlotBefore(ctx.text, at);
+      if (!anchored) return m;
+    }
     // Wiersz TSV w szyku „Nazwisko⇥Imię⇥Dział" („Nowak⇥Anna⇥Kardiologia", „Mazur⇥Grzegorz⇥Kierownik"):
     // wyraz za tabulatorem bez dowodu nazwiska to sąsiednia kolumna, a nazwiskiem jest komórka PRZED
     // imieniem. Rola, tytuł albo nazwa pola w tej kolumnie nigdy nie jest nazwiskiem („Jan⇥Operator").
@@ -7831,6 +7946,11 @@ const RE_CAPS_ROUTE_HEAD = /(?<!\p{L})(?:DROG|TRAS|ODCIN|ŚCIEŻK|CHODNIK|JEZDNI
  * przy pewnej kotwicy, a para, z której adres nie powstał, zostaje osobą — wyraz przed nią nie
  * zdejmuje już maski. Wyjątek: prawdziwa głowa nazwy instytucji albo obiektu („SZKOŁA …").
  */
+// Liczba w kształcie numeru domu za parą WERSALIKAMI. Rok („TRENY JANA KOCHANOWSKIEGO 1580", „ROK
+// ADAMA MICKIEWICZA 2022") i liczebnik przed rzeczownikiem („FRASZKI … 3 KSIĘGI") numerem nie są,
+// więc głowa nazwy utworu albo wydarzenia dalej chroni parę przed maską osoby.
+const RE_CAPS_HOUSE_NO_AFTER =
+  /^[ \t]+(?!(?:1\d|20)\d{2}(?!\d))\d{1,4}[A-Za-z]?(?![\p{L}\d])(?![ \t]+(?!(?:W|WE|I|M|LOK|NR)(?!\p{L}))\p{Lu}{2,})/u;
 function capsNameHeadBefore(t: string, offset: number, end?: number, n1?: string): boolean {
   const before = t.slice(Math.max(0, offset - 60), offset);
   const w = RE_CAPS_WORD_BEFORE.exec(before.slice(-30))?.[1];
@@ -7840,7 +7960,11 @@ function capsNameHeadBefore(t: string, offset: number, end?: number, n1?: string
   if (capsDocRunBefore(before)) return false;
   if (end === undefined) return !CAPS_HEAD_NOT_NAME.has(wl);
   const after = t.slice(end, end + 40);
-  if (/^[ \t]+\d/.test(after) && !capsOrgHead(wl)) return false;
+  // „SALA GIMNASTYCZNA PRZY ADAMA MICKIEWICZA 5", „OŚRODEK ZDROWIA PRZY …" — obiekt publiczny przy
+  // ulicy z patronem: adres obiektu, nie osoba ani adres osoby
+  if (wl === 'przy' && institutionBeforeAddr(before.slice(before.lastIndexOf('\n') + 1).replace(/[ \t]*PRZY[ \t]*$/u, ''))) return true;
+  // (przyimek albo rola przed parą: każda liczba, jak dotąd — „DZIAŁAJĄC PRZY ADAMA NOWAKA 5 RAZY")
+  if ((CAPS_HEAD_NOT_NAME.has(wl) ? /^[ \t]+\d/ : RE_CAPS_HOUSE_NO_AFTER).test(after) && !capsOrgHead(wl)) return false;
   if (!CAPS_HEAD_NOT_NAME.has(wl)) return true;
   if (!n1 || !isFirstNameGenitive(n1) || !/^(?:przy|od|do)$/.test(wl)) return false;
   // „PRZY ADAMA MICKIEWICZA" (bez numeru) to ulica

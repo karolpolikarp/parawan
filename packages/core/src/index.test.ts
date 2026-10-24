@@ -7775,10 +7775,11 @@ test('dom3: inwariant ulicy z patronem — para z numerem domu to [ADRES] albo o
 });
 test('dom3: patron z liczbą rzymską bez kotwicy — maska osoby jak w v0.46.23, odsyłacze i jednostki jawne', () => {
   masked([
-    // I1: adres bez pewnej kotwicy — para dostaje maskę osoby, liczba rzymska i numer zostają
-    ['Jana Pawła II 5/2 Kraków', `${N} II 5/2 Kraków`],
+    // I1: adres bez pewnej kotwicy — para dostaje maskę osoby, liczba rzymska i numer zostają.
+    // Miejscowość ze słownika tuż za numerem (dom3-fix2) jest kotwicą: cały adres to [ADRES].
+    ['Jana Pawła II 5/2 Kraków', `${A} Kraków`],
     ['Jana Pawła II 12 Lubień', `${N} II 12 Lubień`],
-    ['Anna Nowak, Jana Pawła II 5/2 Kraków', `${N}, ${N} II 5/2 Kraków`],
+    ['Anna Nowak, Jana Pawła II 5/2 Kraków', `${N}, ${A} Kraków`],
     ['Doręczono w dniu 3 listopada Jana Pawła II 5/2', `Doręczono w dniu 3 listopada ${N} II 5/2`],
     ['Lista mieszkańców bloku Jana Pawła II 14:', `Lista mieszkańców bloku ${N} II 14:`],
     ['Jana Pawła 12/4', `${N} 12/4`],
@@ -7823,4 +7824,142 @@ test('dom3: patron z liczbą rzymską bez kotwicy — maska osoby jak w v0.46.23
     'UNIWERSYTET ADAMA MICKIEWICZA',
     'Pontyfikat Jana Pawła II 26 lat',
   ]);
+});
+test('dom3-fix2: PESEL przez łamanie wiersza, adres przed datą z godziną, telefon w nazwie pliku, osoba w parametrze URL', () => {
+  masked([
+    ['PESEL 851 103\n142 83', 'PESEL [PESEL]'],
+    ['PESEL: 851 103\n142 83', 'PESEL: [PESEL]'],
+    // literówka w sumie: tylko grupy, które w nowej linii domykają wiersz
+    ['PESEL: 851 103\n142 84', 'PESEL: [PESEL]'],
+    ['Mieszka przy ul. Krótkiej 8 2024-05-12 10:20', 'Mieszka przy [ADRES] 2024-05-12 10:20'],
+    ['lokalizacja ul. Krótka 8 2024-05-12 10:20', 'lokalizacja [ADRES] 2024-05-12 10:20'],
+    ['zgłoszenie: ul. Krótka 8 12.05.2024 10:20', 'zgłoszenie: [ADRES] 12.05.2024 10:20'],
+    ['Skan: firma-my.sharepoint.com/.../Wniosek_PESEL_85010112345_tel_600111222.pdf', 'Skan: firma-my.sharepoint.com/.../Wniosek_PESEL_[PESEL]_tel_[TELEFON].pdf'],
+    ['kontakt_tel_600111222', 'kontakt_tel_[TELEFON]'],
+    ['dok_600111222.pdf', 'dok_[TELEFON].pdf'],
+    ['Profil: facebook.com/profile.php?id=1000045678&ref=Anna_Nowak', 'Profil: facebook.com/profile.php?id=[LOGIN]&ref=[IMIĘ I NAZWISKO]'],
+    ['Profil: facebook.com/profile.php?ref=Anna_Nowak', 'Profil: facebook.com/profile.php?ref=[IMIĘ I NAZWISKO]'],
+    ['https://example.com/a?from=Jan.Kowalski&x=1', 'https://example.com/a?from=[IMIĘ I NAZWISKO]&x=1'],
+  ]);
+  masked([['Profil: facebook.com/profile.php?ref=Anna_Nowak. Anna Nowak pisze.', 'Profil: facebook.com/profile.php?ref=[OSOBA-A]. [OSOBA-A] pisze.']], { pseudonyms: true });
+  // pułapki: inne pole w nowej linii, kod wersalikami, identyfikator bez prefiksu komórkowego, wartość bez imienia
+  keep([
+    'PESEL: 851 103\nTel. 142 83',
+    'ZAM_600111222',
+    'x_123456789',
+    'https://example.com/?utm_source=Facebook_Ads',
+    'https://example.com/a?page=Strona_Glowna',
+  ]);
+});
+test('dom3-fix2: adres z numerem domu przed podmiotem w liczbie mnogiej i z numerem z literą', () => {
+  masked([
+    ['W lokalu przy ul. Kwiatowej 7 dzieci nie mają własnego pokoju.', `W lokalu przy ${A} dzieci nie mają własnego pokoju.`],
+    ['Lokal przy ul. Polnej 5a i Pawilonie 4 wynajęto.', `Lokal przy ${A} i Pawilonie 4 wynajęto.`],
+  ]);
+  // pułapki: liczebnik z orzeczeniem w liczbie pojedynczej, miara czasu, 2–4 z liczbą mnogą
+  for (const t of ['Przy ul. Polnej 7 lat mieszkali.', 'Przy ul. Polnej 3 osoby mieszkają.', 'Przy ul. Polnej 7 dzieci nie ma pokoju.']) {
+    expect(redactPII(t).redacted, t).toContain('ul. Polnej');
+  }
+});
+test('dom3-fix2: „Imię Rynek N" — tylko miejscowość bez kotwicy to adres urzędu, osoba zostaje osobą', () => {
+  masked([
+    ['Świadek Anna Rynek 5', `Świadek ${N} 5`],
+    ['Wnioskodawca: Anna Rynek 5', `Wnioskodawca: ${N} 5`],
+    ['Wnioskodawca Jarosław Rynek 5', `Wnioskodawca ${N} 5`],
+    ['Anna Rynek 5 maja', `${N} 5 maja`],
+    ['Anna Rynek 5 lat temu', `${N} 5 lat temu`],
+    ['Jarosław Rynek 5 lat temu kupił dom', `${N} 5 lat temu kupił dom`],
+    ['Anna Rynek 12 m. 4', `${N} 12 m. 4`],
+    ['Jarosław Rynek 5 m. 4', `${N} 5 m. 4`],
+    ['Anna Rynek\t5', `${N}\t5`],
+    ['Jarosław Rynek\t5', `${N}\t5`],
+  ]);
+  keep(['Jarosław Rynek 5 to adres urzędu', 'Jaroslaw Rynek 5 to adres urzedu']);
+});
+test('dom3-fix2: metraż za parą z patronem to nie lokal', () => {
+  masked([
+    ['Mieszkanie Jana Nowaka 48 m2 wycenione na 300 tys. zł.', `Mieszkanie ${N} 48 m2 wycenione na 300 tys. zł.`],
+    ['Działka Anny Kowalskiej 1200 m2 położona w Lubniu.', `Działka ${N} 1200 m2 położona w Lubniu.`],
+    ['Lokal Tomasza Mazura 62 m2, 3 pokoje.', `Lokal ${N} 62 m2, 3 pokoje.`],
+    ['Nieruchomość Piotra Zająca 850 m2 – działka budowlana.', `Nieruchomość ${N} 850 m2 – działka budowlana.`],
+    // „m" bez kropki ze spacją przed numerem to dalej lokal
+    ['Lokator Adama Mickiewicza 30 m 2 zalega z czynszem.', `Lokator ${A} zalega z czynszem.`],
+    ['Lokator Adama Mickiewicza 30 m.2 zalega z czynszem.', `Lokator ${A} zalega z czynszem.`],
+  ]);
+  masked([['Mieszkanie Jana Nowaka 48 m2 wycenione.', 'Mieszkanie [OSOBA-A] 48 m2 wycenione.']], { pseudonyms: true });
+});
+test('dom3-fix2: nazwisko-homograf „Pawła" — imię w mianowniku albo w niezgodnym przypadku to osoba', () => {
+  masked([
+    ['Oględzin dokonano w obecności świadka Krzysztofa Pawła.', `Oględzin dokonano w obecności świadka ${N}.`],
+    ['Z wniosku wierzyciela Jana Pawła przeciwko dłużnikowi.', `Z wniosku wierzyciela ${N} przeciwko dłużnikowi.`],
+    ['W sprawie z powództwa Piotra Pawła o zapłatę.', `W sprawie z powództwa ${N} o zapłatę.`],
+    ['Na rzecz powoda Jana Pawła kwoty 5 000 zł.', `Na rzecz powoda ${N} kwoty 5 000 zł.`],
+    ['Sąd przesłuchał świadka Zofię Pawła.', `Sąd przesłuchał świadka ${N}.`],
+    ['Spadek po Janie Pawła, zmarłym dnia 5 stycznia 2024 r.', `Spadek po ${N}, zmarłym dnia 5 stycznia 2024 r.`],
+    ['Spotkanie z Janem Pawła.', `Spotkanie z ${N}.`],
+    ['Ja, Krzysztof Pawła, oświadczam.', `Ja, ${N}, oświadczam.`],
+    ['Ja, niżej podpisany Jan Pawła, oświadczam.', `Ja, niżej podpisany ${N}, oświadczam.`],
+    ['Sąsiad Piotr Pawła zakłóca ciszę.', `Sąsiad ${N} zakłóca ciszę.`],
+    ['Ustalono, że Piotr Pawła spożywał alkohol.', `Ustalono, że ${N} spożywał alkohol.`],
+    ['- syn Piotr Pawła, ur. 2010', `- syn ${N}, ur. 2010`],
+    ['- córka Anna Pawła, ur. 2013', `- córka ${N}, ur. 2013`],
+    ['Nabyli: żona Maria Pawła oraz syn Piotr Pawła po 1/2 części.', `Nabyli: żona ${N} oraz syn ${N} po 1/2 części.`],
+    ['Jan Pawła mieszka w Krakowie.', `${N} mieszka w ${C}.`],
+    ['Jan Pawła', N],
+    ['Pan\nPiotr Pawła\nTadeusza Kościuszki 30 m. 2\n35-002 Rzeszów', `Pan\n${N}\n${A}\n[KOD-POCZTOWY] ${C}`],
+    ['1\tJan Pawła\tJana Pawła II 30 m. 1', `1\t${N}\t${A}`],
+    ['2\tAnna Piotra\tJana Pawła II 30 m. 2', `2\t${N}\t${A}`],
+    ['| 1 | Jan Pawła | Jana Pawła II 30/2 | 1 200,00 zł |', `| 1 | ${N} | ${A} | 1 200,00 zł |`],
+  ]);
+  masked([['Świadek Jan Pawła. Jan Pawła zeznał.', 'Świadek [OSOBA-A]. [OSOBA-A] zeznał.']], { pseudonyms: true });
+  // pułapki: papież z liczbą rzymską, imieniny, patron szkoły
+  keep([
+    'Z wniosku wierzyciela Jana Pawła II przeciwko dłużnikowi.',
+    'Encyklika Jana Pawła II o pracy.',
+    'Pielgrzymka Jana Pawła II do Polski.',
+    'Imieniny Jana i Pawła.',
+    'Szkoła im. Jana Pawła w Lubniu.',
+    'Papież Jan Paweł II odwiedził Kraków.',
+    'Kierownik: Jan Pawła II',
+  ]);
+});
+test('dom3-fix2: WERSALIKI — rok i liczebnik za tytułem utworu, obiekt publiczny przy ulicy z patronem', () => {
+  keep([
+    'KONKURS RECYTATORSKI WIERSZY ADAMA MICKIEWICZA 2025',
+    'TRENY JANA KOCHANOWSKIEGO 1580',
+    'LEKTURA: BALLADY ADAMA MICKIEWICZA 1822',
+    'FRASZKI JANA KOCHANOWSKIEGO 3 KSIĘGI',
+    'SONETY ADAMA MICKIEWICZA 1826',
+    'ROK ADAMA MICKIEWICZA 2022',
+    'PIEŚNI JANA KOCHANOWSKIEGO 2 KSIĘGA',
+    'APTEKA PRZY TADEUSZA KOŚCIUSZKI 12 W TARNOWIE',
+    'HALA SPORTOWA PRZY STEFANA BATOREGO 12 W TARNOWIE',
+    'PRZYCHODNIA PRZY JANA PAWŁA II 30 W KRAKOWIE',
+    'SALA GIMNASTYCZNA PRZY ADAMA MICKIEWICZA 5',
+    'PARKING PRZY JANA PAWŁA II 30',
+    'OŚRODEK ZDROWIA PRZY ADAMA MICKIEWICZA 5 W LUBNIU',
+  ]);
+  // pułapki: numer domu z lokalem albo za „DOM/MIESZKANIE PRZY" dalej daje adres
+  masked([
+    ['DOM PRZY STANISŁAWA WYSPIAŃSKIEGO 5.', `DOM PRZY ${A}.`],
+    ['MIESZKANIE PRZY ADAMA MICKIEWICZA 5 W LUBNIU', `MIESZKANIE PRZY ${A} W LUBNIU`],
+    ['W LOKALU PRZY JANA PAWŁA II 30/2 W GORLICACH', `W LOKALU PRZY ${A} W GORLICACH`],
+  ]);
+});
+test('dom3-fix2 pułapki detektora: liczebnik po „PRZY" i dopisek z obiektem w poprzednim wierszu', () => {
+  masked([
+    ['DZIAŁAJĄC PRZY ADAMA NOWAKA 5 RAZY', `DZIAŁAJĄC PRZY ${N} 5 RAZY`],
+    [
+      'Zebranie rodziców klasy 3a – Jana Pawła II 5 (sala gimnastyczna)\nMiejsce szkolenia: Kraków, Jana Pawła II 41 (budynek B), sala 12',
+      `Zebranie rodziców klasy 3a – ${A} (sala gimnastyczna)\nMiejsce szkolenia: ${C}, ${A} (budynek B), sala 12`,
+    ],
+  ]);
+});
+test('dom3-fix2: wyciąg CSV — osoba i adres z patronem przed miejscowością w tej samej komórce', () => {
+  masked([
+    ['2025-01-05;Jan Pawła;Jana Pawła II 30/2 Kraków;150,00', `2025-01-05;${N};${A} Kraków;150,00`],
+    ['2025-01-05;Jan Nowak;Jana Pawła II 30 Kraków;150,00', `2025-01-05;${N};${A} Kraków;150,00`],
+  ]);
+  // pułapka: wyraz spoza słownika miejscowości za numerem nie robi z pary adresu
+  keep(['Laureat;Jana Pawła II 3 Miejsce;x']);
 });
