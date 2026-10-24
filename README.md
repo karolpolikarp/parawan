@@ -151,6 +151,7 @@ rozpoznaje charakterystyczny zapis (kolumna „Metoda”).
 | 🟤 Nr paszportu | kontekst „paszport” + 2 litery + 7 cyfr | `[NR-PASZPORTU]` |
 | 🟤 Numer KRS | kontekst „KRS” + 10 cyfr (też z zerami wiodącymi) | `[KRS]` |
 | 🟤 Numer KSeF | słowo „KSeF” gdziekolwiek w dokumencie + numer faktury `NIP-RRRRMMDD-znaki-suma` (też stary format 36-znakowy) z **sumą kontrolną NIP-u** w pierwszym członie | `[NR-KSEF]` |
+| 🟤 Nr księgi wieczystej | kod wydziału + 8 cyfr + cyfra kontrolna (`AB1C/12345678/9`, wagi 1-3-7) z poprawną sumą i znanym kodem sądu; po słowach „KW”, „Kw nr”, „księga wieczysta” także mimo złej sumy, z wyliczeniem kolejnych numerów | `[NR-KW]` |
 | 🟤 Nr prawa jazdy | kontekst „prawo jazdy” + numer (z cyfrą) | `[PRAWO-JAZDY]` |
 | 🟤 Nr rejestracyjny | kontekst „rejestracyjny/tablica/pojazd” + tablica (np. WI1234K); wyliczenia po przecinku i „oraz/i” z walidacją wyróżnika wojewódzkiego | `[NR-REJESTRACYJNY]` |
 | 🟤 VIN | 17 znaków bez I/O/Q; kontekst „VIN/nadwozia” lub wyraźny układ VIN | `[VIN]` |

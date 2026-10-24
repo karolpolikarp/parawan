@@ -50,6 +50,7 @@ export type PiiType =
   | 'PASZPORT'
   | 'KRS'
   | 'KSEF'
+  | 'KW'
   | 'PRAWO-JAZDY'
   | 'NR-REJESTRACYJNY'
   | 'VIN'
@@ -125,6 +126,7 @@ const MASK: Record<PiiType, string> = {
   PASZPORT: '[NR-PASZPORTU]',
   KRS: '[KRS]',
   KSEF: '[NR-KSEF]',
+  KW: '[NR-KW]',
   'PRAWO-JAZDY': '[PRAWO-JAZDY]',
   'NR-REJESTRACYJNY': '[NR-REJESTRACYJNY]',
   VIN: '[VIN]',
@@ -230,6 +232,28 @@ export function isValidDowod(raw: string): boolean {
     sum += val * w[i];
   }
   return sum % 10 === 0;
+}
+
+/**
+ * Numer księgi wieczystej: kod wydziału (dwie litery, cyfra, litera), 8 cyfr i cyfra kontrolna,
+ * np. „WA1M/00166077/5". Cyfra kontrolna = suma 12 pierwszych znaków z wagami 1, 3, 7 (powtarzanymi)
+ * modulo 10; cyfra to swoja wartość, litery mają X=10, A=11, B=12… z pominięciem Q i V (nie występują
+ * w kodach wydziałów), więc R=27, S=28, T=29, U=30, W=31, Y=32, Z=33. Algorytm potwierdzony
+ * 24.10.2026 na 17 prawdziwych numerach z publicznych ogłoszeń o przetargach (kody KR1P, GD1G,
+ * WR1K, WA1M, LD1M, SZ1S, LU1P): wszystkie przechodzą.
+ */
+const KW_ALPHABET = '0123456789XABCDEFGHIJKLMNOPRSTUWYZ';
+export function isValidKw(raw: string): boolean {
+  const s = raw.replace(/[\s/]/g, '').toUpperCase();
+  if (!/^[A-Z]{2}\d[A-Z]\d{9}$/.test(s)) return false;
+  const w = [1, 3, 7];
+  let sum = 0;
+  for (let i = 0; i < 12; i++) {
+    const v = KW_ALPHABET.indexOf(s[i]);
+    if (v < 0) return false;
+    sum += v * w[i % 3];
+  }
+  return sum % 10 === Number(s[12]);
 }
 
 /** Suma Luhna (mod 10) — walidacja numerów kart płatniczych. */
@@ -2036,6 +2060,11 @@ function passProtectUrls(ctx: RedactCtx): void {
     if (ksefInUrls) {
       url = url.replace(RE_KSEF_VALUE, maskKsefMatch(ctx));
     }
+    // Numer księgi w linku do przeglądarki ksiąg („…?kw=KR1P/00234567/6") — URL jest
+    // sentinelowany przed passKw, a z takim linkiem numer prowadzi wprost do odpisu.
+    if (ctx.on('KW')) {
+      url = url.replace(RE_KW_VALUE, maskKwMatch(ctx, RE_KW_URL_ANCHOR.test(url)));
+    }
     if (ctx.on('LOGIN')) {
       for (const re of URL_PROFILE_PATH_RULES) {
         url = url.replace(re, (_pm, key: string) => {
@@ -3388,6 +3417,75 @@ function passKsef(ctx: RedactCtx): void {
   if (!ctx.on('KSEF')) return;
   if (!hasKsefAnchor(ctx)) return;
   ctx.text = ctx.text.replace(RE_KSEF_VALUE, maskKsefMatch(ctx));
+}
+
+// 1e') NUMER KSIĘGI WIECZYSTEJ — PRZED passZnakSprawy: kształt „XXXX/NNNNNNNN/C" po etykiecie
+// „Sygn." albo „Znak:" pasuje do wartości znaku sprawy, a jawny numer KW przez publiczną
+// przeglądarkę ksiąg prowadzi wprost do właściciela nieruchomości.
+// Ukośnik może otaczać odstęp, a po ukośniku może się złamać wiersz (tak łamie numer edytor).
+// Po kotwicy separatorem bywa też sama spacja albo myślnik („KW WA1M 00512345 3"); bez kotwicy
+// wymagamy ukośników (patrz passKw), bo trzy człony rozdzielone spacją to zbyt pospolity układ.
+const KW_SEP = '(?:[ \\t]*[/-][ \\t]*(?:\\r?\\n[ \\t]*)?|[ \\t]+)';
+const KW_SHAPE = `([A-Za-z]{2}[1-9][A-Za-z])${KW_SEP}(\\d{8})${KW_SEP}(\\d)`;
+const RE_KW_VALUE = new RegExp(`(?<![\\p{L}\\d/])${KW_SHAPE}(?![\\p{L}\\d/]|[.,]\\d)`, 'gu');
+/** Pierwsze dwie litery kodów wydziałów ksiąg wieczystych (obszary sądów okręgowych). Bez kotwicy
+ *  maskujemy tylko te: sama cyfra kontrolna przepuszcza co dziesiąty kod produktu o tym kształcie
+ *  („AB1C/12345678/7"), a znana para liter zawęża to kilkunastokrotnie. Brak pary na liście
+ *  kosztuje najwyżej przeoczenie numeru bez słowa „KW" obok. */
+const KW_COURT_PREFIXES = new Set(
+  ('BB BI BY CZ EL GD GL GW JG KA KI KN KO KR KS KZ LD LE LM LU NS OL OP OS PL PO PR PT RA RZ ' +
+    'SI SL SR SU SW SZ TB TO TR WA WL WR ZA ZG').split(' '),
+);
+/** Kotwica przed numerem: „KW" wielkimi literami jako osobny wyraz (także „nr KW", „Nr_KW",
+ *  „<NumerKW>"), „Kw nr", „nr kw", dowolna odmiana „księga wieczysta" (także bez ogonków i sklejona
+ *  w kluczu „numerKsiegiWieczystej") i skrót „ks. wiecz.". Samo małe „kw." to kwartał albo
+ *  kwiecień, dlatego bez flagi /i: małe litery liczą się tylko po „nr"/„numer". */
+const RE_KW_ANCHOR =
+  /(?:(?<![\p{L}\d])(?:[Nn](?:umer|r)[_-]?)?KW(?![\p{L}\d])|(?<!\p{L})Kw\.?(?=[ \t]+nr)|(?<![\p{L}\d])[Nn](?:umer|r)\.?[ \t_-]*kw(?![\p{L}\d])|(?:[Kk]si[eę]g|KSI[EĘ]G)\p{L}{0,3}[ \t_-]*(?:[Ww]ieczyst|WIECZYST)\p{L}{0,3}|(?<!\p{L})[Kk]s\.[ \t]*wiecz\.)/u;
+/** Koniec zdania w oknie kotwicy. Kropka po „nr", „Kw" czy skrócie „wiecz." to nie koniec zdania. */
+const RE_KW_SENTENCE_END = /(?<!(?:\b[Nn]r|\b[Kk][Ww]|wiecz|\bks))[.!?](?=[ \t]+[A-ZĄĆĘŁŃÓŚŹŻ])|\n[ \t]*\n/g;
+/** Łącznik wyliczenia między dwoma numerami: „KW nr A, B i C" — kotwica pierwszego niesie resztę. */
+const RE_KW_LIST_GAP = /^(?:[ \t,;]|\r?\n|(?:i|oraz|lub|albo|a także)(?=[ \t]))*$/;
+/** Parametr adresu, który zapowiada numer księgi („…/wyszukiwanieKW?kw=KR1P/…"). */
+const RE_KW_URL_ANCHOR = /[?&#](?:kw|nr_?kw|numer_?kw|ksi[eę]g\w*)=/i;
+
+/** Kotwica w oknie 40 znaków przed numerem, w tym samym zdaniu (etykieta z poprzedniego wiersza
+ *  „KW:\n…" się liczy, ale nie z poprzedniego akapitu). */
+function kwAnchoredBefore(text: string, offset: number): boolean {
+  let win = text.slice(Math.max(0, offset - 40), offset);
+  let cut = -1;
+  RE_KW_SENTENCE_END.lastIndex = 0;
+  for (let m = RE_KW_SENTENCE_END.exec(win); m; m = RE_KW_SENTENCE_END.exec(win)) cut = m.index + m[0].length;
+  if (cut >= 0) win = win.slice(cut);
+  return RE_KW_ANCHOR.test(win);
+}
+
+/** Callback dla RE_KW_VALUE. `forced` — kotwica ustalona z zewnątrz (parametr URL-a). */
+function maskKwMatch(ctx: RedactCtx, forced = false) {
+  let prevEnd = -1;
+  return (m: string, code: string, num: string, c: string, offset: number, t: string): string => {
+    const anchored =
+      forced ||
+      kwAnchoredBefore(t, offset) ||
+      (prevEnd >= 0 && offset - prevEnd <= 12 && RE_KW_LIST_GAP.test(t.slice(prevEnd, offset)));
+    // Bez kotwicy tylko pełna pewność: wielkie litery, ukośniki, znany sąd i poprawna cyfra
+    // kontrolna. Przy kotwicy maskujemy mimo złej sumy (literówka w piśmie), jak PESEL po „PESEL:".
+    const ok =
+      anchored ||
+      (/^[A-Z]{2}\d[A-Z]$/.test(code) &&
+        m.split('/').length === 3 &&
+        KW_COURT_PREFIXES.has(code.slice(0, 2)) &&
+        isValidKw(`${code}${num}${c}`));
+    if (!ok) return m;
+    prevEnd = offset + m.length;
+    ctx.bump('KW');
+    return ctx.M.KW;
+  };
+}
+
+function passKw(ctx: RedactCtx): void {
+  if (!ctx.on('KW')) return;
+  ctx.text = ctx.text.replace(RE_KW_VALUE, maskKwMatch(ctx));
 }
 
 // 1f) ZNAK SPRAWY / ZNAK PISMA — sygnatura pisma urzędowego. Biegnie WCZEŚNIE, by zamaskować
@@ -7367,6 +7465,7 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   // PRZED passZnakSprawy (kształt numeru KSeF pasuje do wzorca znaku sprawy — dostawał wtedy
   // maskę [ZNAK-SPRAWY]) i PRZED passNip (inaczej znika sam NIP, reszta numeru zostaje jawna).
   passKsef(ctx);
+  passKw(ctx); // PRZED passZnakSprawy: numer KW po „Sygn."/„Znak:" dostawał maskę znaku sprawy
   passZnakSprawy(ctx);
 
   // ═════ FAZA 2 · IDENTYFIKATORY NUMERYCZNE (suma kontrolna / etykieta / długość) ═════
@@ -7437,6 +7536,7 @@ const HUMAN_LABEL: Record<PiiType, string> = {
   PASZPORT: 'numer paszportu',
   KRS: 'numer KRS',
   KSEF: 'numer KSeF',
+  KW: 'numer księgi wieczystej',
   'PRAWO-JAZDY': 'nr prawa jazdy',
   'NR-REJESTRACYJNY': 'nr rejestracyjny',
   VIN: 'VIN',

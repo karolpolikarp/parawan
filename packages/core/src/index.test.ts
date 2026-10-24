@@ -9,6 +9,7 @@ import {
   isValidIban,
   isValidDowod,
   isValidCard,
+  isValidKw,
 } from './index';
 
 // Buduje POPRAWNY IBAN z kodu kraju + BBAN (liczymy cyfry kontrolne mod 97),
@@ -230,6 +231,87 @@ test('KSEF — separatorem jest TYLKO myślnik (kolumny liczb i listy nie są sc
 test('KSEF — placeholder jest idempotentny', () => {
   const once = redactPII('Numer KSeF: 5265877635-20250826-0100001AF629-AF').redacted;
   expect(redactPII(once).redacted).toBe(once);
+});
+
+// ── Numer księgi wieczystej (K63). Numery zmyślone, z policzoną cyfrą kontrolną. ──
+test('isValidKw — wagi 1,3,7 i litery od X=10, A=11 (bez Q i V)', () => {
+  expect(isValidKw('KR1P/00234567/6')).toBe(true);
+  expect(isValidKw('WA2M/00512345/3')).toBe(true);
+  expect(isValidKw('SZ1S / 00076543 / 3')).toBe(true);
+  expect(isValidKw('LU1I/00045612/8')).toBe(true);
+  expect(isValidKw('KR1P/00234567/7')).toBe(false);
+  expect(isValidKw('KR1P/0023456/6')).toBe(false);
+  expect(isValidKw('KQ1P/00234567/6')).toBe(false);
+});
+test('KW — numer po kotwicy maskowany w całości, także przy złej cyfrze kontrolnej', () => {
+  expect(redactPII('Dłużniczka jest właścicielką nieruchomości objętej księgą wieczystą KW nr KR1P/00234567/6.').redacted).toBe(
+    'Dłużniczka jest właścicielką nieruchomości objętej księgą wieczystą KW nr [NR-KW].',
+  );
+  expect(redactPII('KW: GD1G/00098765/4').redacted).toBe('KW: [NR-KW]');
+  expect(redactPII('Kw nr LU1I/00045612/1').redacted).toBe('Kw nr [NR-KW]');
+  expect(redactPII('Sąd prowadzi księgę wieczystą WA2M/00512345/1 dla lokalu.').redacted).toBe(
+    'Sąd prowadzi księgę wieczystą [NR-KW] dla lokalu.',
+  );
+  expect(redactPII('KSIĘGA WIECZYSTA NR KR1P/00234567/1').redacted).toBe('KSIĘGA WIECZYSTA NR [NR-KW]');
+  expect(redactPII('Numer księgi wieczystej: KR1P/00234567/1').redacted).toBe('Numer księgi wieczystej: [NR-KW]');
+  // spacje wokół ukośników i złamanie wiersza po ukośniku
+  expect(redactPII('księga wieczysta nr WA2M / 00512345 / 3').redacted).toBe('księga wieczysta nr [NR-KW]');
+  expect(redactPII('dla której prowadzona jest księga wieczysta nr WA2M/\n00512345/3').redacted).toBe(
+    'dla której prowadzona jest księga wieczysta nr [NR-KW]',
+  );
+  // po kotwicy separatorem bywa sama spacja albo myślnik; bez kotwicy taki zapis zostaje
+  expect(redactPII('numer księgi wieczystej WA2M 00512345 3').redacted).toBe('numer księgi wieczystej [NR-KW]');
+  expect(redactPII('KW nr KR1P-00234567-6').redacted).toBe('KW nr [NR-KW]');
+  expect(redactPII('Partia WA2M 00512345 3 w magazynie').redacted).toBe('Partia WA2M 00512345 3 w magazynie');
+  // numer po „Sygn." nie dostaje maski znaku sprawy, a obok PESEL-u maska każdego typu osobno
+  expect(redactPII('Sygn. KR1P/00234567/6').redacted).toBe('Sygn. [NR-KW]');
+  expect(redactPII('Jan Kowalski, PESEL 44051401359, właściciel działki z KW KR1P/00234567/6.').redacted).toBe(
+    '[IMIĘ I NAZWISKO], PESEL [PESEL], właściciel działki z KW [NR-KW].',
+  );
+});
+test('KW — kotwica w kluczu XML/JSON, w nagłówku kolumny i w parametrze linku', () => {
+  expect(redactPII('<NumerKW>KR1P/00234567/1</NumerKW>').redacted).toBe('<NumerKW>[NR-KW]</NumerKW>');
+  expect(redactPII('"numerKsiegiWieczystej": "KR1P/00234567/1"').redacted).toBe('"numerKsiegiWieczystej": "[NR-KW]"');
+  expect(redactPII('{"nr_kw": "KR1P/00234567/1"}').redacted).toBe('{"nr_kw": "[NR-KW]"}');
+  expect(redactPII('Nr KW\tPowierzchnia\nKR1P/00234567/1\t120 m2').redacted).toBe('Nr KW\tPowierzchnia\n[NR-KW]\t120 m2');
+  expect(redactPII('Odpis: https://przegladarka-ekw.ms.gov.pl/eukw_prz/wyszukiwanieKW?kw=KR1P/00234567/6 pobrano.').redacted).toBe(
+    'Odpis: https://przegladarka-ekw.ms.gov.pl/eukw_prz/wyszukiwanieKW?kw=[NR-KW] pobrano.',
+  );
+  // parametr „kw" bywa słowem kluczowym wyszukiwarki: bez kształtu numeru nic nie znika
+  expect(redactPII('https://example.com/?kw=buty+zimowe').redacted).toBe('https://example.com/?kw=buty+zimowe');
+  expect(redactPII('https://sklep.example.com/produkt/AB1C/12345678/7').redacted).toBe('https://sklep.example.com/produkt/AB1C/12345678/7');
+});
+test('KW — wyliczenie po jednej kotwicy zasłania wszystkie numery', () => {
+  expect(
+    redactPII('Nieruchomości objęte KW nr KR1P/00234567/6, KR1P/00234567/1, WA2M/00512345/0 oraz WA2M/00512345/9.').redacted,
+  ).toBe('Nieruchomości objęte KW nr [NR-KW], [NR-KW], [NR-KW] oraz [NR-KW].');
+  expect(redactPII('KW nr KR1P/00234567/6,\nKR1P/00234567/1').redacted).toBe('KW nr [NR-KW],\n[NR-KW]');
+});
+test('KW — bez kotwicy tylko poprawna suma, wielkie litery i znany kod sądu', () => {
+  expect(redactPII('nieruchomość KR1P/00234567/6 położona w Krakowie').redacted).toBe('nieruchomość [NR-KW] położona w Krakowie');
+  expect(redactPII('nieruchomość KR1P/00234567/1 położona w Krakowie').redacted).toBe('nieruchomość KR1P/00234567/1 położona w Krakowie');
+  // kod produktu o kształcie numeru KW z poprawną sumą, ale nieznaną parą liter
+  expect(redactPII('Kod produktu AB1C/12345678/7 w magazynie').redacted).toBe('Kod produktu AB1C/12345678/7 w magazynie');
+  expect(redactPII('kr1p/00234567/6 w notatce').redacted).toBe('kr1p/00234567/6 w notatce');
+});
+test('KW — pułapki: kwartał, wzór numeru, sygnatury, działki, lokale, umowy, kotwica z innego zdania', () => {
+  const keep = [
+    'kw. 2026 r. wpłynął wniosek',
+    'Wpis do księgi wieczystej nastąpi po uprawomocnieniu.',
+    'Zamówienie nr AB1C/12345678/0',
+    'Wzór numeru księgi wieczystej: XXXX/XXXXXXXX/X',
+    'działka nr 245/7, lokal 12/3, umowa 12/2026/ZP',
+    'Dokonano wpisu w księdze wieczystej. Zamówienie nr AB1C/12345678/0',
+    'Wniosek z kw. 2026 dotyczy ZA1C/12345678/0',
+  ];
+  for (const t of keep) expect(redactPII(t).redacted).toBe(t);
+  expect(redactPII('Sygn. akt I C 123/24').redacted).toBe('Sygn. akt [ZNAK-SPRAWY]');
+});
+test('KW — placeholder jest idempotentny, a typ można wyłączyć', () => {
+  const once = redactPII('KW nr KR1P/00234567/6').redacted;
+  expect(redactPII(once).redacted).toBe(once);
+  expect(redactPII('KW nr KR1P/00234567/6', { types: ['PESEL'] }).redacted).toBe('KW nr KR1P/00234567/6');
+  expect(redactPII('KW nr KR1P/00234567/6').found).toEqual([{ type: 'KW', count: 1 }]);
 });
 
 // ── Redakcja: maskuje realne PII ──

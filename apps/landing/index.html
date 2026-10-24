@@ -10,7 +10,7 @@
     <title>Parawan: anonimizacja polskich danych osobowych offline</title>
     <meta
       name="description"
-      content="Parawan zasłania polskie dane osobowe (PESEL, NIP, numer KSeF, e-mail, adres i 19 innych typów), zanim tekst trafi do czatu AI. Jeden plik HTML, działa bez internetu."
+      content="Parawan zasłania polskie dane osobowe (PESEL, NIP, numer KSeF, e-mail, adres i 20 innych typów), zanim tekst trafi do czatu AI. Jeden plik HTML, działa bez internetu."
     />
     <link rel="canonical" href="https://parawan.karolwilczynski.com/" />
     <meta property="og:title" content="Parawan zasłania polskie dane osobowe, zanim wkleisz tekst do czatu AI" />
@@ -31,7 +31,7 @@
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "Parawan",
-        "description": "Anonimizator polskich danych osobowych w jednym pliku HTML. Rozpoznaje 24 typy danych regułami, słownikami i sumami kontrolnymi, bez modelu AI, i działa w przeglądarce bez internetu.",
+        "description": "Anonimizator polskich danych osobowych w jednym pliku HTML. Rozpoznaje 25 typów danych regułami, słownikami i sumami kontrolnymi, bez modelu AI, i działa w przeglądarce bez internetu.",
         "url": "https://parawan.karolwilczynski.com/",
         "downloadUrl": "https://github.com/karolpolikarp/parawan/releases/latest/download/Parawan.html",
         "applicationCategory": "UtilitiesApplication",
@@ -146,14 +146,14 @@
       <section class="dok" id="typy">
         <div class="wrap dok-siatka">
           <div class="dok-bok">
-            <h2>24 typy polskich danych w 5 kategoriach</h2>
+            <h2>25 typów polskich danych w 5 kategoriach</h2>
             <p>Parawan nie używa modelu AI. O każdym fragmencie rozstrzyga reguła, słownik albo suma kontrolna, więc ten sam tekst zawsze daje ten sam wynik. W pobranym pliku wybierasz, które typy zasłaniać.</p>
           </div>
           <div class="dok-tresc">
             <table class="kategorie" role="table">
               <caption class="vh">Typy danych według kategorii</caption>
               <tbody role="rowgroup">
-                <tr role="row"><th scope="row" role="rowheader"><span class="tl ct-ident">Identyfikatory · 15</span></th><td role="cell"><span class="chip-t ct-ident">PESEL</span> <span class="chip-t ct-ident">NIP</span> <span class="chip-t ct-ident">REGON</span> <span class="chip-t ct-ident">nr dowodu</span> <span class="chip-t ct-ident">nr paszportu</span> <span class="chip-t ct-ident">numer KRS</span> <span class="chip-t ct-ident">numer KSeF</span> <span class="chip-t ct-ident">znak sprawy</span> <span class="chip-t ct-ident">nr prawa jazdy</span> <span class="chip-t ct-ident">nr rejestracyjny</span> <span class="chip-t ct-ident">VIN</span> <span class="chip-t ct-ident">adres IP</span> <span class="chip-t ct-ident">adres MAC</span> <span class="chip-t ct-ident">token / JWT</span> <span class="chip-t ct-ident">login</span></td></tr>
+                <tr role="row"><th scope="row" role="rowheader"><span class="tl ct-ident">Identyfikatory · 16</span></th><td role="cell"><span class="chip-t ct-ident">PESEL</span> <span class="chip-t ct-ident">NIP</span> <span class="chip-t ct-ident">REGON</span> <span class="chip-t ct-ident">nr dowodu</span> <span class="chip-t ct-ident">nr paszportu</span> <span class="chip-t ct-ident">numer KRS</span> <span class="chip-t ct-ident">numer KSeF</span> <span class="chip-t ct-ident">nr księgi wieczystej</span> <span class="chip-t ct-ident">znak sprawy</span> <span class="chip-t ct-ident">nr prawa jazdy</span> <span class="chip-t ct-ident">nr rejestracyjny</span> <span class="chip-t ct-ident">VIN</span> <span class="chip-t ct-ident">adres IP</span> <span class="chip-t ct-ident">adres MAC</span> <span class="chip-t ct-ident">token / JWT</span> <span class="chip-t ct-ident">login</span></td></tr>
                 <tr role="row"><th scope="row" role="rowheader"><span class="tl ct-fin">Finanse · 2</span></th><td role="cell"><span class="chip-t ct-fin">IBAN / nr konta</span> <span class="chip-t ct-fin">nr karty płatniczej</span></td></tr>
                 <tr role="row"><th scope="row" role="rowheader"><span class="tl ct-contact">Kontakt · 2</span></th><td role="cell"><span class="chip-t ct-contact">e-mail</span> <span class="chip-t ct-contact">telefon</span></td></tr>
                 <tr role="row"><th scope="row" role="rowheader"><span class="tl ct-place">Adres · 3</span></th><td role="cell"><span class="chip-t ct-place">adres</span> <span class="chip-t ct-place">kod pocztowy</span> <span class="chip-t ct-place">miejscowość</span></td></tr>
@@ -164,7 +164,7 @@
             <div class="metoda">
               <div class="m-opis">
                 <h3>Sumy kontrolne</h3>
-                <p>Parawan sprawdza sumą kontrolną PESEL, NIP, REGON, IBAN, numer dowodu i numer karty, a w numerze KSeF sprawdza NIP wystawcy. Numer KSeF zasłania, gdy słowo „KSeF” pada gdziekolwiek w dokumencie. Kartę zasłania dopiero przy słowie „karta” albo nazwie sieci, np. Visa, bo sumę Luhna ma też numer IMEI telefonu.</p>
+                <p>Parawan sprawdza sumą kontrolną PESEL, NIP, REGON, IBAN, numer dowodu, numer księgi wieczystej i numer karty, a w numerze KSeF sprawdza NIP wystawcy. Numer KSeF zasłania, gdy słowo „KSeF” pada gdziekolwiek w dokumencie. Kartę zasłania dopiero przy słowie „karta” albo nazwie sieci, np. Visa, bo sumę Luhna ma też numer IMEI telefonu.</p>
               </div>
               <div class="para">
                 <dl>

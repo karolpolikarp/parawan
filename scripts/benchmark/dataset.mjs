@@ -938,6 +938,16 @@ export function buildDataset() {
   neg('Powód Kruk S.A. z siedzibą we Wrocławiu wniósł pozew. Pozwany Wilk Sp. z o.o. nie stawił się. Cudzoziemiec zam. w Sudanie. Jeżeli dziecko urodziło się 1 czerwca 2026 r., wniosek należy złożyć w terminie. Autem LPG 2010 dojechano. Zakup pojazdów: GBA 2023 r. Adres zamieszkania: Rubryka 7.', ['Kruk S.A.', 'Wilk Sp. z o.o.', 'Sudanie', '1 czerwca 2026', 'LPG 2010', 'GBA 2023', 'Rubryka 7']);
   str('Strony: Anna Kowalska – Jana Pawła II 5. Adres: Kazimierza Wielkiego 12\nImię;Nazwisko;Miasto\nWakat;-;Warszawa\nJan;Kowalski;Kraków', ['Anna Kowalska', 'Jana Pawła II 5', 'Kazimierza Wielkiego 12', 'Jan;Kowalski', ';Kraków'], ['Strony:', 'Wakat;-;Warszawa', 'Imię;Nazwisko;Miasto']);
 
+  // K63 — numer księgi wieczystej (numery zmyślone). Po kotwicy „KW"/„księga wieczysta" także przy
+  // złej cyfrze kontrolnej, bez kotwicy tylko z poprawną sumą i znanym kodem sądu.
+  str('Nieruchomość objęta księgą wieczystą KW nr KR1P/00234567/6 prowadzoną przez Sąd Rejonowy.', ['KR1P/00234567/6'], ['księgą wieczystą KW nr', 'prowadzoną']);
+  str('działka nr ewid. 123/4, obręb 0005 Brzozowa Wola, KW OS1W/00012345/6.', ['OS1W/00012345/6'], ['123/4', 'obręb 0005']);
+  str('Lokal w budynku na nieruchomości WA2M/00512345/3, księgi lokalowej brak.', ['WA2M/00512345/3'], ['Lokal w budynku']);
+  str('Nieruchomości objęte KW nr KR1P/00234567/6, KR1P/00234567/1 oraz WA2M/00512345/0.', ['KR1P/00234567/6', 'KR1P/00234567/1', 'WA2M/00512345/0'], ['Nieruchomości objęte KW nr']);
+  neg('Sygn. akt I C 123/24 dotyczy działki 245/7 i lokalu 12/3 z umowy 12/2026/ZP.', ['245/7', '12/3', '12/2026/ZP']);
+  neg('Wpis do księgi wieczystej nastąpi w kw. 2026. Zamówienie nr AB1C/12345678/0, kod AB1C/12345678/7.', ['księgi wieczystej', 'kw. 2026', 'AB1C/12345678/0', 'AB1C/12345678/7']);
+  neg('Wzór numeru księgi wieczystej: XXXX/XXXXXXXX/X. Nieruchomość KR1P/00234567/1 w zestawieniu.', ['XXXX/XXXXXXXX/X', 'KR1P/00234567/1']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {
