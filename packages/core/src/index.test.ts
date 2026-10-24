@@ -7578,3 +7578,55 @@ test('dom2-fix1: rola procesowa WERSALIKAMI w dopełniaczu, ulica „Jana Pawła
   expect(redactPII('Przepisał mieszkanie na Jana Kowalskiego 1/2 udziału.').redacted).not.toContain('[ADRES]');
   expect(redactPII('adresat="Jana Kowalskiego 5/2"').redacted).not.toContain('[ADRES]');
 });
+
+test('dom2-fix2: ulica „Jana Pawła II" pod etykietą WERSALIKAMI, w kluczu z numerem, w gołym CSV i kopercie; udział w tabeli; wieś-homonim w kopercie', () => {
+  masked([
+    // goły CSV z przecinkami bez nagłówka i komórka z kodem pocztowym między ulicą a miejscowością
+    ['Halyna Roman,hroman,,Jana Pawła II 5/2,Lubień', 'Halyna Roman,hroman,,[ADRES],Lubień'],
+    ['Jan,Kowalski,Jana Pawła II 30/2,Lubień', `Jan,${N},[ADRES],Lubień`],
+    ['"Halyna Roman","hroman","","Jana Pawła II 5/2","34-500","Lubień"', '"Halyna Roman","hroman","","[ADRES]","[KOD-POCZTOWY]","Lubień"'],
+    ['Halyna Roman;hroman;;Jana Pawła II 5/2;34-500;Lubień', 'Halyna Roman;hroman;;[ADRES];[KOD-POCZTOWY];Lubień'],
+    // etykiety WERSALIKAMI, „Korespondencja:", miejscowość przed przecinkiem, koperta bez kodu
+    ['ZAM. Jana Pawła II 5/2', 'ZAM. [ADRES]'],
+    ['ŚWIADEK ZOFIA KOWAL, ZAM. Jana Pawła II 5/2, Lubień', `ŚWIADEK ${N}, ZAM. [ADRES], Lubień`],
+    ['ZAMIESZKAŁY: Jana Pawła II 5/2', 'ZAMIESZKAŁY: [ADRES]'],
+    ['ADRES DO DORĘCZEŃ: Jana Pawła II 5/2', 'ADRES DO DORĘCZEŃ: [ADRES]'],
+    ['ADRES DO KORESPONDENCJI: Jana Pawła II 5', 'ADRES DO KORESPONDENCJI: [ADRES]'],
+    ['Korespondencja: Jana Pawła II 5/2', 'Korespondencja: [ADRES]'],
+    ['zamieszkały w Lubniu, Jana Pawła II 30/2', 'zamieszkały w [MIEJSCOWOŚĆ], [ADRES]'],
+    ['Lubień, Jana Pawła II 30/2', 'Lubień, [ADRES]'],
+    ['Jan Nowak\nJana Pawła II 5/2\nLubień', `${N}\n[ADRES]\nLubień`],
+    // klucz pola z numerem
+    ['addressLine1: Jana Pawła II 5/2', 'addressLine1: [ADRES]'],
+    ['address_line_1="Jana Pawła II 5/2"', 'address_line_1="[ADRES]"'],
+    ['adres2: Jana Pawła II 5', 'adres2: [ADRES]'],
+    ['Adres 2: Jana Pawła II 5', 'Adres 2: [ADRES]'],
+    // osoba z udziałem w tabeli zostaje osobą, ułamek zostaje
+    ['"Udział";"Adama Nowaka 1/2";"Kraków"', `"Udział";"${N} 1/2";"Kraków"`],
+    ['Współwłaściciel\tAdama Nowaka 1/2\tKraków', `Współwłaściciel\t${N} 1/2\tKraków`],
+    ['"Nagroda";"Jana Kowalskiego 1/2";"Warszawa"', `"Nagroda";"${N} 1/2";"Warszawa"`],
+    ['"Oceny";"Jana Kowalskiego 3/5";"Kraków"', `"Oceny";"${N} 3/5";"Kraków"`],
+    // wieś o nazwie z listy odsyłaczy w bloku koperty
+    ['Pan\nJan Kowalski\nPokój 12\n46-034 Pokój', `Pan\n${N}\n[ADRES]\n[KOD-POCZTOWY] [MIEJSCOWOŚĆ]`],
+    ['Pani\nAnna Nowak\nGrupa 12\n86-134 Dragacz', `Pani\n${N}\n[ADRES]\n[KOD-POCZTOWY] [MIEJSCOWOŚĆ]`],
+  ]);
+  for (const t of ['Pan\nJan Kowalski\nPokój 12\n46-034 Pokój', 'Jan Nowak\nJana Pawła II 5/2\nLubień', 'ADRES DO DORĘCZEŃ: Jana Pawła II 5/2']) {
+    expect(redactPII(t, { pseudonyms: true }).redacted).toContain('[ADRES]');
+  }
+  // pułapki: proza z ułamkami, dalszy ciąg zdania za „Miasto, …", pokój pod urzędem i pod ulicą
+  for (const t of [
+    'Oceny: Jana Kowalskiego 3/5, Anny Nowak 4/5',
+    'Wyniki,Jana Kowalskiego 3/5,Anny Nowak 4/5',
+    'Spadkobierca;Jana Kowalskiego 1/2;Kraków',
+    'Kraków, Jana Kowalskiego 3 lata temu',
+    'mieszkanie w Krakowie, Jana Kowalskiego 1/2 udziału',
+    'Lista\nJan Nowak\nJana Kowalskiego 12\nPiotr Lis',
+    'Pan\nJan Kowalski\nul. Wiejska 4\nPokój 12\n00-001 Warszawa',
+    'Wydział Kadr\nPokój 12\n00-001 Warszawa',
+    'Grupa 12\n86-134 Dragacz',
+    'Korespondencja z dnia 12.03.2024',
+  ]) {
+    const r = redactPII(t).redacted;
+    expect(r.split('[ADRES]').length - 1, t).toBe(t.includes('ul. Wiejska') ? 1 : 0);
+  }
+});
