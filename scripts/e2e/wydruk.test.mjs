@@ -397,12 +397,18 @@ test('stopki kart źródła i wyniku na jednej wysokości, bez pustego pasa nad 
       page.evaluate(() => {
         const box = (el) => el.getBoundingClientRect();
         const card = (id) => document.getElementById(id).closest('.card-ed');
-        const parts = (c) => ({
-          grip: box(c.querySelector('.card-b .ed-grip')).bottom,
+        const parts = (c) => {
           // pierwsza widoczna stopka (stopka ręcznych poprawek A09 jest ukryta, dopóki ich nie ma)
-          foot: box(c.querySelector(':scope > .card-f:not([hidden])')).top,
-          bottom: box(c).bottom,
-        });
+          const f = c.querySelector(':scope > .card-f:not([hidden])');
+          const cs = getComputedStyle(f);
+          return {
+            grip: box(c.querySelector('.card-b .ed-grip')).bottom,
+            foot: box(f).top,
+            // kreska i odstęp nad tekstem stopki: ukryta stopka przed nią nie może ich zdjąć
+            line: `${cs.borderTopWidth} ${cs.paddingTop}`,
+            bottom: box(c).bottom,
+          };
+        };
         return {
           src: parts(card('input')),
           out: parts(card('output')),
@@ -422,6 +428,7 @@ test('stopki kart źródła i wyniku na jednej wysokości, bez pustego pasa nad 
       const at = `${width} px`;
       const gap = (p) => Math.round(p.foot - p.grip);
       assert.equal(gap(m.src), gap(m.out), `${at}: odstęp nad stopką źródła ${gap(m.src)} px, wyniku ${gap(m.out)} px`);
+      assert.equal(m.out.line, m.src.line, `${at}: kreska i odstęp stopki wyniku ${m.out.line}, źródła ${m.src.line}`);
       if (aligned) {
         assert.equal(Math.round(m.src.foot), Math.round(m.out.foot), `${at}: stopki ${m.src.foot} i ${m.out.foot}`);
         assert.equal(Math.round(m.src.grip), Math.round(m.out.grip), `${at}: uchwyty okien ${m.src.grip} i ${m.out.grip}`);

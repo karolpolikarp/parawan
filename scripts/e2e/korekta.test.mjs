@@ -101,7 +101,7 @@ test('„Zostaw jawne” pod podpisem wójta: schowek z nazwiskiem wójta, PESEL
     await sig.click();
     const bar = page.getByRole('group', { name: 'Działania dla bieżącego fragmentu' });
     await bar.waitFor();
-    assert.match(await bar.innerText(), /imię i nazwisko · pod znacznikiem: «Sławomir Kędzierski»/);
+    assert.match(await bar.innerText(), /imię i nazwisko · pod znacznikiem: „Sławomir Kędzierski”/);
     assert.equal(await bar.getAttribute('translate'), 'no');
     await bar.getByRole('button', { name: 'Zostaw jawne', exact: true }).click();
     await bar.getByRole('button', { name: 'Zasłoń ponownie' }).waitFor();
@@ -258,7 +258,7 @@ test('samą klawiaturą: „Anną” zaznaczona Shift+strzałkami w polu źród�
     await page.keyboard.press('ArrowDown'); // „Anną” w pierwszym wierszu (zasłonięta ręcznie)
     await page.keyboard.press('Enter');
     assert.equal(await page.evaluate(() => document.activeElement?.id), 'fix-keep');
-    assert.match(await page.locator('#fix-bar').innerText(), /zasłonięte ręcznie: «Anną»/);
+    assert.match(await page.locator('#fix-bar').innerText(), /zasłonięte ręcznie: „Anną”/);
     // Esc wraca na znacznik
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('#fix-bar').isHidden(), true);
@@ -303,5 +303,79 @@ test('edycja źródła przesuwa poprawki, a „Wyczyść” usuwa wszystkie', as
     await paste(page, DECYZJA);
     assert.equal(await page.locator('#output mark.pii-kept').count(), 0);
     assert.equal(await page.locator('#fix-foot').isHidden(), true);
+  });
+});
+
+// Poprawki po weryfikacji A09: odsłonięcie nie rośnie razem z zakresem, ręczne zasłonięcia nie
+// znikają po cichu z eksportu, a „Wyczyść” nie zostawia fragmentów pisma w ukrytym pasku i liście.
+test('„Zostaw jawne” nie odsłania PESEL-u dopisanego potem tuż za nazwiskiem', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    await paste(page, DECYZJA);
+    await page.locator('#output .cl', { hasText: '/-/' }).locator('mark.pii').click();
+    await page.locator('#fix-keep').click();
+    await page.locator('#output mark.pii-kept').waitFor();
+    await page.locator('#input').evaluate((el) => {
+      const ta = /** @type {HTMLTextAreaElement} */ (el);
+      ta.value = ta.value.replace('/-/ Sławomir Kędzierski', '/-/ Sławomir Kędzierski 44051401359');
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await page.waitForFunction(() => !document.querySelector('#output mark.pii-kept'));
+    const out = (await printed(page)) ?? '';
+    assert.ok(!out.includes('44051401359'), 'dopisany PESEL jawny');
+    assert.ok(!out.includes('Kędzierski'), 'zakres szerszy niż decyzja ma zostać zasłonięty');
+  });
+});
+
+test('ręczne zasłonięcie, którego nie da się nałożyć na długi tekst, wstrzymuje kopiowanie, pliki i druk', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    await paste(page, DECYZJA);
+    await selectInOutput(page, KW);
+    await page.locator('#fix-sel-out').click();
+    await page.locator('#fix-apply').click();
+    await app.waitForOutput('[DANE]');
+    // załącznik ponad limit podświetleń (300 000 znaków): zakresów nie ma, decyzji nie da się nałożyć
+    await page.locator('#input').evaluate((el) => {
+      const ta = /** @type {HTMLTextAreaElement} */ (el);
+      ta.value = `${ta.value}\n\nZałącznik:\n${'Treść załącznika bez danych osobowych. '.repeat(8000)}`;
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await page.waitForFunction(() => /** @type {HTMLButtonElement} */ (document.getElementById('copy')).disabled);
+    for (const id of ['copy', 'download', 'download-docx', 'print']) {
+      assert.equal(await page.locator(`#${id}`).isDisabled(), true, `#${id} aktywny`);
+    }
+    assert.ok(!((await printed(page)) ?? '').includes('00045123'), 'numer księgi w wydruku');
+    assert.match(await page.locator('#fix-sum').innerText(), /wstrzymane/);
+    // „Usuń wszystkie” zdejmuje poprawki i oddaje przyciski
+    await page.locator('#fix-clear').click();
+    assert.equal(await page.locator('#copy').isDisabled(), false);
+  });
+});
+
+test('po „Wyczyść” w DOM nie zostaje nic z poprzedniego pisma', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    await paste(page, DECYZJA);
+    await page.locator('#output .cl', { hasText: '/-/' }).locator('mark.pii').click();
+    await page.locator('#fix-keep').click();
+    await selectInOutput(page, KW);
+    await page.locator('#fix-sel-out').click();
+    await page.locator('#fix-apply').click();
+    await app.waitForOutput('[DANE]');
+    await page.locator('#fix-show').click();
+    await page.locator('#clear').click();
+    const left = await page.evaluate((needles) => {
+      const hits = [];
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+        if (needles.some((s) => /** @type {Text} */ (n).data.includes(s))) hits.push(n.parentElement?.id || n.parentElement?.tagName);
+      }
+      for (const el of document.body.querySelectorAll('*')) {
+        for (const a of el.attributes) if (needles.some((s) => a.value.includes(s))) hits.push(`${el.tagName}@${a.name}`);
+      }
+      return hits;
+    }, ['Kędzierski', '00045123']);
+    assert.deepEqual(left, []);
   });
 });

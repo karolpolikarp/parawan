@@ -4,7 +4,7 @@
 // starym Firefoksem, więc ruchy myszy idą czystym WebDriverem (akcje pointerMove, pointerDown,
 // pointerUp). Cztery próby na decyzji z fixtures/urzad: przeciągnięcie przez środek numeru księgi
 // wieczystej, przeciągnięcie z tekstu w środek znacznika, z tekstu przez cały znacznik i cały wiersz
-// od brzegu do brzegu okna. Każda porównuje fragment w wierszu „Zasłoń «…»” z oczekiwanym; pierwsza
+// od brzegu do brzegu okna. Każda porównuje fragment w wierszu „Zasłoń „…”” z oczekiwanym; pierwsza
 // zasłania numer i sprawdza tekst do druku.
 // Użycie: node scripts/e2e/manual/korekta-zaznaczenie.mjs <firefox.exe> <geckodriver.exe> <adres pliku> <zrzut.png>
 import { spawn } from 'node:child_process';
@@ -114,7 +114,7 @@ try {
     await sleep(500);
     return run(POINTS, specs);
   };
-  /** Klik „Zasłoń zaznaczenie” w wyniku i fragment z wiersza „Zasłoń «…»”. */
+  /** Klik „Zasłoń zaznaczenie” w wyniku i fragment z wiersza „Zasłoń „…””. */
   const formValue = async () => {
     await sleep(150);
     const r = await run(

@@ -12,10 +12,13 @@ import { normalizeSurnameKey } from 'anonimizator/surnames';
 import type { Span } from './spans';
 
 export type Decision =
-  /** Odsłoń zakresy nachodzące na [start, end) oryginału. */
+  /** Odsłoń zakresy leżące w całości w [start, end) oryginału (szerszy zakres zostaje zasłonięty). */
   | { kind: 'keep'; scope: 'here'; start: number; end: number }
-  /** Odsłoń każdy zakres o tym samym kluczu (spanKey): ta sama osoba albo ta sama dana. */
-  | { kind: 'keep'; scope: 'same'; key: string; label: string }
+  /**
+   * Odsłoń zakresy o tym samym kluczu (spanKey), ale tylko w formach z listy z chwili decyzji
+   * (formOf): osoba dopisana później z innym imieniem nie wychodzi jawna bez wiedzy urzędnika.
+   */
+  | { kind: 'keep'; scope: 'same'; key: string; label: string; forms: string[] }
   /** Zasłoń [start, end) oryginału znacznikiem [token]. */
   | { kind: 'mask'; scope: 'here'; start: number; end: number; token: string }
   /** Zasłoń każde wystąpienie tekstu (bez wielkości liter, na granicach wyrazów). */
@@ -42,10 +45,25 @@ const startsUpper = (s: string): boolean => /^\p{Lu}/u.test(s);
 /** Klucz nazwiska: forma bazowa z rdzenia, osobno dla każdej części nazwiska z łącznikiem. */
 const surnameKey = (w: string): string => w.split('-').map(normalizeSurnameKey).join('-');
 
+// Końcówki odmiany imienia („Janowi”, „Jerzego”, „Janem”, „Janinie”, „Anną”). Na końcu wyrazu
+// wygrywa najwcześniej zaczynająca się, więc „Janinie” traci „ie”, a nie samo „e”.
+const NAME_ENDING = /(?:owi|ego|emu|em|ie|ym|im|ą|ę|a|y|i|u|o|e)$/u;
+
 /**
- * Klucz osoby: nazwisko o tym samym normalizeSurnameKey i imię o tych samych pierwszych
- * 3 literach („Jan Nowak”, „Jana Nowaka”, „Janowi Nowakowi”). Inicjał („J. Nowak”) ma własny
- * klucz, więc nie łączy się z pełnym imieniem. Samo nazwisko łączy się tylko z samym nazwiskiem.
+ * Rdzeń imienia: bez końcówki, bez miękkiego „i” („Maria”, „Marii” → „mar”) i z ruchomym „e”
+ * („Marek”, „Marka” → „mark”). Całe imię, a nie jego początek: „Jan”, „Janina” i „Janusz” mają
+ * różne rdzenie. Gdy odmiana nie trafi, rdzenie się różnią i znacznik zostaje zasłonięty.
+ */
+function nameStem(w: string): string {
+  const s = w.replace(NAME_ENDING, '');
+  const stem = s.length >= 2 ? s : w;
+  return (stem.length > 2 ? stem.replace(/i$/u, '') : stem).replace(/e([kłcń])$/u, '$1');
+}
+
+/**
+ * Klucz osoby: nazwisko o tym samym normalizeSurnameKey i imię o tym samym rdzeniu (nameStem:
+ * „Jan Nowak”, „Jana Nowaka”, „Janowi Nowakowi”). Inicjał („J. Nowak”) ma własny klucz, więc nie
+ * łączy się z pełnym imieniem. Samo nazwisko łączy się tylko z samym nazwiskiem.
  */
 export function personKey(text: string): string {
   const words = text
@@ -59,7 +77,7 @@ export function personKey(text: string): string {
   const first = words[0].toLowerCase();
   const letters = first.replace(/[^\p{L}]/gu, '');
   const initial = first.endsWith('.') || letters.length < 2;
-  return `P:${initial ? first : letters.slice(0, 3)}|${last}`;
+  return `P:${initial ? first : nameStem(letters)}|${last}`;
 }
 
 /** Klucz „ta sama osoba albo dana” zakresu: rodzaj danych i znormalizowany tekst oryginału. */
@@ -74,6 +92,10 @@ export function spanKey(original: string, span: Pick<Span, 'start' | 'end' | 'to
   // Zakres grupowy („[IMIĘ I NAZWISKO] [PESEL]”) łączy się tylko z taką samą grupą.
   return `${span.tokens.map((t) => (isPerson(t) ? 'P' : t)).join('+')}:${text.toLowerCase().replace(/\s+/g, ' ').trim()}`;
 }
+
+/** Forma zakresu do listy decyzji „wszędzie”: tekst oryginału bez wielkości liter i nadmiaru odstępów. */
+export const formOf = (original: string, span: { start: number; end: number }): string =>
+  original.slice(span.start, span.end).toLowerCase().replace(/s+/g, ' ').trim();
 
 const escapeRe = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -111,6 +133,7 @@ export function findOccurrences(original: string, text: string, token: string): 
 }
 
 const overlaps = (s: { start: number; end: number }, a: number, b: number): boolean => a < s.end && s.start < b;
+const inside = (s: { start: number; end: number }, a: number, b: number): boolean => a <= s.start && s.end <= b;
 
 /** Zakres w trakcie nakładania: z indeksami zakresów automatycznych, które wchłonął. */
 interface Cover extends Span {
@@ -127,7 +150,10 @@ export interface Corrected {
 }
 
 /**
- * Nakłada decyzje na zakresy automatyczne. „Zostaw jawne” zdejmuje cały zakres, także grupowy.
+ * Nakłada decyzje na zakresy automatyczne. „Zostaw jawne” zdejmuje cały zakres, także grupowy,
+ * ale tylko taki, który mieści się w miejscu decyzji: gdy po edycji źródła do odsłoniętego nazwiska
+ * dołączy PESEL („Jan Nowak 44051401359” w jednym zakresie), decyzja przestaje działać i całość
+ * zostaje zasłonięta, bo o PESEL-u urzędnik nie decydował.
  * Zasłonięcie nachodzące na zakresy łączy się z nimi w jeden (suma przedziałów) z tokenem
  * decyzji; zasłonięcie miejsca odsłoniętego wcześniej przywraca zakres automatyczny z jego
  * znacznikami; zasłonięcie wewnątrz zakresu, który już jest zasłonięty, nic nie zmienia.
@@ -173,8 +199,8 @@ export function applyCorrections(original: string, autoSpans: Span[], decisions:
     if (d.kind === 'keep') {
       n =
         d.scope === 'here'
-          ? keepAll((c) => overlaps(c, d.start, d.end))
-          : keepAll((c) => spanKey(original, c) === d.key);
+          ? keepAll((c) => inside(c, d.start, d.end))
+          : keepAll((c) => spanKey(original, c) === d.key && d.forms.includes(formOf(original, c)));
     } else {
       const ranges = d.scope === 'here' ? [[d.start, d.end] as [number, number]] : findOccurrences(original, d.text, d.token);
       for (const [a, b] of ranges) if (maskAt(a, b, d.token)) n++;

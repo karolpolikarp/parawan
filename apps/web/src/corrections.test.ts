@@ -7,6 +7,7 @@ import {
   type Decision,
   defaultToken,
   findOccurrences,
+  formOf,
   lineRanges,
   personKey,
   shiftDecisions,
@@ -32,6 +33,13 @@ const at = (text: string, needle: string, from = 0): { start: number; end: numbe
   return { start, end: start + needle.length };
 };
 
+/** Decyzja „Zostaw jawne wszędzie” jak w aplikacji: klucz zakresu i formy jego odpowiedników z tej chwili. */
+const sameAs = (text: string, spans: Span[], span: Span, label: string): Decision => {
+  const key = spanKey(text, span);
+  const forms = spans.filter((s) => spanKey(text, s) === key).map((s) => formOf(text, s));
+  return { kind: 'keep', scope: 'same', key, label, forms };
+};
+
 const final = (text: string, spans: Span[], decisions: Decision[]): string =>
   applySpans(text, applyCorrections(text, spans, decisions).spans);
 
@@ -50,6 +58,17 @@ describe('klucz „ta sama osoba”', () => {
     expect(personKey('J. Nowak')).not.toBe(k);
     expect(personKey('Nowak')).not.toBe(k);
     expect(personKey('Marii Wierzbickiej')).not.toBe(personKey('Tomasz Wierzbicki'));
+  });
+  test('całe imię, nie 3 litery: Jan, Janina i Janusz to trzy osoby, Marek i Maria dwie', () => {
+    const jan = personKey('Jan Nowak');
+    for (const n of ['Janina Nowak', 'Janusz Nowak', 'Janiny Nowak']) expect(personKey(n)).not.toBe(jan);
+    expect(personKey('Janinie Nowak')).toBe(personKey('Janina Nowak'));
+    expect(personKey('Januszowi Nowakowi')).toBe(personKey('Janusz Nowak'));
+    expect(personKey('Marka Nowaka')).toBe(personKey('Marek Nowak'));
+    expect(personKey('Marii Nowak')).toBe(personKey('Maria Nowak'));
+    expect(personKey('Maria Nowak')).not.toBe(personKey('Marek Nowak'));
+    expect(personKey('Antoniego Nowaka')).toBe(personKey('Antoni Nowak'));
+    expect(personKey('Pawła Nowaka')).toBe(personKey('Paweł Nowak'));
   });
   test('dane numeryczne po samych cyfrach, inne po tekście bez wielkości liter', () => {
     const t = '600 700 800 i 600-700-800, ul. Lipowa 5 i UL. LIPOWA  5';
@@ -80,8 +99,7 @@ describe('„Zostaw jawne”', () => {
       gaps: [],
       source: 'auto',
     }));
-    const key = spanKey(text, spans[0]);
-    const out = final(text, spans, [{ kind: 'keep', scope: 'same', key, label: 'Jan Nowak' }]);
+    const out = final(text, spans, [sameAs(text, spans, spans[0], 'Jan Nowak')]);
     expect(out).toBe('Jan Nowak, [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO]. Pismo do Jana Nowaka.');
   });
 
@@ -89,11 +107,32 @@ describe('„Zostaw jawne”', () => {
     const { spans } = auto(DECYZJA);
     const sig = spans.find((s) => DECYZJA.slice(s.start, s.end).includes('Kędzierski'));
     expect(sig).toBeDefined();
-    const key = spanKey(DECYZJA, sig as Span);
-    const out = final(DECYZJA, spans, [{ kind: 'keep', scope: 'same', key, label: 'Sławomir Kędzierski' }]);
+    const out = final(DECYZJA, spans, [sameAs(DECYZJA, spans, sig as Span, 'Sławomir Kędzierski')]);
     expect(out).toContain('Sławomir Kędzierski');
     expect(out).toContain('[PESEL]');
     expect(out).not.toMatch(/Wierzbick|WIERZBICK/);
+  });
+
+  test('wszędzie: tylko formy z chwili decyzji, osoba dopisana później zostaje zasłonięta', () => {
+    // Józef i Józefa w dopełniaczu mają ten sam rdzeń, więc klucz ich nie rozróżni; lista form tak
+    const before = 'Pismo podpisał Józef Lis.';
+    const s1 = auto(before).spans;
+    const d = sameAs(before, s1, s1[0], 'Józef Lis');
+    const after = `${before} Otrzymuje: Józefa Lis.`;
+    const s2 = auto(after).spans;
+    expect(s2.length).toBe(2);
+    expect(spanKey(after, s2[0])).toBe(spanKey(after, s2[1]));
+    expect(final(after, s2, [d])).toBe('Pismo podpisał Józef Lis. Otrzymuje: [IMIĘ I NAZWISKO].');
+  });
+
+  test('tutaj: zakres szerszy niż miejsce decyzji (PESEL dopisany za nazwiskiem) zostaje zasłonięty', () => {
+    const text = 'Podpisał Jan Kowalski 44051401359 w sprawie.';
+    const { spans } = auto(text);
+    expect(spans[0].tokens.length).toBe(2);
+    const name = at(text, 'Jan Kowalski');
+    const r = applyCorrections(text, spans, [{ kind: 'keep', scope: 'here', ...name }]);
+    expect(applySpans(text, r.spans)).toBe(applySpans(text, spans));
+    expect(r.effects).toEqual([0]);
   });
 
   test('zakres grupowy schodzi w całości', () => {
@@ -187,8 +226,7 @@ describe('kolejność decyzji i cofanie', () => {
     { ...at(text, 'Jan Nowak'), tokens: ['IMIĘ I NAZWISKO'], gaps: [], source: 'auto' },
     { ...at(text, 'Jana Nowaka'), tokens: ['IMIĘ I NAZWISKO'], gaps: [], source: 'auto' },
   ];
-  const key = spanKey(text, spans[0]);
-  const keepAll: Decision = { kind: 'keep', scope: 'same', key, label: 'Jan Nowak' };
+  const keepAll = sameAs(text, spans, spans[0], 'Jan Nowak');
   const remask: Decision = { kind: 'mask', scope: 'here', start: spans[1].start, end: spans[1].end, token: 'IMIĘ I NAZWISKO' };
 
   test('późniejsza decyzja wygrywa', () => {
@@ -244,8 +282,7 @@ describe('edycja tekstu źródłowego', () => {
   test('decyzje nakładane na nowe zakresy po zmianie „Rozróżniaj osoby”', () => {
     const text = 'Jan Nowak i Jana Nowaka oraz Ewa Lis.';
     const plain = auto(text);
-    const key = spanKey(text, plain.spans[0]);
-    const decisions: Decision[] = [{ kind: 'keep', scope: 'same', key, label: 'Jan Nowak' }];
+    const decisions = [sameAs(text, plain.spans, plain.spans[0], 'Jan Nowak')];
     const pseudo = auto(text, { pseudonyms: true });
     expect(pseudo.redacted).toMatch(/\[OSOBA-[A-Z]\]/);
     const out = final(text, pseudo.spans, decisions);

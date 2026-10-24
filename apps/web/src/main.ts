@@ -7,6 +7,7 @@ import {
   type Decision,
   defaultToken,
   findOccurrences,
+  formOf,
   lineRanges,
   MANUAL_TOKENS,
   shiftDecisions,
@@ -416,7 +417,7 @@ function maskHtml(name: string, span?: Span): string {
 }
 
 // Fragment odsłonięty ręcznie (mark.pii-kept): oryginał w przerywanej ramce, w nawigacji ‹ ›.
-const KEPT_ATTRS = ' tabindex="-1" data-tip="Przywrócone ręcznie. Kliknij, żeby zasłonić ponownie."';
+const KEPT_ATTRS = ' tabindex="-1" data-tip="Przywrócone ręcznie. Po kliknięciu nad wynikiem pojawi się „Zasłoń ponownie”."';
 
 /** Owiń HTML w numerowane linie edytora (.cl / .no). */
 function wrapLines(html: string): string {
@@ -913,6 +914,8 @@ if (srcHead && outHead && 'ResizeObserver' in window) {
 }
 
 const SEL_OUT_TIP = fixSelOut.dataset.tip ?? '';
+// Ikona ma aria-label, więc labelTips() pomija jej dymek: zdanie „najpierw zaznacz” idzie do opisu od razu.
+fixSelOut.setAttribute('aria-describedby', tipDescId(SEL_OUT_TIP));
 const SEL_OUT_COMPARE_TIP = 'Zaznacz tekst w widoku „Wynik” albo w polu źródła.';
 let barOpen = false;
 let fixNote = ''; // komunikat o poprawkach odrzuconych po edycji źródła
@@ -929,6 +932,11 @@ const origOf = (start: number, end: number): string => lastInput.slice(start, en
 
 /** Korekta działa tylko na zakresach: bez nich (tryb ścisły) i przy długim tekście jest wyłączona. */
 const fixAvailable = (): boolean => !!lastSpans && !isTooBig();
+/**
+ * Ręczne zasłonięcia, których nie da się nałożyć (tekst urósł ponad HIGHLIGHT_LIMIT albo wynik nie
+ * pasuje do oryginału): wynik rdzenia miałby je jawne, więc kopiowanie, pliki i druk czekają.
+ */
+const exportBlocked = (): boolean => !!lastRedacted && !lastSpans && decisions.some((d) => d.kind === 'mask');
 
 function recomputeCorrections(): void {
   corrected = lastSpans
@@ -1054,6 +1062,12 @@ function clearCorrections(): void {
   fixList.hidden = true;
   fixShow.setAttribute('aria-expanded', 'false');
   fixShow.textContent = 'Pokaż';
+  // Ukryte elementy też trzymały fragmenty pisma (wartość spod znacznika, wpisy listy), a „Wyczyść”
+  // obiecuje usunąć tekst: po nim w DOM nie zostaje nic z poprzedniego pisma.
+  for (const el of [fixBarPos, fixBarVal, fixBarGroup, fixBarForms, fixFormVal, fixAllN, fixSum, fixNoteEl]) el.textContent = '';
+  fixList.replaceChildren();
+  formText = '';
+  formRanges = [];
 }
 
 fixKeep.addEventListener('click', () => {
@@ -1066,7 +1080,9 @@ fixKeepAll.addEventListener('click', () => {
   const frag = currentFrag();
   if (!frag || frag.kept) return;
   const label = origOf(frag.span.start, frag.span.end);
-  const n = addDecision({ kind: 'keep', scope: 'same', key: spanKey(lastInput, frag.span), label });
+  // Formy z paska („Obejmie: …”) z tej chwili: osoba dopisana później nie wyjdzie jawna po cichu.
+  const forms = [...new Set(sameAs(frag.span).map((s) => formOf(lastInput, s)))];
+  const n = addDecision({ kind: 'keep', scope: 'same', key: spanKey(lastInput, frag.span), label, forms });
   correctionsChanged(`Zostawiono jawne: ${fragmentsWord(n)}.`);
 });
 fixRemask.addEventListener('click', () => {
@@ -1252,13 +1268,19 @@ function syncFix(): void {
   const has = decisions.length > 0 && !!lastRedacted;
   const c = correctionCounts(corrected);
   const anyMask = decisions.some((d) => d.kind === 'mask');
+  const blocked = exportBlocked();
   fixSum.textContent = !has
     ? ''
     : lastSpans
       ? `Ręczne poprawki: przywrócono ${c.kept}, zasłonięto ${c.masked}`
-      : 'Ręczne poprawki są wyłączone dla tego tekstu, wynik pokazuje to, co zasłonił automat' +
-        (anyMask ? '. Fragmenty zasłonięte ręcznie są w nim jawne.' : '.');
-  fixFootActs.hidden = !has || !lastSpans;
+      : anyMask
+        ? 'Ręcznych zasłonięć nie da się nałożyć na ten tekst, więc kopiowanie, zapis i druk są wstrzymane. ' +
+          'Skróć tekst albo usuń poprawki'
+        : 'Ręczne poprawki są wyłączone dla tego tekstu, wynik pokazuje to, co zasłonił automat.';
+  fixFootActs.hidden = !has;
+  if (lastRedacted) setResultActions(!blocked);
+  // „Kopiowanie, zapis plików i druk działają” nie jest wtedy prawdą.
+  spansNote.hidden = !lastRedacted || !!lastSpans || isTooBig() || blocked;
   fixNoteEl.textContent = fixNote;
   fixNoteEl.hidden = !fixNote;
   fixFoot.hidden = !lastRedacted || (!has && !fixNote);
@@ -1321,6 +1343,7 @@ const outputText = (): string =>
 const downloadText = (): string => (lastFileExt === 'csv' ? resultText() : outputText());
 
 const PRINT_EMPTY = 'Brak wyniku do wydruku. Wklej tekst w pole „Tekst źródłowy”.';
+const PRINT_BLOCKED = 'Wydruk wstrzymany: ręcznych zasłonięć nie da się nałożyć na ten tekst. Skróć tekst albo usuń poprawki.';
 
 // Co idzie na papier: wynik albo, na czas „Drukuj protokół”, sam protokół. Tryb wraca do wyniku
 // po wydruku (afterprint), także anulowanym, i przy przycisku „Drukuj lub zapisz PDF”.
@@ -1335,6 +1358,7 @@ let printProtocol = '';
 function printContent(): { main: string; annex: string } {
   if (printMode === 'protocol') return { main: printProtocol, annex: '' };
   if (!lastRedacted) return { main: PRINT_EMPTY, annex: '' };
+  if (exportBlocked()) return { main: PRINT_BLOCKED, annex: '' };
   return { main: resultText(), annex: annexText() };
 }
 
@@ -1691,7 +1715,7 @@ const copyFlash = makeFlash((t) => (copyLabel.textContent = t), 'Kopiuj');
 
 copyBtn.addEventListener('click', async () => {
   flushPendingUpdate();
-  if (!lastRedacted) return;
+  if (!lastRedacted || exportBlocked()) return;
   try {
     await navigator.clipboard.writeText(outputText());
     copyFlash.show('Skopiowano ✓');
@@ -1757,7 +1781,7 @@ function notePublishNewFile(): void {
 
 downloadBtn.addEventListener('click', () => {
   flushPendingUpdate();
-  if (!lastRedacted) return;
+  if (!lastRedacted || exportBlocked()) return;
   // Nazwa ze znacznikiem czasu, BOM i windowsowe końce wierszy: output.ts (downloadFor).
   const file = downloadFor(downloadText(), lastFileExt, new Date());
   saveFile(new Blob([file.content], { type: file.type }), file.name);
@@ -1768,7 +1792,7 @@ downloadBtn.addEventListener('click', () => {
 // wczytanego pliku.
 downloadDocxBtn.addEventListener('click', () => {
   flushPendingUpdate();
-  if (!lastRedacted) return;
+  if (!lastRedacted || exportBlocked()) return;
   // Dołączona adnotacja w dodatku po podziale strony (docx-write.ts), nie w ciągu wyniku.
   const annex = annexText();
   const docx = buildDocx(resultText(), { appendix: annex ? [annex] : [] });
@@ -1802,7 +1826,7 @@ addEventListener('afterprint', () => {
 
 printBtn.addEventListener('click', () => {
   flushPendingUpdate();
-  if (!lastRedacted) return;
+  if (!lastRedacted || exportBlocked()) return;
   printMode = 'result';
   syncPrintOut();
   window.print();

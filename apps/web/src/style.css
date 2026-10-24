@@ -756,6 +756,10 @@ mark.pii-kept.pii-active { outline: 2px solid var(--acc); outline-offset: 1px; b
 }
 .fix-fld input { width: 16px; height: 16px; margin: 0; accent-color: var(--acc); }
 .card-h > .fix-sel { flex: none; }
+/* Wyłączona ikona: przygaszona sama ikona, a nie cały przycisk. Przy opacity przycisku bladł też
+   jego dymek (::after), jedyne objaśnienie ikony, do ok. 2,5:1. */
+.card-h > .fix-sel:disabled { opacity: 1; }
+.card-h > .fix-sel:disabled .gi { opacity: .45; }
 /* Otwarty pasek mówi o bieżącym fragmencie to samo co jego dymek, a dymek zasłaniał dwa wiersze. */
 .fix-open .editor .pii-active::after, .fix-open .editor .pii-active::before { display: none; }
 /* Stopka z liczbą poprawek nad ostrzeżeniem o heurystyce, z listą rozwijaną „Pokaż”. */
@@ -793,7 +797,8 @@ mark.pii-kept.pii-active { outline: 2px solid var(--acc); outline-offset: 1px; b
    z ikoną drukarki i spokojniejszym kolorem. W jednym bloku z ostrzeżeniem dostawała trójkąt,
    a „Przejrzyj wynik…” zostawał bez niego. Wiersz łączy się ze stopką nad nim. */
 .print-note { align-items: flex-start; color: var(--mut-2); }
-.card-f + .card-f { border-top: 0; padding-top: 0; }
+/* :not([hidden]): ukryta stopka poprawek (A09) przed ostrzeżeniem nie zdejmuje mu kreski i odstępu */
+.card-f:not([hidden]) + .card-f { border-top: 0; padding-top: 0; }
 /* Karty źródła i wyniku (.card-ed) stoją od 1081 px obok siebie, a siatka wyrównuje ich
    wysokość. Stopka wyniku ma dwa wiersze (ostrzeżenie i rada o druku), stopka źródła jeden, więc
    nadmiar wysokości bierze ostatnia stopka karty, a nie .card-b. Gdy rósł .card-b, nad stopką
@@ -1137,6 +1142,9 @@ table .pii { cursor: default; }
   .editor mark.pii-kept::after, .editor mark.pii-kept::before { display: none; }
   /* otwarty pasek fragmentu zastępuje linię statusu pod wynikiem */
   .fix-open #mask-status { display: none !important; }
+  /* wyłączona ikona bez dymka (nie przyjmuje fokusu) nic by nie mówiła: pojawia się, gdy w wyniku
+     jest zaznaczenie; podpisany przycisk „Zasłoń zaznaczenie” zostaje w pasku źródła */
+  .card-h > .fix-sel:disabled { display: none; }
   :is(button, a)[data-tip]:not(:focus-visible)::after,
   :is(button, a)[data-tip]:not(:focus-visible)::before { display: none; }
   #mask-status:not(:empty) {
