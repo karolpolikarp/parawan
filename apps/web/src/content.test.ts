@@ -271,7 +271,9 @@ test('aplikacja: przycisk druku działa jak „Pobierz” i drukuje bieżący wy
 test('aplikacja: „Kopiuj”, „Pobierz” i druk biorą tekst tylko z finalText (output.ts)', () => {
   expect(webMain).toContain('navigator.clipboard.writeText(outputText())');
   expect(webMain).toContain('ta.value = outputText();');
-  expect(webMain).toContain('downloadFor(outputText(), lastFileExt, new Date())');
+  expect(webMain).toContain('downloadFor(downloadText(), lastFileExt, new Date())');
+  // rejestr .csv bez adnotacji: Excel dokleiłby jej wiersze jako rekordy
+  expect(webMain).toContain("const downloadText = (): string => (lastFileExt === 'csv' ? resultText() : outputText());");
   for (const raw of ['writeText(lastRedacted', 'Blob([lastRedacted', 'ta.value = lastRedacted']) {
     expect(webMain).not.toContain(raw);
   }

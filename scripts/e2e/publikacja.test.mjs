@@ -418,10 +418,41 @@ test('nowe pismo w polu źródła: znak sprawy, ręczna adnotacja i „Dołącz�
       assert.equal(await page.locator('#input').inputValue(), B);
       await assertFresh('po wklejeniu');
     }
+    // „Cofnij” po wczytaniu pliku: karta wypełniona dla pliku nie wraca z poprzednim pismem
+    await page.locator('#input').fill(A);
+    await page.locator('#file-input').setInputFiles({ name: 'B.txt', mimeType: 'text/plain', buffer: Buffer.from(B) });
+    await page.waitForFunction((b) => /** @type {HTMLTextAreaElement} */ (document.getElementById('input')).value === b, B);
+    await openCard(page);
+    await page.locator('#pub-znak').fill('GK.6220.2.2026');
+    await page.locator('#pub-adnotacja').press('End');
+    await page.locator('#pub-adnotacja').pressSequentially(' Dotyczy pisma Marii Nowak.');
+    await page.locator('#pub-append').check();
+    await page.locator('#app-note-undo').click();
+    assert.equal(await page.locator('#input').inputValue(), A);
+    assert.ok(!(await page.locator('#pub-adnotacja').inputValue()).includes('Nowak'), 'po „Cofnij”');
+    assert.equal(await page.locator('#pub-znak').inputValue(), '', 'po „Cofnij”');
+    assert.equal(await page.locator('#pub-append').isChecked(), false, 'po „Cofnij”');
+    assert.ok(!(await page.locator('#print-annex').textContent())?.includes('Nowak'), 'po „Cofnij”: druk');
   });
 });
 
-test('„Pamiętaj” nie włącza się od samego klucza zapisanego przez obcy plik', async (t) => {
+test('rejestr .csv: „Dołącz adnotację” nie dopisuje jej do pobranego pliku', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const csv = 'imie_nazwisko;pesel\nJan Kowalski;85071412358\n';
+    await page.locator('#file-input').setInputFiles({ name: 'rejestr.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
+    await page.locator('#print-out').filter({ hasText: '[PESEL]' }).waitFor({ state: 'attached' });
+    await openCard(page);
+    await page.locator('#pub-append').check();
+    const file = await download(page, '#download');
+    assert.ok(file.name.endsWith('.csv'), file.name);
+    const text = file.bytes.toString('utf8');
+    assert.ok(text.includes('[PESEL]'), text);
+    assert.ok(!text.includes(HEAD), `adnotacja w .csv: ${text}`);
+  });
+});
+
+test('„Pamiętaj” nie włącza się od klucza bez znacznika albo z pustymi polami', async (t) => {
   await withApp(browser, t, '?demo', async (app) => {
     const { page } = app;
     for (const v of ['{}', '{"organ":"Obcy organ","osoba":"Ktoś"}', '{"pamietaj":true,"organ":"","osoba":" "}']) {

@@ -818,6 +818,9 @@ const resultText = (): string => finalText({ redacted: lastRedacted, original: l
 /** Tekst dla „Kopiuj” i „Pobierz .txt”: wynik, a po „Dołącz adnotację” także adnotacja (output.ts). */
 const outputText = (): string =>
   finalText({ redacted: lastRedacted, original: lastInput, spans: lastSpans, annex: annexText() });
+/** Treść pobieranego pliku. Rejestr .csv dostaje sam wynik: wiersze adnotacji z przecinkami Excel
+ * dokleiłby do arkusza jako rekordy. */
+const downloadText = (): string => (lastFileExt === 'csv' ? resultText() : outputText());
 
 const PRINT_EMPTY = 'Brak wyniku do wydruku. Wklej tekst w pole „Tekst źródłowy”.';
 
@@ -1139,6 +1142,9 @@ function replaceSource(text: string, note: string, info = ''): void {
 appNoteUndo.addEventListener('click', () => {
   if (undoText === null) return;
   const info = undoInfo;
+  // Przywrócone pismo to inne pismo niż bieżące (jak w replaceSource): karta wypełniona dla
+  // cofanego tekstu nie może przejść na poprzedni.
+  if (input.value !== undoText) resetDocumentPublication();
   input.value = undoText;
   setFileExt(''); // pobieranie wraca do .txt jak po „Wyczyść” (rodzaj pliku nie wraca)
   dismissNote();
@@ -1240,7 +1246,7 @@ downloadBtn.addEventListener('click', () => {
   flushPendingUpdate();
   if (!lastRedacted) return;
   // Nazwa ze znacznikiem czasu, BOM i windowsowe końce wierszy: output.ts (downloadFor).
-  const file = downloadFor(outputText(), lastFileExt, new Date());
+  const file = downloadFor(downloadText(), lastFileExt, new Date());
   saveFile(new Blob([file.content], { type: file.type }), file.name);
   notePublishNewFile();
 });
@@ -1385,8 +1391,9 @@ function annexChanged(): void {
 const REMEMBER_MAX = 200;
 
 /**
- * Zapamiętany organ i osoba. Wartość mógł zapisać obcy plik, więc tylko krótkie napisy, a „Pamiętaj”
- * włącza się tylko przy znaczniku z zaznaczenia pola i przy niepustym organie albo osobie.
+ * Zapamiętany organ i osoba. Wartość mógł zapisać obcy plik, więc tylko krótkie napisy. Znacznika
+ * „Pamiętaj” nie da się odróżnić od podrobionego (Chrome i Edge dzielą localStorage między plikami
+ * z dysku); to ryzyko opisuje docs/wydanie/DLA-IOD-I-IT.txt, a zaznaczone pole widać w karcie.
  */
 function readRemembered(): { organ: string; osoba: string } | null {
   try {
@@ -1496,7 +1503,7 @@ function sourceKind(): SourceKind {
 
 /** Protokół bieżącego wyniku. Suma SHA-256 tylko po zaznaczeniu i tylko z wyniku, nigdy ze źródła. */
 async function protocolNow(): Promise<string> {
-  const sha = pubSha.checked ? await sha256Hex(outputText()) : null;
+  const sha = pubSha.checked ? await sha256Hex(downloadText()) : null;
   const marks = maskEls.length;
   return buildProtocol({
     when: new Date(),

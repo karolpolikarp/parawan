@@ -37,8 +37,9 @@ CO ZOSTAJE NA KOMPUTERZE
     motion         zatrzymana animacja przykładu
     adnotacja      organ i osoba do adnotacji, po zaznaczeniu „Pamiętaj”
   Chrome i Edge dzielą tę pamięć między pliki otwierane z dysku, więc inny
-  plik .html mógłby tam coś zapisać. Dlatego Parawan przy starcie pokazuje,
-  które typy danych są wyłączone, zanim pracownik cokolwiek wklei.
+  plik .html mógłby tam coś zapisać. Dlatego Parawan przy starcie pokazuje
+  wyłączone typy danych. Obcy plik może też zaznaczyć „Pamiętaj” i potem
+  odczytać organ i osobę wpisane w karcie. Odznaczenie pola od razu je usuwa.
 
   Wynik trafia do schowka albo do pliku tylko po kliknięciu „Kopiuj”,
   „Pobierz .txt”, „Pobierz .docx” albo „Drukuj lub zapisz PDF”. Nazwa
@@ -54,10 +55,9 @@ CO ZOSTAJE NA KOMPUTERZE
   w plikach sesji profilu; od wersji 0.46.24 nie. Sprawdzenie nie obejmuje
   historii schowka Windows (Win+V), pliku stronicowania ani zrzutów pamięci.
 
-  Rozszerzenia Edge i Chrome nie mają domyślnie dostępu do plików otwieranych
-  z dysku (file://). Historia schowka Windows przechowuje to, co pracownik sam
-  skopiował, także oryginał z Worda. Wczytanie albo upuszczenie pliku omija
-  schowek.
+  Rozszerzenia Edge i Chrome domyślnie nie widzą plików z dysku (file://).
+  Historia schowka Windows przechowuje to, co pracownik sam skopiował,
+  także oryginał z Worda. Wczytanie albo upuszczenie pliku omija schowek.
 
 USŁUGI PRZEGLĄDARKI, KTÓRYCH CSP NIE OBEJMUJE
   CSP ogranicza stronę, a nie przeglądarkę. Usługi w chmurze, które
