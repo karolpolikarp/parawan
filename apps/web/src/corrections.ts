@@ -22,7 +22,7 @@ export type Decision =
   | { kind: 'keep'; scope: 'same'; label: string; ranges: [number, number][] }
   /** Zasłoń [start, end) oryginału znacznikiem [token]. */
   | { kind: 'mask'; scope: 'here'; start: number; end: number; token: string }
-  /** Zasłoń każde wystąpienie tekstu (bez wielkości liter, na granicach wyrazów). */
+  /** Reguła: zasłoń każde dosłowne wystąpienie tekstu (bez wielkości liter), w każdej wersji pisma. */
   | { kind: 'mask'; scope: 'all'; text: string; token: string }
   /**
    * Cofnij ręczne zasłonięcie w [start, end): miejsce wraca do stanu sprzed niego, więc to, co
@@ -104,24 +104,23 @@ export function spanKey(original: string, span: Pick<Span, 'start' | 'end' | 'to
 const escapeRe = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 /**
- * Wystąpienia tekstu w oryginale: bez wielkości liter, z dowolnym odstępem w miejscu spacji,
- * na granicach wyrazów liczonych po literach i cyfrach („Anna” nie łapie „Annasz”). Dla
- * jednowyrazowej osoby także formy o tym samym kluczu nazwiska pisane wielką literą („Anną”
- * łapie „Anny”, ale nie „malec” jako rzeczownik).
+ * Wystąpienia tekstu reguły „Zasłoń wszędzie”: dokładny ciąg bez wielkości liter, także w środku
+ * dłuższego wyrazu („KR1P/00012345/9a”) i nachodzące na siebie. Odstępy muszą być takie same jak
+ * w regule, więc ciąg rozdzielony enterem przestaje być wystąpieniem (znacznik nie przechodzi
+ * przez koniec wiersza). Osoba zapisana wielką literą łapie tylko zapis wielką literą („malec”
+ * w zdaniu to nie nazwisko „Malec”). Jednowyrazowa osoba łapie też formy o tym samym kluczu
+ * nazwiska pisane wielką literą („Anną” łapie „Anny”).
  */
 export function findOccurrences(original: string, text: string, token: string): [number, number][] {
-  const needle = text.trim().replace(/\s+/g, ' ');
+  const needle = text.trim();
   if (!needle) return [];
   const found = new Map<number, number>();
-  const re = new RegExp(needle.split(' ').map(escapeRe).join('\\s+'), 'giu');
-  for (const m of original.matchAll(re)) {
-    const a = m.index ?? 0;
-    const b = a + m[0].length;
-    if (isWordChar(needle[0]) && isWordChar(original[a - 1])) continue;
-    if (isWordChar(needle[needle.length - 1]) && isWordChar(original[b])) continue;
-    // Osoba tylko z wielkiej litery: „malec” w zdaniu to nie nazwisko „Malec”.
+  const re = new RegExp(escapeRe(needle), 'giu');
+  for (let m = re.exec(original); m; m = re.exec(original)) {
+    const a = m.index;
+    re.lastIndex = a + 1;
     if (isPerson(token) && startsUpper(needle) && !startsUpper(m[0])) continue;
-    found.set(a, b);
+    found.set(a, a + m[0].length);
   }
   if (isPerson(token) && !needle.includes(' ') && /^\p{L}[\p{L}-]{2,}$/u.test(needle)) {
     const key = surnameKey(needle.toLowerCase());
@@ -314,113 +313,20 @@ export function defaultToken(text: string): string {
 }
 
 /**
- * Decyzje po zmianie tekstu źródłowego. Zmieniony fragment wyznacza wspólny początek i koniec
- * starego i nowego tekstu; miejsca przed nim zostają, za nim przesuwają się o różnicę długości.
- *
- * `sure` mówi, czy zmianę da się pewnie zmapować przesunięciem (pisanie albo usuwanie w jednym
- * miejscu). Wtedy decyzja odsłaniająca nachodząca na zmieniony fragment albo przyklejona do niego
- * odpada, a „Zostaw jawne wszędzie” traci tylko dotknięte miejsca. Przy zmianie niepewnej (cofanie
- * w polu, wklejenie w miejsce całości, zmiana większości tekstu) odpadają wszystkie decyzje
- * odsłaniające: obowiązują tylko w tekście, w którym je podjęto.
- *
- * Zasłonięcie idzie za tekstem, bo lepiej zasłonić więcej niż zostawić coś jawne. Przy pewnej
- * zmianie w nim albo przy poprawce wyrazu, który go dotyka, obejmuje cały nowy tekst w tym miejscu,
- * rozszerzony do całych wyrazów („Lis” → „Lisowski”, „Zagroda” → „Zagxoda”, numer z doklejoną
- * literą). W pozostałych razach (także nowe brzmienie całego wiersza) zostaje tam, gdzie jego
- * tekst dalej stoi, a bez niego odpada. Miejsce zasłonięcia „wszędzie”, którego tekst po zmianie
- * przestał być wystąpieniem (doklejona litera, usunięta spacja), dostaje osobne zasłonięcie
- * „tutaj”. Decyzja „wszędzie” bez żadnego wystąpienia odpada. Zasłonięcie, które odpadło, liczy się w `dropped`.
+ * Decyzje po zmianie tekstu źródłowego. Ręczne decyzje są przypięte do dokładnego tekstu z chwili
+ * decyzji, więc każda zmiana źródła zdejmuje „Zostaw jawne” (tu i wszędzie), „Cofnij zasłonięcie”
+ * i zasłonięcia „tutaj”. Zostają tylko zasłonięcia „wszędzie”: to reguła tekstowa, którą
+ * applyCorrections stosuje od nowa do każdego tekstu. `dropped` to liczba zdjętych decyzji.
  */
-export function shiftDecisions(
-  before: string,
-  after: string,
-  decisions: Decision[],
-  sure = true,
-): { decisions: Decision[]; dropped: number; reveals: number } {
-  if (before === after || !decisions.length) return { decisions, dropped: 0, reveals: 0 };
-  const max = Math.min(before.length, after.length);
-  let p = 0;
-  while (p < max && before[p] === after[p]) p++;
-  let s = 0;
-  while (s < before.length - p && s < after.length - p && before[before.length - 1 - s] === after[after.length - 1 - s]) s++;
-  const oldEnd = before.length - s;
-  const delta = after.length - before.length;
-  const newEnd = after.length - s;
-  // Zmiana tuż przy zakresie dotyczy go, gdy styka się z nim literą albo cyfrą: „Lis” dopisany do
-  // „Lisowski” zostawiłby „owski” jawne. Przecinek albo spacja na styku zakresu nie ruszają.
-  const gluedEnd = isWordChar(before[p - 1]) && isWordChar(after[p]);
-  const gluedStart = isWordChar(before[oldEnd]) && isWordChar(after[newEnd - 1]);
-  /** Miejsce [a, b) po zmianie albo null, gdy zmiana go dotknęła. */
-  const move = (a: number, b: number): [number, number] | null => {
-    if (b < p || (b === p && !gluedEnd)) return [a, b];
-    if (a > oldEnd || (a === oldEnd && !gluedStart)) return [a + delta, b + delta];
-    return null;
-  };
-  /** Zakres nowego tekstu rozszerzony do całych wyrazów, w wierszach (znacznik nie przechodzi przez koniec wiersza). */
-  const words = (a: number, b: number): [number, number][] => {
-    while (a > 0 && isWordChar(after[a - 1]) && isWordChar(after[a])) a--;
-    while (b < after.length && isWordChar(after[b]) && isWordChar(after[b - 1])) b++;
-    return lineRanges(after, a, b);
-  };
-  // Poprawka w obrębie wyrazów: ani usunięty, ani wpisany tekst nie ma odstępu ani końca wiersza
-  // (literówka, doklejona litera, dopisana końcówka nazwiska).
-  const inWord = !/\s/.test(before.slice(p, oldEnd)) && !/\s/.test(after.slice(p, newEnd));
-  /**
-   * Zasłonięcie [a, b) po zmianie. Pewna zmiana w nim (w jednym wierszu) albo poprawka wyrazu przy
-   * nim: stara reszta zakresu razem z tym, co wpisano. Inaczej tekst, który dalej stoi przed
-   * przesunięciem albo po nim. Nowe brzmienie całego wiersza z zasłoniętym wyrazem nie staje się
-   * jednym znacznikiem: bez tego wyrazu zasłonięcie odpada z komunikatem.
-   */
-  const follow = (a: number, b: number): [number, number][] => {
-    const moved = move(a, b);
-    if (moved) return [moved];
-    const inside = a <= p && oldEnd <= b && !after.slice(p, newEnd).includes('\n');
-    if (sure && (inside || inWord)) return words(Math.min(a, p), Math.max(b, oldEnd) + delta);
-    const text = before.slice(a, b);
-    for (const x of [a, a + delta]) {
-      if (x >= 0 && after.slice(x, x + text.length) === text) return words(x, x + text.length);
-    }
-    return [];
-  };
-  const out: Decision[] = [];
-  let dropped = 0;
-  let reveals = 0;
-  for (const d of decisions) {
-    if (d.kind === 'mask' && d.scope === 'all') {
-      const now = findOccurrences(after, d.text, d.token);
-      const extra: Decision[] = [];
-      if (sure) {
-        for (const [a, b] of findOccurrences(before, d.text, d.token)) {
-          if (move(a, b)) continue;
-          for (const [x, y] of follow(a, b)) {
-            if (!now.some(([c, e]) => c <= x && y <= e)) extra.push({ kind: 'mask', scope: 'here', start: x, end: y, token: d.token });
-          }
-        }
-      }
-      if (now.length) out.push(d);
-      out.push(...extra);
-      if (!now.length && !extra.length) dropped++;
-      continue;
-    }
-    let next: Decision[] = [];
-    if (d.kind === 'mask') {
-      next = follow(d.start, d.end).map(([start, end]) => ({ ...d, start, end }));
-    } else if (sure) {
-      if (d.scope === 'here') {
-        const r = move(d.start, d.end);
-        if (r) next = [{ ...d, start: r[0], end: r[1] }];
-      } else {
-        const ranges = d.ranges.map(([a, b]) => move(a, b)).filter((r): r is [number, number] => !!r);
-        if (ranges.length) next = [{ ...d, ranges }];
-      }
-    }
-    if (next.length) out.push(...next);
-    else {
-      dropped++;
-      if (d.kind !== 'mask') reveals++;
-    }
-  }
-  return { decisions: out, dropped, reveals };
+export function afterSourceEdit(decisions: Decision[]): { decisions: Decision[]; dropped: number } {
+  const rules = decisions.filter((d) => d.kind === 'mask' && d.scope === 'all');
+  return { decisions: rules, dropped: decisions.length - rules.length };
+}
+
+/** Zasłonięcia „wszędzie”, których tekstu nie ma w `original` (na liście poprawek z „0 miejsc”). */
+export function rulesWithoutPlace(original: string, decisions: Decision[]): number {
+  return decisions.filter((d) => d.kind === 'mask' && d.scope === 'all' && !findOccurrences(original, d.text, d.token).length)
+    .length;
 }
 
 /** Liczby do stopki i protokołu: odsłonięte znaczniki i fragmenty zasłonięte ręcznie. */

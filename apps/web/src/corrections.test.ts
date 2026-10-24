@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { redactPII } from 'anonimizator';
 import { describe, expect, test } from 'vitest';
 import {
+  afterSourceEdit,
   applyCorrections,
   correctionCounts,
   type Decision,
@@ -9,7 +10,7 @@ import {
   findOccurrences,
   lineRanges,
   personKey,
-  shiftDecisions,
+  rulesWithoutPlace,
   snapSelection,
   spanKey,
 } from './corrections';
@@ -182,10 +183,16 @@ describe('„Zasłoń zaznaczenie”', () => {
     expect(r.effects).toEqual([0]);
   });
 
-  test('wszystkie wystąpienia na granicach wyrazów z polskimi literami', () => {
+  test('wszystkie dosłowne wystąpienia bez wielkości liter, także w środku dłuższego wyrazu', () => {
     const text = 'Anna, Annasz, ANNA, Hanna i Żanna. Anną zajęła się Anna.';
-    expect(findOccurrences(text, 'Anna', 'DANE').map(([a, b]) => text.slice(a, b))).toEqual(['Anna', 'ANNA', 'Anna']);
-    expect(findOccurrences('Łódź i Łódźka, ŁÓDŹ.', 'łódź', 'MIEJSCOWOŚĆ').length).toBe(2);
+    const hits = findOccurrences(text, 'Anna', 'DANE');
+    expect(hits.map(([a, b]) => text.slice(a, b))).toEqual(['Anna', 'Anna', 'ANNA', 'anna', 'anna', 'Anna']);
+    expect(hits[1][0]).toBe(text.indexOf('Annasz'));
+    expect(findOccurrences('Łódź i Łódźka, ŁÓDŹ.', 'łódź', 'MIEJSCOWOŚĆ').length).toBe(3);
+    // nachodzące na siebie wystąpienia: każde jest zasłonięte
+    expect(findOccurrences('ABABA', 'aba', 'DANE')).toEqual([[0, 3], [2, 5]]);
+    // odstęp musi być taki sam: ciąg rozdzielony enterem nie jest wystąpieniem
+    expect(findOccurrences('osiedla Zielone\nWzgórze w gminie', 'Zielone Wzgórze', 'DANE')).toEqual([]);
     // jednowyrazowa osoba łapie też formy o tym samym kluczu nazwiska, tylko z wielkiej litery
     const t2 = 'Pan Malec, panu Malcowi, Malca nie ma. Mały malec płacze.';
     const forms = findOccurrences(t2, 'Malec', 'IMIĘ I NAZWISKO').map(([a, b]) => t2.slice(a, b));
@@ -193,7 +200,7 @@ describe('„Zasłoń zaznaczenie”', () => {
     expect(forms).not.toContain('malec');
   });
 
-  test('„z żoną Anną”: [IMIĘ I NAZWISKO] wszędzie, nie w „Annasz”', () => {
+  test('„z żoną Anną”: [IMIĘ I NAZWISKO] wszędzie, „Annasz” bez „Anną” zostaje', () => {
     const text = 'Przyszedł z żoną Anną. Pani Annasz czekała. Anną zajmie się sekretariat.';
     const out = final(text, [], [{ kind: 'mask', scope: 'all', text: 'Anną', token: 'IMIĘ I NAZWISKO' }]);
     expect(out).toBe('Przyszedł z żoną [IMIĘ I NAZWISKO]. Pani Annasz czekała. [IMIĘ I NAZWISKO] zajmie się sekretariat.');
@@ -340,30 +347,33 @@ describe('zaznaczenie wewnątrz znacznika', () => {
 });
 
 describe('edycja tekstu źródłowego', () => {
-  test('przesunięcie przez wspólny początek i koniec, odrzucenie w zmienionym fragmencie', () => {
-    const before = 'AAA Jan Nowak BBB Piotr Lis CCC';
-    const after = 'AAA Jan Nowak BBB, dopisek, Piotr Lis CCC';
+  test('każda zmiana zdejmuje decyzje przypięte do tekstu, zasłonięcia „wszędzie” zostają', () => {
+    const t = 'AAA Jan Nowak BBB Piotr Lis CCC';
+    const rule: Decision = { kind: 'mask', scope: 'all', text: 'CCC', token: 'DANE' };
     const d: Decision[] = [
-      { kind: 'keep', scope: 'here', ...at(before, 'Jan Nowak') },
-      { kind: 'mask', scope: 'here', ...at(before, 'Piotr Lis'), token: 'DANE' },
-      { kind: 'mask', scope: 'here', ...at(before, 'BBB'), token: 'DANE' },
-      { kind: 'mask', scope: 'all', text: 'CCC', token: 'DANE' },
+      { kind: 'keep', scope: 'here', ...at(t, 'Jan Nowak') },
+      { kind: 'keep', scope: 'same', label: 'Jan Nowak', ranges: [[0, 3]] },
+      { kind: 'mask', scope: 'here', ...at(t, 'Piotr Lis'), token: 'DANE' },
+      rule,
+      { kind: 'unmask', scope: 'here', ...at(t, 'CCC') },
+      { kind: 'unmask', scope: 'same', label: 'CCC', ranges: [[28, 31]] },
     ];
-    const r = shiftDecisions(before, after, d);
-    expect(r.dropped).toBe(0);
-    expect(r.decisions[0]).toEqual(d[0]);
-    expect(r.decisions[1]).toMatchObject(at(after, 'Piotr Lis'));
-    expect(r.decisions[2]).toMatchObject(at(after, 'BBB'));
-    expect(r.decisions[3]).toBe(d[3]);
-    // zmiana w środku zakresu: „Zostaw jawne” odpada, zasłonięcie obejmuje cały nowy wyraz
-    const changed = 'AAA Jan Nowak BBB Piotr Lisowski CCC';
-    const r2 = shiftDecisions(before, changed, d);
-    expect(r2.dropped).toBe(0);
-    expect(r2.decisions[1]).toMatchObject(at(changed, 'Piotr Lisowski'));
-    const r3 = shiftDecisions(before, 'AAA Jan Nowakowski BBB Piotr Lis CCC', d);
-    expect(r3.dropped).toBe(1);
-    expect(r3.decisions.length).toBe(3);
-    expect(shiftDecisions(before, before, d)).toEqual({ decisions: d, dropped: 0, reveals: 0 });
+    expect(afterSourceEdit(d)).toEqual({ decisions: [rule], dropped: 5 });
+    expect(afterSourceEdit([rule])).toEqual({ decisions: [rule], dropped: 0 });
+  });
+
+  test('zasłonięcie „wszędzie” to reguła tekstowa: działa w każdej wersji pisma, bez miejsca liczy 0', () => {
+    const rule: Decision = { kind: 'mask', scope: 'all', text: 'KR1P/00012345/9', token: 'DANE' };
+    const glued = 'Działka, księga wieczysta nr KR1P/00012345/9a.\nUzasadnienie sprawy.';
+    expect(final(glued, auto(glued).spans, [rule])).not.toContain('00012345');
+    const gone = 'Działka, księga wieczysta nr KR1P/0001.\nUzasadnienie sprawy.';
+    expect(rulesWithoutPlace(gone, [rule])).toBe(1);
+    expect(rulesWithoutPlace(glued, [rule])).toBe(0);
+    // usunięta spacja i kropka: „sprawy.\nSkarżący” → „sprawykarżący”, „sprawy” dalej zasłonięte
+    const joined = 'Opis sprawykarżący wnosi.';
+    expect(final(joined, auto(joined).spans, [{ kind: 'mask', scope: 'all', text: 'sprawy', token: 'DANE' }])).toBe(
+      'Opis [DANE]karżący wnosi.',
+    );
   });
 
   test('decyzje nakładane na nowe zakresy po zmianie „Rozróżniaj osoby”', () => {
@@ -387,129 +397,7 @@ test('finalText bierze wynik z poprawkami, a bez zakresów sam wynik rdzenia', (
   expect(finalText({ redacted, original: text, spans, decisions: [] })).toBe(redacted);
 });
 
-test('edycja przyklejona do zakresu odrzuca „Zostaw jawne”, a zasłonięcie rozszerza do całego wyrazu', () => {
-  const before = 'Pismo do Piotr Lis w sprawie.';
-  const keep: Decision[] = [{ kind: 'keep', scope: 'here', ...at(before, 'Lis') }];
-  expect(shiftDecisions(before, 'Pismo do Piotr Lisowski w sprawie.', keep).dropped).toBe(1);
-  expect(shiftDecisions(before, 'Pismo do Piotr Lis, w sprawie.', keep).dropped).toBe(0);
-  expect(shiftDecisions(before, 'Pismo do Piotr XLis w sprawie.', keep).dropped).toBe(1);
-  expect(shiftDecisions(before, 'Pismo do Piotr X Lis w sprawie.', keep).decisions[0]).toMatchObject({ start: before.indexOf('Lis') + 2 });
-  // zasłonięcie: lepiej zasłonić więcej niż zostawić „owski” jawne
-  const mask: Decision[] = [{ kind: 'mask', scope: 'here', ...at(before, 'Lis'), token: 'DANE' }];
-  const longer = 'Pismo do Piotr Lisowski w sprawie.';
-  expect(shiftDecisions(before, longer, mask).decisions[0]).toMatchObject(at(longer, 'Lisowski'));
-  const front = 'Pismo do Piotr XLis w sprawie.';
-  expect(shiftDecisions(before, front, mask).decisions[0]).toMatchObject(at(front, 'XLis'));
-  // zmiana w środku zasłoniętego tekstu: zasłonięcie obejmuje poprawiony wyraz
-  const typo = 'Pismo do Piotr Lks w sprawie.';
-  expect(shiftDecisions(before, typo, mask)).toMatchObject({ dropped: 0, decisions: [at(typo, 'Lks')] });
-  // usunięcie całego zasłoniętego tekstu: nie ma czego zasłaniać, decyzja odpada
-  expect(shiftDecisions(before, 'Pismo do Piotr  w sprawie.', mask).dropped).toBe(1);
-});
-
-describe('zasłonięcie po pewnej edycji w nim albo przy nim (runda 2)', () => {
-  const T = 'Kod dostępu do skrzynki: Trzmielowa-Zagroda-77QX, proszę nie udostępniać. Zagroda stoi.';
-  const typo = T.replace('Trzmielowa-Zagroda', 'Trzmielowa-Zagxoda');
-
-  test('literówka poprawiona wewnątrz zasłonięcia „tutaj” zostaje zasłonięta', () => {
-    const d: Decision[] = [{ kind: 'mask', scope: 'here', ...at(T, 'Zagroda'), token: 'DANE' }];
-    expect(shiftDecisions(T, typo, d)).toMatchObject({ dropped: 0, decisions: [at(typo, 'Zagxoda')] });
-  });
-
-  test('„wszędzie”: zmienione miejsce dostaje zasłonięcie „tutaj”, pozostałe wystąpienia zostają', () => {
-    const d: Decision[] = [{ kind: 'mask', scope: 'all', text: 'Zagroda', token: 'DANE' }];
-    const r = shiftDecisions(T, typo, d);
-    expect(r.dropped).toBe(0);
-    expect(r.decisions).toEqual([d[0], { kind: 'mask', scope: 'here', ...at(typo, 'Zagxoda'), token: 'DANE' }]);
-    const out = final(typo, auto(typo).spans, r.decisions);
-    expect(out).not.toContain('Zag');
-  });
-
-  test('„wszędzie”: litera doklejona do jedynego wystąpienia numeru nie odsłania go', () => {
-    const t = 'Działka, księga wieczysta nr KR1P/00012345/9.\nUzasadnienie sprawy.';
-    const glued = t.replace('/9.', '/9a.');
-    const d: Decision[] = [{ kind: 'mask', scope: 'all', text: 'KR1P/00012345/9', token: 'DANE' }];
-    const r = shiftDecisions(t, glued, d);
-    expect(r).toMatchObject({ dropped: 0, decisions: [{ kind: 'mask', scope: 'here', ...at(glued, 'KR1P/00012345/9a') }] });
-    expect(final(glued, auto(glued).spans, r.decisions)).not.toContain('00012345');
-    // usunięta spacja i kropka między wyrazami: „sprawy.\nSkarżący” → „sprawykarżący”
-    const w = 'Opis sprawy.\nSkarżący wnosi.';
-    const joined = 'Opis sprawykarżący wnosi.';
-    const r2 = shiftDecisions(w, joined, [{ kind: 'mask', scope: 'all', text: 'sprawy', token: 'DANE' }]);
-    expect(r2.dropped).toBe(0);
-    expect(final(joined, auto(joined).spans, r2.decisions)).toBe('Opis [DANE] wnosi.');
-  });
-
-  test('nowe brzmienie całego wiersza bez zasłoniętego wyrazu nie staje się jednym [DANE] (runda 3)', () => {
-    const t = 'Wniosek o podział działki.\nNieruchomość leży w obrębie Zagroda, przy drodze gminnej.\nKoniec.';
-    const line = t.split('\n')[1];
-    const typed = 'Nieruchomość leży w obrębie geodezyjnym Rokitnica, przy drodze powiatowej nr 2228G, na skraju lasu.';
-    const after = t.replace(line, typed);
-    const d: Decision[] = [{ kind: 'mask', scope: 'here', ...at(t, 'Zagroda'), token: 'DANE' }];
-    expect(shiftDecisions(t, after, d)).toEqual({ decisions: [], dropped: 1, reveals: 0 });
-    expect(final(after, auto(after).spans, [])).toContain('na skraju lasu');
-    // ten sam wiersz z zasłoniętym wyrazem: zasłonięcie zostaje na nim
-    const kept = t.replace(line, line.replace('przy drodze gminnej', 'przy drodze powiatowej'));
-    expect(shiftDecisions(t, kept, d).decisions).toEqual([{ ...d[0], ...at(kept, 'Zagroda') }]);
-    // dopisane imię w środku zasłoniętej osoby: zasłonięcie obejmuje całość, bez reszty wiersza
-    const p = 'Pismo do Jan Kowalski w sprawie.';
-    const mid = 'Pismo do Jan Maria Kowalski w sprawie.';
-    const person: Decision[] = [{ kind: 'mask', scope: 'here', ...at(p, 'Jan Kowalski'), token: 'IMIĘ I NAZWISKO' }];
-    expect(shiftDecisions(p, mid, person).decisions).toEqual([{ ...person[0], ...at(mid, 'Jan Maria Kowalski') }]);
-  });
-
-  test('„wszędzie” bez żadnego wystąpienia po zmianie odpada z komunikatem', () => {
-    const t = 'Opis: Zagroda.';
-    const r = shiftDecisions(t, 'Opis: .', [{ kind: 'mask', scope: 'all', text: 'Zagroda', token: 'DANE' }]);
-    expect(r).toEqual({ decisions: [], dropped: 1, reveals: 0 });
-  });
-});
-
-describe('zmiana źródła, której nie da się zmapować przesunięciem', () => {
-  const A = 'Skarżący Jan Kowalski, zam. ul. Lipowa 5, księga OS1W/00045123/6. Uzasadnienie jest krótkie.';
-  const B = 'Sprawę prowadzi inspektor Jan Kowalski. Księga OS1W/00045123/6. Uzasadnienie jest krótkie.';
-
-  test('decyzje odsłaniające odpadają wszystkie, także „wszędzie” i „Cofnij zasłonięcie”', () => {
-    const d: Decision[] = [
-      { kind: 'keep', scope: 'here', ...at(B, 'Jan Kowalski') },
-      { kind: 'keep', scope: 'same', label: 'Jan Kowalski', ranges: [[at(B, 'Jan Kowalski').start, at(B, 'Jan Kowalski').end]] },
-      { kind: 'unmask', scope: 'here', ...at(B, 'Uzasadnienie') },
-    ];
-    const r = shiftDecisions(B, A, d, false);
-    expect(r).toEqual({ decisions: [], dropped: 3, reveals: 3 });
-    // ta sama zmiana jako pewna przesuwa decyzje spoza zmienionego fragmentu
-    expect(shiftDecisions(B, `${B} Koniec.`, d).decisions).toEqual(d);
-  });
-
-  test('zasłonięcie „tutaj” zostaje tylko tam, gdzie jego tekst dalej stoi, „wszędzie” tylko gdy tekst występuje', () => {
-    const tail = at(B, 'Uzasadnienie');
-    const d: Decision[] = [
-      { kind: 'mask', scope: 'here', ...tail, token: 'DANE' },
-      { kind: 'mask', scope: 'here', ...at(B, 'inspektor'), token: 'DANE' },
-      { kind: 'mask', scope: 'all', text: 'OS1W/00045123/6', token: 'DANE' },
-      { kind: 'mask', scope: 'all', text: 'inspektor', token: 'DANE' },
-    ];
-    const r = shiftDecisions(B, A, d, false);
-    expect(r.dropped).toBe(2);
-    expect(r.reveals).toBe(0);
-    expect(r.decisions).toEqual([
-      { ...d[0], ...at(A, 'Uzasadnienie') },
-      d[2],
-    ]);
-  });
-
-  test('„Zostaw jawne wszędzie” obejmuje tylko miejsca z chwili decyzji: wklejona później osoba zostaje zasłonięta', () => {
-    const t = 'Sprawę prowadzi inspektor Jan Kowalski. Zatwierdził Jan Kowalski.';
-    const { spans } = auto(t);
-    const keep = sameAs(t, spans, spans[0], 'Jan Kowalski');
-    const added = `${t} Wnioskodawca Jan Kowalski, PESEL 44051401359.`;
-    const moved = shiftDecisions(t, added, [keep]);
-    expect(moved.dropped).toBe(0);
-    const out = final(added, auto(added).spans, moved.decisions);
-    expect(out).toContain('Zatwierdził Jan Kowalski.');
-    expect(out).toContain('Wnioskodawca [IMIĘ I NAZWISKO]');
-  });
-
+describe('zasłonięcia ręczne a automat', () => {
   test('„Zostaw jawne” na fragmencie zasłoniętym ręcznie nie odsłania wchłoniętego PESEL-u', () => {
     const t = 'Wniosek, PESEL 85071412358, złożony dnia 3 maja.\nPonownie: PESEL 85071412358, złożony dnia 3 maja.';
     const { spans, redacted } = auto(t);

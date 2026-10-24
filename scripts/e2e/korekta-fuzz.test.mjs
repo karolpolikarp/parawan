@@ -1,23 +1,23 @@
 // Fuzzer ręcznej korekty (A09) i karty pisma (A08) na gotowym pliku przez file://, w Chromium
 // i Firefoksie. Generator z ziarnem składa losowe ciągi czynności urzędnika: wklejenie pisma
-// (także pisma z tego samego wzoru, z innymi danymi), pisanie i usuwanie w jednym miejscu, Ctrl+A
-// i wklejenie innego pisma, wklejenie fragmentu, natywne Ctrl+Z i Ctrl+Y w polu źródła, „Zasłoń
-// zaznaczenie” (tu i wszędzie, z pola i z wyniku), klik w znacznik i „Zostaw jawne”, „Zostaw jawne
-// wszędzie”, „Cofnij zasłonięcie”, „Zasłoń ponownie”, Ctrl+Z i Ctrl+Y w wyniku, „Cofnij ostatnią”,
-// „Usuń wszystkie”, „Wyczyść” i „Cofnij” na pasku nad polem.
+// (także pisma z tego samego wzoru, z innymi danymi), pisanie i usuwanie w jednym miejscu, edycja
+// w środku zasłonięcia, Enter w środku, dwuklik i wpisanie innej formy, Ctrl+X fragmentu, Ctrl+X
+// i Ctrl+V wiersza, Ctrl+A i wklejenie innego pisma, natywne Ctrl+Z i Ctrl+Y w polu źródła,
+// „Zasłoń zaznaczenie” (tu i wszędzie, z pola i z wyniku, także przez znacznik automatu), klik
+// w znacznik i „Zostaw jawne”, „Zostaw jawne wszędzie”, „Cofnij zasłonięcie”, „Zasłoń ponownie”,
+// Ctrl+Z i Ctrl+Y w wyniku i na pasku poprawki, „Cofnij ostatnią”, „Usuń wszystkie”, znak sprawy
+// i Ctrl+Z w polach karty, „Wyczyść” i „Cofnij” na pasku nad polem.
 //
 // Model odniesienia liczy dla BIEŻĄCEGO tekstu źródła dane automatu (redactPII i alignSpans
-// z tych samych źródeł co aplikacja) i pamięta decyzje urzędnika razem z tekstem, na którym je
-// podjął. Decyzja „Zostaw jawne” obowiązuje tylko w tym tekście albo w tekście, który powstał
-// z niego samym pisaniem lub usuwaniem w jednym miejscu poza jej zakresem (także wklejeniem
-// fragmentu obok). Ręczne zasłonięcie musi trzymać się, dopóki źródło zmienia się tylko w ten
-// sposób. Zasłonięcie miejsca z decyzją „Zostaw jawne” (Zasłoń ponownie, Usuń wszystkie, Ctrl+Z
-// w wyniku, Zasłoń zaznaczenie) zawiesza ją, a wraca tylko cofnięcie na tym samym tekście, więc
-// powrót Ctrl+Z w polu do tekstu z decyzją nie może jej wskrzesić. Znak sprawy w karcie pisma może
-// stać tylko przy piśmie, przy którym go wpisano (odniesienie isOtherDocument z krokami pośrednimi).
-// Po każdym kroku sprawdzamy wynik na ekranie, druk, schowek i pobrany .txt, znak po znaku:
-// - każda dana automatu jest zasłonięta, chyba że model ma dla tego miejsca ważną decyzję,
-// - żadne ręczne zasłonięcie nie jest jawne bez decyzji, która je zdjęła.
+// z tych samych źródeł co aplikacja). Ręczne decyzje są przypięte do dokładnego tekstu z chwili
+// decyzji: „Zostaw jawne” i „Cofnij zasłonięcie” obowiązują tylko, dopóki tekst się nie zmienił,
+// a zasłonięcie „tutaj” po zmianie nie jest wymagane. Zasłonięcie „wszędzie” to reguła tekstowa:
+// każde dosłowne wystąpienie jej tekstu w bieżącym piśmie ma być zasłonięte, a reguła znika
+// z listy poprawek tylko po czynności urzędnika. Zmiana tekstu, która zdjęła ręczne decyzje, daje
+// notkę przy liście poprawek. Skróty poza polem źródła (wynik, pasek poprawki, karta) nie zmieniają
+// tekstu. Znak sprawy zeruje się przy zmianie ponad połowy tekstu, Ctrl+A i wklejeniu, pustym polu,
+// „Wyczyść” i „Cofnij” na pasku, a poza tym zostaje (także po Ctrl+Z i Ctrl+Y w polu źródła).
+// Po każdym kroku sprawdzamy wynik na ekranie, druk, schowek i pobrany .txt, znak po znaku.
 //
 // Przed losowymi biegną ciągi z wcześniejszych błędów (REGRESSIONS), w każdej przeglądarce.
 // Domyślnie 30 ciągów (po połowie na przeglądarkę) z losowym ziarnem. Zmienne:
@@ -117,6 +117,33 @@ const REGRESSIONS = [
   ],
   // wklejony wnioskodawca odsłaniał się przez „Zostaw jawne wszędzie” dla inspektora o tym samym nazwisku
   [{ a: 'wklej', doc: 2 }, { a: 'znacznik', at: 0.1, co: 'wszedzie' }, { a: 'fragment', doc: 4, line: 0.5, at: 0.5 }],
+  // „Zasłoń wszędzie”, potem litery doklejone do zasłoniętego tekstu (runda 1)
+  [
+    { a: 'wklej', doc: 1 },
+    { a: 'dwie', at: 0.02, at2: 0.01, s: ' zob. akta ' },
+    { a: 'zaslon', z: 'src', wszedzie: true, at: 0.32 },
+    { a: 'piszW', at: 0.4, s: 'ski' },
+  ],
+  [{ a: 'wklej', doc: 1 }, { a: 'zaslon', z: 'out', wszedzie: true, at: 0.32 }, { a: 'piszW', at: 0.3419, s: 'a' }],
+  // Ctrl+Y w polu źródła po wyzerowaniu karty dopisywał znak sprawy drugi raz (runda 3)
+  [{ a: 'wklej', doc: 2 }, { a: 'karta' }, { a: 'karta' }, { a: 'wklej', doc: 0 }, { a: 'cofnijPoleN', n: 3 }, { a: 'ponowPole' }],
+  // zasłonięcie przez znacznik automatu, potem Ctrl+X, zamiana albo całe pismo w środku (runda 3)
+  [{ a: 'wklej', doc: 4 }, { a: 'zaslonZnacznik', at: 0.35, k: 9, wszedzie: false }, { a: 'wytnij', at: 0.3, n: 26 }],
+  [{ a: 'wklej', doc: 2 }, { a: 'zaslonZnacznik', at: 0.61, k: 8, wszedzie: false }, { a: 'zamien', at: 0.56, n: 11, doc: 0, from: 0.5 }],
+  [{ a: 'wklej', doc: 1 }, { a: 'zaslonZnacznik', at: 0.16, k: 6, wszedzie: true }, { a: 'wklejDoc', at: 0.36, doc: 4 }],
+  // Enter w środku zasłonięcia „wszędzie” i „tutaj” (runda 3)
+  [{ a: 'wklej', doc: 0 }, { a: 'zaslonZnacznik', at: 0.16, k: 6, wszedzie: true }, { a: 'enter', at: 0.09 }],
+  [{ a: 'wklej', doc: 3 }, { a: 'zaslon', z: 'src', wszedzie: false, at: 0.3 }, { a: 'enter', at: 0.5 }],
+  // dwuklik i inna forma wyrazu zasłoniętego „wszędzie”, przeniesienie wiersza (runda 3)
+  [{ a: 'wklej', doc: 3 }, { a: 'zaslon', z: 'out', wszedzie: true, at: 0.2 }, { a: 'dwuklik', at: 0.2, s: 'zie' }],
+  [{ a: 'wklej', doc: 0 }, { a: 'zaslon', z: 'out', wszedzie: true, at: 0.9 }, { a: 'wytnijWklej', at: 0.99 }],
+  // edycja w środku zasłonięcia i Ctrl+Z na pasku poprawki
+  [{ a: 'wklej', doc: 0 }, { a: 'zaslon', z: 'src', wszedzie: true, at: 0.05 }, { a: 'srodek', at: 0.1, pos: 0.5, s: 'x', zamien: true }, { a: 'cofnijPole' }],
+  [{ a: 'wklej', doc: 2 }, { a: 'znacznik', at: 0.5, co: 'tu' }, { a: 'paskiemZ', at: 0.5 }, { a: 'cofnijPole' }],
+  // „Zostaw jawne” i dopisek, potem Ctrl+Z w polu wraca do tekstu z decyzją (runda 1)
+  [{ a: 'wklej', doc: 2 }, { a: 'znacznik', at: 0.2, co: 'tu' }, { a: 'pisz', at: 0.9, s: ' uwaga ' }, { a: 'cofnijPole' }],
+  // Ctrl+Z w polach karty działa tylko na nich
+  [{ a: 'wklej', doc: 0 }, { a: 'karta' }, { a: 'wklej', doc: 3 }, { a: 'karta' }, { a: 'cofnijKarta', n: 3, pole: 'organ' }, { a: 'cofnijKarta', n: 3, pole: 'znak' }],
 ];
 
 /* ── Generator z ziarnem ── */
@@ -156,7 +183,14 @@ const WEIGHTS = [
   ['cofnijPoleN', 2],
   ['ponowPoleS', 1],
   ['karta', 2],
-  ['cofnijKarta', 1],
+  ['cofnijKarta', 2],
+  ['srodek', 3],
+  ['enter', 2],
+  ['dwuklik', 2],
+  ['wytnij', 1],
+  ['wytnijWklej', 2],
+  ['paskiemZ', 2],
+  ['zaslonZnacznik', 3],
 ];
 const TOTAL_W = WEIGHTS.reduce((s, [, w]) => s + w, 0);
 
@@ -184,7 +218,20 @@ function generate(seed, len = STEPS) {
       case 'cofnijPoleN':
         return { a, n: 2 + pick(3) };
       case 'cofnijKarta':
-        return { a, n: 1 + pick(3) };
+        return { a, n: 1 + pick(3), pole: ['znak', 'organ', 'adnotacja'][pick(3)] };
+      case 'srodek':
+        return { a, at: r(), pos: r(), s: ['x', 'a', ' ', '-'][pick(4)], zamien: r() < 0.5 };
+      case 'enter':
+      case 'wytnijWklej':
+        return { a, at: r() };
+      case 'dwuklik':
+        return { a, at: r(), s: ['zie', 'ach', 'ą', 'ego'][pick(4)] };
+      case 'wytnij':
+        return { a, at: r(), n: 2 + pick(30) };
+      case 'paskiemZ':
+        return { a, at: r(), y: r() < 0.25 };
+      case 'zaslonZnacznik':
+        return { a, at: r(), k: 1 + pick(10), wszedzie: r() < 0.5 };
       case 'dwie':
         return { a, at: r(), at2: r(), s: TYPED[pick(TYPED.length)] };
       case 'zaslon':
@@ -224,7 +271,21 @@ function describe(s) {
     case 'cofnijPoleN':
       return `Ctrl+Z w polu ×${s.n}`;
     case 'cofnijKarta':
-      return `Ctrl+Z w polu „Znak sprawy” ×${s.n}`;
+      return `Ctrl+Z w polu karty „${s.pole ?? 'znak'}” ×${s.n}`;
+    case 'srodek':
+      return `${s.zamien ? 'zamień znak' : 'wpisz'} „${s.s}” w środku zakresu pod znacznikiem @${f2(s.at)}/${f2(s.pos)}`;
+    case 'enter':
+      return `Enter w miejscu spacji @${f2(s.at)}`;
+    case 'dwuklik':
+      return `dwuklik w wyraz @${f2(s.at)} i wpisz formę z „${s.s}”`;
+    case 'wytnij':
+      return `Ctrl+X ${s.n} zn. @${f2(s.at)}`;
+    case 'wytnijWklej':
+      return `Ctrl+X wiersza @${f2(s.at)} i Ctrl+V na końcu`;
+    case 'paskiemZ':
+      return `znacznik @${f2(s.at)}, fokus na pasku poprawki i ${s.y ? 'Ctrl+Y' : 'Ctrl+Z'}`;
+    case 'zaslonZnacznik':
+      return `Zasłoń zaznaczenie (wynik przez znacznik @${f2(s.at)} ±${s.k}, ${s.wszedzie ? 'wszędzie' : 'tu'})`;
     case 'dwie':
       return `dwie szybkie edycje „${s.s}” @${f2(s.at)} i @${f2(s.at2)}`;
     case 'fragment':
@@ -286,65 +347,55 @@ function diff(a, b) {
   return { p, endA: a.length - s, delta: b.length - a.length };
 }
 
-/** Zakres po edycji jednego miejsca albo null, gdy edycja go dotknęła. */
-function shiftRange([x, y], d, a, b) {
-  let r = null;
-  if (y <= d.p) r = [x, y];
-  else if (x >= d.endA) r = [x + d.delta, y + d.delta];
-  if (!r || b.slice(r[0], r[1]) !== a.slice(x, y)) return null;
-  return r;
+/** Każde dosłowne wystąpienie `needle` w `src`, także nachodzące na siebie. */
+function literal(src, needle) {
+  const out = [];
+  if (!needle) return out;
+  for (let i = src.indexOf(needle); i !== -1; i = src.indexOf(needle, i + 1)) out.push([i, i + needle.length]);
+  return out;
 }
 
-const LOCAL = new Set(['pisz', 'usun', 'fragment', 'piszW', 'zamien', 'duza', 'wklejDoc', 'dwie']);
+const collapse = (t) => t.replace(/\s+/g, ' ').trim();
+const overlap = (rs, x, y) => rs.some(([p, q]) => p < y && x < q);
 
+/**
+ * Model poprawek (M1–M5): decyzje są przypięte do dokładnego tekstu z chwili decyzji.
+ * - `keeps`: odsłonięcia „Zostaw jawne” w bieżącym tekście (wyłączone, gdy urzędnik potem zasłonił
+ *   to miejsce). Każda zmiana tekstu je zdejmuje.
+ * - `masks`: zasłonięcia „tutaj” w bieżącym tekście. Po zmianie tekstu nie są wymagane.
+ * - `opened`: miejsca odsłonięte przez „Cofnij zasłonięcie” w bieżącym tekście (wyjątki od reguł).
+ * - `rules`: zasłonięcia „wszędzie”, reguły tekstowe: każde dosłowne wystąpienie ich tekstu
+ *   w bieżącym piśmie ma być zasłonięte. Znikają tylko z czynnością urzędnika (lista poprawek).
+ */
 class Model {
   constructor() {
-    /** @type {{ chain: { text: string, ranges: [number, number][] }[], what: string }[]} */
+    /** @type {{ ranges: [number, number][], on: boolean, what: string }[]} */
     this.keeps = [];
-    /** @type {{ alive: boolean, text: string, ranges: [number, number][], what: string }[]} */
+    /** @type {{ ranges: [number, number][], what: string }[]} */
     this.masks = [];
+    /** @type {[number, number][]} */
+    this.opened = [];
+    /** @type {{ text: string, what: string }[]} */
+    this.rules = [];
+    this.extra = [];
   }
 
-  /**
-   * Źródło zmieniło się z `a` na `b` krokiem `step`. Wklejenie tego samego pisma, „Wyczyść” i „Cofnij”
-   * na pasku liczą się jako zmiana pisma także przy tym samym tekście: aplikacja może wtedy zdjąć
-   * ręczne zasłonięcia (z komunikatem), a decyzja „Zostaw jawne” zostaje ważna tylko dla tego tekstu.
-   */
-  sourceChanged(step, a, b) {
-    if (step._mid != null && step._mid !== a && step._mid !== b) {
-      const mid = step._mid;
-      this.sourceChanged({ ...step, _mid: null }, a, mid);
-      return this.sourceChanged({ ...step, _mid: null }, mid, b);
-    }
-    const local = LOCAL.has(step.a);
-    const d = diff(a, b);
-    if (local) {
-      for (const k of this.keeps) {
-        const add = [];
-        for (const e of k.chain.filter((e) => e.text === a)) {
-          const ranges = e.ranges.map((r) => shiftRange(r, d, a, b)).filter(Boolean);
-          if (ranges.length) add.push({ text: b, ranges });
-        }
-        k.chain.push(...add);
-      }
-    }
-    for (const m of this.masks) {
-      if (!m.alive) continue;
-      if (!local || m.text !== a) {
-        m.alive = false;
-        continue;
-      }
-      m.ranges = m.ranges.map((r) => shiftRange(r, d, a, b)).filter(Boolean);
-      m.text = b;
-      if (!m.ranges.length) m.alive = false;
-    }
+  /** Ręczne decyzje, które aplikacja musi zdjąć przy zmianie tekstu (z komunikatem). */
+  pinned() {
+    return this.keeps.some((k) => k.on) || this.masks.length > 0;
+  }
+
+  /** Tekst się zmienił: decyzje przypięte do poprzedniego tekstu odpadają, reguły zostają. */
+  sourceChanged() {
+    this.keeps = [];
+    this.masks = [];
+    this.opened = [];
   }
 
   /** Czynność na poprawkach przy tym samym źródle: cov0 przed, cov1 po. */
   corrected(step, kind, src, cov0, cov1) {
     const revealed = runs(src, (i) => cov0[i] && !cov1[i]);
     const masked = runs(src, (i) => !cov0[i] && cov1[i]);
-    this.extra = [];
     if ((kind === 'keep' || kind === 'unmask') && step.a === 'znacznik' && step._range) {
       const [ra, rb] = step._range;
       const word = (t) => (t.toLowerCase().match(/[\p{L}\d]{3,}/gu) ?? []).map((w) => w.slice(0, 4));
@@ -353,55 +404,82 @@ class Model {
         while (x < y && /\s/.test(src[x])) x++;
         while (y > x && /\s/.test(src[y - 1])) y--;
         const t = src.slice(x, y);
-        if (step.co === 'tu' && (x < ra || y > rb)) this.extra.push(`„${step._co}” odsłonił „${t}” [${x},${y}) poza klikniętym znacznikiem [${ra},${rb}) „${src.slice(ra, rb)}”`);
+        // sama interpunkcja na styku znaczników jest w tekście wyniku niejednoznaczna (patrz check)
+        if (!/[\p{L}\p{N}]/u.test(t)) continue;
+        const outside = src.slice(x, Math.max(x, Math.min(y, ra))) + src.slice(Math.min(y, Math.max(x, rb)), y);
+        if (step.co === 'tu' && /[\p{L}\p{N}]/u.test(outside)) this.extra.push(`„${step._co}” odsłonił „${t}” [${x},${y}) poza klikniętym znacznikiem [${ra},${rb}) „${src.slice(ra, rb)}”`);
         if (step.co === 'wszedzie' && !word(t).some((w) => own.has(w))) this.extra.push(`„${step._co}” odsłonił „${t}”, niepodobne do klikniętego „${src.slice(ra, rb)}”`);
       }
     }
-    const hits = (k, rs) => k.chain.some((e) => e.text === src && e.ranges.some(([x, y]) => rs.some(([p, q]) => p < y && x < q)));
     // Zasłonięcie miejsca z decyzją „Zostaw jawne” (Zasłoń ponownie, Usuń wszystkie, Ctrl+Z w wyniku,
     // Zasłoń zaznaczenie) zawiesza tę decyzję. Wraca tylko przez cofnięcie (Ctrl+Z, Cofnij zasłonięcie).
-    if (masked.length) for (const k of this.keeps) if (k.on && hits(k, masked)) k.on = false;
-    if (kind === 'unmask' && revealed.length) for (const k of this.keeps) if (!k.on && hits(k, revealed)) k.on = true;
-    if (kind === 'keep') {
-      for (const r of revealed) this.keeps.push({ chain: [{ text: src, ranges: [r] }], on: true, what: describe(step) });
+    if (masked.length) for (const k of this.keeps) if (k.on && k.ranges.some(([x, y]) => overlap(masked, x, y))) k.on = false;
+    if (kind === 'unmask' && revealed.length) {
+      for (const k of this.keeps) if (!k.on && k.ranges.some(([x, y]) => overlap(revealed, x, y))) k.on = true;
     }
-    // „Zostaw jawne” na znaczniku, który stoi w miejscu ręcznego zasłonięcia (np. „Kowalski” zasłonięty
-    // wszędzie przywrócił znacznik automatu „Jan Kowalski”), to późniejsza decyzja urzędnika: wygrywa.
-    if (kind === 'mask' && masked.length) {
-      this.masks.push({ alive: true, text: src, ranges: masked, what: describe(step) });
-    }
+    if (kind === 'keep') for (const r of revealed) this.keeps.push({ ranges: [r], on: true, what: describe(step) });
+    // „Cofnij zasłonięcie” klikiem w znacznik: to miejsce reguły „wszędzie” może być jawne w tym tekście.
+    if (kind === 'unmask' && step.a === 'znacznik') this.opened.push(...revealed);
+    if (kind === 'mask' && masked.length && !step._rule) this.masks.push({ ranges: masked, what: describe(step) });
+    if (step._rule) this.rules.push({ text: step._rule, what: describe(step) });
     if (kind === 'keep' || kind === 'unmask') {
-      for (const m of this.masks) {
-        if (!m.alive || m.text !== src) continue;
-        m.ranges = m.ranges.filter(([x, y]) => !revealed.some(([p, q]) => p < y && x < q));
-        if (!m.ranges.length) m.alive = false;
-      }
+      for (const m of this.masks) m.ranges = m.ranges.filter(([x, y]) => !overlap(revealed, x, y));
+      this.masks = this.masks.filter((m) => m.ranges.length);
     }
   }
 
-  /** Zakresy, które w tekście `src` wolno pokazać jawnie. */
-  allowed(src) {
-    return this.keeps.filter((k) => k.on).flatMap((k) => k.chain.filter((e) => e.text === src).flatMap((e) => e.ranges));
+  /**
+   * Reguły „wszędzie” z listy poprawek aplikacji (tekst bez zwiniętych odstępów). Reguła znika
+   * z modelu, gdy nie ma jej na liście; zwraca te, które zniknęły.
+   */
+  syncRules(listed) {
+    const pool = [...listed];
+    const alive = [];
+    const lost = [];
+    for (const r of this.rules) {
+      const k = pool.indexOf(collapse(r.text));
+      if (k === -1) lost.push(r);
+      else {
+        pool.splice(k, 1);
+        alive.push(r);
+      }
+    }
+    this.rules = alive;
+    return lost;
+  }
+
+  /** Zakresy, które w bieżącym tekście wolno pokazać jawnie zamiast danej automatu. */
+  allowed() {
+    return this.keeps.filter((k) => k.on).flatMap((k) => k.ranges);
   }
 
   /** Naruszenia w kanale `name` dla wyniku `out`. */
   check(name, src, out, auto) {
     const cov = coverage(src, out);
     if (!cov) return [`${name}: wyniku nie da się dopasować do źródła:\n${out}`];
-    const ok = this.allowed(src);
+    const ok = this.allowed();
+    const free = (i) => ok.some(([x, y]) => x <= i && i < y);
     const errs = [];
     for (const s of auto) {
-      const open = runs(src, (i) => i >= s.start && i < s.end && !cov[i] && !ok.some(([x, y]) => x <= i && i < y));
-      if (open.length) {
+      if (runs(src, (i) => i >= s.start && i < s.end && !cov[i] && !free(i)).length) {
         errs.push(`${name}: jawne „${src.slice(s.start, s.end)}” [${s.tokens.join(', ')}] bez decyzji „Zostaw jawne” podjętej na tym tekście`);
       }
     }
     for (const m of this.masks) {
-      if (!m.alive || m.text !== src) continue;
       for (const [x, y] of m.ranges) {
-        if (runs(src, (i) => i >= x && i < y && !cov[i]).length) {
+        if (runs(src, (i) => i >= x && i < y && !cov[i]).some(([p, q]) => /[\p{L}\p{N}]/u.test(src.slice(p, q)))) {
           errs.push(`${name}: ręcznie zasłonięte „${src.slice(x, y)}” (${m.what}) jawne bez decyzji`);
         }
+      }
+    }
+    for (const r of this.rules) {
+      for (const [x, y] of literal(src, r.text)) {
+        // Sama interpunkcja na styku znaczników („[IMIĘ I NAZWISKO] [ADRES],”) jest w tekście wyniku
+        // niejednoznaczna: dopasowanie może przypisać przecinek dowolnej stronie. Liczą się litery i cyfry.
+        const open = runs(src, (i) => i >= x && i < y && !cov[i] && !free(i) && !this.opened.some(([p, q]) => p <= i && i < q)).filter(
+          ([p, q]) => /[\p{L}\p{N}]/u.test(src.slice(p, q)),
+        );
+        if (open.length) errs.push(`${name}: jawne wystąpienie „${r.text}” reguły „wszędzie” (${r.what})`);
       }
     }
     return errs;
@@ -456,10 +534,98 @@ async function editAt(page, start, end, text) {
 
 const wsPositions = (src) => [...src.matchAll(/ /g)].map((m) => m.index);
 
+/** Zakresy źródła pod znacznikami wyniku [start, end), w kolejności dokumentu. */
+const markRanges = (page, len) =>
+  page.evaluate((len) => {
+    const items = [...document.querySelectorAll('#output [data-o], #output mark.pii, #output mark.pii-kept')];
+    const out = [];
+    for (let k = 0; k < items.length; k++) {
+      const el = items[k];
+      if (el.dataset.o !== undefined) continue;
+      // fragment przywrócony ręcznie ma w sobie tekst oryginału z data-o
+      const inner = [...el.querySelectorAll('[data-o]')];
+      if (inner.length) {
+        const last = inner[inner.length - 1];
+        out.push([Number(inner[0].dataset.o), Number(last.dataset.o) + (last.textContent ?? '').length]);
+        continue;
+      }
+      let a = 0;
+      let b = len;
+      for (let j = k - 1; j >= 0; j--) {
+        const p = items[j];
+        if (p.dataset.o !== undefined && !el.contains(p)) {
+          a = Number(p.dataset.o) + (p.textContent ?? '').length;
+          break;
+        }
+      }
+      for (let j = k + 1; j < items.length; j++) {
+        const n = items[j];
+        if (n.dataset.o !== undefined) {
+          b = Number(n.dataset.o);
+          break;
+        }
+      }
+      out.push([a, b]);
+    }
+    return out;
+  }, len);
+
+/** Ustawia zaznaczenie w wyniku na [a, b) źródła (tekst wokół znacznika, przez sam znacznik). */
+const selectOut = (page, a, b) =>
+  page.evaluate(
+    ([a, b]) => {
+      const at = (pos, end) => {
+        for (const el of document.querySelectorAll('#output [data-o]')) {
+          const o = Number(el.dataset.o);
+          const t = el.firstChild;
+          if (!t || t.nodeType !== Node.TEXT_NODE) continue;
+          if (end ? o < pos && pos <= o + t.data.length : o <= pos && pos < o + t.data.length) return [t, pos - o];
+        }
+        return null;
+      };
+      const s = at(a, false);
+      const e = at(b, true);
+      if (!s || !e) return false;
+      const r = document.createRange();
+      r.setStart(s[0], s[1]);
+      r.setEnd(e[0], e[1]);
+      getSelection()?.removeAllRanges();
+      getSelection()?.addRange(r);
+      return true;
+    },
+    [a, b],
+  );
+
+/**
+ * Kończy „Zasłoń zaznaczenie”: ustawia „wszystkie wystąpienia” i zapisuje w kroku tekst reguły
+ * (dosłowny fragment źródła, który pokazuje wiersz). Zwraca false, gdy wiersz się nie otworzył.
+ */
+async function applyForm(page, step, src, start, end) {
+  if (!(await visible(page, '#fix-apply'))) return false;
+  const all = page.locator('#fix-all');
+  const rule = (await all.isEnabled()) && step.wszedzie;
+  if (await all.isEnabled()) await all.setChecked(step.wszedzie);
+  if (rule) {
+    const shown = ((await page.locator('#fix-form-val').textContent()) ?? '').trim();
+    const re = new RegExp(shown.split(' ').map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('[^\\S\\n]+'), 'g');
+    let best = null;
+    for (const m of src.matchAll(re)) {
+      const a = m.index;
+      const b = a + m[0].length;
+      const ov = Math.min(b, end) - Math.max(a, start);
+      if (ov > 0 && (!best || ov > best.ov)) best = { ov, text: m[0] };
+    }
+    if (best) step._rule = best.text;
+  }
+  await page.locator('#fix-apply').click();
+  return true;
+}
+
 /** Wykonuje krok. Zwraca rodzaj czynności dla modelu albo null, gdy krok nic nie zrobił. */
 async function perform(page, step, browserName) {
   const src = await page.locator('#input').inputValue();
   const ta = page.locator('#input');
+  delete step._rule;
   switch (step.a) {
     case 'wklej': {
       await ta.focus();
@@ -522,10 +688,65 @@ async function perform(page, step, browserName) {
       if (ws.length < 2) return null;
       const a1 = ws[Math.floor(step.at * ws.length)];
       await editAt(page, a1, a1, step.s);
-      step._mid = await ta.inputValue();
-      const ws2 = wsPositions(step._mid);
+      step._mids = [await ta.inputValue()];
+      const ws2 = wsPositions(step._mids[0]);
       const a2 = ws2[Math.floor(step.at2 * ws2.length)];
       await editAt(page, a2, a2, step.s);
+      return 'source';
+    }
+    case 'srodek': {
+      // edycja w środku zasłonięcia: litera wpisana albo zamieniona w środku zakresu pod znacznikiem
+      const rs = (await markRanges(page, src.length)).filter(([a, b]) => b - a >= 3);
+      if (!rs.length) return null;
+      const [a, b] = rs[Math.floor(step.at * rs.length)];
+      const at = a + 1 + Math.floor(step.pos * (b - a - 2));
+      await editAt(page, at, step.zamien ? at + 1 : at, step.s);
+      return 'source';
+    }
+    case 'enter': {
+      // Enter w miejscu spacji, najchętniej w środku zakresu pod znacznikiem
+      const rs = await markRanges(page, src.length);
+      const inside = wsPositions(src).filter((i) => rs.some(([a, b]) => a < i && i < b - 1));
+      const ws = inside.length ? inside : wsPositions(src);
+      if (!ws.length) return null;
+      const at = ws[Math.floor(step.at * ws.length)];
+      await ta.focus();
+      await ta.evaluate((el, a) => el.setSelectionRange(a, a + 1), at);
+      await page.keyboard.press('Enter');
+      return 'source';
+    }
+    case 'dwuklik': {
+      // dwuklik w Windows zaznacza wyraz razem z odstępem za nim; urzędnik wpisuje inną formę
+      const words = [...src.matchAll(/\p{L}{4,} /gu)];
+      if (!words.length) return null;
+      const w = words[Math.floor(step.at * words.length)];
+      const stem = w[0].slice(0, -2);
+      await editAt(page, w.index, w.index + w[0].length, `${stem}${step.s} `);
+      return 'source';
+    }
+    case 'wytnij': {
+      if (!src) return null;
+      const at = Math.floor(step.at * src.length);
+      await ta.focus();
+      await ta.evaluate((el, [a, b]) => el.setSelectionRange(a, b), [at, Math.min(src.length, at + step.n)]);
+      await page.keyboard.press('ControlOrMeta+x');
+      return 'source';
+    }
+    case 'wytnijWklej': {
+      // przeniesienie wiersza: Ctrl+X wiersza z końcem wiersza, Ctrl+V na końcu pisma
+      const lines = [...src.matchAll(/[^\n]*\n/g)];
+      if (!lines.length) return null;
+      const l = lines[Math.floor(step.at * lines.length)];
+      await ta.focus();
+      await ta.evaluate((el, [a, b]) => el.setSelectionRange(a, b), [l.index, l.index + l[0].length]);
+      await page.keyboard.press('ControlOrMeta+x');
+      await page.waitForTimeout(80);
+      const cut = await ta.inputValue();
+      step._mids = [cut];
+      await ta.evaluate((el) => el.setSelectionRange(el.value.length, el.value.length));
+      await page.keyboard.press('Enter');
+      step._mids.push(await ta.inputValue());
+      await page.keyboard.press('ControlOrMeta+v');
       return 'source';
     }
     case 'pusto':
@@ -544,15 +765,14 @@ async function perform(page, step, browserName) {
       return 'source';
     }
     case 'cofnijKarta': {
-      if (!(await visible(page, '#pub-znak'))) return null;
-      step._mids = [];
+      const sel = { znak: '#pub-znak', organ: '#pub-organ', adnotacja: '#pub-adnotacja' }[step.pole ?? 'znak'];
+      if (!(await visible(page, sel))) return null;
       for (let k = 0; k < step.n; k++) {
-        await page.locator('#pub-znak').focus();
+        await page.locator(sel).focus();
         await page.keyboard.press('ControlOrMeta+z');
         await page.waitForTimeout(80);
-        step._mids.push(await ta.inputValue());
       }
-      return 'source';
+      return 'karta-cofnij';
     }
     case 'ponowPoleS':
       await ta.focus();
@@ -602,52 +822,33 @@ async function perform(page, step, browserName) {
         if (!(await visible(page, '#fix-sel-src'))) return null;
         await page.locator('#fix-sel-src').click();
       } else {
-        const ok = await page.evaluate(
-          ([a, b]) => {
-            for (const el of document.querySelectorAll('#output [data-o]')) {
-              const o = Number(el.dataset.o);
-              const t = el.firstChild;
-              if (!t || t.nodeType !== Node.TEXT_NODE || o > a || b > o + t.data.length) continue;
-              const r = document.createRange();
-              r.setStart(t, a - o);
-              r.setEnd(t, b - o);
-              getSelection()?.removeAllRanges();
-              getSelection()?.addRange(r);
-              return true;
-            }
-            return false;
-          },
-          [start, end],
-        );
-        if (!ok) return null;
+        if (!(await selectOut(page, start, end))) return null;
         await page.waitForTimeout(60);
         if (!(await visible(page, '#fix-sel-out'))) return null;
         await page.locator('#fix-sel-out').click();
       }
-      if (!(await visible(page, '#fix-apply'))) return null;
-      const all = page.locator('#fix-all');
-      if (await all.isEnabled()) await all.setChecked(step.wszedzie);
-      await page.locator('#fix-apply').click();
-      return 'mask';
+      return (await applyForm(page, step, src, start, end)) ? 'mask' : null;
+    }
+    case 'zaslonZnacznik': {
+      // zaznaczenie w wyniku od kilku znaków przed znacznikiem do kilku znaków za nim
+      const rs = await markRanges(page, src.length);
+      if (!rs.length) return null;
+      const [a, b] = rs[Math.floor(step.at * rs.length)];
+      const start = Math.max(0, a - step.k);
+      const end = Math.min(src.length, b + step.k);
+      if (!(await selectOut(page, start, end))) return null;
+      await page.waitForTimeout(60);
+      if (!(await visible(page, '#fix-sel-out'))) return null;
+      await page.locator('#fix-sel-out').click();
+      return (await applyForm(page, step, src, start, end)) ? 'mask' : null;
     }
     case 'znacznik': {
       const marks = page.locator('#output mark.pii, #output mark.pii-kept');
       const n = await marks.count();
       if (!n) return null;
-      const mk = marks.nth(Math.floor(step.at * n));
-      step._range = await mk.evaluate((m, len) => {
-        const all = [...document.querySelectorAll('#output [data-o]')];
-        let a = 0;
-        let b = len;
-        for (const el of all) {
-          const o = Number(el.dataset.o);
-          const rel = m.compareDocumentPosition(el);
-          if (rel & Node.DOCUMENT_POSITION_PRECEDING) a = Math.max(a, o + (el.textContent ?? '').length);
-          else if (rel & Node.DOCUMENT_POSITION_FOLLOWING) { b = Math.min(b, o); break; }
-        }
-        return [a, b];
-      }, src.length);
-      await mk.click();
+      const k = Math.floor(step.at * n);
+      step._range = (await markRanges(page, src.length))[k];
+      await marks.nth(k).click();
       await page.waitForTimeout(60);
       const sel = { tu: '#fix-keep', wszedzie: '#fix-keep-all', ponownie: '#fix-remask' }[step.co];
       if (!(await visible(page, sel))) return null;
@@ -658,6 +859,19 @@ async function perform(page, step, browserName) {
       step._co = label;
       if (step.co === 'ponownie') return 'remask';
       return label.startsWith('Cofnij') ? 'unmask' : 'keep';
+    }
+    case 'paskiemZ': {
+      // Ctrl+Z z fokusem na przycisku paska poprawki: cofa ostatnią czynność, nie pismo w polu
+      const marks = page.locator('#output mark.pii, #output mark.pii-kept');
+      const n = await marks.count();
+      if (!n) return null;
+      await marks.nth(Math.floor(step.at * n)).click();
+      await page.waitForTimeout(60);
+      const btn = page.locator('#fix-bar button:visible').first();
+      if (!(await btn.count())) return null;
+      await btn.focus();
+      await page.keyboard.press(step.y ? 'ControlOrMeta+y' : 'ControlOrMeta+z');
+      return 'unmask';
     }
     case 'cofnijWynik':
     case 'ponowWynik':
@@ -704,6 +918,33 @@ async function channels(page) {
 }
 
 /**
+ * Teksty reguł „wszędzie” z listy poprawek (po rozwinięciu „Pokaż” kliknięciem bez fokusu), null
+ * przy pustym polu: wtedy listy nie ma na ekranie, a reguły i tak zostają w aplikacji.
+ */
+const listedRules = (page) =>
+  page.evaluate(() => {
+    const foot = document.getElementById('fix-foot');
+    const input = /** @type {HTMLTextAreaElement} */ (document.getElementById('input'));
+    if (!input.value.trim() || document.querySelector('#output .placeholder')) return null;
+    if (!foot || foot.hidden) return [];
+    const show = document.getElementById('fix-show');
+    if (show && !show.closest('[hidden]') && show.getAttribute('aria-expanded') !== 'true') show.click();
+    const out = [];
+    for (const s of document.querySelectorAll('#fix-list li > span:first-child')) {
+      const t = s.textContent ?? '';
+      const at = t.indexOf('] wszędzie: ');
+      if (!t.startsWith('Zasłonięto jako [') || at === -1) continue;
+      const body = t.slice(at + '] wszędzie: '.length);
+      out.push(body.slice(0, body.lastIndexOf(', ')));
+    }
+    return out;
+  });
+
+const RESETS = new Set(['wyczysc', 'cofnijPasek']);
+const OUTSIDE = new Set(['cofnijWynik', 'ponowWynik', 'ponowWynikS', 'paskiemZ', 'cofnijOstatnia', 'usunPoprawki', 'karta', 'cofnijKarta']);
+const FIELD_HISTORY = new Set(['cofnijPole', 'ponowPole', 'cofnijPoleN', 'ponowPoleS']);
+
+/**
  * Wykonuje ciąg i zwraca pierwszy błąd: { at, errors, log } albo null.
  * @param {import('playwright').Browser} browser
  */
@@ -722,15 +963,13 @@ async function runSequence(browser, browserName, steps, { clean = false } = {}) 
   const model = new Model();
   const log = [];
   let src = '';
-  let cardOwner = null;
-  // Tekst źródła, przy którym wpisano dany znak sprawy. W Chromium Ctrl+Z i Ctrl+Shift+Z w polu
-  // źródła cofają i przywracają też wpis w karcie, ale zawsze przy tym samym tekście.
-  const cardText = new Map();
+  let znak = '';
   let cov = new Uint8Array(0);
   try {
     for (let i = 0; i < steps.length; i++) {
       const step = steps[i];
       let kind;
+      const pinned = model.pinned();
       try {
         kind = await perform(page, step, browserName);
       } catch (e) {
@@ -740,13 +979,14 @@ async function runSequence(browser, browserName, steps, { clean = false } = {}) 
       }
       await settle(page, kind === 'source' ? SETTLE_MS : 120);
       let next = await page.locator('#input').inputValue();
-      // Ctrl+Z w wyniku bez poprawek do cofnięcia trafia do historii pola źródła (Chromium):
-      // wynik przelicza się dopiero po przerwie, więc czekamy jak po edycji źródła.
-      if (next !== src && kind !== 'source') {
+      log.push(`${i + 1}. ${describe(step)}${kind ? '' : ' (bez skutku)'}`);
+      const errors = [];
+      // Skrót poza polem źródła (wynik, pasek poprawki, karta) nigdy nie zmienia tekstu źródła.
+      if (next !== src && OUTSIDE.has(step.a)) {
+        errors.push(`${describe(step)} zmieniło tekst źródła`);
         await settle(page);
         next = await page.locator('#input').inputValue();
       }
-      log.push(`${i + 1}. ${describe(step)}${kind ? '' : ' (bez skutku)'}`);
       // Przerwa przed przeliczeniem rośnie z kosztem poprzedniego (do 2 s): czekamy, aż wynik
       // dotyczy tekstu z pola, zanim sprawdzimy kanały.
       for (let t = 0; t < 30 && next.trim(); t++) {
@@ -754,30 +994,61 @@ async function runSequence(browser, browserName, steps, { clean = false } = {}) 
         if (shown !== null && alignSpans(next, shown)) break;
         await page.waitForTimeout(100);
       }
-      const outs = await channels(page);
+      // „Wyczyść” i „Cofnij” na pasku liczą się tylko wtedy, gdy krok coś zrobił.
+      const resetStep = !!kind && RESETS.has(step.a);
+      const seq = [src, ...(step._mids ?? []), next];
+      const changed = seq.some((t, k) => k > 0 && t !== seq[k - 1]);
+      const outs = await channels(page); if (process.env.DBG) console.log("DBG", JSON.stringify(outs[0]?.[1]));
       const result = outs[0]?.[1] ?? null;
       const cov1 = result === null ? new Uint8Array(next.length) : coverage(next, result);
-      {
-        const seq = [src, ...(step._mid != null ? [step._mid] : []), ...(step._mids ?? []).filter((t) => t !== next), next];
-        for (let k = 1; k < seq.length; k++) if (seq[k] !== seq[k - 1] && otherDoc(seq[k - 1], seq[k])) cardOwner = null;
-        if (kind === 'karta') {
-          cardOwner = next;
-          cardText.set(await page.locator('#pub-znak').inputValue(), next);
+      if (changed || resetStep) model.sourceChanged();
+      if (resetStep) model.rules = [];
+      else if (!changed && kind && kind !== 'source' && cov1 && cov.length === next.length) {
+        model.corrected(step, kind, next, cov, cov1);
+      }
+      const listed = await listedRules(page);
+      if (listed) {
+        const lost = model.syncRules(listed);
+        if (lost.length && (changed || FIELD_HISTORY.has(step.a)) && !resetStep) {
+          errors.push(`zasłonięcie „wszędzie” „${lost[0].text}” zniknęło z listy po zmianie tekstu`);
         }
       }
-      if (next !== src || kind === 'source') model.sourceChanged(step, src, next);
-      else if (kind && kind !== 'source' && cov1 && cov.length === next.length) {
-        model.corrected(step, kind, next, cov, cov1);
+      // M1: zmiana tekstu, która zdjęła ręczne decyzje, daje notkę przy liście poprawek.
+      if (changed && pinned && next.trim() && !resetStep) {
+        const note = (await page.locator('#fix-note').textContent()) ?? '';
+        if (!note.includes('trzeba zrobić od nowa')) errors.push('zmiana tekstu zdjęła ręczne poprawki bez notki przy liście poprawek');
       }
       src = next;
       if (cov1) cov = cov1;
       const al = next.trim() ? alignSpans(next, redactPII(next).redacted) : null;
       const auto = al ? al.spans : [];
-      const errors = outs.flatMap(([name, out]) => model.check(name, next, out, auto));
-      if (model.extra?.length) { errors.push(...model.extra); model.extra = []; }
+      errors.push(...outs.flatMap(([name, out]) => model.check(name, next, out, auto)));
+      if (model.extra.length) {
+        errors.push(...model.extra);
+        model.extra = [];
+      }
+      // M4: karta zeruje się przy zmianie ponad połowy tekstu, przy Ctrl+A i wklejeniu, przy
+      // pustym polu, „Wyczyść” i „Cofnij” na pasku. Poza tym zostaje, także po Ctrl+Z i Ctrl+Y
+      // w polu źródła, które w Chromium trafiają na wpis karty.
       {
-        const znak = await page.locator('#pub-znak').inputValue();
-        if (znak && cardOwner === null && cardText.get(znak) !== next) errors.push(`karta: znak sprawy „${znak}” został przy innym piśmie`);
+        const now = await page.locator('#pub-znak').inputValue();
+        const reset = resetStep || seq.some((t, k) => k > 0 && t !== seq[k - 1] && otherDoc(seq[k - 1], t));
+        const allowed =
+          kind === 'karta' || kind === 'karta-cofnij'
+            ? [now]
+            : reset
+              ? ['']
+              : step.a === 'wklej'
+                ? ['', znak]
+                : [znak];
+        if (!allowed.includes(now)) {
+          errors.push(
+            reset
+              ? `karta: znak sprawy „${now}” został przy innym piśmie`
+              : `karta: znak sprawy zmienił się z „${znak}” na „${now}” bez zmiany pisma`,
+          );
+        }
+        znak = now;
       }
       if (app.pageErrors.length) errors.push(`błąd strony: ${app.pageErrors.join(' | ')}`);
       if (errors.length) return { at: i, errors: [...new Set(errors)], log, src: next };

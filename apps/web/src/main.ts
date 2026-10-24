@@ -1,6 +1,7 @@
 import { redactPII, type PiiFinding, type PiiType } from 'anonimizator';
 import { escapeHtml, guessAligned } from './compare';
 import {
+  afterSourceEdit,
   applyCorrections,
   type Corrected,
   correctionCounts,
@@ -9,7 +10,7 @@ import {
   findOccurrences,
   lineRanges,
   MANUAL_TOKENS,
-  shiftDecisions,
+  rulesWithoutPlace,
   snapSelection,
   spanKey,
 } from './corrections';
@@ -146,34 +147,9 @@ let corrected: Corrected = { spans: [], kept: [], effects: [], by: [] };
 // Cała lista, a nie „zdejmij ostatni wpis”: po „Cofnij zasłonięcie” decyzja znika ze środka listy
 // i Ctrl+Z musi ją przywrócić na jej miejsce, zamiast zdjąć inną, wcześniejszą poprawkę.
 let undoSteps: Decision[][] = [];
-// Zmiana źródła od ostatniego przeliczenia, której nie da się zmapować przesunięciem: natywne
-// cofanie albo ponawianie w polu ('history'), wklejenie w miejsce całego tekstu ('unsure') albo
-// podmiana całego tekstu przez „Wyczyść”, „Przykład”, plik i „Cofnij” na pasku ('replaced', poprawki
-// ustawia wtedy sama podmiana). followSource rozstrzyga przy przeliczeniu, co z poprawkami.
-let sourceChange: 'none' | 'unsure' | 'history' | 'replaced' = 'none';
-// Poprawki kilku ostatnich tekstów źródła, kluczem jest cały tekst. Wracają tylko wtedy, gdy natywne
-// cofanie albo ponawianie przywróci DOKŁADNIE ten tekst (Ctrl+A, Delete, Ctrl+Z). Wpis powstaje przy
-// czynności urzędnika i przed niepewną zmianą, a każde dojście do tekstu inną drogą (wklejenie,
-// pisanie) nadpisuje jego wpis, więc dawna decyzja nie wraca do tego samego pisma wstawionego od nowa.
-// Każda czynność na poprawkach zdejmuje decyzje odsłaniające z wpisów innych tekstów (forgetReveals):
-// urzędnik mógł właśnie zasłonić to, co tam zostawił jawne, a Ctrl+Z w polu nie może tego odwrócić.
-const known = new Map<string, Decision[]>();
-const KNOWN_LIMIT = 8;
-function rememberText(text: string, list: Decision[]): void {
-  if (!text.trim()) return;
-  known.delete(text);
-  if (!list.length) return;
-  known.set(text, list.slice());
-  if (known.size > KNOWN_LIMIT) known.delete(known.keys().next().value as string);
-}
-function forgetReveals(except: string): void {
-  for (const [text, list] of known) {
-    if (text === except) continue;
-    const masks = list.filter((d) => d.kind === 'mask');
-    if (masks.length) known.set(text, masks);
-    else known.delete(text);
-  }
-}
+// Tekst pola źródła po ostatnim zdarzeniu input albo przeliczeniu. Każde zdarzenie, które go zmienia,
+// to zmiana pisma dla ręcznych poprawek (sourceEdited) i miara zmiany dla karty pisma.
+let fieldValue = '';
 
 /* ── Legenda, tabela „Co wykrywa” i przełączniki „Co maskować” (dane w pii-meta.ts) ── */
 
@@ -943,7 +919,7 @@ if (srcHead && outHead && 'ResizeObserver' in window) {
 // Dymek mówi też, czemu w „Porównaniu” przycisk jest nieaktywny (zaznacza się w widoku „Wynik”).
 fixSelOut.setAttribute('aria-describedby', tipDescId(fixSelOut.dataset.tip ?? ''));
 let barOpen = false;
-let fixNote = ''; // komunikat o poprawkach odrzuconych po edycji źródła
+let dropNote = ''; // komunikat o poprawkach zdjętych po zmianie pisma (sourceEdited)
 let formRanges: [number, number][] = [];
 let formText = '';
 let formInput = ''; // tekst źródła z chwili otwarcia wiersza: formRanges to pozycje w nim
@@ -1060,8 +1036,6 @@ function maskAt(r: { start: number; end: number }): number {
  */
 function correctionsChanged(msg: string, target?: { start: number; end: number } | null): void {
   const cur = target === undefined ? (currentFrag()?.span ?? null) : target;
-  forgetReveals(lastInput);
-  rememberText(lastInput, decisions);
   recomputeCorrections();
   const inBar = fixBar.contains(document.activeElement);
   const hadFocus = inBar || output.contains(document.activeElement);
@@ -1092,7 +1066,7 @@ function correctionsChanged(msg: string, target?: { start: number; end: number }
 /** Dopisuje decyzję i zwraca liczbę miejsc, które zmieniła. */
 function addDecision(d: Decision): number {
   decisions.push(d);
-  fixNote = '';
+  dropNote = '';
   recomputeCorrections();
   return corrected.effects[corrected.effects.length - 1] ?? 0;
 }
@@ -1117,7 +1091,7 @@ function undoDecision(i: number, target?: { start: number; end: number }): void 
       decisions.splice(orphan, 1);
     }
   }
-  fixNote = '';
+  dropNote = '';
   correctionsChanged('Cofnięto ręczną poprawkę.', target);
 }
 
@@ -1127,7 +1101,7 @@ function undoLast(): void {
   if (!prev) return;
   const restored = prev.length >= decisions.length;
   decisions = prev;
-  fixNote = '';
+  dropNote = '';
   correctionsChanged(restored ? 'Przywrócono cofniętą ręczną poprawkę.' : 'Cofnięto ręczną poprawkę.');
 }
 
@@ -1153,9 +1127,12 @@ document.addEventListener('keydown', (e) => {
 // Chromium ma jedną historię edycji na całą kartę. Ctrl+Z w polu karty pisma, które nie ma już
 // czego cofać, sięgnąłby do pola źródła i podmienił pismo (np. wklejone B wróciłoby do A). Takie
 // cofnięcie blokujemy: zostaje w historii i działa po Ctrl+Z w samym polu źródła. Odwrotnie
-// zablokować się nie da (krok zostałby na wierzchu i pole źródła przestałoby cofać), więc gdy
-// Ctrl+Z w polu źródła cofa wpis w innym polu, urzędnik dostaje komunikat, które to pole.
+// zablokować się nie da (krok zostałby na wierzchu i pole źródła przestałoby cofać). Gdy Ctrl+Z
+// albo Ctrl+Y w polu źródła trafia na wpis w innym polu (np. „Znak sprawy”), krok przechodzi, ale
+// pole wraca do swojej wartości, a fokus do pola źródła: skrót w polu źródła nie zmienia karty
+// (inaczej Ctrl+Y po wyzerowaniu karty dopisywał znak sprawy drugi raz). Urzędnik dostaje komunikat.
 let historyKeyTarget: EventTarget | null = null;
+let keepField: { el: HTMLInputElement | HTMLTextAreaElement; value: string } | null = null;
 document.addEventListener(
   'keydown',
   (e) => {
@@ -1163,6 +1140,7 @@ document.addEventListener(
     historyKeyTarget = e.target;
     setTimeout(() => {
       historyKeyTarget = null;
+      keepField = null;
     }, 0);
   },
   true,
@@ -1177,83 +1155,60 @@ document.addEventListener(
       return;
     }
     const field = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement ? e.target : null;
-    const label = field?.labels?.[0];
+    if (from !== input || !field) return;
+    keepField = { el: field, value: field.value };
+    const label = field.labels?.[0];
     const name = (label?.querySelector(':scope > span') ?? label)?.firstChild?.textContent?.trim();
-    if (name) announce(`${e.inputType === 'historyUndo' ? 'Cofnięto' : 'Przywrócono'} ostatni wpis w polu „${name}”.`);
+    const what = e.inputType === 'historyUndo' ? 'cofnąć' : 'ponowić';
+    const where = name ? `w polu „${name}”, które zostaje` : 'w karcie pisma, która zostaje';
+    announce(`Skrót trafił na wpis ${where} bez zmian. Naciśnij go jeszcze raz, żeby ${what} zmianę w tekście źródłowym.`);
+  },
+  true,
+);
+document.addEventListener(
+  'input',
+  (e) => {
+    const k = keepField;
+    if (!k || e.target !== k.el) return;
+    keepField = null;
+    e.stopImmediatePropagation();
+    k.el.value = k.value;
+    input.focus({ preventScroll: true });
   },
   true,
 );
 
 /**
- * Źródło zmieniło się z lastInput na `next`: poprawki idą za tekstem (shiftDecisions). Zmiana pewna
- * (pisanie, usuwanie, wklejenie fragmentu w jednym miejscu) przesuwa poprawki i stos do Ctrl+Z
- * w wyniku. Zmiana niepewna zdejmuje decyzje odsłaniające i stos, a zasłonięcia zostają tam, gdzie
- * ich tekst dalej stoi. Natywne cofanie albo ponawianie do dokładnie tego tekstu, który ma wpis
- * w `known`, dokłada jego poprawki (decyzje odsłaniające tylko wtedy, gdy urzędnik nie pracował
- * od tamtej pory na poprawkach innego tekstu, patrz forgetReveals). Każda utracona decyzja
- * odsłaniająca i każde utracone zasłonięcie dostaje komunikat w aria-live. Kartę „Adnotacja i protokół” przy innym piśmie zeruje
- * listener input tym samym kryterium (isOtherDocument), od razu, a nie dopiero przy przeliczeniu.
+ * Pismo w polu źródła zmieniło się (każde zdarzenie input, które zmienia tekst: pisanie, wklejenie,
+ * Ctrl+Z i Ctrl+Y w polu, przeciągnięcie, Ctrl+X). Ręczne decyzje są przypięte do dokładnego tekstu
+ * z chwili decyzji, więc „Zostaw jawne”, „Cofnij zasłonięcie” i zasłonięcia „tutaj” odpadają,
+ * a stos do Ctrl+Z w wyniku się zeruje. Nic nie wraca przez historię pola. Zasłonięcia „wszędzie”
+ * zostają jako reguła tekstowa. Urzędnik dostaje jeden komunikat i notkę przy liście poprawek.
+ * Zwraca true, gdy coś odpadło: wynik trzeba wtedy przeliczyć od razu.
  */
-function followSource(next: string): void {
-  const base = lastInput;
-  const change = sourceChange;
-  sourceChange = 'none';
-  if (change === 'replaced' || next === base) return;
-  const other = isOtherDocument(base, next);
-  if (change === 'none' && !other) {
-    undoSteps = undoSteps.map((list) => shiftDecisions(base, next, list).decisions);
-    const moved = shiftDecisions(base, next, decisions);
-    decisions = moved.decisions;
-    if (known.has(next)) rememberText(next, decisions);
-    if (moved.dropped) {
-      fixNote =
-        `Po zmianie tekstu źródłowego odrzucono ${moved.dropped} ` +
-        `${plural(moved.dropped, 'ręczną poprawkę', 'ręczne poprawki', 'ręcznych poprawek')}.`;
-      announce(fixNote);
-    }
-    return;
-  }
-  const back = change === 'history' ? known.get(next) : undefined;
-  rememberText(base, decisions);
+function sourceEdited(): boolean {
   undoSteps = [];
-  const count = (list: Decision[]): [number, number] => {
-    const masks = list.filter((d) => d.kind === 'mask').length;
-    return [list.length - masks, masks];
-  };
-  const [revealsBefore, masksBefore] = count(decisions);
-  // Zasłonięcia idą za tekstem, jeśli dalej stoi w tym miejscu. Wpis z `known` dokłada do nich
-  // poprawki tego samego tekstu z chwili, gdy urzędnik ostatnio przy nim pracował.
-  const moved = shiftDecisions(base, next, decisions, false).decisions;
-  if (back) {
-    const have = new Set(back.map((d) => JSON.stringify(d)));
-    decisions = [...back, ...moved.filter((d) => !have.has(JSON.stringify(d)))];
-  } else decisions = moved;
-  rememberText(next, decisions);
-  const [revealsAfter, masksAfter] = count(decisions);
-  const reveals = Math.max(0, revealsBefore - revealsAfter);
-  const masks = Math.max(0, masksBefore - masksAfter);
-  const parts = [];
-  if (back && other) parts.push('Tekst źródłowy wrócił do wcześniejszej wersji razem z jej ręcznymi poprawkami.');
-  if (reveals)
-    parts.push(
-      `Zmieniono pismo: cofnięto ${reveals} ` +
-        `${plural(reveals, 'decyzję', 'decyzje', 'decyzji')} o pozostawieniu jawnych danych.`,
-    );
-  if (masks)
-    parts.push(
-      `Odrzucono ${masks} ${plural(masks, 'ręczne zasłonięcie', 'ręczne zasłonięcia', 'ręcznych zasłonięć')}, ` +
-        `${plural(masks, 'którego', 'których', 'których')} tekstu nie ma już w tym miejscu.`,
-    );
-  fixNote = next.trim() ? parts.join(' ') : '';
-  if (fixNote) announce(fixNote);
+  const { decisions: rules, dropped } = afterSourceEdit(decisions);
+  if (!dropped) return false;
+  decisions = rules;
+  barOpen = false;
+  const left = rules.length ? ' Zasłonięcia „wszędzie” dalej obowiązują.' : '';
+  dropNote = `Pismo zmieniło się, więc ręczne poprawki trzeba zrobić od nowa: cofnięto ${dropped}.${left}`;
+  const parts = [dropNote];
+  // Otwarty wiersz „Zasłoń” trzyma pozycje w starym tekście: jeden komunikat mówi o obu sprawach.
+  if (!fixForm.hidden) {
+    closeForm(false);
+    parts.push('Zaznacz fragment jeszcze raz.');
+  }
+  announce(parts.join(' '));
+  return true;
 }
 
 /** Wyczyść, Przykład, plik i nowe pismo: poprawki dotyczyły poprzedniego tekstu. */
 function clearCorrections(): void {
   decisions = [];
   undoSteps = [];
-  known.clear();
-  fixNote = '';
+  dropNote = '';
   barOpen = false;
   closeForm(false);
   fixList.hidden = true;
@@ -1325,7 +1280,7 @@ fixRemask.addEventListener('click', () => {
   remember();
   if (last?.kind === 'keep' && last.scope === 'here' && last.start === start && last.end === end) decisions.pop();
   else addDecision({ kind: 'mask', scope: 'here', start, end, token: frag.span.tokens[0] });
-  fixNote = '';
+  dropNote = '';
   correctionsChanged(`Zasłonięto ponownie: ${fragmentsWord(1)}.`, frag.span);
 });
 fixBarClose.addEventListener('click', () => closeBar(true));
@@ -1479,9 +1434,10 @@ function decisionText(d: Decision, n: number): string {
       ? `Zostawiono jawne: ${origOf(d.start, d.end)}`
       : `Zostawiono jawne wszędzie: ${d.label}${where}`;
   }
-  return d.scope === 'here'
-    ? `Zasłonięto jako [${d.token}]: ${origOf(d.start, d.end)}`
-    : `Zasłonięto jako [${d.token}] wszędzie: ${d.text.replace(/\s+/g, ' ').trim()}${where}`;
+  if (d.scope === 'here') return `Zasłonięto jako [${d.token}]: ${origOf(d.start, d.end)}`;
+  // Reguła liczy wystąpienia w bieżącym tekście, także te, które już zasłonił automat.
+  const places = placesWord(findOccurrences(lastInput, d.text, d.token).length);
+  return `Zasłonięto jako [${d.token}] wszędzie: ${d.text.replace(/\s+/g, ' ').trim()}, ${places}`;
 }
 
 function renderFixList(): void {
@@ -1502,6 +1458,18 @@ function renderFixList(): void {
   );
 }
 
+/** Zdanie o zasłonięciach „wszędzie”, których tekstu nie ma w piśmie (zostają na liście). */
+function zeroRulesNote(): string {
+  const n = lastRedacted ? rulesWithoutPlace(lastInput, decisions) : 0;
+  if (!n) return '';
+  return n === 1
+    ? 'Tekstu jednego zasłonięcia „wszędzie” nie ma teraz w piśmie (0 miejsc). Zostaje na liście i zadziała, gdy ten tekst wróci.'
+    : `Tekstu ${n} zasłonięć „wszędzie” nie ma teraz w piśmie (0 miejsc). Zostają na liście i zadziałają, gdy ten tekst wróci.`;
+}
+
+/** Notka przy liście poprawek: zdjęte poprawki i reguły bez miejsca. */
+const fixNoteText = (): string => [dropNote, zeroRulesNote()].filter(Boolean).join(' ');
+
 /** Stopka poprawek, przyciski zaznaczenia, komunikat o długim tekście i pasek fragmentu. */
 function syncFix(): void {
   const has = decisions.length > 0 && !!lastRedacted;
@@ -1520,9 +1488,10 @@ function syncFix(): void {
   if (lastRedacted) setResultActions(!blocked);
   // „Kopiowanie, zapis plików i druk działają” nie jest wtedy prawdą.
   spansNote.hidden = !lastRedacted || !!lastSpans || isTooBig() || blocked;
-  fixNoteEl.textContent = fixNote;
-  fixNoteEl.hidden = !fixNote;
-  fixFoot.hidden = !lastRedacted || (!has && !fixNote);
+  const note = fixNoteText();
+  fixNoteEl.textContent = note;
+  fixNoteEl.hidden = !note;
+  fixFoot.hidden = !lastRedacted || (!has && !note);
   if (!has) {
     fixList.hidden = true;
     fixShow.setAttribute('aria-expanded', 'false');
@@ -1549,7 +1518,7 @@ $<HTMLButtonElement>('fix-undo').addEventListener('click', undoLast);
 $<HTMLButtonElement>('fix-clear').addEventListener('click', () => {
   remember();
   decisions = [];
-  fixNote = '';
+  dropNote = '';
   correctionsChanged('Usunięto wszystkie ręczne poprawki.');
   output.focus({ preventScroll: true });
 });
@@ -1632,13 +1601,15 @@ function renderResult(redacted: string, found: PiiFinding[]): void {
   if (redacted !== lastRedacted) copyFlash.reset();
   // Przegląd dotyczy dokładnie tego wyniku: po każdej zmianie tekstu albo wyniku liczy się od zera.
   if (redacted !== lastRedacted || input.value !== lastInput) reviewed.clear();
-  // Edycja źródła: poprawki idą za tekstem albo odpadają (followSource).
   // Otwarty wiersz „Zasłoń” trzyma pozycje w starym tekście: po edycji zasłoniłby co innego.
   if (!fixForm.hidden && input.value !== lastInput) {
     closeForm(false);
     announce('Tekst źródłowy się zmienił. Zaznacz fragment jeszcze raz.');
   }
-  followSource(input.value);
+  // Zapas na zmianę bez zdarzenia input (np. decyzja podjęta, zanim przeliczył się wpisany tekst):
+  // poprawki dotyczą lastInput, więc przy innym tekście odpadają tak samo jak przy edycji.
+  if (input.value !== lastInput) sourceEdited();
+  const zeroBefore = lastRedacted ? rulesWithoutPlace(lastInput, decisions) : 0;
   lastRedacted = redacted;
   lastInput = input.value;
   lastFound = found;
@@ -1656,6 +1627,8 @@ function renderResult(redacted: string, found: PiiFinding[]): void {
   syncPublication();
   syncPrintOut();
   syncFix();
+  // Reguła „wszędzie” straciła ostatnie miejsce: komunikat raz, przy zmianie, a notka zostaje.
+  if (rulesWithoutPlace(lastInput, decisions) > zeroBefore) announce(fixNoteText());
 }
 
 // Debounce: przy szybkim pisaniu nie odpalaj pełnego pipeline'u (26 przebiegów + przerender)
@@ -1682,8 +1655,9 @@ function update(): void {
       'Wklej tekst w polu „Tekst źródłowy” albo kliknij „Przykład” powyżej.</span>';
     findingsCard.hidden = true;
     lastRedacted = '';
-    followSource(''); // poprawki pisma czekają w `known` na Ctrl+Z w polu
+    if (lastInput) sourceEdited();
     lastInput = '';
+    fieldValue = text;
     lastSpans = null;
     lastFound = [];
     reviewed.clear();
@@ -1706,6 +1680,7 @@ function update(): void {
     lastUpdateMs = 0;
     return;
   }
+  fieldValue = text;
   const { redacted, found } = redactPII(text, {
     types: activeTypes(),
     pseudonyms: pseudonymsBox.checked,
@@ -1771,35 +1746,26 @@ function flushPendingUpdate(): void {
 // <input> dopisanym kiedyś do takiego formularza nie może go wysłać ani przeładować strony.
 document.addEventListener('submit', (e) => e.preventDefault());
 
-// Tekst wstawiony w puste pole albo w miejsce całego tekstu (wklejenie, upuszczenie, pisanie po
-// zaznaczeniu wszystkiego) to nowe pismo, tak samo jak opróżnione pole: karta „Adnotacja
-// i protokół” nie może przenieść do niego znaku sprawy, ręcznej adnotacji ani „Dołącz”.
-// Inną zmianę, po której to już inne pismo (Ctrl+Z w polu wracające do pisma sprzed wklejenia,
-// podmiana wszystkiego poza nagłówkiem), rozpoznaje isOtherDocument, tak jak followSource przy
-// poprawkach.
+// Karta „Adnotacja i protokół” zeruje się, gdy zmiana usuwa albo zastępuje więcej niż połowę tekstu
+// (isOtherDocument), przy tekście wstawionym w puste pole albo w miejsce całego tekstu (wklejenie,
+// upuszczenie, pisanie po zaznaczeniu wszystkiego) i przy opróżnionym polu. Poza tym zostaje.
 let newDocument = false;
 input.addEventListener('beforeinput', (e) => {
   const whole = !input.value.trim() || (input.selectionStart === 0 && input.selectionEnd === input.value.length);
   newDocument = whole && e.inputType.startsWith('insert');
-  // Poprawki odnoszą się do lastInput, a followSource porównuje go z polem przy przeliczeniu.
-  // Zaległą zmianę przeliczamy przed następną, żeby każda szła osobno: niepewna (cofanie,
-  // wklejenie w miejsce całości) nie zlewa się z pisaniem, a dwie edycje w różnych miejscach nie
-  // dają jednego dużego zmienionego fragmentu, który zdjąłby poprawki między nimi. Przy długim
-  // tekście z poprawkami nie przeliczamy co klawisz: zlany fragment najwyżej zdejmie więcej.
-  const fast = (decisions.length > 0 || undoSteps.length > 0) && lastUpdateMs < SLOW_UPDATE_MS;
-  if (updatePending && (whole || e.inputType.startsWith('history') || sourceChange !== 'none' || fast)) update();
 });
 
-input.addEventListener('input', (e) => {
-  // Natywne cofanie i ponawianie w polu oraz wklejenie w miejsce całości to zmiany, których nie da
-  // się pewnie zmapować przesunięciem: followSource zdejmie przy nich decyzje odsłaniające.
-  const history = (e as InputEvent).inputType?.startsWith('history') ?? false;
-  if (history) sourceChange = 'history';
-  else if (newDocument && sourceChange === 'none') sourceChange = 'unsure';
+input.addEventListener('input', () => {
+  const before = fieldValue;
+  const changed = input.value !== before;
+  fieldValue = input.value;
   // Karta zeruje się od razu, zanim urzędnik zacznie ją wypełniać dla nowego pisma: przeliczenie
   // przychodzi później i nie może wyzerować tego, co już wpisał.
-  if (newDocument || !input.value.trim() || isOtherDocument(lastInput, input.value)) resetDocumentPublication();
+  if (newDocument || !input.value.trim() || isOtherDocument(before, input.value)) resetDocumentPublication();
   newDocument = false;
+  // Każda zmiana tekstu zdejmuje ręczne poprawki przypięte do poprzedniego tekstu. Gdy coś odpadło,
+  // wynik przeliczamy od razu: nie może pokazywać decyzji, które już nie obowiązują.
+  const dropped = changed && sourceEdited();
   // Własna edycja zamyka błąd, bo już nie dotyczy, i „Cofnij”, bo po edycji przywróciłby tekst
   // sprzed niej i skasował to, co właśnie wpisano. Dopisek o pliku (np. o nagłówkach i stopkach,
   // których Parawan nie czyta) zostaje do zamknięcia: te części dalej są w oryginale, a fokus po
@@ -1818,9 +1784,7 @@ input.addEventListener('input', (e) => {
   // Pauza dopasowana do zmierzonego kosztu: krótki tekst po 140 ms, długi dopiero po przerwie
   // w pisaniu (inaczej każda pauza między słowami zamrażałaby kartę na kilka sekund).
   updateTimer = setTimeout(updateNow, Math.min(2000, Math.max(140, lastUpdateMs * 1.5)));
-  // Cofanie przeliczamy od razu: powrót do tekstu z `known` liczy się tylko przy tym samym tekście,
-  // a wynik i karta nie mogą wisieć na starym tekście, gdy poprawki już się zmieniły.
-  if (history) update();
+  if (dropped) updateNow();
 });
 
 /* ── Akcje ── */
@@ -1859,8 +1823,8 @@ const finePointer = matchMedia('(pointer: fine)');
    usunąć. Dlatego „Cofnij” działa tylko przez chwilę i znika od razu po przejściu do innej
    karty, zminimalizowaniu okna albo zamknięciu strony. */
 let undoText: string | null = null;
-// Ręczne poprawki tekstu z undoText: wracają z nim i giną razem z nim.
-let undoDecisions: Decision[] = [];
+// Tekst z undoText miał ręczne poprawki: po „Cofnij” trzeba je zrobić od nowa, co mówi komunikat.
+let undoHadFixes = false;
 // Dopisek, który należał do poprzedniego tekstu: „Cofnij” przywraca go razem z nim, bo nagłówki
 // i komentarze przywróconego DOCX dalej są w oryginale.
 let undoInfo = '';
@@ -1872,7 +1836,7 @@ let undoTimer: ReturnType<typeof setTimeout> | undefined;
 function showNote(msg: string, prev: string | null, info = '', reveal = true): void {
   clearTimeout(undoTimer);
   undoText = prev;
-  if (prev === null) undoDecisions = [];
+  if (prev === null) undoHadFixes = false;
   noteInfo = info;
   // Dopisek w osobnym wierszu (white-space: pre-line w style.css): ostrzeżenie o pliku nie ginie
   // w jednym akapicie z „Zastąpiono tekst treścią pliku.”.
@@ -1897,7 +1861,7 @@ function expireUndo(): void {
   clearTimeout(undoTimer);
   const hadFocus = document.activeElement === appNoteUndo;
   undoText = null;
-  undoDecisions = [];
+  undoHadFixes = false;
   appNoteUndo.hidden = true;
   appNoteText.textContent = noteInfo;
   if (hadFocus) appNoteClose.focus({ preventScroll: true });
@@ -1908,7 +1872,7 @@ function dismissNote(): void {
   // przyciski znikają razem z paskiem, więc fokus z nich wraca do pola źródła
   const hadFocus = appNote.contains(document.activeElement);
   undoText = null;
-  undoDecisions = [];
+  undoHadFixes = false;
   noteInfo = '';
   storedOffNote = false;
   appNoteMaskOn.hidden = true;
@@ -1928,13 +1892,12 @@ addEventListener('pagehide', () => {
 /** Zastąp cały tekst źródła; gdy było co stracić, pokaż pasek „Cofnij”. `info` to dopisek. */
 function replaceSource(text: string, note: string, info = ''): void {
   const prev = input.value;
+  let hadFixes = false;
   if (prev !== text) {
-    // Natywne Ctrl+Z nie sięga sprzed podmiany wartości, więc poprawki czekają tylko na „Cofnij”
-    // na pasku i giną razem z nim.
+    // Poprawki dotyczyły poprzedniego tekstu i nie wracają z nim także po „Cofnij” na pasku.
     flushPendingUpdate();
-    undoDecisions = prev.trim() ? decisions.slice() : [];
+    hadFixes = decisions.length > 0;
     clearCorrections();
-    sourceChange = 'replaced';
     resetDocumentPublication();
   }
   const prevInfo = noteInfo;
@@ -1944,6 +1907,7 @@ function replaceSource(text: string, note: string, info = ''): void {
   const canUndo = prev.trim() !== '' && prev !== text;
   if (canUndo || info) showNote(canUndo ? note : '', canUndo ? prev : null, info);
   else dismissNote();
+  undoHadFixes = canUndo && hadFixes;
   undoInfo = canUndo ? prevInfo : '';
 }
 
@@ -1952,15 +1916,11 @@ appNoteUndo.addEventListener('click', () => {
   const info = undoInfo;
   // Przywrócone pismo to inne pismo niż bieżące (jak w replaceSource): karta wypełniona dla
   // cofanego tekstu nie może przejść na poprzedni.
-  const back = undoDecisions;
+  const hadFixes = undoHadFixes;
   if (input.value !== undoText) {
     flushPendingUpdate();
     clearCorrections();
-    sourceChange = 'replaced';
     resetDocumentPublication();
-    // Pismo wraca razem ze swoimi ręcznymi poprawkami (np. zasłoniętą ręcznie księgą wieczystą):
-    // to dokładnie ten tekst, na którym je podjęto.
-    decisions = back;
   }
   input.value = undoText;
   setFileExt(''); // pobieranie wraca do .txt jak po „Wyczyść” (rodzaj pliku nie wraca)
@@ -1969,7 +1929,8 @@ appNoteUndo.addEventListener('click', () => {
   update();
   // Dopisek o pliku wraca razem z jego tekstem, a czytnik ekranu słyszy jedno i drugie.
   if (info) showNote('', null, info);
-  appNoteStatus.textContent = ['Przywrócono poprzedni tekst.', info].filter(Boolean).join('\n');
+  const back = hadFixes ? 'Przywrócono poprzedni tekst. Jego ręczne poprawki trzeba zrobić od nowa.' : 'Przywrócono poprzedni tekst.';
+  appNoteStatus.textContent = [back, info].filter(Boolean).join('\n');
   if (finePointer.matches) input.focus(); // przycisk znika, więc fokus nie może na nim zostać
 });
 appNoteClose.addEventListener('click', () => {

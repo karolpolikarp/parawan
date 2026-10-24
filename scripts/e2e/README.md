@@ -110,20 +110,27 @@ znaczniku pod podpisem wójta (schowek, .txt i druk z nazwiskiem wójta, a wnios
 zasłonięci, chip „imię i nazwisko” o jeden mniej), „Zostaw jawne wszędzie” z listą form, zaznaczenie
 numeru księgi wieczystej w wyniku zasłonięte jako [DANE] w wyniku, .txt, `#print-out` i PDF z druku,
 ta sama ścieżka samą klawiaturą (Shift+strzałki w polu źródła, Shift+Tab do „Zasłoń zaznaczenie”,
-Enter na znaczniku), Ctrl+Z, przesunięcie poprawek po edycji źródła i „Wyczyść”. Klucze
+Enter na znaczniku), Ctrl+Z, poprawki zdjęte po edycji źródła i „Wyczyść”. Klucze
 localStorage po korektach są te same co przed nimi. Zaznaczenie prawdziwą myszą w Firefoksie ESR
 sprawdza ręcznie `manual/korekta-zaznaczenie.mjs`.
 
 `korekta-fuzz.test.mjs` składa losowe ciągi czynności (wklejanie pism, pisanie i usuwanie w jednym
-miejscu, Ctrl+A z innym pismem, Ctrl+A i Delete, natywne Ctrl+Z, Ctrl+Y i Ctrl+Shift+Z w polu
-i w wyniku, także kilka razy z rzędu, Ctrl+Z w polu karty pisma, „Zasłoń zaznaczenie”, „Zostaw
-jawne” i „Cofnij zasłonięcie” tu i wszędzie, znak sprawy w karcie, „Wyczyść”, „Cofnij” na pasku)
+miejscu, edycja i Enter w środku zasłonięcia, dwuklik z wpisaniem innej formy, Ctrl+X fragmentu,
+Ctrl+X i Ctrl+V wiersza, Ctrl+A z innym pismem, Ctrl+A i Delete, natywne Ctrl+Z, Ctrl+Y
+i Ctrl+Shift+Z w polu, w wyniku i na pasku poprawki, także kilka razy z rzędu, Ctrl+Z w polach
+karty pisma, „Zasłoń zaznaczenie” tu i wszędzie, także przez znacznik automatu, „Zostaw jawne”
+i „Cofnij zasłonięcie” tu i wszędzie, znak sprawy w karcie, „Wyczyść”, „Cofnij” na pasku)
 w Chromium i Firefoksie. Po każdym kroku porównuje wynik, druk, schowek i .txt z modelem, znak po
-znaku: dana wykryta w bieżącym tekście jest zasłonięta, chyba że „Zostaw jawne” podjęto na tym
-samym tekście (albo na tekście, z którego bieżący powstał samym pisaniem obok) i urzędnik nie
-zasłonił potem tego miejsca, a ręczne zasłonięcie nie znika bez decyzji. Znak sprawy stoi tylko
-przy piśmie, przy którym go wpisano. Przed losowymi biegną ciągi z wcześniejszych błędów (`REGRESSIONS`). Domyślnie 30 ciągów
-z losowym ziarnem; błąd podaje ziarno i skrócony ciąg kroków.
+znaku. Ręczne decyzje są przypięte do tekstu z chwili decyzji: dana wykryta w bieżącym tekście
+jest zasłonięta, chyba że „Zostaw jawne” podjęto na tym samym tekście bez żadnej edycji od tamtej
+chwili i urzędnik nie zasłonił potem tego miejsca. Zasłonięcie „tutaj” obowiązuje do pierwszej
+zmiany tekstu, a zasłonięcie „wszędzie” to reguła: każde dosłowne wystąpienie jej tekstu
+w bieżącym piśmie ma być zasłonięte, a reguła nie znika z listy poprawek przy zmianie tekstu.
+Zmiana, która zdjęła poprawki, musi dać notkę przy liście poprawek, a skrót poza polem źródła nie
+może zmienić tekstu. Znak sprawy zeruje się przy zmianie ponad połowy tekstu, Ctrl+A i wklejeniu,
+pustym polu, „Wyczyść” i „Cofnij” na pasku, a poza tym zostaje. Przed losowymi biegną ciągi
+z wcześniejszych błędów (`REGRESSIONS`). Domyślnie 30 ciągów z losowym ziarnem; błąd podaje ziarno
+i skrócony ciąg kroków.
 Długi przebieg: `PARAWAN_FUZZ_N=1000 PARAWAN_FUZZ_WSZYSTKIE=1 PARAWAN_FUZZ_RAPORT=raport.txt`,
 powtórzenie: `PARAWAN_FUZZ_SEED=…` albo `PARAWAN_FUZZ_KROKI_JSON='[…]'` (opis zmiennych na górze pliku).
 Brak Firefoksa z Playwright (jak w CI, które instaluje tylko Chromium) pomija jego część.
