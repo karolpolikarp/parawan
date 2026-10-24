@@ -1,4 +1,4 @@
-import { defineConfig, type Plugin } from 'vite';
+import { defineConfig, normalizePath, type Plugin } from 'vite';
 import { viteSingleFile } from 'vite-plugin-singlefile';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -85,10 +85,22 @@ export default defineConfig({
     assetsInlineLimit: 262144,
   },
   resolve: {
-    alias: {
-      // Importujemy rdzeń bezpośrednio ze źródeł TS — dev/build nie wymaga
-      // wcześniejszego `npm run build` w packages/core.
-      anonimizator: fileURLToPath(new URL('../../packages/core/src/index.ts', import.meta.url)),
-    },
+    // Importujemy rdzeń bezpośrednio ze źródeł TS — dev/build nie wymaga
+    // wcześniejszego `npm run build` w packages/core. Aliasy z dokładnym dopasowaniem: klucz
+    // „anonimizator” w formie obiektu działa jak prefiks i przechwyciłby „anonimizator/surnames”
+    // (ścieżka …/index.ts/surnames). Słownik nazwisk (normalizeSurnameKey dla ręcznej korekty,
+    // corrections.ts) to ten sam moduł, który i tak wchodzi do pliku razem z rdzeniem. normalizePath:
+    // na Windows ścieżka z ukośnikami wstecznymi byłaby dla Vite innym modułem niż import
+    // „./surnames” z index.ts i słownik trafiłby do pliku dwa razy.
+    alias: [
+      {
+        find: /^anonimizator\/surnames$/,
+        replacement: normalizePath(fileURLToPath(new URL('../../packages/core/src/surnames.ts', import.meta.url))),
+      },
+      {
+        find: /^anonimizator$/,
+        replacement: normalizePath(fileURLToPath(new URL('../../packages/core/src/index.ts', import.meta.url))),
+      },
+    ],
   },
 });

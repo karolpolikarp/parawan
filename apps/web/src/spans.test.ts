@@ -253,3 +253,26 @@ describe('korpus benchmarku', () => {
     expect(bad).toEqual([]);
   });
 });
+
+// A09: fragment odsłonięty ręcznie stoi w wyniku jako oryginał w <mark class="pii-kept">, wiersz po
+// wierszu, a jego tekst ma data-o jak reszta, więc zaznaczenie przez taki fragment też daje
+// dokładne pozycje w oryginale.
+test('renderSpansHtml: fragmenty przywrócone w mark.pii-kept z pozycjami oryginału', () => {
+  const original = 'Jan Nowak\nPan Piotr Lis, PESEL 44051401359.';
+  const { redacted } = redactPII(original);
+  const spans = alignSpans(original, redacted)?.spans ?? [];
+  const lis = spans.findIndex((s) => original.slice(s.start, s.end).includes('Piotr'));
+  expect(lis).toBeGreaterThan(-1);
+  const kept = [spans[lis]];
+  const rest = spans.filter((_, i) => i !== lis);
+  const html = renderSpansHtml(original, rest, { maskHtml, compare: false, kept, keptAttrs: ' tabindex="-1"' });
+  expect(html).toContain(`<mark class="pii-kept" data-k="0" tabindex="-1"><span data-o="${kept[0].start}">`);
+  for (const m of html.matchAll(/<span data-o="(\d+)">([^<]*)<\/span>/g)) {
+    const text = m[2].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+    expect(original.slice(Number(m[1]), Number(m[1]) + text.length)).toBe(text);
+  }
+  // tekst wyniku: przywrócony oryginał jawny, numer PESEL dalej pod znacznikiem
+  const plain = html.replace(/<[^>]+>/g, '');
+  expect(plain).toContain('Piotr Lis');
+  expect(plain).toContain('[PESEL]');
+});

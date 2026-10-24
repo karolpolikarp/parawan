@@ -1,0 +1,273 @@
+import { readFileSync } from 'node:fs';
+import { redactPII } from 'anonimizator';
+import { describe, expect, test } from 'vitest';
+import {
+  applyCorrections,
+  correctionCounts,
+  type Decision,
+  defaultToken,
+  findOccurrences,
+  lineRanges,
+  personKey,
+  shiftDecisions,
+  snapSelection,
+  spanKey,
+} from './corrections';
+import { finalText } from './output';
+import { alignSpans, applySpans, type Span } from './spans';
+
+const DECYZJA = readFileSync(new URL('./fixtures/urzad/decyzja.txt', import.meta.url), 'utf8');
+
+/** Zakresy automatyczne tekstu, jak w aplikacji (redactPII, potem alignSpans w trybie ścisłym). */
+function auto(text: string, opts: Parameters<typeof redactPII>[1] = {}): { redacted: string; spans: Span[] } {
+  const { redacted } = redactPII(text, opts);
+  const al = alignSpans(text, redacted);
+  if (!al) throw new Error(`brak zakresów dla: ${text.slice(0, 60)}`);
+  return { redacted, spans: al.spans };
+}
+
+const at = (text: string, needle: string, from = 0): { start: number; end: number } => {
+  const start = text.indexOf(needle, from);
+  if (start === -1) throw new Error(`brak „${needle}”`);
+  return { start, end: start + needle.length };
+};
+
+const final = (text: string, spans: Span[], decisions: Decision[]): string =>
+  applySpans(text, applyCorrections(text, spans, decisions).spans);
+
+describe('klucz „ta sama osoba”', () => {
+  test('imię po 3 literach i nazwisko po kluczu rdzenia, w każdym przypadku', () => {
+    const k = personKey('Jan Nowak');
+    expect(personKey('Jana Nowaka')).toBe(k);
+    expect(personKey('Janowi Nowakowi')).toBe(k);
+    expect(personKey('JAN NOWAK')).toBe(k);
+    expect(personKey('Tomasza Wierzbickiego')).toBe(personKey('Tomasz Wierzbicki'));
+    expect(personKey('Tomaszowi Wierzbickiemu')).toBe(personKey('TOMASZ WIERZBICKI'));
+  });
+  test('inne imię, inicjał i samo nazwisko to inne osoby', () => {
+    const k = personKey('Jan Nowak');
+    expect(personKey('Anna Nowak')).not.toBe(k);
+    expect(personKey('J. Nowak')).not.toBe(k);
+    expect(personKey('Nowak')).not.toBe(k);
+    expect(personKey('Marii Wierzbickiej')).not.toBe(personKey('Tomasz Wierzbicki'));
+  });
+  test('dane numeryczne po samych cyfrach, inne po tekście bez wielkości liter', () => {
+    const t = '600 700 800 i 600-700-800, ul. Lipowa 5 i UL. LIPOWA  5';
+    const tel = { tokens: ['TELEFON'] };
+    expect(spanKey(t, { ...at(t, '600 700 800'), ...tel })).toBe(spanKey(t, { ...at(t, '600-700-800'), ...tel }));
+    const adr = { tokens: ['ADRES'] };
+    expect(spanKey(t, { ...at(t, 'ul. Lipowa 5'), ...adr })).toBe(spanKey(t, { ...at(t, 'UL. LIPOWA  5'), ...adr }));
+  });
+});
+
+describe('„Zostaw jawne”', () => {
+  test('tutaj: odsłania jeden znacznik, reszta zostaje', () => {
+    const text = 'Jan Nowak złożył wniosek. Jana Nowaka poinformowano.';
+    const { spans } = auto(text);
+    expect(spans.length).toBe(2);
+    const r = applyCorrections(text, spans, [{ kind: 'keep', scope: 'here', ...at(text, 'Jan Nowak') }]);
+    expect(applySpans(text, r.spans)).toBe('Jan Nowak złożył wniosek. [IMIĘ I NAZWISKO] poinformowano.');
+    expect(r.kept).toEqual([spans[0]]);
+    expect(r.effects).toEqual([1]);
+    expect(correctionCounts(r)).toEqual({ kept: 1, masked: 0 });
+  });
+
+  test('wszędzie: łączy „Jan Nowak” i „Jana Nowaka”, nie łączy „Anna Nowak” ani „J. Nowak”', () => {
+    const text = 'Jan Nowak, Anna Nowak i J. Nowak. Pismo do Jana Nowaka.';
+    const spans: Span[] = ['Jan Nowak', 'Anna Nowak', 'J. Nowak', 'Jana Nowaka'].map((n) => ({
+      ...at(text, n, n === 'Jan Nowak' ? 0 : 1),
+      tokens: ['IMIĘ I NAZWISKO'],
+      gaps: [],
+      source: 'auto',
+    }));
+    const key = spanKey(text, spans[0]);
+    const out = final(text, spans, [{ kind: 'keep', scope: 'same', key, label: 'Jan Nowak' }]);
+    expect(out).toBe('Jan Nowak, [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO]. Pismo do Jana Nowaka.');
+  });
+
+  test('wszędzie w decyzji: podpis wójta jawny, wnioskodawca zasłonięty we wszystkich formach', () => {
+    const { spans } = auto(DECYZJA);
+    const sig = spans.find((s) => DECYZJA.slice(s.start, s.end).includes('Kędzierski'));
+    expect(sig).toBeDefined();
+    const key = spanKey(DECYZJA, sig as Span);
+    const out = final(DECYZJA, spans, [{ kind: 'keep', scope: 'same', key, label: 'Sławomir Kędzierski' }]);
+    expect(out).toContain('Sławomir Kędzierski');
+    expect(out).toContain('[PESEL]');
+    expect(out).not.toMatch(/Wierzbick|WIERZBICK/);
+  });
+
+  test('zakres grupowy schodzi w całości', () => {
+    const text = 'Jan Kowalski 44051401359 mieszka tu.';
+    const { spans } = auto(text);
+    expect(spans[0].tokens.length).toBe(2);
+    const r = applyCorrections(text, spans, [{ kind: 'keep', scope: 'here', start: spans[0].start, end: spans[0].end }]);
+    expect(applySpans(text, r.spans)).toBe(text);
+    expect(correctionCounts(r).kept).toBe(2);
+  });
+});
+
+describe('„Zasłoń zaznaczenie”', () => {
+  test('numer księgi wieczystej jako [DANE] i redactPII wyniku zostawia [DANE]', () => {
+    const { spans } = auto(DECYZJA);
+    const kw = at(DECYZJA, 'OS1W/00045123/6');
+    const out = final(DECYZJA, spans, [{ kind: 'mask', scope: 'here', ...kw, token: 'DANE' }]);
+    expect(out).toContain('(księga wieczysta nr [DANE])');
+    expect(out).not.toContain('00045123');
+    const again = redactPII(out).redacted;
+    expect(again.match(/\[DANE\]/g)?.length).toBe(1);
+    expect(again).toContain('(księga wieczysta nr [DANE])');
+  });
+
+  test('zaznaczenie zahaczające o znacznik rozszerza się na cały zakres', () => {
+    const text = 'Wpłynęło od Marka Jana Kowalskiego 12 maja.';
+    const spans: Span[] = [{ ...at(text, 'Jana Kowalskiego'), tokens: ['IMIĘ I NAZWISKO'], gaps: [], source: 'auto' }];
+    // zaznaczenie od „Marka” do połowy nazwiska
+    const sel = snapSelection(text, text.indexOf('Marka'), text.indexOf('Kowal') + 3, spans);
+    expect(sel).toEqual({ start: text.indexOf('Marka'), end: spans[0].end });
+    const r = applyCorrections(text, spans, [{ kind: 'mask', scope: 'here', ...(sel as { start: number; end: number }), token: 'IMIĘ I NAZWISKO' }]);
+    expect(applySpans(text, r.spans)).toBe('Wpłynęło od [IMIĘ I NAZWISKO] 12 maja.');
+    expect(r.spans[0].source).toBe('manual');
+    // to samo bez snapSelection: suma przedziałów w applyCorrections
+    expect(final(text, spans, [{ kind: 'mask', scope: 'here', start: text.indexOf('Marka'), end: text.indexOf('Marka') + 5, token: 'DANE' }])).toBe(
+      'Wpłynęło od [DANE] [IMIĘ I NAZWISKO] 12 maja.',
+    );
+    expect(final(text, spans, [{ kind: 'mask', scope: 'here', start: text.indexOf('Marka'), end: text.indexOf('Jana') + 2, token: 'DANE' }])).toBe(
+      'Wpłynęło od [DANE] 12 maja.',
+    );
+  });
+
+  test('zaznaczenie wewnątrz zasłoniętego zakresu nic nie zmienia', () => {
+    const text = 'PESEL 44051401359.';
+    const { spans } = auto(text);
+    const r = applyCorrections(text, spans, [{ kind: 'mask', scope: 'here', start: spans[0].start + 2, end: spans[0].start + 5, token: 'DANE' }]);
+    expect(applySpans(text, r.spans)).toBe('PESEL [PESEL].');
+    expect(r.effects).toEqual([0]);
+  });
+
+  test('wszystkie wystąpienia na granicach wyrazów z polskimi literami', () => {
+    const text = 'Anna, Annasz, ANNA, Hanna i Żanna. Anną zajęła się Anna.';
+    expect(findOccurrences(text, 'Anna', 'DANE').map(([a, b]) => text.slice(a, b))).toEqual(['Anna', 'ANNA', 'Anna']);
+    expect(findOccurrences('Łódź i Łódźka, ŁÓDŹ.', 'łódź', 'MIEJSCOWOŚĆ').length).toBe(2);
+    // jednowyrazowa osoba łapie też formy o tym samym kluczu nazwiska, tylko z wielkiej litery
+    const t2 = 'Pan Malec, panu Malcowi, Malca nie ma. Mały malec płacze.';
+    const forms = findOccurrences(t2, 'Malec', 'IMIĘ I NAZWISKO').map(([a, b]) => t2.slice(a, b));
+    expect(forms).toContain('Malec');
+    expect(forms).not.toContain('malec');
+  });
+
+  test('„z żoną Anną”: [IMIĘ I NAZWISKO] wszędzie, nie w „Annasz”', () => {
+    const text = 'Przyszedł z żoną Anną. Pani Annasz czekała. Anną zajmie się sekretariat.';
+    const out = final(text, [], [{ kind: 'mask', scope: 'all', text: 'Anną', token: 'IMIĘ I NAZWISKO' }]);
+    expect(out).toBe('Przyszedł z żoną [IMIĘ I NAZWISKO]. Pani Annasz czekała. [IMIĘ I NAZWISKO] zajmie się sekretariat.');
+  });
+
+  test('domyślny rodzaj: z wielkiej litery osoba, reszta inne dane', () => {
+    expect(defaultToken('Anną')).toBe('IMIĘ I NAZWISKO');
+    expect(defaultToken('  Łukasz')).toBe('IMIĘ I NAZWISKO');
+    expect(defaultToken('OS1W/00045123/6')).toBe('DANE');
+    expect(defaultToken('245/7')).toBe('DANE');
+    expect(defaultToken('nr 245/7')).toBe('DANE');
+  });
+
+  test('zaznaczenie przycięte do wyrazów, wiersze osobno', () => {
+    const text = 'ab Kowalskiego cd\nPiotr Lis';
+    expect(snapSelection(text, 4, 8, [])).toEqual(at(text, 'Kowalskiego'));
+    expect(snapSelection(text, 2, 3, [])).toBeNull();
+    // numer z ukośnikami i łącznikami w całości, kropka na końcu zdania zostaje poza zakresem
+    const kw = 'księga nr OS1W/00045123/6. Pani Nowak-Kowalska.';
+    expect(snapSelection(kw, kw.indexOf('0004'), kw.indexOf('0004') + 3, [])).toEqual(at(kw, 'OS1W/00045123/6'));
+    expect(snapSelection(kw, kw.indexOf('Kowal'), kw.indexOf('Kowal') + 2, [])).toEqual(at(kw, 'Nowak-Kowalska'));
+    expect(lineRanges(text, 3, text.length).map(([a, b]) => text.slice(a, b))).toEqual(['Kowalskiego cd', 'Piotr Lis']);
+  });
+});
+
+describe('kolejność decyzji i cofanie', () => {
+  const text = 'Jan Nowak i Jana Nowaka.';
+  const spans: Span[] = [
+    { ...at(text, 'Jan Nowak'), tokens: ['IMIĘ I NAZWISKO'], gaps: [], source: 'auto' },
+    { ...at(text, 'Jana Nowaka'), tokens: ['IMIĘ I NAZWISKO'], gaps: [], source: 'auto' },
+  ];
+  const key = spanKey(text, spans[0]);
+  const keepAll: Decision = { kind: 'keep', scope: 'same', key, label: 'Jan Nowak' };
+  const remask: Decision = { kind: 'mask', scope: 'here', start: spans[1].start, end: spans[1].end, token: 'IMIĘ I NAZWISKO' };
+
+  test('późniejsza decyzja wygrywa', () => {
+    expect(final(text, spans, [keepAll, remask])).toBe('Jan Nowak i [IMIĘ I NAZWISKO].');
+    expect(final(text, spans, [remask, keepAll])).toBe('Jan Nowak i Jana Nowaka.');
+    // „Zasłoń ponownie” przywraca zakres automatyczny, a nie ręczny
+    expect(applyCorrections(text, spans, [keepAll, remask]).spans[0].source).toBe('auto');
+  });
+
+  test('cofanie to usunięcie decyzji z listy: wynik wraca do stanu sprzed niej', () => {
+    const decisions = [keepAll, remask];
+    expect(final(text, spans, decisions.slice(0, -1))).toBe('Jan Nowak i Jana Nowaka.');
+    expect(final(text, spans, decisions.filter((d) => d !== keepAll))).toBe(applySpans(text, spans));
+    expect(final(text, spans, [])).toBe(applySpans(text, spans));
+  });
+
+  test('„Zostaw jawne” na fragmencie zasłoniętym ręcznie zdejmuje go razem z wchłoniętym znacznikiem', () => {
+    const t = 'Wpłynęło od Marka Jana Kowalskiego.';
+    const s: Span[] = [{ ...at(t, 'Jana Kowalskiego'), tokens: ['IMIĘ I NAZWISKO'], gaps: [], source: 'auto' }];
+    const mask: Decision = { kind: 'mask', scope: 'here', ...at(t, 'Marka'), token: 'IMIĘ I NAZWISKO' };
+    expect(final(t, s, [mask])).toBe('Wpłynęło od [IMIĘ I NAZWISKO] [IMIĘ I NAZWISKO].');
+    const merged = { kind: 'mask' as const, scope: 'here' as const, start: t.indexOf('Marka'), end: s[0].end, token: 'IMIĘ I NAZWISKO' };
+    const r = applyCorrections(t, s, [merged, { kind: 'keep', scope: 'here', start: merged.start, end: merged.end }]);
+    expect(applySpans(t, r.spans)).toBe(t);
+    expect(r.kept).toEqual(s);
+  });
+});
+
+describe('edycja tekstu źródłowego', () => {
+  test('przesunięcie przez wspólny początek i koniec, odrzucenie w zmienionym fragmencie', () => {
+    const before = 'AAA Jan Nowak BBB Piotr Lis CCC';
+    const after = 'AAA Jan Nowak BBB, dopisek, Piotr Lis CCC';
+    const d: Decision[] = [
+      { kind: 'keep', scope: 'here', ...at(before, 'Jan Nowak') },
+      { kind: 'mask', scope: 'here', ...at(before, 'Piotr Lis'), token: 'DANE' },
+      { kind: 'mask', scope: 'here', ...at(before, 'BBB'), token: 'DANE' },
+      { kind: 'mask', scope: 'all', text: 'CCC', token: 'DANE' },
+    ];
+    const r = shiftDecisions(before, after, d);
+    expect(r.dropped).toBe(0);
+    expect(r.decisions[0]).toEqual(d[0]);
+    expect(r.decisions[1]).toMatchObject(at(after, 'Piotr Lis'));
+    expect(r.decisions[2]).toMatchObject(at(after, 'BBB'));
+    expect(r.decisions[3]).toBe(d[3]);
+    // zmiana w środku zakresu: decyzja „tutaj” odpada, „wszędzie” zostaje
+    const changed = 'AAA Jan Nowak BBB Piotr Lisowski CCC';
+    const r2 = shiftDecisions(before, changed, d);
+    expect(r2.dropped).toBe(1);
+    expect(r2.decisions.length).toBe(3);
+    expect(shiftDecisions(before, before, d)).toEqual({ decisions: d, dropped: 0 });
+  });
+
+  test('decyzje nakładane na nowe zakresy po zmianie „Rozróżniaj osoby”', () => {
+    const text = 'Jan Nowak i Jana Nowaka oraz Ewa Lis.';
+    const plain = auto(text);
+    const key = spanKey(text, plain.spans[0]);
+    const decisions: Decision[] = [{ kind: 'keep', scope: 'same', key, label: 'Jan Nowak' }];
+    const pseudo = auto(text, { pseudonyms: true });
+    expect(pseudo.redacted).toMatch(/\[OSOBA-[A-Z]\]/);
+    const out = final(text, pseudo.spans, decisions);
+    expect(out).toContain('Jan Nowak i Jana Nowaka');
+    expect(out).not.toContain('Ewa Lis');
+  });
+});
+
+test('finalText bierze wynik z poprawkami, a bez zakresów sam wynik rdzenia', () => {
+  const text = 'Jan Nowak, PESEL 44051401359.';
+  const { redacted, spans } = auto(text);
+  const decisions: Decision[] = [{ kind: 'keep', scope: 'here', start: 0, end: 9 }];
+  expect(finalText({ redacted, original: text, spans, decisions })).toBe('Jan Nowak, PESEL [PESEL].');
+  expect(finalText({ redacted, original: text, spans: null, decisions })).toBe(redacted);
+  expect(finalText({ redacted, original: text, spans, decisions: [] })).toBe(redacted);
+});
+
+test('edycja przyklejona do zakresu odrzuca decyzję, przecinek obok nie', () => {
+  const before = 'Pismo do Piotr Lis w sprawie.';
+  const d: Decision[] = [{ kind: 'mask', scope: 'here', ...at(before, 'Lis'), token: 'DANE' }];
+  expect(shiftDecisions(before, 'Pismo do Piotr Lisowski w sprawie.', d).dropped).toBe(1);
+  expect(shiftDecisions(before, 'Pismo do Piotr Lis, w sprawie.', d).dropped).toBe(0);
+  expect(shiftDecisions(before, 'Pismo do Piotr XLis w sprawie.', d).dropped).toBe(1);
+  expect(shiftDecisions(before, 'Pismo do Piotr X Lis w sprawie.', d).decisions[0]).toMatchObject({ start: before.indexOf('Lis') + 2 });
+});

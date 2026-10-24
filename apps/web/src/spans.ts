@@ -233,10 +233,17 @@ export function alignSpans(
 }
 
 export interface SpansHtmlOptions {
-  /** HTML podświetlonego znacznika po nazwie tokenu. */
-  maskHtml: (name: string) => string;
+  /** HTML podświetlonego znacznika po nazwie tokenu (z zakresem, np. dla innego dymku przy ręcznym). */
+  maskHtml: (name: string, span: Span) => string;
   /** true = widok „Porównanie” (oryginał przekreślony przed znacznikiem). */
   compare: boolean;
+  /**
+   * Zakresy odsłonięte ręcznie (corrections.ts), rozłączne z `spans`. Ich oryginał stoi w wyniku
+   * w <mark class="pii-kept" data-k="indeks">, każdy wiersz osobno, z data-o jak reszta tekstu.
+   */
+  kept?: Span[];
+  /** Atrybuty znacznika odsłoniętego fragmentu (dymek, tabindex). */
+  keptAttrs?: string;
 }
 
 /** Tekst oryginału od pozycji at, pocięty na wiersze: każdy kawałek z własną pozycją. */
@@ -250,21 +257,36 @@ const textHtml = (text: string, at: number): string =>
  * w wyniku na miejsca w oryginale; renderAligned (compare.ts) je zdejmuje.
  */
 export function renderSpansHtml(original: string, spans: Span[], opts: SpansHtmlOptions): string {
-  const { maskHtml, compare } = opts;
+  const { maskHtml, compare, kept = [], keptAttrs = '' } = opts;
+  // Zakresy i odsłonięte fragmenty po kolei; rozłączne, więc wystarczy scalić dwie posortowane listy.
+  const items: { s: Span; i: number; kept: boolean }[] = [
+    ...spans.map((s, i) => ({ s, i, kept: false })),
+    ...kept.map((s, i) => ({ s, i, kept: true })),
+  ].sort((a, b) => a.s.start - b.s.start);
   let html = '';
   let pos = 0;
-  spans.forEach((s, i) => {
+  for (const { s, i, kept: isKept } of items) {
     html += textHtml(original.slice(pos, s.start), pos);
+    if (isKept) {
+      html += original
+        .slice(s.start, s.end)
+        .replace(
+          /[^\n]+/g,
+          (line, at: number) => `<mark class="pii-kept" data-k="${i}"${keptAttrs}>${textHtml(line, s.start + at)}</mark>`,
+        );
+      pos = s.end;
+      continue;
+    }
     if (compare) html += origHtml(original.slice(s.start, s.end));
     const q = s.quoted ? '&quot;' : '';
     html += s.tokens
       .map((t, k) => {
-        const m = maskHtml(t).replace(/^<[a-z]+/i, `$& data-s="${i}"`);
+        const m = maskHtml(t, s).replace(/^<[a-z]+/i, `$& data-s="${i}"`);
         return (k ? escapeHtml(s.gaps[k - 1]) : '') + q + m + q;
       })
       .join('');
     pos = s.end;
-  });
+  }
   return html + textHtml(original.slice(pos), pos);
 }
 

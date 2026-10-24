@@ -58,6 +58,8 @@ export const PII_TOKENS: Record<string, TokenMeta> = {
   // Osoby
   'IMIĘ I NAZWISKO': { cat: 'person', icon: 'dane-osobowe', tip: 'słownik imion/nazwisk lub wyzwalacz kontekstu' },
   'DATA-URODZENIA': { cat: 'person', icon: 'kalendarz', tip: 'data z kontekstem „ur./urodzony”' },
+  // Znacznik ręczny (corrections.ts), nie typ rdzenia: nie ma przełącznika ani wiersza „Co wykrywa”.
+  DANE: { cat: 'ident', icon: 'dane-id', tip: 'fragment zasłonięty ręcznie albo z listy' },
 };
 
 /**
@@ -116,6 +118,7 @@ export const GENITIVE_LABEL: Record<string, readonly [string, string]> = {
   MAC: ['adresu MAC', 'adresów MAC'],
   LOGIN: ['loginu', 'loginów'],
   TOKEN: ['tokenu dostępu', 'tokenów dostępu'],
+  DANE: ['innej danej osobowej', 'innych danych osobowych'],
 };
 
 /* ── Przełączniki „Co maskować” (generowane, z ikonami i kodami znaczników) ── */
@@ -267,3 +270,5 @@ export const CHIP_META: Record<string, ChipMeta> = Object.fromEntries(
  */
 export const CHIP_BY_TOKEN: Record<string, ChipMeta> = {};
 for (const m of Object.values(CHIP_META)) CHIP_BY_TOKEN[m.token] ??= m;
+// [DANE] stawia tylko ręczna korekta, więc nie ma typu rdzenia ani wpisu w CHIP_META.
+CHIP_BY_TOKEN.DANE = { label: 'inne dane', token: 'DANE', cat: PII_TOKENS.DANE.cat, icon: PII_TOKENS.DANE.icon };

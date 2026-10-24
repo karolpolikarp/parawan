@@ -1,5 +1,18 @@
 import { redactPII, type PiiFinding, type PiiType } from 'anonimizator';
 import { escapeHtml, guessAligned } from './compare';
+import {
+  applyCorrections,
+  type Corrected,
+  correctionCounts,
+  type Decision,
+  defaultToken,
+  findOccurrences,
+  lineRanges,
+  MANUAL_TOKENS,
+  shiftDecisions,
+  snapSelection,
+  spanKey,
+} from './corrections';
 import { extractDocxText } from './docx';
 import { EXAMPLE_TEXT } from './example';
 import { type DocxInventory, docxEmptyBodyError, docxInventoryNote, inventoryDocx } from './docx-inventory';
@@ -47,6 +60,7 @@ import {
   BASES,
   buildAnnotation,
   buildProtocol,
+  correctionLines,
   countByToken,
   countFromFindings,
   formatDate,
@@ -123,6 +137,10 @@ let maskTabStop: HTMLElement | null = null; // jedyny znacznik w kolejności Tab
 // Postęp przeglądu: indeksy znaczników, które były bieżące (‹ ›, klik, fokus, chip). Zerowany przy
 // nowym wyniku, a nie przy przełączeniu widoku: „Porównanie” ma te same znaczniki w tej kolejności.
 const reviewed = new Set<number>();
+// Ręczne poprawki (corrections.ts) w kolejności podjęcia: tylko w pamięci karty, nigdy
+// w localStorage (zawierają fragmenty pisma). `corrected` to ich wynik dla bieżących zakresów.
+let decisions: Decision[] = [];
+let corrected: Corrected = { spans: [], kept: [], effects: [] };
 
 /* ── Legenda, tabela „Co wykrywa” i przełączniki „Co maskować” (dane w pii-meta.ts) ── */
 
@@ -392,9 +410,13 @@ pseudonymsBox.addEventListener('change', () => {
 
 // tabindex="-1": znaczniki nie są osobnymi przystankami Tab (przy długim piśmie były ich setki).
 // Do kolejności Tab wchodzi tylko bieżący znacznik (roving tabindex: refreshMaskNav, goToMask).
-function maskHtml(name: string): string {
-  return `<mark class="pii pii-${maskCategory(name)}" data-tip="${escapeHtml(maskTip(name))}" tabindex="-1">[${name}]</mark>`;
+function maskHtml(name: string, span?: Span): string {
+  const tip = span?.source === 'manual' ? `Zasłonięte ręcznie · ${CAT_LABELS[maskCategory(name)]}` : maskTip(name);
+  return `<mark class="pii pii-${maskCategory(name)}" data-tip="${escapeHtml(tip)}" tabindex="-1">[${name}]</mark>`;
 }
+
+// Fragment odsłonięty ręcznie (mark.pii-kept): oryginał w przerywanej ramce, w nawigacji ‹ ›.
+const KEPT_ATTRS = ' tabindex="-1" data-tip="Przywrócone ręcznie. Kliknij, żeby zasłonić ponownie."';
 
 /** Owiń HTML w numerowane linie edytora (.cl / .no). */
 function wrapLines(html: string): string {
@@ -431,6 +453,7 @@ function syncViewButtons(): void {
   viewCompareBtn.classList.toggle('on', viewMode === 'compare');
   viewResultBtn.setAttribute('aria-pressed', String(viewMode === 'result'));
   viewCompareBtn.setAttribute('aria-pressed', String(viewMode === 'compare'));
+  syncSelButtons(); // „Zasłoń zaznaczenie” w wyniku działa tylko w widoku „Wynik”
 }
 
 function renderOutput(): void {
@@ -453,7 +476,10 @@ function renderOutput(): void {
     // #spans-note). Z zakresami tekst oryginału ma data-o, a znacznik data-s (indeks zakresu).
     const compare = viewMode === 'compare';
     const { html, kept } = lastSpans
-      ? { html: renderSpansHtml(lastInput, lastSpans, { maskHtml, compare }), kept: keptMasks }
+      ? {
+          html: renderSpansHtml(lastInput, corrected.spans, { maskHtml, compare, kept: corrected.kept, keptAttrs: KEPT_ATTRS }),
+          kept: keptMasks,
+        }
       : guessAligned(lastInput, lastRedacted, { tokenRe: MASK_TOKEN_RE, maskHtml, compare });
     keptMasks = kept;
     output.innerHTML = wrapLines(html);
@@ -473,9 +499,11 @@ function setViewMode(mode: 'result' | 'compare'): void {
   const prevN = maskEls.length;
   const prevMax = output.scrollHeight - output.clientHeight;
   const ratio = prevMax > 0 ? output.scrollTop / prevMax : 0;
+  const wasOpen = barOpen;
   renderOutput();
   if (prevIdx >= 0 && maskEls.length === prevN) goToMask(prevIdx);
   else output.scrollTop = ratio * (output.scrollHeight - output.clientHeight);
+  if (wasOpen) openBar(false); // pasek fragmentu zostaje, w „Porównaniu” bez wiersza z oryginałem
 }
 
 viewResultBtn.addEventListener('click', () => setViewMode('result'));
@@ -519,10 +547,13 @@ function goToMask(i: number, scroll = true): void {
   }
   // Komunikat dla czytnika ekranu (aria-live) z powodem wykrycia. Na dotyku, gdzie dymek
   // znacznika zasłaniał wynik, ta sama linia jest widoczna pod wynikiem (style.css).
-  maskStatus.textContent = `Fragment ${maskIdx + 1} z ${n}: ${el.textContent} · ${el.dataset.tip ?? ''}`;
+  maskStatus.textContent = el.matches('mark.pii-kept')
+    ? `Fragment ${maskIdx + 1} z ${n}: przywrócony ręcznie`
+    : `Fragment ${maskIdx + 1} z ${n}: ${el.textContent} · ${el.dataset.tip ?? ''}`;
   reviewed.add(maskIdx);
   updateMaskCount();
   syncReview();
+  syncBar();
 }
 
 /** Przenieś jedyny przystanek Tab w wyniku na znacznik `el` (roving tabindex). */
@@ -534,11 +565,14 @@ function setMaskTabStop(el: HTMLElement | null): void {
 
 /** Po każdym renderze wyniku: zbierz znaczniki, wyzeruj przegląd, pokaż/ukryj nawigację. */
 function refreshMaskNav(): void {
-  maskEls = [...output.querySelectorAll<HTMLElement>('mark.pii')];
+  // Znaczniki i fragmenty przywrócone ręcznie, w kolejności dokumentu.
+  maskEls = [...output.querySelectorAll<HTMLElement>('mark.pii, mark.pii-kept')];
   maskIdx = -1;
   maskTabStop = null; // poprzedni wynik zniknął z DOM razem ze swoim znacznikiem
   setMaskTabStop(maskEls[0] ?? null); // Tab wchodzi do wyniku na pierwszym znaczniku
   maskStatus.textContent = ''; // stary „Fragment N z M” nie dotyczy nowego wyniku
+  barOpen = false; // pasek dotyczył znacznika z poprzedniego renderu
+  syncBar();
   maskNav.hidden = maskEls.length === 0;
   updateMaskCount();
   syncReview();
@@ -549,17 +583,20 @@ const goToPrevMask = (): void => goToMask(maskIdx <= 0 ? maskEls.length - 1 : ma
 maskPrev.addEventListener('click', goToPrevMask);
 maskNext.addEventListener('click', () => goToMask(maskIdx + 1));
 
-// Klik w znacznik → uczyń go bieżącym (bez przewijania — użytkownik już na niego patrzy).
+// Klik w znacznik → uczyń go bieżącym (bez przewijania — użytkownik już na niego patrzy)
+// i otwórz pasek działań. Przeciągnięcie zaznaczenia przez znacznik paska nie otwiera.
 output.addEventListener('click', (e) => {
-  const el = (e.target as HTMLElement | null)?.closest?.('mark.pii') as HTMLElement | null;
+  const el = (e.target as HTMLElement | null)?.closest?.('mark.pii, mark.pii-kept') as HTMLElement | null;
   const at = el ? maskEls.indexOf(el) : -1;
-  if (at !== -1) goToMask(at, false);
+  if (at === -1) return;
+  goToMask(at, false);
+  if (getSelection()?.isCollapsed !== false) openBar(false);
 });
 
 // Fokus z klawiatury (Tab na przystanek w wyniku) też ustawia bieżący znacznik. Bez tego licznik
 // pokazywał „0 / N”, a pierwsza strzałka ↓ zostawała na tym samym znaczniku.
 output.addEventListener('focusin', (e) => {
-  const el = (e.target as HTMLElement | null)?.closest?.('mark.pii') as HTMLElement | null;
+  const el = (e.target as HTMLElement | null)?.closest?.('mark.pii, mark.pii-kept') as HTMLElement | null;
   const at = el ? maskEls.indexOf(el) : -1;
   if (at !== -1 && at !== maskIdx) goToMask(at, false);
 });
@@ -567,6 +604,21 @@ output.addEventListener('focusin', (e) => {
 // Ctrl+A w wyniku zaznacza sam wynik. Domyślnie zaznaczała całą stronę razem z polem źródła,
 // więc Ctrl+C po kliknięciu w wynik kopiował też oryginalne dane osobowe.
 output.addEventListener('keydown', (e) => {
+  // Enter albo spacja na znaczniku: pasek działań z fokusem na pierwszym przycisku.
+  const mark = (e.target as HTMLElement).closest?.('mark.pii, mark.pii-kept');
+  if (mark && (e.key === 'Enter' || e.key === ' ') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    e.preventDefault();
+    const at = maskEls.indexOf(mark as HTMLElement);
+    if (at !== -1 && at !== maskIdx) goToMask(at, false);
+    openBar(true);
+    return;
+  }
+  // Ctrl+Z w wyniku cofa ostatnią ręczną poprawkę (pole wyniku nie ma własnej historii edycji).
+  if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'z' && decisions.length) {
+    e.preventDefault();
+    undoDecision(decisions.length - 1);
+    return;
+  }
   if (!(e.ctrlKey || e.metaKey) || e.altKey || e.key.toLowerCase() !== 'a') return;
   e.preventDefault();
   const sel = getSelection();
@@ -588,18 +640,22 @@ document.addEventListener('keydown', (e) => {
 });
 
 // Synchroniczne przewijanie źródła i wyniku — przewijasz jedno, drugie podąża (jak w recenzji
-// dokumentu). Proporcjonalnie (treści mają różną długość), z blokadą pętli sprzężenia zwrotnego.
-let syncingScroll = false;
+// dokumentu). Proporcjonalnie (treści mają różną długość). Zdarzenie scroll, które wywołało samo
+// przesunięcie drugiego okna (echo), pomijamy po wartości, a nie po czasie: blokada do następnej
+// klatki nie wystarczała w Firefoksie ESR 115, który zgłasza scroll po requestAnimationFrame.
+// Okna odbijały wtedy ruch w nieskończoność, wynik pełzł w górę o kilkadziesiąt pikseli co pół
+// sekundy, a przeciąganie zaznaczenia w wyniku łapało inny wiersz niż pod kursorem.
+const scrollEcho = new WeakMap<HTMLElement, number>();
 function linkScroll(from: HTMLElement, to: HTMLElement): void {
   from.addEventListener('scroll', () => {
-    if (syncingScroll) return;
-    syncingScroll = true;
+    const echo = scrollEcho.get(from);
+    scrollEcho.delete(from);
+    if (echo !== undefined && Math.abs(from.scrollTop - echo) < 2) return;
     const fromMax = from.scrollHeight - from.clientHeight;
     const toMax = to.scrollHeight - to.clientHeight;
+    const before = to.scrollTop;
     to.scrollTop = fromMax > 0 ? (from.scrollTop / fromMax) * toMax : 0;
-    requestAnimationFrame(() => {
-      syncingScroll = false;
-    });
+    if (to.scrollTop !== before) scrollEcho.set(to, to.scrollTop);
   });
 }
 linkScroll(input, output);
@@ -804,6 +860,447 @@ findingsChips.addEventListener('click', (e) => {
   }
 });
 
+/* ── Ręczna korekta: „Zostaw jawne” na znaczniku i „Zasłoń zaznaczenie” ──
+   Logika (decyzje, klucz osoby, wystąpienia, przesunięcie po edycji) żyje w corrections.ts;
+   tu tylko pasek bieżącego fragmentu, wiersz zasłaniania, stopka z listą poprawek i zdarzenia.
+   Oryginał spod znacznika pokazujemy wyłącznie na ekranie (translate="no"), nigdy w druku,
+   pliku ani protokole: te biorą tekst z finalText (output.ts) i same liczby (publikacja.ts). */
+const fixBar = $<HTMLDivElement>('fix-bar');
+const fixBarPos = $<HTMLSpanElement>('fix-bar-pos');
+const fixBarOrig = $<HTMLSpanElement>('fix-bar-orig');
+const fixBarWhat = $<HTMLSpanElement>('fix-bar-what');
+const fixBarVal = $<HTMLElement>('fix-bar-val');
+const fixBarGroup = $<HTMLParagraphElement>('fix-bar-group');
+const fixBarForms = $<HTMLParagraphElement>('fix-bar-forms');
+const fixKeep = $<HTMLButtonElement>('fix-keep');
+const fixKeepAll = $<HTMLButtonElement>('fix-keep-all');
+const fixRemask = $<HTMLButtonElement>('fix-remask');
+const fixBarClose = $<HTMLButtonElement>('fix-bar-close');
+const fixForm = $<HTMLDivElement>('fix-form');
+const fixFormVal = $<HTMLElement>('fix-form-val');
+const fixToken = $<HTMLSelectElement>('fix-token');
+const fixAll = $<HTMLInputElement>('fix-all');
+const fixAllN = $<HTMLSpanElement>('fix-all-n');
+const fixApply = $<HTMLButtonElement>('fix-apply');
+const fixCancel = $<HTMLButtonElement>('fix-cancel');
+const fixSelSrc = $<HTMLButtonElement>('fix-sel-src');
+const fixSelOut = $<HTMLButtonElement>('fix-sel-out');
+const fixFoot = $<HTMLDivElement>('fix-foot');
+const fixSum = $<HTMLSpanElement>('fix-sum');
+const fixFootActs = $<HTMLSpanElement>('fix-foot-acts');
+const fixShow = $<HTMLButtonElement>('fix-show');
+const fixNoteEl = $<HTMLParagraphElement>('fix-note');
+const fixList = $<HTMLUListElement>('fix-list');
+const fixOff = $<HTMLSpanElement>('fix-off');
+const outCard = output.closest('.card') as HTMLElement;
+const srcToolbar = input.closest('.card')?.querySelector('.toolbar') as HTMLElement;
+
+for (const t of MANUAL_TOKENS) fixToken.add(new Option(t.label, t.token));
+
+// Przycisk „Zasłoń zaznaczenie” i licznik „jawne: 2 · przejrzano 12 z 28” potrafią zawinąć opis
+// w nagłówku wyniku do drugiego wiersza (wąskie okno, powiększenie 125%). Okna źródła i wyniku
+// stoją wtedy obok siebie na różnych wysokościach, a przewijają się razem. Nagłówek źródła
+// dostaje więc wysokość nagłówka wyniku, gdy karty stoją w jednym rzędzie.
+const srcHead = input.closest('.card')?.querySelector<HTMLElement>('.card-h');
+const outHead = outCard.querySelector<HTMLElement>('.card-h');
+if (srcHead && outHead && 'ResizeObserver' in window) {
+  new ResizeObserver(() => {
+    srcHead.style.minHeight = '';
+    const row = Math.abs(srcHead.getBoundingClientRect().top - outHead.getBoundingClientRect().top) < 1;
+    const h = outHead.getBoundingClientRect().height;
+    if (row && h > srcHead.getBoundingClientRect().height) srcHead.style.minHeight = `${h}px`;
+  }).observe(outHead);
+}
+
+const SEL_OUT_TIP = fixSelOut.dataset.tip ?? '';
+const SEL_OUT_COMPARE_TIP = 'Zaznacz tekst w widoku „Wynik” albo w polu źródła.';
+let barOpen = false;
+let fixNote = ''; // komunikat o poprawkach odrzuconych po edycji źródła
+let formRanges: [number, number][] = [];
+let formText = '';
+let formReturn: HTMLElement | null = null;
+let outRange: Range | null = null; // ostatnie niepuste zaznaczenie w wyniku
+
+const fragmentsWord = (n: number): string => `${n} ${plural(n, 'fragment', 'fragmenty', 'fragmentów')}`;
+const placesWord = (n: number): string => `${n} ${plural(n, 'miejsce', 'miejsca', 'miejsc')}`;
+const tokenLabel = (t: string): string => CHIP_BY_TOKEN[t.startsWith('OSOBA-') ? 'IMIĘ I NAZWISKO' : t]?.label ?? t;
+/** Oryginał zakresu w jednym wierszu (do paska i listy poprawek, tylko na ekranie). */
+const origOf = (start: number, end: number): string => lastInput.slice(start, end).replace(/\s+/g, ' ').trim();
+
+/** Korekta działa tylko na zakresach: bez nich (tryb ścisły) i przy długim tekście jest wyłączona. */
+const fixAvailable = (): boolean => !!lastSpans && !isTooBig();
+
+function recomputeCorrections(): void {
+  corrected = lastSpans
+    ? applyCorrections(lastInput, lastSpans, decisions)
+    : { spans: [], kept: [], effects: decisions.map(() => 0) };
+}
+
+/** Bieżący fragment: zakres pod znacznikiem albo fragment przywrócony ręcznie. */
+function currentFrag(): { span: Span; kept: boolean } | null {
+  const el = maskEls[maskIdx];
+  if (!el || !lastSpans) return null;
+  if (el.dataset.s !== undefined) {
+    const span = corrected.spans[Number(el.dataset.s)];
+    return span ? { span, kept: false } : null;
+  }
+  if (el.dataset.k !== undefined) {
+    const span = corrected.kept[Number(el.dataset.k)];
+    return span ? { span, kept: true } : null;
+  }
+  return null;
+}
+
+/** Zakresy wyniku z tym samym kluczem osoby albo danej co `span` (do „Zostaw jawne wszędzie”). */
+function sameAs(span: Span): Span[] {
+  const key = spanKey(lastInput, span);
+  return corrected.spans.filter((s) => spanKey(lastInput, s) === key);
+}
+
+const firstBarButton = (): HTMLButtonElement | undefined =>
+  [...fixBar.querySelectorAll<HTMLButtonElement>('button')].find((b) => !b.hidden);
+
+/** Pasek bieżącego fragmentu: treść i przyciski dla znacznika albo fragmentu przywróconego. */
+function syncBar(): void {
+  const frag = barOpen && fixAvailable() ? currentFrag() : null;
+  fixBar.hidden = !frag;
+  outCard.classList.toggle('fix-open', !!frag);
+  if (!frag) return;
+  const { span, kept } = frag;
+  const manual = span.source === 'manual';
+  fixBarPos.textContent = `Fragment ${maskIdx + 1} z ${maskEls.length} · ${span.tokens.map(tokenLabel).join(', ')}`;
+  fixBarWhat.textContent = kept ? 'przywrócone ręcznie' : manual ? 'zasłonięte ręcznie' : 'pod znacznikiem';
+  fixBarVal.textContent = origOf(span.start, span.end);
+  // W „Porównaniu” oryginał i tak stoi przekreślony obok znacznika.
+  fixBarOrig.hidden = viewMode === 'compare';
+  const n = span.tokens.length;
+  fixBarGroup.hidden = kept || n < 2;
+  fixBarGroup.textContent =
+    n < 2
+      ? ''
+      : `Ten znacznik obejmuje ${n} ${plural(n, 'daną', 'dane', 'danych')}: ${span.tokens.map(tokenLabel).join(', ')}. ` +
+        `„Zostaw jawne” odsłoni ${n === 2 ? 'obie' : 'wszystkie'}.`;
+  const same = kept ? [] : sameAs(span);
+  fixKeep.hidden = kept;
+  fixRemask.hidden = !kept;
+  fixKeepAll.hidden = same.length < 2;
+  fixBarForms.hidden = same.length < 2;
+  if (same.length >= 2) {
+    fixKeepAll.textContent = `Zostaw jawne wszędzie (${same.length})`;
+    const forms = [...new Set(same.map((s) => origOf(s.start, s.end)))];
+    fixBarForms.textContent = `Obejmie: ${forms.slice(0, 8).join(', ')}${forms.length > 8 ? '…' : ''}`;
+  }
+}
+
+function openBar(focus: boolean): void {
+  if (!fixAvailable()) return;
+  barOpen = true;
+  syncBar();
+  if (focus && !fixBar.hidden) firstBarButton()?.focus();
+}
+
+function closeBar(returnFocus: boolean): void {
+  barOpen = false;
+  syncBar();
+  if (returnFocus) (maskEls[maskIdx] ?? output).focus({ preventScroll: true });
+}
+
+/** Po każdej zmianie listy decyzji: wynik, chipy, karta publikacji, druk i stopka od nowa. */
+function correctionsChanged(msg: string): void {
+  recomputeCorrections();
+  const inBar = fixBar.contains(document.activeElement);
+  const hadFocus = inBar || output.contains(document.activeElement);
+  const idx = maskIdx;
+  const top = output.scrollTop;
+  const wasOpen = barOpen;
+  renderOutput();
+  output.scrollTop = top;
+  barOpen = wasOpen;
+  if (idx >= 0 && maskEls.length) goToMask(Math.min(idx, maskEls.length - 1), false);
+  renderFindings(lastFound, countTokens(corrected.spans));
+  syncPublication();
+  syncPrintOut();
+  copyFlash.reset();
+  syncFix();
+  // Przycisk, który miał fokus, mógł zniknąć (np. „Zostaw jawne” zmienia się w „Zasłoń ponownie”).
+  if (inBar && !fixBar.hidden) firstBarButton()?.focus({ preventScroll: true });
+  else if (hadFocus && !output.contains(document.activeElement)) {
+    (maskEls[maskIdx] ?? output).focus({ preventScroll: true });
+  }
+  if (msg) announce(msg);
+}
+
+/** Dopisuje decyzję i zwraca liczbę miejsc, które zmieniła. */
+function addDecision(d: Decision): number {
+  decisions.push(d);
+  fixNote = '';
+  recomputeCorrections();
+  return corrected.effects[corrected.effects.length - 1] ?? 0;
+}
+
+function undoDecision(i: number): void {
+  if (!decisions[i]) return;
+  decisions.splice(i, 1);
+  fixNote = '';
+  correctionsChanged('Cofnięto ręczną poprawkę.');
+}
+
+/** Wyczyść, Przykład, plik i nowe pismo: poprawki dotyczyły poprzedniego tekstu. */
+function clearCorrections(): void {
+  decisions = [];
+  fixNote = '';
+  barOpen = false;
+  closeForm(false);
+  fixList.hidden = true;
+  fixShow.setAttribute('aria-expanded', 'false');
+  fixShow.textContent = 'Pokaż';
+}
+
+fixKeep.addEventListener('click', () => {
+  const frag = currentFrag();
+  if (!frag || frag.kept) return;
+  addDecision({ kind: 'keep', scope: 'here', start: frag.span.start, end: frag.span.end });
+  correctionsChanged(`Zostawiono jawne: ${fragmentsWord(frag.span.tokens.length)}.`);
+});
+fixKeepAll.addEventListener('click', () => {
+  const frag = currentFrag();
+  if (!frag || frag.kept) return;
+  const label = origOf(frag.span.start, frag.span.end);
+  const n = addDecision({ kind: 'keep', scope: 'same', key: spanKey(lastInput, frag.span), label });
+  correctionsChanged(`Zostawiono jawne: ${fragmentsWord(n)}.`);
+});
+fixRemask.addEventListener('click', () => {
+  const frag = currentFrag();
+  if (!frag?.kept) return;
+  const { start, end } = frag.span;
+  // Tuż po „Zostaw jawne” tego samego miejsca wystarczy zdjąć tamtą decyzję.
+  const last = decisions[decisions.length - 1];
+  if (last?.kind === 'keep' && last.scope === 'here' && last.start === start && last.end === end) decisions.pop();
+  else addDecision({ kind: 'mask', scope: 'here', start, end, token: frag.span.tokens[0] });
+  fixNote = '';
+  correctionsChanged(`Zasłonięto ponownie: ${fragmentsWord(1)}.`);
+});
+fixBarClose.addEventListener('click', () => closeBar(true));
+fixBar.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  e.preventDefault();
+  e.stopPropagation();
+  closeBar(true);
+});
+
+/* „Zasłoń zaznaczenie”: zaznaczenie w wyniku (Range z data-o i data-s) albo w polu źródła. */
+
+/** Pozycja punktu zakresu w tekście elementu z data-o albo znacznika. */
+function offsetIn(el: HTMLElement, node: Node, off: number): number {
+  const len = el.textContent?.length ?? 0;
+  if (node.nodeType === Node.TEXT_NODE) return Math.min(off, len);
+  return off === 0 ? 0 : len;
+}
+
+/**
+ * Zaznaczenie w wyniku przeliczone na pozycje oryginału. Elementy tekstu (data-o) dają
+ * dokładne pozycje, znacznik (data-s) cały swój zakres. Liczymy po elementach, które zaznaczenie
+ * przecina, a nie po samych punktach granicznych: Firefox stawia je na granicach elementów
+ * (wiersz, znacznik) inaczej niż Chromium.
+ */
+function rangeToOriginal(range: Range): { start: number; end: number } | null {
+  let start = Number.POSITIVE_INFINITY;
+  let end = Number.NEGATIVE_INFINITY;
+  for (const el of output.querySelectorAll<HTMLElement>('[data-o], mark.pii[data-s]')) {
+    if (!range.intersectsNode(el)) continue;
+    const len = el.textContent?.length ?? 0;
+    const a = el.contains(range.startContainer) ? offsetIn(el, range.startContainer, range.startOffset) : 0;
+    const b = el.contains(range.endContainer) ? offsetIn(el, range.endContainer, range.endOffset) : len;
+    if (b <= a) continue; // zaznaczenie tylko dotyka elementu na jego brzegu
+    if (el.dataset.s !== undefined) {
+      const s = corrected.spans[Number(el.dataset.s)];
+      if (!s) continue;
+      start = Math.min(start, s.start);
+      end = Math.max(end, s.end);
+    } else {
+      const o = Number(el.dataset.o);
+      start = Math.min(start, o + a);
+      end = Math.max(end, o + b);
+    }
+  }
+  return start < end ? { start, end } : null;
+}
+
+function syncSelButtons(): void {
+  const on = fixAvailable();
+  fixSelSrc.hidden = !on;
+  fixSelOut.hidden = !on;
+  fixSelSrc.disabled = !on || input.selectionStart === input.selectionEnd;
+  const compare = viewMode === 'compare';
+  fixSelOut.disabled = !on || compare || !outRange;
+  const tip = compare ? SEL_OUT_COMPARE_TIP : SEL_OUT_TIP;
+  if (fixSelOut.dataset.tip !== tip) {
+    fixSelOut.dataset.tip = tip;
+    fixSelOut.setAttribute('aria-describedby', tipDescId(tip));
+  }
+}
+
+document.addEventListener('selectionchange', () => {
+  const sel = getSelection();
+  const r = sel?.rangeCount && !sel.isCollapsed ? sel.getRangeAt(0) : null;
+  outRange = r && output.contains(r.commonAncestorContainer) ? r.cloneRange() : null;
+  syncSelButtons();
+});
+// Firefox nie zawsze zgłasza selectionchange dla zaznaczenia w polu tekstowym.
+for (const ev of ['select', 'keyup', 'mouseup', 'input'] as const) input.addEventListener(ev, syncSelButtons);
+// Klik w przycisk nie może zgubić zaznaczenia w wyniku (część przeglądarek czyści je przy mousedown).
+fixSelOut.addEventListener('mousedown', (e) => e.preventDefault());
+
+function syncFormCount(): void {
+  const n = findOccurrences(lastInput, formText, fixToken.value).length;
+  fixAllN.textContent = n ? `(${placesWord(n)})` : '';
+}
+
+function openForm(from: 'src' | 'out'): void {
+  flushPendingUpdate();
+  if (!fixAvailable()) return;
+  closeBar(false);
+  const raw =
+    from === 'src'
+      ? { start: input.selectionStart, end: input.selectionEnd }
+      : outRange
+        ? rangeToOriginal(outRange)
+        : null;
+  const snapped = raw && snapSelection(lastInput, raw.start, raw.end, [...corrected.spans, ...corrected.kept]);
+  if (!snapped) {
+    announce('Najpierw zaznacz fragment tekstu.');
+    return;
+  }
+  formRanges = lineRanges(lastInput, snapped.start, snapped.end);
+  formText = lastInput.slice(snapped.start, snapped.end);
+  const multi = formRanges.length > 1;
+  fixFormVal.textContent = formText.replace(/\s+/g, ' ').trim();
+  fixToken.value = defaultToken(formText);
+  // Tekst z kilku wierszy zasłaniamy tylko w zaznaczonym miejscu, wiersz po wierszu.
+  fixAll.checked = !multi;
+  fixAll.disabled = multi;
+  syncFormCount();
+  formReturn = from === 'src' ? fixSelSrc : fixSelOut;
+  if (from === 'src') srcToolbar.after(fixForm);
+  else fixBar.after(fixForm);
+  fixForm.hidden = false;
+  fixToken.focus();
+}
+
+function closeForm(returnFocus: boolean): void {
+  if (fixForm.hidden) return;
+  fixForm.hidden = true;
+  if (!returnFocus) return;
+  const usable = formReturn && !formReturn.hidden && !(formReturn as HTMLButtonElement).disabled;
+  const back = usable ? (formReturn as HTMLElement) : formReturn === fixSelSrc ? input : output;
+  back.focus({ preventScroll: true });
+}
+
+fixSelSrc.addEventListener('click', () => openForm('src'));
+fixSelOut.addEventListener('click', () => openForm('out'));
+fixToken.addEventListener('change', syncFormCount);
+fixCancel.addEventListener('click', () => closeForm(true));
+fixForm.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  e.preventDefault();
+  e.stopPropagation();
+  closeForm(true);
+});
+fixApply.addEventListener('click', () => {
+  const token = fixToken.value;
+  let n = 0;
+  if (fixAll.checked && !fixAll.disabled) n = addDecision({ kind: 'mask', scope: 'all', text: formText, token });
+  else for (const [start, end] of formRanges) n += addDecision({ kind: 'mask', scope: 'here', start, end, token });
+  if (formReturn === fixSelOut) getSelection()?.removeAllRanges();
+  closeForm(true);
+  correctionsChanged(n ? `Zasłonięto ${placesWord(n)}.` : 'Ten fragment był już zasłonięty.');
+});
+
+/** Wpis listy poprawek: co zrobiono, z wartością (tylko na ekranie) i liczbą miejsc. */
+function decisionText(d: Decision, n: number): string {
+  const where = `, ${placesWord(n)}`;
+  if (d.kind === 'keep') {
+    return d.scope === 'here'
+      ? `Zostawiono jawne: ${origOf(d.start, d.end)}`
+      : `Zostawiono jawne wszędzie: ${d.label}${where}`;
+  }
+  return d.scope === 'here'
+    ? `Zasłonięto jako [${d.token}]: ${origOf(d.start, d.end)}`
+    : `Zasłonięto jako [${d.token}] wszędzie: ${d.text.replace(/\s+/g, ' ').trim()}${where}`;
+}
+
+function renderFixList(): void {
+  fixList.replaceChildren(
+    ...decisions.map((d, i) => {
+      const li = document.createElement('li');
+      const t = document.createElement('span');
+      t.textContent = decisionText(d, corrected.effects[i] ?? 0);
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'linklike';
+      b.textContent = 'Cofnij';
+      b.dataset.i = String(i);
+      b.setAttribute('aria-label', `Cofnij: ${t.textContent}`);
+      li.append(t, ' ', b);
+      return li;
+    }),
+  );
+}
+
+/** Stopka poprawek, przyciski zaznaczenia, komunikat o długim tekście i pasek fragmentu. */
+function syncFix(): void {
+  const has = decisions.length > 0 && !!lastRedacted;
+  const c = correctionCounts(corrected);
+  const anyMask = decisions.some((d) => d.kind === 'mask');
+  fixSum.textContent = !has
+    ? ''
+    : lastSpans
+      ? `Ręczne poprawki: przywrócono ${c.kept}, zasłonięto ${c.masked}`
+      : 'Ręczne poprawki są wyłączone dla tego tekstu, wynik pokazuje to, co zasłonił automat' +
+        (anyMask ? '. Fragmenty zasłonięte ręcznie są w nim jawne.' : '.');
+  fixFootActs.hidden = !has || !lastSpans;
+  fixNoteEl.textContent = fixNote;
+  fixNoteEl.hidden = !fixNote;
+  fixFoot.hidden = !lastRedacted || (!has && !fixNote);
+  if (!has) {
+    fixList.hidden = true;
+    fixShow.setAttribute('aria-expanded', 'false');
+    fixShow.textContent = 'Pokaż';
+  }
+  if (!fixList.hidden) renderFixList();
+  fixOff.hidden = !(lastRedacted && isTooBig());
+  if (!fixAvailable()) {
+    barOpen = false;
+    closeForm(false);
+  }
+  syncSelButtons();
+  syncBar();
+}
+
+fixShow.addEventListener('click', () => {
+  const open = fixList.hidden;
+  fixList.hidden = !open;
+  fixShow.setAttribute('aria-expanded', String(open));
+  fixShow.textContent = open ? 'Ukryj' : 'Pokaż';
+  if (open) renderFixList();
+});
+$<HTMLButtonElement>('fix-undo').addEventListener('click', () => undoDecision(decisions.length - 1));
+$<HTMLButtonElement>('fix-clear').addEventListener('click', () => {
+  decisions = [];
+  fixNote = '';
+  correctionsChanged('Usunięto wszystkie ręczne poprawki.');
+  output.focus({ preventScroll: true });
+});
+fixList.addEventListener('click', (e) => {
+  const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-i]');
+  if (!b) return;
+  const i = Number(b.dataset.i);
+  undoDecision(i);
+  // Fokus na sąsiedni wpis listy albo, gdy lista się skończyła, na wynik.
+  const next = fixList.querySelectorAll<HTMLButtonElement>('button[data-i]')[Math.min(i, decisions.length - 1)];
+  (next ?? output).focus({ preventScroll: true });
+});
+
 /* ── Główny przepływ ── */
 
 function setResultActions(on: boolean): void {
@@ -814,10 +1311,11 @@ function setResultActions(on: boolean): void {
 }
 
 /** Sam wynik, bez dołączonej adnotacji: .docx i wydruk stawiają ją osobno, na nowej stronie. */
-const resultText = (): string => finalText({ redacted: lastRedacted, original: lastInput, spans: lastSpans });
+const resultText = (): string =>
+  finalText({ redacted: lastRedacted, original: lastInput, spans: lastSpans, decisions });
 /** Tekst dla „Kopiuj” i „Pobierz .txt”: wynik, a po „Dołącz adnotację” także adnotacja (output.ts). */
 const outputText = (): string =>
-  finalText({ redacted: lastRedacted, original: lastInput, spans: lastSpans, annex: annexText() });
+  finalText({ redacted: lastRedacted, original: lastInput, spans: lastSpans, decisions, annex: annexText() });
 /** Treść pobieranego pliku. Rejestr .csv dostaje sam wynik: wiersze adnotacji z przecinkami Excel
  * dokleiłby do arkusza jako rekordy. */
 const downloadText = (): string => (lastFileExt === 'csv' ? resultText() : outputText());
@@ -870,21 +1368,34 @@ function renderResult(redacted: string, found: PiiFinding[]): void {
   if (redacted !== lastRedacted) copyFlash.reset();
   // Przegląd dotyczy dokładnie tego wyniku: po każdej zmianie tekstu albo wyniku liczy się od zera.
   if (redacted !== lastRedacted || input.value !== lastInput) reviewed.clear();
+  // Edycja źródła: poprawki „tutaj” przesuwają się razem z tekstem albo odpadają (corrections.ts).
+  if (decisions.length && lastInput && input.value !== lastInput) {
+    const moved = shiftDecisions(lastInput, input.value, decisions);
+    decisions = moved.decisions;
+    if (moved.dropped) {
+      fixNote =
+        `Po zmianie tekstu źródłowego odrzucono ${moved.dropped} ` +
+        `${plural(moved.dropped, 'ręczną poprawkę', 'ręczne poprawki', 'ręcznych poprawek')}.`;
+      announce(fixNote);
+    }
+  }
   lastRedacted = redacted;
   lastInput = input.value;
   lastFound = found;
   // Ponad HIGHLIGHT_LIMIT nie ma podświetleń ani porównania: zakresy kosztowałyby czas przy każdej edycji.
   const aligned = isTooBig() ? null : alignSpans(lastInput, redacted);
   lastSpans = aligned?.spans ?? null;
+  recomputeCorrections();
   keptMasks = aligned?.kept ?? 0; // z zakresami renderOutput go nie zmienia
   // Przy długim tekście i tak nie ma podświetleń ani porównania, więc komunikat nic by nie dodał.
   spansNote.hidden = !!lastSpans || isTooBig();
   setResultActions(true);
   renderOutput();
-  renderFindings(found, lastSpans && countTokens(lastSpans));
+  renderFindings(found, lastSpans && countTokens(corrected.spans));
   // Po renderze: wzór adnotacji liczy z zakresów, a dołączona adnotacja idzie do wydruku.
   syncPublication();
   syncPrintOut();
+  syncFix();
 }
 
 // Debounce: przy szybkim pisaniu nie odpalaj pełnego pipeline'u (26 przebiegów + przerender)
@@ -915,6 +1426,7 @@ function update(): void {
     lastFound = [];
     reviewed.clear();
     spansNote.hidden = true;
+    recomputeCorrections();
     syncPrintOut();
     keptMasks = 0;
     maskEls = [];
@@ -927,6 +1439,7 @@ function update(): void {
     setResultActions(false);
     resetDocumentPublication(); // puste pole: następny tekst to już inne pismo
     syncPublication();
+    syncFix();
     measureSeq++; // zaległy pomiar długiego tekstu już nie obowiązuje
     lastUpdateMs = 0;
     return;
@@ -1343,7 +1856,7 @@ function pubFields(): PublicationFields {
 
 /** Liczby po tokenie: z zakresów, a bez nich z liczników rdzenia. */
 function currentCounts(): Map<string, number> {
-  return lastSpans ? countByToken(lastSpans) : countFromFindings(lastFound);
+  return lastSpans ? countByToken(corrected.spans) : countFromFindings(lastFound);
 }
 
 /** Adnotacja dopisywana do wyniku; pusty napis, gdy „Dołącz” nie jest zaznaczone. */
@@ -1362,7 +1875,9 @@ function syncReview(): void {
   const n = maskEls.length;
   const seen = Math.min(reviewed.size, n);
   // Przy podpowiedzi pod nagłówkiem wyniku: w pasku nad wynikiem nie ma już miejsca w jednym rzędzie.
-  maskSeen.textContent = ` · przejrzano ${seen} z ${n}`;
+  // „jawne: 2”: fragmenty przywrócone ręcznie, widoczne obok postępu przeglądu.
+  const keptN = maskEls.filter((el) => el.matches('mark.pii-kept')).length;
+  maskSeen.textContent = `${keptN ? ` · jawne: ${keptN}` : ''} · przejrzano ${seen} z ${n}`;
   maskSeen.hidden = n === 0;
   maskSeen.classList.toggle('is-done', n > 0 && seen === n);
   pubSeenN.textContent = `${seen} z ${n}`;
@@ -1428,6 +1943,7 @@ function syncOtherBasis(): void {
  * karcie dopisałoby ją do nowego wyniku. Organ, osoba, podstawa i data zostają.
  */
 function resetDocumentPublication(): void {
+  clearCorrections(); // ręczne poprawki dotyczyły poprzedniego pisma
   pubZnak.value = '';
   for (const el of [pubAppend, ...pubChecks]) el.checked = false;
   allReviewed = false;
@@ -1517,6 +2033,8 @@ async function protocolNow(): Promise<string> {
     pseudonyms: pseudonymsBox.checked,
     reviewed: isTooBig() ? null : Math.min(reviewed.size, marks),
     marks,
+    // Ręczne poprawki: same liczby (wartości nie trafiają do protokołu).
+    extra: lastSpans ? correctionLines(correctionCounts(corrected).kept, correctionCounts(corrected).masked) : [],
     sha256: sha,
     osoba: pubOsoba.value,
     zatwierdzil: pubZatw.value,

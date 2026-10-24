@@ -10,6 +10,7 @@ import {
   GENITIVE_LABEL,
   MASK_GROUP_DEFS,
   MASK_GROUPS,
+  MASK_TOKEN_RE,
   maskTip,
   PII_TOKENS,
   tokenOfCode,
@@ -120,4 +121,16 @@ test('legenda: zapasowe liczby w index.html zgodne z przełącznikami', () => {
   for (const [, cat, text] of found) expect(text, cat).toBe(catCountLabel(cat as Cat));
   const sum = found.reduce((s, [, , text]) => s + Number.parseInt(text, 10), 0);
   expect(sum).toBe(MASK_GROUPS.length);
+});
+
+// [DANE] stawia tylko ręczna korekta (corrections.ts). Nie jest typem rdzenia, więc nie ma
+// przełącznika, wiersza „Co wykrywa” ani wpisu w CHIP_META, a chip „inne dane” ma osobno.
+test('znacznik ręczny [DANE]: chip „inne dane”, bez przełącznika, bez cyfr i „@”', () => {
+  expect(PII_TOKENS.DANE).toEqual({ cat: 'ident', icon: 'dane-id', tip: 'fragment zasłonięty ręcznie albo z listy' });
+  expect(CHIP_BY_TOKEN.DANE.label).toBe('inne dane');
+  expect(Object.values(CHIP_META).some((c) => c.token === 'DANE')).toBe(false);
+  expect(MASK_GROUPS.some((g) => g.code === '[DANE]')).toBe(false);
+  expect('Księga [DANE] i [IMIĘ I NAZWISKO].'.split(MASK_TOKEN_RE)).toEqual(['Księga ', 'DANE', ' i ', 'IMIĘ I NAZWISKO', '.']);
+  // idempotencja: znacznik bez cyfr i „@”, więc ponowny przebieg rdzenia go nie pożre
+  for (const token of Object.keys(PII_TOKENS)) expect(token, token).not.toMatch(/[\d@]/);
 });

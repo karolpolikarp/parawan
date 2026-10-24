@@ -6,6 +6,7 @@ import {
   BASES,
   basisText,
   buildAnnotation,
+  correctionLines,
   buildProtocol,
   countByToken,
   countFromFindings,
@@ -322,4 +323,10 @@ test('adnotacja i protokół nie zawierają podciągu dłuższego niż 3 znaki s
   expect(leaksIn(['Wyłączenia dokonał(a): Kowalski.'], ['Jan Kowalski'])).not.toEqual([]);
   expect(leaksIn(['Znak sprawy: 85071412358'], ['PESEL 85071412358'])).not.toEqual([]);
   expect(leaksIn(['Przemysłowa'], ['ul. Przemysłowa 8'])).not.toEqual([]);
+});
+
+// A09: protokół podaje ręczne poprawki samymi liczbami (wartości zostają na ekranie).
+test('protokół: wiersze ręcznej korekty z liczbą fragmentów', () => {
+  expect(correctionLines(1, 0)).toEqual(['Zostawiono jawne ręcznie: 1 fragment.', 'Zasłonięto ręcznie: 0 fragmentów.']);
+  expect(correctionLines(2, 5)).toEqual(['Zostawiono jawne ręcznie: 2 fragmenty.', 'Zasłonięto ręcznie: 5 fragmentów.']);
 });

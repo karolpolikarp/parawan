@@ -101,6 +101,15 @@ i widać z niego co najmniej 220 px, przy powiększeniu 125% (1093×520) zaczyna
 ekranie, nagłówek przy 1366×768 ma najwyżej 140 px, a przy 320–1920 px strona nie przewija się
 w poziomie. Zrzuty w prawdziwym Edge robi ręczny `manual/viewports.mjs`.
 
+Ręczną korektę wyniku sprawdza `korekta.test.mjs` na `fixtures/urzad/decyzja.txt`: „Zostaw jawne” na
+znaczniku pod podpisem wójta (schowek, .txt i druk z nazwiskiem wójta, a wnioskodawca i PESEL dalej
+zasłonięci, chip „imię i nazwisko” o jeden mniej), „Zostaw jawne wszędzie” z listą form, zaznaczenie
+numeru księgi wieczystej w wyniku zasłonięte jako [DANE] w wyniku, .txt, `#print-out` i PDF z druku,
+ta sama ścieżka samą klawiaturą (Shift+strzałki w polu źródła, Shift+Tab do „Zasłoń zaznaczenie”,
+Enter na znaczniku), Ctrl+Z, przesunięcie poprawek po edycji źródła i „Wyczyść”. Klucze
+localStorage po korektach są te same co przed nimi. Zaznaczenie prawdziwą myszą w Firefoksie ESR
+sprawdza ręcznie `manual/korekta-zaznaczenie.mjs`.
+
 Dostępność sprawdza `a11y.test.mjs`. axe-core (wersja dokładna w `package.json`, reguły
 `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`) biegnie na pustej aplikacji, po `?demo`, w widoku
 „Porównanie”, z rozwiniętymi `<details>`, na telefonie 390×844 i na landingu. Źródło axe trafia
@@ -122,7 +131,7 @@ z Playwright, `npx playwright install firefox`) zmienia przeglądarkę testów, 
 `PARAWAN_WEB_HTML` i `PARAWAN_LANDING_HTML` wskazują kopię plików w innym katalogu. Tak biegnie
 `.github/workflows/zgodnosc.yml` (raz w tygodniu, po tagu `v*` i na żądanie, bez blokowania PR):
 Chromium 109 ze snapshotu (`legacy.test.mjs` i wydruk), Edge na Windows na kopii w katalogu
-„Narzędzia urzędu” i Firefox (`smoke.test.mjs`). W Firefoksie test drzewa dostępności formularza
+„Narzędzia urzędu” i Firefox (`smoke.test.mjs` i `korekta.test.mjs`). W Firefoksie test drzewa dostępności formularza
 jest pomijany, bo czyta je przez CDP. `wydruk.test.mjs` i `a11y.test.mjs` są dla Chromium.
 
 Przy błędzie zrzut całej strony trafia do `test-results/e2e/` (w CI jako artefakt).

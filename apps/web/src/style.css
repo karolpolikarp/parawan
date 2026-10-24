@@ -725,6 +725,46 @@ mark.pii.pii-linked { box-shadow: 0 0 0 2px var(--acc-line); }
   .nav-btn { width: 40px; height: 40px; }
 }
 
+/* ── Ręczna korekta (corrections.ts) ──
+   Fragment przywrócony ręcznie stoi w wyniku jako oryginał w przerywanej ramce (#566259 na bieli
+   ok. 6,4:1, więc ramka spełnia 3:1 z WCAG 1.4.11). Znacznik i ramka różnią się kształtem, nie
+   tylko kolorem: przywrócone dane widać też w odcieniach szarości. */
+mark.pii-kept {
+  background: none; color: inherit; font: inherit;
+  border: 1.5px dashed var(--mut-2); border-radius: 5px; padding: 0 2px;
+  cursor: pointer; scroll-margin: 60px;
+}
+mark.pii-kept.pii-active { outline: 2px solid var(--acc); outline-offset: 1px; box-shadow: 0 0 0 4px var(--acc-soft); }
+/* Pasek bieżącego fragmentu i wiersz „Zasłoń zaznaczenie”: pod paskiem narzędzi karty, w tym
+   samym stylu co pasek „Cofnij” nad polem źródła. Na wąskim ekranie przyciski schodzą pod tekst. */
+.fix-bar {
+  margin: 10px 16px 0; padding: 7px 7px 7px 14px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px;
+  border: 1px solid var(--acc-line); border-radius: var(--r-ctl);
+  background: var(--acc-soft); color: var(--text);
+  font-size: 13px; line-height: 1.45;
+}
+.fix-bar-t { flex: 1 1 240px; min-width: 0; overflow-wrap: anywhere; }
+.fix-bar-t b { font-weight: 700; }
+.fix-bar-n { flex-basis: 100%; color: var(--mut-2); overflow-wrap: anywhere; }
+.fix-acts { display: flex; flex-wrap: wrap; gap: 6px; }
+.fix-form .fix-bar-t { flex-basis: 100%; }
+.fix-fld { display: inline-flex; align-items: center; gap: 6px; }
+.fix-fld select {
+  height: 32px; padding: 0 8px; border: 1px solid var(--line-2); border-radius: 8px;
+  background: #fff; color: var(--text); font: 600 13px var(--sans);
+}
+.fix-fld input { width: 16px; height: 16px; margin: 0; accent-color: var(--acc); }
+.card-h > .fix-sel { flex: none; }
+/* Otwarty pasek mówi o bieżącym fragmencie to samo co jego dymek, a dymek zasłaniał dwa wiersze. */
+.fix-open .editor .pii-active::after, .fix-open .editor .pii-active::before { display: none; }
+/* Stopka z liczbą poprawek nad ostrzeżeniem o heurystyce, z listą rozwijaną „Pokaż”. */
+.fix-foot { align-items: flex-start; color: var(--text); }
+.fix-foot-b { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.fix-note { color: var(--warn); font-weight: 600; }
+.fix-list { margin: 2px 0 0; padding-left: 18px; overflow-wrap: anywhere; color: var(--mut-2); }
+.fix-list li + li { margin-top: 2px; }
+
 /* Porównanie — oryginał przekreślony (przeszczep z wariantu B) */
 .editor del {
   color: var(--err);
@@ -1079,6 +1119,11 @@ table .pii { cursor: default; }
   .sw:checked { background: Highlight; border-color: Highlight; }
   .sw:checked::after { background: HighlightText; }
   .seg .btn.on { forced-color-adjust: none; background: Highlight; border-color: Highlight; color: HighlightText; }
+  /* przywrócony oryginał: tekst i ramka w kolorach systemu (domyślne Mark i MarkText dawały
+     ciemny tekst na ciemnym tle) */
+  mark.pii-kept { forced-color-adjust: none; background: Canvas; color: CanvasText; border-color: CanvasText; }
+  mark.pii-kept.pii-active { outline-color: Highlight; }
+  .fix-bar { border-color: CanvasText; }
 }
 
 /* Dotyk: dymek stukniętego znacznika zasłaniał kolejne wiersze sprawdzanego wyniku.
@@ -1088,7 +1133,10 @@ table .pii { cursor: default; }
    dymek tylko przy fokusie z klawiatury. Pigułki, legenda, wiersze „Co maskować” i „?” nadal
    otwierają go stuknięciem, bo tam dymek jest jedyną drogą do opisu. */
 @media (hover: none) {
-  .editor mark.pii::after, .editor mark.pii::before { display: none; }
+  .editor mark.pii::after, .editor mark.pii::before,
+  .editor mark.pii-kept::after, .editor mark.pii-kept::before { display: none; }
+  /* otwarty pasek fragmentu zastępuje linię statusu pod wynikiem */
+  .fix-open #mask-status { display: none !important; }
   :is(button, a)[data-tip]:not(:focus-visible)::after,
   :is(button, a)[data-tip]:not(:focus-visible)::before { display: none; }
   #mask-status:not(:empty) {

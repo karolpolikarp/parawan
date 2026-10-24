@@ -1,12 +1,14 @@
 // Typecheck aplikacji web (bez emisji — build robi Vite). Rygor z bazy monorepo, plus
-// biblioteki DOM i alias „anonimizator" na źródła rdzenia (ten sam, co w vite.config.ts).
+// biblioteki DOM i aliasy „anonimizator" i „anonimizator/surnames" na źródła rdzenia (te same,
+// co w vite.config.ts).
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "noEmit": true,
     "paths": {
-      "anonimizator": ["../../packages/core/src/index.ts"]
+      "anonimizator": ["../../packages/core/src/index.ts"],
+      "anonimizator/surnames": ["../../packages/core/src/surnames.ts"]
     }
   },
   "include": ["src"]

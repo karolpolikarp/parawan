@@ -155,6 +155,39 @@ const SCANS = [
     },
   },
   {
+    // A09: pasek bieżącego fragmentu po „Zostaw jawne” (z „Zasłoń ponownie”) i rozwinięta lista
+    // ręcznych poprawek w stopce wyniku
+    gdzie: 'aplikacja, ręczna korekta: pasek fragmentu i lista poprawek',
+    query: '?demo',
+    prepare: async (app) => {
+      await app.demoReady();
+      const { page } = app;
+      await page.locator('#output mark.pii').first().click();
+      await page.locator('#fix-keep').click();
+      await page.locator('#fix-remask').waitFor();
+      await page.locator('#fix-show').click();
+      await page.locator('#fix-list li').first().waitFor();
+    },
+  },
+  {
+    // A09: wiersz „Zasłoń zaznaczenie” pod paskiem źródła, otwarty z zaznaczenia w polu
+    gdzie: 'aplikacja, ręczna korekta: wiersz Zasłoń zaznaczenie, telefon 390×844',
+    query: '?demo',
+    viewport: { width: 390, height: 844 },
+    prepare: async (app) => {
+      await app.demoReady();
+      const { page } = app;
+      await page.locator('#input').evaluate((el) => {
+        const ta = /** @type {HTMLTextAreaElement} */ (el);
+        ta.focus();
+        ta.setSelectionRange(0, 5);
+        ta.dispatchEvent(new Event('select'));
+      });
+      await page.locator('#fix-sel-src').click();
+      await page.locator('#fix-form').waitFor();
+    },
+  },
+  {
     // A04: pasek kopii ze strony produktu i komunikat o zapamiętanym wyłączeniu naraz
     gdzie: 'aplikacja ze strony produktu, zapamiętane wyłączenie PESEL',
     query: '',

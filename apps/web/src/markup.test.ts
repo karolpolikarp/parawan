@@ -138,7 +138,8 @@ test.each(PAGES)('%s: reguła pól pada po usunięciu atrybutu z dowolnego pola'
  * dopisuje się tutaj (i dostaje translate="no").
  */
 const CONTENT_VIEWS = {
-  aplikacja: ['input', 'output', 'print-out'],
+  // fix-bar, fix-form i fix-foot (A09) pokazują oryginał spod znacznika i listę poprawek
+  aplikacja: ['input', 'output', 'print-out', 'fix-bar', 'fix-form', 'fix-foot'],
   landing: ['demo-input', 'demo-output'],
 } as const;
 
@@ -248,8 +249,9 @@ test('aplikacja: #print-out i #print-annex dostają tekst wyłącznie przez text
   expect(body).toContain("if (!lastRedacted) return { main: PRINT_EMPTY, annex: '' };");
   expect(body).toContain('return { main: resultText(), annex: annexText() };');
   expect(body).not.toMatch(/input|orig|innerHTML/);
-  expect(webMain).toContain(
-    'const resultText = (): string => finalText({ redacted: lastRedacted, original: lastInput, spans: lastSpans });',
+  // wynik po ręcznych poprawkach (A09): finalText nakłada decyzje na zakresy
+  expect(webMain).toMatch(
+    /const resultText = \(\): string =>\s+finalText\(\{ redacted: lastRedacted, original: lastInput, spans: lastSpans, decisions \}\);/,
   );
   expect(webMain).toMatch(/function annexText\(\): string \{\n {2}return pubAppend\.checked && lastRedacted \? pubAnn\.value\.trim\(\) : '';\n\}/);
   // protokół do druku powstaje tylko z buildProtocol

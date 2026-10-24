@@ -106,10 +106,12 @@ jobs:
           Copy-Item apps/landing/dist/index.html (Join-Path $dir 'Parawan strona.html')
           "PARAWAN_WEB_HTML=$(Join-Path $dir 'Parawan.html')" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
           "PARAWAN_LANDING_HTML=$(Join-Path $dir 'Parawan strona.html')" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
-      - name: Test dymny w Edge
+      # Ręczna korekta (A09) przelicza zaznaczenie w wyniku na pozycje oryginału, więc biegnie też
+      # w Edge, w którym urzędnik naprawdę pracuje.
+      - name: Test dymny i ręczna korekta w Edge
         env:
           PARAWAN_PRZEGLADARKA: msedge
-        run: node --test scripts/e2e/smoke.test.mjs
+        run: node --test scripts/e2e/smoke.test.mjs scripts/e2e/korekta.test.mjs
       - name: Zrzuty z nieudanych testów
         if: failure()
         uses: actions/upload-artifact@v7
@@ -141,10 +143,13 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-firefox-${{ runner.os }}-${{ steps.pw.outputs.version }}
       - run: npx playwright install --with-deps firefox
-      - name: Test dymny w Firefoksie
+      # Gecko stawia granice zaznaczenia inaczej niż Chromium, a „Zasłoń zaznaczenie” (A09) z nich
+      # liczy pozycje w oryginale. Zaznaczenie myszą w Firefoksie ESR 115 sprawdza ręcznie
+      # scripts/e2e/manual/korekta-zaznaczenie.mjs.
+      - name: Test dymny i ręczna korekta w Firefoksie
         env:
           PARAWAN_PRZEGLADARKA: firefox
-        run: node --test scripts/e2e/smoke.test.mjs
+        run: node --test scripts/e2e/smoke.test.mjs scripts/e2e/korekta.test.mjs
       - name: Zrzuty z nieudanych testów
         if: failure()
         uses: actions/upload-artifact@v7

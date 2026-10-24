@@ -106,8 +106,8 @@ test('aplikacja: karta „Ograniczenia” opisuje urzędnika, księgę wieczyst�
   const card = webHtml.match(/<section class="card g4 caveat" id="ograniczenia"[\s\S]*?<\/section>/)?.[0] ?? '';
   expect(card).not.toBe('');
   for (const li of [
-    'Nazwisko urzędnika pod pismem jest zasłaniane tak samo jak dane strony.',
-    'Numer księgi wieczystej i&nbsp;numer działki zostają w&nbsp;tekście.',
+    'Nazwisko urzędnika pod pismem jest zasłaniane tak samo jak dane strony. Zostawisz je jawne przyciskiem „Zostaw jawne” po kliknięciu znacznika.',
+    'Numer księgi wieczystej i&nbsp;numer działki zostają w&nbsp;tekście. Zasłonisz je, zaznaczając fragment i&nbsp;wybierając „Zasłoń zaznaczenie”.',
     'Właściwości pliku (autor), komentarze i&nbsp;historia zmian zostają w&nbsp;oryginale. Publikuj plik zapisany z&nbsp;Parawana.',
   ]) {
     expect(card).toContain(`<li>${li}</li>`);

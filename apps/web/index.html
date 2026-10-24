@@ -83,6 +83,7 @@
           <button type="button" id="example" class="btn tbtn" data-tip="Zastępuje tekst przykładem z danymi, przetestujesz działanie bez wklejania własnych"><i class="gi" data-i="przyklad"></i><span>Przykład</span></button>
           <button type="button" id="load-file" class="btn tbtn" data-tip="Otwiera plik TXT, MD, CSV, LOG, DOCX lub PDF z dysku"><i class="gi" data-i="plik-txt"></i><span id="load-file-label">Wczytaj plik</span></button>
           <button type="button" id="clear" class="btn tbtn" data-tip="Usuwa cały tekst z obu paneli"><i class="gi" data-i="wyczysc"></i><span>Wyczyść</span></button>
+          <button type="button" id="fix-sel-src" class="btn tbtn fix-sel" data-tip="Zaznacz w polu fragment, którego Parawan nie zasłonił, i zasłoń go w wyniku" disabled hidden><i class="gi" data-i="zaslon"></i><span>Zasłoń zaznaczenie</span></button>
           <input id="file-input" type="file" accept=".txt,.md,.csv,.log,.docx,.pdf" hidden />
           <span class="hint">TXT · DOCX · PDF</span>
         </div>
@@ -132,6 +133,7 @@
           <span class="ic"><i class="gi" data-i="podglad"></i></span>
           <div class="card-t"><h2 id="output-label">Wynik zanonimizowany</h2><p><span id="output-hint">kliknij znacznik albo przechodź strzałkami ‹ ›</span><span id="mask-seen" class="mask-seen" hidden></span></p></div>
           <span class="card-sp"></span>
+          <button type="button" id="fix-sel-out" class="btn btn-sm fix-sel" aria-label="Zasłoń zaznaczenie" data-tip="Zasłoń zaznaczenie: zaznacz w wyniku fragment, którego Parawan nie zasłonił" data-tip-pos="left" disabled hidden><i class="gi" data-i="zaslon"></i></button>
           <span class="help" data-tip="Kolor znacznika wskazuje kategorię danych, legenda jest niżej, pod „Co maskować”" data-tip-pos="left" tabindex="0">?</span>
         </div>
         <div class="toolbar toolbar-out">
@@ -161,17 +163,46 @@
             <button type="button" id="copy" class="btn tbtn btn-acc" data-tip="Kopiuje zanonimizowany tekst do schowka · skrót Ctrl+Enter" data-tip-pos="left" aria-keyshortcuts="Control+Enter"><i class="gi" data-i="kopiuj"></i><span id="copy-label">Kopiuj</span></button>
           </span>
         </div>
+        <div id="fix-bar" class="fix-bar" role="group" aria-label="Działania dla bieżącego fragmentu" translate="no" hidden>
+          <p class="fix-bar-t"><span id="fix-bar-pos"></span><span id="fix-bar-orig"> · <span id="fix-bar-what">pod znacznikiem</span>: «<b id="fix-bar-val"></b>»</span></p>
+          <p id="fix-bar-group" class="fix-bar-n" hidden></p>
+          <span class="fix-acts">
+            <button type="button" id="fix-keep" class="btn btn-sm">Zostaw jawne</button>
+            <button type="button" id="fix-keep-all" class="btn btn-sm" aria-describedby="fix-bar-forms"></button>
+            <button type="button" id="fix-remask" class="btn btn-sm">Zasłoń ponownie</button>
+            <button type="button" id="fix-bar-close" class="btn btn-sm">Zamknij</button>
+          </span>
+          <p id="fix-bar-forms" class="fix-bar-n" hidden></p>
+        </div>
+        <div id="fix-form" class="fix-bar fix-form" role="group" aria-label="Zasłoń zaznaczony fragment" translate="no" hidden>
+          <p class="fix-bar-t">Zasłoń «<b id="fix-form-val"></b>»</p>
+          <label class="fix-fld">jako <select id="fix-token"></select></label>
+          <label class="fix-fld"><input type="checkbox" id="fix-all" checked /> wszystkie wystąpienia <span id="fix-all-n"></span></label>
+          <span class="fix-acts">
+            <button type="button" id="fix-apply" class="btn btn-sm btn-acc">Zasłoń</button>
+            <button type="button" id="fix-cancel" class="btn btn-sm">Anuluj</button>
+          </span>
+        </div>
         <div class="card-b">
           <div id="output" class="editor" role="region" tabindex="0" aria-labelledby="output-label" translate="no"></div>
           <span id="mask-status" role="status" aria-live="polite" class="vh"></span>
           <!-- Potwierdzenia akcji (np. „Skopiowano”) dla czytnika ekranu, osobno od nawigacji. -->
           <p id="sr-status" class="vh" role="status"></p>
         </div>
+        <div id="fix-foot" class="card-f fix-foot" translate="no" hidden>
+          <i class="gi" data-i="zaslon"></i>
+          <div class="fix-foot-b">
+            <p><span id="fix-sum"></span><span id="fix-foot-acts"> · <button type="button" id="fix-show" class="linklike" aria-expanded="false" aria-controls="fix-list">Pokaż</button> · <button type="button" id="fix-undo" class="linklike">Cofnij ostatnią</button> · <button type="button" id="fix-clear" class="linklike">Usuń wszystkie</button></span></p>
+            <p id="fix-note" class="fix-note" hidden></p>
+            <ul id="fix-list" class="fix-list" hidden></ul>
+          </div>
+        </div>
         <div class="card-f warn-note">
           <i class="gi" data-i="ostrzezenie"></i>
           <span class="warn-txt">
             <!-- Stałe ostrzeżenie o typach wyłączonych w „Co maskować” (wybór jest zapamiętywany). -->
             <span id="mask-off-note" class="mask-off" hidden><span id="mask-off-text"></span> <button type="button" id="mask-off-reset" class="linklike">Włącz wszystko</button></span>
+            <span id="fix-off" hidden>Przy tak długim tekście ręczna korekta jest wyłączona. Podziel tekst na części.</span>
             <span id="spans-note" hidden>Nie udało się dopasować wyniku do oryginału co do znaku, więc ręczne poprawki są dla tego tekstu wyłączone. Kopiowanie, zapis plików i druk działają.</span>
             <span>Przejrzyj wynik przed udostępnieniem, wykrywanie nazwisk jest heurystyczne. <a href="#ograniczenia">Ograniczenia</a></span>
           </span>
@@ -378,10 +409,10 @@
           numery w&nbsp;nietypowym zapisie. Traktuj <strong>Parawan</strong> jak pomoc, nie gwarancję, i <strong>zawsze
           przejrzyj wynik, zanim go wyślesz.</strong></p>
           <!-- Stan na dziś. Zdanie zmienia pakiet, który zmienia opisane zachowanie: o urzędniku
-               A10 („Zostaw jawne”), o księdze wieczystej D01 (typ NR-KW). -->
+               A10 (lista „Zostaw jawne”), o księdze wieczystej D01 (typ NR-KW). -->
           <ul class="caveat-list">
-            <li>Nazwisko urzędnika pod pismem jest zasłaniane tak samo jak dane strony.</li>
-            <li>Numer księgi wieczystej i&nbsp;numer działki zostają w&nbsp;tekście.</li>
+            <li>Nazwisko urzędnika pod pismem jest zasłaniane tak samo jak dane strony. Zostawisz je jawne przyciskiem „Zostaw jawne” po kliknięciu znacznika.</li>
+            <li>Numer księgi wieczystej i&nbsp;numer działki zostają w&nbsp;tekście. Zasłonisz je, zaznaczając fragment i&nbsp;wybierając „Zasłoń zaznaczenie”.</li>
             <li>Właściwości pliku (autor), komentarze i&nbsp;historia zmian zostają w&nbsp;oryginale. Publikuj plik zapisany z&nbsp;Parawana.</li>
           </ul>
         </div>

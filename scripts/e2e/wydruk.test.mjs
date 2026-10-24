@@ -399,7 +399,8 @@ test('stopki kart źródła i wyniku na jednej wysokości, bez pustego pasa nad 
         const card = (id) => document.getElementById(id).closest('.card-ed');
         const parts = (c) => ({
           grip: box(c.querySelector('.card-b .ed-grip')).bottom,
-          foot: box(c.querySelector(':scope > .card-f')).top,
+          // pierwsza widoczna stopka (stopka ręcznych poprawek A09 jest ukryta, dopóki ich nie ma)
+          foot: box(c.querySelector(':scope > .card-f:not([hidden])')).top,
           bottom: box(c).bottom,
         });
         return {

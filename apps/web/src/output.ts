@@ -4,6 +4,7 @@
  * korekta, adnotacja) rozszerza tylko OutputState i tę funkcję, a nie każde wyjście osobno.
  * Bez DOM: moduł testuje vitest, a main.ts tylko podaje stan.
  */
+import { applyCorrections, type Decision } from './corrections';
 import { applySpans, type Span } from './spans';
 
 export interface OutputState {
@@ -18,15 +19,21 @@ export interface OutputState {
    * publikacja.ts); pusty albo brak = bez dopisku. Nie wraca do silnika: pole źródła się nie zmienia.
    */
   annex?: string;
+  /**
+   * Ręczne poprawki (corrections.ts) nakładane na zakresy. Bez zakresów nie da się ich nałożyć,
+   * więc wtedy zostaje sam wynik rdzenia, a aplikacja mówi o tym pod wynikiem.
+   */
+  decisions?: Decision[];
 }
 
 /**
- * Tekst wyjściowy składany z zakresów (tam później wejdą ręczne poprawki). Bez zakresów zostaje
- * sam wynik rdzenia. Bez poprawek oba napisy są równe: alignSpans sprawdza to przed zwrotem.
+ * Tekst wyjściowy składany z zakresów po ręcznych poprawkach. Bez zakresów zostaje sam wynik
+ * rdzenia. Bez poprawek oba napisy są równe: alignSpans sprawdza to przed zwrotem.
  * Dopisek (annex) stoi po jednym pustym wierszu, także gdy wynik kończy się końcem wiersza.
  */
 export function finalText(s: OutputState): string {
-  const body = s.spans ? applySpans(s.original, s.spans) : s.redacted;
+  const spans = s.spans && s.decisions?.length ? applyCorrections(s.original, s.spans, s.decisions).spans : s.spans;
+  const body = spans ? applySpans(s.original, spans) : s.redacted;
   const annex = s.annex?.trim();
   return annex ? `${body.replace(/[\r\n]+$/, '')}\n\n${annex}` : body;
 }

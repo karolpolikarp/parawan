@@ -109,6 +109,11 @@ export const ICONS: Record<string, string> = {
     '<path d="M12 3 5 6v5c0 4.6 3 7.6 7 9 4-1.4 7-4.4 7-9V6z"/>' +
       '<rect x="9.3" y="11" width="5.4" height="4.6" rx="1"/><path d="M10.4 11v-1a1.6 1.6 0 0 1 3.2 0v1"/>',
   ),
+  // Ręczne zasłonięcie (corrections.ts): wiersz tekstu z fragmentem przykrytym paskiem.
+  zaslon: svg(
+    '<line x1="3.5" y1="7" x2="20.5" y2="7"/><line x1="3.5" y1="17" x2="11" y2="17"/>' +
+      '<rect x="12.5" y="13.6" width="8" height="6.8" rx="1.4" fill="currentColor"/>',
+  ),
   // Znak marki „Parawan" (dwutonowy, stałe barwy) — patrz parawanMark() niżej.
   'parawan-mark': parawanMark(),
 };

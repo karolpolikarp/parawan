@@ -105,6 +105,8 @@ export const FICTIONAL_PII = [
   ['nazwisko z nagłówka i komentarza DOCX w testach', 'Nowak'],
   ['nazwisko z testu druku', 'Wiśniewsk'],
   ['nazwisko z rejestru CSV w testach', 'Zielińsk'],
+  ['nazwisko wójta z decyzji w testach korekty', 'Kędziersk'],
+  ['numer księgi wieczystej z decyzji w testach korekty', 'OS1W/00045123'],
 ];
 
 /** Górna granica rozmiaru pliku aplikacji w bajtach (dziś ok. 2,09 MB; zapas na kolejne pakiety). */

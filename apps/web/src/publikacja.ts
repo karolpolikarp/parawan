@@ -217,6 +217,14 @@ export function buildProtocol(p: ProtocolInput): string {
   ].join('\n');
 }
 
+/**
+ * Wiersze protokołu o ręcznej korekcie (corrections.ts): ile znaczników odsłonięto i ile
+ * fragmentów zasłonięto ręcznie. Same liczby, bez wartości.
+ */
+export function correctionLines(kept: number, masked: number): string[] {
+  return [`Zostawiono jawne ręcznie: ${fragments(kept)}.`, `Zasłonięto ręcznie: ${fragments(masked)}.`];
+}
+
 /** Suma SHA-256 tekstu (UTF-8) szesnastkowo; null, gdy przeglądarka nie daje crypto.subtle. */
 export async function sha256Hex(text: string): Promise<string | null> {
   try {
