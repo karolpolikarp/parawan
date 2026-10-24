@@ -5390,9 +5390,39 @@ const RE_PATRON_STREET_SLASH = /[ \t]\d{1,4}[a-zA-Z]?\/(?!(?:19|20)\d\d(?!\d))\d
 // Rdzenie zamiast wyliczonych końcówek („zamieszkałą przy", „zamieszkuje przy", „położony przy",
 // „usytuowany przy", „znajdującej się przy") i „pod adresem".
 const RE_PATRON_STREET_RESIDENCE =
-  /(?<!\p{L})(?:[Zz]am\.|(?:[Zz]a)?[Mm]ieszk\p{L}*|[Zz]ameldowan\p{L}*|[Pp]ołożon\p{L}*|[Uu]sytuowan\p{L}*|[Zz]najduj\p{L}*(?:[ \t]+się)?)(?:[ \t]*:)?(?:[ \t]+przy)?[ \t]*$|(?<!\p{L})[Pp]od[ \t]+adresem[ \t]*:?[ \t]*$/u;
+  /(?<!\p{L})(?:[Zz]am\.|(?:[Zz]a)?[Mm]ieszk\p{L}*|[Zz]ameldowan\p{L}*|[Pp]ołożon\p{L}*|[Uu]sytuowan\p{L}*|[Zz]najduj\p{L}*(?:[ \t]+się)?)(?:[ \t]*:)?(?:[ \t]+przy)?[ \t]*$|(?<!\p{L})[Pp]od[ \t]+adresem[ \t]*:?[ \t]*$|(?<!\p{L})(?:[Zz]a)?[Mm]ieszk(?:a|am|asz|amy|acie|ają|ał\p{L}*|uj\p{L}*)[ \t]+na[ \t]+$/u;
+// Ostatnia alternatywa: „mieszka na Jana Pawła II 30/2" — tylko czasownik i imiesłów, bo
+// „mieszkanie na Jana Kowalskiego 1/2" to przepisanie udziału na osobę, nie adres.
 const RE_PATRON_STREET_LABEL =
   /(?<!\p{L})(?:[Aa]dres\p{L}*(?:[ \t]+\p{Ll}+){0,3}[ \t]*:)[ \t]*$/u;
+// Klucz adresu w logu albo JSON-ie tuż przed wartością, z miejscowością przed ulicą w tej samej
+// wartości („street="Jana Pawła II 5/2"", „adres=Jana Pawła II 5/2", „"partyAddress":"Lubień, Jana
+// Pawła II 30/2""). Pod kluczem spoza STRUCT_KEYS („partyAddress") i w zapisie klucz=wartość
+// (passStructured zna tylko JSON i XML) ulica zostawała jawna. Bez adresata, adresu IP, MAC i poczty.
+const RE_PATRON_STREET_KEY =
+  /(?<![\p{L}\p{N}_])([\p{L}_]*(?:[Ss]treet|STREET|[Aa]ddr(?:ess)?|ADDR(?:ESS)?|[Aa]dres|ADRES|[Uu]lic[ay]|ULIC[AY])[\p{L}_]*)["']?[ \t]*[:=][ \t]*["']?(?:\p{Lu}\p{Ll}+(?:[ \t-]\p{Lu}\p{Ll}+)?,[ \t]*)?$/u;
+const RE_PATRON_STREET_KEY_NOT = /adresat|(?:ip|mac|e?mail|web|url|wallet|server|host)_?addr/i;
+const patronStreetKeyBefore = (before: string): boolean => {
+  const k = RE_PATRON_STREET_KEY.exec(before)?.[1];
+  return !!k && !RE_PATRON_STREET_KEY_NOT.test(k);
+};
+// Komórka tabeli CSV/TSV, w której stoi SAMA ulica z numerem lokalu, a w sąsiedniej komórce
+// miejscowość („"Jana Pawła II 5/2","Lubień"", „Lubień⇥Jana Pawła II 5/2⇥…"). Tylko tabulator,
+// średnik albo przecinek między cudzysłowami: przecinek w prozie („Oceny: Jana Kowalskiego 3/5,
+// Anny Nowak 4/5") nie jest granicą komórki.
+const RE_PATRON_CELL_BEFORE = /(?:(?:^|[\r\n\t;,])"|[\t;]|^|[\r\n])$/;
+const RE_PATRON_CELL_AFTER = /^(?:"(?=[\t;,]|\r?\n|$)|(?=[\t;]))/;
+const RE_PATRON_CELL_PLACE = /^"?\p{Lu}\p{Ll}+(?:[ -]\p{Lu}\p{Ll}+)?"?$/u;
+function patronStreetCell(before: string, tail: string): boolean {
+  const pre = RE_PATRON_CELL_BEFORE.exec(before);
+  const post = RE_PATRON_CELL_AFTER.exec(tail);
+  if (!pre || !post || pre[0].endsWith('"') !== post[0].startsWith('"')) return false;
+  // sąsiednia komórka: następna (za separatorem) albo poprzednia (przed separatorem)
+  const next = /^[\t;,]([^\t;,\r\n]*)/.exec(tail.slice(post[0].length))?.[1];
+  const prev = /(?:^|[\t;,\r\n])([^\t;,\r\n]*)[\t;,]$/.exec(pre[0].endsWith('"') ? before.slice(0, -1) : before)?.[1];
+  const place = (c: string | undefined): boolean => !!c && RE_PATRON_CELL_PLACE.test(c.trim()) && !isFirstNameLike(c.replace(/"/g, '').trim());
+  return place(next) || place(prev);
+}
 // Samo „przy" przed ulicą z numerem („Nieruchomość przy Tadeusza Kościuszki 5") — o ile przed nim
 // nie stoi instytucja („Urząd Gminy przy Jana Pawła II 5" to siedziba urzędu).
 const RE_PATRON_STREET_PRZY = /(?<!\p{L})przy[ \t]+$/u;
@@ -5429,9 +5459,13 @@ function patronStreetWithNumber(ctx: RedactCtx): void {
     if (RE_PATRON_STREET_SAINT_BEFORE.test(before) || (/,[ \t]*$/.test(before) && institutionBeforeAddr(before))) return null;
     // Etykieta adresu, zamieszkania albo „przy" wygrywa z udziałem na początku zdania („Udziały
     // w lokalu przy Jana Pawła II 12/4 należą …" — ułamek to numer lokalu).
+    // Klucz adresu w logu albo JSON-ie i komórka tabeli obok miejscowości (z lokalem) — patrz
+    // RE_PATRON_STREET_KEY i patronStreetCell.
     if (
       RE_PATRON_STREET_LABEL.test(before) ||
       RE_PATRON_STREET_RESIDENCE.test(before) ||
+      patronStreetKeyBefore(before) ||
+      ((RE_PATRON_STREET_SLASH.test(m) || RE_PATRON_STREET_FLAT.test(m)) && patronStreetCell(before, t.slice(offset + m.length, offset + m.length + 50))) ||
       (RE_PATRON_STREET_PRZY.test(before) && !institutionBeforeAddr(before.replace(RE_PATRON_STREET_PRZY, ''))) ||
       reEnum.test(before)
     ) {
@@ -5689,12 +5723,18 @@ function passAddress(ctx: RedactCtx): void {
   ctx.text = ctx.text.replace(
     new RegExp(
       // (bez łącznika „i/z/pod" z 12a: bez skrótu ulicy „Spółka Kowalski i Syn 5, 00-001 …" to firma)
-      `\\b([${PL_UP}][${PL_LO}]+(?:[ \\t]+[${PL_UP}][${PL_LO}]+){0,2})` +
+      // Granica wyrazu jawnie, nie „\b": bez flagi „u" „\b" zna tylko litery ASCII, więc wieś na Ł/Ś/Ż/Ź/Ć
+      // („Łagów 12⏎26-140 Bodzentyn", „Świniary 12") zostawała jawna, a „Łęki Szlacheckie 12" traciła
+      // tylko drugi człon („Łęki [ADRES]").
+      `(?<![${PL_UP}${PL_LO}0-9_])([${PL_UP}][${PL_LO}]+(?:[ \\t]+[${PL_UP}][${PL_LO}]+){0,2})` +
         `\\s+${ADDR_HOUSE}${ADDR_UNIT}` +
         `(\\s*,?\\s*)(${KOD})`,
       'g',
     ),
-    (_m, _street: string, sep: string, kod: string) => {
+    (m: string, street: string, sep: string, kod: string) => {
+      // Odsyłacz albo pomieszczenie nad kodem („Sala 12⏎00-001 Warszawa", „Rozdział 12", „Pokój 3")
+      // to nie ulica ani wieś — jak po etykiecie adresu (ADDR_LABEL_VALUE_STOP).
+      if (!/[ \t]/.test(street) && ADDR_LABEL_VALUE_STOP.has(street.toLowerCase())) return m;
       ctx.bump('ADRES');
       return `${ctx.M.ADRES}${sep}${kod}`;
     },
@@ -7437,7 +7477,12 @@ function passPersonOcrTitle(ctx: RedactCtx): void {
       const last = nameWords[nameWords.length - 1];
       const ll = last.toLowerCase();
       if (NON_SURNAME_ADJ.has(ll)) return m; // „WOJEWODA MAZOWIECKI" — przymiotnik odmiejscowy, nie nazwisko
-      if (!confirmedSurname(ll)) return m; // nazwisko MUSI być potwierdzone (chroni nagłówki instytucji)
+      // Nazwisko MUSI być potwierdzone (chroni nagłówki instytucji). Homograf („DŁUŻNIK JERZY PIĄTEK",
+      // „ŚWIADEK EWA MAJ") po roli i imieniu w mianowniku też jest nazwiskiem: dawniej zostawał jawny,
+      // choć ta sama osoba w dopełniaczu („DŁUŻNIKA JERZEGO PIĄTKA") dostawała maskę.
+      const homographAfterGiven =
+        nameWords.length === 2 && POLISH_FIRST_NAMES.has(nameWords[0].toLowerCase()) && !isFirstNameLike(ll) && !!homographBase(ll);
+      if (!confirmedSurname(ll) && !homographAfterGiven) return m;
       ctx.bump('IMIE');
       return `${title}${sep}${ctx.personMask(last)}`;
     },
@@ -7473,13 +7518,36 @@ const RE_CAPS_WORD_BEFORE = /(?:^|[^\p{L}])(\p{Lu}{2,})[ \t]+$/u;
 // „ALIMENTY DLA ZUZANNY WOLSKIEJ", „CZYNSZ OD ANNY KOWALSKIEJ", „KARTA PACJENTA ANNY KOWALSKIEJ",
 // „ŚWIADECTWO PRACY ADAMA NOWAKA" — osoba. Celowo krótka lista (bez wyrazów instytucji): nazwy
 // obiektów („ZESPÓŁ SZKÓŁ JANA KOWALSKIEGO", „CHOROBA STANISŁAWA LEŚNIOWSKIEGO") dalej chronią.
-const CAPS_HEAD_NOT_NAME = new Set(
+// Rola procesowa albo strona umowy w dopełniaczu i celowniku („WEZWANIE ŚWIADKA ANNY KOWALSKIEJ",
+// „W OBECNOŚCI DŁUŻNIKA JANA NOWAKA", „APELACJA OSKARŻONEGO …", „DORĘCZYĆ POZWANEMU …") — za nią
+// stoi osoba, nie patron obiektu. ALLCAPS_TITLES zna tylko mianownik tych ról, więc para była
+// brana za nazwę z patronem i zostawała jawna. Bez „brata/syna/siostry" („SCHRONISKO BRATA
+// ALBERTA CHMIELOWSKIEGO" to patron).
+const CAPS_ROLE_OBLIQUE = new Set(
   (
+    'świadka świadkowi powoda powodowi powódki powódce pozwanego pozwanej pozwanemu ' +
+    'oskarżonego oskarżonej oskarżonemu obwinionego obwinionej obwinionemu podejrzanego podejrzanej podejrzanemu ' +
+    'pokrzywdzonego pokrzywdzonej pokrzywdzonemu poszkodowanego poszkodowanej uczestnika uczestniczki uczestnikowi ' +
+    'obrońcy pełnomocnika pełnomocnikowi dłużnika dłużniczki dłużnikowi wierzyciela wierzycielki wierzycielowi ' +
+    'skazanego skazanej skazanemu nieletniego nieletniej małoletniego małoletniej spadkodawcy spadkodawczyni ' +
+    'spadkobiercy spadkobierczyni biegłego biegłej najemcy najemczyni wynajmującego kupującego sprzedającego ' +
+    'darczyńcy obdarowanego obdarowanej zainteresowanego zainteresowanej wnioskodawczyni ' +
+    'matki ojca żony męża'
+  ).split(' '),
+);
+const CAPS_HEAD_NOT_NAME = new Set([
+  ...(
     'dla od do przez za przy ze na we po wobec przeciwko oraz ' +
     'pacjenta pacjentki pracy choroby przesłuchania pracownika pracownicy ucznia uczennicy klienta klientki ' +
     'ubezpieczonego ubezpieczonej zmarłego zmarłej osoby dziecka wnioskodawcy'
   ).split(' '),
-);
+  ...CAPS_ROLE_OBLIQUE,
+]);
+/** Czy tuż przed parą WERSALIKAMI stoi rola w przypadku zależnym (patrz CAPS_ROLE_OBLIQUE)? */
+const capsRoleObliqueBefore = (t: string, offset: number): boolean => {
+  const w = RE_CAPS_WORD_BEFORE.exec(t.slice(Math.max(0, offset - 30), offset))?.[1];
+  return !!w && CAPS_ROLE_OBLIQUE.has(w.toLowerCase());
+};
 // Rzeczownik dokumentu przed przymiotnikiem i parą („AKTA OSOBOWE ANNY KOWALSKIEJ", „DOKUMENTACJA
 // MEDYCZNA …", „WNIOSEK URLOPOWY JANA NOWAKA") — akta osoby, nie nazwa z patronem jak „SZKOŁA
 // PODSTAWOWA JANA KOCHANOWSKIEGO".
@@ -7747,7 +7815,11 @@ function passPersonOcrPair(ctx: RedactCtx): void {
           ctx.bump('IMIE');
           return ctx.personMask(n1);
         }
-        const hb = homographPairBase(n1, n2);
+        // Homograf z listy wyjątków („PIĄTKA", „MAJA") po roli w dopełniaczu i imieniu w dopełniaczu
+        // to nazwisko („W OBECNOŚCI DŁUŻNIKA JERZEGO PIĄTKA") — wyjątki chronią grafik („PIĄTEK 3 MAJA").
+        const hbRole =
+          (isFirstNameGenitive(n1) || egoNameGenitive(n1)) && !isFirstNameLike(n2) && capsRoleObliqueBefore(src, offset) ? homographBase(n2) : null;
+        const hb = homographPairBase(n1, n2) ?? hbRole;
         // patron w nazwie WERSALIKAMI: para w dopełniaczu za wyrazem nazwy albo ulicy („UNIWERSYTET
         // ADAMA MICKIEWICZA"); nazwisko w mianowniku („NA ULICY ALEKSANDRA NOWAK") to osoba
         const obliquePair = capsObliqueFirst(n1) && (RE_SURNAME_OBLIQUE.test(n2) || /[aeiyąę]$/.test(n2));

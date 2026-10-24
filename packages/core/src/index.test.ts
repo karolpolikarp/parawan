@@ -7524,3 +7524,57 @@ test('fix3: tablica „Po", login pod kolejną etykietą konta, święty w dope�
     'Figura Sw. Pawla Apostola podana do renowacji.',
   ]);
 });
+test('dom2-fix1: rola procesowa WERSALIKAMI w dopełniaczu, ulica „Jana Pawła II" z lokalem, wieś na Ł/Ś nad kodem', () => {
+  masked([
+    // osoba WERSALIKAMI po roli w dopełniaczu i celowniku
+    ['WEZWANIE ŚWIADKA ANNY KOWALSKIEJ\nWzywa się Panią na rozprawę.', `WEZWANIE ŚWIADKA ${N}\nWzywa się Panią na rozprawę.`],
+    [
+      'W OBECNOŚCI DŁUŻNIKA JANA NOWAKA ORAZ ŚWIADKA ADAMA RÓŻAŃSKIEGO DOKONAŁ ZAJĘCIA.',
+      `W OBECNOŚCI DŁUŻNIKA ${N} ORAZ ŚWIADKA ${N} DOKONAŁ ZAJĘCIA.`,
+    ],
+    ['ZAWIADOMIENIE POKRZYWDZONEJ MARII WIŚNIEWSKIEJ', `ZAWIADOMIENIE POKRZYWDZONEJ ${N}`],
+    ['APELACJA OSKARŻONEGO PIOTRA ZIELIŃSKIEGO', `APELACJA OSKARŻONEGO ${N}`],
+    ['SPRZECIW POZWANEJ EWY LEWANDOWSKIEJ', `SPRZECIW POZWANEJ ${N}`],
+    ['ZGODA OJCA JANA NOWAKA', `ZGODA OJCA ${N}`],
+    // homograf z listy wyjątków po roli i imieniu w dopełniaczu
+    ['W OBECNOŚCI DŁUŻNIKA JERZEGO PIĄTKA DOKONAŁ ZAJĘCIA.', `W OBECNOŚCI DŁUŻNIKA ${N} DOKONAŁ ZAJĘCIA.`],
+    ['PODPISY: DŁUŻNIK JERZY PIĄTEK, ŚWIADEK EWA MAJ', `PODPISY: DŁUŻNIK ${N}, ŚWIADEK ${N}`],
+    // ulica z patronem i lokalem w kontekście adresu
+    ['Pan Nowak mieszka na Jana Pawła II 30/2.', `Pan ${N} mieszka na [ADRES].`],
+    ['Zamieszkała na Kazimierza Wielkiego 12/4.', 'Zamieszkała na [ADRES].'],
+    ['"partyAddress":"Lubień, Jana Pawła II 30/2"', '"partyAddress":"Lubień, [ADRES]"'],
+    ['city=Lubień street="Jana Pawła II 5/2"', 'city=Lubień street="[ADRES]"'],
+    ['adres=Jana Pawła II 5/2', 'adres=[ADRES]'],
+    ['"Halyna Roman","hroman","","Jana Pawła II 5/2","Lubień"', '"Halyna Roman","hroman","","[ADRES]","Lubień"'],
+    ['Iryna\tRoman\tiroman\tLubień\tJana Pawła II 5/2\tuwagi', 'Iryna\tRoman\tiroman\tLubień\t[ADRES]\tuwagi'],
+    // wieś z numerem domu nad kodem pocztowym, także na literę diakrytyczną
+    ['Pan\nJan Kowalski\nŁagów 12\n26-140 Bodzentyn', `Pan\n${N}\n[ADRES]\n[KOD-POCZTOWY] [MIEJSCOWOŚĆ]`],
+    ['Jan Kowalski\nŚwiniary 12\n28-100 Busko-Zdrój', `${N}\n[ADRES]\n[KOD-POCZTOWY] [MIEJSCOWOŚĆ]`],
+    ['Pan\nJan Kowalski\nŁęki Szlacheckie 12\n26-140 Bodzentyn', `Pan\n${N}\n[ADRES]\n[KOD-POCZTOWY] [MIEJSCOWOŚĆ]`],
+    ['Adres: Łagów 12\n26-140 Bodzentyn', 'Adres: [ADRES]\n[KOD-POCZTOWY] [MIEJSCOWOŚĆ]'],
+  ]);
+  // pułapki: patron w nazwie obiektu, papież w prozie, adresat, adres IP, urząd, odsyłacz nad kodem
+  keep([
+    'UNIWERSYTET ADAMA MICKIEWICZA',
+    'STADION KAZIMIERZA GÓRSKIEGO',
+    'AKADEMIA WF JÓZEFA PIŁSUDSKIEGO',
+    'ZESPÓŁ SZKÓŁ JANA KOWALSKIEGO',
+    'SCHRONISKO BRATA ALBERTA CHMIELOWSKIEGO',
+    'SZKOŁA PODSTAWOWA IM. OJCA MAKSYMILIANA KOLBEGO',
+    'Papież Jan Paweł II odwiedził Polskę.',
+    'Pomnik Jana Pawła II stoi w parku.',
+    'Przy Jana Pawła II jest korek.',
+    'ipAddress="Jana Pawła II 5/2"',
+    'Urząd Gminy, Jana Pawła II 5/2, Lubień',
+    'mieszka na Mazurach 12 lat',
+    'PIĄTEK 3 MAJA',
+    'GRAFIK: JANA PIĄTKA',
+    'SĘDZIA ANNA KALINA',
+    'DYREKTOR ZARZĄDU DRÓG',
+  ]);
+  for (const t of ['Sala 12\n00-001 Warszawa', 'Rozdział 12\n00-001 Warszawa', 'Art. 12\n00-001 Warszawa']) {
+    expect(redactPII(t).redacted).not.toContain('[ADRES]');
+  }
+  expect(redactPII('Przepisał mieszkanie na Jana Kowalskiego 1/2 udziału.').redacted).not.toContain('[ADRES]');
+  expect(redactPII('adresat="Jana Kowalskiego 5/2"').redacted).not.toContain('[ADRES]');
+});
