@@ -53,6 +53,10 @@ export const PDFJS_WORKER = {
 export const API_TARGETS = {
   web: { file: path.join(ROOT, 'apps', 'web', 'dist', 'index.html'), allow: [PDFJS_WORKER] },
   landing: { file: path.join(ROOT, 'apps', 'landing', 'dist', 'index.html'), allow: [] },
+  'landing-log': {
+    file: path.join(ROOT, 'apps', 'landing', 'dist', 'log', 'index.html'),
+    allow: [],
+  },
 };
 
 /**

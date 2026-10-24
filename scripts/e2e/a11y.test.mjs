@@ -210,6 +210,29 @@ const SCANS = [
       await openAllDetails(page);
     },
   },
+  {
+    // podstrona „Zmiany i plan” (bez skryptu): zakładka Zmiany z rozwiniętymi starszymi wersjami
+    gdzie: 'landing, Zmiany i plan: zakładka Zmiany',
+    query: '',
+    file: path.join(path.dirname(LANDING_HTML), 'log', 'index.html'),
+    prepare: async ({ page }) => {
+      await page.waitForLoadState('load');
+      await openAllDetails(page);
+    },
+  },
+  {
+    gdzie: 'landing, Zmiany i plan: zakładka Plan',
+    query: '',
+    file: path.join(path.dirname(LANDING_HTML), 'log', 'index.html'),
+    prepare: async ({ page }) => {
+      await page.waitForLoadState('load');
+      // zakładka to cel adresu (#plan, :target); zmiana kotwicy nie wysyła żądania
+      await page.evaluate(() => {
+        location.hash = 'plan';
+      });
+      await page.locator('#plan').waitFor({ state: 'visible' });
+    },
+  },
 ];
 
 for (const scan of SCANS) {

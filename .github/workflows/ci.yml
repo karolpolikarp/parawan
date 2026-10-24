@@ -39,7 +39,8 @@ jobs:
       # żeby strona marketingowa nie zgniła przy zmianach w rdzeniu/silniku (live demo importuje redactPII).
       - run: npx tsc -p apps/landing/tsconfig.json
       - run: npm run build -w parawan-landing
-      # Strażnik CSP: oba gotowe pliki muszą nieść politykę z default-src i connect-src 'none'
+      # Strażnik CSP: gotowe pliki (aplikacja, landing i jego podstrona /log/) muszą nieść
+      # politykę z default-src i connect-src 'none'
       # (wstrzykuje ją plugin parawan-csp w vite.config.ts). Bez niej obietnicy „tekst nie
       # opuszcza przeglądarki” pilnowałby tylko nasz kod, a nie przeglądarka.
       # Jeden wzorzec na samym tagu meta: landing cytuje obie dyrektywy w treści („Jak sprawdzić”),
@@ -48,7 +49,7 @@ jobs:
       # w adresie wysyła dane jak fetch. Dlatego csp.mjs sprawdza każdą dyrektywę osobno.
       - name: Strażnik CSP (web i landing)
         run: |
-          for f in apps/web/dist/index.html apps/landing/dist/index.html; do
+          for f in apps/web/dist/index.html apps/landing/dist/index.html apps/landing/dist/log/index.html; do
             grep -Eq "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'[^\"]*connect-src 'none'" "$f" \
               || { echo "::error file=$f::brak Content-Security-Policy z default-src 'none' i connect-src 'none'"; exit 1; }
           done

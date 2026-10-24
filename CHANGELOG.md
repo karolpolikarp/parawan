@@ -12,6 +12,11 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+- **Strona produktu: podstrona „Zmiany i plan” pod `/log/`.** Dziennik zmian i plan rozwoju
+  powstają przy buildzie z `CHANGELOG.md` i `ROADMAP.md`. Strona nie ma skryptu, ma tę samą
+  regułę CSP co strona główna i wbudowane fonty, więc nie wysyła żadnych żądań. Wersje starsze
+  niż v0.46.0 są zwinięte, a każda ma własną kotwicę (np. `/log/#v0-46-25`). Link „Zmiany” jest
+  w pasku nawigacji i w stopce strony głównej.
 - **CLI: tryb `--jsonl` dla wywołań programowych.** `anonimizator --jsonl` działa jako proces
   trwały: każda linia JSON `{"id", "text"}` na wejściu daje jedną linię `{"id", "redacted",
   "found"}` na wyjściu, w tej samej kolejności, a proces kończy się po zamknięciu stdin. Puste

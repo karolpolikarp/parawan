@@ -12,6 +12,8 @@
 // script-src nie może mieć 'unsafe-inline': dopuszczałoby każdy kod w linii, także procedurę
 // onerror wstrzykniętą z treści pisma. W gotowym pliku stoją tam tylko skróty SHA-256, a strażnik
 // liczy je od nowa z treści skryptów, niezależnie od wtyczki z apps/web/src/csp-skrot.ts.
+// Wyjątek to strona bez żadnego skryptu (podstrona /log/ landingu): tam script-src 'none',
+// a strażnik sprawdza, że w pliku naprawdę nie ma skryptu wykonywalnego.
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -57,6 +59,11 @@ export const CSP_TARGETS = {
     file: path.join(ROOT, 'apps', 'landing', 'dist', 'index.html'),
     extra: { 'img-src': ["'self'"] },
   },
+  // Podstrona „Zmiany i plan” (dziennik zmian i plan): bez skryptu, więc script-src 'none'.
+  'landing-log': {
+    file: path.join(ROOT, 'apps', 'landing', 'dist', 'log', 'index.html'),
+    extra: { 'img-src': ["'self'"] },
+  },
 };
 
 /**
@@ -80,6 +87,8 @@ export function cspProblems(policy, extra = {}) {
     }
     seen.set(directive, sources);
     if (directive === 'script-src') {
+      // strona bez skryptu: samo 'none', bez niczego obok
+      if (sources.length === 1 && sources[0] === "'none'") continue;
       for (const s of sources) {
         if (!SHA256_SOURCE.test(s)) problems.push(`script-src: niedozwolone źródło ${s} (tylko 'sha256-…')`);
       }
@@ -125,6 +134,12 @@ export function htmlCspProblems(html, extra = {}) {
   const policy = metas[0][1].replace(/&#39;/g, "'").replace(/&quot;/g, '"');
   const declared = policy.match(/(?:^|;)\s*script-src\s+([^;]*)/i)?.[1].trim().split(/\s+/) ?? [];
   const actual = scriptHashes(html);
+  if (declared.length === 1 && declared[0] === "'none'") {
+    // script-src 'none': żaden skrypt w pliku by nie ruszył, więc żadnego nie może tam być
+    if (actual.length)
+      problems.push(`script-src 'none', a w pliku jest skryptów: ${actual.length}`);
+    return [...problems, ...cspProblems(policy, extra)];
+  }
   if (!actual.length) problems.push('w pliku nie ma skryptu w linii');
   for (const h of actual) {
     if (!declared.includes(h)) problems.push(`script-src: brak skrótu skryptu z pliku ${h}`);

@@ -66,3 +66,15 @@ test('csp.mjs: w script-src dokładnie skróty skryptów z pliku, dane JSON-LD p
   assert.notDeepEqual(htmlCspProblems(`<head>${meta}<script>1</script><script>2</script>`), [], 'drugi skrypt bez skrótu');
   assert.notDeepEqual(htmlCspProblems(`<head>${meta}</head>`), [], 'brak skryptu');
 });
+
+test("csp.mjs: strona bez skryptu przechodzi tylko z samym script-src 'none'", () => {
+  const BEZ = WEB.replace(SCRIPT_SRC, "script-src 'none'");
+  const meta = `<meta http-equiv="Content-Security-Policy" content="${BEZ}">`;
+  assert.deepEqual(cspProblems(BEZ), []);
+  assert.deepEqual(htmlCspProblems(`<head>${meta}<script type="application/ld+json">{}</script></head>`), []);
+  // 'none' z czymkolwiek obok to pomyłka, a skrypt w pliku przy 'none' nie ruszyłby
+  assert.notDeepEqual(cspProblems(WEB.replace(SCRIPT_SRC, "script-src 'none' 'unsafe-inline'")), []);
+  assert.notDeepEqual(cspProblems(WEB.replace(SCRIPT_SRC, `script-src 'none' ${HASH_1}`)), []);
+  const zeSkryptem = htmlCspProblems(`<head>${meta}<script>1</script></head>`);
+  assert.ok(zeSkryptem.some((p) => p.includes("script-src 'none'")), zeSkryptem.join('\n'));
+});

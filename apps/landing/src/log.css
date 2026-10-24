@@ -1,0 +1,134 @@
+/* ============================================================
+   PARAWAN, podstrona /log/: zmiany i plan.
+   Dokładana przy buildzie do stylów strony głównej (wtyczka parawan-log w vite.config.ts),
+   bez przetwarzania przez Vite, więc tylko zwykły CSS: bez zagnieżdżeń i bez url().
+   Kolory i fonty z tokenów strony głównej (style.css).
+   ============================================================ */
+
+.log-glowa { padding: 40px 0 28px; }
+.log-glowa h1 {
+  font-size: clamp(30px, 1.6vw + 18px, 42px); font-weight: 800; line-height: 1.08; letter-spacing: -.02em;
+}
+.log-glowa .lede { max-width: 70ch; }
+
+/* ── Zakładki: #plan pokazuje się tylko jako cel adresu, wtedy chowa #zmiany ── */
+#plan { display: none; }
+#plan:target { display: block; }
+#plan:target ~ #zmiany { display: none; }
+
+.zakladki { border-bottom: 1px solid var(--line-2); }
+.zakladki-in { display: flex; gap: 4px; }
+.zakladki a {
+  display: inline-block; padding: 12px 16px 10px; margin-bottom: -1px;
+  font: 700 15px/1.2 var(--sans); color: var(--mut-2); text-decoration: none;
+  border-bottom: 3px solid transparent;
+}
+.zakladki a:hover { color: var(--acc); border-bottom-color: var(--line-2); }
+.zakladki a[aria-current] { color: var(--acc); border-bottom-color: var(--acc); }
+.zakladka .dok-siatka { padding-top: 40px; }
+.zakladka .dok-siatka::before { display: none; }
+
+/* ── Spis wersji w lewej kolumnie: przewija się sam, gdy nie mieści się w oknie ── */
+.spis { margin-top: 18px; max-height: calc(100vh - 260px); overflow-y: auto; padding-right: 4px; }
+.spis ul { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+.spis a {
+  display: inline-block; padding: 3px 0;
+  font: 500 13.5px/1.4 var(--mono); color: var(--mut-2); text-decoration: none;
+}
+.spis a:hover { color: var(--acc); text-decoration: underline; }
+
+/* ── Wpisy wersji ── */
+.wersja { padding: 28px 0 32px; border-top: 1px solid var(--line-2); }
+.wersja:first-child { border-top: 0; padding-top: 0; }
+.wersja > h3 { font: 800 24px/1.2 var(--sans); letter-spacing: -.01em; }
+.kotw { color: inherit; text-decoration: none; }
+.kotw:hover { text-decoration: underline; }
+.wersja-data {
+  margin-top: 4px; font: 600 12px/1.5 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--mut-2);
+}
+
+/* treść z Markdowna */
+.md { margin-top: 14px; font-size: 15.5px; line-height: 1.6; color: var(--text); overflow-wrap: break-word; }
+.md > * + * { margin-top: 12px; }
+.md p, .md li { max-width: 72ch; }
+.md ul, .md ol { padding-left: 22px; }
+.md li { margin-top: 6px; }
+.md li > ul, .md li > ol, .md li > p + p { margin-top: 6px; }
+.md li::marker { color: var(--mut-2); }
+.md code {
+  background: rgba(11, 61, 46, .06); padding: 1px 4px; border-radius: 4px; font-size: .88em;
+  overflow-wrap: anywhere;
+}
+.md a code { background: none; padding: 0; }
+.md pre {
+  padding: 12px 14px; background: var(--card-2); border: 1px solid var(--line); border-radius: 6px;
+  overflow-x: auto; font-size: 13.5px; line-height: 1.5;
+}
+.md pre code { background: none; padding: 0; overflow-wrap: normal; white-space: pre; }
+.md h3 { margin-top: 36px; font: 800 22px/1.25 var(--sans); }
+.md h4 { margin-top: 24px; font: 700 13px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--mut-2); }
+.md > h3:first-child { margin-top: 0; }
+.md .wiodacy { font-size: 17px; line-height: 1.5; }
+.md .wiodacy strong { font-weight: 700; color: var(--acc); }
+.pilnosc { font: 500 13px/1.5 var(--mono); color: var(--text); }
+.pilnosc span {
+  display: inline-block; margin-right: 6px; padding: 1px 7px; border: 1px solid var(--gold-deep); border-radius: 4px;
+  color: var(--gold-deep); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; font-size: 11px;
+}
+
+/* pozycje planu: tytuł, wersja z rozmiarem, opis */
+.plan ol { padding-left: 34px; }
+.plan ol > li { margin-top: 18px; }
+.plan ol > li::marker { font: 700 15px var(--sans); color: var(--acc); }
+.poz-tytul { font-weight: 700; color: var(--text); }
+.poz-tytul strong { font-weight: 700; }
+.md .poz-meta { margin-top: 2px; font: 500 13px/1.5 var(--mono); color: var(--mut-2); }
+.md .poz-meta + p { margin-top: 6px; }
+.plan-wstep { margin-top: 0; color: var(--mut-2); }
+.plan-wstep + .plan { margin-top: 28px; padding-top: 4px; }
+
+/* ── Starsze wersje: każda zwinięta ── */
+.starsze { margin-top: 8px; padding-top: 28px; border-top: 1px solid var(--line-2); }
+.starsze > h3 { font: 800 22px/1.25 var(--sans); }
+.starsze-opis { margin: 6px 0 14px; font-size: 15px; color: var(--mut-2); }
+.wersja-stara { padding: 0; border-top: 1px solid var(--line); }
+.wersja-stara:first-of-type { border-top-color: var(--line-2); }
+.wersja-stara:last-child { border-bottom: 1px solid var(--line); }
+.wersja-stara summary {
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 14px;
+  padding: 10px 0; cursor: pointer; list-style: none;
+}
+.wersja-stara summary::-webkit-details-marker { display: none; }
+.wersja-stara summary::before {
+  content: "+"; width: 14px; flex: none; font: 700 15px/1 var(--mono); color: var(--acc);
+}
+.wersja-stara[open] summary::before { content: "−"; }
+.wersja-stara summary h4 { font: 700 16px/1.3 var(--sans); color: var(--acc); }
+.wersja-stara summary .wersja-data { margin-top: 0; }
+.wersja-stara summary:hover h4 { text-decoration: underline; text-underline-offset: 3px; }
+.wersja-stara .md { margin: 0 0 20px 28px; }
+/* kotwica stoi na treści, a numer wersji ma zostać widoczny nad nią, pod paskiem */
+.wersja-stara > .md[id] { scroll-margin-top: 64px; }
+
+.pusto { font-size: 16px; color: var(--mut-2); }
+
+@media (max-width: 900px) {
+  .spis { max-height: none; overflow: visible; }
+  .spis ul { flex-direction: row; flex-wrap: wrap; gap: 6px 8px; }
+  .spis a { padding: 4px 8px; border: 1px solid var(--line-2); border-radius: 6px; background: var(--card); }
+  .zakladka .dok-siatka { padding-top: 28px; }
+}
+@media (max-width: 480px) {
+  .log-glowa { padding: 28px 0 20px; }
+  .zakladki a { padding: 12px 12px 10px; }
+  .md ul, .md ol { padding-left: 18px; }
+  .plan ol { padding-left: 28px; }
+  .wersja-stara .md { margin-left: 0; }
+}
+
+/* Wydruk: całość, bez paska i zakładek (reguła strony głównej drukuje tylko #dla-iod). */
+@media print {
+  body.log main > * { display: block !important; }
+  .zakladki, .spis { display: none !important; }
+  .wersja-stara .md { display: block; }
+}

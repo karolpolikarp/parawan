@@ -9,8 +9,11 @@ name: Deploy landing (GitHub Pages)
 #  - po udanym wydaniu (workflow_run po „Release” z tagu): wydanie tworzone GITHUB_TOKEN-em nie
 #    uruchamia zdarzenia release, a demo na stronie ma zmieniać silnik razem z wydanym plikiem.
 #    workflow_run uruchamia ten plik w wersji z main i buduje stronę z main;
-#  - po pushu w apps/landing (bez packages/core: nowa reguła w rdzeniu trafia na stronę dopiero
-#    z wydaniem, inaczej demo pokazywałoby zachowanie, którego plik u ludzi jeszcze nie ma);
+#  - po pushu w apps/landing albo ROADMAP.md (z niego powstaje zakładka „Plan” na /log/).
+#    Bez packages/core i bez CHANGELOG.md: nowa reguła w rdzeniu ma wpis w [Unreleased] w tym
+#    samym commicie, więc trafia na stronę dopiero z wydaniem, inaczej demo pokazywałoby
+#    zachowanie, którego plik u ludzi jeszcze nie ma. Dziennik zmian na /log/ odświeża się
+#    przy wydaniu albo przy najbliższej zmianie strony lub planu;
 #  - ręcznie z zakładki Actions (proba_zlej_sumy: próba, że sprawdzenie kopii wywraca job).
 #
 # Wymagana jednorazowa konfiguracja w repo: Settings → Pages → Source: „GitHub Actions".
@@ -21,6 +24,8 @@ on:
     branches: [main]
     paths:
       - 'apps/landing/**'
+      # zakładka „Plan” na /log/; CHANGELOG.md celowo nie (patrz wyżej)
+      - 'ROADMAP.md'
       - '.github/workflows/deploy-landing.yml'
   workflow_run:
     workflows: [Release]
@@ -106,10 +111,12 @@ jobs:
       - run: npm run build -w parawan-landing
       - name: Strażnik CSP (landing)
         run: |
-          grep -Eq "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'[^\"]*connect-src 'none'" apps/landing/dist/index.html \
-            || { echo "::error::brak Content-Security-Policy z default-src 'none' i connect-src 'none'"; exit 1; }
-          node scripts/e2e/csp.mjs landing
-          node scripts/e2e/zakazane-api.mjs landing
+          for f in apps/landing/dist/index.html apps/landing/dist/log/index.html; do
+            grep -Eq "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'[^\"]*connect-src 'none'" "$f" \
+              || { echo "::error file=$f::brak Content-Security-Policy z default-src 'none' i connect-src 'none'"; exit 1; }
+          done
+          node scripts/e2e/csp.mjs landing landing-log
+          node scripts/e2e/zakazane-api.mjs landing landing-log
       - name: Kopia plików wydania w /pobierz/
         run: |
           mkdir -p apps/landing/dist/pobierz
