@@ -7963,3 +7963,95 @@ test('dom3-fix2: wyciąg CSV — osoba i adres z patronem przed miejscowością 
   // pułapka: wyraz spoza słownika miejscowości za numerem nie robi z pary adresu
   keep(['Laureat;Jana Pawła II 3 Miejsce;x']);
 });
+test('dom3-fix3: formularz z TAB-em — etykieta bez dwukropka tworzy parę z wartością', () => {
+  masked([
+    ['Imię\tAdam\tNazwisko\tNowak', `Imię\t${N}\tNazwisko\t${N}`],
+    ['Imię\tAnna\tNazwisko\tNowak\tTelefon\t600100200', `Imię\t${N}\tNazwisko\t${N}\tTelefon\t[TELEFON]`],
+    ['Imię:\tAdam\tNazwisko\tNowak', `Imię:\t${N}\tNazwisko\t${N}`],
+    ['Imię:\tJan\tData ur.\t03.04.1980', `Imię:\t${N}\tData ur.\t[DATA-URODZENIA]`],
+    ['Imię: Jan\tData ur. 03.04.1980', `Imię: ${N}\tData ur. [DATA-URODZENIA]`],
+    ['Imię\tJan\tData ur.\t03.04.1980', `Imię\t${N}\tData ur.\t[DATA-URODZENIA]`],
+    ['Imię:\tJan\tData ur.\t03.04.1980\tPESEL:\t44051401359', `Imię:\t${N}\tData ur.\t[DATA-URODZENIA]\tPESEL:\t[PESEL]`],
+    ['Nazwisko\tNowak\tImię\tAdam', `Nazwisko\t${N}\tImię\t${N}`],
+  ]);
+  masked([['Imię\tAdam\tNazwisko\tNowak', 'Imię\t[IMIĘ I NAZWISKO]\tNazwisko\t[OSOBA-A]']], { pseudonyms: true });
+  // pułapki: nagłówek tabeli (nazwy kolumn, wiersz danych pod spodem) to nie pary etykieta⇥wartość
+  keep(['Imię i nazwisko\tLokal\tTelefon', 'Nazwisko\tImię\tStanowisko', 'Imię\tWiek\tNazwisko\tMiasto', 'Imię\tNazwisko\nLp\tUwagi']);
+  masked([['Imię\tNazwisko\tDział\nJan\tKowalski\tKadry', `Imię\tNazwisko\tDział\n${N}\t${N}\tKadry`]]);
+});
+test('dom3-fix3: obiekt publiczny przed „PRZY" także poza pierwszym wierszem pisma', () => {
+  keep([
+    'Godziny otwarcia:\nAPTEKA PRZY TADEUSZA KOŚCIUSZKI 12 W TARNOWIE',
+    'Ogłoszenie.\nKINO PRZY JANA PAWŁA II 3',
+    'Ogłoszenie.\nPrzychodnia przy Jana Pawła II 30 w Krakowie.',
+  ]);
+  masked([
+    ['Godziny otwarcia:\nApteka przy Tadeusza Kościuszki 12 w Tarnowie jest czynna.', `Godziny otwarcia:\nApteka przy ${N} 12 w Tarnowie jest czynna.`],
+    // pułapki: obiekt w poprzednim wierszu nie zdejmuje adresu osoby
+    ['Apteka\nJan Nowak zam. przy Tadeusza Kościuszki 12 w Tarnowie.', `Apteka\n${N} zam. przy ${A} w ${C}.`],
+    ['Pismo.\nMieszkanie przy Tadeusza Kościuszki 12 w Tarnowie.', `Pismo.\nMieszkanie przy ${A} w ${C}.`],
+  ]);
+  keep(['Godziny otwarcia:\nApteka przy Tadeusza Kościuszki 12 w Tarnowie jest czynna.'].map((t) => t.replace('Apteka przy Tadeusza Kościuszki 12', 'APTEKA PRZY TADEUSZA KOŚCIUSZKI 12')));
+});
+test('dom3-fix3: WERSALIKI — tytuł utworu z numerem nie jest adresem ani osobą', () => {
+  keep([
+    'TRENY JANA KOCHANOWSKIEGO 19',
+    'TREN JANA KOCHANOWSKIEGO 7',
+    'DZIADY ADAMA MICKIEWICZA 3 W REŻYSERII',
+    'BALLADY ADAMA MICKIEWICZA 5 I 6',
+    'FRASZKI JANA KOCHANOWSKIEGO 12 W OPRACOWANIU',
+    'TRENY JANA KOCHANOWSKIEGO 19 W WYDANIU Z 1580',
+  ]);
+  // pułapki: dokument osoby i lokal dalej maskują
+  masked([
+    ['NAJEMCA LOKALU ADAMA MICKIEWICZA 30/2.', `NAJEMCA LOKALU ${N} 30/2.`],
+    ['MIESZKANIE PRZY ADAMA MICKIEWICZA 5 W LUBNIU', `MIESZKANIE PRZY ${A} W LUBNIU`],
+  ]);
+});
+test('dom3-fix3: „Jana Pawła" i „Piotra Pawła" w dopełniaczu bez roli to osoba, poza patronem i papieżem', () => {
+  masked([
+    ['Żona Jana Pawła zeznała.', `Żona ${N} zeznała.`],
+    ['Brat Jana Pawła mieszka w Lublinie.', `Brat ${N} mieszka w ${C}.`],
+    ['Syn Jana Pawła ma 5 lat.', `Syn ${N} ma 5 lat.`],
+    ['Mieszkanie Jana Pawła zostało zajęte.', `Mieszkanie ${N} zostało zajęte.`],
+    ['Samochód Jana Pawła marki Opel.', `Samochód ${N} marki Opel.`],
+    ['Konto Jana Pawła zablokowano.', `Konto ${N} zablokowano.`],
+    ['Oględzin dokonano w obecności Piotra Pawła.', `Oględzin dokonano w obecności ${N}.`],
+    ['Oględzin dokonano przy udziale Piotra Pawła.', `Oględzin dokonano przy udziale ${N}.`],
+    ['Pouczono Piotra Pawła o prawach.', `Pouczono ${N} o prawach.`],
+    ['Wezwano Michała Pawła do stawiennictwa.', `Wezwano ${N} do stawiennictwa.`],
+    ['Zgłoszenie od Piotra Pawła, tel. 600 111 222.', `Zgłoszenie od ${N}, tel. [TELEFON].`],
+    ['Wizyta Piotra Pawła w urzędzie.', `Wizyta ${N} w urzędzie.`],
+    ['Ujawniono Jana Pawła (ur. 12.03.1985)', `Ujawniono ${N} (ur. [DATA-URODZENIA])`],
+    ['Zatrzymano Jana Pawła, PESEL 85010312345.', `Zatrzymano ${N}, PESEL [PESEL].`],
+    ['Legitymowano Piotra Pawła, zam. ul. Polna 5.', `Legitymowano ${N}, zam. ${A}.`],
+    ['Zatrzymano Jana Pawła, ur. 12.03.1985 r.', `Zatrzymano ${N}, ur. [DATA-URODZENIA] r.`],
+    ['Zatrzymano Jana Kazimierza, ur. 12.03.1985 r.', `Zatrzymano ${N}, ur. [DATA-URODZENIA] r.`],
+  ]);
+  masked([['Żona Jana Pawła zeznała. Jan Pawła odmówił.', 'Żona [OSOBA-A] zeznała. [OSOBA-A] odmówił.']], { pseudonyms: true });
+  // pułapki: patron, papież, władca i wyliczenie imion zostają
+  keep([
+    'Szkoła im. Jana Pawła w Krakowie.',
+    'Encyklika Jana Pawła o pracy.',
+    'Pielgrzymka Jana Pawła do Polski.',
+    'Ulica Jana Pawła została wyremontowana.',
+    'Plac Jana Pawła zamknięto.',
+    'Kościół św. Piotra Pawła w Krakowie.',
+    'Za panowania Zygmunta Augusta powstała unia.',
+    'Czasy Jana Kazimierza były trudne.',
+    'Imieniny Jana i Pawła.',
+    'Wizyta Jana Pawła II w Polsce.',
+  ]);
+});
+test('dom3-fix3: telefon komórkowy w nazwie pliku z datą, wersją albo przedrostkiem zdjęcia', () => {
+  masked([
+    ['Plik: wniosek_2024-05-12_600111222.pdf', 'Plik: wniosek_2024-05-12_[TELEFON].pdf'],
+    ['Plik: skan_dowodu_2024_600111222.pdf', 'Plik: skan_dowodu_2024_[TELEFON].pdf'],
+    ['Załącznik: zdjecie_20240512_600111222.jpg', 'Załącznik: zdjecie_20240512_[TELEFON].jpg'],
+    ['Plik: WhatsApp_600111222.jpg', 'Plik: WhatsApp_[TELEFON].jpg'],
+    ['Plik: umowa_v2_600111222.pdf', 'Plik: umowa_v2_[TELEFON].pdf'],
+    ['Plik: IMG_600111222.jpg', 'Plik: IMG_[TELEFON].jpg'],
+  ]);
+  // pułapki: kod wersalikami, numer bez prefiksu komórkowego, człon z kodem
+  keep(['Plik: ZAM_600111222.pdf', 'Plik: FV_2024_600111222.pdf', 'Plik: faktura_2024_123456789.pdf', 'Klucz: abc_X1_600111222', 'Nr zamówienia ZAM_2024_600111222']);
+});
