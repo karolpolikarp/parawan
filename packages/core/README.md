@@ -17,17 +17,11 @@ Tam, gdzie format ma sumę kontrolną (PESEL, NIP, REGON, IBAN, dowód, karta), 
 **walidowana**, więc przypadkowe ciągi cyfr (numery przepisów, cytowane sygnatury orzeczeń) nie są maskowane.
 Redakcja jest idempotentna.
 
-Pakietu nie ma jeszcze w rejestrze npm. Do czasu publikacji instalujesz go z repozytorium
-(szczegóły w [README projektu](https://github.com/karolpolikarp/parawan), sekcja „Dla programistów”):
-
 ```bash
-git clone https://github.com/karolpolikarp/parawan.git
-cd parawan
-npm ci
-npm run build -w anonimizator          # rdzeń → packages/core/dist
-# we własnym projekcie (ścieżka względem niego):
-npm install ../parawan/packages/core
+npm install anonimizator
 ```
+
+CLI bez instalacji: `npx anonimizator pismo.txt` (opcje: `npx anonimizator --help`).
 
 ```ts
 import { redactPII } from 'anonimizator';

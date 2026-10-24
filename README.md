@@ -218,22 +218,16 @@ w osobnym repozytorium: [**anonimizator-ai**](https://github.com/karolpolikarp/a
 Silnik to pakiet `anonimizator` w katalogu [`packages/core`](./packages/core) (nazwa techniczna
 pakietu; marka produktu to **Parawan**). Zero zależności, działa w Node, Deno, Bun i przeglądarce.
 
-Pakietu nie ma w rejestrze npm, więc instalujesz go z repozytorium:
+Pakiet jest w rejestrze npm:
 
 ```bash
-git clone https://github.com/karolpolikarp/parawan.git
-cd parawan
-npm ci
-npm run build -w anonimizator      # rdzeń → packages/core/dist
+npm install anonimizator
 ```
+
+Wersję prosto ze źródeł zbudujesz z repozytorium (`npm ci`, potem `npm run build -w anonimizator`)
+i podepniesz katalogiem: `npm install ../parawan/packages/core`.
 
 ### Biblioteka
-
-We własnym projekcie podepnij zbudowany katalog (ścieżka względem projektu):
-
-```bash
-npm install ../parawan/packages/core
-```
 
 ```ts
 import { redactPII, hasPII, describeFindings } from 'anonimizator';
@@ -266,8 +260,8 @@ Eksportowane są też walidatory sum kontrolnych: `isValidPesel`, `isValidNip`, 
 
 ### CLI
 
-Po zbudowaniu rdzenia uruchamiasz CLI z katalogu repozytorium. Poza nim nie wpisuj
-`npx anonimizator`: npx szukałby pakietu o tej nazwie w rejestrze npm.
+Z rejestru npm: `npx anonimizator dokument.txt` (opcje: `npx anonimizator --help`). Ze źródeł,
+po zbudowaniu rdzenia, z katalogu repozytorium:
 
 ```bash
 node packages/core/bin/anonimizator.js dokument.txt                  # wynik na stdout, statystyki na stderr
