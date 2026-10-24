@@ -1,5 +1,111 @@
 # Changelog
 
+## v0.46.25 — 2026-10-24
+
+**Parawan dla urzędu: pole tekstu od razu na ekranie, ręczna korekta wyniku, plik Worda z samego wyniku, adnotacja o wyłączeniu jawności z protokołem do akt i pliki wydania dla IOD i działu IT.**
+
+Pilność: zalecana
+
+Silnik wykrywania (`packages/core/src`) bez zmian względem v0.46.24, więc ten sam tekst dostaje
+te same znaczniki. Zmieniły się aplikacja, pliki wydania i strona produktu.
+
+Aplikacja:
+
+- **Pierwszy ekran.** Pole tekstu zaczyna się w górnej części okna (na laptopie 1366×768
+  w górnych 40% okna), a nie półtora ekranu niżej. Nagłówek mówi, do czego służy:
+  „Zasłoń dane osobowe w piśmie, zanim opublikujesz je w BIP albo wkleisz do czatu AI.”
+  „Przykład” wstawia fikcyjne pismo urzędowe ze znakiem sprawy, PESEL-em, rachunkiem i podpisem
+  urzędnika, na którym widać też, co zostaje: „art. 104 Kpa”, numer działki i kwota. Obok wersji
+  stoi data pliku, a plik starszy niż pół roku pokazuje żółte ostrzeżenie (liczy to zegar
+  komputera, bez łączenia się z siecią). Karta „Ograniczenia” mówi, że nazwisko urzędnika pod
+  pismem też jest zasłaniane, a numer działki zostaje.
+- **Ręczna korekta wyniku.** Kliknięcie znacznika albo Enter na nim pokazuje, co pod nim stoi,
+  i daje „Zostaw jawne”. Podpis wójta zostaje jawny, wnioskodawca dalej zasłonięty, bez
+  wyłączania całego typu. „Zostaw jawne wszędzie” odsłania tę samą osobę w każdej formie
+  („Jan Nowak”, „Jana Nowaka”, „Janowi Nowakowi”), a przed kliknięciem pokazuje listę tych form.
+  „Janina Nowak” ani „J. Nowak” do niej nie wchodzą. Przeoczenie zasłonisz sam: zaznacz fragment
+  w wyniku albo w polu źródła i wybierz „Zasłoń zaznaczenie” (imię i nazwisko, miejscowość, adres
+  albo inne dane jako `[DANE]`), tylko tutaj albo we wszystkich wystąpieniach. Zaznaczenie połowy
+  numeru zasłania cały numer. Pod wynikiem jest lista poprawek z „Cofnij” przy każdej pozycji,
+  „Cofnij ostatnią” i „Usuń wszystkie”, a Ctrl+Z w wyniku cofa ostatnią czynność. Kopiowanie,
+  .txt, .docx, wydruk, adnotacja i protokół biorą wynik z poprawkami. Po zamknięciu karty
+  poprawki znikają.
+- **Plik Worda z wyniku.** „Pobierz” ma dwa formaty: .txt i .docx. Plik .docx powstaje od nowa
+  z samego wyniku, więc nie ma w nim autora, ostatniej osoby zapisującej, komentarzy ani historii
+  zmian oryginału. W BIP można opublikować ten plik zamiast oryginału z wklejonym tekstem. Ma polski
+  język tekstu, Arial 11 pt i format A4, znaczniki są pogrubione, a sprawdzanie ułatwień dostępu
+  w Wordzie nie zgłasza problemów. Po pierwszym pobraniu wyniku z wczytanego Worda albo PDF pasek
+  przypomina, żeby publikować nowy plik i przy pierwszym zapisie sprawdzić Plik › Informacje ›
+  Autor.
+- **Adnotacja i protokół.** Nowa karta pod „Zamaskowano” przygotowuje wzór informacji
+  o wyłączeniu jawności z art. 8 ust. 5 ustawy o dostępie do informacji publicznej: zakres,
+  podstawę prawną, kto wyłączył jawność i kto zatwierdził, w czyim interesie i datę. Liczby
+  zasłoniętych fragmentów są domyślnie wyłączone, bo „jedno imię i nazwisko” zdradza, ile osób
+  jest w piśmie. Adnotację można dołączyć na końcu wyniku, a w .docx i na wydruku stoi na osobnej
+  stronie. Protokół do akt (kopia, .txt albo wydruk) podaje datę, wersję Parawana, znak sprawy,
+  liczby zasłonięć według rodzaju danych, wyłączone typy i liczbę ręcznych poprawek, bez nazwy
+  pliku i bez zasłoniętych wartości. Licznik „przejrzano 7 z 10” pokazuje, ile znaczników już
+  obejrzano, a lista „Przed publikacją” ma pięć punktów do sprawdzenia. Brzmienie wzoru warto
+  uzgodnić z prawnikiem urzędu.
+- **Pamięć przeglądarki.** Zostają w niej tylko cztery klucze, bez treści pism: wyłączone typy,
+  „Rozróżniaj osoby”, animacja oraz organ i osoba do adnotacji (te dwa tylko po zaznaczeniu
+  „Pamiętaj”). Zapamiętane wyłączenie typu widać zaraz po otwarciu jako ostrzeżenie z „Włącz
+  wszystko”, bo w Chrome i Edge mógł je zostawić inny plik .html otwarty z dysku. Parawan otwarty
+  ze strony produktu ma stały pasek z prośbą, żeby prawdziwe pisma otwierać w pobranym pliku.
+- **Dostępność.** Liczniki „×1” przy typach danych w „Zamaskowano” mają wystarczający kontrast
+  (WCAG 1.4.3). Przy każdej zmianie axe sprawdza interfejs pod kątem WCAG 2.1 AA, a testy
+  w przeglądarce sprawdzają obsługę klawiaturą, tryb dużego kontrastu Windows i powiększenie 200%.
+  Raz w tygodniu i przy każdym tagu wydania plik jest sprawdzany w Edge na Windows, w Firefoksie
+  i w Chromium 109. W Firefoksie ESR 115 wynik nie przewija się już sam
+  w górę.
+- **Liczniki.** Liczby w „Zamaskowano” odpowiadają znacznikom w wyniku: „Anna i Jan Kowalscy”
+  daje „imię i nazwisko ×2”, a nie ×1.
+
+Bezpieczeństwo, pliki wydania i strona produktu:
+
+- **CSP ze skrótem skryptu.** Parawan.html i strona produktu dopuszczają jeden skrypt, rozpoznany
+  po skrócie SHA-256 (`script-src 'sha256-…'` zamiast `'unsafe-inline'`). Kod z wczytanego pisma,
+  który trafiłby do wyniku (np. obrazek z `onerror`), nie wykona się.
+- **DLA-IOD-I-IT.txt.** Nowy plik w wydaniu opisuje, gdzie są przetwarzane dane, co zostaje na
+  komputerze, czego Parawan nie zrobi, ryzyko resztkowe w liczbach z pomiaru, wymagane
+  przeglądarki, wdrożenie z dysku sieciowego i zasady GPO dla usług przeglądarki, których CSP nie
+  obejmuje. Ma gotowy wpis do ewidencji oprogramowania (KRI § 19) z sumą SHA-256. JAK-UZYC.txt
+  dostał wersję, datę, sumę i część „Zanim opublikujesz pismo w BIP”. Oba pliki otwierają się
+  w Notatniku i Wordzie z polskimi literami.
+- **Sumy i pochodzenie.** Wydanie ma SHA256SUMS.txt i atestację z GitHub Actions
+  (`gh attestation verify`), a opis wydania powstaje z tego wpisu i podaje pilność aktualizacji.
+  Build z tagu, także na Windows, daje plik o tej samej sumie. Błędy bezpieczeństwa zgłasza się
+  według SECURITY.md.
+- **Strona produktu.** Sekcja „Dla inspektora ochrony danych i działu IT” zbiera najważniejsze
+  fakty z DLA-IOD-I-IT.txt, a Ctrl+P drukuje samą ją, na najwyżej dwóch stronach A4. Metryczka
+  podaje sumę SHA-256 najnowszego wydania z poleceniami do PowerShella i wiersza poleceń.
+  Przyciski pobierania prowadzą do kopii pliku na domenie strony, bo filtr WWW urzędu bywa
+  ustawiony na github.com, a po każdym wdrożeniu automat porównuje jej sumę z wydaniem. Demo na
+  stronie dostaje nowy silnik razem z wydanym plikiem.
+
+Na co uważać:
+
+- **Ręczne poprawki należą do jednego tekstu.** Każda zmiana tekstu źródłowego (pisanie,
+  wklejenie, Enter, Ctrl+Z w polu) zdejmuje „Zostaw jawne”, „Cofnij zasłonięcie” i zasłonięcia
+  „tylko tutaj”, a notka pod wynikiem mówi, ile cofnięto. Trzeba je wtedy zrobić od nowa, więc
+  najpierw lepiej poprawić tekst, a dopiero potem przejrzeć znaczniki. Zasłonięcie „wszystkie
+  wystąpienia” działa jak reguła: po każdej zmianie zasłania od nowa każde dokładne wystąpienie
+  (także z podwójną albo twardą spacją), a gdy go nie ma, zostaje na liście z „0 miejsc”. Ręczne
+  zasłonięcie nigdy nie odsłania tego, co zasłonił automat.
+- **Teksty bez ręcznej korekty.** Gdy wyniku nie da się dopasować do oryginału co do znaku (np.
+  dwa takie same znaczniki obok siebie, z których jeden stał już w piśmie) albo tekst ma ponad
+  300 000 znaków, ręczne poprawki są wyłączone i mówi o tym zdanie pod wynikiem. Gdy tekst
+  z ręcznymi zasłonięciami urośnie ponad ten próg, kopiowanie, zapis i druk czekają z komunikatem,
+  zamiast wydać tekst z jawnym fragmentem.
+- **.docx bez układu oryginału.** Wiersz wyniku to akapit, a kolumny tabel zostają tabulatorami.
+- **Karta „Adnotacja i protokół” zeruje się przy nowym piśmie** (wczytany plik, Ctrl+A
+  i wklejenie, zmiana ponad połowy tekstu), żeby znak sprawy nie przeszedł na następne pismo.
+- **Rozmiar.** Parawan.html ma 2 316 486 B, o ok. 50 kB więcej niż v0.46.24, głównie przez
+  ręczną korektę, .docx i kartę adnotacji. Build usuwa za to z HTML komentarze i wcięcia.
+
+687 testów rdzenia i 326 testów aplikacji przechodzi, bramka E2E i benchmark bez zmian. Web
+i landing 0.46.24 → 0.46.25.
+
 ## v0.46.24 — 2026-10-24
 
 **Wydruk samego wyniku, DOCX bez sklejania wierszy, PDF w starszym Edge i Chrome, przebudowany silnik wykrywania i nowy typ danych: numer księgi wieczystej.**
