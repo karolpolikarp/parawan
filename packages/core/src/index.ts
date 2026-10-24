@@ -4050,13 +4050,13 @@ const KW_COURT_PREFIXES = new Set(
     'SI SL SR SU SW SZ TB TO TR WA WL WR ZA ZG').split(' '),
 );
 /** Kotwica przed numerem: „KW" wielkimi literami jako osobny wyraz (także „nr KW", „Nr_KW",
- *  „<NumerKW>"), „Kw nr", „nr kw", dowolna odmiana „księga wieczysta" (także bez ogonków i sklejona
- *  w kluczu „numerKsiegiWieczystej") i skrót „ks. wiecz.". Samo małe „kw." to kwartał albo
- *  kwiecień, dlatego bez flagi /i: małe litery liczą się tylko po „nr"/„numer". Wielkie „KW" to
- *  też kilowaty („agregat 20 KW"), Komenda Wojewódzka („KW Policji", „KW PSP") i nazwa towaru
- *  („Zestaw KW-2") — te nie są etykietą księgi. */
+ *  „<NumerKW>"), „Kw nr", „nr kw", dowolna odmiana „księga wieczysta" („w księdze wieczystej",
+ *  „ksiąg wieczystych", także bez ogonków i sklejona w kluczu „numerKsiegiWieczystej") i skrót
+ *  „ks. wiecz.". Samo małe „kw." to kwartał albo kwiecień, dlatego bez flagi /i: małe litery
+ *  liczą się tylko po „nr"/„numer". Wielkie „KW" to też kilowaty („agregat 20 KW"), Komenda
+ *  Wojewódzka („KW Policji", „KW PSP") i nazwa towaru („Zestaw KW-2") — te nie są etykietą księgi. */
 const RE_KW_ANCHOR =
-  /(?:(?<![\p{L}\d])(?<!\d[ \t]{0,2})(?:[Nn](?:umer|r)[_-]?)?KW(?![\p{L}\d]|-\d|[ \t]+(?:Policji|PSP|PP)(?!\p{L}))|(?<!\p{L})Kw\.?(?=[ \t]+nr)|(?<![\p{L}\d])[Nn](?:umer|r)\.?[ \t_-]*kw(?![\p{L}\d])|(?:[Kk]si[eę]g|KSI[EĘ]G)\p{L}{0,3}[ \t_-]*(?:[Ww]ieczyst|WIECZYST)\p{L}{0,3}|(?<!\p{L})[Kk]s\.[ \t]*wiecz\.)/u;
+  /(?:(?<![\p{L}\d])(?<!\d[ \t]{0,2})(?:[Nn](?:umer|r)[_-]?)?KW(?![\p{L}\d]|-\d|[ \t]+(?:Policji|PSP|PP)(?!\p{L}))|(?<!\p{L})Kw\.?(?=[ \t]+nr)|(?<![\p{L}\d])[Nn](?:umer|r)\.?[ \t_-]*kw(?![\p{L}\d])|(?:[Kk]si(?:[eęą]g|[eę]dz)|KSI(?:[EĘĄ]G|[EĘ]DZ))\p{L}{0,3}[ \t_-]*(?:[Ww]ieczyst|WIECZYST)\p{L}{0,3}|(?<!\p{L})[Kk]s\.[ \t]*wiecz\.)/u;
 /** Koniec zdania w oknie kotwicy. Kropka po „nr" czy skrócie „wiecz." to nie koniec zdania; po
  *  „KW." tylko wtedy, gdy dalej stoi „Nr" („KW. Nr WA1M/…"). „Pismo przekazano do KW. Faktura …"
  *  kończy zdanie, inaczej kotwica przechodziła na numer faktury w następnym zdaniu. */

@@ -294,6 +294,24 @@ test('KW — bez kotwicy tylko poprawna suma, wielkie litery i znany kod sądu',
   expect(redactPII('Kod produktu AB1C/12345678/7 w magazynie').redacted).toBe('Kod produktu AB1C/12345678/7 w magazynie');
   expect(redactPII('kr1p/00234567/6 w notatce').redacted).toBe('kr1p/00234567/6 w notatce');
 });
+test('KW — kotwica w miejscowniku „w księdze wieczystej" i dopełniaczu „ksiąg wieczystych"', () => {
+  // przy kotwicy zła cyfra kontrolna nie ratuje numeru (literówka w piśmie)
+  expect(redactPII('w księdze wieczystej KR1P/00234567/1').redacted).toBe('w księdze wieczystej [NR-KW]');
+  expect(redactPII('wpisano w księdze wieczystej nr WA2M/00512345/0').redacted).toBe(
+    'wpisano w księdze wieczystej nr [NR-KW]',
+  );
+  expect(redactPII('W KSIĘDZE WIECZYSTEJ KR1P/00234567/1').redacted).toBe('W KSIĘDZE WIECZYSTEJ [NR-KW]');
+  expect(redactPII('w ksiedze wieczystej KR1P/00234567/1').redacted).toBe('w ksiedze wieczystej [NR-KW]');
+  expect(redactPII('odpisy z ksiąg wieczystych KR1P/00234567/1').redacted).toBe('odpisy z ksiąg wieczystych [NR-KW]');
+  // inne księgi to nie kotwica
+  const keep = [
+    'w księdze pamiątkowej 12/2020',
+    'w księdze rachunkowej KR1P/00234567/1',
+    'w księdze rachunkowej 12/2020 pozycja',
+    'Wpis w księdze wieczystej nastąpi. Zamówienie nr AB1C/12345678/0',
+  ];
+  for (const t of keep) expect(redactPII(t).redacted).toBe(t);
+});
 test('KW — pułapki: kwartał, wzór numeru, sygnatury, działki, lokale, umowy, kotwica z innego zdania', () => {
   const keep = [
     'kw. 2026 r. wpłynął wniosek',
