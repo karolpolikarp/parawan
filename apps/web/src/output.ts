@@ -4,13 +4,23 @@
  * korekta, adnotacja) rozszerza tylko OutputState i tę funkcję, a nie każde wyjście osobno.
  * Bez DOM: moduł testuje vitest, a main.ts tylko podaje stan.
  */
+import { applySpans, type Span } from './spans';
+
 export interface OutputState {
   /** Wynik redactPII dla bieżącego tekstu źródłowego (pusty napis = brak wyniku). */
   redacted: string;
+  /** Tekst źródłowy, z którego powstał wynik. */
+  original: string;
+  /** Zakresy z alignSpans; null, gdy wyniku nie da się dopasować do oryginału co do znaku. */
+  spans: Span[] | null;
 }
 
+/**
+ * Tekst wyjściowy składany z zakresów (tam później wejdą ręczne poprawki). Bez zakresów zostaje
+ * sam wynik rdzenia. Bez poprawek oba napisy są równe: alignSpans sprawdza to przed zwrotem.
+ */
 export function finalText(s: OutputState): string {
-  return s.redacted;
+  return s.spans ? applySpans(s.original, s.spans) : s.redacted;
 }
 
 // Kodem, a nie ucieczką w napisie: biome format zamienia ją na niewidoczny znak w źródle.

@@ -1,12 +1,24 @@
+import { redactPII } from 'anonimizator';
 import { expect, test } from 'vitest';
 import { downloadFor, downloadName, finalText, printTitle, textForDownload } from './output';
+import { alignSpans } from './spans';
 
 const BOM = String.fromCharCode(0xfeff);
 const boms = (s: string): number => s.split(BOM).length - 1;
 
-test('finalText: dziś to sam wynik maskowania', () => {
-  expect(finalText({ redacted: 'PESEL [PESEL]' })).toBe('PESEL [PESEL]');
-  expect(finalText({ redacted: '' })).toBe('');
+test('finalText: bez zakresów sam wynik maskowania', () => {
+  expect(finalText({ redacted: 'PESEL [PESEL]', original: 'PESEL 44051401359', spans: null })).toBe('PESEL [PESEL]');
+  expect(finalText({ redacted: '', original: '', spans: null })).toBe('');
+});
+
+test('finalText: z zakresów, ten sam tekst co wynik rdzenia', () => {
+  const original = 'Jan Kowalski 44051401359, tel. 600 700 800';
+  const { redacted } = redactPII(original);
+  const spans = alignSpans(original, redacted)?.spans ?? null;
+  expect(spans).not.toBeNull();
+  expect(finalText({ redacted, original, spans })).toBe(redacted);
+  // tekst idzie z zakresów, nie z pola redacted (tu wejdą ręczne poprawki)
+  expect(finalText({ redacted: 'inny', original, spans })).toBe(redacted);
 });
 
 test('textForDownload: dokładnie jeden BOM na początku', () => {

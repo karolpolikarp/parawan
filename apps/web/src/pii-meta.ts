@@ -227,3 +227,10 @@ export const CHIP_META: Record<string, ChipMeta> = Object.fromEntries(
     return [type, { label, token, cat: meta?.cat ?? 'ident', icon: meta?.icon ?? 'dane-id' }];
   }),
 );
+
+/**
+ * Chip po nazwie tokenu z wyniku (chipy liczą znaczniki z zakresów, nie liczniki rdzenia).
+ * Kilka typów może mieć ten sam token: bierzemy pierwszy wpis, etykieta i tak łączy je w jeden chip.
+ */
+export const CHIP_BY_TOKEN: Record<string, ChipMeta> = {};
+for (const m of Object.values(CHIP_META)) CHIP_BY_TOKEN[m.token] ??= m;

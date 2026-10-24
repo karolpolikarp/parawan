@@ -8,7 +8,9 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { after, before, test } from 'node:test';
+import { redactPII } from 'anonimizator';
 import { strFromU8, unzipSync } from 'fflate';
+import { buildDataset } from '../benchmark/dataset.mjs';
 import { CSP_TARGETS, cspProblems, htmlCspProblems } from './csp.mjs';
 import {
   ALLOWED_STORAGE_KEYS,
@@ -815,6 +817,80 @@ test('„Pobierz .docx” po ?demo: siedem części z poprawnym XML, tekst jak w
     assert.deepEqual(docxParagraphs(body), lines);
     // wynik z przykładu, nie z wczytanego pliku: bez komunikatu o oryginale
     assert.equal(await page.locator('#app-note').isVisible(), false, 'komunikat po pobraniu przykładu');
+  });
+});
+
+/* ── Jedno wyjście z zakresów (apps/web/src/spans.ts, output.ts) ── */
+
+/** Wkleja tekst w pole źródła i czeka, aż wydruk (#print-out) dostanie oczekiwany wynik. */
+async function pasteAndWait(page, text, expected) {
+  await page.locator('#input').fill(text);
+  await page
+    .waitForFunction((exp) => document.getElementById('print-out')?.textContent === exp, expected, {
+      timeout: 10_000,
+    })
+    .catch(() => {}); // rozjazd zgłosi asercja niżej, z treścią obu tekstów
+}
+
+// Próbka korpusu benchmarku (co 45. przypadek, w tym dokument JSON z cudzysłowami dopisanymi
+// przez rdzeń) i trzy fikcyjne pisma z fixtures/urzad. Pole <textarea> zamienia \r\n na \n.
+const SPAN_SAMPLES = [
+  ...buildDataset()
+    .cases.filter((c, i) => i % 45 === 0 || c.id === 'str-101')
+    .map((c) => [c.id, c.text]),
+  ...['decyzja.txt', 'informacja-publiczna.txt', 'protokol-kontroli.txt'].map((f) => [
+    f,
+    readFileSync(path.join(FIXTURES, f), 'utf8'),
+  ]),
+].map(([id, text]) => [id, text.replace(/\r\n?/g, '\n')]);
+
+test('„Kopiuj”, .txt, .docx i druk dają ten sam tekst co wynik rdzenia (próbka korpusu i pisma)', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const clipboard = BROWSER === 'chromium';
+    if (clipboard) await app.context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    for (const [id, text] of SPAN_SAMPLES) {
+      const expected = redactPII(text).redacted;
+      await pasteAndWait(page, text, expected);
+      assert.equal(await page.locator('#print-out').textContent(), expected, `${id}: druk`);
+      // dopasowanie co do znaku się udało, więc komunikatu o wyłączonych poprawkach nie ma
+      assert.equal(await page.locator('#spans-note').isVisible(), false, `${id}: #spans-note widoczny`);
+      const txt = await download(page, 'Pobierz .txt');
+      const lines = txt.bytes.toString('utf8').replace(BOM_RE, '').split('\r\n');
+      assert.deepEqual(lines, expected.split('\n'), `${id}: .txt`);
+      const docx = await download(page, 'Pobierz .docx');
+      const body = strFromU8(unzipSync(docx.bytes)['word/document.xml']);
+      assert.deepEqual(docxParagraphs(body), expected.split('\n'), `${id}: .docx`);
+      if (clipboard) {
+        await page.locator('#copy').click();
+        // Chromium na Windows oddaje ze schowka końce wierszy \r\n
+        const copied = await page.evaluate(() => navigator.clipboard.readText());
+        assert.equal(copied.replace(/\r\n/g, '\n'), expected, `${id}: schowek`);
+      }
+    }
+  });
+});
+
+test('„Anna i Jan Kowalscy”: chip i licznik liczą znaczniki w wyniku, nie wykrycia rdzenia', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    for (const pseudonyms of [false, true]) {
+      if (pseudonyms) await page.locator('#pseudonyms').check();
+      const text = 'Wnioskodawcy: Anna i Jan Kowalscy, PESEL 44051401359.';
+      await pasteAndWait(page, text, redactPII(text, { pseudonyms }).redacted);
+      const state = await page.evaluate(() => ({
+        marks: document.querySelectorAll('#output mark.pii').length,
+        tagged: document.querySelectorAll('#output mark.pii[data-s]').length,
+        total: Number(document.getElementById('stat-count')?.textContent),
+        chips: [...document.querySelectorAll('#findings-chips .chip')].map((c) => c.textContent?.trim()),
+      }));
+      const at = `pseudonimy: ${pseudonyms}`;
+      assert.equal(state.marks, 3, `${at}: znaczniki w wyniku`);
+      assert.equal(state.tagged, 3, `${at}: znaczniki z data-s`);
+      assert.equal(state.total, state.marks, `${at}: licznik wykryć ≠ liczba znaczników`);
+      assert.ok(state.chips.includes('imię i nazwisko ×2'), `${at}: chipy ${state.chips.join(', ')}`);
+      assert.ok(state.chips.includes('PESEL ×1'), `${at}: chipy ${state.chips.join(', ')}`);
+    }
   });
 });
 

@@ -3,18 +3,13 @@
  * testowalne w vitest). Landing (apps/landing/src/main.ts) ma kopię tej logiki: zmieniaj obie naraz.
  *
  * Diff w O(n): niemaskowe odcinki wyniku występują w oryginale dosłownie i po kolei, więc luka
- * w oryginale między nimi to zamaskowana wartość. To heurystyka: rdzeń nie zwraca zakresów
- * podmian, więc pary oryginał–znacznik odtwarzamy z samego tekstu.
+ * w oryginale między nimi to zamaskowana wartość. Najpierw tryb ścisły (spans.ts); gdy wynik
+ * nie pasuje do oryginału co do znaku, zostaje dawna heurystyka, wyłącznie do podglądu: przy
+ * nieznalezionym odcinku zgaduje granicę zamiast odmówić.
  */
+import { alignSpans, escapeHtml, GAP_ONLY, origHtml, renderSpansHtml } from './spans';
 
-export function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
+export { escapeHtml };
 
 export interface AlignOptions {
   /** Wzorzec znacznika z jedną grupą przechwytującą (nazwą tokenu), np. /\[(PESEL|NIP)\]/g. */
@@ -31,32 +26,21 @@ export interface Aligned {
   kept: number;
 }
 
-// Sam odstęp między dwoma znacznikami nie może być kotwicą: indexOf trafiłby w spację wewnątrz
-// zamaskowanej wartości („Jan Kowalski 44051401359” daje „[IMIĘ I NAZWISKO] [PESEL]”, a pierwsza
-// spacja oryginału stoi między imieniem a nazwiskiem). Takie znaczniki dostają jeden wspólny,
-// przekreślony fragment oryginału. Nowa linia zostaje kotwicą, bo dzieli wiersze wyniku.
-const GAP_ONLY = /^[^\S\r\n]+$/; // same odstępy poziome: spacje, tabulatory, twarde spacje
-
-/**
- * Przekreślony oryginał w widoku „Porównanie”. Element `.orig` ma w CSS `user-select: none`,
- * więc zaznaczenie i Ctrl+C dają sam wynik, bez danych osobowych; odstęp za przekreśleniem
- * siedzi w środku, żeby po skopiowaniu nie zostawały podwójne spacje. Każdy wiersz wartości
- * dostaje własny element: wiersze wyniku są osobnymi blokami i znacznik nie może przejść
- * przez granicę wiersza (druga część wartości zostałaby wtedy zwykłym, kopiowalnym tekstem).
- */
-function origHtml(orig: string): string {
-  const lines = escapeHtml(orig).split('\n');
-  return lines
-    .map((line, i) =>
-      line ? `<span class="orig"><del>${line}</del>${i === lines.length - 1 ? ' ' : ''}</span>` : '',
-    )
-    .join('\n');
-}
-
 /** Element grupy czekającej na fragment oryginału: znacznik (nazwa tokenu) albo odstęp między znacznikami. */
 type Pending = { mask: string } | { gap: string };
 
 export function renderAligned(original: string, redacted: string, opts: AlignOptions): Aligned {
+  const { tokenRe, maskHtml, compare } = opts;
+  const strict = alignSpans(original, redacted, tokenRe);
+  if (strict) {
+    const html = renderSpansHtml(original, strict.spans, { maskHtml, compare, positions: false });
+    return { html, kept: strict.kept };
+  }
+  return guessAligned(original, redacted, opts);
+}
+
+/** Dawna heurystyka bez trybu ścisłego, dla tekstów, których alignSpans nie dopasował (eksport dla spans.test.ts). */
+export function guessAligned(original: string, redacted: string, opts: AlignOptions): Aligned {
   const { tokenRe, maskHtml, compare } = opts;
   const parts = redacted.split(tokenRe); // nieparzyste indeksy to nazwy tokenów
   let html = '';
@@ -85,7 +69,8 @@ export function renderAligned(original: string, redacted: string, opts: AlignOpt
         orig = rest;
       }
       if (compare && orig) html += origHtml(orig);
-      html += group.map((p) => ('mask' in p ? maskHtml(p.mask) : escapeHtml(p.gap))).join('') + tail;
+      html +=
+        group.map((p) => ('mask' in p ? maskHtml(p.mask) : escapeHtml(p.gap))).join('') + tail;
       group = [];
     }
     pos = gapEnd;

@@ -222,7 +222,9 @@ test('aplikacja: #print-out dostaje tekst wyniku wyłącznie przez textContent',
   );
   const value = webMain.match(new RegExp(`\\b${v}\\.textContent = ([^;]+);`))?.[1] ?? '';
   expect(value).toBe('lastRedacted ? outputText() : PRINT_EMPTY');
-  expect(webMain).toContain('const outputText = (): string => finalText({ redacted: lastRedacted });');
+  expect(webMain).toContain(
+    'const outputText = (): string => finalText({ redacted: lastRedacted, original: lastInput, spans: lastSpans });',
+  );
   // pole źródła ani przekreślone oryginały nie trafiają tam żadną drogą
   expect(value).not.toMatch(/input|orig|innerHTML/);
   // żaden inny moduł aplikacji nie sięga po kontener

@@ -1,5 +1,5 @@
 import { redactPII, type PiiFinding, type PiiType } from 'anonimizator';
-import { escapeHtml, renderAligned } from './compare';
+import { escapeHtml, guessAligned } from './compare';
 import { extractDocxText } from './docx';
 import { EXAMPLE_TEXT } from './example';
 import { type DocxInventory, docxEmptyBodyError, docxInventoryNote, inventoryDocx } from './docx-inventory';
@@ -21,7 +21,9 @@ import { buildMinimalPdf } from './pdf-fixture';
 import {
   CAT_LABELS,
   type Cat,
+  CHIP_BY_TOKEN,
   CHIP_META,
+  type ChipMeta,
   catCountLabel,
   MASK_GROUPS,
   MASK_TOKEN_RE,
@@ -33,6 +35,7 @@ import {
   WYKRYWA_ROWS,
 } from './pii-meta';
 import { plural } from './plural';
+import { alignSpans, countTokens, renderSpansHtml, type Span } from './spans';
 import { storageGet, storageSet } from './storage';
 import { isProductCopy } from './web-copy';
 import './style.css';
@@ -84,6 +87,10 @@ const outputHint = $<HTMLParagraphElement>('output-hint');
 
 let lastRedacted = '';
 let lastInput = '';
+// Zakresy oryginał–znacznik bieżącego wyniku (spans.ts); null = wynik nie pasuje do oryginału
+// co do znaku, więc wszystko, co z zakresów korzysta, jest wyłączone.
+let lastSpans: Span[] | null = null;
+let lastKept = 0; // znaczniki zastane w oryginale, wg alignSpans
 // Rozszerzenie ostatnio wczytanego pliku (bez nazwy): po .csv „Pobierz” oddaje .csv.
 let lastFileExt = '';
 let viewMode: 'result' | 'compare' = 'result';
@@ -254,6 +261,7 @@ maskTogglesEl.append(
 /* ── Akcje zbiorcze „Co maskować” + licznik ── */
 const maskCountOn = $<HTMLElement>('mask-count-on');
 const maskOffNote = $<HTMLElement>('mask-off-note');
+const spansNote = $<HTMLElement>('spans-note');
 const maskOffText = $<HTMLElement>('mask-off-text');
 const maskOffReset = $<HTMLButtonElement>('mask-off-reset');
 
@@ -413,13 +421,17 @@ function renderOutput(): void {
   } else {
     // „Wynik” też idzie przez wyrównanie z oryginałem: dzięki temu znaczniki, które były już
     // w tekście, nie są liczone ani podświetlane jako nowe wykrycia.
-    const { html, kept } = renderAligned(lastInput, lastRedacted, {
-      tokenRe: MASK_TOKEN_RE,
-      maskHtml,
-      compare: viewMode === 'compare',
-    });
-    keptMasks = kept;
-    output.innerHTML = wrapLines(html);
+    // Bez zakresów zostaje dawna heurystyka, wyłącznie do podglądu (pod wynikiem stoi wtedy
+    // #spans-note). Z zakresami tekst oryginału ma data-o, a znacznik data-s (indeks zakresu).
+    const compare = viewMode === 'compare';
+    if (lastSpans) {
+      keptMasks = lastKept;
+      output.innerHTML = wrapLines(renderSpansHtml(lastInput, lastSpans, { maskHtml, compare }));
+    } else {
+      const { html, kept } = guessAligned(lastInput, lastRedacted, { tokenRe: MASK_TOKEN_RE, maskHtml, compare });
+      keptMasks = kept;
+      output.innerHTML = wrapLines(html);
+    }
   }
   refreshMaskNav();
 }
@@ -664,11 +676,18 @@ window.addEventListener('resize', () => syncGripAria());
 
 const CHIP_NAV_TIP = 'Przejdź do kolejnego fragmentu tego typu w wyniku';
 
-function renderFindings(found: PiiFinding[]): void {
+/**
+ * Chipy liczą znaczniki z zakresów (tokens), a nie liczniki rdzenia: „Anna i Jan Kowalscy” to
+ * dwa znaczniki [IMIĘ I NAZWISKO] przy jednym wykryciu w found. Kolejność chipów zostaje z found.
+ * Bez zakresów (tokens null) zostają liczniki rdzenia.
+ */
+function renderFindings(found: PiiFinding[], tokens: Map<string, number> | null): void {
   findingsCard.hidden = false;
-  // koercja licznika do liczby — obrona przed nie-liczbowym count (XSS/NaN)
-  const total = found.reduce((s, f) => s + (Number(f.count) || 0), 0);
   const byLabel = new Map<string, { count: number; cat: Cat; icon: string; token: string }>();
+  const add = (meta: ChipMeta, count: number): void => {
+    const prev = byLabel.get(meta.label);
+    byLabel.set(meta.label, { count: (prev?.count ?? 0) + count, cat: meta.cat, icon: meta.icon, token: meta.token });
+  };
   for (const f of found) {
     // zapas na czas działania (typ spoza CHIP_META mimo typecheck): chip z surowym kodem
     const meta = CHIP_META[f.type] ?? {
@@ -677,14 +696,17 @@ function renderFindings(found: PiiFinding[]): void {
       cat: 'ident' as Cat,
       icon: 'dane-id',
     };
-    const prev = byLabel.get(meta.label);
-    byLabel.set(meta.label, {
-      count: (prev?.count ?? 0) + (Number(f.count) || 0),
-      cat: meta.cat,
-      icon: meta.icon,
-      token: meta.token,
-    });
+    // koercja licznika do liczby — obrona przed nie-liczbowym count (XSS/NaN)
+    add(meta, tokens ? 0 : Number(f.count) || 0);
   }
+  if (tokens) {
+    for (const [token, n] of tokens) {
+      const meta = CHIP_BY_TOKEN[token] ?? { label: token.toLowerCase(), token, cat: maskCategory(token), icon: 'dane-id' };
+      add(meta, n);
+    }
+    for (const [label, v] of byLabel) if (!v.count) byLabel.delete(label);
+  }
+  const total = [...byLabel.values()].reduce((s, v) => s + v.count, 0);
   const cats = new Set([...byLabel.values()].map((v) => v.cat)).size;
   statCount.textContent = String(total);
   statCountW.textContent = plural(total, 'wykrycie', 'wykrycia', 'wykryć');
@@ -695,7 +717,7 @@ function renderFindings(found: PiiFinding[]): void {
     ? ` <span class="chip chip-hint">w tekście były już znaczniki <span class="x">×${keptMasks}</span></span>`
     : '';
 
-  if (found.length === 0) {
+  if (total === 0) {
     const allOff = disabledGroups.size === MASK_GROUPS.length;
     const clean = allOff
       ? '<span class="chip chip-hint">nic nie zamaskowano: maskowanie wszystkich typów jest wyłączone w „Co maskować”</span>'
@@ -766,7 +788,7 @@ function setResultActions(on: boolean): void {
 }
 
 /** Tekst dla „Kopiuj”, „Pobierz” i wydruku; jedno źródło, patrz output.ts. */
-const outputText = (): string => finalText({ redacted: lastRedacted });
+const outputText = (): string => finalText({ redacted: lastRedacted, original: lastInput, spans: lastSpans });
 
 const PRINT_EMPTY = 'Brak wyniku do wydruku. Wklej tekst w pole „Tekst źródłowy”.';
 
@@ -798,10 +820,15 @@ function renderResult(redacted: string, found: PiiFinding[]): void {
   if (redacted !== lastRedacted) copyFlash.reset();
   lastRedacted = redacted;
   lastInput = input.value;
+  const aligned = alignSpans(lastInput, redacted);
+  lastSpans = aligned?.spans ?? null;
+  lastKept = aligned?.kept ?? 0;
+  // Przy długim tekście i tak nie ma podświetleń ani porównania, więc komunikat nic by nie dodał.
+  spansNote.hidden = !!lastSpans || isTooBig();
   setResultActions(true);
   syncPrintOut();
   renderOutput();
-  renderFindings(found);
+  renderFindings(found, lastSpans && countTokens(lastSpans));
 }
 
 // Debounce: przy szybkim pisaniu nie odpalaj pełnego pipeline'u (26 przebiegów + przerender)
@@ -828,6 +855,8 @@ function update(): void {
       'Wklej tekst w polu „Tekst źródłowy” albo kliknij „Przykład” powyżej.</span>';
     findingsCard.hidden = true;
     lastRedacted = '';
+    lastSpans = null;
+    spansNote.hidden = true;
     syncPrintOut();
     keptMasks = 0;
     maskEls = [];
