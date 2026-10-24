@@ -1558,6 +1558,40 @@ test('reguła „wszędzie” bez miejsca nie ogłasza drugi raz starego „cofn
   });
 });
 
+test('jedna zmiana zdejmuje poprawkę i zostawia regułę „wszędzie” bez miejsca: aria-live mówi o obu', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const T = 'Wniosek dotyczy działki. Kod: Trzmielowa-Zagroda-77QX. Pan Sławomir Kędzierski, PESEL 44051401359.';
+    const ta = page.locator('#input');
+    const said = [];
+    await page.exposeFunction('__srSaid', (s) => said.push(s));
+    await page.evaluate(() => {
+      const el = document.querySelector('#sr-status');
+      new MutationObserver(() => el.textContent && window.__srSaid(el.textContent)).observe(el, { childList: true, characterData: true, subtree: true });
+    });
+    await ta.click();
+    await page.keyboard.insertText(T);
+    await app.waitForOutput('[PESEL]');
+    await maskAllFromSource(page, 'Zagroda', 'DANE');
+    await app.waitForOutput('[DANE]');
+    await page.locator('#output mark.pii', { hasText: '[PESEL]' }).first().click();
+    await page.locator('#fix-keep').click();
+    await app.waitForOutput('44051401359');
+    said.length = 0;
+    // literówka w zasłoniętym ciągu: zdejmuje „Zostaw jawne” i zostawia regułę z 0 miejsc naraz
+    const r = T.indexOf('Zagroda') + 3;
+    await selectInSource(page, r, r + 1);
+    await page.keyboard.insertText('x');
+    await settled(page);
+    await page.waitForTimeout(150);
+    const s = (await page.locator('#sr-status').textContent()) ?? '';
+    assert.match(s, /cofnięto 1/, `końcowy komunikat zgubił „cofnięto 1”: ${s}`);
+    assert.match(s, /0 miejsc/, `końcowy komunikat bez notki o 0 miejscach: ${s}`);
+    assert.ok(said.length >= 1, 'brak komunikatu aria-live');
+    assert.equal(said.at(-1), s);
+  });
+});
+
 test('Ctrl+Z w pustym polu karty nie cofa wpisu z innego pola karty (runda 2: karta)', async (t) => {
   await withApp(browser, t, '', async (app) => {
     const { page } = app;

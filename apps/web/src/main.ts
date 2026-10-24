@@ -1207,7 +1207,8 @@ document.addEventListener(
  */
 function sourceEdited(): boolean {
   undoSteps = [];
-  dropAnnounced = '';
+  // dropAnnounced zeruje dopiero koniec renderResult: zapasowe wywołanie z renderResult po
+  // handlerze input nic już nie zdejmuje i nie może zgubić „cofnięto N” z tej samej zmiany.
   const { decisions: rules, dropped } = afterSourceEdit(decisions);
   if (!dropped) return false;
   decisions = rules;
@@ -1679,6 +1680,7 @@ function update(): void {
     findingsCard.hidden = true;
     lastRedacted = '';
     if (lastInput) sourceEdited();
+    dropAnnounced = ''; // bez wyniku nie ma notki o 0 miejscach, z którą trzeba by go łączyć
     lastInput = '';
     fieldValue = text;
     lastSpans = null;
