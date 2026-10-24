@@ -400,8 +400,51 @@ test('edycja przyklejona do zakresu odrzuca „Zostaw jawne”, a zasłonięcie 
   expect(shiftDecisions(before, longer, mask).decisions[0]).toMatchObject(at(longer, 'Lisowski'));
   const front = 'Pismo do Piotr XLis w sprawie.';
   expect(shiftDecisions(before, front, mask).decisions[0]).toMatchObject(at(front, 'XLis'));
-  // zmiana w środku zasłoniętego tekstu: tekstu już nie ma, zasłonięcie odpada
-  expect(shiftDecisions(before, 'Pismo do Piotr Lks w sprawie.', mask).dropped).toBe(1);
+  // zmiana w środku zasłoniętego tekstu: zasłonięcie obejmuje poprawiony wyraz
+  const typo = 'Pismo do Piotr Lks w sprawie.';
+  expect(shiftDecisions(before, typo, mask)).toMatchObject({ dropped: 0, decisions: [at(typo, 'Lks')] });
+  // usunięcie całego zasłoniętego tekstu: nie ma czego zasłaniać, decyzja odpada
+  expect(shiftDecisions(before, 'Pismo do Piotr  w sprawie.', mask).dropped).toBe(1);
+});
+
+describe('zasłonięcie po pewnej edycji w nim albo przy nim (runda 2)', () => {
+  const T = 'Kod dostępu do skrzynki: Trzmielowa-Zagroda-77QX, proszę nie udostępniać. Zagroda stoi.';
+  const typo = T.replace('Trzmielowa-Zagroda', 'Trzmielowa-Zagxoda');
+
+  test('literówka poprawiona wewnątrz zasłonięcia „tutaj” zostaje zasłonięta', () => {
+    const d: Decision[] = [{ kind: 'mask', scope: 'here', ...at(T, 'Zagroda'), token: 'DANE' }];
+    expect(shiftDecisions(T, typo, d)).toMatchObject({ dropped: 0, decisions: [at(typo, 'Zagxoda')] });
+  });
+
+  test('„wszędzie”: zmienione miejsce dostaje zasłonięcie „tutaj”, pozostałe wystąpienia zostają', () => {
+    const d: Decision[] = [{ kind: 'mask', scope: 'all', text: 'Zagroda', token: 'DANE' }];
+    const r = shiftDecisions(T, typo, d);
+    expect(r.dropped).toBe(0);
+    expect(r.decisions).toEqual([d[0], { kind: 'mask', scope: 'here', ...at(typo, 'Zagxoda'), token: 'DANE' }]);
+    const out = final(typo, auto(typo).spans, r.decisions);
+    expect(out).not.toContain('Zag');
+  });
+
+  test('„wszędzie”: litera doklejona do jedynego wystąpienia numeru nie odsłania go', () => {
+    const t = 'Działka, księga wieczysta nr KR1P/00012345/9.\nUzasadnienie sprawy.';
+    const glued = t.replace('/9.', '/9a.');
+    const d: Decision[] = [{ kind: 'mask', scope: 'all', text: 'KR1P/00012345/9', token: 'DANE' }];
+    const r = shiftDecisions(t, glued, d);
+    expect(r).toMatchObject({ dropped: 0, decisions: [{ kind: 'mask', scope: 'here', ...at(glued, 'KR1P/00012345/9a') }] });
+    expect(final(glued, auto(glued).spans, r.decisions)).not.toContain('00012345');
+    // usunięta spacja i kropka między wyrazami: „sprawy.\nSkarżący” → „sprawykarżący”
+    const w = 'Opis sprawy.\nSkarżący wnosi.';
+    const joined = 'Opis sprawykarżący wnosi.';
+    const r2 = shiftDecisions(w, joined, [{ kind: 'mask', scope: 'all', text: 'sprawy', token: 'DANE' }]);
+    expect(r2.dropped).toBe(0);
+    expect(final(joined, auto(joined).spans, r2.decisions)).toBe('Opis [DANE] wnosi.');
+  });
+
+  test('„wszędzie” bez żadnego wystąpienia po zmianie odpada z komunikatem', () => {
+    const t = 'Opis: Zagroda.';
+    const r = shiftDecisions(t, 'Opis: .', [{ kind: 'mask', scope: 'all', text: 'Zagroda', token: 'DANE' }]);
+    expect(r).toEqual({ decisions: [], dropped: 1, reveals: 0 });
+  });
 });
 
 describe('zmiana źródła, której nie da się zmapować przesunięciem', () => {

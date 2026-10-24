@@ -1096,3 +1096,192 @@ test('Ctrl+Z i Ctrl+Y w wyniku bez poprawek do cofnięcia nie zmieniają tekstu 
     assert.equal(await ta.inputValue(), A, 'Ctrl+Y w wyniku zmienił pole źródła');
   });
 });
+
+// Runda 2 przeprojektowania: zasłonięcie idzie za poprawionym tekstem, Ctrl+Z poza polami nie sięga
+// historii pola źródła, karta pisma zeruje się tym samym kryterium co poprawki, a powrót Ctrl+Z
+// dokładnie do tekstu z decyzją przywraca jego poprawki.
+
+test('„Zasłoń wszędzie” na numerze KW: litera doklejona do numeru nie odsłania go (zgłoszenie: doklejona litera)', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const T = `Decyzja nr 14/2024 w sprawie działki, księga wieczysta nr ${KW}.\nUzasadnienie jest krótkie.`;
+    const ta = page.locator('#input');
+    await ta.click();
+    await page.keyboard.insertText(T);
+    await app.waitForOutput('Uzasadnienie');
+    await maskFromSource(page, KW, true);
+    await app.waitForOutput('[DANE]');
+    const end = T.indexOf(KW) + KW.length;
+    await ta.evaluate((el, n) => {
+      /** @type {HTMLTextAreaElement} */ (el).focus();
+      /** @type {HTMLTextAreaElement} */ (el).setSelectionRange(n, n);
+    }, end);
+    await page.keyboard.insertText('a');
+    await settled(page);
+    await assertHidden(page, '00045123', 'księga wieczysta z doklejoną literą');
+  });
+});
+
+test('literówka poprawiona wewnątrz ręcznego zasłonięcia nie odsłania fragmentu, „tutaj” i „wszędzie” (zgłoszenie: Zagroda)', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const T = 'Wniosek dotyczy działki. Kod dostępu do skrzynki: Trzmielowa-Zagroda-77QX, proszę nie udostępniać.';
+    const ta = page.locator('#input');
+    for (const all of [false, true]) {
+      await page.locator('#clear').click();
+      await ta.click();
+      await page.keyboard.insertText(T);
+      await app.waitForOutput('Zagroda');
+      await maskFromSource(page, 'Zagroda', all);
+      await app.waitForOutput('[DANE]');
+      const r = T.indexOf('Zagroda') + 3;
+      await ta.evaluate((el, n) => {
+        /** @type {HTMLTextAreaElement} */ (el).focus();
+        /** @type {HTMLTextAreaElement} */ (el).setSelectionRange(n, n + 1);
+      }, r);
+      await page.keyboard.insertText('x');
+      await settled(page);
+      assert.ok((await ta.inputValue()).includes('Zagxoda'));
+      await assertHidden(page, 'Zagxoda', all ? 'fragment „wszędzie”' : 'fragment „tutaj”');
+      assert.equal(await page.locator('#fix-sum').textContent(), 'Ręczne poprawki: przywrócono 0, zasłonięto 1');
+    }
+  });
+});
+
+test('Ctrl+Z na pasku poprawki i po „Cofnij ostatnią” cofa poprawkę, a nie podmienia pisma w polu (zgłoszenie: fokus na przycisku)', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const A = 'Decyzja nr 14/2024. Wnioskodawca Jan Kowalski, PESEL 44051401359, wnosi o wydanie decyzji.';
+    const B = 'Sprawę prowadzi inspektor Ewa Lis. Kontakt z inspektor Ewa Lis w pokoju 12.';
+    const ta = page.locator('#input');
+    await ta.click();
+    await page.keyboard.insertText(A);
+    await app.waitForOutput('[PESEL]');
+    await pasteOver(page, B);
+    await app.waitForOutput('pokoju 12');
+    await settled(page);
+    for (const button of ['#fix-keep', '#fix-keep-all']) {
+      await page.locator('#output mark.pii').first().click();
+      await page.locator(button).click();
+      await app.waitForOutput('Ewa Lis');
+      assert.equal(await page.evaluate(() => document.activeElement?.id), 'fix-remask');
+      await page.keyboard.press('ControlOrMeta+z');
+      await settled(page);
+      assert.equal(await ta.inputValue(), B, `${button}: Ctrl+Z na pasku zmienił pole źródła`);
+      assert.ok(!(await outText(page)).includes('Ewa Lis'), `${button}: Ctrl+Z nie cofnął „Zostaw jawne”`);
+      await page.keyboard.press(redo);
+      await settled(page);
+      assert.equal(await ta.inputValue(), B, `${button}: Ctrl+Y na pasku zmienił pole źródła`);
+    }
+    // „Cofnij ostatnią” zostawia fokus na body: Ctrl+Z dalej nie sięga historii pola
+    await page.locator('#output mark.pii').first().click();
+    await page.locator('#fix-keep').click();
+    await app.waitForOutput('Ewa Lis');
+    await page.locator('#fix-undo').click();
+    await page.evaluate(() => /** @type {HTMLElement} */ (document.activeElement)?.blur());
+    await page.keyboard.press('ControlOrMeta+z');
+    await settled(page);
+    assert.equal(await ta.inputValue(), B, 'Ctrl+Z bez fokusu zmienił pole źródła');
+    await page.locator('#clear').focus();
+    await page.keyboard.press('ControlOrMeta+z');
+    await settled(page);
+    assert.equal(await ta.inputValue(), B, 'Ctrl+Z na „Wyczyść” zmienił pole źródła');
+  });
+});
+
+test('podmiana pisma poza nagłówkiem zeruje kartę razem z poprawkami (zgłoszenie: częściowa podmiana)', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const H = 'URZĄD GMINY BRZOZOWA WOLA\n';
+    const A = `${H}Wnioskodawca Jan Kowalski, PESEL 44051401359, wnosi o wydanie zaświadczenia o niezaleganiu w podatkach lokalnych.`;
+    const B = 'Wnioskodawczyni Ewa Malinowska, PESEL 85071412358, wnosi o zwrot opłaty skarbowej.';
+    const ta = page.locator('#input');
+    await ta.click();
+    await page.keyboard.insertText(A);
+    await app.waitForOutput('[PESEL]');
+    await page.locator('#output mark.pii').first().click();
+    await page.locator('#fix-keep').click();
+    await app.waitForOutput('Jan Kowalski');
+    await page.locator('#publikacja').waitFor({ state: 'visible' });
+    if (!(await page.locator('#publikacja').evaluate((d) => /** @type {HTMLDetailsElement} */ (d).open)))
+      await page.locator('#publikacja > summary').click();
+    await page.locator('#pub-znak').fill('RGK.6131.47.2026');
+    await page.locator('#pub-adnotacja').fill('Wyłączono dane Jana Kowalskiego z ul. Lipowej 17.');
+    await page.locator('#pub-append').check();
+    await ta.evaluate((el, n) => {
+      /** @type {HTMLTextAreaElement} */ (el).focus();
+      /** @type {HTMLTextAreaElement} */ (el).setSelectionRange(n, /** @type {HTMLTextAreaElement} */ (el).value.length);
+    }, H.length);
+    await page.keyboard.insertText(B);
+    await settled(page);
+    assert.equal(
+      await page.locator('#fix-note').innerText(),
+      'Zmieniono pismo: cofnięto 1 decyzję o pozostawieniu jawnych danych.',
+    );
+    assert.equal(await page.locator('#pub-znak').inputValue(), '');
+    assert.equal(await page.locator('#pub-append').isChecked(), false);
+    await assertHidden(page, 'Lipowej 17', 'adnotacja poprzedniego pisma');
+  });
+});
+
+test('ręczne zasłonięcie pisma wraca przy Ctrl+Z do niego także po edycji innego pisma (zgłoszenie: jedno miejsce)', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const A = `Decyzja w sprawie działki, księga wieczysta nr ${KW}, wnioskodawca Jan Kowalski, PESEL 44051401359.\nUzasadnienie jest krótkie.`;
+    const B = 'Notatka służbowa: wnioskodawca Adam Nowak, PESEL 85071412358, stawił się osobiście w urzędzie.';
+    const ta = page.locator('#input');
+    for (const via of ['wklej', 'usun']) {
+      await page.locator('#clear').click();
+      await ta.click();
+      await page.keyboard.insertText(A);
+      await app.waitForOutput('[PESEL]');
+      await maskFromSource(page, KW);
+      await app.waitForOutput('[DANE]');
+      await ta.focus();
+      if (via === 'wklej') {
+        await page.keyboard.press('ControlOrMeta+a');
+        await page.keyboard.insertText(B);
+        await settled(page);
+        await page.keyboard.press('End');
+        await page.keyboard.insertText(' Uwagi');
+      } else {
+        await page.keyboard.press('ControlOrMeta+a');
+        await page.keyboard.press('Delete');
+        await settled(page);
+        await page.keyboard.insertText('Nowe pismo');
+      }
+      await settled(page);
+      for (let i = 0; i < 4 && (await ta.inputValue()) !== A; i++) {
+        await page.keyboard.press('ControlOrMeta+z');
+        await settled(page);
+      }
+      assert.equal(await ta.inputValue(), A, `${via}: Ctrl+Z nie wrócił do pisma A`);
+      await assertHidden(page, '00045123', `${via}: księga wieczysta`);
+    }
+  });
+});
+
+test('Ctrl+Z dopisku wraca do tekstu z chwili „Zostaw jawne” razem z decyzją (zgłoszenie: dopisek)', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const T = 'Sprawę prowadzi inspektor Ewa Lis. Wnioskodawca Jan Kowalski, PESEL 44051401359, wnosi o decyzję.';
+    const ta = page.locator('#input');
+    await ta.click();
+    await page.keyboard.insertText(T);
+    await app.waitForOutput('[PESEL]');
+    await page.locator('#output mark.pii').first().click();
+    assert.equal(await page.locator('#fix-bar-val').textContent(), 'Ewa Lis');
+    await page.locator('#fix-keep').click();
+    await app.waitForOutput('Ewa Lis');
+    await ta.focus();
+    await page.keyboard.press('End');
+    await page.keyboard.insertText(' Pilne');
+    await settled(page);
+    await page.keyboard.press('ControlOrMeta+z');
+    await settled(page);
+    assert.equal(await ta.inputValue(), T);
+    assert.ok((await outText(page)).includes('inspektor Ewa Lis'), 'Ctrl+Z dopisku cofnął „Zostaw jawne”');
+    assert.equal(await page.locator('#fix-note').innerText(), '');
+    await assertHidden(page, 'Kowalski', 'wnioskodawca');
+  });
+});

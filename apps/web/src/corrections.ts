@@ -323,10 +323,12 @@ export function defaultToken(text: string): string {
  * w polu, wklejenie w miejsce całości, zmiana większości tekstu) odpadają wszystkie decyzje
  * odsłaniające: obowiązują tylko w tekście, w którym je podjęto.
  *
- * Zasłonięcie „tutaj” zostaje, dopóki jego tekst stoi w tym miejscu (przed przesunięciem albo po
- * nim); litery doklejone do niego wchodzą do zakresu („Lis” → „Lisowski”), bo lepiej zasłonić
- * więcej niż zostawić „owski” jawne. Zasłonięcie „wszędzie” zostaje przy pewnej zmianie zawsze,
- * a przy niepewnej, gdy jego tekst występuje w nowym tekście.
+ * Zasłonięcie idzie za tekstem, bo lepiej zasłonić więcej niż zostawić coś jawne. Przy pewnej
+ * zmianie w nim albo przy nim obejmuje cały nowy tekst w tym miejscu, rozszerzony do całych wyrazów
+ * („Lis” → „Lisowski”, „Zagroda” → „Zagxoda”, numer z doklejoną literą). Przy niepewnej zostaje tam,
+ * gdzie jego tekst dalej stoi. Miejsce zasłonięcia „wszędzie”, którego tekst po zmianie przestał być
+ * wystąpieniem (doklejona litera, usunięta spacja), dostaje osobne zasłonięcie „tutaj”. Decyzja
+ * „wszędzie” bez żadnego wystąpienia odpada. Zasłonięcie, które odpadło, liczy się w `dropped`.
  */
 export function shiftDecisions(
   before: string,
@@ -353,40 +355,59 @@ export function shiftDecisions(
     if (a > oldEnd || (a === oldEnd && !gluedStart)) return [a + delta, b + delta];
     return null;
   };
-  /** Zasłonięcie: tekst stoi dalej przed przesunięciem albo po nim, rozszerzony do całych wyrazów. */
-  const follow = (a: number, b: number): [number, number] | null => {
+  /** Zakres nowego tekstu rozszerzony do całych wyrazów, w wierszach (znacznik nie przechodzi przez koniec wiersza). */
+  const words = (a: number, b: number): [number, number][] => {
+    while (a > 0 && isWordChar(after[a - 1]) && isWordChar(after[a])) a--;
+    while (b < after.length && isWordChar(after[b]) && isWordChar(after[b - 1])) b++;
+    return lineRanges(after, a, b);
+  };
+  /**
+   * Zasłonięcie [a, b) po zmianie. Pewna zmiana w nim albo przy nim: stara reszta zakresu razem
+   * z tym, co wpisano. Inaczej tekst, który dalej stoi przed przesunięciem albo po nim.
+   */
+  const follow = (a: number, b: number): [number, number][] => {
+    const moved = move(a, b);
+    if (moved) return [moved];
+    if (sure) return words(Math.min(a, p), Math.max(b, oldEnd) + delta);
     const text = before.slice(a, b);
     for (const x of [a, a + delta]) {
-      if (x < 0 || after.slice(x, x + text.length) !== text) continue;
-      let e = x + text.length;
-      let y = x;
-      while (y > 0 && isWordChar(after[y - 1]) && isWordChar(after[y])) y--;
-      while (e < after.length && isWordChar(after[e]) && isWordChar(after[e - 1])) e++;
-      return [y, e];
+      if (x >= 0 && after.slice(x, x + text.length) === text) return words(x, x + text.length);
     }
-    return null;
+    return [];
   };
   const out: Decision[] = [];
   let dropped = 0;
   let reveals = 0;
   for (const d of decisions) {
-    let next: Decision | null = null;
-    if (d.kind === 'mask') {
-      if (d.scope === 'all') next = sure || findOccurrences(after, d.text, d.token).length ? d : null;
-      else {
-        const r = move(d.start, d.end) ?? follow(d.start, d.end);
-        next = r && { ...d, start: r[0], end: r[1] };
+    if (d.kind === 'mask' && d.scope === 'all') {
+      const now = findOccurrences(after, d.text, d.token);
+      const extra: Decision[] = [];
+      if (sure) {
+        for (const [a, b] of findOccurrences(before, d.text, d.token)) {
+          if (move(a, b)) continue;
+          for (const [x, y] of follow(a, b)) {
+            if (!now.some(([c, e]) => c <= x && y <= e)) extra.push({ kind: 'mask', scope: 'here', start: x, end: y, token: d.token });
+          }
+        }
       }
+      if (now.length) out.push(d);
+      out.push(...extra);
+      if (!now.length && !extra.length) dropped++;
+      continue;
+    }
+    let next: Decision[] = [];
+    if (d.kind === 'mask') {
+      next = follow(d.start, d.end).map(([start, end]) => ({ ...d, start, end }));
     } else if (sure) {
       if (d.scope === 'here') {
         const r = move(d.start, d.end);
-        next = r && { ...d, start: r[0], end: r[1] };
+        if (r) next = [{ ...d, start: r[0], end: r[1] }];
       } else {
         const ranges = d.ranges.map(([a, b]) => move(a, b)).filter((r): r is [number, number] => !!r);
-        next = ranges.length ? { ...d, ranges } : null;
+        if (ranges.length) next = [{ ...d, ranges }];
       }
     }
-    if (next) out.push(next);
+    if (next.length) out.push(...next);
     else {
       dropped++;
       if (d.kind !== 'mask') reveals++;
