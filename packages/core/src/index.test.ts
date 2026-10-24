@@ -343,6 +343,66 @@ test('KW — regresje: w adresie kotwiczy tylko wartość parametru numeru księ
     'https://ekw.ms.gov.pl/x?nr_kw=[NR-KW]&a=1',
   );
 });
+test('KW — regresje: „KW" jako pojęcie w zdaniu, wierszu wyżej albo w innej kolumnie nie kotwiczy kodu dokumentu', () => {
+  const keep = [
+    'Odpis KW w pliku ZP1A-20260315-1.pdf',
+    'brak KW, wniosek EZD WN1A/20260315/2',
+    'KW: brak; skan SC1N 20260315 1',
+    'Kontrolowany przedstawił wypis KW oraz certyfikat CE1A/12345678/4',
+    'dla której prowadzona jest KW, zgodnie z umową nr UM2B-12345678-0',
+    'księga wieczysta – w załączeniu skan ZP1A-20260315-1',
+    'Złożono odpis z księgi wieczystej.\nFaktura FV1A/20240101/1 opłacona.',
+    'Odczytano odpis KW.\nNr dok. AB1C 12345678 9 złożono.',
+    'KW\nFaktura FV1A/20240101/1',
+    'Wpis w KW dokonano. 3) Protokół PR1A/20260101/2 z odbioru.',
+    'Załączniki: 1) odpis księgi wieczystej, 2) faktura FV1A/20240101/1.',
+    'Zał. 1 – odpis KW; zał. 2 – zamówienie ZP1A-20260315-1.',
+    'Kancelaria: nr KW w aktach; umowa UM2B/20260101/3 z dnia 2.01.2026.',
+    '1;odpis KW;\n2;faktura;FV1A/20261012/3',
+    '| 1 | odpis KW |\n| 2 | ZP1A/20260315/2 |',
+    'modul=KW start\nbatch PL1B/20261012/3 ok',
+    'Temat: zapytanie o KW\nZamówienie ZP1A-20260315-2 wysłano.',
+    '[{"typ":"KW"},{"nr":"FV2A/20261012/5"}]',
+    'Nr KW\tStatus\nbrak\tWA2B 12345678 1 szt.',
+    'nr kw: brak, kod przesyłki PO1A 12345678 9',
+  ];
+  for (const t of keep) expect(redactPII(t).redacted).toBe(t);
+  expect(redactPII('Odpis KW nr WA1M/00512345/1, faktura FV1A/20240101/1.').redacted).toBe(
+    'Odpis KW nr [NR-KW], faktura FV1A/20240101/1.',
+  );
+  expect(redactPII('KW nr WA1M/00512345/1 i zamówienie ZP1A-20260315-1.').redacted).toBe(
+    'KW nr [NR-KW] i zamówienie ZP1A-20260315-1.',
+  );
+  // następna kolumna wiersza TSV to nie wyliczenie
+  expect(redactPII('Nr KW\tStatus\nKR1P/00234567/1\tFV1A/20240101/1').redacted).toBe('Nr KW\tStatus\n[NR-KW]\tFV1A/20240101/1');
+});
+test('KW — regresje: etykieta przy numerze nadal kotwiczy (o numerze, nr, kolumna, kilka wierszy)', () => {
+  expect(redactPII('objętej księgą wieczystą o nr KR1P/00123456/5').redacted).toBe('objętej księgą wieczystą o nr [NR-KW]');
+  expect(redactPII('KW o numerach KR1P/00123456/5, GD1G/00012345/2').redacted).toBe('KW o numerach [NR-KW], [NR-KW]');
+  expect(redactPII('księgi wieczystej nr KR1P/00123456/5 oraz nr GD1G/00012345/2').redacted).toBe(
+    'księgi wieczystej nr [NR-KW] oraz nr [NR-KW]',
+  );
+  expect(redactPII('KW (nr KR1P/00123456/5)').redacted).toBe('KW (nr [NR-KW])');
+  expect(redactPII('Nr KW\tPowierzchnia\nKR1P/00234567/1\t120 m2\nGD1G/00012345/2\t80 m2').redacted).toBe(
+    'Nr KW\tPowierzchnia\n[NR-KW]\t120 m2\n[NR-KW]\t80 m2',
+  );
+  expect(redactPII('Lp\tNr KW\r\n1\tKR1P/00234567/1\r\n2\tKR1P/00234567/2\r\n').redacted).toBe('Lp\tNr KW\r\n1\t[NR-KW]\r\n2\t[NR-KW]\r\n');
+  expect(redactPII('| Lp | Nr KW |\n|---|---|\n| 1 | KR1P/00234567/1 |').redacted).toBe('| Lp | Nr KW |\n|---|---|\n| 1 | [NR-KW] |');
+  // pewny numer (znany sąd, poprawna suma) maskujemy także bez etykiety, jak dotąd
+  expect(redactPII('Opłata OP1A/20260302/4.').redacted).toBe('Opłata [NR-KW].');
+});
+test('KW — regresje: numer wklejony w znak sprawy zostaje dla passZnakSprawy, liczebnik po numerze bez cyfry kontrolnej zostaje', () => {
+  expect(redactPII('Znak sprawy: GN.KR1P/00123456/4').redacted).toBe('Znak sprawy: [ZNAK-SPRAWY]');
+  expect(redactPII('Nasz znak: GKN-KR1P/00123456/4').redacted).toBe('Nasz znak: [ZNAK-SPRAWY]');
+  expect(redactPII('Znak: KW.KR1P/00123456/4').redacted).toBe('Znak: [ZNAK-SPRAWY]');
+  expect(redactPII('Znak: WA1M/00512345/6.GN').redacted).toBe('Znak: [ZNAK-SPRAWY]');
+  expect(redactPII('Znak: GN.6840.WA1M/00512345/6').redacted).toBe('Znak: [ZNAK-SPRAWY]');
+  // bez etykiety znaku numer KW po kotwicy dalej dostaje maskę
+  expect(redactPII('KW WA1M/00512345/6.').redacted).toBe('KW [NR-KW].');
+  expect(redactPII('prowadzi księgę wieczystą KR1P 00123456 2 lokale').redacted).toBe('prowadzi księgę wieczystą [NR-KW] 2 lokale');
+  expect(redactPII('KW GD1G 00012345 3 działki').redacted).toBe('KW [NR-KW] 3 działki');
+  expect(redactPII('KW WA1M 00512345 1').redacted).toBe('KW [NR-KW]');
+});
 test('KW — placeholder jest idempotentny, a typ można wyłączyć', () => {
   const once = redactPII('KW nr KR1P/00234567/6').redacted;
   expect(redactPII(once).redacted).toBe(once);

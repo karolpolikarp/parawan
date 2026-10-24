@@ -3456,22 +3456,80 @@ const RE_KW_ANCHOR =
  *  kończy zdanie, inaczej kotwica przechodziła na numer faktury w następnym zdaniu. */
 const RE_KW_SENTENCE_END =
   /(?<!(?:\b[Nn]r|wiecz|\bks))(?<!\b[Kk][Ww](?=\.[ \t]+Nr(?!\p{L})))[.!?](?=[ \t]+[A-ZĄĆĘŁŃÓŚŹŻ])|\n[ \t]*\n/gu;
-/** Łącznik wyliczenia między dwoma numerami: „KW nr A, B i C" — kotwica pierwszego niesie resztę. */
-const RE_KW_LIST_GAP = /^(?:[ \t,;]|\r?\n|(?:i|oraz|lub|albo|a także)(?=[ \t]))*$/;
+/** Łącznik wyliczenia między dwoma numerami: „KW nr A, B i C" — kotwica pierwszego niesie resztę.
+ *  Bez tabulatora: w wierszu TSV („KR1P/…\tFV1A/…") następna komórka to inna kolumna, nie lista. */
+const RE_KW_LIST_GAP = /^(?:[ ,;]|\r?\n|(?:i|oraz|lub|albo|a także)(?=[ \t])|(?:[Nn]r|numer)\.?(?=[ \t:]):?)*$/;
 /** Parametr adresu, który zapowiada numer księgi („…/wyszukiwanieKW?kw=KR1P/…"). Kotwica dotyczy
  *  tylko wartości tego parametru: „?kw=buty" w sklepie to fraza wyszukiwania, a „?ksiegowosc=" to
  *  nie księga, więc sąsiedni parametr („&plik=ZP1A-20260315-1.pdf") nie może z niej korzystać. */
 const RE_KW_URL_PARAM = /[?&#;](?:kw|nr_?kw|numer_?kw|ksi[eę]g[aię]?(?:_?wieczyst\w{0,3})?)=$/i;
 
-/** Kotwica w oknie 40 znaków przed numerem, w tym samym zdaniu (etykieta z poprzedniego wiersza
- *  „KW:\n…" się liczy, ale nie z poprzedniego akapitu). */
+/** Odstęp między kotwicą a numerem, przy którym kotwica jest ETYKIETĄ numeru: interpunkcja
+ *  etykiety, znaczniki XML/JSON, kolumna tabeli, łamanie wiersza i „nr"/„numer"/„o numerze"/„pod".
+ *  Tylko taka kotwica znosi wszystkie zabezpieczenia (zła suma, spacja albo myślnik zamiast
+ *  ukośnika, małe litery). „KW" wspomniane w zdaniu jako pojęcie („odpis KW w pliku ZP1A-…",
+ *  „KW nr …, faktura FV1A/…", „1;odpis KW;\n2;faktura;FV1A/…") nie jest etykietą kodu, który
+ *  stoi za innym słowem, w innym rekordzie albo w następnym punkcie wyliczenia. Taki numer
+ *  maskujemy tylko wtedy, gdy jest pewny sam w sobie (znany sąd i poprawna suma), jak bez kotwicy. */
+const RE_KW_ADJ_GAP =
+  /^(?:[ \t\r\n:=."'<>()[\]|_–-]|(?<!\p{L})(?:o[ \t]+)?(?:[Nn]r|NR|[Nn]umer(?:ze|em|u|y|ach|ami)?|NUMER|pod)(?!\p{L}))*$/u;
+const RE_KW_ANCHOR_G = new RegExp(RE_KW_ANCHOR.source, 'gu');
+/** Etykieta znaku sprawy tuż przed numerem KW wklejonym w znak („Znak sprawy: GN.KR1P/…/4",
+ *  „Znak: WA1M/…/6.GN"). Cały znak maskuje wtedy passZnakSprawy; sam numer zostawiał jawny
+ *  symbol komórki (fragment znaku). */
+const RE_KW_ZNAK_BEFORE =
+  /(?:znak sprawy|znak pisma|nasz znak|wasz znak|sygn\.?[ \t]*akt|sygnatura akt|sygn\.|znak(?=[ \t]*:))[ \t]*:?[ \t]*(?:[\p{L}\d]+[.-])*$/iu;
+
+/** Kotwica-etykieta w oknie 40 znaków przed numerem, w tym samym zdaniu (etykieta z poprzedniego
+ *  wiersza „KW:\n…" się liczy, ale nie z poprzedniego akapitu). Liczy się ostatnia kotwica w oknie
+ *  i tylko wtedy, gdy od numeru dzieli ją sam odstęp etykiety (RE_KW_ADJ_GAP). */
 function kwAnchoredBefore(text: string, offset: number): boolean {
   let win = text.slice(Math.max(0, offset - 40), offset);
   let cut = -1;
   RE_KW_SENTENCE_END.lastIndex = 0;
   for (let m = RE_KW_SENTENCE_END.exec(win); m; m = RE_KW_SENTENCE_END.exec(win)) cut = m.index + m[0].length;
   if (cut >= 0) win = win.slice(cut);
-  return RE_KW_ANCHOR.test(win);
+  let end = -1;
+  RE_KW_ANCHOR_G.lastIndex = 0;
+  for (let m = RE_KW_ANCHOR_G.exec(win); m; m = RE_KW_ANCHOR_G.exec(win)) end = m.index + m[0].length;
+  return (end >= 0 && RE_KW_ADJ_GAP.test(win.slice(end))) || kwColumnAnchored(text, offset);
+}
+
+const RE_KW_SHAPE_CELL = new RegExp(`^[ \\t"']*${KW_SHAPE}[ \\t\\r"']*$`, 'u');
+/** Nagłówek kolumny jako kotwica („Nr KW\tPowierzchnia\nKR1P/…\t120 m2"): numer musi stać w TEJ
+ *  SAMEJ kolumnie co komórka z etykietą. Okno 40 znaków przenosiło „KW" z nagłówka na każdą
+ *  kolumnę następnego wiersza („Nr KW\tStatus\nbrak\tWA2B 12345678 1 szt."). Idziemy w górę przez
+ *  wiersze z numerami KW w tej kolumnie (kilka numerów pod jednym nagłówkiem); wycinek ograniczony,
+ *  by długi tekst bez nowych wierszy nie był skanowany przy każdym trafieniu. */
+function kwColumnAnchored(text: string, offset: number): boolean {
+  const lines = text.slice(Math.max(0, offset - 400), offset).split('\n');
+  if (lines.length < 2) return false;
+  const cur = lines[lines.length - 1];
+  const sep = cur.includes('\t') || lines[lines.length - 2].includes('\t') ? '\t' : cur.includes('|') ? '|' : '';
+  if (!sep) return false;
+  const curCells = cur.split(sep);
+  if (!/^[ \t"']*$/.test(curCells[curCells.length - 1])) return false;
+  const col = curCells.length - 1;
+  // pierwszy wiersz wycinka bywa ucięty, więc go nie oceniamy (chyba że wycinek zaczyna tekst)
+  const first = offset - 400 <= 0 ? 0 : 1;
+  for (let i = lines.length - 2; i >= first; i--) {
+    const row = lines[i];
+    if (sep === '|' && /^[ \t|:-]+$/.test(row)) continue; // linia „|---|---|" w Markdownie
+    const cell = row.split(sep)[col];
+    if (cell === undefined) return false;
+    if (RE_KW_SHAPE_CELL.test(cell)) continue;
+    // Komórka musi BYĆ etykietą („Nr KW", „Księga wieczysta"), a nie opisem z tym słowem
+    // („| 2 | odpis KW |" nad „| 3 | ZP1A/… |" to wiersz danych, nie nagłówek).
+    const label = cell.trim();
+    const a = RE_KW_ANCHOR.exec(label);
+    return (
+      !!a &&
+      label.length <= 30 &&
+      /^(?:(?:[Nn]r|NR|[Nn]umer|NUMER)\.?[ \t]*)?$/.test(label.slice(0, a.index)) &&
+      RE_KW_ADJ_GAP.test(label.slice(a.index + a[0].length))
+    );
+  }
+  return false;
 }
 
 /** Callback dla RE_KW_VALUE. `inUrl` — dopasowanie wewnątrz adresu: kotwicą jest wtedy tylko
@@ -3488,9 +3546,14 @@ function maskKwMatch(ctx: RedactCtx, inUrl = false) {
     t: string,
   ): string => {
     const num = numSlash ?? numSpace ?? '';
-    const anchored =
-      (inUrl ? RE_KW_URL_PARAM.test(t.slice(Math.max(0, offset - 40), offset)) : kwAnchoredBefore(t, offset)) ||
-      (prevEnd >= 0 && offset - prevEnd <= 12 && RE_KW_LIST_GAP.test(t.slice(prevEnd, offset)));
+    const before = t.slice(Math.max(0, offset - 40), offset);
+    const after = t.slice(offset + m.length, offset + m.length + 2);
+    if ((/[\p{L}\d][.-]$/u.test(before) || /^\.\p{L}/u.test(after)) && RE_KW_ZNAK_BEFORE.test(before)) return m;
+    const anchored = inUrl
+      ? RE_KW_URL_PARAM.test(before)
+      : (prevEnd >= 0 && offset - prevEnd <= 12 && RE_KW_LIST_GAP.test(t.slice(prevEnd, offset))) ||
+        kwAnchoredBefore(t, offset);
+    const valid = isValidKw(`${code}${num}${c}`);
     // Bez kotwicy tylko pełna pewność: wielkie litery, ukośniki, znany sąd i poprawna cyfra
     // kontrolna. Przy kotwicy maskujemy mimo złej sumy (literówka w piśmie), jak PESEL po „PESEL:".
     const ok =
@@ -3498,10 +3561,15 @@ function maskKwMatch(ctx: RedactCtx, inUrl = false) {
       (/^[A-Z]{2}\d[A-Z]$/.test(code) &&
         m.split('/').length === 3 &&
         KW_COURT_PREFIXES.has(code.slice(0, 2)) &&
-        isValidKw(`${code}${num}${c}`));
+        valid);
     if (!ok) return m;
     prevEnd = offset + m.length;
     ctx.bump('KW');
+    // „KR1P 00123456 2 lokale": numer bez cyfry kontrolnej, a „2" to liczebnik z prozy. Przy
+    // spacjach i złej sumie, gdy dalej stoi wyraz, cyfra zostaje w tekście (numer i tak w masce).
+    if (numSpace !== undefined && !valid && /^[ \t]+\p{L}/u.test(t.slice(offset + m.length, offset + m.length + 3))) {
+      return ctx.M.KW + m.slice(m.lastIndexOf(numSpace) + numSpace.length);
+    }
     return ctx.M.KW;
   };
 }
