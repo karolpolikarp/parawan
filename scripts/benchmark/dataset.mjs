@@ -950,6 +950,9 @@ export function buildDataset() {
   // audyt końcowy r1: telefon złamany w wierszu po „dzwonić pod", login-wyraz bez rozlewania, patron z tytułem
   str('W razie pytań proszę dzwonić pod 512 345\n678 wieczorem.\nLogin: mazur\nNa zakończenie orkiestra zagrała mazur.', ['512 345\n678', 'Login: mazur'], ['proszę dzwonić pod', 'zagrała mazur']);
   neg('Szpital Specjalistyczny im. dr. Wilka w Krakowie. Szkoła im. Ks. Jerzego Popiełuszki. Kościół pw. bł. ks. Jerzego Popiełuszki. Parafia pw. bł. Józefa Kowalskiego.', ['im. dr. Wilka', 'Ks. Jerzego Popiełuszki', 'bł. ks. Jerzego Popiełuszki', 'bł. Józefa Kowalskiego']);
+  // audyt końcowy r2: adres kończy się na kropce za numerem domu, drugie imię rodzica w tej samej masce
+  str('Zgłaszająca mieszka przy ul. Grochowskiej 17. Od 3 lat skarży się na hałas. Anna Lis, córka Piotra Pawła i Anny Marii.', ['ul. Grochowskiej 17', 'Anna Lis', 'Piotra Pawła', 'Anny Marii'], ['Od 3 lat skarży się']);
+  neg('Odbiorca: Szkoła Podstawowa nr 12 im. Jana Pawła II', ['im. Jana Pawła II']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

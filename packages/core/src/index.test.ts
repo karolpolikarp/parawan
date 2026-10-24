@@ -6838,3 +6838,49 @@ test('audyt końcowy r1: imię matki w dopełniaczu spoza słownika maskowane ra
   ]);
   keep(['Jezus, syn Józefa i Maryi, nauczał.']);
 });
+test('audyt końcowy r2: adres kończy się na kropce za numerem domu, liczba z następnego zdania go nie odsłania', () => {
+  masked([
+    ['Pani Kos mieszka przy ul. Polnej 3. Od 2 lat choruje.', `Pani ${N} mieszka przy ${A}. Od 2 lat choruje.`],
+    ['Mieszka przy ul. Polnej 13. Ma 47 lat.', `Mieszka przy ${A}. Ma 47 lat.`],
+    ['Zgłaszająca mieszka przy ul. Grochowskiej 17. Od 3 lat skarży się na hałas.', `Zgłaszająca mieszka przy ${A}. Od 3 lat skarży się na hałas.`],
+    ['Zebranie odbyło się w świetlicy przy ul. Witosa 3. Obecnych 47 mieszkańców.', `Zebranie odbyło się w świetlicy przy ${A}. Obecnych 47 mieszkańców.`],
+    ['Spotkanie odbyło się przy ul. Polnej 3. Trwało 2 godziny.', `Spotkanie odbyło się przy ${A}. Trwało 2 godziny.`],
+    ['Adres: ul. Polna 3a. Ma 47 lat.', `Adres: ${A}. Ma 47 lat.`],
+  ]);
+  masked([['Mieszka przy ul. Polnej 3. Od 2 tygodni choruje.', 'Mieszka przy [ADRES]. Od 2 tygodni choruje.']], { pseudonyms: true });
+  // liczebnik w tym samym zdaniu dalej nie jest numerem domu
+  keep(['Wypadek przy ul. Długiej 5 osób rannych.']);
+});
+test('audyt końcowy r2: patron instytucji w wierszu nagłówka to nie adresat „Nazwisko Imię"', () => {
+  keep([
+    'Odbiorca: Szkoła Podstawowa nr 12 im. Jana Pawła II',
+    'Do: Szkoła Podstawowa im. Jana Pawła II w Ostrołęce',
+    'Odbiorca: Szkoła im. Jana Pawła Drugiego',
+    'Nadawca: Szkoła im. Anny Marii II',
+  ]);
+  keep(['Odbiorca: Szkoła Podstawowa nr 12 im. Jana Pawła II'], { pseudonyms: true });
+  masked([
+    ['Do: Kowalski Jan', `Do: ${N}`],
+    ['Do: Nowak Anna; Lis Jakub', `Do: ${N}; ${N}`],
+    ['To: Szkoła im. Adama Mickiewicza; Kowalski Jan', `To: Szkoła im. Adama Mickiewicza; ${N}`],
+  ]);
+});
+test('audyt końcowy r2: drugie imię rodzica w tej samej masce', () => {
+  masked([
+    ['Anna Lis, córka Piotra Pawła i Anny Marii, PESEL 78031412349', `${N}, córka ${N} i ${N}, PESEL [PESEL]`],
+    ['Jan Nowak, syn Jana Pawła i Marii.', `${N}, syn ${N} i ${N}.`],
+    ['Anna Lis, córka Piotra Pawła i Anny', `${N}, córka ${N} i ${N}`],
+  ]);
+  masked(
+    [
+      ['Anna Lis, córka Piotra Pawła i Anny Marii, PESEL 78031412349', '[OSOBA-A], córka [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO], PESEL [PESEL]'],
+      ['Jan Nowak, syn Jana Pawła i Marii.', '[OSOBA-A], syn [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO].'],
+    ],
+    { pseudonyms: true },
+  );
+  // małżonkowie ze wspólnym nazwiskiem i para imion bez osoby przed nimi bez zmian
+  masked([
+    ['Anna i Jan Kowalscy', `${N} i ${N}`],
+    ['Jan i Anna Maria', `${N} i ${N}`],
+  ]);
+});

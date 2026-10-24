@@ -4611,6 +4611,8 @@ function labeledPersonBeforeAddr(before: string): boolean {
 // Numer domu przed dniem albo rokiem daty („ul. Długiej 15 12 lipca", „ul. Polna 15 1998 r.",
 // „ul. Długa 5⇥2024-05-12") — adres kończy się na numerze domu, a dzień/rok zostaje za maską.
 const RE_HOUSE_NO_BEFORE_DATE = /^(.*[ \t]\d+[A-Za-z]?)([ \t]+\d{1,4})$/;
+// Numer domu po wyrazie nazwy, a za nim kropka i wielka litera następnego zdania.
+const RE_HOUSE_NO_SENTENCE_END = new RegExp(`(?<=[${PL_LO}])[ \\t]+\\d{1,4}[A-Za-z]?(?=\\.[ \\t]+[${PL_UP}][${PL_LO}])`);
 // Numer domu, także zakres bez odstępów („Hoża 41-43", „41–43"). Pierwszy człon zakresu najwyżej
 // trzycyfrowy: „przy ul. Okopowej 1944-1956" to lata, nie numery.
 const ADDR_HOUSE = String.raw`\d+[A-Za-z]?(?:(?<!\d{4})[-–]\d{1,3}[A-Za-z]?(?!\d))?`;
@@ -4882,7 +4884,15 @@ function passAddress(ctx: RedactCtx): void {
         `[ \\t]+${ADDR_HOUSE}${ADDR_UNIT}`,
       'g',
     ),
-    (m: string, prefix: string, offset: number, str: string) => {
+    function onAddr(m: string, prefix: string, offset: number, str: string): string {
+      // Kropka kończąca zdanie po numerze domu („przy ul. Polnej 3. Od 2 lat choruje"): człon nazwy
+      // może zaczynać się cyfrą, więc dopasowanie przechodziło na następne zdanie i brało jego liczbę
+      // za numer domu. Strażnik ilości oddawał wtedy cały adres jawny. Adres kończy się na kropce.
+      const sb = RE_HOUSE_NO_SENTENCE_END.exec(m);
+      if (sb) {
+        const cut = sb.index + sb[0].length;
+        return onAddr(m.slice(0, cut), prefix, offset, str) + m.slice(cut);
+      }
       // nowe typy obiektów (rondo/most/skwer/bulwar) + GOŁA 4-cyfrowa liczba 1900–2099 to ROK obiektu
       // („Most Grunwaldzki 1910", „Bulwar Filadelfijski 1998"), NIE numer domu — pomiń. Numer domu z
       // literą/mieszkaniem („Bulwar Nadmorski 10", „Rondo X 12/5") kończy się inaczej → maskowany.
@@ -4985,7 +4995,7 @@ function passAddress(ctx: RedactCtx): void {
         return beforeDate();
       ctx.bump('ADRES');
       return ctx.M.ADRES;
-    },
+    }
   );
   // 12a') Drugi adres w wyliczeniu tuż za maską („Lokale przy ul. Polnej 5 i Leśnej 7", „zam. ul.
   // Długa 5 i Krótka 7"). Łącznik po numerze domu nie jest członem nazwy (ADDR_CONNECTOR), więc druga
@@ -5854,9 +5864,16 @@ function passProtectFictional(ctx: RedactCtx): void {
 function passPersonPairs(ctx: RedactCtx): void {
   if (!ctx.on('IMIE')) return;
   // (a0) „Imię i Imię Nazwisko" — małżonkowie/rodzeństwo o WSPÓLNYM nazwisku („Anna i Jan Kowalscy").
-  ctx.text = ctx.text.replace(RE_SPOUSES, (m, a: string, mid: string, b: string, c: string) => {
+  ctx.text = ctx.text.replace(RE_SPOUSES, (m, a: string, mid: string, b: string, c: string, offset: number, t: string) => {
     if (!isFirstNameLike(a) || !isFirstNameLike(b)) return m;
     if (LEGAL_ENTITY_WORDS.has(c.toLowerCase())) return m;
+    // Dwie osoby z dwoma imionami („córka Piotra Pawła i Anny Marii"): pierwszy wyraz to drugie imię
+    // poprzedniej osoby, a trzeci to drugie imię drugiej, nie wspólne nazwisko. Wspólny klucz robił
+    // z ojca i matki jedną osobę, a „Piotra" odrywało się od swojej maski.
+    if (isFirstNameLike(c) && !surnameBase(c)) {
+      const prev = /(\p{Lu}\p{Ll}+)[ \t]+$/u.exec(t.slice(Math.max(0, offset - 30), offset))?.[1];
+      if (prev && isFirstNameLike(prev)) return m;
+    }
     ctx.bump('IMIE');
     // wspólne nazwisko = ten sam klucz osoby; spójnik i odstępy zostają takie jak w tekście
     // (dawniej stałe „ i " zamieniało „oraz" i zwijało wyrównanie spacjami)
@@ -6120,6 +6137,10 @@ function passPersonPairs(ctx: RedactCtx): void {
     if (!isFirstNameLike(w2)) return m;
     const w1l = w1.toLowerCase();
     if (TITLE_WORDS.has(w1l) || ROLE_WORDS.has(w1l) || LEGAL_ENTITY_WORDS.has(w1l) || LEGAL_ENTITY_WORDS.has(w2.toLowerCase())) return m;
+    // Patron instytucji w wierszu nagłówka („Odbiorca: Szkoła Podstawowa nr 12 im. Jana Pawła II",
+    // „Do: Hospicjum im. Jana Pawła II"): dwa imiona w dopełniaczu po „im." to nie „Nazwisko Imię"
+    // adresata. Bez nagłówka para i tak zostaje, więc strażnik tylko wyrównuje oba przypadki.
+    if (precededByStreetEponym(t, offset) || precededByPatron(t, offset)) return m;
     if (
       !surnameBase(w1) &&
       !looksLikeSurname(w1) &&
@@ -6833,15 +6854,43 @@ function passPersonMixedCase(ctx: RedactCtx): void {
 // maską osoby, imiona ze słownika; po skrócie „s."/„c." wymagane oba imiona („[..], s. 15 protokołu").
 const RE_PARENTS_AFTER_MASK = new RegExp(
   `(\\[OSOBA-[A-Z]+\\]|\\[IMIĘ I NAZWISKO\\])(,?[ \\t]+)(syn(?:a|owi|em)?|córk(?:a|i|ą|ę)|SYN|CÓRKA|s\\.|c\\.)([ \\t]+)` +
-    `([${PL_UP}][${PL_UP}${PL_LO}]+)(?:((?:[ \\t]+i|,)[ \\t]+)([${PL_UP}][${PL_UP}${PL_LO}]+))?(?![${NM_BOUND}])`,
+    `([${PL_UP}][${PL_UP}${PL_LO}]+)(?:([ \\t]+)([${PL_UP}][${PL_UP}${PL_LO}]+))?` +
+    `(?:((?:[ \\t]+i|,)[ \\t]+)([${PL_UP}][${PL_UP}${PL_LO}]+)(?:([ \\t]+)([${PL_UP}][${PL_UP}${PL_LO}]+))?)?(?![${NM_BOUND}])`,
   'g',
 );
 function passPersonParents(ctx: RedactCtx): void {
   if (!ctx.on('IMIE')) return;
   ctx.text = ctx.text.replace(
     RE_PARENTS_AFTER_MASK,
-    (m, mask: string, sep: string, kin: string, sp: string, a: string, mid: string | undefined, b: string | undefined) => {
+    (
+      m,
+      mask: string,
+      sep: string,
+      kin: string,
+      sp: string,
+      a: string,
+      sp2: string | undefined,
+      a2: string | undefined,
+      mid: string | undefined,
+      b: string | undefined,
+      spb: string | undefined,
+      b2: string | undefined,
+    ) => {
       const abbr = kin.endsWith('.');
+      const head = mask.length + sep.length + kin.length + sp.length;
+      // Drugie imię rodzica („córka Piotra Pawła i Anny Marii", „syn Jana Pawła i Marii") należy do
+      // tej samej maski: dawniej imię ojca dostawało dwie maski obok siebie, a para „Pawła i Anny"
+      // trafiała do innego przebiegu i w trybie pseudonimów ojciec z matką dostawali wspólny znacznik.
+      // Wyraz spoza imion za pierwszym imieniem („syn Jana Kowalskiego") zostaje jak dawniej: maska
+      // tylko na imieniu, reszta bez zmian.
+      if (a2 !== undefined && !isFirstNameLike(a2)) {
+        if (abbr || !isFirstNameLike(a)) return m;
+        ctx.bump('IMIE');
+        return `${mask}${sep}${kin}${sp}${ctx.M.IMIE}${m.slice(head + a.length)}`;
+      }
+      const father = a + (a2 !== undefined ? `${sp2}${a2}` : '');
+      // drugi wyraz matki spoza imion („i Marii Kowalskiej") zostaje dla dalszych przebiegów
+      const motherTail = b2 !== undefined && !isFirstNameLike(b2) ? `${spb}${b2}` : '';
       // Imię matki spoza słownika w dopełniaczu po „i" („córka Henryka i Marianny", „syn Jana
       // i Leokadii") — para imion rodziców w całości: dawniej maska obejmowała tylko ojca, a matka
       // zostawała jawna obok rozpoznanej danej.
@@ -6854,7 +6903,7 @@ function passPersonParents(ctx: RedactCtx): void {
       }
       if (abbr && b === undefined) return m;
       ctx.bump('IMIE');
-      const tail = b !== undefined ? `${mid}${ctx.M.IMIE}` : m.slice(mask.length + sep.length + kin.length + sp.length + a.length);
+      const tail = b !== undefined ? `${mid}${ctx.M.IMIE}${motherTail}` : m.slice(head + father.length);
       return `${mask}${sep}${kin}${sp}${ctx.M.IMIE}${tail}`;
     },
   );
