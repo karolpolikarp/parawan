@@ -2738,6 +2738,8 @@ function structMasker(ctx: RedactCtx): (kind: StructKind, value: string, key?: s
         break;
       case 'phone':
         if ((v.match(/\d/g) ?? []).length < 6 || /[A-Za-z]{3,}/.test(v)) return null;
+        // data w kolumnie telefonu to stopka eksportu („Stan na;;01.10.2026", „Wydruk z dnia⇥⇥2026-10-01")
+        if (/^\d{1,2}[./-]\d{1,2}[./-]\d{4}$|^\d{4}-\d{2}-\d{2}$/.test(v.trim())) return null;
         break;
       case 'postal':
         if (!/^\d{2}[- ]?\d{3}$/.test(v)) return null;
@@ -2921,6 +2923,26 @@ function splitTableRow(line: string, delim: string, md: boolean): TableCell[] | 
   return cells;
 }
 const tableCellText = (line: string, c: TableCell): string => line.slice(c.start, c.end);
+// Nazwy kolumn spoza STRUCT_KEYS, które w wierszu danych osoby nie występują.
+const TABLE_GENERIC_HEADERS = new Set<string>(
+  (
+    'lp produkt towar usługa cena ilość ilosc jednostka kwota wartość wartosc suma status termin ' +
+    'opis uwagi nazwa typ rodzaj kategoria liczba data godzina stanowisko dział dzial oddział ' +
+    'pokój pokoj kod symbol stawka netto brutto vat waluta priorytet etap wynik'
+  ).split(' '),
+);
+function rowLooksLikeHeader(values: string[]): boolean {
+  const cells = values.map((v) => v.trim()).filter((v) => v);
+  if (cells.length < 2 || cells.some((v) => /\d/.test(v) || !RE_TABLE_HEADER_CELL.test(v))) return false;
+  const known = cells.filter((v) => STRUCT_KEYS.has(normStructKey(v)) || TABLE_GENERIC_HEADERS.has(v.toLowerCase())).length;
+  return known >= 2 && known * 2 >= cells.length;
+}
+const tableOrgCell = (v: string): boolean =>
+  v
+    .toLowerCase()
+    .split(/[ \t]+/)
+    .some((w) => ORG_HEAD_WORDS.has(w) || LEGAL_ENTITY_WORDS.has(w) || /^(?:sp\.?|s\.a\.|spółka|gmina|gminny|gminna|miejski|miejska|powiatowy|powiatowa)$/.test(w));
+const RE_TABLE_SUMMARY_ROW =/^[ \t]*(?:razem|suma|ogółem|łącznie|wszyscy|wszystkie|podsumowanie|stan[ \t]+na|wydruk|wygenerowano|total)(?![\p{L}])/iu;
 function passDelimitedTable(ctx: RedactCtx): void {
   const t = ctx.text;
   if (!/[;,\t|]/.test(t)) return;
@@ -2937,7 +2959,11 @@ function passDelimitedTable(ctx: RedactCtx): void {
     if (!hc || hc.length < 2) continue;
     const names = hc.map((c) => tableCellText(header, c).trim().replace(/^"(.*)"$/, '$1').trim());
     if (!names.every((n) => RE_TABLE_HEADER_CELL.test(n) && n.split(' ').length <= 4)) continue;
-    if (!names.some((n) => TABLE_GATE_KINDS.has(STRUCT_KEYS.get(normStructKey(n)) as StructKind))) continue;
+    const headKinds = names.map((n) => STRUCT_KEYS.get(normStructKey(n)));
+    if (!headKinds.some((k) => TABLE_GATE_KINDS.has(k as StructKind))) continue;
+    // Sama kolumna imienia bez innej danej osoby („Imię;Data imienin", „Imię,Liczba nadań",
+    // „Imię,Płeć,Pochodzenie") to kalendarz albo statystyka imion, w której przedmiotem jest nazwa.
+    if (headKinds.every((k) => !k || k === 'first' || k === 'city')) continue;
     let r = h + (md ? 2 : 1);
     for (; r < lines.length; r++) {
       const line = lines[r];
@@ -2952,6 +2978,11 @@ function passDelimitedTable(ctx: RedactCtx): void {
         const q = /^([ \t]*"?)(.*?)("?[ \t]*)$/.exec(raw) as RegExpExecArray;
         return q[1].endsWith('"') !== q[3].startsWith('"') ? raw.trim() : q[2];
       });
+      // Kolejny nagłówek o tej samej liczbie kolumn („Produkt,Cena,Ilość") zaczyna nową tabelę:
+      // kolumny poprzedniej przestają obowiązywać, a od tego wiersza nagłówek bada pętla zewnętrzna.
+      if (rowLooksLikeHeader(values)) break;
+      // Wiersz podsumowania albo stopka eksportu („Razem działów⇥Wszyscy", „Stan na;;01.10.2026").
+      if (RE_TABLE_SUMMARY_ROW.test(values.find((v) => v.trim()) ?? '')) continue;
       const kinds = values.map((v, i) => structKindOf(names[i], v));
       // Komórki osoby maskujemy tylko w wierszu, w którym choć jedna z nich jest potwierdzona
       // (imię ze słownika, nazwisko ze słownika, morfologii albo homograf). Wiersz „Oddział⇥Kardiologia"
@@ -2962,6 +2993,11 @@ function passDelimitedTable(ctx: RedactCtx): void {
         const ws = v.trim().split(/ +/);
         return ws.some((w) => isFirstNameLike(w) || tsvSurnameProof(w));
       });
+      // Wiersz instytucji w wykazie osób („Ochotnicza Straż Pożarna,Zalesie,10000", „Urząd
+      // Miasta,Łódź"): siedziba to nie dana osoby, więc wiersz zostaje. Tylko z wyrazem instytucji
+      // w komórce osoby: obce imię spoza słownika („Liu Wei;Lipowa 5") nie potwierdza osoby, ale
+      // adres i dokument w jego wierszu dalej są danymi osoby.
+      if (!personOk && values.some((v, i) => personCell(kinds[i]) && tableOrgCell(v))) continue;
       let out = '';
       let last = 0;
       cells.forEach((c, i) => {
@@ -3990,7 +4026,9 @@ const RE_PLATE_ITEM_SCAN = new RegExp(`(?<![A-Z])${PLATE_ITEM}`, 'g');
 const RE_PLATE_ACRONYM_HEAD = new RegExp(`^${PLATE_NOT_ACRONYM}`);
 // Skrót z rokiem („PIT 2024", „OC 2024", „SN 2020") — kształt tablicy, ale w prozie to temat albo sygnatura.
 const RE_PLATE_YEAR_SHAPE = /^[A-Z]{2,3}[\s-]?(?:19|20)\d{2}$/;
-const RE_PLATE_GAP_PREP = /^(?:w|we|do|z|ze|od|na|dla|po|przez|przy|o|u|według|wg|wobec|między|pod|nad|za)$/;
+// Marki pojazdów o trzech literach, które z rocznikiem udają tablicę („KIA 2019", „DAF 2018").
+const PLATE_VEHICLE_BRANDS = new Set<string>('KIA DAF SAM MAN BMW FSO FSM GAZ UAZ MAZ ZIL JCB FAW BYD DFM KTM SAF BPW'.split(' '));
+const RE_PLATE_GAP_PREP =/^(?:w|we|do|z|ze|od|na|dla|po|przez|przy|o|u|według|wg|wobec|między|pod|nad|za)$/;
 // Trzyliterowe skróty, które z rokiem są tematem, polisą czy programem, a nie tablicą („/ PZU 2024",
 // „; RPO 2021"). Inny powiat trzyliterowy z rokiem to zwykła tablica („nr rej. WPI 12345, WPI 2019").
 const PLATE_YEAR_ABBR = new Set<string>(
@@ -4065,6 +4103,17 @@ function passPlate(ctx: RedactCtx): void {
     // Dwie litery z rokiem po samej kotwicy pojazdowej („dla pojazdów PN 2020", „samochody EN 2018")
     // to norma albo rocznik — polska tablica z dwuliterowym wyróżnikiem ma pięć znaków za nim.
     if (/^[A-Z]{2}[\s-]?(?:19|20)\d{2}$/.test(plate)) return m;
+    // Kod waluty albo jednostki z kwotą („Wartość samochodów wynosi PLN 45000", „Leasing pojazdów:
+    // CHF 12000", „Liczba pojazdów: SZT 1200") to kwota, nie tablica.
+    if (/^(?:PLN|EUR|USD|CHF|GBP|CZK|SEK|NOK|DKK|JPY|UAH|SZT|KPL|KOM)(?![A-Z])/.test(plate)) return m;
+    // Trzy litery z rokiem to marka z rocznikiem („dostawę samochodów KIA 2019", „Liczba pojazdów:
+    // DAF 2018", „przyczepą SAM 2012"), a po kotwicy w dopełniaczu mnogim bez dwukropka to proza
+    // przetargu czy sprawozdania („pojazdów marki MAN TGL 2012"). Wykaz z dwukropkiem („Wykaz
+    // pojazdów: WPI 2019, WE 12345") i liczba pojedyncza („autem WPI 2019") zostają tablicą.
+    if (RE_PLATE_YEAR_SHAPE.test(plate) && /^[A-Z]{3}/.test(plate)) {
+      if (PLATE_VEHICLE_BRANDS.has(plate.slice(0, 3))) return m;
+      if (/(?:ów|^[Aa]ut|[Pp]rzyczep|[Nn]aczep)$/.test(kw) && !sep.includes(':')) return m;
+    }
     // Wtrącenie między kotwicą a kandydatem: zakończone przyimkiem („Liczba pojazdów według GUS
     // 2023", „samochodów w KRS 1234", „Autem do PZU 2020") wskazuje źródło albo instytucję, a skrót
     // z rokiem po kilku wyrazach („z silnikiem TDI 2000") to opis, nie tablica.
@@ -4180,10 +4229,46 @@ function birthPluralDativeBefore(before: string): boolean {
   if (m[1] === undefined) return !/,[ \t]*\p{Ll}+[ \t]+$/u.test(before);
   return !RE_BIRTH_SINGULAR_BEFORE_ADJ.test(m[1]);
 }
+// Czasownik „urodził(a) się" jest kotwicą tylko wtedy, gdy mówi o osobie. W prozie urzędowej
+// i prasowej rodzi się też pomysł, projekt, festiwal albo cielę, a forma nijaka i mnoga („najwięcej
+// dzieci urodziło się w Krakowie") to statystyka. Pierwsza i druga osoba („urodziłam się") zawsze;
+// trzecia pojedyncza, gdy podmiotem nie jest rzecz, zwierzę ani patron. Podmiotu osobowego nie
+// wymagamy: przed FAZĄ 4 nazwisko stoi jeszcze jawne („Kowalski urodził się", „Nowakowa", „Wnuczka").
+// Forma nijaka tylko o dziecku, mnoga tylko o bliźniętach.
+const RE_BIRTH_VERB_SELF = /^urodzi(?:łam|łem|łaś|łeś|liśmy|łyśmy|liście|łyście)[ \t]/i;
+const RE_BIRTH_VERB_3SG = /^urodzi(?:ł|ła)[ \t]/i;
+const RE_BIRTH_VERB_NEUTER = /^urodziło[ \t]/i;
+const RE_BIRTH_VERB_PLURAL = /^urodzi(?:li|ły)[ \t]/i;
+const RE_BIRTH_SUBJECT_THING =
+  /(?<!\p{L})(?:pomysł|projekt|idea|koncepcja|myśl|plan|inicjatywa|przedsięwzięcie|festiwal|ruch|zespół|firma|marka|akcja|tradycja|zwyczaj|impreza|wydarzenie|program|konkurs|stowarzyszenie|fundacja|spółka|teatr|kabaret|cielę|źrebię|źrebak|szczenię|szczeniak|kocię|jagnię|prosię|koźlę|zwierzę|pies|kot|klacz|jałówka|młode|najwięcej|najmniej|łącznie|ogółem|dzieci|noworodków|osób)(?!\p{L})/iu;
+const RE_BIRTH_SUBJECT_CHILD = /\[OSOBA-[A-Z]+\]|\[IMIĘ I NAZWISKO\]|(?<!\p{L})(?:dziecko|dziecię|niemowlę|małoletnie|wnuczę|bliźnię)(?!\p{L})/iu;
+const RE_BIRTH_SUBJECT_TWINS = /(?<!\p{L})(?:bliźnięta|bliźniaki|bliźniaczki|bliźniacy|trojaczki)(?!\p{L})/iu;
+function birthVerbAboutPerson(kw: string, before: string): boolean {
+  if (!/^urodzi/i.test(kw)) return true;
+  if (RE_BIRTH_VERB_SELF.test(kw)) return true;
+  const seg0 = before.slice(-120);
+  const seg = seg0.slice(Math.max(seg0.lastIndexOf('.'), seg0.lastIndexOf('!'), seg0.lastIndexOf('?'), seg0.lastIndexOf('\n')) + 1);
+  // biogram patrona szkoły czy ulicy w uzasadnieniu uchwały to nie dane strony
+  if (RE_BIRTH_SUBJECT_PUBLIC.test(seg)) return false;
+  if (RE_BIRTH_VERB_NEUTER.test(kw)) return RE_BIRTH_SUBJECT_CHILD.test(seg) && !RE_BIRTH_SUBJECT_THING.test(seg);
+  if (RE_BIRTH_VERB_PLURAL.test(kw)) return RE_BIRTH_SUBJECT_TWINS.test(seg);
+  if (!RE_BIRTH_VERB_3SG.test(kw)) return false;
+  // rzecz albo zwierzę tuż przed czasownikiem („Pomysł urodził się …", „Festiwal urodził się …")
+  const near = seg.split(/[ \t]+/).filter(Boolean).slice(-3).join(' ');
+  return !RE_BIRTH_SUBJECT_THING.test(near);
+}
+const RE_BIRTH_SUBJECT_PUBLIC =
+  /(?<!\p{L})(?:patron\p{L}*|święt(?:y|a|ego|ej)|św\.|papież\p{L}*|król|króla|królowa|królowej|poeta|poetka|poety|pisarz|pisarka|pisarza|kompozytor|kompozytora)(?!\p{L})/iu;
 function passBirthDate(ctx: RedactCtx): void {
   if (!ctx.on('DATA-UR')) return;
-  ctx.text = ctx.text.replace(RE_BIRTH_LABELED, (m, kw: string, sep: string, _d: string, offset: number, str: string) => {
+  ctx.text = ctx.text.replace(RE_BIRTH_LABELED, (m, kw: string, sep: string, d: string, offset: number, str: string) => {
     if (RE_BIRTH_THRESHOLD_AFTER.test(str.slice(offset + m.length, offset + m.length + 60))) return m;
+    if (/^urodzi/i.test(kw)) {
+      if (!birthVerbAboutPerson(kw, str.slice(Math.max(0, offset - 120), offset))) return m;
+      // biogram patrona w uchwale („Mikołaj Kopernik urodził się 19 lutego 1473 r.") to nie dane osoby
+      const year = /(\d{4})$/.exec(d)?.[1];
+      if (year && +year < 1900) return m;
+    }
     if (/^urodzonym$/i.test(kw) && birthPluralDativeBefore(str.slice(Math.max(0, offset - 30), offset))) return m;
     ctx.bump('DATA-UR');
     return `${kw}${sep}${ctx.M['DATA-UR']}`;
@@ -4423,9 +4508,20 @@ function patronStreetWithNumber(ctx: RedactCtx): void {
     const b = w2.toLowerCase();
     if (!isFirstNameGenitive(a) && !egoNameGenitive(a)) return m;
     if (!(isFirstNameGenitive(b) || egoNameGenitive(b) || RE_SURNAME_OBLIQUE.test(b) || /(?:a|ego|ej|i|y)$/.test(b))) return m;
-    const after = RE_ADDR_CITY_AFTER.exec(t.slice(offset + m.length, offset + m.length + 50));
-    const cityOk = !!after && (!!after[1] || (!!after[2] && POLISH_CITIES.has(after[2].toLowerCase())) || /^[ \t]*,[ \t]*\d{2}-\d{3}/.test(t.slice(offset + m.length, offset + m.length + 12)));
-    if (!cityOk && !personPairBeforeAddr(t.slice(Math.max(0, offset - 60), offset))) return m;
+    const before = t.slice(Math.max(0, offset - 60), offset);
+    // Patron instytucji („Szkoła Podstawowa im. Jana Pawła II 3, Kraków", „Nagroda im. Jana
+    // Kochanowskiego 2023") i rok zamiast numeru domu („dla Jana Kowalskiego 2023, Warszawa") to
+    // nie adres. Rok bez lokalu odrzucamy: numer domu 1900–2099 jest rzadszy niż data.
+    if (/(?<!\p{L})(?:im\.|imienia)[ \t]*$/u.test(before) || /[ \t](?:1[89]|20)\d\d$/.test(m)) return m;
+    const tail = t.slice(offset + m.length, offset + m.length + 50);
+    const after = RE_ADDR_CITY_AFTER.exec(tail);
+    // Kod pocztowy za przecinkiem bywa już maską („…14, [KOD-POCZTOWY] Busko"), a etykieta
+    // zamieszkania tuż przed ulicą („zam. Jana Pawła II 14, Busko") sama wskazuje adres.
+    const cityOk =
+      (!!after && (!!after[1] || (!!after[2] && POLISH_CITIES.has(after[2].toLowerCase())))) ||
+      /^[ \t]*,[ \t]*(?:\d{2}-\d{3}|\[KOD-POCZTOWY\])/.test(tail) ||
+      /(?<!\p{L})(?:[Zz]am\.|[Zz]amieszka(?:ły|ła|li|łe)|[Zz]ameldowan[aey])[ \t]*:?[ \t]*$/u.test(before);
+    if (!cityOk && !personPairBeforeAddr(before)) return m;
     ctx.bump('ADRES');
     return ctx.M.ADRES;
   });
@@ -4651,14 +4747,27 @@ const LOCATIVE_NOT_PLACE = new Set<string>(
     'turcji egipcie brazylii meksyku wielkopolsce małopolsce mazowszu śląsku pomorzu podlasiu kaszubach ' +
     'warmii mazurach podhalu bieszczadach kujawach lubelszczyźnie domu szpitalu zakładzie ośrodku internacie ' +
     'akademiku bloku mieszkaniu kamienicy hospicjum schronisku placówce kraju mieście gminie powiecie ' +
-    'województwie wsi stolicy centrum okolicy rejonie'
+    'województwie wsi stolicy centrum okolicy rejonie ' +
+    // kraje i kontynenty spoza Europy, częste w zawiadomieniach o stronach za granicą
+    'iranie iraku libanie izraelu syrii jordanii egipcie maroku tunezji algierii libii nigerii kenii ' +
+    'afryce azji wietnamie tajlandii korei mongolii indonezji filipinach malezji singapurze gruzji ' +
+    'armenii azerbejdżanie białorusi mołdawii estonii węgrzech serbii słowenii albanii macedonii ' +
+    'czarnogórze bośni luksemburgu argentynie ekwadorze kolumbii wenezueli boliwii peru chile kubie ' +
+    'katarze kuwejcie emiratach arabii zelandii ' +
+    // pasma górskie (liczba mnoga na „-ach" przechodzi końcówkę miejscownika miejscowości)
+    'tatrach sudetach karpatach beskidach pieninach karkonoszach gorcach alpach ' +
+    // budynki i placówki pisane wielką literą na początku nazwy własnej albo zdania
+    'areszcie więzieniu zakładzie klasztorze zakonie plebanii bursie budynku domku pustostanie altanie ' +
+    'przyczepie namiocie baraku kontenerze garażu piwnicy dworze zamku pałacu pensjonacie hotelu ' +
+    'hostelu motelu lokalu noclegowni'
   ).split(' '),
 );
 const RE_LOCATIVE_PLACE_END = /^(?:[ \t]*(?:[,.;)]|\r?\n|$)|[ \t]+(?:przy|ul\.|al\.|os\.|pl\.|gm\.|pow\.|woj\.|nr|i|oraz)(?![\p{L}]))/u;
 function residenceLocativeCity(marker: string, run: string, after: string): boolean {
   // liczba pojedyncza: „osób zamieszkałych w …" to zdanie ogólne (ogłoszenie, uchwała)
   if (!/^(?:[Zz]am\.|[Zz]amieszka[łl](?:y|a|ą|ej|ego|emu|ym)?[ \t]|[Zz]ameldowan(?:y|a|ą|ej|ego|emu|ym)[ \t])/.test(marker) || !/(?<!\p{L})[Ww]e?[ \t]+$/u.test(marker)) return false;
-  if (/[ \t-]/.test(run) || !RE_LOCATIVE_PLACE.test(run) || LOCATIVE_NOT_PLACE.has(run.toLowerCase())) return false;
+  // „-stanie" to miejscownik nazw państw (Kazachstanie, Pakistanie, Afganistanie), nie miejscowości.
+  if (/[ \t-]/.test(run) || !RE_LOCATIVE_PLACE.test(run) || LOCATIVE_NOT_PLACE.has(run.toLowerCase()) || /stanie$/.test(run)) return false;
   return RE_LOCATIVE_PLACE_END.test(after);
 }
 // Marker ZAMIESZKANIA przed miastem (12f) — zamknięta lista form czasownika i imiesłowu zamiast
@@ -5122,7 +5231,8 @@ function passCity(ctx: RedactCtx): void {
         `((?:${CAP_CITY}[ \\t]+){0,2}${CAP_CITY})${CITY_END}`,
       'g',
     ),
-    (m, marker: string, run: string) => {
+    (m, marker: string, run: string, offset: number, str: string) => {
+      if (/^urodzi/i.test(marker) && !birthVerbAboutPerson(marker, str.slice(Math.max(0, offset - 120), offset))) return m;
       const r = cityByPrefix(ctx, run);
       return r ? `${marker}${ctx.M.MIEJSCOWOSC}${r.leftover}` : m;
     },
@@ -5380,6 +5490,34 @@ function reversedHomographAnchored(t: string, offset: number, w1l: string, w2l: 
   const hb = homographBase(w1l);
   if (!hb || hb !== w1l || HOMOGRAPH_PAIR_EXCL.has(hb) || CAPS_REVERSED_HEAD_EXCL.has(hb) || isFirstNameLike(w1l)) return false;
   return personSlotBefore(t, offset);
+}
+// Postacie literackie i artyści znani pod imieniem z przydomkiem („Przygody Tomka Sawyera",
+// „Kubuś Puchatek", „Staś Tarkowski", „Pan Wołodyjowski"). Odmiana zdrobnień i zapis bez ogonków
+// zrobiły z nich osobę w prozie, choć to tytuł albo bohater lektury. Zbiór zamknięty, tylko pary,
+// których nie nosi strona pisma (sam „Tarkowski" bywa nazwiskiem, więc zawsze ze zdrobnieniem
+// z lektury; „Michał Anioł" to też zwykłe imię i nazwisko, więc go tu nie ma). Rola, etykieta albo
+// dane osoby przy parze rozstrzygają za osobą. Para trafia za sentinel URL i wraca jawna na końcu.
+const FICTIONAL_PAIRS_SRC = [
+  'tom(?:ek|ka|kowi|kiem|ku)[ \\t]+(?:sawyer(?:a|owi|em|ze)?|wilmowsk(?:i|iego|iemu|im))',
+  'kubu(?:ś|sia|siowi|siem|siu)[ \\t]+puchat(?:ek|ka|kowi|kiem|ku)',
+  'sta(?:ś|sia|siowi|siem|siu)[ \\t]+tarkowsk(?:i|iego|iemu|im)',
+  'ani(?:a|i|ę|ą|u)[ \\t]+shirley',
+  'pan(?:a|u|em|ie)?[ \\t]+wołodyjowsk(?:i|iego|iemu|im)',
+];
+// Każda litera z ogonkiem także w zapisie ASCII („Kubus Puchatek", „Michalem Aniolem").
+const foldClass = (s: string): string =>
+  s.replace(/[ąćęłńóśźż]/g, (c) => `[${c}${'acelnoszz'['ąćęłńóśźż'.indexOf(c)]}]`);
+const RE_FICTIONAL_PAIR = new RegExp(`(?<![\\p{L}\\p{N}])(?:${FICTIONAL_PAIRS_SRC.map(foldClass).join('|')})(?![\\p{L}\\p{N}])`, 'giu');
+function passProtectFictional(ctx: RedactCtx): void {
+  if (!ctx.on('IMIE')) return;
+  ctx.text = ctx.text.replace(RE_FICTIONAL_PAIR, (m, offset: number, t: string) => {
+    const prev = /(\p{L}+)\.?[ \t]*:?[ \t]*$/u.exec(t.slice(Math.max(0, offset - 40), offset))?.[1]?.toLowerCase();
+    if (prev && (ROLE_WORDS.has(prev) || TITLE_WORDS.has(prev) || PARTY_ROLE_WORDS.has(prev))) return m;
+    if (personSlotBefore(t, offset) || RE_PERSON_DATA_AHEAD.test(t.slice(offset + m.length, offset + m.length + 24))) return m;
+    const sentinel = `${URL_SENTINEL_OPEN}${indexToLetters(ctx.protectedUrls.length)}${URL_SENTINEL_CLOSE}`;
+    ctx.protectedUrls.push(m);
+    return sentinel;
+  });
 }
 function passPersonPairs(ctx: RedactCtx): void {
   if (!ctx.on('IMIE')) return;
@@ -6826,6 +6964,22 @@ const RE_MASK_HYPHEN_TAIL = new RegExp(
   `(\\[OSOBA-[A-Z]+\\]|\\[IMIĘ I NAZWISKO\\]|\\[MIEJSCOWOŚĆ\\])-\\r?\\n[ \\t]*([${PL_LO}]{2,14}|[${PL_UP}]{2,14})(?![${PL_UP}${PL_LO}0-9-])`,
   'g',
 );
+// Wyrazy przeniesione do następnego wiersza w oryginale: ogon (małymi literami) → początki sprzed
+// łącznika. Maska zastąpiła już początek w `text`, więc o całym wyrazie rozstrzyga oryginał.
+const RE_RAW_HYPHEN_SPLIT = new RegExp(
+  `([${PL_UP}${PL_LO}]+)-\\r?\\n[ \\t]*([${PL_LO}]{2,14}|[${PL_UP}]{2,14})(?![${PL_UP}${PL_LO}0-9-])`,
+  'g',
+);
+function rawHyphenHeads(raw: string): Map<string, string[]> {
+  const out = new Map<string, string[]>();
+  for (const r of raw.matchAll(RE_RAW_HYPHEN_SPLIT)) {
+    const k = r[2].toLowerCase();
+    const list = out.get(k);
+    if (list) list.push(r[1].toLowerCase());
+    else out.set(k, [r[1].toLowerCase()]);
+  }
+  return out;
+}
 function finalizePersons(ctx: RedactCtx): void {
   let links: Map<string, RawWordLink[]> | undefined;
   const rawLinks = (w: string): RawWordLink[] => (links ??= buildRawWordLinks(ctx.raw)).get(w) ?? [];
@@ -6921,9 +7075,23 @@ function finalizePersons(ctx: RedactCtx): void {
   // „02-511 Warsza-⏎wa"): przebieg złapał początek nazwiska albo miasta, a ogon w następnym wierszu
   // zostawał jawny. Myślnik doklejony do maski i ciąg samych małych (albo samych wielkich) liter na
   // początku wiersza to druga część tego samego wyrazu. Miasto tylko z ogonem małymi literami.
-  ctx.text = ctx.text.replace(RE_MASK_HYPHEN_TAIL, (m, mask: string, tail: string) =>
-    mask === '[MIEJSCOWOŚĆ]' && tail !== tail.toLowerCase() ? m : mask,
-  );
+  // Myślnik na końcu wiersza bywa też pauzą przed funkcją albo dalszym zdaniem („Jan Kowalski-⏎
+  // kierownik", „Adam Mazur-⏎następnie go wycofał"): ogon doklejamy więc tylko wtedy, gdy początek
+  // sprzed łącznika (z oryginału) razem z ogonem daje nazwisko albo miasto, a sam początek nie jest
+  // już pełnym nazwiskiem czy miastem ze słownika.
+  if (ctx.text.includes('-\n') || ctx.text.includes('-\r\n')) {
+    let heads: Map<string, string[]> | undefined;
+    ctx.text = ctx.text.replace(RE_MASK_HYPHEN_TAIL, (m, mask: string, tail: string) => {
+      if (mask === '[MIEJSCOWOŚĆ]' && tail !== tail.toLowerCase()) return m;
+      const lo = tail.toLowerCase();
+      const ok = ((heads ??= rawHyphenHeads(ctx.raw)).get(lo) ?? []).some((h) => {
+        const joined = h + lo;
+        if (mask === '[MIEJSCOWOŚĆ]') return POLISH_CITIES.has(joined) || !POLISH_CITIES.has(h);
+        return !!surnameBase(joined) || (looksLikeSurname(joined) && !surnameBase(h));
+      });
+      return ok ? mask : m;
+    });
+  }
   // DOMKNIĘCIE OCR: imię z homoglifem tuż przed maską („J0anna [..]", „KaroI [..]", „Kami1 [..]",
   // „J0ANNA [..]"). Nazwisko maskował przebieg słownikowy albo OCR, a imię z zerem czy wielkim „I"
   // nie przechodziło bramki słownika i zostawało jawne. Słowo co najmniej 4-znakowe (kody „A1a",
@@ -7114,6 +7282,7 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   passCity(ctx);
 
   // ═══════════════════ FAZA 4 · IMIĘ I NAZWISKO (heurystyka) ═══════════════════
+  passProtectFictional(ctx);
   passPersonMixedCase(ctx); // PRZED wyzwalaczem „Pan/Pani" (zjadał imię, nazwisko zostawało jawne)
   passPersonRoleComplement(ctx);
   passPersonPairs(ctx);

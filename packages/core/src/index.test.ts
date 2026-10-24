@@ -6305,3 +6305,135 @@ test('b7 K56: ulica z patronem w dopełniaczu i numerem bez „ul." przy miejsco
   keep(['rondo Jana Pawła II w Krakowie', 'Wyrok z dnia 12 maja, Kraków', 'Na Jana Pawła II 5 mieszka Jan.']);
   masked([['Pismo Jerzego Nowaka 12 maja wpłynęło.', `Pismo ${N} 12 maja wpłynęło.`]]);
 });
+test('b7 regresje: przeniesienie wyrazu tylko, gdy początek z ogonem tworzy nazwisko albo miasto', () => {
+  masked([
+    ['z powództwa Barbary Wojciechow-\nskiej przeciwko', `z powództwa ${N} przeciwko`],
+    ['Wniosek złożył Jan Wojciechow-\nski z Radomia.', `Wniosek złożył ${N} z Radomia.`],
+    ['02-511 Warsza-\nwa', `${KOD} ${C}`],
+    ['Jan Kowalski-\nkierownik.', `${N}-\nkierownik.`],
+    ['Wniosek złożył Adam Mazur-\nnastępnie go wycofał.', `Wniosek złożył ${N}-\nnastępnie go wycofał.`],
+    ['Rozmawiałem z Anną Nowak-\nktóra potwierdziła.', `Rozmawiałem z ${N}-\nktóra potwierdziła.`],
+    ['Uczestnicy: Jan Nowak-\nprezes, Anna Lis-\nsekretarz.', `Uczestnicy: ${N}-\nprezes, ${N}-\nsekretarz.`],
+    ['Kierownik: Jan Kowal-\nkierownik działu odpowiada za BHP.', `Kierownik: ${N}-\nkierownik działu odpowiada za BHP.`],
+  ]);
+});
+test('b7 regresje: tabela z nagłówkiem — wiersze instytucji, kolejny nagłówek, podsumowanie, data pod telefonem', () => {
+  masked([
+    ['Nazwisko i imię,Miasto\nKowalski Jan,Kraków\nUrząd Miasta,Łódź', `Nazwisko i imię,Miasto\n${N},${C}\nUrząd Miasta,Łódź`],
+    ['Lp;Imię i nazwisko;Miejscowość\n1;Jan Kowalski;Radom\n2;Gminny Ośrodek Kultury;Kozienice', `Lp;Imię i nazwisko;Miejscowość\n1;${N};${C}\n2;Gminny Ośrodek Kultury;Kozienice`],
+    ['Nazwisko,Imię,Pokój\nNowak,Jan,12\nProdukt,Cena,Ilość\nZając pluszowy,29.99,5', `Nazwisko,Imię,Pokój\n${N},${N},12\nProdukt,Cena,Ilość\nZając pluszowy,29.99,5`],
+    ['Imię;Nazwisko;Telefon\nJan;Nowak;501 234 567\nStan na;;01.10.2026', `Imię;Nazwisko;Telefon\n${N};${N};[TELEFON]\nStan na;;01.10.2026`],
+    ['Imię\tNazwisko\tTelefon\nJan\tNowak\t501 234 567\nWydruk z dnia\t\t2026-10-01', `Imię\tNazwisko\tTelefon\n${N}\t${N}\t[TELEFON]\nWydruk z dnia\t\t2026-10-01`],
+    ['Nazwisko\tImię\nRazem działów\tWszyscy', 'Nazwisko\tImię\nRazem działów\t[IMIĘ I NAZWISKO]'],
+    ['Imię;Telefon\nJan;501 234 567', `Imię;Telefon\n${N};[TELEFON]`],
+  ]);
+  keep([
+    'Imię i nazwisko,Miejscowość,Kwota\nOchotnicza Straż Pożarna,Zalesie,10000',
+    'Imię i nazwisko;Adres\nOchotnicza Straż Pożarna;Zalesie 12',
+    'Imię;Data imienin\nAnna;26 lipca',
+    'Imię,Liczba nadań\nZofia,1234',
+    '| Imię | Liczba nadań w 2023 |\n|------|------|\n| Zofia | 4512 |',
+    'Imię,Płeć,Pochodzenie\nJan,M,hebrajskie',
+  ]);
+});
+test('b7 regresje: miejscownik po „zam. w" — kraje, góry i placówki to nie miejscowość', () => {
+  masked([
+    ['Jan Kowalski, zam. w Kraśniku, ul. Lipowa 5', `${N}, zam. w ${C}, ${A}`],
+    ['Jan Kowalski, zam. w Kozienicach.', `${N}, zam. w ${C}.`],
+  ]);
+  keep([
+    'Zam. w Tatrach.',
+    'Zamieszkały w Iranie.',
+    'Zam. w Klasztorze.',
+    'zam. w Libanie',
+    'zamieszkały w Ekwadorze.',
+    'Gmina Kobylnica, zam. w Budynku nr 5',
+  ]);
+  masked([['Jan Kowalski, zam. w Kazachstanie.', `${N}, zam. w Kazachstanie.`]]);
+});
+test('b7 regresje: kotwica pojazdowa w odmianie — kwota z kodem waluty i marka z rocznikiem to nie tablica', () => {
+  masked([
+    ['Kierujący autem WE 12345 zbiegł.', `Kierujący autem ${NR} zbiegł.`],
+    ['Wykaz pojazdów: WE 12345, GD 2345A', `Wykaz pojazdów: ${NR}, ${NR}`],
+    ['Właściciel samochodu WPI 2019 zgłosił kradzież.', `Właściciel samochodu ${NR} zgłosił kradzież.`],
+  ]);
+  keep([
+    'Wartość samochodów wynosi PLN 45000.',
+    'Leasing pojazdów: CHF 12000 miesięcznie.',
+    'Liczba pojazdów: SZT 1200.',
+    'Wartość samochodów to EUR 12000.',
+    'Przetarg na dostawę samochodów KIA 2019.',
+    'Liczba pojazdów: DAF 2018 - 3 szt.',
+    'Dzierżawa przyczepą SAM 2012.',
+    'Pojazdów marki MAN TGL 2012',
+  ]);
+});
+test('b7 regresje: ulica z patronem — „im." i rok to nie adres, kod pocztowy i „zam." kotwiczą', () => {
+  masked([
+    ['Anna Nowak, zam. Jana Pawła II 14, 28-500 Busko', `${N}, zam. ${A}, ${KOD} ${C}`],
+    ['Anna Nowak, zam. Jana Pawła II 14, Busko', `${N}, zam. ${A}, Busko`],
+    ['Anna Nowak, zam. Jana Pawła II 14, Gdańsk', `${N}, zam. ${A}, ${C}`],
+    ['Wypłata dla Jana Kowalskiego 2023, Warszawa', `Wypłata dla ${N} 2023, Warszawa`],
+  ]);
+  keep([
+    'Nagroda im. Jana Kochanowskiego 2023, Kraków',
+    'Głosowanie w lokalu Szkoły Podstawowej im. Jana Pawła II 3, Kraków.',
+    'Ośrodek Sportu im. Kazimierza Górskiego 3, Słupsk',
+  ]);
+});
+test('b7 regresje: „urodził(a) się" tylko o osobie', () => {
+  masked([
+    ['Jan Nowak urodził się 12 maja 1980 r. w Krakowie.', `${N} urodził się ${DU} r. w ${C}.`],
+    ['Urodził się w Krakowie, a później przeprowadził się do Łodzi.', `Urodził się w ${C}, a później przeprowadził się do Łodzi.`],
+    ['Wnioskodawczyni urodziła się w Radomiu.', `Wnioskodawczyni urodziła się w ${C}.`],
+    ['Urodziłem się 12 maja 1980 r. w Krakowie.', `Urodziłem się ${DU} r. w ${C}.`],
+  ]);
+  keep([
+    'W 2023 r. najwięcej dzieci urodziło się w Krakowie.',
+    'Pomysł urodził się 12 maja 2020 r. podczas spotkania.',
+    'Projekt urodził się w Krakowie.',
+    'Idea urodziła się w Gdańsku.',
+    'Festiwal urodził się w Opolu w 1963 r.',
+    'Cielę urodziło się 3.04.2025.',
+    'Patron szkoły Jan Paweł II urodził się 18 maja 1920 r. w Wadowicach.',
+  ]);
+  masked([['Mikołaj Kopernik urodził się 19 lutego 1473 r. w Toruniu.', `${N} urodził się 19 lutego 1473 r. w Toruniu.`]]);
+});
+test('b7 regresje: postacie literackie z odmianą zdrobnień i bez ogonków to nie osoba', () => {
+  keep([
+    'Przygody Tomka Sawyera to klasyka.',
+    'Przygody Kubusia Puchatka to klasyka.',
+    'Kubus Puchatek i przyjaciele',
+    'Kubuś Puchatek i przyjaciele',
+    'W pustyni i w puszczy: Staś Tarkowski i Nel.',
+    'Pan Wołodyjowski to lektura.',
+    'PAN WOŁODYJOWSKI',
+  ]);
+  masked([
+    ['Przygody Tomka Nowaka to sprawa sądowa.', `Przygody ${N} to sprawa sądowa.`],
+    ['Świadek Stanisław Tarkowski zeznał.', `Świadek ${N} zeznał.`],
+    ['Pozwany Michał Anioł nie stawił się.', `Pozwany ${N} nie stawił się.`],
+    ['Wnioskodawca: Staś Tarkowski', `Wnioskodawca: ${N}`],
+    ['Tomek Sawyer, PESEL 80010112345', `${N}, PESEL [PESEL]`],
+    ['Pozwany Tomek Sawyer nie stawił się.', `Pozwany ${N} nie stawił się.`],
+  ]);
+});
+test('b7 regresje: wiersz z obcym imieniem spoza słownika dalej maskuje adres i dokument', () => {
+  masked([
+    ['Imię i nazwisko;Adres;Telefon\nLiu Wei;Lipowa 5;501 234 567', 'Imię i nazwisko;Adres;Telefon\nLiu Wei;[ADRES];[TELEFON]'],
+    ['Nazwisko;Imię;Nr dowodu\nSmith;John;ABC123456', 'Nazwisko;Imię;Nr dowodu\nSmith;John;[NR-DOWODU]'],
+  ]);
+  keep(['Imię i nazwisko,Miasto\nZielona Góra Sp. z o.o.,Zielona Góra']);
+});
+test('b7 regresje: strażniki tablicy i „urodził się" nie odsłaniają prawdziwych danych', () => {
+  masked([
+    ['Kierujący autem WPI 2019 zbiegł.', `Kierujący autem ${NR} zbiegł.`],
+    ['Holowanie przyczepą WPI 2019.', `Holowanie przyczepą ${NR}.`],
+    ['Wykaz pojazdów: WPI 2019, WE 12345', `Wykaz pojazdów: ${NR}, ${NR}`],
+    ['Kowalski urodził się 12 maja 1980 r. w Radomiu.', `${N} urodził się ${DU} r. w ${C}.`],
+    ['Dziecko urodziło się 12.03.2020 r. w Radomiu.', `Dziecko urodziło się ${DU} r. w ${C}.`],
+    ['Wnuczka urodziła się 12.03.2010 w Radomiu.', `Wnuczka urodziła się ${DU} w ${C}.`],
+    ['Bliźnięta urodziły się 12.03.2020 r.', `Bliźnięta urodziły się ${DU} r.`],
+    ['Królikowski urodził się 12.03.1980 w Radomiu.', `${N} urodził się ${DU} w ${C}.`],
+  ]);
+});
