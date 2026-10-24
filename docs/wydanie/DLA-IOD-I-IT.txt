@@ -19,8 +19,8 @@ GDZIE SĄ PRZETWARZANE DANE
     {{CSP}}
   Co znaczą jej dyrektywy:
     default-src 'none'          nic spoza pliku, chyba że niżej jest wyjątek
-    script-src 'sha256-…'       jeden skrypt pliku, rozpoznany po skrócie;
-                                inny kod w linii przeglądarka odrzuci
+    script-src 'sha256-…'       tylko skrypt o tym skrócie SHA-256;
+                                inny, choćby wstrzyknięty, będzie zablokowany
     style-src 'unsafe-inline'   tylko style zapisane w pliku
     img-src data:               obrazki tylko wbudowane w plik
     font-src data:              czcionki tylko wbudowane w plik

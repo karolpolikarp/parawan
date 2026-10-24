@@ -11,8 +11,9 @@ import { cspSkrot } from './src/csp-skrot';
 // wyciekiem. Wszystko, czego aplikacja potrzebuje, jest w środku: skrypt i style inline,
 // fonty i ikony jako data:. „script-src 'unsafe-inline'” to tylko miejsce na skrót: wtyczka
 // cspSkrot (src/csp-skrot.ts) podmienia je na końcu builda na SHA-256 jedynego skryptu w pliku,
-// więc żaden inny kod w linii (np. onerror wstrzyknięty z treści pisma) się nie wykona. pdf.js działa na „fake workerze” w głównym wątku (pdf.ts), więc
-// worker-src nie jest potrzebny. Bliźniacza polityka landingu: apps/landing/vite.config.ts.
+// więc żaden inny skrypt inline (np. onerror wstrzyknięty z treści pisma) się nie wykona.
+// pdf.js działa na „fake workerze” w głównym wątku (pdf.ts), więc worker-src nie jest
+// potrzebny. Bliźniacza polityka landingu: apps/landing/vite.config.ts.
 const CSP = [
   "default-src 'none'",
   "script-src 'unsafe-inline'",

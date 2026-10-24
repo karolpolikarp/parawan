@@ -116,10 +116,10 @@ test('szablony mają wszystkie pola i tylko znane pola', () => {
 test('DLA-IOD-I-IT.txt opisuje każdą dyrektywę CSP gotowego pliku i żadnej innej', () => {
   expect(CSP.length).toBeGreaterThanOrEqual(9);
   expect(describedCsp(dla)).toEqual(CSP);
-  // skrypt rozpoznany po skrócie, bez 'unsafe-inline', które wpuściłoby każdy kod w linii
+  // skrypt rozpoznany po skrócie, bez 'unsafe-inline', które wpuściłoby każdy wstrzyknięty skrypt
   expect(CSP).toContain("script-src 'sha256-…'");
   expect(CSP.join('; ')).not.toMatch(/script-src[^;]*unsafe-inline/);
-  expect(dla.replace(/\s+/g, ' ')).toContain('jeden skrypt pliku, rozpoznany po skrócie; inny kod w linii przeglądarka odrzuci');
+  expect(dla.replace(/\s+/g, ' ')).toContain('tylko skrypt o tym skrócie SHA-256; inny, choćby wstrzyknięty, będzie zablokowany');
   // każda dyrektywa cytowana gdzie indziej w tekstach (np. „connect-src 'none'”) jest w polityce
   for (const [name, tpl] of DOCS) {
     for (const m of tpl.matchAll(/\b([a-z]+-src|form-action|base-uri) ('[a-z-]+'|data:)/g)) {
