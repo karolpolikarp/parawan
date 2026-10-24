@@ -250,12 +250,12 @@ test('samą klawiaturą: „Anną” zaznaczona Shift+strzałkami w polu źród�
     assert.ok(!out.includes('Anną'), out);
     assert.equal(await page.evaluate(() => document.activeElement?.id), 'fix-sel-src', 'fokus wraca do przycisku');
 
-    // Tab do wyniku: przystanek na znaczniku, strzałki, Enter otwiera pasek, Enter „Zostaw jawne”
+    // Tab do wyniku: przystanek na bieżącym znaczniku, Enter otwiera pasek, Enter „Zostaw jawne”
     await page.locator('#output').focus();
     await page.keyboard.press('Tab');
     const active = () => page.evaluate(() => document.activeElement?.textContent ?? '');
     assert.equal(await active(), '[IMIĘ I NAZWISKO]');
-    await page.keyboard.press('ArrowDown'); // „Anną” w pierwszym wierszu (zasłonięta ręcznie)
+    // bieżącym fragmentem jest świeżo zasłonięta „Anną” z pierwszego wiersza, więc Tab staje od razu na niej
     await page.keyboard.press('Enter');
     assert.equal(await page.evaluate(() => document.activeElement?.id), 'fix-keep');
     assert.match(await page.locator('#fix-bar').innerText(), /zasłonięte ręcznie: „Anną”/);
@@ -377,5 +377,97 @@ test('po „Wyczyść” w DOM nie zostaje nic z poprzedniego pisma', async (t) 
       return hits;
     }, ['Kędzierski', '00045123']);
     assert.deepEqual(left, []);
+  });
+});
+
+// Poprawki po weryfikacji A09, runda 2: wiersz „Zasłoń” nie zasłania starych pozycji po edycji
+// źródła, pasek po korekcie zostaje na tym samym fragmencie, a fokus nie spada na <body>.
+
+/** Zaznacza `needle` w polu źródła i otwiera wiersz „Zasłoń zaznaczenie” z odznaczonym „wszystkie”. */
+async function openFormFromSource(page, needle) {
+  await page.locator('#input').evaluate((el, n) => {
+    const ta = /** @type {HTMLTextAreaElement} */ (el);
+    const i = ta.value.indexOf(n);
+    ta.focus();
+    ta.setSelectionRange(i, i + n.length);
+    ta.dispatchEvent(new Event('select', { bubbles: true }));
+  }, needle);
+  await page.locator('#fix-sel-src').click();
+  await page.locator('#fix-form').waitFor();
+  await page.locator('#fix-all').uncheck();
+}
+
+test('edycja źródła przy otwartym wierszu „Zasłoń” nie zasłania przesuniętych pozycji', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    await paste(page, DECYZJA);
+    // edycja i od razu „Zasłoń”, zanim wynik się przeliczy (zegar strony stoi)
+    await openFormFromSource(page, KW);
+    await page.locator('#input').focus();
+    await page.keyboard.press('Control+Home');
+    await page.keyboard.type('Pismo z poprawką. ');
+    await page.locator('#fix-apply').click({ force: true });
+    await page.locator('#fix-form').waitFor({ state: 'hidden' });
+    await app.waitForOutput('Pismo z poprawką.');
+    let out = await app.output();
+    assert.ok(!out.includes('[DANE]'), 'zasłonięty przypadkowy fragment');
+    assert.ok(out.includes('(księga wieczysta nr OS1W/00045123/6)'), 'numer naruszony');
+    assert.equal(await page.locator('#fix-foot').isHidden(), true, 'stopka liczy poprawkę, której nie ma');
+    // edycja po przeliczeniu: wiersz zamyka się sam z komunikatem
+    await openFormFromSource(page, KW);
+    await page.locator('#input').focus();
+    await page.keyboard.press('Control+Home');
+    await page.keyboard.press('Delete');
+    await page.clock.runFor(1500);
+    await page.locator('#fix-form').waitFor({ state: 'hidden' });
+    await page.clock.runFor(100);
+    assert.match((await page.locator('#sr-status').textContent()) ?? '', /Zaznacz fragment jeszcze raz/);
+    out = await app.output();
+    assert.ok(!out.includes('[DANE]'), out);
+    assert.ok(((await printed(page)) ?? '').includes('nr OS1W/00045123/6)'), 'druk naruszony');
+  });
+});
+
+test('po „Zostaw jawne” na drugim znaczniku grupy pasek zostaje na tym samym fragmencie', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    await paste(page, DECYZJA);
+    // pierwszy znacznik, który dzieli zakres (data-s) z poprzednim: [MIEJSCOWOŚĆ] po [KOD-POCZTOWY]
+    const i = await page.evaluate(() => {
+      const m = [...document.querySelectorAll('#output mark.pii')];
+      return m.findIndex((el, k) => k > 0 && el.getAttribute('data-s') === m[k - 1].getAttribute('data-s'));
+    });
+    assert.ok(i > 0, 'w piśmie nie ma zakresu grupowego');
+    await page.locator('#output mark.pii').nth(i).click();
+    assert.match(await page.locator('#fix-bar').innerText(), /kod pocztowy, miejscowość/);
+    await page.locator('#fix-keep').click();
+    await page.locator('#fix-remask').waitFor();
+    const bar = await page.locator('#fix-bar').innerText();
+    assert.match(bar, /kod pocztowy, miejscowość · przywrócone ręcznie: „07-215 Brzozowa/);
+    assert.equal(await page.evaluate(() => document.activeElement?.id), 'fix-remask');
+    assert.ok((await app.output()).includes('tel. [TELEFON]'), 'telefon odsłonięty');
+  });
+});
+
+test('„Cofnij zasłonięcie” na fragmencie zasłoniętym ręcznie zamyka pasek zamiast przejść na inną osobę', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    await paste(page, DECYZJA);
+    await selectInOutput(page, KW);
+    await page.locator('#fix-sel-out').click();
+    await page.locator('#fix-all').uncheck();
+    await page.locator('#fix-apply').click();
+    await app.waitForOutput('[DANE]');
+    // fokus wraca na nowy znacznik, a nie na wyłączony przycisk (i dalej na <body>)
+    await page.waitForFunction(() => !document.querySelector('#fix-sel-out:not([disabled])'));
+    assert.equal(await page.evaluate(() => document.activeElement?.textContent), '[DANE]');
+    await page.keyboard.press('Enter');
+    assert.equal(await page.locator('#fix-keep').innerText(), 'Cofnij zasłonięcie');
+    await page.keyboard.press('Enter');
+    await page.waitForFunction(() => !(document.getElementById('output')?.textContent ?? '').includes('[DANE]'));
+    assert.equal(await page.locator('#fix-bar').isHidden(), true, 'pasek przeszedł na inny fragment');
+    assert.equal(await page.evaluate(() => document.activeElement?.id), 'output');
+    assert.equal(await page.locator('#fix-foot').isHidden(), true, 'cofnięta poprawka dalej na liście');
+    assert.ok(!/wierzbick/i.test(await app.output()), 'wnioskodawca jawny');
   });
 });

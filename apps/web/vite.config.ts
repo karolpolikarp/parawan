@@ -37,6 +37,26 @@ const cspMeta: Plugin = {
   },
 };
 
+// Komentarze i wcięcia z index.html są dla czytającego źródło, w pliku dla urzędnika to ok. 11 kB
+// balastu. Usuwamy je przy buildzie poza <script>, <style>, <pre> i treścią <textarea>, gdzie odstęp jest
+// treścią. Odstęp zostaje jednym znakiem (nowy wiersz albo spacja), więc odstępy między elementami
+// w wierszu się nie zmieniają. Wieloliniowych wartości atrybutów w index.html nie ma (straciłyby wcięcia).
+const compactHtml: Plugin = {
+  name: 'parawan-compact-html',
+  apply: 'build',
+  transformIndexHtml(html) {
+    // Jeden przebieg od lewej: komentarz wspominający „<script>” nie otwiera bloku chronionego.
+    // Drugi przebieg skleja puste wiersze, które zostały po komentarzach.
+    const pass = (s: string): string =>
+      s.replace(
+        /<!--[\s\S]*?-->|<(script|style|pre)\b[\s\S]*?<\/\1>|(?<=<textarea\b[^>]*>)((?:(?!<\/textarea>)[\s\S])+)|\s*\n\s*|[ \t]{2,}/gi,
+        (m, tag, ta) => (tag || ta ? m : m.startsWith('<!--') ? '' : m.includes('\n') ? '\n' : ' '),
+      );
+    // Ukośnik w pustych elementach HTML nic nie znaczy (w SVG znaczy, więc tylko te nazwy).
+    return pass(pass(html)).replace(/(<(?:meta|link|input|br|img|hr)\b[^<>]*?)\s*\/>/gi, '$1>');
+  },
+};
+
 // Data pliku w nagłówku („wersja 0.46.25 · 17.10.2026”) i podstawa notki o wieku pliku
 // (src/file-age.ts). Data ostatniego commita, nie bieżący czas: dwa buildy z tego samego commita
 // muszą mieć tę samą sumę SHA-256 (strażnik powtarzalności w release.yml), a pliki wydania
@@ -70,7 +90,7 @@ export default defineConfig({
   // JEDEN samowystarczalny index.html (JS+CSS inline). Kluczowe dla użycia z dysku:
   // Chromium blokuje <script type="module"> i <link crossorigin> na file:// (CORS,
   // origin null), więc rozbite assety NIE działają po podwójnym kliknięciu.
-  plugins: [viteSingleFile(), cspMeta],
+  plugins: [viteSingleFile(), compactHtml, cspMeta],
   base: './',
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? 'dev'),

@@ -308,3 +308,10 @@ test('edycja przyklejona do zakresu odrzuca decyzję, przecinek obok nie', () =>
   expect(shiftDecisions(before, 'Pismo do Piotr XLis w sprawie.', d).dropped).toBe(1);
   expect(shiftDecisions(before, 'Pismo do Piotr X Lis w sprawie.', d).decisions[0]).toMatchObject({ start: before.indexOf('Lis') + 2 });
 });
+
+test('formOf: bez wielkości liter i z jednym odstępem, litera „s” zostaje', () => {
+  const f = (s: string): string => formOf(s, { start: 0, end: s.length });
+  expect(f('Sławomir Kędzierski')).toBe('sławomir kędzierski');
+  expect(f('Jan  Nowak')).toBe(f('Jan\nNowak'));
+  expect(f('Ala Kos')).not.toBe(f('Ala Koss'));
+});

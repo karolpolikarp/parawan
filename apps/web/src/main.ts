@@ -913,14 +913,15 @@ if (srcHead && outHead && 'ResizeObserver' in window) {
   }).observe(outHead);
 }
 
-const SEL_OUT_TIP = fixSelOut.dataset.tip ?? '';
 // Ikona ma aria-label, więc labelTips() pomija jej dymek: zdanie „najpierw zaznacz” idzie do opisu od razu.
-fixSelOut.setAttribute('aria-describedby', tipDescId(SEL_OUT_TIP));
-const SEL_OUT_COMPARE_TIP = 'Zaznacz tekst w widoku „Wynik” albo w polu źródła.';
+// Dymek mówi też, czemu w „Porównaniu” przycisk jest nieaktywny (zaznacza się w widoku „Wynik”).
+fixSelOut.setAttribute('aria-describedby', tipDescId(fixSelOut.dataset.tip ?? ''));
 let barOpen = false;
 let fixNote = ''; // komunikat o poprawkach odrzuconych po edycji źródła
 let formRanges: [number, number][] = [];
 let formText = '';
+let formInput = ''; // tekst źródła z chwili otwarcia wiersza: formRanges to pozycje w nim
+let formAt: { start: number; end: number } | null = null;
 let formReturn: HTMLElement | null = null;
 let outRange: Range | null = null; // ostatnie niepuste zaznaczenie w wyniku
 
@@ -990,6 +991,7 @@ function syncBar(): void {
         `„Zostaw jawne” odsłoni ${n === 2 ? 'obie' : 'wszystkie'}.`;
   const same = kept ? [] : sameAs(span);
   fixKeep.hidden = kept;
+  fixKeep.textContent = manual ? 'Cofnij zasłonięcie' : 'Zostaw jawne';
   fixRemask.hidden = !kept;
   fixKeepAll.hidden = same.length < 2;
   fixBarForms.hidden = same.length < 2;
@@ -1013,18 +1015,34 @@ function closeBar(returnFocus: boolean): void {
   if (returnFocus) (maskEls[maskIdx] ?? output).focus({ preventScroll: true });
 }
 
-/** Po każdej zmianie listy decyzji: wynik, chipy, karta publikacji, druk i stopka od nowa. */
-function correctionsChanged(msg: string): void {
+/** Indeks znacznika o zakresie `r`, a bez takiego: znacznika, który go obejmuje (-1, gdy żaden). */
+function maskAt(r: { start: number; end: number }): number {
+  const spans = maskEls.map((el) =>
+    el.dataset.s !== undefined ? corrected.spans[Number(el.dataset.s)] : corrected.kept[Number(el.dataset.k)],
+  );
+  const at = spans.findIndex((s) => s && s.start === r.start && s.end === r.end);
+  return at >= 0 ? at : spans.findIndex((s) => s && s.start <= r.start && r.end <= s.end);
+}
+
+/**
+ * Po każdej zmianie listy decyzji: wynik, chipy, karta publikacji, druk i stopka od nowa.
+ * Bieżący fragment wybieramy po zakresie (`target`; domyślnie fragment z paska sprzed przeliczenia,
+ * więc po addDecision wołający podaje go sam), a nie po numerze: korekta zmienia liczbę znaczników
+ * i ten sam numer wskazywałby inną daną z gotowym „Zostaw jawne”.
+ */
+function correctionsChanged(msg: string, target?: { start: number; end: number } | null): void {
+  const cur = target === undefined ? (currentFrag()?.span ?? null) : target;
   recomputeCorrections();
   const inBar = fixBar.contains(document.activeElement);
   const hadFocus = inBar || output.contains(document.activeElement);
-  const idx = maskIdx;
   const top = output.scrollTop;
   const wasOpen = barOpen;
   renderOutput();
   output.scrollTop = top;
-  barOpen = wasOpen;
-  if (idx >= 0 && maskEls.length) goToMask(Math.min(idx, maskEls.length - 1), false);
+  const at = cur ? maskAt(cur) : -1;
+  // Fragmentu już nie ma (cofnięte zasłonięcie): pasek się zamyka, zamiast przejść na inną daną.
+  barOpen = wasOpen && at >= 0;
+  if (at >= 0) goToMask(at, false);
   renderFindings(lastFound, countTokens(corrected.spans));
   syncPublication();
   syncPrintOut();
@@ -1073,8 +1091,15 @@ function clearCorrections(): void {
 fixKeep.addEventListener('click', () => {
   const frag = currentFrag();
   if (!frag || frag.kept) return;
+  const { start, end } = frag.span;
+  // Fragment zasłonięty ręcznie: „Cofnij zasłonięcie” zdejmuje tamtą poprawkę z listy.
+  const own = decisions.findIndex((d) => d.kind === 'mask' && d.scope === 'here' && d.start === start && d.end === end);
+  if (frag.span.source === 'manual' && own >= 0) {
+    undoDecision(own);
+    return;
+  }
   addDecision({ kind: 'keep', scope: 'here', start: frag.span.start, end: frag.span.end });
-  correctionsChanged(`Zostawiono jawne: ${fragmentsWord(frag.span.tokens.length)}.`);
+  correctionsChanged(`Zostawiono jawne: ${fragmentsWord(frag.span.tokens.length)}.`, frag.span);
 });
 fixKeepAll.addEventListener('click', () => {
   const frag = currentFrag();
@@ -1083,7 +1108,7 @@ fixKeepAll.addEventListener('click', () => {
   // Formy z paska („Obejmie: …”) z tej chwili: osoba dopisana później nie wyjdzie jawna po cichu.
   const forms = [...new Set(sameAs(frag.span).map((s) => formOf(lastInput, s)))];
   const n = addDecision({ kind: 'keep', scope: 'same', key: spanKey(lastInput, frag.span), label, forms });
-  correctionsChanged(`Zostawiono jawne: ${fragmentsWord(n)}.`);
+  correctionsChanged(`Zostawiono jawne: ${fragmentsWord(n)}.`, frag.span);
 });
 fixRemask.addEventListener('click', () => {
   const frag = currentFrag();
@@ -1094,7 +1119,7 @@ fixRemask.addEventListener('click', () => {
   if (last?.kind === 'keep' && last.scope === 'here' && last.start === start && last.end === end) decisions.pop();
   else addDecision({ kind: 'mask', scope: 'here', start, end, token: frag.span.tokens[0] });
   fixNote = '';
-  correctionsChanged(`Zasłonięto ponownie: ${fragmentsWord(1)}.`);
+  correctionsChanged(`Zasłonięto ponownie: ${fragmentsWord(1)}.`, frag.span);
 });
 fixBarClose.addEventListener('click', () => closeBar(true));
 fixBar.addEventListener('keydown', (e) => {
@@ -1147,13 +1172,7 @@ function syncSelButtons(): void {
   fixSelSrc.hidden = !on;
   fixSelOut.hidden = !on;
   fixSelSrc.disabled = !on || input.selectionStart === input.selectionEnd;
-  const compare = viewMode === 'compare';
-  fixSelOut.disabled = !on || compare || !outRange;
-  const tip = compare ? SEL_OUT_COMPARE_TIP : SEL_OUT_TIP;
-  if (fixSelOut.dataset.tip !== tip) {
-    fixSelOut.dataset.tip = tip;
-    fixSelOut.setAttribute('aria-describedby', tipDescId(tip));
-  }
+  fixSelOut.disabled = !on || viewMode === 'compare' || !outRange;
 }
 
 document.addEventListener('selectionchange', () => {
@@ -1188,6 +1207,8 @@ function openForm(from: 'src' | 'out'): void {
     return;
   }
   formRanges = lineRanges(lastInput, snapped.start, snapped.end);
+  formInput = lastInput;
+  formAt = snapped;
   formText = lastInput.slice(snapped.start, snapped.end);
   const multi = formRanges.length > 1;
   fixFormVal.textContent = formText.replace(/\s+/g, ' ').trim();
@@ -1223,13 +1244,18 @@ fixForm.addEventListener('keydown', (e) => {
   closeForm(true);
 });
 fixApply.addEventListener('click', () => {
+  flushPendingUpdate(); // edycja źródła sprzed chwili zamyka wiersz (renderResult)
+  if (fixForm.hidden || !fixAvailable() || lastInput !== formInput) return;
   const token = fixToken.value;
   let n = 0;
   if (fixAll.checked && !fixAll.disabled) n = addDecision({ kind: 'mask', scope: 'all', text: formText, token });
   else for (const [start, end] of formRanges) n += addDecision({ kind: 'mask', scope: 'here', start, end, token });
-  if (formReturn === fixSelOut) getSelection()?.removeAllRanges();
-  closeForm(true);
-  correctionsChanged(n ? `Zasłonięto ${placesWord(n)}.` : 'Ten fragment był już zasłonięty.');
+  // Z wyniku fokus idzie na nowy znacznik: przycisk „Zasłoń zaznaczenie” zaraz się wyłączy.
+  const fromOut = formReturn === fixSelOut;
+  if (fromOut) getSelection()?.removeAllRanges();
+  closeForm(!fromOut);
+  correctionsChanged(n ? `Zasłonięto ${placesWord(n)}.` : 'Ten fragment był już zasłonięty.', formAt);
+  if (fromOut) (maskEls[maskIdx] ?? output).focus({ preventScroll: true });
 });
 
 /** Wpis listy poprawek: co zrobiono, z wartością (tylko na ekranie) i liczbą miejsc. */
@@ -1393,6 +1419,11 @@ function renderResult(redacted: string, found: PiiFinding[]): void {
   // Przegląd dotyczy dokładnie tego wyniku: po każdej zmianie tekstu albo wyniku liczy się od zera.
   if (redacted !== lastRedacted || input.value !== lastInput) reviewed.clear();
   // Edycja źródła: poprawki „tutaj” przesuwają się razem z tekstem albo odpadają (corrections.ts).
+  // Otwarty wiersz „Zasłoń” trzyma pozycje w starym tekście: po edycji zasłoniłby co innego.
+  if (!fixForm.hidden && input.value !== lastInput) {
+    closeForm(false);
+    announce('Tekst źródłowy się zmienił. Zaznacz fragment jeszcze raz.');
+  }
   if (decisions.length && lastInput && input.value !== lastInput) {
     const moved = shiftDecisions(lastInput, input.value, decisions);
     decisions = moved.decisions;

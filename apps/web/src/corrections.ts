@@ -95,7 +95,7 @@ export function spanKey(original: string, span: Pick<Span, 'start' | 'end' | 'to
 
 /** Forma zakresu do listy decyzji „wszędzie”: tekst oryginału bez wielkości liter i nadmiaru odstępów. */
 export const formOf = (original: string, span: { start: number; end: number }): string =>
-  original.slice(span.start, span.end).toLowerCase().replace(/s+/g, ' ').trim();
+  original.slice(span.start, span.end).toLowerCase().replace(/\s+/g, ' ').trim();
 
 const escapeRe = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
