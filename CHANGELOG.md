@@ -12,6 +12,10 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+- **Zależności.** pdf.js, który czyta PDF-y w Parawan.html, 6.1.200 → 6.4.299. Narzędzia budowania
+  i testów: Vite 8.3.5, vite-plugin-singlefile 2.3.4, Vitest 4.1.12, Biome 2.6.3, esbuild 0.28.2.
+  Akcje GitHub: setup-node v7, upload-pages-artifact v5, deploy-pages v5. Zastępuje PR-y
+  Dependabota #15, #16, #17 i #21, które powstały na starszym `main`.
 - **Strona produktu: podstrona „Zmiany i plan” pod `/log/`.** Dziennik zmian i plan rozwoju
   powstają przy buildzie z `CHANGELOG.md` i `ROADMAP.md`. Strona nie ma skryptu, ma tę samą
   regułę CSP co strona główna i wbudowane fonty, więc nie wysyła żadnych żądań. Wersje starsze

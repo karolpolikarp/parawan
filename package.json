@@ -14,9 +14,9 @@
     "e2e": "node --test \"scripts/e2e/*.test.mjs\""
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.3",
+    "@biomejs/biome": "^2.6.3",
     "axe-core": "4.11.1",
-    "esbuild": "^0.28.1",
+    "esbuild": "^0.28.2",
     "playwright": "1.61.1"
   }
 }
