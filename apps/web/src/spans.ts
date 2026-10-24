@@ -121,10 +121,55 @@ export function alignSpans(
       end -= suffix.length;
     }
     if (end === pos) return false; // znacznik bez żadnego fragmentu oryginału
+    // Znaczniki zastane w środku grupy („600 700 800 [EMAIL] 44051401359” daje
+    // „[TELEFON] [EMAIL] [PESEL]”): jeśli oryginał zawiera dosłownie odstęp, znacznik i odstęp
+    // z wyniku, grupa dzieli się tam na dwa zakresy, a znacznik zostaje tekstem oryginału.
+    // Inaczej liczyłby się jako nowe wykrycie (chip typu, którego rdzeń w tekście nie znalazł).
+    let segStart = pos;
+    let seg: Pending[] = [];
+    for (let k = 0; k < group.length; k++) {
+      const p = group[k];
+      const prev = group[k - 1];
+      const next = group[k + 1];
+      if ('mask' in p && next && 'gap' in next && k + 2 < group.length) {
+        const lit = `[${p.mask}]`;
+        if (seg.length && prev && 'gap' in prev) {
+          // odstęp przed znacznikiem siedzi już na końcu seg
+          const needle = prev.gap + lit + next.gap;
+          const f = original.indexOf(needle, segStart + 1);
+          if (f !== -1 && f + needle.length < end) {
+            pushSpan(segStart, f, seg);
+            kept++;
+            segStart = f + needle.length;
+            seg = [];
+            k++; // odstęp za znacznikiem należy do tekstu oryginału
+            continue;
+          }
+        } else if (!seg.length && original.startsWith(lit + next.gap, segStart)) {
+          // kolejny zastany znacznik tuż za poprzednim
+          const after = segStart + lit.length + next.gap.length;
+          if (after < end) {
+            kept++;
+            segStart = after;
+            k++;
+            continue;
+          }
+        }
+      }
+      seg.push(p);
+    }
+    pushSpan(segStart, end, seg);
+    group = [];
+    pos = gapEnd;
+    return true;
+  };
+
+  /** Dopisuje zakres [start, end) z tokenami i odstępami z elementów grupy. */
+  const pushSpan = (start: number, end: number, elems: Pending[]): void => {
     const tokens: string[] = [];
     const gaps: string[] = [];
     let gapAcc = '';
-    for (const p of group) {
+    for (const p of elems) {
       if ('gap' in p) gapAcc += p.gap;
       else {
         if (tokens.length) gaps.push(gapAcc);
@@ -132,12 +177,9 @@ export function alignSpans(
         gapAcc = '';
       }
     }
-    const span: Span = { start: pos, end, tokens, gaps, source: 'auto' };
+    const span: Span = { start, end, tokens, gaps, source: 'auto' };
     if (quoted) span.quoted = true;
     spans.push(span);
-    group = [];
-    pos = gapEnd;
-    return true;
   };
 
   for (let i = 0; i < parts.length; i++) {

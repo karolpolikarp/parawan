@@ -95,6 +95,26 @@ test('dawny znacznik na końcu grupy zostaje tekstem oryginału poza zakresem', 
   ]);
 });
 
+test('dawny znacznik w środku grupy dzieli ją na dwa zakresy i nie liczy się jako wykrycie', () => {
+  const cases: [string, string[], Record<string, number>][] = [
+    ['Tel. 600 700 800 [EMAIL] 44051401359', ['600 700 800', '44051401359'], { TELEFON: 1, PESEL: 1 }],
+    ['Jan Kowalski [PESEL] 600 700 800', ['Jan Kowalski', '600 700 800'], { 'IMIĘ I NAZWISKO': 1, TELEFON: 1 }],
+    ['PESEL 44051401359 [PESEL] 44051401359', ['44051401359', '44051401359'], { PESEL: 2 }],
+    ['Tel. 600 700 800 [EMAIL] [NIP] 44051401359', ['600 700 800', '44051401359'], { TELEFON: 1, PESEL: 1 }],
+  ];
+  for (const [original, values, counts] of cases) {
+    const { redacted, found } = redactPII(original);
+    const a = alignSpans(original, redacted);
+    expect(a, original).not.toBeNull();
+    if (!a) continue;
+    expect(a.spans.map((s) => original.slice(s.start, s.end))).toEqual(values);
+    expect(Object.fromEntries(countTokens(a.spans))).toEqual(counts);
+    expect(a.kept).toBeGreaterThan(0);
+    expect(applySpans(original, a.spans)).toBe(redacted);
+    expect(found.reduce((n, f) => n + f.count, 0)).toBe(values.length);
+  }
+});
+
 test('tryb ścisły odmawia zamiast zgadywać', () => {
   // odcinek wyniku, którego nie ma w oryginale (np. zamieniony odstęp)
   expect(alignSpans('Jan Kowalski\tmieszka tu', '[IMIĘ I NAZWISKO] mieszka tu')).toBeNull();
