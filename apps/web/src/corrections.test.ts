@@ -255,6 +255,72 @@ describe('kolejność decyzji i cofanie', () => {
   });
 });
 
+describe('„Cofnij zasłonięcie” (unmask)', () => {
+  const text = 'Wnioskodawca, PESEL 44051401359, złożonego 3 maja, mieszka w Lublinie.';
+  const unmaskAt = (t: string, spans: Span[], d: Decision[]): Decision => {
+    const r = applyCorrections(t, spans, d);
+    const m = r.spans.find((s) => s.source === 'manual');
+    if (!m) throw new Error('brak zakresu ręcznego');
+    return { kind: 'unmask', scope: 'here', start: m.start, end: m.end };
+  };
+
+  test('zasłonięcie „wszędzie” wchłaniające PESEL: cofnięcie wraca do [PESEL], nie odsłania automatu', () => {
+    const { spans, redacted } = auto(text);
+    expect(redacted).toContain('[PESEL]');
+    const mask: Decision = { kind: 'mask', scope: 'all', text: '44051401359, złożonego', token: 'DANE' };
+    expect(final(text, spans, [mask])).toContain('[DANE] 3 maja');
+    const d = [mask, unmaskAt(text, spans, [mask])];
+    const r = applyCorrections(text, spans, d);
+    expect(applySpans(text, r.spans)).toBe(redacted);
+    expect(r.kept).toEqual([]);
+    expect(r.effects).toEqual([1, 1]);
+    expect(correctionCounts(r)).toEqual({ kept: 0, masked: 0 });
+  });
+
+  test('zakres ręczny, który urósł po włączeniu typu: cofnięcie zostawia adres zasłonięty', () => {
+    const t = 'Strona zam. ul. Lipowa 17, Lublin.';
+    const adres: Span = { ...at(t, 'ul. Lipowa 17'), tokens: ['ADRES'], gaps: [], source: 'auto' };
+    const mask: Decision = { kind: 'mask', scope: 'here', ...at(t, 'zam. ul. Lipowa'), token: 'ADRES' };
+    // przy wyłączonym „Adres” zakres ręczny to samo zaznaczenie, po włączeniu wchłania adres automatu
+    expect(final(t, [], [mask])).toBe('Strona [ADRES] 17, Lublin.');
+    const grown = unmaskAt(t, [adres], [mask]);
+    expect(grown).toMatchObject(at(t, 'zam. ul. Lipowa 17'));
+    expect(final(t, [adres], [mask, grown])).toBe('Strona zam. [ADRES], Lublin.');
+  });
+
+  test('cofnięcie wraca do stanu sprzed zasłonięcia: odsłonięty wcześniej znacznik znów jawny, starsze zasłonięcie wraca', () => {
+    const { spans } = auto(text);
+    const keep: Decision = { kind: 'keep', scope: 'here', start: spans[0].start, end: spans[0].end };
+    const mask: Decision = { kind: 'mask', scope: 'here', ...at(text, 'PESEL 44051401359'), token: 'DANE' };
+    const d = [keep, mask];
+    expect(final(text, spans, d)).toContain('[DANE]');
+    const r = applyCorrections(text, spans, [...d, unmaskAt(text, spans, d)]);
+    expect(applySpans(text, r.spans)).toBe(final(text, spans, [keep]));
+    expect(r.kept).toEqual([spans[0]]);
+    // zasłonięcie nachodzące na starsze ręczne: cofnięcie młodszego przywraca starsze
+    const a: Decision = { kind: 'mask', scope: 'here', ...at(text, 'złożonego'), token: 'DANE' };
+    const b: Decision = { kind: 'mask', scope: 'here', ...at(text, 'złożonego 3 maja'), token: 'DANE' };
+    expect(final(text, spans, [a, b, unmaskAt(text, spans, [a, b])])).toBe(final(text, spans, [a]));
+  });
+
+  test('numer decyzji zasłonięcia przy każdym zakresie ręcznym (by), -1 przy automacie', () => {
+    const { spans } = auto(text);
+    const r = applyCorrections(text, spans, [{ kind: 'mask', scope: 'all', text: 'maja', token: 'DANE' }]);
+    expect(r.by).toEqual(r.spans.map((s) => (s.source === 'manual' ? 0 : -1)));
+    expect(r.by).toContain(0);
+  });
+});
+
+describe('zaznaczenie wewnątrz znacznika', () => {
+  test('„Jan” w zakresie „Jan Kowalski” rozszerza się do całego zakresu, a nie do każdego „Jan”', () => {
+    const t = 'Jan Kowalski i Jan Nowak.';
+    const spans = [{ ...at(t, 'Jan Kowalski') }];
+    expect(snapSelection(t, 0, 3, spans)).toEqual(at(t, 'Jan Kowalski'));
+    // z prawej strony zakresu też
+    expect(snapSelection(t, t.indexOf('Kowal'), t.indexOf('Kowal') + 3, spans)).toEqual(at(t, 'Jan Kowalski'));
+  });
+});
+
 describe('edycja tekstu źródłowego', () => {
   test('przesunięcie przez wspólny początek i koniec, odrzucenie w zmienionym fragmencie', () => {
     const before = 'AAA Jan Nowak BBB Piotr Lis CCC';

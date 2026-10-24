@@ -141,7 +141,7 @@ const reviewed = new Set<number>();
 // Ręczne poprawki (corrections.ts) w kolejności podjęcia: tylko w pamięci karty, nigdy
 // w localStorage (zawierają fragmenty pisma). `corrected` to ich wynik dla bieżących zakresów.
 let decisions: Decision[] = [];
-let corrected: Corrected = { spans: [], kept: [], effects: [] };
+let corrected: Corrected = { spans: [], kept: [], effects: [], by: [] };
 
 /* ── Legenda, tabela „Co wykrywa” i przełączniki „Co maskować” (dane w pii-meta.ts) ── */
 
@@ -942,7 +942,7 @@ const exportBlocked = (): boolean => !!lastRedacted && !lastSpans && decisions.s
 function recomputeCorrections(): void {
   corrected = lastSpans
     ? applyCorrections(lastInput, lastSpans, decisions)
-    : { spans: [], kept: [], effects: decisions.map(() => 0) };
+    : { spans: [], kept: [], effects: decisions.map(() => 0), by: [] };
 }
 
 /** Bieżący fragment: zakres pod znacznikiem albo fragment przywrócony ręcznie. */
@@ -1015,11 +1015,12 @@ function closeBar(returnFocus: boolean): void {
   if (returnFocus) (maskEls[maskIdx] ?? output).focus({ preventScroll: true });
 }
 
+const maskSpans = (): (Span | undefined)[] =>
+  maskEls.map((el) => (el.dataset.s !== undefined ? corrected.spans[Number(el.dataset.s)] : corrected.kept[Number(el.dataset.k)]));
+
 /** Indeks znacznika o zakresie `r`, a bez takiego: znacznika, który go obejmuje (-1, gdy żaden). */
 function maskAt(r: { start: number; end: number }): number {
-  const spans = maskEls.map((el) =>
-    el.dataset.s !== undefined ? corrected.spans[Number(el.dataset.s)] : corrected.kept[Number(el.dataset.k)],
-  );
+  const spans = maskSpans();
   const at = spans.findIndex((s) => s && s.start === r.start && s.end === r.end);
   return at >= 0 ? at : spans.findIndex((s) => s && s.start <= r.start && r.end <= s.end);
 }
@@ -1041,8 +1042,11 @@ function correctionsChanged(msg: string, target?: { start: number; end: number }
   output.scrollTop = top;
   const at = cur ? maskAt(cur) : -1;
   // Fragmentu już nie ma (cofnięte zasłonięcie): pasek się zamyka, zamiast przejść na inną daną.
+  // Gdy w jego miejscu wrócił znacznik automatu (PESEL), bieżący jest ten znacznik, ale bez paska:
+  // Enter nie może od razu odsłonić danej, o której urzędnik nie decydował.
   barOpen = wasOpen && at >= 0;
-  if (at >= 0) goToMask(at, false);
+  const back = at < 0 && cur ? maskSpans().findIndex((s) => s && cur.start <= s.start && s.end <= cur.end) : -1;
+  if (at >= 0 || back >= 0) goToMask(Math.max(at, back), false);
   renderFindings(lastFound, countTokens(corrected.spans));
   syncPublication();
   syncPrintOut();
@@ -1064,11 +1068,11 @@ function addDecision(d: Decision): number {
   return corrected.effects[corrected.effects.length - 1] ?? 0;
 }
 
-function undoDecision(i: number): void {
+function undoDecision(i: number, target?: { start: number; end: number }): void {
   if (!decisions[i]) return;
   decisions.splice(i, 1);
   fixNote = '';
-  correctionsChanged('Cofnięto ręczną poprawkę.');
+  correctionsChanged('Cofnięto ręczną poprawkę.', target);
 }
 
 /** Wyczyść, Przykład, plik i nowe pismo: poprawki dotyczyły poprzedniego tekstu. */
@@ -1091,15 +1095,22 @@ function clearCorrections(): void {
 fixKeep.addEventListener('click', () => {
   const frag = currentFrag();
   if (!frag || frag.kept) return;
-  const { start, end } = frag.span;
-  // Fragment zasłonięty ręcznie: „Cofnij zasłonięcie” zdejmuje tamtą poprawkę z listy.
-  const own = decisions.findIndex((d) => d.kind === 'mask' && d.scope === 'here' && d.start === start && d.end === end);
-  if (frag.span.source === 'manual' && own >= 0) {
-    undoDecision(own);
+  const { span } = frag;
+  if (span.source === 'manual') {
+    // „Cofnij zasłonięcie” wraca do stanu sprzed ręcznej poprawki: dane zasłonięte przez automat
+    // zostają zasłonięte. Poprawkę „tutaj” albo „wszędzie” z jednym miejscem zdejmuje z listy,
+    // a z kilku miejsc cofa tylko to jedno.
+    const by = corrected.by[Number(maskEls[maskIdx]?.dataset.s)] ?? -1;
+    const d = decisions[by];
+    if (d && (d.scope === 'here' || corrected.effects[by] === 1)) undoDecision(by, span);
+    else {
+      addDecision({ kind: 'unmask', scope: 'here', start: span.start, end: span.end });
+      correctionsChanged(`Cofnięto zasłonięcie w tym miejscu.`, span);
+    }
     return;
   }
-  addDecision({ kind: 'keep', scope: 'here', start: frag.span.start, end: frag.span.end });
-  correctionsChanged(`Zostawiono jawne: ${fragmentsWord(frag.span.tokens.length)}.`, frag.span);
+  addDecision({ kind: 'keep', scope: 'here', start: span.start, end: span.end });
+  correctionsChanged(`Zostawiono jawne: ${fragmentsWord(span.tokens.length)}.`, span);
 });
 fixKeepAll.addEventListener('click', () => {
   const frag = currentFrag();
@@ -1261,6 +1272,7 @@ fixApply.addEventListener('click', () => {
 /** Wpis listy poprawek: co zrobiono, z wartością (tylko na ekranie) i liczbą miejsc. */
 function decisionText(d: Decision, n: number): string {
   const where = `, ${placesWord(n)}`;
+  if (d.kind === 'unmask') return `Cofnięto zasłonięcie w jednym miejscu: ${origOf(d.start, d.end)}`;
   if (d.kind === 'keep') {
     return d.scope === 'here'
       ? `Zostawiono jawne: ${origOf(d.start, d.end)}`

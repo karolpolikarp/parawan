@@ -471,3 +471,65 @@ test('„Cofnij zasłonięcie” na fragmencie zasłoniętym ręcznie zamyka pas
     assert.ok(!/wierzbick/i.test(await app.output()), 'wnioskodawca jawny');
   });
 });
+
+// Poprawki po weryfikacji A09, runda 3: „Cofnij zasłonięcie” wraca do stanu sprzed ręcznej
+// poprawki. Dane zasłonięte przez automat zostają zasłonięte, a stopka i lista mówią to samo.
+
+test('„Cofnij zasłonięcie” na zakresie, który wchłonął PESEL, zostawia [PESEL] w wyniku, pliku i druku', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    await paste(page, DECYZJA);
+    // domyślne „wszystkie wystąpienia” (jedno miejsce), zaznaczenie zahacza o PESEL automatu
+    await openFormFromSource(page, '85071412358, złożonego');
+    await page.locator('#fix-all').check();
+    await page.locator('#fix-token').selectOption('DANE');
+    await page.locator('#fix-apply').click();
+    await app.waitForOutput('[DANE]');
+    assert.ok(!(await app.output()).includes('[PESEL], złożonego'));
+    await page.locator('#output mark.pii', { hasText: '[DANE]' }).click();
+    assert.equal(await page.locator('#fix-keep').innerText(), 'Cofnij zasłonięcie');
+    await page.locator('#fix-keep').click();
+    await page.waitForFunction(() => !(document.getElementById('output')?.textContent ?? '').includes('[DANE]'));
+    const out = await app.output();
+    assert.ok(out.includes('PESEL [PESEL], złożonego'), out);
+    assert.equal(await page.locator('#fix-bar').isHidden(), true, 'pasek z „Zostaw jawne” na PESEL-u');
+    assert.equal(await page.evaluate(() => document.activeElement?.textContent), '[PESEL]');
+    for (const [where, text] of [
+      ['wynik', out],
+      ['druk', (await printed(page)) ?? ''],
+      ['.txt', await downloadTxt(page)],
+    ]) {
+      assert.ok(!squash(text).includes('85071412358'), `${where}: PESEL jawny`);
+    }
+    // jedyne miejsce: poprawka zdjęta z listy, stopka nie liczy niczego
+    assert.equal(await page.locator('#fix-foot').isHidden(), true);
+  });
+});
+
+test('„Cofnij zasłonięcie” w jednym z kilku miejsc „wszędzie”: stopka i lista zgodne, reszta zasłonięta', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    await paste(page, DECYZJA);
+    await selectInOutput(page, '245/7');
+    await page.locator('#fix-sel-out').click();
+    await page.locator('#fix-token').selectOption('DANE');
+    assert.equal(await page.locator('#fix-all').isChecked(), true);
+    await page.locator('#fix-apply').click();
+    await page.waitForFunction(() => ((document.getElementById('output')?.textContent ?? '').match(/\[DANE\]/g) ?? []).length === 3);
+    // fokus stoi na nowym [DANE], Enter otwiera pasek
+    assert.equal(await page.evaluate(() => document.activeElement?.textContent), '[DANE]');
+    await page.keyboard.press('Enter');
+    assert.equal(await page.locator('#fix-keep').innerText(), 'Cofnij zasłonięcie');
+    await page.locator('#fix-keep').click();
+    await page.waitForFunction(() => ((document.getElementById('output')?.textContent ?? '').match(/\[DANE\]/g) ?? []).length === 2);
+    assert.equal((await app.output()).split('245/7').length, 2, 'odsłonięte więcej niż jedno miejsce');
+    assert.equal(await page.locator('#fix-sum').textContent(), 'Ręczne poprawki: przywrócono 0, zasłonięto 2');
+    await page.locator('#fix-show').click();
+    const list = (await page.locator('#fix-list').innerText()).replace(/\s+/g, ' ');
+    assert.ok(list.includes('Cofnięto zasłonięcie w jednym miejscu: 245/7'), list);
+    assert.ok(!list.includes('Zostawiono jawne'), list);
+    // cofnięcie wpisu z listy zasłania to miejsce z powrotem
+    await page.locator('#fix-list button[data-i="1"]').click();
+    await page.waitForFunction(() => ((document.getElementById('output')?.textContent ?? '').match(/\[DANE\]/g) ?? []).length === 3);
+  });
+});

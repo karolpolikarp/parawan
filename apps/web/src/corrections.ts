@@ -22,7 +22,12 @@ export type Decision =
   /** Zasłoń [start, end) oryginału znacznikiem [token]. */
   | { kind: 'mask'; scope: 'here'; start: number; end: number; token: string }
   /** Zasłoń każde wystąpienie tekstu (bez wielkości liter, na granicach wyrazów). */
-  | { kind: 'mask'; scope: 'all'; text: string; token: string };
+  | { kind: 'mask'; scope: 'all'; text: string; token: string }
+  /**
+   * Cofnij ręczne zasłonięcie w [start, end): miejsce wraca do stanu sprzed niego, więc to, co
+   * zasłaniał automat (PESEL wchłonięty przez zaznaczenie), dalej jest zasłonięte.
+   */
+  | { kind: 'unmask'; scope: 'here'; start: number; end: number };
 
 /** Tokeny do wyboru przy „Zasłoń zaznaczenie”, w kolejności listy. */
 export const MANUAL_TOKENS: readonly { token: string; label: string }[] = [
@@ -135,9 +140,16 @@ export function findOccurrences(original: string, text: string, token: string): 
 const overlaps = (s: { start: number; end: number }, a: number, b: number): boolean => a < s.end && s.start < b;
 const inside = (s: { start: number; end: number }, a: number, b: number): boolean => a <= s.start && s.end <= b;
 
-/** Zakres w trakcie nakładania: z indeksami zakresów automatycznych, które wchłonął. */
+/**
+ * Zakres w trakcie nakładania. Automatyczny ma numer `ai` w autoSpans; ręczny ma numer decyzji `by`,
+ * która go utworzyła, oraz zakresy (`under`) i odsłonięcia automatu (`wasKept`) sprzed niej, żeby
+ * „Cofnij zasłonięcie” wróciło dokładnie do tamtego stanu.
+ */
 interface Cover extends Span {
-  auto: number[];
+  ai: number;
+  by: number;
+  under: Cover[];
+  wasKept: number[];
 }
 
 export interface Corrected {
@@ -147,6 +159,8 @@ export interface Corrected {
   kept: Span[];
   /** Ile miejsc zmieniła każda decyzja (do listy poprawek i komunikatów). */
   effects: number[];
+  /** Numer decyzji, która utworzyła zakres z `spans` (-1 dla zakresu automatu). */
+  by: number[];
 }
 
 /**
@@ -157,60 +171,70 @@ export interface Corrected {
  * Zasłonięcie nachodzące na zakresy łączy się z nimi w jeden (suma przedziałów) z tokenem
  * decyzji; zasłonięcie miejsca odsłoniętego wcześniej przywraca zakres automatyczny z jego
  * znacznikami; zasłonięcie wewnątrz zakresu, który już jest zasłonięty, nic nie zmienia.
+ * Cofnięcie zasłonięcia (unmask) przywraca to, co zakres ręczny wchłonął, a nie odsłania automatu.
  */
 export function applyCorrections(original: string, autoSpans: Span[], decisions: Decision[]): Corrected {
-  if (!decisions.length) return { spans: autoSpans, kept: [], effects: [] };
-  let cover: Cover[] = autoSpans.map((s, i) => ({ ...s, auto: [i] }));
+  if (!decisions.length) return { spans: autoSpans, kept: [], effects: [], by: autoSpans.map(() => -1) };
+  const autoCover = (i: number): Cover => ({ ...autoSpans[i], ai: i, by: -1, under: [], wasKept: [] });
+  let cover: Cover[] = autoSpans.map((_, i) => autoCover(i));
   const kept = new Set<number>();
   const effects: number[] = [];
+  /** Zakresy automatyczne wchłonięte w `c` (także przez wchłonięte zakresy ręczne). */
+  const autoOf = (c: Cover): number[] => (c.by < 0 ? [c.ai] : c.under.flatMap(autoOf));
   const keepAll = (pick: (c: Cover) => boolean): number => {
     const hit = cover.filter(pick);
     if (!hit.length) return 0;
-    for (const c of hit) for (const i of c.auto) kept.add(i);
+    for (const c of hit) for (const i of autoOf(c)) kept.add(i);
     cover = cover.filter((c) => !hit.includes(c));
     return hit.length;
   };
-  const maskAt = (a: number, b: number, token: string): boolean => {
+  const maskAt = (a: number, b: number, token: string, by: number): boolean => {
     if (!(a >= 0 && b <= original.length && a < b)) return false;
     const restored = [...kept].filter((i) => overlaps(autoSpans[i], a, b));
     for (const i of restored) {
       kept.delete(i);
-      cover.push({ ...autoSpans[i], auto: [i] });
+      cover.push(autoCover(i));
     }
     if (cover.some((c) => c.start <= a && b <= c.end)) return restored.length > 0;
     let s = a;
     let e = b;
-    const auto: number[] = [];
+    const under: Cover[] = [];
     for (;;) {
       const hit = cover.filter((c) => overlaps(c, s, e));
       if (!hit.length) break;
       for (const c of hit) {
         s = Math.min(s, c.start);
         e = Math.max(e, c.end);
-        auto.push(...c.auto);
+        under.push(c);
       }
       cover = cover.filter((c) => !hit.includes(c));
     }
-    cover.push({ start: s, end: e, tokens: [token], gaps: [], source: 'manual', auto });
+    cover.push({ start: s, end: e, tokens: [token], gaps: [], source: 'manual', ai: -1, by, under, wasKept: restored });
     return true;
   };
-  for (const d of decisions) {
+  decisions.forEach((d, i) => {
     let n = 0;
     if (d.kind === 'keep') {
       n =
         d.scope === 'here'
           ? keepAll((c) => inside(c, d.start, d.end))
           : keepAll((c) => spanKey(original, c) === d.key && d.forms.includes(formOf(original, c)));
+    } else if (d.kind === 'unmask') {
+      // Zakres ręczny w miejscu decyzji albo szerszy od niego (po ponownym włączeniu typu urósł).
+      for (const c of cover.filter((c) => c.by >= 0 && (inside(c, d.start, d.end) || inside(d, c.start, c.end)))) {
+        cover = cover.filter((x) => x !== c).concat(c.under.filter((u) => !c.wasKept.includes(u.ai)));
+        for (const k of c.wasKept) kept.add(k);
+        n++;
+      }
     } else {
       const ranges = d.scope === 'here' ? [[d.start, d.end] as [number, number]] : findOccurrences(original, d.text, d.token);
-      for (const [a, b] of ranges) if (maskAt(a, b, d.token)) n++;
+      for (const [a, b] of ranges) if (maskAt(a, b, d.token, i)) n++;
     }
     effects.push(n);
-  }
-  const spans = cover
-    .sort((x, y) => x.start - y.start)
-    .map(({ auto: _auto, ...s }) => s as Span);
-  return { spans, kept: [...kept].sort((x, y) => x - y).map((i) => autoSpans[i]), effects };
+  });
+  cover.sort((x, y) => x.start - y.start);
+  const spans = cover.map(({ ai: _a, by: _b, under: _u, wasKept: _w, ...s }) => s as Span);
+  return { spans, kept: [...kept].sort((x, y) => x - y).map((i) => autoSpans[i]), effects, by: cover.map((c) => c.by) };
 }
 
 /**
