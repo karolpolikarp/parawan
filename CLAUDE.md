@@ -65,6 +65,21 @@ Release (`.github/workflows/release.yml`, tag `v*`): jeden artefakt — `Parawan
 Sam benchmark nie wystarcza — sprawdzaj zmiany wieloagentowo/adwersarialnie na realistycznych pismach
 (patrz pamięć `weryfikacja-precyzji-audyt-adwersarialny`). UX weryfikuj zrzutami (Playwright).
 
+## Wersjonowanie
+
+- Każda zmiana widoczna dla użytkownika trafia do `## [Unreleased]` w `CHANGELOG.md` w tym samym
+  commicie. Format pliku jest własny (`## vX.Y.Z — RRRR-MM-DD`, pogrubione podsumowanie,
+  `Pilność:`), nie Keep a Changelog — nie przerabiać starych wpisów.
+- Przy wydaniu `[Unreleased]` staje się `## vX.Y.Z — data` (SemVer: PATCH poprawki, MINOR nowe
+  funkcje i typy PII, MAJOR zmiana łamiąca). Podbij `version` w `apps/web/package.json`
+  i `apps/landing/package.json` (rdzeń `packages/core` ma własną numerację 0.29.x), dopisz link
+  porównawczy na dole CHANGELOG i utwórz tag adnotowany `vX.Y.Z`. Pełna lista: `docs/WYDANIE.md`.
+- Granica wersji = commit podbijający `version` w `apps/web/package.json`; tag stoi na ostatnim
+  commicie przed następnym podbiciem.
+- `ROADMAP.md` (Teraz / Następnie / Później) aktualizuj przy wydaniu. Oba pliki renderuje strona
+  `/log` landingu przy buildzie.
+- Commity: Conventional Commits (`feat`, `fix`, `refactor`, `docs`, `chore`, `test`).
+
 ## Język
 
 Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i diakrytyką).

@@ -1,5 +1,27 @@
 # Changelog
 
+Zmiany w Parawanie, od najnowszej wersji. Nagłówek „## vX.Y.Z — data” odpowiada wersji aplikacji
+z `apps/web/package.json` i tagowi `vX.Y.Z` w repozytorium; wpisy z dopiskiem „(wpis odtworzony
+z historii commitów)” dopisano później na podstawie commitów z danego zakresu.
+
+Odnośniki na końcu pliku prowadzą do porównania kolejnych wersji na GitHubie. Nagłówki ich nie
+używają, bo skrypt wydania (`scripts/release/render-docs.mjs`) szuka sekcji po „## vX.Y.Z”, więc
+w podglądzie Markdowna to spis adresów, a nie linki w nagłówkach. Tagi v0.41.0, v0.42.0,
+v0.46.11, v0.46.14, v0.46.15, v0.46.17 i v0.46.21 dodano wstecznie 2026-10-25; porównania z nimi
+działają na GitHubie od chwili wypchnięcia tagów.
+
+## [Unreleased]
+
+- **CLI: tryb `--jsonl` dla wywołań programowych.** `anonimizator --jsonl` działa jako proces
+  trwały: każda linia JSON `{"id", "text"}` na wejściu daje jedną linię `{"id", "redacted",
+  "found"}` na wyjściu, w tej samej kolejności, a proces kończy się po zamknięciu stdin. Puste
+  linie są pomijane, `--osoby` działa jak w zwykłym trybie. Z `--bez-tekstu` odpowiedź zawiera
+  tylko `id` i listę znalezisk z liczbą wystąpień, bez zredagowanego tekstu. Starsze wydania
+  odrzucają nieznaną opcję kodem wyjścia 2, więc program po drugiej stronie może w ten sposób
+  sprawdzić, czy wersja zna ten tryb. Rdzeń `anonimizator` 0.29.12 → 0.29.13 (jeszcze
+  nieopublikowany w npm) zawiera silnik z v0.46.24 i eksport `isValidKw`. Aplikacja bez zmian.
+  (fa5edef)
+
 ## v0.46.25 — 2026-10-24
 
 **Parawan dla urzędu: pole tekstu od razu na ekranie, ręczna korekta wyniku, plik Worda z samego wyniku, adnotacja o wyłączeniu jawności z protokołem do akt i pliki wydania dla IOD i działu IT.**
@@ -354,6 +376,57 @@ benchmarku bez regresji (recall 94,8%, precyzja 99,7%). Trzy rundy audytu adwers
 (FP / FN / kolejność przebiegów / wydajność) zamknięte — po drodze zniknęła też kwadratowa
 złożoność w dokumentach z tysiącami linków (1 MB: 3,7 s → 0,12 s).
 Rdzeń 0.29.11 → 0.29.12, web/landing 0.46.21 → 0.46.22.
+
+## v0.46.21 — 2026-07-19
+
+(wpis odtworzony z historii commitów)
+
+**Strona produktu po audycie treści, SEO i dostępności: aktualne liczby skuteczności, demo zgodne
+z silnikiem i tekst przepisany na prostszą polszczyznę.**
+
+Silnik i aplikacja bez zmian (rdzeń dalej 0.29.11), wersja aplikacji podbita razem ze stroną.
+Doszły skrypty pomocnicze dla autora, uruchamiane ręcznie poza stroną.
+
+- **Treść strony.** FAQ wylicza wszystkie 23 typy (brakowało znaku sprawy). Sekcja
+  o przejrzystości ma panel „Skuteczność zmierzona, nie obiecana” z nowym pomiarem: wykrywalność
+  94,8%, trafność 99,7%, F1 97,2% na 309 zdaniach (wcześniej 94,2% i 96,8% na 268 zdaniach).
+  Przyciski pobierania prowadzą prosto do pliku `Parawan.html` z najnowszego wydania zamiast do
+  listy wydań, a stopka ma link do npm, „Wszystkie wydania” i „Ograniczenia”. (05b2509)
+- **SEO i podgląd linku.** Obraz podglądu 1200×630 dla serwisów społecznościowych, adres
+  kanoniczny, ikona dla iOS, dane strukturalne JSON-LD, krótszy opis (153 znaki zamiast około
+  280) i tytuł (60 znaków). Obraz powstaje z ręcznie uruchamianego `scripts/og/generate.mjs`
+  i leży w plikach strony, która dalej nie wykonuje żadnych żądań. (05b2509)
+- **Kontrast WCAG AA.** Ciemniejsze odcienie złota tylko na stronie produktu: etykiety i kroki
+  5,05:1 na kremowym tle, biały tekst na przyciskach 4,83:1. Małe teksty dostały ciemniejszy
+  kolor (5,45:1). Kolory wspólne z aplikacją bez zmian. (05b2509)
+- **Demo zgodne z silnikiem.** Znaczniki `[NR-KARTY]` i `[LOGIN]` wyświetlały się w demo jako
+  zwykły tekst, a widok „Porównanie” się rozjeżdżał. Teraz są rozpoznawane, a karta płatnicza
+  trafia do kategorii Finanse. Notka o sumach kontrolnych twierdziła, że sygnatura akt zostaje
+  nietknięta, choć chip „znak sprawy” mówi o jej maskowaniu, więc przykład zmieniono na numer
+  przepisu. Krok 1 nie obiecuje już upuszczania pliku na stronę, tylko w oknie pobranego
+  narzędzia. (e81308e)
+- **Dostępność.** Link pomijający nawigację widać przy fokusie z klawiatury, treść jest
+  w `<main>`, sekcja ograniczeń ma nagłówek h2. Wynik demo nie ma już `aria-live`, bo czytnik
+  ekranu dostawał cały wynik po każdej serii klawiszy. Obrys fokusu na ciemnozielonym tle jest
+  biały, a tekst chipów ma kontrast 5,59–6,07:1 zamiast 4,10–4,49:1. Te poprawki to część
+  20 wad potwierdzonych w audycie wieloagentowym. (e81308e)
+- **Ton tekstu.** Treść przepisana na zwykłą polszczyznę: z 51 wtrąceń myślnikowych zostało około
+  trzech, zniknęły puste wzmacniacze („100%” w prozie, „w pełni”, „po prostu”). Strona przestała
+  też mówić jak firma („naszych serwerach”, „maskujemy”), bo to lokalne narzędzie jednego autora.
+  Liczby i układ bez zmian. (3d141f1, 73366d9)
+- **Drobiazgi wizualne.** Kafelek z plikiem `Parawan.html` na stronie ma teraz ikonę `</>`
+  w zielonym kolorze marki zamiast niebieskiej ikony adresu. W tabeli
+  porównania „wysokie ryzyko wycieku” na czerwono zmieniło się na „podwyższone” na bursztynowo.
+  Krótkie bloki łamią się równiej, a po jednoliterowych spójnikach stoją twarde spacje
+  (wstawia je `scripts/typografia/nbsp.mjs`). (5def39e)
+- **Statystyki odwiedzin po stronie Cloudflare.** `scripts/analytics/cf-stats.mjs` (Node, bez
+  zależności) czyta z API GraphQL Cloudflare zagregowane dane ruchu strony produktu: odwiedziny,
+  żądania, trend dzienny albo godzinowy, kraje oraz podział na ludzi i boty. To narzędzie autora
+  uruchamiane z wiersza poleceń. Strona nie dostała żadnego skryptu analitycznego, dalej nie
+  wysyła żadnych żądań, a jej licznik żądań nadal pokazuje zero. Dane dostępowe skrypt bierze ze
+  zmiennych środowiskowych (`CLOUDFLARE_API_TOKEN`, awaryjnie `CLOUDFLARE_API_KEY`
+  z `CLOUDFLARE_EMAIL`, opcjonalnie `CLOUDFLARE_ZONE_ID`), nigdy z repozytorium.
+  (6a342d5, e5a208d, 3026e7d)
 
 ## v0.46.20 — 2026-07-16
 
@@ -857,8 +930,8 @@ z kropkami i tablic w wyliczeniu (raport testów: XML/JSON/OCR + mikrotest N1/B3
   seryjne/wersje/kwoty — świadoma polityka).
 - **Tablice w wyliczeniu — domknięcie (N1)**: człony po przecinku/„oraz"/„i" dziedziczą
   kotwicę pierwszej tablicy („pojazdy: WW 1234A, ZS 4567, WE 123AB…"); nowe kotwice
-  „parking/zaparkowan…" z przerwą do 3 słów; bezpiecznik: ścisły format (druga część od cyfry)
-  + walidacja pierwszej litery wyróżnika wojewódzkiego. „Rozporządzenie (WE) nr 1234/2009"
+  „parking/zaparkowan…" z przerwą do 3 słów; bezpiecznik: ścisły format (druga część od cyfry) +
+  walidacja pierwszej litery wyróżnika wojewódzkiego. „Rozporządzenie (WE) nr 1234/2009"
   i „dyrektywa WE 123" zostają. Naprawiona idempotencja: kotwica „rej…" nie zjada już
   końcówki „…cyjnym" przy drugim przebiegu (wartość tablicy musi zawierać cyfrę).
 - **Tolerancja błędów OCR**: kotwice z homoglifem („teI:" → telefon, „uI." → ulica), nazwa
@@ -1057,8 +1130,8 @@ najczęstszych nazwisk BEZ sufiksu `-ski/-cki/-icz/-czyk` (te i tak łapie morfo
 nazwiska obce (ukraińskie, niemieckie, wietnamskie), coraz realniejsze w dzisiejszej Polsce.
 
 - **Źródło:** rejestr PESEL osób żyjących (dane.gov.pl, 2023, licencja **CC0**).
-- **Kuracja precyzja > recall:** odsiew homonimów wyrazów pospolitych (filtr listy częstości korpusu)
-  + wieloagentowa klasyfikacja nazwisko/wyraz. Homonimy typu „górka/zięba/żurek/bednarz" świadomie
+- **Kuracja precyzja > recall:** odsiew homonimów wyrazów pospolitych (filtr listy częstości korpusu) +
+  wieloagentowa klasyfikacja nazwisko/wyraz. Homonimy typu „górka/zięba/żurek/bednarz" świadomie
   pominięte — łapie je warstwa kontekstowa (imię obok / „Pan"). Zero nowego nadmaskowania.
 - **Wynik (benchmark):** recall rdzenia 89,7% → 91,8% (kategoria `osoby-rzadkie-ner` 0% → 21%),
   **precyzja 99,0% bez zmian**. Plik edycji „urząd" nadal ~1,83 MB (fosa single-HTML zachowana).
@@ -1111,6 +1184,28 @@ u których sygnatura pisma identyfikuje sprawę i pośrednio osobę. Dwa tryby w
 Anty-nadmaskowanie: daty (`12.05.2024`), odwołania prawne (`art. 5 ust. 1`), numeracja
 (`Rozdział 5.2`) i frazy typu „znak drogowy B-2" pozostają nietknięte. Nowy przełącznik
 w „Co maskować" (Identyfikatory).
+
+## v0.40.0 — 2026-07-09
+
+(wpis odtworzony z historii commitów)
+
+**Okna źródła i wyniku rozszerzają się razem, a nagłówek mówi wprost o wklejaniu tekstu do czatu
+AI.**
+
+Silnik bez zmian, zmieniła się tylko aplikacja.
+
+- **Wspólne rozszerzanie okien.** Okno źródła ma uchwyt w prawym dolnym rogu (wcześniej rozmiar
+  był zablokowany), a okno wyniku dostaje tę samą wysokość, więc oba rosną i maleją równo.
+  Najmniejsza wysokość zależy od wysokości ekranu. (25cfd7e)
+- **Równe paski narzędzi.** Paski przycisków nad oboma oknami mają tę samą minimalną wysokość,
+  więc wiersze przycisków nie rozjeżdżają się w pionie. (25cfd7e)
+- **Teksty.** Podpowiedź przy „Porównanie” i wskazówka opisują ten widok jako oryginał
+  przekreślony obok znacznika, bez odwołania do recenzji w Wordzie. Komunikat o prywatności
+  brzmi teraz: „Twój tekst nie opuszcza przeglądarki — nic nie trafia na żaden serwer.”
+  (25cfd7e)
+- **Nagłówek.** „Usuń dane osobowe z tekstu, zanim wkleisz go do czatu AI lub asystenta.”
+  zamiast „…do czatu, e-maila czy formularza”. Wersję z nazwami ChatGPT i Claude z pierwszego
+  commita tego samego dnia zastąpiło określenie bez nazw własnych. (25cfd7e, 4def736)
 
 ## v0.39.0 — 2026-07-07
 
@@ -1418,7 +1513,7 @@ pismach). Wersja dla prawników/zaawansowanych przyjdzie osobno.
   `launcher/serve.ps1`: mini-serwer na `127.0.0.1` (zwykły `TcpListener`, bez uprawnień
   administratora, bez zależności) podaje aplikację po `http`, dzięki czemu model
   ONNX w przeglądarce rusza po podwójnym kliknięciu. Launcher trafia do paczki offline;
-  instrukcja krok po kroku: [`docs/AI-BEZ-DOCKERA.md`](./docs/AI-BEZ-DOCKERA.md).
+  instrukcja krok po kroku: [`docs/AI-BEZ-DOCKERA.md`](https://github.com/karolpolikarp/parawan/blob/v0.18.0/docs/AI-BEZ-DOCKERA.md).
   Odpowiedź na feedback: „większość urzędników nie zainstaluje Dockera”.
 - **NER przeprojektowany na „AI, opcjonalne”** — karta zwinięta domyślnie (mniej
   natłoku), prowadzi ścieżką przeglądarkową (Docker zdegradowany do „zaawansowane”),
@@ -1428,6 +1523,27 @@ pismach). Wersja dla prawników/zaawansowanych przyjdzie osobno.
   wyraźniejsze etykiety i kontrast (feedback: „wiersz słabo widoczny, ikonki za małe”).
 - **Mniej natłoku** — tabela „Co wykrywa” zwinięta domyślnie (czysty widok narzędzia,
   szczegóły po kliknięciu).
+
+## v0.17.0 — 2026-07-06
+
+(wpis odtworzony z historii commitów)
+
+**Aplikacja przebudowana na układ kart w siatce, z typami danych pogrupowanymi w kategorie
+i podsumowaniem wykryć pod wynikiem.**
+
+Silnik bez zmian, całość weszła jednym commitem.
+
+- **Układ kart.** Strona składa się z kart na 12-kolumnowej siatce: cztery kroki (Wklej tekst,
+  Analiza, Maskowanie, Gotowe), legenda „Kategorie danych” (kolor znacznika oznacza kategorię),
+  okna „Tekst źródłowy” i „Wynik” oraz karty „Dlaczego mało fałszywych trafień”, „Ograniczenia”
+  i „Wskazówki”. (f05a550)
+- **„Co maskować” w kategoriach.** Typy są pogrupowane w Osoby, Kontakt, Identyfikatory, Finanse
+  oraz Adres i czas. Każdy kafelek ma ikonę i podpowiedź z metodą wykrywania, np. „11 cyfr +
+  walidacja sumy kontrolnej” przy PESEL-u. (f05a550)
+- **Podsumowanie wykryć.** Karta „Zamaskowano” pokazuje liczbę wykryć i kategorii, a czytnik
+  ekranu ogłasza jej zmiany. „Kopiuj” i „Pobierz” są aktywne dopiero, gdy jest wynik. (f05a550)
+- **Ikony.** Aplikacja używa 30 ikon PNG (23 z nich doszły w tej wersji), wbudowanych w pojedynczy
+  plik. W repozytorium przybył też katalog `design-variants/` z trzema wariantami makiety (A, B, C) i zrzutami ekranu. (f05a550)
 
 ## v0.16.0 — 2026-07-05
 
@@ -1594,7 +1710,7 @@ Trzy równoległe fronty programu SOTA (T3+T4+T5) w jednym wydaniu:
 ## v0.5.0 — 2026-07-04
 
 Start programu „najlepszy anonimizator PL 2026/2027" — analiza SOTA i architektura
-warstwowa w [docs/SOTA-ANALIZA.md](./docs/SOTA-ANALIZA.md).
+warstwowa w [docs/SOTA-ANALIZA.md](https://github.com/karolpolikarp/parawan/blob/v0.5.0/docs/SOTA-ANALIZA.md).
 
 - **Słownik ~230 najczęstszych polskich nazwisk z obsługą fleksji** w rdzeniu (T1a):
   maskuje nazwisko występujące samodzielnie („Sprawę Kowalskiego przekazano…"),
@@ -1647,8 +1763,8 @@ Przegląd stabilizacyjny:
 
 ## v0.3.0 — 2026-07-04
 
-- **Aplikacja czyta pliki .docx** — ekstrakcja tekstu w 100% lokalnie (maleńki `fflate`
-  + własny parser `word/document.xml`, bez ciężkich zależności); drag&drop i „Wczytaj plik".
+- **Aplikacja czyta pliki .docx** — ekstrakcja tekstu w 100% lokalnie (maleńki `fflate` +
+  własny parser `word/document.xml`, bez ciężkich zależności); drag&drop i „Wczytaj plik".
 - `CHANGELOG.md`.
 
 ## v0.2.1 — 2026-07-04
@@ -1680,3 +1796,89 @@ Przegląd stabilizacyjny:
   zależności), CLI, aplikacja webowa 100% client-side.
 - Opcjonalny lokalny NER (spaCy PL): usługa `services/ner` (Docker) + klient
   `anonimizator/ner` (fail-safe, circuit breaker).
+
+[Unreleased]: https://github.com/karolpolikarp/parawan/compare/v0.46.25...HEAD
+[v0.46.25]: https://github.com/karolpolikarp/parawan/compare/v0.46.24...v0.46.25
+[v0.46.24]: https://github.com/karolpolikarp/parawan/compare/v0.46.23...v0.46.24
+[v0.46.23]: https://github.com/karolpolikarp/parawan/compare/v0.46.22...v0.46.23
+[v0.46.22]: https://github.com/karolpolikarp/parawan/compare/v0.46.21...v0.46.22
+[v0.46.21]: https://github.com/karolpolikarp/parawan/compare/v0.46.20...v0.46.21
+[v0.46.20]: https://github.com/karolpolikarp/parawan/compare/v0.46.19...v0.46.20
+[v0.46.19]: https://github.com/karolpolikarp/parawan/compare/v0.46.18...v0.46.19
+[v0.46.18]: https://github.com/karolpolikarp/parawan/compare/v0.46.17...v0.46.18
+[v0.46.17]: https://github.com/karolpolikarp/parawan/compare/v0.46.16...v0.46.17
+[v0.46.16]: https://github.com/karolpolikarp/parawan/compare/v0.46.15...v0.46.16
+[v0.46.15]: https://github.com/karolpolikarp/parawan/compare/v0.46.14...v0.46.15
+[v0.46.14]: https://github.com/karolpolikarp/parawan/compare/v0.46.13...v0.46.14
+[v0.46.13]: https://github.com/karolpolikarp/parawan/compare/v0.46.12...v0.46.13
+[v0.46.12]: https://github.com/karolpolikarp/parawan/compare/v0.46.11...v0.46.12
+[v0.46.11]: https://github.com/karolpolikarp/parawan/compare/v0.46.10...v0.46.11
+[v0.46.10]: https://github.com/karolpolikarp/parawan/compare/v0.46.9...v0.46.10
+[v0.46.9]: https://github.com/karolpolikarp/parawan/compare/v0.46.8...v0.46.9
+[v0.46.8]: https://github.com/karolpolikarp/parawan/compare/v0.46.7...v0.46.8
+[v0.46.7]: https://github.com/karolpolikarp/parawan/compare/v0.46.6...v0.46.7
+[v0.46.6]: https://github.com/karolpolikarp/parawan/compare/v0.46.5...v0.46.6
+[v0.46.5]: https://github.com/karolpolikarp/parawan/compare/v0.46.4...v0.46.5
+[v0.46.4]: https://github.com/karolpolikarp/parawan/compare/v0.46.3...v0.46.4
+[v0.46.3]: https://github.com/karolpolikarp/parawan/compare/v0.46.2...v0.46.3
+[v0.46.2]: https://github.com/karolpolikarp/parawan/compare/v0.46.1...v0.46.2
+[v0.46.1]: https://github.com/karolpolikarp/parawan/compare/v0.46.0...v0.46.1
+[v0.46.0]: https://github.com/karolpolikarp/parawan/compare/v0.45.2...v0.46.0
+[v0.45.2]: https://github.com/karolpolikarp/parawan/compare/v0.45.1...v0.45.2
+[v0.45.1]: https://github.com/karolpolikarp/parawan/compare/v0.45.0...v0.45.1
+[v0.45.0]: https://github.com/karolpolikarp/parawan/compare/v0.44.4...v0.45.0
+[v0.44.4]: https://github.com/karolpolikarp/parawan/compare/v0.44.3...v0.44.4
+[v0.44.3]: https://github.com/karolpolikarp/parawan/compare/v0.44.2...v0.44.3
+[v0.44.2]: https://github.com/karolpolikarp/parawan/compare/v0.44.1...v0.44.2
+[v0.44.1]: https://github.com/karolpolikarp/parawan/compare/v0.44.0...v0.44.1
+[v0.44.0]: https://github.com/karolpolikarp/parawan/compare/v0.43.0...v0.44.0
+[v0.43.0]: https://github.com/karolpolikarp/parawan/compare/v0.42.0...v0.43.0
+[v0.42.0]: https://github.com/karolpolikarp/parawan/compare/v0.41.0...v0.42.0
+[v0.41.0]: https://github.com/karolpolikarp/parawan/compare/v0.40.0...v0.41.0
+[v0.40.0]: https://github.com/karolpolikarp/parawan/compare/v0.39.0...v0.40.0
+[v0.39.0]: https://github.com/karolpolikarp/parawan/compare/v0.38.0...v0.39.0
+[v0.38.0]: https://github.com/karolpolikarp/parawan/compare/v0.37.0...v0.38.0
+[v0.37.0]: https://github.com/karolpolikarp/parawan/compare/v0.36.0...v0.37.0
+[v0.36.0]: https://github.com/karolpolikarp/parawan/compare/v0.35.0...v0.36.0
+[v0.35.0]: https://github.com/karolpolikarp/parawan/compare/v0.34.0...v0.35.0
+[v0.34.0]: https://github.com/karolpolikarp/parawan/compare/v0.33.0...v0.34.0
+[v0.33.0]: https://github.com/karolpolikarp/parawan/compare/v0.32.0...v0.33.0
+[v0.32.0]: https://github.com/karolpolikarp/parawan/compare/v0.31.0...v0.32.0
+[v0.31.0]: https://github.com/karolpolikarp/parawan/compare/v0.30.0...v0.31.0
+[v0.30.0]: https://github.com/karolpolikarp/parawan/compare/v0.29.0...v0.30.0
+[v0.29.0]: https://github.com/karolpolikarp/parawan/compare/v0.28.0...v0.29.0
+[v0.28.0]: https://github.com/karolpolikarp/parawan/compare/v0.27.0...v0.28.0
+[v0.27.0]: https://github.com/karolpolikarp/parawan/compare/v0.26.0...v0.27.0
+[v0.26.0]: https://github.com/karolpolikarp/parawan/compare/v0.25.0...v0.26.0
+[v0.25.0]: https://github.com/karolpolikarp/parawan/compare/v0.24.0...v0.25.0
+[v0.24.0]: https://github.com/karolpolikarp/parawan/compare/v0.23.0...v0.24.0
+[v0.23.0]: https://github.com/karolpolikarp/parawan/compare/v0.22.0...v0.23.0
+[v0.22.0]: https://github.com/karolpolikarp/parawan/compare/v0.21.0...v0.22.0
+[v0.21.0]: https://github.com/karolpolikarp/parawan/compare/v0.20.0...v0.21.0
+[v0.20.0]: https://github.com/karolpolikarp/parawan/compare/v0.19.0...v0.20.0
+[v0.19.0]: https://github.com/karolpolikarp/parawan/compare/v0.18.0...v0.19.0
+[v0.18.0]: https://github.com/karolpolikarp/parawan/compare/v0.17.0...v0.18.0
+[v0.17.0]: https://github.com/karolpolikarp/parawan/compare/v0.16.0...v0.17.0
+[v0.16.0]: https://github.com/karolpolikarp/parawan/compare/v0.15.0...v0.16.0
+[v0.15.0]: https://github.com/karolpolikarp/parawan/compare/v0.14.0...v0.15.0
+[v0.14.0]: https://github.com/karolpolikarp/parawan/compare/v0.13.0...v0.14.0
+[v0.13.0]: https://github.com/karolpolikarp/parawan/compare/v0.12.0...v0.13.0
+[v0.12.0]: https://github.com/karolpolikarp/parawan/compare/v0.11.0...v0.12.0
+[v0.11.0]: https://github.com/karolpolikarp/parawan/compare/v0.10.0...v0.11.0
+[v0.10.0]: https://github.com/karolpolikarp/parawan/compare/v0.9.1...v0.10.0
+[v0.9.1]: https://github.com/karolpolikarp/parawan/compare/v0.9.0...v0.9.1
+[v0.9.0]: https://github.com/karolpolikarp/parawan/compare/v0.8.0...v0.9.0
+[v0.8.0]: https://github.com/karolpolikarp/parawan/compare/v0.7.0...v0.8.0
+[v0.7.0]: https://github.com/karolpolikarp/parawan/compare/v0.6.0...v0.7.0
+[v0.6.0]: https://github.com/karolpolikarp/parawan/compare/v0.5.0...v0.6.0
+[v0.5.0]: https://github.com/karolpolikarp/parawan/compare/v0.4.0...v0.5.0
+[v0.4.0]: https://github.com/karolpolikarp/parawan/compare/v0.3.4...v0.4.0
+[v0.3.4]: https://github.com/karolpolikarp/parawan/compare/v0.3.3...v0.3.4
+[v0.3.3]: https://github.com/karolpolikarp/parawan/compare/v0.3.2...v0.3.3
+[v0.3.2]: https://github.com/karolpolikarp/parawan/compare/v0.3.1...v0.3.2
+[v0.3.1]: https://github.com/karolpolikarp/parawan/compare/v0.3.0...v0.3.1
+[v0.3.0]: https://github.com/karolpolikarp/parawan/compare/v0.2.1...v0.3.0
+[v0.2.1]: https://github.com/karolpolikarp/parawan/compare/v0.2.0...v0.2.1
+[v0.2.0]: https://github.com/karolpolikarp/parawan/compare/v0.1.1...v0.2.0
+[v0.1.1]: https://github.com/karolpolikarp/parawan/compare/v0.1.0...v0.1.1
+[v0.1.0]: https://github.com/karolpolikarp/parawan/releases/tag/v0.1.0
