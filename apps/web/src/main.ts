@@ -1408,7 +1408,9 @@ $('app-version-top').textContent = __APP_VERSION__;
 // Data builda (data commita) obok wersji, a po pół roku odsyłacz do wydań staje się
 // ostrzeżeniem. Tylko zegar komputera (file-age.ts): bez sieci i bez zapisu.
 const buildDate = formatBuildDate(__BUILD_DATE__);
-if (buildDate) $('app-build-date').textContent = `· ${buildDate}`;
+// Twarda spacja przed kropką: na telefonie wiersz łamie się dopiero za kropką, a data
+// przechodzi do drugiej linii sama („wersja 0.46.23 ·” / „24.10.2026”).
+if (buildDate) $('app-build-date').textContent = `\u00a0· ${buildDate}`;
 const ageNote = fileAgeNote(__BUILD_DATE__, new Date());
 if (ageNote) {
   const verLink = $('ver-link');

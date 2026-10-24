@@ -270,7 +270,8 @@ export async function openApp(browser, query = '', opts = {}) {
     webSockets.push(ws.url());
     ws.close();
   });
-  if (javaScriptEnabled) await context.clock.install();
+  // opts.clockTime: zegar strony od podanej chwili (np. plik starszy niż pół roku, file-age.ts)
+  if (javaScriptEnabled) await context.clock.install(opts.clockTime ? { time: opts.clockTime } : undefined);
   await context.exposeFunction('__parawanCsp', (v) => violations.push(v));
   await context.exposeFunction('__parawanRefresh', (v) => refreshes.push(v));
   await context.exposeFunction('__parawanRtc', (v) => rtc.push(v));

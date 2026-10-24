@@ -37,8 +37,10 @@ test('data pliku po polsku w nagłówku', () => {
 
 test('nagłówek: data obok wersji i notka w miejscu odsyłacza do wydań, bez sieci i zapisu', () => {
   expect(webHtml).toContain(
-    '<span class="ver-chip">wersja <span id="app-version-top">…</span> <span id="app-build-date"></span></span>',
+    '<span class="ver-chip">wersja <span id="app-version-top">…</span><span id="app-build-date"></span></span>',
   );
+  // twarda spacja przed kropką: na telefonie „·” zostaje przy numerze wersji, nie zaczyna wiersza
+  expect(webMain).toContain("$('app-build-date').textContent = `\\u00a0· ");
   expect(webHtml).toMatch(/<a class="ver-link" id="ver-link" href="https:\/\/github\.com\/karolpolikarp\/parawan\/releases\/latest"[^>]*>sprawdź nowszą wersję ↗<\/a>/);
   expect(webMain).toContain('fileAgeNote(__BUILD_DATE__, new Date())');
   expect(webMain).toContain('formatBuildDate(__BUILD_DATE__)');

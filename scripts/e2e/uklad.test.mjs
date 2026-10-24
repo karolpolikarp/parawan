@@ -63,6 +63,27 @@ for (const { okno, width, height } of LAPTOPY) {
   }
 }
 
+// Urzędnik ze starym plikiem widzi dłuższe ostrzeżenie zamiast „sprawdź nowszą wersję”. Data builda
+// to data commita, więc „dziś + 200 dni” jest zawsze ponad 180 dni od niej.
+const STARY_PLIK = new Date(Date.now() + 200 * 24 * 60 * 60 * 1000);
+for (const { okno, width, height } of LAPTOPY) {
+  test(`${okno}, okno ${width}×${height}, plik starszy niż pół roku: pole tekstu w górnych 40%`, async (t) => {
+    await withApp(
+      browser,
+      t,
+      '',
+      async (app) => {
+        const old = await app.page.locator('#ver-link.is-old').count();
+        assert.equal(old, 1, 'brak ostrzeżenia o starym pliku');
+        const m = await measure(app.page);
+        assert.ok(m.top <= 0.4 * m.vh, `#input zaczyna się na ${m.top} px, a 40% okna to ${0.4 * m.vh} px`);
+        assert.ok(m.header <= 140, `nagłówek ma ${m.header} px`);
+      },
+      { viewport: { width, height }, clockTime: STARY_PLIK },
+    );
+  });
+}
+
 test('powiększenie 125% przy 1366×768 (okno 1093×520): pole zaczyna się na pierwszym ekranie', async (t) => {
   await withApp(
     browser,
@@ -146,3 +167,33 @@ test('„Jak to działa” pod narzędziem, przed stopką, i skrót do edytora n
     { viewport: { width: 1366, height: 650 } },
   );
 });
+
+for (const width of [320, 390]) {
+  test(`szerokość ${width} px: kropka przed datą zostaje w wierszu z numerem wersji`, async (t) => {
+    await withApp(
+      browser,
+      t,
+      '',
+      async (app) => {
+        const r = await app.page.evaluate(() => {
+          const date = document.getElementById('app-build-date')?.firstChild;
+          const ver = document.getElementById('app-version-top')?.firstChild;
+          if (!date || !ver) return null;
+          const top = (node, from, to) => {
+            const range = document.createRange();
+            range.setStart(node, from);
+            range.setEnd(node, to);
+            return Math.round(range.getBoundingClientRect().top);
+          };
+          const text = date.textContent ?? '';
+          const dot = text.indexOf('·');
+          return { ver: top(ver, ver.length - 1, ver.length), dot: top(date, dot, dot + 1), text };
+        });
+        // build z „dev” nie ma daty: nie ma czego sprawdzać
+        if (!r?.text) return;
+        assert.equal(r.dot, r.ver, `kropka w innym wierszu niż numer wersji („${r.text}”)`);
+      },
+      { viewport: { width, height: 800 } },
+    );
+  });
+}
