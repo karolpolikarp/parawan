@@ -34,12 +34,13 @@ Docelowo v0.46.26, rdzeń 0.29.14 (0.29.13 ma silnik z v0.46.24 i tryb `--jsonl`
    trybów: zwykłego (stdin → stdout) i `--jsonl` z poprawnym i złym wierszem.
    Źródło: fa5edef, `packages/core/bin/anonimizator.js`.
 
-4. **Publikacja paczki npm `anonimizator`**
-   rdzeń 0.29.13 · S
-   Paczka gotowa (`NOTICE` w `files`, README z `npm install anonimizator`), publikacja czeka na
-   włączenie 2FA na koncie npm (rejestr odrzucił ją kodem E403). Kolejne wersje lepiej wydawać
-   z CI z `--provenance`, tak jak Parawan.html ma atestację pochodzenia.
-   Źródło: packages/core/package.json, `.github/workflows/release.yml`.
+4. **Publikacja paczki npm z CI**
+   rdzeń 0.29.14 · S
+   0.29.13 opublikowano ręcznie 2026-10-25 z komputera autora (2FA). Kolejne wersje lepiej
+   wydawać z CI z `--provenance` (atestacja pochodzenia, jak przy Parawan.html) i tokenem
+   z zaufanego wydawcy npm. W rejestrze została też wersja zastępcza `0.0.0-stage`
+   z nieudanej pierwszej próby; usunąć albo oznaczyć jako przestarzałą.
+   Źródło: packages/core/package.json, `.github/workflows/release.yml`, `npm view anonimizator`.
 
 5. **pdf.js nowszy niż 6.1 bez utraty Chromium/Edge 109**
    v0.47.x · M
@@ -226,7 +227,7 @@ v0.46.24 świadomie wyszło z listą znanych regresji, w tym dwiema klasami wyso
 - wzór adnotacji przeszedł opinię prawnika (pozycja 8);
 - CI nie stoi na wersjach bez wsparcia, a pdf.js nie odstaje od bieżącej wersji (pozycje 5 i 6).
 
-Rdzeń ma własną numerację (0.29.x) i może dojść do 1.0 osobno, gdy
+Rdzeń ma własną numerację (0.29.x), jest w npm od 0.29.13 i może dojść do 1.0 osobno, gdy
 kontrakt API będzie spisany (pozycja 26).
 
 ## Świadomie poza roadmapą

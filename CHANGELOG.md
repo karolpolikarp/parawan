@@ -12,6 +12,10 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+- **Paczka npm.** `anonimizator` 0.29.13 jest w rejestrze npm (opublikowana 2026-10-25):
+  `npm install anonimizator`, a CLI bez instalacji przez `npx anonimizator`. Paczka zawiera
+  `LICENSE` i `NOTICE` licencji Apache 2.0. Wcześniej rdzeń instalowało się tylko z katalogu
+  repozytorium.
 - **Dostępność.** Nagłówki rozwijanych kart „Adnotacja i protokół”, „Co maskować” i „Co wykrywa”
   mają teraz nazwę złożoną z tytułu i opisu, czyli z całego widocznego tekstu (WCAG 2.5.3, etykieta
   w nazwie). Czytnik ekranu i sterowanie głosem posługują się tymi samymi słowami, które widać.
@@ -33,8 +37,7 @@ działają na GitHubie od chwili wypchnięcia tagów.
   tylko `id` i listę znalezisk z liczbą wystąpień, bez zredagowanego tekstu. Starsze wydania
   odrzucają nieznaną opcję kodem wyjścia 2, więc program po drugiej stronie może w ten sposób
   sprawdzić, czy wersja zna ten tryb. Wiersz, który nie jest poprawnym JSON-em albo ma `text`
-  innego typu niż napis, dostaje odpowiedź `{"id", "error"}` zamiast zakończenia procesu. Rdzeń `anonimizator` 0.29.12 → 0.29.13 (jeszcze
-  nieopublikowany w npm) zawiera silnik z v0.46.24 i eksport `isValidKw`. Aplikacja bez zmian.
+  innego typu niż napis, dostaje odpowiedź `{"id", "error"}` zamiast zakończenia procesu. Rdzeń `anonimizator` 0.29.12 → 0.29.13 zawiera silnik z v0.46.24 i eksport `isValidKw`. Aplikacja bez zmian.
   (fa5edef)
 
 ## v0.46.25 — 2026-10-24
