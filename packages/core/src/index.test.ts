@@ -6314,7 +6314,7 @@ test('b7 K31: imiona w odmianie (ruchome e, -iem, przymiotnikowa, zdrobnienia, o
     'Sobór św. Jerzego Zwycięzcy.',
     'Fundacja Jerzego Owsiaka.',
     'Pomnik Jerzego Waszyngtona stoi w parku.',
-    'Jerzego Waszyngtona 12',
+    // „Jerzego Waszyngtona 12" bez kontekstu adresu — patrz test.skip „fix3: ulica z patronem bez kontekstu…"
     'Szkoła im. Jerzego Kukuczki',
     'Ewangelia według św. Marka',
     'Marka Toyota zdobyła nagrodę.',
@@ -7201,9 +7201,10 @@ test('fix2: udział i głos na końcu wiersza, celownik, ulica z patronem — ty
     ['Piotrowi Kosowi 18', `${N} 18`],
     ['Głosowało na Tomasza Mazura 12', `Głosowało na ${N} 12`],
     ['Na Tomasza Mazura 12\nNa Annę Nowak 3', `Na ${N} 12\nNa ${N} 3`],
-    ['Tomasza Mazura 12/3', '[ADRES]'],
+    // fix3: sam ukośnik bez miejscowości wygląda jak udział czy ocena — osoba, nie adres
+    ['Tomasza Mazura 12/3', `${N} 12/3`],
     ['Tomasza Mazura 12 m. 3', '[ADRES]'],
-    ['Jerzego Waszyngtona 12/4', '[ADRES]'],
+    ['Jerzego Waszyngtona 12/4', `${N} 12/4`],
     ['Wnioskodawca zamieszkały przy Jana Pawła II 14 zwrócił się o zezwolenie.', 'Wnioskodawca zamieszkały przy [ADRES] zwrócił się o zezwolenie.'],
     ['Wnioskodawczyni mieszka przy Jana Pawła II 14 od 2010 roku.', 'Wnioskodawczyni mieszka przy [ADRES] od 2010 roku.'],
     ['Mieszkańcy Jana Pawła II 5 zgłosili awarię.', 'Mieszkańcy [ADRES] zgłosili awarię.'],
@@ -7213,7 +7214,7 @@ test('fix2: udział i głos na końcu wiersza, celownik, ulica z patronem — ty
     // tytuł bez numeru domu to dalej osoba, nie adres
     ['Odznaczenie Generała Władysława Andersa.', `Odznaczenie Generała ${N}.`],
   ]);
-  keep(['Urząd Gminy przy Jana Pawła II 5 informuje.', 'Szkoła Podstawowa przy Jana Pawła II 12 ogłasza nabór.', 'Jerzego Waszyngtona 12']);
+  keep(['Urząd Gminy przy Jana Pawła II 5 informuje.', 'Szkoła Podstawowa przy Jana Pawła II 12 ogłasza nabór.']);
 });
 test('fix2: formularz z TAB-em — etykieta i wartość w osobnych komórkach, pseudonim samego nazwiska, wiersz danych pod nagłówkiem', () => {
   masked([
@@ -7364,5 +7365,162 @@ test('fix2: data urodzenia w życiorysie z „lub później", wersaliki przy prz
     'HISTORIA SZKOŁY JANA KOCHANOWSKIEGO',
     'Sw. Lukasz Ewangelista.',
     'Kościół Sw. Jana Apostoła',
+  ]);
+});
+test('fix3: para z liczbą bez kontekstu adresu to osoba — dział II KW, wynik, narzędnik, ukośnik, tytuł', () => {
+  masked([
+    ['Dział II\nJana Lisa 3/4\nMarii Lis 1/4', `Dział II\n${N} 3/4\n${N} 1/4`],
+    ['Marii Lis 1/4\nJana Lisa 3/4', `${N} 1/4\n${N} 3/4`],
+    ['Współwłaściciele: Jana Lisa 3/4, Marii Lis 1/4', `Współwłaściciele: ${N} 3/4, ${N} 1/4`],
+    ['Marii Lis 12', `${N} 12`],
+    ['Dla Marii Lis 1/2', `Dla ${N} 1/2`],
+    ['Marii Lis 1/2 w Kielcach', `${N} 1/2 w Kielcach`],
+    ['Tomasza Mazura 12', `${N} 12`],
+    ['Tomasza Mazura 12\nAnny Nowak 3', `${N} 12\n${N} 3`],
+    ['Wynik: Tomasza Mazura 12', `Wynik: ${N} 12`],
+    ['Głosowało za Tomasza Mazura 12', `Głosowało za ${N} 12`],
+    ['Za Tomaszem Mazurem 12', `Za ${N} 12`],
+    ['Jana Lisa 3/4', `${N} 3/4`],
+    ['Właściciel: Jana Lisa 3/4', `Właściciel: ${N} 3/4`],
+    ['Piotra Kosa 1/2', `${N} 1/2`],
+    ['Właściciel: Tomasza Mazura 12/3', `Właściciel: ${N} 12/3`],
+    ['Zeszyty Henryka Sienkiewicza 5/1', `Zeszyty ${N} 5/1`],
+    ['Ocena Tomasza Mazura 3/5.', `Ocena ${N} 3/5.`],
+    ['Praca Tomasza Mazura 18/20.', `Praca ${N} 18/20.`],
+    ['Liczba godzin: Prof. Jana Nowaka 30, Dr. Anny Lis 15.', `Liczba godzin: Prof. ${N} 30, Dr. ${N} 15.`],
+    ['Pismo Generała Władysława Andersa 1.', `Pismo Generała ${N} 1.`],
+    // z miejscowością albo lokalem dalej adres
+    ['Tomasza Mazura 12/3 w Kielcach', '[ADRES] w [MIEJSCOWOŚĆ]'],
+    ['Tomasza Mazura 12 m. 3', '[ADRES]'],
+  ]);
+  masked(
+    [
+      ['Dział II\nJana Lisa 3/4\nMarii Lis 1/4', 'Dział II\n[OSOBA-A] 3/4\n[OSOBA-B] 1/4'],
+      ['Ocena Tomasza Mazura 3/5. Tomasz Mazur odwołał się.', 'Ocena [OSOBA-A] 3/5. [OSOBA-A] odwołał się.'],
+    ],
+    { pseudonyms: true },
+  );
+});
+// Zysk b7 K31 cofnięty w fix3: bez kontekstu adresu (lokal, miejscowość, kod, „przy", „ul.")
+// para w dopełniaczu z samym numerem na końcu wiersza wygląda tak samo jak osoba z wynikiem czy
+// udziałem („Tomasza Mazura 12", „Dział II⏎Jana Lisa 3/4"). Rozróżnienie ulicy „Jerzego
+// Waszyngtona" od osoby wymagałoby słownika patronów; maska osoby na nazwie ulicy niczego nie
+// ujawnia, a jawna osoba tak — wybieramy maskę (jak v0.46.23).
+test.skip('fix3: ulica z patronem bez kontekstu adresu zostaje jawna (pominięte — patrz komentarz)', () => {
+  keep(['Jerzego Waszyngtona 12']);
+});
+test('fix3: ulica z patronem po etykiecie adresu w dowolnym otoczeniu, wyliczenie, „to adres"', () => {
+  masked([
+    ['Adres zamieszkania: Jana Pawła II 14 Kielce', 'Adres zamieszkania: [ADRES] Kielce'],
+    ['Adres: Jana Pawła II 14 Kielce', 'Adres: [ADRES] Kielce'],
+    ['zam. Jana Pawła II 14 Kielce', 'zam. [ADRES] Kielce'],
+    ['Adres zamieszkania: Jana Pawła II 14 25-001 Kielce', 'Adres zamieszkania: [ADRES] [KOD-POCZTOWY] [MIEJSCOWOŚĆ]'],
+    ['zamieszkały przy Jana Pawła II nr 14', 'zamieszkały przy [ADRES]'],
+    ['zamieszkały przy Jana Pawła II pod nr 14', 'zamieszkały przy [ADRES]'],
+    ['Wnioskodawca zamieszkały przy Jana Pawła II 14 - wnosi', 'Wnioskodawca zamieszkały przy [ADRES] - wnosi'],
+    ['zamieszkały przy Jana Pawła II 14 Jan Lis wnosi', `zamieszkały przy [ADRES] ${N} wnosi`],
+    ['Mieszkańcy Adama Mickiewicza 5 i Jana Pawła II 7 zgłosili', 'Mieszkańcy [ADRES] i [ADRES] zgłosili'],
+    ['Prezydenta Lecha Wałęsy 15/2 to adres korespondencyjny.', '[ADRES] to adres korespondencyjny.'],
+    ['Udziały w lokalu przy Jana Pawła II 12/4 należą do Marii Lis.', `Udziały w lokalu przy [ADRES] należą do ${N}.`],
+    // kod pocztowy w następnym wierszu bloku adresowego
+    ['Anna Kowalska\nJana Pawła II 5\n25-001 Kielce', `${N}\n[ADRES]\n[KOD-POCZTOWY] [MIEJSCOWOŚĆ]`],
+  ]);
+  keep(['Urząd Gminy przy Jana Pawła II 5 informuje.', 'Kaplica św. Jana Pawła II 2', 'Jaroslaw Rynek 5 to adres urzedu']);
+});
+test('fix3: WERSALIKI — dokument przed dopełniaczem, przymiotnik prywatności, przelew z kwotą', () => {
+  masked([
+    ['AKTA SPRAWY ANNY KOWALSKIEJ', `AKTA SPRAWY ${N}`],
+    ['DOKUMENTACJA PRACOWNICZA ANNY KOWALSKIEJ', `DOKUMENTACJA PRACOWNICZA ${N}`],
+    ['AKTA PRACOWNICZE ANNY KOWALSKIEJ', `AKTA PRACOWNICZE ${N}`],
+    ['KARTA INFORMACYJNA LECZENIA SZPITALNEGO JANA NOWAKA', `KARTA INFORMACYJNA LECZENIA SZPITALNEGO ${N}`],
+    ['AKT NOTARIALNY JANA NOWAKA', `AKT NOTARIALNY ${N}`],
+    ['ARCHIWUM PRYWATNE JANA NOWAKA', `ARCHIWUM PRYWATNE ${N}`],
+    ['FUNDACJA RODZINNA JANA NOWAKA', `FUNDACJA RODZINNA ${N}`],
+    ['STYPENDIUM NAUKOWE JANA NOWAKA', `STYPENDIUM NAUKOWE ${N}`],
+    ['NAGRODA SPECJALNA JANA NOWAKA', `NAGRODA SPECJALNA ${N}`],
+    ['DOKUMENTACJA SPRAWY ANNY KOWALSKIEJ', `DOKUMENTACJA SPRAWY ${N}`],
+    ['TECZKA SPRAWY ANNY KOWALSKIEJ', `TECZKA SPRAWY ${N}`],
+    ['UMOWA NAJMU JANA KOWALSKIEGO', `UMOWA NAJMU ${N}`],
+    ['UMOWA DZIERŻAWY JANA KOWALSKIEGO', `UMOWA DZIERŻAWY ${N}`],
+    ['UMOWA SPRZEDAŻY JANA KOWALSKIEGO', `UMOWA SPRZEDAŻY ${N}`],
+    ['2026-03-01\tPRZELEW OD JANA NOWAKA\t150,00', `2026-03-01\tPRZELEW OD ${N}\t150,00`],
+    ['PRZELEW DO JANA NOWAKA 5', `PRZELEW DO ${N} 5`],
+    ['PRZELEW OD JANA NOWAKA 150,00 PLN', `PRZELEW OD ${N} 150,00 PLN`],
+    ['PRZELEW OD JANA NOWAKA 2026-03-01', `PRZELEW OD ${N} 2026-03-01`],
+    ['WPŁATA OD ANNY KOWALSKIEJ 12 RATA', `WPŁATA OD ${N} 12 RATA`],
+    ['PISMO OD ANNY KOWALSKIEJ 12 MARCA 2026', `PISMO OD ${N} 12 MARCA 2026`],
+    ['PRZELEW OD ANNY KOWALSKIEJ 500 ZŁ', `PRZELEW OD ${N} 500 ZŁ`],
+    ['ZWROT DO PIOTRA ZIELIŃSKIEGO 45,50 ZŁ', `ZWROT DO ${N} 45,50 ZŁ`],
+    ['WPŁATA OD MARII WIŚNIEWSKIEJ 300', `WPŁATA OD ${N} 300`],
+    ['PISMO DO ANNY KOWALSKIEJ 2 EGZ.', `PISMO DO ${N} 2 EGZ.`],
+    ['ZAPROSZENIE DO JANA NOWAKA 12 MARCA', `ZAPROSZENIE DO ${N} 12 MARCA`],
+    ['DECYZJA DO MARII WIŚNIEWSKIEJ 3', `DECYZJA DO ${N} 3`],
+    ['12.03 PRZELEW OD ANNY KOWALSKIEJ 500,00', `12.03 PRZELEW OD ${N} 500,00`],
+  ]);
+  masked([['PRZELEW OD ANNY KOWALSKIEJ 500 ZŁ', 'PRZELEW OD [OSOBA-A] 500 ZŁ']], { pseudonyms: true });
+  // pułapki: ulica z patronem na kopercie, szkoła z patronem za dokumentem, nazwy obiektów
+  keep([
+    'DO ADAMA MICKIEWICZA 5',
+    'HISTORIA SZKOŁY JANA KOCHANOWSKIEGO',
+    'UNIWERSYTET ADAMA MICKIEWICZA',
+    'FUNDACJA JOLANTY KWAŚNIEWSKIEJ',
+    'SZKOŁA PODSTAWOWA JANA KOCHANOWSKIEGO',
+  ]);
+});
+test('fix3: klucz pseudonimu pod „fullName"/„osoba" — obce imię nie jest kluczem', () => {
+  masked(
+    [
+      ['{"fullName": "Iryna Roman"}\n{"fullName": "Iryna Marek"}', '{"fullName": "[OSOBA-A]"}\n{"fullName": "[OSOBA-B]"}'],
+      ['{"full_name": "Iryna Roman"}\n{"full_name": "Iryna Marek"}', '{"full_name": "[OSOBA-A]"}\n{"full_name": "[OSOBA-B]"}'],
+      ['{"osoba": "Iryna Roman"}\n{"osoba": "Iryna Marek"}', '{"osoba": "[OSOBA-A]"}\n{"osoba": "[OSOBA-B]"}'],
+      ['<fullName>Iryna Roman</fullName>\n<fullName>Iryna Marek</fullName>', '<fullName>[OSOBA-A]</fullName>\n<fullName>[OSOBA-B]</fullName>'],
+      ['{"fullName": "Halyna Szymon"}\n{"fullName": "Halyna Adam"}', '{"fullName": "[OSOBA-A]"}\n{"fullName": "[OSOBA-B]"}'],
+      ['{"fullName": "Iryna Roman"}\nPani Roman podpisała.', '{"fullName": "[OSOBA-A]"}\nPani [OSOBA-A] podpisała.'],
+      ['{"fullName": "Kowalski Jan"}\nPan Kowalski', '{"fullName": "[OSOBA-A]"}\nPan [OSOBA-A]'],
+    ],
+    { pseudonyms: true },
+  );
+});
+test('fix3: komórki z TAB-em — etykieta z kropką, rola osoby, lista imion rodziców', () => {
+  const D = '[DATA-URODZENIA]';
+  masked([
+    ['Nazwisko:\tWypych\tImię:\tMarek\tData ur.:\t03.04.1980', `Nazwisko:\t${N}\tImię:\t${N}\tData ur.:\t${D}`],
+    ['Imię:\tJan\tData ur.:\t03.04.1980', `Imię:\t${N}\tData ur.:\t${D}`],
+    ['Imię:\tJan\tMiejsce ur.:\tRadom', `Imię:\t${N}\tMiejsce ur.:\tRadom`],
+    ['Imię ojca:\tJan\tNr tel.:\t600100200', `Imię ojca:\t${N}\tNr tel.:\t[TELEFON]`],
+    ['Imię ojca:\tJan\tImię matki:\tAnna\tData ur.:\t03.04.1980', `Imię ojca:\t${N}\tImię matki:\t${N}\tData ur.:\t${D}`],
+    ['Świadek:\tJan\tNazwisko:\tKowalski', `Świadek:\t${N}\tNazwisko:\t${N}`],
+    ['Ojciec:\tJan\tMatka:\tEwa', `Ojciec:\t${N}\tMatka:\t${N}`],
+    ['Kierownik:\tMarek\tDział:\tKadry', `Kierownik:\t${N}\tDział:\tKadry`],
+    ['Imiona rodziców:\tJan, Anna\tData urodzenia:\t03.04.1980', `Imiona rodziców:\t${N}, ${N}\tData urodzenia:\t${D}`],
+    ['Imiona rodziców:\tJan, Anna\tNazwisko:\tGzowski', `Imiona rodziców:\t${N}, ${N}\tNazwisko:\t${N}`],
+    ['Imiona rodziców: Jan i Anna', `Imiona rodziców: ${N} i ${N}`],
+    ['Imiona rodziców: Stanisław', `Imiona rodziców: ${N}`],
+  ]);
+  // pułapki: rola z nie-imieniem, wyraz-imię pospolite i dopisek pod etykietą imion zostają
+  keep([
+    'Kierownik:\tKadry\tDział:\tKsięgowość',
+    'Świadek:\tbrak\tData:\t12.03.2026',
+    'Matka:\tRóża\tOjciec:\tbrak',
+    'Imiona rodziców: zgodnie z aktem urodzenia',
+    'Imiona rodziców: Urząd Stanu Cywilnego',
+  ]);
+});
+test('fix3: tablica „Po", login pod kolejną etykietą konta, święty w dopełniaczu, klub za przymiotnikiem', () => {
+  masked([
+    ['tablice rejestracyjne Po 12345', 'tablice rejestracyjne [NR-REJESTRACYJNY]'],
+    ['Login: soltys\nKonto: soltys', 'Login: [LOGIN]\nKonto: [LOGIN]'],
+    ['Login: kasjer\nUżytkownik: kasjer', 'Login: [LOGIN]\nUżytkownik: [LOGIN]'],
+    ['Login: JAN GÓRSKI\nKLUB SPORTOWY GÓRSKI', `Login: ${N}\nKLUB SPORTOWY GÓRSKI`],
+    ['Sw. Jan Apostol zeznal, ze widzial sprawce.', `Sw. ${N} zeznal, ze widzial sprawce.`],
+    ['Sw. Jana Apostola zeznal.', `Sw. ${N} zeznal.`],
+    ['Login: soltys\nKonto: soltys (zablokowane)', 'Login: [LOGIN]\nKonto: [LOGIN] (zablokowane)'],
+    // wyraz-login w prozie zostaje
+    ['Login: soltys\nSołtys wsi zwołał zebranie.', 'Login: [LOGIN]\nSołtys wsi zwołał zebranie.'],
+  ]);
+  keep([
+    'tablice rejestracyjne Do 2025',
+    'Figura św. Pawła Apostoła podana do renowacji.',
+    'Figura Sw. Pawla Apostola podana do renowacji.',
   ]);
 });
