@@ -22,6 +22,9 @@ NIGDY zewnętrzny `<link>`. Warstwa AI (NER/LLM) mieszka w OSOBNYM repo-dodatku
   morfologia. `src/ner-postprocess.ts` / `src/ner-client.ts` / `src/llm-client.ts` = eksporty
   npm (`anonimizator/ner-postprocess`, `/ner`, `/llm`) — SZEW, w który wpina się dodatek AI;
   zostają tu jako część biblioteki, single-HTML ich NIE importuje.
+- `packages/parawan/` — pakiet npm `parawan`: nazwa marki dla `anonimizator`, BEZ własnego kodu
+  (`export * from 'anonimizator'`, bin `parawan` uruchamia CLI rdzenia). Wersja i zależność
+  zawsze = wersja rdzenia; pilnuje tego `packages/core/src/paczki-npm.test.ts`.
 - `apps/web/` — pakiet `anonimizator-web`. UI budowane Vite `vite-plugin-singlefile` do JEDNEGO
   samowystarczalnego `index.html`. Bez warstwy AI (wycięta w v0.45.2 — patrz CHANGELOG).
 - `scripts/benchmark/` — deterministyczny benchmark precision/recall/F1 (`dataset.mjs` + `run.mjs`).
@@ -72,7 +75,8 @@ Sam benchmark nie wystarcza — sprawdzaj zmiany wieloagentowo/adwersarialnie na
   `Pilność:`), nie Keep a Changelog — nie przerabiać starych wpisów.
 - Przy wydaniu `[Unreleased]` staje się `## vX.Y.Z — data` (SemVer: PATCH poprawki, MINOR nowe
   funkcje i typy PII, MAJOR zmiana łamiąca). Podbij `version` w `apps/web/package.json`
-  i `apps/landing/package.json` (rdzeń `packages/core` ma własną numerację 0.29.x), dopisz link
+  i `apps/landing/package.json` (rdzeń `packages/core` ma własną numerację 0.29.x, a `packages/parawan`
+  zawsze tę samą co rdzeń; publikacja w npm: najpierw `-w anonimizator`, potem `-w parawan`), dopisz link
   porównawczy na dole CHANGELOG i utwórz tag adnotowany `vX.Y.Z`. Pełna lista: `docs/WYDANIE.md`.
 - Granica wersji = commit podbijający `version` w `apps/web/package.json`; tag stoi na ostatnim
   commicie przed następnym podbiciem.

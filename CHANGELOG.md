@@ -15,7 +15,8 @@ działają na GitHubie od chwili wypchnięcia tagów.
 - **Paczka npm.** `anonimizator` 0.29.13 jest w rejestrze npm (opublikowana 2026-10-25):
   `npm install anonimizator`, a CLI bez instalacji przez `npx anonimizator`. Paczka zawiera
   `LICENSE` i `NOTICE` licencji Apache 2.0. Wcześniej rdzeń instalowało się tylko z katalogu
-  repozytorium.
+  repozytorium. Ten sam silnik jest też pod nazwą marki: `npm install parawan` (paczka bez
+  własnego kodu, instaluje `anonimizator` w tej samej wersji) i `npx parawan pismo.txt`.
 - **Dostępność.** Nagłówki rozwijanych kart „Adnotacja i protokół”, „Co maskować” i „Co wykrywa”
   mają teraz nazwę złożoną z tytułu i opisu, czyli z całego widocznego tekstu (WCAG 2.5.3, etykieta
   w nazwie). Czytnik ekranu i sterowanie głosem posługują się tymi samymi słowami, które widać.

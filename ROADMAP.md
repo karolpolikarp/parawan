@@ -27,17 +27,16 @@ Docelowo v0.46.26, rdzeń 0.29.14 (0.29.13 ma silnik z v0.46.24 i tryb `--jsonl`
    i [IMIĘ I NAZWISKO] dodatek.` (odtworzone dziś). To druga klasa wysoka z listy znanych
    regresji v0.46.24. Źródło: CHANGELOG.md, v0.46.24, „Znane regresje”.
 
-3. **CLI: brak testów `bin/anonimizator.js`**
+3. **CLI: testy obu poleceń (zrobione w [Unreleased])**
    rdzeń 0.29.14 · S
-   Zły wiersz w `--jsonl` nie kończy już procesu (odpowiedź `{"id", "error"}`, poprawione
-   w [Unreleased]), ale żaden test ani workflow nie uruchamia CLI. Wystarczy test dymny obu
-   trybów: zwykłego (stdin → stdout) i `--jsonl` z poprawnym i złym wierszem.
-   Źródło: fa5edef, `packages/core/bin/anonimizator.js`.
+   `packages/core/src/paczki-npm.test.ts` uruchamia `anonimizator` i `parawan` w trybie zwykłym
+   i `--jsonl` (z poprawnym, złym i pustym wierszem). Zostaje do wydania rdzenia 0.29.14.
+   Źródło: `packages/core/src/paczki-npm.test.ts`.
 
 4. **Publikacja paczki npm z CI**
    rdzeń 0.29.14 · S
-   0.29.13 opublikowano ręcznie 2026-10-25 z komputera autora (2FA). Kolejne wersje lepiej
-   wydawać z CI z `--provenance` (atestacja pochodzenia, jak przy Parawan.html) i tokenem
+   0.29.13 (`anonimizator` i `parawan`) opublikowano ręcznie 2026-10-25 z komputera autora (2FA).
+   Każde wydanie rdzenia to dwie publikacje, więc kolejne wersje lepiej wydawać z CI z `--provenance` (atestacja pochodzenia, jak przy Parawan.html) i tokenem
    z zaufanego wydawcy npm. W rejestrze została też wersja zastępcza `0.0.0-stage`
    z nieudanej pierwszej próby; usunąć albo oznaczyć jako przestarzałą.
    Źródło: packages/core/package.json, `.github/workflows/release.yml`, `npm view anonimizator`.

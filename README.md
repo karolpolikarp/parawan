@@ -218,10 +218,12 @@ w osobnym repozytorium: [**anonimizator-ai**](https://github.com/karolpolikarp/a
 Silnik to pakiet `anonimizator` w katalogu [`packages/core`](./packages/core) (nazwa techniczna
 pakietu; marka produktu to **Parawan**). Zero zależności, działa w Node, Deno, Bun i przeglądarce.
 
-Pakiet jest w rejestrze npm:
+Pakiet jest w rejestrze npm pod dwiema nazwami: `anonimizator` (silnik) i `parawan` (nazwa marki,
+bez własnego kodu: instaluje `anonimizator` w tej samej wersji, ma te same eksporty i polecenie
+`parawan`). Wybierz jedną:
 
 ```bash
-npm install anonimizator
+npm install anonimizator   # albo: npm install parawan
 ```
 
 Wersję prosto ze źródeł zbudujesz z repozytorium (`npm ci`, potem `npm run build -w anonimizator`)

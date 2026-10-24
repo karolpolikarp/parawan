@@ -48,6 +48,10 @@ w `release.yml` z szablonów w `docs/wydanie/` (`scripts/release/render-docs.mjs
    to, co zmienia się dla urzędnika, potem szczegóły. Bez tej linii `render-docs.mjs`
    zatrzymuje wydanie.
 6. Wersja w `apps/web/package.json` (i w `packages/core/package.json`, jeśli zmienia się rdzeń).
+   Nowa wersja rdzenia to ta sama wersja w `packages/parawan/package.json` (pole `version`
+   i zależność `anonimizator`), a po wydaniu dwie publikacje w npm, najpierw rdzeń:
+   `npm publish -w anonimizator`, potem `npm publish -w parawan`. Zgodność obu paczek
+   pilnuje `packages/core/src/paczki-npm.test.ts`.
 7. Próba wydania na `main`, bez publikacji:
 
    ```bash

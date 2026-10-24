@@ -1,0 +1,61 @@
+{
+  "name": "parawan",
+  "version": "0.29.13",
+  "description": "Parawan — lokalny anonimizator polskich danych osobowych (PII). Nazwa marki dla paczki anonimizator: ten sam silnik, te same eksporty, polecenie parawan.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    },
+    "./ner": {
+      "types": "./ner.d.ts",
+      "import": "./ner.js"
+    },
+    "./ner-postprocess": {
+      "types": "./ner-postprocess.d.ts",
+      "import": "./ner-postprocess.js"
+    },
+    "./llm": {
+      "types": "./llm.d.ts",
+      "import": "./llm.js"
+    }
+  },
+  "bin": {
+    "parawan": "bin/parawan.js"
+  },
+  "files": [
+    "*.js",
+    "*.d.ts",
+    "bin",
+    "README.md",
+    "NOTICE"
+  ],
+  "dependencies": {
+    "anonimizator": "0.29.13"
+  },
+  "keywords": [
+    "parawan",
+    "anonimizator",
+    "pii",
+    "rodo",
+    "gdpr",
+    "anonimizacja",
+    "pesel",
+    "nip",
+    "polish",
+    "privacy"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/karolpolikarp/parawan.git",
+    "directory": "packages/parawan"
+  },
+  "homepage": "https://parawan.karolwilczynski.com",
+  "engines": {
+    "node": ">=18.19"
+  }
+}
