@@ -130,7 +130,7 @@
       <section class="card g6 card-ed">
         <div class="card-h">
           <span class="ic"><i class="gi" data-i="podglad"></i></span>
-          <div class="card-t"><h2 id="output-label">Wynik zanonimizowany</h2><p id="output-hint">kliknij znacznik albo przechodź strzałkami ‹ ›</p></div>
+          <div class="card-t"><h2 id="output-label">Wynik zanonimizowany</h2><p><span id="output-hint">kliknij znacznik albo przechodź strzałkami ‹ ›</span><span id="mask-seen" class="mask-seen" hidden></span></p></div>
           <span class="card-sp"></span>
           <span class="help" data-tip="Kolor znacznika wskazuje kategorię danych, legenda jest niżej, pod „Co maskować”" data-tip-pos="left" tabindex="0">?</span>
         </div>
@@ -208,8 +208,74 @@
         </div>
       </section>
 
-      <!-- Miejsce na kartę „Adnotacja i protokół” (<details id="publikacja">, pakiet A08):
-           zaraz po „Zamaskowano”, przed „Co maskować”. -->
+      <!-- ══════════ ADNOTACJA I PROTOKÓŁ ══════════ -->
+      <!-- Oba teksty składa publikacja.ts z nazw typów i liczb, bez zasłoniętych wartości. Karta
+           widoczna przy niepustym wyniku. Pola żyją w pamięci karty (czyści je „Wyczyść”
+           i „Przykład”); organ i osoba trafiają do localStorage tylko po zaznaczeniu „Pamiętaj”.
+           Formularz tylko dla autocomplete="off" (jak przy polu źródła), bez wysyłki. -->
+      <details class="card g12" id="publikacja" hidden>
+        <summary class="card-h" aria-labelledby="publikacja-h" aria-describedby="publikacja-d">
+          <span class="ic"><i class="gi" data-i="numer-dok"></i></span>
+          <div class="card-t"><h2 id="publikacja-h">Adnotacja i protokół</h2><p id="publikacja-d">Wzór adnotacji do BIP i protokół do akt. Nie zawierają zasłoniętych danych.</p></div>
+          <span class="card-sp"></span>
+          <span class="help" data-tip="Adnotację publikujesz w BIP razem z dokumentem, protokół zostaje w aktach sprawy. Oba teksty powstają z nazw typów i liczb, bez treści pisma." data-tip-pos="left" tabindex="0">?</span>
+          <span class="chev" aria-hidden="true">▸</span>
+        </summary>
+        <form class="card-b pub" autocomplete="off" role="none">
+          <section class="pub-col" aria-labelledby="pub-ann-h">
+            <h3 class="pub-h" id="pub-ann-h">Adnotacja o wyłączeniu jawności</h3>
+            <div class="pub-grid">
+              <label class="fld" for="pub-organ"><span>Organ, który wyłączył jawność</span></label>
+              <input id="pub-organ" class="inp" type="text" placeholder="Wójt Gminy Brzozowa Wola" autocomplete="off" spellcheck="false" translate="no" />
+              <label class="fld" for="pub-osoba"><span>Wyłączenia dokonał(a)</span></label>
+              <input id="pub-osoba" class="inp" type="text" placeholder="Joanna Malec, inspektor" autocomplete="off" spellcheck="false" translate="no" />
+              <label class="fld" for="pub-zatw"><span>Zatwierdził(a) <span class="opt">opcjonalnie</span></span></label>
+              <input id="pub-zatw" class="inp" type="text" autocomplete="off" spellcheck="false" translate="no" />
+              <label class="fld" for="pub-podstawa"><span>Podstawa prawna</span></label>
+              <span class="fld-row">
+                <select id="pub-podstawa" class="inp" aria-describedby="pub-podstawa-d"></select>
+                <span class="help" id="pub-podstawa-help" data-tip="Gdy odmawiasz udostępnienia części informacji na wniosek, może być potrzebna decyzja (art. 16 u.d.i.p.). Ten wzór jej nie zastępuje." data-tip-pos="left" tabindex="0">?</span>
+              </span>
+              <span id="pub-podstawa-d" hidden>Gdy odmawiasz udostępnienia części informacji na wniosek, może być potrzebna decyzja (art. 16 u.d.i.p.). Ten wzór jej nie zastępuje.</span>
+              <label class="fld" for="pub-inna" id="pub-inna-l" hidden><span>Podstawa prawna, własne brzmienie</span></label>
+              <input id="pub-inna" class="inp" type="text" autocomplete="off" spellcheck="false" translate="no" hidden />
+              <label class="fld" for="pub-data"><span>Data</span></label>
+              <input id="pub-data" class="inp inp-date" type="text" inputmode="numeric" placeholder="dd.mm.rrrr" autocomplete="off" spellcheck="false" translate="no" />
+            </div>
+            <label class="chk" data-tip="Liczby mogą coś zdradzić, na przykład że w piśmie występuje jedna osoba."><input type="checkbox" id="pub-counts" /><span>Podaj liczbę zasłoniętych fragmentów</span></label>
+            <label class="chk"><input type="checkbox" id="pub-remember" /><span>Pamiętaj organ i osobę na tym komputerze</span></label>
+            <label class="fld fld-ta" for="pub-adnotacja"><span>Treść adnotacji</span><span class="opt" id="pub-ann-state">wzór odświeża się przy zmianie pól, dopóki go nie poprawisz</span></label>
+            <textarea id="pub-adnotacja" class="inp pub-ta" rows="8" autocomplete="off" spellcheck="false" translate="no" aria-describedby="pub-ann-note"></textarea>
+            <p class="pub-note" id="pub-ann-note">To wzór. Podstawę prawną i brzmienie adnotacji ustala urząd.</p>
+            <div class="pub-acts">
+              <button type="button" id="pub-copy-ann" class="btn btn-sm"><i class="gi" data-i="kopiuj"></i><span id="pub-copy-ann-label">Kopiuj adnotację</span></button>
+              <button type="button" id="pub-reset-ann" class="btn btn-sm" hidden>Przywróć wzór</button>
+              <label class="chk chk-inline" data-tip="Adnotacja trafia na koniec wyniku w „Kopiuj” i .txt, w .docx i w druku na osobnej stronie. Pole źródła się nie zmienia."><input type="checkbox" id="pub-append" /><span>Dołącz adnotację na końcu wyniku</span></label>
+            </div>
+          </section>
+          <section class="pub-col" aria-labelledby="pub-prot-h">
+            <h3 class="pub-h" id="pub-prot-h">Protokół do akt</h3>
+            <div class="pub-grid">
+              <label class="fld" for="pub-znak"><span>Znak sprawy <span class="opt">bez danych strony, tylko do protokołu</span></span></label>
+              <input id="pub-znak" class="inp" type="text" autocomplete="off" spellcheck="false" translate="no" />
+            </div>
+            <label class="chk" data-tip="Suma pozwala później sprawdzić, który tekst był przetwarzany. Przy krótkim tekście da się ją dopasować do zgadywanej treści, dlatego jest domyślnie wyłączona."><input type="checkbox" id="pub-sha" /><span>Suma SHA-256 wyniku</span></label>
+            <div class="pub-acts">
+              <button type="button" id="pub-copy-prot" class="btn btn-sm"><i class="gi" data-i="kopiuj"></i><span id="pub-copy-prot-label">Kopiuj protokół</span></button>
+              <button type="button" id="pub-dl-prot" class="btn btn-sm"><i class="gi" data-i="plik-txt"></i>Pobierz protokół (.txt)</button>
+              <button type="button" id="pub-print-prot" class="btn btn-sm"><i class="gi" data-i="drukarka"></i>Drukuj protokół</button>
+            </div>
+            <fieldset class="pub-check">
+              <legend class="pub-h">Przed publikacją</legend>
+              <label class="chk"><input type="checkbox" id="pub-chk-seen" /><span>Wszystkie zasłonięte fragmenty są przejrzane (<span id="pub-chk-seen-n">0 z 0</span>).</span></label>
+              <label class="chk"><input type="checkbox" /><span>Osoby pełniące funkcje publiczne i dane urzędu są jawne tam, gdzie powinny.</span></label>
+              <label class="chk"><input type="checkbox" /><span>Publikowany jest nowy plik z Parawana (.docx albo PDF z druku), a nie poprawiony oryginał.</span></label>
+              <label class="chk"><input type="checkbox" /><span>Nazwa pliku nie zawiera imienia, nazwiska ani adresu.</span></label>
+              <label class="chk"><input type="checkbox" /><span>Druga osoba sprawdziła wynik, jeśli wymaga tego procedura urzędu.</span></label>
+            </fieldset>
+          </section>
+        </form>
+      </details>
 
       <!-- ══════════ CO MASKOWAĆ ══════════ -->
       <details class="card g12" id="co-maskowac" open>
@@ -454,6 +520,8 @@
          na papier, a długi wynik nie urywa się na wysokości okienka. main.ts wypełnia go przy
          każdym przeliczeniu, wyłącznie przez textContent. -->
     <div id="print-out" class="print-out" lang="pl" translate="no"></div>
+    <!-- Adnotacja dołączona do wyniku: na papierze od nowej strony (break-before w style.css). -->
+    <div id="print-annex" class="print-annex" lang="pl" translate="no"></div>
 
     <script type="module" src="/src/main.ts"></script>
   </body>

@@ -13,14 +13,22 @@ export interface OutputState {
   original: string;
   /** Zakresy z alignSpans; null, gdy wyniku nie da się dopasować do oryginału co do znaku. */
   spans: Span[] | null;
+  /**
+   * Tekst dopisywany na końcu wyniku po pustym wierszu (adnotacja o wyłączeniu jawności,
+   * publikacja.ts); pusty albo brak = bez dopisku. Nie wraca do silnika: pole źródła się nie zmienia.
+   */
+  annex?: string;
 }
 
 /**
  * Tekst wyjściowy składany z zakresów (tam później wejdą ręczne poprawki). Bez zakresów zostaje
  * sam wynik rdzenia. Bez poprawek oba napisy są równe: alignSpans sprawdza to przed zwrotem.
+ * Dopisek (annex) stoi po jednym pustym wierszu, także gdy wynik kończy się końcem wiersza.
  */
 export function finalText(s: OutputState): string {
-  return s.spans ? applySpans(s.original, s.spans) : s.redacted;
+  const body = s.spans ? applySpans(s.original, s.spans) : s.redacted;
+  const annex = s.annex?.trim();
+  return annex ? `${body.replace(/[\r\n]+$/, '')}\n\n${annex}` : body;
 }
 
 // Kodem, a nie ucieczką w napisie: biome format zamienia ją na niewidoczny znak w źródle.
@@ -47,10 +55,22 @@ export function printTitle(d: Date): string {
   return `zanonimizowany-${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`;
 }
 
+const stamp = (d: Date): string =>
+  `${p2(d.getHours())}-${p2(d.getMinutes())}-${p2(d.getSeconds())}`;
+
 /** Nazwa pobieranego pliku: zanonimizowany-RRRR-MM-DD_GG-MM-SS.{ext}, nigdy z nazwy wczytanego pliku. */
 export function downloadName(d: Date, ext: string): string {
-  const time = `${p2(d.getHours())}-${p2(d.getMinutes())}-${p2(d.getSeconds())}`;
-  return `${printTitle(d)}_${time}.${ext}`;
+  return `${printTitle(d)}_${stamp(d)}.${ext}`;
+}
+
+/** Tytuł karty na czas druku protokołu (nazwa pliku w „Zapisz jako PDF”). */
+export function protocolTitle(d: Date): string {
+  return `protokol-${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`;
+}
+
+/** Nazwa pobieranego protokołu: protokol-RRRR-MM-DD_GG-MM-SS.txt, bez nazwy pliku i znaku sprawy. */
+export function protocolName(d: Date): string {
+  return `${protocolTitle(d)}_${stamp(d)}.txt`;
 }
 
 export interface DownloadFile {

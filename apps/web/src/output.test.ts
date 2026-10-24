@@ -1,6 +1,14 @@
 import { redactPII } from 'anonimizator';
 import { expect, test } from 'vitest';
-import { downloadFor, downloadName, finalText, printTitle, textForDownload } from './output';
+import {
+  downloadFor,
+  downloadName,
+  finalText,
+  printTitle,
+  protocolName,
+  protocolTitle,
+  textForDownload,
+} from './output';
 import { alignSpans } from './spans';
 
 const BOM = String.fromCharCode(0xfeff);
@@ -68,4 +76,22 @@ test('downloadFor: .txt, a po wczytaniu .csv plik .csv; treść przez textForDow
 
 test('downloadName: .docx z tą samą nazwą ze znacznikiem czasu co .txt', () => {
   expect(downloadName(AT, 'docx')).toBe('zanonimizowany-2026-01-07_09-05-03.docx');
+});
+
+// Adnotacja o wyłączeniu jawności dołączona do wyniku (publikacja.ts): po jednym pustym wierszu,
+// także gdy wynik kończy się końcem wiersza; pusta adnotacja nie zmienia tekstu.
+test('finalText: dołączona adnotacja po pustym wierszu, pusta bez zmian', () => {
+  const s = { redacted: 'Pan [IMIĘ I NAZWISKO].', original: 'Pan Jan Kowalski.', spans: null };
+  expect(finalText({ ...s, annex: 'Informacja o wyłączeniu jawności' })).toBe(
+    'Pan [IMIĘ I NAZWISKO].\n\nInformacja o wyłączeniu jawności',
+  );
+  expect(finalText({ ...s, redacted: 'Pan [IMIĘ I NAZWISKO].\n\n', annex: 'A' })).toBe('Pan [IMIĘ I NAZWISKO].\n\nA');
+  expect(finalText({ ...s, annex: '  \n' })).toBe('Pan [IMIĘ I NAZWISKO].');
+  expect(finalText(s)).toBe('Pan [IMIĘ I NAZWISKO].');
+});
+
+test('protokół: nazwa pliku i tytuł druku z datą, bez nazwy pliku źródłowego', () => {
+  const d = new Date(2026, 9, 4, 7, 8, 9);
+  expect(protocolName(d)).toBe('protokol-2026-10-04_07-08-09.txt');
+  expect(protocolTitle(d)).toBe('protokol-2026-10-04');
 });

@@ -15,7 +15,15 @@ import {
 import { fileAgeNote, formatBuildDate } from './file-age';
 import { makeFlash } from './flash';
 import { buildDocx, DOCX_MIME } from './docx-write';
-import { downloadFor, downloadName, finalText, printTitle } from './output';
+import {
+  downloadFor,
+  downloadName,
+  finalText,
+  printTitle,
+  protocolName,
+  protocolTitle,
+  textForDownload,
+} from './output';
 import { extractPdfText } from './pdf';
 import { buildMinimalPdf } from './pdf-fixture';
 import {
@@ -35,8 +43,20 @@ import {
   WYKRYWA_ROWS,
 } from './pii-meta';
 import { plural } from './plural';
+import {
+  BASES,
+  buildAnnotation,
+  buildProtocol,
+  countByToken,
+  countFromFindings,
+  formatDate,
+  OTHER_BASIS,
+  type PublicationFields,
+  type SourceKind,
+  sha256Hex,
+} from './publikacja';
 import { alignSpans, countTokens, renderSpansHtml, type Span } from './spans';
-import { storageGet, storageSet } from './storage';
+import { storageGet, storageRemove, storageSet } from './storage';
 import { isProductCopy } from './web-copy';
 import './style.css';
 import { initTips, tipDescId } from './tips';
@@ -63,6 +83,7 @@ const downloadLabel = $<HTMLSpanElement>('download-label');
 const downloadDocxBtn = $<HTMLButtonElement>('download-docx');
 const printBtn = $<HTMLButtonElement>('print');
 const printOut = $<HTMLDivElement>('print-out');
+const printAnnex = $<HTMLDivElement>('print-annex');
 const clearBtn = $<HTMLButtonElement>('clear');
 const exampleBtn = $<HTMLButtonElement>('example');
 const loadFileBtn = $<HTMLButtonElement>('load-file');
@@ -82,20 +103,26 @@ const maskPrev = $<HTMLButtonElement>('mask-prev');
 const maskNext = $<HTMLButtonElement>('mask-next');
 const maskCount = $<HTMLSpanElement>('mask-count');
 const maskStatus = $<HTMLSpanElement>('mask-status');
+const maskSeen = $<HTMLSpanElement>('mask-seen');
 const srStatus = $<HTMLParagraphElement>('sr-status');
-const outputHint = $<HTMLParagraphElement>('output-hint');
+const outputHint = $<HTMLSpanElement>('output-hint');
 
 let lastRedacted = '';
 let lastInput = '';
 // Zakresy oryginał–znacznik bieżącego wyniku (spans.ts); null = wynik nie pasuje do oryginału
 // co do znaku, więc wszystko, co z zakresów korzysta, jest wyłączone.
 let lastSpans: Span[] | null = null;
+// Liczniki rdzenia bieżącego wyniku: zapas dla adnotacji i protokołu, gdy zakresów nie ma.
+let lastFound: PiiFinding[] = [];
 // Rozszerzenie ostatnio wczytanego pliku (bez nazwy): po .csv „Pobierz” oddaje .csv.
 let lastFileExt = '';
 let viewMode: 'result' | 'compare' = 'result';
 let maskEls: HTMLElement[] = []; // znaczniki w wyniku, w kolejności dokumentu
 let maskIdx = -1; // bieżący znacznik w przeglądaniu (-1 = żaden)
 let maskTabStop: HTMLElement | null = null; // jedyny znacznik w kolejności Tab (roving tabindex)
+// Postęp przeglądu: indeksy znaczników, które były bieżące (‹ ›, klik, fokus, chip). Zerowany przy
+// nowym wyniku, a nie przy przełączeniu widoku: „Porównanie” ma te same znaczniki w tej kolejności.
+const reviewed = new Set<number>();
 
 /* ── Legenda, tabela „Co wykrywa” i przełączniki „Co maskować” (dane w pii-meta.ts) ── */
 
@@ -493,7 +520,9 @@ function goToMask(i: number, scroll = true): void {
   // Komunikat dla czytnika ekranu (aria-live) z powodem wykrycia. Na dotyku, gdzie dymek
   // znacznika zasłaniał wynik, ta sama linia jest widoczna pod wynikiem (style.css).
   maskStatus.textContent = `Fragment ${maskIdx + 1} z ${n}: ${el.textContent} · ${el.dataset.tip ?? ''}`;
+  reviewed.add(maskIdx);
   updateMaskCount();
+  syncReview();
 }
 
 /** Przenieś jedyny przystanek Tab w wyniku na znacznik `el` (roving tabindex). */
@@ -512,6 +541,7 @@ function refreshMaskNav(): void {
   maskStatus.textContent = ''; // stary „Fragment N z M” nie dotyczy nowego wyniku
   maskNav.hidden = maskEls.length === 0;
   updateMaskCount();
+  syncReview();
 }
 
 const goToPrevMask = (): void => goToMask(maskIdx <= 0 ? maskEls.length - 1 : maskIdx - 1);
@@ -783,18 +813,39 @@ function setResultActions(on: boolean): void {
   printBtn.disabled = !on;
 }
 
-/** Tekst dla „Kopiuj”, „Pobierz” i wydruku; jedno źródło, patrz output.ts. */
-const outputText = (): string => finalText({ redacted: lastRedacted, original: lastInput, spans: lastSpans });
+/** Sam wynik, bez dołączonej adnotacji: .docx i wydruk stawiają ją osobno, na nowej stronie. */
+const resultText = (): string => finalText({ redacted: lastRedacted, original: lastInput, spans: lastSpans });
+/** Tekst dla „Kopiuj” i „Pobierz .txt”: wynik, a po „Dołącz adnotację” także adnotacja (output.ts). */
+const outputText = (): string =>
+  finalText({ redacted: lastRedacted, original: lastInput, spans: lastSpans, annex: annexText() });
 
 const PRINT_EMPTY = 'Brak wyniku do wydruku. Wklej tekst w pole „Tekst źródłowy”.';
 
+// Co idzie na papier: wynik albo, na czas „Drukuj protokół”, sam protokół. Tryb wraca do wyniku
+// po wydruku (afterprint), także anulowanym, i przy przycisku „Drukuj lub zapisz PDF”.
+let printMode: 'result' | 'protocol' = 'result';
+let printProtocol = '';
+
+/**
+ * Treść wydruku: wynik i dołączona adnotacja albo sam protokół. Pole źródła i przekreślone
+ * oryginały (.orig) nie mogą tu trafić żadną drogą: tylko finalText (output.ts) i protokół
+ * z metadanych (publikacja.ts).
+ */
+function printContent(): { main: string; annex: string } {
+  if (printMode === 'protocol') return { main: printProtocol, annex: '' };
+  if (!lastRedacted) return { main: PRINT_EMPTY, annex: '' };
+  return { main: resultText(), annex: annexText() };
+}
+
 /**
  * Kontener wydruku (#print-out) dostaje cały wynik przy każdym przeliczeniu, niezależnie od
- * widoku i od HIGHLIGHT_LIMIT. Tylko textContent: tekst wyniku pochodzi od użytkownika, a pole
- * źródła i przekreślone oryginały (.orig) nie mogą tu trafić żadną drogą.
+ * widoku i od HIGHLIGHT_LIMIT, a #print-annex adnotację, którą arkusz druku stawia od nowej
+ * strony. Tylko textContent: tekst wyniku pochodzi od użytkownika.
  */
 function syncPrintOut(): void {
-  printOut.textContent = lastRedacted ? outputText() : PRINT_EMPTY;
+  const print = printContent();
+  printOut.textContent = print.main;
+  printAnnex.textContent = print.annex;
 }
 
 function setFileExt(ext: string): void {
@@ -814,8 +865,11 @@ function updateSrcMeta(text: string): void {
 function renderResult(redacted: string, found: PiiFinding[]): void {
   // Nowy wynik: „Skopiowano ✓” dotyczyło poprzedniego, więc etykieta wraca do „Kopiuj”.
   if (redacted !== lastRedacted) copyFlash.reset();
+  // Przegląd dotyczy dokładnie tego wyniku: po każdej zmianie tekstu albo wyniku liczy się od zera.
+  if (redacted !== lastRedacted || input.value !== lastInput) reviewed.clear();
   lastRedacted = redacted;
   lastInput = input.value;
+  lastFound = found;
   // Ponad HIGHLIGHT_LIMIT nie ma podświetleń ani porównania: zakresy kosztowałyby czas przy każdej edycji.
   const aligned = isTooBig() ? null : alignSpans(lastInput, redacted);
   lastSpans = aligned?.spans ?? null;
@@ -823,9 +877,11 @@ function renderResult(redacted: string, found: PiiFinding[]): void {
   // Przy długim tekście i tak nie ma podświetleń ani porównania, więc komunikat nic by nie dodał.
   spansNote.hidden = !!lastSpans || isTooBig();
   setResultActions(true);
-  syncPrintOut();
   renderOutput();
   renderFindings(found, lastSpans && countTokens(lastSpans));
+  // Po renderze: wzór adnotacji liczy z zakresów, a dołączona adnotacja idzie do wydruku.
+  syncPublication();
+  syncPrintOut();
 }
 
 // Debounce: przy szybkim pisaniu nie odpalaj pełnego pipeline'u (26 przebiegów + przerender)
@@ -853,6 +909,8 @@ function update(): void {
     findingsCard.hidden = true;
     lastRedacted = '';
     lastSpans = null;
+    lastFound = [];
+    reviewed.clear();
     spansNote.hidden = true;
     syncPrintOut();
     keptMasks = 0;
@@ -864,6 +922,7 @@ function update(): void {
     viewCompareBtn.disabled = false;
     syncOutputHint();
     setResultActions(false);
+    syncPublication();
     measureSeq++; // zaległy pomiar długiego tekstu już nie obowiązuje
     lastUpdateMs = 0;
     return;
@@ -1085,6 +1144,7 @@ appNoteClose.addEventListener('click', () => {
 clearBtn.addEventListener('click', () => {
   clearError();
   setFileExt('');
+  clearPublication();
   replaceSource('', 'Wyczyszczono tekst.');
 });
 
@@ -1177,7 +1237,10 @@ downloadBtn.addEventListener('click', () => {
 downloadDocxBtn.addEventListener('click', () => {
   flushPendingUpdate();
   if (!lastRedacted) return;
-  saveFile(new Blob([buildDocx(outputText())], { type: DOCX_MIME }), downloadName(new Date(), 'docx'));
+  // Dołączona adnotacja w dodatku po podziale strony (docx-write.ts), nie w ciągu wyniku.
+  const annex = annexText();
+  const docx = buildDocx(resultText(), { appendix: annex ? [annex] : [] });
+  saveFile(new Blob([docx], { type: DOCX_MIME }), downloadName(new Date(), 'docx'));
   notePublishNewFile();
 });
 
@@ -1192,9 +1255,14 @@ addEventListener('beforeprint', () => {
   flushPendingUpdate();
   // Firefox potrafi zgłosić beforeprint drugi raz przed afterprint: pierwotny tytuł zostaje.
   titleBeforePrint ??= document.title;
-  document.title = printTitle(new Date());
+  // Przy protokole nazwa pliku PDF mówi, że to protokół, a nie wynik.
+  document.title = printMode === 'protocol' ? protocolTitle(new Date()) : printTitle(new Date());
 });
 addEventListener('afterprint', () => {
+  if (printMode === 'protocol') {
+    printMode = 'result';
+    syncPrintOut();
+  }
   if (titleBeforePrint === null) return;
   document.title = titleBeforePrint;
   titleBeforePrint = null;
@@ -1203,12 +1271,296 @@ addEventListener('afterprint', () => {
 printBtn.addEventListener('click', () => {
   flushPendingUpdate();
   if (!lastRedacted) return;
+  printMode = 'result';
+  syncPrintOut();
   window.print();
 });
+
+/* ── Adnotacja o wyłączeniu jawności, protokół i lista „Przed publikacją” ──
+   Teksty składa publikacja.ts z nazw typów i liczb; tu tylko pola karty i akcje. Pola żyją
+   w pamięci karty i czyszczą je „Wyczyść” i „Przykład”. Organ i osoba (imię i nazwisko
+   pracownika) trafiają do localStorage wyłącznie po zaznaczeniu „Pamiętaj” (storage.ts, reguła e). */
+const pubCard = $<HTMLDetailsElement>('publikacja');
+const pubOrgan = $<HTMLInputElement>('pub-organ');
+const pubOsoba = $<HTMLInputElement>('pub-osoba');
+const pubZatw = $<HTMLInputElement>('pub-zatw');
+const pubBasis = $<HTMLSelectElement>('pub-podstawa');
+const pubOther = $<HTMLInputElement>('pub-inna');
+const pubOtherLabel = $<HTMLLabelElement>('pub-inna-l');
+const pubDate = $<HTMLInputElement>('pub-data');
+const pubCounts = $<HTMLInputElement>('pub-counts');
+const pubRemember = $<HTMLInputElement>('pub-remember');
+const pubAnn = $<HTMLTextAreaElement>('pub-adnotacja');
+const pubAnnState = $<HTMLSpanElement>('pub-ann-state');
+const pubResetAnn = $<HTMLButtonElement>('pub-reset-ann');
+const pubAppend = $<HTMLInputElement>('pub-append');
+const pubZnak = $<HTMLInputElement>('pub-znak');
+const pubSha = $<HTMLInputElement>('pub-sha');
+const pubSeenBox = $<HTMLInputElement>('pub-chk-seen');
+const pubSeenN = $<HTMLSpanElement>('pub-chk-seen-n');
+const pubChecks = [...pubCard.querySelectorAll<HTMLInputElement>('.pub-check input[type="checkbox"]')];
+
+for (const b of BASES) pubBasis.add(new Option(b.label, b.key));
+
+const ANN_AUTO = pubAnnState.textContent ?? '';
+const ANN_EDITED = 'poprawiony ręcznie, pola już go nie zmieniają';
+// true: urzędnik poprawił treść adnotacji, więc zmiana pól jej nie nadpisuje („Przywróć wzór”).
+let annEdited = false;
+// Stan „przejrzano wszystkie” z ostatniego odświeżenia: pierwsza pozycja listy zmienia się sama
+// tylko przy zmianie tego stanu, więc ręczne odznaczenie zostaje do następnej zmiany.
+let allReviewed = false;
+
+function pubFields(): PublicationFields {
+  return {
+    organ: pubOrgan.value,
+    osoba: pubOsoba.value,
+    zatwierdzil: pubZatw.value,
+    basis: pubBasis.value,
+    basisOther: pubOther.value,
+    data: pubDate.value,
+    withCounts: pubCounts.checked,
+  };
+}
+
+/** Liczby po tokenie: z zakresów, a bez nich z liczników rdzenia. */
+function currentCounts(): Map<string, number> {
+  return lastSpans ? countByToken(lastSpans) : countFromFindings(lastFound);
+}
+
+/** Adnotacja dopisywana do wyniku; pusty napis, gdy „Dołącz” nie jest zaznaczone. */
+function annexText(): string {
+  return pubAppend.checked && lastRedacted ? pubAnn.value.trim() : '';
+}
+
+function refreshAnnotation(): void {
+  if (!annEdited) pubAnn.value = buildAnnotation(currentCounts(), pubFields());
+  pubResetAnn.hidden = !annEdited;
+  pubAnnState.textContent = annEdited ? ANN_EDITED : ANN_AUTO;
+}
+
+/** Licznik „przejrzano N z M” przy ‹ › i pierwsza pozycja listy „Przed publikacją”. */
+function syncReview(): void {
+  const n = maskEls.length;
+  const seen = Math.min(reviewed.size, n);
+  // Przy podpowiedzi pod nagłówkiem wyniku: w pasku nad wynikiem nie ma już miejsca w jednym rzędzie.
+  maskSeen.textContent = ` · przejrzano ${seen} z ${n}`;
+  maskSeen.hidden = n === 0;
+  maskSeen.classList.toggle('is-done', n > 0 && seen === n);
+  pubSeenN.textContent = `${seen} z ${n}`;
+  const all = n > 0 && seen === n;
+  if (all !== allReviewed) {
+    allReviewed = all;
+    pubSeenBox.checked = all;
+    if (all) announce(`Przejrzano wszystkie zasłonięte fragmenty: ${n} z ${n}.`);
+  }
+}
+
+/** Po każdym przeliczeniu: karta przy niepustym wyniku, świeży wzór i postęp przeglądu. */
+function syncPublication(): void {
+  pubCard.hidden = !lastRedacted;
+  refreshAnnotation();
+  syncReview();
+}
+
+/** Zmiana adnotacji przy zaznaczonym „Dołącz”: inny tekst w „Kopiuj”, w pliku i w druku. */
+function annexChanged(): void {
+  if (!pubAppend.checked) return;
+  copyFlash.reset();
+  syncPrintOut();
+}
+
+const REMEMBER_MAX = 200;
+
+/** Zapamiętany organ i osoba. Wartość mógł zapisać obcy plik, więc tylko krótkie napisy. */
+function readRemembered(): { organ: string; osoba: string } | null {
+  try {
+    const v = JSON.parse(storageGet('adnotacja') ?? 'null') as unknown;
+    if (!v || typeof v !== 'object') return null;
+    const { organ, osoba } = v as Record<string, unknown>;
+    const str = (x: unknown): string => (typeof x === 'string' ? x.slice(0, REMEMBER_MAX) : '');
+    return { organ: str(organ), osoba: str(osoba) };
+  } catch {
+    return null;
+  }
+}
+
+function saveRemembered(): void {
+  if (!pubRemember.checked) return;
+  storageSet('adnotacja', JSON.stringify({ organ: pubOrgan.value.trim(), osoba: pubOsoba.value.trim() }));
+}
+
+function syncOtherBasis(): void {
+  const other = pubBasis.value === OTHER_BASIS;
+  pubOther.hidden = !other;
+  pubOtherLabel.hidden = !other;
+}
+
+/**
+ * „Wyczyść” i „Przykład”: pola karty wracają do stanu z otwarcia pliku, lista „Przed publikacją”
+ * jest pusta. Zapamiętany organ i osoba wracają, jeśli „Pamiętaj” jest zaznaczone.
+ */
+function clearPublication(): void {
+  const kept = pubRemember.checked ? readRemembered() : null;
+  pubOrgan.value = kept?.organ ?? '';
+  pubOsoba.value = kept?.osoba ?? '';
+  for (const el of [pubZatw, pubOther, pubZnak]) el.value = '';
+  pubBasis.value = BASES[0].key;
+  syncOtherBasis();
+  pubDate.value = formatDate(new Date());
+  for (const el of [pubCounts, pubAppend, pubSha, ...pubChecks]) el.checked = false;
+  allReviewed = false;
+  annEdited = false;
+  refreshAnnotation();
+}
+
+for (const el of [pubOrgan, pubOsoba, pubZatw, pubOther, pubDate]) {
+  el.addEventListener('input', () => {
+    refreshAnnotation();
+    annexChanged();
+    if (el === pubOrgan || el === pubOsoba) saveRemembered();
+  });
+}
+for (const el of [pubBasis, pubCounts]) {
+  el.addEventListener('change', () => {
+    syncOtherBasis();
+    refreshAnnotation();
+    annexChanged();
+  });
+}
+pubAnn.addEventListener('input', () => {
+  annEdited = true;
+  refreshAnnotation();
+  annexChanged();
+});
+pubResetAnn.addEventListener('click', () => {
+  annEdited = false;
+  refreshAnnotation();
+  annexChanged();
+  // przycisk znika, więc fokus przechodzi do adnotacji
+  pubAnn.focus({ preventScroll: true });
+  announce('Przywrócono wzór adnotacji.');
+});
+pubAppend.addEventListener('change', () => {
+  copyFlash.reset();
+  syncPrintOut();
+  announce(
+    pubAppend.checked
+      ? 'Adnotacja zostanie dołączona na końcu wyniku.'
+      : 'Adnotacja nie będzie dołączana do wyniku.',
+  );
+});
+pubRemember.addEventListener('change', () => {
+  if (pubRemember.checked) saveRemembered();
+  else storageRemove('adnotacja');
+});
+
+/** Rodzaj źródła do protokołu: z rozszerzenia wczytanego pliku, bez jego nazwy. */
+function sourceKind(): SourceKind {
+  if (!lastFileExt) return 'wklejony';
+  if (lastFileExt === 'docx' || lastFileExt === 'pdf') return lastFileExt;
+  return 'tekstowy';
+}
+
+/** Protokół bieżącego wyniku. Suma SHA-256 tylko po zaznaczeniu i tylko z wyniku, nigdy ze źródła. */
+async function protocolNow(): Promise<string> {
+  const sha = pubSha.checked ? await sha256Hex(outputText()) : null;
+  const marks = maskEls.length;
+  return buildProtocol({
+    when: new Date(),
+    version: __APP_VERSION__,
+    source: sourceKind(),
+    chars: lastInput.length,
+    lines: lastInput.split('\n').length,
+    znak: pubZnak.value,
+    counts: currentCounts(),
+    disabled: MASK_GROUPS.filter((g) => disabledGroups.has(g.key)).map((g) => inSentence(g.label)),
+    pseudonyms: pseudonymsBox.checked,
+    reviewed: isTooBig() ? null : Math.min(reviewed.size, marks),
+    marks,
+    sha256: sha,
+    osoba: pubOsoba.value,
+    zatwierdzil: pubZatw.value,
+  });
+}
+
+/** Kopiowanie do schowka z zapasem przez ukryte pole (jak „Kopiuj” wyniku). */
+async function copyPlain(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    const prevFocus = document.activeElement as HTMLElement | null;
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.append(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    ta.remove();
+    prevFocus?.focus({ preventScroll: true });
+    return ok;
+  }
+}
+
+const annCopyLabel = $<HTMLSpanElement>('pub-copy-ann-label');
+const protCopyLabel = $<HTMLSpanElement>('pub-copy-prot-label');
+const annCopyFlash = makeFlash((t) => (annCopyLabel.textContent = t), 'Kopiuj adnotację');
+const protCopyFlash = makeFlash((t) => (protCopyLabel.textContent = t), 'Kopiuj protokół');
+const COPY_BLOCKED = 'Kopiowanie zablokowane przez przeglądarkę: zaznacz tekst i naciśnij Ctrl+C.';
+
+$<HTMLButtonElement>('pub-copy-ann').addEventListener('click', async () => {
+  flushPendingUpdate();
+  if (!lastRedacted) return;
+  if (await copyPlain(pubAnn.value.trim())) {
+    annCopyFlash.show('Skopiowano ✓');
+    announce('Skopiowano adnotację do schowka.');
+  } else showError(COPY_BLOCKED);
+});
+
+$<HTMLButtonElement>('pub-copy-prot').addEventListener('click', async () => {
+  flushPendingUpdate();
+  if (!lastRedacted) return;
+  if (await copyPlain(await protocolNow())) {
+    protCopyFlash.show('Skopiowano ✓');
+    announce('Skopiowano protokół do schowka.');
+  } else showError(COPY_BLOCKED);
+});
+
+// Plik jak „Pobierz .txt”: BOM i końce wierszy \r\n, nazwa z datą, bez nazwy pliku i znaku sprawy.
+$<HTMLButtonElement>('pub-dl-prot').addEventListener('click', async () => {
+  flushPendingUpdate();
+  if (!lastRedacted) return;
+  const text = textForDownload(await protocolNow());
+  saveFile(new Blob([text], { type: 'text/plain;charset=utf-8' }), protocolName(new Date()));
+});
+
+// Druk przez ten sam #print-out: na czas wydruku zamiast wyniku stoi w nim protokół.
+$<HTMLButtonElement>('pub-print-prot').addEventListener('click', async () => {
+  flushPendingUpdate();
+  if (!lastRedacted) return;
+  printProtocol = await protocolNow();
+  printMode = 'protocol';
+  syncPrintOut();
+  window.print();
+});
+
+// Start: zapamiętany organ i osoba (tylko gdy kiedyś zaznaczono „Pamiętaj”), dzisiejsza data.
+{
+  const kept = readRemembered();
+  if (kept) {
+    pubRemember.checked = true;
+    pubOrgan.value = kept.organ;
+    pubOsoba.value = kept.osoba;
+  }
+  pubDate.value = formatDate(new Date());
+  syncOtherBasis();
+}
 
 exampleBtn.addEventListener('click', () => {
   clearError();
   setFileExt('');
+  clearPublication();
   replaceSource(EXAMPLE_TEXT, 'Wstawiono przykład w miejsce Twojego tekstu.');
 });
 

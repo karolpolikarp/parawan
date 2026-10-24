@@ -130,6 +130,7 @@ test('aplikacja: kolejność sekcji w kodzie równa kolejności na ekranie', () 
     'id="edytor"',
     '<h2 id="output-label">',
     'id="findings"',
+    'id="publikacja"',
     'id="co-maskowac"',
     '<h2>Kolory znaczników</h2>',
     'id="co-wykrywa"',
@@ -259,7 +260,11 @@ test('aplikacja: przycisk druku działa jak „Pobierz” i drukuje bieżący wy
   // Ctrl+P i menu przeglądarki też najpierw kończą odłożone przeliczenie
   const before = webMain.match(/addEventListener\('beforeprint', \(\) => \{([\s\S]*?)\n\}\);/)?.[1] ?? '';
   expect(before).toContain('flushPendingUpdate();');
-  expect(before).toContain('document.title = printTitle(new Date());');
+  // przy „Drukuj protokół” nazwa pliku PDF mówi, że to protokół (protocolTitle)
+  expect(before).toContain(
+    "document.title = printMode === 'protocol' ? protocolTitle(new Date()) : printTitle(new Date());",
+  );
+  expect(click).toContain("printMode = 'result';");
   expect(webMain).toMatch(/addEventListener\('afterprint', /);
 });
 

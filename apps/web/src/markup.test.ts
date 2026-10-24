@@ -166,13 +166,18 @@ test('arkusz aplikacji przeczytany z dysku (nie pusty napis z ?raw)', () => {
 
 // Bez arkusza druku Ctrl+P wysyłał na papier całą aplikację z polem źródła, w „Porównaniu” także
 // przekreślone oryginały, a z wyniku tylko okienko (19 ze 121 wierszy).
-test('aplikacja: przy druku widać tylko #print-out', () => {
+test('aplikacja: przy druku widać tylko #print-out i dołączoną adnotację', () => {
   expect(webCss.length).toBeGreaterThan(10_000);
   const print = webCss.match(/@media print \{([\s\S]*?)\n\}/)?.[1] ?? '';
-  expect(print).toMatch(/^\s*body > :not\(#print-out\) \{ display: none !important; \}/m);
+  expect(print).toMatch(/^\s*body > :not\(#print-out\):not\(#print-annex\) \{ display: none !important; \}/m);
   expect(print).toMatch(/\.print-out \{[^}]*display: block;[^}]*white-space: pre-wrap;/);
-  // poza drukiem kontener jest niewidoczny, także dla czytnika ekranu i Ctrl+F
+  // adnotacja od nowej strony i tylko wtedy, gdy ją dołączono (pusty kontener nie dokłada strony)
+  expect(print).toMatch(
+    /\.print-annex:not\(:empty\) \{[^}]*display: block;[^}]*break-before: page;[^}]*white-space: pre-wrap;/,
+  );
+  // poza drukiem kontenery są niewidoczne, także dla czytnika ekranu i Ctrl+F
   expect(webCss).toMatch(/^\.print-out \{ display: none; \}$/m);
+  expect(webCss).toMatch(/^\.print-annex \{ display: none; \}$/m);
   expect(webCss).toMatch(/^@page \{ size: A4; margin: 18mm 16mm; \}$/m);
   // margin: 0 chowa nagłówki, ale zabiera marginesy każdej strony wydruku
   expect(webCss).not.toMatch(/@page[^{]*\{[^}]*margin:\s*0\s*[;}]/);
@@ -189,10 +194,12 @@ test('aplikacja: wydruk fontem systemowym, nie wbudowanym Archivo', () => {
   );
   const rule = print.match(/\.print-out \{([^}]*)\}/)?.[1] ?? '';
   expect(rule).toContain('font: 11pt/1.45 Arial, sans-serif;');
+  const annex = print.match(/\.print-annex:not\(:empty\) \{([^}]*)\}/)?.[1] ?? '';
+  expect(annex).toContain('font: 11pt/1.45 Arial, sans-serif;');
   expect(print).not.toMatch(/Archivo|var\(--sans\)|var\(--mono\)|font-family/);
 });
 
-test('aplikacja: #print-out to dziecko <body> poza .grid, bez tłumacza', () => {
+test('aplikacja: #print-out i #print-annex to dzieci <body> poza .grid, bez tłumacza', () => {
   const gridStart = webHtml.indexOf('<div class="grid">');
   expect(gridStart).toBeGreaterThan(0);
   const gridEnd = divEnd(webHtml, gridStart);
@@ -201,35 +208,57 @@ test('aplikacja: #print-out to dziecko <body> poza .grid, bez tłumacza', () => 
   expect(at).toBeGreaterThan(gridEnd);
   // między końcem .grid a kontenerem tylko odstępy i komentarze, więc to dziecko <body>
   expect(webHtml.slice(gridEnd, at).replace(/<!--[\s\S]*?-->/g, '').trim()).toBe('');
-  expect(webHtml.indexOf('</body>')).toBeGreaterThan(at);
   expect(tag).toBe('<div id="print-out" class="print-out" lang="pl" translate="no">');
+  // adnotacja tuż za wynikiem, też dziecko <body>
+  const annexTag = tagOf(webHtml, 'print-annex');
+  const annexAt = webHtml.indexOf(annexTag);
+  const between = webHtml.slice(at + tag.length, annexAt).replace(/<!--[\s\S]*?-->/g, '').trim();
+  expect(between).toBe('</div>');
+  expect(webHtml.indexOf('</body>')).toBeGreaterThan(annexAt);
+  expect(annexTag).toBe('<div id="print-annex" class="print-annex" lang="pl" translate="no">');
 });
 
-test('aplikacja: #print-out dostaje tekst wyniku wyłącznie przez textContent', () => {
-  const v = webMain.match(/const (\w+) = \$<\w+>\('print-out'\);/)?.[1] ?? '';
-  expect(v).not.toBe('');
-  // jedyny uchwyt do kontenera i jedyne przypisanie: textContent z wyniku albo komunikat
-  expect(webMain.match(/['"]#?print-out['"]/g)).toHaveLength(1);
-  // każde przypisanie, także złożone (+=, ??= …), i każde wywołanie metody na kontenerze
-  const assign = '(?:[-+*/%&|^]|\\*\\*|<<|>>>?|&&|\\|\\||\\?\\?)?=(?!=)';
-  const writes = [...webMain.matchAll(new RegExp(`\\b${v}\\.(\\w+)\\s*(?:${assign}|\\()`, 'g'))];
-  expect(writes.map((m) => m[1])).toEqual(['textContent']);
-  // Uchwyt pada tylko w deklaracji i w tym jednym przypisaniu, więc ani alias
-  // (const el = printOut), ani zapis przez nawias (printOut['innerHTML']) nie przejdą bokiem.
-  expect(webMain.match(new RegExp(`\\b${v}\\b`, 'g'))).toHaveLength(2);
-  expect(webMain).not.toMatch(
-    new RegExp(`\\b${v}\\s*(?:\\.|\\[)\\s*['"\`]?(?:innerHTML|outerHTML|insertAdjacentHTML)`),
-  );
-  const value = webMain.match(new RegExp(`\\b${v}\\.textContent = ([^;]+);`))?.[1] ?? '';
-  expect(value).toBe('lastRedacted ? outputText() : PRINT_EMPTY');
+test('aplikacja: #print-out i #print-annex dostają tekst wyłącznie przez textContent', () => {
+  for (const [id, field] of [
+    ['print-out', 'main'],
+    ['print-annex', 'annex'],
+  ]) {
+    const v = webMain.match(new RegExp(`const (\\w+) = \\$<\\w+>\\('${id}'\\);`))?.[1] ?? '';
+    expect(v, id).not.toBe('');
+    // jedyny uchwyt do kontenera i jedyne przypisanie: textContent z printContent()
+    expect(webMain.match(new RegExp(`['"]#?${id}['"]`, 'g')), id).toHaveLength(1);
+    // każde przypisanie, także złożone (+=, ??= …), i każde wywołanie metody na kontenerze
+    const assign = '(?:[-+*/%&|^]|\\*\\*|<<|>>>?|&&|\\|\\||\\?\\?)?=(?!=)';
+    const writes = [...webMain.matchAll(new RegExp(`\\b${v}\\.(\\w+)\\s*(?:${assign}|\\()`, 'g'))];
+    expect(writes.map((m) => m[1]), id).toEqual(['textContent']);
+    // Uchwyt pada tylko w deklaracji i w tym jednym przypisaniu, więc ani alias
+    // (const el = printOut), ani zapis przez nawias (printOut['innerHTML']) nie przejdą bokiem.
+    expect(webMain.match(new RegExp(`\\b${v}\\b`, 'g')), id).toHaveLength(2);
+    expect(webMain).not.toMatch(
+      new RegExp(`\\b${v}\\s*(?:\\.|\\[)\\s*['"\`]?(?:innerHTML|outerHTML|insertAdjacentHTML)`),
+    );
+    const value = webMain.match(new RegExp(`\\b${v}\\.textContent = ([^;]+);`))?.[1] ?? '';
+    expect(value, id).toBe(`print.${field}`);
+  }
+  expect(webMain).toContain('const print = printContent();');
+  // printContent: wynik z finalText (output.ts), dołączona adnotacja, komunikat albo protokół
+  // z metadanych (publikacja.ts); pole źródła ani przekreślone oryginały żadną drogą
+  const body = webMain.match(/function printContent\(\)[^{]*\{([\s\S]*?)\n\}/)?.[1] ?? '';
+  expect(body).toContain("if (printMode === 'protocol') return { main: printProtocol, annex: '' };");
+  expect(body).toContain("if (!lastRedacted) return { main: PRINT_EMPTY, annex: '' };");
+  expect(body).toContain('return { main: resultText(), annex: annexText() };');
+  expect(body).not.toMatch(/input|orig|innerHTML/);
   expect(webMain).toContain(
-    'const outputText = (): string => finalText({ redacted: lastRedacted, original: lastInput, spans: lastSpans });',
+    'const resultText = (): string => finalText({ redacted: lastRedacted, original: lastInput, spans: lastSpans });',
   );
-  // pole źródła ani przekreślone oryginały nie trafiają tam żadną drogą
-  expect(value).not.toMatch(/input|orig|innerHTML/);
-  // żaden inny moduł aplikacji nie sięga po kontener
+  expect(webMain).toMatch(/function annexText\(\): string \{\n {2}return pubAppend\.checked && lastRedacted \? pubAnn\.value\.trim\(\) : '';\n\}/);
+  // protokół do druku powstaje tylko z buildProtocol
+  expect(webMain.match(/^\s*printProtocol = /gm)).toHaveLength(1);
+  expect(webMain).toContain('printProtocol = await protocolNow();');
+  expect(webMain).toMatch(/async function protocolNow\(\): Promise<string> \{[\s\S]*?return buildProtocol\(\{/);
+  // żaden inny moduł aplikacji nie sięga po kontenery
   for (const [file, src] of appModules) {
-    if (file !== './main.ts') expect(src, file).not.toContain('print-out');
+    if (file !== './main.ts') expect(src, file).not.toMatch(/print-out|print-annex/);
   }
 });
 

@@ -15,8 +15,10 @@ test('aplikacja: semantyka strony', () => {
   // licznik ‹ › nie dubluje ogłoszenia z #mask-status
   expect(webHtml).not.toMatch(/id="mask-count"[^>]*aria-live/);
   // „▸”, opis i pomoc „?” nie wchodzą do nazwy rozwijanych sekcji
-  expect(webHtml.match(/<span class="chev" aria-hidden="true">/g)).toHaveLength(2);
-  expect(webHtml.match(/<summary class="card-h" aria-labelledby="/g)).toHaveLength(2);
+  const sections = webHtml.match(/<details class="card g12"/g)?.length ?? 0;
+  expect(sections).toBe(3); // „Adnotacja i protokół”, „Co maskować”, „Co wykrywa”
+  expect(webHtml.match(/<span class="chev" aria-hidden="true">/g)).toHaveLength(sections);
+  expect(webHtml.match(/<summary class="card-h" aria-labelledby="/g)).toHaveLength(sections);
 });
 
 test('landing: tabele, nagłówki i statystyki demo dla czytnika ekranu', () => {

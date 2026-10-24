@@ -85,6 +85,39 @@ export function maskTip(name: string): string {
   return meta ? `${CAT_LABELS[meta.cat]} · ${meta.tip}` : 'Wykryta dana osobowa';
 }
 
+/**
+ * Nazwa danych w dopełniaczu do adnotacji o wyłączeniu jawności („wyłączono jawność w zakresie:
+ * imion i nazwisk, numerów PESEL”): [liczba pojedyncza, liczba mnoga]. Wpis dla KAŻDEGO tokenu
+ * z PII_TOKENS (pilnuje pii-meta.test.ts). Kolejność wpisów to kolejność w adnotacji: najpierw
+ * osoba, potem adres i kontakt, na końcu numery.
+ */
+export const GENITIVE_LABEL: Record<string, readonly [string, string]> = {
+  'IMIĘ I NAZWISKO': ['imienia i nazwiska', 'imion i nazwisk'],
+  'DATA-URODZENIA': ['daty urodzenia', 'dat urodzenia'],
+  ADRES: ['adresu', 'adresów'],
+  'KOD-POCZTOWY': ['kodu pocztowego', 'kodów pocztowych'],
+  'MIEJSCOWOŚĆ': ['nazwy miejscowości', 'nazw miejscowości'],
+  TELEFON: ['numeru telefonu', 'numerów telefonów'],
+  EMAIL: ['adresu e-mail', 'adresów e-mail'],
+  PESEL: ['numeru PESEL', 'numerów PESEL'],
+  NIP: ['numeru NIP', 'numerów NIP'],
+  REGON: ['numeru REGON', 'numerów REGON'],
+  'NR-DOWODU': ['numeru dowodu osobistego', 'numerów dowodów osobistych'],
+  'NR-PASZPORTU': ['numeru paszportu', 'numerów paszportów'],
+  'PRAWO-JAZDY': ['numeru prawa jazdy', 'numerów praw jazdy'],
+  'NR-REJESTRACYJNY': ['numeru rejestracyjnego pojazdu', 'numerów rejestracyjnych pojazdów'],
+  VIN: ['numeru VIN', 'numerów VIN'],
+  KRS: ['numeru KRS', 'numerów KRS'],
+  'NR-KSEF': ['numeru faktury w KSeF', 'numerów faktur w KSeF'],
+  'ZNAK-SPRAWY': ['znaku sprawy', 'znaków spraw'],
+  'NR-KONTA': ['numeru rachunku bankowego', 'numerów rachunków bankowych'],
+  'NR-KARTY': ['numeru karty płatniczej', 'numerów kart płatniczych'],
+  IP: ['adresu IP', 'adresów IP'],
+  MAC: ['adresu MAC', 'adresów MAC'],
+  LOGIN: ['loginu', 'loginów'],
+  TOKEN: ['tokenu dostępu', 'tokenów dostępu'],
+};
+
 /* ── Przełączniki „Co maskować” (generowane, z ikonami i kodami znaczników) ── */
 
 export interface MaskGroup {

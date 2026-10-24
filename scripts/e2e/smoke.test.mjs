@@ -1000,10 +1000,15 @@ test('localStorage: tylko znane klucze ustawień, bez treści pisma', async (t) 
   await withApp(browser, t, '?demo', async (app) => {
     const { page } = app;
     await app.demoReady();
-    // Zmiana każdego zapamiętywanego ustawienia: typ danych, tryb osób, animacja.
+    // Zmiana każdego zapamiętywanego ustawienia: typ danych, tryb osób, animacja i organ z osobą
+    // do adnotacji (tylko po „Pamiętaj”, publikacja.test.mjs sprawdza, że bez niego klucza nie ma).
     await page.locator('#mask-toggles input[data-key]').first().uncheck();
     await page.locator('#pseudonyms').check();
     await page.locator('#demo-motion').click();
+    await page.locator('#publikacja > summary').click();
+    await page.locator('#pub-znak').fill('RGK.6220.14.2026');
+    await page.locator('#pub-remember').check();
+    await page.locator('#pub-organ').fill('Wójt Gminy Testowo');
     const store = await page.evaluate(() => ({ ...localStorage }));
     const keys = Object.keys(store);
     const unknown = keys.filter((k) => !ALLOWED_STORAGE_KEYS.includes(k));
@@ -1011,6 +1016,8 @@ test('localStorage: tylko znane klucze ustawień, bez treści pisma', async (t) 
     assert.deepEqual(keys.sort(), [...ALLOWED_STORAGE_KEYS].sort(), 'ustawienia nie zostały zapisane');
     const values = Object.values(store).join(' ');
     assert.ok(!values.includes(EXAMPLE_PESEL) && !values.includes(EXAMPLE_NAME), 'treść pisma w localStorage');
+    // znak sprawy i reszta pól karty nie są zapamiętywane
+    assert.ok(!values.includes('RGK.6220'), 'znak sprawy w localStorage');
   }, opts);
 });
 

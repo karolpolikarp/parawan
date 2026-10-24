@@ -1,5 +1,5 @@
 import { afterEach, expect, test, vi } from 'vitest';
-import { ALLOWED_KEYS, storageGet, storageSet } from './storage';
+import { ALLOWED_KEYS, storageGet, storageRemove, storageSet } from './storage';
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -16,6 +16,7 @@ test('zablokowana pamięć witryny (SecurityError przy samym dostępie) nie prze
   try {
     expect(storageGet('mask-disabled')).toBeNull();
     expect(() => storageSet('mask-disabled', 'pesel')).not.toThrow();
+    expect(() => storageRemove('adnotacja')).not.toThrow();
   } finally {
     Reflect.deleteProperty(globalThis, 'localStorage');
   }
@@ -62,11 +63,11 @@ test('pamięć przeglądarki tylko przez storage.ts, z kluczami z listy ALLOWED_
   expect('document.cookie = tekst;').toMatch(direct);
 });
 
-test('każde wywołanie storageGet i storageSet ma klucz z ALLOWED_KEYS wpisany wprost', () => {
+test('każde wywołanie storageGet, storageSet i storageRemove ma klucz z ALLOWED_KEYS wpisany wprost', () => {
   const allowed: readonly string[] = ALLOWED_KEYS;
   // Klucz ze zmiennej albo złożony z kawałków ominąłby i tę listę, i bramkę E2E, więc pierwszym
   // argumentem musi być sam napis w apostrofach.
-  const call = /\bstorage(?:Get|Set)\(\s*([^,)]*)/g;
+  const call = /\bstorage(?:Get|Set|Remove)\(\s*([^,)]*)/g;
   const literal = /^'([\w-]+)'$/;
   let calls = 0;
   for (const [file, src] of appModules) {
@@ -80,7 +81,7 @@ test('każde wywołanie storageGet i storageSet ma klucz z ALLOWED_KEYS wpisany 
       expect(allowed, `${file}: klucz ${arg} spoza ALLOWED_KEYS`).toContain(key);
     }
   }
-  // main.ts czyta i zapisuje każdy z trzech kluczy, więc zero trafień znaczyłoby zepsuty wzorzec.
+  // main.ts czyta i zapisuje każdy klucz, więc zero trafień znaczyłoby zepsuty wzorzec.
   expect(calls).toBeGreaterThanOrEqual(ALLOWED_KEYS.length * 2);
   // strażnik strażnika: klucz ze zmiennej i klucz spoza listy nie przechodzą
   expect(literal.exec('klucz')).toBeNull();

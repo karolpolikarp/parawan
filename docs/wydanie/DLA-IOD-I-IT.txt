@@ -35,10 +35,10 @@ CO ZOSTAJE NA KOMPUTERZE
     mask-disabled  typy danych odznaczone w „Co maskować”
     pseudonyms     włączony tryb „Rozróżniaj osoby”
     motion         zatrzymana animacja przykładu
-  Chrome i Edge dzielą tę pamięć między wszystkie pliki otwierane z dysku,
-  więc inny plik .html mógłby tam coś zapisać. Dlatego Parawan przy
-  starcie pokazuje, które typy danych są wyłączone, zanim pracownik
-  cokolwiek wklei.
+    adnotacja      organ i osoba do adnotacji, po zaznaczeniu „Pamiętaj”
+  Chrome i Edge dzielą tę pamięć między pliki otwierane z dysku, więc inny
+  plik .html mógłby tam coś zapisać. Dlatego Parawan przy starcie pokazuje,
+  które typy danych są wyłączone, zanim pracownik cokolwiek wklei.
 
   Wynik trafia do schowka albo do pliku tylko po kliknięciu „Kopiuj”,
   „Pobierz .txt”, „Pobierz .docx” albo „Drukuj lub zapisz PDF”. Nazwa

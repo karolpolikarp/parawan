@@ -883,6 +883,51 @@ body.file-drag textarea.editor-ta {
 }
 .stat-total b { color: var(--text); font-size: 15px; }
 
+/* ============ ADNOTACJA I PROTOKÓŁ ============ */
+/* Dwie kolumny (adnotacja, protokół z listą „Przed publikacją”), na węższym ekranie jedna.
+   Pola z obramowaniem w kolorze --mut: 5:1 na bieli, czyli granica pola jest widoczna (WCAG 1.4.11). */
+.pub { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px 28px; align-items: start; }
+.pub-col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.pub-col + .pub-col { padding-left: 28px; border-left: 1px solid var(--line); }
+.pub-h { font-size: 14px; font-weight: 800; color: var(--acc); letter-spacing: -.005em; }
+.pub-grid { display: grid; grid-template-columns: minmax(150px, max-content) minmax(0, 1fr); gap: 8px 12px; align-items: center; }
+.fld { font-size: 13px; font-weight: 600; color: var(--text); }
+.fld .opt, .fld-ta .opt { font-weight: 500; color: var(--mut-2); }
+.fld-ta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; margin-top: 4px; }
+.fld-ta .opt { font-size: 12.5px; }
+.fld-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.fld-row .inp { flex: 1 1 auto; }
+.inp {
+  width: 100%; min-width: 0; min-height: 38px; padding: 7px 10px;
+  border: 1px solid var(--mut); border-radius: var(--r-ctl);
+  background: #fff; color: var(--text); font: 14px/1.4 var(--sans);
+}
+select.inp { padding-right: 6px; }
+.inp-date { max-width: 160px; font-variant-numeric: tabular-nums; }
+.inp::placeholder { color: var(--mut); opacity: 1; }
+.pub-ta { min-height: 196px; resize: vertical; font: 13.5px/1.5 var(--sans); }
+.pub-note { font-size: 12.5px; color: var(--mut-2); }
+.pub-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.pub-acts .btn .gi { width: 16px; height: 16px; }
+.chk { display: flex; align-items: flex-start; gap: 9px; font-size: 13.5px; line-height: 1.45; cursor: pointer; }
+.chk input { flex: none; width: 17px; height: 17px; margin-top: 1px; accent-color: var(--acc); cursor: pointer; }
+.chk-inline { display: inline-flex; }
+.pub-check { display: flex; flex-direction: column; gap: 9px; margin-top: 6px; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--r-ctl); background: var(--well); }
+.pub-check legend { padding: 0 6px; margin-left: -6px; }
+/* licznik przeglądu pod nagłówkiem wyniku: zielony, gdy przejrzano wszystkie znaczniki */
+.mask-seen { font-weight: 600; color: var(--mut-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mask-seen.is-done { color: var(--ok); }
+@media (max-width: 1080px) {
+  .pub { grid-template-columns: minmax(0, 1fr); }
+  .pub-col + .pub-col { padding-left: 0; border-left: 0; padding-top: 18px; border-top: 1px solid var(--line); }
+}
+@media (max-width: 480px) {
+  .pub-grid { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .pub-grid .inp + .fld { margin-top: 8px; }
+  .inp, .pub-ta { font-size: 16px; } /* iOS powiększa stronę przy polach mniejszych niż 16 px */
+  .pub-ta { min-height: 300px; } /* wąska kolumna: wzór ma ok. 15 wierszy */
+}
+
 /* ============ CO MASKOWAĆ ============ */
 /* Zwarte wiersze + akcje zbiorcze. Każdy pas kategorii to osobna siatka z TYM SAMYM szablonem
    kolumn (auto-fill), więc kolumny zgrywają się w pionie między pasami. Kontakt+Finanse leżą
@@ -1157,10 +1202,21 @@ table .pii { cursor: default; }
    przekreślone oryginały, a z wyniku tylko to, co mieściło się w okienku. Na papier idzie więc
    sam #print-out (main.ts wypełnia go całym wynikiem jako tekstem). Marginesy strony zostają:
    przy margin: 0 przeglądarka chowa wprawdzie nagłówki i stopki, ale tekst dochodzi do krawędzi
-   na każdej stronie, a Firefox i tak drukuje je po swojemu. O nagłówki prosi .out-hint. */
+   na każdej stronie, a Firefox i tak drukuje je po swojemu. O nagłówki prosi .out-hint.
+   Dołączona adnotacja (#print-annex) zaczyna się od nowej strony, tym samym fontem. */
 .print-out { display: none; }
+.print-annex { display: none; }
 @media print {
-  body > :not(#print-out) { display: none !important; }
+  body > :not(#print-out):not(#print-annex) { display: none !important; }
+  .print-annex:not(:empty) {
+    display: block;
+    break-before: page;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font: 11pt/1.45 Arial, sans-serif;
+    color: #000;
+    background: #fff;
+  }
   body { background: #fff; padding: 0; }
   /* Font systemowy, nie wbudowany Archivo: z jego zmiennej wersji (woff2 „100 900” z data:)
      „Zapisz jako PDF” robi PDF z zepsutą warstwą tekstu. Firefox 115–156 nie zapisuje w nim

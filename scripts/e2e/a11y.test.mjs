@@ -136,6 +136,25 @@ const SCANS = [
     prepare: async (app) => app.demoReady(),
   },
   {
+    // A08: karta „Adnotacja i protokół” rozwinięta, z własną podstawą, poprawioną adnotacją
+    // („Przywróć wzór”) i listą „Przed publikacją” po przejrzeniu wszystkich znaczników
+    gdzie: 'aplikacja, karta Adnotacja i protokół, telefon 390×844',
+    query: '?demo',
+    viewport: { width: 390, height: 844 },
+    prepare: async (app) => {
+      await app.demoReady();
+      const { page } = app;
+      await page.locator('#publikacja > summary').click();
+      await page.locator('#pub-podstawa').selectOption('inna');
+      await page.locator('#pub-inna').fill('art. 5 ust. 1 u.d.i.p.');
+      await page.locator('#pub-adnotacja').press('End');
+      await page.locator('#pub-adnotacja').pressSequentially(' Poprawka.');
+      const n = await page.locator('#output mark.pii').count();
+      for (let i = 0; i < n; i++) await page.locator('#mask-next').click();
+      await page.locator('#pub-chk-seen:checked').waitFor({ state: 'attached' });
+    },
+  },
+  {
     // A04: pasek kopii ze strony produktu i komunikat o zapamiętanym wyłączeniu naraz
     gdzie: 'aplikacja ze strony produktu, zapamiętane wyłączenie PESEL',
     query: '',

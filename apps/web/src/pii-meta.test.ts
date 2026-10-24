@@ -7,6 +7,7 @@ import {
   CHIP_BY_TOKEN,
   CHIP_META,
   catCountLabel,
+  GENITIVE_LABEL,
   MASK_GROUP_DEFS,
   MASK_GROUPS,
   maskTip,
@@ -44,6 +45,19 @@ test('chipy: wpis dla każdego typu z przełączników, z tokenem i ikoną', () 
 test('chipy: każdy token z PII_TOKENS ma chip po nazwie tokenu', () => {
   for (const token of [...Object.keys(PII_TOKENS), 'IMIĘ I NAZWISKO'])
     expect(CHIP_BY_TOKEN[token], token).toBeDefined();
+});
+
+// Adnotacja o wyłączeniu jawności (publikacja.ts) wymienia zakres nazwami w dopełniaczu. Token
+// bez wpisu dostałby w adnotacji zastępczy opis, więc nowy typ PII musi dopisać tu obie formy.
+test('adnotacja: każdy token z PII_TOKENS ma GENITIVE_LABEL w obu liczbach', () => {
+  expect(Object.keys(GENITIVE_LABEL).sort()).toEqual(Object.keys(PII_TOKENS).sort());
+  for (const [token, [one, many]] of Object.entries(GENITIVE_LABEL)) {
+    expect(one, token).toMatch(/^[a-ząćęłńóśźż][\p{L} -]+$/u);
+    expect(many, token).toMatch(/^[a-ząćęłńóśźż][\p{L} -]+$/u);
+    expect(one, token).not.toBe(many);
+  }
+  expect(GENITIVE_LABEL['IMIĘ I NAZWISKO']).toEqual(['imienia i nazwiska', 'imion i nazwisk']);
+  expect(GENITIVE_LABEL['NR-KONTA']).toEqual(['numeru rachunku bankowego', 'numerów rachunków bankowych']);
 });
 
 test('chipy: skróty zostają skrótami, reszta po polsku małą literą', () => {
