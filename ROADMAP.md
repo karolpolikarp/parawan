@@ -34,21 +34,20 @@ Docelowo v0.46.26, rdzeń 0.29.14 (0.29.13 ma silnik z v0.46.24 i tryb `--jsonl`
    trybów: zwykłego (stdin → stdout) i `--jsonl` z poprawnym i złym wierszem.
    Źródło: fa5edef, `packages/core/bin/anonimizator.js`.
 
-4. **Decyzja o paczce npm `anonimizator` 0.29.13**
+4. **Publikacja paczki npm `anonimizator`**
    rdzeń 0.29.13 · S
-   Paczki nie ma w rejestrze (`npm view anonimizator` zwraca 404), README każe instalować
-   z katalogu (README.md:235), a `package.json` ma już `prepublishOnly`. Trzeba wybrać: opublikować
-   (wtedy także nazwa i lista `files`) albo zostać przy instalacji z repo i zapisać to wprost.
-   `LICENSE` musi zostać w `packages/core`: npm dołącza ją do paczki sam, z katalogu paczki.
-   Źródło: fa5edef, packages/core/package.json, README.md:235.
+   Paczka gotowa (`NOTICE` w `files`, README z `npm install anonimizator`), publikacja czeka na
+   włączenie 2FA na koncie npm (rejestr odrzucił ją kodem E403). Kolejne wersje lepiej wydawać
+   z CI z `--provenance`, tak jak Parawan.html ma atestację pochodzenia.
+   Źródło: packages/core/package.json, `.github/workflows/release.yml`.
 
-5. **Zaległe aktualizacje zależności z Dependabota**
-   v0.46.26 · S
-   Otwarte od lipca i sierpnia: #21 (Biome, esbuild, Vitest, Vite, pdfjs-dist), #15, #16, #17
-   (akcje GitHub Pages i setup-node). `npm outdated` pokazuje już nowsze wersje niż #21 (Vite 8.3.5,
-   pdfjs-dist 6.4.299), więc PR trzeba odświeżyć. pdfjs-dist trafia do `Parawan.html`, dlatego
-   po podbiciu potrzebne są bramka E2E, limit rozmiaru i porównanie sumy w buildzie z tagu.
-   Źródło: PR #21, #15, #16, #17, `npm outdated`.
+5. **pdf.js nowszy niż 6.1 bez utraty Chromium/Edge 109**
+   v0.47.x · M
+   Próba z 6.4.299 (c2bcd31) padła: pdf.js 6.2+ woła `Promise.withResolvers` (Chrome 119+),
+   więc w Chromium 109 i w CI na Node 20 PDF-y przestały się czytać. Wróciło 6.1.200, a Dependabot
+   pomija minorowe wersje pdfjs-dist. Do zrobienia: lista nowych API w pdf.js 6.4, polyfille obok
+   `ensureStreamIteration()` w apps/web/src/pdf.ts, zielony job chromium-109 w zgodnosc.yml.
+   Źródło: c2bcd31, `.github/dependabot.yml`, apps/web/src/pdf.ts.
 
 6. **Job CI na Node 20**
    v0.46.26 · S
@@ -208,7 +207,7 @@ Docelowo v0.48 i dalej, potem 1.0.0 według kryteriów niżej.
 
 27. **Vitest 5**
     v0.48+ · M
-    `npm outdated`: Vitest 4.1.10, najnowszy 5.0.5. Osobno od pozycji 5, bo to zmiana główna
+    `npm outdated`: Vitest 4.1.10, najnowszy 5.0.5. Osobno od pozostałych aktualizacji, bo to zmiana główna
     w narzędziu, na którym stoją golden-master i 1000+ testów. Źródło: `npm outdated`.
 
 ## Kryteria 1.0.0
@@ -225,10 +224,10 @@ v0.46.24 świadomie wyszło z listą znanych regresji, w tym dwiema klasami wyso
 - lista znaczników i obsługiwanych przeglądarek jest zapisana jako obietnica, której nie zmienia
   się bez wersji głównej (pozycja 26);
 - wzór adnotacji przeszedł opinię prawnika (pozycja 8);
-- CI nie stoi na wersjach bez wsparcia, a zaległe PR zależności są zamknięte (pozycje 5 i 6).
+- CI nie stoi na wersjach bez wsparcia, a pdf.js nie odstaje od bieżącej wersji (pozycje 5 i 6).
 
-Rdzeń ma własną numerację (0.29.x) i może dojść do 1.0 osobno, dopiero gdy zapadnie decyzja
-o publikacji w npm (pozycja 4).
+Rdzeń ma własną numerację (0.29.x) i może dojść do 1.0 osobno, gdy
+kontrakt API będzie spisany (pozycja 26).
 
 ## Świadomie poza roadmapą
 

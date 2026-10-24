@@ -7,6 +7,12 @@ updates:
     groups:
       npm-all:
         patterns: ["*"]
+    ignore:
+      # pdf.js 6.2+ wymaga Promise.withResolvers (Chrome 119+), a Parawan.html ma czytać PDF-y
+      # w Chromium/Edge 109 (Windows 7/8.1). Przejście na nowszy pdf.js tylko ręcznie, z polyfillami
+      # i zielonym zgodnosc.yml (job chromium-109). Poprawki 6.1.x przychodzą dalej.
+      - dependency-name: "pdfjs-dist"
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
