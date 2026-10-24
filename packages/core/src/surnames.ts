@@ -67,6 +67,24 @@ export const HOMOGRAPH_SURNAMES = new Set<string>((
   'żak kurek sitek gajda jarosz marek bober przybysz dziedzic mroczek starosta'
 ).split(/\s+/));
 
+/**
+ * Forma bazowa nazwiska-homografu z HOMOGRAPH_SURNAMES albo null — także w przypadku zależnym
+ * („Wróbla" → wróbel, „Sikory"/„Sikorą" → sikora, „Mroza" → mróz, „Wilkiem" → wilk). Klucz
+ * normalizeSurnameKey nie przywracał ruchomego „e" ani końcowego „-a", więc homograf przy kotwicy
+ * w odmianie zostawał jawny. Sama forma nie przesądza o osobie — decyduje kotwica wywołującego.
+ */
+export function homographBase(word: string): string | null {
+  const w = word.toLowerCase();
+  if (HOMOGRAPH_SURNAMES.has(w)) return w;
+  for (const end of NOUN_ENDINGS) {
+    if (w.length - end.length < 2 || !w.endsWith(end)) continue;
+    const stem = w.slice(0, -end.length);
+    const oo = stem.replace(/o([^aeiouąęóy]+)$/, 'ó$1');
+    for (const c of [stem, stem.replace(NO_E, '$1e$2'), `${stem}a`, oo]) if (HOMOGRAPH_SURNAMES.has(c)) return c;
+  }
+  return null;
+}
+
 // Odmiana przymiotnikowa nazwisk na -ski/-cki/-dzki (też żeńska i mnoga).
 const ADJ_RULES: Array<[RegExp, string]> = [
   [/(sk|ck|dzk)iego$/, '$1i'],

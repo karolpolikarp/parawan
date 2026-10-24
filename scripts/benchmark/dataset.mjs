@@ -912,6 +912,28 @@ export function buildDataset() {
   str('FB: facebook.com/profile.php?id=100004567890123.Tel.501234567\nUser name: Anna Zając\nUser: TOMASZ JANKOWSKI\nWnioskodawca: JANKOWSKI TOMASZ', ['100004567890123', '501234567', 'Anna Zając', 'TOMASZ JANKOWSKI', 'JANKOWSKI TOMASZ'], ['facebook.com/profile.php?id=', '.Tel.', 'User name:', 'Wnioskodawca:']);
   neg(String.raw`Pole sAMAccountName: jest obowiązkowe. Plik w C:\Users\pielegniarki\Desktop i /home/wnioski/przychodzace. Zastąp C:\Users\nazwa_uzytkownika swoim loginem. session opened for user cron by (uid=0)`, ['jest obowiązkowe', 'pielegniarki', '/home/wnioski/', 'nazwa_uzytkownika', 'user cron']);
 
+  // ── b7: nagłówek tabeli jako kotwica, TSV, WERSALIKI, homografy, odmiana imion, adres po etykiecie ──
+  // K61: wiersze pod nagłówkiem CSV/TSV/Markdown; nagłówek bez kolumny osoby zostaje nietknięty
+  str('imie;nazwisko;pesel;data_urodzenia;miejscowosc\nJan;Kos;90053024683;1990-05-30;Biała Podlaska', ['Jan;', 'Kos', '1990-05-30', 'Biała Podlaska'], ['imie;nazwisko;pesel']);
+  str('Lp.;Nr rejestracyjny;Marka\n1;WI 4821F;Skoda\n| Imię | Nazwisko |\n|---|---|\n| Magdalena | Zając |', ['WI 4821F', 'Magdalena', 'Zając'], ['Lp.;Nr rejestracyjny;Marka', ';Skoda']);
+  neg('city,population\nKraków,800000\nid,name,category\n1,Zając,zabawka\nimie,nazwisko\nDzień dobry, przesyłam listę.', ['Kraków,800000', '1,Zając,zabawka', 'Dzień dobry, przesyłam listę.']);
+  // K03: komórki TSV dostają osobne maski, kolumna stanowiska i nagłówek zostają
+  osr('Nazwisko\tImię\tStanowisko\nWróbel\tHenryk\tKierowca\nMazur\tGrzegorz\tKierownik', ['Wróbel', 'Henryk', 'Mazur', 'Grzegorz'], ['Nazwisko\tImię\tStanowisko', 'Kierowca', 'Kierownik']);
+  neg('Imię i nazwisko\tLokal\tTelefon\nUlica\tAdama\tMickiewicza\nMaj\tAnna\nSąd Rejonowy\tWydział Cywilny', ['Lokal\tTelefon', 'Adama\tMickiewicza', 'Maj\tAnna', 'Wydział Cywilny']);
+  // K47/K48: WERSALIKI w szyku odwróconym i nazwiska-homografy przy kotwicy osoby
+  osr('Wnioskodawca: KOWALSKI JAN\nLista obecności: NOWAK PIOTR, WÓJCIK MARIA\nPOWÓD: MAREK DUDA\nPacjent: KOWALSKA Anna', ['KOWALSKI JAN', 'NOWAK PIOTR', 'WÓJCIK MARIA', 'MAREK DUDA', 'KOWALSKA Anna'], ['Wnioskodawca:', 'POWÓD:']);
+  osr('Konsultował dr Mróz. Prokurator Baran nie oponuje. Pacjent: Wilk Jadwiga. Współpracuje z zespołem p. Wróbla.', ['Mróz', 'Baran', 'Wilk Jadwiga', 'Wróbla'], ['Konsultował dr', 'Prokurator', 'nie oponuje']);
+  neg('UNIWERSYTET ADAMA MICKIEWICZA W POZNANIU. ULICA KOŚCIUSZKI TADEUSZA. KRÓL JAN III SOBIESKI. PIĄTEK 3 MAJA. ANNA STAROSTA. Kot Anny spał. Świadek Jehowy odmówił. Biuro na II p. Pokój 304.', ['ADAMA MICKIEWICZA', 'KOŚCIUSZKI TADEUSZA', 'JAN III SOBIESKI', 'ANNA STAROSTA', 'Kot Anny', 'Świadek Jehowy', 'II p. Pokój']);
+  // K31/K51/K67: odmiana imion, zapis bez ogonków, imiona rodziców
+  oso('z powództwa Pawła Kowalskiego przeciwko Agacie Nowak, z udziałem Jerzego Nowaka i Henrykiem Lisem', ['Pawła Kowalskiego', 'Agacie Nowak', 'Jerzego Nowaka', 'Henrykiem Lisem'], ['z powództwa', 'przeciwko']);
+  osp('Michal Nowak napisal, ze Lukasz Wisniewski bedzie o 18. Krzysztof Wróbel, syn Józefa i Marii, stawił się.', ['Michal Nowak', 'Lukasz Wisniewski', 'Krzysztof Wróbel', 'Józefa', 'Marii'], ['napisal', 'syn', 'stawił się']);
+  neg('Kościół św. Jerzego Męczennika. Katedra Świętego Jerzego. Marka Toyota zdobyła nagrodę. Walka z korupcją trwa. Ewangelia wg sw. Lukasza. Jezus, syn Józefa i Maryi, nauczał.', ['Jerzego Męczennika', 'Świętego Jerzego', 'Marka Toyota', 'Walka z', 'sw. Lukasza', 'syn Józefa i Maryi']);
+  // K56/K53/K58/K60: adres bez „ul.", forma „urodziłam się", login z kwalifikatorem, vCard i atrybuty XML
+  str('Adres zamieszkania: Lipowa 14/3, Gdańsk\nTomasz Wróblewski, zam. Rynek 15 m. 3 w Krakowie\nurodziłam się 12.05.1990 w Łodzi\nLogin AD: wkozlowski\nTEL;TYPE=WORK:22 123 45 67\n<Osoba imie="Anna" nazwisko="Gzik" miasto="Kalisz"/>', ['Lipowa 14/3', 'Rynek 15 m. 3', '12.05.1990', 'wkozlowski', '22 123 45 67', '"Anna"', '"Gzik"', '"Kalisz"'], ['Adres zamieszkania:', 'Login AD:', 'TEL;TYPE=WORK:']);
+  neg('Nr zam. 45/2024 z dnia 12.03.2024. zam. Kawa 3 opakowania. Adres: Sala 5. Dziecko urodzi się około 12.05.2026. Login SSO: Okta. Login VPN: tak. <xs:element name="Nazwisko"/> <Podmiot osoba="prawna"/> Liczba pojazdów według GUS 2023 wzrosła.', ['Nr zam. 45/2024', 'Kawa 3 opakowania', 'Sala 5', '12.05.2026', 'Okta', 'VPN: tak', 'name="Nazwisko"', 'osoba="prawna"', 'GUS 2023']);
+  // b5: kotwica pojazdowa w odmianie i miejscownik miejscowości spoza słownika po „zam. w"
+  str('Wykaz pojazdów: WE 12345, GD 2345A. Kierujący autem WE 6789P zbiegł. Jan Kowalski, zam. w Świdniku, zeznaje.', ['WE 12345', 'GD 2345A', 'WE 6789P', 'Świdniku'], ['Wykaz pojazdów:', 'Kierujący autem', 'zeznaje']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {

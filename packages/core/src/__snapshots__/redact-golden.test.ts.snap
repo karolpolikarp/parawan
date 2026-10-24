@@ -90,6 +90,19 @@ Serwer intranet działa.
 "GET /Users/Edit/15 HTTP/1.1" 200
 User name: Administrator",
   "neg-153": "Pole sAMAccountName: jest obowiązkowe. Plik w C:\\Users\\pielegniarki\\Desktop i /home/wnioski/przychodzace. Zastąp C:\\Users\\nazwa_uzytkownika swoim loginem. session opened for user cron by (uid=0)",
+  "neg-154": "city,population
+Kraków,800000
+id,name,category
+1,Zając,zabawka
+imie,nazwisko
+Dzień dobry, przesyłam listę.",
+  "neg-155": "Imię i nazwisko	Lokal	Telefon
+Ulica	Adama	Mickiewicza
+Maj	Anna
+Sąd Rejonowy	Wydział Cywilny",
+  "neg-156": "UNIWERSYTET ADAMA MICKIEWICZA W POZNANIU. ULICA KOŚCIUSZKI TADEUSZA. KRÓL JAN III SOBIESKI. PIĄTEK 3 MAJA. ANNA STAROSTA. Kot Anny spał. Świadek Jehowy odmówił. Biuro na II p. Pokój 304.",
+  "neg-157": "Kościół św. Jerzego Męczennika. Katedra Świętego Jerzego. Marka Toyota zdobyła nagrodę. Walka z korupcją trwa. Ewangelia wg sw. Lukasza. Jezus, syn Józefa i Maryi, nauczał.",
+  "neg-158": "Nr zam. 45/2024 z dnia 12.03.2024. zam. Kawa 3 opakowania. Adres: Sala 5. Dziecko urodzi się około 12.05.2026. Login SSO: Okta. Login VPN: tak. <xs:element name="Nazwisko"/> <Podmiot osoba="prawna"/> Liczba pojazdów według GUS 2023 wzrosła.",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
@@ -209,6 +222,7 @@ User name: Administrator",
   "os-o-33": "Na ulicy spotkałem wczoraj Jana Kowalskiego.",
   "os-o-34": "Jan
 Wiśniewski złożył wniosek do urzędu.",
+  "os-o-35": "z powództwa Pawła Kowalskiego przeciwko Agacie Nowak, z udziałem Jerzego Nowaka i Henrykiem Lisem",
   "os-p-01": "Pozwany Jan Kowalski nie stawił się na rozprawie.",
   "os-p-02": "Powódka Anna Nowak wniosła o zasądzenie kosztów.",
   "os-p-03": "Świadek Piotr Wiśniewski zeznał, że widział zdarzenie.",
@@ -298,6 +312,7 @@ Pozwany Zieliński Annie groził.",
 Anna Kowalska z domu Sikora
 Kierownik Działu Kadr Grzegorz Mazur",
   "os-p-73": "Świadek Poleski zeznał. Mieczyk zatrudniony od 01.02.2010 r. Szanowna Pani Dyrektor Szkoły Kowalska-Nowak. Grafik: Dzień Lisiecka, Noc Brzozowska. Do kościoła wraz ze św. Kowalskim wszedł sprawca.",
+  "os-p-74": "Michal Nowak napisal, ze Lukasz Wisniewski bedzie o 18. Krzysztof Wróbel, syn Józefa i Marii, stawił się.",
   "os-r-01": "Marek Bąkiewicz podpisał protokół odbioru.",
   "os-r-02": "Alicja Krzemieniecka złożyła wniosek o urlop.",
   "os-r-03": "Tadeusz Gzowski wynajął magazyn pod miastem.",
@@ -323,6 +338,14 @@ Kierownik Działu Kadr Grzegorz Mazur",
   "os-r-23": "Dorota Sajkowska-Mróz podpisała aneks.",
   "os-r-24": "opinia Rzepeckiej-Gil była druzgocąca",
   "os-r-25": "Świętomira Gzowska przyszła na przesłuchanie.",
+  "os-r-26": "Nazwisko	Imię	Stanowisko
+Wróbel	Henryk	Kierowca
+Mazur	Grzegorz	Kierownik",
+  "os-r-27": "Wnioskodawca: KOWALSKI JAN
+Lista obecności: NOWAK PIOTR, WÓJCIK MARIA
+POWÓD: MAREK DUDA
+Pacjent: KOWALSKA Anna",
+  "os-r-28": "Konsultował dr Mróz. Prokurator Baran nie oponuje. Pacjent: Wilk Jadwiga. Współpracuje z zespołem p. Wróbla.",
   "os-rn-01": "list od Achtelika leżał tydzień na biurku",
   "os-rn-02": "sprawę Fąfary umorzono w drugiej instancji",
   "os-rn-03": "zeznania Gągały spisano protokolarnie",
@@ -447,6 +470,20 @@ LinkedIn: https://www.linkedin.com/in/joanna-pietrzak-hr/",
 User name: Anna Zając
 User: TOMASZ JANKOWSKI
 Wnioskodawca: JANKOWSKI TOMASZ",
+  "str-154": "imie;nazwisko;pesel;data_urodzenia;miejscowosc
+Jan;Kos;[PESEL];1990-05-30;Biała Podlaska",
+  "str-155": "Lp.;Nr rejestracyjny;Marka
+1;WI 4821F;Skoda
+| Imię | Nazwisko |
+|---|---|
+| Magdalena | Zając |",
+  "str-156": "Adres zamieszkania: Lipowa 14/3, Gdańsk
+Tomasz Wróblewski, zam. Rynek 15 m. 3 w Krakowie
+urodziłam się 12.05.1990 w Łodzi
+Login AD: wkozlowski
+TEL;TYPE=WORK:[TELEFON]
+<Osoba imie="Anna" nazwisko="Gzik" miasto="Kalisz"/>",
+  "str-157": "Wykaz pojazdów: WE 12345, GD 2345A. Kierujący autem WE 6789P zbiegł. Jan Kowalski, zam. w Świdniku, zeznaje.",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
@@ -625,6 +662,19 @@ Serwer intranet działa.
 "GET /Users/Edit/15 HTTP/1.1" 200
 User name: Administrator",
   "neg-153": "Pole sAMAccountName: jest obowiązkowe. Plik w C:\\Users\\pielegniarki\\Desktop i /home/wnioski/przychodzace. Zastąp C:\\Users\\nazwa_uzytkownika swoim loginem. session opened for user cron by (uid=0)",
+  "neg-154": "city,population
+Kraków,800000
+id,name,category
+1,Zając,zabawka
+imie,nazwisko
+Dzień dobry, przesyłam listę.",
+  "neg-155": "Imię i nazwisko	Lokal	Telefon
+Ulica	Adama	Mickiewicza
+Maj	Anna
+Sąd Rejonowy	Wydział Cywilny",
+  "neg-156": "UNIWERSYTET ADAMA MICKIEWICZA W POZNANIU. ULICA KOŚCIUSZKI TADEUSZA. KRÓL JAN III SOBIESKI. PIĄTEK 3 MAJA. ANNA STAROSTA. Kot Anny spał. Świadek Jehowy odmówił. Biuro na II p. Pokój 304.",
+  "neg-157": "Kościół św. Jerzego Męczennika. Katedra Świętego Jerzego. Marka Toyota zdobyła nagrodę. Walka z korupcją trwa. Ewangelia wg sw. Lukasza. Jezus, syn Józefa i Maryi, nauczał.",
+  "neg-158": "Nr zam. 45/2024 z dnia 12.03.2024. zam. Kawa 3 opakowania. Adres: Sala 5. Dziecko urodzi się około 12.05.2026. Login SSO: Okta. Login VPN: tak. <xs:element name="Nazwisko"/> <Podmiot osoba="prawna"/> Liczba pojazdów według GUS 2023 wzrosła.",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
@@ -743,6 +793,7 @@ User name: Administrator",
   "os-o-32": "Decyzję wysłano do [OSOBA-A].",
   "os-o-33": "Na ulicy spotkałem wczoraj [OSOBA-A].",
   "os-o-34": "[OSOBA-A] złożył wniosek do urzędu.",
+  "os-o-35": "z powództwa [OSOBA-A] przeciwko [OSOBA-B], z udziałem [OSOBA-B] i [OSOBA-C]",
   "os-p-01": "Pozwany [OSOBA-A] nie stawił się na rozprawie.",
   "os-p-02": "Powódka [OSOBA-A] wniosła o zasądzenie kosztów.",
   "os-p-03": "Świadek [OSOBA-A] zeznał, że widział zdarzenie.",
@@ -831,6 +882,7 @@ Pozwany [OSOBA-C] Annie groził.",
 [OSOBA-B] z domu [OSOBA-C]
 Kierownik Działu Kadr [OSOBA-D]",
   "os-p-73": "Świadek [OSOBA-A] zeznał. [OSOBA-B] zatrudniony od 01.02.2010 r. Szanowna Pani Dyrektor Szkoły [OSOBA-C]. Grafik: Dzień [OSOBA-D], Noc [OSOBA-E]. Do kościoła wraz ze św. [OSOBA-F] wszedł sprawca.",
+  "os-p-74": "[OSOBA-A] napisal, ze [OSOBA-B] bedzie o 18. [OSOBA-C], syn [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO], stawił się.",
   "os-r-01": "[OSOBA-A] podpisał protokół odbioru.",
   "os-r-02": "[OSOBA-A] złożyła wniosek o urlop.",
   "os-r-03": "[OSOBA-A] wynajął magazyn pod miastem.",
@@ -856,6 +908,14 @@ Kierownik Działu Kadr [OSOBA-D]",
   "os-r-23": "[OSOBA-A] podpisała aneks.",
   "os-r-24": "opinia [OSOBA-A] była druzgocąca",
   "os-r-25": "[OSOBA-A] przyszła na przesłuchanie.",
+  "os-r-26": "Nazwisko	Imię	Stanowisko
+[OSOBA-A]	[IMIĘ I NAZWISKO]	Kierowca
+[OSOBA-B]	[IMIĘ I NAZWISKO]	Kierownik",
+  "os-r-27": "Wnioskodawca: [OSOBA-A]
+Lista obecności: [OSOBA-B], [OSOBA-C]
+POWÓD: [OSOBA-D]
+Pacjent: [OSOBA-A]",
+  "os-r-28": "Konsultował dr [OSOBA-A]. Prokurator [OSOBA-B] nie oponuje. Pacjent: [OSOBA-C]. Współpracuje z zespołem p. [OSOBA-D].",
   "os-rn-01": "list od Achtelika leżał tydzień na biurku",
   "os-rn-02": "sprawę Fąfary umorzono w drugiej instancji",
   "os-rn-03": "zeznania Gągały spisano protokolarnie",
@@ -917,7 +977,7 @@ Zablokowano konto [LOGIN].",
   "str-114": "Koordynator: [OSOBA-A]/[TELEFON], zastępca [OSOBA-B]-[TELEFON].",
   "str-115": "Zatrzymano pojazd nr rej. [NR-REJESTRACYJNY] na parkingu.",
   "str-116": "Wdrożono nową wersję na [IP] wieczorem. Konwersja adresów [IP] nie działa.",
-  "str-117": "NOWAK JAN [TELEFON] ZŁOŻYŁ WNIOSEK",
+  "str-117": "[OSOBA-A] [TELEFON] ZŁOŻYŁ WNIOSEK",
   "str-118": "DHCPv6 Client DUID. . . : [MAC]",
   "str-119": "Login: [LOGIN]
 Pismo przekazano do działu kadry.",
@@ -980,6 +1040,20 @@ LinkedIn: https://www.linkedin.com/in/[LOGIN]/",
 User name: [OSOBA-A]
 User: [OSOBA-B]
 Wnioskodawca: [OSOBA-B]",
+  "str-154": "imie;nazwisko;pesel;data_urodzenia;miejscowosc
+[IMIĘ I NAZWISKO];[OSOBA-A];[PESEL];[DATA-URODZENIA];[MIEJSCOWOŚĆ]",
+  "str-155": "Lp.;Nr rejestracyjny;Marka
+1;[NR-REJESTRACYJNY];Skoda
+| Imię | Nazwisko |
+|---|---|
+| [IMIĘ I NAZWISKO] | [OSOBA-A] |",
+  "str-156": "Adres zamieszkania: [ADRES], [MIEJSCOWOŚĆ]
+[OSOBA-A], zam. [ADRES] w [MIEJSCOWOŚĆ]
+urodziłam się [DATA-URODZENIA] w [MIEJSCOWOŚĆ]
+Login AD: [LOGIN]
+TEL;TYPE=WORK:[TELEFON]
+<Osoba imie="[IMIĘ I NAZWISKO]" nazwisko="[OSOBA-B]" miasto="[MIEJSCOWOŚĆ]"/>",
+  "str-157": "Wykaz pojazdów: [NR-REJESTRACYJNY], [NR-REJESTRACYJNY]. Kierujący autem [NR-REJESTRACYJNY] zbiegł. [OSOBA-A], zam. w [MIEJSCOWOŚĆ], zeznaje.",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
@@ -1158,6 +1232,19 @@ Serwer intranet działa.
 "GET /Users/Edit/15 HTTP/1.1" 200
 User name: Administrator",
   "neg-153": "Pole sAMAccountName: jest obowiązkowe. Plik w C:\\Users\\pielegniarki\\Desktop i /home/wnioski/przychodzace. Zastąp C:\\Users\\nazwa_uzytkownika swoim loginem. session opened for user cron by (uid=0)",
+  "neg-154": "city,population
+Kraków,800000
+id,name,category
+1,Zając,zabawka
+imie,nazwisko
+Dzień dobry, przesyłam listę.",
+  "neg-155": "Imię i nazwisko	Lokal	Telefon
+Ulica	Adama	Mickiewicza
+Maj	Anna
+Sąd Rejonowy	Wydział Cywilny",
+  "neg-156": "UNIWERSYTET ADAMA MICKIEWICZA W POZNANIU. ULICA KOŚCIUSZKI TADEUSZA. KRÓL JAN III SOBIESKI. PIĄTEK 3 MAJA. ANNA STAROSTA. Kot Anny spał. Świadek Jehowy odmówił. Biuro na II p. Pokój 304.",
+  "neg-157": "Kościół św. Jerzego Męczennika. Katedra Świętego Jerzego. Marka Toyota zdobyła nagrodę. Walka z korupcją trwa. Ewangelia wg sw. Lukasza. Jezus, syn Józefa i Maryi, nauczał.",
+  "neg-158": "Nr zam. 45/2024 z dnia 12.03.2024. zam. Kawa 3 opakowania. Adres: Sala 5. Dziecko urodzi się około 12.05.2026. Login SSO: Okta. Login VPN: tak. <xs:element name="Nazwisko"/> <Podmiot osoba="prawna"/> Liczba pojazdów według GUS 2023 wzrosła.",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
@@ -1276,6 +1363,7 @@ User name: Administrator",
   "os-o-32": "Decyzję wysłano do [IMIĘ I NAZWISKO].",
   "os-o-33": "Na ulicy spotkałem wczoraj [IMIĘ I NAZWISKO].",
   "os-o-34": "[IMIĘ I NAZWISKO] złożył wniosek do urzędu.",
+  "os-o-35": "z powództwa [IMIĘ I NAZWISKO] przeciwko [IMIĘ I NAZWISKO], z udziałem [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO]",
   "os-p-01": "Pozwany [IMIĘ I NAZWISKO] nie stawił się na rozprawie.",
   "os-p-02": "Powódka [IMIĘ I NAZWISKO] wniosła o zasądzenie kosztów.",
   "os-p-03": "Świadek [IMIĘ I NAZWISKO] zeznał, że widział zdarzenie.",
@@ -1364,6 +1452,7 @@ Pozwany [IMIĘ I NAZWISKO] Annie groził.",
 [IMIĘ I NAZWISKO] z domu [IMIĘ I NAZWISKO]
 Kierownik Działu Kadr [IMIĘ I NAZWISKO]",
   "os-p-73": "Świadek [IMIĘ I NAZWISKO] zeznał. [IMIĘ I NAZWISKO] zatrudniony od 01.02.2010 r. Szanowna Pani Dyrektor Szkoły [IMIĘ I NAZWISKO]. Grafik: Dzień [IMIĘ I NAZWISKO], Noc [IMIĘ I NAZWISKO]. Do kościoła wraz ze św. [IMIĘ I NAZWISKO] wszedł sprawca.",
+  "os-p-74": "[IMIĘ I NAZWISKO] napisal, ze [IMIĘ I NAZWISKO] bedzie o 18. [IMIĘ I NAZWISKO], syn [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO], stawił się.",
   "os-r-01": "[IMIĘ I NAZWISKO] podpisał protokół odbioru.",
   "os-r-02": "[IMIĘ I NAZWISKO] złożyła wniosek o urlop.",
   "os-r-03": "[IMIĘ I NAZWISKO] wynajął magazyn pod miastem.",
@@ -1389,6 +1478,14 @@ Kierownik Działu Kadr [IMIĘ I NAZWISKO]",
   "os-r-23": "[IMIĘ I NAZWISKO] podpisała aneks.",
   "os-r-24": "opinia [IMIĘ I NAZWISKO] była druzgocąca",
   "os-r-25": "[IMIĘ I NAZWISKO] przyszła na przesłuchanie.",
+  "os-r-26": "Nazwisko	Imię	Stanowisko
+[IMIĘ I NAZWISKO]	[IMIĘ I NAZWISKO]	Kierowca
+[IMIĘ I NAZWISKO]	[IMIĘ I NAZWISKO]	Kierownik",
+  "os-r-27": "Wnioskodawca: [IMIĘ I NAZWISKO]
+Lista obecności: [IMIĘ I NAZWISKO], [IMIĘ I NAZWISKO]
+POWÓD: [IMIĘ I NAZWISKO]
+Pacjent: [IMIĘ I NAZWISKO]",
+  "os-r-28": "Konsultował dr [IMIĘ I NAZWISKO]. Prokurator [IMIĘ I NAZWISKO] nie oponuje. Pacjent: [IMIĘ I NAZWISKO]. Współpracuje z zespołem p. [IMIĘ I NAZWISKO].",
   "os-rn-01": "list od Achtelika leżał tydzień na biurku",
   "os-rn-02": "sprawę Fąfary umorzono w drugiej instancji",
   "os-rn-03": "zeznania Gągały spisano protokolarnie",
@@ -1450,7 +1547,7 @@ Zablokowano konto [LOGIN].",
   "str-114": "Koordynator: [IMIĘ I NAZWISKO]/[TELEFON], zastępca [IMIĘ I NAZWISKO]-[TELEFON].",
   "str-115": "Zatrzymano pojazd nr rej. [NR-REJESTRACYJNY] na parkingu.",
   "str-116": "Wdrożono nową wersję na [IP] wieczorem. Konwersja adresów [IP] nie działa.",
-  "str-117": "NOWAK JAN [TELEFON] ZŁOŻYŁ WNIOSEK",
+  "str-117": "[IMIĘ I NAZWISKO] [TELEFON] ZŁOŻYŁ WNIOSEK",
   "str-118": "DHCPv6 Client DUID. . . : [MAC]",
   "str-119": "Login: [LOGIN]
 Pismo przekazano do działu kadry.",
@@ -1513,6 +1610,20 @@ LinkedIn: https://www.linkedin.com/in/[LOGIN]/",
 User name: [IMIĘ I NAZWISKO]
 User: [IMIĘ I NAZWISKO]
 Wnioskodawca: [IMIĘ I NAZWISKO]",
+  "str-154": "imie;nazwisko;pesel;data_urodzenia;miejscowosc
+[IMIĘ I NAZWISKO];[IMIĘ I NAZWISKO];[PESEL];[DATA-URODZENIA];[MIEJSCOWOŚĆ]",
+  "str-155": "Lp.;Nr rejestracyjny;Marka
+1;[NR-REJESTRACYJNY];Skoda
+| Imię | Nazwisko |
+|---|---|
+| [IMIĘ I NAZWISKO] | [IMIĘ I NAZWISKO] |",
+  "str-156": "Adres zamieszkania: [ADRES], [MIEJSCOWOŚĆ]
+[IMIĘ I NAZWISKO], zam. [ADRES] w [MIEJSCOWOŚĆ]
+urodziłam się [DATA-URODZENIA] w [MIEJSCOWOŚĆ]
+Login AD: [LOGIN]
+TEL;TYPE=WORK:[TELEFON]
+<Osoba imie="[IMIĘ I NAZWISKO]" nazwisko="[IMIĘ I NAZWISKO]" miasto="[MIEJSCOWOŚĆ]"/>",
+  "str-157": "Wykaz pojazdów: [NR-REJESTRACYJNY], [NR-REJESTRACYJNY]. Kierujący autem [NR-REJESTRACYJNY] zbiegł. [IMIĘ I NAZWISKO], zam. w [MIEJSCOWOŚĆ], zeznaje.",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
