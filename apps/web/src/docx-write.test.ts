@@ -3,11 +3,10 @@ import { strFromU8, unzipSync } from 'fflate';
 import { expect, test } from 'vitest';
 import { extractDocxText } from './docx';
 import { buildDocx, DOCX_DEFAULT_TITLE, stripXmlInvalid, xmlText } from './docx-write';
-import webMain from './main.ts?raw';
+import { EXAMPLE_TEXT } from './example';
 import { crc32 } from './zip';
 
-// Przykład z przycisku „Przykład” (main.ts), żeby test szedł na tym samym piśmie co aplikacja.
-const EXAMPLE_TEXT = /const EXAMPLE_TEXT = `([^`]+)`/.exec(webMain)?.[1] ?? '';
+// Przykład z przycisku „Przykład” (example.ts): test idzie na tym samym piśmie co aplikacja.
 
 const PARTS = [
   '[Content_Types].xml',

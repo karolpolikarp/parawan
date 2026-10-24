@@ -1,6 +1,7 @@
 // Zrzuty pierwszego ekranu Parawana w Edge przy typowych urzędowych ekranach i pomiar, gdzie
 // leżą pole źródła, wynik i „Kopiuj”. Pokazuje, czy urzędnik widzi pole do wklejenia bez
-// przewijania. Pomiar #input przejmie automatyczny test układu (A06: scripts/e2e/uklad.test.mjs).
+// przewijania. Pomiar #input z progami sprawdza automatycznie scripts/e2e/uklad.test.mjs (A06);
+// ten skrypt zostaje do zrzutów w prawdziwym Edge.
 // Użycie: node scripts/e2e/manual/viewports.mjs [plik.html] [katalog-zrzutów]
 // Domyślnie apps/web/dist/index.html i .cache/viewports (w .gitignore, żeby zrzuty nie trafiły
 // przypadkiem do repo). Bez Edge (np. Linux) użyje Chromium.

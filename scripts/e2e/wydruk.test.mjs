@@ -12,6 +12,7 @@ import {
   EXAMPLE_EMAIL,
   EXAMPLE_IBAN_START,
   EXAMPLE_NAME,
+  EXAMPLE_OFFICIAL,
   EXAMPLE_PESEL,
   LANDING_HTML,
   LEGACY_SKIP,
@@ -74,7 +75,8 @@ function assertNoExampleData(text) {
   const flat = squash(text);
   for (const [name, value] of [
     ['EXAMPLE_PESEL', EXAMPLE_PESEL],
-    ['imię i nazwisko', 'Anna Kowalska'],
+    ['imię i nazwisko', 'Tomasz Wierzbicki'],
+    ['EXAMPLE_OFFICIAL', EXAMPLE_OFFICIAL],
     ['EXAMPLE_NAME', EXAMPLE_NAME],
     ['EXAMPLE_EMAIL', EXAMPLE_EMAIL],
     ['EXAMPLE_IBAN_START', EXAMPLE_IBAN_START],
@@ -118,7 +120,7 @@ test('?demo, widok „Wynik”: PDF ma sam wynik, bez danych z pola źródła', 
 
 // Bieżący Chromium zapisywał tekst poprawnie także z Archivo, więc wadę widać tylko na starym
 // silniku: Chromium 109 i 111 (próg build.target, Windows 7 i 8.1) oraz 125 wstawiały \x00
-// zamiast ó, ś, ć, ń, ź („Dzie\x00 dobry”, „[MIEJSCOWO\x00\x00]”).
+// zamiast ó, ś, ć, ń, ź („Dzie\x00 dobry”, „[MIEJSCOWO\x00\x00]”). Przykład pisma ma „ó” w „Wójta”.
 test('stary silnik (PARAWAN_CHROMIUM): PDF ma polskie litery w warstwie tekstu', {
   skip: LEGACY_SKIP,
 }, async (t) => {
@@ -132,7 +134,7 @@ test('stary silnik (PARAWAN_CHROMIUM): PDF ma polskie litery w warstwie tekstu',
         assert.ok(!text.includes('\u0000'), `${view}: znak zerowy w PDF:\n${JSON.stringify(text)}`);
         const flat = squash(text);
         assert.ok(
-          flat.includes('Dzieńdobry') && flat.includes('[MIEJSCOWOŚĆ]'),
+          flat.includes('Zup.Wójta') && flat.includes('[MIEJSCOWOŚĆ]'),
           `${view}:\n${text}`,
         );
         assertNoExampleData(text);

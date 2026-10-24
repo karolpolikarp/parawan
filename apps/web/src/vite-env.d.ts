@@ -7,6 +7,9 @@ declare module '*.css';
 /** Wersja aplikacji wstrzykiwana przy buildzie (vite define, z package.json). */
 declare const __APP_VERSION__: string;
 
+/** Data ostatniego commita „RRRR-MM-DD” albo 'dev' (vite define, vite.config.ts). */
+declare const __BUILD_DATE__: string;
+
 // Moduł workera pdf.js nie ma typów — importujemy go tylko po to,
 // żeby podstawić globalThis.pdfjsWorker (fake worker w buildzie single-file).
 declare module 'pdfjs-dist/legacy/build/pdf.worker.mjs';

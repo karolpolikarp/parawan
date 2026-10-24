@@ -95,6 +95,12 @@ upuszczony na pole źródła. pdf.js czyta tekst przez `for await` po `ReadableS
 i Edge przed 124 nie mają, i działa tam dzięki łatce w `pdf.ts`. `PARAWAN_CHROMIUM_WERSJA=109`
 dodatkowo sprawdza, że binarka to naprawdę ta wersja.
 
+Pierwszy ekran sprawdza `uklad.test.mjs`: przy oknach 1366×650, 1536×745, 1280×900 i 1920×960
+(obszar strony typowych ekranów urzędowych w Edge) pole tekstu zaczyna się w górnych 40% okna
+i widać z niego co najmniej 220 px, przy powiększeniu 125% (1093×520) zaczyna się na pierwszym
+ekranie, nagłówek przy 1366×768 ma najwyżej 140 px, a przy 320–1920 px strona nie przewija się
+w poziomie. Zrzuty w prawdziwym Edge robi ręczny `manual/viewports.mjs`.
+
 Dostępność sprawdza `a11y.test.mjs`. axe-core (wersja dokładna w `package.json`, reguły
 `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`) biegnie na pustej aplikacji, po `?demo`, w widoku
 „Porównanie”, z rozwiniętymi `<details>`, na telefonie 390×844 i na landingu. Źródło axe trafia

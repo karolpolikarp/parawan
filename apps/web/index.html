@@ -26,28 +26,29 @@
     <noscript><div class="boot-fail boot-fail-now"><p><strong>Ta przeglądarka ma wyłączony JavaScript.</strong> Parawan rozpoznaje dane programem zapisanym w tym pliku, więc bez JavaScriptu nie zadziała. Plik nie łączy się z internetem. Na komputerze służbowym poproś dział IT o zezwolenie na skrypty w plikach otwieranych z dysku.</p></div></noscript>
     <div class="grid">
 
-      <!-- ══════════ HERO ══════════ -->
+      <!-- ══════════ NAGŁÓWEK ══════════ -->
+      <!-- Jeden pas: marka, wersja z datą, hasło i obietnica prywatności. Przy 1366×768 ma najwyżej
+           140 px, żeby pole tekstu stało na pierwszym ekranie (scripts/e2e/uklad.test.mjs). Kroki
+           i animacja „Jak to działa” są pod narzędziem, przed stopką. -->
       <header class="card hero g12">
         <div class="card-h">
           <span class="brand-mark" data-tip="Parawan: wszystko dzieje się lokalnie, w Twojej przeglądarce" tabindex="0">
             <i class="gi" data-i="parawan-mark"></i>
           </span>
           <span class="brand-div" aria-hidden="true"></span>
-          <div class="card-t">
+          <div class="card-t hero-t">
             <div class="brand-row">
               <h1>Parawan</h1>
-              <span class="ver-chip">wersja <span id="app-version-top">…</span></span>
+              <span class="ver-chip">wersja <span id="app-version-top">…</span> <span id="app-build-date"></span></span>
+              <!-- Po pół roku od daty pliku main.ts zmienia napis w ostrzeżenie (file-age.ts). -->
+              <a class="ver-link" id="ver-link" href="https://github.com/karolpolikarp/parawan/releases/latest" target="_blank" rel="noopener noreferrer" data-tip="Otwiera stronę wydań: porównaj numer, żeby sprawdzić, czy masz najnowszą wersję">sprawdź nowszą wersję ↗</a>
             </div>
-            <p id="hero-sub">Lokalny anonimizator polskich danych</p>
-            <div class="hero-meta">
-              <a class="ver-link" href="https://github.com/karolpolikarp/parawan/releases/latest" target="_blank" rel="noopener noreferrer" data-tip="Otwiera stronę wydań: porównaj numer, żeby sprawdzić, czy masz najnowszą wersję">sprawdź nowszą wersję ↗</a>
-              <a class="ver-link" href="https://karolwilczynski.com" target="_blank" rel="noopener noreferrer" data-tip="Strona autora: Karol Wilczyński"><img class="site-fav" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9ImtwdyDigJQgS2Fyb2wgUG9saWthcnAgV2lsY3p5xYRza2kiPjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMwMDY4M2MiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwMDNhMjAiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgcng9IjI0IiBmaWxsPSJ1cmwoI2JnKSIvPjx0ZXh0IHg9IjUwLjUiIHk9IjY0IiBmaWxsPSIjZmZmZmZmIiBmb250LWZhbWlseT0iJ1NlZ29lIFVJJywgLWFwcGxlLXN5c3RlbSwgQmxpbmtNYWNTeXN0ZW1Gb250LCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI0NiIgZm9udC13ZWlnaHQ9IjcwMCIgbGV0dGVyLXNwYWNpbmc9Ii0xLjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmtwdzwvdGV4dD48L3N2Zz4=" alt="" width="14" height="14" />autor · karolwilczynski.com ↗</a>
-            </div>
+            <p class="hero-lead">Zasłoń dane osobowe w&nbsp;piśmie, zanim opublikujesz je w&nbsp;BIP albo wkleisz do czatu&nbsp;AI.</p>
           </div>
-          <!-- Na węższym ekranie edytor leży kilka ekranów niżej (kroki, demo, legenda); skrót
-               prowadzi prosto do niego. Stoi wysoko w nagłówku, żeby przy 320×568 był na pierwszym
-               ekranie. Nie przestawiamy go przez „order”: kolejność na ekranie i kolejność fokusu
-               muszą się zgadzać. -->
+          <!-- Na węższym ekranie karty stoją w jednej kolumnie i edytor bywa niżej niż pierwszy
+               ekran; skrót prowadzi prosto do niego. Stoi wysoko w nagłówku, żeby przy 320×568
+               był na pierwszym ekranie. Nie przestawiamy go przez „order”: kolejność na ekranie
+               i kolejność fokusu muszą się zgadzać. -->
           <a class="btn skip-editor" href="#edytor"><i class="gi" data-i="szablon"></i>Przejdź do edytora</a>
           <span class="card-sp"></span>
           <div class="privacy" data-tip="Cała analiza odbywa się w Twojej przeglądarce, możesz rozłączyć internet i sprawdzić" tabindex="0">
@@ -58,120 +59,10 @@
             </span>
           </div>
         </div>
-        <div class="card-b hero-b">
-          <p class="hero-lead">Usuń dane osobowe z&nbsp;tekstu, <strong>zanim wkleisz go do asystenta lub czatu&nbsp;AI.</strong></p>
-          <ul class="feat-strip" aria-label="Cechy">
-            <li data-tip="Działa bez internetu, możesz rozłączyć sieć i sprawdzić" tabindex="0">działa offline</li>
-            <li data-tip="Tekst nie opuszcza przeglądarki, zero wysyłania na serwery" tabindex="0">bezpieczne</li>
-            <li data-tip="Kod otwarty na licencji Apache 2.0, możesz go samodzielnie zweryfikować" tabindex="0">open source</li>
-            <li class="feat-solid" data-tip-pos="left" data-tip="Wyłącznie reguły, słowniki i sumy kontrolne: zero modeli AI, wyniki przewidywalne" tabindex="0">reguły + sumy kontrolne</li>
-          </ul>
-        </div>
       </header>
-
-      <!-- ══════════ KROKI 1–4 ══════════ -->
-      <section class="card step g3">
-        <div class="step-h">
-          <span class="ic ic-s" data-tip="Obsługiwane formaty: TXT, MD, CSV, LOG, DOCX, PDF" tabindex="0"><i class="gi" data-i="plik-txt"></i></span>
-          <span class="kick">Krok 1</span>
-        </div>
-        <h2 class="step-t">Wklej tekst</h2>
-        <p class="step-d"><span class="hint-desk">lub upuść plik (TXT, DOCX, PDF) w&nbsp;dowolnym miejscu strony</span><span class="hint-touch">lub wczytaj plik (TXT, DOCX, PDF)</span></p>
-      </section>
-
-      <section class="card step g3">
-        <div class="step-h">
-          <span class="ic ic-s" data-tip="Analiza działa na bieżąco, podczas pisania" tabindex="0"><i class="gi" data-i="sprawdz"></i></span>
-          <span class="kick">Krok 2</span>
-        </div>
-        <h2 class="step-t">Analiza</h2>
-        <p class="step-d" id="step2-sub">reguły, słowniki i sumy kontrolne, bez AI</p>
-      </section>
-
-      <section class="card step g3">
-        <div class="step-h">
-          <span class="ic ic-s" data-tip="Każda kategoria danych ma swój kolor znacznika" tabindex="0"><i class="gi" data-i="maskowanie"></i></span>
-          <span class="kick">Krok 3</span>
-        </div>
-        <h2 class="step-t">Maskowanie</h2>
-        <p class="step-d">kolorowe znaczniki zamiast danych osobowych</p>
-      </section>
-
-      <section class="card step g3">
-        <div class="step-h">
-          <span class="ic ic-s" id="step4-tip" data-tip="Skrót Ctrl+Enter kopiuje wynik do schowka" tabindex="0"><i class="gi" data-i="walidacja"></i></span>
-          <span class="kick">Krok 4</span>
-        </div>
-        <h2 class="step-t">Gotowe</h2>
-        <p class="step-d">skopiuj bezpieczny tekst lub pobierz plik</p>
-      </section>
-
-      <!-- ══════════ DEMO: JAK TO DZIAŁA ══════════ -->
-      <section class="card demo g12" aria-label="Jak to działa: dokument z danymi wchodzi i wychodzi zanonimizowany">
-        <div class="demo-head-row">
-          <div class="demo-head-t">
-            <div class="demo-kick">Jak to działa</div>
-            <h2>Wrzucasz dokument z&nbsp;danymi, wychodzi zanonimizowany</h2>
-          </div>
-          <!-- Animacja demo i podświetlanie kroków biegną w pętli; przycisk je zatrzymuje (WCAG 2.2.2). -->
-          <button type="button" id="demo-motion" class="btn btn-sm demo-motion">Zatrzymaj animację</button>
-        </div>
-        <div class="demo-stage">
-          <span class="demo-zone demo-zone-in" aria-hidden="true"><span>Wejście<span class="dz-x"> · dane jawne</span></span></span>
-          <span class="demo-zone demo-zone-out" aria-hidden="true"><span>Wyjście<span class="dz-x"> · anonim</span></span></span>
-          <div class="demo-doc demo-in" aria-hidden="true">
-            <div class="demo-card">
-              <div class="demo-tag">Pismo · wejście</div>
-              <div class="demo-name">Jan Kowalski</div>
-              <div class="demo-mono">PESEL 44051401359</div>
-              <div class="demo-lines"><i style="width:100%"></i><i style="width:78%"></i></div>
-            </div>
-          </div>
-          <div class="demo-doc demo-out" aria-hidden="true">
-            <div class="demo-card">
-              <div class="demo-head"><span class="demo-tag">Pismo · wyjście</span><span class="demo-anon">anonim</span></div>
-              <div class="demo-name">[IMIĘ&nbsp;I&nbsp;NAZWISKO]</div>
-              <div class="demo-mono">PESEL [PESEL]</div>
-              <div class="demo-lines"><i style="width:100%"></i><i style="width:78%"></i></div>
-            </div>
-          </div>
-          <div class="demo-mark" aria-hidden="true"><i class="gi" data-i="parawan-mark"></i></div>
-          <div class="demo-badge-wrap" aria-hidden="true">
-            <div class="demo-badge">
-              <svg viewBox="0 0 32 32" width="15" height="15" aria-hidden="true"><path d="M16 3 L27 8 V15 C27 23 22 27 16 29 C10 27 5 23 5 15 V8 Z" fill="none" stroke="#F4F6F1" stroke-width="2.6" stroke-linejoin="round"></path><path d="M11 16 l3.5 3.5 L21 12" fill="none" stroke="#F4F6F1" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-              <span>anonimizacja…</span>
-            </div>
-          </div>
-        </div>
-      </section>
 
       <!-- ══════════ NARZĘDZIE (landmark main; display:contents, karty zostają w siatce) ══════════ -->
       <main class="grid-main">
-
-      <!-- ══════════ LEGENDA KATEGORII ══════════ -->
-      <section class="card legend g12" aria-label="Legenda kategorii danych">
-        <div class="card-h">
-          <div class="card-t"><h2>Kolory znaczników</h2><p>każda kategoria danych ma swój kolor, ten sam w wyniku i w tabeli niżej</p></div>
-          <div class="legend-items">
-            <!-- Liczby typów main.ts liczy z przełączników „Co maskować”; tu stoją te same jako zapas. -->
-            <span class="lg" data-cat="person" data-tip="Imię i nazwisko oraz data urodzenia" tabindex="0">
-              <span class="dot dot-person"></span><b>Osoby</b><span class="lg-n">2 typy</span>
-            </span>
-            <span class="lg" data-cat="contact" data-tip="E-mail i telefon" tabindex="0">
-              <span class="dot dot-contact"></span><b>Kontakt</b><span class="lg-n">2 typy</span>
-            </span>
-            <span class="lg" data-cat="ident" data-tip="PESEL, NIP, REGON i dowód: suma kontrolna albo etykieta przy numerze; paszport, KRS, KSeF, znak sprawy, prawo jazdy, nr rejestracyjny, VIN, IP, MAC, token i login: kontekst lub charakterystyczny zapis" tabindex="0">
-              <span class="dot dot-ident"></span><b>Identyfikatory</b><span class="lg-n">15 typów</span>
-            </span>
-            <span class="lg" data-cat="fin" data-tip="Numer konta (IBAN: mod 97 albo kontekst „konto/rachunek”) i karta płatnicza (kontekst i suma Luhna)" tabindex="0">
-              <span class="dot dot-fin"></span><b>Finanse</b><span class="lg-n">2 typy</span>
-            </span>
-            <span class="lg" data-cat="place" data-tip="Adres, kod pocztowy, miejscowość" tabindex="0">
-              <span class="dot dot-place"></span><b>Adres</b><span class="lg-n">3 typy</span>
-            </span>
-          </div>
-        </div>
-      </section>
 
       <!-- Kopia otwarta ze strony produktu (lista hostów w web-copy.ts). Plik z dysku i kopia
            w intranecie urzędu paska nie pokazują. -->
@@ -241,7 +132,7 @@
           <span class="ic"><i class="gi" data-i="podglad"></i></span>
           <div class="card-t"><h2 id="output-label">Wynik zanonimizowany</h2><p id="output-hint">kliknij znacznik albo przechodź strzałkami ‹ ›</p></div>
           <span class="card-sp"></span>
-          <span class="help" data-tip="Kolor znacznika wskazuje kategorię danych, legenda powyżej" data-tip-pos="left" tabindex="0">?</span>
+          <span class="help" data-tip="Kolor znacznika wskazuje kategorię danych, legenda jest niżej, pod „Co maskować”" data-tip-pos="left" tabindex="0">?</span>
         </div>
         <div class="toolbar toolbar-out">
           <span class="seg" role="group" aria-label="Widok wyniku">
@@ -316,6 +207,9 @@
         </div>
       </section>
 
+      <!-- Miejsce na kartę „Adnotacja i protokół” (<details id="publikacja">, pakiet A08):
+           zaraz po „Zamaskowano”, przed „Co maskować”. -->
+
       <!-- ══════════ CO MASKOWAĆ ══════════ -->
       <details class="card g12" id="co-maskowac" open>
         <summary class="card-h" aria-labelledby="co-maskowac-h" aria-describedby="co-maskowac-d">
@@ -340,6 +234,34 @@
           <span>Odznaczone typy <strong>pozostaną widoczne</strong> w wyniku, zaznaczaj świadomie.</span>
         </div>
       </details>
+
+      <!-- Miejsce na kartę „Zostaw jawne i zawsze zasłaniaj” (<details id="zostaw-jawne">,
+           pakiet A10): zaraz po „Co maskować”, przed legendą kolorów. -->
+
+      <!-- ══════════ LEGENDA KATEGORII ══════════ -->
+      <section class="card legend g12" aria-label="Legenda kategorii danych">
+        <div class="card-h">
+          <div class="card-t"><h2>Kolory znaczników</h2><p>każda kategoria danych ma swój kolor, ten sam w wyniku i w tabeli niżej</p></div>
+          <div class="legend-items">
+            <!-- Liczby typów main.ts liczy z przełączników „Co maskować”; tu stoją te same jako zapas. -->
+            <span class="lg" data-cat="person" data-tip="Imię i nazwisko oraz data urodzenia" tabindex="0">
+              <span class="dot dot-person"></span><b>Osoby</b><span class="lg-n">2 typy</span>
+            </span>
+            <span class="lg" data-cat="contact" data-tip="E-mail i telefon" tabindex="0">
+              <span class="dot dot-contact"></span><b>Kontakt</b><span class="lg-n">2 typy</span>
+            </span>
+            <span class="lg" data-cat="ident" data-tip="PESEL, NIP, REGON i dowód: suma kontrolna albo etykieta przy numerze; paszport, KRS, KSeF, znak sprawy, prawo jazdy, nr rejestracyjny, VIN, IP, MAC, token i login: kontekst lub charakterystyczny zapis" tabindex="0">
+              <span class="dot dot-ident"></span><b>Identyfikatory</b><span class="lg-n">15 typów</span>
+            </span>
+            <span class="lg" data-cat="fin" data-tip="Numer konta (IBAN: mod 97 albo kontekst „konto/rachunek”) i karta płatnicza (kontekst i suma Luhna)" tabindex="0">
+              <span class="dot dot-fin"></span><b>Finanse</b><span class="lg-n">2 typy</span>
+            </span>
+            <span class="lg" data-cat="place" data-tip="Adres, kod pocztowy, miejscowość" tabindex="0">
+              <span class="dot dot-place"></span><b>Adres</b><span class="lg-n">3 typy</span>
+            </span>
+          </div>
+        </div>
+      </section>
 
       <!-- ══════════ CO WYKRYWA ══════════ -->
       <details class="card g12" id="co-wykrywa">
@@ -388,6 +310,13 @@
           bez imienia ze słownika i&nbsp;bez podpowiedzi z&nbsp;kontekstu, może się prześlizgnąć. Podobnie
           numery w&nbsp;nietypowym zapisie. Traktuj <strong>Parawan</strong> jak pomoc, nie gwarancję, i <strong>zawsze
           przejrzyj wynik, zanim go wyślesz.</strong></p>
+          <!-- Stan na dziś. Zdanie zmienia pakiet, który zmienia opisane zachowanie: o urzędniku
+               A10 („Zostaw jawne”), o księdze wieczystej D01 (typ NR-KW). -->
+          <ul class="caveat-list">
+            <li>Nazwisko urzędnika pod pismem jest zasłaniane tak samo jak dane strony.</li>
+            <li>Numer księgi wieczystej i&nbsp;numer działki zostają w&nbsp;tekście.</li>
+            <li>Właściwości pliku (autor), komentarze i&nbsp;historia zmian zostają w&nbsp;oryginale. Publikuj plik zapisany z&nbsp;Parawana.</li>
+          </ul>
         </div>
       </section>
 
@@ -412,6 +341,95 @@
 
       </main>
 
+      <!-- ══════════ JAK TO DZIAŁA ══════════ -->
+      <!-- Pod narzędziem, przed stopką: kto otwiera plik kilka razy dziennie, ma pole tekstu na
+           pierwszym ekranie, a kto pierwszy raz, znajdzie tu kroki i animację. Własna siatka
+           12 kolumn, te same klasy g3 i g12 co wyżej. -->
+      <section class="how g12" id="jak-to-dziala" aria-labelledby="jak-h">
+        <div class="how-h g12">
+          <h2 id="jak-h">Jak to działa</h2>
+          <ul class="feat-strip" aria-label="Cechy">
+            <li data-tip="Działa bez internetu, możesz rozłączyć sieć i sprawdzić" tabindex="0">działa offline</li>
+            <li data-tip="Nie ma konta ani serwera. Tekst przetwarza przeglądarka na tym komputerze." tabindex="0">bez konta i serwera</li>
+            <li data-tip="Kod otwarty na licencji Apache 2.0, możesz go samodzielnie zweryfikować" tabindex="0">open source</li>
+            <li class="feat-solid" data-tip-pos="left" data-tip="Wyłącznie reguły, słowniki i sumy kontrolne: zero modeli AI, wyniki przewidywalne" tabindex="0">reguły + sumy kontrolne</li>
+          </ul>
+          <span class="card-sp"></span>
+          <!-- Animacja demo i podświetlanie kroków biegną w pętli; przycisk je zatrzymuje (WCAG 2.2.2).
+               Stoi przed nimi, więc z klawiatury trafia się na niego pierwszego. -->
+          <button type="button" id="demo-motion" class="btn btn-sm demo-motion">Zatrzymaj animację</button>
+        </div>
+
+        <section class="card step g3">
+          <div class="step-h">
+            <span class="ic ic-s" data-tip="Obsługiwane formaty: TXT, MD, CSV, LOG, DOCX, PDF" tabindex="0"><i class="gi" data-i="plik-txt"></i></span>
+            <span class="kick">Krok 1</span>
+          </div>
+          <h3 class="step-t">Wklej tekst</h3>
+          <p class="step-d"><span class="hint-desk">lub upuść plik (TXT, DOCX, PDF) w&nbsp;dowolnym miejscu strony</span><span class="hint-touch">lub wczytaj plik (TXT, DOCX, PDF)</span></p>
+        </section>
+
+        <section class="card step g3">
+          <div class="step-h">
+            <span class="ic ic-s" data-tip="Analiza działa na bieżąco, podczas pisania" tabindex="0"><i class="gi" data-i="sprawdz"></i></span>
+            <span class="kick">Krok 2</span>
+          </div>
+          <h3 class="step-t">Analiza</h3>
+          <p class="step-d" id="step2-sub">reguły, słowniki i sumy kontrolne, bez AI</p>
+        </section>
+
+        <section class="card step g3">
+          <div class="step-h">
+            <span class="ic ic-s" data-tip="Każda kategoria danych ma swój kolor znacznika" tabindex="0"><i class="gi" data-i="maskowanie"></i></span>
+            <span class="kick">Krok 3</span>
+          </div>
+          <h3 class="step-t">Maskowanie</h3>
+          <p class="step-d">kolorowe znaczniki zamiast danych osobowych</p>
+        </section>
+
+        <section class="card step g3">
+          <div class="step-h">
+            <span class="ic ic-s" id="step4-tip" data-tip="Skrót Ctrl+Enter kopiuje wynik do schowka" tabindex="0"><i class="gi" data-i="walidacja"></i></span>
+            <span class="kick">Krok 4</span>
+          </div>
+          <h3 class="step-t">Gotowe</h3>
+          <p class="step-d">skopiuj wynik albo zapisz plik</p>
+        </section>
+
+        <section class="card demo g12" aria-labelledby="demo-h">
+          <div class="demo-head-row">
+            <h3 id="demo-h">Wrzucasz pismo z&nbsp;danymi, wychodzi ze znacznikami w&nbsp;miejscu danych</h3>
+          </div>
+          <div class="demo-stage">
+            <span class="demo-zone demo-zone-in" aria-hidden="true"><span>Wejście<span class="dz-x"> · dane jawne</span></span></span>
+            <span class="demo-zone demo-zone-out" aria-hidden="true"><span>Wyjście<span class="dz-x"> · zasłonięte</span></span></span>
+            <div class="demo-doc demo-in" aria-hidden="true">
+              <div class="demo-card">
+                <div class="demo-tag">Pismo · wejście</div>
+                <div class="demo-name">Tomasz Wierzbicki</div>
+                <div class="demo-mono">PESEL 85071412358</div>
+                <div class="demo-lines"><i style="width:100%"></i><i style="width:78%"></i></div>
+              </div>
+            </div>
+            <div class="demo-doc demo-out" aria-hidden="true">
+              <div class="demo-card">
+                <div class="demo-head"><span class="demo-tag">Pismo</span><span class="demo-anon">zasłonięte</span></div>
+                <div class="demo-name">[IMIĘ&nbsp;I&nbsp;NAZWISKO]</div>
+                <div class="demo-mono">PESEL [PESEL]</div>
+                <div class="demo-lines"><i style="width:100%"></i><i style="width:78%"></i></div>
+              </div>
+            </div>
+            <div class="demo-mark" aria-hidden="true"><i class="gi" data-i="parawan-mark"></i></div>
+            <div class="demo-badge-wrap" aria-hidden="true">
+              <div class="demo-badge">
+                <svg viewBox="0 0 32 32" width="15" height="15" aria-hidden="true"><path d="M16 3 L27 8 V15 C27 23 22 27 16 29 C10 27 5 23 5 15 V8 Z" fill="none" stroke="#F4F6F1" stroke-width="2.6" stroke-linejoin="round"></path><path d="M11 16 l3.5 3.5 L21 12" fill="none" stroke="#F4F6F1" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                <span>zasłanianie…</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+
       <!-- ══════════ STOPKA ══════════ -->
       <footer class="card foot g12">
         <div class="card-b">
@@ -421,6 +439,10 @@
           <a href="https://github.com/karolpolikarp/parawan/tree/main/packages/core" target="_blank" rel="noopener noreferrer">silnik i CLI: <code>packages/core</code></a>
           <span class="sep">·</span>
           <a href="https://github.com/karolpolikarp/parawan/issues" target="_blank" rel="noopener noreferrer">zgłoś nietrafione wykrycie</a>
+          <span class="sep">·</span>
+          <a href="https://parawan.karolwilczynski.com/#dla-iod" target="_blank" rel="noopener noreferrer">Informacja dla IOD i działu IT</a>
+          <span class="sep">·</span>
+          <a href="https://karolwilczynski.com" target="_blank" rel="noopener noreferrer" data-tip="Strona autora: Karol Wilczyński"><img class="site-fav" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9ImtwdyDigJQgS2Fyb2wgUG9saWthcnAgV2lsY3p5xYRza2kiPjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMwMDY4M2MiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwMDNhMjAiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgcng9IjI0IiBmaWxsPSJ1cmwoI2JnKSIvPjx0ZXh0IHg9IjUwLjUiIHk9IjY0IiBmaWxsPSIjZmZmZmZmIiBmb250LWZhbWlseT0iJ1NlZ29lIFVJJywgLWFwcGxlLXN5c3RlbSwgQmxpbmtNYWNTeXN0ZW1Gb250LCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI0NiIgZm9udC13ZWlnaHQ9IjcwMCIgbGV0dGVyLXNwYWNpbmc9Ii0xLjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmtwdzwvdGV4dD48L3N2Zz4=" alt="" width="14" height="14" />autor · karolwilczynski.com</a>
         </div>
       </footer>
 

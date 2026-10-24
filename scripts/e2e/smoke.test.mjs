@@ -14,6 +14,8 @@ import {
   ALLOWED_STORAGE_KEYS,
   BROWSER,
   DOCX_MIME,
+  EXAMPLE_EMAIL,
+  EXAMPLE_IBAN_START,
   EXAMPLE_NAME,
   EXAMPLE_PESEL,
   FIXTURES,
@@ -214,16 +216,16 @@ test('bramka widzi dane z pisma w pamięci przeglądarki, adresie i tytule karty
   const app = await openApp(browser, '?demo');
   try {
     await app.demoReady();
-    await app.page.evaluate(async () => {
+    await app.page.evaluate(async ({ pesel, email, iban }) => {
       const text = document.getElementById('input').value;
       localStorage.setItem('kopia-pisma', text.slice(0, 80)); // klucz spoza listy, z nazwiskiem
       // dozwolony klucz z numerem PESEL, skasowany po 10 s: widać go tylko zaraz po scenariuszu
-      localStorage.setItem('pseudonyms', '44051401359');
+      localStorage.setItem('pseudonyms', pesel);
       setTimeout(() => localStorage.removeItem('pseudonyms'), 10_000);
       // zapis po trzech godzinach: widać go tylko po przewinięciu zegara
-      setTimeout(() => sessionStorage.setItem('robocze', 'PL61 1090 1014 0000'), 3 * 60 * 60_000);
+      setTimeout(() => sessionStorage.setItem('robocze', `${iban} 0000`), 3 * 60 * 60_000);
       document.title = 'Decyzja Bąkiewicz';
-      location.hash = `d=${encodeURIComponent('anna.kowalska@example.com')}`;
+      location.hash = `d=${encodeURIComponent(email)}`;
       window.name = 'Wierzbicki';
       history.replaceState({ tel: '600-700-800' }, '');
       const open = indexedDB.open('parawan-kopia', 1);
@@ -237,7 +239,7 @@ test('bramka widzi dane z pisma w pamięci przeglądarki, adresie i tytule karty
         tx.oncomplete = resolve;
       });
       db.close();
-    });
+    }, { pesel: EXAMPLE_PESEL, email: EXAMPLE_EMAIL, iban: EXAMPLE_IBAN_START });
     const now = (await app.storageProblems()).join('\n');
     for (const where of [
       'localStorage: klucz „kopia-pisma”',

@@ -1,8 +1,10 @@
 import { readFileSync } from 'node:fs';
+import { redactPII } from 'anonimizator';
 import { expect, test } from 'vitest';
 import landingHtml from '../../landing/index.html?raw';
 import landingMain from '../../landing/src/main.ts?raw';
 import webHtml from '../index.html?raw';
+import { EXAMPLE_TEXT } from './example';
 import { ICONS } from './icons';
 import webMain from './main.ts?raw';
 
@@ -65,6 +67,116 @@ test('ta sama nazwa funkcji „Rozróżniaj osoby” co w README: znacznik, nie 
 
 test('landing: kod na GitHubie to nie „jeden plik” (jednym plikiem jest Parawan.html)', () => {
   expect(landingHtml).not.toContain('kod na GitHubie: to jeden plik');
+});
+
+/* ── Pierwszy ekran i teksty dla urzędu (A06) ── */
+
+/** Tekst widoczny na stronie: bez komentarzy, stylów, skryptów i znaczników. */
+const visibleText = (html: string): string =>
+  html
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<(style|script)\b[\s\S]*?<\/\1>/g, '')
+    .replace(/<[^>]+>/g, ' ');
+
+test('aplikacja: hasło i teksty bez obietnicy „bezpiecznego” wyniku', () => {
+  expect(webHtml).toContain(
+    '<p class="hero-lead">Zasłoń dane osobowe w&nbsp;piśmie, zanim opublikujesz je w&nbsp;BIP albo wkleisz do czatu&nbsp;AI.</p>',
+  );
+  // karta „Ograniczenia” mówi „narzędzie pomocnicze, nie gwarancja”, więc reszta strony też
+  expect(webHtml).not.toContain('bezpieczny tekst');
+  expect(webHtml).not.toContain('· anonim');
+  expect(webHtml).not.toMatch(/>\s*bezpieczne\s*</);
+  expect(webHtml).toContain(
+    '<li data-tip="Nie ma konta ani serwera. Tekst przetwarza przeglądarka na tym komputerze." tabindex="0">bez konta i serwera</li>',
+  );
+  expect(webHtml).toContain('<p class="step-d">skopiuj wynik albo zapisz plik</p>');
+  expect(webHtml).toContain('<span class="dz-x"> · zasłonięte</span>');
+  expect(webHtml).toContain('<span class="demo-anon">zasłonięte</span>');
+  // skrót do edytora zostaje dla wąskich ekranów
+  expect(webHtml).toMatch(/<section class="card g6 card-ed" id="edytor">/);
+});
+
+test('aplikacja: liczba „—” w widocznej treści nie rośnie (dziś zero)', () => {
+  const text = visibleText(webHtml);
+  expect(text).toContain('Tekst źródłowy');
+  expect(text.match(/—/g) ?? []).toHaveLength(0);
+});
+
+test('aplikacja: karta „Ograniczenia” opisuje urzędnika, księgę wieczystą, działkę i metadane pliku', () => {
+  const card = webHtml.match(/<section class="card g4 caveat" id="ograniczenia"[\s\S]*?<\/section>/)?.[0] ?? '';
+  expect(card).not.toBe('');
+  for (const li of [
+    'Nazwisko urzędnika pod pismem jest zasłaniane tak samo jak dane strony.',
+    'Numer księgi wieczystej i&nbsp;numer działki zostają w&nbsp;tekście.',
+    'Właściwości pliku (autor), komentarze i&nbsp;historia zmian zostają w&nbsp;oryginale. Publikuj plik zapisany z&nbsp;Parawana.',
+  ]) {
+    expect(card).toContain(`<li>${li}</li>`);
+  }
+});
+
+test('aplikacja: stopka prowadzi do informacji dla IOD i działu IT na stronie produktu', () => {
+  const foot = webHtml.match(/<footer class="card foot g12">[\s\S]*?<\/footer>/)?.[0] ?? '';
+  expect(foot).toContain(
+    '<a href="https://parawan.karolwilczynski.com/#dla-iod" target="_blank" rel="noopener noreferrer">Informacja dla IOD i działu IT</a>',
+  );
+  // sekcja istnieje na stronie produktu
+  expect(landingHtml).toMatch(/id="dla-iod"/);
+});
+
+test('aplikacja: kolejność sekcji w kodzie równa kolejności na ekranie', () => {
+  const html = webHtml.replace(/<!--[\s\S]*?-->/g, '');
+  const order = [
+    '<header class="card hero g12">',
+    'id="edytor"',
+    '<h2 id="output-label">',
+    'id="findings"',
+    'id="co-maskowac"',
+    '<h2>Kolory znaczników</h2>',
+    'id="co-wykrywa"',
+    'id="ograniczenia"',
+    '<section class="how g12" id="jak-to-dziala"',
+    '<footer class="card foot g12">',
+  ].map((m) => html.indexOf(m));
+  expect(order.every((i) => i >= 0)).toBe(true);
+  expect([...order].sort((a, b) => a - b)).toEqual(order);
+  // nagłówek strony bez kroków i animacji: są w „Jak to działa”
+  const header = html.match(/<header class="card hero g12">[\s\S]*?<\/header>/)?.[0] ?? '';
+  expect(header).toContain('id="app-build-date"');
+  expect(header).not.toMatch(/class="card step|demo-stage/);
+});
+
+// Przykład pod „Przykład” i w ?demo: pismo urzędowe, na którym widać i to, co Parawan zasłania,
+// i to, co zostawia. Gdy wynik zaskoczy, poprawia się przykład, nie silnik.
+test('aplikacja: przykład pisma urzędowego, co zasłania, a co zostawia', () => {
+  const { redacted } = redactPII(EXAMPLE_TEXT);
+  for (const leak of [
+    'RGK.6220.14.2026',
+    '85071412358',
+    'Lipowa',
+    '62-650',
+    'Kłodawa',
+    'PL43 1090',
+    '600 700 800',
+    't.wierzbicki@example.com',
+    'Wierzbicki',
+    'Malec',
+  ]) {
+    expect(redacted, leak).not.toContain(leak);
+  }
+  for (const token of ['[ZNAK-SPRAWY]', '[PESEL]', '[ADRES]', '[KOD-POCZTOWY]', '[MIEJSCOWOŚĆ]', '[NR-KONTA]', '[TELEFON]', '[EMAIL]']) {
+    expect(redacted, token).toContain(token);
+  }
+  expect(redacted.match(/\[IMIĘ I NAZWISKO\]/g)).toHaveLength(2);
+  for (const kept of ['art. 104 Kpa', 'działki nr 245/7', '17 zł', 'Z up. Wójta', 'Kierownik Referatu Gospodarki Komunalnej']) {
+    expect(redacted, kept).toContain(kept);
+  }
+  // ten sam numer PESEL i nazwisko powtarza scripts/e2e/helpers.mjs
+  const helpers = repoFile(new URL('../../../scripts/e2e/helpers.mjs', import.meta.url));
+  expect(helpers).toContain("export const EXAMPLE_PESEL = '85071412358';");
+  expect(helpers).toContain("export const EXAMPLE_NAME = 'Wierzbicki';");
+  // demo w ?demo i przycisk „Przykład” biorą ten sam tekst
+  expect(webMain).toContain("import { EXAMPLE_TEXT } from './example';");
+  expect(webMain.match(/EXAMPLE_TEXT/g)).toHaveLength(3);
 });
 
 /* ── Druk i pobieranie ── */

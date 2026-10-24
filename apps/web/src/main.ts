@@ -1,6 +1,7 @@
 import { redactPII, type PiiFinding, type PiiType } from 'anonimizator';
 import { escapeHtml, renderAligned } from './compare';
 import { extractDocxText } from './docx';
+import { EXAMPLE_TEXT } from './example';
 import { type DocxInventory, docxEmptyBodyError, docxInventoryNote, inventoryDocx } from './docx-inventory';
 import {
   decodeText,
@@ -11,6 +12,7 @@ import {
   MAX_FILE_MB,
   unsupportedFormat,
 } from './files';
+import { fileAgeNote, formatBuildDate } from './file-age';
 import { makeFlash } from './flash';
 import { buildDocx, DOCX_MIME } from './docx-write';
 import { downloadFor, downloadName, finalText, printTitle } from './output';
@@ -1178,13 +1180,6 @@ printBtn.addEventListener('click', () => {
   window.print();
 });
 
-// Przykład: maskowanie + strażnik kontekstu (art. 123 456 789 celowo zostaje)
-const EXAMPLE_TEXT = `Dzień dobry, nazywam się Anna Kowalska (PESEL 44051401359).
-Mieszkam przy ul. Polnej 12/3, 00-950 Warszawa.
-Proszę o kontakt: anna.kowalska@example.com lub tel. 600 700 800.
-Nr konta do zwrotu: PL61 1090 1014 0000 0712 1981 2874.
-Sprawę prowadzi pan Bąkiewicz zgodnie z art. 123 456 789 KC.`;
-
 exampleBtn.addEventListener('click', () => {
   clearError();
   setFileExt('');
@@ -1374,8 +1369,8 @@ const params = new URLSearchParams(location.search);
 if (params.has('demo')) {
   input.value = EXAMPLE_TEXT;
 } else if (finePointer.matches) {
-  // Autofokus bez przewijania: pole leży niżej, a nagłówek z obietnicą prywatności ma zostać
-  // widoczny. Ctrl+V i tak trafia do pola.
+  // Autofokus bez przewijania: na laptopie pole stoi na pierwszym ekranie, a przy wąskim oknie
+  // leży niżej i nagłówek z obietnicą prywatności ma zostać widoczny. Ctrl+V i tak trafia do pola.
   input.focus({ preventScroll: true });
 }
 
@@ -1410,6 +1405,16 @@ if (storedOff && disabledGroups.size > 0) {
 if (isProductCopy(location.hostname)) $('web-copy').hidden = false;
 
 $('app-version-top').textContent = __APP_VERSION__;
+// Data builda (data commita) obok wersji, a po pół roku odsyłacz do wydań staje się
+// ostrzeżeniem. Tylko zegar komputera (file-age.ts): bez sieci i bez zapisu.
+const buildDate = formatBuildDate(__BUILD_DATE__);
+if (buildDate) $('app-build-date').textContent = `· ${buildDate}`;
+const ageNote = fileAgeNote(__BUILD_DATE__, new Date());
+if (ageNote) {
+  const verLink = $('ver-link');
+  verLink.textContent = `${ageNote} ↗`;
+  verLink.classList.add('is-old');
+}
 
 // Podmień wszystkie statyczne <i class="gi" data-i="…"> z index.html na inline SVG.
 hydrateIcons();

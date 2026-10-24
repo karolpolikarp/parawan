@@ -100,7 +100,7 @@ body {
     var(--bg);
   color: var(--text);
   font: 16px/1.55 var(--sans);
-  padding: 28px 24px 40px;
+  padding: 12px 24px 40px; /* mały margines górny: pole tekstu ma stać na pierwszym ekranie */
   -webkit-font-smoothing: antialiased;
 }
 
@@ -363,59 +363,64 @@ details.card::details-content {
 .sw:not(:checked)::after { background: var(--mut); box-shadow: none; }
 
 /* ============ HERO ============ */
-/* Poziomy lockup marki: znak │ PARAWAN + tagline (mono wersaliki), jak w karcie marki. */
-.hero .card-h { min-height: 96px; gap: 18px; }
-.brand-mark { width: 78px; height: 72px; flex: none; display: block; }
+/* Jeden pas: znak │ PARAWAN, wersja z datą i hasło │ obietnica prywatności. Przy 1366×768 pas
+   ma ok. 80 px, a pole tekstu zaczyna się w górnych 40% okna (scripts/e2e/uklad.test.mjs).
+   Kroki, animacja i pigułki cech są w sekcji „Jak to działa” pod narzędziem. */
+.hero .card-h { min-height: 0; padding: 8px 16px; gap: 16px; }
+.brand-mark { width: 60px; height: 56px; flex: none; display: block; }
 .brand-mark .gi { width: 100%; height: 100%; }
-.brand-div { width: 2px; height: 68px; flex: none; background: var(--line-2); border-radius: 2px; }
-.brand-row { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-.hero .card-t h1 { font-size: 33px; text-transform: uppercase; letter-spacing: -.01em; line-height: 1; }
-#hero-sub {
-  font-family: var(--sans); font-size: 12.5px; font-weight: 700;
-  letter-spacing: .1em; text-transform: uppercase; color: var(--acc); margin-top: 5px;
-  text-wrap: balance; /* na telefonie bez jednego słowa w drugiej linii */
-}
+.brand-div { width: 2px; height: 52px; flex: none; background: var(--line-2); border-radius: 2px; }
+.brand-row { display: flex; align-items: baseline; gap: 6px 12px; flex-wrap: wrap; }
+.hero .card-t h1 { font-size: 30px; text-transform: uppercase; letter-spacing: -.01em; line-height: 1; }
+#app-build-date { white-space: nowrap; } /* data nie odrywa się od kropki na telefonie */
 .ver-chip { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--mut); }
-.hero-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
 .ver-link {
   display: inline-flex; align-items: center; white-space: nowrap;
   font-size: 11.5px; font-weight: 600; color: var(--mut);
   border: 1px solid var(--line-2); border-radius: 999px; padding: 2px 10px;
 }
 .ver-link:hover { color: var(--acc); border-color: var(--acc-line); text-decoration: none; }
-/* ikona strony autora (favicon karolwilczynski.com) przy linku „autor" — w jednej linii z tekstem */
-.site-fav { width: 14px; height: 14px; border-radius: 3px; margin-right: 6px; flex: none; }
-/* pasek cech — czyste pigułki z „✓" po PRAWEJ stronie leadu (wypełnia dolny rząd) */
-.feat-strip { display: flex; gap: 8px; flex-wrap: wrap; list-style: none; justify-content: flex-end; }
-.feat-strip li {
-  display: inline-flex; align-items: center; gap: 7px;
-  font-size: 12.5px; font-weight: 600; cursor: default;
-  color: var(--acc); background: var(--card-2); border: 1px solid var(--line);
-  border-radius: 999px; padding: 6px 14px;
-}
-/* znak to ozdoba: pusty tekst zastępczy po „/” nie wpuszcza go do nazwy pigułki („✓ działa offline”) */
-.feat-strip li::before { content: "✓"; content: "✓" / ""; font-size: 11px; font-weight: 800; color: var(--fin); }
-.feat-strip .feat-solid { color: #f4f6f1; background: var(--acc); border-color: var(--acc); }
-.feat-strip .feat-solid::before { color: #a9c6b4; }
-
-.hero-b { display: flex; align-items: center; gap: 16px 24px; flex-wrap: wrap; }
-.hero-lead { font-size: 18px; color: var(--text); flex: 1 1 320px; }
-.hero-lead strong { color: var(--acc); }
+/* plik starszy niż pół roku (file-age.ts): odsyłacz staje się ostrzeżeniem, napis może się zawinąć */
+.ver-link.is-old { white-space: normal; color: var(--warn); border-color: var(--warn); background: #fff4c2; }
+/* ikona strony autora (favicon karolwilczynski.com) przy linku w stopce, w jednej linii z tekstem */
+.site-fav { display: inline-block; vertical-align: -2px; width: 14px; height: 14px; border-radius: 3px; margin-right: 6px; }
+.hero-t { flex: 1 1 200px; min-width: 0; } /* na telefonie tekst zostaje obok znaku, a nie pod nim */
+.hero-lead { font-size: 16.5px; line-height: 1.4; color: var(--text); margin-top: 6px; }
 /* skrót do edytora: tylko gdy karty układają się w jedną kolumnę (≤1080 px, reguła niżej) */
 .skip-editor { display: none; }
 #edytor { scroll-margin-top: 12px; }
 /* callout prywatności w prawej części nagłówka — mocny akcent zaufania, dopasowany do treści */
 .privacy {
-  display: flex; align-items: center; gap: 12px;
-  padding: 12px 16px; border-radius: var(--r-ctl);
+  display: flex; align-items: center; gap: 12px; flex: none;
+  padding: 10px 14px; border-radius: var(--r-ctl);
   border: 1px solid var(--acc-line); background: var(--acc-soft);
-  color: var(--acc); width: 430px; max-width: 42vw;
+  color: var(--acc); max-width: 400px;
 }
 .privacy-t b { white-space: nowrap; } /* nagłówek w jednej linii */
-.privacy .gi { width: 30px; height: 30px; flex: none; }
+.privacy .gi { width: 28px; height: 28px; flex: none; }
 .privacy-t { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .privacy-t b { font-size: 14px; font-weight: 700; line-height: 1.25; }
 .privacy-t span { font-size: 12px; color: var(--mut-2); line-height: 1.35; }
+
+/* ============ JAK TO DZIAŁA ============ */
+/* Sekcja pod narzędziem: własna siatka 12 kolumn (bez subgrid, którego Chrome 109 nie zna),
+   te same klasy g3 i g12 co karty wyżej, więc progi responsywności działają bez zmian. */
+.how { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; margin-top: 8px; }
+.how > .card { min-width: 0; }
+.how-h { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 16px; padding: 0 4px; }
+.how-h h2 { font-size: 20px; font-weight: 800; letter-spacing: -.01em; color: var(--acc); }
+/* pigułki cech (dawniej w nagłówku strony) */
+.feat-strip { display: flex; gap: 8px; flex-wrap: wrap; list-style: none; }
+.feat-strip li {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 12.5px; font-weight: 600; cursor: default;
+  color: var(--acc); background: var(--card-2); border: 1px solid var(--line);
+  border-radius: 999px; padding: 5px 13px;
+}
+/* znak to ozdoba: pusty tekst zastępczy po „/” nie wpuszcza go do nazwy pigułki („✓ działa offline”) */
+.feat-strip li::before { content: "✓"; content: "✓" / ""; font-size: 11px; font-weight: 800; color: var(--fin); }
+.feat-strip .feat-solid { color: #f4f6f1; background: var(--acc); border-color: var(--acc); }
+.feat-strip .feat-solid::before { color: #a9c6b4; }
 
 /* ============ KROKI 1–4 ============ */
 /* Układ jak w makiecie: ikona + „Krok N" w jednym rzędzie, tytuł i opis pod spodem.
@@ -434,7 +439,8 @@ details.card::details-content {
   26%      { border-color: var(--line); box-shadow: var(--shadow); }
 }
 /* Kroki świecą po kolei, co 3 s: blask trwa od 6% do 26% z 12 s, więc kolejne się nie nakładają.
-   Kroki to pierwsze cztery <section> w siatce (przed nimi stoi tylko <header>). */
+   Kroki to pierwsze cztery <section> w sekcji „Jak to działa” (przed nimi stoi tylko <div>
+   z nagłówkiem, a demo jest piątą <section>). */
 .step:nth-of-type(2) { animation-delay: 3s; }
 .step:nth-of-type(3) { animation-delay: 6s; }
 .step:nth-of-type(4) { animation-delay: 9s; }
@@ -470,10 +476,8 @@ details.card::details-content {
   display: flex; align-items: center; flex-wrap: wrap; gap: 10px 16px;
   padding: 15px 22px; border-bottom: 1px solid var(--line);
 }
-.demo-head-t { flex: 1 1 260px; min-width: 0; }
 .demo-motion { flex: none; }
-.demo-kick { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-deep); }
-.demo-head-row h2 { font-size: 17px; font-weight: 800; color: var(--acc); margin-top: 3px; }
+.demo-head-row h3 { flex: 1 1 260px; min-width: 0; font-size: 17px; font-weight: 800; color: var(--acc); }
 .demo-stage { position: relative; height: 300px; overflow: hidden; }
 /* strefy WEJŚCIE / WYJŚCIE — wyeksponowane etykiety z akcentem, kotwiczą przepływ animacji */
 .demo-zone {
@@ -503,7 +507,7 @@ details.card::details-content {
 .demo-in .demo-name, .demo-in .demo-mono { color: var(--acc); }
 .demo-out .demo-name { color: var(--gold-deep); letter-spacing: .5px; }
 .demo-out .demo-mono { color: var(--gold-deep); }
-.demo-out .demo-head { display: flex; justify-content: space-between; }
+.demo-out .demo-head { display: flex; justify-content: space-between; gap: 8px; } /* „zasłonięte” obok „Pismo · wyjście” w jednym wierszu */
 .demo-anon { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--gold-deep); font-weight: 700; }
 .demo-mark { position: absolute; left: 50%; top: 70px; width: 240px; height: 198px; margin-left: -120px; z-index: 3; }
 .demo-mark .gi { display: block; width: 100%; height: 100%; }
@@ -547,12 +551,12 @@ details.card::details-content {
 /* ============ EDYTORY ============ */
 .toolbar {
   display: flex; align-items: center; gap: 8px;
-  padding: 10px 16px; border-bottom: 1px solid var(--line);
+  padding: 6px 16px; border-bottom: 1px solid var(--line);
   background: rgba(11, 61, 46, .02);
   flex-wrap: wrap;
   /* RÓWNE paski narzędzi w obu oknach — ta sama wysokość niezależnie od zawartości
      (segment vs pojedyncze przyciski), by wiersze przycisków nie rozjeżdżały się w pionie. */
-  min-height: 90px;
+  min-height: 82px;
 }
 .toolbar .hint { margin-left: auto; font-size: 11.5px; color: var(--mut-2); letter-spacing: .06em; }
 /* Akcje na wyniku trzymają się razem: węższy pasek przenosi do nowego rzędu całą grupę
@@ -561,11 +565,11 @@ details.card::details-content {
 .out-acts .tbtn { justify-content: flex-start; }
 #copy { min-width: 78px; }
 /* 64 px: „zapisz PDF” (ok. 62 px) się mieści, „Drukuj lub zapisz” (ok. 94 px) już nie.
-   Drugi wiersz etykiety odbiera 3 px z odstępów, żeby przycisk nie wydłużał paska ponad 90 px. */
+   Drugi wiersz etykiety odbiera 3 px z odstępów, żeby przycisk nie wydłużał paska ponad 82 px. */
 #print { gap: 3px; padding-bottom: 6px; }
 #print span { white-space: normal; max-width: 64px; text-align: center; }
 /* Pasek wyniku ma siedem kontrolek, pasek źródła trzy. Kiedy wynik schodził do drugiego rzędu,
-   jego pasek miał 166 px zamiast 90 px, a okno wyniku zaczynało się 76 px niżej niż okno źródła
+   jego pasek miał 166 px zamiast 90 px (dziś 82 px), a okno wyniku zaczynało się 76 px niżej niż okno źródła
    (1366 px z paskiem przewijania Windows, 1280 px, 1920 px w skali 150%). W jednym rzędzie
    kontrolki wyniku są więc węższe: bez min-width 86 px, z mniejszymi marginesami bocznymi
    i odstępami (strzałki i licznik niżej, przy .mask-nav). Razem mają ok. 530 px, nie więcej niż
@@ -755,7 +759,14 @@ mark.pii.pii-linked { box-shadow: 0 0 0 2px var(--acc-line); }
    Teraz kreski nad stopkami i ich pierwsze wiersze („5 wierszy · 290 znaków” i „Przejrzyj
    wynik…”) stoją w jednej linii, a wolne miejsce zostaje pod tekstem stopki. Gdy pasek wyniku
    schodzi do drugiego rzędu (ok. 1081–1210 px), okno i stopka wyniku są niżej o ten rząd. */
-.card-ed > .card-b { flex: none; }
+.card-ed > .card-b { flex: none; padding-top: 10px; }
+/* Niższe nagłówki obu kart edytora (ten sam rozmiar w obu, więc okna dalej stoją w jednej
+   linii): razem z paskiem narzędzi to ok. 30 px, o które pole tekstu wchodzi wyżej na
+   pierwszy ekran laptopa 1366×768 (scripts/e2e/uklad.test.mjs). */
+.card-ed > .card-h { min-height: 0; padding-top: 6px; padding-bottom: 6px; }
+.card-ed > .card-h .card-t { line-height: 1.35; }
+.card-ed > .card-h > .ic { width: 40px; height: 40px; }
+.card-ed > .card-h > .ic .gi { width: 26px; height: 26px; }
 .card-ed > .card-f:last-child { flex: 1 0 auto; align-items: flex-start; }
 .linklike {
   border: 0; background: none; padding: 0; margin: 0;
@@ -959,6 +970,7 @@ table .pii { cursor: default; }
 .note-b p { font-size: 13px; color: var(--mut); }
 /* wyróżnienia w kartach informacyjnych — zieleń marki (także „Parawan", „Porównanie", „heurystyczne") */
 .note-b p strong { color: var(--acc); font-weight: 700; }
+.caveat-list { margin: 10px 0 0 18px; display: grid; gap: 5px; font-size: 13px; color: var(--mut); }
 .caveat { border-color: rgba(224, 181, 102, .38); }
 .caveat .card-h { border-bottom-color: rgba(224, 181, 102, .22); }
 .tips { list-style: none; display: grid; gap: 9px; }
@@ -1058,7 +1070,7 @@ table .pii { cursor: default; }
   /* hero: na węższych ekranach callout prywatności spływa pod lockup marki */
   .hero .card-h { flex-wrap: wrap; }
   .hero .card-sp { display: none; }
-  .privacy { margin-left: 0; width: auto; max-width: none; }
+  .privacy { margin-left: 0; max-width: none; flex: 1 1 100%; }
   .skip-editor { display: inline-flex; }
   .table-wrap { overflow-x: auto; }
   /* Demo: na wąsko chowamy ruchome karty; zostają strefy Wejście/Wyjście, znak i puls „anonimizacja…". */
@@ -1092,10 +1104,6 @@ table .pii { cursor: default; }
 }
 @media (max-width: 640px) {
   .g3 { grid-column: span 12; }
-  .hero-b { flex-direction: column; align-items: flex-start; }
-  /* w kolumnie flex-basis 320px stawało się wysokością: pod leadem zostawała pusta luka */
-  .hero-lead { flex: none; }
-  .feat-strip { justify-content: flex-start; }
   .privacy { margin-left: 0; }
   .editor, textarea.editor-ta { min-height: 200px; }
 }

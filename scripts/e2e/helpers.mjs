@@ -27,17 +27,18 @@ export const LANDING_HTML =
 export const FIXTURES = path.join(ROOT, 'apps', 'web', 'src', 'fixtures', 'urzad');
 
 /**
- * Numer PESEL z przykładu w aplikacji (EXAMPLE_TEXT w main.ts). Zmiana przykładu (A06) = zmiana
- * tutaj; demoReady() sprawdza, że ten numer naprawdę stoi w polu źródła, więc rozjazd wywraca testy.
+ * Numer PESEL z przykładu w aplikacji (EXAMPLE_TEXT w apps/web/src/example.ts). Zmiana przykładu =
+ * zmiana tutaj; demoReady() sprawdza, że ten numer naprawdę stoi w polu źródła, więc rozjazd
+ * wywraca testy (a content.test.ts porównuje tę linię z przykładem).
  */
-export const EXAMPLE_PESEL = '44051401359';
+export const EXAMPLE_PESEL = '85071412358';
 
 /**
  * Nazwisko osoby z przykładu, w tej samej formie co w EXAMPLE_TEXT. demoReady() sprawdza je tak
  * jak EXAMPLE_PESEL: test „bez treści pisma w localStorage” szuka go w zapisanych wartościach,
  * a po zmianie przykładu szukałby nazwiska, którego w piśmie już nie ma.
  */
-export const EXAMPLE_NAME = 'Kowalska';
+export const EXAMPLE_NAME = 'Wierzbicki';
 
 /**
  * Pozostałe dane osobowe z przykładu, których nie może być na wydruku (wydruk.test.mjs): adres
@@ -46,13 +47,16 @@ export const EXAMPLE_NAME = 'Kowalska';
  * białych znaków (squash w wydruk.test.mjs), bo tekst wyciągnięty z PDF bywa inaczej rozstawiony,
  * a assertClean() też pomija spacje i łączniki.
  */
-export const EXAMPLE_EMAIL = 'anna.kowalska@example.com';
-export const EXAMPLE_IBAN_START = 'PL61 1090 1014';
+export const EXAMPLE_EMAIL = 't.wierzbicki@example.com';
+export const EXAMPLE_IBAN_START = 'PL43 1090 1014';
+
+/** Nazwisko urzędnika z bloku podpisu przykładu („Z up. Wójta / Joanna Malec”). */
+export const EXAMPLE_OFFICIAL = 'Malec';
 
 /**
  * Numer PESEL wpisany na stałe w pliki pismo.* z FIXTURES (buduje je
- * scripts/e2e/manual/zbuduj-pisma.mjs). Dziś równy EXAMPLE_PESEL, ale to osobny fakt: zmiana
- * przykładu w aplikacji nie zmienia gotowego pismo.pdf.
+ * scripts/e2e/manual/zbuduj-pisma.mjs). To osobny fakt niż EXAMPLE_PESEL: zmiana przykładu
+ * w aplikacji nie zmienia gotowego pismo.pdf.
  */
 export const PISMO_PESEL = '44051401359';
 
@@ -87,11 +91,13 @@ export const ALLOWED_STORAGE_KEYS = readStorageKeys();
 export const FICTIONAL_PII = [
   ['PESEL z przykładu', EXAMPLE_PESEL],
   ['PESEL z pism pismo.*', PISMO_PESEL],
-  ['nazwisko z przykładu', 'Kowalsk'],
+  ['nazwisko z przykładu', 'Wierzbick'],
+  ['nazwisko z pism pismo.*', 'Kowalsk'],
   ['adres e-mail z przykładu', EXAMPLE_EMAIL],
   ['numer konta z przykładu', EXAMPLE_IBAN_START],
   ['telefon z przykładu', '600 700 800'],
-  ['nazwisko prowadzącego z przykładu', 'Bąkiewicz'],
+  ['nazwisko urzędnika z przykładu', EXAMPLE_OFFICIAL],
+  ['nazwisko prowadzącego z pism pismo.*', 'Bąkiewicz'],
   ['PESEL z pism DOCX i CSV w testach', '85071412358'],
   ['nazwisko z pism DOCX i CSV w testach', 'Wierzbick'],
   ['PESEL ze stopki DOCX w testach', '02270803628'],
@@ -425,7 +431,7 @@ export async function openApp(browser, query = '', opts = {}) {
       ),
     /**
      * Czeka na wynik przykładu z ?demo i sprawdza, że w polu źródła stoją EXAMPLE_PESEL,
-     * EXAMPLE_NAME, EXAMPLE_EMAIL i EXAMPLE_IBAN_START.
+     * EXAMPLE_NAME, EXAMPLE_EMAIL, EXAMPLE_IBAN_START i EXAMPLE_OFFICIAL.
      */
     async demoReady() {
       await this.waitForOutput('[PESEL]');
@@ -436,6 +442,7 @@ export async function openApp(browser, query = '', opts = {}) {
         ['EXAMPLE_NAME', EXAMPLE_NAME],
         ['EXAMPLE_EMAIL', EXAMPLE_EMAIL],
         ['EXAMPLE_IBAN_START', EXAMPLE_IBAN_START],
+        ['EXAMPLE_OFFICIAL', EXAMPLE_OFFICIAL],
       ]) {
         assert.ok(
           input.includes(value),
