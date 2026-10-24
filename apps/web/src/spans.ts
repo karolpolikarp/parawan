@@ -87,6 +87,18 @@ export function applySpans(
   return out + original.slice(pos);
 }
 
+/** Ile pozycji z posortowanej listy jest ≥ from (wyszukiwanie binarne). */
+function countFrom(sorted: number[], from: number): number {
+  let lo = 0;
+  let hi = sorted.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (sorted[mid] < from) lo = mid + 1;
+    else hi = mid;
+  }
+  return sorted.length - lo;
+}
+
 /** Element grupy czekającej na fragment oryginału: znacznik (nazwa tokenu) albo odstęp między znacznikami. */
 type Pending = { mask: string } | { gap: string };
 
@@ -129,29 +141,64 @@ export function alignSpans(
     // stać dokładnie na początku reszty fragmentu.
     let segStart = pos;
     let seg: Pending[] = [];
+    // Szukamy tylko we fragmencie grupy i w czasie liniowym: napisy znaczników we fragmencie
+    // zbieramy raz (pozycje po napisie), a dla każdej trójki odstęp–znacznik–odstęp wskaźnik
+    // po tych pozycjach idzie tylko do przodu. Skan fragmentu przy każdym znaczniku dawał czas
+    // kwadratowy (tysiące PESEL-i rozdzielonych spacją w jednym wierszu).
+    const lits = new Map<string, number[]>();
+    if (group.length >= 3) {
+      const win = original.slice(pos, end);
+      if (win.includes('['))
+        for (const m of win.matchAll(/\[[^[\]]*\]/g)) {
+          const a = lits.get(m[0]);
+          if (a) a.push(pos + m.index);
+          else lits.set(m[0], [pos + m.index]);
+        }
+    }
+    // Ile znaczników każdej nazwy zostało w grupie od bieżącego do przedostatniego elementu.
+    const left = new Map<string, number>();
+    for (const x of group.slice(0, -1)) if ('mask' in x) left.set(x.mask, (left.get(x.mask) ?? 0) + 1);
+    const ptr = new Map<string, number>();
     for (let k = 0; k < group.length; k++) {
       const p = group[k];
       const prev = group[k - 1];
       const next = group[k + 1];
       // odstęp przed znacznikiem siedzi już na końcu seg
       const lead = !seg.length ? '' : 'gap' in prev ? prev.gap : null;
+      const n = 'mask' in p ? (left.get(p.mask) ?? 0) : 0;
+      if ('mask' in p && k < group.length - 1) left.set(p.mask, n - 1);
       if ('mask' in p && k + 2 < group.length && 'gap' in next && lead !== null) {
         const lit = `[${p.mask}]`;
-        const needle = lead + lit + next.gap;
-        // Szukamy tylko we fragmencie grupy: skan do końca dokumentu przy każdej grupie dawał
-        // czas kwadratowy (wklejka tabeli z Excela, wiersz po wierszu).
+        const at = lits.get(lit);
         const from = segStart + (lead ? 1 : 0);
-        const w = original.slice(from, end);
-        const f = w.indexOf(needle);
-        if (f !== -1 && (lead || !f) && f + needle.length < w.length) {
+        // Pierwsze wystąpienie lead + lit + next.gap od `from`, całe przed końcem fragmentu.
+        let f = -1;
+        if (at) {
+          const key = `${lead}|${lit}|${next.gap}`;
+          let i = ptr.get(key) ?? 0;
+          for (; i < at.length; i++) {
+            const q = at[i] - lead.length;
+            if (q < from) continue;
+            if (at[i] + lit.length + next.gap.length > end) {
+              i = at.length;
+              break;
+            }
+            if (original.startsWith(lead, q) && original.startsWith(next.gap, at[i] + lit.length)) {
+              f = q - from;
+              break;
+            }
+          }
+          ptr.set(key, i);
+        }
+        const needle = lead.length + lit.length + next.gap.length;
+        if (f !== -1 && (lead || !f) && from + f + needle < end) {
           // Ile znaczników tej nazwy zostało w grupie, tyle takich napisów musi mieć fragment.
           // Inaczej nie wiadomo, który znacznik jest zastany („[TELEFON] [EMAIL] [EMAIL]”
           // przy jednym „[EMAIL]” w oryginale), a zakres z cudzą wartością jest gorszy niż null.
-          if (w.split(lit).length !== group.slice(k, -1).filter((x) => (x as { mask?: string }).mask === p.mask).length + 1)
-            return false;
+          if (countFrom(at as number[], from) !== n) return false;
           if (seg.length) pushSpan(segStart, from + f, seg);
           kept++;
-          segStart = from + f + needle.length;
+          segStart = from + f + needle;
           seg = [];
           k++; // odstęp za znacznikiem należy do tekstu oryginału
           continue;

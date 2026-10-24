@@ -276,3 +276,46 @@ test('renderSpansHtml: fragmenty przywrócone w mark.pii-kept z pozycjami orygin
   expect(plain).toContain('Piotr Lis');
   expect(plain).toContain('[PESEL]');
 });
+
+describe('wydajność', () => {
+  /** PESEL z poprawną sumą kontrolną dla 10 pierwszych cyfr. */
+  const pesel = (n: number): string => {
+    const d = `440514${String(n).padStart(4, '0')}`;
+    const w = [1, 3, 7, 9, 1, 3, 7, 9, 1, 3];
+    const sum = [...d].reduce((s, c, i) => s + Number(c) * w[i], 0);
+    return d + ((10 - (sum % 10)) % 10);
+  };
+
+  test('jedna długa grupa znaczników rozdzielonych spacją: czas liniowy, nie kwadratowy', () => {
+    // 20 000 PESEL-i w jednym wierszu (240 tys. znaków, poniżej HIGHLIGHT_LIMIT) to jedna grupa.
+    // Skan fragmentu przy każdym znaczniku dawał tu ok. 1,5 s, liniowo to kilkanaście ms.
+    const text = Array.from({ length: 20000 }, (_, i) => pesel(i % 10000)).join(' ');
+    const { redacted } = redactPII(text);
+    expect(redacted.match(/\[PESEL\]/g)?.length).toBe(20000);
+    alignSpans(text, redacted); // rozgrzewka JIT
+    const t0 = performance.now();
+    const al = alignSpans(text, redacted);
+    const ms = performance.now() - t0;
+    expect(al?.spans.length).toBe(1);
+    expect(al?.spans[0].tokens.length).toBe(20000);
+    expect(ms).toBeLessThan(250);
+    // podwojenie danych nie może dawać czterokrotnie dłuższego czasu
+    const half = text.slice(0, text.length / 2).trim();
+    const hr = redactPII(half).redacted;
+    const t1 = performance.now();
+    alignSpans(half, hr);
+    const msHalf = performance.now() - t1;
+    expect(ms).toBeLessThan(Math.max(4 * msHalf, 40));
+  });
+
+  test('ten sam wiersz z zastanym znacznikiem w środku dzieli się bez skanu przy każdym znaczniku', () => {
+    const ps = Array.from({ length: 10000 }, (_, i) => pesel(i));
+    const text = `${ps.slice(0, 5000).join(' ')} [EMAIL] ${ps.slice(5000).join(' ')}`;
+    const { redacted } = redactPII(text);
+    const t0 = performance.now();
+    const al = alignSpans(text, redacted);
+    expect(performance.now() - t0).toBeLessThan(250);
+    expect(al?.kept).toBe(1);
+    expect(al?.spans.map((s) => s.tokens.length)).toEqual([5000, 5000]);
+  });
+});
