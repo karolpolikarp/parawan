@@ -110,6 +110,41 @@ test('CSP zatrzymuje próbę wysłania danych (fetch, obrazek)', async (t) => {
   });
 });
 
+// script-src ma tylko skrót jedynego skryptu (wtyczka cspSkrot, apps/web/src/csp-skrot.ts), więc
+// procedury zdarzeń w atrybutach i adresy javascript: w pliku by nie zadziałały. Gdyby któraś tam
+// była, przycisk byłby martwy tylko w gotowym pliku, a w `vite dev` (bez CSP) działałby.
+for (const [name, target] of Object.entries(CSP_TARGETS)) {
+  test(`${name}: w pliku nie ma procedur zdarzeń w atrybutach ani adresów javascript:`, () => {
+    const markup = readFileSync(target.file, 'utf8').replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, '');
+    const handlers = [...markup.matchAll(/<[a-z][^>]*?\s(on[a-z]+)\s*=/gi)].map((m) => m[1]);
+    assert.deepEqual(handlers, [], `atrybuty on*= w ${target.file}`);
+    assert.doesNotMatch(markup, /javascript:/i, `adres javascript: w ${target.file}`);
+  });
+}
+
+test('CSP odrzuca kod wstrzyknięty do wyniku (<img onerror>): tytuł bez zmian, naruszenie script-src', async (t) => {
+  await withApp(browser, t, '?demo', async (app) => {
+    await app.demoReady();
+    const title = await app.page.title();
+    // Tak wyglądałaby treść pisma, której ucieczka znaków nie zatrzymała. Z 'unsafe-inline'
+    // w script-src procedura onerror by się wykonała (obrazek blokuje img-src, a to wywołuje błąd).
+    await app.page.evaluate(() => {
+      document.getElementById('output').insertAdjacentHTML('beforeend', '<img src=x onerror="document.title=\'X\'">');
+    });
+    // Ten jeden test oczekuje naruszenia: zdarzenie przychodzi z opóźnieniem.
+    let script = [];
+    for (let i = 0; i < 50 && !script.length; i++) {
+      await app.page.waitForTimeout(100);
+      script = app.takeViolations((v) => v.directive.startsWith('script-src'));
+    }
+    assert.ok(script.length > 0, 'przeglądarka nie zgłosiła naruszenia script-src');
+    assert.equal(await app.page.title(), title, 'procedura onerror zmieniła tytuł karty');
+    // obrazek „x” zatrzymuje img-src, a komunikaty przeglądarki o obu blokadach są tu oczekiwane
+    app.takeViolations((v) => v.directive === 'img-src');
+    app.takeConsoleErrors(/Content.Security.Policy|inline event handler|script-src/i);
+  });
+});
+
 test('bramka widzi próbę wysyłki i wyjątek odłożone na później (timer, WebSocket, meta refresh)', async () => {
   // Test samej bramki: scenariusz kończy się w niecałą sekundę, a zdarzenia przychodzą po 5 i 20 s
   // (minuta przewijana krok po kroku) i po 3 godzinach (skok o dobę). Bez przewinięcia zegara

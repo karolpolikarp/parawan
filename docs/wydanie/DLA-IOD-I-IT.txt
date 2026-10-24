@@ -19,7 +19,8 @@ GDZIE SĄ PRZETWARZANE DANE
     {{CSP}}
   Co znaczą jej dyrektywy:
     default-src 'none'          nic spoza pliku, chyba że niżej jest wyjątek
-    script-src 'unsafe-inline'  tylko skrypt zapisany w samym pliku
+    script-src 'sha256-…'       jeden skrypt pliku, rozpoznany po skrócie;
+                                inny kod w linii przeglądarka odrzuci
     style-src 'unsafe-inline'   tylko style zapisane w pliku
     img-src data:               obrazki tylko wbudowane w plik
     font-src data:              czcionki tylko wbudowane w plik
@@ -30,8 +31,7 @@ GDZIE SĄ PRZETWARZANE DANE
   Można to sprawdzić, odłączając sieć: Parawan działa tak samo.
 
 CO ZOSTAJE NA KOMPUTERZE
-  W pamięci przeglądarki (localStorage) Parawan zapisuje tylko te klucze,
-  bez treści pism:
+  W pamięci przeglądarki (localStorage) zostają tylko te klucze, bez pism:
     mask-disabled  typy danych odznaczone w „Co maskować”
     pseudonyms     włączony tryb „Rozróżniaj osoby”
     motion         zatrzymana animacja przykładu
@@ -148,8 +148,7 @@ BUDOWA Z KODU
     npm ci
     npm run build -w anonimizator-web
   Gotowy plik leży w apps/web/dist/index.html i ma tę samą sumę SHA-256.
-  Wydanie powstaje w GitHub Actions z tagu, a atestację pochodzenia
-  sprawdza polecenie gh attestation verify z punktu Wdrożenie.
+  Wydanie powstaje w GitHub Actions z tagu (atestacja: punkt 1 Wdrożenia).
 
 AKTUALIZACJE I BŁĘDY BEZPIECZEŃSTWA
   Plik sam się nie aktualizuje i nie sprawdza wersji przez sieć.

@@ -5,6 +5,7 @@ import jakRaw from '../../../docs/wydanie/JAK-UZYC.txt?raw';
 import webHtmlRaw from '../index.html?raw';
 import webConfigRaw from '../vite.config.ts?raw';
 import webMainRaw from './main.ts?raw';
+import { wstawSkrotySkryptow } from './csp-skrot';
 import { ALLOWED_KEYS } from './storage';
 
 // Szablony plików wydania (docs/wydanie/, wypełnia je scripts/release/render-docs.mjs). IOD
@@ -31,7 +32,21 @@ function cspFromConfig(src: string): string[] {
   const block = src.match(/const CSP = \[([\s\S]*?)\]\.join\('; '\);/)?.[1] ?? '';
   return [...block.matchAll(/"([^"]*)"|'([^']*)'/g)].map((m) => (m[1] ?? m[2]).trim());
 }
-const CSP = cspFromConfig(webConfig);
+
+/**
+ * Polityka gotowego pliku: tablica z vite.config.ts po wtyczce cspSkrot, która przy buildzie
+ * podmienia script-src 'unsafe-inline' na skrót skryptu (src/csp-skrot.ts). Szablon opisuje
+ * skrót jako 'sha256-…', bo jego wartość zmienia się z każdą wersją kodu.
+ */
+async function builtCsp(directives: string[], script = 'void 0'): Promise<string[]> {
+  const html = `<meta http-equiv="Content-Security-Policy" content="${directives.join('; ')}"><script type="module">${script}</script>`;
+  const policy = (await wstawSkrotySkryptow(html)).match(/content="([^"]*)"/)?.[1] ?? '';
+  return policy.split('; ');
+}
+const SHA256_SOURCE = /'sha256-[A-Za-z0-9+/]{43}='/;
+/** Polityka do wypełnienia {{CSP}} w próbnym renderze, z prawdziwej długości skrótem. */
+const CSP_BUILT = await builtCsp(cspFromConfig(webConfig));
+const CSP = CSP_BUILT.map((d) => d.replace(SHA256_SOURCE, "'sha256-…'"));
 
 /** Wiersze opisu dyrektyw w DLA-IOD-I-IT.txt: „    nazwa źródła   opis”. */
 const describedCsp = (tpl: string) =>
@@ -39,7 +54,7 @@ const describedCsp = (tpl: string) =>
 
 /** Wypełnienie jak w render-docs.mjs: {{CSP}} łamane po dyrektywach z wcięciem wiersza. */
 function render(tpl: string): string {
-  const csp = CSP.join('; ');
+  const csp = CSP_BUILT.join('; ');
   const sample: Record<string, string> = {
     WERSJA: '10.100.1000',
     DATA: '2026-12-31',
@@ -98,9 +113,13 @@ test('szablony mają wszystkie pola i tylko znane pola', () => {
   }
 });
 
-test('DLA-IOD-I-IT.txt opisuje każdą dyrektywę CSP z vite.config.ts i żadnej innej', () => {
+test('DLA-IOD-I-IT.txt opisuje każdą dyrektywę CSP gotowego pliku i żadnej innej', () => {
   expect(CSP.length).toBeGreaterThanOrEqual(9);
   expect(describedCsp(dla)).toEqual(CSP);
+  // skrypt rozpoznany po skrócie, bez 'unsafe-inline', które wpuściłoby każdy kod w linii
+  expect(CSP).toContain("script-src 'sha256-…'");
+  expect(CSP.join('; ')).not.toMatch(/script-src[^;]*unsafe-inline/);
+  expect(dla.replace(/\s+/g, ' ')).toContain('jeden skrypt pliku, rozpoznany po skrócie; inny kod w linii przeglądarka odrzuci');
   // każda dyrektywa cytowana gdzie indziej w tekstach (np. „connect-src 'none'”) jest w polityce
   for (const [name, tpl] of DOCS) {
     for (const m of tpl.matchAll(/\b([a-z]+-src|form-action|base-uri) ('[a-z-]+'|data:)/g)) {
@@ -176,8 +195,8 @@ test('liczby z pomiaru w DLA-IOD-I-IT.txt zgodne z docs/BENCHMARK.md', () => {
 test('ton i typografia: polskie cudzysłowy, bez wtrąceń myślnikami, „100%” i „my”', () => {
   for (const [name, tpl] of DOCS) {
     expect(tpl, name).not.toContain('"');
-    // apostrof tylko w źródłach CSP ('none', 'unsafe-inline')
-    expect(tpl.replace(/'[a-z-]+'/g, ''), name).not.toContain("'");
+    // apostrof tylko w źródłach CSP ('none', 'unsafe-inline', 'sha256-…')
+    expect(tpl.replace(/'(?:[a-z-]+|sha256-…)'/g, ''), name).not.toContain("'");
     expect(tpl, name).not.toMatch(/ [—–] /);
     expect(tpl, name).not.toContain('100%');
     expect(tpl, name).not.toMatch(/\b(w pełni|po prostu)\b/i);

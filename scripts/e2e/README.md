@@ -57,7 +57,11 @@ strażnik, ale nie pułapkę WebRTC z bramki.
 
 Politykę CSP obu plików `csp.mjs` sprawdza dyrektywa po dyrektywie: dozwolone źródła to tylko
 `'none'`, `'unsafe-inline'` i `data:` (w landingu także `img-src 'self'`), a `default-src`,
-`connect-src`, `form-action`, `base-uri` i `object-src` muszą mieć `'none'`. Ten sam moduł działa
+`connect-src`, `form-action`, `base-uri` i `object-src` muszą mieć `'none'`. W `script-src` stoją
+wyłącznie skróty `'sha256-…'`, które `csp.mjs` liczy od nowa z treści skryptów w pliku: brak skrótu
+zatrzymałby aplikację, a `'unsafe-inline'` wpuściłoby kod wstrzyknięty z treści pisma (test
+w `smoke.test.mjs` wstawia do wyniku `<img onerror>` i oczekuje naruszenia CSP). Skróty wstawia
+wtyczka `cspSkrot` z `apps/web/src/csp-skrot.ts` na końcu builda. Ten sam moduł działa
 jako strażnik CSP w `ci.yml`, `release.yml` i `deploy-landing.yml`: `node scripts/e2e/csp.mjs`
 (bez argumentu oba pliki, z `web` albo `landing` jeden).
 

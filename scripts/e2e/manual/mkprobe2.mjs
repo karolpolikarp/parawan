@@ -10,6 +10,7 @@
 // diagnozy, nigdy do publikacji.
 // Użycie: node scripts/e2e/manual/mkprobe2.mjs [Parawan.html] [katalog-wyjściowy]
 // Domyślnie apps/web/dist/index.html i .cache/sonda w katalogu repo.
+import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -86,11 +87,15 @@ const filesProbe = (withPolyfill) =>
   (withPolyfill ? polyfill : '');
 
 // Sondę wstawiamy przed <meta name="viewport">, czyli przed skryptem aplikacji: słuchacze błędów
-// muszą działać, zanim aplikacja ruszy.
+// muszą działać, zanim aplikacja ruszy. Od B02 script-src w pliku dopuszcza tylko skrót skryptu
+// aplikacji, więc kopia dostaje w CSP także skrót sondy (starsze pliki mają 'unsafe-inline'
+// i zostają bez zmian).
 function inject(code) {
   const i = html.indexOf('<meta name="viewport"');
   if (i < 0) throw new Error('w pliku brak <meta name="viewport">, nie ma gdzie wstawić sondy');
-  return `${html.slice(0, i)}<script>${code}</script>\n    ${html.slice(i)}`;
+  const hash = `'sha256-${createHash('sha256').update(code, 'utf8').digest('base64')}'`;
+  const withProbe = `${html.slice(0, i)}<script>${code}</script>\n    ${html.slice(i)}`;
+  return withProbe.replace(/(content="[^"]*script-src )('sha256-)/, `$1${hash} $2`);
 }
 
 writeFileSync(path.join(out, 'Parawan-probe.html'), inject(startProbe));

@@ -2,13 +2,16 @@ import { defineConfig, normalizePath, type Plugin } from 'vite';
 import { viteSingleFile } from 'vite-plugin-singlefile';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { cspSkrot } from './src/csp-skrot';
 
 // Content-Security-Policy gotowego pliku. Obietnicę „tekst nie opuszcza przeglądarki” pilnuje
 // wtedy sama przeglądarka, a nie tylko nasz kod: connect-src 'none' blokuje fetch, XHR,
 // WebSocket i sendBeacon, a default-src 'none' każdy zasób spoza pliku. Przyszła zależność
 // z żądaniem sieciowym albo font z URL-em w CSS skończą się błędem w konsoli, nie cichym
 // wyciekiem. Wszystko, czego aplikacja potrzebuje, jest w środku: skrypt i style inline,
-// fonty i ikony jako data:. pdf.js działa na „fake workerze” w głównym wątku (pdf.ts), więc
+// fonty i ikony jako data:. „script-src 'unsafe-inline'” to tylko miejsce na skrót: wtyczka
+// cspSkrot (src/csp-skrot.ts) podmienia je na końcu builda na SHA-256 jedynego skryptu w pliku,
+// więc żaden inny kod w linii (np. onerror wstrzyknięty z treści pisma) się nie wykona. pdf.js działa na „fake workerze” w głównym wątku (pdf.ts), więc
 // worker-src nie jest potrzebny. Bliźniacza polityka landingu: apps/landing/vite.config.ts.
 const CSP = [
   "default-src 'none'",
@@ -90,7 +93,8 @@ export default defineConfig({
   // JEDEN samowystarczalny index.html (JS+CSS inline). Kluczowe dla użycia z dysku:
   // Chromium blokuje <script type="module"> i <link crossorigin> na file:// (CORS,
   // origin null), więc rozbite assety NIE działają po podwójnym kliknięciu.
-  plugins: [viteSingleFile(), compactHtml, cspMeta],
+  // cspSkrot na końcu: liczy skrót skryptu już wklejonego przez viteSingleFile.
+  plugins: [viteSingleFile(), compactHtml, cspMeta, cspSkrot()],
   base: './',
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? 'dev'),

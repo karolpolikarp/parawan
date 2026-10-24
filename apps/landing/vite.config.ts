@@ -1,12 +1,15 @@
 import { defineConfig, type Plugin } from 'vite';
 import { viteSingleFile } from 'vite-plugin-singlefile';
 import { fileURLToPath } from 'node:url';
+import { cspSkrot } from '../web/src/csp-skrot';
 import { wstawWydanie, wydanieZEnv } from './src/wydanie';
 
 // Content-Security-Policy strony, bliźniacza do polityki aplikacji (apps/web/vite.config.ts,
 // tam pełne uzasadnienie). Jedyna różnica to img-src 'self': <link rel="apple-touch-icon">
 // wskazuje plik PNG obok strony (public/), a nie data:. Dyrektywa frame-ancestors w meta jest
-// ignorowana, więc jej tu nie ma.
+// ignorowana, więc jej tu nie ma. „script-src 'unsafe-inline'” podmienia przy buildzie wtyczka
+// cspSkrot (wspólna z aplikacją) na SHA-256 skryptu strony. Domena idzie przez proxy Cloudflare,
+// więc skrypt wstrzyknięty w linii po drodze przeglądarka też odrzuci.
 const CSP = [
   "default-src 'none'",
   "script-src 'unsafe-inline'",
@@ -54,7 +57,8 @@ const BUILD_TARGET = ['chrome109', 'edge109', 'firefox115', 'safari16.4'];
 // do serwerów firm trzecich — to weryfikowalna obietnica (DevTools → Network: 0 żądań),
 // a plik działa też z file:// po podwójnym kliknięciu.
 export default defineConfig({
-  plugins: [viteSingleFile(), cspMeta, wydanieMeta],
+  // cspSkrot na końcu: liczy skrót skryptu już wklejonego przez viteSingleFile.
+  plugins: [viteSingleFile(), cspMeta, wydanieMeta, cspSkrot()],
   base: './',
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? 'dev'),
