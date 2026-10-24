@@ -12,9 +12,13 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+- **Dostępność.** Nagłówki rozwijanych kart „Adnotacja i protokół”, „Co maskować” i „Co wykrywa”
+  mają teraz nazwę złożoną z tytułu i opisu, czyli z całego widocznego tekstu (WCAG 2.5.3, etykieta
+  w nazwie). Czytnik ekranu i sterowanie głosem posługują się tymi samymi słowami, które widać.
+  Wadę wykrył axe-core 4.14.
 - **Zależności.** Narzędzia budowania i testów: Vite 8.3.5, vite-plugin-singlefile 2.3.4, Vitest 4.1.12, Biome 2.6.3, esbuild 0.28.2.
-  Akcje GitHub: setup-node v7, upload-pages-artifact v5, deploy-pages v5. Zastępuje PR-y
-  Dependabota #15, #16, #17 i #21, które powstały na starszym `main`.
+  Akcje GitHub: setup-node v7, upload-pages-artifact v5, deploy-pages v5. Bramka e2e: axe-core
+  4.14.0, Playwright 1.64.1. Zastępuje PR-y Dependabota #15, #16, #17, #21 i #24, które powstały na starszym `main`.
   pdf.js zostaje na 6.1.200: wersja 6.4 wymaga `Promise.withResolvers`, którego nie ma
   w Chromium i Edge 109, więc PDF-y przestałyby się tam wczytywać.
 - **Strona produktu: podstrona „Zmiany i plan” pod `/log/`.** Dziennik zmian i plan rozwoju

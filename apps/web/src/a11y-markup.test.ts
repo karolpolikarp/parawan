@@ -14,7 +14,8 @@ test('aplikacja: semantyka strony', () => {
   expect(webHtml).not.toContain('aria-label="Wynik zanonimizowany"');
   // licznik ‹ › nie dubluje ogłoszenia z #mask-status
   expect(webHtml).not.toMatch(/id="mask-count"[^>]*aria-live/);
-  // „▸”, opis i pomoc „?” nie wchodzą do nazwy rozwijanych sekcji
+  // nazwa rozwijanej sekcji = nagłówek + opis (WCAG 2.5.3: cały widoczny tekst w nazwie),
+  // bez „▸” i pomocy „?”
   const sections = webHtml.match(/<details class="card g12"/g)?.length ?? 0;
   expect(sections).toBe(3); // „Adnotacja i protokół”, „Co maskować”, „Co wykrywa”
   expect(webHtml.match(/<span class="chev" aria-hidden="true">/g)).toHaveLength(sections);
