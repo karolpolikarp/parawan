@@ -307,6 +307,42 @@ test('KW — pułapki: kwartał, wzór numeru, sygnatury, działki, lokale, umow
   for (const t of keep) expect(redactPII(t).redacted).toBe(t);
   expect(redactPII('Sygn. akt I C 123/24').redacted).toBe('Sygn. akt [ZNAK-SPRAWY]');
 });
+test('KW — regresje: „KW" jako kilowaty, komenda, towar i koniec zdania nie kotwiczą', () => {
+  const keep = [
+    'Zestaw KW-2, kod AB1C/12345678/0, szt. 2.',
+    'Pismo przekazano do KW. Faktura FV1A 20260315 1 opłacona.',
+    'Wniosek złożył KW. Pozycja ZP2A/12345678/9 w planie.',
+    'KW Policji, sprawa AB2C 20261015 1.',
+    'Agregat prądotwórczy 20 KW, nr fabr. PA4K 20210101 7.',
+    'Moc przyłączeniowa: 40 KW. HG2X 20190315 1 to nr licznika.',
+    'Pompa ciepła 12 KW, nr seryjny HP2X/20230512/1',
+  ];
+  for (const t of keep) expect(redactPII(t).redacted).toBe(t);
+  // „KW. Nr …" to nadal etykieta tego samego numeru
+  expect(redactPII('Nieruchomość ma założoną KW. Nr WA1M/00512345/1 prowadzi SR.').redacted).toBe(
+    'Nieruchomość ma założoną KW. Nr [NR-KW] prowadzi SR.',
+  );
+  expect(redactPII('działka 12/3, KW WA1M/00512345/6.').redacted).toBe('działka 12/3, KW [NR-KW].');
+});
+test('KW — regresje: mieszany separator nie wciąga liczby z prozy, łącznik zostawia cały znak sprawy', () => {
+  expect(redactPII('księga wieczysta LU1I/00045678 2 działki').redacted).toBe('księga wieczysta LU1I/00045678 2 działki');
+  expect(redactPII('KW nr KR1P/00012345 3 lokale mieszkalne').redacted).toBe('KW nr KR1P/00012345 3 lokale mieszkalne');
+  expect(redactPII('KW nr KR1P/00012345/3 oraz WA1M 00512345 1').redacted).toBe('KW nr [NR-KW] oraz [NR-KW]');
+  expect(redactPII('Znak: WA1M/00512345/6-12').redacted).toBe('Znak: [ZNAK-SPRAWY]');
+  expect(redactPII('Sygn. akt: WA1M/00512345/6-KW').redacted).toBe('Sygn. akt: [ZNAK-SPRAWY]');
+});
+test('KW — regresje: w adresie kotwiczy tylko wartość parametru numeru księgi', () => {
+  const keep = [
+    'Szczegóły: https://bip.gmina.pl/download?ksiega=1&plik=ZP1A-20260315-1.pdf',
+    'https://sklep.example.pl/szukaj?kw=buty&id=AB1C-12345678-7',
+    'https://bip.gmina.pl/a?ksiegowosc=1&dok=FN1A-20260101-3',
+    'https://sklep.pl/szukaj?kw=buty&sku=ab1c-12345678-5',
+  ];
+  for (const t of keep) expect(redactPII(t).redacted).toBe(t);
+  expect(redactPII('https://ekw.ms.gov.pl/x?nr_kw=KR1P-00234567-1&a=1').redacted).toBe(
+    'https://ekw.ms.gov.pl/x?nr_kw=[NR-KW]&a=1',
+  );
+});
 test('KW — placeholder jest idempotentny, a typ można wyłączyć', () => {
   const once = redactPII('KW nr KR1P/00234567/6').redacted;
   expect(redactPII(once).redacted).toBe(once);

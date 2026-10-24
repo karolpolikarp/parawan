@@ -2063,7 +2063,7 @@ function passProtectUrls(ctx: RedactCtx): void {
     // Numer księgi w linku do przeglądarki ksiąg („…?kw=KR1P/00234567/6") — URL jest
     // sentinelowany przed passKw, a z takim linkiem numer prowadzi wprost do odpisu.
     if (ctx.on('KW')) {
-      url = url.replace(RE_KW_VALUE, maskKwMatch(ctx, RE_KW_URL_ANCHOR.test(url)));
+      url = url.replace(RE_KW_VALUE, maskKwMatch(ctx, true));
     }
     if (ctx.on('LOGIN')) {
       for (const re of URL_PROFILE_PATH_RULES) {
@@ -3425,9 +3425,16 @@ function passKsef(ctx: RedactCtx): void {
 // Ukośnik może otaczać odstęp, a po ukośniku może się złamać wiersz (tak łamie numer edytor).
 // Po kotwicy separatorem bywa też sama spacja albo myślnik („KW WA1M 00512345 3"); bez kotwicy
 // wymagamy ukośników (patrz passKw), bo trzy człony rozdzielone spacją to zbyt pospolity układ.
-const KW_SEP = '(?:[ \\t]*[/-][ \\t]*(?:\\r?\\n[ \\t]*)?|[ \\t]+)';
-const KW_SHAPE = `([A-Za-z]{2}[1-9][A-Za-z])${KW_SEP}(\\d{8})${KW_SEP}(\\d)`;
-const RE_KW_VALUE = new RegExp(`(?<![\\p{L}\\d/])${KW_SHAPE}(?![\\p{L}\\d/]|[.,]\\d)`, 'gu');
+// Oba separatory tego samego rodzaju: mieszany „LU1I/00045678 2 działki" to numer zapisany bez
+// cyfry kontrolnej, a spacja wciągała z prozy następną liczbę („2 działki" → „działki").
+// Łącznik z ciągiem dalej („WA1M/00512345/6-12") to dłuższy znak sprawy, który passZnakSprawy
+// maskuje w całości; odcięty numer zostawiał jawny przyrostek.
+const KW_SLASH = '[ \\t]*[/-][ \\t]*(?:\\r?\\n[ \\t]*)?';
+const KW_SHAPE = `([A-Za-z]{2}[1-9][A-Za-z])(?:${KW_SLASH}(\\d{8})${KW_SLASH}|[ \\t]+(\\d{8})[ \\t]+)(\\d)`;
+const RE_KW_VALUE = new RegExp(
+  `(?<![\\p{L}\\d/])${KW_SHAPE}(?![\\p{L}\\d/]|[.,]\\d|[-–][\\p{L}\\d])`,
+  'gu',
+);
 /** Pierwsze dwie litery kodów wydziałów ksiąg wieczystych (obszary sądów okręgowych). Bez kotwicy
  *  maskujemy tylko te: sama cyfra kontrolna przepuszcza co dziesiąty kod produktu o tym kształcie
  *  („AB1C/12345678/7"), a znana para liter zawęża to kilkunastokrotnie. Brak pary na liście
@@ -3439,15 +3446,22 @@ const KW_COURT_PREFIXES = new Set(
 /** Kotwica przed numerem: „KW" wielkimi literami jako osobny wyraz (także „nr KW", „Nr_KW",
  *  „<NumerKW>"), „Kw nr", „nr kw", dowolna odmiana „księga wieczysta" (także bez ogonków i sklejona
  *  w kluczu „numerKsiegiWieczystej") i skrót „ks. wiecz.". Samo małe „kw." to kwartał albo
- *  kwiecień, dlatego bez flagi /i: małe litery liczą się tylko po „nr"/„numer". */
+ *  kwiecień, dlatego bez flagi /i: małe litery liczą się tylko po „nr"/„numer". Wielkie „KW" to
+ *  też kilowaty („agregat 20 KW"), Komenda Wojewódzka („KW Policji", „KW PSP") i nazwa towaru
+ *  („Zestaw KW-2") — te nie są etykietą księgi. */
 const RE_KW_ANCHOR =
-  /(?:(?<![\p{L}\d])(?:[Nn](?:umer|r)[_-]?)?KW(?![\p{L}\d])|(?<!\p{L})Kw\.?(?=[ \t]+nr)|(?<![\p{L}\d])[Nn](?:umer|r)\.?[ \t_-]*kw(?![\p{L}\d])|(?:[Kk]si[eę]g|KSI[EĘ]G)\p{L}{0,3}[ \t_-]*(?:[Ww]ieczyst|WIECZYST)\p{L}{0,3}|(?<!\p{L})[Kk]s\.[ \t]*wiecz\.)/u;
-/** Koniec zdania w oknie kotwicy. Kropka po „nr", „Kw" czy skrócie „wiecz." to nie koniec zdania. */
-const RE_KW_SENTENCE_END = /(?<!(?:\b[Nn]r|\b[Kk][Ww]|wiecz|\bks))[.!?](?=[ \t]+[A-ZĄĆĘŁŃÓŚŹŻ])|\n[ \t]*\n/g;
+  /(?:(?<![\p{L}\d])(?<!\d[ \t]{0,2})(?:[Nn](?:umer|r)[_-]?)?KW(?![\p{L}\d]|-\d|[ \t]+(?:Policji|PSP|PP)(?!\p{L}))|(?<!\p{L})Kw\.?(?=[ \t]+nr)|(?<![\p{L}\d])[Nn](?:umer|r)\.?[ \t_-]*kw(?![\p{L}\d])|(?:[Kk]si[eę]g|KSI[EĘ]G)\p{L}{0,3}[ \t_-]*(?:[Ww]ieczyst|WIECZYST)\p{L}{0,3}|(?<!\p{L})[Kk]s\.[ \t]*wiecz\.)/u;
+/** Koniec zdania w oknie kotwicy. Kropka po „nr" czy skrócie „wiecz." to nie koniec zdania; po
+ *  „KW." tylko wtedy, gdy dalej stoi „Nr" („KW. Nr WA1M/…"). „Pismo przekazano do KW. Faktura …"
+ *  kończy zdanie, inaczej kotwica przechodziła na numer faktury w następnym zdaniu. */
+const RE_KW_SENTENCE_END =
+  /(?<!(?:\b[Nn]r|wiecz|\bks))(?<!\b[Kk][Ww](?=\.[ \t]+Nr(?!\p{L})))[.!?](?=[ \t]+[A-ZĄĆĘŁŃÓŚŹŻ])|\n[ \t]*\n/gu;
 /** Łącznik wyliczenia między dwoma numerami: „KW nr A, B i C" — kotwica pierwszego niesie resztę. */
 const RE_KW_LIST_GAP = /^(?:[ \t,;]|\r?\n|(?:i|oraz|lub|albo|a także)(?=[ \t]))*$/;
-/** Parametr adresu, który zapowiada numer księgi („…/wyszukiwanieKW?kw=KR1P/…"). */
-const RE_KW_URL_ANCHOR = /[?&#](?:kw|nr_?kw|numer_?kw|ksi[eę]g\w*)=/i;
+/** Parametr adresu, który zapowiada numer księgi („…/wyszukiwanieKW?kw=KR1P/…"). Kotwica dotyczy
+ *  tylko wartości tego parametru: „?kw=buty" w sklepie to fraza wyszukiwania, a „?ksiegowosc=" to
+ *  nie księga, więc sąsiedni parametr („&plik=ZP1A-20260315-1.pdf") nie może z niej korzystać. */
+const RE_KW_URL_PARAM = /[?&#;](?:kw|nr_?kw|numer_?kw|ksi[eę]g[aię]?(?:_?wieczyst\w{0,3})?)=$/i;
 
 /** Kotwica w oknie 40 znaków przed numerem, w tym samym zdaniu (etykieta z poprzedniego wiersza
  *  „KW:\n…" się liczy, ale nie z poprzedniego akapitu). */
@@ -3460,13 +3474,22 @@ function kwAnchoredBefore(text: string, offset: number): boolean {
   return RE_KW_ANCHOR.test(win);
 }
 
-/** Callback dla RE_KW_VALUE. `forced` — kotwica ustalona z zewnątrz (parametr URL-a). */
-function maskKwMatch(ctx: RedactCtx, forced = false) {
+/** Callback dla RE_KW_VALUE. `inUrl` — dopasowanie wewnątrz adresu: kotwicą jest wtedy tylko
+ *  parametr numeru księgi stojący tuż przed wartością. */
+function maskKwMatch(ctx: RedactCtx, inUrl = false) {
   let prevEnd = -1;
-  return (m: string, code: string, num: string, c: string, offset: number, t: string): string => {
+  return (
+    m: string,
+    code: string,
+    numSlash: string | undefined,
+    numSpace: string | undefined,
+    c: string,
+    offset: number,
+    t: string,
+  ): string => {
+    const num = numSlash ?? numSpace ?? '';
     const anchored =
-      forced ||
-      kwAnchoredBefore(t, offset) ||
+      (inUrl ? RE_KW_URL_PARAM.test(t.slice(Math.max(0, offset - 40), offset)) : kwAnchoredBefore(t, offset)) ||
       (prevEnd >= 0 && offset - prevEnd <= 12 && RE_KW_LIST_GAP.test(t.slice(prevEnd, offset)));
     // Bez kotwicy tylko pełna pewność: wielkie litery, ukośniki, znany sąd i poprawna cyfra
     // kontrolna. Przy kotwicy maskujemy mimo złej sumy (literówka w piśmie), jak PESEL po „PESEL:".
