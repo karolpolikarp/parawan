@@ -7230,10 +7230,11 @@ test('fix2: formularz z TAB-em — etykieta i wartość w osobnych komórkach, p
   ]);
   masked(
     [
-      ['Imię: Jan\tNazwisko: Kowalski\nPan Jan Kowalski wnosi.', `Imię: ${N}\tNazwisko: [OSOBA-A]\nPan [OSOBA-A] wnosi.`],
+      // imię z tego samego wiersza formularza dostaje pseudonim tej samej osoby (dom4)
+      ['Imię: Jan\tNazwisko: Kowalski\nPan Jan Kowalski wnosi.', 'Imię: [OSOBA-A]\tNazwisko: [OSOBA-A]\nPan [OSOBA-A] wnosi.'],
       ['Nazwisko: Kowalski\tUwagi: brak\nPan Kowalski przyszedł.', 'Nazwisko: [OSOBA-A]\tUwagi: brak\nPan [OSOBA-A] przyszedł.'],
       ['Imię: Jan;\tNazwisko: Kowalski', 'Imię: Jan;\tNazwisko: [OSOBA-A]'],
-      ['Imię:\tAdam\tNazwisko:\tNowak', `Imię:\t${N}\tNazwisko:\t[OSOBA-A]`],
+      ['Imię:\tAdam\tNazwisko:\tNowak', 'Imię:\t[OSOBA-A]\tNazwisko:\t[OSOBA-A]'],
     ],
     { pseudonyms: true },
   );
@@ -7974,7 +7975,7 @@ test('dom3-fix3: formularz z TAB-em — etykieta bez dwukropka tworzy parę z wa
     ['Imię:\tJan\tData ur.\t03.04.1980\tPESEL:\t44051401359', `Imię:\t${N}\tData ur.\t[DATA-URODZENIA]\tPESEL:\t[PESEL]`],
     ['Nazwisko\tNowak\tImię\tAdam', `Nazwisko\t${N}\tImię\t${N}`],
   ]);
-  masked([['Imię\tAdam\tNazwisko\tNowak', 'Imię\t[IMIĘ I NAZWISKO]\tNazwisko\t[OSOBA-A]']], { pseudonyms: true });
+  masked([['Imię\tAdam\tNazwisko\tNowak', 'Imię\t[OSOBA-A]\tNazwisko\t[OSOBA-A]']], { pseudonyms: true });
   // pułapki: nagłówek tabeli (nazwy kolumn, wiersz danych pod spodem) to nie pary etykieta⇥wartość
   keep(['Imię i nazwisko\tLokal\tTelefon', 'Nazwisko\tImię\tStanowisko', 'Imię\tWiek\tNazwisko\tMiasto', 'Imię\tNazwisko\nLp\tUwagi']);
   masked([['Imię\tNazwisko\tDział\nJan\tKowalski\tKadry', `Imię\tNazwisko\tDział\n${N}\t${N}\tKadry`]]);
@@ -8054,4 +8055,104 @@ test('dom3-fix3: telefon komórkowy w nazwie pliku z datą, wersją albo przedro
   ]);
   // pułapki: kod wersalikami, numer bez prefiksu komórkowego, człon z kodem
   keep(['Plik: ZAM_600111222.pdf', 'Plik: FV_2024_600111222.pdf', 'Plik: faktura_2024_123456789.pdf', 'Klucz: abc_X1_600111222', 'Nr zamówienia ZAM_2024_600111222']);
+});
+test('dom4-fix1: formularz z TAB-em z kilkoma wierszami — wiersz etykieta⇥wartość to formularz, nie nagłówek', () => {
+  masked([
+    ['Imię\tAdam\tNazwisko\tNowak\nTelefon\t600111222\tE-mail\ta@b.pl', `Imię\t${N}\tNazwisko\t${N}\nTelefon\t[TELEFON]\tE-mail\t[EMAIL]`],
+    ['Imię\tAdam\tNazwisko\tNowak\nPESEL\t44051401359\tTelefon\t600111222', `Imię\t${N}\tNazwisko\t${N}\nPESEL\t[PESEL]\tTelefon\t[TELEFON]`],
+    ['Adres\tul. Długa 5\tMiasto\tKraków\nImię\tAdam\tNazwisko\tNowak', `Adres\t${A}\tMiasto\tKraków\nImię\t${N}\tNazwisko\t${N}`],
+    ['Imię ojca:\tPiotr\tData ur.\t03.04.1980\nMiejsce ur.\tKraków\tPESEL\t80040312345', `Imię ojca:\t${N}\tData ur.\t[DATA-URODZENIA]\nMiejsce ur.\tKraków\tPESEL\t[PESEL]`],
+    ['Drugie imię\tPiotr\tNazwisko rodowe\tPawła\nTelefon\t600111222\tE-mail\ta@b.pl', `Drugie imię\t${N}\tNazwisko rodowe\t${N}\nTelefon\t[TELEFON]\tE-mail\t[EMAIL]`],
+    ['Pacjent\tJan\tNazwisko\tKowal\nOddział\tWewnętrzny\tSala\t4', `Pacjent\t${N}\tNazwisko\t${N}\nOddział\tWewnętrzny\tSala\t4`],
+    ['Ojciec\tJan\tMatka\tEwa\nAdres\tRadom\tTelefon\t600111222', `Ojciec\t${N}\tMatka\t${N}\nAdres\tRadom\tTelefon\t[TELEFON]`],
+    ['Imię ojca\tHenryk\tImię matki\tDanuta', `Imię ojca\t${N}\tImię matki\t${N}`],
+    ['Nazwisko\tMarek\tStanowisko\tkierowca', `Nazwisko\t${N}\tStanowisko\tkierowca`],
+    ['Nazwisko\tJana\tDział\tkadry', `Nazwisko\t${N}\tDział\tkadry`],
+    ['Imię i nazwisko\tJan Pawła\tFunkcja\tświadek', `Imię i nazwisko\t${N}\tFunkcja\tświadek`],
+  ]);
+  // pułapki: nagłówek tabeli z samych nazw kolumn (także z wierszem danych pod spodem)
+  keep(['Imię\tSzkoła\tNazwisko\tPrzedmiot', 'Imię\tWiek\tNazwisko\tMiasto\nJan\t40\tKowalski\tRadom'.split('\n')[0]]);
+  masked([['Imię\tNazwisko\tDział\nJan\tKowalski\tKadry', `Imię\tNazwisko\tDział\n${N}\t${N}\tKadry`]]);
+});
+test('dom4-fix1: tryb pseudonimów — imię w osobnej komórce dostaje pseudonim osoby z komórki nazwiska', () => {
+  const P = { pseudonyms: true };
+  masked(
+    [
+      ['Imię\tTomasz\tNazwisko\tWróblewski', 'Imię\t[OSOBA-A]\tNazwisko\t[OSOBA-A]'],
+      ['Pacjent\tJan\tNazwisko\tKowal', 'Pacjent\t[OSOBA-A]\tNazwisko\t[OSOBA-A]'],
+      ['Nr\tNazwisko\tImię\tObecności\n1\tAdamczyk\tJulia\t76', 'Nr\tNazwisko\tImię\tObecności\n1\t[OSOBA-A]\t[OSOBA-A]\t76'],
+      ['Nazwisko\tImię\tPESEL\nNowak\tAnna\t44051401359\nLis\tJan\t44051401359', 'Nazwisko\tImię\tPESEL\n[OSOBA-A]\t[OSOBA-A]\t[PESEL]\n[OSOBA-B]\t[OSOBA-B]\t[PESEL]'],
+    ],
+    P,
+  );
+  // pułapka: dwa nazwiska w wierszu — imię zostaje z ogólną etykietą
+  masked([['Imię\tJan\tNazwisko\tNowak\tNazwisko\tLis', 'Imię\t[IMIĘ I NAZWISKO]\tNazwisko\t[OSOBA-A]\tNazwisko\t[OSOBA-B]']], P);
+});
+test('dom4-fix1: imię i nazwisko-homograf imienia w celowniku i narzędniku to osoba; wyliczenie nie skleja pseudonimów', () => {
+  masked([
+    ['Odpis pozwu doręczyć pozwanemu Tomaszowi Markowi.', `Odpis pozwu doręczyć pozwanemu ${N}.`],
+    ['umowa z Tomaszem Markiem', `umowa z ${N}`],
+    ['Pismo przekazano Janowi Pawłowi.', `Pismo przekazano ${N}.`],
+    ['Wezwanie doręczono Krzysztofowi Pawle.', `Wezwanie doręczono ${N}.`],
+    ['Doręczyć Annie Kowalskiej i Tomaszowi Markowi.', `Doręczyć ${N} i ${N}.`],
+    ['Umowa pomiędzy Janem Markiem a Anną Nowak.', `Umowa pomiędzy ${N} a ${N}.`],
+  ]);
+  masked(
+    [
+      ['Sąd przesłuchał Piotra Pawła i Annę Nowak.', 'Sąd przesłuchał [OSOBA-A] i [OSOBA-B].'],
+      ['Doręczono Piotrowi Markowi i Annie Nowak.', 'Doręczono [OSOBA-A] i [OSOBA-B].'],
+      ['umowa z Tomaszem Markiem i Anną Nowak', 'umowa z [OSOBA-A] i [OSOBA-B]'],
+      ['Sąd przesłuchał Piotra Pawła i Tomasza Lisa.', 'Sąd przesłuchał [OSOBA-A] i [OSOBA-B].'],
+      // wspólne nazwisko małżonków dalej łączy
+      ['Anna i Jan Kowalscy wnoszą.', '[OSOBA-A] i [OSOBA-A] wnoszą.'],
+    ],
+    { pseudonyms: true },
+  );
+  // pułapki: papież z liczbą rzymską, patron, dwa imiona
+  keep(['Dziękujemy Janowi Pawłowi II za pontyfikat.', 'Spotkanie z Janem Pawłem II.', 'Imieniny Jana i Pawła.', 'Kościół pw. Piotra i Pawła', 'Z Anną Marią rozmawiałem.']);
+});
+test('dom4-fix1: WERSALIKI — osoba przed ulicą z patronem i numerem, „NA ROGU"; ulica nigdy jawna', () => {
+  masked([
+    ['JAN NOWAK ADAMA MICKIEWICZA 30 KRAKÓW', `${N} ${A} KRAKÓW`],
+    ['PRZELEW OD: STEFAN GÓRSKI JÓZEFA PIŁSUDSKIEGO 101 ŁÓDŹ TYTUŁ: ZWROT', `PRZELEW OD: ${N} ${A} ŁÓDŹ TYTUŁ: ZWROT`],
+    ['PRZELEW DO: HENRYK NOWICKI MARII KONOPNICKIEJ 1 LUBLIN TYTUŁ: FV 12/2025', `PRZELEW DO: ${N} ${A} LUBLIN TYTUŁ: FV 12/2025`],
+    ['JAN NOWAK\tADAMA MICKIEWICZA 30 KRAKÓW', `${N}\t${A} KRAKÓW`],
+    ['JAN NOWAK ADAMA MICKIEWICZA 30 ZGŁOSIŁ AWARIĘ.', `${N} ${A} ZGŁOSIŁ AWARIĘ.`],
+    ['NA ROGU ADAMA MICKIEWICZA 30', `NA ROGU ${A}`],
+    ['NA ROGU ADAMA MICKIEWICZA 7A/11', `NA ROGU ${A}`],
+  ]);
+  // pułapki: obiekt przy ulicy i tytuł utworu zostają
+  keep(['APTEKA PRZY TADEUSZA KOŚCIUSZKI 12', 'TRENY JANA KOCHANOWSKIEGO 19']);
+});
+test('dom4-fix1: bez nadmaskowania — obiekt z patronem WERSALIKAMI, godzina, procent, rok, wymiar, bibliografia, parametr URL', () => {
+  keep([
+    'AULA JANA KOCHANOWSKIEGO 3',
+    'SALA ADAMA MICKIEWICZA 12',
+    'SALA ADAMA MICKIEWICZA 10:00',
+    'LIST ADAMA MICKIEWICZA DO JOACHIMA LELEWELA',
+    'MECZ O PUCHAR JANA NOWAKA 3:1',
+    'PROGRAM: WYKŁAD O TWÓRCZOŚCI ADAMA MICKIEWICZA 10:00 – AULA',
+    'WYSTAWA ADAMA MICKIEWICZA 30%',
+    'BIOGRAFIA ADAMA MICKIEWICZA 3/2025',
+    'Rondo Adama Mickiewicza 3/2025',
+    'SPOTKANIE: RONDO ADAMA MICKIEWICZA 10:00',
+    'Nauczanie Jana Pawła II 4, Kraków 2005.',
+    'https://sklep.pl/p?kategoria=Anna_Karenina',
+    'https://sklep.pl/p?kolekcja=Maja_Summer',
+    'https://sklep.pl/p?produkt=Maria_Plus',
+    'https://pl.wikipedia.org/wiki?title=Jan_Matejko',
+  ]);
+  masked([
+    ['Wzrost Jana Nowaka 1 m 80 cm.', `Wzrost ${N} 1 m 80 cm.`],
+    ['Poezje Adama Mickiewicza 2, Warszawa 1955.', `Poezje ${N} 2, Warszawa 1955.`],
+    ['Pielgrzymka,Jana Pawła II 2 Kraków,1979', `Pielgrzymka,${N} II 2 Kraków,1979`],
+    // pułapki: dokument osoby, lokal „m", osoba w parametrze URL dalej maskowane
+    ['DEKLARACJA JANA NOWAKA', `DEKLARACJA ${N}`],
+    ['Lokator Adama Mickiewicza 30 m 2 zalega.', `Lokator ${A} zalega.`],
+    ['Profil: facebook.com/profile.php?ref=Anna_Nowak', 'Profil: facebook.com/profile.php?ref=[IMIĘ I NAZWISKO]'],
+  ]);
+});
+test('dom4-fix1: pułapki — skrzyżowanie w prozie prasowej, nazwisko „Wakat" w tabeli pseudonimów', () => {
+  keep(['Na rogu Tadeusza Kościuszki 12 i Romualda Traugutta 3 powstanie rondo.']);
+  masked([['Imię;Nazwisko\nAnna;Wakat', 'Imię;Nazwisko\n[IMIĘ I NAZWISKO];Wakat']], { pseudonyms: true });
 });

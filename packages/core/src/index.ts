@@ -2124,6 +2124,8 @@ const RE_URL_PARAM_PERSON = new RegExp(
   `([?&#][A-Za-z_]{1,30}=)(?=([${PL_UP}][${PL_LO}]+)[._+])([${PL_UP}][${PL_LO}]+(?:[._+][${PL_UP}][${PL_LO}]+){1,2})(?=[&#]|$)`,
   'g',
 );
+const RE_URL_CONTENT_PARAM =
+  /^(?:t|q|p|c|s|cat|category|categories|kategoria|kategorie|kolekcja|collection|produkt|product|item|firma|company|brand|marka|shop|sklep|store|title|tytul|tytuł|tag|tags|page|strona|article|artykul|film|movie|book|ksiazka|search|szukaj|query|haslo|wiki|topic|temat|serial|show|album|song|track)$/i;
 function passProtectUrls(ctx: RedactCtx): void {
   // Kotwica KSeF liczona RAZ: to skan całego wejścia, a wewnątrz callbacku wykonywałby się
   // dla każdego adresu z osobna (dokument z tysiącami linków rósł kwadratowo — 3,7 s na 1 MB).
@@ -2177,6 +2179,12 @@ function passProtectUrls(ctx: RedactCtx): void {
     if (ctx.on('IMIE')) {
       url = url.replace(RE_URL_PARAM_PERSON, (pm, key: string, first: string, val: string) => {
         if (!POLISH_FIRST_NAMES.has(first.toLowerCase())) return pm;
+        // Parametr treści sklepu albo serwisu („?kategoria=Anna_Karenina", „?produkt=Maria_Plus",
+        // „?title=Jan_Matejko") to nazwa produktu, kolekcji albo hasła, a drugi człon musi mieć
+        // kształt nazwiska („Maja_Summer", „Anna_Moda" — nie). Precyzja przed nadmaskowaniem.
+        if (RE_URL_CONTENT_PARAM.test(key.slice(1, -1))) return pm;
+        const last = val.split(/[._+]/).pop() ?? '';
+        if (!surnameBase(last) && !looksLikeSurname(last)) return pm;
         ctx.bump('IMIE');
         // w trybie pseudonimów ta sama osoba co w treści („Anna Nowak" → [OSOBA-A])
         return `${key}${ctx.personMask(val.split(/[._+]/).pop() ?? val)}`;
@@ -2706,7 +2714,7 @@ const RE_TAB_CELL_LABEL = /^[ ]*(?:\d{1,2}[.)][ ]*)?\p{L}(?:[\p{L} ()]|\.(?=[ ]*
 // 03.04.1980") — ZAMKNIĘTA lista etykiet osobowych i identyfikatorów. Inaczej wiersz nie dzielił się
 // na pola, a imię obok zamaskowanego nazwiska zostawało jawne (dawniej osoba zjadała etykietę).
 const RE_TAB_BARE_LABEL =
-  /^[ ]*(?:(?:pierwsze[ ]+|drugie[ ]+)?imi[eę]|imiona|nazwisko(?:[ ]+rodowe)?|imi[eę][ ]+i[ ]+nazwisko|nazwisko[ ]+i[ ]+imi[eę]|data[ ]+ur(?:\.|odzenia)|miejsce[ ]+ur(?:\.|odzenia)|pesel|nip|tel(?:\.|efon)|nr[ ]+tel(?:\.|efonu)|e-?mail|adres|ulica|miejscowo[sś][cć]|kod[ ]+pocztowy|nr[ ]+dowodu|płeć|obywatelstwo)[ ]*$/iu;
+  /^[ ]*(?:(?:pierwsze[ ]+|drugie[ ]+)?imi[eę](?:[ ]+(?:ojca|matki))?|imiona|nazwisko(?:[ ]+(?:rodowe|panie[nń]skie))?(?:[ ]+matki)?|imi[eę][ ]+i[ ]+nazwisko|nazwisko[ ]+i[ ]+imi[eę]|data[ ]+ur(?:\.|odzenia)|miejsce[ ]+ur(?:\.|odzenia)|pesel|nip|tel(?:\.|efon)|nr[ ]+tel(?:\.|efonu)|e-?mail|adres|ulica|miejscowo[sś][cć]|kod[ ]+pocztowy|nr[ ]+dowodu|płeć|obywatelstwo)[ ]*$/iu;
 // Komórka „etykieta wartość" bez dwukropka („Data ur. 03.04.1980", „PESEL 44051401359", „Tel. 600…")
 // to osobne pole — tylko etykiety identyfikatorów, nie osobowe („Imię Jan" bywa nagłówkiem prozy).
 // Nazwy kolumn, które w nagłówku tabeli stoją za etykietą osobową („Nazwisko⇥Imię⇥Stanowisko").
@@ -2726,12 +2734,35 @@ function passFormFields(ctx: RedactCtx): void {
   const tabCell = new Set<number>();
   // komórka „etykieta bez dwukropka⇥wartość" → długość etykiety z separatorem (początek wartości)
   const bareLabel = new Map<number, number>();
+  // Tryb pseudonimów: nazwisko z komórki „Nazwisko" tego samego wiersza formularza (indeks pierwszej
+  // komórki wiersza → nazwisko). Imię w osobnej komórce („Imię⇥Tomasz⇥Nazwisko⇥Wróblewski") dostaje
+  // pseudonim tej samej osoby, a nie ogólną etykietę obok [OSOBA-A].
+  const rowSurname = new Map<number, string>();
+  const noteRowSurname = (first: number, units: string[]): void => {
+    if (!ctx.pseudonyms) return;
+    const sur = units
+      .map((u) => /^[ ]*nazwisko[ ]*:[ \t]*(\p{Lu}[\p{L}-]+)[ \t]*$/iu.exec(u)?.[1])
+      .filter((v): v is string => !!v);
+    if (sur.length !== 1) return;
+    for (let k = 0; k < units.length; k++) rowSurname.set(first + k, sur[0]);
+  };
   const srcLines = ctx.text.split('\n');
   // Czy pod wierszem stoi wiersz tabeli z tą samą liczbą komórek (wtedy wiersz to nagłówek)?
+  // Etykieta w formularzu z TAB-em (pozycja parzysta): pole osobowe albo identyfikator, rola osoby
+  // („Pacjent", „Ojciec") albo nazwa pola spoza osoby („Stanowisko", „Dział", „Oddział").
+  const tabLabelish = (c: string): boolean => {
+    const l = c.trim().toLowerCase();
+    return RE_TAB_CELL_LABEL.test(c) || RE_TAB_LABEL_VALUE.test(c) || RE_TAB_BARE_LABEL.test(c) || TAB_ROLE_LABELS.has(l) || TAB_HEADER_WORDS.has(l);
+  };
+  // Czy pod wierszem stoi wiersz DANYCH tabeli z tą samą liczbą komórek (wtedy wiersz to nagłówek)?
+  // Wiersz formularza pod spodem („Telefon⇥600…⇥E-mail⇥…", „Oddział⇥Wewnętrzny⇥Sala⇥4") ma na
+  // pozycjach parzystych etykiety — to dalszy formularz, nie dane pod nagłówkiem.
   const tabRowBelow = (li: number, n: number): boolean => {
     let j = li + 1;
     while (j < srcLines.length && srcLines[j].trim() === '') j++;
-    return j < srcLines.length && srcLines[j].split(/\t+/).length === n;
+    if (j >= srcLines.length) return false;
+    const below = srcLines[j].split(/\t+/);
+    return below.length === n && !below.some((c, k) => k % 2 === 0 && tabLabelish(c));
   };
   for (let li = 0; li < srcLines.length; li++) {
     const ln = srcLines[li];
@@ -2742,6 +2773,7 @@ function passFormFields(ctx: RedactCtx): void {
       const labelCell = (c: string): boolean => fieldCell(c) || RE_TAB_BARE_LABEL.test(c);
       const labelled = cells.filter(fieldCell).length;
       if (labelled >= 2 && cells.every((c) => c.trim() === '' || fieldCell(c))) {
+        noteRowSurname(lines.length, cells);
         for (const c of cells) {
           tabCell.add(lines.length);
           lines.push(c);
@@ -2759,13 +2791,25 @@ function passFormFields(ctx: RedactCtx): void {
       // Nagłówek tabeli („Nazwisko⇥Imię⇥Stanowisko", „Imię i nazwisko⇥Lokal⇥Telefon") to nie pary:
       // przy etykiecie bez dwukropka wszystkie komórki muszą tworzyć pary „etykieta⇥wartość",
       // wartość nie jest nazwą kolumny, a wiersz pod nim nie ma tylu samo komórek.
-      const bareRow = cells.some((c) => RE_TAB_BARE_LABEL.test(c));
+      // Wiersz, w którym komórki NA PRZEMIAN są etykietami i wartościami, to formularz („Imię⇥Adam⇥
+      // Nazwisko⇥Nowak", „Pacjent⇥Jan⇥Nazwisko⇥Kowal", „Nazwisko⇥Marek⇥Stanowisko⇥kierowca"), także
+      // z dalszymi wierszami formularza pod spodem. Nagłówek tabeli to wiersz z samych nazw kolumn.
+      // Wartość pod etykietą imienia musi być imieniem („Imię⇥Szkoła⇥Nazwisko⇥Przedmiot" to nagłówek).
+      const roleAt = (k: number): boolean =>
+        k % 2 === 0 && TAB_ROLE_LABELS.has(cells[k].trim().toLowerCase()) && k + 1 < cells.length && POLISH_FIRST_NAMES.has(cells[k + 1].trim().toLowerCase());
+      const bareRow = cells.some((c, k) => RE_TAB_BARE_LABEL.test(c) || roleAt(k));
+      const isValueCell = (c: string): boolean => {
+        const l = c.trim().toLowerCase();
+        // rola małą literą to wartość pola („Funkcja⇥świadek"), wielką — etykieta („Świadek⇥Jan")
+        return l !== '' && !labelCell(c) && !TAB_HEADER_WORDS.has(l) && !(TAB_ROLE_LABELS.has(l) && /^[ ]*\p{Lu}/u.test(c));
+      };
       const bareOk =
         !bareRow ||
         (cells.length % 2 === 0 &&
-          cells.every((c, k) => (k % 2 === 0 ? labelCell(c) : c.trim() !== '' && !labelCell(c) && !TAB_HEADER_WORDS.has(c.trim().toLowerCase()))) &&
+          cells.every((c, k) => (k % 2 === 0 ? tabLabelish(c) : isValueCell(c))) &&
+          cells.every((c, k) => k % 2 === 1 || !/^[ ]*(?:pierwsze[ ]+|drugie[ ]+)?imi[eę](?:[ ]+(?:ojca|matki))?[ ]*$/iu.test(c) || isFirstNameLike(cells[k + 1].trim().split(/[ ]+/)[0])) &&
           !tabRowBelow(li, cells.length));
-      if (bareOk && cells.filter(labelCell).length >= 2) {
+      if (bareOk && (bareRow ? cells.filter((c, k) => k % 2 === 0 && tabLabelish(c)).length : cells.filter(labelCell).length) >= 2) {
         const seps = parts.filter((_p, k) => k % 2 === 1);
         const units: string[] = [];
         const unitSeps: string[] = [];
@@ -2776,7 +2820,7 @@ function passFormFields(ctx: RedactCtx): void {
           const c = cells[k];
           if (k > 0) unitSeps.push(seps[k - 1]);
           const colonLabel = /^[^:]*:[ ]*$/.test(c) && RE_TAB_CELL_LABEL.test(c);
-          const bareLbl = !colonLabel && RE_TAB_BARE_LABEL.test(c);
+          const bareLbl = !colonLabel && (RE_TAB_BARE_LABEL.test(c) || (bareRow && k % 2 === 0 && tabLabelish(c) && !fieldCell(c)));
           if ((colonLabel || bareLbl) && k + 1 < cells.length && cells[k + 1].trim() !== '' && !labelCell(cells[k + 1])) {
             units.push(c + seps[k] + cells[k + 1]);
             unitBare.push(bareLbl ? c.length + seps[k].length : 0);
@@ -2788,11 +2832,13 @@ function passFormFields(ctx: RedactCtx): void {
           } else ok = false;
         }
         if (ok && pairs) {
+          const first = lines.length;
           for (let u = 0; u < units.length; u++) {
             tabCell.add(lines.length);
             if (unitBare[u]) bareLabel.set(lines.length, unitBare[u]);
             lines.push(units[u]);
           }
+          noteRowSurname(first, units.map((u, k) => (unitBare[k] ? `${u.slice(0, unitBare[k]).trim()}: ${u.slice(unitBare[k])}` : u)));
           groups.push({ n: units.length, seps: unitSeps });
           continue;
         }
@@ -2876,7 +2922,8 @@ function passFormFields(ctx: RedactCtx): void {
       const rv = /^([\p{L} ]{2,30}):[ \t]+(\p{Lu}\p{Ll}+)[ \t]*$/u.exec(bare);
       const nl = rv?.[2].toLowerCase() ?? '';
       if (rv && TAB_ROLE_LABELS.has(rv[1].trim().toLowerCase()) && POLISH_FIRST_NAMES.has(nl) && !NOUN_LIKE_FIRST_NAMES.has(nl)) {
-        lines[i] = lines[i].replace(new RegExp(`${escapeRe(rv[2])}(?=[ \\t]*$)`), () => ctx.M.IMIE);
+        const rowSur = rowSurname.get(i);
+        lines[i] = lines[i].replace(new RegExp(`${escapeRe(rv[2])}(?=[ \\t]*$)`), () => (rowSur ? ctx.personMask(rowSur) : ctx.M.IMIE));
         ctx.bump('IMIE');
       }
       continue;
@@ -2924,7 +2971,13 @@ function passFormFields(ctx: RedactCtx): void {
         }
         // Końcowe „\r" (tekst z CRLF dzielimy po „\n") zostaje — inaczej linia z zamaskowanym
         // polem traciła windowsowy koniec wiersza i plik wychodził z mieszanymi końcami linii.
-        const mask = tabCell.has(i) ? maskCell(field, val, label) : maskFor(field, val);
+        const rowSur = tabCell.has(i) ? rowSurname.get(i) : undefined;
+        const mask =
+          rowSur && /^(?:pierwsze[ ]+|drugie[ ]+)?imi[eę]$/iu.test(label) && /^\p{Lu}\p{Ll}+$/u.test(val)
+            ? ctx.personMask(rowSur)
+            : tabCell.has(i)
+              ? maskCell(field, val, label)
+              : maskFor(field, val);
         lines[i] = lines[i].replace(new RegExp(`${escapeRe(val)}[^\\S\\r]*(?=\\s*$)`), () => mask);
         ctx.bump(field.type);
       }
@@ -3518,6 +3571,10 @@ function passDelimitedTable(ctx: RedactCtx): void {
         (personVals.length > 0 && personVals.every((v) => /^\p{Lu}/u.test(v) && !tableOfficeCell(v) && !v.split(/ +/).some((w) => isPersonRoleValue(w.toLowerCase()))));
       let out = '';
       let last = 0;
+      // Tryb pseudonimów: imię w osobnej kolumnie („Nazwisko⇥Imię", „Adamczyk⇥Julia") dostaje
+      // pseudonim osoby z kolumny nazwiska tego samego wiersza, nie ogólną etykietę obok [OSOBA-A].
+      const surCells = values.filter((v, i) => kinds[i] === 'surname' && /^\p{Lu}[\p{L}-]+$/u.test(v.trim()) && !isEmptyFormValue(v.trim()) && !isPersonRoleValue(v.trim().toLowerCase()));
+      const rowSur = ctx.pseudonyms && surCells.length === 1 ? surCells[0].trim() : '';
       cells.forEach((c, i) => {
         const raw = texts[i];
         const value = values[i];
@@ -3528,8 +3585,9 @@ function passDelimitedTable(ctx: RedactCtx): void {
         // i miasto mają własne przebiegi i maski, jak w drugiej linii adresu pod kluczem JSON
         if (kind === 'addr' && /\d{2}-\d{3}(?!\d)/.test(value)) return;
         if ((kind === 'addr' || kind === 'city') && !personPlausible && kinds.some(personCell)) return;
-        const mask = structMask(kind, value, names[i]);
+        let mask = structMask(kind, value, names[i]);
         if (mask === null) return;
+        if (rowSur && kind === 'first' && /^\p{Lu}\p{Ll}+$/u.test(value.trim()) && mask === ctx.M.IMIE) mask = ctx.personMask(rowSur);
         const at = c.start + raw.indexOf(value);
         out += line.slice(last, at) + mask;
         last = at + value.length;
@@ -5491,7 +5549,7 @@ const PATRON_STREET_TITLES =
 const PATRON_STREET_HEAD_SRC = String.raw`(?<![\p{L}\p{N}])(?:(?<!\.)|(?<=(?<!\p{L})im\.))(?:(?:${PATRON_STREET_TITLES}) +)?(\p{Lu}\p{Ll}+)(?: +(\p{Lu}\p{Ll}+))? +(\p{Lu}\p{Ll}+(?:-\p{Lu}\p{Ll}+)?)(?: +[IVX]{1,4})?`;
 // Liczba przed jednostką powierzchni („Mieszkanie Jana Nowaka 48 m2", „Działka … 1200 m2", „… 2 ha")
 // to metraż, nie numer domu, a „m" bez kropki to lokal tylko ze spacją przed numerem („30 m 2").
-const PATRON_STREET_NUM_SRC = String.raw` +\d{1,4}[a-zA-Z]?(?: ?[/-] ?\d{1,4}[a-zA-Z]?)?(?: *(?:[mM]\.(?= *\d)|[mM](?= +\d)|[lL][oO][kK]\.|[lL]okal(?:u)?|LOKAL(?:U)?) *\d{1,3}[a-zA-Z]?)?(?! *(?:[mM]2|[mM]²|[mM][kK][wW]|[mM]\.? ?[kK][wW]\.?|ha)(?![\p{L}\p{N}]))`;
+const PATRON_STREET_NUM_SRC = String.raw` +\d{1,4}[a-zA-Z]?(?: ?[/-] ?\d{1,4}[a-zA-Z]?)?(?: *(?:[mM]\.(?= *\d)|[mM](?= +\d)(?! +\d{1,3} *(?:cm|mm)(?![\p{L}\p{N}]))|[lL][oO][kK]\.|[lL]okal(?:u)?|LOKAL(?:U)?) *\d{1,3}[a-zA-Z]?)?(?! *(?:[mM]2|[mM]²|[mM][kK][wW]|[mM]\.? ?[kK][wW]\.?|ha)(?![\p{L}\p{N}]))`;
 const PATRON_STREET_SRC = PATRON_STREET_HEAD_SRC + PATRON_STREET_NUM_SRC;
 // Po etykiecie adresu, zamieszkania albo „przy" ulica z numerem w dowolnym otoczeniu: miasto
 // wielką literą, kod pocztowy, „nr"/„pod nr", myślnik czy imię kolejnej osoby za numerem
@@ -5519,7 +5577,7 @@ const RE_PATRON_STREET_NO_LOOSE = new RegExp(String.raw`${PATRON_STREET_SRC}(?= 
 // odwiedzała", „… 12 maja", „… 5 lat") — liczba należy do zdania, nie do adresu. Tylko w tej samej
 // komórce: „Adres:⇥Jana Pawła II 14⇥Miejsc.:⇥Kielce" to adres, a „Miejsc." — następna etykieta.
 const RE_PATRON_NUM_UNIT_AFTER =
-  /^ *(?:stycznia|lutego|marca|kwietnia|maja|czerwca|lipca|sierpnia|września|października|listopada|grudnia|r\.|roku|lat|lata|zł|osób|os\.|egz\.?|egzemplarz\p{L}*|razy|raz|szt\.?|sztuk\p{L}*|pkt|punkt\p{L}*|proc\p{L}*|%|tys\.?|godz\p{L}*|min\.?|minut\p{L}*|sekund\p{L}*|dni|tygodni\p{L}*|miesięc\p{L}*|km|metr\p{L}*|m(?! *[.\d])|klas\p{L}*|uczni\p{L}*|miejsc\p{L}*)(?!\p{L})/iu;
+  /^ *(?:stycznia|lutego|marca|kwietnia|maja|czerwca|lipca|sierpnia|września|października|listopada|grudnia|r\.|roku|lat|lata|zł|osób|os\.|egz\.?|egzemplarz\p{L}*|razy|raz|szt\.?|sztuk\p{L}*|pkt|punkt\p{L}*|proc\p{L}*|%|tys\.?|godz\p{L}*|min\.?|minut\p{L}*|sekund\p{L}*|dni|tygodni\p{L}*|miesięc\p{L}*|km|metr\p{L}*|m(?! *[.\d])|m +\d{1,3} *(?:cm|mm)|cm|mm|klas\p{L}*|uczni\p{L}*|miejsc\p{L}*)(?!\p{L})/iu;
 // Patron z liczbą rzymską i numerem domu („Jana Pawła II 5/2", „Jana Pawła II 30") to nazwa ulicy:
 // żywa osoba nie nosi liczby rzymskiej, a papież nie ma numeru domu. Od kiedy „Jana Pawła" przestało
 // być parą osoby, taka ulica bez kotwicy adresu zostawała jawna w całości (wiersz CSV z rolą
@@ -5719,6 +5777,18 @@ function institutionBeforeAddr(before: string): boolean {
     );
   });
 }
+/**
+ * Czy tuż przed ulicą stoi osoba WERSALIKAMI („JAN NOWAK ", „PRZELEW OD: STEFAN GÓRSKI ", „NOWAK
+ * JAN⇥")? Jedno imię w mianowniku ze słownika i drugi wyraz w kształcie nazwiska.
+ */
+function capsPersonPairBefore(before: string): boolean {
+  const mm = /(?:^|[^\p{L}])(\p{Lu}{2,}(?:-\p{Lu}{2,})?) +(\p{Lu}{2,}(?:-\p{Lu}{2,})?)[ \t]*$/u.exec(before);
+  if (!mm) return false;
+  const [a, b] = [mm[1].toLowerCase(), mm[2].toLowerCase()];
+  const nom = (w: string): boolean => POLISH_FIRST_NAMES.has(w) && !isFirstNameGenitive(w);
+  const sur = (w: string): boolean => !isFirstNameLike(w) && !LEGAL_ENTITY_WORDS.has(w) && (!!surnameBase(w) || looksLikeSurname(w));
+  return (nom(a) && sur(b)) || (sur(a) && nom(b));
+}
 function patronStreetWithNumber(ctx: RedactCtx): void {
   // Kolejna ulica w wyliczeniu za zamaskowanym adresem („Mieszkańcy [ADRES] i Jana Pawła II 7").
   const reEnum = new RegExp(String.raw`${escapeRe(ctx.M.ADRES)}[ \t]*(?:,|i|oraz)[ \t]+$`, 'u');
@@ -5739,6 +5809,9 @@ function patronStreetWithNumber(ctx: RedactCtx): void {
     // Kochanowskiego 2023") i rok zamiast numeru domu („dla Jana Kowalskiego 2023, Warszawa") to
     // nie adres. Rok bez lokalu odrzucamy: numer domu 1900–2099 jest rzadszy niż data.
     if ((/(?<!\p{L})(?:im\.|imienia)[ \t]*$/u.test(before) && !RE_PATRON_STREET_WORD_BEFORE.test(before)) || /[ \t](?:1[89]|20)\d\d$/.test(m)) return null;
+    // Numer z rokiem po ukośniku („Rondo Adama Mickiewicza 3/2025" — uchwała, sygnatura) i godzina
+    // („RONDO ADAMA MICKIEWICZA 10:00") to nie numer domu ani lokalu.
+    if (/\/(?:19|20)\d\d$/.test(m) || /^:\d/.test(t.slice(offset + m.length, offset + m.length + 2))) return null;
     if (RE_PATRON_STREET_SAINT_BEFORE.test(before) || (/,[ \t]*$/.test(before) && institutionBeforeAddr(before))) return null;
     const tail = t.slice(offset + m.length, offset + m.length + 50);
     // Data, jednostka albo krotność za numerem („… 5 egz.", „… 5 razy") i głowa nazwy obiektu tuż
@@ -5768,6 +5841,12 @@ function patronStreetWithNumber(ctx: RedactCtx): void {
       (mode === '' && (patronStreetEnvelope(before, t.slice(offset + m.length, offset + m.length + 50)) || patronStreetCityLead(before, m))) ||
       (RE_PATRON_STREET_PRZY.test(before) && !institutionBeforeAddr(before.replace(RE_PATRON_STREET_PRZY, ''))) ||
       (w1 === w1.toUpperCase() && RE_PATRON_STREET_CAPS_DO.test(before) && RE_PATRON_STREET_CAPS_DO_END.test(tail)) ||
+      // WERSALIKI: osoba tuż przed ulicą z patronem i numerem („JAN NOWAK ADAMA MICKIEWICZA 30
+      // KRAKÓW", „PRZELEW OD: STEFAN GÓRSKI JÓZEFA PIŁSUDSKIEGO 101 ŁÓDŹ") — wyciąg bankowy, adres osoby
+      (w1 === w1.toUpperCase() && w1.length > 1 && (capsPersonPairBefore(before) || RE_PERSON_MASK_BEFORE.test(before))) ||
+      // „NA ROGU ADAMA MICKIEWICZA 30" WERSALIKAMI — skrzyżowanie ulic (zapis mieszany „na rogu …"
+      // w prozie prasowej zostaje jak w v0.46.23)
+      (w1 === w1.toUpperCase() && /(?<!\p{L})NA[ \t]+ROGU[ \t]+$/u.test(before)) ||
       RE_PATRON_STREET_WORD_BEFORE.test(before) ||
       reEnum.test(before)
     ) {
@@ -5791,7 +5870,10 @@ function patronStreetWithNumber(ctx: RedactCtx): void {
       const k = RE_PATRON_STREET_KEY.exec(before)?.[1];
       if ((k && RE_PATRON_STREET_KEY_NOT.test(k)) || institutionBeforeAddr(before)) return null;
       if (/(?<!\d)(?:1[89]|20)\d\d(?!\d)/.test(m)) return null;
-      if (mode === 'roman' && (RE_PATRON_ROMAN_BOUNDARY.test(before) || personPairBeforeAddr(before))) {
+      // odsyłacz w poprzedniej komórce („Pielgrzymka,Jana Pawła II 2 Kraków,1979", „| Pielgrzymka |
+      // Jana Pawła II 2 Kraków |") to opis wydarzenia, nie adres — dalej jak w v0.46.23 (osoba)
+      const refCell = RE_PATRON_ROMAN_REF_BEFORE.test(before.replace(/[ \t]*[,;|\t][ \t]*$/, ' '));
+      if (mode === 'roman' && ((RE_PATRON_ROMAN_BOUNDARY.test(before) && !refCell) || personPairBeforeAddr(before))) {
         ctx.bump('ADRES');
         return ctx.M.ADRES;
       }
@@ -5814,6 +5896,14 @@ function patronStreetWithNumber(ctx: RedactCtx): void {
     // Ułamek właściwy przed gołym przecinkiem CSV („1,Jana Nowaka 4/5,Kraków" pod nagłówkiem „Ocena")
     // to ocena, wynik albo udział osoby, nie numer lokalu.
     if (RE_PATRON_STREET_SLASH.test(m) && !patronStreetFlatNo(m) && /^,(?![ \t])/.test(tail)) return null;
+    // Opis bibliograficzny („Poezje Adama Mickiewicza 2, Warszawa 1955.", „Nauczanie Jana Pawła II 4,
+    // Kraków 2005.", „Psalmy Jana Kochanowskiego 3, Lublin."): tytuł dzieła przed autorem albo rok
+    // wydania za miejscem — numer to tom, a miasto to miejsce wydania, nie adres.
+    if (
+      (headW && (RE_CAPS_WORK_HEAD.test(headW) || RE_PATRON_ROMAN_REF_BEFORE.test(`${headW} `))) ||
+      /^[ \t]*,[ \t]*\p{Lu}\p{Ll}+(?:[ -]\p{Lu}\p{Ll}+)?[ \t]+(?:1[5-9]|20)\d\d(?!\d)/u.test(tail)
+    )
+      return null;
     const after = RE_ADDR_CITY_AFTER.exec(tail);
     // Kod pocztowy za przecinkiem bywa już maską („…14, [KOD-POCZTOWY] Busko"), a etykieta
     // zamieszkania tuż przed ulicą („zam. Jana Pawła II 14, Busko") sama wskazuje adres.
@@ -6967,7 +7057,10 @@ const RE_GEN_PAIR_PATRON_BEFORE =
 function genPairPersonFree(t: string, at: number, end: number, pair: string): boolean {
   // Wyliczenie rodziców („córka Piotra Pawła i Anny Marii") i szyk rekordu z nazwiskiem przed parą
   // („Wniosek Kowalskiego Stanisława Jana") maskują dalsze przebiegi w całości, nie po kawałku.
-  if (/^[ \t]+(?:i|oraz)[ \t]+\p{Lu}/u.test(t.slice(end, end + 12))) return false;
+  // Tylko gdy dalej stoi drugie imię albo dwa imiona bez nazwiska; osoba z nazwiskiem w wyliczeniu
+  // („Piotra Pawła i Annę Nowak", „… i Tomasza Lisa") nie zdejmuje maski z pary.
+  const enumNext = /^[ \t]+(?:i|oraz)[ \t]+(\p{Lu}\p{Ll}+)(?:[ \t]+(\p{Lu}\p{Ll}+))?/u.exec(t.slice(end, end + 40));
+  if (enumNext && (!isFirstNameLike(enumNext[1]) || !enumNext[2] || (isFirstNameLike(enumNext[2]) && !surnameBase(enumNext[2])))) return false;
   const prevCap = /(\p{Lu}\p{Ll}+)[ \t]+$/u.exec(t.slice(Math.max(0, at - 30), at))?.[1]?.toLowerCase();
   if (prevCap && !isFirstNameLike(prevCap) && (!!surnameBase(prevCap) || looksLikeSurname(prevCap))) return false;
   if (RE_GEN_PAIR_PERSON_AFTER.test(t.slice(end, end + 30))) return true;
@@ -6991,6 +7084,15 @@ function passPersonPairs(ctx: RedactCtx): void {
     // poprzedniej osoby, a trzeci to drugie imię drugiej, nie wspólne nazwisko. Wspólny klucz robił
     // z ojca i matki jedną osobę, a „Piotra" odrywało się od swojej maski.
     if (isFirstNameLike(c) && !surnameBase(c)) {
+      const prev = /(\p{Lu}\p{Ll}+)[ \t]+$/u.exec(t.slice(Math.max(0, offset - 30), offset))?.[1];
+      if (prev && isFirstNameLike(prev)) return m;
+    }
+    // Imię przed pierwszym członem, który nie jest imieniem w mianowniku („Piotra Pawła i Annę
+    // Nowak", „Tomaszem Markiem i Anną Nowak", „Piotrowi Markowi i Annie Nowak"): pierwszy człon to
+    // nazwisko poprzedniej osoby (homograf imienia w odmianie), nie imię drugiej osoby o wspólnym
+    // nazwisku. Wspólny klucz sklejał dwie różne osoby w jeden pseudonim.
+    const al = a.toLowerCase();
+    if (!POLISH_FIRST_NAMES.has(al) || isFirstNameGenitive(al)) {
       const prev = /(\p{Lu}\p{Ll}+)[ \t]+$/u.exec(t.slice(Math.max(0, offset - 30), offset))?.[1];
       if (prev && isFirstNameLike(prev)) return m;
     }
@@ -7143,6 +7245,18 @@ function passPersonPairs(ctx: RedactCtx): void {
       // Wyraz z wielkiej litery tuż za parą to nazwisko („Prezesa Zarządu Jana Kazimierza Nowaka"):
       // para to wtedy dwa imiona, a osobę maskuje dalszy przebieg w całości, nie po kawałku.
       const capAfter = /^ +\p{Lu}/u.test(ctx.text.slice(offset + m.length, offset + m.length + 3));
+      // Imię w celowniku, narzędniku albo miejscowniku i odmiana imienia z ruchomym „e" („Tomaszowi
+      // Markowi", „Tomaszem Markiem", „Janowi Pawłowi", „Krzysztofowi Pawle"): drugi człon to
+      // nazwisko-homograf (Marek, Paweł), jak w v0.46.23. Papież z liczbą rzymską zostaje (niżej).
+      const obliqueHomo = obliqueF && EXTRA_NAME_FORMS.has(g) && /(?:owi|em|le)$/.test(g) && isFirstNameLike(g);
+      if (
+        !capAfter &&
+        obliqueHomo &&
+        !/^[ \t]+[IVX]{1,4}(?!\p{L})/u.test(ctx.text.slice(offset + m.length, offset + m.length + 8))
+      ) {
+        ctx.bump('IMIE');
+        return parts.slice(0, 2 * start).join('') + maskCells(parts, start, k - 1, ctx.personMask(words[k - 1])) + parts.slice(2 * k - 1).join('');
+      }
       if (
         !capAfter &&
         (nomF || obliqueF || (genF && (anchored || roleGen || genFree))) &&
@@ -8056,8 +8170,11 @@ const RE_CAPS_ROUTE_HEAD = /(?<!\p{L})(?:DROG|TRAS|ODCIN|ŚCIEŻK|CHODNIK|JEZDNI
 // Liczba w kształcie numeru domu za parą WERSALIKAMI. Rok („TRENY JANA KOCHANOWSKIEGO 1580", „ROK
 // ADAMA MICKIEWICZA 2022") i liczebnik przed rzeczownikiem („FRASZKI … 3 KSIĘGI") numerem nie są,
 // więc głowa nazwy utworu albo wydarzenia dalej chroni parę przed maską osoby.
+// Głowa nazwy obiektu, wydarzenia albo dzieła z patronem WERSALIKAMI (po toLowerCase).
+const RE_CAPS_PATRON_OBJECT_HEAD =
+  /^(?:aul[aiię]|list|listy|listu|puchar\p{L}*|memoriał\p{L}*|turniej\p{L}*|nagrod\p{L}*|stypendi\p{L}*|wystaw\p{L}*|biografi\p{L}*|twórczoś\p{L}*|wykład\p{L}*|pomnik\p{L}*|popiers\p{L}*|tablic\p{L}*|rond\p{L}*|skwer\p{L}*|park\p{L}*|kopiec|kopca)$/u;
 const RE_CAPS_HOUSE_NO_AFTER =
-  /^[ \t]+(?!(?:1\d|20)\d{2}(?!\d))\d{1,4}[A-Za-z]?(?![\p{L}\d])(?![ \t]+(?!(?:W|WE|I|M|LOK|NR)(?!\p{L}))\p{Lu}{2,})/u;
+  /^[ \t]+(?!(?:1\d|20)\d{2}(?!\d))\d{1,4}[A-Za-z]?(?![\p{L}\d])(?![ \t]*[:%]|\/(?:19|20)\d\d(?!\d))(?![ \t]+(?!(?:W|WE|I|M|LOK|NR)(?!\p{L}))\p{Lu}{2,})/u;
 // Głowa tytułu utworu literackiego albo religijnego przed autorem (małymi literami po toLowerCase).
 const RE_CAPS_WORK_HEAD =
   /^(?:treny|tren|dziady|ballad[ya]?|romans(?:e|y)?|fraszk[ia]|sonet(?:y)?|pieśni?|pieśń|wiersz(?:e)?|rapsod(?:y)?|hymn(?:y)?|psalm(?:y)?|poemat(?:y)?|poezje|liryki|opowiadani[ae]|nowel[ae]|bajk[ia]|baśni|baśń|dzieła|utwory|kazani[ae]|encyklik[ai]|homili[ae])$/u;
@@ -8067,7 +8184,9 @@ function capsNameHeadBefore(t: string, offset: number, end?: number, n1?: string
   if (!w) return false;
   const wl = w.toLowerCase();
   if (ALLCAPS_TITLES.has(wl)) return false;
-  if (capsDocRunBefore(before)) return false;
+  // Dokument przed postacią historyczną („LIST ADAMA MICKIEWICZA DO JOACHIMA LELEWELA") to dzieło
+  // albo odsyłacz, jak w v0.46.23 — nie dokument strony pisma.
+  if (capsDocRunBefore(before) && !(/^list(?:y|u|ów)?$/.test(wl) && historicGenPairAt(t, offset))) return false;
   if (end === undefined) return !CAPS_HEAD_NOT_NAME.has(wl);
   const after = t.slice(end, end + 40);
   // „SALA GIMNASTYCZNA PRZY ADAMA MICKIEWICZA 5", „OŚRODEK ZDROWIA PRZY …" — obiekt publiczny przy
@@ -8076,6 +8195,10 @@ function capsNameHeadBefore(t: string, offset: number, end?: number, n1?: string
   // Tytuł utworu z numerem („TRENY JANA KOCHANOWSKIEGO 19", „DZIADY ADAMA MICKIEWICZA 3 W REŻYSERII",
   // „BALLADY … 5 I 6") — numer utworu albo części, nie numer domu; autor to nie strona pisma.
   if (RE_CAPS_WORK_HEAD.test(wl)) return true;
+  // Sala, aula, obiekt, puchar, list albo inne dzieło z patronem („SALA ADAMA MICKIEWICZA 12", „AULA
+  // JANA KOCHANOWSKIEGO 3", „MECZ O PUCHAR JANA NOWAKA 3:1", „LIST ADAMA MICKIEWICZA DO …") — nazwa
+  // obiektu albo odsyłacz, jak w v0.46.23.
+  if (RE_CAPS_PATRON_OBJECT_HEAD.test(wl) || RE_PUBLIC_FACILITY_WORD.test(wl) || PATRON_GEN_HEADS.has(wl)) return true;
   // (przyimek albo rola przed parą: każda liczba, jak dotąd — „DZIAŁAJĄC PRZY ADAMA NOWAKA 5 RAZY")
   if ((CAPS_HEAD_NOT_NAME.has(wl) ? /^[ \t]+\d/ : RE_CAPS_HOUSE_NO_AFTER).test(after) && !capsOrgHead(wl)) return false;
   if (!CAPS_HEAD_NOT_NAME.has(wl)) return true;
@@ -8089,6 +8212,18 @@ function capsNameHeadBefore(t: string, offset: number, end?: number, n1?: string
     return !!to && isFirstNameGenitive(to[1].toLowerCase());
   }
   return /(?<!\p{L})OD[ \t]+\p{Lu}{2,}(?:[ \t]+\p{Lu}{2,}){1,3}[ \t]+DO[ \t]+$/u.test(line);
+}
+// Dopełniacz nazwiska postaci historycznej („MICKIEWICZA", „KOCHANOWSKIEGO", „KONOPNICKIEJ",
+// „KOŚCIUSZKI") — patrz HISTORIC_SURNAMES.
+const HISTORIC_SURNAMES_GEN = new Set<string>(
+  [...'jagiełło matejko sobieski kopernik chopin skłodowska piłsudski mickiewicz słowacki kościuszko moniuszko sienkiewicz konopnicka wyspiański paderewski kochanowski norwid żeromski reymont szymanowski wieniawski lutosławski fredro krasicki orzeszkowa'.split(' ')].map((s) =>
+    /ki$/.test(s) ? `${s}ego` : /ka$/.test(s) ? `${s.slice(0, -1)}iej` : /o$/.test(s) ? `${s.slice(0, -1)}i` : `${s}a`,
+  ),
+);
+/** Czy od `offset` stoi para „IMIĘ NAZWISKO" w dopełniaczu postaci historycznej? */
+function historicGenPairAt(t: string, offset: number): boolean {
+  const p = /^(\p{L}+)[ \t]+(\p{L}+)/u.exec(t.slice(offset, offset + 50));
+  return !!p && isFirstNameGenitive(p[1].toLowerCase()) && HISTORIC_SURNAMES_GEN.has(p[2].toLowerCase());
 }
 /** Przypadek zależny imienia WERSALIKAMI (nie mianownik ze słownika). */
 const capsObliqueFirst = (n: string): boolean => !POLISH_FIRST_NAMES.has(n) || isFirstNameGenitive(n);

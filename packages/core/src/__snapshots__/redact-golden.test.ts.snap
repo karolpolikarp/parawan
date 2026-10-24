@@ -933,8 +933,8 @@ Kierownik Działu Kadr [OSOBA-D]",
   "os-r-24": "opinia [OSOBA-A] była druzgocąca",
   "os-r-25": "[OSOBA-A] przyszła na przesłuchanie.",
   "os-r-26": "Nazwisko	Imię	Stanowisko
-[OSOBA-A]	[IMIĘ I NAZWISKO]	Kierowca
-[OSOBA-B]	[IMIĘ I NAZWISKO]	Kierownik",
+[OSOBA-A]	[OSOBA-A]	Kierowca
+[OSOBA-B]	[OSOBA-B]	Kierownik",
   "os-r-27": "Wnioskodawca: [OSOBA-A]
 Lista obecności: [OSOBA-B], [OSOBA-C]
 POWÓD: [OSOBA-D]
@@ -1065,12 +1065,12 @@ User name: [OSOBA-A]
 User: [OSOBA-B]
 Wnioskodawca: [OSOBA-B]",
   "str-154": "imie;nazwisko;pesel;data_urodzenia;miejscowosc
-[IMIĘ I NAZWISKO];[OSOBA-A];[PESEL];[DATA-URODZENIA];[MIEJSCOWOŚĆ]",
+[OSOBA-A];[OSOBA-A];[PESEL];[DATA-URODZENIA];[MIEJSCOWOŚĆ]",
   "str-155": "Lp.;Nr rejestracyjny;Marka
 1;[NR-REJESTRACYJNY];Skoda
 | Imię | Nazwisko |
 |---|---|
-| [IMIĘ I NAZWISKO] | [OSOBA-A] |",
+| [OSOBA-A] | [OSOBA-A] |",
   "str-156": "Adres zamieszkania: [ADRES], [MIEJSCOWOŚĆ]
 [OSOBA-A], zam. [ADRES] w [MIEJSCOWOŚĆ]
 urodziłam się [DATA-URODZENIA] w [MIEJSCOWOŚĆ]
@@ -1081,7 +1081,7 @@ TEL;TYPE=WORK:[TELEFON]
   "str-158": "Strony: [OSOBA-A] – [ADRES]. Adres: [ADRES]
 Imię;Nazwisko;Miasto
 Wakat;-;Warszawa
-[IMIĘ I NAZWISKO];[OSOBA-A];[MIEJSCOWOŚĆ]",
+[OSOBA-A];[OSOBA-A];[MIEJSCOWOŚĆ]",
   "str-159": "Nieruchomość objęta księgą wieczystą KW nr [NR-KW] prowadzoną przez Sąd Rejonowy.",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-160": "działka nr ewid. 123/4, obręb 0005 Brzozowa Wola, KW [NR-KW].",
