@@ -103,6 +103,7 @@ Sąd Rejonowy	Wydział Cywilny",
   "neg-156": "UNIWERSYTET ADAMA MICKIEWICZA W POZNANIU. ULICA KOŚCIUSZKI TADEUSZA. KRÓL JAN III SOBIESKI. PIĄTEK 3 MAJA. ANNA STAROSTA. Kot Anny spał. Świadek Jehowy odmówił. Biuro na II p. Pokój 304.",
   "neg-157": "Kościół św. Jerzego Męczennika. Katedra Świętego Jerzego. Marka Toyota zdobyła nagrodę. Walka z korupcją trwa. Ewangelia wg sw. Lukasza. Jezus, syn Józefa i Maryi, nauczał.",
   "neg-158": "Nr zam. 45/2024 z dnia 12.03.2024. zam. Kawa 3 opakowania. Adres: Sala 5. Dziecko urodzi się około 12.05.2026. Login SSO: Okta. Login VPN: tak. <xs:element name="Nazwisko"/> <Podmiot osoba="prawna"/> Liczba pojazdów według GUS 2023 wzrosła.",
+  "neg-159": "Powód Kruk S.A. z siedzibą we Wrocławiu wniósł pozew. Pozwany Wilk Sp. z o.o. nie stawił się. Cudzoziemiec zam. w Sudanie. Jeżeli dziecko urodziło się 1 czerwca 2026 r., wniosek należy złożyć w terminie. Autem LPG 2010 dojechano. Zakup pojazdów: GBA 2023 r. Adres zamieszkania: Rubryka 7.",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
@@ -484,6 +485,10 @@ Login AD: wkozlowski
 TEL;TYPE=WORK:[TELEFON]
 <Osoba imie="Anna" nazwisko="Gzik" miasto="Kalisz"/>",
   "str-157": "Wykaz pojazdów: WE 12345, GD 2345A. Kierujący autem WE 6789P zbiegł. Jan Kowalski, zam. w Świdniku, zeznaje.",
+  "str-158": "Strony: Anna Kowalska – Jana Pawła II 5. Adres: Kazimierza Wielkiego 12
+Imię;Nazwisko;Miasto
+Wakat;-;Warszawa
+Jan;Kowalski;Kraków",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
@@ -675,6 +680,7 @@ Sąd Rejonowy	Wydział Cywilny",
   "neg-156": "UNIWERSYTET ADAMA MICKIEWICZA W POZNANIU. ULICA KOŚCIUSZKI TADEUSZA. KRÓL JAN III SOBIESKI. PIĄTEK 3 MAJA. ANNA STAROSTA. Kot Anny spał. Świadek Jehowy odmówił. Biuro na II p. Pokój 304.",
   "neg-157": "Kościół św. Jerzego Męczennika. Katedra Świętego Jerzego. Marka Toyota zdobyła nagrodę. Walka z korupcją trwa. Ewangelia wg sw. Lukasza. Jezus, syn Józefa i Maryi, nauczał.",
   "neg-158": "Nr zam. 45/2024 z dnia 12.03.2024. zam. Kawa 3 opakowania. Adres: Sala 5. Dziecko urodzi się około 12.05.2026. Login SSO: Okta. Login VPN: tak. <xs:element name="Nazwisko"/> <Podmiot osoba="prawna"/> Liczba pojazdów według GUS 2023 wzrosła.",
+  "neg-159": "Powód Kruk S.A. z siedzibą we Wrocławiu wniósł pozew. Pozwany Wilk Sp. z o.o. nie stawił się. Cudzoziemiec zam. w Sudanie. Jeżeli dziecko urodziło się 1 czerwca 2026 r., wniosek należy złożyć w terminie. Autem LPG 2010 dojechano. Zakup pojazdów: GBA 2023 r. Adres zamieszkania: Rubryka 7.",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
@@ -1054,6 +1060,10 @@ Login AD: [LOGIN]
 TEL;TYPE=WORK:[TELEFON]
 <Osoba imie="[IMIĘ I NAZWISKO]" nazwisko="[OSOBA-B]" miasto="[MIEJSCOWOŚĆ]"/>",
   "str-157": "Wykaz pojazdów: [NR-REJESTRACYJNY], [NR-REJESTRACYJNY]. Kierujący autem [NR-REJESTRACYJNY] zbiegł. [OSOBA-A], zam. w [MIEJSCOWOŚĆ], zeznaje.",
+  "str-158": "Strony: [OSOBA-A] – [ADRES]. Adres: [ADRES]
+Imię;Nazwisko;Miasto
+Wakat;-;Warszawa
+[IMIĘ I NAZWISKO];[OSOBA-A];[MIEJSCOWOŚĆ]",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
@@ -1245,6 +1255,7 @@ Sąd Rejonowy	Wydział Cywilny",
   "neg-156": "UNIWERSYTET ADAMA MICKIEWICZA W POZNANIU. ULICA KOŚCIUSZKI TADEUSZA. KRÓL JAN III SOBIESKI. PIĄTEK 3 MAJA. ANNA STAROSTA. Kot Anny spał. Świadek Jehowy odmówił. Biuro na II p. Pokój 304.",
   "neg-157": "Kościół św. Jerzego Męczennika. Katedra Świętego Jerzego. Marka Toyota zdobyła nagrodę. Walka z korupcją trwa. Ewangelia wg sw. Lukasza. Jezus, syn Józefa i Maryi, nauczał.",
   "neg-158": "Nr zam. 45/2024 z dnia 12.03.2024. zam. Kawa 3 opakowania. Adres: Sala 5. Dziecko urodzi się około 12.05.2026. Login SSO: Okta. Login VPN: tak. <xs:element name="Nazwisko"/> <Podmiot osoba="prawna"/> Liczba pojazdów według GUS 2023 wzrosła.",
+  "neg-159": "Powód Kruk S.A. z siedzibą we Wrocławiu wniósł pozew. Pozwany Wilk Sp. z o.o. nie stawił się. Cudzoziemiec zam. w Sudanie. Jeżeli dziecko urodziło się 1 czerwca 2026 r., wniosek należy złożyć w terminie. Autem LPG 2010 dojechano. Zakup pojazdów: GBA 2023 r. Adres zamieszkania: Rubryka 7.",
   "neg-16": "Naczelny Sąd Administracyjny uchylił zaskarżony wyrok.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
@@ -1624,6 +1635,10 @@ Login AD: [LOGIN]
 TEL;TYPE=WORK:[TELEFON]
 <Osoba imie="[IMIĘ I NAZWISKO]" nazwisko="[IMIĘ I NAZWISKO]" miasto="[MIEJSCOWOŚĆ]"/>",
   "str-157": "Wykaz pojazdów: [NR-REJESTRACYJNY], [NR-REJESTRACYJNY]. Kierujący autem [NR-REJESTRACYJNY] zbiegł. [IMIĘ I NAZWISKO], zam. w [MIEJSCOWOŚĆ], zeznaje.",
+  "str-158": "Strony: [IMIĘ I NAZWISKO] – [ADRES]. Adres: [ADRES]
+Imię;Nazwisko;Miasto
+Wakat;-;Warszawa
+[IMIĘ I NAZWISKO];[IMIĘ I NAZWISKO];[MIEJSCOWOŚĆ]",
   "str-16": "Kontakt: [TELEFON] po godzinie 17.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",

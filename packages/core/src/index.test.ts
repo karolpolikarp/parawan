@@ -6437,3 +6437,129 @@ test('b7 regresje: strażniki tablicy i „urodził się" nie odsłaniają prawd
     ['Królikowski urodził się 12.03.1980 w Radomiu.', `${N} urodził się ${DU} w ${C}.`],
   ]);
 });
+test('b7 regresje r2: „urodził się" w pouczeniu, przykładzie, biogramie władcy i przy organizacji to nie dane osoby', () => {
+  keep([
+    'Jan Paweł II urodził się 18 maja 1920 r. w Wadowicach.',
+    'Jeżeli dziecko urodziło się 1 czerwca 2026 r., wniosek należy złożyć w ciągu 3 miesięcy.',
+    'Przykład: dziecko urodziło się 10 marca 2026 r.',
+    'Przykład: ubezpieczony urodził się 1 lipca 1958 r.',
+    'Solidarność urodziła się 31 sierpnia 1980 r. w Gdańsku.',
+    'NSZZ Solidarność urodził się 31 sierpnia 1980 r. w Gdańsku',
+    'Znany aktor urodził się w Radomiu w 1950 r.',
+  ]);
+  masked([
+    ['Osoba, która urodziła się w Kielcach, a mieszka w Radomiu, składa wniosek.', `Osoba, która urodziła się w Kielcach, a mieszka w ${C}, składa wniosek.`],
+    ['Kardynał Stefan Wyszyński urodził się 3 sierpnia 1901 r.', `Kardynał ${N} urodził się 3 sierpnia 1901 r.`],
+    // pułapki: osoba z imienia i nazwiska oraz podmiot rolowy bez przykładu dalej dostają maskę daty
+    ['Jan Kowalski urodził się 5 maja 1980 r. w Radomiu.', `${N} urodził się ${DU} r. w ${C}.`],
+    ['Wnioskodawca urodził się 5 maja 1980 r. w Radomiu.', `Wnioskodawca urodził się ${DU} r. w ${C}.`],
+    ['Dziecko urodziło się 12.03.2020 r. w Radomiu.', `Dziecko urodziło się ${DU} r. w ${C}.`],
+  ]);
+});
+test('b7 regresje r2: tablica z rocznikiem po kotwicy pojazdowej — skrót, kod silnika, typ pojazdu, „r."', () => {
+  keep([
+    'Autem PKP 2024 nie pojedziesz.',
+    'Autem TDI 2008.',
+    'Autem LPG 2010 dojechano.',
+    'Wyjechał autem CNG 2018.',
+    'Autem TIR 2015.',
+    'Autem OSP 2012 wyjeżdża straż.',
+    'Autem SUV 2020 jeździ wójt.',
+    'Przyczepą TPV 2019.',
+    'Wykaz pojazdów: GBA 2010.',
+    'Zakup pojazdów: GBA 2023 r.',
+    'Autem PKS 2019 r. dojedzie 30 osób.',
+  ]);
+  masked([
+    ['Kierujący autem WPI 2019 zbiegł.', `Kierujący autem ${NR} zbiegł.`],
+    ['Wykaz pojazdów: WPI 2019, WE 12345', `Wykaz pojazdów: ${NR}, ${NR}`],
+    ['Autem WE 6789P odjechał.', `Autem ${NR} odjechał.`],
+  ]);
+});
+test('b7 regresje r2: homograf po roli procesowej przed formą prawną to firma', () => {
+  keep([
+    'Powód Kruk S.A. z siedzibą we Wrocławiu wniósł pozew.',
+    'Pełnomocnik powoda Kruka S.A.',
+    'Pozwana Sowa Ubezpieczenia S.A.',
+    'Pozwany Wilk Sp. z o.o.',
+    'Pozwana Wrona i Wspólnicy Sp. k.',
+    'Powód Lis Logistics Sp. z o.o.',
+    'Powód Zając Transport sp. j.',
+    'Pełnomocnik powoda Kruk Towarzystwo Funduszy Inwestycyjnych S.A.',
+  ]);
+  masked([
+    ['Powód Kruk wniósł pozew.', `Powód ${N} wniósł pozew.`],
+    ['Pozwany Wilk nie stawił się.', `Pozwany ${N} nie stawił się.`],
+  ]);
+});
+test('b7 regresje r2: miejscownik po „zam. w" — państwo, kraina i koszary to nie miejscowość', () => {
+  keep(['Cudzoziemiec zam. w Sudanie.', 'Wcześniej zamieszkały w Palestynie.', 'zamieszkała w Donbasie', 'Cudzoziemka zam. w Jemenie, ubiega się o ochronę.']);
+  masked([
+    ['Jan Kowalski, zam. w Kurpiach.', `${N}, zam. w Kurpiach.`],
+    ['Jan Kowalski, zam. w Ponidziu.', `${N}, zam. w Ponidziu.`],
+    ['Jan Kowalski, zam. w Koszarach.', `${N}, zam. w Koszarach.`],
+    ['Jan Kowalski, zam. w Zalesiu.', `${N}, zam. w ${C}.`],
+    ['Jan Kowalski, zam. w Świdniku, zeznaje.', `${N}, zam. w ${C}, zeznaje.`],
+  ]);
+});
+test('b7 regresje r2: imię i nazwisko WERSALIKAMI postaci historycznej w zapisie mieszanym', () => {
+  keep(['Józef PIŁSUDSKI.', 'Lektura: Henryk SIENKIEWICZ, Adam MICKIEWICZ, Stefan ŻEROMSKI, Maria KONOPNICKA', 'Jan MATEJKO', 'Kompozytorzy: Karol SZYMANOWSKI, Henryk WIENIAWSKI']);
+  masked([
+    ['Anna KOWALSKA', N],
+    ['Pacjent: KOWALSKA Anna', `Pacjent: ${N}`],
+  ]);
+});
+test('b7 regresje r2: atrybut XML z kluczem osobowym — ustawienie, etykieta i wypełniacz to nie osoba', () => {
+  keep([
+    '<Ustawienia imie="tak" nazwisko="tak"/>',
+    '<Pola imie="wymagane" nazwisko="opcjonalne"/> <Sort nazwisko="rosnąco"/>',
+    '<a nazwisko="true" imie="false"/> <a imie="string"/>',
+    '<adresat imie="Imię" nazwisko="Nazwisko"/>',
+    '<urzednik imie="Kierownik" nazwisko="Referatu"/> <adresat imie="Wójt" nazwisko="Gminy"/>',
+    '<pracownik nazwisko="Wakat"/> <osoba imie="Brak" nazwisko="Danych"/> <osoba nazwisko="Anonim"/> <osoba nazwisko="Zastrzeżone"/>',
+  ]);
+  masked([
+    ['<osoba imie="Jan" nazwisko="Kowalski"/>', `<osoba imie="${N}" nazwisko="${N}"/>`],
+    ['<osoba nazwisko="Marszałek"/>', `<osoba nazwisko="${N}"/>`],
+    ['<Osoba imie="Anna" nazwisko="Gzik" miasto="Kalisz"/>', `<Osoba imie="${N}" nazwisko="${N}" miasto="${C}"/>`],
+  ]);
+});
+test('b7 regresje r2: wypełniacz w polu imienia, także rozstrzelony', () => {
+  keep(['Imię i nazwisko: W A K A T', 'Nazwisko: D O   U Z U P E Ł N I E N I A', 'Imię i nazwisko: WAKAT', 'Nazwisko: Zastrzeżone']);
+  masked([
+    ['Imię i nazwisko: J A N   N O W A K', `Imię i nazwisko: ${N}`],
+    ['Nazwisko: Wakatowski', `Nazwisko: ${N}`],
+  ]);
+});
+test('b7 regresje r2: tabela — wiersz instytucji kościelnej i wiersz bez osoby', () => {
+  keep(['Lp;Imię i nazwisko;Kwota\n1;Parafia św. Józefa;100\n2;Kościół św. Anny;50', 'Imię;Nazwisko;Miasto\nWakat;-;Warszawa\nSala;konferencyjna;Gdańsk']);
+  masked([
+    ['Lp;Imię i nazwisko;Kwota\n1;Parafia św. Józefa;100\n3;Jan Kowalski;20', `Lp;Imię i nazwisko;Kwota\n1;Parafia św. Józefa;100\n3;${N};20`],
+    ['Imię;Nazwisko;Miasto\nJan;Kowalski;Kraków', `Imię;Nazwisko;Miasto\n${N};${N};${C}`],
+    ['Lp.,Imię i nazwisko,Adres,Kwota\n3,Parafia Rzymskokatolicka pw. Św. Jana,Kościelna 1 Zalesie,0', `Lp.,Imię i nazwisko,Adres,Kwota\n3,${N} pw. Św. Jana,Kościelna 1 Zalesie,0`],
+    ['Imię i nazwisko;Adres;Telefon\nLiu Wei;Lipowa 5;501 234 567', 'Imię i nazwisko;Adres;Telefon\nLiu Wei;[ADRES];[TELEFON]'],
+  ]);
+});
+test('b7 regresje r2: odsyłacz formularza po etykiecie zamieszkania to nie adres', () => {
+  keep(['Adres zamieszkania: Rubryka 7.', 'Adres zamieszkania: Strona 2.', 'Zamieszkała: Lat 5.', 'Adres zamieszkania: Tabela 3.', 'Adres zamieszkania: Wariant 2.']);
+  masked([['Adres zamieszkania: Lipowa 7.', `Adres zamieszkania: ${A}.`]]);
+});
+test('b7 regresje r2: ulica z patronem i numerem po etykiecie, „przy" i osobie — bez kaplicy i urzędu', () => {
+  masked([
+    ['Adres: Jana Pawła II 5', `Adres: ${A}`],
+    ['Jan Nowak zamieszkały przy Jana Pawła II 5.', `${N} zamieszkały przy ${A}.`],
+    ['Strony: Anna Kowalska – Jana Pawła II 5.', `Strony: ${N} – ${A}.`],
+    ['Strony: Anna Kowalska; Jana Pawła II 5; Zalesie.', `Strony: ${N}; ${A}; Zalesie.`],
+    ['Właściciel: Jan Nowak (Jana Pawła II 5).', `Właściciel: ${N} (${A}).`],
+    ['Adres: Kazimierza Wielkiego 5', `Adres: ${A}`],
+    ['Adres: Władysława Jagiełły 5', `Adres: ${A}`],
+    ['Jan Nowak zam. przy Kazimierza Wielkiego 5 w Zalesiu', `${N} zam. przy ${A} w Zalesiu`],
+    ['Anna Kowalska – Kazimierza Wielkiego 12', `${N} – ${A}`],
+    ['Jan Nowak, Jana Pawła II 5', `${N}, ${A}`],
+  ]);
+  keep([
+    'Kaplica św. Jana Pawła II 2, Wadowice.',
+    'Dokumenty należy składać w Urzędzie Gminy, Jana Pawła II 5, Kraków, pok. 12.',
+    'Szkoła Podstawowa im. Jana Pawła II 3, Kraków',
+  ]);
+});

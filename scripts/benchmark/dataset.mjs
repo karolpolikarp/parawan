@@ -933,6 +933,10 @@ export function buildDataset() {
   neg('Nr zam. 45/2024 z dnia 12.03.2024. zam. Kawa 3 opakowania. Adres: Sala 5. Dziecko urodzi się około 12.05.2026. Login SSO: Okta. Login VPN: tak. <xs:element name="Nazwisko"/> <Podmiot osoba="prawna"/> Liczba pojazdów według GUS 2023 wzrosła.', ['Nr zam. 45/2024', 'Kawa 3 opakowania', 'Sala 5', '12.05.2026', 'Okta', 'VPN: tak', 'name="Nazwisko"', 'osoba="prawna"', 'GUS 2023']);
   // b5: kotwica pojazdowa w odmianie i miejscownik miejscowości spoza słownika po „zam. w"
   str('Wykaz pojazdów: WE 12345, GD 2345A. Kierujący autem WE 6789P zbiegł. Jan Kowalski, zam. w Świdniku, zeznaje.', ['WE 12345', 'GD 2345A', 'WE 6789P', 'Świdniku'], ['Wykaz pojazdów:', 'Kierujący autem', 'zeznaje']);
+  // b7 r2: spółka po roli procesowej, państwo po „zam. w", pouczenie z „urodził się", rocznik po kotwicy
+  // pojazdowej, odsyłacz formularza; ulica z patronem po etykiecie i za osobą dalej jest adresem
+  neg('Powód Kruk S.A. z siedzibą we Wrocławiu wniósł pozew. Pozwany Wilk Sp. z o.o. nie stawił się. Cudzoziemiec zam. w Sudanie. Jeżeli dziecko urodziło się 1 czerwca 2026 r., wniosek należy złożyć w terminie. Autem LPG 2010 dojechano. Zakup pojazdów: GBA 2023 r. Adres zamieszkania: Rubryka 7.', ['Kruk S.A.', 'Wilk Sp. z o.o.', 'Sudanie', '1 czerwca 2026', 'LPG 2010', 'GBA 2023', 'Rubryka 7']);
+  str('Strony: Anna Kowalska – Jana Pawła II 5. Adres: Kazimierza Wielkiego 12\nImię;Nazwisko;Miasto\nWakat;-;Warszawa\nJan;Kowalski;Kraków', ['Anna Kowalska', 'Jana Pawła II 5', 'Kazimierza Wielkiego 12', 'Jan;Kowalski', ';Kraków'], ['Strony:', 'Wakat;-;Warszawa', 'Imię;Nazwisko;Miasto']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
