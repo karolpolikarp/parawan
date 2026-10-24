@@ -440,6 +440,24 @@ describe('zasłonięcie po pewnej edycji w nim albo przy nim (runda 2)', () => {
     expect(final(joined, auto(joined).spans, r2.decisions)).toBe('Opis [DANE] wnosi.');
   });
 
+  test('nowe brzmienie całego wiersza bez zasłoniętego wyrazu nie staje się jednym [DANE] (runda 3)', () => {
+    const t = 'Wniosek o podział działki.\nNieruchomość leży w obrębie Zagroda, przy drodze gminnej.\nKoniec.';
+    const line = t.split('\n')[1];
+    const typed = 'Nieruchomość leży w obrębie geodezyjnym Rokitnica, przy drodze powiatowej nr 2228G, na skraju lasu.';
+    const after = t.replace(line, typed);
+    const d: Decision[] = [{ kind: 'mask', scope: 'here', ...at(t, 'Zagroda'), token: 'DANE' }];
+    expect(shiftDecisions(t, after, d)).toEqual({ decisions: [], dropped: 1, reveals: 0 });
+    expect(final(after, auto(after).spans, [])).toContain('na skraju lasu');
+    // ten sam wiersz z zasłoniętym wyrazem: zasłonięcie zostaje na nim
+    const kept = t.replace(line, line.replace('przy drodze gminnej', 'przy drodze powiatowej'));
+    expect(shiftDecisions(t, kept, d).decisions).toEqual([{ ...d[0], ...at(kept, 'Zagroda') }]);
+    // dopisane imię w środku zasłoniętej osoby: zasłonięcie obejmuje całość, bez reszty wiersza
+    const p = 'Pismo do Jan Kowalski w sprawie.';
+    const mid = 'Pismo do Jan Maria Kowalski w sprawie.';
+    const person: Decision[] = [{ kind: 'mask', scope: 'here', ...at(p, 'Jan Kowalski'), token: 'IMIĘ I NAZWISKO' }];
+    expect(shiftDecisions(p, mid, person).decisions).toEqual([{ ...person[0], ...at(mid, 'Jan Maria Kowalski') }]);
+  });
+
   test('„wszędzie” bez żadnego wystąpienia po zmianie odpada z komunikatem', () => {
     const t = 'Opis: Zagroda.';
     const r = shiftDecisions(t, 'Opis: .', [{ kind: 'mask', scope: 'all', text: 'Zagroda', token: 'DANE' }]);

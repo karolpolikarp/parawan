@@ -324,11 +324,12 @@ export function defaultToken(text: string): string {
  * odsłaniające: obowiązują tylko w tekście, w którym je podjęto.
  *
  * Zasłonięcie idzie za tekstem, bo lepiej zasłonić więcej niż zostawić coś jawne. Przy pewnej
- * zmianie w nim albo przy nim obejmuje cały nowy tekst w tym miejscu, rozszerzony do całych wyrazów
- * („Lis” → „Lisowski”, „Zagroda” → „Zagxoda”, numer z doklejoną literą). Przy niepewnej zostaje tam,
- * gdzie jego tekst dalej stoi. Miejsce zasłonięcia „wszędzie”, którego tekst po zmianie przestał być
- * wystąpieniem (doklejona litera, usunięta spacja), dostaje osobne zasłonięcie „tutaj”. Decyzja
- * „wszędzie” bez żadnego wystąpienia odpada. Zasłonięcie, które odpadło, liczy się w `dropped`.
+ * zmianie w nim albo przy poprawce wyrazu, który go dotyka, obejmuje cały nowy tekst w tym miejscu,
+ * rozszerzony do całych wyrazów („Lis” → „Lisowski”, „Zagroda” → „Zagxoda”, numer z doklejoną
+ * literą). W pozostałych razach (także nowe brzmienie całego wiersza) zostaje tam, gdzie jego
+ * tekst dalej stoi, a bez niego odpada. Miejsce zasłonięcia „wszędzie”, którego tekst po zmianie
+ * przestał być wystąpieniem (doklejona litera, usunięta spacja), dostaje osobne zasłonięcie
+ * „tutaj”. Decyzja „wszędzie” bez żadnego wystąpienia odpada. Zasłonięcie, które odpadło, liczy się w `dropped`.
  */
 export function shiftDecisions(
   before: string,
@@ -361,14 +362,20 @@ export function shiftDecisions(
     while (b < after.length && isWordChar(after[b]) && isWordChar(after[b - 1])) b++;
     return lineRanges(after, a, b);
   };
+  // Poprawka w obrębie wyrazów: ani usunięty, ani wpisany tekst nie ma odstępu ani końca wiersza
+  // (literówka, doklejona litera, dopisana końcówka nazwiska).
+  const inWord = !/\s/.test(before.slice(p, oldEnd)) && !/\s/.test(after.slice(p, newEnd));
   /**
-   * Zasłonięcie [a, b) po zmianie. Pewna zmiana w nim albo przy nim: stara reszta zakresu razem
-   * z tym, co wpisano. Inaczej tekst, który dalej stoi przed przesunięciem albo po nim.
+   * Zasłonięcie [a, b) po zmianie. Pewna zmiana w nim (w jednym wierszu) albo poprawka wyrazu przy
+   * nim: stara reszta zakresu razem z tym, co wpisano. Inaczej tekst, który dalej stoi przed
+   * przesunięciem albo po nim. Nowe brzmienie całego wiersza z zasłoniętym wyrazem nie staje się
+   * jednym znacznikiem: bez tego wyrazu zasłonięcie odpada z komunikatem.
    */
   const follow = (a: number, b: number): [number, number][] => {
     const moved = move(a, b);
     if (moved) return [moved];
-    if (sure) return words(Math.min(a, p), Math.max(b, oldEnd) + delta);
+    const inside = a <= p && oldEnd <= b && !after.slice(p, newEnd).includes('\n');
+    if (sure && (inside || inWord)) return words(Math.min(a, p), Math.max(b, oldEnd) + delta);
     const text = before.slice(a, b);
     for (const x of [a, a + delta]) {
       if (x >= 0 && after.slice(x, x + text.length) === text) return words(x, x + text.length);

@@ -115,12 +115,14 @@ localStorage po korektach są te same co przed nimi. Zaznaczenie prawdziwą mysz
 sprawdza ręcznie `manual/korekta-zaznaczenie.mjs`.
 
 `korekta-fuzz.test.mjs` składa losowe ciągi czynności (wklejanie pism, pisanie i usuwanie w jednym
-miejscu, Ctrl+A z innym pismem, natywne Ctrl+Z i Ctrl+Y w polu i w wyniku, „Zasłoń zaznaczenie”,
-„Zostaw jawne” i „Cofnij zasłonięcie” tu i wszędzie, „Wyczyść”, „Cofnij” na pasku) w Chromium
-i Firefoksie. Po każdym kroku porównuje wynik, druk, schowek i .txt z modelem: dana wykryta
-w bieżącym tekście jest zasłonięta, chyba że „Zostaw jawne” podjęto na tym samym tekście (albo
-na tekście, z którego bieżący powstał samym pisaniem obok), a ręczne zasłonięcie nie znika bez
-decyzji. Przed losowymi biegną ciągi z wcześniejszych błędów (`REGRESSIONS`). Domyślnie 30 ciągów
+miejscu, Ctrl+A z innym pismem, Ctrl+A i Delete, natywne Ctrl+Z, Ctrl+Y i Ctrl+Shift+Z w polu
+i w wyniku, także kilka razy z rzędu, Ctrl+Z w polu karty pisma, „Zasłoń zaznaczenie”, „Zostaw
+jawne” i „Cofnij zasłonięcie” tu i wszędzie, znak sprawy w karcie, „Wyczyść”, „Cofnij” na pasku)
+w Chromium i Firefoksie. Po każdym kroku porównuje wynik, druk, schowek i .txt z modelem, znak po
+znaku: dana wykryta w bieżącym tekście jest zasłonięta, chyba że „Zostaw jawne” podjęto na tym
+samym tekście (albo na tekście, z którego bieżący powstał samym pisaniem obok) i urzędnik nie
+zasłonił potem tego miejsca, a ręczne zasłonięcie nie znika bez decyzji. Znak sprawy stoi tylko
+przy piśmie, przy którym go wpisano. Przed losowymi biegną ciągi z wcześniejszych błędów (`REGRESSIONS`). Domyślnie 30 ciągów
 z losowym ziarnem; błąd podaje ziarno i skrócony ciąg kroków.
 Długi przebieg: `PARAWAN_FUZZ_N=1000 PARAWAN_FUZZ_WSZYSTKIE=1 PARAWAN_FUZZ_RAPORT=raport.txt`,
 powtórzenie: `PARAWAN_FUZZ_SEED=…` albo `PARAWAN_FUZZ_KROKI_JSON='[…]'` (opis zmiennych na górze pliku).

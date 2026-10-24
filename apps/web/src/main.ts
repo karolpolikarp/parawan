@@ -155,6 +155,8 @@ let sourceChange: 'none' | 'unsure' | 'history' | 'replaced' = 'none';
 // cofanie albo ponawianie przywróci DOKŁADNIE ten tekst (Ctrl+A, Delete, Ctrl+Z). Wpis powstaje przy
 // czynności urzędnika i przed niepewną zmianą, a każde dojście do tekstu inną drogą (wklejenie,
 // pisanie) nadpisuje jego wpis, więc dawna decyzja nie wraca do tego samego pisma wstawionego od nowa.
+// Każda czynność na poprawkach zdejmuje decyzje odsłaniające z wpisów innych tekstów (forgetReveals):
+// urzędnik mógł właśnie zasłonić to, co tam zostawił jawne, a Ctrl+Z w polu nie może tego odwrócić.
 const known = new Map<string, Decision[]>();
 const KNOWN_LIMIT = 8;
 function rememberText(text: string, list: Decision[]): void {
@@ -163,6 +165,14 @@ function rememberText(text: string, list: Decision[]): void {
   if (!list.length) return;
   known.set(text, list.slice());
   if (known.size > KNOWN_LIMIT) known.delete(known.keys().next().value as string);
+}
+function forgetReveals(except: string): void {
+  for (const [text, list] of known) {
+    if (text === except) continue;
+    const masks = list.filter((d) => d.kind === 'mask');
+    if (masks.length) known.set(text, masks);
+    else known.delete(text);
+  }
 }
 
 /* ── Legenda, tabela „Co wykrywa” i przełączniki „Co maskować” (dane w pii-meta.ts) ── */
@@ -1050,6 +1060,7 @@ function maskAt(r: { start: number; end: number }): number {
  */
 function correctionsChanged(msg: string, target?: { start: number; end: number } | null): void {
   const cur = target === undefined ? (currentFrag()?.span ?? null) : target;
+  forgetReveals(lastInput);
   rememberText(lastInput, decisions);
   recomputeCorrections();
   const inBar = fixBar.contains(document.activeElement);
@@ -1139,12 +1150,48 @@ document.addEventListener('keydown', (e) => {
   if (key === 'z' && !e.shiftKey && fixArea) undoLast();
 });
 
+// Chromium ma jedną historię edycji na całą kartę. Ctrl+Z w polu karty pisma, które nie ma już
+// czego cofać, sięgnąłby do pola źródła i podmienił pismo (np. wklejone B wróciłoby do A). Takie
+// cofnięcie blokujemy: zostaje w historii i działa po Ctrl+Z w samym polu źródła. Odwrotnie
+// zablokować się nie da (krok zostałby na wierzchu i pole źródła przestałoby cofać), więc gdy
+// Ctrl+Z w polu źródła cofa wpis w innym polu, urzędnik dostaje komunikat, które to pole.
+let historyKeyTarget: EventTarget | null = null;
+document.addEventListener(
+  'keydown',
+  (e) => {
+    if (!(e.ctrlKey || e.metaKey) || !['z', 'y'].includes(e.key.toLowerCase())) return;
+    historyKeyTarget = e.target;
+    setTimeout(() => {
+      historyKeyTarget = null;
+    }, 0);
+  },
+  true,
+);
+document.addEventListener(
+  'beforeinput',
+  (e) => {
+    const from = historyKeyTarget;
+    if (!e.inputType.startsWith('history') || !from || from === e.target) return;
+    if (e.target === input) {
+      e.preventDefault();
+      return;
+    }
+    const field = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement ? e.target : null;
+    const label = field?.labels?.[0];
+    const name = (label?.querySelector(':scope > span') ?? label)?.firstChild?.textContent?.trim();
+    if (name) announce(`${e.inputType === 'historyUndo' ? 'Cofnięto' : 'Przywrócono'} ostatni wpis w polu „${name}”.`);
+  },
+  true,
+);
+
 /**
  * Źródło zmieniło się z lastInput na `next`: poprawki idą za tekstem (shiftDecisions). Zmiana pewna
  * (pisanie, usuwanie, wklejenie fragmentu w jednym miejscu) przesuwa poprawki i stos do Ctrl+Z
  * w wyniku. Zmiana niepewna zdejmuje decyzje odsłaniające i stos, a zasłonięcia zostają tam, gdzie
  * ich tekst dalej stoi. Natywne cofanie albo ponawianie do dokładnie tego tekstu, który ma wpis
- * w `known`, przywraca jego poprawki. Kartę „Adnotacja i protokół” przy innym piśmie zeruje
+ * w `known`, dokłada jego poprawki (decyzje odsłaniające tylko wtedy, gdy urzędnik nie pracował
+ * od tamtej pory na poprawkach innego tekstu, patrz forgetReveals). Każda utracona decyzja
+ * odsłaniająca i każde utracone zasłonięcie dostaje komunikat w aria-live. Kartę „Adnotacja i protokół” przy innym piśmie zeruje
  * listener input tym samym kryterium (isOtherDocument), od razu, a nie dopiero przy przeliczeniu.
  */
 function followSource(next: string): void {
@@ -1169,21 +1216,28 @@ function followSource(next: string): void {
   const back = change === 'history' ? known.get(next) : undefined;
   rememberText(base, decisions);
   undoSteps = [];
+  const count = (list: Decision[]): [number, number] => {
+    const masks = list.filter((d) => d.kind === 'mask').length;
+    return [list.length - masks, masks];
+  };
+  const [revealsBefore, masksBefore] = count(decisions);
+  // Zasłonięcia idą za tekstem, jeśli dalej stoi w tym miejscu. Wpis z `known` dokłada do nich
+  // poprawki tego samego tekstu z chwili, gdy urzędnik ostatnio przy nim pracował.
+  const moved = shiftDecisions(base, next, decisions, false).decisions;
   if (back) {
-    decisions = back.slice();
-    fixNote = other ? 'Tekst źródłowy wrócił do wcześniejszej wersji razem z jej ręcznymi poprawkami.' : '';
-    if (fixNote) announce(fixNote);
-    return;
-  }
-  const moved = shiftDecisions(base, next, decisions, false);
-  decisions = moved.decisions;
+    const have = new Set(back.map((d) => JSON.stringify(d)));
+    decisions = [...back, ...moved.filter((d) => !have.has(JSON.stringify(d)))];
+  } else decisions = moved;
   rememberText(next, decisions);
-  const masks = moved.dropped - moved.reveals;
+  const [revealsAfter, masksAfter] = count(decisions);
+  const reveals = Math.max(0, revealsBefore - revealsAfter);
+  const masks = Math.max(0, masksBefore - masksAfter);
   const parts = [];
-  if (moved.reveals)
+  if (back && other) parts.push('Tekst źródłowy wrócił do wcześniejszej wersji razem z jej ręcznymi poprawkami.');
+  if (reveals)
     parts.push(
-      `Zmieniono pismo: cofnięto ${moved.reveals} ` +
-        `${plural(moved.reveals, 'decyzję', 'decyzje', 'decyzji')} o pozostawieniu jawnych danych.`,
+      `Zmieniono pismo: cofnięto ${reveals} ` +
+        `${plural(reveals, 'decyzję', 'decyzje', 'decyzji')} o pozostawieniu jawnych danych.`,
     );
   if (masks)
     parts.push(

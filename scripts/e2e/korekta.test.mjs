@@ -1285,3 +1285,144 @@ test('Ctrl+Z dopisku wraca do tekstu z chwili „Zostaw jawne” razem z decyzj�
     await assertHidden(page, 'Kowalski', 'wnioskodawca');
   });
 });
+
+// Runda 3 przeprojektowania: każda czynność na poprawkach zdejmuje decyzje odsłaniające z wpisów
+// innych tekstów, więc Ctrl+Z i Ctrl+Y w polu nie wskrzeszają „Zostaw jawne”, które urzędnik już
+// wycofał. Ctrl+Z w polu karty pisma nie sięga do pola źródła, a nowe brzmienie wiersza
+// z zasłoniętym wyrazem nie staje się jednym [DANE].
+
+test('Ctrl+Z i Ctrl+Y w polu nie przywracają wycofanego „Zostaw jawne” (zgłoszenie: nieaktualny wpis)', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const T = 'Wniosek złożył Sławomir Kędzierski, zam. w Opolu, w sprawie dzialka nr 12.\nKoniec';
+    const ta = page.locator('#input');
+    const withdraw = {
+      ponownie: async () => {
+        await page.locator('#output mark.pii-kept').first().click();
+        await page.locator('#fix-remask').click();
+      },
+      usun: async () => page.locator('#fix-clear').click(),
+      wynik: async () => {
+        await page.locator('#output').focus();
+        await page.keyboard.press('ControlOrMeta+z');
+      },
+    };
+    for (const [via, act] of Object.entries(withdraw)) {
+      await page.locator('#clear').click();
+      await ta.click();
+      await page.keyboard.insertText(T);
+      await app.waitForOutput('Koniec');
+      await page.locator('#output mark.pii').first().click();
+      assert.equal(await page.locator('#fix-bar-val').textContent(), 'Sławomir Kędzierski');
+      await page.locator('#fix-keep').click();
+      await app.waitForOutput('Kędzierski');
+      // poprawka literówki: „dzialka” → „działka”
+      const at = T.indexOf('dzialka') + 3;
+      await ta.evaluate((el, n) => {
+        /** @type {HTMLTextAreaElement} */ (el).focus();
+        /** @type {HTMLTextAreaElement} */ (el).setSelectionRange(n, n + 1);
+      }, at);
+      await page.keyboard.insertText('ł');
+      await settled(page);
+      assert.ok((await outText(page)).includes('Kędzierski'), `${via}: poprawka literówki zdjęła „Zostaw jawne”`);
+      await act();
+      await page.waitForFunction(() => !document.getElementById('output')?.textContent?.includes('Kędzierski'));
+      await ta.focus();
+      for (const key of ['ControlOrMeta+z', 'ControlOrMeta+z', redo, 'ControlOrMeta+z']) {
+        await page.keyboard.press(key);
+        await settled(page);
+        if (!(await ta.inputValue()).trim()) continue;
+        await assertHidden(page, 'Kędzierski', `${via}, ${key}: wycofane „Zostaw jawne”`);
+      }
+    }
+  });
+});
+
+test('Ctrl+Z w polu karty pisma nie podmienia pisma w polu źródła (zgłoszenie: karta)', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const A = 'Pismo A. Wniosek złożył Sławomir Kędzierski, zam. w Opolu.';
+    const B = 'Pismo B. Skarga Anny Malinowskiej na bezczynność organu.';
+    const ta = page.locator('#input');
+    await ta.click();
+    await page.keyboard.insertText(A);
+    await app.waitForOutput('złożył');
+    await page.locator('#output mark.pii').first().click();
+    await page.locator('#fix-keep').click();
+    await app.waitForOutput('Kędzierski');
+    await pasteOver(page, B);
+    await settled(page);
+    await page.locator('#publikacja').waitFor({ state: 'visible' });
+    if (!(await page.locator('#publikacja').evaluate((d) => /** @type {HTMLDetailsElement} */ (d).open)))
+      await page.locator('#publikacja > summary').click();
+    await page.locator('#pub-znak').click();
+    await page.keyboard.type('OR.1431.5');
+    for (let i = 0; i < 3; i++) {
+      await page.keyboard.press('ControlOrMeta+z');
+      await settled(page);
+    }
+    assert.equal(await ta.inputValue(), B, 'Ctrl+Z w karcie zmienił pole źródła');
+    await assertHidden(page, 'Kędzierski', 'pismo A');
+    // Ctrl+Z w samym polu źródła dalej cofa wklejenie
+    await ta.focus();
+    await page.keyboard.press('ControlOrMeta+z');
+    await settled(page);
+    assert.equal(await ta.inputValue(), A, 'Ctrl+Z w polu źródła nie cofnął wklejenia');
+  });
+});
+
+test('Ctrl+Z w polu źródła, który cofa wpis w karcie, mówi o tym komunikatem (zgłoszenie: znak sprawy)', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const C = 'Skarga z dnia 3 maja 2024 r. Skarżący Piotr Zieliński, PESEL 90010112345, wnosi o rozpatrzenie sprawy.';
+    const ta = page.locator('#input');
+    await ta.click();
+    await page.keyboard.insertText(C);
+    await app.waitForOutput('[PESEL]');
+    await page.locator('#publikacja').waitFor({ state: 'visible' });
+    if (!(await page.locator('#publikacja').evaluate((d) => /** @type {HTMLDetailsElement} */ (d).open)))
+      await page.locator('#publikacja > summary').click();
+    await page.locator('#pub-znak').fill('');
+    await page.locator('#pub-znak').click();
+    await page.keyboard.type('ZN.6220.1.2024');
+    await ta.focus();
+    await page.keyboard.press('ControlOrMeta+z');
+    await settled(page);
+    if (BROWSER === 'chromium' && !(await page.locator('#pub-znak').inputValue())) {
+      assert.equal(await ta.inputValue(), C);
+      await page.waitForFunction(() => document.getElementById('sr-status')?.textContent === 'Cofnięto ostatni wpis w polu „Znak sprawy”.');
+    } else {
+      // Firefox ma osobną historię każdego pola: Ctrl+Z cofa wklejenie, a karta zeruje się z pismem
+      assert.notEqual(await ta.inputValue(), C);
+      assert.equal(await page.locator('#pub-znak').inputValue(), '');
+    }
+  });
+});
+
+test('nowe brzmienie wiersza z ręcznym zasłonięciem nie zasłania całego wiersza (zgłoszenie: wiersz)', async (t) => {
+  await withApp(browser, t, '', async (app) => {
+    const { page } = app;
+    const T = 'Wniosek o podział działki.\nNieruchomość leży w obrębie Zagroda, przy drodze gminnej.\nKoniec pisma.';
+    const line = T.split('\n')[1];
+    const typed = 'Nieruchomość leży w obrębie geodezyjnym Rokitnica, przy drodze powiatowej nr 2228G, na skraju lasu.';
+    const ta = page.locator('#input');
+    await ta.click();
+    await page.keyboard.insertText(T);
+    await app.waitForOutput('Koniec');
+    await maskFromSource(page, 'Zagroda');
+    await app.waitForOutput('[DANE]');
+    const at = T.indexOf(line);
+    await ta.evaluate(
+      (el, [a, b]) => {
+        /** @type {HTMLTextAreaElement} */ (el).focus();
+        /** @type {HTMLTextAreaElement} */ (el).setSelectionRange(a, b);
+      },
+      [at, at + line.length],
+    );
+    await page.keyboard.insertText(typed);
+    await settled(page);
+    assert.ok((await outText(page)).includes('na skraju lasu'), 'nowe brzmienie wiersza zasłonięte');
+    assert.ok(!(await outText(page)).includes('[DANE]'));
+    assert.equal(await page.locator('#fix-note').innerText(), 'Po zmianie tekstu źródłowego odrzucono 1 ręczną poprawkę.');
+  });
+});

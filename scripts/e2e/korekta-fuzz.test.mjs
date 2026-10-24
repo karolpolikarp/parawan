@@ -11,7 +11,11 @@
 // podjął. Decyzja „Zostaw jawne” obowiązuje tylko w tym tekście albo w tekście, który powstał
 // z niego samym pisaniem lub usuwaniem w jednym miejscu poza jej zakresem (także wklejeniem
 // fragmentu obok). Ręczne zasłonięcie musi trzymać się, dopóki źródło zmienia się tylko w ten
-// sposób. Po każdym kroku sprawdzamy wynik na ekranie, druk, schowek i pobrany .txt:
+// sposób. Zasłonięcie miejsca z decyzją „Zostaw jawne” (Zasłoń ponownie, Usuń wszystkie, Ctrl+Z
+// w wyniku, Zasłoń zaznaczenie) zawiesza ją, a wraca tylko cofnięcie na tym samym tekście, więc
+// powrót Ctrl+Z w polu do tekstu z decyzją nie może jej wskrzesić. Znak sprawy w karcie pisma może
+// stać tylko przy piśmie, przy którym go wpisano (odniesienie isOtherDocument z krokami pośrednimi).
+// Po każdym kroku sprawdzamy wynik na ekranie, druk, schowek i pobrany .txt, znak po znaku:
 // - każda dana automatu jest zasłonięta, chyba że model ma dla tego miejsca ważną decyzję,
 // - żadne ręczne zasłonięcie nie jest jawne bez decyzji, która je zdjęła.
 //
@@ -76,10 +80,18 @@ const DOC_NAMES = ['A1', 'A2', 'B', 'C', 'C2'];
 const TYPED = [' uwaga ', ' por. ', ' i ', ' zob. akta '];
 
 /*
- * Ciągi z wcześniejszych przebiegów, które kończyły się wyciekiem (na 02ce30c). Biegną w każdej
- * przeglądarce przed losowymi, więc powtarzają się przy każdym `npm run e2e`.
+ * Ciągi z wcześniejszych przebiegów, które kończyły się wyciekiem. Biegną w każdej przeglądarce
+ * przed losowymi, więc powtarzają się przy każdym `npm run e2e`.
  */
 const REGRESSIONS = [
+  // „Zostaw jawne”, dopisek, „Zasłoń ponownie”, Ctrl+Z w polu: stary wpis tekstu wskrzeszał decyzję
+  [{ a: 'wklej', doc: 0 }, { a: 'znacznik', at: 0.4, co: 'tu' }, { a: 'pisz', at: 0.05, s: ' uwaga ' }, { a: 'znacznik', at: 0.4, co: 'ponownie' }, { a: 'cofnijPole' }],
+  [{ a: 'wklej', doc: 0 }, { a: 'znacznik', at: 0.4, co: 'tu' }, { a: 'pisz', at: 0.05, s: ' uwaga ' }, { a: 'usunPoprawki' }, { a: 'cofnijPoleN', n: 2 }, { a: 'ponowPole' }],
+  [{ a: 'wklej', doc: 0 }, { a: 'znacznik', at: 0.4, co: 'tu' }, { a: 'pisz', at: 0.05, s: ' uwaga ' }, { a: 'cofnijWynik' }, { a: 'cofnijPole' }],
+  // Ctrl+Z w polu karty pisma sięgał w Chromium do pola źródła i wracał do pisma A z jego decyzją
+  [{ a: 'wklej', doc: 0 }, { a: 'znacznik', at: 0.4, co: 'tu' }, { a: 'wklej', doc: 3 }, { a: 'karta' }, { a: 'cofnijKarta', n: 3 }],
+  // znak sprawy cofnięty przez Ctrl+Z w polu źródła wraca przez Ctrl+Shift+Z przy tym samym piśmie
+  [{ a: 'wklej', doc: 3 }, { a: 'karta' }, { a: 'cofnijPoleN', n: 2 }, { a: 'ponowPole' }, { a: 'ponowPoleS' }],
   // „Zostaw jawne” po usunięciu znaku, potem Ctrl+Z w polu: odsłonięcie zostawało w tekście sprzed edycji
   [{ a: 'wklej', doc: 4 }, { a: 'usun', at: 0.69, n: 1 }, { a: 'znacznik', at: 0.58, co: 'tu' }, { a: 'cofnijPole' }],
   [{ a: 'wklej', doc: 1 }, { a: 'pisz', at: 0.51, s: ' i ' }, { a: 'znacznik', at: 0.64, co: 'tu' }, { a: 'cofnijPole' }],
@@ -134,6 +146,17 @@ const WEIGHTS = [
   ['usunPoprawki', 1],
   ['wyczysc', 1],
   ['cofnijPasek', 2],
+  ['piszW', 3],
+  ['zamien', 3],
+  ['duza', 1],
+  ['wklejDoc', 1],
+  ['dwie', 2],
+  ['ponowWynikS', 1],
+  ['pusto', 1],
+  ['cofnijPoleN', 2],
+  ['ponowPoleS', 1],
+  ['karta', 2],
+  ['cofnijKarta', 1],
 ];
 const TOTAL_W = WEIGHTS.reduce((s, [, w]) => s + w, 0);
 
@@ -150,6 +173,20 @@ function generate(seed, len = STEPS) {
         return { a, at: r(), n: 1 + pick(6) };
       case 'fragment':
         return { a, doc: pick(DOCS.length), line: r(), at: r() };
+      case 'piszW':
+        return { a, at: r(), s: ['x', 'ab', 'ski', '1'][pick(4)] };
+      case 'zamien':
+        return { a, at: r(), n: 2 + pick(25), doc: pick(DOCS.length), from: r() };
+      case 'duza':
+        return { a, at: r(), frac: 0.3 + r() * 0.18, doc: pick(DOCS.length), from: r() };
+      case 'wklejDoc':
+        return { a, at: r(), doc: pick(DOCS.length) };
+      case 'cofnijPoleN':
+        return { a, n: 2 + pick(3) };
+      case 'cofnijKarta':
+        return { a, n: 1 + pick(3) };
+      case 'dwie':
+        return { a, at: r(), at2: r(), s: TYPED[pick(TYPED.length)] };
       case 'zaslon':
         return { a, z: r() < 0.5 ? 'src' : 'out', wszedzie: r() < 0.5, at: r() };
       case 'znacznik':
@@ -176,6 +213,20 @@ function describe(s) {
       return `wpisz „${s.s}” @${f2(s.at)}`;
     case 'usun':
       return `usuń ${s.n} zn. @${f2(s.at)}`;
+    case 'piszW':
+      return `wpisz w wyraz „${s.s}” @${f2(s.at)}`;
+    case 'zamien':
+      return `zaznacz ${s.n} zn. @${f2(s.at)} i wklej ${s.n} zn. z ${DOC_NAMES[s.doc]}/${f2(s.from)}`;
+    case 'duza':
+      return `zaznacz ${f2(s.frac)} tekstu @${f2(s.at)} i wklej kawałek ${DOC_NAMES[s.doc]}`;
+    case 'wklejDoc':
+      return `wklej całe ${DOC_NAMES[s.doc]} w środek @${f2(s.at)}`;
+    case 'cofnijPoleN':
+      return `Ctrl+Z w polu ×${s.n}`;
+    case 'cofnijKarta':
+      return `Ctrl+Z w polu „Znak sprawy” ×${s.n}`;
+    case 'dwie':
+      return `dwie szybkie edycje „${s.s}” @${f2(s.at)} i @${f2(s.at2)}`;
     case 'fragment':
       return `wklej wiersz ${DOC_NAMES[s.doc]}/${f2(s.line)} @${f2(s.at)}`;
     case 'zaslon':
@@ -188,6 +239,10 @@ function describe(s) {
         ponowPole: 'Ctrl+Y w polu',
         cofnijWynik: 'Ctrl+Z w wyniku',
         ponowWynik: 'Ctrl+Y w wyniku',
+        ponowWynikS: 'Ctrl+Shift+Z w wyniku',
+        pusto: 'Ctrl+A i Delete w polu',
+        ponowPoleS: 'Ctrl+Shift+Z w polu',
+        karta: 'wpisz znak sprawy w karcie',
         cofnijOstatnia: '„Cofnij ostatnią”',
         usunPoprawki: '„Usuń wszystkie”',
         wyczysc: '„Wyczyść”',
@@ -240,7 +295,7 @@ function shiftRange([x, y], d, a, b) {
   return r;
 }
 
-const LOCAL = new Set(['pisz', 'usun', 'fragment']);
+const LOCAL = new Set(['pisz', 'usun', 'fragment', 'piszW', 'zamien', 'duza', 'wklejDoc', 'dwie']);
 
 class Model {
   constructor() {
@@ -256,6 +311,11 @@ class Model {
    * ręczne zasłonięcia (z komunikatem), a decyzja „Zostaw jawne” zostaje ważna tylko dla tego tekstu.
    */
   sourceChanged(step, a, b) {
+    if (step._mid != null && step._mid !== a && step._mid !== b) {
+      const mid = step._mid;
+      this.sourceChanged({ ...step, _mid: null }, a, mid);
+      return this.sourceChanged({ ...step, _mid: null }, mid, b);
+    }
     const local = LOCAL.has(step.a);
     const d = diff(a, b);
     if (local) {
@@ -284,8 +344,26 @@ class Model {
   corrected(step, kind, src, cov0, cov1) {
     const revealed = runs(src, (i) => cov0[i] && !cov1[i]);
     const masked = runs(src, (i) => !cov0[i] && cov1[i]);
-    if (kind === 'keep' && revealed.length) {
-      this.keeps.push({ chain: [{ text: src, ranges: revealed }], what: describe(step) });
+    this.extra = [];
+    if ((kind === 'keep' || kind === 'unmask') && step.a === 'znacznik' && step._range) {
+      const [ra, rb] = step._range;
+      const word = (t) => (t.toLowerCase().match(/[\p{L}\d]{3,}/gu) ?? []).map((w) => w.slice(0, 4));
+      const own = new Set(word(src.slice(ra, rb)));
+      for (let [x, y] of revealed) {
+        while (x < y && /\s/.test(src[x])) x++;
+        while (y > x && /\s/.test(src[y - 1])) y--;
+        const t = src.slice(x, y);
+        if (step.co === 'tu' && (x < ra || y > rb)) this.extra.push(`„${step._co}” odsłonił „${t}” [${x},${y}) poza klikniętym znacznikiem [${ra},${rb}) „${src.slice(ra, rb)}”`);
+        if (step.co === 'wszedzie' && !word(t).some((w) => own.has(w))) this.extra.push(`„${step._co}” odsłonił „${t}”, niepodobne do klikniętego „${src.slice(ra, rb)}”`);
+      }
+    }
+    const hits = (k, rs) => k.chain.some((e) => e.text === src && e.ranges.some(([x, y]) => rs.some(([p, q]) => p < y && x < q)));
+    // Zasłonięcie miejsca z decyzją „Zostaw jawne” (Zasłoń ponownie, Usuń wszystkie, Ctrl+Z w wyniku,
+    // Zasłoń zaznaczenie) zawiesza tę decyzję. Wraca tylko przez cofnięcie (Ctrl+Z, Cofnij zasłonięcie).
+    if (masked.length) for (const k of this.keeps) if (k.on && hits(k, masked)) k.on = false;
+    if (kind === 'unmask' && revealed.length) for (const k of this.keeps) if (!k.on && hits(k, revealed)) k.on = true;
+    if (kind === 'keep') {
+      for (const r of revealed) this.keeps.push({ chain: [{ text: src, ranges: [r] }], on: true, what: describe(step) });
     }
     // „Zostaw jawne” na znaczniku, który stoi w miejscu ręcznego zasłonięcia (np. „Kowalski” zasłonięty
     // wszędzie przywrócił znacznik automatu „Jan Kowalski”), to późniejsza decyzja urzędnika: wygrywa.
@@ -303,7 +381,7 @@ class Model {
 
   /** Zakresy, które w tekście `src` wolno pokazać jawnie. */
   allowed(src) {
-    return this.keeps.flatMap((k) => k.chain.filter((e) => e.text === src).flatMap((e) => e.ranges));
+    return this.keeps.filter((k) => k.on).flatMap((k) => k.chain.filter((e) => e.text === src).flatMap((e) => e.ranges));
   }
 
   /** Naruszenia w kanale `name` dla wyniku `out`. */
@@ -313,8 +391,7 @@ class Model {
     const ok = this.allowed(src);
     const errs = [];
     for (const s of auto) {
-      if (ok.some(([x, y]) => x < s.end && s.start < y)) continue;
-      const open = runs(src, (i) => i >= s.start && i < s.end && !cov[i]);
+      const open = runs(src, (i) => i >= s.start && i < s.end && !cov[i] && !ok.some(([x, y]) => x <= i && i < y));
       if (open.length) {
         errs.push(`${name}: jawne „${src.slice(s.start, s.end)}” [${s.tokens.join(', ')}] bez decyzji „Zostaw jawne” podjętej na tym tekście`);
       }
@@ -329,6 +406,15 @@ class Model {
     }
     return errs;
   }
+}
+
+/** Odniesienie: inne pismo (jak isOtherDocument w publikacja.ts). */
+function otherDoc(before, after) {
+  if (before === after) return false;
+  if (!before.trim() || !after.trim()) return true;
+  const d = diff(before, after);
+  const s = before.length - d.endA;
+  return (before.length - d.p - s) * 2 > before.length || (after.length - d.p - s) * 2 > after.length;
 }
 
 /* ── Przebieg jednego ciągu w przeglądarce ── */
@@ -402,6 +488,91 @@ async function perform(page, step, browserName) {
       await editAt(page, at, at, ` ${line} `);
       return 'source';
     }
+    case 'piszW': {
+      if (!src) return null;
+      const at = Math.floor(step.at * src.length);
+      await editAt(page, at, at, step.s);
+      return 'source';
+    }
+    case 'zamien': {
+      if (!src) return null;
+      const at = Math.floor(step.at * src.length);
+      const d = DOCS[step.doc];
+      const f = Math.floor(step.from * Math.max(1, d.length - step.n));
+      await editAt(page, at, Math.min(src.length, at + step.n), d.slice(f, f + step.n));
+      return 'source';
+    }
+    case 'duza': {
+      if (!src) return null;
+      const len = Math.floor(step.frac * src.length);
+      const at = Math.floor(step.at * (src.length - len));
+      const d = DOCS[step.doc];
+      const f = Math.floor(step.from * Math.max(1, d.length - len));
+      await editAt(page, at, at + len, d.slice(f, f + len));
+      return 'source';
+    }
+    case 'wklejDoc': {
+      const ws = wsPositions(src);
+      const at = ws.length ? ws[Math.floor(step.at * ws.length)] : src.length;
+      await editAt(page, at, at, ` ${DOCS[step.doc]} `);
+      return 'source';
+    }
+    case 'dwie': {
+      const ws = wsPositions(src);
+      if (ws.length < 2) return null;
+      const a1 = ws[Math.floor(step.at * ws.length)];
+      await editAt(page, a1, a1, step.s);
+      step._mid = await ta.inputValue();
+      const ws2 = wsPositions(step._mid);
+      const a2 = ws2[Math.floor(step.at2 * ws2.length)];
+      await editAt(page, a2, a2, step.s);
+      return 'source';
+    }
+    case 'pusto':
+      await ta.focus();
+      await page.keyboard.press('ControlOrMeta+a');
+      await page.keyboard.press('Delete');
+      return 'source';
+    case 'cofnijPoleN': {
+      step._mids = [];
+      for (let k = 0; k < step.n; k++) {
+        await ta.focus();
+        await page.keyboard.press('ControlOrMeta+z');
+        await page.waitForTimeout(80);
+        step._mids.push(await ta.inputValue());
+      }
+      return 'source';
+    }
+    case 'cofnijKarta': {
+      if (!(await visible(page, '#pub-znak'))) return null;
+      step._mids = [];
+      for (let k = 0; k < step.n; k++) {
+        await page.locator('#pub-znak').focus();
+        await page.keyboard.press('ControlOrMeta+z');
+        await page.waitForTimeout(80);
+        step._mids.push(await ta.inputValue());
+      }
+      return 'source';
+    }
+    case 'ponowPoleS':
+      await ta.focus();
+      await page.keyboard.press('ControlOrMeta+Shift+z');
+      return 'source';
+    case 'karta': {
+      const ok = await page.evaluate(() => {
+        const d = document.getElementById('publikacja');
+        if (!d || d.hidden) return false;
+        d.open = true;
+        return true;
+      });
+      if (!ok || !(await visible(page, '#pub-znak'))) return null;
+      await page.locator('#pub-znak').fill('ZN.6220.' + Math.floor(step.at ?? 1) + '.2024');
+      return 'karta';
+    }
+    case 'ponowWynikS':
+      await page.locator('#output').focus();
+      await page.keyboard.press('ControlOrMeta+Shift+z');
+      return 'unmask';
     case 'cofnijPole':
       await ta.focus();
       await page.keyboard.press('ControlOrMeta+z');
@@ -463,7 +634,20 @@ async function perform(page, step, browserName) {
       const marks = page.locator('#output mark.pii, #output mark.pii-kept');
       const n = await marks.count();
       if (!n) return null;
-      await marks.nth(Math.floor(step.at * n)).click();
+      const mk = marks.nth(Math.floor(step.at * n));
+      step._range = await mk.evaluate((m, len) => {
+        const all = [...document.querySelectorAll('#output [data-o]')];
+        let a = 0;
+        let b = len;
+        for (const el of all) {
+          const o = Number(el.dataset.o);
+          const rel = m.compareDocumentPosition(el);
+          if (rel & Node.DOCUMENT_POSITION_PRECEDING) a = Math.max(a, o + (el.textContent ?? '').length);
+          else if (rel & Node.DOCUMENT_POSITION_FOLLOWING) { b = Math.min(b, o); break; }
+        }
+        return [a, b];
+      }, src.length);
+      await mk.click();
       await page.waitForTimeout(60);
       const sel = { tu: '#fix-keep', wszedzie: '#fix-keep-all', ponownie: '#fix-remask' }[step.co];
       if (!(await visible(page, sel))) return null;
@@ -471,6 +655,7 @@ async function perform(page, step, browserName) {
       await page.locator(sel).click();
       // „Zasłoń ponownie” tuż po „Zostaw jawne” zdejmuje tamtą decyzję, a dana wraca do automatu:
       // nie powstaje ręczne zasłonięcie, które trzeba by potem pilnować.
+      step._co = label;
       if (step.co === 'ponownie') return 'remask';
       return label.startsWith('Cofnij') ? 'unmask' : 'keep';
     }
@@ -537,6 +722,10 @@ async function runSequence(browser, browserName, steps, { clean = false } = {}) 
   const model = new Model();
   const log = [];
   let src = '';
+  let cardOwner = null;
+  // Tekst źródła, przy którym wpisano dany znak sprawy. W Chromium Ctrl+Z i Ctrl+Shift+Z w polu
+  // źródła cofają i przywracają też wpis w karcie, ale zawsze przy tym samym tekście.
+  const cardText = new Map();
   let cov = new Uint8Array(0);
   try {
     for (let i = 0; i < steps.length; i++) {
@@ -568,6 +757,14 @@ async function runSequence(browser, browserName, steps, { clean = false } = {}) 
       const outs = await channels(page);
       const result = outs[0]?.[1] ?? null;
       const cov1 = result === null ? new Uint8Array(next.length) : coverage(next, result);
+      {
+        const seq = [src, ...(step._mid != null ? [step._mid] : []), ...(step._mids ?? []).filter((t) => t !== next), next];
+        for (let k = 1; k < seq.length; k++) if (seq[k] !== seq[k - 1] && otherDoc(seq[k - 1], seq[k])) cardOwner = null;
+        if (kind === 'karta') {
+          cardOwner = next;
+          cardText.set(await page.locator('#pub-znak').inputValue(), next);
+        }
+      }
       if (next !== src || kind === 'source') model.sourceChanged(step, src, next);
       else if (kind && kind !== 'source' && cov1 && cov.length === next.length) {
         model.corrected(step, kind, next, cov, cov1);
@@ -577,6 +774,11 @@ async function runSequence(browser, browserName, steps, { clean = false } = {}) 
       const al = next.trim() ? alignSpans(next, redactPII(next).redacted) : null;
       const auto = al ? al.spans : [];
       const errors = outs.flatMap(([name, out]) => model.check(name, next, out, auto));
+      if (model.extra?.length) { errors.push(...model.extra); model.extra = []; }
+      {
+        const znak = await page.locator('#pub-znak').inputValue();
+        if (znak && cardOwner === null && cardText.get(znak) !== next) errors.push(`karta: znak sprawy „${znak}” został przy innym piśmie`);
+      }
       if (app.pageErrors.length) errors.push(`błąd strony: ${app.pageErrors.join(' | ')}`);
       if (errors.length) return { at: i, errors: [...new Set(errors)], log, src: next };
     }
