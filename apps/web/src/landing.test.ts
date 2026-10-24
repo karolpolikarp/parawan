@@ -347,7 +347,7 @@ test('landing: #dla-iod zgodne z DLA-IOD-I-IT.txt, ALLOWED_KEYS i docs/BENCHMARK
     'gh attestation verify Parawan.html --repo karolpolikarp/parawan',
     'releases.atom',
   ]) {
-    expect(iodSection, c).toContain(c);
+    expect(textOf(iodSection), c).toContain(c);
     expect(dla, c).toContain(c);
   }
   // liczby z pomiaru jak w BENCHMARK.md i w DLA-IOD-I-IT.txt
@@ -387,6 +387,14 @@ test('landing: przeglądarki i suma SHA-256 w #pobierz', () => {
     'Sprawdzisz ją w PowerShellu: Get-FileHash .\\Parawan.html albo w wierszu poleceń: certutil -hashfile Parawan.html SHA256',
   );
   expect(landingStyle).toMatch(/\.suma \{[^}]*user-select: all/);
+  // polecenia łamią się tylko na spacji: cały <code> w nowrap wchodził przy 901–1080 px na
+  // sąsiednią kolumnę, a człon łamany po łączniku przepisuje się z ekranu jako „-- repo”
+  expect(landingStyle).not.toMatch(/\.suma-pod code \{[^}]*nowrap/);
+  for (const flag of ['Get-FileHash', '-hashfile', '--repo']) {
+    expect(iodSection, flag).toContain(`<span class="nw">${flag}</span>`);
+  }
+  expect(pobierzSection).toContain('<span class="nw">Get-FileHash</span>');
+  expect(pobierzSection).toContain('<span class="nw">-hashfile</span>');
   expect(pobierz.get('Aktualizacje')).toContain('kanale Atom');
   expect(pobierzSection).toContain('href="https://github.com/karolpolikarp/parawan/releases.atom"');
   expect(pobierz.get('Wynik')).toMatch(/skopiowania.*\.txt lub \.docx.*wydruku, także do PDF/);
@@ -511,8 +519,9 @@ test('landing: wydruk to sama sekcja #dla-iod', () => {
   // kartka w teczce IOD jest samodzielna: pełne polecenia sumy, a odsyłacze do innych sekcji
   // strony stoją tylko w .tylko-ekran, którego wydruk nie pokazuje
   expect(print).toMatch(/\.tylko-ekran \{ display: none; \}/);
-  expect(iodSection).toContain('<code>certutil -hashfile Parawan.html SHA256</code>');
-  expect(iodSection).toContain('<code>Get-FileHash .\\Parawan.html</code>');
+  const kody = [...iodSection.matchAll(/<code>([\s\S]*?)<\/code>/g)].map((m) => textOf(m[1]));
+  expect(kody).toContain('certutil -hashfile Parawan.html SHA256');
+  expect(kody).toContain('Get-FileHash .\\Parawan.html');
   expect(iodSection).not.toContain('wyżej');
   const bezEkranu = iodSection.replace(/<span class="tylko-ekran">[\s\S]*?<\/span>/g, '');
   expect(bezEkranu).not.toMatch(/href="#(?!dla-iod)/);

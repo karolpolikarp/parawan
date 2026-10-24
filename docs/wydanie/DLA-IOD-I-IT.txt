@@ -36,8 +36,8 @@ CO ZOSTAJE NA KOMPUTERZE
     pseudonyms     włączony tryb „Rozróżniaj osoby”
     motion         zatrzymana animacja przykładu
   Chrome i Edge dzielą tę pamięć między wszystkie pliki otwierane z dysku,
-  więc inny plik .html mógłby tam coś zapisać. Dlatego zapamiętane
-  wyłączenie zasłaniania Parawan pokazuje przy starcie, zanim pracownik
+  więc inny plik .html mógłby tam coś zapisać. Dlatego Parawan przy
+  starcie pokazuje, które typy danych są wyłączone, zanim pracownik
   cokolwiek wklei.
 
   Wynik trafia do schowka albo do pliku tylko po kliknięciu „Kopiuj”,

@@ -462,7 +462,9 @@ textarea.editor:focus-visible { outline: 2px solid var(--acc); outline-offset: 2
   -webkit-user-select: all; user-select: all;
 }
 .suma-wer, .suma-pod { display: block; margin-top: 4px; font-size: 13.5px; line-height: 1.5; color: var(--mut-2); }
-.suma-pod code { white-space: nowrap; }
+/* polecenie łamie się tylko na spacji: człony z łącznikiem (Get-FileHash, -hashfile, --repo)
+   stoją w .nw, więc w wąskiej kolumnie układu dwukolumnowego (901–1080 px) nie wchodzi na sąsiada */
+.suma-pod code { white-space: normal; overflow-wrap: normal; }
 
 /* ── Dla IOD i działu IT: ta sama metryczka, szersza kolumna pytań ── */
 .metryczka-iod { grid-template-columns: 200px minmax(0, 1fr); }
