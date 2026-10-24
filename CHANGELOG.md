@@ -12,25 +12,32 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+Na razie brak zmian od v0.46.26.
+
+## v0.46.26 — 2026-10-25
+
+**Czytnik ekranu podaje pełne nazwy rozwijanych kart, silnik jest w npm jako `anonimizator` i `parawan`, a strona produktu ma dziennik zmian i plan pod `/log/`.**
+
+Pilność: zwykła
+
+Silnik wykrywania (`packages/core/src`) bez zmian względem v0.46.24, więc ten sam tekst dostaje
+te same znaczniki. W Parawan.html zmieniła się tylko dostępność trzech kart. Plik zbudowano
+nowszymi narzędziami (Vite 8.3.5), dlatego ma inną sumę SHA-256 niż v0.46.25.
+
+Aplikacja:
+
+- **Dostępność.** Nagłówki rozwijanych kart „Adnotacja i protokół”, „Co maskować” i „Co wykrywa”
+  mają teraz nazwę złożoną z tytułu i opisu, czyli z całego widocznego tekstu (WCAG 2.5.3, etykieta
+  w nazwie). Czytnik ekranu i sterowanie głosem posługują się tymi samymi słowami, które widać.
+  Wadę wykrył axe-core 4.14.
+
+Dla programistów:
+
 - **Paczka npm.** `anonimizator` 0.29.13 jest w rejestrze npm (opublikowana 2026-10-25):
   `npm install anonimizator`, a CLI bez instalacji przez `npx anonimizator`. Paczka zawiera
   `LICENSE` i `NOTICE` licencji Apache 2.0. Wcześniej rdzeń instalowało się tylko z katalogu
   repozytorium. Ten sam silnik jest też pod nazwą marki: `npm install parawan` (paczka bez
   własnego kodu, instaluje `anonimizator` w tej samej wersji) i `npx parawan pismo.txt`.
-- **Dostępność.** Nagłówki rozwijanych kart „Adnotacja i protokół”, „Co maskować” i „Co wykrywa”
-  mają teraz nazwę złożoną z tytułu i opisu, czyli z całego widocznego tekstu (WCAG 2.5.3, etykieta
-  w nazwie). Czytnik ekranu i sterowanie głosem posługują się tymi samymi słowami, które widać.
-  Wadę wykrył axe-core 4.14.
-- **Zależności.** Narzędzia budowania i testów: Vite 8.3.5, vite-plugin-singlefile 2.3.4, Vitest 4.1.12, Biome 2.6.3, esbuild 0.28.2.
-  Akcje GitHub: setup-node v7, upload-pages-artifact v5, deploy-pages v5. Bramka e2e: axe-core
-  4.14.0, Playwright 1.64.1. Zastępuje PR-y Dependabota #15, #16, #17, #21 i #24, które powstały na starszym `main`.
-  pdf.js zostaje na 6.1.200: wersja 6.4 wymaga `Promise.withResolvers`, którego nie ma
-  w Chromium i Edge 109, więc PDF-y przestałyby się tam wczytywać.
-- **Strona produktu: podstrona „Zmiany i plan” pod `/log/`.** Dziennik zmian i plan rozwoju
-  powstają przy buildzie z `CHANGELOG.md` i `ROADMAP.md`. Strona nie ma skryptu, ma tę samą
-  regułę CSP co strona główna i wbudowane fonty, więc nie wysyła żadnych żądań. Wersje starsze
-  niż v0.46.0 są zwinięte, a każda ma własną kotwicę (np. `/log/#v0-46-25`). Link „Zmiany” jest
-  w pasku nawigacji i w stopce strony głównej.
 - **CLI: tryb `--jsonl` dla wywołań programowych.** `anonimizator --jsonl` działa jako proces
   trwały: każda linia JSON `{"id", "text"}` na wejściu daje jedną linię `{"id", "redacted",
   "found"}` na wyjściu, w tej samej kolejności, a proces kończy się po zamknięciu stdin. Puste
@@ -38,8 +45,26 @@ działają na GitHubie od chwili wypchnięcia tagów.
   tylko `id` i listę znalezisk z liczbą wystąpień, bez zredagowanego tekstu. Starsze wydania
   odrzucają nieznaną opcję kodem wyjścia 2, więc program po drugiej stronie może w ten sposób
   sprawdzić, czy wersja zna ten tryb. Wiersz, który nie jest poprawnym JSON-em albo ma `text`
-  innego typu niż napis, dostaje odpowiedź `{"id", "error"}` zamiast zakończenia procesu. Rdzeń `anonimizator` 0.29.12 → 0.29.13 zawiera silnik z v0.46.24 i eksport `isValidKw`. Aplikacja bez zmian.
-  (fa5edef)
+  innego typu niż napis, dostaje odpowiedź `{"id", "error"}` zamiast zakończenia procesu.
+  Rdzeń `anonimizator` 0.29.12 → 0.29.13 zawiera silnik z v0.46.24 i eksport `isValidKw`.
+  (fa5edef, 00583f4)
+
+Strona produktu:
+
+- **Podstrona „Zmiany i plan” pod `/log/`.** Dziennik zmian i plan rozwoju
+  powstają przy buildzie z `CHANGELOG.md` i `ROADMAP.md`. Strona nie ma skryptu, ma tę samą
+  regułę CSP co strona główna i wbudowane fonty, więc nie wysyła żadnych żądań. Wersje starsze
+  niż v0.46.0 są zwinięte, a każda ma własną kotwicę (np. `/log/#v0-46-25`). Link „Zmiany” jest
+  w pasku nawigacji i w stopce strony głównej.
+
+Zależności i automaty:
+
+- **Zależności.** Narzędzia budowania i testów: Vite 8.3.5, vite-plugin-singlefile 2.3.4,
+  Vitest 4.1.12, Biome 2.6.3, esbuild 0.28.2. Akcje GitHub: setup-node v7, upload-pages-artifact v5,
+  deploy-pages v5. Bramka e2e: axe-core 4.14.0, Playwright 1.64.1. Zastępuje PR-y Dependabota #15,
+  #16, #17, #21 i #24, które powstały na starszym `main`.
+  pdf.js zostaje na 6.1.200: wersja 6.4 wymaga `Promise.withResolvers`, którego nie ma
+  w Chromium i Edge 109, więc PDF-y przestałyby się tam wczytywać.
 
 ## v0.46.25 — 2026-10-24
 
@@ -1819,7 +1844,8 @@ Przegląd stabilizacyjny:
 - Opcjonalny lokalny NER (spaCy PL): usługa `services/ner` (Docker) + klient
   `anonimizator/ner` (fail-safe, circuit breaker).
 
-[Unreleased]: https://github.com/karolpolikarp/parawan/compare/v0.46.25...HEAD
+[Unreleased]: https://github.com/karolpolikarp/parawan/compare/v0.46.26...HEAD
+[v0.46.26]: https://github.com/karolpolikarp/parawan/compare/v0.46.25...v0.46.26
 [v0.46.25]: https://github.com/karolpolikarp/parawan/compare/v0.46.24...v0.46.25
 [v0.46.24]: https://github.com/karolpolikarp/parawan/compare/v0.46.23...v0.46.24
 [v0.46.23]: https://github.com/karolpolikarp/parawan/compare/v0.46.22...v0.46.23
