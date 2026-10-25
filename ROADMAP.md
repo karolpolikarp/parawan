@@ -1,6 +1,6 @@
 # Roadmapa Parawana
 
-Stan na 2026-10-24, wersja bazowa v0.46.25 (rdzeń `anonimizator` 0.29.13 w repo, commit fa5edef).
+Stan na 2026-10-25, wersja bazowa v0.46.26 (rdzeń `anonimizator` 0.29.13, w npm także jako `parawan`).
 Każda pozycja ma docelową wersję i rozmiar (S, M, L). Pozycje „Z repozytorium” wynikają z kodu,
 CHANGELOG, dokumentów i PR-ów i podają źródło; „Propozycje” to pomysły spoza tych źródeł.
 
@@ -10,19 +10,20 @@ Zasady, które tu obowiązują: precyzja ważniejsza niż nadmaskowanie, jeden s
 
 ## Teraz
 
-Docelowo v0.46.26, rdzeń 0.29.14 (0.29.13 ma silnik z v0.46.24 i tryb `--jsonl`).
+Docelowo v0.46.27, rdzeń 0.29.14 (0.29.13 ma silnik z v0.46.24 i tryb `--jsonl`). v0.46.26 wyszło
+2026-10-25 bez zmian w detekcji: dostępność kart, paczki npm, strona `/log/`.
 
 ### Z repozytorium
 
 1. **Formularz z TAB-em, w którym rola stoi jako etykieta**
-   v0.46.26 / rdzeń 0.29.14 · M
+   v0.46.27 / rdzeń 0.29.14 · M
    Klasa regresji oznaczona jako wysoka: `Powód:⇥Jan⇥Nazwisko:⇥Nowak` zostawia jawne imię,
    a `Rola⇥Poszkodowany⇥Imię⇥Ewa⇥Nazwisko⇥Lis` całą osobę. Sprawdzone dziś na `src`: wynik
    `Powód:⇥Jan⇥Nazwisko:⇥[IMIĘ I NAZWISKO]`. Źródło: CHANGELOG.md, v0.46.24, „Znane regresje”
    (pierwsza klasa).
 
 2. **Pierwsza osoba w wyliczeniu w celowniku**
-   v0.46.26 / rdzeń 0.29.14 · M
+   v0.46.27 / rdzeń 0.29.14 · M
    `Przyznano Piotrowi Janowi i Annie Nowak dodatek.` daje `Przyznano Piotrowi Janowi
    i [IMIĘ I NAZWISKO] dodatek.` (odtworzone dziś). To druga klasa wysoka z listy znanych
    regresji v0.46.24. Źródło: CHANGELOG.md, v0.46.24, „Znane regresje”.
@@ -50,7 +51,7 @@ Docelowo v0.46.26, rdzeń 0.29.14 (0.29.13 ma silnik z v0.46.24 i tryb `--jsonl`
    Źródło: c2bcd31, `.github/dependabot.yml`, apps/web/src/pdf.ts.
 
 6. **Job CI na Node 20**
-   v0.46.26 · S
+   v0.46.27 · S
    Build i testy rdzenia oraz bramka benchmarku idą na Node 20 (`.github/workflows/ci.yml:15`),
    który nie ma wsparcia od 30.04.2026; reszta workflow jest już na Node 22. Rdzeń deklaruje
    `"node": ">=18"` (packages/core/package.json:60). Job z bramką celowo zostawiono na Node 20,
@@ -66,7 +67,7 @@ Docelowo v0.46.26, rdzeń 0.29.14 (0.29.13 ma silnik z v0.46.24 i tryb `--jsonl`
    2026-10-24, reguła w packages/core/src/index.ts:4483.
 
 8. **Brzmienie adnotacji o wyłączeniu jawności do sprawdzenia przez prawnika**
-   v0.46.26 · S (bez kodu)
+   v0.46.27 · S (bez kodu)
    Wzór informacji z art. 8 ust. 5 u.d.i.p. wszedł w v0.46.25 z dopiskiem, że brzmienie warto
    uzgodnić z prawnikiem urzędu. Po opinii poprawka tekstów i testu treści. Źródło: CHANGELOG.md,
    v0.46.25, „Adnotacja i protokół”.
@@ -74,7 +75,7 @@ Docelowo v0.46.26, rdzeń 0.29.14 (0.29.13 ma silnik z v0.46.24 i tryb `--jsonl`
 ### Propozycje
 
 9. **Korpus ataków i narzędzia bilansu w repozytorium**
-   v0.46.26 · M
+   v0.46.27 · M
    Bilans przed v0.46.24 (43,7 tys. miejsc lepiej, 334 gorzej) i korpus pod atak żyją tylko
    w roboczych katalogach poza repozytorium. Bez nich poprawki klas z pozycji 1 i 2 nie mają z czym się porównać.
    Proponuję `scripts/bilans/` z syntetycznym korpusem i porównaniem z poprzednim tagiem, wiersz
