@@ -87,3 +87,15 @@ Sam benchmark nie wystarcza — sprawdzaj zmiany wieloagentowo/adwersarialnie na
 ## Język
 
 Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i diakrytyką).
+
+## Stan (2026-11-01)
+
+- `main` = v0.46.26 + roadmapa, czysty.
+- W toku: nowy landing (`/frontend`), kierunek „Sosna o poranku”. Próbki poza repo w
+  `E:\parawan-landing-proby\`. Handoff: `docs/handoff-2026-11-01.md`.
+
+## Backlog
+
+1. Wybór y/u (kolory kategorii jak w aplikacji czy nowa paleta), potem `DESIGN.md` i przeniesienie
+   próbki do `apps/landing` na gałęzi `feat/landing-sosna`. Powrót: odpowiedź użytkownika.
+2. Przy wyborze „u”: nowa paleta kategorii w `apps/web/src/style.css` (kolory w handoffie).
