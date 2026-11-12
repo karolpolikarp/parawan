@@ -1,12 +1,4 @@
-/**
- * Post-processing wyjścia neuronowego NER (token-classification) na maski osobowe; szew dla dodatku AI.
- *
- * `token-classification` w transformers.js nie zwraca offsetów `start`/`end` (issue #359), a `word`
- * to fragment subword. Dlatego kandydata lokalizujemy sami: w strumieniu liter z mapą na pozycje
- * oryginału, potem rozszerzamy do granic słowa. Gdy offsety są, używamy ich zamiast skanu.
- *
- * Bez `throw`: wyjątki modelu łapie wołający (dodatek AI, benchmark).
- */
+// Post-processing wyjścia neuronowego NER (token-classification) na maski osobowe; szew dla dodatku AI.
 
 import { HOMOGRAPH_SURNAMES, isGeoAdjective, normalizeSurnameKey } from './surnames.js';
 import { NON_PERSON_CONTEXT } from './guards/eponyms.js';
@@ -40,7 +32,8 @@ const NER_COMMON_NOUNS = new Set<string>(
   ).split(/\s+/),
 );
 
-/** Pojedyncza encja z pipeline `token-classification`. `start`/`end` na przyszłość (dziś brak). */
+/** Pojedyncza encja z pipeline `token-classification`. `start`/`end` są opcjonalne, bo transformers.js
+ *  ich nie zwraca (issue #359). */
 export interface NerToken {
   entity: string;
   word: string;
@@ -105,7 +98,11 @@ interface Group {
   end?: number;
 }
 
-/** Strumień samych liter (małych) i mapa na pozycje w oryginale. */
+/**
+ * Strumień samych liter (małych) i mapa na pozycje w oryginale. Bez offsetów od modelu, a `word` bywa
+ * fragmentem subword, więc kandydata lokalizujemy w tym strumieniu i rozszerzamy do granic słowa.
+ * Gdy offsety są, używamy ich zamiast skanu.
+ */
 function buildLetterStream(text: string): { stream: string; pos: number[] } {
   let stream = '';
   const pos: number[] = [];
@@ -152,7 +149,8 @@ function locate(
 }
 
 /**
- * Zamień wyjście NER na tekst z zamaskowanymi osobami. Deterministyczne, bez `throw`.
+ * Zamień wyjście NER na tekst z zamaskowanymi osobami. Deterministyczne, bez `throw`: wyjątki modelu
+ * łapie wołający (dodatek AI, benchmark).
  *
  * @param text   tekst wejściowy, zwykle już po redakcji strukturalnej (redactPII).
  * @param tokens surowe encje z pipeline `token-classification`.

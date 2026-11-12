@@ -1,9 +1,8 @@
+// Przebiegi numeru KSeF, numeru księgi wieczystej i znaku sprawy. Biegną przed NIP-em
+// i krótszymi detektorami, żeby maskować całe numery, a nie ich fragmenty.
 import { PL_LO, PL_UP } from '../charset.js';
 import { maskAfterLabel, type RedactCtx } from '../context.js';
 import { isValidKw, isValidNip } from '../validators.js';
-
-// Przebiegi numeru KSeF, numeru księgi wieczystej i znaku sprawy. Biegną przed NIP-em
-// i krótszymi detektorami, żeby maskować całe numery, a nie ich fragmenty.
 
 // Numer KSeF: NIP wystawcy (albo „M" + 9 cyfr) + data + 12 znaków hex (w KSeF 1.0 rozbite 6+6)
 // + 2 znaki sumy, np. „5265877635-20250826-0100001AF629-AF". Sumy CRC-8 nie sprawdzamy, bo

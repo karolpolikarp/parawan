@@ -81,11 +81,11 @@ export function isValidDowod(raw: string): boolean {
   return sum % 10 === 0;
 }
 
+const KW_ALPHABET = '0123456789XABCDEFGHIJKLMNOPRSTUWYZ';
 /**
  * Księga wieczysta, np. „WA1M/00166077/5”: cyfra kontrolna to suma 12 znaków z wagami 1, 3, 7
  * modulo 10. Litery liczą się od X=10, A=11, B=12… z pominięciem Q i V (nie ma ich w kodach wydziałów).
  */
-const KW_ALPHABET = '0123456789XABCDEFGHIJKLMNOPRSTUWYZ';
 export function isValidKw(raw: string): boolean {
   const s = raw.replace(/[\s/]/g, '').toUpperCase();
   if (!/^[A-Z]{2}\d[A-Z]\d{9}$/.test(s)) return false;

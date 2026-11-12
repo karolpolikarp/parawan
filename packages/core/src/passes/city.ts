@@ -218,7 +218,7 @@ function capsCityTailPart(w: string, prev: string, lineEnd = false): boolean {
   // rzeczownik po przymiotniku-głowie tylko jako ostatni człon wiersza („34-400 STARY TARG")
   return lineEnd && CAPS_CITY_ADJ_HEAD.has(pl);
 }
-// „św." osobno: tylko z kontekstem sakralnym (RE_SAINT_CONTEXT), bo bez niego bywa skrótem
+// „św." osobno: tylko z kontekstem sakralnym (saintWithContext), bo bez niego bywa skrótem
 // „świadek" („św. Jan Turek, ul. …" to osoba, nie miasto).
 const RE_SAINT_BEFORE = /(?<!\p{L})(?:bł|im|pw)\.[ \t]*$/iu;
 // Obiekt noclegowy lub lokal tuż przed nazwą: „Maria" to nazwa obiektu, nie imię osoby. Bez sklepu,

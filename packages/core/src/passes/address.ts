@@ -267,7 +267,7 @@ const RE_PATRON_STREET_CAPS = new RegExp(
 );
 const RE_PATRON_STREET_NO = new RegExp(PATRON_STREET_SRC + ADDR_END_AHEAD, 'gu');
 // To samo z dalszym ciągiem zdania za numerem („zamieszkały przy Jana Pawła II 14 zwrócił się …").
-// Tylko po etykiecie zamieszkania, adresu albo „przy" (patrz street0): bez nich liczba
+// Tylko po etykiecie zamieszkania, adresu albo „przy" (patrz classifyPatronStreet): bez nich liczba
 // z rzeczownikiem („Głosowało na Tomasza Mazura 12 radnych") to osoba.
 const RE_PATRON_STREET_NO_LOOSE = new RegExp(String.raw`${PATRON_STREET_SRC}(?= +\p{Ll})`, 'gu');
 // Data, jednostka albo krotność tuż za numerem („Jana Pawła II 5 egz.", „… 5 lat") należą do zdania,
@@ -281,7 +281,7 @@ const RE_PATRON_NUM_UNIT_AFTER = new RegExp(
 const RE_SHARE_BEFORE = /(?<!\p{L})(?:udzia\p{L}*|częś\p{L}*|spad[ek]\p{L}*|przypad\p{L}*|dziedzicz\p{L}*|nabył\p{L}*|nabyła)(?!\p{L})/iu;
 // Patron z liczbą rzymską i numerem domu („Jana Pawła II 5/2") to nazwa ulicy: żywa osoba nie nosi
 // liczby rzymskiej, a papież nie ma numeru domu. Za numerem koniec wiersza, zdania albo komórki,
-// separator, „w Mieście" albo miejscowość (sprawdza ją street0 w słowniku), a nie dalszy ciąg zdania
+// separator, „w Mieście" albo miejscowość (sprawdza ją patronStreetRomanOrPerson w słowniku), a nie dalszy ciąg zdania
 // („pontyfikat Jana Pawła II 26 lat").
 const RE_PATRON_STREET_ROMAN = new RegExp(
   PATRON_STREET_NAME_SRC +

@@ -12,13 +12,13 @@ export const PLATE_VOIV_LETTERS = 'BCDEFGHKLNOPRSTUWZ';
  *  (DMC/DMR), normy, PKD i numer UN materiału niebezpiecznego (cztery cyfry, wojskowe „U…" mają
  *  pięć). „PN" celowo nie, bo to Konin. Wstawiany na początku kandydata tablicy. */
 const PLATE_NOT_ACRONYM = '(?!(?:BMW|DMC|DMR|RAL|DIN|DOT|EN|PKD|KTM|RAM|FSO)(?![A-Z])|UN[\\s-]?\\d{4}(?![\\dA-Z]))';
-/** Jednostka zaraz po kandydacie („DMC 3500 kg", „150 KM") oznacza parametr. Tylko odstęp poziomy:
- *  jednostka z następnego wiersza nie odbiera maski. „KM Policji/PSP" to komenda, „t.j." skrót. */
-/** Kod waluty albo jednostki ilości na początku kandydata tablicy to kwota lub liczba sztuk. Bez RUB,
- *  żeby kandydat „RUB…” przechodził dalej do strażników tablicy (dopisanie zmieniłoby wynik). */
+/** Kod waluty albo jednostki ilości na początku kandydata tablicy to kwota lub liczba sztuk. Bez RUB:
+ *  „RUB” może zaczynać tablicę podkarpacką, więc taki kandydat idzie dalej do strażników tablicy. */
 const RE_PLATE_CURRENCY_HEAD = new RegExp(
   `^(?:${[...CURRENCY_CODES].filter((c) => c !== 'RUB').join('|')}|SZT|KPL|KOM)(?![A-Z])`,
 );
+/** Jednostka zaraz po kandydacie („DMC 3500 kg", „150 KM") oznacza parametr. Tylko odstęp poziomy:
+ *  jednostka z następnego wiersza nie odbiera maski. „KM Policji/PSP" to komenda, „t.j." skrót. */
 const PLATE_NOT_UNIT =
   '(?![ \\t]*(?:kg|t(?!\\.[a-ząćęłńóśźż])|ton\\w*|km|kW|KM(?![ \\t]+(?:Policji|PSP))|mm|cm[3³]?|ccm|zł|PLN|szt)(?![\\wąćęłńóśźż]))';
 

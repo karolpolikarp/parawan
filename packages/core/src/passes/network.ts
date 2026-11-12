@@ -90,11 +90,11 @@ export function passIp(ctx: RedactCtx): void {
   );
 }
 
+const PUBLIC_DNS_IPV4 = new Set(['8.8.8.8', '8.8.4.4', '1.1.1.1', '1.0.0.1', '9.9.9.9', '149.112.112.112']);
 /**
  * Adres bez hosta ani osoby: 0.0.0.0, pętla 127/8, maska podsieci, adres sieci w CIDR („10.0.0.0/24";
  * host „192.168.1.20/24" dalej maskujemy) i publiczne resolwery DNS. To parametry konfiguracji.
  */
-const PUBLIC_DNS_IPV4 = new Set(['8.8.8.8', '8.8.4.4', '1.1.1.1', '1.0.0.1', '9.9.9.9', '149.112.112.112']);
 function isNonHostIpv4(ip: string, after: string): boolean {
   const o = ip.split('.').map(Number);
   if (ip === '0.0.0.0' || o[0] === 127 || PUBLIC_DNS_IPV4.has(ip)) return true;
