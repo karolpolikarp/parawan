@@ -7329,6 +7329,19 @@ test('fix2: tabela z nagłówkiem — proza małymi literami i WERSALIKAMI, kale
     ],
     { pseudonyms: true },
   );
+  // Każdy wariant klucza „nazwisko…" (rodowe, panieńskie, numerowany, JSON i XML) czyta szyk tak samo:
+  // nazwisko naprzód, więc kluczem jest pierwszy wyraz także przy nazwisku-homografie imienia.
+  masked(
+    [
+      ['{"nazwiskoRodowe": "Iryna Roman"}\nPani Iryna podpisała.', '{"nazwiskoRodowe": "[OSOBA-A]"}\nPani [OSOBA-A] podpisała.'],
+      ['{"nazwisko_panienskie": "Iryna Roman"}\nPani Iryna podpisała.', '{"nazwisko_panienskie": "[OSOBA-A]"}\nPani [OSOBA-A] podpisała.'],
+      ['{"NAZWISKO-I-IMIE": "Iryna Roman"}\nPani Iryna podpisała.', '{"NAZWISKO-I-IMIE": "[OSOBA-A]"}\nPani [OSOBA-A] podpisała.'],
+      ['{"nazwisko1": "Lipińska Aleksandra"}\nPani Lipińska przyszła.', '{"nazwisko1": "[OSOBA-A]"}\nPani [OSOBA-A] przyszła.'],
+      ['<nazwisko_panienskie>Domańska Witolda</nazwisko_panienskie>\nPani Domańska przyszła.', '<nazwisko_panienskie>[OSOBA-A]</nazwisko_panienskie>\nPani [OSOBA-A] przyszła.'],
+      ['<NazwiskoRodowe>Witolda Domańska</NazwiskoRodowe>\nPani Domańska przyszła.', '<NazwiskoRodowe>[OSOBA-A]</NazwiskoRodowe>\nPani [OSOBA-A] przyszła.'],
+    ],
+    { pseudonyms: true },
+  );
 });
 test('fix2: login WERSALIKAMI nie rozlewa się na ulicę ani nazwę klubu; konto-homograf nazwiska w ścieżce profilu', () => {
   masked([
