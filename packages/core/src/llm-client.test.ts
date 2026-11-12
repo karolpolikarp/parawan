@@ -297,3 +297,10 @@ test('llmRedact — kandydat obejmujący cały znacznik albo nawias spoza masek 
   );
   expect(r?.found).toEqual([{ type: 'IMIE', count: 3 }]);
 });
+
+test('llmRedact — kandydat obejmujący początek etykiety [OSOBA-X] nie rozbija jej', async () => {
+  const text = 'Pan Ab i [OSOBA-AB] podpisali. Kolejny: i [OSOBA-AB].';
+  vi.stubGlobal('fetch', vi.fn(async () => ollamaResponse(JSON.stringify({ pii: ['i [OSOBA', 'Ab'] }))));
+  const r = await llmRedact(text, CFG);
+  expect(r?.redacted).toBe('Pan [IMIĘ I NAZWISKO] i [OSOBA-AB] podpisali. Kolejny: i [OSOBA-AB].');
+});

@@ -46,7 +46,7 @@ const isMaskFragment = (c: string): boolean =>
 
 // Wystąpienie kandydata, które zaczyna się albo kończy w środku znacznika, rozbiłoby go („AB”
 // w [OSOBA-AB]). Wystąpienie obejmujące cały znacznik („Jan [IMIĘ I NAZWISKO]”) jest zamieniane.
-const PLACEHOLDER_RE = new RegExp(`\[OSOBA-[A-Z]+\]|${KNOWN_MASKS.map(escapeRe).join('|')}`, 'g');
+const PLACEHOLDER_RE = new RegExp(String.raw`\[OSOBA-[A-Z]+\]|${KNOWN_MASKS.map(escapeRe).join('|')}`, 'g');
 
 function replaceCandidate(text: string, c: string): { text: string; count: number } {
   const spans = [...text.matchAll(PLACEHOLDER_RE)].map((m) => [m.index, m.index + m[0].length]);
