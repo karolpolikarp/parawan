@@ -1,7 +1,7 @@
 // Maskowanie miejscowości: po kodzie pocztowym, przy adresie, z etykietą TERYT oraz po markerze
 // zamieszkania lub urodzenia.
 import { HOMOGRAPH_SURNAMES, isConfirmedSurname, looksLikeSurname, NON_SURNAME_ADJ, surnameBase } from '../surnames.js';
-import { CAP_CITY, CITY_RUN, CITY_START, escapeRe, PL_LO, PL_UP, RE_CHAR_LL, splitWords } from '../charset.js';
+import { ADR_MASK_SRC, CAP_CITY, CITY_RUN, CITY_START, DUR_MASK_SRC, KOD_MASK_SRC, PL_LO, PL_UP, RE_CHAR_LL, splitWords } from '../charset.js';
 import type { RedactCtx } from '../context.js';
 import { MASK } from '../types.js';
 import { FORM_LABEL_WORDS } from '../dict/forms.js';
@@ -111,7 +111,7 @@ const RE_GENERIC_PREDICATE_AFTER =
 const RE_RESIDENCE_ADVERBIAL = /^(?:Zam|M)ieszk(?:uj|aj)ąc(?![\p{L}])/u;
 const RE_IMPERSONAL_AFTER =
   /^[ \t]*,?[ \t]*(?:(?:nie|też|także|również|łatwiej|łatwo|taniej|szybciej|zawsze)[ \t]+)?(?:można|warto|należy|trzeba|wystarczy|da[ \t]+się|opłaca[ \t]+się)(?!\p{L})/u;
-const RE_STREET_ADDR_AFTER_CITY = new RegExp(String.raw`^[ \t]*,?[ \t]*(?:przy[ \t]+)?${escapeRe(MASK.ADRES)}`);
+const RE_STREET_ADDR_AFTER_CITY = new RegExp(String.raw`^[ \t]*,?[ \t]*(?:przy[ \t]+)?${ADR_MASK_SRC}`);
 const RE_POPULATION_AFTER =
   /^[ \t]+(?:(?:ok\.|około|ponad|blisko|niemal|prawie|przeszło|już|aż)[ \t]+)?\d[\d  .,]{0,12}(?:[ \t]*(?:tys\.|tysięcy|tys|mln|milion\p{L}*))?[ \t]+(?:osób|osoby|mieszkańców|ludzi|rodzin|obywateli|dzieci|uczniów|studentów|cudzoziemców)(?!\p{L})/u;
 /**
@@ -317,14 +317,18 @@ const RE_CITY_RESIDENCE = new RegExp(
   'g',
 );
 
-function maskCityAfterPostalCode(ctx: RedactCtx, KOD: string): void {
-  // Miejscowość tuż po kodzie pocztowym. Człon może zaczynać łącznik „nad/pod" („66-470 Kostrzyn
-  // nad Odrą"); łącznik wchodzi do maski tylko wtedy, gdy cała fraza jest w słowniku.
+// Miejscowość tuż po kodzie pocztowym. Człon może zaczynać łącznik „nad/pod" („66-470 Kostrzyn
+// nad Odrą"); łącznik wchodzi do maski tylko wtedy, gdy cała fraza jest w słowniku.
+const RE_CITY_AFTER_POSTAL = new RegExp(
+  `(${KOD_MASK_SRC}|(?<![\\d-])\\d{2}-\\d{3})([ \\t]+)(${CAP_CITY})((?:[ \\t]+(?:(?:nad|pod)[ \\t]+)?${CAP_CITY}){0,2})`,
+  'g',
+);
+function maskCityAfterPostalCode(ctx: RedactCtx): void {
   ctx.text = ctx.text.replace(
-    new RegExp(`(${KOD}|(?<![\\d-])\\d{2}-\\d{3})([ \\t]+)(${CAP_CITY})((?:[ \\t]+(?:(?:nad|pod)[ \\t]+)?${CAP_CITY}){0,2})`, 'g'),
+    RE_CITY_AFTER_POSTAL,
     (m, anchor: string, sep: string, first: string, restRaw: string, offset: number, str: string) => {
       // surowy kod poprzedzony odwołaniem prawnym („poz. 12-345 Rejestr") to nie adres
-      if (anchor !== ctx.M['KOD-POCZTOWY'] && precededByLegalRef(str, offset)) return m;
+      if (anchor !== MASK['KOD-POCZTOWY'] && precededByLegalRef(str, offset)) return m;
       const restParts = splitTail(restRaw);
       let take = multiwordTake(first, restParts);
       // Przymiotnik-człon spoza słownika („05-082 Stare Babice") dokleja drugi wyraz tylko po jednej
@@ -359,22 +363,26 @@ function maskCityAfterPostalCode(ctx: RedactCtx, KOD: string): void {
   );
 }
 
-function maskCapsCityAfterPostalCode(ctx: RedactCtx, KOD: string, ADR: string): void {
-  // Miejscowość wersalikami po kodzie („26-900 KOZIENICE"). Wersalikami pisze się też skróty
-  // („Partia 11-222 ZUS"), więc tylko słownik albo blok adresowy (kod tuż po [ADRES]), bez stoplisty
-  // i bez dwukropka za nazwą („POCZTA: WARSZAWA"). Surowy kod (odrzucony przez passPostal): tylko słownik.
-  const ADR_BEFORE = new RegExp(`${ADR}[ \\t]*[,/;]?[ \\t]*(?:\\r?\\n[ \\t]*)?$`);
+// Miejscowość wersalikami po kodzie („26-900 KOZIENICE"). Wersalikami pisze się też skróty
+// („Partia 11-222 ZUS"), więc tylko słownik albo blok adresowy (kod tuż po [ADRES]), bez stoplisty
+// i bez dwukropka za nazwą („POCZTA: WARSZAWA"). Surowy kod (odrzucony przez passPostal): tylko słownik.
+const RE_ADR_BEFORE_POSTAL = new RegExp(`${ADR_MASK_SRC}[ \\t]*[,/;]?[ \\t]*(?:\\r?\\n[ \\t]*)?$`);
+const RE_CAPS_CITY_AFTER_POSTAL = new RegExp(
+  `(${KOD_MASK_SRC}|(?<![\\d-])\\d{2}-\\d{3})([ \\t]+)(${CAPS_CITY_TOK})((?:[ \\t]+(?:(?:NAD|POD)[ \\t]+)?${CAPS_CITY_TOK}){0,2})`,
+  'g',
+);
+function maskCapsCityAfterPostalCode(ctx: RedactCtx): void {
   ctx.text = ctx.text.replace(
-    new RegExp(`(${KOD}|(?<![\\d-])\\d{2}-\\d{3})([ \\t]+)(${CAPS_CITY_TOK})((?:[ \\t]+(?:(?:NAD|POD)[ \\t]+)?${CAPS_CITY_TOK}){0,2})`, 'g'),
+    RE_CAPS_CITY_AFTER_POSTAL,
     (m, anchor: string, sep: string, first: string, restRaw: string, offset: number, str: string) => {
-      const masked = anchor === ctx.M['KOD-POCZTOWY'];
+      const masked = anchor === MASK['KOD-POCZTOWY'];
       if (!masked && precededByLegalRef(str, offset)) return m;
       const lo = first.toLowerCase();
       if (CAPS_CITY_STOP.has(lo)) return m;
       const tailParts = splitTail(restRaw);
       let take = multiwordTake(first, tailParts);
       const dict = take > 0 || POLISH_CITIES.has(lo);
-      const block = masked && lo.length >= 3 && ADR_BEFORE.test(str.slice(Math.max(0, offset - 40), offset));
+      const block = masked && lo.length >= 3 && RE_ADR_BEFORE_POSTAL.test(str.slice(Math.max(0, offset - 40), offset));
       if (!dict && !block) return m;
       // Blok adresowy bez słownika: cała nazwa wielowyrazowa („NOWA WIEŚ WIELKA"). Człon musi wyglądać
       // na część nazwy i stać za spacją, bo tabulator zaczyna kolejną komórkę. Kończy go też imię albo
@@ -402,14 +410,12 @@ function maskCapsCityAfterPostalCode(ctx: RedactCtx, KOD: string, ADR: string): 
   );
 }
 
-function maskCityInCsvAndTerytFields(ctx: RedactCtx, KOD: string): void {
-  // Miejscowość po kodzie za średnikiem albo przecinkiem (CSV „…;00-001;Warszawa"). Kolejna
-  // kolumna bywa krajem czy województwem, więc tylko słownik, a nazwa musi zamykać pole: „…, 00-003,
-  // Warszawa zgłosiła awarię" to zdanie.
-  ctx.text = ctx.text.replace(
-    new RegExp(`(${KOD}"?)([ \\t]*[;,][ \\t]*"?)(${CITY_RUN})(?=[ \\t]*(?:["';,.)\\r\\n]|$))`, 'g'),
-    (m, kod: string, sep: string, run: string) => maskCityPrefix(ctx, kod + sep, run) ?? m,
-  );
+// Miejscowość po kodzie za średnikiem albo przecinkiem (CSV „…;00-001;Warszawa"). Kolejna
+// kolumna bywa krajem czy województwem, więc tylko słownik, a nazwa musi zamykać pole: „…, 00-003,
+// Warszawa zgłosiła awarię" to zdanie.
+const RE_CITY_CSV_AFTER_POSTAL = new RegExp(`(${KOD_MASK_SRC}"?)([ \\t]*[;,][ \\t]*"?)(${CITY_RUN})(?=[ \\t]*(?:["';,.)\\r\\n]|$))`, 'g');
+function maskCityInCsvAndTerytFields(ctx: RedactCtx): void {
+  ctx.text = ctx.text.replace(RE_CITY_CSV_AFTER_POSTAL, (m, kod: string, sep: string, run: string) => maskCityPrefix(ctx, kod + sep, run) ?? m);
   // Etykieta TERYT z systemów e-urzędowych („Gliwice (miasto)", „Zabłudów (gmina miejsko-wiejska)")
   // to pewna kotwica, że wyraz przed nią jest nazwą miejscowości.
   ctx.text = ctx.text.replace(RE_CITY_TERYT, (m, pre: string | undefined, preSep: string | undefined, city: string, tag: string) => {
@@ -423,11 +429,22 @@ function maskCityInCsvAndTerytFields(ctx: RedactCtx, KOD: string): void {
   });
 }
 
-function maskCityNextToAddress(ctx: RedactCtx, ADR: string): void {
-  const ADDR_ANCHOR = `(?:${ADR}|ul\\.|al\\.|os\\.|pl\\.)`;
-  // Miejscowość przed adresem bez kodu pocztowego („Warszawa, ul. …").
+const ADDR_ANCHOR = `(?:${ADR_MASK_SRC}|ul\\.|al\\.|os\\.|pl\\.)`;
+// Miejscowość przed adresem bez kodu pocztowego („Warszawa, ul. …").
+const RE_CITY_BEFORE_ADDR = new RegExp(`${CITY_START}(${CITY_RUN})([ \\t]*,?[ \\t]+)(${ADDR_ANCHOR})`, 'g');
+// Miasto w osobnym wierszu tuż nad adresem („Warszawa⏎Hoża 41"). Cały wiersz musi być miastem
+// ze słownika: „Wydział Kontroli⏎ul. …" nie jest.
+const RE_CITY_LINE_ABOVE_ADDR = new RegExp(`(?<=^|\\n)([ \\t]*)(${CITY_RUN})(?=[ \\t]*\\r?\\n[ \\t]*${ADDR_ANCHOR})`, 'g');
+// Miejscowość tuż po adresie bez kodu („[ADRES], Warszawa"), też po średniku i wersalikami.
+// Przechodzą tylko nazwy ze słownika.
+const RE_CITY_AFTER_ADDR = new RegExp(
+  `(${ADR_MASK_SRC})([ \\t]*[,;][ \\t]*|[ \\t]+[Ww][Ee]?[ \\t]+|[ \\t]*\\n(?:[ \\t]*\\n)?[ \\t]*)` +
+    `(${CITY_RUN}|(?:${CAPS_CITY_TOK}[ \\t]+){0,2}${CAPS_CITY_TOK})`,
+  'g',
+);
+function maskCityNextToAddress(ctx: RedactCtx): void {
   ctx.text = ctx.text.replace(
-    new RegExp(`${CITY_START}(${CITY_RUN})([ \\t]*,?[ \\t]+)(${ADDR_ANCHOR})`, 'g'),
+    RE_CITY_BEFORE_ADDR,
     (m, capRun: string, sep: string, anchor: string, offset: number, str: string) => {
       // Nazwisko-homonim miasta po imieniu albo „Pan/Pani" to osoba („Jan Turek, ul. Długa 5"), ciąg
       // zostaje dla fazy osób. Tabulator to granica komórki: o mieście rozstrzyga ostatnia komórka.
@@ -438,23 +455,15 @@ function maskCityNextToAddress(ctx: RedactCtx, ADR: string): void {
       return rest === null ? m : `${lead}${rest}${ctx.M.MIEJSCOWOSC}${sep}${anchor}`;
     },
   );
-  // Miasto w osobnym wierszu tuż nad adresem („Warszawa⏎Hoża 41"). Cały wiersz musi być miastem
-  // ze słownika: „Wydział Kontroli⏎ul. …" nie jest.
   ctx.text = ctx.text.replace(
-    new RegExp(`(?<=^|\\n)([ \\t]*)(${CITY_RUN})(?=[ \\t]*\\r?\\n[ \\t]*${ADDR_ANCHOR})`, 'g'),
+    RE_CITY_LINE_ABOVE_ADDR,
     (m, lead: string, run: string) => {
       if (!POLISH_CITIES.has(run.toLowerCase().split(/[ \t]+/).join(' '))) return m;
       return `${lead}${ctx.hit('MIEJSCOWOSC')}`;
     },
   );
-  // Miejscowość tuż po adresie bez kodu („[ADRES], Warszawa"), też po średniku i wersalikami.
-  // Przechodzą tylko nazwy ze słownika.
   ctx.text = ctx.text.replace(
-    new RegExp(
-      `(${ADR})([ \\t]*[,;][ \\t]*|[ \\t]+[Ww][Ee]?[ \\t]+|[ \\t]*\\n(?:[ \\t]*\\n)?[ \\t]*)` +
-        `(${CITY_RUN}|(?:${CAPS_CITY_TOK}[ \\t]+){0,2}${CAPS_CITY_TOK})`,
-      'g',
-    ),
+    RE_CITY_AFTER_ADDR,
     (m, adr: string, sep: string, run: string) => maskCityPrefix(ctx, adr + sep, run) ?? m,
   );
 }
@@ -483,18 +492,25 @@ function maskCityAfterResidenceMarker(ctx: RedactCtx): void {
   });
 }
 
+// Miejscowość po markerze urodzenia, z datą pomiędzy („ur. [DATA-URODZENIA] w Krakowie").
+const RE_CITY_AFTER_BIRTH = new RegExp(
+  // jedno łamanie wiersza po dacie tylko przed małym „w/we" („ur. [DATA] r.⏎w Sosnowcu"); „r.⏎W …"
+  // zaczyna nowe zdanie. Forma osobowa („urodziłam się [DATA] w Łodzi") jak w passBirthDate.
+  `\\b((?:[Uu]r\\.|[Uu]rodzon[a-ząę]+|[Uu]rodzi(?:ł(?:a|am|em|aś|eś|o|y|i)?|liśmy|łyśmy)[ \\t]+się)[ \\t]+(?:(?:dnia|w[ \\t]+dniu)[ \\t]+)?` +
+    `(?:${DUR_MASK_SRC}[ \\t]*r?\\.?,?(?:[ \\t]*\\r?\\n[ \\t]*(?=we?[ \\t])|[ \\t]*))?[Ww]e?[ \\t]+)` +
+    `(${CITY_RUN})${CITY_END}`,
+  'g',
+);
+// Etykieta łączona „Data i miejsce urodzenia:", miasto przed datą albo za nią („…: 12.04.1985,
+// Kielce"). Tylko słownik: „Data i miejsce urodzenia Kandydata podaje się w CV" nie daje maski.
+const RE_CITY_AFTER_BIRTH_COMBO = new RegExp(
+  `\\b(${BIRTH_COMBO}[ \\t]*:?\\s*(?:${DUR_MASK_SRC}[ \\t]*(?:r\\.)?(?:[ \\t]*,[ \\t]*|[ \\t]+)(?:[Ww]e?[ \\t]+)?)?)` +
+    `(${CITY_RUN})(?=[ \\t.,;:?!)(\\r\\n]|$)`,
+  'g',
+);
 function maskCityAfterBirthMarker(ctx: RedactCtx): void {
-  // Miejscowość po markerze urodzenia, z datą pomiędzy („ur. [DATA-URODZENIA] w Krakowie").
-  const DUR = escapeRe(ctx.M['DATA-UR']);
   ctx.text = ctx.text.replace(
-    new RegExp(
-      // jedno łamanie wiersza po dacie tylko przed małym „w/we" („ur. [DATA] r.⏎w Sosnowcu"); „r.⏎W …"
-      // zaczyna nowe zdanie. Forma osobowa („urodziłam się [DATA] w Łodzi") jak w passBirthDate.
-      `\\b((?:[Uu]r\\.|[Uu]rodzon[a-ząę]+|[Uu]rodzi(?:ł(?:a|am|em|aś|eś|o|y|i)?|liśmy|łyśmy)[ \\t]+się)[ \\t]+(?:(?:dnia|w[ \\t]+dniu)[ \\t]+)?` +
-        `(?:${DUR}[ \\t]*r?\\.?,?(?:[ \\t]*\\r?\\n[ \\t]*(?=we?[ \\t])|[ \\t]*))?[Ww]e?[ \\t]+)` +
-        `(${CITY_RUN})${CITY_END}`,
-      'g',
-    ),
+    RE_CITY_AFTER_BIRTH,
     (m, marker: string, run: string, offset: number, str: string) => {
       if (/^urodzi/i.test(marker) && !birthVerbAboutPerson(marker, str.slice(Math.max(0, offset - 320), offset))) return m;
       // biogram postaci historycznej: rok sprzed 1900 w tym samym zdaniu („Mikołaj Kopernik urodził się
@@ -503,26 +519,15 @@ function maskCityAfterBirthMarker(ctx: RedactCtx): void {
       return maskCityPrefix(ctx, marker, run) ?? m;
     },
   );
-  // Etykieta łączona „Data i miejsce urodzenia:", miasto przed datą albo za nią („…: 12.04.1985,
-  // Kielce"). Tylko słownik: „Data i miejsce urodzenia Kandydata podaje się w CV" nie daje maski.
-  ctx.text = ctx.text.replace(
-    new RegExp(
-      `\\b(${BIRTH_COMBO}[ \\t]*:?\\s*(?:${DUR}[ \\t]*(?:r\\.)?(?:[ \\t]*,[ \\t]*|[ \\t]+)(?:[Ww]e?[ \\t]+)?)?)` +
-        `(${CITY_RUN})(?=[ \\t.,;:?!)(\\r\\n]|$)`,
-      'g',
-    ),
-    (m, marker: string, run: string) => maskCityPrefix(ctx, marker, run) ?? m,
-  );
+  ctx.text = ctx.text.replace(RE_CITY_AFTER_BIRTH_COMBO, (m, marker: string, run: string) => maskCityPrefix(ctx, marker, run) ?? m);
 }
 
 export function passCity(ctx: RedactCtx): void {
   if (!ctx.on('MIEJSCOWOSC')) return;
-  const KOD = escapeRe(ctx.M['KOD-POCZTOWY']);
-  const ADR = escapeRe(ctx.M.ADRES);
-  maskCityAfterPostalCode(ctx, KOD);
-  maskCapsCityAfterPostalCode(ctx, KOD, ADR);
-  maskCityInCsvAndTerytFields(ctx, KOD);
-  maskCityNextToAddress(ctx, ADR);
+  maskCityAfterPostalCode(ctx);
+  maskCapsCityAfterPostalCode(ctx);
+  maskCityInCsvAndTerytFields(ctx);
+  maskCityNextToAddress(ctx);
   maskCityAfterResidenceMarker(ctx);
   maskCityAfterBirthMarker(ctx);
 }

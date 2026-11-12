@@ -8,7 +8,7 @@ import { POLISH_CITIES } from '../dict/places.js';
 import { egoNameGenitive, precededByEponym, precededByPatron } from '../guards/eponyms.js';
 import { HOMOGRAPH_PAIR_EXCL, institutionBeforeAddr, ORG_HEAD_WORDS, PATRON_GEN_HEADS, RE_CAPS_WORK_HEAD, RE_PUBLIC_FACILITY_WORD } from '../guards/person-context.js';
 import { LEGAL_ENTITY_WORDS, ROLE_WORDS, TITLE_WORDS } from '../guards/roles.js';
-import { RE_SURNAME_OBLIQUE } from '../person-patterns.js';
+import { OCR_MIX_WORD, RE_SURNAME_OBLIQUE } from '../person-patterns.js';
 
 // Tytuły i role, po których wersalikami stoi osoba. TITLE_WORDS ma tylko mianownik i wołacz „Pan",
 // stąd dopisane formy zależne i skróty sędziowskie.
@@ -22,16 +22,17 @@ const ALLCAPS_TITLES = new Set<string>([
 // Tytuł albo rola i osoba, wszystko wersalikami („PANEM MARKIEM WIŚNIEWSKIM"). Wymagany rozpoznany
 // tytuł i nazwisko potwierdzone słownikiem lub morfologią, więc nagłówki instytucji („SĄD OKRĘGOWY…")
 // zostają. Uruchamiane przed passPersonOcrPair, żeby ten nie sparował „tytuł + imię" i nie osierocił nazwiska.
+const CAPS_WORD = `[${PL_UP}]{2,}`;
+const CAPS_NAME_WORD = `[${PL_UP}]{2,}(?:-[${PL_UP}]{2,})?`;
+const RE_CAPS_TITLE_NAME = new RegExp(
+  `(?<![${PL_UP}${PL_LO}0-9.\\-])(${CAPS_WORD})([ \\t]+)(${CAPS_NAME_WORD}(?:[ \\t]+${CAPS_NAME_WORD})?)(?![${PL_UP}${PL_LO}0-9\\-])`,
+  'g',
+);
 export function passPersonOcrTitle(ctx: RedactCtx): void {
   if (!ctx.on('IMIE')) return;
-  const UPW = `[${PL_UP}]{2,}`;
-  const NAMEW = `[${PL_UP}]{2,}(?:-[${PL_UP}]{2,})?`;
   const confirmedSurname = (l: string): boolean => surnameShaped(l) || (l.includes('-') && l.split('-').some(surnameShaped));
   ctx.text = ctx.text.replace(
-    new RegExp(
-      `(?<![${PL_UP}${PL_LO}0-9.\\-])(${UPW})([ \\t]+)(${NAMEW}(?:[ \\t]+${NAMEW})?)(?![${PL_UP}${PL_LO}0-9\\-])`,
-      'g',
-    ),
+    RE_CAPS_TITLE_NAME,
     (m, title: string, sep: string, name: string, offset: number) => {
       if (!ALLCAPS_TITLES.has(title.toLowerCase())) return m;
       if (precededByEponym(ctx.text, offset)) return m;
@@ -393,12 +394,17 @@ const capsGiven = (w: string): boolean => {
 // Para tokenów wersalikami, także z homoglifami OCR („J0AN K0WALSKI"). Para stoi w lookahead,
 // a pętla exec: odrzucona para („CZYNSZ JAN") zużywa tylko pierwszy wyraz, więc imię może otworzyć
 // następną parę („CZYNSZ JAN KOWALSKI").
+const OCR_CAPS_TOKEN = `[${PL_UP}][${PL_UP}01]{1,19}`;
+// Nazwisko dwuczłonowe („ANNA NOWAK-KOWALSKA") mieści się w parze; trzeci człon już nie pasuje,
+// więc fragment nie wycieka.
+const RE_OCR_PAIR = new RegExp(
+  `(?<![${PL_UP}${PL_LO}0-9.-])(${OCR_CAPS_TOKEN})(?=([ \\t]+)(${OCR_CAPS_TOKEN}(?:-${OCR_CAPS_TOKEN})?)(?![${PL_UP}${PL_LO}0-9-]))`,
+  'g',
+);
 export function passPersonOcrPair(ctx: RedactCtx): void {
   if (!ctx.on('IMIE')) return;
-  const OCRW = `[${PL_UP}][${PL_UP}01]{1,19}`;
-  // Nazwisko dwuczłonowe („ANNA NOWAK-KOWALSKA") mieści się w parze; trzeci człon już nie pasuje,
-  // więc fragment nie wycieka.
-  const re = new RegExp(`(?<![${PL_UP}${PL_LO}0-9.-])(${OCRW})(?=([ \\t]+)(${OCRW}(?:-${OCRW})?)(?![${PL_UP}${PL_LO}0-9-]))`, 'g');
+  const re = RE_OCR_PAIR;
+  re.lastIndex = 0;
   const src = ctx.text;
   const decide = (t1: string, sep: string, t2: string, offset: number): string | null => {
     const homo1 = /[01]/.test(t1);
@@ -550,11 +556,11 @@ export function passPersonMaidenAfterMask(ctx: RedactCtx): void {
 }
 
 // Homoglif OCR wewnątrz słowa kapitalizowanego („Jan KowaIski": wielkie I zamiast l).
+const RE_OCR_MIX = new RegExp(`(?<![${PL_UP}${PL_LO}0-9-])(?:(${CAP_WORD})([ \\t]+))?(${OCR_MIX_WORD})(?![${PL_UP}${PL_LO}0-9-])`, 'g');
 export function passPersonOcrMix(ctx: RedactCtx): void {
   if (!ctx.on('IMIE')) return;
-  const OCR_MIX = `[${PL_UP}][${PL_LO}]*[I01][${PL_LO}I01]*`;
   ctx.text = ctx.text.replace(
-    new RegExp(`(?<![${PL_UP}${PL_LO}0-9-])(?:(${CAP_WORD})([ \\t]+))?(${OCR_MIX})(?![${PL_UP}${PL_LO}0-9-])`, 'g'),
+    RE_OCR_MIX,
     (m, w1: string | undefined, sep: string | undefined, w2: string) => {
       const n2 = w2[0].toLowerCase() + w2.slice(1).replace(/[I1]/g, 'l').replace(/0/g, 'o').toLowerCase();
       if (!surnameShaped(n2)) return m;

@@ -10,7 +10,7 @@ import { cellEndsAt, cellStartsBefore, DOT_CHAIN, dotChainKind, INITIAL_START, i
 import { LEGAL_ENTITY_WORDS, ROLE_WORDS, TITLE_WORDS } from '../guards/roles.js';
 import { MAIDEN_D_SENTINEL } from './person-caps-ocr.js';
 import { MASK } from '../types.js';
-import { RE_DECLINED_NOM_SURNAME, RE_NEXT_CAP_WORD_SP } from '../person-patterns.js';
+import { OCR_NAME_WORD, RE_DECLINED_NOM_SURNAME, RE_NEXT_CAP_WORD_SP } from '../person-patterns.js';
 
 // Długość kontekstu za wyrazem w RawWordLink.next; linksAt porównuje dokładnie tyle znaków.
 const LINK_CTX_LEN = 12;
@@ -79,7 +79,6 @@ const RE_MASK_FOREIGN_PARTICLE = new RegExp(
   `(${PERSON_MASK_SRC})[ \\t]+(?:[Vv][ao]n|[Dd]e[rl]|[Dd]ella|[Bb]in|[Tt]er|D[aei]|De[rl]?|El|Al|L[ae])[ \\t]+[${PL_UP}][${PL_LO}]+`,
   'g',
 );
-const OCR_NAME_WORD = `[${PL_UP}](?:[${PL_LO}]*[I01][${PL_LO}I01]*|[${PL_UP}]*[01][${PL_UP}01]*)`;
 const RE_OCR_NAME_BEFORE_MASK = new RegExp(`(?<![${PL_UP}${PL_LO}0-9])(${OCR_NAME_WORD})([ \\t\\n_-])(${PERSON_MASK_SRC})`, 'g');
 // Imię z homoglifem za maską na końcu wiersza („[..] KaroI⏎"): rekord „Nazwisko Imię" po OCR.
 const RE_MASK_THEN_OCR_NAME = new RegExp(`(${PERSON_MASK_SRC}) (${OCR_NAME_WORD})(?=[ \\t]*(?:\\r?\\n|$))`, 'g');

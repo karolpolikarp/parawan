@@ -1,7 +1,7 @@
 // Adresy: ulice ze skrótem i bez, ulice z patronem w dopełniaczu, adres po etykiecie zamieszkania
 // i przed kodem pocztowym, kod pocztowy bez myślnika.
 import { surnameShaped } from '../surnames.js';
-import { CAP_CITY, countOf, escapeRe, MONTHS_GEN, PL_LO, PL_UP } from '../charset.js';
+import { ADR_MASK_SRC, CAP_CITY, countOf, KOD_MASK_SRC, MONTHS_GEN, PL_LO, PL_UP } from '../charset.js';
 import { maskKeepPrefix, type RedactCtx } from '../context.js';
 import { MASK } from '../types.js';
 import { isFirstNameGenitive, isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
@@ -13,9 +13,11 @@ import { RE_SURNAME_OBLIQUE } from '../person-patterns.js';
 
 // Miesiąc w dopełniaczu tuż za numerem („11 listopada") oznacza, że numer to dzień daty. „Maja"
 // z wielkiej litery bywa imieniem („ul. Polna 5 Maja Wróbel"), więc jest miesiącem tylko wtedy,
-// gdy nie stoi za nim wyraz z wielkiej litery („3 Maja o godz. 12").
-const RE_MONTH_GEN_AHEAD =
-  /^[ \t]+(?:stycznia|lutego|marca|kwietnia|czerwca|lipca|sierpnia|września|października|listopada|grudnia)(?!\p{L})/iu;
+// gdy nie stoi za nim wyraz z wielkiej litery („3 Maja o godz. 12"), stąd osobny RE_MAY_AHEAD.
+const RE_MONTH_GEN_AHEAD = new RegExp(
+  String.raw`^[ \t]+(?:${MONTHS_GEN.split('|').filter((m) => m !== 'maja').join('|')})(?!\p{L})`,
+  'iu',
+);
 const RE_MAY_AHEAD = /^[ \t]+(?:maja(?!\p{L})|(?:Maja|MAJA)(?!\p{L})(?![ \t]+\p{Lu}))/u;
 const monthAhead = (rest: string): boolean => RE_MONTH_GEN_AHEAD.test(rest) || RE_MAY_AHEAD.test(rest);
 // Ciąg za liczbą po „Miejscowość Rynek N": data, okres, ilość albo lokal („5 maja", „12 m. 4").
@@ -341,12 +343,11 @@ const patronStreetKeyBefore = (before: string): boolean => {
 const RE_PATRON_CELL_BEFORE = /(?:(?:^|[\r\n\t;,])"|[\t;]|^|[\r\n])$/;
 const RE_PATRON_CELL_AFTER = /^(?:"(?=[\t;,]|\r?\n|$)|(?=[\t;]))/;
 const RE_PATRON_CELL_PLACE = /^"?\p{Lu}\p{Ll}+(?:[ -]\p{Lu}\p{Ll}+)?"?$/u;
-const KOD_MASK = escapeRe(MASK['KOD-POCZTOWY']);
-const RE_PATRON_CELL_POSTAL = new RegExp(String.raw`^"?(?:\d{2}-\d{3}|${KOD_MASK})"?$`);
+const RE_PATRON_CELL_POSTAL = new RegExp(String.raw`^"?(?:\d{2}-\d{3}|${KOD_MASK_SRC})"?$`);
 // kod pocztowy albo jego maska za przecinkiem lub w następnym wierszu
-const RE_PATRON_POSTAL_AFTER = new RegExp(String.raw`^[ \t]*(?:,[ \t]*|\r?\n[ \t]*)(?:\d{2}-\d{3}|${KOD_MASK})`);
+const RE_PATRON_POSTAL_AFTER = new RegExp(String.raw`^[ \t]*(?:,[ \t]*|\r?\n[ \t]*)(?:\d{2}-\d{3}|${KOD_MASK_SRC})`);
 // Kolejna ulica w wyliczeniu za zamaskowanym adresem („Mieszkańcy [ADRES] i Jana Pawła II 7").
-const RE_PATRON_ENUM_BEFORE = new RegExp(String.raw`${escapeRe(MASK.ADRES)}[ \t]*(?:,|i|oraz)[ \t]+$`, 'u');
+const RE_PATRON_ENUM_BEFORE = new RegExp(String.raw`${ADR_MASK_SRC}[ \t]*(?:,|i|oraz)[ \t]+$`, 'u');
 // Słowo udziału, oceny albo nagrody na miejscu miejscowości (patrz patronStreetCityLead).
 const RE_PATRON_CELL_NOT =
   /^(?:udzia\p{L}*|współwłaściciel\p{L}*|właściciel\p{L}*|spadk\p{L}*|nagrod\p{L}*|wyróżnieni\p{L}*|ocen\p{L}*|wynik\p{L}*|punkt\p{L}*|głos\p{L}*|stypend\p{L}*|część|części)$/iu;
@@ -764,42 +765,42 @@ function maskStreetMatch(ctx: RedactCtx, m: string, prefix: string, offset: numb
   return maskStreetNumberOrCount(ctx, m, prefix, offset, str, before, rest, labeled, hasUnit);
 }
 // Adres ze skrótem albo typem ulicy, nazwą i numerem.
+const RE_STREET_ADDR = new RegExp(
+  // skróty bez względu na wielkość liter, też ze skanów i OCR („UL. KWIATOWA 5"), oraz „Aleje/Alejach/Aleją"
+  `\\b([Uu][lLI1]\\.|[Uu][Ll][Ii][Cc][AaIiYy]|[Aa][Ll]\\.|[Aa][Ll][Ee][IiJj](?:[Aa][Cc][Hh]|[AaIiĘęEeĄą])?|[Oo][Ss]\\.|[Oo][Ss][Ii][Ee][Dd][Ll][EeAaUu]|[Pp][Ll]\\.|[Pp][Ll][Aa][Cc][UuAa]?|` +
+    // typy ulic bez skrótu („Rondo Dmowskiego 3", „skwer Kościuszki 5"); bez „park", bo
+    // „Park Narodowy … 2024" to instytucja
+    `[Rr]ond[${PL_LO}]*|[Mm]ost[${PL_LO}]*|[Ss]kwer[${PL_LO}]*|[Bb]ulwar[${PL_LO}]*)` +
+    // po „ul." (też OCR „UI."/„U1.") spacja bywa pominięta („zam. ul.Lipowa 14"); tylko po nim,
+    // bo „et al.Nature 12" czy „2 os.Cena 350" to nie adresy
+    `(?:\\s+|(?<=\\b[Uu][lLI1]\\.))` +
+    // tytuły patrona jak w RE_STREET_EPONYM_TAIL („ul. prof. dr. hab. Jana Nowaka 3"): rangi
+    // STREET_RANK bez „pułk”, tylko małymi literami
+    `(?:(?:\\d+|${STREET_RANK_WORDS.filter((r) => r !== 'pułk').join('|')})\\.?\\s+|[A-ZĄĆĘŁŃÓŚŹŻ]\\.\\s+){0,4}` +
+    // „r."/„roku" jako człon nazwy z datą („ul. Bitwy Warszawskiej 1920 r. 18"); numer domu stoi po nich
+    `[${PL_UP}][${PL_LO}${PL_UP}01.-]*(?:[ \\t]+(?:[${PL_UP}0-9][${PL_LO}${PL_UP}0-9.-]*|r\\.|roku)){0,3}` +
+    ADDR_CONNECTOR +
+    // blok na osiedlu przed numerem („os. Tysiąclecia bl. 4 m. 3")
+    `(?:[ \\t]+(?:bl\\.|blok))?` +
+    `[ \\t]+${ADDR_HOUSE}${ADDR_UNIT}`,
+  'g',
+);
 function maskStreetAddresses(ctx: RedactCtx): void {
-  ctx.text = ctx.text.replace(
-    new RegExp(
-      // skróty bez względu na wielkość liter, też ze skanów i OCR („UL. KWIATOWA 5"), oraz „Aleje/Alejach/Aleją"
-      `\\b([Uu][lLI1]\\.|[Uu][Ll][Ii][Cc][AaIiYy]|[Aa][Ll]\\.|[Aa][Ll][Ee][IiJj](?:[Aa][Cc][Hh]|[AaIiĘęEeĄą])?|[Oo][Ss]\\.|[Oo][Ss][Ii][Ee][Dd][Ll][EeAaUu]|[Pp][Ll]\\.|[Pp][Ll][Aa][Cc][UuAa]?|` +
-        // typy ulic bez skrótu („Rondo Dmowskiego 3", „skwer Kościuszki 5"); bez „park", bo
-        // „Park Narodowy … 2024" to instytucja
-        `[Rr]ond[${PL_LO}]*|[Mm]ost[${PL_LO}]*|[Ss]kwer[${PL_LO}]*|[Bb]ulwar[${PL_LO}]*)` +
-        // po „ul." (też OCR „UI."/„U1.") spacja bywa pominięta („zam. ul.Lipowa 14"); tylko po nim,
-        // bo „et al.Nature 12" czy „2 os.Cena 350" to nie adresy
-        `(?:\\s+|(?<=\\b[Uu][lLI1]\\.))` +
-        // tytuły patrona jak w RE_STREET_EPONYM_TAIL („ul. prof. dr. hab. Jana Nowaka 3"): rangi
-        // STREET_RANK bez „pułk”, tylko małymi literami
-        `(?:(?:\\d+|${STREET_RANK_WORDS.filter((r) => r !== 'pułk').join('|')})\\.?\\s+|[A-ZĄĆĘŁŃÓŚŹŻ]\\.\\s+){0,4}` +
-        // „r."/„roku" jako człon nazwy z datą („ul. Bitwy Warszawskiej 1920 r. 18"); numer domu stoi po nich
-        `[${PL_UP}][${PL_LO}${PL_UP}01.-]*(?:[ \\t]+(?:[${PL_UP}0-9][${PL_LO}${PL_UP}0-9.-]*|r\\.|roku)){0,3}` +
-        ADDR_CONNECTOR +
-        // blok na osiedlu przed numerem („os. Tysiąclecia bl. 4 m. 3")
-        `(?:[ \\t]+(?:bl\\.|blok))?` +
-        `[ \\t]+${ADDR_HOUSE}${ADDR_UNIT}`,
-      'g',
-    ),
-    (m: string, prefix: string, offset: number, str: string): string => maskStreetMatch(ctx, m, prefix, offset, str),
+  ctx.text = ctx.text.replace(RE_STREET_ADDR, (m: string, prefix: string, offset: number, str: string): string =>
+    maskStreetMatch(ctx, m, prefix, offset, str),
   );
 }
 // Drugi adres w wyliczeniu tuż za maską („Lokale przy ul. Polnej 5 i Leśnej 7"): łącznik po numerze
 // domu nie jest członem nazwy (ADDR_CONNECTOR). Liczba przed ilością, kwotą, godziną czy datą
 // („… i Leśnej 7 dzieci") zostaje, jak w głównym przebiegu.
+const RE_SECOND_STREET = new RegExp(
+  `(${ADR_MASK_SRC}[ \\t]+(?:i|oraz)[ \\t]+)[${PL_UP}][${PL_LO}]+(?:-[${PL_UP}][${PL_LO}]+)?(?:[ \\t]+[${PL_UP}][${PL_LO}]+)?` +
+    `[ \\t]+${ADDR_HOUSE}${ADDR_UNIT}(?![\\d${PL_LO}${PL_UP}])`,
+  'g',
+);
 function maskSecondStreetInEnumeration(ctx: RedactCtx): void {
-  const ADR = escapeRe(ctx.M.ADRES);
   ctx.text = ctx.text.replace(
-    new RegExp(
-      `(${ADR}[ \\t]+(?:i|oraz)[ \\t]+)[${PL_UP}][${PL_LO}]+(?:-[${PL_UP}][${PL_LO}]+)?(?:[ \\t]+[${PL_UP}][${PL_LO}]+)?` +
-        `[ \\t]+${ADDR_HOUSE}${ADDR_UNIT}(?![\\d${PL_LO}${PL_UP}])`,
-      'g',
-    ),
+    RE_SECOND_STREET,
     (m: string, lead: string, offset: number, str: string) => {
       const rest = str.slice(offset + m.length, offset + m.length + 24);
       if (RE_NUMERIC_TAIL_AFTER.test(rest) || RE_TIME_AFTER.test(rest) || monthAhead(rest)) return m;
@@ -813,17 +814,17 @@ function maskSecondStreetInEnumeration(ctx: RedactCtx): void {
 // Adres bez „ul." tuż przed zamaskowanym kodem pocztowym. Człony nazwy łączy tylko odstęp poziomy:
 // przez nową linię nazwisko z podpisu („Monika Sadowska\nSzosa Chełmińska 77/9") stawałoby się
 // początkiem nazwy ulicy.
+const RE_STREET_BEFORE_POSTAL = new RegExp(
+  // bez łącznika „i/z/pod": bez skrótu ulicy „Spółka Kowalski i Syn 5, 00-001 …" to firma.
+  // Granica wyrazu jawnie, bo „\b" w JS zna tylko litery ASCII, a nazwa bywa na Ł/Ś/Ż („Łagów 12⏎26-140 Bodzentyn").
+  `(?<![${PL_UP}${PL_LO}0-9_])([${PL_UP}][${PL_LO}]+(?:[ \\t]+[${PL_UP}][${PL_LO}]+){0,2})` +
+    `\\s+${ADDR_HOUSE}${ADDR_UNIT}` +
+    `(\\s*,?\\s*)(${KOD_MASK_SRC})`,
+  'g',
+);
 function maskStreetBeforePostalCode(ctx: RedactCtx): void {
-  const KOD = escapeRe(ctx.M['KOD-POCZTOWY']);
   ctx.text = ctx.text.replace(
-    new RegExp(
-      // bez łącznika „i/z/pod": bez skrótu ulicy „Spółka Kowalski i Syn 5, 00-001 …" to firma.
-      // Granica wyrazu jawnie, bo „\b" w JS zna tylko litery ASCII, a nazwa bywa na Ł/Ś/Ż („Łagów 12⏎26-140 Bodzentyn").
-      `(?<![${PL_UP}${PL_LO}0-9_])([${PL_UP}][${PL_LO}]+(?:[ \\t]+[${PL_UP}][${PL_LO}]+){0,2})` +
-        `\\s+${ADDR_HOUSE}${ADDR_UNIT}` +
-        `(\\s*,?\\s*)(${KOD})`,
-      'g',
-    ),
+    RE_STREET_BEFORE_POSTAL,
     (m: string, street: string, sep: string, kod: string, offset: number, str: string) => {
       // Odsyłacz albo pomieszczenie nad kodem („Sala 12⏎00-001 Warszawa", „Pokój 3") to nie ulica
       // ani wieś (jak ADDR_LABEL_VALUE_STOP po etykiecie). Chyba że to wieś w bloku koperty: osoba
@@ -852,11 +853,8 @@ export function passAddress(ctx: RedactCtx): void {
 
 // Kod pocztowy bez myślnika („65048") tylko przy mocnej kotwicy: tuż za maską adresu i bezpośrednio
 // przed miejscowością (wyraz z wielkiej litery).
+const RE_POSTAL_NO_HYPHEN = new RegExp(`(${ADR_MASK_SRC}\\s*,?\\s*)(?<!\\d)\\d{5}(?!\\d)(?=[ \\t]+${CAP_CITY})`, 'g');
 export function passPostalNoHyphen(ctx: RedactCtx): void {
   if (!ctx.on('KOD-POCZTOWY')) return;
-  const ADR = escapeRe(ctx.M.ADRES);
-  ctx.text = ctx.text.replace(
-    new RegExp(`(${ADR}\\s*,?\\s*)(?<!\\d)\\d{5}(?!\\d)(?=[ \\t]+${CAP_CITY})`, 'g'),
-    maskKeepPrefix(ctx, 'KOD-POCZTOWY'),
-  );
+  ctx.text = ctx.text.replace(RE_POSTAL_NO_HYPHEN, maskKeepPrefix(ctx, 'KOD-POCZTOWY'));
 }

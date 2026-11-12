@@ -274,11 +274,15 @@ function maskFlatFormFields(
 // Komórka „Etykieta: wartość" w wierszu rozdzielonym TAB-em („Imię: Jan⇥Nazwisko: Kowal"). Kropka
 // skrótu może stać w etykiecie („Data ur.:", „Nr tel.:").
 const RE_TAB_CELL_LABEL = /^[ ]*(?:\d{1,2}[.)][ ]*)?\p{L}(?:[\p{L} ()]|\.(?=[ ]*[\p{L}:])){0,40}:/u;
+// Etykieta imienia, także drugiego i imienia rodzica.
+const FIRST_NAME_LABEL_SRC = String.raw`(?:pierwsze[ ]+|drugie[ ]+)?imi[eę](?:[ ]+(?:ojca|matki))?`;
 // Etykieta bez dwukropka w osobnej komórce („Imię⇥Adam⇥Nazwisko⇥Nowak"): zamknięta lista etykiet
 // osobowych i identyfikatorów.
-const RE_TAB_BARE_LABEL =
-  /^[ ]*(?:(?:pierwsze[ ]+|drugie[ ]+)?imi[eę](?:[ ]+(?:ojca|matki))?|imiona|nazwisko(?:[ ]+(?:rodowe|panie[nń]skie))?(?:[ ]+matki)?|imi[eę][ ]+i[ ]+nazwisko|nazwisko[ ]+i[ ]+imi[eę]|data[ ]+ur(?:\.|odzenia)|miejsce[ ]+ur(?:\.|odzenia)|pesel|nip|tel(?:\.|efon)|nr[ ]+tel(?:\.|efonu)|e-?mail|adres|ulica|miejscowo[sś][cć]|kod[ ]+pocztowy|nr[ ]+dowodu|płeć|obywatelstwo)[ ]*$/iu;
-const RE_TAB_FIRST_NAME_LABEL = /^[ ]*(?:pierwsze[ ]+|drugie[ ]+)?imi[eę](?:[ ]+(?:ojca|matki))?[ ]*$/iu;
+const RE_TAB_BARE_LABEL = new RegExp(
+  String.raw`^[ ]*(?:${FIRST_NAME_LABEL_SRC}|imiona|nazwisko(?:[ ]+(?:rodowe|panie[nń]skie))?(?:[ ]+matki)?|imi[eę][ ]+i[ ]+nazwisko|nazwisko[ ]+i[ ]+imi[eę]|data[ ]+ur(?:\.|odzenia)|miejsce[ ]+ur(?:\.|odzenia)|pesel|nip|tel(?:\.|efon)|nr[ ]+tel(?:\.|efonu)|e-?mail|adres|ulica|miejscowo[sś][cć]|kod[ ]+pocztowy|nr[ ]+dowodu|płeć|obywatelstwo)[ ]*$`,
+  'iu',
+);
+const RE_TAB_FIRST_NAME_LABEL = new RegExp(String.raw`^[ ]*${FIRST_NAME_LABEL_SRC}[ ]*$`, 'iu');
 // Etykieta własnego imienia osoby z wiersza (bez imion rodziców).
 const RE_OWN_FIRST_NAME_LABEL = /^(?:pierwsze[ ]+|drugie[ ]+)?imi[eę]$/iu;
 // Nazwy kolumn, które w nagłówku tabeli stoją za etykietą osobową („Nazwisko⇥Imię⇥Stanowisko").

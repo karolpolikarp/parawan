@@ -30,6 +30,10 @@ export const RE_LOWER_RUN = new RegExp(
   `(?<![${PL_UP}${PL_LO}@./-])${LO_WORD}(?:[ \\t]+${LO_WORD}){1,6}(?![${PL_UP}${PL_LO}-])`,
   'g',
 );
+// Wyraz kapitalizowany z homoglifem OCR w środku („KowaIski": wielkie I albo 1 zamiast l, 0 zamiast o).
+export const OCR_MIX_WORD = `[${PL_UP}][${PL_LO}]*[I01][${PL_LO}I01]*`;
+// Wyraz z homoglifem OCR: kapitalizowany jak OCR_MIX_WORD albo wersalikami z cyfrą („K0WALSKI").
+export const OCR_NAME_WORD = `(?:${OCR_MIX_WORD}|[${PL_UP}][${PL_UP}]*[01][${PL_UP}01]*)`;
 // Mianownik nazwiska odmiennego jak przymiotnik („Kowalski", „Zielińska"); forma zależna to „Kowalskiego".
 export const RE_DECLINED_NOM_SURNAME = /(?:sk|ck|dzk)[ia]$/i;
 export const RE_SURNAME_OBLIQUE =

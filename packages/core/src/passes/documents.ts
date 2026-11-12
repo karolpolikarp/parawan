@@ -1,6 +1,6 @@
 // Numery dokumentów z kotwicą: dowód osobisty, paszport, KRS, prawo jazdy, tablica rejestracyjna,
 // a także kod pocztowy.
-import { escapeRe } from '../charset.js';
+import { REJ_MASK_SRC } from '../charset.js';
 import { maskAfterLabel, maskKeepPrefix, type RedactCtx } from '../context.js';
 import { type PiiType } from '../types.js';
 import { CURRENCY_CODES, isValidDowod, precededByLegalRef } from '../validators.js';
@@ -238,10 +238,13 @@ export function passPlate(ctx: RedactCtx): void {
 // z jednostką, skrót techniczny, numer aktu z ukośnikiem („, UE 2016/679") i skrót z rokiem
 // („; SN 2020 r. orzekł"); trzyliterowy powiat z rokiem jest jednak tablicą (plateYearEndsList).
 // Średnik i ukośnik tylko z odstępami poziomymi, żeby lista nie sięgała do kolejnego akapitu.
+const RE_PLATE_ENUM = new RegExp(
+  `(${REJ_MASK_SRC})((?:(?:\\s*,\\s*|[ \\t]*[;/][ \\t]*|\\s+oraz\\s+|\\s+i\\s+)${PLATE_ITEM}(?![\\w-]|/\\d)${PLATE_NOT_UNIT})+)`,
+  'g',
+);
 function maskPlateEnumeration(ctx: RedactCtx): void {
-  const REJ = escapeRe(ctx.M['NR-REJESTRACYJNY']);
   ctx.text = ctx.text.replace(
-    new RegExp(`(${REJ})((?:(?:\\s*,\\s*|[ \\t]*[;/][ \\t]*|\\s+oraz\\s+|\\s+i\\s+)${PLATE_ITEM}(?![\\w-]|/\\d)${PLATE_NOT_UNIT})+)`, 'g'),
+    RE_PLATE_ENUM,
     (_m, first: string, tail: string) => {
       let ended = false;
       const maskedTail = tail.replace(RE_PLATE_ITEM_SCAN, (p) => {

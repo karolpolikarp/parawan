@@ -52,9 +52,14 @@ export const CITY_START = `(?<![${PL_UP}${PL_LO}]|[${PL_UP}${PL_LO}]-)`;
 export const LIST_BULLET = '(?:(?:\\d{1,4}[.)]|[-*•–])[ \\t]*)?';
 export const MONTHS_GEN = 'stycznia|lutego|marca|kwietnia|maja|czerwca|lipca|sierpnia|września|października|listopada|grudnia';
 export const escapeRe = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-// Wzorzec maski osoby: etykieta pseudonimu albo maska IMIE. Przebiegi wstawiają zawsze maski domyślne
-// (własne z options.masks podstawia redactPII dopiero na końcu), więc wzorzec jest stały.
+// Wzorce masek, na których kotwiczą przebiegi. Przebiegi wstawiają zawsze maski domyślne (własne
+// z options.masks podstawia redactPII dopiero na końcu), więc wzorce są stałe.
+// Maska osoby: etykieta pseudonimu albo maska IMIE.
 export const PERSON_MASK_SRC = `\\[OSOBA-[A-Z]+\\]|${escapeRe(MASK.IMIE)}`;
+export const ADR_MASK_SRC = escapeRe(MASK.ADRES);
+export const KOD_MASK_SRC = escapeRe(MASK['KOD-POCZTOWY']);
+export const DUR_MASK_SRC = escapeRe(MASK['DATA-UR']);
+export const REJ_MASK_SRC = escapeRe(MASK['NR-REJESTRACYJNY']);
 export const countOf = (s: string, ch: string): number => s.split(ch).length - 1;
 
 export const RE_CHAR_LL = /\p{Ll}/u;
