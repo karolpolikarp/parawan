@@ -57,7 +57,7 @@ const httpNerLayer = (name, desc, url) => ({
 const LAYERS = [
   {
     name: 'T0+T1 core',
-    desc: 'redactPII() — regex + sumy kontrolne + słownik (in-process, offline)',
+    desc: 'redactPII(): regex, sumy kontrolne i słownik (in-process, offline)',
     url: null,
     run: async (text) => redactPII(text).redacted,
   },
@@ -65,7 +65,7 @@ const LAYERS = [
   httpNerLayer('core+fastpdn', 'redactPIIFull() + NER FastPDN/HerBERT (127.0.0.1:8091)', 'http://127.0.0.1:8091'),
   {
     name: 'core+onnx (Node)',
-    desc: 'redactPII() + FastPDN ONNX int8 (q8) w Node przez @huggingface/transformers — bez Dockera',
+    desc: 'redactPII() + FastPDN ONNX int8 (q8) w Node przez @huggingface/transformers, bez Dockera',
     url: null,
     probe: onnxAvailable,
     skipReason: 'biblioteka @huggingface/transformers lub lokalny model ONNX niedostępne',
@@ -126,7 +126,7 @@ async function main() {
   const { cases } = buildDataset();
   const categories = [...new Set(cases.map((c) => c.category))];
 
-  console.log(`Benchmark anonimizatora — ${cases.length} przypadków (seed ${SEED}), core v${coreVersion}\n`);
+  console.log(`Benchmark anonimizatora: ${cases.length} przypadków (seed ${SEED}), core v${coreVersion}\n`);
 
   const activeLayers = [];
   const skippedLayers = [];
@@ -153,7 +153,7 @@ async function main() {
       console.log(`✔ ${layer.name}: dostępna${layer.url ? ` (${layer.url})` : ''}`);
     } else {
       skippedLayers.push(layer);
-      console.log(`✖ ${layer.name}: NIEDOSTĘPNA${layer.url ? ` (${layer.url})` : ''} — warstwa pominięta`);
+      console.log(`✖ ${layer.name}: niedostępna${layer.url ? ` (${layer.url})` : ''}, warstwa pominięta`);
     }
   }
   console.log('');
@@ -212,9 +212,9 @@ async function main() {
     );
   }
 
-  console.log('\n=== RECALL (odsetek mustMask usuniętych) ===');
+  console.log('\n=== Recall (odsetek mustMask usuniętych) ===');
   printTable(layerResults, categories, 'recall');
-  console.log('\n=== PRECISION-PROXY (odsetek mustKeep zachowanych) ===');
+  console.log('\n=== Precision-proxy (odsetek mustKeep zachowanych) ===');
   printTable(layerResults, categories, 'precision');
   console.log('\n=== F1 (średnia harmoniczna recall i precision-proxy) ===');
   printTable(layerResults, categories, 'f1');
@@ -267,17 +267,17 @@ async function main() {
       }
     }
     if (violations.length) {
-      console.error('\n❌ BRAMKA BENCHMARKU (--check) — regresja:');
+      console.error('\n❌ Bramka benchmarku (--check) wykryła regresję:');
       for (const v of violations) console.error('   - ' + v);
       process.exit(1);
     }
-    console.log('\n✔ BRAMKA BENCHMARKU (--check): brak regresji (rdzeń w normie, warstwy NER nie obniżają ochrony).');
+    console.log('\n✔ Bramka benchmarku (--check): brak regresji (rdzeń w normie, warstwy NER nie obniżają ochrony).');
   }
 }
 
 function printTable(layerResults, categories, metric) {
   const col = (c) => (CAT_SHORT[c] ?? c).padStart(11);
-  const header = ['Warstwa'.padEnd(16), 'ŁĄCZNIE'.padStart(8), ...categories.map(col)].join(' | ');
+  const header = ['Warstwa'.padEnd(16), 'Łącznie'.padStart(8), ...categories.map(col)].join(' | ');
   console.log(header);
   console.log('-'.repeat(header.length));
   for (const lr of layerResults) {
@@ -294,7 +294,7 @@ function buildMarkdown({ startedAt, coreVersion, cases, mustMaskTotal, mustKeepT
   const lines = [];
   const push = (...xs) => lines.push(...xs);
 
-  push(`# Benchmark anonimizacji — precision / recall`);
+  push(`# Benchmark anonimizacji: precision i recall`);
   push('');
   push(`- **Data uruchomienia:** ${date}`);
   push(`- **Wersja rdzenia (\`anonimizator\`):** ${coreVersion}`);
@@ -304,27 +304,27 @@ function buildMarkdown({ startedAt, coreVersion, cases, mustMaskTotal, mustKeepT
   push('');
   push(`## Metodologia`);
   push('');
-  push(`Każdy przypadek testowy to zdanie z listą **mustMask** (dokładne podłańcuchy, które MUSZĄ`);
-  push(`zniknąć z wyniku redakcji — PESEL-e, nazwiska w odmianie itd.) oraz **mustKeep** (podłańcuchy,`);
-  push(`które MUSZĄ pozostać — numery przepisów, sygnatury akt, instytucje, homonimy nazwisk).`);
+  push(`Każdy przypadek testowy to zdanie z listą **mustMask** (dokładne podłańcuchy, które mają`);
+  push(`zniknąć z wyniku redakcji: PESEL-e, nazwiska w odmianie itd.) oraz **mustKeep** (podłańcuchy,`);
+  push(`które mają zostać: numery przepisów, sygnatury akt, instytucje, homonimy nazwisk).`);
   push('');
-  push(`- **recall** — odsetek elementów mustMask nieobecnych w wyniku (miara skuteczności anonimizacji;`);
+  push(`- **recall**: odsetek elementów mustMask nieobecnych w wyniku (miara skuteczności anonimizacji;`);
   push(`  element obecny w wyniku = wyciek danych osobowych);`);
-  push(`- **precision-proxy** — odsetek elementów mustKeep zachowanych w wyniku (miara nadmaskowania;`);
+  push(`- **precision-proxy**: odsetek elementów mustKeep zachowanych w wyniku (miara nadmaskowania;`);
   push(`  element usunięty = fałszywy pozytyw, który psuje użyteczność tekstu).`);
   push('');
   push(`Wszystkie identyfikatory w zbiorze mają **poprawne sumy kontrolne** policzone w generatorze`);
   push(`(PESEL, NIP, REGON, IBAN mod-97, nr dowodu), a negatywy zawierają m.in. ciągi o celowo`);
-  push(`**błędnych** sumach kontrolnych — silnik ma je zostawić w spokoju.`);
+  push(`**błędnych** sumach kontrolnych, które silnik ma zostawić w spokoju.`);
   push('');
-  push(`Liczności kategorii: ${[...perCatCount.entries()].map(([c, n]) => `${c} — ${n}`).join(', ')}.`);
+  push(`Liczności kategorii: ${[...perCatCount.entries()].map(([c, n]) => `${c}: ${n}`).join(', ')}.`);
   push('');
   push(`### Warstwy`);
   push('');
-  for (const lr of layerResults) push(`- **${lr.name}** — ${lr.desc}`);
+  for (const lr of layerResults) push(`- **${lr.name}**: ${lr.desc}`);
   for (const sl of skippedLayers) {
     const why = sl.skipReason ?? `usługa \`${sl.url}\` niedostępna w chwili uruchomienia (health-check)`;
-    push(`- **${sl.name}** — POMINIĘTA: ${why}.`);
+    push(`- **${sl.name}**: pominięta, ${why}.`);
   }
   push('');
   push(`## Wyniki`);
@@ -361,7 +361,7 @@ function buildMarkdown({ startedAt, coreVersion, cases, mustMaskTotal, mustKeepT
   push(`**zjedzono** = element mustKeep został zamaskowany (fałszywy pozytyw).`);
   push('');
   for (const lr of layerResults) {
-    push(`### ${lr.name} — ${lr.failures.length} przypadków z porażką`);
+    push(`### ${lr.name}: ${lr.failures.length} przypadków z porażką`);
     push('');
     if (lr.failures.length === 0) {
       push(`Brak porażek.`);
@@ -374,7 +374,7 @@ function buildMarkdown({ startedAt, coreVersion, cases, mustMaskTotal, mustKeepT
       push(`**Wycieki (przeszło ${leaks.reduce((a, f) => a + f.leaked.length, 0)} elem. w ${leaks.length} przypadkach):**`);
       push('');
       for (const f of leaks) {
-        push(`- \`${f.id}\` (${f.category}): przeszło ${f.leaked.map((s) => `„${s}"`).join(', ')} — tekst: _${f.text}_`);
+        push(`- \`${f.id}\` (${f.category}): przeszło ${f.leaked.map((s) => `„${s}"`).join(', ')}; tekst: _${f.text}_`);
       }
       push('');
     }
@@ -382,25 +382,25 @@ function buildMarkdown({ startedAt, coreVersion, cases, mustMaskTotal, mustKeepT
       push(`**Nadmaskowania (zjedzono ${eats.reduce((a, f) => a + f.eaten.length, 0)} elem. w ${eats.length} przypadkach):**`);
       push('');
       for (const f of eats) {
-        push(`- \`${f.id}\` (${f.category}): zjedzono ${f.eaten.map((s) => `„${s}"`).join(', ')} — wynik: _${f.redacted}_`);
+        push(`- \`${f.id}\` (${f.category}): zjedzono ${f.eaten.map((s) => `„${s}"`).join(', ')}; wynik: _${f.redacted}_`);
       }
       push('');
     }
   }
   push(`## Uwagi`);
   push('');
-  push(`- Kategoria **osoby-rzadkie-ner** to przypadki, które rdzeń deterministyczny PROWADZI`);
-  push(`  ŚWIADOMIE do wycieku (nazwiska bez wyzwalacza i bez sufiksu -ski/-cki/-icz/-czyk oraz`);
-  push(`  obce) — recall rdzenia jest tu z założenia niski (bliski 0%). Ta kategoria istnieje po to,`);
-  push(`  by ZMIERZYĆ przewagę warstwy NER: uruchom benchmark z modelem ONNX, aby zobaczyć wzrost`);
-  push(`  recall bez spadku precyzji na negatywach.`);
+  push(`- Kategoria **osoby-rzadkie-ner** to przypadki, w których rdzeń deterministyczny świadomie`);
+  push(`  dopuszcza wyciek (nazwiska bez wyzwalacza i bez sufiksu -ski/-cki/-icz/-czyk oraz obce),`);
+  push(`  więc recall rdzenia jest tu z założenia niski (bliski 0%). Ta kategoria mierzy przewagę`);
+  push(`  warstwy NER: uruchom benchmark z modelem ONNX, aby zobaczyć wzrost recall bez spadku`);
+  push(`  precyzji na negatywach.`);
   push(`- Warstwę **core+onnx (Node)** aktywujesz bez Dockera: \`npm i -D @huggingface/transformers\``);
   push(`  oraz rozpakuj model do \`scripts/benchmark/models/fastpdn/\` (albo wskaż \`ONNX_MODELS_DIR\`).`);
   push(`  Bez biblioteki/modelu warstwa jest pomijana (fail-safe), a raport pokazuje tylko rdzeń.`);
-  push(`- Zbiór jest w pełni syntetyczny — wszystkie dane (PESEL-e, nazwiska, adresy) zostały`);
+  push(`- Zbiór jest w pełni syntetyczny: wszystkie dane (PESEL-e, nazwiska, adresy) zostały`);
   push(`  wygenerowane albo wymyślone; nie zawierają danych rzeczywistych osób.`);
   push(`- Kolumna „Wynik ≠ core" pokazuje, w ilu przypadkach warstwa NER faktycznie zmieniła`);
-  push(`  wynik względem czystego rdzenia — wartość bliska zeru sugerowałaby, że usługa NER`);
+  push(`  wynik względem czystego rdzenia. Wartość bliska zeru sugerowałaby, że usługa NER`);
   push(`  nie działała podczas pomiaru (fail-safe po cichu wraca do rdzenia).`);
   push(`- Usługi NER widzą tekst już po redakcji strukturalnej (PESEL/NIP/IBAN zamaskowane`);
   push(`  in-process), zgodnie z architekturą \`redactPIIFull\`.`);
