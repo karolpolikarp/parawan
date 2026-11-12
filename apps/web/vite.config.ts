@@ -116,7 +116,7 @@ export default defineConfig({
     // (ścieżka …/index.ts/surnames). Słownik nazwisk (normalizeSurnameKey dla ręcznej korekty,
     // corrections.ts) to ten sam moduł, który i tak wchodzi do pliku razem z rdzeniem. normalizePath:
     // na Windows ścieżka z ukośnikami wstecznymi byłaby dla Vite innym modułem niż import
-    // „./surnames” z index.ts i słownik trafiłby do pliku dwa razy.
+    // „../surnames.js” z modułów rdzenia (passes/, guards/, dict/) i słownik trafiłby do pliku dwa razy.
     alias: [
       {
         find: /^anonimizator\/surnames$/,

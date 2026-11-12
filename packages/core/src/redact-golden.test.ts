@@ -55,7 +55,7 @@ test('golden: korpus benchmarku — filtr types (tylko strukturalne)', () => {
 });
 
 // ── Zbiór adwersarialny — celuje w strażniki dotykane przez helpery A2–A5 ──
-// Każdy wpis broni konkretnej granicy precyzji (patrz komentarze w index.ts). Zamrożenie ich
+// Każdy wpis broni konkretnej granicy precyzji (patrz komentarze w passes/ i guards/). Zamrożenie ich
 // osobno daje czytelny, samodokumentujący się obraz „co ma zostać, a co zniknąć".
 const ADVERSARIAL: Record<string, string> = {
   'krs-literal': 'Spółka wpisana do KRS 0000123456 w rejestrze przedsiębiorców.',
