@@ -104,12 +104,11 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 
 ## Stan (2026-11-12)
 
-- `main` = v0.46.26 + roadmapa, czysty.
-- Gałąź `refactor/rdzen-czysty`: podział i sprzątanie rdzenia (dawny `index.ts` rozbity na moduły,
+- `main` = v0.46.26 + scalona gałąź `refactor/rdzen-czysty` (2026-11-12, CI zielone): podział i sprzątanie rdzenia (dawny `index.ts` rozbity na moduły,
   patrz Struktura). Zachowanie domyślne, z pseudonimami i z filtrem `types` identyczne z `main`
   (golden bez zmian). Świadome zmiany: własne maski podstawiane po wykryciu, poprawki warstwy LLM,
-  dopełniacze postaci historycznych (CHANGELOG `[Unreleased]`). Wypchnięta, czeka na decyzję
-  o merge. Handoff: `docs/handoff-2026-11-12.md`.
+  dopełniacze postaci historycznych (CHANGELOG `[Unreleased]`). Nie wydane (Parawan.html i npm
+  bez tych zmian). Handoff: `docs/handoff-2026-11-12.md`.
 - W toku: nowy landing (`/frontend`), kierunek „Sosna o poranku”. Próbki poza repo w
   `E:\parawan-landing-proby\`. Handoff: `docs/handoff-2026-11-01.md`.
 
@@ -129,7 +128,8 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 3. „tarnowski” w słowniku nazwisk i na liście przymiotników: rozróżnienie przez regułę kontekstową
    (nazwa instytucji lub geografii po przymiotniku, np. „Starosta Tarnowski”, „Ziemia Tarnowska”).
    Usunięcie ze słownika dawało wycieki („Sędzia Tarnowski”), cofnięte w 380586a.
-4. Merge `refactor/rdzen-czysty` do `main` i wydanie v0.46.27 / rdzeń 0.29.14. Powrót: „merguj”.
+4. Wydanie v0.46.27 / rdzeń 0.29.14 (zmiany rdzenia z `refactor/rdzen-czysty`), wg `docs/WYDANIE.md`.
+   Powrót: „rób wydanie”.
 
 ## Znane problemy
 
