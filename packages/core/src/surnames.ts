@@ -34,7 +34,7 @@ const SURNAMES = wordSet(
   'masłowski matusiak młynarczyk morawski murawski niedźwiedzki niewiadomski pawelec ' +
   'pawlik piasecki pietrzyk rogowski rudnicki rudziński rybarczyk skowroński smoliński ' +
   'stachowiak stachura stefański stolarczyk strzelecki szafrański szostak szydłowski ' +
-  'tarnowski trojanowski twardowski urban winiarski wojtczak wojtkowiak wolski woś ' +
+  'trojanowski twardowski urban winiarski wojtczak wojtkowiak wolski woś ' +
   'żebrowski żurawski cichocki głogowski świderski stec ' +
   'krzemiński krzyżanowski kurowski lewicki mielczarek niemczyk pilarski ' +
   'raczyński radecki rogalski rosiński różycki sieradzki wachowiak ' +
@@ -143,7 +143,10 @@ const SURNAME_SUFFIX =
 /**
  * Wyrazy o końcówce nazwiskowej, które nazwiskami nie są, w formie bazowej (odmianę sprowadza adjBase):
  * „Polski", „Mazowiecki", „Warszawski" w nazwach własnych. Nie wpisywać tu nazwisk-przymiotników
- * („Górski"), bo mają być maskowane.
+ * („Górski"), bo mają być maskowane. Wyjątek to przymiotniki od dużych miast, które bywają też
+ * nazwiskiem (krakowski, warszawski, tarnowski): zostają tu, bo „Starosta Tarnowski" i „Tarnowskie
+ * Góry" są częstsze, a osobę maskuje para z imieniem albo „Pan/Pani". Wyraz z tej listy nie może
+ * być w SURNAMES, bo słownik wygrałby ze stoplistą (pilnuje tego test).
  */
 export const NON_SURNAME_ADJ = wordSet(
   // narodowe / etniczne

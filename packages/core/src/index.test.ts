@@ -12,6 +12,7 @@ import {
   isValidKw,
 } from './index';
 import { HISTORIC_SURNAMES_GEN } from './passes/person-caps-ocr';
+import { NON_SURNAME_ADJ, surnameBase } from './surnames';
 
 // Buduje poprawny IBAN z kodu kraju + BBAN (liczymy cyfry kontrolne mod 97),
 // żeby test nie zależał od zapamiętanego wektora.
@@ -8309,4 +8310,34 @@ test('dom4-fix2: ogłoszenie WERSALIKAMI — osoba za rzeczownikiem grafiku i za
     'NAGRODA ADAMA NOWAKA 12',
     'STADION KAZIMIERZA GÓRSKIEGO 15 TYS. MIEJSC',
   ]);
+});
+
+test('tarnowski: przymiotnik od Tarnowa zostaje, osoba z imieniem albo tytułem jest maskowana', () => {
+  // osoba: para z imieniem, Pan/Pani, rola procesowa
+  masked([
+    ['Jan Tarnowski złożył wniosek.', `${N} złożył wniosek.`],
+    ['Pozew wniosła Anna Tarnowska.', `Pozew wniosła ${N}.`],
+    ['Pan Tarnowski złożył wniosek.', `Pan ${N} złożył wniosek.`],
+    ['Pani Tarnowska złożyła wniosek.', `Pani ${N} złożyła wniosek.`],
+    ['Świadek Tarnowski zeznał.', `Świadek ${N} zeznał.`],
+    ['Powód Tarnowski wniósł pozew.', `Powód ${N} wniósł pozew.`],
+  ]);
+  // przymiotnik geograficzny: jak krakowski i warszawski
+  keep([
+    'Starostwo Powiatowe, powiat tarnowski.',
+    'Starosta Tarnowski wydał decyzję.',
+    'Sąd Rejonowy w Tarnowie oddalił pozew.',
+    'Tarnowski Sąd oddalił pozew.',
+    'ziemia tarnowska słynie z sadów.',
+    'Ziemia Tarnowska słynie z sadów.',
+    'Tarnowskie Góry to miasto.',
+    'Tarnowska Izba Gospodarcza',
+    'Wiceprezes Tarnowskiego Klubu Sportowego',
+  ]);
+});
+
+test('stoplista przymiotników nie pokrywa się ze słownikiem nazwisk', () => {
+  // Wyraz w obu listach dawał sprzeczne odpowiedzi: surnameBase mówił „nazwisko", isGeoAdjective „przymiotnik".
+  const both = [...NON_SURNAME_ADJ].filter((w) => surnameBase(w) === w);
+  expect(both).toEqual([]);
 });
