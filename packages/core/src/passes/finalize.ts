@@ -406,12 +406,12 @@ function joinHyphenatedTailAfterMask(ctx: RedactCtx): void {
   if (!ctx.text.includes('-\n') && !ctx.text.includes('-\r\n')) return;
   let heads: Map<string, string[]> | undefined;
   ctx.text = ctx.text.replace(RE_MASK_HYPHEN_TAIL, (m, mask: string, tail: string) => {
-    if (mask === '[MIEJSCOWOŚĆ]' && tail !== tail.toLowerCase()) return m;
+    if (mask === MASK.MIEJSCOWOSC && tail !== tail.toLowerCase()) return m;
     const lo = tail.toLowerCase();
     const ok = ((heads ??= rawHyphenHeads(ctx.raw)).get(lo) ?? []).some((h) => {
       const joined = h + lo;
       // etykieta jednostki w następnym wierszu („Halinów-⏎powiat miński") to nie ogon nazwy
-      if (mask === '[MIEJSCOWOŚĆ]') return POLISH_CITIES.has(joined) || (!POLISH_CITIES.has(h) && !RE_ADMIN_UNIT_WORD.test(lo));
+      if (mask === MASK.MIEJSCOWOSC) return POLISH_CITIES.has(joined) || (!POLISH_CITIES.has(h) && !RE_ADMIN_UNIT_WORD.test(lo));
       return !!surnameBase(joined) || (looksLikeSurname(joined) && !surnameBase(h));
     });
     return ok ? mask : m;

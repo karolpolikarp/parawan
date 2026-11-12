@@ -111,7 +111,7 @@ if (jsonl) {
 
 function main() {
   // Pliki UTF-8 zapisane na Windows (np. przez Out-File) zaczynają się od BOM, który nie jest treścią.
-  const stripBom = (s) => s.replace(/^﻿/, '');
+  const stripBom = (s) => s.replace(/^\uFEFF/, '');
 
   let input;
   try {

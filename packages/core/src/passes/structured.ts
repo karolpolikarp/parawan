@@ -13,7 +13,6 @@ import { TSV_NOT_SURNAME } from './person-pairs.js';
 import { normStructKey, STRUCT_KEYS, STRUCT_KIND_TYPE, type StructKind, structKindOf } from '../struct-keys.js';
 import { isValidIban } from '../validators.js';
 
-
 // Rola, która jest też częstym nazwiskiem („Marszałek", „Wójt", „Koło"): pod kluczem osoby wartość
 // z wielkiej litery to nazwisko, nie rola.
 const ROLE_HOMOGRAPH_SURNAMES = new Set<string>('marszałek wójt dziadek dziekan komornik król starosta koło kowal'.split(' '));
@@ -312,7 +311,7 @@ const TABLE_OFFICE_WORDS = new Set<string>(
 );
 const tableOfficeCell = (v: string): boolean => TABLE_OFFICE_WORDS.has(v.trim().toLowerCase());
 const RE_TABLE_PROSE_PREP = /^(?:w|we|na|do|od|po|przy|dla|o|u|za|ze|pod|nad|przed|bez|oraz)$/i;
-const RE_TABLE_SUMMARY_ROW =/^[ \t]*(?:razem|suma|ogółem|łącznie|wszyscy|wszystkie|podsumowanie|stan[ \t]+na|wydruk|wygenerowano|total)(?![\p{L}])/iu;
+const RE_TABLE_SUMMARY_ROW = /^[ \t]*(?:razem|suma|ogółem|łącznie|wszyscy|wszystkie|podsumowanie|stan[ \t]+na|wydruk|wygenerowano|total)(?![\p{L}])/iu;
 /**
  * Komórka osoby, która jest zdaniem, nie imieniem i nazwiskiem („Wyjazd w maju", „silny mróz"):
  * przyimek jako osobny wyraz, same małe litery z wyrazem spoza słowników imion i nazwisk (a „anna

@@ -7,7 +7,6 @@ import { FORM_FIELDS, FORM_LABEL_WORDS, type FormField, formLabelOf, GENERIC_LOG
 import { isFirstNameLike, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { LEGAL_ENTITY_WORDS, ROLE_WORDS, TITLE_WORDS } from '../guards/roles.js';
 
-
 // Wyraz z wielkiej litery sam po tytule („Pani Nguyen") wskazuje, który wyraz wartości z nierozpoznanym
 // imieniem i nazwiskiem jest nazwiskiem.
 const RE_TITLED_SINGLE = /(?<!\p{L})(?:Pan(?:i|a|u|ią|em|ie)?|dr|prof|mgr)\.?[ \t]+(\p{Lu}[\p{Ll}'’-]+)(?![\p{L}'’-])(?![ \t]+\p{Lu})/gu;

@@ -190,7 +190,7 @@ function reversedHomographAnchored(t: string, offset: number, w1l: string, w2l: 
   return personSlotBefore(t, offset);
 }
 // Postacie literackie znane pod imieniem z przydomkiem („Przygody Tomka Sawyera", „Kubuś Puchatek"):
-// odmiana zdrobnień robiła z nich osobę w prozie. Zbiór zamknięty, tylko pary, których nie nosi strona
+// odmiana zdrobnień czyni z nich osobę w prozie. Zbiór zamknięty, tylko pary, których nie nosi strona
 // pisma („Michał Anioł" to też zwykłe imię i nazwisko, więc go tu nie ma). Rola, etykieta albo dane
 // osoby przy parze rozstrzygają za osobą. Para trafia za sentinel URL i wraca jawna na końcu.
 const FICTIONAL_PAIRS_SRC = [
@@ -530,7 +530,7 @@ function maskNameSequences(ctx: RedactCtx): void {
 // RE_PAIR, bo ta zużywa „Napisał Kuba" i „Kowalski" zostaje sam. Nazwisko zamaskowałby też przebieg
 // samodzielny; ten krok wciąga do maski zdrobnienie.
 function maskNicknamePairs(ctx: RedactCtx): void {
-  ctx.text = ctx.text.replace(RE_NICK_PAIR, (m, w1: string, w2: string, offset: number, t: string) => {
+  ctx.text = ctx.text.replace(RE_NICK_PAIR, (m, _w1: string, w2: string, offset: number, t: string) => {
     if (!nicknamePairIsPerson(t, offset, m, w2)) return m;
     ctx.bump('IMIE');
     return ctx.personMask(w2);
