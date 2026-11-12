@@ -27,7 +27,7 @@ export function passProtectJsonEscapes(ctx: RedactCtx): void {
 
 // Cały adres chronimy przed pozostałymi przebiegami, żeby detektory nazwisk, telefonów i PESEL
 // nie gryzły jego fragmentów: PII wewnątrz maskujemy tutaj, potem URL idzie pod sentinel
-// U+E000<litery>U+E001 i wraca na końcu (finalizePersons). Klasy wartości wykluczają „[", więc
+// U+E000<litery>U+E001 i wraca na końcu (passRestoreUrls). Klasy wartości wykluczają „[", więc
 // drugi przebieg jest idempotentny.
 // Bez schematu adresem jest tylko profil z URL_PROFILE_PATH_RULES („pl.linkedin.com/in/…"). Lewa
 // granica bez kropki, „@" i ukośnika („jan@linkedin.com/…" to e-mail). Adres kończy się na samym

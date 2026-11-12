@@ -1,5 +1,5 @@
 // Ostatnia faza: domknięcia masek osób (imię, inicjał, ogon przeniesienia), stabilna numeracja
-// etykiet, przywrócenie URL-i i ucieczek JSON oraz cudzysłowy wokół masek w dokumencie JSON.
+// etykiet, przywrócenie URL-i i ucieczek JSON, cudzysłowy wokół masek w dokumencie JSON i własne maski.
 import { HOMOGRAPH_SURNAMES, isGeoAdjective, looksLikeSurname, NON_SURNAME_ADJ, surnameBase, surnameShaped } from '../surnames.js';
 import { CAP_WORD, ESC_WS, escapeRe, JSON_ESC_PUA, LIST_BULLET, NM_BOUND, PERSON_MASK_SRC, PL_LO, PL_UP, RE_CHAR_LU } from '../charset.js';
 import { indexToLetters, JSON_ESC_FROM_PUA, lettersToIndex, RE_URL_SENTINEL, type RedactCtx } from '../context.js';
@@ -104,7 +104,7 @@ const RE_FIRST_NAME_AT_END = new RegExp(`(?<![${PL_UP}${PL_LO}])[${PL_UP}][${PL_
  * kotwicą wiersza nad nim, więc cała lista maskuje się w jednym przebiegu (idempotentnie). Komórki
  * CSV/TSV („Sowa;Przemysław") dostają osobne maski tej samej osoby, żeby kolumny się nie przesuwały.
  */
-function passListEntries(ctx: RedactCtx): void {
+function closeListEntries(ctx: RedactCtx): void {
   if (!ctx.text.includes('\n')) return;
   const lines = ctx.text.split('\n');
   let changed = false;
@@ -372,7 +372,7 @@ function closeNameBeforeMask(ctx: RedactCtx, rawLinks: RawLinksLookup): void {
       if (isFirstNameGenitive(wl) && precededByPatron(t, offset)) return m;
       const pre = t.slice(Math.max(0, offset - 24), offset);
       if (RE_SAINT_WORD_BEFORE.test(pre)) return m;
-      // sam wpis listy maskuje passListEntries niżej
+      // sam wpis listy maskuje closeListEntries niżej
       if (sep === '\n' && newlineJoinBlocked(t, offset, offset + m.length, linksAt(rawLinks(w), t, offset + w.length), w, ctx.raw)) return m;
       // imię w sąsiedniej komórce TSV: własna maska, kolumna zostaje (patrz maskCells)
       return sep === '\t' ? `${mask}\t${mask}` : mask;
@@ -462,14 +462,10 @@ function absorbInitialsAndParticles(ctx: RedactCtx): void {
   ctx.text = ctx.text.replace(RE_MASK_FOREIGN_PARTICLE, '$1');
 }
 /** Etykiety osób według kolejności pierwszego wystąpienia, dopiero gdy żadna maska już nie powstanie. */
-function relabelPersonsAndRestoreUrls(ctx: RedactCtx): void {
+function relabelPersons(ctx: RedactCtx): void {
   const labels = new Map<string, string>();
   for (const mm of ctx.text.matchAll(/\[OSOBA-([A-Z]+)\]/g)) if (!labels.has(mm[1])) labels.set(mm[1], indexToLetters(labels.size));
   ctx.text = ctx.text.replace(/\[OSOBA-([A-Z]+)\]/g, (_m, l: string) => `[OSOBA-${labels.get(l)}]`);
-  // PII wewnątrz chronionych URL-i zamaskował już passProtectUrls.
-  if (ctx.protectedUrls.length) {
-    ctx.text = ctx.text.replace(RE_URL_SENTINEL, (mm, letters: string) => ctx.protectedUrls[lettersToIndex(letters)] ?? mm);
-  }
 }
 export function finalizePersons(ctx: RedactCtx): void {
   let links: Map<string, RawWordLink[]> | undefined;
@@ -480,9 +476,15 @@ export function finalizePersons(ctx: RedactCtx): void {
   closeGluedNameAfterMask(ctx, rawLinks);
   joinHyphenatedTailAfterMask(ctx);
   closeOcrNamesAroundMask(ctx, rawLinks);
-  passListEntries(ctx);
+  closeListEntries(ctx);
   absorbInitialsAndParticles(ctx);
-  relabelPersonsAndRestoreUrls(ctx);
+  relabelPersons(ctx);
+}
+
+// PII wewnątrz chronionych URL-i zamaskował już passProtectUrls.
+export function passRestoreUrls(ctx: RedactCtx): void {
+  if (!ctx.protectedUrls.length) return;
+  ctx.text = ctx.text.replace(RE_URL_SENTINEL, (mm, letters: string) => ctx.protectedUrls[lettersToIndex(letters)] ?? mm);
 }
 
 const RE_JSON_ESC_PUA_G = new RegExp(`\\\\?([${JSON_ESC_PUA}])`, 'g');
@@ -511,28 +513,33 @@ function isJsonDocument(s: string): boolean {
   return lines.length > 1 && lines.every(parses);
 }
 
+const altOf = (ms: Iterable<string>): string => [...ms].sort((a, b) => b.length - a.length).map(escapeRe).join('|');
+/** Literał łańcuchowy JSON, pochłaniany w całości. */
+const JSON_STRING_SRC = `"(?:[^"\\\\\\n]|\\\\.)*"`;
+const RE_JSON_STRING = new RegExp(JSON_STRING_SRC, 'g');
+/** Czy przebiegi zmieniły dokument JSON lub NDJSON, a więc czy jego maski są literałami JSON. */
+const isMaskedJson = (ctx: RedactCtx): boolean => ctx.text !== ctx.raw && isJsonDocument(ctx.raw);
+
 // Maska w miejscu liczby JSON („"pesel": 85031412347") dostaje cudzysłowy, żeby wynik się parsował.
 // Tylko gdy oryginał to poprawny JSON lub NDJSON; proza się nie parsuje, więc „Pole "Telefon": 512…"
 // zostaje. Wykrywanie liczb nie zależy od klucza, bo „"id": 85031412347" to też PESEL.
-//
-// Tu też maski przebiegów (ctx.M) zamieniają się na własne z options.masks (`own`: maska przebiegu →
-// maska własna). Cytowanie szuka masek przebiegów, więc własna maska pusta, ze spacji czy
-// z cudzysłowem nie myli ani literałów JSON, ani granic masek.
-export function passJsonRequote(ctx: RedactCtx, own: Map<string, string> | null): void {
-  const altOf = (ms: Iterable<string>): string => [...ms].sort((a, b) => b.length - a.length).map(escapeRe).join('|');
-  const ownRe = own && own.size > 0 ? new RegExp(altOf(own.keys()), 'g') : null;
-  const toOwn = (m: string): string => own?.get(m) ?? m;
-  const swap = (s: string): string => (ownRe ? s.replace(ownRe, toOwn) : s);
-  if (ctx.text === ctx.raw || !isJsonDocument(ctx.raw)) {
-    ctx.text = swap(ctx.text);
+export function passJsonRequote(ctx: RedactCtx): void {
+  if (!isMaskedJson(ctx)) return;
+  const re = new RegExp(`${JSON_STRING_SRC}|(${altOf(new Set(Object.values(ctx.M)))}|\\[OSOBA-[A-Z]+\\])`, 'g');
+  ctx.text = ctx.text.replace(re, (m, mask: string | undefined) => (mask ? JSON.stringify(mask) : m));
+}
+
+// Maski przebiegów (ctx.M) zamieniają się na własne z options.masks (`own`: maska przebiegu → maska
+// własna). Biegnie po passJsonRequote, które szuka masek przebiegów, więc własna maska pusta, ze spacji
+// czy z cudzysłowem nie myli ani literałów JSON, ani granic masek. W dokumencie JSON każda maska stoi
+// już w literale, więc własna maska z cudzysłowem, backslashem albo znakiem sterującym dostaje ucieczki.
+export function passApplyOwnMasks(ctx: RedactCtx, own: Map<string, string>): void {
+  const ownRe = new RegExp(altOf(own.keys()), 'g');
+  const toOwn = (m: string): string => own.get(m) ?? m;
+  if (!isMaskedJson(ctx)) {
+    ctx.text = ctx.text.replace(ownRe, toOwn);
     return;
   }
-  // Literał łańcuchowy pochłaniany w całości. Własna maska z cudzysłowem, backslashem albo znakiem
-  // sterującym trafia do JSON z ucieczkami: jako nowy literał albo wewnątrz istniejącego.
-  const re = new RegExp(`"(?:[^"\\\\\\n]|\\\\.)*"|(${altOf(new Set(Object.values(ctx.M)))}|\\[OSOBA-[A-Z]+\\])`, 'g');
   const inString = (m: string): string => JSON.stringify(toOwn(m)).slice(1, -1);
-  ctx.text = ctx.text.replace(re, (m, mask: string | undefined) => {
-    if (mask) return JSON.stringify(toOwn(mask));
-    return ownRe ? m.replace(ownRe, inString) : m;
-  });
+  ctx.text = ctx.text.replace(RE_JSON_STRING, (m) => m.replace(ownRe, inString));
 }

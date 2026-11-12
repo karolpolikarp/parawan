@@ -6,7 +6,7 @@ import { passBirthDate } from './passes/birth-date.js';
 import { passCity } from './passes/city.js';
 import { passDriverLicense, passIdCard, passKrs, passPassport, passPlate, passPostal } from './passes/documents.js';
 import { passEmail } from './passes/email.js';
-import { finalizePersons, passJsonRequote, passRestoreJsonEscapes } from './passes/finalize.js';
+import { finalizePersons, passApplyOwnMasks, passJsonRequote, passRestoreJsonEscapes, passRestoreUrls } from './passes/finalize.js';
 import { passFormFields } from './passes/forms.js';
 import { hasKsefAnchor, passKsef, passKw, passZnakSprawy } from './passes/kw-ksef-case.js';
 import { passLogin } from './passes/login.js';
@@ -22,11 +22,11 @@ import { HUMAN_LABEL, MASK, type PiiFinding, type PiiType, type RedactionResult,
 /**
  * Maski, z którymi biegną przebiegi, i podmiana ich na własne z options.masks. Przebiegi zawsze
  * wstawiają maski domyślne, bo część reguł czyta je w tekście jako kotwice; własne maski podstawia
- * dopiero passJsonRequote. Typy o wspólnej masce domyślnej (IBAN i NR-KONTA), którym podano różne
+ * dopiero passApplyOwnMasks. Typy o wspólnej masce domyślnej (IBAN i NR-KONTA), którym podano różne
  * własne maski, dostają osobny znacznik przebiegu: domyślny z U+2060 przed „]". Żaden przebieg nie
  * czyta „[NR-KONTA]" jako kotwicy, więc znacznik niczego nie zmienia w wykrywaniu.
  */
-function passMasks(custom: RedactOptions['masks']): { M: Record<PiiType, string>; own: Map<string, string> | null } {
+function resolveMasks(custom: RedactOptions['masks']): { M: Record<PiiType, string>; own: Map<string, string> | null } {
   if (!custom) return { M: MASK, own: null };
   const M = { ...MASK };
   const own = new Map<string, string>();
@@ -53,7 +53,7 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   // Filtr typów (brak = wszystkie) i ewentualne własne placeholdery.
   const enabled = options?.types ? new Set(options.types) : null;
   const on = (t: PiiType) => enabled === null || enabled.has(t);
-  const { M, own } = passMasks(options?.masks);
+  const { M, own } = resolveMasks(options?.masks);
   const hit = (t: PiiType): string => {
     bump(t);
     return M[t];
@@ -142,8 +142,10 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
 
   // Faza 5: domknięcia osób, stabilna numeracja, przywrócenie URL-i i ucieczek
   finalizePersons(ctx);
+  passRestoreUrls(ctx);
   passRestoreJsonEscapes(ctx);
-  passJsonRequote(ctx, own); // na samym końcu: widzi tekst z przywróconymi ucieczkami; podstawia własne maski
+  passJsonRequote(ctx); // po ucieczkach: widzi tekst z przywróconymi ucieczkami
+  if (own) passApplyOwnMasks(ctx, own); // na samym końcu: kotwice i cytowanie widzą maski domyślne
 
   const found: PiiFinding[] = [...counts.entries()].map(([type, count]) => ({ type, count }));
   return { redacted: ctx.text, found };
