@@ -319,7 +319,7 @@ z RODO, zasada minimalizacji danych). Reguły i testy regresji pochodzą z realn
 **Parawan** is a local-first redactor for Polish PII: PESEL, NIP, REGON, IBAN and national ID numbers
 are validated against their checksums (very few false positives); e-mails, phones, addresses and
 person names are matched heuristically, **no AI, deterministic rules only**. Ships as a
-zero-dependency library + CLI (`packages/core`, not published to npm) and a **single-file offline
+zero-dependency library + CLI (`packages/core`, published to npm as `anonimizator` and `parawan`) and a **single-file offline
 web app** (grab `Parawan.html` from Releases and just double-click it, nothing ever leaves your
 machine). An optional
 local-only AI add-on for rare/foreign surnames lives in a separate repo:
