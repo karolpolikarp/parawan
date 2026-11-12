@@ -1,7 +1,7 @@
 // Imię i nazwisko z heurystyk par: małżonkowie, ciągi imion, zdrobnienia, szyk „Nazwisko Imię",
 // zapis rekordu, małe litery i nazwisko panieńskie; ochrona postaci literackich.
 import { foldAsciiChar, HOMOGRAPH_SURNAMES, homographBase, isConfirmedSurname, isGeoAdjective, looksLikeSurname, NON_SURNAME_ADJ, normalizeSurnameKey, RE_PL_DIACRITIC_G, surnameBase, surnameShaped } from '../surnames.js';
-import { CAP_WORD, LIST_BULLET, NM_BOUND, PL_LO, PL_UP, splitWords } from '../charset.js';
+import { CAP_WORD, LIST_BULLET, NM_BOUND, PL_LO, PL_UP } from '../charset.js';
 import { protectSpan, type RedactCtx } from '../context.js';
 import { FORM_LABEL_WORDS } from '../dict/forms.js';
 import { TABLE_HEADER_WORDS, TSV_NOT_SURNAME } from '../dict/headers.js';
@@ -13,6 +13,7 @@ import { columnGapBetween, headAgreesWithAdjective, LEGAL_ENTITY_WORDS, NON_NAME
 import { RE_PATRON_ROMAN_REF_BEFORE, rynekNoNotHouse } from '../guards/address-context.js';
 import { isPersonRoleValue, NOUN_LIKE_NAMES_IN_TITLES } from '../guards/person-values.js';
 import { RE_DECLINED_NOM_SURNAME, RE_LOWER_RUN, RE_NEXT_CAP_WORD_SP, RE_NON_PL_LETTER, RE_PAIR, RE_SPOUSES, RE_SURNAME_OBLIQUE } from '../person-patterns.js';
+import { splitWords } from '../util.js';
 
 // Ostatni wyraz przed pozycją; grupa 2 to dwukropek etykiety („Świadek: ").
 const RE_PREV_TOKEN = /(\p{L}+)\.?[ \t]*(:?)[ \t]*$/u;

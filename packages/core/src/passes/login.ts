@@ -1,13 +1,14 @@
 // Przebieg LOGIN: pola loginu z etykietą, osoba wersalikami w takim polu, loginy z kotwic budowy
 // tekstu (ścieżka profilu, udział domowy, logi sshd/sudo) i propagacja znalezionych wartości.
 import { foldAscii, HOMOGRAPH_SURNAMES, homographBase, isAsciiSurname, surnameShaped } from '../surnames.js';
-import { escapeRe, NM_BOUND, PL_LO, PL_UP, splitWords } from '../charset.js';
+import { NM_BOUND, PL_LO, PL_UP } from '../charset.js';
 import { type RedactCtx } from '../context.js';
 import { FORM_LABEL_WORDS, isEmptyFormValue } from '../dict/forms.js';
 import { GENERIC_LOGINS, isAsciiFirstName, isNameishPart, isPersonalSegment, isPropagatableLogin, isSystemAccount, loginUserPart, RE_BUILTIN_ACCOUNT, RE_DOTTED_PERSON } from '../dict/logins.js';
 import { isFirstNameLike } from '../dict/names.js';
 import { ORG_HEAD_WORDS } from '../guards/person-context.js';
 import { LEGAL_ENTITY_WORDS } from '../guards/roles.js';
+import { escapeRe, splitWords } from '../util.js';
 
 const RE_ASCII_CAP_WORD = /^[A-Z][a-z]+$/;
 /** Samo nazwisko z wielkiej litery („Kowalska") zostaje dla fazy 4, która nada mu etykietę osoby. */

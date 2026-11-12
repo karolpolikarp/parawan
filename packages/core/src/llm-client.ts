@@ -10,8 +10,8 @@ import type { PiiFinding, RedactionResult } from './index.js';
 import { mergeFindings, redactPIIFull, type NerConfig } from './ner-client.js';
 import { createBreaker } from './breaker.js';
 import { fetchWithTimeout, okJson, positiveOr } from './http.js';
-import { escapeRe } from './charset.js';
 import { MASK, PERSON_MASK } from './types.js';
+import { escapeRe } from './util.js';
 
 export interface LlmConfig {
   /** Bazowy URL Ollamy. Domyślnie `http://127.0.0.1:11434`. */

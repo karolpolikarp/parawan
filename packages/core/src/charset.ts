@@ -2,12 +2,7 @@
 // wyrazów, z których budowane są regexy przebiegów.
 import { JSON_ESC_PUA } from './context.js';
 import { MASK } from './types.js';
-
-/** Wyrazy (parzyste indeksy `parts`) i zachowane odstępy między nimi; `words` to same wyrazy. */
-export function splitWords(s: string): { parts: string[]; words: string[] } {
-  const parts = s.split(/([ \t]+)/);
-  return { parts, words: parts.filter((_, i) => i % 2 === 0) };
-}
+import { escapeRe } from './util.js';
 
 export const PL_UP = 'A-ZĄĆĘŁŃÓŚŹŻ';
 export const PL_LO = 'a-ząćęłńóśźż';
@@ -48,7 +43,6 @@ export const CITY_START = `(?<![${PL_UP}${PL_LO}]|[${PL_UP}${PL_LO}]-)`;
 // Opcjonalny punkt listy przed wpisem („1. ”, „3) ”, „- ”).
 export const LIST_BULLET = '(?:(?:\\d{1,4}[.)]|[-*•–])[ \\t]*)?';
 export const MONTHS_GEN = 'stycznia|lutego|marca|kwietnia|maja|czerwca|lipca|sierpnia|września|października|listopada|grudnia';
-export const escapeRe = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 // Wzorce masek, na których kotwiczą przebiegi. Przebiegi wstawiają zawsze maski domyślne (własne
 // z options.masks podstawia redactPII dopiero na końcu), więc wzorce są stałe.
 // Maska osoby: etykieta pseudonimu albo maska IMIE.
@@ -57,7 +51,6 @@ export const ADR_MASK_SRC = escapeRe(MASK.ADRES);
 export const KOD_MASK_SRC = escapeRe(MASK['KOD-POCZTOWY']);
 export const DUR_MASK_SRC = escapeRe(MASK['DATA-UR']);
 export const REJ_MASK_SRC = escapeRe(MASK['NR-REJESTRACYJNY']);
-export const countOf = (s: string, ch: string): number => s.split(ch).length - 1;
 
 export const RE_CHAR_LL = /\p{Ll}/u;
 export const RE_CHAR_LU = /\p{Lu}/u;

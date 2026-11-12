@@ -1,10 +1,10 @@
 // Identyfikatory numeryczne: IBAN, numer konta, PESEL, NIP, REGON, karta płatnicza i telefon.
 // Najdłuższe ciągi cyfr idą pierwsze (IBAN 26 → PESEL 11 → NIP 10 → REGON), krótsze potem.
-import { countOf } from '../charset.js';
 import { maskAfterLabel, type RedactCtx } from '../context.js';
 import { type PiiType } from '../types.js';
 import { CURRENCY_CODES, precededByLegalRef, precededByNonPhoneLabel } from '../guards/numbers.js';
 import { isValidCard, isValidIban, isValidNip, isValidPesel, isValidRegon14, isValidRegon9 } from '../validators.js';
+import { countOf } from '../util.js';
 
 /** Długości IBAN wg rejestru ISO 13616 (kraj → liczba znaków bez spacji). */
 const IBAN_LENGTHS: Record<string, number> = {

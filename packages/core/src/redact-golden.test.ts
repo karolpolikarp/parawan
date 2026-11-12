@@ -19,7 +19,7 @@
  */
 import { expect, test } from 'vitest';
 import { redactPII, type PiiType } from './index';
-import { escapeRe } from './charset';
+import { escapeRe } from './util';
 import { MASK } from './types';
 // dataset.mjs to plain-JS oracle benchmarku (bez deklaracji typów) — import bez typowania.
 // @ts-expect-error — brak pliku deklaracji dla modułu .mjs (świadomie, to skrypt benchmarku)

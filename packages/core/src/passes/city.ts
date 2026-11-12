@@ -1,7 +1,7 @@
 // Maskowanie miejscowości: po kodzie pocztowym, przy adresie, z etykietą TERYT oraz po markerze
 // zamieszkania lub urodzenia.
 import { HOMOGRAPH_SURNAMES, isConfirmedSurname, looksLikeSurname, NON_SURNAME_ADJ, surnameBase } from '../surnames.js';
-import { ADR_MASK_SRC, CAP_CITY, CITY_RUN, CITY_START, DUR_MASK_SRC, KOD_MASK_SRC, PL_LO, PL_UP, RE_CHAR_LL, splitWords } from '../charset.js';
+import { ADR_MASK_SRC, CAP_CITY, CITY_RUN, CITY_START, DUR_MASK_SRC, KOD_MASK_SRC, PL_LO, PL_UP, RE_CHAR_LL } from '../charset.js';
 import type { RedactCtx } from '../context.js';
 import { MASK } from '../types.js';
 import { FORM_LABEL_WORDS } from '../dict/forms.js';
@@ -11,6 +11,7 @@ import { BIRTH_COMBO, birthVerbAboutPerson } from '../guards/birth.js';
 import { saintWithContext } from '../guards/eponyms.js';
 import { LEGAL_ENTITY_WORDS, PARTY_ROLE_WORDS, ROLE_WORDS } from '../guards/roles.js';
 import { precededByLegalRef } from '../guards/numbers.js';
+import { splitWords } from '../util.js';
 
 /** Rok sprzed 1900 jako osobny wyraz („w 1867 r.”). */
 const RE_PRE1900_YEAR = /(?<![\d.\/-])1[0-8]\d\d(?![\d.\/-]\d)/;

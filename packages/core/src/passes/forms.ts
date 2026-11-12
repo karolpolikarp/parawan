@@ -1,12 +1,12 @@
 // Pola formularza („Etykieta: wartość", wartość w następnej linii, wiersze z TAB-em).
 import { foldAscii, isConfirmedSurname, normalizeSurnameKey } from '../surnames.js';
-import { escapeRe } from '../charset.js';
 import { type RedactCtx } from '../context.js';
 import { FORM_FIELDS, type FormField, formLabelOf, isFormLabelLine, isValidFormValue, RE_DATE_VALUE, RE_PROPER_WORDS, stripFormPrefix, TAB_ROLE_LABELS } from '../dict/forms.js';
 import { NEXT_LINE_HEADER_WORDS, TAB_HEADER_WORDS } from '../dict/headers.js';
 import { isFirstNameLike, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { lowercaseNameLooksLikePerson, RE_VALUE_TITLE_OR_INITIAL } from '../guards/person-values.js';
 import { LEGAL_ENTITY_WORDS, ROLE_WORDS } from '../guards/roles.js';
+import { escapeRe } from '../util.js';
 
 // Wyraz z wielkiej litery sam po tytule („Pani Nguyen") wskazuje, który wyraz wartości z nierozpoznanym
 // imieniem i nazwiskiem jest nazwiskiem.

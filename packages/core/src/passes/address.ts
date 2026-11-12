@@ -1,7 +1,7 @@
 // Adresy: ulice ze skrótem i bez, ulice z patronem w dopełniaczu, adres po etykiecie zamieszkania
 // i przed kodem pocztowym, kod pocztowy bez myślnika.
 import { surnameShaped } from '../surnames.js';
-import { ADR_MASK_SRC, CAP_CITY, countOf, KOD_MASK_SRC, MONTHS_GEN, PL_LO, PL_UP } from '../charset.js';
+import { ADR_MASK_SRC, CAP_CITY, KOD_MASK_SRC, MONTHS_GEN, PL_LO, PL_UP } from '../charset.js';
 import { maskKeepPrefix, PATRON_STREET_MARK, type RedactCtx } from '../context.js';
 import { isFirstNameGenitive, isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
@@ -10,6 +10,7 @@ import { ADDR_PLACE_ADJ_OK, institutionBeforeAddr, PATRON_GEN_HEADS, RE_CAPS_WOR
 import { monthAhead, RE_PATRON_ROMAN_REF_BEFORE, RE_QUANTITY_AFTER } from '../guards/address-context.js';
 import { LEGAL_ENTITY_WORDS } from '../guards/roles.js';
 import { RE_SURNAME_OBLIQUE } from '../person-patterns.js';
+import { countOf } from '../util.js';
 
 // Silna etykieta adresu przed „ul. …": po niej niejednoznaczny numer zostaje numerem domu. Także
 // z dopowiedzeniem przed dwukropkiem („Adres do korespondencji:") i „zamieszkały przy".

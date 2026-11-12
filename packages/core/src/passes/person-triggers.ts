@@ -1,7 +1,7 @@
 // Przebiegi osobowe z kotwicą: „Pan/Pani” i rola, self-ID, inicjał, tytuł przed homografem, obce imię
 // z łącznikiem oraz samodzielne nazwisko ze słownika albo z morfologii.
 import { COMMON_NOUN_LOOKALIKES, DIMINUTIVE_LOOKALIKES, homographBase, isCompoundAdjective, isConfirmedSurname, isGeoAdjective, looksLikeSurname, NON_SURNAME_ADJ, normalizeSurnameKey, surnameBase, surnameShaped } from '../surnames.js';
-import { CAP_WORD, NM_BOUND, NM_LO, NM_UP, PL_LO, PL_UP, PRECEDED_BY_CAP, splitWords } from '../charset.js';
+import { CAP_WORD, NM_BOUND, NM_LO, NM_UP, PL_LO, PL_UP, PRECEDED_BY_CAP } from '../charset.js';
 import { JSON_ESC_PUA_EOL, type RedactCtx, VI_GIVEN_SENTINEL } from '../context.js';
 import { FORM_LABEL_WORDS, isEmptyFormValue } from '../dict/forms.js';
 import { TABLE_HEADER_WORDS } from '../dict/headers.js';
@@ -11,6 +11,7 @@ import { afterNonPersonContext, isObliqueSurnameForm, precededByAdminLabel, prec
 import { DOT_CHAIN, dotChainKind, HOMOGRAPH_PAIR_EXCL, INITIAL_START, isHonorificP, RE_PAST_VERB_AFTER } from '../guards/person-context.js';
 import { LEGAL_ENTITY_WORDS, RE_FOLLOWED_BY_PARK, ROLE_COMPLEMENT_GEN, ROLE_WORDS, TITLE_WORDS } from '../guards/roles.js';
 import { RE_FOREIGN_BRAND_WORD, RE_FOREIGN_TAIL_START, RE_NON_PL_LETTER, RE_PL_OBLIQUE_ENDING, RE_SLAVIC_TAIL_START, RE_SOLO_DICT, RE_SOLO_MORPH } from '../person-patterns.js';
+import { splitWords } from '../util.js';
 
 const isNonPersonWord = (l: string): boolean => LEGAL_ENTITY_WORDS.has(l) || NON_SURNAME_ADJ.has(l) || TITLE_WORDS.has(l) || ROLE_WORDS.has(l);
 

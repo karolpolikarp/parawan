@@ -1,7 +1,7 @@
 // Ostatnia faza: domknięcia masek osób (imię, inicjał, ogon przeniesienia), stabilna numeracja
 // etykiet, przywrócenie URL-i i ucieczek JSON, cudzysłowy wokół masek w dokumencie JSON i własne maski.
 import { HOMOGRAPH_SURNAMES, isGeoAdjective, looksLikeSurname, NON_SURNAME_ADJ, surnameBase, surnameShaped } from '../surnames.js';
-import { CAP_WORD, ESC_WS, escapeRe, LIST_BULLET, NM_BOUND, PERSON_MASK_SRC, PL_LO, PL_UP, RE_CHAR_LU } from '../charset.js';
+import { CAP_WORD, ESC_WS, LIST_BULLET, NM_BOUND, PERSON_MASK_SRC, PL_LO, PL_UP, RE_CHAR_LU } from '../charset.js';
 import { indexToLetters, JSON_ESC_FROM_PUA, JSON_ESC_PUA, JSON_ESC_PUA_EOL, JSON_ESC_TO_PUA, lettersToIndex, MAIDEN_D_SENTINEL, RE_URL_SENTINEL, type RedactCtx } from '../context.js';
 import { COLLIDING_NAME_FORMS, isFirstNameGenitive, isFirstNameLike, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
@@ -10,6 +10,7 @@ import { cellEndsAt, cellStartsBefore, DOT_CHAIN, dotChainKind, INITIAL_START, i
 import { LEGAL_ENTITY_WORDS, ROLE_WORDS, TITLE_WORDS } from '../guards/roles.js';
 import { MASK } from '../types.js';
 import { OCR_NAME_WORD, RE_DECLINED_NOM_SURNAME, RE_NEXT_CAP_WORD_SP } from '../person-patterns.js';
+import { escapeRe } from '../util.js';
 
 // Długość kontekstu za wyrazem w RawWordLink.next; linksAt porównuje dokładnie tyle znaków.
 const LINK_CTX_LEN = 12;
