@@ -10,7 +10,8 @@ import type { PiiFinding, RedactionResult } from './index.js';
 import { mergeFindings, redactPIIFull, type NerConfig } from './ner-client.js';
 import { createBreaker } from './breaker.js';
 import { fetchWithTimeout, okJson, positiveOr } from './http.js';
-import { PERSON_MASK } from './types.js';
+import { escapeRe } from './charset.js';
+import { MASK, PERSON_MASK } from './types.js';
 
 export interface LlmConfig {
   /** Bazowy URL Ollamy. Domyślnie `http://127.0.0.1:11434`. */
@@ -33,24 +34,37 @@ const MAX_CANDIDATE_LEN = 80;
 
 const PLACEHOLDER_ONLY = /^\[[^\[\]]*\]$/;
 
-// Kandydat będący fragmentem maski („PESEL") rozbiłby ją przy zamianie. Ręczna kopia części
-// placeholderów `MASK` z index.ts.
-const KNOWN_MASKS = [
-  '[EMAIL]',
-  '[NR-KONTA]',
-  '[PESEL]',
-  '[NIP]',
-  '[REGON]',
-  '[TELEFON]',
-  '[NR-DOWODU]',
-  '[NR-PASZPORTU]',
-  '[KRS]',
-  '[KOD-POCZTOWY]',
-  '[MIEJSCOWOŚĆ]',
-  '[DATA-URODZENIA]',
-  '[ADRES]',
-  '[IMIĘ I NAZWISKO]',
-];
+// Kandydat będący fragmentem maski („PESEL", „VIN") rozbiłby ją przy zamianie. Lista idzie wprost
+// z `MASK`, więc nowy typ PII nie wymaga pamiętania o tym miejscu.
+const KNOWN_MASKS = [...new Set(Object.values(MASK))];
+
+// Fragment etykiety pseudonimu [OSOBA-X]: kawałek „[OSOBA-", dowolny ogon prefiksu z myślnikiem
+// i literami („SOBA-AB", „-A]") albo litery z zamykającym nawiasem („AB]").
+const OSOBA_FRAGMENT = /^(?:\[?OSOBA-|SOBA-|OBA-|BA-|A-|-)[A-Z]*\]?$|^[A-Z]+\]$/;
+const isMaskFragment = (c: string): boolean =>
+  KNOWN_MASKS.some((m) => m.includes(c)) || '[OSOBA-'.includes(c) || OSOBA_FRAGMENT.test(c);
+
+// Placeholdery w tekście (maski rdzenia i etykiety [OSOBA-X]) są nietykalne przy zamianie; chroni to
+// też przed kandydatem, który przypadkiem pokrywa się z literami etykiety („AB" w [OSOBA-AB]).
+const PLACEHOLDER_RE = new RegExp(`\\[OSOBA-[A-Z]+\\]|${KNOWN_MASKS.map(escapeRe).join('|')}`, 'g');
+
+/** Zamień wszystkie wystąpienia `c` poza placeholderami; zwraca nowy tekst i liczbę zamian. */
+function replaceOutsidePlaceholders(text: string, c: string): { text: string; count: number } {
+  let out = '';
+  let count = 0;
+  let last = 0;
+  const swap = (seg: string): string => {
+    const parts = seg.split(c);
+    count += parts.length - 1;
+    return parts.join(PERSON_MASK);
+  };
+  for (const m of text.matchAll(PLACEHOLDER_RE)) {
+    out += swap(text.slice(last, m.index)) + m[0];
+    last = m.index + m[0].length;
+  }
+  out += swap(text.slice(last));
+  return { text: out, count };
+}
 
 const SYSTEM_PROMPT =
   'Jesteś detektorem danych osobowych w polskim tekście. ' +
@@ -76,7 +90,7 @@ function validateCandidates(raw: unknown[], text: string): string[] {
     if (typeof c !== 'string') continue;
     if (c.length < MIN_CANDIDATE_LEN || c.length > MAX_CANDIDATE_LEN) continue;
     if (PLACEHOLDER_ONLY.test(c)) continue;
-    if (KNOWN_MASKS.some((m) => m.includes(c))) continue;
+    if (isMaskFragment(c)) continue;
     if (text.indexOf(c) === -1) continue;
     if (seen.has(c)) continue;
     seen.add(c);
@@ -140,10 +154,10 @@ export async function llmRedact(
     let redacted = text;
     let count = 0;
     for (const c of candidates) {
-      const parts = redacted.split(c);
-      if (parts.length === 1) continue; // zniknął w poprzedniej zamianie (nakładanie)
-      count += parts.length - 1;
-      redacted = parts.join(PERSON_MASK);
+      // Kandydat mógł zniknąć w poprzedniej zamianie (nakładanie); wtedy count się nie zmienia.
+      const r = replaceOutsidePlaceholders(redacted, c);
+      count += r.count;
+      redacted = r.text;
     }
 
     if (count === 0) return null;

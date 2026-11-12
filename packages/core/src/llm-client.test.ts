@@ -80,6 +80,61 @@ test('llmRedact — twarda walidacja: halucynacje, placeholdery i złe długośc
   expect(r?.found).toEqual([{ type: 'IMIE', count: 1 }]);
 });
 
+test('llmRedact — fragmenty WSZYSTKICH masek rdzenia i etykiet [OSOBA-X] nie rozbijają placeholderów', async () => {
+  // Nowsze maski (VIN, TOKEN, NR-KSEF…) i etykiety pseudonimów nie były znane walidacji kandydatów.
+  const text =
+    'Auto [VIN], klucz [TOKEN], faktura [NR-KSEF], karta [NR-KARTY], KW [NR-KW], ' +
+    'sprawa [ZNAK-SPRAWY], host [IP] [MAC], konto [LOGIN], rej. [NR-REJESTRACYJNY], ' +
+    'prawo jazdy [PRAWO-JAZDY]. Strony: [OSOBA-A] i [OSOBA-AB] oraz Bąkiewicz.';
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async () =>
+      ollamaResponse(
+        JSON.stringify({
+          pii: [
+            'VIN',
+            'TOKEN',
+            'KSEF',
+            'NR-KARTY',
+            'NR-KW',
+            'ZNAK-SPRAWY',
+            'MAC',
+            'LOGIN',
+            'REJESTRACYJNY',
+            'PRAWO-JAZDY',
+            'OSOBA',
+            'OSOBA-A',
+            '[OSOBA-A]',
+            'SOBA-AB',
+            'AB]',
+            'AB', // sama litera etykiety: nie może trafić do środka [OSOBA-AB]
+            'Bąkiewicz', // JEDYNY prawidłowy kandydat
+          ],
+        }),
+      ),
+    ),
+  );
+
+  const r = await llmRedact(text, CFG);
+  expect(r?.redacted).toBe(text.replace('Bąkiewicz', '[IMIĘ I NAZWISKO]'));
+  expect(r?.found).toEqual([{ type: 'IMIE', count: 1 }]);
+});
+
+test('llmRedact — kandydat obecny i w tekście, i w masce: zamiana tylko poza maską', async () => {
+  // Ten sam ciąg jako słowo w tekście i jako treść maski [LOGIN] albo etykiety [OSOBA-AB].
+  const text = 'Świadek LOGIN zeznał, że [LOGIN] należy do niego.';
+  vi.stubGlobal('fetch', vi.fn(async () => ollamaResponse(JSON.stringify({ pii: ['LOGIN'] }))));
+  const r = await llmRedact(text, CFG);
+  // „LOGIN" to fragment maski, więc walidacja go odrzuca w całości (precyzja > nadmaskowanie).
+  expect(r).toBeNull();
+
+  resetLlmBreakers();
+  const text2 = 'Pan Ab i [OSOBA-AB] podpisali.';
+  vi.stubGlobal('fetch', vi.fn(async () => ollamaResponse(JSON.stringify({ pii: ['Ab', 'AB'] }))));
+  const r2 = await llmRedact(text2, CFG);
+  expect(r2?.redacted).toBe('Pan [IMIĘ I NAZWISKO] i [OSOBA-AB] podpisali.');
+});
+
 test('llmRedact — zły JSON lub brak listy "pii" → null (fail-safe)', async () => {
   vi.stubGlobal('fetch', vi.fn(async () => ollamaResponse('to nie jest {json')));
   expect(await llmRedact('Pan Iksiński', CFG)).toBeNull();

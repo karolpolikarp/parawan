@@ -29,6 +29,11 @@ Silnik:
   „Tarnowski Sąd”, „Ziemia Tarnowska” czy „Tarnowskie Góry” dostawały maskę osoby. Teraz działa
   tak jak „krakowski” i „warszawski”: osoba jest maskowana z imieniem albo po „Pan/Pani” lub roli
   („Świadek Tarnowski”), a samo nazwisko bez takiego kontekstu zostaje jawne.
+- **Warstwa LLM nie psuje nowszych znaczników.** Biblioteczny klient lokalnego modelu
+  (`anonimizator/llm`) znał tylko część masek, więc kandydat „VIN” albo „TOKEN” zamieniał środek
+  `[VIN]` czy `[TOKEN]` na maskę osoby, a litery etykiety `[OSOBA-AB]` też były do wzięcia. Teraz
+  lista masek pochodzi wprost z rdzenia, fragmenty `[OSOBA-…]` są odrzucane, a zamiana omija
+  wszystkie znaczniki już obecne w tekście. Aplikacji Parawan.html to nie dotyczy.
 
 ## v0.46.26 — 2026-10-25
 
