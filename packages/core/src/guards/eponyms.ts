@@ -264,7 +264,7 @@ function saintNameAt(t: string, offset: number): boolean {
 /** Dopełniacz imienia na -i/-y („Antoniego", „Jerzego", „Ksawerego"). */
 export const egoNameGenitive = (wl: string): boolean =>
   /ego$/.test(wl) && (POLISH_FIRST_NAMES.has(wl.slice(0, -3)) || POLISH_FIRST_NAMES.has(`${wl.slice(0, -3)}y`));
-// Kotwica wyrazu ulicznego: rdzeń i zamknięta lista końcówek (otwarta łapała „placówki", „Mostowski").
+// Kotwica wyrazu ulicznego: rdzeń i zamknięta lista końcówek (otwarta łapie „placówki", „Mostowski").
 // Granice \p{L}, bo \b w JS jest ASCII. „im" tylko z kropką, bo bez niej to zaimek („Pomógł im Jan Kowalski").
 const STREET_ANCHOR_SRC =
   `(?:[Uu]lic(?:a|y|ę|ą|e|om|ami|ach|zk[aięą]|zce)?|[Aa]lej(?:a|ę|ą|e|om|ami|ach)?|[Aa]lei|` +
@@ -280,7 +280,7 @@ export const STREET_RANK = `(?:${STREET_RANK_WORDS
   .map((r) => `[${r[0].toUpperCase()}${r[0]}]${r.slice(1)}`)
   .join('|')})\\.?`;
 // Patron tylko tuż po kotwicy, w jednej linii, bez mostkowania „i/oraz", przecinka, nowej linii
-// i kropki (wciągały osobę z następnej klauzuli). Cena: drugi patron w wyliczeniu „ulic X oraz Y"
+// i kropki (wciągają osobę z następnej klauzuli). Cena: drugi patron w wyliczeniu „ulic X oraz Y"
 // bywa zamaskowany. Rangi tylko przed nazwą, bo tytuł po nazwie zaczyna osobę („Na ul. Długiej
 // lek. Anna Nowak"). Dopuszczone „im."/„ul." sklejone z nazwą („im.Henryka Sienkiewicza").
 const RE_STREET_EPONYM_TAIL = new RegExp(

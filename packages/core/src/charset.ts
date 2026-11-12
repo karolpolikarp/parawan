@@ -46,7 +46,7 @@ export const CAP_CITY = `[${PL_UP}][${PL_LO}]+(?:-[${PL_UP}][${PL_LO}]+)*`;
 // Od jednego do trzech wyrazów nazwy miejscowości.
 export const CITY_RUN = `(?:${CAP_CITY}[ \\t]+){0,2}${CAP_CITY}`;
 // Lewa granica wzorców zaczynających się od CAP_CITY. Bez niej każdy człon łańcucha „Abc-Abc-…”
-// skanował go do końca (czas kwadratowy). Łącznik przed nazwą w wypunktowaniu („-Gliwice”) nie blokuje.
+// skanuje go do końca (czas kwadratowy). Łącznik przed nazwą w wypunktowaniu („-Gliwice”) nie blokuje.
 export const CITY_START = `(?<![${PL_UP}${PL_LO}]|[${PL_UP}${PL_LO}]-)`;
 // Opcjonalny punkt listy przed wpisem („1. ”, „3) ”, „- ”).
 export const LIST_BULLET = '(?:(?:\\d{1,4}[.)]|[-*•–])[ \\t]*)?';

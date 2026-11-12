@@ -234,7 +234,7 @@ function initialAnchorsSurname(ctx: RedactCtx, w2: string, offset: number): bool
 // Tanie warunki najpierw (granica i lookahead na „X. ”): lookbehindy o zmiennej długości (początek wiersza,
 // koniec zdania) liczą się tylko tam, gdzie stoi inicjał. Początek wiersza to też ucieczka „\n” z JSON-a
 // (punkt wyliczenia „A.”). „Sz.” na liście skrótów: „Sz. P. Wilk” to nagłówek listu, nie koniec zdania.
-// Skróty tytułów są też w RE_TITLE_BEFORE_DOT i DOT_TITLES (guards/person-context.ts); listy celowo się różnią.
+// Skróty tytułów są też w RE_TITLE_BEFORE_DOT (niżej) i w DOT_TITLES (guards/person-context.ts); listy celowo się różnią.
 const RE_INITIAL_SURNAME = new RegExp(
   `${INITIAL_START}(?=[${PL_UP}]\\.[ \\t])(?<!(?:^|\\n|\\\\[\\uE00A\\uE00D])[ \\t]*)(?<!(?<!\\b(?:[Mm]ec|[Pp]rof|[Dd]r|[Mm]gr|[Ii]nż|hab|[Aa]dw|[Kk]s|płk|gen|kpt|mjr|por|sierż|lek|med|[Ss]ędz|[Ss]z))[.!?][ \\t]+)[${PL_UP}]\\.[ \\t]+(${CAP_WORD})(?![${NM_BOUND}])`,
   'g',

@@ -222,8 +222,8 @@ export const RE_DATE_VALUE = new RegExp(
 export const stripFormPrefix = (s: string): string => s.replace(/^[ \t]*\d+[.)][ \t]*/, '').trim();
 /**
  * Etykieta bez wartości po „:” i bez końcowej podpowiedzi w nawiasie („Nazwisko (rodowe): …” →
- * „Nazwisko”). Liniowy odpowiednik `s.replace(/\s*:.*$/, '').replace(/\s*\([^)]*\)\s*$/, '')`,
- * który na długich ciągach spacji był kwadratowy. Jak „.*$” liczy pierwszy „:” po ostatnim końcu wiersza.
+ * „Nazwisko”). Skan liniowy zamiast `s.replace(/\s*:.*$/, '').replace(/\s*\([^)]*\)\s*$/, '')`, bo ten
+ * regex jest kwadratowy na długich ciągach spacji. Jak „.*$” liczy pierwszy „:” po ostatnim końcu wiersza.
  */
 export function formLabelOf(s: string): string {
   const lastTerm = Math.max(s.lastIndexOf('\r'), s.lastIndexOf('\u2028'), s.lastIndexOf('\u2029'));

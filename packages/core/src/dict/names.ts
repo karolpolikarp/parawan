@@ -46,7 +46,7 @@ export const POLISH_FIRST_NAMES = new Set<string>(
 export function isFirstNameGenitive(w: string): boolean {
   return isMaleFirstNameGenitive(w) || (/[iy]$/.test(w) && POLISH_FIRST_NAMES.has(`${w.slice(0, -1)}a`));
 }
-/** Dopełniacz męskiego imienia („Jacka", „Marka", „Pawła", „Jana") — patron, choć „Jacka" ma
+/** Dopełniacz męskiego imienia („Jacka", „Marka", „Pawła", „Jana"): forma patrona, choć „Jacka" ma
  *  końcówkę żeńskiego nazwiska na -cka. Ruchome „e" jak w słowniku nazwisk (Jacek → Jacka). */
 export function isMaleFirstNameGenitive(w: string): boolean {
   if (!w.endsWith('a')) return false;
@@ -71,7 +71,7 @@ export const FOREIGN_GIVEN_NAMES = new Set<string>(
 const FIRST_NAME_STEMS = new Set<string>(
   [...POLISH_FIRST_NAMES].map((n) => (n.endsWith('a') ? n.slice(0, -1) : n)),
 );
-// Bez pustego sufiksu: mianownik pokrywa POLISH_FIRST_NAMES, a sam rdzeń („maj” z „Maja”) dawał
+// Bez pustego sufiksu: mianownik pokrywa POLISH_FIRST_NAMES, a sam rdzeń („maj” z „Maja”) daje
 // fałszywe trafienia („Pierwszego Maja”).
 const NAME_INFLECTIONS = ['a', 'i', 'y', 'ie', 'ę', 'ą', 'o', 'u', 'e', 'em', 'owi'];
 

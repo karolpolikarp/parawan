@@ -10,7 +10,6 @@ import { HOMOGRAPH_PAIR_EXCL, institutionBeforeAddr, ORG_HEAD_WORDS, PATRON_GEN_
 import { LEGAL_ENTITY_WORDS, ROLE_WORDS, TITLE_WORDS } from '../guards/roles.js';
 import { RE_SURNAME_OBLIQUE } from '../person-patterns.js';
 
-
 // Tytuły i role, po których wersalikami stoi osoba. TITLE_WORDS ma tylko mianownik i wołacz „Pan",
 // stąd dopisane formy zależne i skróty sędziowskie.
 const ALLCAPS_TITLES = new Set<string>([
@@ -431,7 +430,7 @@ export function passPersonOcrPair(ctx: RedactCtx): void {
       if (obliquePair && (capsNameHeadBefore(src, offset, pairEnd, n1) || capsStreetBefore(src, offset))) return null;
     }
     // Celowo nie capsSurnameConfirmed: tamten odrzuca też jednoczłonowy przymiotnik odmiejscowy
-    // i sprawdza NON_SURNAME_ADJ na członach, a podmiana zmieniłaby wynik.
+    // i sprawdza NON_SURNAME_ADJ na każdym członie, a tu stoplista dotyczy całego nazwiska.
     if (LEGAL_ENTITY_WORDS.has(n2) || NON_SURNAME_ADJ.has(n2)) return null;
     // Każdy człon potwierdzony, nie którykolwiek: „MARII SKŁODOWSKIEJ-CURIE" w nazwie instytucji
     // przeszłoby przez „skłodowskiej", a „ADAM MIŃSKI-MAZOWIECKI" to miejscowość.

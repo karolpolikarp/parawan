@@ -9,6 +9,8 @@
  * passes/ (przebiegi według rodzaju danych), guards/ (strażniki kontekstu), dict/ i surnames.ts
  * (słowniki), validators.ts (sumy kontrolne), charset.ts i person-patterns.ts (wspólne wzorce),
  * context.ts (stan redakcji), struct-keys.ts (klucze XML/JSON), types.ts (typy i placeholdery).
+ * Osobne punkty wejścia dla dodatku AI: ner-postprocess.ts, ner-client.ts i llm-client.ts, ze wspólnymi
+ * http.ts (wywołania HTTP) i breaker.ts (wyłącznik awaryjny).
  */
 
 export type { PiiType, PiiFinding, RedactionResult, RedactOptions } from './types.js';

@@ -30,8 +30,8 @@ export function hasKsefAnchor(raw: string): boolean {
   return RE_KSEF_ANCHOR.test(raw);
 }
 
-/** Słaba kotwica dokumentowa wymaga mocnej wartości: bez sprawdzenia NIP-u znikały numery
- *  zamówień o tym samym kształcie („4500123456-20260115-000000012345-01"). Wariant „M" + 9 cyfr
+/** Słaba kotwica dokumentowa wymaga mocnej wartości: suma NIP-u odróżnia numer KSeF od numeru
+ *  zamówienia o tym samym kształcie („4500123456-20260115-000000012345-01"). Wariant „M" + 9 cyfr
  *  nie ma sumy, więc tam decyduje sam kształt. */
 export function maskKsefMatch(ctx: RedactCtx) {
   return (m: string): string => {
@@ -56,7 +56,7 @@ export function passKsef(ctx: RedactCtx): void {
 // Numer księgi wieczystej „WA1M/00512345/3". Jawny prowadzi przez publiczną przeglądarkę ksiąg
 // wprost do właściciela nieruchomości.
 // Separator: ukośnik albo łącznik (także z łamaniem wiersza po nim), po kotwicy też spacja; oba
-// tego samego rodzaju, bo mieszany „LU1I/00045678 2 działki" wciągał liczbę z prozy. Bez kotwicy
+// tego samego rodzaju, bo mieszany („LU1I/00045678 2 działki") wciąga liczbę z prozy. Bez kotwicy
 // maskKwMatch wymaga ukośników. Łącznik z ciągiem dalej („WA1M/00512345/6-12") to dłuższy znak
 // sprawy, który passZnakSprawy maskuje w całości.
 const KW_SLASH = '[ \\t]*[/-][ \\t]*(?:\\r?\\n[ \\t]*)?';
@@ -233,7 +233,7 @@ export function passKw(ctx: RedactCtx): void {
 }
 
 // Znak sprawy wg JRWA „SYMBOL.klasa.numer.ROK". Lookbehind obejmuje polskie litery, bo start
-// w środku ciągu „ŻŻŻ…" dawał czas kwadratowy. Po roku najwyżej dwa człony: symbol komórki
+// w środku ciągu „ŻŻŻ…" daje czas kwadratowy. Po roku najwyżej dwa człony: symbol komórki
 // („.PL") albo numer kolejny („.1"), żeby maska objęła cały znak.
 const ZNAK_START = `[${PL_UP}]{2,}[0-9]*(?:-[A-Za-z${PL_UP}${PL_LO}0-9]+)*`;
 const ZNAK_MID = `(?:\\.[A-Za-z${PL_UP}${PL_LO}0-9-]+)*?`;

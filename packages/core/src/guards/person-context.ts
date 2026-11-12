@@ -1,10 +1,11 @@
 // Strażniki kontekstu osoby: instytucja przed adresem, granice komórek tabeli, patroni, inicjały
-// i łańcuchy kropkowe, homografy imion.
+// i łańcuchy kropkowe, homografy nazwisk przy imieniu.
 import { PERSON_MASK_SRC, PL_LO, PL_UP, RE_JSON_ESC_PUA } from '../charset.js';
 import { RE_INSTITUTION_WORD } from './eponyms.js';
 import { LEGAL_ENTITY_WORDS, PROPER_NAME_HEADS } from './roles.js';
 
-// Przymiotniki miejscowe, które są też w LEGAL_ENTITY_WORDS („Nowa Wieś”).
+// Przymiotniki w nazwach miejscowości („Nowa Wieś”, „Stary Sącz”), które nie odbierają adresu jako
+// nazwa podmiotu. „nowa” i „nowy” są w LEGAL_ENTITY_WORDS, pozostałe formy dopełniają parę.
 export const ADDR_PLACE_ADJ_OK = new Set<string>('nowa nowe nowy stara stare stary'.split(' '));
 // Obiekt publiczny przed adresem („Hala sportowa przy …”): adres obiektu, nie osoby.
 export const RE_PUBLIC_FACILITY_WORD =
