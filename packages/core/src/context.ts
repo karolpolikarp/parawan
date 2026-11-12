@@ -1,5 +1,4 @@
 // Kontekst redakcji współdzielony przez przebiegi, sentinele PUA i wspólne helpery masek.
-import { POLISH_CITIES } from './dict/places.js';
 import { type PiiType } from './types.js';
 
 /** 0→A, 1→B… 25→Z, 26→AA… Etykiety bez cyfr, żeby placeholdery były idempotentne. */
@@ -26,8 +25,12 @@ export interface RedactCtx {
   /** Oryginalne wejście. Kotwice dokumentowe liczy się na nim, bo wcześniejsze przebiegi
    *  zamieniają adresy na sentinel albo [EMAIL], a „KSeF" bywa tylko tam („ksef@mf.gov.pl"). */
   raw: string;
+  /** Czy oryginalne wejście ma kotwicę KSeF; potrzebne przy URL-ach i w passKsef. */
+  ksefAnchor: boolean;
   on: (t: PiiType) => boolean;
   bump: (t: PiiType) => void;
+  /** bump i maska typu w jednym, dla callbacków .replace(). */
+  hit: (t: PiiType) => string;
   M: Record<PiiType, string>;
   personMask: (surnameToken: string) => string;
   /** Czy włączona pseudonimizacja (etykiety [OSOBA-X]). */
@@ -55,42 +58,17 @@ export const JSON_ESC_FROM_PUA: Record<string, string> = { '\uE00A': 'n', '\uE00
 
 // Przebieg „etykieta + separator + wartość": grupy 1 i 2 zostają, grupa 3 idzie pod maskę typu.
 export function maskAfterLabel(ctx: RedactCtx, re: RegExp, type: PiiType): void {
-  ctx.text = ctx.text.replace(re, (_m, kw: string, sep: string) => {
-    ctx.bump(type);
-    return `${kw}${sep}${ctx.M[type]}`;
-  });
+  ctx.text = ctx.text.replace(re, (_m, kw: string, sep: string) => `${kw}${sep}${ctx.hit(type)}`);
 }
 
-// Callback .replace() ze stałą maską, dla przebiegów bez strażnika i bez użycia dopasowania.
-export function maskConst(ctx: RedactCtx, type: PiiType) {
-  return (): string => {
-    ctx.bump(type);
-    return ctx.M[type];
-  };
+// Callback .replace(): grupa 1 (kotwica) zostaje, reszta dopasowania znika pod maską.
+export function maskKeepPrefix(ctx: RedactCtx, type: PiiType) {
+  return (_m: string, pre: string): string => `${pre}${ctx.hit(type)}`;
 }
 
-// Najdłuższe (do 3 wyrazów) miasto ze słownika na początku albo końcu ciągu wyrazów; null, gdy brak.
-// Ciąg dzieli się z zachowaniem odstępów (parzyste = wyrazy), żeby reszta zachowała oryginalny
-// separator: tabulator to granica kolumny TSV i nie może zamienić się w spację.
-export function cityByPrefix(ctx: RedactCtx, run: string): { leftover: string } | null {
-  const parts = run.split(/([ \t]+)/);
-  const words = parts.filter((_, i) => i % 2 === 0);
-  for (let n = Math.min(3, words.length); n >= 1; n--) {
-    if (POLISH_CITIES.has(words.slice(0, n).join(' ').toLowerCase())) {
-      ctx.bump('MIEJSCOWOSC');
-      return { leftover: parts.slice(2 * n - 1).join('') };
-    }
-  }
-  return null;
-}
-export function cityBySuffix(ctx: RedactCtx, run: string): { prefix: string } | null {
-  const parts = run.split(/([ \t]+)/);
-  const words = parts.filter((_, i) => i % 2 === 0);
-  for (let n = Math.min(3, words.length); n >= 1; n--) {
-    if (POLISH_CITIES.has(words.slice(words.length - n).join(' ').toLowerCase())) {
-      ctx.bump('MIEJSCOWOSC');
-      return { prefix: parts.slice(0, 2 * (words.length - n)).join('') };
-    }
-  }
-  return null;
+// Chroni fragment przed resztą przebiegów: wstawia sentinel, a finalizacja przywraca `s`.
+export function protectSpan(ctx: RedactCtx, s: string): string {
+  const sentinel = `${URL_SENTINEL_OPEN}${indexToLetters(ctx.protectedUrls.length)}${URL_SENTINEL_CLOSE}`;
+  ctx.protectedUrls.push(s);
+  return sentinel;
 }

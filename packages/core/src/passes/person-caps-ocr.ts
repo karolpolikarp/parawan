@@ -355,8 +355,7 @@ export function passPersonParents(ctx: RedactCtx): void {
       // pierwszym imieniem („syn Jana Kowalskiego"): maska tylko na imieniu.
       if (a2 !== undefined && !isFirstNameLike(a2)) {
         if (abbr || !isFirstNameLike(a)) return m;
-        ctx.bump('IMIE');
-        return `${mask}${sep}${kin}${sp}${ctx.M.IMIE}${m.slice(head + a.length)}`;
+        return `${mask}${sep}${kin}${sp}${ctx.hit('IMIE')}${m.slice(head + a.length)}`;
       }
       const father = a + (a2 !== undefined ? `${sp2}${a2}` : '');
       // drugi wyraz matki spoza imion („i Marii Kowalskiej") zostaje dla dalszych przebiegów

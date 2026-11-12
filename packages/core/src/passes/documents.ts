@@ -1,7 +1,7 @@
 // Numery dokumentów z kotwicą: dowód osobisty, paszport, KRS, prawo jazdy, tablica rejestracyjna,
 // a także kod pocztowy.
 import { escapeRe } from '../charset.js';
-import { maskAfterLabel, type RedactCtx } from '../context.js';
+import { maskAfterLabel, maskKeepPrefix, type RedactCtx } from '../context.js';
 import { type PiiType } from '../types.js';
 import { CURRENCY_CODES, isValidDowod, precededByLegalRef } from '../validators.js';
 
@@ -22,21 +22,12 @@ const RE_PLATE_CURRENCY_HEAD = new RegExp(
 const PLATE_NOT_UNIT =
   '(?![ \\t]*(?:kg|t(?!\\.[a-ząćęłńóśźż])|ton\\w*|km|kW|KM(?![ \\t]+(?:Policji|PSP))|mm|cm[3³]?|ccm|zł|PLN|szt)(?![\\wąćęłńóśźż]))';
 
-/** Grupa 1 (kotwica) zostaje, reszta dopasowania znika pod maską. */
-function maskAfterPrefix(ctx: RedactCtx, re: RegExp, type: PiiType): void {
-  ctx.text = ctx.text.replace(re, (_m, pre: string) => {
-    ctx.bump(type);
-    return `${pre}${ctx.M[type]}`;
-  });
-}
-
 /** „dokument serii XX nr N": seria musi być wersalikami, flaga „i" służy tylko kotwicy
  *  („DOWÓD OSOBISTY SERIA"). Maska obejmuje serię i numer, „serii" zostaje. */
 function maskSeriesNumber(ctx: RedactCtx, re: RegExp, type: PiiType): void {
   ctx.text = ctx.text.replace(re, (m, pre: string, series: string) => {
     if (!/^[A-Z]+$/.test(series)) return m;
-    ctx.bump(type);
-    return `${pre}${ctx.M[type]}`;
+    return `${pre}${ctx.hit(type)}`;
   });
 }
 
@@ -53,18 +44,16 @@ export function passIdCard(ctx: RedactCtx): void {
   );
   // Z kontekstem maskujemy nawet przy złej sumie kontrolnej; łączniki także w odmianie
   // („dowodem osobistym serii ABA 123456").
-  maskAfterPrefix(
-    ctx,
+  ctx.text = ctx.text.replace(
     /\b((?:dow[oó]d\w*|dow\.|legitymacj\w*|dokument\w*\s+tożsamości|seria i numer|nr dowodu)(?:\s+(?:osobist\w+|służbow\w+|nr\.?|numer(?:ze|em|u)?|seri[aiięą]|o|i))*[\s:.=-]*)([A-Za-z]{3}[\s-]?\d{6})(?!\d)/gi,
-    'DOWOD',
+    maskKeepPrefix(ctx, 'DOWOD'),
   );
   // Bez kontekstu tylko z poprawną sumą. Kody walut wyłączone: „PLN 123456" przechodzi sumę co
   // dziesiąty raz, a to kwota.
   ctx.text = ctx.text.replace(/\b([A-Za-z]{3})[\s-]?\d{6}\b/g, (m, letters: string) => {
     if (CURRENCY_CODES.has(letters.toUpperCase())) return m;
     if (!isValidDowod(m)) return m;
-    ctx.bump('DOWOD');
-    return ctx.M.DOWOD;
+    return ctx.hit('DOWOD');
   });
 }
 
@@ -93,10 +82,9 @@ export function passKrs(ctx: RedactCtx): void {
 // Prawo jazdy: tylko z kontekstem, numer w całości razem z separatorami „/" i „-".
 export function passDriverLicense(ctx: RedactCtx): void {
   if (!ctx.on('PRAWO-JAZDY')) return;
-  maskAfterPrefix(
-    ctx,
+  ctx.text = ctx.text.replace(
     /\b((?:(?:nr|numer)\s+)?praw(?:o|a|em|ie)\s+jazdy(?:\s+(?:nr\.?|numer(?:u|ze|em)?|seri[ai]|kat\.?|kategori[ai]|o|[ABCDEMT]{1,2}\d?))*[\s:=.-]*)((?=[A-Za-z0-9/-]*\d)[A-Za-z0-9]{4,15}(?:[/-][A-Za-z0-9]{1,6}){0,3})/gi,
-    'PRAWO-JAZDY',
+    maskKeepPrefix(ctx, 'PRAWO-JAZDY'),
   );
 }
 
@@ -201,8 +189,7 @@ export function passPlate(ctx: RedactCtx): void {
       // etykieta pola, więc wyróżnik musi wyglądać na tablicę. Skrót z rokiem („na tablicy o PIT
       // 2024") to temat ogłoszenia.
       if (!hasRej && /(?<!\p{L})(?:o|to|pod)(?!\p{L})/iu.test(pre) && (!(upperHead && voiv) || RE_PLATE_YEAR_SHAPE.test(plate))) return m;
-      ctx.bump('NR-REJESTRACYJNY');
-      return `${pre}${ctx.M['NR-REJESTRACYJNY']}`;
+      return `${pre}${ctx.hit('NR-REJESTRACYJNY')}`;
     },
   );
   ctx.text = ctx.text.replace(RE_PLATE_VEHICLE, (m, kw: string, sep: string, plate: string, offset: number, str: string) => {
@@ -242,8 +229,7 @@ export function passPlate(ctx: RedactCtx): void {
     const gap = /(?:^|\s)([a-ząćęłńóśźż]{1,15})[\s:=.-]*$/.exec(sep)?.[1];
     if (gap && RE_PLATE_GAP_PREP.test(gap)) return m;
     if (gap && RE_PLATE_YEAR_SHAPE.test(plate) && !RE_PLATE_VEHICLE_ADJ.test(gap)) return m;
-    ctx.bump('NR-REJESTRACYJNY');
-    return `${kw}${sep}${ctx.M['NR-REJESTRACYJNY']}`;
+    return `${kw}${sep}${ctx.hit('NR-REJESTRACYJNY')}`;
   });
   maskPlateEnumeration(ctx);
 }
@@ -264,8 +250,7 @@ function maskPlateEnumeration(ctx: RedactCtx): void {
           return p;
         }
         if (!PLATE_VOIV_LETTERS.includes(p[0])) return p;
-        ctx.bump('NR-REJESTRACYJNY');
-        return ctx.M['NR-REJESTRACYJNY'];
+        return ctx.hit('NR-REJESTRACYJNY');
       });
       return `${first}${maskedTail}`;
     },
@@ -279,7 +264,6 @@ export function passPostal(ctx: RedactCtx): void {
   if (!ctx.on('KOD-POCZTOWY')) return;
   ctx.text = ctx.text.replace(RE_POSTAL, (m, offset: number) => {
     if (precededByLegalRef(ctx.text, offset)) return m;
-    ctx.bump('KOD-POCZTOWY');
-    return ctx.M['KOD-POCZTOWY'];
+    return ctx.hit('KOD-POCZTOWY');
   });
 }

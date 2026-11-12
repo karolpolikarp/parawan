@@ -1,11 +1,11 @@
 // Faza 0: ucieczki JSON i ochrona URL-i sentinelem, z maskowaniem PII wewnątrz adresu.
 import { looksLikeSurname, surnameBase } from '../surnames.js';
 import { JSON_ESC_PUA, PL_LO, PL_UP } from '../charset.js';
-import { indexToLetters, JSON_ESC_TO_PUA, maskConst, type RedactCtx, URL_SENTINEL_CLOSE, URL_SENTINEL_OPEN } from '../context.js';
+import { JSON_ESC_TO_PUA, maskKeepPrefix, protectSpan, type RedactCtx } from '../context.js';
 import { isPropagatableLogin } from '../dict/forms.js';
 import { POLISH_FIRST_NAMES } from '../dict/names.js';
 import { RE_EMAIL, RE_EMAIL_CHAIN, RE_EMAIL_URLENC, RE_EMAIL_URLENC_CHAIN, replaceEmails, URL_PARAM_RULES, URL_PROFILE_PATH_RULES } from './email.js';
-import { hasKsefAnchor, maskKsefMatch, maskKwMatch, RE_KSEF_VALUE, RE_KW_VALUE } from './kw-ksef-case.js';
+import { maskKsefMatch, maskKwMatch, RE_KSEF_VALUE, RE_KW_VALUE } from './kw-ksef-case.js';
 import { JWT_SRC } from './network.js';
 
 // Dosłowne ucieczki „\n/\r/\t" (patrz JSON_ESC_TO_PUA), tylko nieucieczone (parzysta liczba
@@ -56,19 +56,18 @@ const RE_JWT_IN_URL = new RegExp(JWT_SRC, 'g');
 // Interpunkcja zdania za adresem nie należy do URL-a.
 const RE_URL_TRAIL = /[.,;:!?\]]+$/;
 export function passProtectUrls(ctx: RedactCtx): void {
-  // Kotwica KSeF to skan całego wejścia: liczona raz, nie dla każdego adresu (koszt kwadratowy).
-  const ksefInUrls = ctx.on('KSEF') && hasKsefAnchor(ctx);
+  const ksefInUrls = ctx.on('KSEF') && ctx.ksefAnchor;
   // Adres jest chroniony przed resztą przebiegów, więc PII w nim (e-mail, JWT, KSeF, KW, profil,
   // parametry, imię) maskujemy tutaj. Podmieniona ucieczka „\n/\t" kończy adres.
   ctx.text = ctx.text.replace(RE_URL_PROTECT, (raw) => {
     const trail = RE_URL_TRAIL.exec(raw)?.[0] ?? '';
     let url = raw.slice(0, raw.length - trail.length);
     if (ctx.on('EMAIL')) {
-      url = replaceEmails(url, RE_EMAIL_CHAIN, RE_EMAIL, maskConst(ctx, 'EMAIL'));
-      url = replaceEmails(url, RE_EMAIL_URLENC_CHAIN, RE_EMAIL_URLENC, maskConst(ctx, 'EMAIL'));
+      url = replaceEmails(url, RE_EMAIL_CHAIN, RE_EMAIL, () => ctx.hit('EMAIL'));
+      url = replaceEmails(url, RE_EMAIL_URLENC_CHAIN, RE_EMAIL_URLENC, () => ctx.hit('EMAIL'));
     }
     if (ctx.on('TOKEN')) {
-      url = url.replace(RE_JWT_IN_URL, maskConst(ctx, 'TOKEN'));
+      url = url.replace(RE_JWT_IN_URL, () => ctx.hit('TOKEN'));
     }
     if (ksefInUrls) {
       url = url.replace(RE_KSEF_VALUE, maskKsefMatch(ctx));
@@ -79,10 +78,7 @@ export function passProtectUrls(ctx: RedactCtx): void {
     }
     if (ctx.on('LOGIN')) {
       for (const re of URL_PROFILE_PATH_RULES) {
-        url = url.replace(re, (_pm, key: string) => {
-          ctx.bump('LOGIN');
-          return `${key}${ctx.M.LOGIN}`;
-        });
+        url = url.replace(re, maskKeepPrefix(ctx, 'LOGIN'));
       }
     }
     for (const rule of URL_PARAM_RULES) {
@@ -90,8 +86,7 @@ export function passProtectUrls(ctx: RedactCtx): void {
       url = url.replace(rule.re, (_pm, key: string, val: string) => {
         // „?user=a.kaminska" to ten sam login co „Konto a.kaminska zablokowane" w treści
         if (rule.type === 'LOGIN' && !val.includes('%') && isPropagatableLogin(val)) ctx.loginSeeds.add(val);
-        ctx.bump(rule.type);
-        return `${key}${ctx.M[rule.type]}`;
+        return `${key}${ctx.hit(rule.type)}`;
       });
     }
     // Imię i nazwisko sklejone „_", „." albo „+" jako cała wartość dowolnego parametru
@@ -108,8 +103,6 @@ export function passProtectUrls(ctx: RedactCtx): void {
         return `${key}${ctx.personMask(last)}`;
       });
     }
-    const sentinel = `${URL_SENTINEL_OPEN}${indexToLetters(ctx.protectedUrls.length)}${URL_SENTINEL_CLOSE}`;
-    ctx.protectedUrls.push(url);
-    return `${sentinel}${trail}`;
+    return `${protectSpan(ctx, url)}${trail}`;
   });
 }

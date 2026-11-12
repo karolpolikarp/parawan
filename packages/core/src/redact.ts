@@ -8,7 +8,7 @@ import { passDriverLicense, passIdCard, passKrs, passPassport, passPlate, passPo
 import { passEmail } from './passes/email.js';
 import { finalizePersons, passJsonRequote, passRestoreJsonEscapes } from './passes/finalize.js';
 import { passFormFields } from './passes/forms.js';
-import { passKsef, passKw, passZnakSprawy } from './passes/kw-ksef-case.js';
+import { hasKsefAnchor, passKsef, passKw, passZnakSprawy } from './passes/kw-ksef-case.js';
 import { passLogin } from './passes/login.js';
 import { passIp, passMac, passTokens, passVin } from './passes/network.js';
 import { passAccount, passCard, passIban, passNip, passPesel, passPhone, passRegon } from './passes/numeric.js';
@@ -31,6 +31,10 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   const enabled = options?.types ? new Set(options.types) : null;
   const on = (t: PiiType) => enabled === null || enabled.has(t);
   const M: Record<PiiType, string> = options?.masks ? { ...MASK, ...options.masks } : MASK;
+  const hit = (t: PiiType): string => {
+    bump(t);
+    return M[t];
+  };
 
   // Klucz nazwiska → etykieta tymczasowa; ostateczną numerację nadaje finalizePersons.
   const personLabels = options?.pseudonyms ? new Map<string, string>() : null;
@@ -47,16 +51,16 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
     return `[OSOBA-${label}]`;
   };
 
-  const ctx: RedactCtx = { text: input, raw: input, on, bump, M, personMask, pseudonyms: !!personLabels, maskedSurnames, protectedUrls: [], jsonEscapes: false, loginSeeds: new Set() };
+  const ctx: RedactCtx = { text: input, raw: input, ksefAnchor: hasKsefAnchor(input), on, bump, hit, M, personMask, pseudonyms: !!personLabels, maskedSurnames, protectedUrls: [], jsonEscapes: false, loginSeeds: new Set() };
 
   // Kolejność ma znaczenie: przebiegi czytają placeholdery poprzednich, a pierwszy bump typu
   // ustala kolejność `found`.
 
-  // Faza 0: ochrona URL (sentinel)
+  // Faza 0: ochrona URL-i (sentinel)
   passProtectJsonEscapes(ctx); // przed URL-ami: podmieniona ucieczka kończy adres
   passProtectUrls(ctx);
 
-  // Faza 1: strukturalne, wysoka precyzja (etykieta, wzorzec)
+  // Faza 1: dane strukturalne o wysokiej precyzji (etykieta, wzorzec)
   passEmail(ctx);
   passTokens(ctx);
   passMac(ctx);
@@ -90,6 +94,8 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   passBirthDate(ctx);
   passAddress(ctx);
   passAddressAfterResidenceLabel(ctx);
+  // Kod bez myślnika i miejscowość kotwiczą na już zamaskowanym [ADRES] i [KOD-POCZTOWY],
+  // dlatego biegną po adresie.
   passPostalNoHyphen(ctx);
   passCity(ctx);
 
@@ -105,13 +111,13 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   passPersonHomographAnchor(ctx);
   passPersonForeign(ctx);
   passPersonSoloMorph(ctx);
-  passPersonOcrTitle(ctx);
+  passPersonOcrTitle(ctx); // przed parą: para wzięłaby „tytuł + imię” i osierociła nazwisko
   passPersonOcrPair(ctx);
   passPersonOcrMix(ctx);
   passPersonMaidenAfterMask(ctx);
   passPersonParents(ctx);
 
-  // Faza 5: domknięcia osób, stabilna numeracja, przywrócenie URL i ucieczek
+  // Faza 5: domknięcia osób, stabilna numeracja, przywrócenie URL-i i ucieczek
   finalizePersons(ctx);
   passRestoreJsonEscapes(ctx);
   passJsonRequote(ctx); // na samym końcu: widzi tekst z przywróconymi ucieczkami

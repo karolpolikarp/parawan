@@ -121,8 +121,7 @@ export function passBirthDate(ctx: RedactCtx): void {
       if (year && +year < 1900) return m;
     }
     if (/^urodzonym$/i.test(kw) && birthPluralDativeBefore(str.slice(Math.max(0, offset - 50), offset))) return m;
-    ctx.bump('DATA-UR');
-    return `${kw}${sep}${ctx.M['DATA-UR']}`;
+    return `${kw}${sep}${ctx.hit('DATA-UR')}`;
   });
   maskAfterLabel(ctx, RE_BIRTH_COMBO_CITY_FIRST, 'DATA-UR');
   maskAfterLabel(ctx, RE_BIRTH_UR_NODOT, 'DATA-UR');

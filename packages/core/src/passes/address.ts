@@ -1,8 +1,8 @@
 // Adresy: ulice ze skrótem i bez, ulice z patronem w dopełniaczu, adres po etykiecie zamieszkania
 // i przed kodem pocztowym, kod pocztowy bez myślnika.
 import { looksLikeSurname, surnameBase } from '../surnames.js';
-import { CAP_CITY, escapeRe, MONTHS_GEN, PL_LO, PL_UP } from '../charset.js';
-import { type RedactCtx } from '../context.js';
+import { CAP_CITY, countOf, escapeRe, MONTHS_GEN, PL_LO, PL_UP } from '../charset.js';
+import { maskKeepPrefix, type RedactCtx } from '../context.js';
 import { isFirstNameGenitive, isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
 import { egoNameGenitive, RE_STREET_WORD, STREET_RANK_WORDS } from '../guards/eponyms.js';
@@ -394,7 +394,7 @@ function streetHeaderAbove(t: string, offset: number): boolean {
   const row = t.slice(ls, le < 0 ? t.length : le);
   const delim = row.includes('\t') ? '\t' : row.includes(';') ? ';' : '';
   if (!delim || ls === 0) return false;
-  const col = pre.split(delim).length - 1;
+  const col = countOf(pre, delim);
   let top = ls;
   for (let n = 0; n < 50 && top > 0; n++) {
     const ps = t.lastIndexOf('\n', top - 2) + 1;
@@ -469,8 +469,7 @@ function patronStreetWithNumber(ctx: RedactCtx): void {
     // Lokal „m."/„lok." sam wskazuje adres w każdym trybie, także w prozie bez etykiety („Lokator
     // Adama Mickiewicza 30 m. 2 zalega z czynszem").
     if (RE_PATRON_STREET_FLAT.test(m)) {
-      ctx.bump('ADRES');
-      return ctx.M.ADRES;
+      return ctx.hit('ADRES');
     }
     const caps = w1 === w1.toUpperCase();
     // Etykieta adresu, zamieszkania albo „przy" wygrywa z udziałem na początku zdania („Udziały
@@ -491,8 +490,7 @@ function patronStreetWithNumber(ctx: RedactCtx): void {
       RE_PATRON_STREET_WORD_BEFORE.test(before) ||
       reEnum.test(before)
     ) {
-      ctx.bump('ADRES');
-      return ctx.M.ADRES;
+      return ctx.hit('ADRES');
     }
     // Bez instytucji przed patronem („Parafia Jana Pawła II 5"), klucza adresu IP czy adresata i roku
     // („… 1978-2005"). Parę, którą zamaskuje przebieg osób („Tadeusza Kościuszki 30 w Krakowie."),
@@ -508,8 +506,7 @@ function patronStreetWithNumber(ctx: RedactCtx): void {
       // odsyłacz w poprzedniej komórce („Pielgrzymka,Jana Pawła II 2 Kraków,1979") to opis wydarzenia
       const refCell = RE_PATRON_ROMAN_REF_BEFORE.test(before.replace(/[ \t]*[,;|\t][ \t]*$/, ' '));
       if (mode === 'roman' && ((RE_PATRON_ROMAN_BOUNDARY.test(before) && !refCell) || personPairBeforeAddr(before))) {
-        ctx.bump('ADRES');
-        return ctx.M.ADRES;
+        return ctx.hit('ADRES');
       }
       const roman = / [IVX]{1,4} /.test(m);
       // wyraz uliczny przed patronem („Rondo Jana Pawła II 2 km") oznacza nazwę ulicy, nie osobę
@@ -524,8 +521,7 @@ function patronStreetWithNumber(ctx: RedactCtx): void {
     // „… 15/2 to adres korespondencyjny": zdanie samo nazywa ulicę adresem.
     if (mode === 'loose') {
       if (!/^[ \t]+(?:to|jest)[ \t]+adres/u.test(tail)) return null;
-      ctx.bump('ADRES');
-      return ctx.M.ADRES;
+      return ctx.hit('ADRES');
     }
     // Ułamek właściwy przed gołym przecinkiem CSV („1,Jana Nowaka 4/5,Kraków" pod nagłówkiem „Ocena")
     // to ocena, wynik albo udział osoby, nie numer lokalu.
@@ -546,17 +542,14 @@ function patronStreetWithNumber(ctx: RedactCtx): void {
     // Tytuł patrona i ukośnik wskazują adres dopiero z miejscowością za numerem: bez niej to też
     // ocena czy liczba godzin osoby („Ocena Tomasza Mazura 3/5", „Prof. Jana Nowaka 30").
     if ((RE_PATRON_STREET_TITLE_HEAD.test(m) || RE_PATRON_STREET_SLASH.test(m)) && (cityOk || /^[ \t]+we?[ \t]+\p{Lu}/u.test(tail))) {
-      ctx.bump('ADRES');
-      return ctx.M.ADRES;
+      return ctx.hit('ADRES');
     }
     const sepPerson = RE_PATRON_STREET_PERSON_SEP.exec(before);
     if (sepPerson && personPairBeforeAddr(before.slice(0, sepPerson.index))) {
-      ctx.bump('ADRES');
-      return ctx.M.ADRES;
+      return ctx.hit('ADRES');
     }
     if (!cityOk && !personPairBeforeAddr(before)) return null;
-    ctx.bump('ADRES');
-    return ctx.M.ADRES;
+    return ctx.hit('ADRES');
   };
   const street = (m: string, w1: string, wMid: string | undefined, w2: string, offset: number, t: string, mode: PatronStreetMode): string | null => {
     const r = street0(m, w1, wMid, w2, offset, t, mode);
@@ -579,8 +572,7 @@ function patronStreetWithNumber(ctx: RedactCtx): void {
     if (!(isFirstNameGenitive(a) || egoNameGenitive(a)) || (wMid !== undefined && !isFirstNameGenitive(wMid.toLowerCase()))) return m;
     const before = t.slice(Math.max(0, offset - 60), offset);
     if (!streetHeaderAbove(t, offset) && !RE_PATRON_STREET_LABEL.test(before) && !RE_PATRON_STREET_RESIDENCE.test(before) && !patronStreetKeyBefore(before)) return m;
-    ctx.bump('ADRES');
-    return ctx.M.ADRES;
+    return ctx.hit('ADRES');
   });
   for (const [re, mode] of [
     [RE_PATRON_STREET_NO_LOOSE, 'loose'],
@@ -610,8 +602,7 @@ export function passAddressAfterResidenceLabel(ctx: RedactCtx): void {
         const cityOk = (city && POLISH_CITIES.has(city.toLowerCase())) || after?.[1] || (after?.[2] && POLISH_CITIES.has(after[2].toLowerCase()));
         if (!flat && !cityOk) return m;
       } else if (!strong) return m;
-      ctx.bump('ADRES');
-      return `${strong ?? weak}${sep}${city ?? ''}${csep ?? ''}${ctx.M.ADRES}`;
+      return `${strong ?? weak}${sep}${city ?? ''}${csep ?? ''}${ctx.hit('ADRES')}`;
     },
   );
 }
@@ -672,8 +663,7 @@ export function passAddress(ctx: RedactCtx): void {
       const beforeDate = (): string => {
         const cut = RE_HOUSE_NO_BEFORE_DATETIME.exec(m) ?? RE_HOUSE_NO_BEFORE_DATE.exec(m);
         if (!cut) return m;
-        ctx.bump('ADRES');
-        return `${ctx.M.ADRES}${cut[2]}`;
+        return `${ctx.hit('ADRES')}${cut[2]}`;
       };
       if (RE_TIME_AFTER.test(rest)) return beforeDate();
       // Silna etykieta adresu albo osoba po etykiecie tuż przed nim: liczba to numer domu.
@@ -708,8 +698,7 @@ export function passAddress(ctx: RedactCtx): void {
       if (!personNear && quantity) {
         const tail = RE_SPACE_UNIT_TAIL.exec(m);
         if (tail) {
-          ctx.bump('ADRES');
-          return ctx.M.ADRES + m.slice(tail.index);
+          return ctx.hit('ADRES') + m.slice(tail.index);
         }
       }
       if (!labeled && RE_YEAR_TAIL.test(m) && RE_ADDR_CONNECTOR_USED.test(m)) return m;
@@ -729,8 +718,7 @@ export function passAddress(ctx: RedactCtx): void {
         !/^[ \t]*(?:r\.|roku)[ \t]+(?:nr\.?[ \t]*)?\d/.test(rest)
       )
         return beforeDate();
-      ctx.bump('ADRES');
-      return ctx.M.ADRES;
+      return ctx.hit('ADRES');
     }
   );
   // Drugi adres w wyliczeniu tuż za maską („Lokale przy ul. Polnej 5 i Leśnej 7"): łącznik po numerze
@@ -749,8 +737,7 @@ export function passAddress(ctx: RedactCtx): void {
       if (quantityAfter(m, rest)) return m;
       const accInstr = RE_SECOND_STREET_ACC_PREP.test(str.slice(Math.max(0, offset - 12), offset));
       if (!secondStreetShape(m.slice(lead.length), accInstr)) return m;
-      ctx.bump('ADRES');
-      return `${lead}${ctx.M.ADRES}`;
+      return `${lead}${ctx.hit('ADRES')}`;
     },
   );
   // Adres bez „ul." tuż przed zamaskowanym kodem pocztowym. Człony nazwy łączy tylko odstęp poziomy:
@@ -779,8 +766,7 @@ export function passAddress(ctx: RedactCtx): void {
         const sameName = after.startsWith(' ' + street) && !/^\p{L}/u.test(after.slice(street.length + 1));
         if (!envelope && !sameName) return m;
       }
-      ctx.bump('ADRES');
-      return `${ctx.M.ADRES}${sep}${kod}`;
+      return `${ctx.hit('ADRES')}${sep}${kod}`;
     },
   );
 }
@@ -792,9 +778,6 @@ export function passPostalNoHyphen(ctx: RedactCtx): void {
   const ADR = escapeRe(ctx.M.ADRES);
   ctx.text = ctx.text.replace(
     new RegExp(`(${ADR}\\s*,?\\s*)(?<!\\d)\\d{5}(?!\\d)(?=[ \\t]+${CAP_CITY})`, 'g'),
-    (_m, pre: string) => {
-      ctx.bump('KOD-POCZTOWY');
-      return `${pre}${ctx.M['KOD-POCZTOWY']}`;
-    },
+    maskKeepPrefix(ctx, 'KOD-POCZTOWY'),
   );
 }

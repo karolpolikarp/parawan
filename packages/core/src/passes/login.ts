@@ -133,8 +133,7 @@ function maskAnchoredLogins(ctx: RedactCtx): void {
     }
     if (isBareAsciiSurname(user)) return m;
     if (!attempt && isPropagatableLogin(user)) ctx.loginSeeds.add(user);
-    ctx.bump('LOGIN');
-    return `${pre}${ctx.M.LOGIN}`;
+    return `${pre}${ctx.hit('LOGIN')}`;
   };
   if (/[\\/]/.test(ctx.text)) {
     ctx.text = ctx.text.replace(RE_PROFILE_PATH, mask(true));
@@ -155,8 +154,7 @@ function maskLoginsInUrls(ctx: RedactCtx, values: Iterable<string>): void {
     const head = /^(?:[a-z][a-z0-9+.-]*:\/\/)?[^/?#]*/i.exec(url)?.[0] ?? '';
     const path = url.slice(head.length).replace(/(?<=[/~=])[^/?#&=~\s[\]]+(?=[/?#&]|$)/g, (seg) => {
       if (!known.has(seg.toLowerCase())) return seg;
-      ctx.bump('LOGIN');
-      return ctx.M.LOGIN;
+      return ctx.hit('LOGIN');
     });
     return head + path;
   });
@@ -181,8 +179,7 @@ function maskCapsPersonLogins(ctx: RedactCtx): Map<string, string> {
     if (isAsciiFirstName(folded[si]) && !isAsciiFirstName(folded[0])) si = 0;
     const surname = words[si];
     if (!ctx.on('IMIE')) {
-      ctx.bump('LOGIN');
-      return `${kw}${ctx.M.LOGIN}`;
+      return `${kw}${ctx.hit('LOGIN')}`;
     }
     ctx.bump('IMIE');
     capsPersons.set(words.join(' '), surname);
@@ -313,14 +310,12 @@ export function passLogin(ctx: RedactCtx): void {
       if (acct !== val) loginValues.add(val);
       fieldOnlyLogins.add(acct);
     } else if (!medium || isPropagatableLogin(acct)) remember(val);
-    ctx.bump('LOGIN');
-    return `${kw}${q1}${ctx.M.LOGIN}${q2}`;
+    return `${kw}${q1}${ctx.hit('LOGIN')}${q2}`;
   });
   ctx.text = ctx.text.replace(RE_LOGIN_QUOTED, (m, kw: string, q1: string, val: string, q2: string) => {
     if (RE_BUILTIN_ACCOUNT.test(val)) return m;
     remember(val);
-    ctx.bump('LOGIN');
-    return `${kw}${q1}${ctx.M.LOGIN}${q2}`;
+    return `${kw}${q1}${ctx.hit('LOGIN')}${q2}`;
   });
   if (capsPersons.size) spillCapsPersons(ctx, capsPersons);
   maskAnchoredLogins(ctx);
@@ -336,8 +331,7 @@ export function passLogin(ctx: RedactCtx): void {
       new RegExp(`(?<![\\w.-])${escapeRe(v)}(?!\\.?[\\w\\u00C0-\\u024F-])`, 'g'),
       (m: string, offset: number, t: string) => {
         if (word && loginWordInPersonPair(t, offset, m)) return m;
-        ctx.bump('LOGIN');
-        return ctx.M.LOGIN;
+        return ctx.hit('LOGIN');
       },
     );
   }
@@ -351,8 +345,7 @@ export function passLogin(ctx: RedactCtx): void {
         'g',
       ),
       (_m: string, lb: string) => {
-        ctx.bump('LOGIN');
-        return lb + ctx.M.LOGIN;
+        return lb + ctx.hit('LOGIN');
       },
     );
   }

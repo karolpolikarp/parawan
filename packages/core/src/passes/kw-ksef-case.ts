@@ -1,5 +1,5 @@
 import { PL_LO, PL_UP } from '../charset.js';
-import { maskAfterLabel, maskConst, type RedactCtx } from '../context.js';
+import { maskAfterLabel, type RedactCtx } from '../context.js';
 import { isValidKw, isValidNip } from '../validators.js';
 
 // Przebiegi numeru KSeF, numeru księgi wieczystej i znaku sprawy. Biegną przed NIP-em
@@ -26,9 +26,9 @@ const RE_KSEF_ANCHOR = /ksef|krajow\w*\s+system\w*\s+e[-‐-―]?faktur/i;
 // („faktura-5265877635-…-AF.xml"), a taki dłuższy identyfikator i tak niesie NIP wystawcy.
 export const RE_KSEF_VALUE = new RegExp(`(?<![0-9A-Za-z])${KSEF_VALUE}(?![0-9A-Za-z])`, 'g');
 
-/** Kotwica liczona na oryginalnym wejściu (patrz RedactCtx.raw). */
-export function hasKsefAnchor(ctx: RedactCtx): boolean {
-  return RE_KSEF_ANCHOR.test(ctx.raw);
+/** Liczona raz na oryginalnym wejściu (patrz RedactCtx.raw): to skan całego dokumentu. */
+export function hasKsefAnchor(raw: string): boolean {
+  return RE_KSEF_ANCHOR.test(raw);
 }
 
 /** Słaba kotwica dokumentowa wymaga mocnej wartości: bez sprawdzenia NIP-u znikały numery
@@ -43,15 +43,14 @@ export function maskKsefMatch(ctx: RedactCtx) {
     if (!/[A-Fa-f]/.test(m.slice(head.length))) return m;
     // Żaden NIP nie zaczyna się od zera, a suma kontrolna to przepuszcza.
     if (/^\d{10}$/.test(head) && (head.startsWith('0') || !isValidNip(head))) return m;
-    ctx.bump('KSEF');
-    return ctx.M.KSEF;
+    return ctx.hit('KSEF');
   };
 }
 
 // Przed passZnakSprawy, który dałby numerowi maskę znaku sprawy, i przed passNip, który
 // zamaskowałby sam prefiks i zostawił „[NIP]-20250826-0100001AF629-AF".
 export function passKsef(ctx: RedactCtx): void {
-  if (!ctx.on('KSEF') || !hasKsefAnchor(ctx)) return;
+  if (!ctx.on('KSEF') || !ctx.ksefAnchor) return;
   ctx.text = ctx.text.replace(RE_KSEF_VALUE, maskKsefMatch(ctx));
 }
 
@@ -252,6 +251,6 @@ const RE_ZNAK_LABELED = new RegExp(`\\b(${ZNAK_LABEL})([ \\t]*:?[ \\t]*)(${ZNAK_
 // Biegnie wcześnie, żeby zamaskować cały znak, zanim kod pocztowy czy telefon odgryzą jego cyfry.
 export function passZnakSprawy(ctx: RedactCtx): void {
   if (!ctx.on('ZNAK-SPRAWY')) return;
-  ctx.text = ctx.text.replace(RE_ZNAK_JRWA, maskConst(ctx, 'ZNAK-SPRAWY'));
+  ctx.text = ctx.text.replace(RE_ZNAK_JRWA, () => ctx.hit('ZNAK-SPRAWY'));
   maskAfterLabel(ctx, RE_ZNAK_LABELED, 'ZNAK-SPRAWY');
 }

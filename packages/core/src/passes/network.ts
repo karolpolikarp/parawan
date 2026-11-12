@@ -1,5 +1,5 @@
 // Identyfikatory techniczne: tokeny i sekrety, MAC, IPv6/IPv4, VIN.
-import { maskConst, type RedactCtx } from '../context.js';
+import { maskKeepPrefix, type RedactCtx } from '../context.js';
 import { precededByLegalRef } from '../validators.js';
 
 // „eyJ" to base64 z „{\"": znikome FP, a token daje dostęp, więc maskujemy w całości.
@@ -9,10 +9,10 @@ const RE_JWT = new RegExp(String.raw`\b${JWT_SRC}`, 'g');
 
 export function passTokens(ctx: RedactCtx): void {
   if (!ctx.on('TOKEN')) return;
-  ctx.text = ctx.text.replace(RE_JWT, maskConst(ctx, 'TOKEN'));
+  ctx.text = ctx.text.replace(RE_JWT, () => ctx.hit('TOKEN'));
   ctx.text = ctx.text.replace(
     /\b(?:sk_(?:live|test)_[A-Za-z0-9]{8,}|(?:ghp|gho|ghs|ghu|ghr)_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|xox[baprs]-[A-Za-z0-9-]{10,})/g,
-    maskConst(ctx, 'TOKEN'),
+    () => ctx.hit('TOKEN'),
   );
 }
 
@@ -38,28 +38,24 @@ export function passMac(ctx: RedactCtx): void {
           (pairs === 8 && hex.slice(6, 10) === 'fffe');
         if (!embedsMac && !RE_MAC_LABEL_BEFORE.test(ctx.text.slice(Math.max(0, offset - 32), offset))) return m;
       }
-      ctx.bump('MAC');
-      return ctx.M.MAC;
+      return ctx.hit('MAC');
     },
   );
   // Sześć par z mieszanymi separatorami („00:11-22:33-44:55"), tylko samodzielne, nie wycinek łańcucha.
   ctx.text = ctx.text.replace(
     /(?<![0-9A-Fa-f]{2}[:-])\b(?:[0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}\b(?![:-][0-9A-Fa-f]{2})/g,
-    maskConst(ctx, 'MAC'),
+    () => ctx.hit('MAC'),
   );
   // Notacja Cisco „aabb.ccdd.eeff" z co najmniej jedną literą hex. {0,13} ogranicza lookahead
   // do samego adresu, inaczej ciąg „1.1.1…" daje czas kwadratowy.
   ctx.text = ctx.text.replace(
     /\b(?=[0-9A-Fa-f.]{0,13}[A-Fa-f])(?:[0-9A-Fa-f]{4}\.){2}[0-9A-Fa-f]{4}(?![:\w-]|\.\w)/g,
-    maskConst(ctx, 'MAC'),
+    () => ctx.hit('MAC'),
   );
   // Po etykiecie „MAC" także notacja Cisco z samych cyfr.
   ctx.text = ctx.text.replace(
     /\b(MAC[\s:.=-]+)((?:[0-9A-Fa-f]{4}\.){2}[0-9A-Fa-f]{4})(?![:\w-]|\.\w)/gi,
-    (_m, pre: string) => {
-      ctx.bump('MAC');
-      return `${pre}${ctx.M.MAC}`;
-    },
+    maskKeepPrefix(ctx, 'MAC'),
   );
 }
 
@@ -78,8 +74,7 @@ export function passIp(ctx: RedactCtx): void {
   if (!ctx.on('IP')) return;
   ctx.text = ctx.text.replace(RE_IPV6, (m) => {
     if (RE_HEX_8_PAIRS.test(m)) return m;
-    ctx.bump('IP');
-    return ctx.M.IP;
+    return ctx.hit('IP');
   });
   // Prawa granica jak w IPv6 („10.0.0.1.nip.io", OID „1.3.6.1.4" blokują). Kropka kończy też numer
   // punktu konspektu („1.2.3.4. Zakres prac"), więc adres przed kropką wymaga kontekstu sieciowego.
@@ -90,8 +85,7 @@ export function passIp(ctx: RedactCtx): void {
       if (RE_IPV4_VERSION_BEFORE.test(ctx.text.slice(Math.max(0, offset - 32), offset))) return m;
       if (isNonHostIpv4(m, ctx.text.slice(offset + m.length, offset + m.length + 4))) return m;
       if (ctx.text[offset + m.length] === '.' && !ipv4BeforeDotIsAddress(ctx.text, offset, m)) return m;
-      ctx.bump('IP');
-      return ctx.M.IP;
+      return ctx.hit('IP');
     },
   );
 }
@@ -149,17 +143,13 @@ export function passVin(ctx: RedactCtx): void {
   // „nr vin" i „numer vin" łapie samo „vin" (prefiks zostaje w tekście bez zmian).
   ctx.text = ctx.text.replace(
     /\b((?:vin|n(?:ume)?r\s+nadwozia)[\s:.=-]*)([A-HJ-NPR-Za-hj-npr-z0-9]{17})\b/gi,
-    (_m, pre: string) => {
-      ctx.bump('VIN');
-      return `${pre}${ctx.M.VIN}`;
-    },
+    maskKeepPrefix(ctx, 'VIN'),
   );
   ctx.text = ctx.text.replace(/\b[A-HJ-NPR-Z0-9]{17}\b/g, (m) => {
     const digits = (m.match(/\d/g) || []).length;
     const letters = (m.match(/[A-Z]/g) || []).length;
     if (digits >= 4 && letters >= 3) {
-      ctx.bump('VIN');
-      return ctx.M.VIN;
+      return ctx.hit('VIN');
     }
     return m;
   });

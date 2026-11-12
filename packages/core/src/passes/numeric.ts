@@ -1,10 +1,9 @@
 // Identyfikatory numeryczne: IBAN, numer konta, PESEL, NIP, REGON, karta płatnicza i telefon.
 // Najdłuższe ciągi cyfr idą pierwsze (IBAN 26 → PESEL 11 → NIP 10 → REGON), krótsze potem.
+import { countOf } from '../charset.js';
 import { maskAfterLabel, type RedactCtx } from '../context.js';
 import { type PiiType } from '../types.js';
 import { CURRENCY_CODES, isValidCard, isValidIban, isValidNip, isValidPesel, isValidRegon14, isValidRegon9, precededByLegalRef, precededByNonPhoneLabel } from '../validators.js';
-
-const countOf = (s: string, ch: string): number => s.split(ch).length - 1;
 
 /** Długości IBAN wg rejestru ISO 13616 (kraj → liczba znaków bez spacji). */
 const IBAN_LENGTHS: Record<string, number> = {
@@ -120,8 +119,7 @@ export function passAccount(ctx: RedactCtx): void {
   // Bez etykiety tylko z poprawną sumą. Prefiks „PL" idzie pod maskę razem z numerem.
   ctx.text = ctx.text.replace(RE_NRB_BARE, (m) => {
     if (isValidIban('PL' + m.replace(/^PL/, ''))) {
-      ctx.bump('NR-KONTA');
-      return ctx.M['NR-KONTA'];
+      return ctx.hit('NR-KONTA');
     }
     return m;
   });
@@ -135,8 +133,7 @@ export function passPesel(ctx: RedactCtx): void {
   ctx.text = ctx.text.replace(/(?<![\dA-Za-z])\d{11}(?![\d])/g, (m, offset: number) => {
     if (precededByLegalRef(ctx.text, offset)) return m;
     if (isValidPesel(m)) {
-      ctx.bump('PESEL');
-      return ctx.M.PESEL;
+      return ctx.hit('PESEL');
     }
     return m;
   });
@@ -155,6 +152,8 @@ const RE_FOREIGN_FIELD_WORD =
  * spacją lub łącznikiem maskujemy mimo złej sumy. Pojedyncze cyfry, tabulator, „|" albo kilka spacji
  * tylko z poprawną sumą, bo tak wyglądają też wzory z instrukcji i kolumny tabel.
  * Bez etykiety nic się nie zmienia: „Jan Kowalski 501 120 345 43" to telefon i wiek, nie PESEL.
+ * Nie scalać z maskAfterLabel: tam etykieta wystarcza, tu decydują jeszcze wiersz etykiety, układ
+ * grup i suma kontrolna.
  */
 function maskSpacedAfterLabel(ctx: RedactCtx, re: RegExp, type: PiiType, valid: (d: string) => boolean): void {
   ctx.text = ctx.text.replace(re, (m, kw: string, sep: string, val: string, off: number, str: string) => {
@@ -173,8 +172,7 @@ function maskSpacedAfterLabel(ctx: RedactCtx, re: RegExp, type: PiiType, valid: 
     }
     const grouped = /^\d{2,}(?:(?:[ -]|[ \t]*\r?\n[ \t]*)\d{2,})+$/.test(core);
     if (!grouped && !valid(d)) return m;
-    ctx.bump(type);
-    return `${kw}${sep}${ctx.M[type]}`;
+    return `${kw}${sep}${ctx.hit(type)}`;
   });
 }
 
@@ -190,8 +188,7 @@ export function passNip(ctx: RedactCtx): void {
   // Prefiks „PL" idzie pod maskę razem z numerem; isValidNip i tak liczy tylko cyfry.
   ctx.text = ctx.text.replace(RE_NIP, (m, offset: number) => {
     if (precededByLegalRef(ctx.text, offset) || !isValidNip(m)) return m;
-    ctx.bump('NIP');
-    return ctx.M.NIP;
+    return ctx.hit('NIP');
   });
   // Silna etykieta: maska mimo złej sumy.
   maskAfterLabel(ctx, RE_NIP_LABELED, 'NIP');
@@ -205,8 +202,7 @@ export function passRegon(ctx: RedactCtx): void {
   // Bez etykiety tylko 14 cyfr z poprawną sumą; 9 cyfr wymaga etykiety.
   ctx.text = ctx.text.replace(/(?<![\d])\d{14}(?![\d])/g, (m) => {
     if (isValidRegon14(m)) {
-      ctx.bump('REGON');
-      return ctx.M.REGON;
+      return ctx.hit('REGON');
     }
     return m;
   });
@@ -224,8 +220,7 @@ export function passCard(ctx: RedactCtx): void {
   if (!ctx.on('KARTA')) return;
   ctx.text = ctx.text.replace(RE_CARD_LABELED, (m, kw: string, sep: string, num: string) => {
     if (isValidCard(num)) {
-      ctx.bump('KARTA');
-      return `${kw}${sep}${ctx.M.KARTA}`;
+      return `${kw}${sep}${ctx.hit('KARTA')}`;
     }
     return m;
   });
@@ -465,7 +460,6 @@ export function passPhone(ctx: RedactCtx): void {
     // 800/801 to wyłącznie infolinie firm: nie ma strefy geograficznej ani zakresu komórkowego 80.
     if (d.startsWith('0') || /^80[01]/.test(d)) return m;
     if (gluedToIdentifier(ctx.text, offset, m.length) || looksLikeAmount(ctx.text, offset, m)) return m;
-    ctx.bump('TELEFON');
-    return ctx.M.TELEFON;
+    return ctx.hit('TELEFON');
   });
 }

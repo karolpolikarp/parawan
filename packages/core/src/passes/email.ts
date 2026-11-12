@@ -60,15 +60,13 @@ export function passEmail(ctx: RedactCtx): void {
   ctx.text = full.replace(RE_EMAIL_CHAIN, (chain: string, chainAt: number) =>
     chain.replace(RE_EMAIL, (m: string, at: number) => {
       if (isGitRemote(full, chainAt + at, m)) return m;
-      ctx.bump('EMAIL');
-      return ctx.M.EMAIL;
+      return ctx.hit('EMAIL');
     }),
   );
   // URL-e są już za sentinelem, więc zostaje tylko „%40" poza nimi.
   ctx.text = replaceEmails(ctx.text, RE_EMAIL_URLENC_CHAIN, RE_EMAIL_URLENC, (m: string) => {
     if (RE_URLENC_FILE_NAME.test(m)) return m;
-    ctx.bump('EMAIL');
-    return ctx.M.EMAIL;
+    return ctx.hit('EMAIL');
   });
 }
 

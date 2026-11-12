@@ -2,7 +2,7 @@
 // zamieszkania lub urodzenia.
 import { HOMOGRAPH_SURNAMES, NON_SURNAME_ADJ, looksLikeSurname, surnameBase } from '../surnames.js';
 import { CAP_CITY, CITY_RUN, CITY_START, escapeRe, PL_LO, PL_UP, RE_CHAR_LL } from '../charset.js';
-import { cityByPrefix, cityBySuffix, type RedactCtx } from '../context.js';
+import { type RedactCtx } from '../context.js';
 import { FORM_LABEL_WORDS } from '../dict/forms.js';
 import { isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { MULTIWORD_CITIES, POLISH_CITIES } from '../dict/places.js';
@@ -288,10 +288,25 @@ function multiwordTake(first: string, parts: string[]): number {
   }
   return take;
 }
+// Najdłuższe (do 3 wyrazów) miasto ze słownika na początku albo końcu ciągu wyrazów. Zwraca resztę
+// ciągu z oryginalnymi odstępami (tabulator to granica kolumny TSV), a null, gdy miasta nie ma.
+// Pusta reszta to też trafienie, więc wynik porównuje się z null.
+function cityAtEdge(ctx: RedactCtx, run: string, edge: 'start' | 'end'): string | null {
+  const parts = run.split(/([ \t]+)/);
+  const words = parts.filter((_, i) => i % 2 === 0);
+  for (let n = Math.min(3, words.length); n >= 1; n--) {
+    const city = edge === 'start' ? words.slice(0, n) : words.slice(words.length - n);
+    if (POLISH_CITIES.has(city.join(' ').toLowerCase())) {
+      ctx.bump('MIEJSCOWOSC');
+      return edge === 'start' ? parts.slice(2 * n - 1).join('') : parts.slice(0, 2 * (words.length - n)).join('');
+    }
+  }
+  return null;
+}
 // Maska nazwy ze słownika na początku `run`; null, gdy jej tam nie ma.
 function maskCityPrefix(ctx: RedactCtx, head: string, run: string): string | null {
-  const r = cityByPrefix(ctx, run);
-  return r ? `${head}${ctx.M.MIEJSCOWOSC}${r.leftover}` : null;
+  const rest = cityAtEdge(ctx, run, 'start');
+  return rest === null ? null : `${head}${ctx.M.MIEJSCOWOSC}${rest}`;
 }
 
 const TERYT_UNIT =
@@ -343,8 +358,7 @@ export function passCity(ctx: RedactCtx): void {
           else if (/^ +\S/.test(part1) && (isFirstNameLike(p1) || looksLikeSurname(p1) || !!surnameBase(p1.toLowerCase()))) take = 1;
         }
       }
-      ctx.bump('MIEJSCOWOSC');
-      return `${anchor}${sep}${ctx.M.MIEJSCOWOSC}${restParts.slice(take).join('')}`;
+      return `${anchor}${sep}${ctx.hit('MIEJSCOWOSC')}${restParts.slice(take).join('')}`;
     },
   );
   // 12c-caps: miejscowość wersalikami po kodzie („26-900 KOZIENICE"). Wersalikami pisze się też skróty
@@ -384,8 +398,7 @@ export function passCity(ctx: RedactCtx): void {
       }
       const end = offset + anchor.length + sep.length + first.length + tailParts.slice(0, take).join('').length;
       if (/^[ \t]*:/.test(str.slice(end, end + 4))) return m;
-      ctx.bump('MIEJSCOWOSC');
-      return `${anchor}${sep}${ctx.M.MIEJSCOWOSC}${tailParts.slice(take).join('')}`;
+      return `${anchor}${sep}${ctx.hit('MIEJSCOWOSC')}${tailParts.slice(take).join('')}`;
     },
   );
   // 12c': miejscowość po kodzie za średnikiem albo przecinkiem (CSV „…;00-001;Warszawa"). Kolejna
@@ -415,8 +428,8 @@ export function passCity(ctx: RedactCtx): void {
       const lead = capRun.slice(0, capRun.lastIndexOf('\t') + 1);
       const run = capRun.slice(lead.length);
       if (cityRunLooksLikePerson(run, str.slice(Math.max(0, offset - 80), offset) + lead)) return m;
-      const r = cityBySuffix(ctx, run);
-      return r ? `${lead}${r.prefix}${ctx.M.MIEJSCOWOSC}${sep}${anchor}` : m;
+      const rest = cityAtEdge(ctx, run, 'end');
+      return rest === null ? m : `${lead}${rest}${ctx.M.MIEJSCOWOSC}${sep}${anchor}`;
     },
   );
   // 12d': miasto w osobnym wierszu tuż nad adresem („Warszawa⏎Hoża 41"). Cały wiersz musi być miastem
@@ -425,8 +438,7 @@ export function passCity(ctx: RedactCtx): void {
     new RegExp(`(?<=^|\\n)([ \\t]*)(${CITY_RUN})(?=[ \\t]*\\r?\\n[ \\t]*${ADDR_ANCHOR})`, 'g'),
     (m, lead: string, run: string) => {
       if (!POLISH_CITIES.has(run.toLowerCase().split(/[ \t]+/).join(' '))) return m;
-      ctx.bump('MIEJSCOWOSC');
-      return `${lead}${ctx.M.MIEJSCOWOSC}`;
+      return `${lead}${ctx.hit('MIEJSCOWOSC')}`;
     },
   );
   // 12e: miejscowość tuż po adresie bez kodu („[ADRES], Warszawa"), też po średniku i wersalikami.
@@ -456,8 +468,7 @@ export function passCity(ctx: RedactCtx): void {
     const masked = maskCityPrefix(ctx, marker, run);
     if (masked) return masked;
     if (residenceLocativeCity(marker, run, after)) {
-      ctx.bump('MIEJSCOWOSC');
-      return `${marker}${ctx.M.MIEJSCOWOSC}`;
+      return `${marker}${ctx.hit('MIEJSCOWOSC')}`;
     }
     return m;
   });

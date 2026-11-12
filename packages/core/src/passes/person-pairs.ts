@@ -2,7 +2,7 @@
 // zapis rekordu, małe litery i nazwisko panieńskie; ochrona postaci literackich.
 import { HOMOGRAPH_SURNAMES, NON_SURNAME_ADJ, homographBase, isGeoAdjective, looksLikeSurname, normalizeSurnameKey, surnameBase } from '../surnames.js';
 import { CAP_WORD, LIST_BULLET, NM_BOUND, PL_LO, PL_UP } from '../charset.js';
-import { indexToLetters, type RedactCtx, URL_SENTINEL_CLOSE, URL_SENTINEL_OPEN } from '../context.js';
+import { protectSpan, type RedactCtx } from '../context.js';
 import { FORM_LABEL_WORDS } from '../dict/forms.js';
 import { EXTRA_NAME_FORMS, FOREIGN_GIVEN_NAMES, isFirstNameGenitive, isFirstNameLike, isMaleFirstNameGenitive, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
@@ -214,9 +214,7 @@ export function passProtectFictional(ctx: RedactCtx): void {
     const prev = RE_PREV_TOKEN.exec(t.slice(Math.max(0, offset - 40), offset))?.[1]?.toLowerCase();
     if (prev && (ROLE_WORDS.has(prev) || TITLE_WORDS.has(prev) || PARTY_ROLE_WORDS.has(prev))) return m;
     if (personSlotBefore(t, offset) || RE_PERSON_DATA_AHEAD.test(t.slice(offset + m.length, offset + m.length + 24))) return m;
-    const sentinel = `${URL_SENTINEL_OPEN}${indexToLetters(ctx.protectedUrls.length)}${URL_SENTINEL_CLOSE}`;
-    ctx.protectedUrls.push(m);
-    return sentinel;
+    return protectSpan(ctx, m);
   });
 }
 // Postacie historyczne z dwoma imionami w dopełniaczu („za panowania Zygmunta Augusta"): bez kotwicy

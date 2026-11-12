@@ -47,6 +47,7 @@ export const MONTHS_GEN = 'stycznia|lutego|marca|kwietnia|maja|czerwca|lipca|sie
 // Maska osoby w domyślnym zapisie; maski z options.masks tu nie pasują.
 export const PERSON_MASK = '\\[OSOBA-[A-Z]+\\]|\\[IMIĘ I NAZWISKO\\]';
 export const escapeRe = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+export const countOf = (s: string, ch: string): number => s.split(ch).length - 1;
 
 export const RE_CHAR_LL = /\p{Ll}/u;
 export const RE_CHAR_LU = /\p{Lu}/u;
