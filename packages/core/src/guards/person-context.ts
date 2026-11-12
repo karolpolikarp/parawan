@@ -1,6 +1,7 @@
 // Strażniki kontekstu osoby: instytucja przed adresem, granice komórek tabeli, patroni, inicjały
 // i łańcuchy kropkowe, homografy nazwisk przy imieniu.
-import { PERSON_MASK_SRC, PL_LO, PL_UP, RE_JSON_ESC_PUA } from '../charset.js';
+import { PERSON_MASK_SRC, PL_LO, PL_UP } from '../charset.js';
+import { RE_JSON_ESC_PUA } from '../context.js';
 import { RE_INSTITUTION_WORD } from './eponyms.js';
 import { LEGAL_ENTITY_WORDS, PROPER_NAME_HEADS } from './roles.js';
 

@@ -1,7 +1,7 @@
 // Faza 0: ucieczki JSON i ochrona URL-i sentinelem, z maskowaniem PII wewnątrz adresu.
 import { surnameShaped } from '../surnames.js';
-import { JSON_ESC_PUA, PL_LO, PL_UP } from '../charset.js';
-import { JSON_ESC_TO_PUA, maskKeepPrefix, protectSpan, type RedactCtx } from '../context.js';
+import { PL_LO, PL_UP } from '../charset.js';
+import { JSON_ESC_PUA, JSON_ESC_TO_PUA, maskKeepPrefix, RE_JSON_ESC_PUA, protectSpan, type RedactCtx } from '../context.js';
 import { isPropagatableLogin } from '../dict/forms.js';
 import { POLISH_FIRST_NAMES } from '../dict/names.js';
 import { RE_EMAIL, RE_EMAIL_CHAIN, RE_EMAIL_URLENC, RE_EMAIL_URLENC_CHAIN, replaceEmails, URL_PARAM_RULES, URL_PROFILE_PATH_RULES } from './email.js';
@@ -15,7 +15,7 @@ import { JWT_SRC } from './network.js';
 const RE_JSON_VALID_ESCAPE = /\\(?:u[0-9A-Fa-f]{4}|["\\/bfnrt])/g;
 const RE_JSON_GLUED_ESCAPE = /(?<!\\)((?:\\\\)*)\\([nrt])(?=[\p{L}\p{N}\\])/gu;
 export function passProtectJsonEscapes(ctx: RedactCtx): void {
-  if (!ctx.text.includes('\\') || /[\uE009\uE00A\uE00D]/.test(ctx.text)) return;
+  if (!ctx.text.includes('\\') || RE_JSON_ESC_PUA.test(ctx.text)) return;
   ctx.text = ctx.text.replace(/\S+/g, (tok) => {
     if (!tok.includes('\\') || tok.replace(RE_JSON_VALID_ESCAPE, '').includes('\\')) return tok;
     return tok.replace(RE_JSON_GLUED_ESCAPE, (_m, bs: string, l: string) => {

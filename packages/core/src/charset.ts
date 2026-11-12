@@ -1,5 +1,6 @@
 // Klasy liter (polskie, obce w nazwiskach, granice wyrazu) i wspólne fragmenty wzorców
 // wyrazów, z których budowane są regexy przebiegów.
+import { JSON_ESC_PUA } from './context.js';
 import { MASK } from './types.js';
 
 /** Wyrazy (parzyste indeksy `parts`) i zachowane odstępy między nimi; `words` to same wyrazy. */
@@ -25,10 +26,6 @@ export const NM_LO = `${PL_LO}${NM_LO_EXTRA}`;
 // zakresami). Celowo bez znaków łączących U+0300–U+036F: granica na nich odsłaniałaby nazwisko w NFD.
 export const NM_BOUND = 'A-Za-z\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u024F\\u0259\\u1E00-\\u1EFF';
 
-// Znaki PUA, na które passProtectJsonEscapes podmienia litery ucieczek JSON „\t”, „\n”, „\r”
-// (patrz JSON_ESC_TO_PUA). Treść klasy znaków do wstawienia we wzorzec.
-export const JSON_ESC_PUA = '\uE009\uE00A\uE00D';
-export const RE_JSON_ESC_PUA = new RegExp(`[${JSON_ESC_PUA}]`);
 // Ucieczka „\n/\r/\t” w JSON-ie po passProtectJsonEscapes (backslash i znak PUA) liczy się jak biały
 // znak, inaczej „Uniwersytet Adama\nMickiewicza” traciłby kontekst złożenia i stawał się osobą.
 export const ESC_WS = `\\\\[${JSON_ESC_PUA}]`;

@@ -1,14 +1,13 @@
 // Ostatnia faza: domknięcia masek osób (imię, inicjał, ogon przeniesienia), stabilna numeracja
 // etykiet, przywrócenie URL-i i ucieczek JSON, cudzysłowy wokół masek w dokumencie JSON i własne maski.
 import { HOMOGRAPH_SURNAMES, isGeoAdjective, looksLikeSurname, NON_SURNAME_ADJ, surnameBase, surnameShaped } from '../surnames.js';
-import { CAP_WORD, ESC_WS, escapeRe, JSON_ESC_PUA, LIST_BULLET, NM_BOUND, PERSON_MASK_SRC, PL_LO, PL_UP, RE_CHAR_LU } from '../charset.js';
-import { indexToLetters, JSON_ESC_FROM_PUA, lettersToIndex, RE_URL_SENTINEL, type RedactCtx } from '../context.js';
+import { CAP_WORD, ESC_WS, escapeRe, LIST_BULLET, NM_BOUND, PERSON_MASK_SRC, PL_LO, PL_UP, RE_CHAR_LU } from '../charset.js';
+import { indexToLetters, JSON_ESC_FROM_PUA, JSON_ESC_PUA, JSON_ESC_PUA_EOL, JSON_ESC_TO_PUA, lettersToIndex, MAIDEN_D_SENTINEL, RE_URL_SENTINEL, type RedactCtx } from '../context.js';
 import { COLLIDING_NAME_FORMS, isFirstNameGenitive, isFirstNameLike, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
 import { isObliqueSurnameForm, precededByPatron } from '../guards/eponyms.js';
 import { cellEndsAt, cellStartsBefore, DOT_CHAIN, dotChainKind, INITIAL_START, institutionLabelBefore, isHonorificP, LIST_HEAD_NOT_SURNAME, RE_PERSON_MASK_BEFORE, RE_SAINT_WORD_BEFORE } from '../guards/person-context.js';
 import { LEGAL_ENTITY_WORDS, ROLE_WORDS, TITLE_WORDS } from '../guards/roles.js';
-import { MAIDEN_D_SENTINEL } from './person-caps-ocr.js';
 import { MASK } from '../types.js';
 import { OCR_NAME_WORD, RE_DECLINED_NOM_SURNAME, RE_NEXT_CAP_WORD_SP } from '../person-patterns.js';
 
@@ -72,7 +71,7 @@ const RE_MASK_COMMA_NAME = new RegExp(
 const RE_MASK_GLUED_NAME = new RegExp(`(${PERSON_MASK_SRC})[._]([${PL_UP}][${PL_LO}]+)(?![${NM_BOUND}])`, 'g');
 // Kropka bez odstępu („Jan.Kowalski", „C:\Users\Jan.Kowalski") skleja imię z nazwiskiem w loginie
 // i katalogu profilu; kropka ze spacją kończy zdanie i nie pasuje. Ucieczka „\t" z JSON-a jak ⇥.
-const RE_NAME_BEFORE_MASK = new RegExp(`(?<![${NM_BOUND}])([${PL_UP}][${PL_LO}]+)([ \\t\\n_.-]|\\\\\\uE009)(${PERSON_MASK_SRC})`, 'g');
+const RE_NAME_BEFORE_MASK = new RegExp(`(?<![${NM_BOUND}])([${PL_UP}][${PL_LO}]+)([ \\t\\n_.-]|\\\\${JSON_ESC_TO_PUA.t})(${PERSON_MASK_SRC})`, 'g');
 const RE_INITIAL_BEFORE_MASK = new RegExp(`${INITIAL_START}[${PL_UP}]\\.[ \\t]*(${PERSON_MASK_SRC})`, 'g');
 const RE_DOT_CHAIN_BEFORE_MASK = new RegExp(`${DOT_CHAIN}[ \\t]*(${PERSON_MASK_SRC})`, 'g');
 const RE_MASK_FOREIGN_PARTICLE = new RegExp(
@@ -442,7 +441,7 @@ function absorbInitialsAndParticles(ctx: RedactCtx): void {
     // (znak PUA z passProtectJsonEscapes) też zaczyna wiersz
     let i = offset - 1;
     while (i >= 0 && (t[i] === ' ' || t[i] === '\t')) i--;
-    if (i < 0 || t[i] === '\n' || ((t[i] === '\uE00A' || t[i] === '\uE00D') && t[i - 1] === '\\')) return m;
+    if (i < 0 || t[i] === '\n' || (JSON_ESC_PUA_EOL.includes(t[i]) && t[i - 1] === '\\')) return m;
     // „Sp. J." / „Sp. K." to forma prawna spółki
     if (/(?<!\p{L})[Ss][Pp]\.$/u.test(t.slice(Math.max(0, i - 3), i + 1))) return m;
     if (isHonorificP(t, offset)) return m; // „Sz. P. [OSOBA-A]": „P." to „Pan"

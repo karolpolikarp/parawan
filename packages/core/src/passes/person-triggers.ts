@@ -2,7 +2,7 @@
 // z łącznikiem oraz samodzielne nazwisko ze słownika albo z morfologii.
 import { COMMON_NOUN_LOOKALIKES, DIMINUTIVE_LOOKALIKES, homographBase, isCompoundAdjective, isConfirmedSurname, isGeoAdjective, looksLikeSurname, NON_SURNAME_ADJ, normalizeSurnameKey, surnameBase, surnameShaped } from '../surnames.js';
 import { CAP_WORD, NM_BOUND, NM_LO, NM_UP, PL_LO, PL_UP, PRECEDED_BY_CAP, splitWords } from '../charset.js';
-import { type RedactCtx } from '../context.js';
+import { JSON_ESC_PUA_EOL, type RedactCtx, VI_GIVEN_SENTINEL } from '../context.js';
 import { FORM_LABEL_WORDS, isEmptyFormValue } from '../dict/forms.js';
 import { FOREIGN_GIVEN_NAMES, isFirstNameGenitive, isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
@@ -69,7 +69,6 @@ function triggerGivenName(w: string): boolean {
   return FOREIGN_GIVEN_NAMES.has(f) || CE_GIVEN_NAMES_FOLDED.has(f) || POLISH_FIRST_NAMES.has(f.replace(/v/g, 'w'));
 }
 const RE_SACRED_NAME = /^(?:bóg|boga|bogu|bogiem|jezus|jezusa|jezusowi|jezusem|chrystus|chrystusa|chrystusowi|chrystusem)$/;
-const VI_GIVEN_SENTINEL = String.fromCharCode(0xe0d2);
 const RE_VI_GIVEN_TAIL = new RegExp(`${VI_GIVEN_SENTINEL}(?:[ \\t]+[${NM_UP}][${NM_LO}]{1,6}(?![${NM_BOUND}-]))?`, 'g');
 const RE_LABEL_TRIGGER = /^(?:[Ii]mi[eę] i nazwisko|[Nn]azwisko:)$/;
 // Nagłówki kolumn spoza FORM_LABEL_WORDS, które w wierszu TSV stoją za etykietą osoby.
@@ -236,7 +235,7 @@ function initialAnchorsSurname(ctx: RedactCtx, w2: string, offset: number): bool
 // (punkt wyliczenia „A.”). „Sz.” na liście skrótów: „Sz. P. Wilk” to nagłówek listu, nie koniec zdania.
 // Skróty tytułów są też w RE_TITLE_BEFORE_DOT (niżej) i w DOT_TITLES (guards/person-context.ts); listy celowo się różnią.
 const RE_INITIAL_SURNAME = new RegExp(
-  `${INITIAL_START}(?=[${PL_UP}]\\.[ \\t])(?<!(?:^|\\n|\\\\[\\uE00A\\uE00D])[ \\t]*)(?<!(?<!\\b(?:[Mm]ec|[Pp]rof|[Dd]r|[Mm]gr|[Ii]nż|hab|[Aa]dw|[Kk]s|płk|gen|kpt|mjr|por|sierż|lek|med|[Ss]ędz|[Ss]z))[.!?][ \\t]+)[${PL_UP}]\\.[ \\t]+(${CAP_WORD})(?![${NM_BOUND}])`,
+  `${INITIAL_START}(?=[${PL_UP}]\\.[ \\t])(?<!(?:^|\\n|\\\\[${JSON_ESC_PUA_EOL}])[ \\t]*)(?<!(?<!\\b(?:[Mm]ec|[Pp]rof|[Dd]r|[Mm]gr|[Ii]nż|hab|[Aa]dw|[Kk]s|płk|gen|kpt|mjr|por|sierż|lek|med|[Ss]ędz|[Ss]z))[.!?][ \\t]+)[${PL_UP}]\\.[ \\t]+(${CAP_WORD})(?![${NM_BOUND}])`,
   'g',
 );
 const RE_DOT_CHAIN_SURNAME = new RegExp(`${DOT_CHAIN}([ \\t]+)(${CAP_WORD})(?![${NM_BOUND}])`, 'g');

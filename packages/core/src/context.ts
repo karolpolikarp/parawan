@@ -45,16 +45,31 @@ export interface RedactCtx {
   loginSeeds: Set<string>;
 }
 
-// Sentinel URL ze znaków Prywatnego Obszaru Użytku: bez cyfr, „@" i liter, więc żaden przebieg go nie rusza.
+// Znaki Prywatnego Obszaru Użytku (PUA) to sentinele: bez cyfr, „@" i liter, więc żaden przebieg ich
+// nie rusza. Wszystkie są tutaj, każdy z innym kodem: U+E000/E001 URL, U+E009/E00A/E00D ucieczki JSON,
+// U+E0D0 „D." z „z d.", U+E0D2 wietnamskie imię, U+E0F1 znacznik ulicy z patronem.
+
 export const URL_SENTINEL_OPEN = '\uE000';
 export const URL_SENTINEL_CLOSE = '\uE001';
 export const RE_URL_SENTINEL = new RegExp(`${URL_SENTINEL_OPEN}([A-Z]+)${URL_SENTINEL_CLOSE}`, 'g');
 
 // Dosłowne ucieczki „\n", „\r", „\t" (pole JSON, log) sklejają literę z wartością: „n85031412347"
 // nie ma lewej granicy PESEL-u. Na czas detekcji litera ucieczki staje się znakiem PUA (nie litera,
-// cyfra ani biały znak), a na końcu wraca. Inne znaki PUA niż sentinel URL.
+// cyfra ani biały znak), a na końcu wraca.
 export const JSON_ESC_TO_PUA: Record<string, string> = { n: '\uE00A', r: '\uE00D', t: '\uE009' };
-export const JSON_ESC_FROM_PUA: Record<string, string> = { '\uE00A': 'n', '\uE00D': 'r', '\uE009': 't' };
+export const JSON_ESC_FROM_PUA: Record<string, string> = Object.fromEntries(Object.entries(JSON_ESC_TO_PUA).map(([l, c]) => [c, l]));
+// Treść klasy znaków do wstawienia we wzorzec: wszystkie ucieczki i tylko te końca wiersza.
+export const JSON_ESC_PUA = `${JSON_ESC_TO_PUA.t}${JSON_ESC_TO_PUA.n}${JSON_ESC_TO_PUA.r}`;
+export const JSON_ESC_PUA_EOL = `${JSON_ESC_TO_PUA.n}${JSON_ESC_TO_PUA.r}`;
+export const RE_JSON_ESC_PUA = new RegExp(`[${JSON_ESC_PUA}]`);
+
+// Znak w miejscu „D." ze skrótu „Z D.", żeby finalizePersons nie wciągnął go do maski jako inicjału
+// imienia (patrz passPersonMaidenAfterMask).
+export const MAIDEN_D_SENTINEL = '\uE0D0';
+// Znacznik za maską w miejscu wietnamskiego imienia spoza kandydata (patrz passPersonTrigger).
+export const VI_GIVEN_SENTINEL = '\uE0D2';
+// Znacznik przed maską adresu z przebiegu ulic z patronem (patrz passes/address.ts).
+export const PATRON_STREET_MARK = '\uE0F1';
 
 // Przebieg „etykieta + separator + wartość": grupy 1 i 2 zostają, grupa 3 idzie pod maskę typu.
 export function maskAfterLabel(ctx: RedactCtx, re: RegExp, type: PiiType): void {

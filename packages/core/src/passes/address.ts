@@ -2,7 +2,7 @@
 // i przed kodem pocztowym, kod pocztowy bez myślnika.
 import { surnameShaped } from '../surnames.js';
 import { ADR_MASK_SRC, CAP_CITY, countOf, KOD_MASK_SRC, MONTHS_GEN, PL_LO, PL_UP } from '../charset.js';
-import { maskKeepPrefix, type RedactCtx } from '../context.js';
+import { maskKeepPrefix, PATRON_STREET_MARK, type RedactCtx } from '../context.js';
 import { MASK } from '../types.js';
 import { isFirstNameGenitive, isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
@@ -427,7 +427,6 @@ const STREET_WORD_BEFORE_SRC = String.raw`(?<!\p{L})(?:(?:ul|al|pl|os)\.[ \t]*|(
 const RE_PATRON_STREET_WORD_BEFORE = new RegExp(`${STREET_WORD_BEFORE_SRC}$`, 'iu');
 // Znacznik przed maską adresu z tego przebiegu: tylko on, a nie dosłowne „[ADRES]" z wejścia, wciąga
 // skrót ulicy do maski (idempotencja).
-const PATRON_STREET_MARK = '\uE0F1';
 const RE_STREET_WORD_BEFORE_MARK = new RegExp(STREET_WORD_BEFORE_SRC + PATRON_STREET_MARK, 'giu');
 // Osoba, a za nią myślnik, średnik albo nawias z adresem („Jan Nowak (Jana Pawła II 5)").
 const RE_PATRON_STREET_PERSON_SEP = /[ \t]*(?:[–—;(]|[ \t]-)[ \t]*$/u;

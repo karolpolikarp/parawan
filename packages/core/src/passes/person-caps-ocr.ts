@@ -2,7 +2,7 @@
 // i nazwisko panieńskie tuż za maską osoby.
 import { homographBase, isConfirmedSurname, isGeoAdjective, looksLikeSurname, NON_SURNAME_ADJ, surnameBase, surnameShaped } from '../surnames.js';
 import { CAP_WORD, NM_BOUND, PERSON_MASK_SRC, PL_LO, PL_UP } from '../charset.js';
-import type { RedactCtx } from '../context.js';
+import { MAIDEN_D_SENTINEL, type RedactCtx } from '../context.js';
 import { isFirstNameGenitive, isFirstNameLike, isMaleFirstNameGenitive, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
 import { egoNameGenitive, precededByEponym, precededByPatron } from '../guards/eponyms.js';
@@ -517,10 +517,8 @@ function maidenNameContinues(sur: string, next: string): boolean {
 const RE_MAIDEN_NEXT_FIELD = new RegExp(
   `^ (?:[${PL_UP}][${PL_LO}]{0,3}\\.(?![${PL_LO}${PL_UP}])|[${PL_UP}][${PL_LO}]*(?:[ \\t]+[${PL_LO}]+){0,2}[ \\t]*:|[${PL_UP}][${PL_LO}]+(?:ąc(?:a|y|e)|[${PL_LO}]{3}ła|[${PL_LO}](?:an|on|ęt|it|yt)[aey])(?![${PL_LO}])|Zmarł[ay]?(?![${PL_LO}]))`,
 );
-// Znak PUA w miejscu „D." ze skrótu „Z D.", żeby finalizePersons nie wciągnął go do maski jako inicjału
-// imienia. Znacznik stoi przy samym skrócie, więc maska innej osoby („Rozmowa Jana Kowalskiego
+// MAIDEN_D_SENTINEL stoi przy samym skrócie „Z D.", więc maska innej osoby („Rozmowa Jana Kowalskiego
 // z D. Nowakiem") dalej wciąga inicjał.
-export const MAIDEN_D_SENTINEL = String.fromCharCode(0xe0d0);
 // Nazwisko panieńskie za maską osoby („EWELINA KRAWCZYK Z D. MAJEWSKA"). Para jest już maską, więc
 // reguła par z „z domu" jej nie widzi. Po masce „z domu" to jawna kotwica: Titlecase przechodzi po
 // stopliście instytucji, wersaliki muszą być potwierdzone („JAN KOWALSKI Z DOMU WYSZEDŁ RANO" to zdanie).

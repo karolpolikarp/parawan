@@ -1,7 +1,8 @@
 // Strażniki kontekstu nie-osobowego: eponimy medyczne, patroni ulic, instytucji i świętych,
 // etykiety jednostek administracyjnych.
 import { HOMOGRAPH_SURNAMES, normalizeSurnameKey, surnameBase } from '../surnames.js';
-import { JSON_ESC_PUA, PL_LO, PL_UP, RE_CHAR_L, RE_CHAR_LL, RE_CHAR_LU, RE_JSON_ESC_PUA } from '../charset.js';
+import { PL_LO, PL_UP, RE_CHAR_L, RE_CHAR_LL, RE_CHAR_LU } from '../charset.js';
+import { JSON_ESC_PUA, RE_JSON_ESC_PUA } from '../context.js';
 import { FOREIGN_GIVEN_NAMES, isFirstNameGenitive, isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { RE_SURNAME_OBLIQUE } from '../person-patterns.js';
 
