@@ -12,6 +12,18 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+Na razie brak zmian od v0.46.27.
+
+## v0.46.27 — 2026-11-12
+
+**Silnik jest podzielony na moduły i działa szybciej, a Parawan.html zaznacza to samo co v0.46.26. Paczka npm poprawia własne maski i warstwę LLM.**
+
+Pilność: zwykła
+
+Parawan.html daje te same znaczniki co v0.46.26, co do znaku: sprawdzone na korpusie benchmarku,
+wszystkich tekstach z testów i kilku tysiącach losowo sklejonych pism. Poprawki niżej dotyczą
+paczki `anonimizator` (rdzeń 0.29.14, także jako `parawan`).
+
 Silnik:
 
 - **Własne maski działają jak domyślne.** Przy `redactPII(text, { masks })` część reguł szukała
@@ -1869,7 +1881,8 @@ Przegląd stabilizacyjny:
 - Opcjonalny lokalny NER (spaCy PL): usługa `services/ner` (Docker) + klient
   `anonimizator/ner` (fail-safe, circuit breaker).
 
-[Unreleased]: https://github.com/karolpolikarp/parawan/compare/v0.46.26...HEAD
+[Unreleased]: https://github.com/karolpolikarp/parawan/compare/v0.46.27...HEAD
+[v0.46.27]: https://github.com/karolpolikarp/parawan/compare/v0.46.26...v0.46.27
 [v0.46.26]: https://github.com/karolpolikarp/parawan/compare/v0.46.25...v0.46.26
 [v0.46.25]: https://github.com/karolpolikarp/parawan/compare/v0.46.24...v0.46.25
 [v0.46.24]: https://github.com/karolpolikarp/parawan/compare/v0.46.23...v0.46.24
