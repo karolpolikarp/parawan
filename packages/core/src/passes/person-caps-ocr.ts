@@ -216,13 +216,16 @@ const HISTORIC_SURNAMES = new Set<string>(
 );
 /**
  * Dopełniacz nazwiska postaci historycznej (małymi literami): przymiotnikowe „-ski/-cki" → „-skiego",
- * żeńskie „-ska/-cka" → „-skiej", „-owa" → „-owej", „-ko/-go" → „-ki/-gi" („MATEJKI"), inne „-o"
- * → „-y" („JAGIEŁŁY", „FREDRY"), spółgłoska → „-a" („MICKIEWICZA").
+ * żeńskie przymiotnikowe „-ska/-cka/-dzka" → „-skiej", „-owa" → „-owej"; rzeczownikowe „-a" → „-y"
+ * („WAŁĘSY", „ZAGŁOBY"), po k/g → „-i"; „-ko/-go" → „-ki/-gi" („MATEJKI"), inne „-o" → „-y"
+ * („JAGIEŁŁY", „FREDRY"), spółgłoska → „-a" („MICKIEWICZA"). Eksport tylko dla testów.
  */
-function historicSurnameGenitive(s: string): string {
+export function historicSurnameGenitive(s: string): string {
   if (/ki$/.test(s)) return `${s}ego`;
-  if (/ka$/.test(s)) return `${s.slice(0, -1)}iej`;
-  if (/a$/.test(s)) return `${s.slice(0, -1)}ej`;
+  if (/(?:sk|ck|dzk)a$/.test(s)) return `${s.slice(0, -1)}iej`;
+  if (/owa$/.test(s)) return `${s.slice(0, -1)}ej`;
+  if (/[kg]a$/.test(s)) return `${s.slice(0, -1)}i`;
+  if (/a$/.test(s)) return `${s.slice(0, -1)}y`;
   if (/[kg]o$/.test(s)) return `${s.slice(0, -1)}i`;
   if (/o$/.test(s)) return `${s.slice(0, -1)}y`;
   return `${s}a`;

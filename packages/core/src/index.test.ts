@@ -11,7 +11,7 @@ import {
   isValidCard,
   isValidKw,
 } from './index';
-import { HISTORIC_SURNAMES_GEN } from './passes/person-caps-ocr';
+import { HISTORIC_SURNAMES_GEN, historicSurnameGenitive } from './passes/person-caps-ocr';
 import { MASK, type PiiType } from './types';
 
 // Buduje poprawny IBAN z kodu kraju + BBAN (liczymy cyfry kontrolne mod 97),
@@ -6818,6 +6818,19 @@ test('postacie historyczne: poprawny dopełniacz wszystkich nazwisk listy (ORZES
       .split(' ')
       .sort(),
   );
+});
+test('postacie historyczne: dopełniacz rzeczownikowego „-a" to „-y" („-i" po k/g), przymiotnikowego „-ej"', () => {
+  const gen = (xs: string[]) => xs.map(historicSurnameGenitive);
+  expect(gen(['wałęsa', 'zagłoba', 'kmicica', 'wołodyjowska'])).toEqual(['wałęsy', 'zagłoby', 'kmicicy', 'wołodyjowskiej']);
+  expect(gen(['kruszynka', 'zawisza', 'grzegorzewska', 'potocka', 'grodzka', 'orzeszkowa'])).toEqual([
+    'kruszynki',
+    'zawiszy',
+    'grzegorzewskiej',
+    'potockiej',
+    'grodzkiej',
+    'orzeszkowej',
+  ]);
+  expect(gen(['noga', 'piłsudski', 'matejko', 'fredro', 'chopin'])).toEqual(['nogi', 'piłsudskiego', 'matejki', 'fredry', 'chopina']);
 });
 test('b7 regresje r2: atrybut XML z kluczem osobowym — ustawienie, etykieta i wypełniacz to nie osoba', () => {
   keep([
