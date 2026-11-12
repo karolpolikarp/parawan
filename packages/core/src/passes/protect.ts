@@ -2,7 +2,7 @@
 import { surnameShaped } from '../surnames.js';
 import { PL_LO, PL_UP } from '../charset.js';
 import { JSON_ESC_PUA, JSON_ESC_TO_PUA, maskKeepPrefix, RE_JSON_ESC_PUA, protectSpan, type RedactCtx } from '../context.js';
-import { isPropagatableLogin } from '../dict/forms.js';
+import { isPropagatableLogin } from '../dict/logins.js';
 import { POLISH_FIRST_NAMES } from '../dict/names.js';
 import { RE_EMAIL, RE_EMAIL_CHAIN, RE_EMAIL_URLENC, RE_EMAIL_URLENC_CHAIN, replaceEmails, URL_PARAM_RULES, URL_PROFILE_PATH_RULES } from './email.js';
 import { maskKsefMatch, maskKwMatch, RE_KSEF_VALUE, RE_KW_VALUE } from './kw-ksef-case.js';

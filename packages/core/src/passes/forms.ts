@@ -3,7 +3,8 @@
 import { foldAscii, HOMOGRAPH_SURNAMES, isConfirmedSurname, normalizeSurnameKey, surnameShaped } from '../surnames.js';
 import { escapeRe } from '../charset.js';
 import { type RedactCtx } from '../context.js';
-import { FORM_FIELDS, FORM_LABEL_WORDS, type FormField, formLabelOf, GENERIC_LOGINS, isFormLabelLine, isValidFormValue, RE_DATE_VALUE, RE_PROPER_WORDS, stripFormPrefix, TAB_ROLE_LABELS } from '../dict/forms.js';
+import { FORM_FIELDS, FORM_LABEL_WORDS, type FormField, formLabelOf, isFormLabelLine, isValidFormValue, RE_DATE_VALUE, RE_PROPER_WORDS, stripFormPrefix, TAB_ROLE_LABELS } from '../dict/forms.js';
+import { GENERIC_LOGINS } from '../dict/logins.js';
 import { isFirstNameLike, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { LEGAL_ENTITY_WORDS, ROLE_WORDS, TITLE_WORDS } from '../guards/roles.js';
 

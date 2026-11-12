@@ -3,7 +3,8 @@
 import { foldAscii, HOMOGRAPH_SURNAMES, homographBase, isAsciiSurname, surnameShaped } from '../surnames.js';
 import { escapeRe, NM_BOUND, PL_LO, PL_UP, splitWords } from '../charset.js';
 import { type RedactCtx } from '../context.js';
-import { FORM_LABEL_WORDS, GENERIC_LOGINS, isAsciiFirstName, isEmptyFormValue, isNameishPart, isPersonalSegment, isPropagatableLogin, isSystemAccount, loginUserPart, RE_BUILTIN_ACCOUNT, RE_DOTTED_PERSON } from '../dict/forms.js';
+import { FORM_LABEL_WORDS, isEmptyFormValue } from '../dict/forms.js';
+import { GENERIC_LOGINS, isAsciiFirstName, isNameishPart, isPersonalSegment, isPropagatableLogin, isSystemAccount, loginUserPart, RE_BUILTIN_ACCOUNT, RE_DOTTED_PERSON } from '../dict/logins.js';
 import { isFirstNameLike } from '../dict/names.js';
 import { ORG_HEAD_WORDS } from '../guards/person-context.js';
 import { LEGAL_ENTITY_WORDS } from '../guards/roles.js';

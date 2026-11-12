@@ -3,7 +3,8 @@
 import { isAsciiSurname, isConfirmedSurname, surnameShaped } from '../surnames.js';
 import { type RedactCtx, URL_SENTINEL_CLOSE, URL_SENTINEL_OPEN } from '../context.js';
 import { MASK } from '../types.js';
-import { FORM_LABEL_WORDS, isEmptyFormValue, isPropagatableLogin, isSystemAccount, isValidFormValue, loginUserPart, RE_BUILTIN_ACCOUNT, RE_DATE_VALUE, RE_PROPER_WORDS, RE_WELL_KNOWN_ACCOUNT } from '../dict/forms.js';
+import { FORM_LABEL_WORDS, isEmptyFormValue, isValidFormValue, RE_DATE_VALUE, RE_PROPER_WORDS } from '../dict/forms.js';
+import { isPropagatableLogin, isSystemAccount, loginUserPart, RE_BUILTIN_ACCOUNT, RE_WELL_KNOWN_ACCOUNT } from '../dict/logins.js';
 import { isFirstNameLike } from '../dict/names.js';
 import { ORG_HEAD_WORDS } from '../guards/person-context.js';
 import { LEGAL_ENTITY_WORDS, ROLE_WORDS } from '../guards/roles.js';
