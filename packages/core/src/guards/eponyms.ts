@@ -336,7 +336,7 @@ function institutionBeforeIm(pre: string): boolean {
  * w mianowniku („Na ulicy Jan Kowalski zasłabł")? Tylko konteksty uliczne i dedykacyjne: w medycznych
  * para z imieniem bywa realną osobą. Uzupełnia precededByPatron o pełne wyrazy i gołe „im".
  */
-export const precededByStreetEponym = (t: string, offset: number): boolean => {
+const precededByStreetEponym = (t: string, offset: number): boolean => {
   const tail = t.slice(Math.max(0, offset - 220), offset);
   // tabulator tuż przed parą to granica komórki: „Plac⇥Kowalczyk Anna" to sąsiednia kolumna
   if (/\t[ \t]*$/.test(tail)) return false;

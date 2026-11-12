@@ -13,7 +13,7 @@ import { RE_PATRON_ROMAN_REF_BEFORE, rynekNoNotHouse } from './address.js';
 import { isPersonRoleValue, NOUN_LIKE_NAMES_IN_TITLES } from './forms.js';
 import { CAPS_REVERSED_HEAD_EXCL, CAPS_ROLE_OBLIQUE, capsOrgHead, MAIDEN_NOT_SURNAME, personSlotBefore } from './person-caps-ocr.js';
 import { TABLE_HEADER_WORDS } from './person-triggers.js';
-import { RE_DECLINED_NOM_SURNAME, RE_LOWER_RUN, RE_NAME_SEQ, RE_NEXT_CAP_WORD, RE_NEXT_CAP_WORD_SP, RE_NON_PL_LETTER, RE_PAIR, RE_SPOUSES, RE_SURNAME_OBLIQUE } from '../person-patterns.js';
+import { RE_DECLINED_NOM_SURNAME, RE_LOWER_RUN, RE_NEXT_CAP_WORD_SP, RE_NON_PL_LETTER, RE_PAIR, RE_SPOUSES, RE_SURNAME_OBLIQUE } from '../person-patterns.js';
 
 // Ostatni wyraz przed pozycją; grupa 2 to dwukropek etykiety („Świadek: ").
 const RE_PREV_TOKEN = /(\p{L}+)\.?[ \t]*(:?)[ \t]*$/u;
@@ -292,6 +292,10 @@ function maskWordRange(ctx: RedactCtx, parts: string[], from: number, to: number
   ctx.bump('IMIE');
   return parts.slice(0, 2 * from).join('') + maskCells(parts, from, to, ctx.personMask(key)) + parts.slice(2 * to + 1).join('');
 }
+// Ciąg 2–4 wyrazów z wielkiej litery. Stanowy (flaga g): maskNameSequences steruje lastIndex ręcznie.
+const RE_NAME_SEQ = new RegExp(`(?<![${NM_BOUND}-])${CAP_WORD}(?:[ \\t]+${CAP_WORD}){1,3}(?![${NM_BOUND}])`, 'g');
+// Wyraz z wielkiej litery tuż za porcją RE_NAME_SEQ w tej samej linii (wznowienie okna).
+const RE_NEXT_CAP_WORD = new RegExp(`^[ \\t]+(${CAP_WORD})(?![${NM_BOUND}])`);
 /**
  * Okno RE_NAME_SEQ ma najwyżej 4 wyrazy, więc w dłuższym ciągu imię wypada na końcu porcji
  * („Kierownik Działu Kadr Grzegorz | Mazur"). Wtedy porcja oddaje ogon: zwraca pozycję imienia, od
