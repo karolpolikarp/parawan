@@ -3,7 +3,7 @@ import { redactPII } from 'anonimizator';
 import { expect, test } from 'vitest';
 import benchmarkMd from '../../../docs/BENCHMARK.md?raw';
 import dlaRaw from '../../../docs/wydanie/DLA-IOD-I-IT.txt?raw';
-import coreSrc from '../../../packages/core/src/index.ts?raw';
+import coreSrc from '../../../packages/core/src/types.ts?raw';
 import landingHtmlRaw from '../../landing/index.html?raw';
 import landingConfig from '../../landing/vite.config.ts?raw';
 import { ICONS as LANDING_ICONS } from '../../landing/src/icons';

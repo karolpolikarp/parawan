@@ -28,7 +28,8 @@
  */
 
 import { NON_SURNAME_ADJ, HOMOGRAPH_SURNAMES, isGeoAdjective, normalizeSurnameKey } from './surnames.js';
-import { LEGAL_ENTITY_WORDS, NON_PERSON_CONTEXT } from './index.js';
+import { NON_PERSON_CONTEXT } from './guards/eponyms.js';
+import { LEGAL_ENTITY_WORDS } from './guards/roles.js';
 
 const DEFAULT_MASK = '[IMIĘ I NAZWISKO]';
 const DEFAULT_MIN_SCORE = 0.5; // == PII_NER_MIN_SCORE (services/ner/app.py)

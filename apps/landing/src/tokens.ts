@@ -2,7 +2,7 @@
  * Znaczniki rdzenia i ich kategorie wizualne dla demo na landingu. Osobny moduł bez DOM,
  * żeby spójność z rdzeniem mógł sprawdzić test (apps/web/src/landing.test.ts).
  *
- * SYNCHRONIZACJA: `token` to tekst z mapy MASK w packages/core/src/index.ts (bez nawiasów).
+ * SYNCHRONIZACJA: `token` to tekst z mapy MASK w packages/core/src/types.ts (bez nawiasów).
  * Record<PiiType, …> sprawia, że nowy typ w rdzeniu bez wpisu tutaj nie przejdzie tsc,
  * a test porównuje same znaczniki z rdzeniem. Bez tego nowy znacznik w wyniku demo
  * zostawał zwykłym tekstem: bez koloru i bez przekreślonego oryginału w „Porównaniu”.
