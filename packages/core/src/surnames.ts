@@ -63,7 +63,7 @@ const adjBase = (w: string): string | null =>
 // Końcówki od najdłuższej, bo wygrywa pierwsza pasująca: Nowakowie, Nowakowi, Nowakiem, Nowaka.
 const NOUN_ENDINGS = ['owie', 'ował', 'owi', 'iem', 'ami', 'ach', 'em', 'om', 'ów', 'u', 'a', 'ą', 'ę', 'y', 'o', 'e'];
 
-const NO_E = /([^aeiouąęóy])([^aeiouąęóy])$/; // ruchome „e": kurk → kurek, wróbl → wróbel
+export const NO_E = /([^aeiouąęóy])([^aeiouąęóy])$/; // ruchome „e": kurk → kurek, wróbl → wróbel
 const RE_O_OO = /o([^aeiouąęóy]+)$/; // o → ó w temacie: mroz → mróz
 
 /**
@@ -115,7 +115,10 @@ export function surnameBase(word: string): string | null {
 
 let asciiSurnames: Set<string> | null = null;
 /** Zapis bez polskich znaków, jak w loginach i nazwach katalogów („kamiński" → „kaminski"). */
-export const foldAscii = (s: string): string => s.replace(/[ąćęłńóśźż]/g, (c) => 'acelnoszz'['ąćęłńóśźż'.indexOf(c)]);
+export const RE_PL_DIACRITIC_G = /[ąćęłńóśźż]/g;
+/** Mała polska litera z ogonkiem bez ogonka („ą” → „a”). */
+export const foldAsciiChar = (c: string): string => 'acelnoszz'['ąćęłńóśźż'.indexOf(c)];
+export const foldAscii = (s: string): string => s.replace(RE_PL_DIACRITIC_G, foldAsciiChar);
 /**
  * Czy wyraz ASCII to mianownik nazwiska ze słownika (też żeński -ska/-cka/-dzka)? Loginy i ścieżki
  * profili nie mają ogonków ani odmiany. Indeks budowany leniwie, żeby tekst bez loginów go nie płacił.

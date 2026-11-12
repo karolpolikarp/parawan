@@ -1,6 +1,6 @@
 // Imię i nazwisko z heurystyk par: małżonkowie, ciągi imion, zdrobnienia, szyk „Nazwisko Imię",
 // zapis rekordu, małe litery i nazwisko panieńskie; ochrona postaci literackich.
-import { HOMOGRAPH_SURNAMES, homographBase, isConfirmedSurname, isGeoAdjective, looksLikeSurname, NON_SURNAME_ADJ, normalizeSurnameKey, surnameBase, surnameShaped } from '../surnames.js';
+import { foldAsciiChar, HOMOGRAPH_SURNAMES, homographBase, isConfirmedSurname, isGeoAdjective, looksLikeSurname, NON_SURNAME_ADJ, normalizeSurnameKey, RE_PL_DIACRITIC_G, surnameBase, surnameShaped } from '../surnames.js';
 import { CAP_WORD, LIST_BULLET, NM_BOUND, PL_LO, PL_UP, splitWords } from '../charset.js';
 import { protectSpan, type RedactCtx } from '../context.js';
 import { FORM_LABEL_WORDS } from '../dict/forms.js';
@@ -201,8 +201,7 @@ const FICTIONAL_PAIRS_SRC = [
   'pan(?:a|u|em|ie)?[ \\t]+wołodyjowsk(?:i|iego|iemu|im)',
 ];
 // Każda litera z ogonkiem także w zapisie ASCII („Kubus Puchatek").
-const foldClass = (s: string): string =>
-  s.replace(/[ąćęłńóśźż]/g, (c) => `[${c}${'acelnoszz'['ąćęłńóśźż'.indexOf(c)]}]`);
+const foldClass = (s: string): string => s.replace(RE_PL_DIACRITIC_G, (c) => `[${c}${foldAsciiChar(c)}]`);
 const RE_FICTIONAL_PAIR = new RegExp(`(?<![\\p{L}\\p{N}])(?:${FICTIONAL_PAIRS_SRC.map(foldClass).join('|')})(?![\\p{L}\\p{N}])`, 'giu');
 export function passProtectFictional(ctx: RedactCtx): void {
   if (!ctx.on('IMIE')) return;

@@ -1,5 +1,5 @@
 // Słowniki imion (polskie, obce, formy odmienione i zapisy bez ogonków) oraz testy „czy to imię”.
-import { foldAscii } from '../surnames.js';
+import { foldAscii, NO_E } from '../surnames.js';
 
 // Imiona pełne i zdrobnienia w mianowniku. Bez zdrobnień kolidujących z rzeczownikami (kuba, maks,
 // misiek, ryś), bo imię maskujemy tylko w parze z nazwiskiem albo po wyzwalaczu.
@@ -51,7 +51,7 @@ export function isFirstNameGenitive(w: string): boolean {
 export function isMaleFirstNameGenitive(w: string): boolean {
   if (!w.endsWith('a')) return false;
   const stem = w.slice(0, -1);
-  return POLISH_FIRST_NAMES.has(stem) || POLISH_FIRST_NAMES.has(stem.replace(/([^aeiouyąęó])([^aeiouyąęó])$/, '$1e$2'));
+  return POLISH_FIRST_NAMES.has(stem) || POLISH_FIRST_NAMES.has(stem.replace(NO_E, '$1e$2'));
 }
 
 // Częste obce imiona: bramka reguły imion z myślnikiem („Jean-Pierre Dubois”). Bez niej każda para
