@@ -1,12 +1,12 @@
 // Adresy: ulice ze skrótem i bez, ulice z patronem w dopełniaczu, adres po etykiecie zamieszkania
 // i przed kodem pocztowym, kod pocztowy bez myślnika.
 import { looksLikeSurname, surnameBase } from '../surnames.js';
-import { CAP_CITY, escapeRe, PL_LO, PL_UP } from '../charset.js';
+import { CAP_CITY, escapeRe, MONTHS_GEN, PL_LO, PL_UP } from '../charset.js';
 import { type RedactCtx } from '../context.js';
 import { isFirstNameGenitive, isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
-import { egoNameGenitive, RE_STREET_WORD } from '../guards/eponyms.js';
-import { ADDR_PLACE_ADJ_OK, institutionBeforeAddr, PATRON_GEN_HEADS, RE_CAPS_WORK_HEAD, RE_PERSON_MASK_BEFORE, RE_SHARE_BEFORE } from '../guards/person-context.js';
+import { egoNameGenitive, RE_STREET_WORD, STREET_RANK_WORDS } from '../guards/eponyms.js';
+import { ADDR_PLACE_ADJ_OK, institutionBeforeAddr, PATRON_GEN_HEADS, RE_CAPS_WORK_HEAD, RE_PERSON_MASK_BEFORE } from '../guards/person-context.js';
 import { LEGAL_ENTITY_WORDS } from '../guards/roles.js';
 import { RE_SURNAME_OBLIQUE } from '../person-patterns.js';
 
@@ -272,8 +272,12 @@ const RE_PATRON_STREET_NO_LOOSE = new RegExp(String.raw`${PATRON_STREET_SRC}(?= 
 // Data, jednostka albo krotność tuż za numerem („Jana Pawła II 5 egz.", „… 5 lat") należą do zdania,
 // nie do adresu. Tylko w tej samej komórce: w „Adres:⇥Jana Pawła II 14⇥Miejsc.:⇥Kielce" „Miejsc."
 // to następna etykieta.
-const RE_PATRON_NUM_UNIT_AFTER =
-  /^ *(?:stycznia|lutego|marca|kwietnia|maja|czerwca|lipca|sierpnia|września|października|listopada|grudnia|r\.|roku|lat|lata|zł|osób|os\.|egz\.?|egzemplarz\p{L}*|razy|raz|szt\.?|sztuk\p{L}*|pkt|punkt\p{L}*|proc\p{L}*|%|tys\.?|godz\p{L}*|min\.?|minut\p{L}*|sekund\p{L}*|dni|tygodni\p{L}*|miesięc\p{L}*|km|metr\p{L}*|m(?! *[.\d])|m +\d{1,3} *(?:cm|mm)|cm|mm|klas\p{L}*|uczni\p{L}*|miejsc\p{L}*)(?!\p{L})/iu;
+const RE_PATRON_NUM_UNIT_AFTER = new RegExp(
+  String.raw`^ *(?:${MONTHS_GEN}|r\.|roku|lat|lata|zł|osób|os\.|egz\.?|egzemplarz\p{L}*|razy|raz|szt\.?|sztuk\p{L}*|pkt|punkt\p{L}*|proc\p{L}*|%|tys\.?|godz\p{L}*|min\.?|minut\p{L}*|sekund\p{L}*|dni|tygodni\p{L}*|miesięc\p{L}*|km|metr\p{L}*|m(?! *[.\d])|m +\d{1,3} *(?:cm|mm)|cm|mm|klas\p{L}*|uczni\p{L}*|miejsc\p{L}*)(?!\p{L})`,
+  'iu',
+);
+// Ułamek w kontekście udziału („Udział Marii Lis 1/4”) to nie numer domu.
+const RE_SHARE_BEFORE = /(?<!\p{L})(?:udzia\p{L}*|częś\p{L}*|spad[ek]\p{L}*|przypad\p{L}*|dziedzicz\p{L}*|nabył\p{L}*|nabyła)(?!\p{L})/iu;
 // Patron z liczbą rzymską i numerem domu („Jana Pawła II 5/2") to nazwa ulicy: żywa osoba nie nosi
 // liczby rzymskiej, a papież nie ma numeru domu. Za numerem koniec wiersza, zdania albo komórki,
 // separator, „w Mieście" albo miejscowość (sprawdza ją street0 w słowniku), a nie dalszy ciąg zdania
@@ -630,8 +634,9 @@ export function passAddress(ctx: RedactCtx): void {
         // po „ul." (też OCR „UI."/„U1.") spacja bywa pominięta („zam. ul.Lipowa 14"); tylko po nim,
         // bo „et al.Nature 12" czy „2 os.Cena 350" to nie adresy
         `(?:\\s+|(?<=\\b[Uu][lLI1]\\.))` +
-        // tytuły patrona jak w RE_STREET_EPONYM_TAIL („ul. prof. dr. hab. Jana Nowaka 3")
-        `(?:(?:\\d+|gen|płk|ppłk|mjr|kpt|por|ks|św|bł|bp|abp|kard|marsz|prof|doc|dra|dr|hab|med|lek|n|inż|hr)\\.?\\s+|[A-ZĄĆĘŁŃÓŚŹŻ]\\.\\s+){0,4}` +
+        // tytuły patrona jak w RE_STREET_EPONYM_TAIL („ul. prof. dr. hab. Jana Nowaka 3"): rangi
+        // STREET_RANK bez „pułk”, tylko małymi literami
+        `(?:(?:\\d+|${STREET_RANK_WORDS.filter((r) => r !== 'pułk').join('|')})\\.?\\s+|[A-ZĄĆĘŁŃÓŚŹŻ]\\.\\s+){0,4}` +
         // „r."/„roku" jako człon nazwy z datą („ul. Bitwy Warszawskiej 1920 r. 18"); numer domu stoi po nich
         `[${PL_UP}][${PL_LO}${PL_UP}01.-]*(?:[ \\t]+(?:[${PL_UP}0-9][${PL_LO}${PL_UP}0-9.-]*|r\\.|roku)){0,3}` +
         ADDR_CONNECTOR +

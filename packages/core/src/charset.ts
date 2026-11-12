@@ -18,9 +18,13 @@ export const NM_LO = `${PL_LO}${NM_LO_EXTRA}`;
 // zakresami). Celowo bez znaków łączących U+0300–U+036F: granica na nich odsłaniałaby nazwisko w NFD.
 export const NM_BOUND = 'A-Za-z\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u024F\\u0259\\u1E00-\\u1EFF';
 
+// Znaki PUA, na które passProtectJsonEscapes podmienia litery ucieczek JSON „\t”, „\n”, „\r”
+// (patrz JSON_ESC_TO_PUA). Treść klasy znaków do wstawienia we wzorzec.
+export const JSON_ESC_PUA = '\uE009\uE00A\uE00D';
+export const RE_JSON_ESC_PUA = new RegExp(`[${JSON_ESC_PUA}]`);
 // Ucieczka „\n/\r/\t” w JSON-ie po passProtectJsonEscapes (backslash i znak PUA) liczy się jak biały
 // znak, inaczej „Uniwersytet Adama\nMickiewicza” traciłby kontekst złożenia i stawał się osobą.
-const ESC_WS = '\\\\[\\uE009\\uE00A\\uE00D]';
+export const ESC_WS = `\\\\[${JSON_ESC_PUA}]`;
 
 /** Wyraz z wielkiej litery i odstęp tuż przed pozycją (drugi człon złożenia). */
 export const PRECEDED_BY_CAP = new RegExp(`[${PL_UP}][${PL_LO}]+(?:\\s|${ESC_WS})+$`);
@@ -32,9 +36,16 @@ export const LO_WORD = `[${PL_LO}]+(?:-[${PL_LO}]+)?`;
 
 // Miejscowości mają wielokrotne łączniki („Kędzierzyn-Koźle”), stąd „*”.
 export const CAP_CITY = `[${PL_UP}][${PL_LO}]+(?:-[${PL_UP}][${PL_LO}]+)*`;
+// Od jednego do trzech wyrazów nazwy miejscowości.
+export const CITY_RUN = `(?:${CAP_CITY}[ \\t]+){0,2}${CAP_CITY}`;
 // Lewa granica wzorców zaczynających się od CAP_CITY. Bez niej każdy człon łańcucha „Abc-Abc-…”
 // skanował go do końca (czas kwadratowy). Łącznik przed nazwą w wypunktowaniu („-Gliwice”) nie blokuje.
 export const CITY_START = `(?<![${PL_UP}${PL_LO}]|[${PL_UP}${PL_LO}]-)`;
+// Opcjonalny punkt listy przed wpisem („1. ”, „3) ”, „- ”).
+export const LIST_BULLET = '(?:(?:\\d{1,4}[.)]|[-*•–])[ \\t]*)?';
+export const MONTHS_GEN = 'stycznia|lutego|marca|kwietnia|maja|czerwca|lipca|sierpnia|września|października|listopada|grudnia';
+// Maska osoby w domyślnym zapisie; maski z options.masks tu nie pasują.
+export const PERSON_MASK = '\\[OSOBA-[A-Z]+\\]|\\[IMIĘ I NAZWISKO\\]';
 export const escapeRe = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 export const RE_CHAR_LL = /\p{Ll}/u;

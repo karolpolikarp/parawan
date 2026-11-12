@@ -1,9 +1,9 @@
 // Data urodzenia: maskowana tylko za jawną kotwicą („ur.”, etykieta, imiesłów, „urodził się”).
-// Tu też testy biogramu i progu w przepisie, z których korzysta passCity.
-import { CAP_CITY } from '../charset.js';
+// Tu też test, czy „urodził się” mówi o osobie, z którego korzysta passCity.
+import { CITY_RUN, MONTHS_GEN, PERSON_MASK } from '../charset.js';
 import { maskAfterLabel, type RedactCtx } from '../context.js';
 
-const BIRTH_DATE_SRC = String.raw`\d{1,2}[.\-/]\d{1,2}[.\-/]\d{2,4}|\d{4}-\d{2}-\d{2}|\d{1,2}\s+(?:[IVX]{1,4}|stycznia|lutego|marca|kwietnia|maja|czerwca|lipca|sierpnia|września|października|listopada|grudnia)\s+\d{4}`;
+const BIRTH_DATE_SRC = String.raw`\d{1,2}[.\-/]\d{1,2}[.\-/]\d{2,4}|\d{4}-\d{2}-\d{2}|\d{1,2}\s+(?:[IVX]{1,4}|${MONTHS_GEN})\s+\d{4}`;
 const BIRTH_DATA_LABEL = String.raw`data\s+(?:urodzenia|urodz\.|ur\.)`;
 const BIRTH_LABEL_PAREN = String.raw`\([^()\n]{1,40}\)`;
 // Etykieta z dopełnieniem musi mieć dwukropek, bo bez niego to proza („Data urodzenia pacjenta
@@ -20,7 +20,7 @@ const RE_BIRTH_LABELED = new RegExp(
 // Przy zwykłej kolejności datę bierze RE_BIRTH_LABELED, a miejscowość maskuje passCity.
 export const BIRTH_COMBO = String.raw`(?:[Dd]ata[ \t]+i[ \t]+[Mm]iejsce|[Mm]iejsce[ \t]+i[ \t]+[Dd]ata)[ \t]+(?:urodzenia|ur\.)`;
 const RE_BIRTH_COMBO_CITY_FIRST = new RegExp(
-  String.raw`\b(${BIRTH_COMBO}[ \t]*:?\s*(?:${CAP_CITY}[ \t]+){0,2}${CAP_CITY}[ \t]*,?[ \t]*)()(${BIRTH_DATE_SRC})`,
+  String.raw`\b(${BIRTH_COMBO}[ \t]*:?\s*${CITY_RUN}[ \t]*,?[ \t]*)()(${BIRTH_DATE_SRC})`,
   'g',
 );
 // „ur” bez kropki (czat, notatka) tylko tuż przed datą i nie wersalikami („Senat UR 14.02.1993” to uczelnia).
@@ -70,7 +70,10 @@ const RE_BIRTH_VERB_NEUTER = /^urodziło[ \t]/i;
 const RE_BIRTH_VERB_PLURAL = /^urodzi(?:li|ły)[ \t]/i;
 const RE_BIRTH_SUBJECT_THING =
   /(?<!\p{L})(?:pomysł|projekt|idea|koncepcja|myśl|plan|inicjatywa|przedsięwzięcie|festiwal|ruch|zespół|firma|marka|akcja|tradycja|zwyczaj|impreza|wydarzenie|program|konkurs|stowarzyszenie|fundacja|spółka|teatr|kabaret|cielę|źrebię|źrebak|szczenię|szczeniak|kocię|jagnię|prosię|koźlę|zwierzę|pies|kot|klacz|jałówka|młode|najwięcej|najmniej|łącznie|ogółem|dzieci|noworodków|osób)(?!\p{L})/iu;
-const RE_BIRTH_SUBJECT_CHILD = /\[OSOBA-[A-Z]+\]|\[IMIĘ I NAZWISKO\]|(?<!\p{L})(?:dziecko|dziecię|niemowlę|małoletnie|wnuczę|bliźnię)(?!\p{L})/iu;
+const RE_BIRTH_SUBJECT_CHILD = new RegExp(
+  String.raw`${PERSON_MASK}|(?<!\p{L})(?:dziecko|dziecię|niemowlę|małoletnie|wnuczę|bliźnię)(?!\p{L})`,
+  'iu',
+);
 const RE_BIRTH_SUBJECT_TWINS = /(?<!\p{L})(?:bliźnięta|bliźniaki|bliźniaczki|bliźniacy|trojaczki)(?!\p{L})/iu;
 const RE_BIRTH_SUBJECT_PUBLIC =
   /(?<!\p{L})(?:patron\p{L}*|święt(?:y|a|ego|ej)|św\.|bł\.|błogosławion\p{L}*|papież\p{L}*|kardynał\p{L}*|prymas\p{L}*|znan[ya]|słynn[ya]|wybitn[ya]|sławn[ya]|król|króla|królowa|królowej|poeta|poetka|poety|pisarz|pisarka|pisarza|kompozytor|kompozytora)(?!\p{L})/iu;
@@ -103,17 +106,6 @@ export function birthVerbAboutPerson(kw: string, before: string): boolean {
   if (/\p{L}{2,}ość[ \t]*$/iu.test(seg)) return false;
   const near = seg.split(/[ \t]+/).filter(Boolean).slice(-3).join(' ');
   return !RE_BIRTH_SUBJECT_THING.test(near);
-}
-/** Rok sprzed 1900 jako osobny wyraz („w 1867 r.”). */
-export const RE_PRE1900_YEAR = /(?<![\d.\/-])1[0-8]\d\d(?![\d.\/-]\d)/;
-/** Zdanie wokół zakresu [start, end), najwyżej 200 znaków w każdą stronę. */
-export function sentenceAround(t: string, start: number, end: number): string {
-  const lo = Math.max(0, start - 200);
-  const head = t.slice(lo, start);
-  const cut = Math.max(head.lastIndexOf('. '), head.lastIndexOf('!'), head.lastIndexOf('?'), head.lastIndexOf('\n'));
-  const tail = t.slice(end, end + 200);
-  const stop = tail.search(/[.!?](?:[ \t]+\p{Lu}|[ \t]*$|[ \t]*\n)|\n/u);
-  return head.slice(cut + 1) + t.slice(start, end) + (stop < 0 ? tail : tail.slice(0, stop));
 }
 export function passBirthDate(ctx: RedactCtx): void {
   if (!ctx.on('DATA-UR')) return;

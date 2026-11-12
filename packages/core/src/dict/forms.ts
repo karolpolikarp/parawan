@@ -1,5 +1,6 @@
 // Słowniki i bramki pól formularza (etykieta → wartość) oraz kont i loginów, które osobą nie są.
 import { HOMOGRAPH_SURNAMES, foldAscii, isAsciiSurname } from '../surnames.js';
+import { MONTHS_GEN } from '../charset.js';
 import { NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from './names.js';
 import { normStructKey, STRUCT_KEYS } from '../struct-keys.js';
 import { type PiiType } from '../types.js';
@@ -214,8 +215,10 @@ export const FORM_LABEL_WORDS = new Set<string>(
   ).split(' '),
 );
 /** Data cyfrowa lub słowna: w polu „Data urodzenia” maskujemy samą datę. */
-export const RE_DATE_VALUE =
-  /\d{1,2}[.\-/]\d{1,2}[.\-/]\d{2,4}|\d{4}-\d{2}-\d{2}|\d{1,2}\s+(?:stycznia|lutego|marca|kwietnia|maja|czerwca|lipca|sierpnia|września|października|listopada|grudnia)\s+\d{4}/i;
+export const RE_DATE_VALUE = new RegExp(
+  String.raw`\d{1,2}[.\-/]\d{1,2}[.\-/]\d{2,4}|\d{4}-\d{2}-\d{2}|\d{1,2}\s+(?:${MONTHS_GEN})\s+\d{4}`,
+  'i',
+);
 /** Zdejmuje numerację („12. ”, „3) ”) i białe znaki z brzegów. */
 export const stripFormPrefix = (s: string): string => s.replace(/^[ \t]*\d+[.)][ \t]*/, '').trim();
 /**

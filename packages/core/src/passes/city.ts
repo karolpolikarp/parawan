@@ -1,19 +1,28 @@
 // Maskowanie miejscowości: po kodzie pocztowym, przy adresie, z etykietą TERYT oraz po markerze
 // zamieszkania lub urodzenia.
 import { HOMOGRAPH_SURNAMES, NON_SURNAME_ADJ, looksLikeSurname, surnameBase } from '../surnames.js';
-import { CAP_CITY, CITY_START, escapeRe, PL_LO, PL_UP, RE_CHAR_LL } from '../charset.js';
+import { CAP_CITY, CITY_RUN, CITY_START, escapeRe, PL_LO, PL_UP, RE_CHAR_LL } from '../charset.js';
 import { cityByPrefix, cityBySuffix, type RedactCtx } from '../context.js';
 import { FORM_LABEL_WORDS } from '../dict/forms.js';
 import { isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { MULTIWORD_CITIES, POLISH_CITIES } from '../dict/places.js';
 import { saintWithContext } from '../guards/eponyms.js';
 import { LEGAL_ENTITY_WORDS, PARTY_ROLE_WORDS, ROLE_WORDS } from '../guards/roles.js';
-import { BIRTH_COMBO, birthVerbAboutPerson, RE_PRE1900_YEAR, sentenceAround } from './birth-date.js';
+import { BIRTH_COMBO, birthVerbAboutPerson } from './birth-date.js';
 import { isConfirmedSurname } from './forms.js';
 import { precededByLegalRef } from '../validators.js';
 
-// Ciąg od jednego do trzech wyrazów nazwy miejscowości.
-const CITY_RUN = `(?:${CAP_CITY}[ \\t]+){0,2}${CAP_CITY}`;
+/** Rok sprzed 1900 jako osobny wyraz („w 1867 r.”). */
+const RE_PRE1900_YEAR = /(?<![\d.\/-])1[0-8]\d\d(?![\d.\/-]\d)/;
+/** Zdanie wokół zakresu [start, end), najwyżej 200 znaków w każdą stronę. */
+function sentenceAround(t: string, start: number, end: number): string {
+  const lo = Math.max(0, start - 200);
+  const head = t.slice(lo, start);
+  const cut = Math.max(head.lastIndexOf('. '), head.lastIndexOf('!'), head.lastIndexOf('?'), head.lastIndexOf('\n'));
+  const tail = t.slice(end, end + 200);
+  const stop = tail.search(/[.!?](?:[ \t]+\p{Lu}|[ \t]*$|[ \t]*\n)|\n/u);
+  return head.slice(cut + 1) + t.slice(start, end) + (stop < 0 ? tail : tail.slice(0, stop));
+}
 
 // Miejscownik miejscowości spoza słownika po „zam. w", „zamieszkały w", „zameldowana w": słownik zna
 // średnie i duże miasta, a mniejsza miejscowość stoi tuż przy zamaskowanym adresie („zam. w Świdniku").

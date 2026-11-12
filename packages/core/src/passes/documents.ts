@@ -2,9 +2,8 @@
 // a także kod pocztowy.
 import { escapeRe } from '../charset.js';
 import { maskAfterLabel, type RedactCtx } from '../context.js';
-import { CURRENCY_CODES } from '../guards/eponyms.js';
 import { type PiiType } from '../types.js';
-import { isValidDowod, precededByLegalRef } from '../validators.js';
+import { CURRENCY_CODES, isValidDowod, precededByLegalRef } from '../validators.js';
 
 /** Pierwsze litery wyróżników wojewódzkich tablic (H i U to służby i wojsko). Walidują człony
  *  wyliczenia i tablice po kotwicy z przerwą („ISO 9001" to nie tablica). */
@@ -15,6 +14,11 @@ export const PLATE_VOIV_LETTERS = 'BCDEFGHKLNOPRSTUWZ';
 const PLATE_NOT_ACRONYM = '(?!(?:BMW|DMC|DMR|RAL|DIN|DOT|EN|PKD|KTM|RAM|FSO)(?![A-Z])|UN[\\s-]?\\d{4}(?![\\dA-Z]))';
 /** Jednostka zaraz po kandydacie („DMC 3500 kg", „150 KM") oznacza parametr. Tylko odstęp poziomy:
  *  jednostka z następnego wiersza nie odbiera maski. „KM Policji/PSP" to komenda, „t.j." skrót. */
+/** Kod waluty albo jednostki ilości na początku kandydata tablicy to kwota lub liczba sztuk. Bez RUB,
+ *  żeby kandydat „RUB…” przechodził dalej do strażników tablicy (dopisanie zmieniłoby wynik). */
+const RE_PLATE_CURRENCY_HEAD = new RegExp(
+  `^(?:${[...CURRENCY_CODES].filter((c) => c !== 'RUB').join('|')}|SZT|KPL|KOM)(?![A-Z])`,
+);
 const PLATE_NOT_UNIT =
   '(?![ \\t]*(?:kg|t(?!\\.[a-ząćęłńóśźż])|ton\\w*|km|kW|KM(?![ \\t]+(?:Policji|PSP))|mm|cm[3³]?|ccm|zł|PLN|szt)(?![\\wąćęłńóśźż]))';
 
@@ -222,7 +226,7 @@ export function passPlate(ctx: RedactCtx): void {
     )
       return m;
     // Kod waluty albo jednostki z kwotą („Wartość samochodów wynosi PLN 45000").
-    if (/^(?:PLN|EUR|USD|CHF|GBP|CZK|SEK|NOK|DKK|JPY|UAH|SZT|KPL|KOM)(?![A-Z])/.test(plate)) return m;
+    if (RE_PLATE_CURRENCY_HEAD.test(plate)) return m;
     // Trzy litery z rokiem: marka z rocznikiem, skrót instytucji, kod silnika, paliwa albo typu
     // pojazdu, rok z „r." za nim, a po dopełniaczu mnogim bez dwukropka proza przetargu („pojazdów
     // marki MAN TGL 2012"). Wykaz z dwukropkiem i liczba pojedyncza („autem WPI 2019") to tablica.

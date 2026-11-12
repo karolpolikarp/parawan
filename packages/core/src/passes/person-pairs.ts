@@ -1,7 +1,7 @@
 // Imię i nazwisko z heurystyk par: małżonkowie, ciągi imion, zdrobnienia, szyk „Nazwisko Imię",
 // zapis rekordu, małe litery i nazwisko panieńskie; ochrona postaci literackich.
 import { HOMOGRAPH_SURNAMES, NON_SURNAME_ADJ, homographBase, isGeoAdjective, looksLikeSurname, normalizeSurnameKey, surnameBase } from '../surnames.js';
-import { CAP_WORD, NM_BOUND, PL_LO, PL_UP } from '../charset.js';
+import { CAP_WORD, LIST_BULLET, NM_BOUND, PL_LO, PL_UP } from '../charset.js';
 import { indexToLetters, type RedactCtx, URL_SENTINEL_CLOSE, URL_SENTINEL_OPEN } from '../context.js';
 import { FORM_LABEL_WORDS } from '../dict/forms.js';
 import { EXTRA_NAME_FORMS, FOREIGN_GIVEN_NAMES, isFirstNameGenitive, isFirstNameLike, isMaleFirstNameGenitive, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
@@ -13,7 +13,7 @@ import { RE_PATRON_ROMAN_REF_BEFORE, rynekNoNotHouse } from './address.js';
 import { isPersonRoleValue, NOUN_LIKE_NAMES_IN_TITLES } from './forms.js';
 import { CAPS_REVERSED_HEAD_EXCL, CAPS_ROLE_OBLIQUE, capsOrgHead, MAIDEN_NOT_SURNAME, personSlotBefore } from './person-caps-ocr.js';
 import { TABLE_HEADER_WORDS } from './person-triggers.js';
-import { RE_LOWER_RUN, RE_NAME_SEQ, RE_NEXT_CAP_WORD, RE_NEXT_CAP_WORD_SP, RE_NON_PL_LETTER, RE_PAIR, RE_SPOUSES, RE_SURNAME_OBLIQUE } from '../person-patterns.js';
+import { RE_DECLINED_NOM_SURNAME, RE_LOWER_RUN, RE_NAME_SEQ, RE_NEXT_CAP_WORD, RE_NEXT_CAP_WORD_SP, RE_NON_PL_LETTER, RE_PAIR, RE_SPOUSES, RE_SURNAME_OBLIQUE } from '../person-patterns.js';
 
 const isSurnameShaped = (w: string): boolean => !!surnameBase(w) || looksLikeSurname(w);
 // Ostatni wyraz przed pozycją; grupa 2 to dwukropek etykiety („Świadek: ").
@@ -26,7 +26,7 @@ const RE_TOPONYM_PERSON_ROLE =
 // Dane osoby tuż za ciągiem („Kazimierz Dolny (PESEL …)", „…, ur. 03.03.1950").
 const RE_PERSON_DATA_AHEAD = /^[ \t]*[,(]?[ \t]*(?:PESEL|ur\.|urodzon|zam\.|zamieszka|syn |córka )/iu;
 // Początek wiersza albo punkt listy („1. ", „- ") przed wpisem.
-const RE_LINE_HEAD_ONLY = /(?:^|\n)[ \t]*(?:(?:\d{1,4}[.)]|[-*•–])[ \t]*)?$/;
+const RE_LINE_HEAD_ONLY = new RegExp(`(?:^|\\n)[ \\t]*${LIST_BULLET}$`);
 // Etykieta roli z dwukropkiem tuż przed wpisem („Wnioskodawca: ").
 const RE_ROLE_LABEL_BEFORE = /(\p{L}+)[ \t]*:[ \t]*$/u;
 /**
@@ -38,7 +38,7 @@ const RE_ROLE_LABEL_BEFORE = /(\p{L}+)[ \t]*:[ \t]*$/u;
 function stoplistedSurnameAnchored(t: string, offset: number, m: string, w1: string, w2: string): boolean {
   const w1l = w1.toLowerCase();
   const w2l = w2.toLowerCase();
-  if (!/(?:sk|ck|dzk)[ia]$/.test(w1l) || !isGeoAdjective(w1l)) return false;
+  if (!RE_DECLINED_NOM_SURNAME.test(w1l) || !isGeoAdjective(w1l)) return false;
   if (!POLISH_FIRST_NAMES.has(w2l) || isFirstNameGenitive(w2l)) return false;
   const end = offset + m.length;
   if (RE_PERSON_DATA_AHEAD.test(t.slice(end, end + 24))) return true;
@@ -517,7 +517,7 @@ export function passPersonPairs(ctx: RedactCtx): void {
     // Tylko gdy dalej nie stoi nazwa z wielkiej litery („Pozwany Polski Związek …").
     const partyAdj =
       PARTY_ROLE_WORDS.has(w1.toLowerCase()) &&
-      /(?:sk|ck|dzk)[ia]$/.test(w2.toLowerCase()) &&
+      RE_DECLINED_NOM_SURNAME.test(w2.toLowerCase()) &&
       RE_AFTER_PARTY_ADJ.test(t.slice(offset + m.length, offset + m.length + 3));
     const w2s = looksLikeSurname(w2) || partyAdj ? w2 : foreignSecond ? w2.slice(0, hy) : '';
     if (!w2s) return m;

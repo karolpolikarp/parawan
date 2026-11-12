@@ -30,5 +30,7 @@ export const RE_LOWER_RUN = new RegExp(
   `(?<![${PL_UP}${PL_LO}@./-])${LO_WORD}(?:[ \\t]+${LO_WORD}){1,6}(?![${PL_UP}${PL_LO}-])`,
   'g',
 );
+// Mianownik nazwiska odmiennego jak przymiotnik („Kowalski", „Zielińska"); forma zależna to „Kowalskiego".
+export const RE_DECLINED_NOM_SURNAME = /(?:sk|ck|dzk)[ia]$/i;
 export const RE_SURNAME_OBLIQUE =
   /(?:sk|ck|dzk)(?:iego|iej|iemu|im|imi|ich|ą)$|icz(?:a|owi|em|owie|ami|ach)$|czyk(?:a|owi|iem|ami|ach|owie)$/;

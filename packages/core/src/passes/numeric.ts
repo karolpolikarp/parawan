@@ -1,9 +1,8 @@
 // Identyfikatory numeryczne: IBAN, numer konta, PESEL, NIP, REGON, karta płatnicza i telefon.
 // Najdłuższe ciągi cyfr idą pierwsze (IBAN 26 → PESEL 11 → NIP 10 → REGON), krótsze potem.
 import { maskAfterLabel, type RedactCtx } from '../context.js';
-import { CURRENCY_CODES } from '../guards/eponyms.js';
 import { type PiiType } from '../types.js';
-import { isValidCard, isValidIban, isValidNip, isValidPesel, isValidRegon14, isValidRegon9, precededByLegalRef, precededByNonPhoneLabel } from '../validators.js';
+import { CURRENCY_CODES, isValidCard, isValidIban, isValidNip, isValidPesel, isValidRegon14, isValidRegon9, precededByLegalRef, precededByNonPhoneLabel } from '../validators.js';
 
 const countOf = (s: string, ch: string): number => s.split(ch).length - 1;
 

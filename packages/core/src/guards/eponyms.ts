@@ -1,7 +1,7 @@
 // Strażniki kontekstu nie-osobowego: eponimy medyczne, patroni ulic, instytucji i świętych,
 // etykiety jednostek administracyjnych.
 import { HOMOGRAPH_SURNAMES, normalizeSurnameKey, surnameBase } from '../surnames.js';
-import { PL_LO, PL_UP, RE_CHAR_L, RE_CHAR_LL, RE_CHAR_LU } from '../charset.js';
+import { JSON_ESC_PUA, PL_LO, PL_UP, RE_CHAR_L, RE_CHAR_LL, RE_CHAR_LU, RE_JSON_ESC_PUA } from '../charset.js';
 import { FOREIGN_GIVEN_NAMES, isFirstNameGenitive, isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { RE_SURNAME_OBLIQUE } from '../person-patterns.js';
 
@@ -37,15 +37,17 @@ export const NON_PERSON_CONTEXT = new Set<string>([
   // jawne (patrz FORM_FIELDS)
   ...'powiat powiatu powiecie powiatem gmina gminy gminie gminą województwo województwa województwie'.split(/\s+/),
 ]);
+const RE_ADMIN_LABEL_END = new RegExp(
+  String.raw`(?:powiat\w*|gmin[aęyą]|województw[oaeu]m?|dzielnic[aęy])[ \t]*:?[ \t]*(?:\n|\\[${JSON_ESC_PUA}])?[ \t]*$`,
+  'i',
+);
 /**
  * Etykieta pola administracyjnego tuż przed wartością („Powiat: Pruszkowski", też wartość w następnej
  * linii): przymiotnik odmiejscowy po niej to nazwa jednostki, nie nazwisko. prevContextWord nie widzi
  * etykiety przez dwukropek i nową linię.
  */
 export const precededByAdminLabel = (t: string, offset: number): boolean =>
-  /(?:powiat\w*|gmin[aęyą]|województw[oaeu]m?|dzielnic[aęy])[ \t]*:?[ \t]*(?:\n|\\[])?[ \t]*$/i.test(
-    t.slice(Math.max(0, offset - 24), offset),
-  );
+  RE_ADMIN_LABEL_END.test(t.slice(Math.max(0, offset - 24), offset));
 /**
  * Głowy eponimów, które wyłączają nazwisko także po wyrazie z wielkiej litery (początek zdania).
  * Pozostałe wyrazy NON_PERSON_CONTEXT to tam zwykłe rzeczowniki, po których stoi osoba
@@ -100,8 +102,9 @@ export function isObliqueSurnameForm(word: string): boolean {
   return !!base && base !== w;
 }
 /**
- * Wyraz tuż przed pozycją. Wyraz z wielkiej litery liczy się tylko przez same spacje (cap: true);
- * mały przez dowolne odstępy, też podmienione ucieczki JSON „\n/\r/\t".
+ * Wyraz tuż przed pozycją, szukany najwyżej 40 znaków wstecz. Wyraz z wielkiej litery liczy się
+ * tylko przez same spacje (wtedy cap: true), mały przez dowolne odstępy, też podmienione ucieczki
+ * JSON „\n/\r/\t".
  */
 const prevContextWord = (text: string, offset: number): { word: string; cap: boolean } | undefined => {
   const lo = Math.max(0, offset - 40);
@@ -116,7 +119,7 @@ const prevContextWord = (text: string, offset: number): { word: string; cap: boo
   j = offset;
   for (;;) {
     if (j > lo && /\s/.test(text[j - 1])) j--;
-    else if (j - 1 > lo && text[j - 2] === '\\' && /[]/.test(text[j - 1])) j -= 2;
+    else if (j - 1 > lo && text[j - 2] === '\\' && RE_JSON_ESC_PUA.test(text[j - 1])) j -= 2;
     else break;
   }
   let k = j;
@@ -272,8 +275,8 @@ const STREET_ANCHOR_SRC =
   `[Ii]m(?=\\.)|[Uu]l|[Aa]l|[Pp]l|[Oo]s)`;
 // Rangi i tytuły w nazwie patrona („ul. gen. Andersa", „im. dr. med. Rafała Masztaka"); pierwsza
 // litera też wielka, bo tak piszą urzędy („ul. Ks. Jerzego Popiełuszki").
-export const STREET_RANK = `(?:${'gen pułk płk ppłk mjr kpt por ks św bł bp abp kard marsz prof doc dra dr hab med lek n inż hr'
-  .split(' ')
+export const STREET_RANK_WORDS = 'gen pułk płk ppłk mjr kpt por ks św bł bp abp kard marsz prof doc dra dr hab med lek n inż hr'.split(' ');
+export const STREET_RANK = `(?:${STREET_RANK_WORDS
   .map((r) => `[${r[0].toUpperCase()}${r[0]}]${r.slice(1)}`)
   .join('|')})\\.?`;
 // Patron tylko tuż po kotwicy, w jednej linii, bez mostkowania „i/oraz", przecinka, nowej linii
@@ -351,7 +354,3 @@ export const precededByStreetEponym = (t: string, offset: number): boolean => {
 /** Pojedynczy wyraz uliczny (ta sama zamknięta odmiana co STREET_ANCHOR_SRC). Stoi tuż przed imieniem
  *  wciągniętym do pary („Rondo Romana Dmowskiego"), więc para to patron. */
 export const RE_STREET_WORD = new RegExp(`^${STREET_ANCHOR_SRC.replace('(?=\\.)', '')}$`, 'iu');
-/** Kody walut: ciąg cyfr po nich to kwota (DOWÓD, IBAN, TELEFON). */
-export const CURRENCY_CODES = new Set([
-  'PLN', 'EUR', 'USD', 'GBP', 'CHF', 'CZK', 'SEK', 'NOK', 'DKK', 'JPY', 'UAH', 'RUB',
-]);

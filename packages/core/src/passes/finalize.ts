@@ -1,7 +1,7 @@
 // Ostatnia faza: domknięcia masek osób (imię, inicjał, ogon przeniesienia), stabilna numeracja
 // etykiet, przywrócenie URL-i i ucieczek JSON oraz cudzysłowy wokół masek w dokumencie JSON.
 import { HOMOGRAPH_SURNAMES, NON_SURNAME_ADJ, isGeoAdjective, looksLikeSurname, surnameBase } from '../surnames.js';
-import { CAP_WORD, escapeRe, NM_BOUND, PL_LO, PL_UP, RE_CHAR_LU } from '../charset.js';
+import { CAP_WORD, ESC_WS, escapeRe, JSON_ESC_PUA, LIST_BULLET, NM_BOUND, PERSON_MASK, PL_LO, PL_UP, RE_CHAR_LU } from '../charset.js';
 import { indexToLetters, JSON_ESC_FROM_PUA, lettersToIndex, RE_URL_SENTINEL, type RedactCtx } from '../context.js';
 import { COLLIDING_NAME_FORMS, isFirstNameGenitive, isFirstNameLike, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
@@ -9,10 +9,8 @@ import { isObliqueSurnameForm, precededByPatron } from '../guards/eponyms.js';
 import { cellEndsAt, cellStartsBefore, DOT_CHAIN, dotChainKind, INITIAL_START, institutionLabelBefore, isHonorificP, LIST_HEAD_NOT_SURNAME, RE_PERSON_MASK_BEFORE, RE_SAINT_WORD_BEFORE } from '../guards/person-context.js';
 import { LEGAL_ENTITY_WORDS, ROLE_WORDS, TITLE_WORDS } from '../guards/roles.js';
 import { MAIDEN_D_SENTINEL } from './person-caps-ocr.js';
-import { RE_NEXT_CAP_WORD_SP } from '../person-patterns.js';
+import { RE_DECLINED_NOM_SURNAME, RE_NEXT_CAP_WORD_SP } from '../person-patterns.js';
 
-const PERSON_MASK = '\\[OSOBA-[A-Z]+\\]|\\[IMIĘ I NAZWISKO\\]';
-const LIST_BULLET = '(?:(?:\\d{1,4}[.)]|[-*•–])[ \\t]*)?';
 // Długość kontekstu za wyrazem w RawWordLink.next; linksAt porównuje dokładnie tyle znaków.
 const LINK_CTX_LEN = 12;
 
@@ -204,7 +202,7 @@ function buildRawWordLinks(raw: string): Map<string, RawWordLink[]> {
   }
   return map;
 }
-const RE_ESC_WS_G = /\\[\uE009\uE00A\uE00D]/g;
+const RE_ESC_WS_G = new RegExp(ESC_WS, 'g');
 /**
  * Wpisy z oryginału zgodne z tekstem za tym wystąpieniem imienia aż do pierwszej maski, cyfry albo
  * znaku technicznego (te już podmieniono). Gdy imię pada kilka razy, decyduje wpis z tego miejsca.
@@ -224,8 +222,6 @@ function linksAt(all: RawWordLink[], t: string, end: number): RawWordLink[] {
   });
   return fits.length ? fits : all;
 }
-// Mianownik nazwiska odmiennego jak przymiotnik („Kowalski", „Zielińska"); forma zależna to „Kowalskiego".
-const RE_DECLINED_NOM_SURNAME = /(?:sk|ck|dzk)[ia]$/i;
 /**
  * Czy imię `form` (małymi literami) za maską to inna osoba? Drugie imię stoi tylko za rekordem
  * „Nazwisko Imię" albo za samym nazwiskiem w mianowniku. Za parą „Imię Nazwisko" to następna osoba
@@ -449,11 +445,12 @@ export function finalizePersons(ctx: RedactCtx): void {
   }
 }
 
+const RE_JSON_ESC_PUA_G = new RegExp(`\\\\?([${JSON_ESC_PUA}])`, 'g');
 // Po przywróceniu URL-i, bo zapamiętane adresy też mogą zawierać ucieczki. Znak PUA bez backslasha
 // też wraca jako pełna ucieczka, żeby wartość JSON-a została poprawnym łańcuchem.
 export function passRestoreJsonEscapes(ctx: RedactCtx): void {
   if (!ctx.jsonEscapes) return;
-  ctx.text = ctx.text.replace(/\\?([\uE009\uE00A\uE00D])/g, (_m, c: string) => `\\${JSON_ESC_FROM_PUA[c]}`);
+  ctx.text = ctx.text.replace(RE_JSON_ESC_PUA_G, (_m, c: string) => `\\${JSON_ESC_FROM_PUA[c]}`);
 }
 
 /** Czy tekst to dokument JSON: obiekt lub tablica w całości albo NDJSON (każdy niepusty wiersz osobno). */

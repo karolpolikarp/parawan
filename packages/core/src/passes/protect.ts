@@ -1,6 +1,6 @@
 // Faza 0: ucieczki JSON i ochrona URL-i sentinelem, z maskowaniem PII wewnątrz adresu.
 import { looksLikeSurname, surnameBase } from '../surnames.js';
-import { PL_LO, PL_UP } from '../charset.js';
+import { JSON_ESC_PUA, PL_LO, PL_UP } from '../charset.js';
 import { indexToLetters, JSON_ESC_TO_PUA, maskConst, type RedactCtx, URL_SENTINEL_CLOSE, URL_SENTINEL_OPEN } from '../context.js';
 import { isPropagatableLogin } from '../dict/forms.js';
 import { POLISH_FIRST_NAMES } from '../dict/names.js';
@@ -32,7 +32,7 @@ export function passProtectJsonEscapes(ctx: RedactCtx): void {
 // Bez schematu adresem jest tylko profil z URL_PROFILE_PATH_RULES („pl.linkedin.com/in/…"). Lewa
 // granica bez kropki, „@" i ukośnika („jan@linkedin.com/…" to e-mail). Adres kończy się na samym
 // profilu, żeby doklejone „;501-234-567" czy „,PESEL:…" czytały zwykłe przebiegi.
-const URL_BARE_SEG = String.raw`[^/?#\s<>"'„”()[\],;|]+`;
+const URL_BARE_SEG = String.raw`[^/?#\s<>"'„”()[\],;|${JSON_ESC_PUA}]+`;
 // Z parametrów tylko znane z linków tych serwisów („?trk=…&originalSubdomain=pl"), a kropka
 // w wartości tylko przed małą literą, żeby doklejone „.Anna Nowak" czy „&Anna=Nowak" zostały poza adresem.
 const URL_BARE_PARAM =
@@ -40,7 +40,7 @@ const URL_BARE_PARAM =
   String.raw`=[A-Za-z0-9_%+~-]*(?:\.[a-z][A-Za-z0-9_%+~-]*)*`;
 const URL_BARE_QUERY = String.raw`\?${URL_BARE_PARAM}(?:&${URL_BARE_PARAM})*`;
 const RE_URL_PROTECT = new RegExp(
-  String.raw`\b(?:https?:\/\/|www\.)[^\s<>"'„”()]+|(?<![\w.@/-])(?:[a-z0-9-]+\.)?(?:` +
+  String.raw`\b(?:https?:\/\/|www\.)[^\s<>"'„”()${JSON_ESC_PUA}]+|(?<![\w.@/-])(?:[a-z0-9-]+\.)?(?:` +
     String.raw`linkedin\.com\/(?:in|pub)\/${URL_BARE_SEG}(?:\/[0-9a-z]{1,3}(?=[/?#\s]|$)){0,3}\/?(?:${URL_BARE_QUERY})?|` +
     String.raw`facebook\.com\/profile\.php${URL_BARE_QUERY}|[a-z0-9-]+-my\.sharepoint\.com\/personal\/${URL_BARE_SEG})`,
   'g',

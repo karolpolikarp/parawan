@@ -1,7 +1,7 @@
 // Osoby zapisane wersalikami, zapisem mieszanym i z homoglifami OCR, a także imiona rodziców
 // i nazwisko panieńskie tuż za maską osoby.
 import { HOMOGRAPH_SURNAMES, NON_SURNAME_ADJ, homographBase, isGeoAdjective, looksLikeSurname, normalizeSurnameKey, surnameBase } from '../surnames.js';
-import { CAP_WORD, escapeRe, NM_BOUND, PL_LO, PL_UP } from '../charset.js';
+import { CAP_WORD, escapeRe, NM_BOUND, PERSON_MASK, PL_LO, PL_UP } from '../charset.js';
 import { type RedactCtx } from '../context.js';
 import { isFirstNameGenitive, isFirstNameLike, isMaleFirstNameGenitive, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
@@ -325,7 +325,7 @@ export function passPersonMixedCase(ctx: RedactCtx): void {
 // razem z datą i miejscem urodzenia identyfikują osobę. Tylko imiona ze słownika; po skrócie
 // „s."/„c." wymagane oba imiona („[..], s. 15 protokołu").
 const RE_PARENTS_AFTER_MASK = new RegExp(
-  `(\\[OSOBA-[A-Z]+\\]|\\[IMIĘ I NAZWISKO\\])(,?[ \\t]+)(syn(?:a|owi|em)?|córk(?:a|i|ą|ę)|SYN|CÓRKA|s\\.|c\\.)([ \\t]+)` +
+  `(${PERSON_MASK})(,?[ \\t]+)(syn(?:a|owi|em)?|córk(?:a|i|ą|ę)|SYN|CÓRKA|s\\.|c\\.)([ \\t]+)` +
     `([${PL_UP}][${PL_UP}${PL_LO}]+)(?:([ \\t]+)([${PL_UP}][${PL_UP}${PL_LO}]+))?` +
     `(?:((?:[ \\t]+i|,)[ \\t]+)([${PL_UP}][${PL_UP}${PL_LO}]+)(?:([ \\t]+)([${PL_UP}][${PL_UP}${PL_LO}]+))?)?(?![${NM_BOUND}])`,
   'g',

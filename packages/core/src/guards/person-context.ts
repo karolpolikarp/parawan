@@ -1,6 +1,6 @@
 // Strażniki kontekstu osoby: instytucja przed adresem, granice komórek tabeli, patroni, inicjały
 // i łańcuchy kropkowe, homografy imion.
-import { PL_LO, PL_UP } from '../charset.js';
+import { PERSON_MASK, PL_LO, PL_UP, RE_JSON_ESC_PUA } from '../charset.js';
 import { RE_INSTITUTION_WORD } from './eponyms.js';
 import { LEGAL_ENTITY_WORDS, PROPER_NAME_HEADS } from './roles.js';
 
@@ -27,8 +27,6 @@ export function institutionBeforeAddr(before: string): boolean {
     );
   });
 }
-// Ucieczki JSON „\n”, „\r”, „\t” zamienione wcześniej na znaki PUA.
-const RE_PUA_ESC = /[\uE009\uE00A\uE00D]/;
 /** Czy przed pozycją (po samych spacjach) zaczyna się komórka: początek wiersza, punkt listy,
  *  etykieta „…:”, separator pola, cudzysłów, nawias albo znacznik? Bez przecinka, bo w CSV
  *  „1, Kowalski, Jan” nazwisko i imię to dwie kolumny. */
@@ -37,7 +35,7 @@ export function cellStartsBefore(t: string, offset: number): boolean {
   while (i >= 0 && t[i] === ' ') i--;
   if (i < 0) return true;
   const c = t[i];
-  if (c === '\n' || c === '\r' || (RE_PUA_ESC.test(c) && t[i - 1] === '\\')) return true;
+  if (c === '\n' || c === '\r' || (RE_JSON_ESC_PUA.test(c) && t[i - 1] === '\\')) return true;
   if ((c === '.' || c === ')') && /\d/.test(t[i - 1] ?? '')) return true; // „1. Nowak, Anna”
   if (/[-*•–]/.test(c)) return i === 0 || /\s/.test(t[i - 1]); // punktor
   return /[:;|\t"'„“(<>]/.test(c);
@@ -50,7 +48,7 @@ export function cellEndsAt(t: string, end: number): boolean {
   while (t[i] === ' ') i++;
   if (i >= t.length) return true;
   const c = t[i];
-  if (c === '\\' && RE_PUA_ESC.test(t[i + 1] ?? '')) return true;
+  if (c === '\\' && RE_JSON_ESC_PUA.test(t[i + 1] ?? '')) return true;
   return /[\r\n;|\t"'”)<>(]/.test(c);
 }
 /** Czy komórkę otwiera etykieta-placówka („Szpital: Bielański, Marta”)? Przymiotnik po niej to
@@ -83,8 +81,6 @@ export const PATRON_GEN_HEADS = new Set<string>([
 // „Świętego”, „Błogosławionej” przed imieniem, także bez ogonków. Skrótu „św.” tu nie ma, bo bywa
 // świadkiem; rozstrzyga go precededByPatron z kontekstem sakralnym.
 export const RE_SAINT_WORD_BEFORE = /(?:^|[^\p{L}])(?:[Śś]więt|[Ss]wiet|[Bb]łogosławion|[Bb]logoslawion)\p{L}*[ \t]+$/u;
-// Ułamek w kontekście udziału („Udział Marii Lis 1/4”) to nie numer domu.
-export const RE_SHARE_BEFORE = /(?<!\p{L})(?:udzia\p{L}*|częś\p{L}*|spad[ek]\p{L}*|przypad\p{L}*|dziedzicz\p{L}*|nabył\p{L}*|nabyła)(?!\p{L})/iu;
 
 // Lewa granica inicjału: przed literą nie może stać litera (także polska) ani kropka. Odcina ostatni
 // człon kropkowego skrótu („A” z „S.A.”), a ASCII \b nie zadziałałby przed „Ł.”, „Ś.”.
@@ -144,4 +140,4 @@ export const LIST_HEAD_NOT_SURNAME = new Set<string>(
     'czerwiec lipiec sierpień wrzesień październik listopad grudzień sołtys starosta').split(' '),
 );
 // Maska osoby przed wyrazem w tym samym wierszu, po odstępie albo separatorze pola („[..];Jan”).
-export const RE_PERSON_MASK_BEFORE = /(?:\[OSOBA-[A-Z]+\]|\[IMIĘ I NAZWISKO\])(?:[ \t]+|[ \t]*[,;|][ \t]*)$/;
+export const RE_PERSON_MASK_BEFORE = new RegExp(`(?:${PERSON_MASK})(?:[ \\t]+|[ \\t]*[,;|][ \\t]*)$`);

@@ -1,6 +1,11 @@
 // Sumy kontrolne numerów (PESEL, NIP, REGON, IBAN, dowód, księga wieczysta, karta) i strażniki
 // kontekstu, które odróżniają numer przepisu albo etykietę techniczną od danej osobowej.
 
+/** Kody walut: ciąg cyfr po nich to kwota (DOWÓD, IBAN, TELEFON). */
+export const CURRENCY_CODES = new Set([
+  'PLN', 'EUR', 'USD', 'GBP', 'CHF', 'CZK', 'SEK', 'NOK', 'DKK', 'JPY', 'UAH', 'RUB',
+]);
+
 const onlyDigits = (s: string): number[] =>
   s.replace(/\D/g, '').split('').map((d) => parseInt(d, 10));
 
