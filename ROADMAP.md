@@ -62,9 +62,9 @@ Docelowo v0.46.27, rdzeń 0.29.14 (0.29.13 ma silnik z v0.46.24 i tryb `--jsonl`
    rdzeń 0.29.14 · S
    `REGON jednostki lokalnej przy oddziale w Gdańsku to 123456785` daje dziś `… to [TELEFON]`.
    Numer jest zasłonięty, ale z błędnym typem, a ten typ trafia do liczników i protokołu do akt.
-   Okno etykiety ma `{0,3}` wyrazów (packages/core/src/index.ts:4483). Możliwy wariant: dłuższe
+   Okno etykiety ma `{0,3}` wyrazów (`LABEL_WORDS` w packages/core/src/passes/numeric.ts). Możliwy wariant: dłuższe
    okno tylko przy poprawnej sumie kontrolnej. Źródło: przypadek odtworzony na rdzeniu
-   2026-10-24, reguła w packages/core/src/index.ts:4483.
+   2026-10-24, reguła `LABEL_WORDS` w packages/core/src/passes/numeric.ts.
 
 8. **Brzmienie adnotacji o wyłączeniu jawności do sprawdzenia przez prawnika**
    v0.46.27 · S (bez kodu)
@@ -125,20 +125,20 @@ v0.46.25. Dlatego następna fala (A10, A11 i L02) przesuwa się z v0.47.1 na v0.
 15. **Loginy w ścieżkach adresów URL**
     v0.47.x / rdzeń 0.30.x · M
     Profil LinkedIn, osobisty OneDrive (`firma-my.sharepoint.com/personal/…`) i numeryczny profil
-    Facebooka (`profile.php?id=…`) są już zasłaniane (packages/core/src/index.ts:1774–1786), ale
+    Facebooka (`profile.php?id=…`) są już zasłaniane (`URL_PROFILE_PATH_RULES` w packages/core/src/passes/email.ts), ale
     `bank.example.com/user/akowalski` przechodzi jawne (sprawdzone dziś). Segment `/user/` i inne
     jednoznacznie osobowe ścieżki to kotwice strukturalne, więc pasują do zasady precyzji. Gołe
     `github.com/akowalski` świadomie zostaje bez reguły, bo ten sam kształt ma organizacja i projekt
-    (komentarz w index.ts:1780). Źródło: docs/SCENARIUSZ-TESTOW-v0.45.md, sekcja 4.
+    (komentarz przy `URL_PROFILE_PATH_RULES`). Źródło: docs/SCENARIUSZ-TESTOW-v0.45.md, sekcja 4.
 
 ### Propozycje
 
-16. **Podział `index.ts` na moduły według faz**
+16. **Podział `index.ts` na moduły według faz (zrobione w [Unreleased])**
     v0.47.x · L
-    Plik ma 9359 linii i 51 funkcji `pass*`, a testy w `index.test.ts` kolejne 8270. Orkiestrator
-    już jest (od v0.46.10), więc przeniesienie faz do osobnych plików nie zmienia zachowania,
-    a golden-master daje twarde kryterium pustego diffu. Lepiej po pozycjach 1 i 2, żeby nie
-    rozjechać równoległych poprawek. Siatką jest packages/core/src/redact-golden.test.ts.
+    Orkiestrator jest w `packages/core/src/redact.ts`, przebiegi w `passes/`, strażniki w `guards/`,
+    słowniki w `dict/`, a `index.ts` tylko reeksportuje publiczne API. Golden-master
+    (packages/core/src/redact-golden.test.ts) bez zmian, więc wynik jest ten sam. Zostaje do wydania
+    rdzenia. Źródło: `packages/core/src/struktura.test.ts`.
 
 17. **Wspólne fonty dla aplikacji i strony**
     v0.47.x · S
