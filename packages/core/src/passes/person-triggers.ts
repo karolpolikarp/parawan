@@ -130,7 +130,7 @@ export function passPersonTrigger(ctx: RedactCtx): void {
       const [w0, w1] = [words[s], words[s + 1]];
       if (VI_MIDDLE_NAMES.has(w1.toLowerCase())) {
         keyWord = w0;
-        // imię za członem środkowym stoi poza kandydatem (najwyżej dwa wyrazy); zdejmuje je drugi krok za znacznikiem
+        // imię za członem środkowym stoi poza kandydatem (najwyżej dwa wyrazy); zdejmuje je RE_VI_GIVEN_TAIL za znacznikiem
         viGiven = VI_GIVEN_SENTINEL;
         viTail = true;
       } else if (triggerGivenName(w1) && !triggerGivenName(w0)) keyWord = w0;

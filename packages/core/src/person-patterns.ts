@@ -14,7 +14,7 @@ export const RE_SPOUSES = new RegExp(`(?<![${NM_BOUND}-])(${CAP_WORD})([ \\t]+(?
 export const RE_NAME_SEQ = new RegExp(`(?<![${NM_BOUND}-])${CAP_WORD}(?:[ \\t]+${CAP_WORD}){1,3}(?![${NM_BOUND}])`, 'g');
 // Wyraz z wielkiej litery tuż za porcją RE_NAME_SEQ w tej samej linii (wznowienie okna).
 export const RE_NEXT_CAP_WORD = new RegExp(`^[ \\t]+(${CAP_WORD})(?![${NM_BOUND}])`);
-// Współdzielony przez kilka kroków; bezpieczne, bo .replace zeruje lastIndex.
+// Współdzielony przez kilka przebiegów; bezpieczne, bo .replace zeruje lastIndex.
 export const RE_PAIR = new RegExp(`(?<![${NM_BOUND}-])(${CAP_WORD})[ \\t]+(${CAP_WORD})(?![${NM_BOUND}])`, 'g');
 // Prawy kontekst pary tylko przez spacje: tabulator zaczyna następną komórkę.
 export const RE_NEXT_CAP_WORD_SP = new RegExp(`^ +(${CAP_WORD})`);

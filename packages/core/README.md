@@ -44,6 +44,15 @@ import { redactPIIFull } from 'anonimizator/ner';
 const { redacted } = await redactPIIFull(tekst, { url: 'http://127.0.0.1:8090' });
 ```
 
+## Budowa
+
+`redactPII` to orkiestrator (`src/redact.ts`), który woła kolejno kilkadziesiąt przebiegów
+z `src/passes/`: najpierw ochrona URL-i, potem dane z etykietą lub wzorcem, numery z sumą
+kontrolną, adresy i miejscowości, na końcu osoby. Kolejność ma znaczenie, bo późniejsze przebiegi
+czytają placeholdery wcześniejszych. Strażniki kontekstu leżą w `src/guards/`, słowniki imion,
+miejscowości i pól formularzy w `src/dict/`, nazwiska i ich odmiana w `src/surnames.ts`, sumy
+kontrolne w `src/validators.ts`. `src/index.ts` tylko reeksportuje publiczne API.
+
 Pełna dokumentacja: <https://github.com/karolpolikarp/parawan>
 
 Licencja: Apache 2.0, patrz [LICENSE](./LICENSE) i [NOTICE](./NOTICE). Wydania repozytorium do

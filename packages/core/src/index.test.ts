@@ -12,7 +12,7 @@ import {
   isValidKw,
 } from './index';
 
-// Buduje POPRAWNY IBAN z kodu kraju + BBAN (liczymy cyfry kontrolne mod 97),
+// Buduje poprawny IBAN z kodu kraju + BBAN (liczymy cyfry kontrolne mod 97),
 // żeby test nie zależał od zapamiętanego wektora.
 function makeIban(country: string, bban: string): string {
   const rearranged = bban + country + '00';
@@ -77,7 +77,7 @@ test('KARTA — redakcja: karta Z KONTEKSTEM maskowana', () => {
   expect(redactPII('nr karty 378282246310005 na fakturze').redacted).toBe('nr karty [NR-KARTY] na fakturze');
 });
 test('KARTA — BEZ kontekstu karty nie maskuje (precyzja > nadmaskowanie)', () => {
-  // IMEI (15 cyfr, ma sumę Luhna, prefiks 35 = zakres JCB) BEZ kontekstu karty — zostaje
+  // IMEI (15 cyfr, ma sumę Luhna, prefiks 35 = zakres JCB) bez kontekstu karty — zostaje
   expect(redactPII('IMEI telefonu: 353281112345672').redacted).toBe('IMEI telefonu: 353281112345672');
   // EAN-13 z prefiksem 54 (Mastercard) — kod kreskowy, nie karta
   expect(redactPII('Kod kreskowy EAN 5449000000996').redacted).toBe('Kod kreskowy EAN 5449000000996');
@@ -133,7 +133,7 @@ test('KSEF — kotwicą bywa sam adres portalu (link) albo skrzynka w stopce', (
       'Faktura wystawiona (portal https://ksef.mf.gov.pl/web/login).\nNumer dokumentu: 5265877635-20250826-0100001AF629-AF',
     ).redacted,
   ).toBe('Faktura wystawiona (portal https://ksef.mf.gov.pl/web/login).\nNumer dokumentu: [NR-KSEF]');
-  // e-mail znika w FAZIE 1, więc kotwicę liczymy na ORYGINALNYM wejściu
+  // e-mail znika w fazie 1, więc kotwicę liczymy na oryginalnym wejściu
   expect(redactPII('Kontakt: ksef@mf.gov.pl\nNumer dokumentu: 5265877635-20250826-0100001AF629-AF').redacted).toBe(
     'Kontakt: [EMAIL]\nNumer dokumentu: [NR-KSEF]',
   );
@@ -200,7 +200,7 @@ test('KSEF — tag <NrKSeF> i klucz „ksefNumber" niosą kotwicę w samej nazwi
 test('KSEF — BEZ kotwicy i bez kształtu numeru nie maskuje (precyzja > nadmaskowanie)', () => {
   expect(redactPII('System KSeF działa od 2026 roku.').redacted).toBe('System KSeF działa od 2026 roku.');
   expect(redactPII('KSeF 2.0 zastąpił wersję 1.0.').redacted).toBe('KSeF 2.0 zastąpił wersję 1.0.');
-  // numer referencyjny sesji zaczyna się od DATY, nie od NIP-u — nie jest numerem KSeF
+  // numer referencyjny sesji zaczyna się od daty, nie od NIP-u — nie jest numerem KSeF
   expect(redactPII('Numer referencyjny sesji w KSeF: 20250626-SO-2F14610000-242991F8C9-B4').redacted).toBe(
     'Numer referencyjny sesji w KSeF: 20250626-SO-2F14610000-242991F8C9-B4',
   );
@@ -211,7 +211,7 @@ test('KSEF — numer doklejony myślnikiem oraz w ścieżce URL-a', () => {
   expect(redactPII('Pobrano z KSeF: faktura-5265877635-20250826-0100001AF629-AF.xml').redacted).toBe(
     'Pobrano z KSeF: faktura-[NR-KSEF].xml',
   );
-  // URL jest sentinelowany PRZED fazą identyfikatorów — numer zdejmujemy już w passProtectUrls
+  // URL jest sentinelowany przed fazą identyfikatorów — numer zdejmujemy już w passProtectUrls
   expect(redactPII('Link: https://ksef.mf.gov.pl/faktura/5265877635-20250826-0100001AF629-AF/upo').redacted).toBe(
     'Link: https://ksef.mf.gov.pl/faktura/[NR-KSEF]/upo',
   );
@@ -219,7 +219,7 @@ test('KSEF — numer doklejony myślnikiem oraz w ścieżce URL-a', () => {
 test('KSEF — separatorem jest TYLKO myślnik (kolumny liczb i listy nie są scalane)', () => {
   // audyt adwersarialny: spacja jako separator zjadała cztery sąsiednie kolumny raportu
   expect(redactPII('KSeF 5265877635 20250826 000000012345 23').redacted).not.toContain('[NR-KSEF]');
-  // lista punktowana pod nagłówkiem „KSeF" — złamanie wiersza PRZED myślnikiem nie scala członów
+  // lista punktowana pod nagłówkiem „KSeF" — złamanie wiersza przed myślnikiem nie scala członów
   expect(redactPII('Wysyłka: KSeF\n- 5265877635\n- 20250826\n- 000000012345\n- 23').redacted).not.toContain(
     '[NR-KSEF]',
   );
@@ -480,14 +480,14 @@ test('redactPII — nazwisko po wyzwalaczu kontekstu maskowane', () => {
 });
 test('redactPII — wyzwalacz NIE pożera kolejnego małego słowa (zachowuje sens zdania)', () => {
   // Regresja: pod flagą /i klasa [PL_UP] łapała małe litery, więc „Pan Wiśniewski nie" maskowało
-  // też „nie" → „zapłacił" zamiast „nie zapłacił". „nie" MUSI zostać.
+  // też „nie" → „zapłacił" zamiast „nie zapłacił". „nie" musi zostać.
   const r = redactPII('Pan Wiśniewski nie zapłacił czynszu');
   expect(r.redacted).toContain('[IMIĘ I NAZWISKO]');
   expect(r.redacted.includes('Wiśniewski')).toBe(false);
   expect(r.redacted).toContain('nie zapłacił');
 });
 
-// ── Wielkość liter w imionach/nazwiskach (v0.29.6): łapiemy nietypowy zapis w KONTEKŚCIE ──
+// ── Wielkość liter w imionach/nazwiskach (v0.29.6): łapiemy nietypowy zapis w kontekście ──
 test('casing — self-ID łapie imię/nazwisko niezależnie od wielkości liter', () => {
   for (const s of [
     'nazywam się pAMELA nOWAK',   // mieszana
@@ -523,7 +523,7 @@ test('casing — precyzja: nagłówki WERSALIKAMI i homonimy małą literą zost
   expect(redactPII('to jest jagoda i kalina').redacted).toBe('to jest jagoda i kalina');
 });
 
-// ── Tytuł/rola + imię/nazwisko WERSALIKAMI (v0.29.7): „SSO JAN KOWALSKI", „PANEM …", „PAN KOWALSKI" ──
+// ── Tytuł/rola + imię/nazwisko wersalikami (v0.29.7): „SSO JAN KOWALSKI", „PANEM …", „PAN KOWALSKI" ──
 test('all-caps: tytuł/rola WERSALIKAMI + nazwisko maskowane (tytuł zostaje)', () => {
   for (const s of [
     'SSO JAN KOWALSKI',
@@ -569,7 +569,7 @@ test('redactPII — encja prawna NIE jest nazwiskiem', () => {
   expect(r.redacted.includes('[IMIĘ I NAZWISKO]')).toBe(false);
 });
 test('redactPII — losowe 10 cyfr bez poprawnej sumy NIP zostaje', () => {
-  // 1234567890 ma sumę kontrolną NIP == 10 (nieważny) → NIE maskujemy.
+  // 1234567890 ma sumę kontrolną NIP == 10 (nieważny) → nie maskujemy.
   const r = redactPII('Sygnatura 1234567890 w aktach');
   expect(r.redacted.includes('[NIP]')).toBe(false);
 });
@@ -785,7 +785,7 @@ test('małe litery + 6 cyfr bez sumy kontrolnej NIE są maskowane', () => {
   expect(redactPII('kod abc123456 systemu').redacted.includes('[NR-DOWODU]')).toBe(false);
 });
 
-// ── Imiona w ODMIANIE (nie tylko mianownik) ──
+// ── Imiona w odmianie (nie tylko mianownik) ──
 test('imię w narzędniku + nazwisko (Anną Kowalską) maskowane w całości', () => {
   const r = redactPII('Anną Kowalską, zwaną dalej');
   expect(r.redacted).toContain('[IMIĘ I NAZWISKO]');
@@ -895,7 +895,7 @@ test('miasto: marker zamieszkania maskuje, zwykły czasownik/proza nie', () => {
   expect(redactPII('Powód mieszka w Warszawie i pracuje w Krakowie').redacted).toBe(
     'Powód mieszka w [MIEJSCOWOŚĆ] i pracuje w Krakowie',
   );
-  // czysta proza / instytucja → NIE maskujemy (precyzja)
+  // czysta proza / instytucja → nie maskujemy (precyzja)
   expect(redactPII('Spotkanie odbędzie się w Łodzi.').redacted).toBe('Spotkanie odbędzie się w Łodzi.');
   expect(redactPII('Sąd Okręgowy w Katowicach').redacted).toBe('Sąd Okręgowy w Katowicach');
 });
@@ -907,15 +907,15 @@ test('miasto w kontekście adresu/zamieszkania jest maskowane', () => {
   expect(redactPII('mieszka w Sopocie od 2010 roku').redacted).toBe('mieszka w [MIEJSCOWOŚĆ] od 2010 roku');
   expect(redactPII('zam. w Rzeszowie').redacted).toBe('zam. w [MIEJSCOWOŚĆ]');
   expect(redactPII('miejsce zamieszkania: Białystok').redacted).toBe('miejsce zamieszkania: [MIEJSCOWOŚĆ]');
-  // kraj/region i lokal NIE są miastem po markerze
+  // kraj/region i lokal nie są miastem po markerze
   expect(redactPII('zamieszkały w Polsce').redacted).toBe('zamieszkały w Polsce');
 });
 test('marker zamieszkania NIE maskuje instytucji ani ulicy (bramka słownikowa)', () => {
-  // słowo po markerze, które NIE jest znanym miastem → zostaje (instytucja/placówka/ulica)
+  // słowo po markerze, które nie jest znanym miastem → zostaje (instytucja/placówka/ulica)
   expect(redactPII('Interesant mieszka w Sądzie Rejonowym').redacted).toBe('Interesant mieszka w Sądzie Rejonowym');
   expect(redactPII('zamieszkały w Areszcie Śledczym').redacted).toBe('zamieszkały w Areszcie Śledczym');
   expect(redactPII('zamieszkały w Zakładzie Karnym').redacted).toBe('zamieszkały w Zakładzie Karnym');
-  // ulica po markerze — nie miasto; adres zdejmie krok ADRES, tu bez korupcji „[MIEJSCOWOŚĆ]c"
+  // ulica po markerze — nie miasto; adres zdejmie passAddress, tu bez korupcji „[MIEJSCOWOŚĆ]c"
   expect(redactPII('Zameldowany: Plac Wolności 2').redacted.includes('[MIEJSCOWOŚĆ]')).toBe(false);
   // miasto wielowyrazowe po markerze
   expect(redactPII('zamieszkały w Zielonej Górze').redacted).toContain('[MIEJSCOWOŚĆ]');
@@ -935,7 +935,7 @@ test('miejscowość — idempotencja (drugi przebieg nic nie psuje)', () => {
   expect(redactPII(once).redacted).toBe(once);
 });
 
-// ── MIEJSCOWOŚĆ przed adresem BEZ kodu (słownik miast, tylko w pozycji „…, ul.") ──
+// ── MIEJSCOWOŚĆ przed adresem bez kodu (słownik miast, tylko w pozycji „…, ul.") ──
 test('miasto przed adresem bez kodu (Warszawa, ul. …)', () => {
   const r = redactPII('Warszawa, ul. Królewska 27');
   expect(r.redacted).toBe('[MIEJSCOWOŚĆ], [ADRES]');
@@ -1000,7 +1000,7 @@ test('„Pani Anna" zachowuje tytuł, maskuje imię', () => {
   expect(r.redacted).toContain('[IMIĘ I NAZWISKO]');
 });
 
-// ── DWA imiona + nazwisko (nazwisko nie może zostać jawne) ──
+// ── Dwa imiona + nazwisko (nazwisko nie może zostać jawne) ──
 test('dwa imiona w odmianie + nazwisko (Moniką Ewą Nojszewską) — jedna maska', () => {
   const r = redactPII('Moniką Ewą Nojszewską, zwaną dalej');
   expect(r.redacted).toContain('[IMIĘ I NAZWISKO]');
@@ -1016,7 +1016,7 @@ test('wyraz przed imieniem zostaje, para imię+nazwisko maskowana', () => {
   expect(redactPII('Wczoraj Jan Kowalski przyszedł').redacted).toBe('Wczoraj [IMIĘ I NAZWISKO] przyszedł');
 });
 
-// ── Anty-nadmaskowanie: realny tekst urzędowy/nazwy własne NIE mogą być ruszane ──
+// ── Anty-nadmaskowanie: realny tekst urzędowy/nazwy własne nie mogą być ruszane ──
 // (blokada regresji dla agresywnych reguł imion/dowodów — nadmaskowanie niszczy sens pisma)
 test('instytucje, programy i nazwy własne pozostają nietknięte', () => {
   const clean = [
@@ -1038,7 +1038,7 @@ test('instytucje, programy i nazwy własne pozostają nietknięte', () => {
   for (const t of clean) expect(redactPII(t).redacted).toBe(t);
 });
 
-// ── Samodzielne nazwiska ze słownika (krok 13c) ──
+// ── Samodzielne nazwiska ze słownika (passPersonSoloDict) ──
 test('nazwisko solo w odmianie — dopełniacz maskowany', () => {
   const r = redactPII('Sprawę Kowalskiego przekazano do sądu');
   expect(r.redacted).toContain('[IMIĘ I NAZWISKO]');
@@ -1070,7 +1070,7 @@ test('małe litery NIE są nazwiskiem (kowalski jako przymiotnik)', () => {
   const q = 'zawód kowalski wymaga siły';
   expect(redactPII(q).redacted).toBe(q);
 });
-// ── IMIĘ + NAZWISKO małymi literami (krok 13a4) — imię ze słownika + nazwisko morfologiczne ──
+// ── Imię i nazwisko małymi literami (passPersonPairs) — imię ze słownika + nazwisko morfologiczne ──
 test('para małymi literami: imię ze słownika + nazwisko (jan kowalski)', () => {
   const r = redactPII('jan kowalski');
   expect(r.redacted).toBe('[IMIĘ I NAZWISKO]');
@@ -1098,12 +1098,12 @@ test('proza małymi literami NIE jest nadmaskowana', () => {
     expect(redactPII(p).redacted).toBe(p);
   }
 });
-// ── E-mail z polską diakrytyką w części lokalnej — maskuj W CAŁOŚCI (bez wycieku fragmentu) ──
+// ── E-mail z polską diakrytyką w części lokalnej — maskuj w całości (bez wycieku fragmentu) ──
 test('e-mail z „ś" w części lokalnej maskowany w całości', () => {
   const r = redactPII('e-mail: piotr.wiśniewski-nowak@poczta.pl');
   expect(r.redacted).toBe('e-mail: [EMAIL]');
 });
-// ── Kod pocztowy BEZ myślnika przy kotwicy adresowej (krok 10b) ──
+// ── Kod pocztowy bez myślnika przy kotwicy adresowej (passPostalNoHyphen) ──
 test('kod pocztowy bez myślnika po adresie (65048 Zielona Góra)', () => {
   const r = redactPII('ul. Krótka 5, 65048 Zielona Góra');
   expect(r.redacted).toBe('[ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]');
@@ -1117,12 +1117,12 @@ test('5 cyfr BEZ kotwicy adresowej NIE są kodem pocztowym', () => {
     expect(redactPII(q).redacted).toBe(q);
   }
 });
-test('krok 13c nie psuje idempotencji', () => {
+test('passPersonSoloDict nie psuje idempotencji', () => {
   const once = redactPII('Sprawę Kowalskiego i Wiśniewskiej umorzono').redacted;
   expect(redactPII(once).redacted).toBe(once);
 });
 
-// ── Nazwiska rozpoznane MORFOLOGICZNIE (spoza słownika: -ski/-cki/-icz/-czyk) ──
+// ── Nazwiska rozpoznane morfologicznie (spoza słownika: -ski/-cki/-icz/-czyk) ──
 test('rzadkie nazwisko solo w mianowniku (Fiołkowska)', () => {
   const r = redactPII('Fiołkowska wygrała przetarg na dostawę mebli.');
   expect(r.redacted).toContain('[IMIĘ I NAZWISKO]');
@@ -1156,7 +1156,7 @@ test('małżonkowie o wspólnym nazwisku (Anna i Jan Kowalscy) — nic nie wycie
   expect(r.redacted.includes('Kowalscy')).toBe(false);
 });
 
-// ── ANTY-NADMASKOWANIE morfologiczne: przymiotnik w nazwie instytucji/geo NIE jest nazwiskiem ──
+// ── Anty-nadmaskowanie morfologiczne: przymiotnik w nazwie instytucji/geo nie jest nazwiskiem ──
 test('nazwy instytucji z przymiotnikiem -ski/-cki pozostają nietknięte', () => {
   const clean = [
     'Uniwersytet Warszawski ogłosił konkurs.',
@@ -1175,11 +1175,11 @@ test('rzeczownik przed nazwiskiem w dopełniaczu ZOSTAJE (Zaległości Trzebiato
 });
 
 // ── Poprawki precyzji z audytu optymalizacyjnego (v0.30) ──
-test('(a3) zwykły wyraz + imię NIE jest maskowany (Wczoraj Anna, Umowa Marii)', () => {
+test('passPersonPairs: zwykły wyraz + imię NIE jest maskowany (Wczoraj Anna, Umowa Marii)', () => {
   expect(redactPII('Wczoraj Anna wróciła z urlopu.').redacted).toBe('Wczoraj Anna wróciła z urlopu.');
   expect(redactPII('Umowa Marii została podpisana.').redacted).toBe('Umowa Marii została podpisana.');
 });
-test('(a3) „Nazwisko Imię" w nagłówku e-maila nadal maskowane (From: Ejkszto Anna)', () => {
+test('passPersonPairs: „Nazwisko Imię" w nagłówku e-maila nadal maskowane (From: Ejkszto Anna)', () => {
   const r = redactPII('From: Ejkszto Anna');
   expect(r.redacted.includes('Ejkszto')).toBe(false);
 });
@@ -1654,7 +1654,7 @@ test('URL bez danych osobowych zostaje nietknięty (też z kapitalizowaną ście
 test('URL: detektory nazwisk/telefonów nie rozbijają adresu (ochrona sentinelami)', () => {
   const t = 'Profil https://intranet.firma.pl/osoby/Jan-Kowalski?tab=dane w systemie.';
   const r = redactPII(t, { pseudonyms: true });
-  // adres pozostaje JEDNYM spójnym URL-em — bez rozerwania maską w środku ścieżki
+  // adres pozostaje jednym spójnym URL-em — bez rozerwania maską w środku ścieżki
   expect(r.redacted).toContain('https://intranet.firma.pl/osoby/Jan-Kowalski?tab=dane');
 });
 
@@ -1795,8 +1795,8 @@ test('OCR: wielkie I w środku nazwiska („KowaIski") — całe słowo w masce,
 });
 
 // ── Petycja do Urzędu Marszałkowskiego — nad/niedomaskowania z realnego pisma (v0.46.17) ──
-// „Urząd/Urzędu Marszałkowski/ego" to nazwa instytucji, NIE osoba — „marszałkowski" trafił do
-// NON_SURNAME_ADJ. Osoba nazwiskiem „Marszałkowski" NADAL łapana w parze z imieniem.
+// „Urząd/Urzędu Marszałkowski/ego" to nazwa instytucji, nie osoba — „marszałkowski" trafił do
+// NON_SURNAME_ADJ. Osoba nazwiskiem „Marszałkowski" nadal łapana w parze z imieniem.
 test('przymiotnik urzędowy „Marszałkowskiego" nie jest osobą; instytucja zostaje', () => {
   const t = 'platformach społecznościowych Urzędu Marszałkowskiego Województwa Śląskiego w Katowicach';
   expect(redactPII(t, { pseudonyms: true }).redacted).toBe(t);
@@ -1818,7 +1818,7 @@ test('adres WERSALIKAMI (skan/OCR) maskowany jak zapis małą literą', () => {
     const r = redactPII(t, { pseudonyms: true });
     expect(r.redacted).toBe('[ADRES]');
   }
-  // adres OSOBY WERSALIKAMI (dawniej wyciekał) — zamaskowany w całości
+  // adres osoby wersalikami (dawniej wyciekał) — zamaskowany w całości
   const os = redactPII('Zamieszkały UL. KWIATOWA 5', { pseudonyms: true });
   expect(os.redacted.includes('KWIATOWA')).toBe(false);
   // „UL" bez kropki i numeru to nie adres (brak FP)
@@ -1837,9 +1837,9 @@ test('miejscowość z anotacją jednostki TERYT „(miasto)/(gmina …)" maskowa
   expect(redactPII('Wisła (rzeka)', { pseudonyms: true }).redacted).toBe('Wisła (rzeka)');
 });
 
-// ── Eponimy uliczne (patroni) BEZPOŚREDNIO po kotwicy NIE są osobą (v0.46.18) ──
+// ── Eponimy uliczne (patroni) bezpośrednio po kotwicy nie są osobą (v0.46.18) ──
 // „ulica/rondo/plac X" (też z rangą „ul. gen. X") — to nazwa ulicy, nie człowiek. Strażnik jest
-// ZACHOWAWCZY: chroni patrona tuż po kotwicy w jednej linii, bez mostkowania spójników (to
+// Zachowawczy: chroni patrona tuż po kotwicy w jednej linii, bez mostkowania spójników (to
 // wchłaniało realne osoby — patrz test regresji niżej). Drugi człon wyliczenia „X oraz Y" bywa
 // nadmaskowany — to zamaskowana nazwa ulicy, nie wyciek PII (dopuszczalne).
 test('patron ulicy bezpośrednio po kotwicy nie jest osobą', () => {
@@ -1857,11 +1857,11 @@ test('patron ulicy bezpośrednio po kotwicy nie jest osobą', () => {
   ]) {
     expect(redactPII(s, { pseudonyms: true }).redacted).toBe(s);
   }
-  // wyliczenie: PIERWSZY patron (tuż po kotwicy) zawsze chroniony
+  // wyliczenie: pierwszy patron (tuż po kotwicy) zawsze chroniony
   const enl = 'Do kolizji doszło u zbiegu ulic Jana Kilińskiego oraz Stefana Batorego.';
   expect(redactPII(enl, { pseudonyms: true }).redacted).toContain('Jana Kilińskiego');
 });
-// REGRESJA (audyt v0.46.18): osoba w NASTĘPNEJ klauzuli/wierszu po eponimie MUSI być maskowana —
+// Regresja (audyt v0.46.18): osoba w następnej klauzuli/wierszu po eponimie musi być maskowana —
 // strażnik uliczny działa tylko w obrębie jednej linii i nie wchłania osoby przez „,"/„\n"/kropkę.
 test('osoba po eponimie ulicznym (nowa linia/przecinek/kropka) NADAL maskowana', () => {
   const a = redactPII('Miejsce: skwer Wojciecha Korfantego\nRoman Dmowski zeznał, że tam był.', { pseudonyms: true }).redacted;
@@ -1883,10 +1883,10 @@ test('REGRESJA: realna osoba w sąsiedztwie słowa „ulica" NADAL maskowana', (
   const c = redactPII('Obecni byli Jan Kowalski oraz Anna Nowak.', { pseudonyms: true }).redacted;
   expect(c.includes('Jan Kowalski')).toBe(false);
   expect(c.includes('Anna Nowak')).toBe(false);
-  // ranga/tytuł BEZ kotwicy ulicznej NIE chroni osoby (gen./ks. to człowiek, nie patron ulicy)
+  // ranga/tytuł bez kotwicy ulicznej nie chroni osoby (gen./ks. to człowiek, nie patron ulicy)
   expect(redactPII('Rozkaz wydał gen. Jan Kowalski osobiście.', { pseudonyms: true }).redacted.includes('Jan Kowalski')).toBe(false);
   expect(redactPII('Mszę odprawił ks. Jan Kowalski.', { pseudonyms: true }).redacted.includes('Jan Kowalski')).toBe(false);
-  // ulica Z NUMEREM (adres) + nowa linia + osoba — osoba nadal maskowana (adres to [ADRES], nie kotwica)
+  // ulica z numerem (adres) + nowa linia + osoba — osoba nadal maskowana (adres to [ADRES], nie kotwica)
   expect(redactPII('Biuro: ul. Zielona 5\nJan Kowalski złożył wniosek.', { pseudonyms: true }).redacted.includes('Jan Kowalski')).toBe(false);
 });
 
@@ -1901,14 +1901,14 @@ test('adres z typem ulicy bez skrótu (Rondo/most/skwer/bulwar) maskowany; „Pa
   expect(redactPII('zam. Rondo Romana Dmowskiego 3/7 w Warszawie', { pseudonyms: true }).redacted).toContain('[ADRES]');
   expect(redactPII('biuro: skwer Kościuszki 12', { pseudonyms: true }).redacted).toContain('[ADRES]');
   expect(redactPII('mieszka przy most Piłsudskiego 5', { pseudonyms: true }).redacted).toContain('[ADRES]');
-  // „park" WYKLUCZONE — częsta nazwa instytucji („Park Narodowy … 2024") dawała FP
+  // „park" wykluczone — częsta nazwa instytucji („Park Narodowy … 2024") dawała FP
   const neg = 'Park Narodowy Gór Stołowych 2024 obchodzi jubileusz.';
   expect(redactPII(neg, { pseudonyms: true }).redacted).toBe(neg);
-  // ROK (4 cyfry 1900–2099) po nowym typie obiektu to NIE numer domu (regresja z audytu v0.46.19)
+  // Rok (4 cyfry 1900–2099) po nowym typie obiektu to nie numer domu (regresja z audytu v0.46.19)
   for (const y of ['Bulwar Filadelfijski 1998 objęty rewitalizacją.', 'Most Grunwaldzki 1910 wybudowano.', 'Skwer Powstańców 1944 odsłonięto.']) {
     expect(redactPII(y, { pseudonyms: true }).redacted).toBe(y);
   }
-  // …ale realny numer domu (mała liczba/mieszkanie) NADAL adresem
+  // …ale realny numer domu (mała liczba/mieszkanie) nadal adresem
   expect(redactPII('Bulwar Nadmorski 10', { pseudonyms: true }).redacted).toBe('[ADRES]');
 });
 test('kotwica IBAN nie zjada liter następnego słowa (diakrytyk po IBAN)', () => {
@@ -1925,7 +1925,7 @@ test('imię na końcu wiersza przed potwierdzonym nazwiskiem w następnej linii 
     expect(/\bJan\b/.test(r)).toBe(false);
     expect(r.includes('Wiśniewski')).toBe(false);
   }
-  // proza na końcu wiersza (nie imię) NIE jest wciągana do maski
+  // proza na końcu wiersza (nie imię) nie jest wciągana do maski
   expect(redactPII('protokół\nKowalski podpisał.', { pseudonyms: true }).redacted).toContain('protokół');
 });
 test('nazwisko panieńskie „Imię z Nazwiskoskich"/„z domu" — jedna osoba; narzędnik „z Kowalskim" — dwie', () => {
@@ -1935,7 +1935,7 @@ test('nazwisko panieńskie „Imię z Nazwiskoskich"/„z domu" — jedna osoba;
     expect(/Lewandowskich|Kowalskich|Nowaków/.test(r)).toBe(false);
   }
   expect(redactPII('Maria Nowak z domu Zielińska przyszła.', { pseudonyms: true }).redacted.includes('Zielińska')).toBe(false);
-  // REGRESJA: narzędnik „z Kowalskim" = „z kimś" (DWIE osoby) — imię MUSI zostać
+  // Regresja: narzędnik „z Kowalskim" = „z kimś" (dwie osoby) — imię musi zostać
   const instr = redactPII('Anna rozmawiała z Kowalskim wczoraj.', { pseudonyms: true }).redacted;
   expect(instr).toContain('Anna');
   // miejsce po „z" nie jest osobą
@@ -1949,7 +1949,7 @@ test('REGON/PESEL po ETYKIECIE z wieloma wyrazami wtrącenia maskowane', () => {
 test('przymiotnik ODMIEJSCOWY powiatowy po roli to nie nazwisko; realne nazwisko po roli — tak', () => {
   expect(redactPII('Z upoważnienia Starosty Wołomińskiego', { pseudonyms: true }).redacted).toBe('Z upoważnienia Starosty Wołomińskiego');
   expect(redactPII('Decyzja Wojewody Mazowieckiego', { pseudonyms: true }).redacted).toBe('Decyzja Wojewody Mazowieckiego');
-  // po roli realne nazwisko NADAL maskowane
+  // po roli realne nazwisko nadal maskowane
   expect(redactPII('Prezes Kowalski podpisał uchwałę.', { pseudonyms: true }).redacted.includes('Kowalski')).toBe(false);
 });
 test('zdrobnienia imion w parze z nazwiskiem maskowane; samo zdrobnienie/wyraz pospolity — nie', () => {
@@ -1958,13 +1958,13 @@ test('zdrobnienia imion w parze z nazwiskiem maskowane; samo zdrobnienie/wyraz p
     expect(/Kowalski|Nowak|Wiśniewski|Dąbrowska/.test(r)).toBe(false);
     expect(r).toContain('[OSOBA-A]');
   }
-  // samo zdrobnienie / zdrobnienie + wyraz pospolity (mała litera) — NIE maskowane (brak nazwiska)
+  // samo zdrobnienie / zdrobnienie + wyraz pospolity (mała litera) — nie maskowane (brak nazwiska)
   for (const neg of ['Janek poszedł do sklepu.', 'To była wielka anka zamówień.', 'Elka wisiała na ścianie.']) {
     expect(redactPII(neg, { pseudonyms: true }).redacted).toBe(neg);
   }
 });
 
-// ── Telefon: most „pod numerem" po kotwicy; bez kotwicy 2-3-2-2 świadomie NIE maskowany (v0.46.18) ──
+// ── Telefon: most „pod numerem" po kotwicy; bez kotwicy 2-3-2-2 świadomie nie maskowany (v0.46.18) ──
 test('telefon 2-3-2-2 po kotwicy „kontakt … pod numerem" (też przez nową linię)', () => {
   const t = 'Prosimy o kontakt telefoniczny pod numerem\n32 774 91 55 lub adresem.';
   const r = redactPII(t, { pseudonyms: true }).redacted;
@@ -2040,7 +2040,7 @@ test('K02: odstępy wokół maski osoby zostają co do znaku (tabulatory, wyrów
   // małżonkowie: spójnik i odstępy z oryginału („oraz" nie zamienia się w „i")
   expect(redactPII('Anna oraz Jan Kowalscy').redacted).toBe('[IMIĘ I NAZWISKO] oraz [IMIĘ I NAZWISKO]');
   expect(redactPII('Anna   i   Jan Kowalscy', { pseudonyms: true }).redacted).toBe('[OSOBA-A]   i   [OSOBA-A]');
-  // rola/tytuł przed maską z oryginalnym odstępem (para morfologiczna, wyzwalacz, WERSALIKI, OCR)
+  // rola/tytuł przed maską z oryginalnym odstępem (para morfologiczna, wyzwalacz, wersaliki, OCR)
   expect(redactPII('Prezes\tGzowski\tKraków').redacted).toBe('Prezes\t[IMIĘ I NAZWISKO]\tKraków');
   expect(redactPII('Kierownik\tKowalski\t5000').redacted).toBe('Kierownik\t[IMIĘ I NAZWISKO]\t5000');
   expect(redactPII('Pan Dyrektor\tKowalski').redacted).toBe('Pan Dyrektor\t[IMIĘ I NAZWISKO]');
@@ -2972,7 +2972,7 @@ test('b2-fix K01: telefon po imieniu, nazwisku lub „SMS/Tel" łączonym „/" 
 test('b2-fix K26: „ZŁ…" wersalikami i „Gr." po numerze to nie waluta; kwoty w złotych i groszach bez zmian', () => {
   masked([
     ['602 345 678 ZŁOTÓW', '[TELEFON] ZŁOTÓW'],
-    // K47: szyk odwrócony WERSALIKAMI z nazwiskiem ze słownika to osoba
+    // K47: szyk odwrócony wersalikami z nazwiskiem ze słownika to osoba
     ['NOWAK JAN 602 345 678 ZŁOŻYŁ WNIOSEK', `${N} [TELEFON] ZŁOŻYŁ WNIOSEK`],
     ['601 234 567 złożył wniosek', '[TELEFON] złożył wniosek'],
     ['602 345 678 Gr. A', '[TELEFON] Gr. A'],
@@ -4252,7 +4252,7 @@ test('K36: imię z homoglifem OCR przed maską i nazwisko dwuczłonowe WERSALIKA
     ['STANISŁAW KOWALSKI-WOLSKI', N],
     ['J0ANNA N0WAK-KOWALSKA', N],
   ]);
-  // ten sam klucz osoby w zapisie WERSALIKAMI i Titlecase
+  // ten sam klucz osoby w zapisie wersalikami i Titlecase
   masked([['Pani ANNA NOWAK-KOWALSKA\nPani Anna Nowak-Kowalska', 'Pani [OSOBA-A]\nPani [OSOBA-A]']], { pseudonyms: true });
 });
 test('K36 pułapki: kody z cyframi, nazwy instytucji i miejscowości z łącznikiem bez zmian', () => {
@@ -5928,7 +5928,7 @@ test('b6 §8 p.3: ścieżka profilu użytkownika (Windows, Linux, macOS) — seg
     String.raw`Binarka w /usr/bin/ssh oraz C:\Program Files\Git\bin`,
     'Katalog /home/projekty/raport. Projekty zamknięto.',
   ]);
-  // imię i nazwisko w nazwie katalogu maskuje FAZA 4 w całości
+  // imię i nazwisko w nazwie katalogu maskuje faza 4 w całości
   masked([
     [String.raw`Plik: C:\Users\Tomasz Kamiński\Documents\raport.docx`, String.raw`Plik: C:\Users\[IMIĘ I NAZWISKO]\Documents\raport.docx`],
     [String.raw`C:\Users\Jan.Kowalski\AppData`, String.raw`C:\Users\[IMIĘ I NAZWISKO]\AppData`],
@@ -6007,7 +6007,7 @@ test('b6 fix1: słaba etykieta „Alias"/„Konto AD" bierze tylko uchwyt osoby 
     '    alias: pamiec\n# pamiec podręczna',
     'alias: wnioski_2026\nIndeks wnioski_2026 zawiera dane.',
   ]);
-  // nazwisko pod słabą etykietą maskuje FAZA 4 jako osobę, bez rozbijania par
+  // nazwisko pod słabą etykietą maskuje faza 4 jako osobę, bez rozbijania par
   masked([
     ['Alias: Nowak\nPani Nowak złożyła reklamację.', 'Alias: [IMIĘ I NAZWISKO]\nPani [IMIĘ I NAZWISKO] złożyła reklamację.'],
     ['Ustalono, że Marek Kowal ma\nAlias: Kowal\nSprawę prowadzi Jan Kowal.', 'Ustalono, że [IMIĘ I NAZWISKO] ma\nAlias: Kowal\nSprawę prowadzi [IMIĘ I NAZWISKO].'],
@@ -6032,7 +6032,7 @@ test('b6 fix1: konta wbudowane i zastępniki pod „User name", „sAMAccountNam
   ]);
   masked([
     ['User name: anowak\nanowak zalogował się.', `User name: ${LG}\n${LG} zalogował się.`],
-    // osoba WIELKIMI literami w polu loginu — cała para jako osoba, bez jawnego imienia (fix2)
+    // osoba wielkimi literami w polu loginu — cała para jako osoba, bez jawnego imienia (fix2)
     ['User name: ZIELINSKA KATARZYNA', 'User name: [IMIĘ I NAZWISKO]'],
     ['Login: ZIELINSKA KATARZYNA', 'Login: [IMIĘ I NAZWISKO]'],
   ]);
@@ -6120,7 +6120,7 @@ test('b6 fix2: „Imię.Nazwisko" i nazwisko pod etykietą konta zostają osobą
       ['User name: Jan.Kowalski\nJan Kowalski', 'User name: [OSOBA-A]\n[OSOBA-A]'],
       ['User name: Nowak\nPani Nowak zgłosiła awarię.', 'User name: [OSOBA-A]\nPani [OSOBA-A] zgłosiła awarię.'],
       ['sAMAccountName: Nowak\nPan Nowak zgłosił awarię.', 'sAMAccountName: [OSOBA-A]\nPan [OSOBA-A] zgłosił awarię.'],
-      // osoba WIELKIMI literami w polu loginu dostaje tę samą etykietę co w treści
+      // osoba wielkimi literami w polu loginu dostaje tę samą etykietę co w treści
       ['Pracownik: Adam Nowak\nUser name: ADAM NOWAK\n', 'Pracownik: [OSOBA-A]\nUser name: [OSOBA-A]\n'],
       ['User name: SYLWIA KRAWCZYK\nSylwia Krawczyk zgłosiła awarię.', 'User name: [OSOBA-A]\n[OSOBA-A] zgłosiła awarię.'],
     ],
@@ -6139,7 +6139,7 @@ test('b6 fix2: para WIELKIMI literami z pola loginu maskowana też w odwrotnym s
   // pułapka: pojedynczy wyraz w ciągu wielkich liter obok innego to może być inna osoba,
   // a placeholdery z nawiasem nie są danymi
   keep(['ZAŁĄCZNIK NR 2']);
-  // K48: imię i nazwisko-homograf WERSALIKAMI to osoba; login obok zostaje osobną maską
+  // K48: imię i nazwisko-homograf wersalikami to osoba; login obok zostaje osobną maską
   masked([['Kontakt: TOMASZ WRÓBEL [LOGIN]', `Kontakt: ${N} [LOGIN]`]]);
 });
 test('b6 fix2: „User name" i „sAMAccountName" nie rozbijają osób i nie rozlewają zwykłych wyrazów', () => {
@@ -6187,7 +6187,7 @@ test('b6 fix2: katalogi działów, sekcje serwisu, zastępniki i konta usług w 
   ]);
 });
 
-// ── Partia b7 (FIX_CAREFULLY): tabele, WERSALIKI, homografy, odmiana imion, adres po etykiecie ──
+// ── Partia b7 (FIX_CAREFULLY): tabele, wersaliki, homografy, odmiana imion, adres po etykiecie ──
 const NR = '[NR-REJESTRACYJNY]';
 const PS = '[PESEL]';
 test('b7 K61: nagłówek CSV/TSV/Markdown z kolumną osoby to kotwica dla komórek pod nim', () => {
@@ -7548,7 +7548,7 @@ test('fix3: tablica „Po", login pod kolejną etykietą konta, święty w dope�
 });
 test('dom2-fix1: rola procesowa WERSALIKAMI w dopełniaczu, ulica „Jana Pawła II" z lokalem, wieś na Ł/Ś nad kodem', () => {
   masked([
-    // osoba WERSALIKAMI po roli w dopełniaczu i celowniku
+    // osoba wersalikami po roli w dopełniaczu i celowniku
     ['WEZWANIE ŚWIADKA ANNY KOWALSKIEJ\nWzywa się Panią na rozprawę.', `WEZWANIE ŚWIADKA ${N}\nWzywa się Panią na rozprawę.`],
     [
       'W OBECNOŚCI DŁUŻNIKA JANA NOWAKA ORAZ ŚWIADKA ADAMA RÓŻAŃSKIEGO DOKONAŁ ZAJĘCIA.',
@@ -7608,7 +7608,7 @@ test('dom2-fix2: ulica „Jana Pawła II" pod etykietą WERSALIKAMI, w kluczu z 
     ['Jan,Kowalski,Jana Pawła II 30/2,Lubień', `Jan,${N},[ADRES],Lubień`],
     ['"Halyna Roman","hroman","","Jana Pawła II 5/2","34-500","Lubień"', '"Halyna Roman","hroman","","[ADRES]","[KOD-POCZTOWY]","Lubień"'],
     ['Halyna Roman;hroman;;Jana Pawła II 5/2;34-500;Lubień', 'Halyna Roman;hroman;;[ADRES];[KOD-POCZTOWY];Lubień'],
-    // etykiety WERSALIKAMI, „Korespondencja:", miejscowość przed przecinkiem, koperta bez kodu
+    // etykiety wersalikami, „Korespondencja:", miejscowość przed przecinkiem, koperta bez kodu
     ['ZAM. Jana Pawła II 5/2', 'ZAM. [ADRES]'],
     ['ŚWIADEK ZOFIA KOWAL, ZAM. Jana Pawła II 5/2, Lubień', `ŚWIADEK ${N}, ZAM. [ADRES], Lubień`],
     ['ZAMIESZKAŁY: Jana Pawła II 5/2', 'ZAMIESZKAŁY: [ADRES]'],
@@ -7665,7 +7665,7 @@ test('dom2-fix3: ulica „Jana Pawła II" z numerem w wierszu z rolą, bez lokal
     ['"Halyna Roman";"hroman";"";"Jana Pawła II 5";"Lubień"', '"Halyna Roman";"hroman";"";"[ADRES]";"Lubień"'],
     ['Halyna Roman,hroman,,Jana Pawła II 5a,Lubień', 'Halyna Roman,hroman,,[ADRES],Lubień'],
     ['Halyna Roman, hroman, , Jana Pawła II 5/2, Lubień', 'Halyna Roman, hroman, , [ADRES], Lubień'],
-    // miejscowość przed ulicą: bez lokalu, dwuwyrazowa, WERSALIKAMI, po osobie, z kodem w nawiasie
+    // miejscowość przed ulicą: bez lokalu, dwuwyrazowa, wersalikami, po osobie, z kodem w nawiasie
     ['Lubień, Jana Pawła II 30', 'Lubień, [ADRES]'],
     ['Nowy Targ, Jana Pawła II 30/2', `${M}, [ADRES]`],
     ['KRAKÓW, Jana Pawła II 30/2', 'KRAKÓW, [ADRES]'],
@@ -7673,11 +7673,11 @@ test('dom2-fix3: ulica „Jana Pawła II" z numerem w wierszu z rolą, bez lokal
     ['zamieszkała w Lubniu (34-500), Jana Pawła II 30/2', 'zamieszkała w Lubniu ([KOD-POCZTOWY]), [ADRES]'],
     ['Kraków, Jana Pawła II 30/2 - lokal powódki.', `${M}, [ADRES] - lokal powódki.`],
     ['Halina Rój, Kraków, Jana Pawła II 14/3 (parter)', `${N}, ${M}, [ADRES] (parter)`],
-    // koperta i stopka: bez miejscowości pod ulicą, adresat WERSALIKAMI
+    // koperta i stopka: bez miejscowości pod ulicą, adresat wersalikami
     ['Jan Nowak\nJana Pawła II 5/2', `${N}\n[ADRES]`],
     ['Anna Nowak\nJana Pawła II 5/2\ntel. 601 234 567', `${N}\n[ADRES]\ntel. [TELEFON]`],
     ['JAN KOWALSKI\nJana Pawła II 5/2\nLubień', `${N}\n[ADRES]\nLubień`],
-    // etykiety bez kropki, z myślnikiem, WERSALIKAMI i z imiesłowem
+    // etykiety bez kropki, z myślnikiem, wersalikami i z imiesłowem
     ['ZAM: Jana Pawła II 5/2', 'ZAM: [ADRES]'],
     ['Zamieszkały - Jana Pawła II 5/2', 'Zamieszkały - [ADRES]'],
     ['Adres do doręczeń - Jana Pawła II 5/2', 'Adres do doręczeń - [ADRES]'],
@@ -7735,7 +7735,7 @@ test('dom3: inwariant ulicy z patronem — para z numerem domu to [ADRES] albo o
     ['Treny Jana Kochanowskiego II 3.', `Treny ${N} II 3.`],
     ['Ranking: Kazimierza Wielkiego III 2;', `Ranking: ${N} III 2;`],
     ['mieszkająca w Lubniu, Adama Mickiewicza 5 razy odwiedzała', `mieszkająca w Lubniu, ${N} 5 razy odwiedzała`],
-    // WERSALIKI: „PRZY" z numerem domu to adres, bez numeru ulica zostaje jawna
+    // Wersaliki: „PRZY" z numerem domu to adres, bez numeru ulica zostaje jawna
     ['DOM PRZY STANISŁAWA WYSPIAŃSKIEGO 5.', `DOM PRZY ${A}.`],
     ['PROTOKÓŁ SPORZĄDZONO W LOKALU PRZY JANA KOWALSKIEGO 5/2.', `PROTOKÓŁ SPORZĄDZONO W LOKALU PRZY ${A}.`],
     ['MIESZKANIE PRZY ADAMA MICKIEWICZA 5 M. 2', `MIESZKANIE PRZY ${A}`],
@@ -7786,7 +7786,7 @@ test('dom3: inwariant ulicy z patronem — para z numerem domu to [ADRES] albo o
       for (const end of [' 30 m. 2 zalega z czynszem.', ' 30 lok. 2', ' 30 w Krakowie.', ' 30/2.', ' 30 m. 3 (powód Jan Nowak)', ' 14, Kraków']) {
         const t = pre + p + end;
         expect(redactPII(t).redacted, t).not.toContain(p);
-        // WERSALIKAMI bez kotwicy tylko z lokalem (para WERSALIKAMI spoza słownika nazwisk nie jest osobą)
+        // Wersalikami bez kotwicy tylko z lokalem (para wersalikami spoza słownika nazwisk nie jest osobą)
         if (/ (?:m|lok)\. /.test(end)) expect(redactPII(t.toUpperCase()).redacted, t.toUpperCase()).not.toContain(p.toUpperCase());
       }
     }
@@ -7818,7 +7818,7 @@ test('dom3: patron z liczbą rzymską bez kotwicy — maska osoby jak w v0.46.23
     // tabulator to granica komórki — głowa nazwy albo wyraz uliczny z sąsiedniej kolumny nie robi z osoby patrona
     ['Logistyka\tPlac\tKowalczyk Anna', `Logistyka\tPlac\t${N}`],
     ['Nagroda\tJana Lisa\tKraków', `Nagroda\t${N}\tKraków`],
-    // pisma kadrowe WERSALIKAMI przed osobą
+    // pisma kadrowe wersalikami przed osobą
     ['WYPOWIEDZENIE UMOWY JANA KOWALSKIEGO', `WYPOWIEDZENIE UMOWY ${N}`],
     ['LISTA PŁAC JANA NOWAKA', `LISTA PŁAC ${N}`],
     ['LIST MOTYWACYJNY JANA NOWAKA', `LIST MOTYWACYJNY ${N}`],

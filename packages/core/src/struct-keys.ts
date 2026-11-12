@@ -1,12 +1,12 @@
 // Słownik kluczy XML/JSON i nagłówków kolumn, które są kotwicą danej osobowej, oraz ich rodzaje.
 import { type PiiType } from './types.js';
 
-// Tag „<Surname>” albo klucz „"lastName"” to kotwica jak etykieta formularza; maskujemy samą
-// wartość, więc JSON dalej się parsuje. Klucz normalizuje normStructKey („first_name” = „FirstName”).
 export type StructKind =
   | 'first' | 'surname' | 'fullname' | 'name' | 'person' | 'phone' | 'email' | 'addr'
   | 'city' | 'postal' | 'birth' | 'login' | 'pesel' | 'nip' | 'regon'
   | 'passport' | 'idcard' | 'krs' | 'license' | 'plate' | 'account';
+// Tag „<Surname>” albo klucz „"lastName"” to kotwica jak etykieta formularza; maskujemy samą
+// wartość, więc JSON dalej się parsuje. Klucz normalizuje normStructKey („first_name” = „FirstName”).
 export const STRUCT_KEYS = new Map<string, StructKind>(Object.entries({
   imie: 'first', imię: 'first', imiona: 'first', firstname: 'first', givenname: 'first', middlename: 'first',
   // pola e-Deklaracji, JPK i ZUS („<ImiePierwsze>”, „imie_ojca”)

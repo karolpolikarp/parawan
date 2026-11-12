@@ -226,11 +226,11 @@ export function passCard(ctx: RedactCtx): void {
   });
 }
 
-// Telefon, polskie numery 9-cyfrowe, trzy tryby. Kotwicowy (b) biegnie przed prefiksowym (a), żeby
-// placeholder nie przerwał łańcucha wyliczenia po kotwicy. (c) to fallback bez kontekstu.
+// Telefon, polskie numery 9-cyfrowe, trzy tryby. Kotwicowy biegnie przed prefiksowym, żeby
+// placeholder nie przerwał łańcucha wyliczenia po kotwicy. Tryb bez kontekstu domyka resztę.
 // Separatory wyliczenia. Po ścisłym człon musi być całym numerem bez dalszych cyfr w wierszu:
-// „lub 0048 61 852 33 48" przejmuje wtedy w całości tryb (a). „bądź" z granicą polskich liter,
-// bo \b nie widzi granicy przy „ź".
+// „lub 0048 61 852 33 48" przejmuje wtedy w całości tryb prefiksowy. „bądź" z granicą polskich
+// liter, bo \b nie widzi granicy przy „ź".
 const PHONE_ENUM_SEP_LOOSE = String.raw`(?:,|\boraz\b|\bi\b)`;
 const PHONE_ENUM_SEP_STRICT = String.raw`(?:;|\/|\blub\b|\balbo\b|(?<![a-ząćęłńóśźż])bądź(?![a-ząćęłńóśźż]))`;
 // Prefiks kraju („+48", „0048", „(+48)", „48" sklejone z numerem, „+48 (0)22") i zero międzymiastowe
@@ -244,8 +244,8 @@ const PHONE_NOT_AMOUNT = String.raw`(?![ \t]*(?:,\d{2})?[ \t]*(?:zł|PLN|EUR|USD
 // Słowo przerwy w mocnej kotwicy. Skróty z wykazów sprzętu („Telefon nr inw. 012345678", „Fax nr
 // fabr. 12 345 67 89") nie są przerwą: za nimi stoi numer składnika majątku.
 const PHONE_GAP_WORD = String.raw`(?!(?:inw|ewid|fabr|ser|kat|poz|szt|egz|lp)\.)[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]{2,15}`;
-// Kotwice trybu (b). Linia vCard wymaga parametru przed dwukropkiem („TEL;TYPE=WORK:…"), więc
-// „Hotel; pokój 22 123 45 67" odpada. Mocne kotwice (tel., telefon, nr tel., fax) dopuszczają do
+// Kotwice trybu kotwicowego. Linia vCard wymaga parametru przed dwukropkiem („TEL;TYPE=WORK:…"),
+// więc „Hotel; pokój 22 123 45 67" odpada. Mocne kotwice (tel., telefon, nr tel., fax) dopuszczają do
 // dwóch wyrazów przerwy w tej samej linii, gdy ostatni jest skrótem z kropką albo stoi przed
 // dwukropkiem („tel. stacj. 22 843 21 09", „Nr tel. opiekuna: …"). Przerwa należy do kotwicy, nie do
 // strażnika w callbacku: odrzucone dopasowanie zjadłoby kotwicę leżącą dalej. „kom." (Komisja)
@@ -302,7 +302,7 @@ const RE_PHONE_ENUM_SPLIT = new RegExp(String.raw`\s*${PHONE_ENUM_SEP}\s*`, 'i')
 const RE_PHONE_DATE_SHAPE =
   /^[\s(]*(?:\d{1,2}[.\-/](?:0?[1-9]|1[0-2])[.\-/](?:19|20)\d{2}|(?:19|20)\d{2}[.\-/](?:0?[1-9]|1[0-2])[.\-/]\d{1,2})(?!\d)/;
 
-// Strażniki trybu (c): liczba w kształcie telefonu, która telefonem nie jest.
+// Strażniki trybu bez kontekstu: liczba w kształcie telefonu, która telefonem nie jest.
 // Odstępy także twarde i wąskie: arkusze wstawiają je między grupy cyfr kwoty i przed walutą.
 const PHONE_GAP = '[ \\t\\u00A0\\u2009\\u202F]';
 const PHONE_CODES = [...CURRENCY_CODES, 'HUF', 'EURO', 'KČ', 'ZL'].join('|');
@@ -333,9 +333,10 @@ const RE_PHONE_BILLION_HEAD = /(?<!\d)[:|=;\t(][ \t]*(?!48\D)[1-9]\d{0,2}.$/;
 const RE_PHONE_ID_LABEL =
   /(?<![\p{L}])(?:pesel|nip|regon|krs|dow[oó]d\p{L}*|paszport\p{L}*|tel|telefon\p{L}*|kom|komórk\p{L}*|fax|faks|kontakt\p{L}*|nr|numer\p{L}*|id)(?![\p{L}])/iu;
 /**
- * Czy liczba w kształcie telefonu to kwota? Tryb (c) nie ma kotwicy, więc decyduje otoczenie:
- * waluta lub mnożnik obok, grosze, ogon większej liczby po etykiecie pola, okrągłe setki milionów.
- * Tryb (b) tego nie sprawdza: „tel. 500 000 000" jest telefonem.
+ * Czy liczba w kształcie telefonu to kwota? Tryb bez kontekstu nie ma kotwicy, więc decyduje
+ * otoczenie: waluta lub mnożnik obok, grosze, ogon większej liczby po etykiecie pola, okrągłe setki
+ * milionów.
+ * Tryb kotwicowy tego nie sprawdza: „tel. 500 000 000" jest telefonem.
  */
 function looksLikeAmount(full: string, offset: number, m: string): boolean {
   const end = offset + m.length;
@@ -407,19 +408,19 @@ function gluedToIdentifier(full: string, offset: number, len: number): boolean {
   if (!/[\p{L}_]/u.test(next)) return false;
   return !(/[wzoiu]/.test(next) && !/[\p{L}\d_]/u.test(full.charAt(offset + len + 1)) && !/[\p{L}\d]$/u.test(before));
 }
-// Tryb (a): nawias przed prefiksem należy do numeru. Strażnik przepisów liczony od „+"/„00",
+// Tryb prefiksowy: nawias przed prefiksem należy do numeru. Strażnik przepisów liczony od „+"/„00",
 // nie od nawiasu.
 const RE_PHONE_INTL = /(?<![\d])(\([ \t]?)?((?:\+|00)[\s]?48(?:[ \t]?\(0\))?(?:[\s\-().]{0,3}\d){9})(?!\.?\d)/g;
-// Tryb (c): bez kontekstu tylko 3-3-3, 9 cyfr ciągiem lub kierunkowy w nawiasie. Grupowanie 2-3-2-2
+// Tryb bez kontekstu: tylko 3-3-3, 9 cyfr ciągiem lub kierunkowy w nawiasie. Grupowanie 2-3-2-2
 // bez kotwicy to zwykle numer pozycji („Pozycja 32 774 91 55 w wykazie"). Separator tylko poziomy
 // (bez tabulatora) albo łącznik, bo kolumna liczb i komórki TSV skleiłyby się w jeden „telefon".
 const RE_PHONE_BARE =
   /(?<![\d.])(?:\(\d{2}\)[ \t]?\d{3}[ \t-]?\d{2}[ \t-]?\d{2}|\d{3}[ \u00A0\u2009\u202F-]?\d{3}[ \u00A0\u2009\u202F-]?\d{3})(?!\.?\d)/g;
 export function passPhone(ctx: RedactCtx): void {
   if (!ctx.on('TELEFON')) return;
-  // (b) kotwica + 9 cyfr, także wyliczenie; słowo zostaje, numer idzie pod maskę. Odrzucona kotwica
-  // oddaje resztę dopasowania do ponownego skanu, bo wyliczenie za numerem rekordu („Kontakt nr
-  // 512 345 678, tel. 22 843 21 09") ma własną kotwicę.
+  // Tryb kotwicowy: kotwica + 9 cyfr, także wyliczenie; słowo zostaje, numer idzie pod maskę.
+  // Odrzucona kotwica oddaje resztę dopasowania do ponownego skanu, bo wyliczenie za numerem rekordu
+  // („Kontakt nr 512 345 678, tel. 22 843 21 09") ma własną kotwicę.
   const anchored = (m: string, kw: string, sep: string, nums: string, offset: number, str: string): string => {
     if (rejectPhoneNrFiller(kw, sep, str, offset)) return `${kw}${sep}${nums.replace(RE_PHONE_ANCHORED, anchored)}`;
     const parts = nums.split(RE_PHONE_ENUM_SPLIT);
@@ -443,7 +444,7 @@ export function passPhone(ctx: RedactCtx): void {
     return `${kw}${sep}${out}`;
   };
   ctx.text = ctx.text.replace(RE_PHONE_ANCHORED, anchored);
-  // (a) prefiks +48/0048 razem z zerem „(0)". Nawias oddajemy tylko, gdy numer domyka się sam
+  // Tryb prefiksowy: +48/0048 razem z zerem „(0)". Nawias oddajemy tylko, gdy numer domyka się sam
   // („(+48 512 345 678)." → „([TELEFON])."). Przy „+" bez strażnika przepisów, bo żaden numer
   // przepisu nie zaczyna się plusem; „00" po „nr" zostaje pod strażnikiem („Zamówienie nr 0048512345678").
   ctx.text = ctx.text.replace(RE_PHONE_INTL, (m, open: string | undefined, num: string, offset: number) => {
@@ -453,7 +454,7 @@ export function passPhone(ctx: RedactCtx): void {
     const unbalanced = countOf(num, ')') > countOf(num, '(');
     return (unbalanced ? '' : o) + ctx.M.TELEFON;
   });
-  // (c) fallback bez kontekstu; strażniki kwot, identyfikatorów i etykiet nie-telefonu wyżej.
+  // Tryb bez kontekstu; strażniki kwot, identyfikatorów i etykiet nie-telefonu wyżej.
   ctx.text = ctx.text.replace(RE_PHONE_BARE, (m, offset: number) => {
     if (precededByLegalRef(ctx.text, offset) || precededByNonPhoneLabel(ctx.text, offset)) return m;
     const d = m.replace(/\D/g, '');

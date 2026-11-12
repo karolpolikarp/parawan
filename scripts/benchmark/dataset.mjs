@@ -405,7 +405,7 @@ export function buildDataset() {
   // daty urodzenia (z jawnym kontekstem)
   // miasto zamieszkania to dana osobowa (decyzja produktowa): marker „zamieszkały w" → maskuj miasto
   str('Wnioskodawca, ur. 12.05.1985, zamieszkały w Łodzi.', ['12.05.1985', 'Łodzi'], ['Wnioskodawca']);
-  // v0.44.2: miasto urodzenia po markerze „urodzona … w" to PII — maskowane (krok 12g)
+  // v0.44.2: miasto urodzenia po markerze „urodzona … w" to PII — maskowane (passCity)
   str('Urodzona 3.04.1992 w Poznaniu.', ['3.04.1992', 'Poznaniu'], []);
   str('Data urodzenia: 1990-01-01 (wg aktu).', ['1990-01-01'], ['wg aktu']);
   str('urodzony 07/11/1978 w Gdańsku', ['07/11/1978', 'Gdańsku'], []);
@@ -525,7 +525,7 @@ export function buildDataset() {
   // precyzja: numer wersji oprogramowania to NIE adres IP
   neg('Aktualizacja do wersji 1.2.3.4 usuwa błędy krytyczne.', ['1.2.3.4']);
   // dowód BEZ kontekstu wymaga poprawnej sumy kontrolnej (v0.30) — ABA300001 ma złą sumę,
-  // więc (jak sygnatura/kod) pozostaje; realny dowód z kontekstem „dowód…" maskuje gałąź (a)
+  // więc (jak sygnatura/kod) pozostaje; realny dowód z kontekstem „dowód…" maskuje passIdCard z kotwicą
   neg('Seria ABA300001 nie jest poprawnym numerem dowodu.', ['ABA300001']);
   neg('Wartość 12345678901 pojawiła się w logu importu.', ['12345678901']);
   // ciągi cyfr osłonięte kontekstem numeracyjnym
@@ -620,7 +620,7 @@ export function buildDataset() {
   neg('Kwota 50000 Euro oraz faktura 12345 Netto do rozliczenia.', ['50000', '12345', 'Euro', 'Netto']);
   // e-mail z polską diakrytyką w części lokalnej — maskuj W CAŁOŚCI (bez wycieku fragmentu nazwiska)
   str('Kontakt: piotr.wiśniewski@poczta.pl w sprawie umowy.', ['piotr.wiśniewski@poczta.pl'], ['sprawie']);
-  // proza małymi literami — sąsiedztwa mylące, ale zero nadmaskowania (krok 13a4 wymaga imienia+nazwiska)
+  // proza małymi literami — sąsiedztwa mylące, ale zero nadmaskowania (passPersonPairs wymaga imienia i nazwiska)
   neg('polski rynek pracy zmienia się, a wąski segment rośnie.', ['polski', 'wąski']);
   neg('mam ochotę na kawę, ala woli herbatę, ola pije wodę.', ['ochotę', 'ala', 'ola']);
   // v0.29.6: granice precyzji przy poluzowaniu WIELKOŚCI LITER w imionach/nazwiskach —

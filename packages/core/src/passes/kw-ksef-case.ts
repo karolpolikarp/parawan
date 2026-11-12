@@ -9,10 +9,10 @@ import { isValidKw, isValidNip } from '../validators.js';
 // + 2 znaki sumy, np. „5265877635-20250826-0100001AF629-AF". Sumy CRC-8 nie sprawdzamy, bo
 // numery z KSeF 1.0 jej nie przechodzą; w zamian wymagamy kotwicy „KSeF" w dokumencie.
 // Separatorem jest tylko myślnik bez spacji wokół, z łamaniem wiersza wyłącznie po nim: spacja,
-// „ - " albo łamanie przed myślnikiem scalały kolumny liczb i listy punktowane w jeden numer.
+// „ - " albo łamanie przed myślnikiem scaliłyby kolumny liczb i listy punktowane w jeden numer.
 // Miękki dywiz (U+00AD) pada wewnątrz członów jako artefakt łamania wyrazu, więc nie dzieli.
 const KSEF_SEP = '[-\\u2010-\\u2015](?:[ \\t]*\\r?\\n[ \\t\\u00A0\\u2009\\u202F]*)?';
-// Wariant „3 litery + 7 cyfr" z FA(3) jest pominięty celowo: w praktyce go nie ma, a łapał numery
+// Wariant „3 litery + 7 cyfr" z FA(3) jest pominięty celowo: w praktyce go nie ma, a łapałby numery
 // seryjne i partii („SRV2026001-20260108-000000004512-03") w dokumentach wspominających KSeF.
 const KSEF_HEAD = '(?:\\d{10}|[Mm]\\d{9})';
 const KSEF_DATE = '20\\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\\d|3[01])';

@@ -165,10 +165,11 @@ function subjectBeforeGap(before: string, subject: RegExp): boolean {
   }
   return false;
 }
-// Koniec nazwy miasta w 12f/12g: separator, koniec wiersza albo koniec tekstu. Regex jest bez flagi „m",
-// więc samo „$" oznacza koniec całego tekstu i nie łapie „zam. w Krakowie⏎PESEL …".
+// Koniec nazwy miasta po markerze zamieszkania i urodzenia: separator, koniec wiersza albo koniec
+// tekstu. Regex jest bez flagi „m", więc samo „$" oznacza koniec całego tekstu i nie łapie
+// „zam. w Krakowie⏎PESEL …".
 const CITY_END = '(?=[ \\t\\r\\n.,;:?!)]|$)';
-// Wyraz wersalikami jako nazwa miejscowości (12c-caps, 12e). Granica po całym wyrazie, żeby cofanie
+// Wyraz wersalikami jako nazwa miejscowości (po kodzie i po adresie). Granica po całym wyrazie, żeby cofanie
 // nie skracało go do prefiksu („KRAKÓWek").
 const CAPS_CITY_TOK = `[${PL_UP}]{2,}(?:-[${PL_UP}]{2,})*(?![${PL_UP}${PL_LO}0-9-])`;
 // Skróty, waluty i etykiety wersalikami za kodem to nie miejscowość („[KOD] VAT", „00-238 POCZTA WARSZAWA").
@@ -224,7 +225,7 @@ const RE_SAINT_BEFORE = /(?<!\p{L})(?:bł|im|pw)\.[ \t]*$/iu;
 const RE_FACILITY_BEFORE =
   /(?<!\p{L})(?:pensjona|hotel|motel|hostel|restauracj|kawiarni|karczm|zajazd|zajeździe|gospod|will[iaęą])\p{Ll}*[ \t]+$/u;
 /**
- * Czy ciąg przed „, ul./[ADRES]" (12d) to osoba z nazwiskiem będącym też nazwą miasta („Jan Turek",
+ * Czy ciąg przed „, ul./[ADRES]" to osoba z nazwiskiem będącym też nazwą miasta („Jan Turek",
  * „Pani Anna Kalisz")? Imię tylko w mianowniku ze słownika, bo odmiana bywa patronem; „św./bł./im./pw."
  * przed imieniem to też patron. Rzeczownik przed imieniem („Pensjonat Maria Zakopane") to nazwa firmy.
  */
@@ -320,7 +321,7 @@ export function passCity(ctx: RedactCtx): void {
   const KOD = escapeRe(ctx.M['KOD-POCZTOWY']);
   const ADR = escapeRe(ctx.M.ADRES);
   const ADDR_ANCHOR = `(?:${ADR}|ul\\.|al\\.|os\\.|pl\\.)`;
-  // 12c: miejscowość tuż po kodzie pocztowym. Człon może zaczynać łącznik „nad/pod" („66-470 Kostrzyn
+  // Miejscowość tuż po kodzie pocztowym. Człon może zaczynać łącznik „nad/pod" („66-470 Kostrzyn
   // nad Odrą"); łącznik wchodzi do maski tylko wtedy, gdy cała fraza jest w słowniku.
   ctx.text = ctx.text.replace(
     new RegExp(`(${KOD}|(?<![\\d-])\\d{2}-\\d{3})([ \\t]+)(${CAP_CITY})((?:[ \\t]+(?:(?:nad|pod)[ \\t]+)?${CAP_CITY}){0,2})`, 'g'),
@@ -359,7 +360,7 @@ export function passCity(ctx: RedactCtx): void {
       return `${anchor}${sep}${ctx.hit('MIEJSCOWOSC')}${restParts.slice(take).join('')}`;
     },
   );
-  // 12c-caps: miejscowość wersalikami po kodzie („26-900 KOZIENICE"). Wersalikami pisze się też skróty
+  // Miejscowość wersalikami po kodzie („26-900 KOZIENICE"). Wersalikami pisze się też skróty
   // („Partia 11-222 ZUS"), więc tylko słownik albo blok adresowy (kod tuż po [ADRES]), bez stoplisty
   // i bez dwukropka za nazwą („POCZTA: WARSZAWA"). Surowy kod (odrzucony przez passPostal): tylko słownik.
   const ADR_BEFORE = new RegExp(`${ADR}[ \\t]*[,/;]?[ \\t]*(?:\\r?\\n[ \\t]*)?$`);
@@ -399,14 +400,14 @@ export function passCity(ctx: RedactCtx): void {
       return `${anchor}${sep}${ctx.hit('MIEJSCOWOSC')}${tailParts.slice(take).join('')}`;
     },
   );
-  // 12c': miejscowość po kodzie za średnikiem albo przecinkiem (CSV „…;00-001;Warszawa"). Kolejna
+  // Miejscowość po kodzie za średnikiem albo przecinkiem (CSV „…;00-001;Warszawa"). Kolejna
   // kolumna bywa krajem czy województwem, więc tylko słownik, a nazwa musi zamykać pole: „…, 00-003,
   // Warszawa zgłosiła awarię" to zdanie.
   ctx.text = ctx.text.replace(
     new RegExp(`(${KOD}"?)([ \\t]*[;,][ \\t]*"?)(${CITY_RUN})(?=[ \\t]*(?:["';,.)\\r\\n]|$))`, 'g'),
     (m, kod: string, sep: string, run: string) => maskCityPrefix(ctx, kod + sep, run) ?? m,
   );
-  // 12h: etykieta TERYT z systemów e-urzędowych („Gliwice (miasto)", „Zabłudów (gmina miejsko-wiejska)")
+  // Etykieta TERYT z systemów e-urzędowych („Gliwice (miasto)", „Zabłudów (gmina miejsko-wiejska)")
   // to pewna kotwica, że wyraz przed nią jest nazwą miejscowości.
   ctx.text = ctx.text.replace(RE_CITY_TERYT, (m, pre: string | undefined, preSep: string | undefined, city: string, tag: string) => {
     const cl = city.toLowerCase();
@@ -417,7 +418,7 @@ export function passCity(ctx: RedactCtx): void {
     if (pre && MULTIWORD_CITIES.has(`${pre.toLowerCase()} ${cl}`)) return `${ctx.M.MIEJSCOWOSC}${tag}`;
     return `${pre ? pre + preSep : ''}${ctx.M.MIEJSCOWOSC}${tag}`;
   });
-  // 12d: miejscowość przed adresem bez kodu pocztowego („Warszawa, ul. …").
+  // Miejscowość przed adresem bez kodu pocztowego („Warszawa, ul. …").
   ctx.text = ctx.text.replace(
     new RegExp(`${CITY_START}(${CITY_RUN})([ \\t]*,?[ \\t]+)(${ADDR_ANCHOR})`, 'g'),
     (m, capRun: string, sep: string, anchor: string, offset: number, str: string) => {
@@ -430,7 +431,7 @@ export function passCity(ctx: RedactCtx): void {
       return rest === null ? m : `${lead}${rest}${ctx.M.MIEJSCOWOSC}${sep}${anchor}`;
     },
   );
-  // 12d': miasto w osobnym wierszu tuż nad adresem („Warszawa⏎Hoża 41"). Cały wiersz musi być miastem
+  // Miasto w osobnym wierszu tuż nad adresem („Warszawa⏎Hoża 41"). Cały wiersz musi być miastem
   // ze słownika: „Wydział Kontroli⏎ul. …" nie jest.
   ctx.text = ctx.text.replace(
     new RegExp(`(?<=^|\\n)([ \\t]*)(${CITY_RUN})(?=[ \\t]*\\r?\\n[ \\t]*${ADDR_ANCHOR})`, 'g'),
@@ -439,7 +440,7 @@ export function passCity(ctx: RedactCtx): void {
       return `${lead}${ctx.hit('MIEJSCOWOSC')}`;
     },
   );
-  // 12e: miejscowość tuż po adresie bez kodu („[ADRES], Warszawa"), też po średniku i wersalikami.
+  // Miejscowość tuż po adresie bez kodu („[ADRES], Warszawa"), też po średniku i wersalikami.
   // Przechodzą tylko nazwy ze słownika.
   ctx.text = ctx.text.replace(
     new RegExp(
@@ -449,7 +450,7 @@ export function passCity(ctx: RedactCtx): void {
     ),
     (m, adr: string, sep: string, run: string) => maskCityPrefix(ctx, adr + sep, run) ?? m,
   );
-  // 12f: miejscowość po markerze zamieszkania („zamieszkały w Krakowie").
+  // Miejscowość po markerze zamieszkania („zamieszkały w Krakowie").
   ctx.text = ctx.text.replace(RE_CITY_RESIDENCE, (m, marker: string, run: string, offset: number, str: string) => {
     const after = str.slice(offset + m.length, offset + m.length + 80);
     if (residenceIsGeneral(marker, str.slice(Math.max(0, offset - 40), offset), after)) return m;
@@ -470,7 +471,7 @@ export function passCity(ctx: RedactCtx): void {
     }
     return m;
   });
-  // 12g: miejscowość po markerze urodzenia, z datą pomiędzy („ur. [DATA-URODZENIA] w Krakowie").
+  // Miejscowość po markerze urodzenia, z datą pomiędzy („ur. [DATA-URODZENIA] w Krakowie").
   const DUR = escapeRe(ctx.M['DATA-UR']);
   ctx.text = ctx.text.replace(
     new RegExp(
@@ -489,7 +490,7 @@ export function passCity(ctx: RedactCtx): void {
       return maskCityPrefix(ctx, marker, run) ?? m;
     },
   );
-  // 12g2: etykieta łączona „Data i miejsce urodzenia:", miasto przed datą albo za nią („…: 12.04.1985,
+  // Etykieta łączona „Data i miejsce urodzenia:", miasto przed datą albo za nią („…: 12.04.1985,
   // Kielce"). Tylko słownik: „Data i miejsce urodzenia Kandydata podaje się w CV" nie daje maski.
   ctx.text = ctx.text.replace(
     new RegExp(
