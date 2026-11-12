@@ -7,9 +7,9 @@ import { MASK } from '../types.js';
 import { FORM_LABEL_WORDS } from '../dict/forms.js';
 import { isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { MULTIWORD_CITIES, POLISH_CITIES } from '../dict/places.js';
+import { BIRTH_COMBO, birthVerbAboutPerson } from '../guards/birth.js';
 import { saintWithContext } from '../guards/eponyms.js';
 import { LEGAL_ENTITY_WORDS, PARTY_ROLE_WORDS, ROLE_WORDS } from '../guards/roles.js';
-import { BIRTH_COMBO, birthVerbAboutPerson } from './birth-date.js';
 import { precededByLegalRef } from '../validators.js';
 
 /** Rok sprzed 1900 jako osobny wyraz („w 1867 r.”). */
