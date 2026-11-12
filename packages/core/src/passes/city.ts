@@ -316,11 +316,7 @@ const RE_CITY_RESIDENCE = new RegExp(
   'g',
 );
 
-export function passCity(ctx: RedactCtx): void {
-  if (!ctx.on('MIEJSCOWOSC')) return;
-  const KOD = escapeRe(ctx.M['KOD-POCZTOWY']);
-  const ADR = escapeRe(ctx.M.ADRES);
-  const ADDR_ANCHOR = `(?:${ADR}|ul\\.|al\\.|os\\.|pl\\.)`;
+function maskCityAfterPostalCode(ctx: RedactCtx, KOD: string): void {
   // Miejscowość tuż po kodzie pocztowym. Człon może zaczynać łącznik „nad/pod" („66-470 Kostrzyn
   // nad Odrą"); łącznik wchodzi do maski tylko wtedy, gdy cała fraza jest w słowniku.
   ctx.text = ctx.text.replace(
@@ -360,6 +356,9 @@ export function passCity(ctx: RedactCtx): void {
       return `${anchor}${sep}${ctx.hit('MIEJSCOWOSC')}${restParts.slice(take).join('')}`;
     },
   );
+}
+
+function maskCapsCityAfterPostalCode(ctx: RedactCtx, KOD: string, ADR: string): void {
   // Miejscowość wersalikami po kodzie („26-900 KOZIENICE"). Wersalikami pisze się też skróty
   // („Partia 11-222 ZUS"), więc tylko słownik albo blok adresowy (kod tuż po [ADRES]), bez stoplisty
   // i bez dwukropka za nazwą („POCZTA: WARSZAWA"). Surowy kod (odrzucony przez passPostal): tylko słownik.
@@ -400,6 +399,9 @@ export function passCity(ctx: RedactCtx): void {
       return `${anchor}${sep}${ctx.hit('MIEJSCOWOSC')}${tailParts.slice(take).join('')}`;
     },
   );
+}
+
+function maskCityInCsvAndTerytFields(ctx: RedactCtx, KOD: string): void {
   // Miejscowość po kodzie za średnikiem albo przecinkiem (CSV „…;00-001;Warszawa"). Kolejna
   // kolumna bywa krajem czy województwem, więc tylko słownik, a nazwa musi zamykać pole: „…, 00-003,
   // Warszawa zgłosiła awarię" to zdanie.
@@ -418,6 +420,10 @@ export function passCity(ctx: RedactCtx): void {
     if (pre && MULTIWORD_CITIES.has(`${pre.toLowerCase()} ${cl}`)) return `${ctx.M.MIEJSCOWOSC}${tag}`;
     return `${pre ? pre + preSep : ''}${ctx.M.MIEJSCOWOSC}${tag}`;
   });
+}
+
+function maskCityNextToAddress(ctx: RedactCtx, ADR: string): void {
+  const ADDR_ANCHOR = `(?:${ADR}|ul\\.|al\\.|os\\.|pl\\.)`;
   // Miejscowość przed adresem bez kodu pocztowego („Warszawa, ul. …").
   ctx.text = ctx.text.replace(
     new RegExp(`${CITY_START}(${CITY_RUN})([ \\t]*,?[ \\t]+)(${ADDR_ANCHOR})`, 'g'),
@@ -450,6 +456,9 @@ export function passCity(ctx: RedactCtx): void {
     ),
     (m, adr: string, sep: string, run: string) => maskCityPrefix(ctx, adr + sep, run) ?? m,
   );
+}
+
+function maskCityAfterResidenceMarker(ctx: RedactCtx): void {
   // Miejscowość po markerze zamieszkania („zamieszkały w Krakowie").
   ctx.text = ctx.text.replace(RE_CITY_RESIDENCE, (m, marker: string, run: string, offset: number, str: string) => {
     const after = str.slice(offset + m.length, offset + m.length + 80);
@@ -471,6 +480,9 @@ export function passCity(ctx: RedactCtx): void {
     }
     return m;
   });
+}
+
+function maskCityAfterBirthMarker(ctx: RedactCtx): void {
   // Miejscowość po markerze urodzenia, z datą pomiędzy („ur. [DATA-URODZENIA] w Krakowie").
   const DUR = escapeRe(ctx.M['DATA-UR']);
   ctx.text = ctx.text.replace(
@@ -500,4 +512,16 @@ export function passCity(ctx: RedactCtx): void {
     ),
     (m, marker: string, run: string) => maskCityPrefix(ctx, marker, run) ?? m,
   );
+}
+
+export function passCity(ctx: RedactCtx): void {
+  if (!ctx.on('MIEJSCOWOSC')) return;
+  const KOD = escapeRe(ctx.M['KOD-POCZTOWY']);
+  const ADR = escapeRe(ctx.M.ADRES);
+  maskCityAfterPostalCode(ctx, KOD);
+  maskCapsCityAfterPostalCode(ctx, KOD, ADR);
+  maskCityInCsvAndTerytFields(ctx, KOD);
+  maskCityNextToAddress(ctx, ADR);
+  maskCityAfterResidenceMarker(ctx);
+  maskCityAfterBirthMarker(ctx);
 }

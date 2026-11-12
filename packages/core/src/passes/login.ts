@@ -246,36 +246,51 @@ function spillCapsPersons(ctx: RedactCtx, capsPersons: Map<string, string>): voi
     return out.join('');
   });
 }
-export function passLogin(ctx: RedactCtx): void {
-  if (!ctx.on('LOGIN')) return;
-  const loginValues = new Set<string>();
-  // Wyraz-login nierozlewany na prozę („Login: soltys"); maskujemy go jeszcze pod inną etykietą konta.
-  const fieldOnlyLogins = new Set<string>();
-  // Propagujemy cały token („FIRMA\jkowalski") i samą nazwę użytkownika, nigdy samą domenę (nazwa
-  // firmy pada w prozie). Konta generyczne („admin") w prozie są zwykłymi słowami („panel admin").
-  const remember = (val: string): void => {
-    const user = loginUserPart(val);
-    for (const v of user === val ? [val] : [val, user]) {
-      if (v.length >= 4 && !GENERIC_LOGINS.has(v.toLowerCase())) loginValues.add(v);
-    }
-  };
-  const capsPersons = maskCapsPersonLogins(ctx);
+// Propagujemy cały token („FIRMA\jkowalski") i samą nazwę użytkownika, nigdy samą domenę (nazwa
+// firmy pada w prozie). Konta generyczne („admin") w prozie są zwykłymi słowami („panel admin").
+function rememberLogin(loginValues: Set<string>, val: string): void {
+  const user = loginUserPart(val);
+  for (const v of user === val ? [val] : [val, user]) {
+    if (v.length >= 4 && !GENERIC_LOGINS.has(v.toLowerCase())) loginValues.add(v);
+  }
+}
+// Za etykietą z kwalifikatorem systemu stoi też stan, metoda albo konto wbudowane („Login VPN:
+// tak", „User SAP: Administrator"). Wartość musi wypełniać wiersz i wyglądać na uchwyt osoby.
+function rejectsSystemQualifiedValue(q1: string, val: string, lineRest: string): boolean {
+  // dopisek w nawiasie („wkozlowski (konto zablokowane)") nie jest kolejnym wyrazem
+  if (!/^[\s.,;]*$/.test(lineRest) && !/^[ \t]+\([^()\n]*\)[\s.,;]*$/.test(lineRest)) return true;
+  if (q1 || RE_ASCII_CAP_WORD.test(val) || /^[A-Z0-9]{2,6}$/.test(val)) return true;
+  // imiesłów albo przymiotnik z formularza („Login AD: wymagany", „nadane")
+  if (/^[a-ząćęłńóśźż]+(?:[aoey]ny|[aoey]ne|[aoey]na|alny|alne|owy|owe)$/.test(val)) return true;
+  const lv = val.toLowerCase();
+  return LOGIN_STATE_WORDS.has(lv) || GENERIC_LOGINS.has(lv) || isSystemAccount(loginUserPart(val));
+}
+function rejectsMediumLabelValue(t: string, val: string, after: number): boolean {
+  const account = loginUserPart(val);
+  // konto wbudowane albo zastępnik („Administrator", „krbtgt", „unknown") to nie osoba
+  if (isSystemAccount(account)) return true;
+  // Kolejny wyraz po spacji to instrukcja albo osoba („Pole sAMAccountName: jest obowiązkowe",
+  // „User name: Anna Zając"), nie login; osobę maskuje faza 4.
+  if (/^ {1,2}[\p{L}\p{N}]/u.test(t.slice(after, after + 3))) return true;
+  return RE_DOTTED_PERSON.test(account) || isBareAsciiSurname(account);
+}
+// Samo imię albo zwykły wyraz („Tomasz", „mazur", „zima") rozlany na prozę rozbijał pary osób
+// i rzeczowniki, więc rozlewamy tylko uchwyt osoby („jkowalski"), a przy domenie cały token.
+// W samym polu maska zostaje.
+function recordLoginFieldValue(val: string, medium: boolean, loginValues: Set<string>, fieldOnlyLogins: Set<string>): void {
+  const acct = loginUserPart(val);
+  if (!medium && /^[a-z]+$/.test(acct) && !isPropagatableLogin(acct)) {
+    if (acct !== val) loginValues.add(val);
+    fieldOnlyLogins.add(acct);
+  } else if (!medium || isPropagatableLogin(acct)) rememberLogin(loginValues, val);
+}
+function maskLoginFields(ctx: RedactCtx, loginValues: Set<string>, fieldOnlyLogins: Set<string>): void {
   ctx.text = ctx.text.replace(RE_LOGIN_FIELD, (m, kw: string, q1: string, val: string, q2: string, offset: number) => {
     if (q1 && !q2) return m; // niedomknięty cudzysłów: to nie wartość pola
     const after = offset + m.length;
     const nl = ctx.text.indexOf('\n', after);
     const lineRest = ctx.text.slice(after, nl === -1 ? ctx.text.length : nl);
-    // Za etykietą z kwalifikatorem systemu stoi też stan, metoda albo konto wbudowane („Login VPN:
-    // tak", „User SAP: Administrator"). Wartość musi wypełniać wiersz i wyglądać na uchwyt osoby.
-    if (RE_LOGIN_ACR_IN_LABEL.test(kw) && !/^[Kk]onto/.test(kw)) {
-      // dopisek w nawiasie („wkozlowski (konto zablokowane)") nie jest kolejnym wyrazem
-      if (!/^[\s.,;]*$/.test(lineRest) && !/^[ \t]+\([^()\n]*\)[\s.,;]*$/.test(lineRest)) return m;
-      if (q1 || RE_ASCII_CAP_WORD.test(val) || /^[A-Z0-9]{2,6}$/.test(val)) return m;
-      // imiesłów albo przymiotnik z formularza („Login AD: wymagany", „nadane")
-      if (/^[a-ząćęłńóśźż]+(?:[aoey]ny|[aoey]ne|[aoey]na|alny|alne|owy|owe)$/.test(val)) return m;
-      const lv = val.toLowerCase();
-      if (LOGIN_STATE_WORDS.has(lv) || GENERIC_LOGINS.has(lv) || isSystemAccount(loginUserPart(val))) return m;
-    }
+    if (RE_LOGIN_ACR_IN_LABEL.test(kw) && !/^[Kk]onto/.test(kw) && rejectsSystemQualifiedValue(q1, val, lineRest)) return m;
     // wartość nie może być kolejną etykietą („Login:\nHasło:")
     if (!q2 && ctx.text[after] === ':') return m;
     // „Alias" bywa nazwą hosta, a pod „Konto AD" stoi też stan konta, więc to etykiety słabsze.
@@ -287,41 +302,27 @@ export function passLogin(ctx: RedactCtx): void {
     // („Konto AD: nadane", „Alias: zamowienia", „Alias: Kowal"): tylko uchwyt osoby.
     if (weak && !isPropagatableLogin(loginUserPart(val))) return m;
     const medium = /^(?:[Uu]ser[ \t]+[Nn]ame|[Ss][Aa][Mm])/.test(kw);
-    if (medium) {
-      const account = loginUserPart(val);
-      // konto wbudowane albo zastępnik („Administrator", „krbtgt", „unknown") to nie osoba
-      if (isSystemAccount(account)) return m;
-      // Kolejny wyraz po spacji to instrukcja albo osoba („Pole sAMAccountName: jest obowiązkowe",
-      // „User name: Anna Zając"), nie login; osobę maskuje faza 4.
-      if (/^ {1,2}[\p{L}\p{N}]/u.test(ctx.text.slice(after, after + 3))) return m;
-      if (RE_DOTTED_PERSON.test(account) || isBareAsciiSurname(account)) return m;
-    }
+    if (medium && rejectsMediumLabelValue(ctx.text, val, after)) return m;
     const user = loginUserPart(val).toLowerCase();
     if (isEmptyFormValue(user) || FORM_LABEL_WORDS.has(user) || RE_BUILTIN_ACCOUNT.test(val)) return m;
     // „User: Kowalski Jan" to osoba, nie login: parę maskuje w całości faza 4.
     if (!q1 && !kw.includes('\n') && loginValueIsPersonPair(val, ctx.text.slice(after, after + LOGIN_PAIR_WINDOW))) return m;
-    // Samo imię albo zwykły wyraz („Tomasz", „mazur", „zima") rozlany na prozę rozbijał pary osób
-    // i rzeczowniki, więc rozlewamy tylko uchwyt osoby („jkowalski"), a przy domenie cały token.
-    // W samym polu maska zostaje.
-    const acct = loginUserPart(val);
-    if (!medium && /^[a-z]+$/.test(acct) && !isPropagatableLogin(acct)) {
-      if (acct !== val) loginValues.add(val);
-      fieldOnlyLogins.add(acct);
-    } else if (!medium || isPropagatableLogin(acct)) remember(val);
+    recordLoginFieldValue(val, medium, loginValues, fieldOnlyLogins);
     return `${kw}${q1}${ctx.hit('LOGIN')}${q2}`;
   });
+}
+function maskQuotedLogins(ctx: RedactCtx, loginValues: Set<string>): void {
   ctx.text = ctx.text.replace(RE_LOGIN_QUOTED, (m, kw: string, q1: string, val: string, q2: string) => {
     if (RE_BUILTIN_ACCOUNT.test(val)) return m;
-    remember(val);
+    rememberLogin(loginValues, val);
     return `${kw}${q1}${ctx.hit('LOGIN')}${q2}`;
   });
-  if (capsPersons.size) spillCapsPersons(ctx, capsPersons);
-  maskAnchoredLogins(ctx);
-  for (const v of ctx.loginSeeds) loginValues.add(v);
-  // Od najdłuższych: „FIRMA\jkowalski" musi zniknąć w całości, zanim propagacja „jkowalski" go
-  // rozetnie. Kropka kończąca zdanie nie blokuje, kropka z dalszym ciągiem tak („jan.nowak.adm").
-  // Zakres Latin-1/Extended zamiast \p{L}: regex powstaje dla każdej wartości, a flaga „u" jest
-  // wielokrotnie droższa w kompilacji.
+}
+// Od najdłuższych: „FIRMA\jkowalski" musi zniknąć w całości, zanim propagacja „jkowalski" go
+// rozetnie. Kropka kończąca zdanie nie blokuje, kropka z dalszym ciągiem tak („jan.nowak.adm").
+// Zakres Latin-1/Extended zamiast \p{L}: regex powstaje dla każdej wartości, a flaga „u" jest
+// wielokrotnie droższa w kompilacji.
+function propagateLoginValues(ctx: RedactCtx, loginValues: Set<string>): void {
   for (const v of [...loginValues].sort((a, b) => b.length - a.length)) {
     // login zapisany jak imię albo nazwisko nie rozbija pary osobowej zostawionej dla fazy 4
     const word = RE_ASCII_CAP_WORD.test(v);
@@ -333,19 +334,33 @@ export function passLogin(ctx: RedactCtx): void {
       },
     );
   }
-  // Ta sama wartość jako całe pole pod inną etykietą konta („Login: soltys⏎Konto: soltys") jawna
-  // obok maski zdradzałaby login. W prozie wyraz zostaje.
-  if (fieldOnlyLogins.size) {
-    const alt = [...fieldOnlyLogins].map(escapeRe).join('|');
-    ctx.text = ctx.text.replace(
-      new RegExp(
-        String.raw`((?:^|\n)[ \t]*(?:[Kk]onto(?:[ \t]+użytkownika)?|[Uu]żytkownik|[Ll]ogin\w{0,3}|[Uu]ser(?:name)?|[Nn]azwa[ \t]+użytkownika)[ \t]*[:=][ \t]*)(?:${alt})(?=[ \t]*(?:\([^()\n]*\)[ \t]*)?(?:\r?\n|$))`,
-        'g',
-      ),
-      (_m: string, lb: string) => {
-        return lb + ctx.hit('LOGIN');
-      },
-    );
-  }
+}
+// Ta sama wartość jako całe pole pod inną etykietą konta („Login: soltys⏎Konto: soltys") jawna
+// obok maski zdradzałaby login. W prozie wyraz zostaje.
+function maskFieldOnlyLoginsUnderOtherLabels(ctx: RedactCtx, fieldOnlyLogins: Set<string>): void {
+  const alt = [...fieldOnlyLogins].map(escapeRe).join('|');
+  ctx.text = ctx.text.replace(
+    new RegExp(
+      String.raw`((?:^|\n)[ \t]*(?:[Kk]onto(?:[ \t]+użytkownika)?|[Uu]żytkownik|[Ll]ogin\w{0,3}|[Uu]ser(?:name)?|[Nn]azwa[ \t]+użytkownika)[ \t]*[:=][ \t]*)(?:${alt})(?=[ \t]*(?:\([^()\n]*\)[ \t]*)?(?:\r?\n|$))`,
+      'g',
+    ),
+    (_m: string, lb: string) => {
+      return lb + ctx.hit('LOGIN');
+    },
+  );
+}
+export function passLogin(ctx: RedactCtx): void {
+  if (!ctx.on('LOGIN')) return;
+  const loginValues = new Set<string>();
+  // Wyraz-login nierozlewany na prozę („Login: soltys"); maskujemy go jeszcze pod inną etykietą konta.
+  const fieldOnlyLogins = new Set<string>();
+  const capsPersons = maskCapsPersonLogins(ctx);
+  maskLoginFields(ctx, loginValues, fieldOnlyLogins);
+  maskQuotedLogins(ctx, loginValues);
+  if (capsPersons.size) spillCapsPersons(ctx, capsPersons);
+  maskAnchoredLogins(ctx);
+  for (const v of ctx.loginSeeds) loginValues.add(v);
+  propagateLoginValues(ctx, loginValues);
+  if (fieldOnlyLogins.size) maskFieldOnlyLoginsUnderOtherLabels(ctx, fieldOnlyLogins);
   if (ctx.protectedUrls.length) maskLoginsInUrls(ctx, loginValues);
 }

@@ -309,12 +309,15 @@ function rawHyphenHeads(raw: string): Map<string, string[]> {
   }
   return out;
 }
-export function finalizePersons(ctx: RedactCtx): void {
-  let links: Map<string, RawWordLink[]> | undefined;
-  const rawLinks = (w: string): RawWordLink[] => (links ??= buildRawWordLinks(ctx.raw)).get(w) ?? [];
-  // Domknięcie w prawo: imię za maską w szyku „Nazwisko Imię" („Pozwany Kowalski Jan Paweł"). Tylko
-  // przez spację, bo ⇥ zaczyna kolumnę, a nowa linia następny wpis. Idzie przed domknięciem w lewo,
-  // inaczej osierocone imię z końca wiersza trafiłoby do maski z następnego wiersza.
+/** Wpisy oryginału dla wyrazu; indeks budowany leniwie przy pierwszym użyciu, wspólny dla kroków. */
+type RawLinksLookup = (w: string) => RawWordLink[];
+
+/**
+ * Domknięcie w prawo: imię za maską w szyku „Nazwisko Imię" („Pozwany Kowalski Jan Paweł"). Tylko
+ * przez spację, bo ⇥ zaczyna kolumnę, a nowa linia następny wpis. Idzie przed domknięciem w lewo,
+ * inaczej osierocone imię z końca wiersza trafiłoby do maski z następnego wiersza.
+ */
+function closeNameAfterMask(ctx: RedactCtx, rawLinks: RawLinksLookup): void {
   for (let pass = 0; pass < 2; pass++) {
     ctx.text = ctx.text.replace(RE_MASK_THEN_NAME, (m, mask: string, w: string, offset: number, t: string) => {
       const wl = w.toLowerCase();
@@ -331,10 +334,14 @@ export function finalizePersons(ctx: RedactCtx): void {
       return mask;
     });
   }
-  // Domknięcie przez przecinek tylko w rekordzie, gdy maska otwiera komórkę, a imię ją zamyka
-  // („<osoba>[..], Jan</osoba>"). W prozie i za parą „Imię Nazwisko" („Rodzice: Jan Kowalski, Anna")
-  // to druga osoba. Przecinek bez odstępu tylko w komórce wydzielonej innym separatorem, bo
-  // „Kowalski,Jan" w CSV to dwie kolumny.
+}
+/**
+ * Domknięcie przez przecinek tylko w rekordzie, gdy maska otwiera komórkę, a imię ją zamyka
+ * („<osoba>[..], Jan</osoba>"). W prozie i za parą „Imię Nazwisko" („Rodzice: Jan Kowalski, Anna")
+ * to druga osoba. Przecinek bez odstępu tylko w komórce wydzielonej innym separatorem, bo
+ * „Kowalski,Jan" w CSV to dwie kolumny.
+ */
+function closeNameAfterMaskComma(ctx: RedactCtx, rawLinks: RawLinksLookup): void {
   ctx.text = ctx.text.replace(RE_MASK_COMMA_NAME, (m, mask: string, a: string, b: string | undefined, offset: number, t: string) => {
     if (!POLISH_FIRST_NAMES.has(a.toLowerCase()) || (b && !POLISH_FIRST_NAMES.has(b.toLowerCase()))) return m;
     if (institutionLabelBefore(t, offset)) return m;
@@ -344,8 +351,12 @@ export function finalizePersons(ctx: RedactCtx): void {
     if (commaLinks.some((l) => linkAfterMask(l) || (l.sep[0] === ',' && (linkPrevIsName(l) || pairBeforeLink(l))))) return m;
     return mask;
   });
-  // Domknięcie w lewo: imię tuż przed maską. Nowa linia obejmuje „Jan\nWiśniewski", a bramka
-  // isFirstNameLike chroni „protokół\n[OSOBA]". Dwa przebiegi, bo wciągnięte imię odsłania kolejne.
+}
+/**
+ * Domknięcie w lewo: imię tuż przed maską. Nowa linia obejmuje „Jan\nWiśniewski", a bramka
+ * isFirstNameLike chroni „protokół\n[OSOBA]". Dwa przebiegi, bo wciągnięte imię odsłania kolejne.
+ */
+function closeNameBeforeMask(ctx: RedactCtx, rawLinks: RawLinksLookup): void {
   for (let pass = 0; pass < 2; pass++) {
     ctx.text = ctx.text.replace(RE_NAME_BEFORE_MASK, (m, w: string, sep: string, mask: string, offset: number, t: string) => {
       // forma imienia, która jest też słowem pospolitym („od Marka [..]", „od Ani [..]"), tylko przez
@@ -366,10 +377,14 @@ export function finalizePersons(ctx: RedactCtx): void {
       return sep === '\t' ? `${mask}\t${mask}` : mask;
     });
   }
-  // Imię doklejone za maską kropką albo podkreśleniem („Kowalski_Jan" w nazwach katalogów i kont).
-  // Spację obsługuje szyk odwrócony w passPersonPairs, a łącznik należy do nazwiska dwuczłonowego.
-  // Przy kropce, jak w lewo, tylko imię w mianowniku za nazwiskiem w mianowniku: „z Kowalskim.Marek
-  // potwierdził" to koniec zdania bez spacji.
+}
+/**
+ * Imię doklejone za maską kropką albo podkreśleniem („Kowalski_Jan" w nazwach katalogów i kont).
+ * Spację obsługuje szyk odwrócony w passPersonPairs, a łącznik należy do nazwiska dwuczłonowego.
+ * Przy kropce, jak w lewo, tylko imię w mianowniku za nazwiskiem w mianowniku: „z Kowalskim.Marek
+ * potwierdził" to koniec zdania bez spacji.
+ */
+function closeGluedNameAfterMask(ctx: RedactCtx, rawLinks: RawLinksLookup): void {
   ctx.text = ctx.text.replace(RE_MASK_GLUED_NAME, (m, mask: string, w: string, offset: number, t: string) => {
     if (!isFirstNameLike(w)) return m;
     if (m[mask.length] === '.') {
@@ -379,27 +394,34 @@ export function finalizePersons(ctx: RedactCtx): void {
     }
     return mask;
   });
-  // Ogon wyrazu przeniesionego za maską („Barbary Wojciechow-⏎skiej", „Warsza-⏎wa"). Myślnik na końcu
-  // wiersza bywa też pauzą („Jan Kowalski-⏎kierownik"), więc ogon dołącza tylko wtedy, gdy początek
-  // z oryginału razem z nim daje nazwisko albo miasto, a sam początek nie jest już pełną nazwą.
-  // Miasto tylko z ogonem małymi literami.
-  if (ctx.text.includes('-\n') || ctx.text.includes('-\r\n')) {
-    let heads: Map<string, string[]> | undefined;
-    ctx.text = ctx.text.replace(RE_MASK_HYPHEN_TAIL, (m, mask: string, tail: string) => {
-      if (mask === '[MIEJSCOWOŚĆ]' && tail !== tail.toLowerCase()) return m;
-      const lo = tail.toLowerCase();
-      const ok = ((heads ??= rawHyphenHeads(ctx.raw)).get(lo) ?? []).some((h) => {
-        const joined = h + lo;
-        // etykieta jednostki w następnym wierszu („Halinów-⏎powiat miński") to nie ogon nazwy
-        if (mask === '[MIEJSCOWOŚĆ]') return POLISH_CITIES.has(joined) || (!POLISH_CITIES.has(h) && !RE_ADMIN_UNIT_WORD.test(lo));
-        return !!surnameBase(joined) || (looksLikeSurname(joined) && !surnameBase(h));
-      });
-      return ok ? mask : m;
+}
+/**
+ * Ogon wyrazu przeniesionego za maską („Barbary Wojciechow-⏎skiej", „Warsza-⏎wa"). Myślnik na końcu
+ * wiersza bywa też pauzą („Jan Kowalski-⏎kierownik"), więc ogon dołącza tylko wtedy, gdy początek
+ * z oryginału razem z nim daje nazwisko albo miasto, a sam początek nie jest już pełną nazwą.
+ * Miasto tylko z ogonem małymi literami.
+ */
+function joinHyphenatedTailAfterMask(ctx: RedactCtx): void {
+  if (!ctx.text.includes('-\n') && !ctx.text.includes('-\r\n')) return;
+  let heads: Map<string, string[]> | undefined;
+  ctx.text = ctx.text.replace(RE_MASK_HYPHEN_TAIL, (m, mask: string, tail: string) => {
+    if (mask === '[MIEJSCOWOŚĆ]' && tail !== tail.toLowerCase()) return m;
+    const lo = tail.toLowerCase();
+    const ok = ((heads ??= rawHyphenHeads(ctx.raw)).get(lo) ?? []).some((h) => {
+      const joined = h + lo;
+      // etykieta jednostki w następnym wierszu („Halinów-⏎powiat miński") to nie ogon nazwy
+      if (mask === '[MIEJSCOWOŚĆ]') return POLISH_CITIES.has(joined) || (!POLISH_CITIES.has(h) && !RE_ADMIN_UNIT_WORD.test(lo));
+      return !!surnameBase(joined) || (looksLikeSurname(joined) && !surnameBase(h));
     });
-  }
-  // Imię z homoglifem OCR przy masce („J0anna [..]", „KaroI [..]"), którego nie przepuszcza bramka
-  // słownika. Najpierw w prawo na końcu wiersza („Nowak KaroI⏎Jan Kowalski"), potem w lewo ze
-  // strażnikami nowej linii, żeby imię z końca wiersza nie trafiło do osoby z następnego.
+    return ok ? mask : m;
+  });
+}
+/**
+ * Imię z homoglifem OCR przy masce („J0anna [..]", „KaroI [..]"), którego nie przepuszcza bramka
+ * słownika. Najpierw w prawo na końcu wiersza („Nowak KaroI⏎Jan Kowalski"), potem w lewo ze
+ * strażnikami nowej linii, żeby imię z końca wiersza nie trafiło do osoby z następnego.
+ */
+function closeOcrNamesAroundMask(ctx: RedactCtx, rawLinks: RawLinksLookup): void {
   ctx.text = ctx.text.replace(RE_MASK_THEN_OCR_NAME, (m, mask: string, w: string, offset: number, t: string) => {
     const form = ocrFirstNameForm(w);
     if (!form) return m;
@@ -411,7 +433,9 @@ export function finalizePersons(ctx: RedactCtx): void {
     if (sep === '\n' && newlineJoinBlocked(t, offset, offset + m.length)) return m;
     return mask;
   });
-  passListEntries(ctx);
+}
+/** Inicjały i cząstki obcych nazwisk przy masce; znacznik „z d." wraca między inicjałem a łańcuchem inicjałów. */
+function absorbInitialsAndParticles(ctx: RedactCtx): void {
   // Inicjał imienia przed maską („mec. J. [OSOBA-B]").
   ctx.text = ctx.text.replace(RE_INITIAL_BEFORE_MASK, (m, mask: string, offset: number, t: string) => {
     // na początku wiersza to punkt wyliczenia („A. Jan Kowalski zeznał"); ucieczka „\n" w JSON-ie
@@ -435,7 +459,9 @@ export function finalizePersons(ctx: RedactCtx): void {
   });
   // Cząstka obcego nazwiska wieloczłonowego („[OSOBA-F] Van Anh").
   ctx.text = ctx.text.replace(RE_MASK_FOREIGN_PARTICLE, '$1');
-  // Etykiety osób według kolejności pierwszego wystąpienia.
+}
+/** Etykiety osób według kolejności pierwszego wystąpienia, dopiero gdy żadna maska już nie powstanie. */
+function relabelPersonsAndRestoreUrls(ctx: RedactCtx): void {
   const labels = new Map<string, string>();
   for (const mm of ctx.text.matchAll(/\[OSOBA-([A-Z]+)\]/g)) if (!labels.has(mm[1])) labels.set(mm[1], indexToLetters(labels.size));
   ctx.text = ctx.text.replace(/\[OSOBA-([A-Z]+)\]/g, (_m, l: string) => `[OSOBA-${labels.get(l)}]`);
@@ -443,6 +469,19 @@ export function finalizePersons(ctx: RedactCtx): void {
   if (ctx.protectedUrls.length) {
     ctx.text = ctx.text.replace(RE_URL_SENTINEL, (mm, letters: string) => ctx.protectedUrls[lettersToIndex(letters)] ?? mm);
   }
+}
+export function finalizePersons(ctx: RedactCtx): void {
+  let links: Map<string, RawWordLink[]> | undefined;
+  const rawLinks: RawLinksLookup = (w) => (links ??= buildRawWordLinks(ctx.raw)).get(w) ?? [];
+  closeNameAfterMask(ctx, rawLinks);
+  closeNameAfterMaskComma(ctx, rawLinks);
+  closeNameBeforeMask(ctx, rawLinks);
+  closeGluedNameAfterMask(ctx, rawLinks);
+  joinHyphenatedTailAfterMask(ctx);
+  closeOcrNamesAroundMask(ctx, rawLinks);
+  passListEntries(ctx);
+  absorbInitialsAndParticles(ctx);
+  relabelPersonsAndRestoreUrls(ctx);
 }
 
 const RE_JSON_ESC_PUA_G = new RegExp(`\\\\?([${JSON_ESC_PUA}])`, 'g');

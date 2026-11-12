@@ -309,107 +309,125 @@ const isTabValueCell = (c: string): boolean => {
   // rola małą literą to wartość pola („Funkcja⇥świadek"), wielką etykieta („Świadek⇥Jan")
   return l !== '' && !isTabLabelCell(c) && !TAB_HEADER_WORDS.has(l) && !(TAB_ROLE_LABELS.has(l) && /^[ ]*\p{Lu}/u.test(c));
 };
-// Pola formularza to kotwica strukturalna: wartość w tej samej linii („Nazwisko: X") albo w następnej
-// („Nazwisko⏎WILCZYŃSKI"), także wersalikami. Każde pole sprawdza własny typ przez ctx.on.
-export function passFormFields(ctx: RedactCtx): void {
-  // Wiersz z co najmniej dwiema komórkami „Etykieta: wartość" rozdzielonymi TAB-em to kilka pól. Każdą
-  // komórkę przetwarzamy jak osobny wiersz. Wiersz TSV z danymi („Nazwisko:⇥Gzowski⇥Kadry") ma jedną
-  // komórkę-etykietę i zostaje bez zmian.
-  const lines: string[] = [];
-  const groups: { n: number; seps: string[] }[] = [];
-  const tabCell = new Set<number>();
+// Wiersze tekstu po rozbiciu wierszy z TAB-em na komórki-pola. `groups` pozwala złożyć je z powrotem
+// z oryginalnymi separatorami.
+interface FormRows {
+  lines: string[];
+  groups: { n: number; seps: string[] }[];
+  tabCell: Set<number>;
   // komórka „etykieta bez dwukropka⇥wartość" → długość etykiety z separatorem (początek wartości)
-  const bareLabel = new Map<number, number>();
+  bareLabel: Map<number, number>;
   // Tryb pseudonimów: indeks komórki wiersza → nazwisko z komórki „Nazwisko" tego wiersza, żeby imię
   // w osobnej komórce dostało pseudonim tej samej osoby. `at` to indeks komórki „Nazwisko": rola osoby
   // należy do niej tylko tuż przed tą komórką, dalsza rola („Świadek⇥Paweł") to inna osoba.
-  const rowSurname = new Map<number, { sur: string; at: number }>();
-  const noteRowSurname = (first: number, units: string[]): void => {
-    if (!ctx.pseudonyms) return;
-    const sur: { sur: string; at: number }[] = [];
-    units.forEach((u, k) => {
-      const m = RE_TAB_SURNAME_CELL.exec(u);
-      if (m) sur.push({ sur: m[1], at: first + k });
-    });
-    if (sur.length !== 1) return;
-    for (let k = 0; k < units.length; k++) rowSurname.set(first + k, sur[0]);
+  rowSurname: Map<number, { sur: string; at: number }>;
+}
+interface FormMaskers {
+  maskFor: (field: FormField, val: string) => string;
+  maskCell: (field: FormField, val: string, label: string) => string;
+}
+function noteRowSurname(ctx: RedactCtx, rows: FormRows, first: number, units: string[]): void {
+  if (!ctx.pseudonyms) return;
+  const sur: { sur: string; at: number }[] = [];
+  units.forEach((u, k) => {
+    const m = RE_TAB_SURNAME_CELL.exec(u);
+    if (m) sur.push({ sur: m[1], at: first + k });
+  });
+  if (sur.length !== 1) return;
+  for (let k = 0; k < units.length; k++) rows.rowSurname.set(first + k, sur[0]);
+}
+// Czy pod wierszem stoi wiersz danych tabeli z tą samą liczbą komórek (wtedy wiersz to nagłówek)?
+// Wiersz z etykietami na pozycjach parzystych („Oddział⇥Wewnętrzny⇥Sala⇥4") to dalszy formularz.
+function tabRowBelow(srcLines: string[], li: number, n: number): boolean {
+  let j = li + 1;
+  while (j < srcLines.length && srcLines[j].trim() === '') j++;
+  if (j >= srcLines.length) return false;
+  const below = srcLines[j].split(/\t+/);
+  return below.length === n && !below.some((c, k) => k % 2 === 0 && isTabLabelish(c));
+}
+// Wiersz z co najmniej dwiema komórkami „Etykieta: wartość" rozdzielonymi TAB-em to kilka pól. Każdą
+// komórkę przetwarzamy jak osobny wiersz. Wiersz TSV z danymi („Nazwisko:⇥Gzowski⇥Kadry") ma jedną
+// komórkę-etykietę i zostaje bez zmian.
+function pushColonCellRow(ctx: RedactCtx, rows: FormRows, parts: string[], cells: string[]): boolean {
+  const labelled = cells.filter(isTabFieldCell).length;
+  if (labelled < 2 || !cells.every((c) => c.trim() === '' || isTabFieldCell(c))) return false;
+  noteRowSurname(ctx, rows, rows.lines.length, cells);
+  for (const c of cells) {
+    rows.tabCell.add(rows.lines.length);
+    rows.lines.push(c);
+  }
+  rows.groups.push({ n: cells.length, seps: parts.filter((_p, k) => k % 2 === 1) });
+  return true;
+}
+// Etykieta i wartość w osobnych komórkach („Imię:⇥Adam⇥Nazwisko:⇥Nowak") to jedno pole. Przy
+// etykiecie bez dwukropka cały wiersz musi na przemian składać się z etykiet i wartości, pod
+// etykietą imienia musi stać imię („Imię⇥Szkoła⇥Nazwisko⇥Przedmiot" to nagłówek), a pod wierszem
+// nie może stać wiersz danych o tej samej liczbie komórek.
+function pushLabelValueRow(ctx: RedactCtx, rows: FormRows, srcLines: string[], li: number, parts: string[], cells: string[]): boolean {
+  const roleAt = (k: number): boolean =>
+    k % 2 === 0 && TAB_ROLE_LABELS.has(cells[k].trim().toLowerCase()) && k + 1 < cells.length && POLISH_FIRST_NAMES.has(cells[k + 1].trim().toLowerCase());
+  const bareRow = cells.some((c, k) => RE_TAB_BARE_LABEL.test(c) || roleAt(k));
+  const bareOk =
+    !bareRow ||
+    (cells.length % 2 === 0 &&
+      cells.every((c, k) => (k % 2 === 0 ? isTabLabelish(c) : isTabValueCell(c))) &&
+      cells.every((c, k) => k % 2 === 1 || !RE_TAB_FIRST_NAME_LABEL.test(c) || isFirstNameLike(cells[k + 1].trim().split(/[ ]+/)[0])) &&
+      !tabRowBelow(srcLines, li, cells.length));
+  if (!bareOk || (bareRow ? cells.filter((c, k) => k % 2 === 0 && isTabLabelish(c)).length : cells.filter(isTabLabelCell).length) < 2) return false;
+  const seps = parts.filter((_p, k) => k % 2 === 1);
+  const units: string[] = [];
+  const unitSeps: string[] = [];
+  const unitBare: number[] = [];
+  let pairs = 0;
+  let ok = true;
+  for (let k = 0; k < cells.length && ok; k++) {
+    const c = cells[k];
+    if (k > 0) unitSeps.push(seps[k - 1]);
+    const colonLabel = RE_TAB_EMPTY_COLON_LABEL.test(c) && RE_TAB_CELL_LABEL.test(c);
+    const bareLbl = !colonLabel && (RE_TAB_BARE_LABEL.test(c) || (bareRow && k % 2 === 0 && isTabLabelish(c) && !isTabFieldCell(c)));
+    if ((colonLabel || bareLbl) && k + 1 < cells.length && cells[k + 1].trim() !== '' && !isTabLabelCell(cells[k + 1])) {
+      units.push(c + seps[k] + cells[k + 1]);
+      unitBare.push(bareLbl ? c.length + seps[k].length : 0);
+      pairs++;
+      k++;
+    } else if (c.trim() === '' || isTabLabelCell(c)) {
+      units.push(c);
+      unitBare.push(0);
+    } else ok = false;
+  }
+  if (!ok || !pairs) return false;
+  const first = rows.lines.length;
+  for (let u = 0; u < units.length; u++) {
+    rows.tabCell.add(rows.lines.length);
+    if (unitBare[u]) rows.bareLabel.set(rows.lines.length, unitBare[u]);
+    rows.lines.push(units[u]);
+  }
+  noteRowSurname(ctx, rows, first, units.map((u, k) => (unitBare[k] ? `${u.slice(0, unitBare[k]).trim()}: ${u.slice(unitBare[k])}` : u)));
+  rows.groups.push({ n: units.length, seps: unitSeps });
+  return true;
+}
+function splitFormRows(ctx: RedactCtx): FormRows {
+  const rows: FormRows = {
+    lines: [],
+    groups: [],
+    tabCell: new Set<number>(),
+    bareLabel: new Map<number, number>(),
+    rowSurname: new Map<number, { sur: string; at: number }>(),
   };
   const srcLines = ctx.text.split('\n');
-  // Czy pod wierszem stoi wiersz danych tabeli z tą samą liczbą komórek (wtedy wiersz to nagłówek)?
-  // Wiersz z etykietami na pozycjach parzystych („Oddział⇥Wewnętrzny⇥Sala⇥4") to dalszy formularz.
-  const tabRowBelow = (li: number, n: number): boolean => {
-    let j = li + 1;
-    while (j < srcLines.length && srcLines[j].trim() === '') j++;
-    if (j >= srcLines.length) return false;
-    const below = srcLines[j].split(/\t+/);
-    return below.length === n && !below.some((c, k) => k % 2 === 0 && isTabLabelish(c));
-  };
   for (let li = 0; li < srcLines.length; li++) {
     const ln = srcLines[li];
     if (ln.includes('\t')) {
       const parts = ln.split(/(\t+)/);
       const cells = parts.filter((_p, k) => k % 2 === 0);
-      const labelled = cells.filter(isTabFieldCell).length;
-      if (labelled >= 2 && cells.every((c) => c.trim() === '' || isTabFieldCell(c))) {
-        noteRowSurname(lines.length, cells);
-        for (const c of cells) {
-          tabCell.add(lines.length);
-          lines.push(c);
-        }
-        groups.push({ n: cells.length, seps: parts.filter((_p, k) => k % 2 === 1) });
-        continue;
-      }
-      // Etykieta i wartość w osobnych komórkach („Imię:⇥Adam⇥Nazwisko:⇥Nowak") to jedno pole. Przy
-      // etykiecie bez dwukropka cały wiersz musi na przemian składać się z etykiet i wartości, pod
-      // etykietą imienia musi stać imię („Imię⇥Szkoła⇥Nazwisko⇥Przedmiot" to nagłówek), a pod wierszem
-      // nie może stać wiersz danych o tej samej liczbie komórek.
-      const roleAt = (k: number): boolean =>
-        k % 2 === 0 && TAB_ROLE_LABELS.has(cells[k].trim().toLowerCase()) && k + 1 < cells.length && POLISH_FIRST_NAMES.has(cells[k + 1].trim().toLowerCase());
-      const bareRow = cells.some((c, k) => RE_TAB_BARE_LABEL.test(c) || roleAt(k));
-      const bareOk =
-        !bareRow ||
-        (cells.length % 2 === 0 &&
-          cells.every((c, k) => (k % 2 === 0 ? isTabLabelish(c) : isTabValueCell(c))) &&
-          cells.every((c, k) => k % 2 === 1 || !RE_TAB_FIRST_NAME_LABEL.test(c) || isFirstNameLike(cells[k + 1].trim().split(/[ ]+/)[0])) &&
-          !tabRowBelow(li, cells.length));
-      if (bareOk && (bareRow ? cells.filter((c, k) => k % 2 === 0 && isTabLabelish(c)).length : cells.filter(isTabLabelCell).length) >= 2) {
-        const seps = parts.filter((_p, k) => k % 2 === 1);
-        const units: string[] = [];
-        const unitSeps: string[] = [];
-        const unitBare: number[] = [];
-        let pairs = 0;
-        let ok = true;
-        for (let k = 0; k < cells.length && ok; k++) {
-          const c = cells[k];
-          if (k > 0) unitSeps.push(seps[k - 1]);
-          const colonLabel = RE_TAB_EMPTY_COLON_LABEL.test(c) && RE_TAB_CELL_LABEL.test(c);
-          const bareLbl = !colonLabel && (RE_TAB_BARE_LABEL.test(c) || (bareRow && k % 2 === 0 && isTabLabelish(c) && !isTabFieldCell(c)));
-          if ((colonLabel || bareLbl) && k + 1 < cells.length && cells[k + 1].trim() !== '' && !isTabLabelCell(cells[k + 1])) {
-            units.push(c + seps[k] + cells[k + 1]);
-            unitBare.push(bareLbl ? c.length + seps[k].length : 0);
-            pairs++;
-            k++;
-          } else if (c.trim() === '' || isTabLabelCell(c)) {
-            units.push(c);
-            unitBare.push(0);
-          } else ok = false;
-        }
-        if (ok && pairs) {
-          const first = lines.length;
-          for (let u = 0; u < units.length; u++) {
-            tabCell.add(lines.length);
-            if (unitBare[u]) bareLabel.set(lines.length, unitBare[u]);
-            lines.push(units[u]);
-          }
-          noteRowSurname(first, units.map((u, k) => (unitBare[k] ? `${u.slice(0, unitBare[k]).trim()}: ${u.slice(unitBare[k])}` : u)));
-          groups.push({ n: units.length, seps: unitSeps });
-          continue;
-        }
-      }
+      if (pushColonCellRow(ctx, rows, parts, cells) || pushLabelValueRow(ctx, rows, srcLines, li, parts, cells)) continue;
     }
-    lines.push(ln);
-    groups.push({ n: 1, seps: [] });
+    rows.lines.push(ln);
+    rows.groups.push({ n: 1, seps: [] });
   }
+  return rows;
+}
+function formMaskers(ctx: RedactCtx): FormMaskers {
   // Wyrazy stojące samotnie po tytule („Pani Nguyen"), liczone raz, na żądanie.
   let titled: Set<string> | null = null;
   const titledSingles = (): Set<string> => {
@@ -466,120 +484,149 @@ export function passFormFields(ctx: RedactCtx): void {
       return maskFor(field, val);
     return maskFor({ ...field, surnameAt: /^nazwisko/i.test(label) ? 'first' : 'last' }, val);
   };
-  for (let i = 0; i < lines.length; i++) {
-    // komórka „etykieta bez dwukropka⇥wartość" czytana jak „etykieta: wartość"
-    const bareAt = bareLabel.get(i);
-    const bare = bareAt ? `${lines[i].slice(0, bareAt).trim()}: ${lines[i].slice(bareAt)}` : stripFormPrefix(lines[i]);
-    const label = formLabelOf(bare);
-    const field = FORM_FIELDS.find((f) => f.re.test(label));
-    // Rola osoby w komórce wiersza z TAB-ami („Świadek:⇥Jan⇥Nazwisko:⇥Kowalski"): samo imię ze słownika
-    // albo para imion jako cała wartość to osoba. Proza i zwykły wiersz „Świadek: Jan" bez zmian.
-    if (!field && tabCell.has(i) && ctx.on('IMIE')) {
-      const rv = RE_TAB_ROLE_NAME_CELL.exec(bare);
-      const ws = rv ? rv[2].split(/[ ]+/).map((w) => w.toLowerCase()) : [];
-      if (rv && TAB_ROLE_LABELS.has(rv[1].trim().toLowerCase()) && ws.every((w) => POLISH_FIRST_NAMES.has(w) && !NOUN_LIKE_FIRST_NAMES.has(w))) {
-        const rs = rowSurname.get(i);
-        const rowSur = ws.length === 1 && rs && rs.at === i + 1 ? rs.sur : undefined;
-        const pair = ws.length === 2 && ctx.pseudonyms ? rv[2].split(/[ ]+/)[1] : undefined;
-        lines[i] = lines[i].replace(new RegExp(`${escapeRe(rv[2])}(?=[ \\t]*$)`), () =>
-          rowSur ? ctx.personMask(rowSur) : pair ? ctx.personMask(pair) : ctx.M.IMIE,
-        );
-        ctx.bump('IMIE');
-      }
-      continue;
-    }
-    if (!field || !ctx.on(field.type)) continue;
-    const colon = bare.match(/:\s*(.+)$/);
-    if (colon) {
-      // lista imion: każde imię dostaje maskę
-      const list = field.nameList ? RE_NAME_LIST_PAIR.exec(colon[1].trim()) : null;
-      if (list && isFirstNameLike(list[1]) && isFirstNameLike(list[3])) {
-        const at = lines[i].lastIndexOf(list[0]);
-        lines[i] = `${lines[i].slice(0, at)}${field.mask}${list[2]}${field.mask}${lines[i].slice(at + list[0].length)}`;
-        ctx.bump(field.type);
-        ctx.bump(field.type);
-        continue;
-      }
-      // pod tą etykietą tylko imiona, dopisek („zgodnie z aktem urodzenia") zostaje
-      if (field.nameList && !isFirstNameLike(colon[1].trim())) continue;
-      // Data w tej samej linii ma swój detektor (passBirthDate).
-      if (field.kind === 'date') continue;
-      const val = colon[1].trim();
-      // Formularz spłaszczony do wiersza („Ulica: Krótka Nr domu: 7 Miejscowość: Mysiadło"): wartość
-      // pola adresowego kończy się przed etykietą następnego pola.
-      if (field.kind === 'addr') {
-        const flat = maskFlatFormFields(ctx, field, val, RE_FLAT_FORM_NUMBERED.test(lines[i]), maskCell);
-        if (flat !== null) {
-          const at = lines[i].lastIndexOf(val);
-          lines[i] = `${lines[i].slice(0, at)}${flat}${lines[i].slice(at + val.length)}`;
-          continue;
-        }
-      }
-      if (isValidFormValue(val, field.kind)) {
-        if (field.gated) {
-          const g = gatedPersonValue(val, false, !!field.surnameOnly);
-          if (!g) continue;
-          const at = lines[i].lastIndexOf(val);
-          const mask = maskFor(field, g.core);
-          lines[i] = `${lines[i].slice(0, at)}${g.lead}${mask}${g.tail}${lines[i].slice(at + val.length).replace(/^[^\S\r]+/, '')}`;
-          ctx.bump(field.type);
-          continue;
-        }
-        // Końcowe „\r" (tekst z CRLF dzielimy po „\n") zostaje, inaczej plik wychodziłby z mieszanymi
-        // końcami linii.
-        const rowSur = tabCell.has(i) ? rowSurname.get(i)?.sur : undefined;
-        const mask =
-          rowSur && RE_OWN_FIRST_NAME_LABEL.test(label) && /^\p{Lu}\p{Ll}+$/u.test(val)
-            ? ctx.personMask(rowSur)
-            : tabCell.has(i)
-              ? maskCell(field, val, label)
-              : maskFor(field, val);
-        lines[i] = lines[i].replace(new RegExp(`${escapeRe(val)}[^\\S\\r]*(?=\\s*$)`), () => mask);
-        ctx.bump(field.type);
-      }
-      continue;
-    }
-    // wartość w następnej niepustej linii, z pominięciem podpowiedzi w nawiasach
-    let j = i + 1;
-    while (j < lines.length && (lines[j].trim() === '' || /^\(.*\)$/.test(lines[j].trim()))) j++;
-    if (j >= lines.length || isFormLabelLine(lines[j])) continue;
-    // pusta komórka-etykieta w wierszu z TAB-ami: następna komórka to inne pole, nie wartość
-    if (tabCell.has(i) && tabCell.has(j)) continue;
-    // Pod ostatnią komórką-etykietą nagłówka („Nazwisko:⇥Miejscowość:⏎Kowalski⇥Radom") wiersz z TAB-em
-    // to cały wiersz danych tabeli, nie wartość tej jednej etykiety.
-    if (tabCell.has(i) && lines[j].includes('\t')) continue;
-    const val = lines[j].trim();
-    if (!isValidFormValue(val, field.kind)) continue;
-    if (field.nameList && !isFirstNameLike(val)) continue;
-    if (field.kind === 'date') {
-      // sama data, adnotacja zostaje („1990-01-01 (wg aktu)")
-      if (RE_DATE_VALUE.test(lines[j])) {
-        lines[j] = lines[j].replace(RE_DATE_VALUE, field.mask);
-        ctx.bump(field.type);
-      }
-      continue;
-    }
-    let lead = '';
-    let core = val;
-    let tail = '';
-    if (field.gated) {
-      const g = gatedPersonValue(val, true);
-      if (!g) continue;
-      ({ lead, core, tail } = g);
-    }
-    const mask = maskFor(field, core);
-    lines[j] = lines[j].replace(/^(\s*)[\s\S]*?(\s*)$/, (_m, a: string, b: string) => `${a}${lead}${mask}${tail}${b}`);
-    ctx.bump(field.type);
+  return { maskFor, maskCell };
+}
+// Rola osoby w komórce wiersza z TAB-ami („Świadek:⇥Jan⇥Nazwisko:⇥Kowalski"): samo imię ze słownika
+// albo para imion jako cała wartość to osoba. Proza i zwykły wiersz „Świadek: Jan" bez zmian.
+function maskRoleNameCell(ctx: RedactCtx, rows: FormRows, i: number, bare: string): void {
+  const { lines } = rows;
+  const rv = RE_TAB_ROLE_NAME_CELL.exec(bare);
+  const ws = rv ? rv[2].split(/[ ]+/).map((w) => w.toLowerCase()) : [];
+  if (rv && TAB_ROLE_LABELS.has(rv[1].trim().toLowerCase()) && ws.every((w) => POLISH_FIRST_NAMES.has(w) && !NOUN_LIKE_FIRST_NAMES.has(w))) {
+    const rs = rows.rowSurname.get(i);
+    const rowSur = ws.length === 1 && rs && rs.at === i + 1 ? rs.sur : undefined;
+    const pair = ws.length === 2 && ctx.pseudonyms ? rv[2].split(/[ ]+/)[1] : undefined;
+    lines[i] = lines[i].replace(new RegExp(`${escapeRe(rv[2])}(?=[ \\t]*$)`), () =>
+      rowSur ? ctx.personMask(rowSur) : pair ? ctx.personMask(pair) : ctx.M.IMIE,
+    );
+    ctx.bump('IMIE');
   }
+}
+// Wartość w tej samej linii co etykieta („Nazwisko: X").
+function maskSameLineValue(
+  ctx: RedactCtx,
+  rows: FormRows,
+  masks: FormMaskers,
+  i: number,
+  field: FormField,
+  label: string,
+  colonVal: string,
+): void {
+  const { lines, tabCell, rowSurname } = rows;
+  // lista imion: każde imię dostaje maskę
+  const list = field.nameList ? RE_NAME_LIST_PAIR.exec(colonVal.trim()) : null;
+  if (list && isFirstNameLike(list[1]) && isFirstNameLike(list[3])) {
+    const at = lines[i].lastIndexOf(list[0]);
+    lines[i] = `${lines[i].slice(0, at)}${field.mask}${list[2]}${field.mask}${lines[i].slice(at + list[0].length)}`;
+    ctx.bump(field.type);
+    ctx.bump(field.type);
+    return;
+  }
+  // pod tą etykietą tylko imiona, dopisek („zgodnie z aktem urodzenia") zostaje
+  if (field.nameList && !isFirstNameLike(colonVal.trim())) return;
+  // Data w tej samej linii ma swój detektor (passBirthDate).
+  if (field.kind === 'date') return;
+  const val = colonVal.trim();
+  // Formularz spłaszczony do wiersza („Ulica: Krótka Nr domu: 7 Miejscowość: Mysiadło"): wartość
+  // pola adresowego kończy się przed etykietą następnego pola.
+  if (field.kind === 'addr') {
+    const flat = maskFlatFormFields(ctx, field, val, RE_FLAT_FORM_NUMBERED.test(lines[i]), masks.maskCell);
+    if (flat !== null) {
+      const at = lines[i].lastIndexOf(val);
+      lines[i] = `${lines[i].slice(0, at)}${flat}${lines[i].slice(at + val.length)}`;
+      return;
+    }
+  }
+  if (!isValidFormValue(val, field.kind)) return;
+  if (field.gated) {
+    const g = gatedPersonValue(val, false, !!field.surnameOnly);
+    if (!g) return;
+    const at = lines[i].lastIndexOf(val);
+    const mask = masks.maskFor(field, g.core);
+    lines[i] = `${lines[i].slice(0, at)}${g.lead}${mask}${g.tail}${lines[i].slice(at + val.length).replace(/^[^\S\r]+/, '')}`;
+    ctx.bump(field.type);
+    return;
+  }
+  // Końcowe „\r" (tekst z CRLF dzielimy po „\n") zostaje, inaczej plik wychodziłby z mieszanymi
+  // końcami linii.
+  const rowSur = tabCell.has(i) ? rowSurname.get(i)?.sur : undefined;
+  const mask =
+    rowSur && RE_OWN_FIRST_NAME_LABEL.test(label) && /^\p{Lu}\p{Ll}+$/u.test(val)
+      ? ctx.personMask(rowSur)
+      : tabCell.has(i)
+        ? masks.maskCell(field, val, label)
+        : masks.maskFor(field, val);
+  lines[i] = lines[i].replace(new RegExp(`${escapeRe(val)}[^\\S\\r]*(?=\\s*$)`), () => mask);
+  ctx.bump(field.type);
+}
+// Wartość w następnej niepustej linii („Nazwisko⏎WILCZYŃSKI"), z pominięciem podpowiedzi w nawiasach.
+function maskNextLineValue(ctx: RedactCtx, rows: FormRows, masks: FormMaskers, i: number, field: FormField): void {
+  const { lines, tabCell } = rows;
+  let j = i + 1;
+  while (j < lines.length && (lines[j].trim() === '' || /^\(.*\)$/.test(lines[j].trim()))) j++;
+  if (j >= lines.length || isFormLabelLine(lines[j])) return;
+  // pusta komórka-etykieta w wierszu z TAB-ami: następna komórka to inne pole, nie wartość
+  if (tabCell.has(i) && tabCell.has(j)) return;
+  // Pod ostatnią komórką-etykietą nagłówka („Nazwisko:⇥Miejscowość:⏎Kowalski⇥Radom") wiersz z TAB-em
+  // to cały wiersz danych tabeli, nie wartość tej jednej etykiety.
+  if (tabCell.has(i) && lines[j].includes('\t')) return;
+  const val = lines[j].trim();
+  if (!isValidFormValue(val, field.kind)) return;
+  if (field.nameList && !isFirstNameLike(val)) return;
+  if (field.kind === 'date') {
+    // sama data, adnotacja zostaje („1990-01-01 (wg aktu)")
+    if (RE_DATE_VALUE.test(lines[j])) {
+      lines[j] = lines[j].replace(RE_DATE_VALUE, field.mask);
+      ctx.bump(field.type);
+    }
+    return;
+  }
+  let lead = '';
+  let core = val;
+  let tail = '';
+  if (field.gated) {
+    const g = gatedPersonValue(val, true);
+    if (!g) return;
+    ({ lead, core, tail } = g);
+  }
+  const mask = masks.maskFor(field, core);
+  lines[j] = lines[j].replace(/^(\s*)[\s\S]*?(\s*)$/, (_m, a: string, b: string) => `${a}${lead}${mask}${tail}${b}`);
+  ctx.bump(field.type);
+}
+function maskFormLine(ctx: RedactCtx, rows: FormRows, masks: FormMaskers, i: number): void {
+  const { lines } = rows;
+  // komórka „etykieta bez dwukropka⇥wartość" czytana jak „etykieta: wartość"
+  const bareAt = rows.bareLabel.get(i);
+  const bare = bareAt ? `${lines[i].slice(0, bareAt).trim()}: ${lines[i].slice(bareAt)}` : stripFormPrefix(lines[i]);
+  const label = formLabelOf(bare);
+  const field = FORM_FIELDS.find((f) => f.re.test(label));
+  if (!field && rows.tabCell.has(i) && ctx.on('IMIE')) {
+    maskRoleNameCell(ctx, rows, i, bare);
+    return;
+  }
+  if (!field || !ctx.on(field.type)) return;
+  const colon = bare.match(/:\s*(.+)$/);
+  if (colon) maskSameLineValue(ctx, rows, masks, i, field, label, colon[1]);
+  else maskNextLineValue(ctx, rows, masks, i, field);
+}
+function joinFormRows(rows: FormRows): string {
   const out: string[] = [];
   let at = 0;
-  for (const g of groups) {
-    let row = lines[at];
-    for (let k = 1; k < g.n; k++) row += g.seps[k - 1] + lines[at + k];
+  for (const g of rows.groups) {
+    let row = rows.lines[at];
+    for (let k = 1; k < g.n; k++) row += g.seps[k - 1] + rows.lines[at + k];
     out.push(row);
     at += g.n;
   }
-  ctx.text = out.join('\n');
+  return out.join('\n');
+}
+// Pola formularza to kotwica strukturalna: wartość w tej samej linii („Nazwisko: X") albo w następnej
+// („Nazwisko⏎WILCZYŃSKI"), także wersalikami. Każde pole sprawdza własny typ przez ctx.on.
+export function passFormFields(ctx: RedactCtx): void {
+  const rows = splitFormRows(ctx);
+  const masks = formMaskers(ctx);
+  for (let i = 0; i < rows.lines.length; i++) maskFormLine(ctx, rows, masks, i);
+  ctx.text = joinFormRows(rows);
 }
 
 // Kategoria pod kluczem „osoba"/„person" („<osoba>Prawna</osoba>"), nie osoba.
