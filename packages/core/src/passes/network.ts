@@ -1,6 +1,6 @@
 // Identyfikatory techniczne: tokeny i sekrety, MAC, IPv6/IPv4, VIN.
 import { maskKeepPrefix, type RedactCtx } from '../context.js';
-import { precededByLegalRef } from '../validators.js';
+import { precededByLegalRef } from '../guards/numbers.js';
 
 // „eyJ" to base64 z „{\"": znikome FP, a token daje dostęp, więc maskujemy w całości.
 // Źródło współdzielone z passProtectUrls, które zdejmuje JWT z adresów przed sentinelem.

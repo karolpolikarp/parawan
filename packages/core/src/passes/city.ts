@@ -10,7 +10,7 @@ import { MULTIWORD_CITIES, POLISH_CITIES } from '../dict/places.js';
 import { BIRTH_COMBO, birthVerbAboutPerson } from '../guards/birth.js';
 import { saintWithContext } from '../guards/eponyms.js';
 import { LEGAL_ENTITY_WORDS, PARTY_ROLE_WORDS, ROLE_WORDS } from '../guards/roles.js';
-import { precededByLegalRef } from '../validators.js';
+import { precededByLegalRef } from '../guards/numbers.js';
 
 /** Rok sprzed 1900 jako osobny wyraz („w 1867 r.”). */
 const RE_PRE1900_YEAR = /(?<![\d.\/-])1[0-8]\d\d(?![\d.\/-]\d)/;

@@ -3,7 +3,8 @@
 import { countOf } from '../charset.js';
 import { maskAfterLabel, type RedactCtx } from '../context.js';
 import { type PiiType } from '../types.js';
-import { CURRENCY_CODES, isValidCard, isValidIban, isValidNip, isValidPesel, isValidRegon14, isValidRegon9, precededByLegalRef, precededByNonPhoneLabel } from '../validators.js';
+import { CURRENCY_CODES, precededByLegalRef, precededByNonPhoneLabel } from '../guards/numbers.js';
+import { isValidCard, isValidIban, isValidNip, isValidPesel, isValidRegon14, isValidRegon9 } from '../validators.js';
 
 /** Długości IBAN wg rejestru ISO 13616 (kraj → liczba znaków bez spacji). */
 const IBAN_LENGTHS: Record<string, number> = {

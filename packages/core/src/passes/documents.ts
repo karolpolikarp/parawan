@@ -4,7 +4,8 @@ import { REJ_MASK_SRC } from '../charset.js';
 import { maskAfterLabel, maskKeepPrefix, type RedactCtx } from '../context.js';
 import { PLATE_NOT_ACRONYM, PLATE_VOIV_LETTERS, PLATE_YEAR_ABBR, plateYearEndsList, RE_PLATE_ACRONYM_HEAD, RE_PLATE_YEAR_SHAPE } from '../guards/plates.js';
 import { type PiiType } from '../types.js';
-import { CURRENCY_CODES, isValidDowod, precededByLegalRef } from '../validators.js';
+import { CURRENCY_CODES, precededByLegalRef } from '../guards/numbers.js';
+import { isValidDowod } from '../validators.js';
 
 /** Kod waluty albo jednostki ilości na początku kandydata tablicy to kwota lub liczba sztuk. Bez RUB:
  *  „RUB” może zaczynać tablicę podkarpacką, więc taki kandydat idzie dalej do strażników tablicy. */
