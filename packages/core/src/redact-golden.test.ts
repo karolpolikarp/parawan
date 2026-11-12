@@ -134,3 +134,35 @@ test('idempotencja: także z pseudonimizacją', () => {
     expect(twice).toBe(once);
   }
 });
+
+// Lista `found` (typ, liczba, kolejność pierwszego wykrycia) jest częścią publicznego wyniku.
+function foundAll(opts?: { pseudonyms?: boolean }): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const c of cases) out[c.id] = redactPII(c.text, opts).found.map((f) => `${f.type}:${f.count}`).join(' ');
+  for (const [k, v] of Object.entries(ADVERSARIAL)) out[`adv:${k}`] = redactPII(v, opts).found.map((f) => `${f.type}:${f.count}`).join(' ');
+  return out;
+}
+
+test('golden: lista found — wariant domyślny', () => {
+  expect(foundAll()).toMatchSnapshot();
+});
+
+test('golden: lista found — pseudonimizacja', () => {
+  expect(foundAll({ pseudonyms: true })).toMatchSnapshot();
+});
+
+// Własne placeholdery (`options.masks`) idą inną ścieżką niż domyślne maski.
+const CUSTOM_MASKS = {
+  IMIE: '<<osoba>>',
+  ADRES: '<<adres>>',
+  MIEJSCOWOSC: '<<miejsce>>',
+  'KOD-POCZTOWY': '<<kod>>',
+  'DATA-UR': '<<data>>',
+  PESEL: '<<pesel>>',
+} as const;
+test('golden: korpus benchmarku — własne maski', () => {
+  const out: Record<string, string> = {};
+  for (const c of cases) out[c.id] = redactPII(c.text, { masks: CUSTOM_MASKS }).redacted;
+  for (const [k, v] of Object.entries(ADVERSARIAL)) out[`adv:${k}`] = redactPII(v, { masks: CUSTOM_MASKS }).redacted;
+  expect(out).toMatchSnapshot();
+});
