@@ -104,11 +104,10 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 
 ## Stan (2026-11-12)
 
-- `main` = v0.46.26 + scalona gałąź `refactor/rdzen-czysty` (2026-11-12, CI zielone): podział i sprzątanie rdzenia (dawny `index.ts` rozbity na moduły,
-  patrz Struktura). Zachowanie domyślne, z pseudonimami i z filtrem `types` identyczne z `main`
-  (golden bez zmian). Świadome zmiany: własne maski podstawiane po wykryciu, poprawki warstwy LLM,
-  dopełniacze postaci historycznych (CHANGELOG `[Unreleased]`). Nie wydane (Parawan.html i npm
-  bez tych zmian). Handoff: `docs/handoff-2026-11-12.md`.
+- `main` = v0.46.27 (wydane 2026-11-12, tag, Release i kopia na domenie zgodne, suma
+  `2ce67831…`). Rdzeń podzielony na moduły (patrz Struktura), wynik domyślny identyczny z v0.46.26.
+  npm 0.29.14 (`anonimizator`, `parawan`) czeka na ręczną publikację (Backlog 4).
+  Handoff sprzątania: `docs/handoff-2026-11-12.md`.
 - W toku: nowy landing (`/frontend`), kierunek „Sosna o poranku”. Próbki poza repo w
   `E:\parawan-landing-proby\`. Handoff: `docs/handoff-2026-11-01.md`.
 
@@ -128,8 +127,8 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 3. „tarnowski” w słowniku nazwisk i na liście przymiotników: rozróżnienie przez regułę kontekstową
    (nazwa instytucji lub geografii po przymiotniku, np. „Starosta Tarnowski”, „Ziemia Tarnowska”).
    Usunięcie ze słownika dawało wycieki („Sędzia Tarnowski”), cofnięte w 380586a.
-4. Wydanie v0.46.27 / rdzeń 0.29.14 (zmiany rdzenia z `refactor/rdzen-czysty`), wg `docs/WYDANIE.md`.
-   Powrót: „rób wydanie”.
+4. Publikacja npm 0.29.14 z komputera autora (2FA): `npm login`, potem `npm publish -w anonimizator`
+   i `npm publish -w parawan`. Powrót: po publikacji sprawdzić `npm view anonimizator version`.
 
 ## Znane problemy
 
