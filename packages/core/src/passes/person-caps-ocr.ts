@@ -6,7 +6,7 @@ import { MAIDEN_D_SENTINEL, type RedactCtx } from '../context.js';
 import { isFirstNameGenitive, isFirstNameLike, isMaleFirstNameGenitive, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
 import { egoNameGenitive, precededByEponym, precededByPatron } from '../guards/eponyms.js';
-import { HOMOGRAPH_PAIR_EXCL, institutionBeforeAddr, ORG_HEAD_WORDS, PATRON_GEN_HEADS, RE_CAPS_WORK_HEAD, RE_PUBLIC_FACILITY_WORD } from '../guards/person-context.js';
+import { CAPS_REVERSED_HEAD_EXCL, CAPS_ROLE_OBLIQUE, capsOrgHead, HOMOGRAPH_PAIR_EXCL, institutionBeforeAddr, MAIDEN_NOT_SURNAME, PATRON_GEN_HEADS, personSlotBefore, RE_CAPS_WORK_HEAD, RE_PUBLIC_FACILITY_WORD } from '../guards/person-context.js';
 import { LEGAL_ENTITY_WORDS, ROLE_WORDS, TITLE_WORDS } from '../guards/roles.js';
 import { OCR_MIX_WORD, RE_SURNAME_OBLIQUE } from '../person-patterns.js';
 
@@ -72,22 +72,6 @@ const capsStreetBefore = (t: string, offset: number): boolean => RE_CAPS_STREET_
 // Wyraz wersalikami tuż przed parą w dopełniaczu („UNIWERSYTET ADAMA MICKIEWICZA") zwykle jest głową
 // nazwy z patronem. Tytuł albo rola przed parą i etykieta z dwukropkiem to dalej osoba.
 const RE_CAPS_WORD_BEFORE = /(?:^|[^\p{L}])(\p{Lu}{2,})[ \t]+$/u;
-// Rola procesowa albo strona umowy w przypadku zależnym („W OBECNOŚCI DŁUŻNIKA JANA NOWAKA"): za nią
-// stoi osoba. ALLCAPS_TITLES zna tylko mianownik tych ról. Bez „brata/syna/siostry", bo „SCHRONISKO
-// BRATA ALBERTA CHMIELOWSKIEGO" to patron.
-export const CAPS_ROLE_OBLIQUE = new Set(
-  (
-    'świadka świadkowi powoda powodowi powódki powódce pozwanego pozwanej pozwanemu ' +
-    'oskarżonego oskarżonej oskarżonemu obwinionego obwinionej obwinionemu podejrzanego podejrzanej podejrzanemu ' +
-    'pokrzywdzonego pokrzywdzonej pokrzywdzonemu poszkodowanego poszkodowanej uczestnika uczestniczki uczestnikowi ' +
-    'obrońcy pełnomocnika pełnomocnikowi dłużnika dłużniczki dłużnikowi wierzyciela wierzycielki wierzycielowi ' +
-    'skazanego skazanej skazanemu nieletniego nieletniej małoletniego małoletniej spadkodawcy spadkodawczyni ' +
-    'spadkobiercy spadkobierczyni biegłego biegłej najemcy najemczyni wynajmującego kupującego sprzedającego ' +
-    'darczyńcy obdarowanego obdarowanej zainteresowanego zainteresowanej wnioskodawczyni ' +
-    'właściciela właścicielki współwłaściciela współwłaścicielki lokatora lokatorki ' +
-    'matki ojca żony męża'
-  ).split(' '),
-);
 // Przyimek albo rzeczownik w dopełniaczu przed parą to nie nazwa z patronem („ALIMENTY DLA ZUZANNY
 // WOLSKIEJ", „KARTA PACJENTA ANNY KOWALSKIEJ"). Celowo bez wyrazów instytucji: „ZESPÓŁ SZKÓŁ JANA
 // KOWALSKIEGO" dalej chroni.
@@ -122,12 +106,6 @@ const CAPS_DOC_NOUNS = new Set(
 const RE_CAPS_PRIVATE_ADJ = /^(?:RODZINN|PRYWATN|OSOBIST|SPECJALN|INDYWIDUALN|PRACOWNICZ|NOTARIALN|SPADKOW)\p{Lu}*$/u;
 // Do czterech wyrazów wersalikami tuż przed parą (ta sama linia).
 const RE_CAPS_RUN_BEFORE = /(?:^|[^\p{L}])((?:\p{Lu}{2,}[ \t]+){1,4})$/u;
-// Rzeczownik, nie przymiotnik od niego („SZPITALNEGO" w „KARTA INFORMACYJNA LECZENIA SZPITALNEGO").
-export const capsOrgHead = (w: string): boolean =>
-  ORG_HEAD_WORDS.has(w) ||
-  PATRON_GEN_HEADS.has(w) ||
-  (/^(?:szkoł|zespoł|zespół|uniwersyt|akademi|instytut|fundacj|stowarzysz|towarzystw|klub|teatr|muze|stadion|parafi|kości|szpital|liceum|gimnazj|przedszkol|bibliotek|galeri|ośrod|centrum)/.test(w) &&
-    !/(?:n|sk|ck|ow)(?:y|a|e|i|ego|iego|ej|iej|ym|ych|emu|ą)$/.test(w));
 /**
  * Czy ciąg wersalików przed parą to dokument albo rzecz konkretnej osoby? Dokument może stać przed
  * dłuższym ciągiem („UMOWA NAJMU …"), chyba że między nim a parą stoi głowa instytucji
@@ -241,12 +219,6 @@ const capsObliqueFirst = (n: string): boolean => !POLISH_FIRST_NAMES.has(n) || i
 // Imię w formie wyrazu pospolitego od imion-rzeczowników („POLE KOT": pole, nie wołacz Poli).
 const nounLikeNameForm = (n: string): boolean =>
   [...NOUN_LIKE_FIRST_NAMES].some((x) => n !== x && n.startsWith(x.slice(0, -1)) && n.length <= x.length + 1);
-// Etykieta osoby albo numer wpisu tuż przed nazwiskiem („Pacjent: ", „1. "), także w środku wiersza
-// po końcu zdania. Kotwica dla nazwiska z samej morfologii albo homografu w szyku odwróconym.
-const RE_PERSON_SLOT_BEFORE = /(?:^|\n|[.;!?][ \t]+)[ \t]*(?:\d{1,3}[.)][ \t]*|\p{L}{2,20}(?:[ \t]\p{L}{2,20})?[ \t]*:[ \t]*)$/u;
-export const personSlotBefore = (t: string, offset: number): boolean => RE_PERSON_SLOT_BEFORE.test(t.slice(Math.max(0, offset - 45), offset));
-// Po tych głowach imię w mianowniku to tytuł władcy albo świętego („KRÓL JAN III SOBIESKI"), nie szyk odwrócony.
-export const CAPS_REVERSED_HEAD_EXCL = new Set<string>('król królowa książę księżna cesarz papież święty święta'.split(' '));
 /**
  * Szyk odwrócony wersalikami („NOWAK PIOTR, WÓJCIK MARIA"). Imię w mianowniku ze słownika; nazwisko
  * ze słownika od razu, a z samej morfologii albo homograf tylko na miejscu osoby (etykieta, numer
@@ -476,23 +448,6 @@ export function passPersonOcrPair(ctx: RedactCtx): void {
   if (last) ctx.text = out + src.slice(last);
 }
 
-// Dopełnienie nazwy „Dom …" po „z domu" (instytucja, nie nazwisko panieńskie): „z Domu Dziecka",
-// „Z DOMU KULTURY". „dziecka" ma kształt nazwiska (-cka), więc sama morfologia go nie odrzuci.
-export const MAIDEN_NOT_SURNAME = new Set<string>(
-  (
-    'dziecka pomocy kultury opieki seniora bożego maklerskiego towarowego handlowego weselnego ' +
-    'pogrzebowego studenckiego samotnej spokojnej starości wczasowego zdrojowego parafialnego ' +
-    'rekolekcyjnego aukcyjnego wydawniczego mody książki rodzinnego dziennego ' +
-    // rodzina i „Państwa" wielką literą z szacunku („z domu Babci") oraz typowe „Dom Strażaka"
-    'babci babki mamy mamusi matki taty ojca rodziców teściów dziadków dziadka cioci wujka siostry ' +
-    'brata sąsiadów sąsiada przyjaciół państwa strażaka nauczyciela sportowca turysty harcerza ' +
-    'rzemiosła kombatanta działkowca studenta chłopa pielgrzyma samopomocy miłosierdzia rolnika ' +
-    'górnika żołnierza ucznia emeryta rencisty kolejarza lekarza pracownika pracy ludu ' +
-    // nazwy domów i placówek („z domu Caritas") oraz przyimek z nazwy pensjonatu („z domu Pod Lipami")
-    'caritas hospicjum muzyki sztuki literatury techniki technika prasy wsi spotkań sióstr braci ' +
-    'pod na nad przy za u w we od do po ze przed obok'
-  ).split(' '),
-);
 // Nazwisko panieńskie po „z domu"/„z d." stoi w mianowniku. Przymiotnik w przypadku zależnym
 // („z domu Ludowego"), narzędnik („z D. Nowakiem") i dopełniacz na „-ii" to inna fraza. Bez „-ów"
 // i „-ych" („z domu Wróblów" bywa nazwiskiem rodu) i bez isObliqueSurnameForm („Nowakówna" to mianownik).

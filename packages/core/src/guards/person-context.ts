@@ -1,5 +1,5 @@
 // Strażniki kontekstu osoby: instytucja przed adresem, granice komórek tabeli, patroni, inicjały
-// i łańcuchy kropkowe, homografy nazwisk przy imieniu.
+// i łańcuchy kropkowe, homografy nazwisk przy imieniu, role i głowy przed osobą wersalikami.
 import { PERSON_MASK_SRC, PL_LO, PL_UP } from '../charset.js';
 import { RE_JSON_ESC_PUA } from '../context.js';
 import { RE_INSTITUTION_WORD } from './eponyms.js';
@@ -145,3 +145,48 @@ export const LIST_HEAD_NOT_SURNAME = new Set<string>(
 );
 // Maska osoby przed wyrazem w tym samym wierszu, po odstępie albo separatorze pola („[..];Jan”).
 export const RE_PERSON_MASK_BEFORE = new RegExp(`(?:${PERSON_MASK_SRC})(?:[ \\t]+|[ \\t]*[,;|][ \\t]*)$`);
+// Etykieta osoby albo numer wpisu tuż przed nazwiskiem („Pacjent: ", „1. "), także w środku wiersza
+// po końcu zdania. Kotwica dla nazwiska z samej morfologii albo homografu w szyku odwróconym.
+const RE_PERSON_SLOT_BEFORE = /(?:^|\n|[.;!?][ \t]+)[ \t]*(?:\d{1,3}[.)][ \t]*|\p{L}{2,20}(?:[ \t]\p{L}{2,20})?[ \t]*:[ \t]*)$/u;
+export const personSlotBefore = (t: string, offset: number): boolean => RE_PERSON_SLOT_BEFORE.test(t.slice(Math.max(0, offset - 45), offset));
+// Po tych głowach imię w mianowniku to tytuł władcy albo świętego („KRÓL JAN III SOBIESKI"), nie szyk odwrócony.
+export const CAPS_REVERSED_HEAD_EXCL = new Set<string>('król królowa książę księżna cesarz papież święty święta'.split(' '));
+// Rola procesowa albo strona umowy w przypadku zależnym („W OBECNOŚCI DŁUŻNIKA JANA NOWAKA"): za nią
+// stoi osoba. ALLCAPS_TITLES zna tylko mianownik tych ról. Bez „brata/syna/siostry", bo „SCHRONISKO
+// BRATA ALBERTA CHMIELOWSKIEGO" to patron.
+export const CAPS_ROLE_OBLIQUE = new Set(
+  (
+    'świadka świadkowi powoda powodowi powódki powódce pozwanego pozwanej pozwanemu ' +
+    'oskarżonego oskarżonej oskarżonemu obwinionego obwinionej obwinionemu podejrzanego podejrzanej podejrzanemu ' +
+    'pokrzywdzonego pokrzywdzonej pokrzywdzonemu poszkodowanego poszkodowanej uczestnika uczestniczki uczestnikowi ' +
+    'obrońcy pełnomocnika pełnomocnikowi dłużnika dłużniczki dłużnikowi wierzyciela wierzycielki wierzycielowi ' +
+    'skazanego skazanej skazanemu nieletniego nieletniej małoletniego małoletniej spadkodawcy spadkodawczyni ' +
+    'spadkobiercy spadkobierczyni biegłego biegłej najemcy najemczyni wynajmującego kupującego sprzedającego ' +
+    'darczyńcy obdarowanego obdarowanej zainteresowanego zainteresowanej wnioskodawczyni ' +
+    'właściciela właścicielki współwłaściciela współwłaścicielki lokatora lokatorki ' +
+    'matki ojca żony męża'
+  ).split(' '),
+);
+// Rzeczownik, nie przymiotnik od niego („SZPITALNEGO" w „KARTA INFORMACYJNA LECZENIA SZPITALNEGO").
+export const capsOrgHead = (w: string): boolean =>
+  ORG_HEAD_WORDS.has(w) ||
+  PATRON_GEN_HEADS.has(w) ||
+  (/^(?:szkoł|zespoł|zespół|uniwersyt|akademi|instytut|fundacj|stowarzysz|towarzystw|klub|teatr|muze|stadion|parafi|kości|szpital|liceum|gimnazj|przedszkol|bibliotek|galeri|ośrod|centrum)/.test(w) &&
+    !/(?:n|sk|ck|ow)(?:y|a|e|i|ego|iego|ej|iej|ym|ych|emu|ą)$/.test(w));
+// Dopełnienie nazwy „Dom …" po „z domu" (instytucja, nie nazwisko panieńskie): „z Domu Dziecka",
+// „Z DOMU KULTURY". „dziecka" ma kształt nazwiska (-cka), więc sama morfologia go nie odrzuci.
+export const MAIDEN_NOT_SURNAME = new Set<string>(
+  (
+    'dziecka pomocy kultury opieki seniora bożego maklerskiego towarowego handlowego weselnego ' +
+    'pogrzebowego studenckiego samotnej spokojnej starości wczasowego zdrojowego parafialnego ' +
+    'rekolekcyjnego aukcyjnego wydawniczego mody książki rodzinnego dziennego ' +
+    // rodzina i „Państwa" wielką literą z szacunku („z domu Babci") oraz typowe „Dom Strażaka"
+    'babci babki mamy mamusi matki taty ojca rodziców teściów dziadków dziadka cioci wujka siostry ' +
+    'brata sąsiadów sąsiada przyjaciół państwa strażaka nauczyciela sportowca turysty harcerza ' +
+    'rzemiosła kombatanta działkowca studenta chłopa pielgrzyma samopomocy miłosierdzia rolnika ' +
+    'górnika żołnierza ucznia emeryta rencisty kolejarza lekarza pracownika pracy ludu ' +
+    // nazwy domów i placówek („z domu Caritas") oraz przyimek z nazwy pensjonatu („z domu Pod Lipami")
+    'caritas hospicjum muzyki sztuki literatury techniki technika prasy wsi spotkań sióstr braci ' +
+    'pod na nad przy za u w we od do po ze przed obok'
+  ).split(' '),
+);
