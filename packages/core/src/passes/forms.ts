@@ -2,7 +2,8 @@
 import { foldAscii, isConfirmedSurname, normalizeSurnameKey } from '../surnames.js';
 import { escapeRe } from '../charset.js';
 import { type RedactCtx } from '../context.js';
-import { FORM_FIELDS, FORM_LABEL_WORDS, type FormField, formLabelOf, isFormLabelLine, isValidFormValue, RE_DATE_VALUE, RE_PROPER_WORDS, stripFormPrefix, TAB_ROLE_LABELS } from '../dict/forms.js';
+import { FORM_FIELDS, type FormField, formLabelOf, isFormLabelLine, isValidFormValue, RE_DATE_VALUE, RE_PROPER_WORDS, stripFormPrefix, TAB_ROLE_LABELS } from '../dict/forms.js';
+import { NEXT_LINE_HEADER_WORDS, TAB_HEADER_WORDS } from '../dict/headers.js';
 import { isFirstNameLike, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { lowercaseNameLooksLikePerson, RE_VALUE_TITLE_OR_INITIAL } from '../guards/person-values.js';
 import { LEGAL_ENTITY_WORDS, ROLE_WORDS } from '../guards/roles.js';
@@ -60,15 +61,6 @@ const FORM_INSTITUTION_ACRONYMS = new Set<string>(
 );
 // Imię dwuczłonowe z łącznikiem w transkrypcji koreańskiej i wietnamskiej („Min-jun").
 const RE_HYPHEN_GIVEN_NAME = /^\p{Lu}\p{Ll}+-\p{L}\p{Ll}+$|^\p{Lu}{2,}-\p{Lu}{2,}$/u;
-// Słownictwo nagłówków kolumn tabeli z PDF (komórka pod komórką, zapis bez ogonków).
-const NEXT_LINE_HEADER_WORDS = new Set<string>(
-  (
-    'podpis podpisy grupa ocena ocen godzina rodzaj srednia rok lekarz wychowawca klasa klasy data ' +
-    'numer termin uwagi wynik wyniki miejsce adres telefon stanowisko kwota liczba status typ opis ' +
-    'rozpoznanie zawod plec wiek rodzica rodzicow opiekuna ucznia pacjenta dziecka imie nazwisko lp ' +
-    'semestr przedmiot frekwencja oddzial sala pokoj godziny dzien'
-  ).split(' '),
-);
 // Imiesłów i rzeczownik odczasownikowy („Prowadzący", „Przyjęcia").
 const RE_NEXT_LINE_HEADER_MORPH = /(?:ący|ąca|ące|[eęa]nia|ęcia|enie|anie|ości|ość)$/u;
 const nextLineHeaderWord = (w: string): boolean =>
@@ -285,11 +277,6 @@ const RE_TAB_BARE_LABEL = new RegExp(
 const RE_TAB_FIRST_NAME_LABEL = new RegExp(String.raw`^[ ]*${FIRST_NAME_LABEL_SRC}[ ]*$`, 'iu');
 // Etykieta własnego imienia osoby z wiersza (bez imion rodziców).
 const RE_OWN_FIRST_NAME_LABEL = /^(?:pierwsze[ ]+|drugie[ ]+)?imi[eę]$/iu;
-// Nazwy kolumn, które w nagłówku tabeli stoją za etykietą osobową („Nazwisko⇥Imię⇥Stanowisko").
-const TAB_HEADER_WORDS = new Set<string>([
-  ...FORM_LABEL_WORDS,
-  ...'wiek miasto lokal dział stanowisko uwagi status lp funkcja rola klasa grupa oddział stopień ocena wynik kwota termin podpis'.split(' '),
-]);
 // Komórka „etykieta wartość" bez dwukropka („Data ur. 03.04.1980", „PESEL 44051401359") to osobne pole.
 // Tylko etykiety identyfikatorów, bo „Imię Jan" bywa nagłówkiem prozy.
 const RE_TAB_LABEL_VALUE = /^[ ]*(?:data[ ]+ur(?:\.|odzenia)|pesel|nip|tel(?:\.|efon)|nr[ ]+tel(?:\.|efonu)?)[ ]+[\p{L}\d]/iu;

@@ -4,13 +4,13 @@ import { isAsciiSurname, isConfirmedSurname, surnameShaped } from '../surnames.j
 import { type RedactCtx, URL_SENTINEL_CLOSE, URL_SENTINEL_OPEN } from '../context.js';
 import { MASK } from '../types.js';
 import { FORM_LABEL_WORDS, isEmptyFormValue, isValidFormValue, RE_DATE_VALUE, RE_PROPER_WORDS } from '../dict/forms.js';
+import { TABLE_GENERIC_HEADERS, TSV_NOT_SURNAME } from '../dict/headers.js';
 import { isPropagatableLogin, isSystemAccount, loginUserPart, RE_BUILTIN_ACCOUNT, RE_WELL_KNOWN_ACCOUNT } from '../dict/logins.js';
 import { isFirstNameLike } from '../dict/names.js';
 import { ORG_HEAD_WORDS } from '../guards/person-context.js';
 import { LEGAL_ENTITY_WORDS, ROLE_WORDS } from '../guards/roles.js';
 import { PLATE_VOIV_LETTERS, plateYearEndsList, RE_PLATE_ACRONYM_HEAD } from './documents.js';
 import { isPersonRoleValue, lowercaseNameLooksLikePerson, PERSON_CATEGORY_VALUES, RE_LOWER_NOT_SURNAME, RE_VALUE_TITLE_OR_INITIAL, SURNAME_PARTICLES } from '../guards/person-values.js';
-import { TSV_NOT_SURNAME } from './person-pairs.js';
 import { normStructKey, STRUCT_KEYS, STRUCT_KIND_TYPE, type StructKind, structKindOf } from '../struct-keys.js';
 import { isValidIban } from '../validators.js';
 
@@ -262,14 +262,6 @@ function splitTableRow(line: string, delim: string, md: boolean): TableCell[] | 
   cells.push({ start, end: to });
   return cells;
 }
-// Nazwy kolumn spoza STRUCT_KEYS, które w wierszu danych osoby nie występują.
-const TABLE_GENERIC_HEADERS = new Set<string>(
-  (
-    'lp produkt towar usługa cena ilość ilosc jednostka kwota wartość wartosc suma status termin ' +
-    'opis uwagi nazwa typ rodzaj kategoria liczba data godzina stanowisko dział dzial oddział ' +
-    'pokój pokoj kod symbol stawka netto brutto vat waluta priorytet etap wynik'
-  ).split(' '),
-);
 function rowLooksLikeHeader(values: string[]): boolean {
   const cells = values.map((v) => v.trim()).filter((v) => v);
   if (cells.length < 2 || cells.some((v) => /\d/.test(v) || !RE_TABLE_HEADER_CELL.test(v))) return false;

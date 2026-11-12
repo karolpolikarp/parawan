@@ -4,6 +4,7 @@ import { COMMON_NOUN_LOOKALIKES, DIMINUTIVE_LOOKALIKES, homographBase, isCompoun
 import { CAP_WORD, NM_BOUND, NM_LO, NM_UP, PL_LO, PL_UP, PRECEDED_BY_CAP, splitWords } from '../charset.js';
 import { JSON_ESC_PUA_EOL, type RedactCtx, VI_GIVEN_SENTINEL } from '../context.js';
 import { FORM_LABEL_WORDS, isEmptyFormValue } from '../dict/forms.js';
+import { TABLE_HEADER_WORDS } from '../dict/headers.js';
 import { FOREIGN_GIVEN_NAMES, isFirstNameGenitive, isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
 import { afterNonPersonContext, isObliqueSurnameForm, precededByAdminLabel, precededByEponym, STREET_RANK } from '../guards/eponyms.js';
@@ -71,8 +72,6 @@ function triggerGivenName(w: string): boolean {
 const RE_SACRED_NAME = /^(?:bóg|boga|bogu|bogiem|jezus|jezusa|jezusowi|jezusem|chrystus|chrystusa|chrystusowi|chrystusem)$/;
 const RE_VI_GIVEN_TAIL = new RegExp(`${VI_GIVEN_SENTINEL}(?:[ \\t]+[${NM_UP}][${NM_LO}]{1,6}(?![${NM_BOUND}-]))?`, 'g');
 const RE_LABEL_TRIGGER = /^(?:[Ii]mi[eę] i nazwisko|[Nn]azwisko:)$/;
-// Nagłówki kolumn spoza FORM_LABEL_WORDS, które w wierszu TSV stoją za etykietą osoby.
-export const TABLE_HEADER_WORDS = new Set<string>('lokal uwagi funkcja podpis status kontakt login rola grupa klasa termin godzina pokój lp'.split(' '));
 const RE_NAME_TRIGGER = new RegExp(
   `\\b([Nn]azywam się|[Mm]am na imię|[Ii]mię i nazwisko|[Ii]mie i nazwisko|[Nn]azwisko:|` +
     `[Pp]anowie|[Pp]anami|[Pp]anom|[Pp]anów|[Pp]anem|[Pp]ana|[Pp]anią|[Pp]aniom|[Pp]anu|[Pp]ani|[Pp]an)` +

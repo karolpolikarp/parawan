@@ -4,6 +4,7 @@ import { foldAsciiChar, HOMOGRAPH_SURNAMES, homographBase, isConfirmedSurname, i
 import { CAP_WORD, LIST_BULLET, NM_BOUND, PL_LO, PL_UP, splitWords } from '../charset.js';
 import { protectSpan, type RedactCtx } from '../context.js';
 import { FORM_LABEL_WORDS } from '../dict/forms.js';
+import { TABLE_HEADER_WORDS, TSV_NOT_SURNAME } from '../dict/headers.js';
 import { EXTRA_NAME_FORMS, FOREIGN_GIVEN_NAMES, isFirstNameGenitive, isFirstNameLike, isMaleFirstNameGenitive, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
 import { afterNonPersonContext, EPONYM_HEADS, eponymFits, precededByAdminLabel, precededByEponym, RE_STREET_WORD } from '../guards/eponyms.js';
@@ -12,7 +13,6 @@ import { columnGapBetween, headAgreesWithAdjective, LEGAL_ENTITY_WORDS, NON_NAME
 import { RE_PATRON_ROMAN_REF_BEFORE, rynekNoNotHouse } from './address.js';
 import { isPersonRoleValue, NOUN_LIKE_NAMES_IN_TITLES } from '../guards/person-values.js';
 import { CAPS_REVERSED_HEAD_EXCL, CAPS_ROLE_OBLIQUE, capsOrgHead, MAIDEN_NOT_SURNAME, personSlotBefore } from './person-caps-ocr.js';
-import { TABLE_HEADER_WORDS } from './person-triggers.js';
 import { RE_DECLINED_NOM_SURNAME, RE_LOWER_RUN, RE_NEXT_CAP_WORD_SP, RE_NON_PL_LETTER, RE_PAIR, RE_SPOUSES, RE_SURNAME_OBLIQUE } from '../person-patterns.js';
 
 // Ostatni wyraz przed pozycją; grupa 2 to dwukropek etykiety („Świadek: ").
@@ -160,9 +160,6 @@ function patronFirstNameAt(t: string, offset: number, parts: string[], start: nu
   }
   return false;
 }
-// Homografy kalendarza i narodowości przed imieniem w grafiku czy liście („Maj⇥Anna", „Polak⇥Jan"):
-// kolumna dnia albo obywatelstwa, nie nazwisko.
-export const TSV_NOT_SURNAME = new Set<string>('maj sobota piątek niedziela środa wtorek poniedziałek czwartek polak polka niemiec czech rusin litwin węgier'.split(' '));
 /**
  * Maska ciągu wyrazów osoby od `from` do `to` (indeksy wyrazów w podziale z separatorami). Tabulator
  * w ciągu to granica komórki TSV („Adam⇥Kowalczyk⇥Magazynier"): każda komórka dostaje własną maskę
