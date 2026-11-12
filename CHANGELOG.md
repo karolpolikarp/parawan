@@ -32,6 +32,12 @@ Silnik:
   lista masek pochodzi wprost z rdzenia, fragmenty `[OSOBA-…]` są odrzucane, a zamiana pomija
   wystąpienia, które zaczynają się albo kończą w środku znacznika. Kandydat obejmujący cały znacznik
   („Jan [IMIĘ I NAZWISKO]”) jest zamieniany w całości. Aplikacji Parawan.html to nie dotyczy.
+- **Silnik podzielony na moduły, wynik bez zmian.** Kod `redactPII` leżał w jednym pliku
+  o ponad 9 tys. linii. Teraz przebiegi, strażniki kontekstu i słowniki są w osobnych modułach,
+  a wzorce powstają raz przy ładowaniu paczki, nie przy każdym wywołaniu. Ten sam tekst dostaje te
+  same znaczniki, co sprawdza test zamrażający wynik na całym korpusie benchmarku. Krótkie teksty,
+  np. pojedyncze zdania i pola formularza, przechodzą mniej więcej dwa razy szybciej, a długie
+  pismo prawie w tym samym czasie. Publiczne API paczki `anonimizator` się nie zmienia.
 
 ## v0.46.26 — 2026-10-25
 
