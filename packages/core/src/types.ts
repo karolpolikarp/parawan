@@ -84,6 +84,9 @@ export const MASK: Record<PiiType, string> = {
   IMIE: '[IMIĘ I NAZWISKO]',
 };
 
+/** Maska osoby wspólna dla warstw NER i LLM. */
+export const PERSON_MASK = MASK.IMIE;
+
 /** Czytelne etykiety wykrytych typów (np. do komunikatu „Zamaskowano: PESEL, e-mail"). */
 export const HUMAN_LABEL: Record<PiiType, string> = {
   EMAIL: 'adres e-mail',

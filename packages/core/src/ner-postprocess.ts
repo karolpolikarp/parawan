@@ -11,8 +11,8 @@
 import { HOMOGRAPH_SURNAMES, isGeoAdjective, normalizeSurnameKey } from './surnames.js';
 import { NON_PERSON_CONTEXT } from './guards/eponyms.js';
 import { LEGAL_ENTITY_WORDS } from './guards/roles.js';
+import { PERSON_MASK } from './types.js';
 
-const DEFAULT_MASK = '[IMIĘ I NAZWISKO]';
 const DEFAULT_MIN_SCORE = 0.5;
 // Gołych homonimów (Wilk, Lis) nie maskujemy nawet przy wysokim score: model daje „Lis przemknął
 // przez drogę" ≥0.9. Osobę z kontekstem (imię obok, „Pan") łapie wcześniej rdzeń.
@@ -165,7 +165,7 @@ export function applyNerPersons(
   const empty: NerPostprocessResult = { redacted: text, found: [] };
   if (!text || !Array.isArray(tokens) || tokens.length === 0) return empty;
 
-  const mask = options.mask ?? DEFAULT_MASK;
+  const mask = options.mask ?? PERSON_MASK;
   const minScore = options.minScore ?? DEFAULT_MIN_SCORE;
   const homographMinScore = options.homographMinScore ?? DEFAULT_HOMOGRAPH_MIN_SCORE;
   const isPersonLabel = options.isPersonLabel ?? defaultIsPersonLabel;

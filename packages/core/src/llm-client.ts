@@ -9,6 +9,8 @@
 import type { PiiFinding, RedactionResult } from './index.js';
 import { mergeFindings, redactPIIFull, type NerConfig } from './ner-client.js';
 import { createBreaker } from './breaker.js';
+import { fetchWithTimeout, okJson, positiveOr } from './http.js';
+import { PERSON_MASK } from './types.js';
 
 export interface LlmConfig {
   /** Bazowy URL Ollamy. Domyślnie `http://127.0.0.1:11434`. */
@@ -49,8 +51,6 @@ const KNOWN_MASKS = [
   '[ADRES]',
   '[IMIĘ I NAZWISKO]',
 ];
-
-const LLM_MASK = '[IMIĘ I NAZWISKO]';
 
 const SYSTEM_PROMPT =
   'Jesteś detektorem danych osobowych w polskim tekście. ' +
@@ -98,32 +98,31 @@ export async function llmRedact(
   const url = (config.url && config.url.length > 0 ? config.url : DEFAULT_URL).replace(/\/$/, '');
   if (breaker.isOpen(url)) return null;
 
-  const timeoutMs = config.timeoutMs && config.timeoutMs > 0 ? config.timeoutMs : DEFAULT_TIMEOUT_MS;
-  const maxChars = config.maxChars && config.maxChars > 0 ? config.maxChars : DEFAULT_MAX_CHARS;
+  const timeoutMs = positiveOr(config.timeoutMs, DEFAULT_TIMEOUT_MS);
+  const maxChars = positiveOr(config.maxChars, DEFAULT_MAX_CHARS);
 
   const head = text.slice(0, maxChars);
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetch(`${url}/api/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: config.model,
-        stream: false,
-        format: 'json',
-        options: { temperature: 0 },
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: head },
-        ],
-      }),
-      signal: controller.signal,
-    });
-
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = (await res.json()) as { message?: { content?: unknown } };
+    const data = (await fetchWithTimeout(
+      `${url}/api/chat`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: config.model,
+          stream: false,
+          format: 'json',
+          options: { temperature: 0 },
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: head },
+          ],
+        }),
+      },
+      timeoutMs,
+      okJson,
+    )) as { message?: { content?: unknown } };
     const content = data?.message?.content;
     if (typeof content !== 'string' || content.length === 0) {
       throw new Error('Nieprawidłowa odpowiedź Ollamy');
@@ -144,7 +143,7 @@ export async function llmRedact(
       const parts = redacted.split(c);
       if (parts.length === 1) continue; // zniknął w poprzedniej zamianie (nakładanie)
       count += parts.length - 1;
-      redacted = parts.join(LLM_MASK);
+      redacted = parts.join(PERSON_MASK);
     }
 
     if (count === 0) return null;
@@ -152,8 +151,6 @@ export async function llmRedact(
   } catch {
     breaker.recordFailure(url);
     return null;
-  } finally {
-    clearTimeout(timer);
   }
 }
 

@@ -1,7 +1,7 @@
 {
   "name": "parawan",
   "version": "0.29.13",
-  "description": "Parawan — lokalny anonimizator polskich danych osobowych (PII). Nazwa marki dla paczki anonimizator: ten sam silnik, te same eksporty, polecenie parawan.",
+  "description": "Parawan to nazwa marki paczki anonimizator: ten sam silnik, te same eksporty, polecenie parawan. Lokalna redakcja polskich danych osobowych (PII): ponad 20 typów, m.in. PESEL, NIP, REGON, IBAN, dowód (z walidacją sum kontrolnych), e-mail, telefon, adres, imię i nazwisko. Bez zależności, działa w Node, Deno, Bun i przeglądarce.",
   "license": "Apache-2.0",
   "type": "module",
   "main": "./index.js",
@@ -31,7 +31,6 @@
     "*.js",
     "*.d.ts",
     "bin",
-    "README.md",
     "NOTICE"
   ],
   "dependencies": {

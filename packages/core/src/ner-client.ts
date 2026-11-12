@@ -8,6 +8,7 @@
 
 import { redactPII, type PiiFinding, type PiiType, type RedactionResult } from './index.js';
 import { createBreaker } from './breaker.js';
+import { fetchWithTimeout, okJson, positiveOr } from './http.js';
 
 export interface NerConfig {
   /** Bazowy URL usługi NER, np. `http://127.0.0.1:8090`. */
@@ -51,28 +52,23 @@ export async function nerRedact(
 
   if (breaker.isOpen(config.url)) return null;
 
-  const timeoutMs = config.timeoutMs && config.timeoutMs > 0 ? config.timeoutMs : DEFAULT_TIMEOUT_MS;
-  const maxChars = config.maxChars && config.maxChars > 0 ? config.maxChars : DEFAULT_MAX_CHARS;
+  const timeoutMs = positiveOr(config.timeoutMs, DEFAULT_TIMEOUT_MS);
+  const maxChars = positiveOr(config.maxChars, DEFAULT_MAX_CHARS);
 
   // NER dostaje tylko początek tekstu (latencja); ogon zostaje zamaskowany in-process.
   const head = text.slice(0, maxChars);
   const tail = text.slice(maxChars);
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (config.apiKey) headers['Authorization'] = `Bearer ${config.apiKey}`;
 
-    const res = await fetch(`${config.url.replace(/\/$/, '')}/redact`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ text: head }),
-      signal: controller.signal,
-    });
-
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = (await res.json()) as NerResponse;
+    const data = (await fetchWithTimeout(
+      `${config.url.replace(/\/$/, '')}/redact`,
+      { method: 'POST', headers, body: JSON.stringify({ text: head }) },
+      timeoutMs,
+      okJson,
+    )) as NerResponse;
     if (typeof data.redacted !== 'string') throw new Error('Nieprawidłowa odpowiedź NER');
 
     breaker.recordSuccess(config.url);
@@ -80,8 +76,6 @@ export async function nerRedact(
   } catch {
     breaker.recordFailure(config.url);
     return null;
-  } finally {
-    clearTimeout(timer);
   }
 }
 
@@ -102,16 +96,14 @@ export async function redactPIIFull(input: string, config?: NerConfig): Promise<
 /** Szybki test dostępności usługi NER (`GET /health`). */
 export async function nerHealthCheck(config: NerConfig): Promise<boolean> {
   if (!config?.url) return false;
-  const controller = new AbortController();
-  // timeoutMs <= 0 jak brak wartości, a nie natychmiastowy abort.
-  const timeoutMs = config.timeoutMs && config.timeoutMs > 0 ? config.timeoutMs : DEFAULT_TIMEOUT_MS;
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetch(`${config.url.replace(/\/$/, '')}/health`, { signal: controller.signal });
-    return res.ok;
+    return await fetchWithTimeout(
+      `${config.url.replace(/\/$/, '')}/health`,
+      {},
+      positiveOr(config.timeoutMs, DEFAULT_TIMEOUT_MS),
+      (res) => res.ok,
+    );
   } catch {
     return false;
-  } finally {
-    clearTimeout(timer);
   }
 }
