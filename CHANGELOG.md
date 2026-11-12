@@ -29,8 +29,9 @@ Silnik:
 - **Warstwa LLM nie psuje nowszych znaczników.** Biblioteczny klient lokalnego modelu
   (`anonimizator/llm`) znał tylko część masek, więc kandydat „VIN” albo „TOKEN” zamieniał środek
   `[VIN]` czy `[TOKEN]` na maskę osoby, a litery etykiety `[OSOBA-AB]` też były do wzięcia. Teraz
-  lista masek pochodzi wprost z rdzenia, fragmenty `[OSOBA-…]` są odrzucane, a zamiana omija
-  wszystkie znaczniki już obecne w tekście. Aplikacji Parawan.html to nie dotyczy.
+  lista masek pochodzi wprost z rdzenia, fragmenty `[OSOBA-…]` są odrzucane, a zamiana pomija
+  wystąpienia, które zaczynają się albo kończą w środku znacznika. Kandydat obejmujący cały znacznik
+  („Jan [IMIĘ I NAZWISKO]”) jest zamieniany w całości. Aplikacji Parawan.html to nie dotyczy.
 
 ## v0.46.26 — 2026-10-25
 

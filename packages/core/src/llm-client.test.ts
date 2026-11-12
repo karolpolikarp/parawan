@@ -281,3 +281,19 @@ test('redactPIIUltra — awaria LLM nie obniża ochrony (wynik == in-process)', 
   expect(ultra.redacted).toBe(base.redacted);
   expect(ultra.found).toEqual(base.found);
 });
+
+test('llmRedact — kandydat obejmujący cały znacznik albo nawias spoza masek jest zamieniany w całości', async () => {
+  const text =
+    'Grzegorz [IMIĘ I NAZWISKO] stawił się. Świadek Jan Kowalski [sic] zeznał. Pani Anna [DANE] złożyła wniosek.';
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async () =>
+      ollamaResponse(JSON.stringify({ pii: ['Grzegorz [IMIĘ I NAZWISKO]', 'Jan Kowalski [sic]', 'Anna [DANE]'] })),
+    ),
+  );
+  const r = await llmRedact(text, CFG);
+  expect(r?.redacted).toBe(
+    '[IMIĘ I NAZWISKO] stawił się. Świadek [IMIĘ I NAZWISKO] zeznał. Pani [IMIĘ I NAZWISKO] złożyła wniosek.',
+  );
+  expect(r?.found).toEqual([{ type: 'IMIE', count: 3 }]);
+});

@@ -44,26 +44,23 @@ const OSOBA_FRAGMENT = /^(?:\[?OSOBA-|SOBA-|OBA-|BA-|A-|-)[A-Z]*\]?$|^[A-Z]+\]$/
 const isMaskFragment = (c: string): boolean =>
   KNOWN_MASKS.some((m) => m.includes(c)) || '[OSOBA-'.includes(c) || OSOBA_FRAGMENT.test(c);
 
-// Placeholdery w tekście (maski rdzenia i etykiety [OSOBA-X]) są nietykalne przy zamianie; chroni to
-// też przed kandydatem, który przypadkiem pokrywa się z literami etykiety („AB" w [OSOBA-AB]).
-const PLACEHOLDER_RE = new RegExp(`\\[OSOBA-[A-Z]+\\]|${KNOWN_MASKS.map(escapeRe).join('|')}`, 'g');
+// Wystąpienie kandydata, które zaczyna się albo kończy w środku znacznika, rozbiłoby go („AB”
+// w [OSOBA-AB]). Wystąpienie obejmujące cały znacznik („Jan [IMIĘ I NAZWISKO]”) jest zamieniane.
+const PLACEHOLDER_RE = new RegExp(`\[OSOBA-[A-Z]+\]|${KNOWN_MASKS.map(escapeRe).join('|')}`, 'g');
 
-/** Zamień wszystkie wystąpienia `c` poza placeholderami; zwraca nowy tekst i liczbę zamian. */
-function replaceOutsidePlaceholders(text: string, c: string): { text: string; count: number } {
+function replaceCandidate(text: string, c: string): { text: string; count: number } {
+  const spans = [...text.matchAll(PLACEHOLDER_RE)].map((m) => [m.index, m.index + m[0].length]);
+  const cuts = (pos: number) => spans.some(([a, b]) => pos > a && pos < b);
   let out = '';
   let count = 0;
   let last = 0;
-  const swap = (seg: string): string => {
-    const parts = seg.split(c);
-    count += parts.length - 1;
-    return parts.join(PERSON_MASK);
-  };
-  for (const m of text.matchAll(PLACEHOLDER_RE)) {
-    out += swap(text.slice(last, m.index)) + m[0];
-    last = m.index + m[0].length;
+  for (let at = text.indexOf(c); at !== -1; at = text.indexOf(c, at + 1)) {
+    if (at < last || cuts(at) || cuts(at + c.length)) continue;
+    out += text.slice(last, at) + PERSON_MASK;
+    last = at + c.length;
+    count++;
   }
-  out += swap(text.slice(last));
-  return { text: out, count };
+  return { text: out + text.slice(last), count };
 }
 
 const SYSTEM_PROMPT =
@@ -155,7 +152,7 @@ export async function llmRedact(
     let count = 0;
     for (const c of candidates) {
       // Kandydat mógł zniknąć w poprzedniej zamianie (nakładanie); wtedy count się nie zmienia.
-      const r = replaceOutsidePlaceholders(redacted, c);
+      const r = replaceCandidate(redacted, c);
       count += r.count;
       redacted = r.text;
     }
