@@ -1,0 +1,202 @@
+{
+  "id": "10_szkoda_oc",
+  "template": "szkoda_oc",
+  "title": "Zgłoszenie szkody komunikacyjnej",
+  "seed": 1010,
+  "traps": [
+    "dwa numery rejestracyjne i VIN",
+    "funkcjonariusz z imienia i nazwiska",
+    "prawo jazdy"
+  ],
+  "entities": [
+    {
+      "text": "ul. Krótka 37 m. 48",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "20-888",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Lublin",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "ul. Kazimierza Wielkiego 56",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "05-520",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Konstancin-Jeziorna",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "TU Przezorny S.A.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "OC/82655147",
+      "type": "POLICY_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "skrzyżowaniu ul. Puławskiej i ul. Woronicza",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "miejsce zdarzenia",
+      "count": 1
+    },
+    {
+      "text": "Łukasz Wysocki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "76030589570",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+48 631 349 438",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wysockil53@poczta-test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "89063/20/2950",
+      "type": "DRIVING_LICENSE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Hyundai i30",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "WX 739HT",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "5UBGC1HYPSDG85ZCW",
+      "type": "VIN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Paweł Pietrzycki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "1982-11-17",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "WI 789WC",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Pawła Pietrzyckiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Andrzej Kowal",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "RSD-9605/26",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer notatki policyjnej",
+      "count": 1
+    },
+    {
+      "text": "stłuczenia klatki piersiowej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krzysztof Sadowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "573-003-346",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "87 1050 0099 4473 0270 7362 0379",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

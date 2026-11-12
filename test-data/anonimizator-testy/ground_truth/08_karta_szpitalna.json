@@ -1,0 +1,145 @@
+{
+  "id": "08_karta_szpitalna",
+  "template": "karta_szpitalna",
+  "title": "Karta informacyjna ze szpitala",
+  "seed": 1008,
+  "traps": [
+    "kody ICD-10",
+    "patron w nazwie szpitala"
+  ],
+  "entities": [
+    {
+      "text": "ul. Adama Mickiewicza 69 m. 3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "91-437",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Łódź",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Centrum Medyczne Zdrowa Przystań",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "placówka, może zawierać patrona",
+      "count": 1
+    },
+    {
+      "text": "Tomasz Michalski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "12311960614",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "19.11.2012",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "2518/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer hospitalizacji",
+      "count": 1
+    },
+    {
+      "text": "Joanna Michalska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+48 653 317 745",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "F32.1",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "epizod depresyjny umiarkowany",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "J45.0",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "astma oskrzelowa z przewagą komponenty alergicznej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "sertralina 50 mg",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "salbutamol doraźnie",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "Joannie Michalskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Adam Polak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "3757956",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,244 @@
+{
+  "id": "03_kadry_pracownik",
+  "template": "kadry_pracownik",
+  "title": "Pismo działu kadr do pracownika",
+  "seed": 1003,
+  "traps": [
+    "dane o zdrowiu opisowo",
+    "telefon bez słowa „tel.”",
+    "inicjał + nazwisko w rozdzielniku"
+  ],
+  "entities": [
+    {
+      "text": "Instytut Rozwoju Technologii Cyfrowych",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "pracodawca, quasi-identyfikator",
+      "count": 1
+    },
+    {
+      "text": "ul. Stanisława Moniuszki 3",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "00-009",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Krótka 115A lok. 9",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "03-283",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Warszawa",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 3
+    },
+    {
+      "text": "DKP.1110.943.2026.PJ",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak z inicjałami kierownika",
+      "count": 1
+    },
+    {
+      "text": "starszej analityczki danych",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "stanowisko, quasi-identyfikator",
+      "count": 1
+    },
+    {
+      "text": "Joanna Zawadzka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "2663347",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer prawa wykonywania zawodu lekarza",
+      "count": 1
+    },
+    {
+      "text": "Joannie Zawadzkiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "89091502666",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "15 września 1989",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marka Nowaka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "26261702538",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "17 czerwca 2026",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia dziecka bez słowa „urodzony”",
+      "count": 1
+    },
+    {
+      "text": "Tomasza Sowę",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "cesarskie cięcie",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "przeciwwskazane jest dźwiganie ciężarów",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jakubowi Kosowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Brukseli",
+      "type": "TRAVEL_CITY",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "GL5752886",
+      "type": "PASSPORT",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "51 1160 2202 1306 2848 3176 6569",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PO 112AL",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "12 368 67 89",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "22 379 56 66",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "j.zawadzka@irtc-test.gov.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "203.0.113.86",
+      "type": "IP",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mariusz Michalski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wew. 789",
+      "type": "PHONE_EXT",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zawadzkiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 2
+    },
+    {
+      "text": "Piotr Jabłoński",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "J. Zawadzka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał imienia + nazwisko",
+      "count": 1
+    }
+  ]
+}

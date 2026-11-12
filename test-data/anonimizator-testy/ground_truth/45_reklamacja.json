@@ -1,0 +1,110 @@
+{
+  "id": "45_reklamacja",
+  "template": "reklamacja",
+  "title": "Reklamacja konsumencka",
+  "seed": 1045,
+  "traps": [
+    "samo imię osoby (kurier, konsultantka)",
+    "numer klienta i zamówienia"
+  ],
+  "entities": [
+    {
+      "text": "ul. Krótka 61 m. 55",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "61-625",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Poznań",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "Sklep AGD Plus sp. z o.o.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ZAM-2026255-88",
+      "type": "ORDER_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KL-4552823",
+      "type": "CUSTOMER_ID",
+      "expect": "policy",
+      "note": "identyfikator klienta, pseudonim",
+      "count": 1
+    },
+    {
+      "text": "2189",
+      "type": "CARD_LAST4",
+      "expect": "policy",
+      "note": "ostatnie 4 cyfry karty",
+      "count": 1
+    },
+    {
+      "text": "SN4284829901",
+      "type": "SERIAL_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jakub Wróbel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "jakub87@skrzynka-test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+48520753460",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tomasz",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię",
+      "count": 1
+    },
+    {
+      "text": "Zofia",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię",
+      "count": 1
+    },
+    {
+      "text": "40102028921705760845484974",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

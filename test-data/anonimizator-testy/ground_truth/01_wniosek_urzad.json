@@ -1,0 +1,167 @@
+{
+  "id": "01_wniosek_urzad",
+  "template": "wniosek_urzad",
+  "title": "Wniosek mieszkańca do urzędu",
+  "seed": 1001,
+  "traps": [
+    "nazwisko Zima i słowo „zimą”",
+    "patron ulicy w adresie osoby (maskować jako adres)",
+    "adres urzędu ma zostać"
+  ],
+  "entities": [
+    {
+      "text": "Urząd Miasta Łodzi",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Piotrkowska 104",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "90-926",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Krótka 120 m. 13",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "05-529",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Konstancin-Jeziorna",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "ul. Lipowa 116/44",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "02-591",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Warszawa",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "588614526",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "DO/2023/737317",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer deklaracji",
+      "count": 1
+    },
+    {
+      "text": "Wojciech Zima",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "85072641632",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "zimaw84@skrzynka-test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "EWR439005",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jadwiga Zima",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "88102179969",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "zimą",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko Zima",
+      "count": 1
+    },
+    {
+      "text": "35 1160 2202 2158 3091 3895 7070",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+48 588 614 526",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "ten sam numer w innym formacie",
+      "count": 1
+    },
+    {
+      "text": "Adam Kowal",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jadwigi Zimy",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    }
+  ]
+}

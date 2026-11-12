@@ -1,0 +1,17 @@
+NOTATKA SŁUŻBOWA
+ze spotkania roboczego w dniu 2 czerwca 2026 r., sala 214, budynek przy ul. Królewskiej 27 w Warszawie
+Uczestnicy:
+1. dr hab. inż. Anna Sadowska (Ministerstwo Cyfryzacji)
+2. mgr Katarzyna Kot (Centralny Ośrodek Informatyki)
+3. dr Adam Nowakowski (NASK – Państwowy Instytut Badawczy)
+4. Magdalena Kamińska (Ministerstwo Cyfryzacji)
+5. mgr inż. Wojciech Kowal (Centralny Ośrodek Informatyki)
+6. Monika Lis (Narodowy Instytut Onkologii im. Marii Skłodowskiej-Curie)
+Spotkanie otworzyła Anna Sadowska, która przedstawiła stan prac nad wdrożeniem elektronicznego obiegu dokumentów. Pani Kot zwróciła uwagę na opóźnienie odbioru drugiego etapu. Zgodnie z ustaleniami z Panem Ministrem termin nie może zostać przesunięty.
+Adam Nowakowski poinformował, że testy obciążeniowe wykonał zespół Magdaleny Kamińskiej. Wyniki przesłano Wojciechowi Kowalowi 3 dni temu. Przedstawicielka instytutu, Monika Lis, zgłosiła potrzebę udziału w pilotażu.
+Ustalenia:
+1. Harmonogram odbioru do 5 dni roboczych (odp. AS).
+2. Uzupełnienie raportu z testów (odp. MK, kontakt magdalena89@coi-test.gov.pl, tel. 22 767 55 61).
+3. Zaproszenie przedstawiciela Rzecznika Praw Obywatelskich na kolejne spotkanie (odp. KK).
+Sporządził: Wojciech Kowal
+wojciech94@mc-test.gov.pl

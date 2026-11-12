@@ -1,0 +1,110 @@
+{
+  "id": "05_reklamacja",
+  "template": "reklamacja",
+  "title": "Reklamacja konsumencka",
+  "seed": 1005,
+  "traps": [
+    "samo imię osoby (kurier, konsultantka)",
+    "numer klienta i zamówienia"
+  ],
+  "entities": [
+    {
+      "text": "ul. Lipowa 23/8",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "05-508",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Piaseczno",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "Mebloteka Online sp. z o.o.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ZAM-2026097-43",
+      "type": "ORDER_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KL-4894791",
+      "type": "CUSTOMER_ID",
+      "expect": "policy",
+      "note": "identyfikator klienta, pseudonim",
+      "count": 1
+    },
+    {
+      "text": "2423",
+      "type": "CARD_LAST4",
+      "expect": "policy",
+      "note": "ostatnie 4 cyfry karty",
+      "count": 1
+    },
+    {
+      "text": "SN3033554320",
+      "type": "SERIAL_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Adam Kot",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "adam98@mail-test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+48544469777",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wojciech",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię",
+      "count": 1
+    },
+    {
+      "text": "Zofia",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię",
+      "count": 1
+    },
+    {
+      "text": "98124010379105964859397820",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

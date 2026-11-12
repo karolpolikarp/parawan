@@ -1,0 +1,237 @@
+{
+  "id": "42_wezwanie_zaplata",
+  "template": "wezwanie_zaplata",
+  "title": "Przedsądowe wezwanie do zapłaty",
+  "seed": 1042,
+  "traps": [
+    "numer wpisu radcy w podpisie",
+    "fragment firmy JDG z nazwiskiem",
+    "fałszywy PESEL jako numer polisy"
+  ],
+  "entities": [
+    {
+      "text": "WA-6242",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer wpisu na listę radców",
+      "count": 1
+    },
+    {
+      "text": "Drewnostal sp. z o.o.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "0000657064",
+      "type": "KRS",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "2259600850",
+      "type": "NIP_COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "893130739",
+      "type": "REGON_COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Marii Konopnickiej 65 lok. 20",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres kancelarii jednoosobowej",
+      "count": 1
+    },
+    {
+      "text": "02-653",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "58 233 73 32",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "POLAK-POL",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "fragment firmy JDG zawierający nazwisko",
+      "count": 1
+    },
+    {
+      "text": "ul. Jana Heweliusza 70/30",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "30-334",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kraków",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "ul. Granicznej 37",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres budowy u osoby fizycznej",
+      "count": 1
+    },
+    {
+      "text": "FV/2026/07/296",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "65793324563",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "11 cyfr bez poprawnej sumy kontrolnej PESEL",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy dla Łodzi-Śródmieścia w Łodzi",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Joanna Kawa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "3751365784",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kancelaria@kawa-legal-test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "JK/844/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak z inicjałami",
+      "count": 1
+    },
+    {
+      "text": "Ewa Polak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "POLAK-POL Ewa Polak",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "pełna firma JDG",
+      "count": 1
+    },
+    {
+      "text": "1206860938",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "318138577",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Antoni Lewandowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "67 1940 1076 6635 4441 5292 0483",
+      "type": "IBAN_COMPANY",
+      "expect": "policy",
+      "note": "rachunek osoby prawnej",
+      "count": 1
+    },
+    {
+      "text": "Barbarą Wrzosek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wrzosekb18@kawa-legal-test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "745 345 977",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wrzosek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 2
+    },
+    {
+      "text": "Katarzyna Lipowska-Dąbek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Lipowską-Dąbek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 1
+    }
+  ]
+}

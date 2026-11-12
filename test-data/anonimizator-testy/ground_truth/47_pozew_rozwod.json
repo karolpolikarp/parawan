@@ -1,0 +1,202 @@
+{
+  "id": "47_pozew_rozwod",
+  "template": "pozew_rozwod",
+  "title": "Pozew o rozwód",
+  "seed": 1047,
+  "traps": [
+    "dane małoletnich",
+    "dane wrażliwe opisowo",
+    "numer aktu USC"
+  ],
+  "entities": [
+    {
+      "text": "Sąd Okręgowy w Gdańsku",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Polna 2C lok. 2",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "61-629",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Poznań",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "ul. Adama Mickiewicza 56 m. 56",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "02-525",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Warszawa",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "ul. Kazimierza Wielkiego 18",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "03-293",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KR-1585",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "1705/2018",
+      "type": "CIVIL_RECORD",
+      "expect": "mask",
+      "note": "numer aktu małżeństwa",
+      "count": 1
+    },
+    {
+      "text": "Magdalena Wysocka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "93031225481",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marka Lewandowskiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krzysztof Wysocki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "78020491397",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Magdaleny Wysockiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krzysztofa Wysockiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jakubem Wysockim",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "2019-10-21",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "19302109753",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "11 318 zł netto",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "dochód osoby",
+      "count": 1
+    },
+    {
+      "text": "Kamex Logistyka sp. z o.o.",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "nadużywa alkoholu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "dane wrażliwe",
+      "count": 1
+    },
+    {
+      "text": "Niebieskiej Karty",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "przemoc domowa",
+      "count": 1
+    },
+    {
+      "text": "Katarzyny Dąbrowskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marek Lewandowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

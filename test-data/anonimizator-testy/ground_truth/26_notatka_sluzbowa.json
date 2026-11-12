@@ -1,0 +1,160 @@
+{
+  "id": "26_notatka_sluzbowa",
+  "template": "notatka_sluzbowa",
+  "title": "Notatka służbowa ze spotkania",
+  "seed": 1026,
+  "traps": [
+    "inicjały osób",
+    "patron w nazwie instytucji",
+    "odmiana wielu nazwisk"
+  ],
+  "entities": [
+    {
+      "text": "Ministerstwo Cyfryzacji",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Centralny Ośrodek Informatyki",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "NASK – Państwowy Instytut Badawczy",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Narodowy Instytut Onkologii im. Marii Skłodowskiej-Curie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie instytucji",
+      "count": 1
+    },
+    {
+      "text": "ul. Królewskiej 27",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jadwiga Sadowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Andrzej Polak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mariusz Wróbel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Joanna Zielińska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wojciech Kot",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Anna Sowa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Polak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 2
+    },
+    {
+      "text": "Joanny Zielińskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wojciechowi Kotowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "JS",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "inicjały w liście zadań",
+      "count": 1
+    },
+    {
+      "text": "JZ",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "inicjały w liście zadań",
+      "count": 1
+    },
+    {
+      "text": "joanna.zielinska@coi-test.gov.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "71 722 36 53",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "AP",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "inicjały w liście zadań",
+      "count": 1
+    },
+    {
+      "text": "Rzecznika Praw Obywatelskich",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kotw60@mc-test.gov.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,118 @@
+{
+  "id": "15_reklamacja",
+  "template": "reklamacja",
+  "title": "Reklamacja konsumencka",
+  "seed": 1015,
+  "traps": [
+    "nazwisko Sowa i słowo „sowa”",
+    "samo imię osoby (kurier, konsultantka)",
+    "numer klienta i zamówienia"
+  ],
+  "entities": [
+    {
+      "text": "ul. Lipowa 106",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "91-469",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Łódź",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "Sklep AGD Plus sp. z o.o.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ZAM-2026338-90",
+      "type": "ORDER_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KL-4874606",
+      "type": "CUSTOMER_ID",
+      "expect": "policy",
+      "note": "identyfikator klienta, pseudonim",
+      "count": 1
+    },
+    {
+      "text": "4799",
+      "type": "CARD_LAST4",
+      "expect": "policy",
+      "note": "ostatnie 4 cyfry karty",
+      "count": 1
+    },
+    {
+      "text": "SN2301825330",
+      "type": "SERIAL_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Andrzej Sowa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "andrzej89@poczta-test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "764-978-945",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mariusz",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię",
+      "count": 1
+    },
+    {
+      "text": "sowa",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko Sowa",
+      "count": 1
+    },
+    {
+      "text": "Aleksandra",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię",
+      "count": 1
+    },
+    {
+      "text": "61 1160 2202 2102 8806 6013 3307",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

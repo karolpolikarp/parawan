@@ -1,0 +1,223 @@
+{
+  "id": "23_kadry_pracownik",
+  "template": "kadry_pracownik",
+  "title": "Pismo działu kadr do pracownika",
+  "seed": 1023,
+  "traps": [
+    "dane o zdrowiu opisowo",
+    "telefon bez słowa „tel.”",
+    "inicjał + nazwisko w rozdzielniku"
+  ],
+  "entities": [
+    {
+      "text": "Centrum Usług Wspólnych Mazowsza",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "pracodawca, quasi-identyfikator",
+      "count": 1
+    },
+    {
+      "text": "ul. Stanisława Moniuszki 3",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "00-009",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Ogrodowa 67/29",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "03-257",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Warszawa",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 3
+    },
+    {
+      "text": "DKP.1110.605.2026.MZ",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak z inicjałami kierownika",
+      "count": 1
+    },
+    {
+      "text": "głównej księgowej",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "stanowisko, quasi-identyfikator",
+      "count": 1
+    },
+    {
+      "text": "Małgorzata Nowakowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "5579635",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer prawa wykonywania zawodu lekarza",
+      "count": 1
+    },
+    {
+      "text": "Małgorzacie Nowakowskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "95071237644",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "1995-07-12",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wizyt u psychiatry co dwa tygodnie",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "leczenia epizodu depresyjnego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Joanny Dąbrowskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tetianie Bondarenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rygi",
+      "type": "TRAVEL_CITY",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "BH3069873",
+      "type": "PASSPORT",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL79249000056286554728216595",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KR 2022M",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "58 556 60 96",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "12 041 18 95",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "m.nowakowska@irtc-test.gov.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "192.0.2.153",
+      "type": "IP",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Paweł Wrzosek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wew. 096",
+      "type": "PHONE_EXT",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Nowakowskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 2
+    },
+    {
+      "text": "Magdalena Zawadzka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "M. Nowakowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał imienia + nazwisko",
+      "count": 1
+    }
+  ]
+}
