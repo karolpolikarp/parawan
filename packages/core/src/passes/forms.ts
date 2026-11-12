@@ -205,8 +205,8 @@ function flatNextLabel(rest: string): { index: number; text: string } | null {
 // Samodzielne „Lokal: 5" czy „Miasto: Kraków" to nagłówki urzędów albo opis lokalu, więc nie ma ich
 // w FORM_FIELDS. Numer lokalu tylko liczbowy, bo „M.:" bywa skrótem miasta.
 const FLAT_ONLY_FIELDS: FormField[] = [
-  { re: /^(?:m|lok|lokal|mieszk|mieszkanie)\.?$/i, type: 'ADRES', kind: 'addr', mask: '[ADRES]' },
-  { re: /^(?:miasto|poczta)$/i, type: 'MIEJSCOWOSC', kind: 'place', mask: '[MIEJSCOWOŚĆ]' },
+  { re: /^(?:m|lok|lokal|mieszk|mieszkanie)\.?$/i, type: 'ADRES', kind: 'addr' },
+  { re: /^(?:miasto|poczta)$/i, type: 'MIEJSCOWOSC', kind: 'place' },
 ];
 /**
  * Wartość pola adresowego z kolejnymi polami w tym samym wierszu: każda wartość znanego pola dostaje
@@ -266,7 +266,7 @@ function maskFlatFormFields(
     ) {
       const lead = /^[ \t]*/.exec(value)?.[0] ?? '';
       // kolejne pole osobowe w trybie pseudonimów dostaje etykietę osoby (spójną z prozą)
-      out += `${lb}${lead}${k === 0 ? f.mask : maskOf(f, vt, lbl)}${value.slice(lead.length + vt.length)}`;
+      out += `${lb}${lead}${k === 0 ? ctx.M[f.type] : maskOf(f, vt, lbl)}${value.slice(lead.length + vt.length)}`;
       ctx.bump(f.type);
     } else out += lb + value;
   }
@@ -442,7 +442,7 @@ function formMaskers(ctx: RedactCtx): FormMaskers {
   // Maska wartości: stała, a w trybie pseudonimów dla pól z nazwiskiem (surnameAt) etykieta osoby
   // kluczowana nazwiskiem, spójna z przebiegami osób.
   const maskFor = (field: FormField, val: string): string => {
-    if (!field.surnameAt || !ctx.pseudonyms) return field.mask;
+    if (!field.surnameAt || !ctx.pseudonyms) return ctx.M[field.type];
     const ws = val.trim().split(/[ \t]+/);
     let [sur, other] = field.surnameAt === 'first' ? [ws[0], ws[ws.length - 1]] : [ws[ws.length - 1], ws[0]];
     let ambiguous = false;
@@ -464,7 +464,7 @@ function formMaskers(ctx: RedactCtx): FormMaskers {
       }
     }
     // fragment przeniesienia („Mał-⏎gorzata") albo inicjał nie jest kluczem tożsamości
-    if (!/^\p{L}{2,}(?:-\p{L}{2,})*$/u.test(sur)) return field.mask;
+    if (!/^\p{L}{2,}(?:-\p{L}{2,})*$/u.test(sur)) return ctx.M[field.type];
     if (ambiguous) {
       // Ten sam nierozpoznany klucz przy innym drugim wyrazie („Hans Schmidt", „Hans Becker") to dwie
       // osoby; kluczem drugiej jest cała wartość.
@@ -517,7 +517,7 @@ function maskSameLineValue(
   const list = field.nameList ? RE_NAME_LIST_PAIR.exec(colonVal.trim()) : null;
   if (list && isFirstNameLike(list[1]) && isFirstNameLike(list[3])) {
     const at = lines[i].lastIndexOf(list[0]);
-    lines[i] = `${lines[i].slice(0, at)}${field.mask}${list[2]}${field.mask}${lines[i].slice(at + list[0].length)}`;
+    lines[i] = `${lines[i].slice(0, at)}${ctx.M[field.type]}${list[2]}${ctx.M[field.type]}${lines[i].slice(at + list[0].length)}`;
     ctx.bump(field.type);
     ctx.bump(field.type);
     return;
@@ -576,7 +576,7 @@ function maskNextLineValue(ctx: RedactCtx, rows: FormRows, masks: FormMaskers, i
   if (field.kind === 'date') {
     // sama data, adnotacja zostaje („1990-01-01 (wg aktu)")
     if (RE_DATE_VALUE.test(lines[j])) {
-      lines[j] = lines[j].replace(RE_DATE_VALUE, field.mask);
+      lines[j] = lines[j].replace(RE_DATE_VALUE, () => ctx.M[field.type]);
       ctx.bump(field.type);
     }
     return;

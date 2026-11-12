@@ -50,9 +50,9 @@ export const CITY_START = `(?<![${PL_UP}${PL_LO}]|[${PL_UP}${PL_LO}]-)`;
 // Opcjonalny punkt listy przed wpisem („1. ”, „3) ”, „- ”).
 export const LIST_BULLET = '(?:(?:\\d{1,4}[.)]|[-*•–])[ \\t]*)?';
 export const MONTHS_GEN = 'stycznia|lutego|marca|kwietnia|maja|czerwca|lipca|sierpnia|września|października|listopada|grudnia';
-// Maska osoby w domyślnym zapisie; maski z options.masks tu nie pasują.
-export const PERSON_MASK = '\\[OSOBA-[A-Z]+\\]|\\[IMIĘ I NAZWISKO\\]';
 export const escapeRe = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+/** Wzorzec maski osoby: etykieta pseudonimu [OSOBA-X] albo maska IMIE (domyślna lub z options.masks). */
+export const personMaskSrc = (imie: string): string => `\\[OSOBA-[A-Z]+\\]|${escapeRe(imie)}`;
 export const countOf = (s: string, ch: string): number => s.split(ch).length - 1;
 
 export const RE_CHAR_LL = /\p{Ll}/u;

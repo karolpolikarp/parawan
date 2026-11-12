@@ -19,6 +19,7 @@
  */
 import { expect, test } from 'vitest';
 import { redactPII, type PiiType } from './index';
+import { MASK } from './types';
 // dataset.mjs to plain-JS oracle benchmarku (bez deklaracji typów) — import bez typowania.
 // @ts-expect-error — brak pliku deklaracji dla modułu .mjs (świadomie, to skrypt benchmarku)
 import { buildDataset } from '../../../scripts/benchmark/dataset.mjs';
@@ -165,4 +166,20 @@ test('golden: korpus benchmarku — własne maski', () => {
   for (const c of cases) out[c.id] = redactPII(c.text, { masks: CUSTOM_MASKS }).redacted;
   for (const [k, v] of Object.entries(ADVERSARIAL)) out[`adv:${k}`] = redactPII(v, { masks: CUSTOM_MASKS }).redacted;
   expect(out).toMatchSnapshot();
+});
+
+// Własna maska zmienia tylko tekst placeholdera. Po zamianie własnych masek z powrotem na domyślne
+// wynik musi być identyczny z domyślnym: kotwice i domknięcia czytające wstawione maski nie mogą
+// zależeć od ich domyślnego brzmienia.
+const RENAMED_MASKS = Object.fromEntries((Object.keys(MASK) as PiiType[]).map((t) => [t, `[ZAKRYTE ${t}]`])) as Record<PiiType, string>;
+const backToDefault = (s: string): string =>
+  (Object.keys(RENAMED_MASKS) as PiiType[]).reduce((acc, t) => acc.split(RENAMED_MASKS[t]).join(MASK[t]), s);
+test.each([
+  ['domyślnie', {}],
+  ['z pseudonimizacją', { pseudonyms: true }],
+] as const)('własne maski: wynik %s = wynik domyślny z podmienionym tekstem masek (cały korpus)', (_n, opts) => {
+  const texts = [...cases.map((c) => c.text), ...Object.values(ADVERSARIAL)];
+  for (const text of texts) {
+    expect(backToDefault(redactPII(text, { ...opts, masks: RENAMED_MASKS }).redacted)).toBe(redactPII(text, opts).redacted);
+  }
 });

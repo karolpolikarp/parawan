@@ -12,7 +12,14 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
-Na razie brak zmian od v0.46.26.
+Silnik:
+
+- **Własne maski działają jak domyślne.** Przy `redactPII(text, { masks })` część reguł szukała
+  w tekście domyślnych znaczników, np. `[IMIĘ I NAZWISKO]` czy `[ADRES]`, więc nie widziała maski
+  podanej przez użytkownika. Imię nad nazwiskiem albo imiona rodziców zostawały wtedy jawne obok
+  maski, a miasto przed zamaskowaną ulicą nie było maskowane. Pola formularza („Imię i nazwisko:”,
+  „Ulica:”) wstawiały domyślną maskę zamiast własnej. Teraz wynik z własnymi maskami różni się od
+  domyślnego tylko tekstem znaczników.
 
 ## v0.46.26 — 2026-10-25
 

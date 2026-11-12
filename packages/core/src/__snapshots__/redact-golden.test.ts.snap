@@ -1774,8 +1774,8 @@ exports[`golden: korpus benchmarku — własne maski 1`] = `
   "adv:allcaps-panem": "Rozmawiałem z PANEM <<osoba>> w tej sprawie.",
   "adv:allcaps-rola": "POZWANY <<osoba>> oraz ŚWIADEK <<osoba>> stawili się.",
   "adv:allcaps-sso": "W składzie: przewodniczący SSO <<osoba>> wydał wyrok.",
-  "adv:casing-form-lower": "Imię: [IMIĘ I NAZWISKO]
-Nazwisko: [IMIĘ I NAZWISKO]
+  "adv:casing-form-lower": "Imię: <<osoba>>
+Nazwisko: <<osoba>>
 Oddział: kardiologia",
   "adv:casing-homonim-lower": "to jest jagoda, a obok rośnie kalina i róża pnąca.",
   "adv:casing-imie-caps": "mam na imię <<osoba>> i dzwonię w sprawie faktury.",
@@ -2041,8 +2041,7 @@ Sąd Rejonowy	Wydział Cywilny",
   "os-o-31": "Dokumenty od <<osoba>> dotarły pocztą.",
   "os-o-32": "Decyzję wysłano do <<osoba>>.",
   "os-o-33": "Na ulicy spotkałem wczoraj <<osoba>>.",
-  "os-o-34": "Jan
-<<osoba>> złożył wniosek do urzędu.",
+  "os-o-34": "<<osoba>> złożył wniosek do urzędu.",
   "os-o-35": "z powództwa <<osoba>> przeciwko <<osoba>>, z udziałem <<osoba>> i <<osoba>>",
   "os-p-01": "Pozwany <<osoba>> nie stawił się na rozprawie.",
   "os-p-02": "Powódka <<osoba>> wniosła o zasądzenie kosztów.",
@@ -2054,7 +2053,7 @@ Sąd Rejonowy	Wydział Cywilny",
   "os-p-08": "Na spotkanie przyszedł <<osoba>> z dokumentami.",
   "os-p-09": "<<osoba>> odebrała przesyłkę osobiście.",
   "os-p-10": "hej, pisze do was <<osoba>>, mam pytanie o umowę",
-  "os-p-11": "imię i nazwisko: [IMIĘ I NAZWISKO]",
+  "os-p-11": "imię i nazwisko: <<osoba>>",
   "os-p-12": "od <<osoba>> dostałem pismo",
   "os-p-13": "pełnomocnik: <<osoba>>",
   "os-p-14": "<<osoba>> wygrała sprawę w drugiej instancji.",
@@ -2069,12 +2068,12 @@ Sąd Rejonowy	Wydział Cywilny",
   "os-p-23": "Mam na imię <<osoba>>, nazwisko <<osoba>>.",
   "os-p-24": "Pan <<osoba>> nie odpowiada na wezwania.",
   "os-p-25": "Proszę przekazać dokumenty pani <<osoba>>.",
-  "os-p-26": "Imię i nazwisko: [IMIĘ I NAZWISKO]",
+  "os-p-26": "Imię i nazwisko: <<osoba>>",
   "os-p-27": "nazywam się <<osoba>> i czekam na odpowiedź.",
   "os-p-28": "Nazywam się <<osoba>>, proszę o kontakt telefoniczny.",
   "os-p-29": "mam na imię <<osoba>> i dzwonię w sprawie faktury.",
-  "os-p-30": "Imię: [IMIĘ I NAZWISKO]
-Nazwisko: [IMIĘ I NAZWISKO]",
+  "os-p-30": "Imię: <<osoba>>
+Nazwisko: <<osoba>>",
   "os-p-31": "<<osoba>> złożyła wniosek w urzędzie miasta.",
   "os-p-32": "W składzie SSO <<osoba>> wydał wyrok.",
   "os-p-33": "Rozmawiałem z PANEM <<osoba>> osobiście.",
@@ -2085,11 +2084,10 @@ Nazwisko: [IMIĘ I NAZWISKO]",
   "os-p-38": "ORLEN S.A. <<osoba>> — pełnomocnik spółki.",
   "os-p-39": "Sz. P. <<osoba>> — odpowiedź na pismo.",
   "os-p-40": "Pełnomocnik: mec. <<osoba>> przedłożył pełnomocnictwo.",
-  "os-p-41": "Sporządził Jan
-<<osoba>>, dnia 3 marca.",
+  "os-p-41": "Sporządził <<osoba>>, dnia 3 marca.",
   "os-p-42": "Lista obecności:
-Wilk Bartosz
-Sowa Przemysław
+<<osoba>>
+<<osoba>>
 <<osoba>>",
   "os-p-43": "Przewodniczący: SSO <<osoba>>
 Sędziowie: SO <<osoba>>, SO <<osoba>> (spr.)",
@@ -2115,25 +2113,25 @@ Sędziowie: SO <<osoba>>, SO <<osoba>> (spr.)",
   "os-p-63": "Pacjent <<osoba>> trafił na SOR. Objawy <<osoba>> nasiliły się w nocy. Mistrz linii <<osoba>> wydał polecenie.",
   "os-p-64": "Do: <<osoba>>; <<osoba>>
 Lista obecności:
-<<osoba>> Maria
-<<osoba>> Piotr",
+<<osoba>>
+<<osoba>>",
   "os-p-65": "[12:10] <<osoba>>: siema
 Napisał <<osoba>>.",
-  "os-p-66": "Konto Jan.<<osoba>> zostało zablokowane. Przeniesiono folder <<osoba>>_Anna do archiwum.",
-  "os-p-67": "Od: J0anna <<osoba>>
+  "os-p-66": "Konto <<osoba>> zostało zablokowane. Przeniesiono folder <<osoba>> do archiwum.",
+  "os-p-67": "Od: <<osoba>>
 Pani <<osoba>>",
   "os-p-68": "User: <<osoba>>
 <<osoba>> zgłosił awarię.",
   "os-p-69": "Pani <<osoba>> i <<osoba>> oraz Pan <<osoba>> złożyli wniosek.",
-  "os-p-70": "<<osoba>> KaroI
+  "os-p-70": "<<osoba>>
 <<osoba>>
 Pozwany <<osoba>> Annie groził.",
-  "os-p-71": "<<osoba>> Anna, obywatelka Ukrainy. Świadek <<osoba>> zeznał. Pani <<osoba>> złożyła wniosek.",
-  "os-p-72": "Imię i nazwisko pacjenta: [IMIĘ I NAZWISKO]
+  "os-p-71": "<<osoba>>, obywatelka Ukrainy. Świadek <<osoba>> zeznał. Pani <<osoba>> złożyła wniosek.",
+  "os-p-72": "Imię i nazwisko pacjenta: <<osoba>>
 <<osoba>> z domu <<osoba>>
 Kierownik Działu Kadr <<osoba>>",
   "os-p-73": "Świadek <<osoba>> zeznał. <<osoba>> zatrudniony od 01.02.2010 r. Szanowna Pani Dyrektor Szkoły <<osoba>>. Grafik: Dzień <<osoba>>, Noc <<osoba>>. Do kościoła wraz ze św. <<osoba>> wszedł sprawca.",
-  "os-p-74": "<<osoba>> napisal, ze <<osoba>> bedzie o 18. <<osoba>>, syn Józefa i Marii, stawił się.",
+  "os-p-74": "<<osoba>> napisal, ze <<osoba>> bedzie o 18. <<osoba>>, syn <<osoba>> i <<osoba>>, stawił się.",
   "os-r-01": "<<osoba>> podpisał protokół odbioru.",
   "os-r-02": "<<osoba>> złożyła wniosek o urlop.",
   "os-r-03": "<<osoba>> wynajął magazyn pod miastem.",
@@ -2268,15 +2266,15 @@ Tak	<<osoba>>	Urząd Miasta",
   "str-143": "Pani <<osoba>>, urodzonej <<data>> r. w <<miejsce>>. <<adres>>, <<kod>> <<miejsce>>. zam. <<adres>>. Card number: [NR-KARTY].",
   "str-144": "Kontakt nr 512 345 678, tel. [TELEFON]. Obecnych 12 os.<<osoba>> przewodniczyła. <<adres>>, <<kod>> <<miejsce>>. <<osoba>> z domu Ludowego.",
   "str-145": "<<osoba>>, <<adres>> osoby. Lokale przy <<adres>> i <<adres>>. Najem: <<adres>>, lokal 32,4 m2. Świadek <<osoba>> zeznała.
-04. Ulica: [ADRES]  05. Nr domu: [ADRES]",
+04. Ulica: <<adres>>  05. Nr domu: <<adres>>",
   "str-146": "Wnioskodawczyni zamieszkała w <<miejsce>> 3 osoby na utrzymaniu. <<kod>> <<miejsce>>   Sposób płatności: przelew",
   "str-147": "Prezes Zarządu Spółki <<osoba>> podpisała umowę. Sąd ustanowił opiekuna nad ubezwłasnowolnionym urodzonym <<data>> r. Pojazd pod numerem rejestracji [NR-REJESTRACYJNY].
-Imię i nazwisko pacjenta: [IMIĘ I NAZWISKO]
+Imię i nazwisko pacjenta: <<osoba>>
 <<osoba>> z domu <<osoba>> Zam. <<miejsce>>
 Zam. <<adres>> i <<adres>>",
   "str-148": "Imię i nazwisko pacjenta:
-[IMIĘ I NAZWISKO]
-Imię i nazwisko ucznia: [IMIĘ I NAZWISKO]
+<<osoba>>
+Imię i nazwisko ucznia: <<osoba>>
 Opiekuje się bratem niepełnosprawnym urodzonym <<data>> r.
 <<osoba>> z domu <<osoba>> Wypisana 12.10.",
   "str-149": "Plik: C:\\Users\\[LOGIN]\\Desktop\\a.txt, udział \\\\FS01\\home$\\[LOGIN], katalog /home/[LOGIN]/projekty",
@@ -2317,7 +2315,7 @@ Wakat;-;Warszawa
   "str-163": "W razie pytań proszę dzwonić pod [TELEFON] wieczorem.
 Login: [LOGIN]
 Na zakończenie orkiestra zagrała mazur.",
-  "str-164": "Zgłaszająca mieszka przy <<adres>>. Od 3 lat skarży się na hałas. <<osoba>>, córka Piotra Pawła i Anny Marii.",
+  "str-164": "Zgłaszająca mieszka przy <<adres>>. Od 3 lat skarży się na hałas. <<osoba>>, córka <<osoba>> i <<osoba>>.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
   "str-19": "sms na [TELEFON] nie doszedł",
@@ -2378,7 +2376,7 @@ Na zakończenie orkiestra zagrała mazur.",
   "str-74": "Zabezpieczono pojazdy: [NR-REJESTRACYJNY], [NR-REJESTRACYJNY], [NR-REJESTRACYJNY] oraz [NR-REJESTRACYJNY].",
   "str-75": "Zgłosił się <<osoba>>, zamieszkały <<adres>>.",
   "str-76": "Biuro przy <<adres>> w <<miejsce>> czynne od 8:00.",
-  "str-77": "Załącznik: Umowa_Kredytowa_Adam_<<osoba>>.pdf w aktach.",
+  "str-77": "Załącznik: Umowa_Kredytowa_<<osoba>>.pdf w aktach.",
   "str-78": "Zgłosił się <<osoba>> po odbiór dokumentów.",
   "str-79": "Adres korespondencyjny: <<adres>>, <<kod>> <<miejsce>>.",
   "str-80": "Kontakt: [EMAIL] w sprawie umowy.",

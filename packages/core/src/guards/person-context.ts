@@ -1,6 +1,7 @@
 // Strażniki kontekstu osoby: instytucja przed adresem, granice komórek tabeli, patroni, inicjały
 // i łańcuchy kropkowe, homografy imion.
-import { PERSON_MASK, PL_LO, PL_UP, RE_JSON_ESC_PUA } from '../charset.js';
+import { personMaskSrc, PL_LO, PL_UP, RE_JSON_ESC_PUA } from '../charset.js';
+import { perMasks } from '../context.js';
 import { RE_INSTITUTION_WORD } from './eponyms.js';
 import { LEGAL_ENTITY_WORDS, PROPER_NAME_HEADS } from './roles.js';
 
@@ -142,4 +143,5 @@ export const LIST_HEAD_NOT_SURNAME = new Set<string>(
     'czerwiec lipiec sierpień wrzesień październik listopad grudzień sołtys starosta').split(' '),
 );
 // Maska osoby przed wyrazem w tym samym wierszu, po odstępie albo separatorze pola („[..];Jan”).
-export const RE_PERSON_MASK_BEFORE = new RegExp(`(?:${PERSON_MASK})(?:[ \\t]+|[ \\t]*[,;|][ \\t]*)$`);
+// Grupa 1 to separator za maską.
+export const rePersonMaskBefore = perMasks((M) => new RegExp(`(?:${personMaskSrc(M.IMIE)})([ \\t]+|[ \\t]*[,;|][ \\t]*)$`));

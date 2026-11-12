@@ -1,6 +1,6 @@
 // Orkiestrator redakcji: przygotowuje kontekst i woła przebiegi w ustalonej kolejności.
 import { normalizeSurnameKey } from './surnames.js';
-import { indexToLetters, type RedactCtx } from './context.js';
+import { indexToLetters, type Masks, type RedactCtx } from './context.js';
 import { passAddress, passAddressAfterResidenceLabel, passPostalNoHyphen } from './passes/address.js';
 import { passBirthDate } from './passes/birth-date.js';
 import { passCity } from './passes/city.js';
@@ -19,6 +19,22 @@ import { passProtectJsonEscapes, passProtectUrls } from './passes/protect.js';
 import { passDelimitedTable, passStructured } from './passes/structured.js';
 import { HUMAN_LABEL, MASK, type PiiFinding, type PiiType, type RedactionResult, type RedactOptions } from './types.js';
 
+// Te same własne maski dają ten sam obiekt, żeby wzorce zależne od masek (perMasks) nie kompilowały
+// się przy każdym wywołaniu. Kilka ostatnich zestawów wystarcza: maski zmienia się rzadko.
+const MERGED_MASKS = new Map<string, Masks>();
+function mergedMasks(custom: Partial<Masks>): Masks {
+  const key = JSON.stringify(custom);
+  let M = MERGED_MASKS.get(key);
+  if (!M) {
+    if (MERGED_MASKS.size >= 16) MERGED_MASKS.clear();
+    M = { ...MASK };
+    // pole z undefined zostawia maskę domyślną (JSON.stringify i tak je pomija w kluczu)
+    for (const [t, v] of Object.entries(custom) as [PiiType, string | undefined][]) if (v !== undefined) M[t] = v;
+    MERGED_MASKS.set(key, M);
+  }
+  return M;
+}
+
 export function redactPII(input: string, options?: RedactOptions): RedactionResult {
   if (!input || typeof input !== 'string') {
     return { redacted: input ?? '', found: [] };
@@ -30,7 +46,7 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   // Filtr typów (brak = wszystkie) i ewentualne własne placeholdery.
   const enabled = options?.types ? new Set(options.types) : null;
   const on = (t: PiiType) => enabled === null || enabled.has(t);
-  const M: Record<PiiType, string> = options?.masks ? { ...MASK, ...options.masks } : MASK;
+  const M = options?.masks ? mergedMasks(options.masks) : MASK;
   const hit = (t: PiiType): string => {
     bump(t);
     return M[t];

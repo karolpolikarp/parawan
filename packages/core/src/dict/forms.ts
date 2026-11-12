@@ -12,7 +12,6 @@ type FormKind = 'name' | 'date' | 'place' | 'addr';
 export interface FormField {
   re: RegExp; // etykieta bez numeracji („12. ”) do „:” lub końca linii
   type: PiiType;
-  mask: string;
   kind: FormKind;
   /** Gdzie w wartości stoi nazwisko: w trybie pseudonimów pole dostaje wtedy [OSOBA-X] zamiast stałej maski. */
   surnameAt?: 'first' | 'last';
@@ -39,20 +38,20 @@ const FORM_PERSON_OF = String.raw`(?:\s+(?:pacjent(?:a|ki)|dziecka|ucznia|uczenn
 // Wpisy z `gated` (ogonki opcjonalne z OCR, liczebnik po „imię” w szyku ZUS i KRUS) stoją za
 // podstawowymi: podstawowe etykiety zachowują stałą maskę także w trybie pseudonimów.
 export const FORM_FIELDS: FormField[] = [
-  { re: /^imię\s+i\s+nazwisko$|^nazwisko\s+i\s+imię$/i, type: 'IMIE', kind: 'name', mask: '[IMIĘ I NAZWISKO]' },
-  { re: /^nazwisk[ao](?:\s+(?:rodowe|panieńskie|poprzednie))?(?:\s+(?:matki|ojca))?$/i, type: 'IMIE', kind: 'name', mask: '[IMIĘ I NAZWISKO]' },
-  { re: /^(?:pierwsze\s+|drugie\s+|kolejne\s+)?imi(?:ę|ona)(?:\s+(?:ojca|matki))?$/i, type: 'IMIE', kind: 'name', mask: '[IMIĘ I NAZWISKO]' },
-  { re: /^imiona\s+rodzic[oó]w$/i, type: 'IMIE', kind: 'name', mask: '[IMIĘ I NAZWISKO]', nameList: true },
-  { re: new RegExp(`^imi[eę]\\s+i\\s+nazwisko${FORM_PERSON_OF}$`, 'i'), type: 'IMIE', kind: 'name', mask: '[IMIĘ I NAZWISKO]', surnameAt: 'last', gated: true },
-  { re: new RegExp(`^nazwisko\\s+i\\s+imi[eę]${FORM_PERSON_OF}$`, 'i'), type: 'IMIE', kind: 'name', mask: '[IMIĘ I NAZWISKO]', surnameAt: 'first', gated: true },
-  { re: new RegExp(`^nazwisk[ao](?:\\s+(?:rodowe|panie[nń]skie|poprzednie))?${FORM_PERSON_OF}$`, 'i'), type: 'IMIE', kind: 'name', mask: '[IMIĘ I NAZWISKO]', surnameAt: 'first', gated: true, surnameOnly: true },
-  { re: new RegExp(`^(?:(?:pierwsze|drugie|kolejne)\\s+)?imi(?:[eę]|ona)(?:\\s+(?:pierwsze|drugie|kolejne))?${FORM_PERSON_OF}$`, 'i'), type: 'IMIE', kind: 'name', mask: '[IMIĘ I NAZWISKO]', gated: true },
-  { re: /^data\s+urodzenia$/i, type: 'DATA-UR', kind: 'date', mask: '[DATA-URODZENIA]' },
-  { re: /^miejsce\s+urodzenia$/i, type: 'MIEJSCOWOSC', kind: 'place', mask: '[MIEJSCOWOŚĆ]' },
-  { re: /^miejscowo[sś][cć]$/i, type: 'MIEJSCOWOSC', kind: 'place', mask: '[MIEJSCOWOŚĆ]' },
-  { re: /^(?:miejsce|adres)\s+(?:zamieszkania|zameldowania|pobytu)$/i, type: 'MIEJSCOWOSC', kind: 'place', mask: '[MIEJSCOWOŚĆ]' },
-  { re: /^ulica$/i, type: 'ADRES', kind: 'addr', mask: '[ADRES]' },
-  { re: /^(?:nr|numer)\s+(?:domu|budynku|lokalu|mieszkania)$/i, type: 'ADRES', kind: 'addr', mask: '[ADRES]' },
+  { re: /^imię\s+i\s+nazwisko$|^nazwisko\s+i\s+imię$/i, type: 'IMIE', kind: 'name' },
+  { re: /^nazwisk[ao](?:\s+(?:rodowe|panieńskie|poprzednie))?(?:\s+(?:matki|ojca))?$/i, type: 'IMIE', kind: 'name' },
+  { re: /^(?:pierwsze\s+|drugie\s+|kolejne\s+)?imi(?:ę|ona)(?:\s+(?:ojca|matki))?$/i, type: 'IMIE', kind: 'name' },
+  { re: /^imiona\s+rodzic[oó]w$/i, type: 'IMIE', kind: 'name', nameList: true },
+  { re: new RegExp(`^imi[eę]\\s+i\\s+nazwisko${FORM_PERSON_OF}$`, 'i'), type: 'IMIE', kind: 'name', surnameAt: 'last', gated: true },
+  { re: new RegExp(`^nazwisko\\s+i\\s+imi[eę]${FORM_PERSON_OF}$`, 'i'), type: 'IMIE', kind: 'name', surnameAt: 'first', gated: true },
+  { re: new RegExp(`^nazwisk[ao](?:\\s+(?:rodowe|panie[nń]skie|poprzednie))?${FORM_PERSON_OF}$`, 'i'), type: 'IMIE', kind: 'name', surnameAt: 'first', gated: true, surnameOnly: true },
+  { re: new RegExp(`^(?:(?:pierwsze|drugie|kolejne)\\s+)?imi(?:[eę]|ona)(?:\\s+(?:pierwsze|drugie|kolejne))?${FORM_PERSON_OF}$`, 'i'), type: 'IMIE', kind: 'name', gated: true },
+  { re: /^data\s+urodzenia$/i, type: 'DATA-UR', kind: 'date' },
+  { re: /^miejsce\s+urodzenia$/i, type: 'MIEJSCOWOSC', kind: 'place' },
+  { re: /^miejscowo[sś][cć]$/i, type: 'MIEJSCOWOSC', kind: 'place' },
+  { re: /^(?:miejsce|adres)\s+(?:zamieszkania|zameldowania|pobytu)$/i, type: 'MIEJSCOWOSC', kind: 'place' },
+  { re: /^ulica$/i, type: 'ADRES', kind: 'addr' },
+  { re: /^(?:nr|numer)\s+(?:domu|budynku|lokalu|mieszkania)$/i, type: 'ADRES', kind: 'addr' },
 ];
 const FORM_EMPTY_VALUES = new Set([
   'brak', 'niedotyczy', 'nd', 'n/d', 'bd', 'x', 'bez', '-', '–', '—', '',

@@ -2,7 +2,7 @@
 // zamieszkania lub urodzenia.
 import { HOMOGRAPH_SURNAMES, isConfirmedSurname, looksLikeSurname, NON_SURNAME_ADJ, surnameBase } from '../surnames.js';
 import { CAP_CITY, CITY_RUN, CITY_START, escapeRe, PL_LO, PL_UP, RE_CHAR_LL, splitWords } from '../charset.js';
-import { type RedactCtx } from '../context.js';
+import { type Masks, perMasks, type RedactCtx } from '../context.js';
 import { FORM_LABEL_WORDS } from '../dict/forms.js';
 import { isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { MULTIWORD_CITIES, POLISH_CITIES } from '../dict/places.js';
@@ -110,16 +110,16 @@ const RE_GENERIC_PREDICATE_AFTER =
 const RE_RESIDENCE_ADVERBIAL = /^(?:Zam|M)ieszk(?:uj|aj)ąc(?![\p{L}])/u;
 const RE_IMPERSONAL_AFTER =
   /^[ \t]*,?[ \t]*(?:(?:nie|też|także|również|łatwiej|łatwo|taniej|szybciej|zawsze)[ \t]+)?(?:można|warto|należy|trzeba|wystarczy|da[ \t]+się|opłaca[ \t]+się)(?!\p{L})/u;
-const RE_STREET_ADDR_AFTER_CITY = /^[ \t]*,?[ \t]*(?:przy[ \t]+)?\[ADRES\]/;
+const reStreetAddrAfterCity = perMasks((M) => new RegExp(String.raw`^[ \t]*,?[ \t]*(?:przy[ \t]+)?${escapeRe(M.ADRES)}`));
 const RE_POPULATION_AFTER =
   /^[ \t]+(?:(?:ok\.|około|ponad|blisko|niemal|prawie|przeszło|już|aż)[ \t]+)?\d[\d  .,]{0,12}(?:[ \t]*(?:tys\.|tysięcy|tys|mln|milion\p{L}*))?[ \t]+(?:osób|osoby|mieszkańców|ludzi|rodzin|obywateli|dzieci|uczniów|studentów|cudzoziemców)(?!\p{L})/u;
 /**
  * Czy marker zamieszkania stoi w zdaniu ogólnym (ogłoszenie, uchwała, poradnik, statystyka), a nie
  * przy konkretnej osobie? `before` to tekst przed markerem, `after` to tekst za nazwą miasta.
  */
-function residenceIsGeneral(marker: string, before: string, after: string): boolean {
+function residenceIsGeneral(marker: string, before: string, after: string, M: Masks): boolean {
   // zamaskowany adres za miastem to konkretne miejsce („Ludzie mieszkający w Krakowie przy ul. Długiej 5")
-  if (RE_STREET_ADDR_AFTER_CITY.test(after)) return false;
+  if (reStreetAddrAfterCity(M).test(after)) return false;
   if (RE_RESIDENCE_GENERAL.test(marker)) return true;
   if (populationAfter(after)) return true;
   if (RE_RESIDENCE_ADVERBIAL.test(marker) && RE_IMPERSONAL_AFTER.test(after)) return true;
@@ -462,7 +462,7 @@ function maskCityAfterResidenceMarker(ctx: RedactCtx): void {
   // Miejscowość po markerze zamieszkania („zamieszkały w Krakowie").
   ctx.text = ctx.text.replace(RE_CITY_RESIDENCE, (m, marker: string, run: string, offset: number, str: string) => {
     const after = str.slice(offset + m.length, offset + m.length + 80);
-    if (residenceIsGeneral(marker, str.slice(Math.max(0, offset - 40), offset), after)) return m;
+    if (residenceIsGeneral(marker, str.slice(Math.max(0, offset - 40), offset), after, ctx.M)) return m;
     // Po czasowniku bez „w" i dwukropka imię zaczyna podmiot („zamieszkuje Jarosław Wilk"), nie miasto:
     // inaczej imię dostałoby maskę miasta, a nazwisko zostałoby jawne. Etykieta „Miejsce
     // zamieszkania⇥Jarosław" podaje miasto.
@@ -495,7 +495,7 @@ function maskCityAfterBirthMarker(ctx: RedactCtx): void {
       'g',
     ),
     (m, marker: string, run: string, offset: number, str: string) => {
-      if (/^urodzi/i.test(marker) && !birthVerbAboutPerson(marker, str.slice(Math.max(0, offset - 320), offset))) return m;
+      if (/^urodzi/i.test(marker) && !birthVerbAboutPerson(marker, str.slice(Math.max(0, offset - 320), offset), ctx.M)) return m;
       // biogram postaci historycznej: rok sprzed 1900 w tym samym zdaniu („Mikołaj Kopernik urodził się
       // w Toruniu w 1473 r."), jak dla daty w passBirthDate
       if (/^urodzi/i.test(marker) && RE_PRE1900_YEAR.test(sentenceAround(str, offset, offset + m.length))) return m;

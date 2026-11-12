@@ -2,11 +2,11 @@
 // i przed kodem pocztowym, kod pocztowy bez myślnika.
 import { surnameShaped } from '../surnames.js';
 import { CAP_CITY, countOf, escapeRe, MONTHS_GEN, PL_LO, PL_UP } from '../charset.js';
-import { maskKeepPrefix, type RedactCtx } from '../context.js';
+import { maskKeepPrefix, perMasks, type RedactCtx } from '../context.js';
 import { isFirstNameGenitive, isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
 import { egoNameGenitive, RE_STREET_WORD, STREET_RANK_WORDS } from '../guards/eponyms.js';
-import { ADDR_PLACE_ADJ_OK, institutionBeforeAddr, PATRON_GEN_HEADS, RE_CAPS_WORK_HEAD, RE_PERSON_MASK_BEFORE } from '../guards/person-context.js';
+import { ADDR_PLACE_ADJ_OK, institutionBeforeAddr, PATRON_GEN_HEADS, RE_CAPS_WORK_HEAD, rePersonMaskBefore } from '../guards/person-context.js';
 import { LEGAL_ENTITY_WORDS } from '../guards/roles.js';
 import { RE_SURNAME_OBLIQUE } from '../person-patterns.js';
 
@@ -340,11 +340,23 @@ const patronStreetKeyBefore = (before: string): boolean => {
 const RE_PATRON_CELL_BEFORE = /(?:(?:^|[\r\n\t;,])"|[\t;]|^|[\r\n])$/;
 const RE_PATRON_CELL_AFTER = /^(?:"(?=[\t;,]|\r?\n|$)|(?=[\t;]))/;
 const RE_PATRON_CELL_PLACE = /^"?\p{Lu}\p{Ll}+(?:[ -]\p{Lu}\p{Ll}+)?"?$/u;
-const RE_PATRON_CELL_POSTAL = /^"?(?:\d{2}-\d{3}|\[KOD-POCZTOWY\])"?$/;
+// Kotwice ulicy z patronem na już wstawionych maskach: kod pocztowy w sąsiedniej komórce albo
+// w następnym wierszu, maska osoby tuż przed ulicą i poprzednia ulica w wyliczeniu.
+const patronMaskRe = perMasks((M) => {
+  const KOD = escapeRe(M['KOD-POCZTOWY']);
+  return {
+    cellPostal: new RegExp(String.raw`^"?(?:\d{2}-\d{3}|${KOD})"?$`),
+    postalAfter: new RegExp(String.raw`^[ \t]*(?:,[ \t]*|\r?\n[ \t]*)(?:\d{2}-\d{3}|${KOD})`),
+    personBefore: rePersonMaskBefore(M),
+    // Kolejna ulica w wyliczeniu za zamaskowanym adresem („Mieszkańcy [ADRES] i Jana Pawła II 7").
+    enumBefore: new RegExp(String.raw`${escapeRe(M.ADRES)}[ \t]*(?:,|i|oraz)[ \t]+$`, 'u'),
+  };
+});
+type PatronMaskRe = ReturnType<typeof patronMaskRe>;
 // Słowo udziału, oceny albo nagrody na miejscu miejscowości (patrz patronStreetCityLead).
 const RE_PATRON_CELL_NOT =
   /^(?:udzia\p{L}*|współwłaściciel\p{L}*|właściciel\p{L}*|spadk\p{L}*|nagrod\p{L}*|wyróżnieni\p{L}*|ocen\p{L}*|wynik\p{L}*|punkt\p{L}*|głos\p{L}*|stypend\p{L}*|część|części)$/iu;
-function patronStreetCell(before: string, tail: string): boolean {
+function patronStreetCell(before: string, tail: string, ar: PatronMaskRe): boolean {
   const lineStart = before.lastIndexOf('\n') + 1;
   const lineEnd = tail.search(/\r?\n|$/);
   const line = before.slice(lineStart) + '\u0000' + tail.slice(0, lineEnd);
@@ -359,7 +371,7 @@ function patronStreetCell(before: string, tail: string): boolean {
   const next = /^[\t;,]([^\t;,\r\n]*)/.exec(tail.slice(post.length))?.[1];
   const prev = /(?:^|[\t;,\r\n])([^\t;,\r\n]*)[\t;,]$/.exec(pre.endsWith('"') ? before.slice(0, -1) : before)?.[1];
   const place = (c: string | undefined): boolean =>
-    !!c && (RE_PATRON_CELL_POSTAL.test(c.trim()) || (RE_PATRON_CELL_PLACE.test(c.trim()) && !isFirstNameLike(c.replace(/"/g, '').trim())));
+    !!c && (ar.cellPostal.test(c.trim()) || (RE_PATRON_CELL_PLACE.test(c.trim()) && !isFirstNameLike(c.replace(/"/g, '').trim())));
   return place(next) || place(prev);
 }
 // Blok koperty bez kodu pocztowego: imię i nazwisko w wierszu wyżej, ulica z numerem w osobnym
@@ -479,23 +491,23 @@ function patronStreetExcluded(h: PatronStreetHit): boolean {
 // Etykieta adresu, zamieszkania albo „przy" wygrywa z udziałem na początku zdania („Udziały
 // w lokalu przy Jana Pawła II 12/4 należą …"). Koperta i miejscowość przed przecinkiem tylko
 // w trybie '': za „Kraków, Jana Kowalskiego 3 lata temu" stoi dalszy ciąg zdania.
-function patronStreetAnchored(h: PatronStreetHit, reEnum: RegExp): boolean {
+function patronStreetAnchored(h: PatronStreetHit, ar: PatronMaskRe): boolean {
   const { m, w1, before, tail, mode } = h;
   const caps = w1 === w1.toUpperCase();
   return (
     RE_PATRON_STREET_LABEL.test(before) ||
     RE_PATRON_STREET_RESIDENCE.test(before) ||
     patronStreetKeyBefore(before) ||
-    (patronStreetFlatNo(m) && patronStreetCell(before, tail)) ||
+    (patronStreetFlatNo(m) && patronStreetCell(before, tail, ar)) ||
     (mode === '' && (patronStreetEnvelope(before, tail) || patronStreetCityLead(before, m))) ||
     (RE_PATRON_STREET_PRZY.test(before) && !institutionBeforeAddr(before.replace(RE_PATRON_STREET_PRZY, ''))) ||
     (caps && RE_PATRON_STREET_CAPS_DO.test(before) && RE_PATRON_STREET_CAPS_DO_END.test(tail)) ||
     // osoba wersalikami przed ulicą, np. w wyciągu bankowym („PRZELEW OD: STEFAN GÓRSKI JÓZEFA PIŁSUDSKIEGO 101 ŁÓDŹ")
-    (caps && w1.length > 1 && (capsPersonPairBefore(before) || RE_PERSON_MASK_BEFORE.test(before))) ||
+    (caps && w1.length > 1 && (capsPersonPairBefore(before) || ar.personBefore.test(before))) ||
     // „NA ROGU ADAMA MICKIEWICZA 30" wersalikami to skrzyżowanie ulic; mieszany zapis w prozie nie jest kotwicą
     (caps && /(?<!\p{L})NA[ \t]+ROGU[ \t]+$/u.test(before)) ||
     RE_PATRON_STREET_WORD_BEFORE.test(before) ||
-    reEnum.test(before)
+    ar.enumBefore.test(before)
   );
 }
 // Bez instytucji przed patronem („Parafia Jana Pawła II 5"), klucza adresu IP czy adresata i roku
@@ -548,7 +560,7 @@ function patronStreetUnanchored(ctx: RedactCtx, h: PatronStreetHit): string | nu
   const cityOk =
     (!!after && (!!after[1] || (!!after[2] && POLISH_CITIES.has(after[2].toLowerCase())))) ||
     // kod pocztowy w następnym wierszu bloku adresowego („Anna Kowalska⏎Jana Pawła II 5⏎25-001 Kielce")
-    /^[ \t]*(?:,[ \t]*|\r?\n[ \t]*)(?:\d{2}-\d{3}|\[KOD-POCZTOWY\])/.test(tail);
+    patronMaskRe(ctx.M).postalAfter.test(tail);
   // Tytuł patrona i ukośnik wskazują adres dopiero z miejscowością za numerem: bez niej to też
   // ocena czy liczba godzin osoby („Ocena Tomasza Mazura 3/5", „Prof. Jana Nowaka 30").
   if ((RE_PATRON_STREET_TITLE_HEAD.test(m) || RE_PATRON_STREET_SLASH.test(m)) && (cityOk || /^[ \t]+we?[ \t]+\p{Lu}/u.test(tail))) {
@@ -564,7 +576,6 @@ function patronStreetUnanchored(ctx: RedactCtx, h: PatronStreetHit): string | nu
 // Maska adresu, maska osoby albo null, gdy dopasowanie zostaje jawne.
 function classifyPatronStreet(
   ctx: RedactCtx,
-  reEnum: RegExp,
   m: string,
   w1: string,
   wMid: string | undefined,
@@ -583,7 +594,7 @@ function classifyPatronStreet(
   if (RE_PATRON_STREET_FLAT.test(m)) {
     return ctx.hit('ADRES');
   }
-  if (patronStreetAnchored(h, reEnum)) {
+  if (patronStreetAnchored(h, patronMaskRe(ctx.M))) {
     return ctx.hit('ADRES');
   }
   if (mode === 'roman' || mode === 'fallback') return patronStreetRomanOrPerson(ctx, h);
@@ -592,9 +603,9 @@ function classifyPatronStreet(
 }
 // Przy trzech wyrazach, z których pierwszy nie jest imieniem patrona („Anna Kowalska Jana Pawła II
 // 5"), ulicą może być para od drugiego wyrazu i dopasowanie nie może jej pochłonąć.
-function replacePatronStreets(ctx: RedactCtx, reEnum: RegExp, re: RegExp, mode: PatronStreetMode): void {
+function replacePatronStreets(ctx: RedactCtx, re: RegExp, mode: PatronStreetMode): void {
   const street = (m: string, w1: string, wMid: string | undefined, w2: string, offset: number, t: string): string | null => {
-    const r = classifyPatronStreet(ctx, reEnum, m, w1, wMid, w2, offset, t, mode);
+    const r = classifyPatronStreet(ctx, m, w1, wMid, w2, offset, t, mode);
     return r === ctx.M.ADRES && RE_PATRON_STREET_WORD_BEFORE.test(t.slice(Math.max(0, offset - 60), offset)) ? PATRON_STREET_MARK + r : r;
   };
   ctx.text = ctx.text.replace(re, (m, w1: string, wMid: string | undefined, w2: string, offset: number, t: string) => {
@@ -616,9 +627,7 @@ function maskPatronStreetCells(ctx: RedactCtx): void {
   });
 }
 function patronStreetWithNumber(ctx: RedactCtx): void {
-  // Kolejna ulica w wyliczeniu za zamaskowanym adresem („Mieszkańcy [ADRES] i Jana Pawła II 7").
-  const reEnum = new RegExp(String.raw`${escapeRe(ctx.M.ADRES)}[ \t]*(?:,|i|oraz)[ \t]+$`, 'u');
-  replacePatronStreets(ctx, reEnum, RE_PATRON_STREET_NO, '');
+  replacePatronStreets(ctx, RE_PATRON_STREET_NO, '');
   maskPatronStreetCells(ctx);
   for (const [re, mode] of [
     [RE_PATRON_STREET_NO_LOOSE, 'loose'],
@@ -627,7 +636,7 @@ function patronStreetWithNumber(ctx: RedactCtx): void {
     [RE_PATRON_STREET_ROMAN, 'roman'],
     [RE_PATRON_STREET_NO_CTX, 'fallback'],
   ] as const) {
-    replacePatronStreets(ctx, reEnum, re, mode);
+    replacePatronStreets(ctx, re, mode);
   }
   // Skrót albo wyraz uliczny przed oznaczoną maską wchodzi do niej („al. [ADRES]" → „[ADRES]").
   ctx.text = ctx.text.replace(RE_STREET_WORD_BEFORE_MARK, '').replaceAll(PATRON_STREET_MARK, '');

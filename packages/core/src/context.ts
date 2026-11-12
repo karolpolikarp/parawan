@@ -19,6 +19,25 @@ export function lettersToIndex(s: string): number {
   return n - 1;
 }
 
+/** Placeholdery wszystkich typów (domyślne albo z options.masks). */
+export type Masks = Record<PiiType, string>;
+
+/**
+ * Wzorce, które czytają już wstawione maski, kompilowane raz na zestaw masek. redactPII podaje
+ * ten sam obiekt dla tych samych masek, więc domyślna ścieżka kompiluje je raz na cały proces.
+ */
+export function perMasks<T>(build: (M: Masks) => T): (M: Masks) => T {
+  const cache = new WeakMap<Masks, T>();
+  return (M) => {
+    let v = cache.get(M);
+    if (v === undefined) {
+      v = build(M);
+      cache.set(M, v);
+    }
+    return v;
+  };
+}
+
 /** Stan jednego wywołania redactPII; każdy przebieg nadpisuje `text`. */
 export interface RedactCtx {
   text: string;
@@ -31,7 +50,7 @@ export interface RedactCtx {
   bump: (t: PiiType) => void;
   /** bump i maska typu w jednym, dla callbacków .replace(). */
   hit: (t: PiiType) => string;
-  M: Record<PiiType, string>;
+  M: Masks;
   personMask: (surnameToken: string) => string;
   /** Czy włączona pseudonimizacja (etykiety [OSOBA-X]). */
   pseudonyms: boolean;

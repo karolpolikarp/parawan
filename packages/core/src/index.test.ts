@@ -1357,6 +1357,36 @@ test('options.masks — własny placeholder, reszta domyślna', () => {
   expect(r.redacted).toContain('[EMAIL]');
 });
 
+// Własna maska zmienia tylko tekst placeholdera: kotwice i domknięcia, które czytają już wstawione
+// maski, muszą widzieć maskę z options.masks tak samo jak domyślną.
+const OWN_MASKS = { IMIE: '[OSOBA]', ADRES: '[ULICA]', MIEJSCOWOSC: '[MIASTO]', 'KOD-POCZTOWY': '[KOD]', 'DATA-UR': '[URODZINY]' } as const;
+const OWN_TO_DEFAULT: Record<string, string> = {
+  '[OSOBA]': '[IMIĘ I NAZWISKO]',
+  '[ULICA]': '[ADRES]',
+  '[MIASTO]': '[MIEJSCOWOŚĆ]',
+  '[KOD]': '[KOD-POCZTOWY]',
+  '[URODZINY]': '[DATA-URODZENIA]',
+};
+const withOwnMasks = (s: string): string =>
+  Object.entries(OWN_TO_DEFAULT).reduce((acc, [own, def]) => acc.split(def).join(own), redactPII(s).redacted);
+
+test.each([
+  ['IMIE: imię w wierszu nad maską', 'Sporządził Jan\nKowalski, dnia 3 marca.'],
+  ['IMIE: imiona rodziców za maską', 'Jan Kowalski, syn Józefa i Marii, stawił się.'],
+  ['IMIE: imię doklejone podkreśleniem', 'Załącznik: Umowa_Kredytowa_Adam_Nowak.pdf w aktach.'],
+  ['IMIE: pole formularza', 'Imię i nazwisko:\nJAN KOWALSKI'],
+  ['ADRES: zamaskowana ulica za miastem', 'Ludzie mieszkający w Krakowie przy ul. Długiej 5 skarżą się na hałas.'],
+  ['MIEJSCOWOSC: ogon przeniesienia za maską miasta', 'Kod: 00-950 Warsza-\nwa'],
+  ['KOD-POCZTOWY: zamaskowany kod pod ulicą z patronem', 'Wysyłka: Jana Pawła II 5\n25-001 Kielce'],
+])('options.masks — %s: wynik jak domyślny z innym tekstem maski', (_name, input) => {
+  expect(redactPII(input, { masks: OWN_MASKS }).redacted).toBe(withOwnMasks(input));
+});
+
+test('options.masks — pole formularza dostaje własną maskę, nie domyślną', () => {
+  const r = redactPII('Imię i nazwisko:\nJAN KOWALSKI\nData urodzenia: 12.03.1985\nUlica: Długa 5', { masks: OWN_MASKS });
+  expect(r.redacted).toBe('Imię i nazwisko:\n[OSOBA]\nData urodzenia: [URODZINY]\nUlica: [ULICA]');
+});
+
 test('options — brak opcji identyczny z domyślnym wywołaniem', () => {
   const input = 'PESEL 44051401359, NIP 123-456-32-18, Jan Kowalski, ul. Polna 12/3, x@y.pl';
   expect(redactPII(input, {}).redacted).toBe(redactPII(input).redacted);

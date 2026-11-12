@@ -397,7 +397,7 @@ export function passDelimitedTable(ctx: RedactCtx): void {
       const personVals = values.map((v, i) => (tablePersonCell(kinds[i]) ? v.trim() : '')).filter((v) => v && !isEmptyFormValue(v));
       const personPlausible =
         personOk ||
-        personVals.some((v) => /^\[(?:IMIĘ|OSOBA)/.test(v)) ||
+        personVals.some((v) => /^\[(?:IMIĘ|OSOBA)/.test(v) || v.startsWith(ctx.M.IMIE)) ||
         (personVals.length > 0 && personVals.every((v) => /^\p{Lu}/u.test(v) && !tableOfficeCell(v) && !v.split(/ +/).some((w) => isPersonRoleValue(w.toLowerCase()))));
       let out = '';
       let last = 0;
