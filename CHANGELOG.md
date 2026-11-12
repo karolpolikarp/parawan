@@ -20,6 +20,10 @@ Silnik:
   maski, a miasto przed zamaskowaną ulicą nie było maskowane. Pola formularza („Imię i nazwisko:”,
   „Ulica:”) wstawiały domyślną maskę zamiast własnej. Teraz wynik z własnymi maskami różni się od
   domyślnego tylko tekstem znaczników.
+- **Poprawne dopełniacze trzech postaci historycznych.** Lista znanych postaci, które w nazwach
+  wersalikami nie są stroną pisma (np. „LIST ADAMA MICKIEWICZA”), miała złe formy dla Orzeszkowej,
+  Jagiełły i Fredry („ORZESZKOWAA”, „JAGIEŁŁI”, „FREDRI”). Teraz są poprawne. Dziś te trzy nazwiska
+  nie są rozpoznawane jako osoby, więc wynik się nie zmienia; poprawka chroni je na przyszłość.
 
 ## v0.46.26 — 2026-10-25
 

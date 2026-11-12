@@ -214,12 +214,20 @@ const HISTORIC_SURNAMES = new Set<string>(
     'szymanowski wieniawski lutosławski fredro krasicki orzeszkowa'
   ).split(' '),
 );
-// Dopełniacz nazwisk postaci historycznych („MICKIEWICZA", „KONOPNICKIEJ", „KOŚCIUSZKI").
-const HISTORIC_SURNAMES_GEN = new Set<string>(
-  [...HISTORIC_SURNAMES].map((s) =>
-    /ki$/.test(s) ? `${s}ego` : /ka$/.test(s) ? `${s.slice(0, -1)}iej` : /o$/.test(s) ? `${s.slice(0, -1)}i` : `${s}a`,
-  ),
-);
+/**
+ * Dopełniacz nazwiska postaci historycznej (małymi literami): przymiotnikowe „-ski/-cki" → „-skiego",
+ * żeńskie „-ska/-cka" → „-skiej", „-owa" → „-owej", „-ko/-go" → „-ki/-gi" („MATEJKI"), inne „-o"
+ * → „-y" („JAGIEŁŁY", „FREDRY"), spółgłoska → „-a" („MICKIEWICZA").
+ */
+function historicSurnameGenitive(s: string): string {
+  if (/ki$/.test(s)) return `${s}ego`;
+  if (/ka$/.test(s)) return `${s.slice(0, -1)}iej`;
+  if (/a$/.test(s)) return `${s.slice(0, -1)}ej`;
+  if (/[kg]o$/.test(s)) return `${s.slice(0, -1)}i`;
+  if (/o$/.test(s)) return `${s.slice(0, -1)}y`;
+  return `${s}a`;
+}
+export const HISTORIC_SURNAMES_GEN = new Set<string>([...HISTORIC_SURNAMES].map(historicSurnameGenitive));
 /** Czy od `offset` stoi para „IMIĘ NAZWISKO" w dopełniaczu postaci historycznej? */
 function historicGenPairAt(t: string, offset: number): boolean {
   const p = /^(\p{L}+)[ \t]+(\p{L}+)/u.exec(t.slice(offset, offset + 50));

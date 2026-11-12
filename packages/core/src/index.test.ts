@@ -11,6 +11,7 @@ import {
   isValidCard,
   isValidKw,
 } from './index';
+import { HISTORIC_SURNAMES_GEN } from './passes/person-caps-ocr';
 
 // Buduje poprawny IBAN z kodu kraju + BBAN (liczymy cyfry kontrolne mod 97),
 // żeby test nie zależał od zapamiętanego wektora.
@@ -6739,6 +6740,17 @@ test('b7 regresje r2: imię i nazwisko WERSALIKAMI postaci historycznej w zapisi
     ['Anna KOWALSKA', N],
     ['Pacjent: KOWALSKA Anna', `Pacjent: ${N}`],
   ]);
+});
+test('postacie historyczne: poprawny dopełniacz wszystkich nazwisk listy (ORZESZKOWEJ, JAGIEŁŁY, FREDRY)', () => {
+  expect([...HISTORIC_SURNAMES_GEN].sort()).toEqual(
+    (
+      'jagiełły matejki sobieskiego kopernika chopina skłodowskiej piłsudskiego mickiewicza słowackiego kościuszki moniuszki sienkiewicza ' +
+      'konopnickiej wyspiańskiego paderewskiego kochanowskiego norwida żeromskiego reymonta szymanowskiego wieniawskiego lutosławskiego ' +
+      'fredry krasickiego orzeszkowej'
+    )
+      .split(' ')
+      .sort(),
+  );
 });
 test('b7 regresje r2: atrybut XML z kluczem osobowym — ustawienie, etykieta i wypełniacz to nie osoba', () => {
   keep([
