@@ -3,7 +3,6 @@
 import { surnameShaped } from '../surnames.js';
 import { ADR_MASK_SRC, CAP_CITY, countOf, KOD_MASK_SRC, MONTHS_GEN, PL_LO, PL_UP } from '../charset.js';
 import { maskKeepPrefix, PATRON_STREET_MARK, type RedactCtx } from '../context.js';
-import { MASK } from '../types.js';
 import { isFirstNameGenitive, isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
 import { egoNameGenitive, RE_STREET_WORD, STREET_RANK_WORDS } from '../guards/eponyms.js';
