@@ -1,8 +1,8 @@
 // Maskowanie miejscowości: po kodzie pocztowym, przy adresie, z etykietą TERYT oraz po markerze
 // zamieszkania lub urodzenia.
 import { HOMOGRAPH_SURNAMES, isConfirmedSurname, looksLikeSurname, NON_SURNAME_ADJ, surnameBase } from '../surnames.js';
-import { CAP_CITY, CITY_RUN, CITY_START, escapeRe, PL_LO, PL_UP, RE_CHAR_LL, splitWords } from '../charset.js';
-import { type Masks, perMasks, type RedactCtx } from '../context.js';
+import { CAP_CITY, CITY_RUN, CITY_START, PL_LO, PL_UP, RE_CHAR_LL, splitWords } from '../charset.js';
+import { anchorMaskSrc, maskSrc, type Masks, perMasks, type RedactCtx } from '../context.js';
 import { FORM_LABEL_WORDS } from '../dict/forms.js';
 import { isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { MULTIWORD_CITIES, POLISH_CITIES } from '../dict/places.js';
@@ -110,7 +110,7 @@ const RE_GENERIC_PREDICATE_AFTER =
 const RE_RESIDENCE_ADVERBIAL = /^(?:Zam|M)ieszk(?:uj|aj)ąc(?![\p{L}])/u;
 const RE_IMPERSONAL_AFTER =
   /^[ \t]*,?[ \t]*(?:(?:nie|też|także|również|łatwiej|łatwo|taniej|szybciej|zawsze)[ \t]+)?(?:można|warto|należy|trzeba|wystarczy|da[ \t]+się|opłaca[ \t]+się)(?!\p{L})/u;
-const reStreetAddrAfterCity = perMasks((M) => new RegExp(String.raw`^[ \t]*,?[ \t]*(?:przy[ \t]+)?${escapeRe(M.ADRES)}`));
+const reStreetAddrAfterCity = perMasks((M) => new RegExp(String.raw`^[ \t]*,?[ \t]*(?:przy[ \t]+)?${anchorMaskSrc(M, 'ADRES')}`));
 const RE_POPULATION_AFTER =
   /^[ \t]+(?:(?:ok\.|około|ponad|blisko|niemal|prawie|przeszło|już|aż)[ \t]+)?\d[\d  .,]{0,12}(?:[ \t]*(?:tys\.|tysięcy|tys|mln|milion\p{L}*))?[ \t]+(?:osób|osoby|mieszkańców|ludzi|rodzin|obywateli|dzieci|uczniów|studentów|cudzoziemców)(?!\p{L})/u;
 /**
@@ -484,7 +484,7 @@ function maskCityAfterResidenceMarker(ctx: RedactCtx): void {
 
 function maskCityAfterBirthMarker(ctx: RedactCtx): void {
   // Miejscowość po markerze urodzenia, z datą pomiędzy („ur. [DATA-URODZENIA] w Krakowie").
-  const DUR = escapeRe(ctx.M['DATA-UR']);
+  const DUR = maskSrc(ctx.M, 'DATA-UR');
   ctx.text = ctx.text.replace(
     new RegExp(
       // jedno łamanie wiersza po dacie tylko przed małym „w/we" („ur. [DATA] r.⏎w Sosnowcu"); „r.⏎W …"
@@ -516,8 +516,8 @@ function maskCityAfterBirthMarker(ctx: RedactCtx): void {
 
 export function passCity(ctx: RedactCtx): void {
   if (!ctx.on('MIEJSCOWOSC')) return;
-  const KOD = escapeRe(ctx.M['KOD-POCZTOWY']);
-  const ADR = escapeRe(ctx.M.ADRES);
+  const KOD = maskSrc(ctx.M, 'KOD-POCZTOWY');
+  const ADR = maskSrc(ctx.M, 'ADRES');
   maskCityAfterPostalCode(ctx, KOD);
   maskCapsCityAfterPostalCode(ctx, KOD, ADR);
   maskCityInCsvAndTerytFields(ctx, KOD);

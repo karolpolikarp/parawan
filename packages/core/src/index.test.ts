@@ -12,6 +12,7 @@ import {
   isValidKw,
 } from './index';
 import { HISTORIC_SURNAMES_GEN } from './passes/person-caps-ocr';
+import { MASK, type PiiType } from './types';
 
 // Buduje poprawny IBAN z kodu kraju + BBAN (liczymy cyfry kontrolne mod 97),
 // żeby test nie zależał od zapamiętanego wektora.
@@ -1386,6 +1387,72 @@ test.each([
 test('options.masks — pole formularza dostaje własną maskę, nie domyślną', () => {
   const r = redactPII('Imię i nazwisko:\nJAN KOWALSKI\nData urodzenia: 12.03.1985\nUlica: Długa 5', { masks: OWN_MASKS });
   expect(r.redacted).toBe('Imię i nazwisko:\n[OSOBA]\nData urodzenia: [URODZINY]\nUlica: [ULICA]');
+});
+
+// Maska jest kotwicą tylko wtedy, gdy da się ją jednoznacznie rozpoznać: niepusta i różna od masek
+// innych typów. Pusta maska pasuje wszędzie (domknięcia zjadałyby imiona firm i inicjały), a wspólna
+// maska kilku typów myli adres czy miasto z osobą. Wtedy domknięcia na niej się nie uruchamiają.
+const SAME_MASK = (m: string) => Object.fromEntries(Object.keys(MASK).map((t) => [t, m])) as Record<PiiType, string>;
+test.each([
+  ['pusta maska osoby: nazwa firmy z imieniem', { IMIE: '' }, 'Sklep Jagoda oferuje owoce. Firma Wiktoria Sp. z o.o. zatrudnia.'],
+  ['pusta maska osoby: nazwa hotelu', { IMIE: '' }, 'Hotel Maria w centrum'],
+  ['pusta maska osoby: punkty wyliczenia', { IMIE: '' }, 'wg pkt A. i B. uzasadnienia'],
+  ['pusta maska osoby: N.N. i imiona rodziców', { IMIE: '' }, 'Ofiara N.N., syn Józefa i Marii'],
+  ['puste maski adresu, kodu i miasta: nazwa sklepu nad adresem', { ADRES: '', 'KOD-POCZTOWY': '', MIEJSCOWOSC: '' }, 'Sklep Jagoda\nul. Polna 5\n30-001 Kraków'],
+  ['wspólna maska [UKRYTE]: nazwa sklepu nad adresem', SAME_MASK('[UKRYTE]'), 'Sklep Jagoda\nul. Polna 5\n30-001 Kraków'],
+  ['wspólna maska [UKRYTE]: nazwa kwiaciarni przed adresem', SAME_MASK('[UKRYTE]'), 'Kwiaciarnia Róża ul. Polna 5, Kraków'],
+  ['wspólna maska [UKRYTE]: „syn” za maską adresu', SAME_MASK('[UKRYTE]'), 'Mieszka przy ul. Polnej 5, syn Józefa i Marii był obecny.'],
+  ['wspólna maska ***: nazwa sklepu nad adresem', SAME_MASK('***'), 'Sklep Jagoda\nul. Polna 5\n30-001 Kraków'],
+  ['wspólna maska ***: „syn” za maską adresu', SAME_MASK('***'), 'Mieszka przy ul. Polnej 5, syn Józefa i Marii był obecny.'],
+] as const)('options.masks — %s: bez domknięć osoby', (_name, masks, input) => {
+  const r = redactPII(input, { masks }).redacted;
+  // wyrazy spoza danych osobowych zostają (wynik sprzed udostępnienia własnych masek kotwicom)
+  for (const w of ['Jagoda', 'Wiktoria', 'Maria', 'A.', 'B.', 'Róża', 'Józefa', 'Marii', 'N.N.']) {
+    if (input.includes(w)) expect(r).toContain(w);
+  }
+});
+
+test('options.masks — wspólna maska: adres, kod i miasto dalej zamaskowane, nazwa firmy zostaje', () => {
+  const masks = SAME_MASK('[UKRYTE]');
+  expect(redactPII('Sklep Jagoda\nul. Polna 5\n30-001 Kraków', { masks }).redacted).toBe('Sklep Jagoda\n[UKRYTE]\n[UKRYTE] [UKRYTE]');
+  expect(redactPII('Kwiaciarnia Róża ul. Polna 5, Kraków', { masks }).redacted).toBe('Kwiaciarnia Róża [UKRYTE], [UKRYTE]');
+  expect(redactPII('Mieszka przy ul. Polnej 5, syn Józefa i Marii był obecny.', { masks }).redacted).toBe(
+    'Mieszka przy [UKRYTE], syn Józefa i Marii był obecny.',
+  );
+});
+
+test('options.masks — pusta maska miasta nie wciąga ogona przeniesienia', () => {
+  expect(redactPII('Kod: 00-950 Warsza-\nwa', { masks: { MIEJSCOWOSC: '' } }).redacted).toBe('Kod: [KOD-POCZTOWY] -\nwa');
+});
+
+test('options.masks — pusta maska adresu nie jest kotwicą kodu pocztowego bez myślnika', () => {
+  expect(redactPII('Sprzedano 12345 Kraków i okolice.', { masks: { ADRES: '' } }).redacted).toBe(redactPII('Sprzedano 12345 Kraków i okolice.').redacted);
+});
+
+test('options.masks — maska e-maila kończąca się kropką nie udaje maski osoby', () => {
+  expect(redactPII('Konto Kowalski.Jan zostało zablokowane.', { masks: { EMAIL: 'e-mail.' } }).redacted).toBe(
+    'Konto [IMIĘ I NAZWISKO] zostało zablokowane.',
+  );
+});
+
+// Maska bez nawiasów (różna od pozostałych) działa jak domyślna.
+test.each([
+  ['XXX', 'Jan Kowalski, syn Józefa i Marii, stawił się.'],
+  ['XXX', 'Sporządził Jan\nKowalski, dnia 3 marca.'],
+  ['XXX', 'Konto Kowalski.Jan zostało zablokowane.'],
+  ['***', 'Jan Kowalski, syn Józefa i Marii, stawił się.'],
+  ['OSOBA UKRYTA', 'Pełnomocnik: mec. J. Kowalski, Anna Nowak z d. Wiśniewska.'],
+])('options.masks — maska osoby bez nawiasów „%s”: wynik jak domyślny', (mask, input) => {
+  expect(redactPII(input, { masks: { IMIE: mask } }).redacted).toBe(redactPII(input).redacted.split('[IMIĘ I NAZWISKO]').join(mask));
+});
+
+test('options.masks — maska osoby bez nawiasów: ponowny przebieg nie zmienia wyniku', () => {
+  for (const mask of ['XXX', 'OSOBA UKRYTA', '***']) {
+    for (const input of ['Kowalski, Anna złożyła wniosek.', 'Zeznał Kowalski Jan Paweł, a potem Nowak Piotr.', 'Konto Kowalski.Jan zostało zablokowane.']) {
+      const once = redactPII(input, { masks: { IMIE: mask } }).redacted;
+      expect(redactPII(once, { masks: { IMIE: mask } }).redacted).toBe(once);
+    }
+  }
 });
 
 test('options — brak opcji identyczny z domyślnym wywołaniem', () => {

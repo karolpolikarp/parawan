@@ -1,8 +1,8 @@
 // Ostatnia faza: domknięcia masek osób (imię, inicjał, ogon przeniesienia), stabilna numeracja
 // etykiet, przywrócenie URL-i i ucieczek JSON oraz cudzysłowy wokół masek w dokumencie JSON.
 import { HOMOGRAPH_SURNAMES, isGeoAdjective, looksLikeSurname, NON_SURNAME_ADJ, surnameBase, surnameShaped } from '../surnames.js';
-import { CAP_WORD, ESC_WS, escapeRe, JSON_ESC_PUA, LIST_BULLET, NM_BOUND, personMaskSrc, PL_LO, PL_UP, RE_CHAR_LU } from '../charset.js';
-import { indexToLetters, JSON_ESC_FROM_PUA, lettersToIndex, perMasks, RE_URL_SENTINEL, type RedactCtx } from '../context.js';
+import { CAP_WORD, ESC_WS, escapeRe, JSON_ESC_PUA, LIST_BULLET, NM_BOUND, PL_LO, PL_UP, RE_CHAR_LU } from '../charset.js';
+import { anchorMask, anchorMaskSrc, indexToLetters, JSON_ESC_FROM_PUA, lettersToIndex, perMasks, personMaskSrc, RE_URL_SENTINEL, type RedactCtx } from '../context.js';
 import { COLLIDING_NAME_FORMS, isFirstNameGenitive, isFirstNameLike, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
 import { isObliqueSurnameForm, precededByPatron } from '../guards/eponyms.js';
@@ -63,11 +63,30 @@ function geoSurnameBeforeName(word: string, t: string, start: number): boolean {
 const OCR_NAME_WORD = `[${PL_UP}](?:[${PL_LO}]*[I01][${PL_LO}I01]*|[${PL_UP}]*[01][${PL_UP}01]*)`;
 /** Znaki za ostatnią literą maski („]" w „[IMIĘ I NAZWISKO]"); pusty, gdy maska kończy się literą. */
 const tailAfterLastLetter = (mask: string): string => mask.slice(mask.search(/\p{L}[^\p{L}]*$/u) + 1);
-// Domknięcia czytają maskę osoby (i miejscowości) w tekście, więc wzorce zależą od masek.
+/**
+ * Czy wyraz z oryginału stoi tuż za maską osoby (`sep` to odstęp od poprzedniego wyrazu, który kończy
+ * się w `wordEnd`)? „]" na początku separatora to etykieta [OSOBA-X] albo maska domyślna; własna
+ * maska osoby musi stać w oryginale w całości. Maski innych typów („e-mail.") się nie liczą.
+ */
+function rawAfterPersonMask(src: string, wordEnd: number, sep: string, pm: string | null): boolean {
+  if (sep[0] === ']') return true;
+  if (pm === null || wordEnd < 0) return false;
+  const tail = tailAfterLastLetter(pm);
+  // maska bez liter („***") leży cała w separatorze
+  if (tail === pm) return sep.includes(pm);
+  if (!sep.startsWith(tail)) return false;
+  const end = wordEnd + tail.length;
+  if (!src.slice(0, end).endsWith(pm)) return false;
+  // maska z litery na początku nie może być końcówką dłuższego wyrazu („AXXX" to nie „XXX")
+  return !(/^\p{L}/u.test(pm) && /\p{L}/u.test(src[end - pm.length - 1] ?? ''));
+}
+// Domknięcia czytają maskę osoby (i miejscowości) w tekście, więc wzorce zależą od masek. Tylko maski
+// rozpoznawalne jednoznacznie (anchorMask): pustą albo wspólną z innym typem domknięcia pomijają.
 const finalizeRe = perMasks((M) => {
-  const PM = personMaskSrc(M.IMIE);
-  const all = Object.values(M).filter(Boolean);
+  const PM = personMaskSrc(M);
+  const pm = anchorMask(M, 'IMIE');
   return {
+    personMask: pm,
     personAtStart: new RegExp(`^(?:${PM})`),
     // maska osoby przed wyrazem i okno, w którym jej szukać (maska i separator)
     personBefore: rePersonMaskBefore(M),
@@ -90,12 +109,11 @@ const finalizeRe = perMasks((M) => {
     // Imię z homoglifem za maską na końcu wiersza („[..] KaroI⏎"): rekord „Nazwisko Imię" po OCR.
     maskThenOcrName: new RegExp(`(${PM}) (${OCR_NAME_WORD})(?=[ \\t]*(?:\\r?\\n|$))`, 'g'),
     hyphenTail: new RegExp(
-      `(${PM}|${escapeRe(M.MIEJSCOWOSC)})-\\r?\\n[ \\t]*([${PL_LO}]{2,14}|[${PL_UP}]{2,14})(?![${PL_UP}${PL_LO}0-9-])`,
+      `(${PM}|${anchorMaskSrc(M, 'MIEJSCOWOSC')})-\\r?\\n[ \\t]*([${PL_LO}]{2,14}|[${PL_UP}]{2,14})(?![${PL_UP}${PL_LO}0-9-])`,
       'g',
     ),
-    // pierwsze znaki masek (linksAt) i znaki za ostatnią literą maski (linkAfterMask)
-    maskHeads: new Set(['[', ...all.map((m) => m[0])]),
-    maskTails: [...new Set([']', ...all.map(tailAfterLastLetter).filter(Boolean)])],
+    // pierwsze znaki maski osoby (linksAt)
+    maskHeads: new Set(pm ? ['[', pm[0]] : ['[']),
   };
 });
 type FinalizeRe = ReturnType<typeof finalizeRe>;
@@ -153,7 +171,7 @@ interface RawWordLink {
   sep3: string;
   /** Kilka znaków oryginału za wyrazem, do dopasowania wystąpienia, gdy imię się powtarza. */
   next: string;
-  /** Czy separator zaczyna się od końcówki maski (patrz linkAfterMask). */
+  /** Czy wyraz stoi w oryginale tuż za maską osoby (rawAfterPersonMask, linkAfterMask). */
   afterMask: boolean;
   // oceny liczone raz na wpis, bo ten sam wpis sprawdza każde wystąpienie imienia
   prevName?: boolean;
@@ -192,7 +210,7 @@ const RE_RAW_WORD = /\p{L}+/gu;
  * Paweł"), parę „Imię Nazwisko" („Zofia Nowak Antoni") czy nazwisko w formie zależnej („Według
  * Nowaka Ewa nie przyszła"). Budowane leniwie, dopiero gdy jest co domykać.
  */
-function buildRawWordLinks(raw: string, maskTails: string[]): Map<string, RawWordLink[]> {
+function buildRawWordLinks(raw: string, personMask: string | null): Map<string, RawWordLink[]> {
   const map = new Map<string, RawWordLink[]>();
   // dosłowne ucieczki JSON „\n/\r/\t" jak odstęp, żeby litera ucieczki nie skleiła się z wyrazem
   const src = raw.replace(/\\[nrt]/g, '  ');
@@ -211,7 +229,7 @@ function buildRawWordLinks(raw: string, maskTails: string[]): Map<string, RawWor
       let list = map.get(w);
       if (!list) map.set(w, (list = []));
       const next = src.slice(at + w.length, at + w.length + LINK_CTX_LEN);
-      const afterMask = maskTails.some((x) => sep.startsWith(x));
+      const afterMask = rawAfterPersonMask(src, lastEnd < 0 || at - lastEnd > 8 ? -1 : lastEnd, sep, personMask);
       if (list.length < 32) list.push({ prev: p1, sep, prev2: p2, sep2: p1Sep, prev3: p3, sep3: p2Sep, next, afterMask });
     }
     p3 = p2;
@@ -426,7 +444,7 @@ function closeGluedNameAfterMask(ctx: RedactCtx, rawLinks: RawLinksLookup): void
 function joinHyphenatedTailAfterMask(ctx: RedactCtx): void {
   if (!ctx.text.includes('-\n') && !ctx.text.includes('-\r\n')) return;
   let heads: Map<string, string[]> | undefined;
-  const city = ctx.M.MIEJSCOWOSC;
+  const city = anchorMask(ctx.M, 'MIEJSCOWOSC');
   ctx.text = ctx.text.replace(finalizeRe(ctx.M).hyphenTail, (m, mask: string, tail: string) => {
     if (mask === city && tail !== tail.toLowerCase()) return m;
     const lo = tail.toLowerCase();
@@ -497,7 +515,7 @@ function relabelPersonsAndRestoreUrls(ctx: RedactCtx): void {
 }
 export function finalizePersons(ctx: RedactCtx): void {
   let links: Map<string, RawWordLink[]> | undefined;
-  const rawLinks: RawLinksLookup = (w) => (links ??= buildRawWordLinks(ctx.raw, finalizeRe(ctx.M).maskTails)).get(w) ?? [];
+  const rawLinks: RawLinksLookup = (w) => (links ??= buildRawWordLinks(ctx.raw, finalizeRe(ctx.M).personMask)).get(w) ?? [];
   closeNameAfterMask(ctx, rawLinks);
   closeNameAfterMaskComma(ctx, rawLinks);
   closeNameBeforeMask(ctx, rawLinks);
@@ -540,7 +558,7 @@ function isJsonDocument(s: string): boolean {
 // zostaje. Wykrywanie liczb nie zależy od klucza, bo „"id": 85031412347" to też PESEL.
 export function passJsonRequote(ctx: RedactCtx): void {
   if (ctx.text === ctx.raw || !isJsonDocument(ctx.raw)) return;
-  const masks = [...new Set(Object.values(ctx.M))].sort((a, b) => b.length - a.length).map(escapeRe);
+  const masks = [...new Set(Object.values(ctx.M))].filter(Boolean).sort((a, b) => b.length - a.length).map(escapeRe);
   // Literał łańcuchowy pochłaniany w całości i oddawany bez zmian. JSON.stringify na wypadek własnej
   // maski z cudzysłowem albo backslashem.
   const re = new RegExp(`"(?:[^"\\\\\\n]|\\\\.)*"|(${[...masks, '\\[OSOBA-[A-Z]+\\]'].join('|')})`, 'g');

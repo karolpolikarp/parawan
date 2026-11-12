@@ -1,7 +1,7 @@
 // Kotwice strukturalne: wartości pod kluczem XML (tag i atrybut), JSON i pod nagłówkiem tabeli
 // (CSV, TSV, Markdown), z bramką kształtu dla każdego rodzaju pola.
 import { isAsciiSurname, isConfirmedSurname, surnameShaped } from '../surnames.js';
-import { type RedactCtx, URL_SENTINEL_CLOSE, URL_SENTINEL_OPEN } from '../context.js';
+import { anchorMask, type RedactCtx, URL_SENTINEL_CLOSE, URL_SENTINEL_OPEN } from '../context.js';
 import { FORM_LABEL_WORDS, isEmptyFormValue, isPropagatableLogin, isSystemAccount, isValidFormValue, loginUserPart, RE_BUILTIN_ACCOUNT, RE_DATE_VALUE, RE_PROPER_WORDS, RE_WELL_KNOWN_ACCOUNT } from '../dict/forms.js';
 import { isFirstNameLike } from '../dict/names.js';
 import { ORG_HEAD_WORDS } from '../guards/person-context.js';
@@ -339,6 +339,11 @@ function tableProseCell(v: string): boolean {
     )
   );
 }
+/** Komórka zaczyna się od własnej maski osoby (tylko rozpoznawalnej: niepustej i nie wspólnej z innym typem). */
+function startsWithPersonMask(ctx: RedactCtx, v: string): boolean {
+  const pm = anchorMask(ctx.M, 'IMIE');
+  return pm !== null && v.startsWith(pm);
+}
 export function passDelimitedTable(ctx: RedactCtx): void {
   const t = ctx.text;
   if (!/[;,\t|]/.test(t)) return;
@@ -397,7 +402,7 @@ export function passDelimitedTable(ctx: RedactCtx): void {
       const personVals = values.map((v, i) => (tablePersonCell(kinds[i]) ? v.trim() : '')).filter((v) => v && !isEmptyFormValue(v));
       const personPlausible =
         personOk ||
-        personVals.some((v) => /^\[(?:IMIĘ|OSOBA)/.test(v) || v.startsWith(ctx.M.IMIE)) ||
+        personVals.some((v) => /^\[(?:IMIĘ|OSOBA)/.test(v) || startsWithPersonMask(ctx, v)) ||
         (personVals.length > 0 && personVals.every((v) => /^\p{Lu}/u.test(v) && !tableOfficeCell(v) && !v.split(/ +/).some((w) => isPersonRoleValue(w.toLowerCase()))));
       let out = '';
       let last = 0;

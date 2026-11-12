@@ -44,7 +44,9 @@ export interface RedactOptions {
   types?: PiiType[];
   /**
    * Własne placeholdery dla typów. Placeholder nie może zawierać cyfr ani „@”, bo ponowny
-   * przebieg redakcji wziąłby go za dane osobowe.
+   * przebieg redakcji wziąłby go za dane osobowe. Placeholdery powinny być niepuste i różne dla
+   * różnych typów: reguły czytające już wstawione maski (np. imię przy masce osoby, miasto przy
+   * masce ulicy) pomijają maskę pustą albo wspólną z innym typem.
    */
   masks?: Partial<Record<PiiType, string>>;
   /**

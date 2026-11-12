@@ -1,7 +1,6 @@
 // Numery dokumentów z kotwicą: dowód osobisty, paszport, KRS, prawo jazdy, tablica rejestracyjna,
 // a także kod pocztowy.
-import { escapeRe } from '../charset.js';
-import { maskAfterLabel, maskKeepPrefix, type RedactCtx } from '../context.js';
+import { maskAfterLabel, maskKeepPrefix, maskSrc, type RedactCtx } from '../context.js';
 import { type PiiType } from '../types.js';
 import { CURRENCY_CODES, isValidDowod, precededByLegalRef } from '../validators.js';
 
@@ -239,7 +238,7 @@ export function passPlate(ctx: RedactCtx): void {
 // („; SN 2020 r. orzekł"); trzyliterowy powiat z rokiem jest jednak tablicą (plateYearEndsList).
 // Średnik i ukośnik tylko z odstępami poziomymi, żeby lista nie sięgała do kolejnego akapitu.
 function maskPlateEnumeration(ctx: RedactCtx): void {
-  const REJ = escapeRe(ctx.M['NR-REJESTRACYJNY']);
+  const REJ = maskSrc(ctx.M, 'NR-REJESTRACYJNY');
   ctx.text = ctx.text.replace(
     new RegExp(`(${REJ})((?:(?:\\s*,\\s*|[ \\t]*[;/][ \\t]*|\\s+oraz\\s+|\\s+i\\s+)${PLATE_ITEM}(?![\\w-]|/\\d)${PLATE_NOT_UNIT})+)`, 'g'),
     (_m, first: string, tail: string) => {

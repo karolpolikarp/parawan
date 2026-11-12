@@ -32,6 +32,12 @@ const { redacted, found } = redactPII('Mój PESEL to 44051401359, mail jan@examp
 //            (kolejność elementów found nie jest częścią kontraktu)
 ```
 
+Własne znaczniki podaje opcja `masks`, np. `redactPII(tekst, { masks: { IMIE: '[OSOBA]' } })`.
+Znacznik nie może zawierać cyfr ani „@”. Daj każdemu typowi inny, niepusty znacznik: część reguł
+czyta już wstawione znaczniki (np. imię obok zamaskowanego nazwiska, miasto przy zamaskowanej
+ulicy), a pustego albo wspólnego dla kilku typów nie da się rozpoznać, więc te reguły wtedy nie
+działają.
+
 **Ograniczenie:** wykrywanie imion i nazwisk warstwą podstawową jest heurystyczne (słownik
 imion i nazwisk, morfologia, wyzwalacze kontekstu), więc zawsze przejrzyj wynik przed
 udostępnieniem. Recall rzadkich nazwisk podnosi opcjonalna lokalna usługa NER z dodatku

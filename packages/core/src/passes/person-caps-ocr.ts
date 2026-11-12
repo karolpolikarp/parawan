@@ -1,8 +1,8 @@
 // Osoby zapisane wersalikami, zapisem mieszanym i z homoglifami OCR, a także imiona rodziców
 // i nazwisko panieńskie tuż za maską osoby.
 import { homographBase, isConfirmedSurname, isGeoAdjective, looksLikeSurname, NON_SURNAME_ADJ, surnameBase, surnameShaped } from '../surnames.js';
-import { CAP_WORD, NM_BOUND, personMaskSrc, PL_LO, PL_UP } from '../charset.js';
-import { perMasks, type RedactCtx } from '../context.js';
+import { CAP_WORD, NM_BOUND, PL_LO, PL_UP } from '../charset.js';
+import { perMasks, personMaskSrc, type RedactCtx } from '../context.js';
 import { isFirstNameGenitive, isFirstNameLike, isMaleFirstNameGenitive, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
 import { egoNameGenitive, precededByEponym, precededByPatron } from '../guards/eponyms.js';
@@ -330,7 +330,7 @@ export function passPersonMixedCase(ctx: RedactCtx): void {
 const reParentsAfterMask = perMasks(
   (M) =>
     new RegExp(
-      `(${personMaskSrc(M.IMIE)})(,?[ \\t]+)(syn(?:a|owi|em)?|córk(?:a|i|ą|ę)|SYN|CÓRKA|s\\.|c\\.)([ \\t]+)` +
+      `(${personMaskSrc(M)})(,?[ \\t]+)(syn(?:a|owi|em)?|córk(?:a|i|ą|ę)|SYN|CÓRKA|s\\.|c\\.)([ \\t]+)` +
         `([${PL_UP}][${PL_UP}${PL_LO}]+)(?:([ \\t]+)([${PL_UP}][${PL_UP}${PL_LO}]+))?` +
         `(?:((?:[ \\t]+i|,)[ \\t]+)([${PL_UP}][${PL_UP}${PL_LO}]+)(?:([ \\t]+)([${PL_UP}][${PL_UP}${PL_LO}]+))?)?(?![${NM_BOUND}])`,
       'g',
@@ -523,7 +523,7 @@ export const MAIDEN_D_SENTINEL = String.fromCharCode(0xe0d0);
 const reMaidenAfterMask = perMasks(
   (M) =>
     new RegExp(
-      `(${personMaskSrc(M.IMIE)})([ \\t]*[,(]?[ \\t\\n]*[Zz][ \\t\\n]+(?:domu|DOMU|d\\.|D\\.)[ \\t]+)` +
+      `(${personMaskSrc(M)})([ \\t]*[,(]?[ \\t\\n]*[Zz][ \\t\\n]+(?:domu|DOMU|d\\.|D\\.)[ \\t]+)` +
         `([${PL_UP}][${PL_LO}]+(?:-[${PL_UP}][${PL_LO}]+)?|[${PL_UP}]{2,}(?:-[${PL_UP}]{2,})?)(?![${NM_BOUND}0-9-])`,
       'g',
     ),

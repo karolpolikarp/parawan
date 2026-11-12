@@ -1,8 +1,8 @@
 // Adresy: ulice ze skrótem i bez, ulice z patronem w dopełniaczu, adres po etykiecie zamieszkania
 // i przed kodem pocztowym, kod pocztowy bez myślnika.
 import { surnameShaped } from '../surnames.js';
-import { CAP_CITY, countOf, escapeRe, MONTHS_GEN, PL_LO, PL_UP } from '../charset.js';
-import { maskKeepPrefix, perMasks, type RedactCtx } from '../context.js';
+import { CAP_CITY, countOf, MONTHS_GEN, PL_LO, PL_UP } from '../charset.js';
+import { anchorMaskSrc, maskKeepPrefix, maskSrc, perMasks, type RedactCtx } from '../context.js';
 import { isFirstNameGenitive, isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
 import { egoNameGenitive, RE_STREET_WORD, STREET_RANK_WORDS } from '../guards/eponyms.js';
@@ -343,13 +343,13 @@ const RE_PATRON_CELL_PLACE = /^"?\p{Lu}\p{Ll}+(?:[ -]\p{Lu}\p{Ll}+)?"?$/u;
 // Kotwice ulicy z patronem na już wstawionych maskach: kod pocztowy w sąsiedniej komórce albo
 // w następnym wierszu, maska osoby tuż przed ulicą i poprzednia ulica w wyliczeniu.
 const patronMaskRe = perMasks((M) => {
-  const KOD = escapeRe(M['KOD-POCZTOWY']);
+  const KOD = anchorMaskSrc(M, 'KOD-POCZTOWY');
   return {
     cellPostal: new RegExp(String.raw`^"?(?:\d{2}-\d{3}|${KOD})"?$`),
     postalAfter: new RegExp(String.raw`^[ \t]*(?:,[ \t]*|\r?\n[ \t]*)(?:\d{2}-\d{3}|${KOD})`),
     personBefore: rePersonMaskBefore(M),
     // Kolejna ulica w wyliczeniu za zamaskowanym adresem („Mieszkańcy [ADRES] i Jana Pawła II 7").
-    enumBefore: new RegExp(String.raw`${escapeRe(M.ADRES)}[ \t]*(?:,|i|oraz)[ \t]+$`, 'u'),
+    enumBefore: new RegExp(String.raw`${maskSrc(M, 'ADRES')}[ \t]*(?:,|i|oraz)[ \t]+$`, 'u'),
   };
 });
 type PatronMaskRe = ReturnType<typeof patronMaskRe>;
@@ -799,7 +799,7 @@ function maskStreetAddresses(ctx: RedactCtx): void {
 // domu nie jest członem nazwy (ADDR_CONNECTOR). Liczba przed ilością, kwotą, godziną czy datą
 // („… i Leśnej 7 dzieci") zostaje, jak w głównym przebiegu.
 function maskSecondStreetInEnumeration(ctx: RedactCtx): void {
-  const ADR = escapeRe(ctx.M.ADRES);
+  const ADR = maskSrc(ctx.M, 'ADRES');
   ctx.text = ctx.text.replace(
     new RegExp(
       `(${ADR}[ \\t]+(?:i|oraz)[ \\t]+)[${PL_UP}][${PL_LO}]+(?:-[${PL_UP}][${PL_LO}]+)?(?:[ \\t]+[${PL_UP}][${PL_LO}]+)?` +
@@ -820,7 +820,7 @@ function maskSecondStreetInEnumeration(ctx: RedactCtx): void {
 // przez nową linię nazwisko z podpisu („Monika Sadowska\nSzosa Chełmińska 77/9") stawałoby się
 // początkiem nazwy ulicy.
 function maskStreetBeforePostalCode(ctx: RedactCtx): void {
-  const KOD = escapeRe(ctx.M['KOD-POCZTOWY']);
+  const KOD = maskSrc(ctx.M, 'KOD-POCZTOWY');
   ctx.text = ctx.text.replace(
     new RegExp(
       // bez łącznika „i/z/pod": bez skrótu ulicy „Spółka Kowalski i Syn 5, 00-001 …" to firma.
@@ -860,7 +860,7 @@ export function passAddress(ctx: RedactCtx): void {
 // przed miejscowością (wyraz z wielkiej litery).
 export function passPostalNoHyphen(ctx: RedactCtx): void {
   if (!ctx.on('KOD-POCZTOWY')) return;
-  const ADR = escapeRe(ctx.M.ADRES);
+  const ADR = maskSrc(ctx.M, 'ADRES');
   ctx.text = ctx.text.replace(
     new RegExp(`(${ADR}\\s*,?\\s*)(?<!\\d)\\d{5}(?!\\d)(?=[ \\t]+${CAP_CITY})`, 'g'),
     maskKeepPrefix(ctx, 'KOD-POCZTOWY'),

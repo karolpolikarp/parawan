@@ -1,7 +1,7 @@
 // Data urodzenia: maskowana tylko za jawną kotwicą („ur.”, etykieta, imiesłów, „urodził się”).
 // Tu też test, czy „urodził się” mówi o osobie, z którego korzysta passCity.
-import { CITY_RUN, MONTHS_GEN, personMaskSrc } from '../charset.js';
-import { maskAfterLabel, type Masks, perMasks, type RedactCtx } from '../context.js';
+import { CITY_RUN, MONTHS_GEN } from '../charset.js';
+import { maskAfterLabel, type Masks, perMasks, personMaskSrc, type RedactCtx } from '../context.js';
 
 const BIRTH_DATE_SRC = String.raw`\d{1,2}[.\-/]\d{1,2}[.\-/]\d{2,4}|\d{4}-\d{2}-\d{2}|\d{1,2}\s+(?:[IVX]{1,4}|${MONTHS_GEN})\s+\d{4}`;
 const BIRTH_DATA_LABEL = String.raw`data\s+(?:urodzenia|urodz\.|ur\.)`;
@@ -71,7 +71,7 @@ const RE_BIRTH_VERB_PLURAL = /^urodzi(?:li|ły)[ \t]/i;
 const RE_BIRTH_SUBJECT_THING =
   /(?<!\p{L})(?:pomysł|projekt|idea|koncepcja|myśl|plan|inicjatywa|przedsięwzięcie|festiwal|ruch|zespół|firma|marka|akcja|tradycja|zwyczaj|impreza|wydarzenie|program|konkurs|stowarzyszenie|fundacja|spółka|teatr|kabaret|cielę|źrebię|źrebak|szczenię|szczeniak|kocię|jagnię|prosię|koźlę|zwierzę|pies|kot|klacz|jałówka|młode|najwięcej|najmniej|łącznie|ogółem|dzieci|noworodków|osób)(?!\p{L})/iu;
 const reBirthSubjectChild = perMasks(
-  (M) => new RegExp(String.raw`${personMaskSrc(M.IMIE)}|(?<!\p{L})(?:dziecko|dziecię|niemowlę|małoletnie|wnuczę|bliźnię)(?!\p{L})`, 'iu'),
+  (M) => new RegExp(String.raw`${personMaskSrc(M)}|(?<!\p{L})(?:dziecko|dziecię|niemowlę|małoletnie|wnuczę|bliźnię)(?!\p{L})`, 'iu'),
 );
 const RE_BIRTH_SUBJECT_TWINS = /(?<!\p{L})(?:bliźnięta|bliźniaki|bliźniaczki|bliźniacy|trojaczki)(?!\p{L})/iu;
 const RE_BIRTH_SUBJECT_PUBLIC =
