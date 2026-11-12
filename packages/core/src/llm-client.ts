@@ -34,36 +34,50 @@ const MAX_CANDIDATE_LEN = 80;
 
 const PLACEHOLDER_ONLY = /^\[[^\[\]]*\]$/;
 
-// Kandydat będący fragmentem maski („PESEL", „VIN") rozbiłby ją przy zamianie. Lista idzie wprost
-// z `MASK`, więc nowy typ PII nie wymaga pamiętania o tym miejscu.
 const KNOWN_MASKS = [...new Set(Object.values(MASK))];
 
-// Fragment etykiety pseudonimu [OSOBA-X]: kawałek „[OSOBA-", dowolny ogon prefiksu z myślnikiem
-// i literami („SOBA-AB", „-A]") albo litery z zamykającym nawiasem („AB]").
-const OSOBA_FRAGMENT = /^(?:\[?OSOBA-|SOBA-|OBA-|BA-|A-|-)[A-Z]*\]?$|^[A-Z]+\]$/;
-const isMaskFragment = (c: string): boolean =>
-  KNOWN_MASKS.some((m) => m.includes(c)) || '[OSOBA-'.includes(c) || OSOBA_FRAGMENT.test(c);
-
-// Placeholdery w tekście (maski rdzenia i etykiety [OSOBA-X]) są nietykalne przy zamianie; chroni to
-// też przed kandydatem, który przypadkiem pokrywa się z literami etykiety („AB" w [OSOBA-AB]).
+// Placeholdery w tekście (maski rdzenia i etykiety [OSOBA-X]) są nietykalne przy zamianie. Lista idzie
+// wprost z `MASK`, więc nowy typ PII nie wymaga pamiętania o tym miejscu.
 const PLACEHOLDER_RE = new RegExp(`\\[OSOBA-[A-Z]+\\]|${KNOWN_MASKS.map(escapeRe).join('|')}`, 'g');
 
-/** Zamień wszystkie wystąpienia `c` poza placeholderami; zwraca nowy tekst i liczbę zamian. */
+// Całe słowa etykiet („PESEL", „NIP", „MAC", „ADRES", „OSOBA"): model, który je wskazuje, myli
+// etykietę z daną, a takie słowo stojące luzem w tekście („nr PESEL [PESEL]") to nie osoba.
+// Dłuższe słowa zawierające kawałek etykiety („TRACY", „REJ" w [NR-REJESTRACYJNY]) przechodzą.
+const MASK_LABEL_WORDS = new Set(
+  [...KNOWN_MASKS, '[OSOBA]'].flatMap((m) => m.slice(1, -1).split(/[\s-]+/)).filter(Boolean),
+);
+
+// Kandydat z nawiasem spoza pełnego placeholdera ucina znacznik („Kowalski [OSOBA-A", „AB] i Nowak").
+const hasBrokenPlaceholder = (c: string): boolean => /[[\]]/.test(c.replace(PLACEHOLDER_RE, ''));
+
+const isMaskLabel = (c: string): boolean => MASK_LABEL_WORDS.has(c) || hasBrokenPlaceholder(c);
+
+/**
+ * Zamień wystąpienia `c` na maskę osoby; zwraca nowy tekst i liczbę zamian. Pomija tylko wystąpienia
+ * CZĘŚCIOWO nachodzące na placeholder (zaczynają się albo kończą w jego środku), bo rozbiłyby
+ * znacznik („AB" w [OSOBA-AB]). Wystąpienie obejmujące placeholder w całości („Grzegorz
+ * [IMIĘ I NAZWISKO]", „Anna;Zając;[PESEL]") jest zamieniane razem z nim.
+ */
 function replaceOutsidePlaceholders(text: string, c: string): { text: string; count: number } {
+  const spans = [...text.matchAll(PLACEHOLDER_RE)].map((m) => [m.index, m.index + m[0].length]);
+  const cutsPlaceholder = (s: number, e: number): boolean =>
+    spans.some(([ps, pe]) => s < pe && e > ps && !(s <= ps && e >= pe));
   let out = '';
   let count = 0;
   let last = 0;
-  const swap = (seg: string): string => {
-    const parts = seg.split(c);
-    count += parts.length - 1;
-    return parts.join(PERSON_MASK);
-  };
-  for (const m of text.matchAll(PLACEHOLDER_RE)) {
-    out += swap(text.slice(last, m.index)) + m[0];
-    last = m.index + m[0].length;
+  let i = text.indexOf(c);
+  while (i !== -1) {
+    const end = i + c.length;
+    if (cutsPlaceholder(i, end)) {
+      i = text.indexOf(c, i + 1);
+      continue;
+    }
+    out += text.slice(last, i) + PERSON_MASK;
+    count++;
+    last = end;
+    i = text.indexOf(c, end);
   }
-  out += swap(text.slice(last));
-  return { text: out, count };
+  return { text: out + text.slice(last), count };
 }
 
 const SYSTEM_PROMPT =
@@ -90,7 +104,7 @@ function validateCandidates(raw: unknown[], text: string): string[] {
     if (typeof c !== 'string') continue;
     if (c.length < MIN_CANDIDATE_LEN || c.length > MAX_CANDIDATE_LEN) continue;
     if (PLACEHOLDER_ONLY.test(c)) continue;
-    if (isMaskFragment(c)) continue;
+    if (isMaskLabel(c)) continue;
     if (text.indexOf(c) === -1) continue;
     if (seen.has(c)) continue;
     seen.add(c);

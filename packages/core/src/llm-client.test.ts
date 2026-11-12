@@ -135,6 +135,70 @@ test('llmRedact — kandydat obecny i w tekście, i w masce: zamiana tylko poza 
   expect(r2?.redacted).toBe('Pan [IMIĘ I NAZWISKO] i [OSOBA-AB] podpisali.');
 });
 
+test('llmRedact — kandydat obejmujący CAŁY placeholder jest zamieniany w całości', async () => {
+  const cases: { text: string; pii: string[]; out: string; count: number }[] = [
+    {
+      text: 'Grzegorz [IMIĘ I NAZWISKO] stawił się osobiście.',
+      pii: ['Grzegorz [IMIĘ I NAZWISKO]'],
+      out: '[IMIĘ I NAZWISKO] stawił się osobiście.',
+      count: 1,
+    },
+    {
+      text: 'Świadek [OSOBA-A] Kowalska-Nowak zeznała.',
+      pii: ['[OSOBA-A] Kowalska-Nowak'],
+      out: 'Świadek [IMIĘ I NAZWISKO] zeznała.',
+      count: 1,
+    },
+    {
+      text: 'Od: Anna Wiśniewska <[EMAIL]>',
+      pii: ['Anna Wiśniewska <[EMAIL]>', 'Anna'],
+      out: 'Od: [IMIĘ I NAZWISKO]',
+      count: 1,
+    },
+    {
+      text: 'Anna;Zając;[PESEL]\nPiotr;Wróbel;[PESEL]',
+      pii: ['Anna;Zając;[PESEL]', 'Piotr;Wróbel;[PESEL]'],
+      out: '[IMIĘ I NAZWISKO]\n[IMIĘ I NAZWISKO]',
+      count: 2,
+    },
+  ];
+  for (const { text, pii, out, count } of cases) {
+    resetLlmBreakers();
+    vi.stubGlobal('fetch', vi.fn(async () => ollamaResponse(JSON.stringify({ pii }))));
+    const r = await llmRedact(text, CFG);
+    expect(r?.redacted, text).toBe(out);
+    expect(r?.found, text).toEqual([{ type: 'IMIE', count }]);
+  }
+});
+
+test('llmRedact — kandydat zaczynający się albo kończący w środku placeholdera nie jest zamieniany', async () => {
+  // Niedomknięty nawias: kandydat ucina placeholder, więc walidacja go odrzuca.
+  const text = 'Pan Kowalski [OSOBA-AB] i Nowak [PESEL] podpisali.';
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async () =>
+      ollamaResponse(JSON.stringify({ pii: ['Kowalski [OSOBA-A', 'AB] i Nowak', 'Nowak [PES', 'SEL] podpisali'] })),
+    ),
+  );
+  expect(await llmRedact(text, CFG)).toBeNull();
+});
+
+test('llmRedact — nazwisko wersalikami będące częścią dłuższej etykiety maski nie jest odrzucane', async () => {
+  // „REJ" i „TRACY" siedzą w [NR-REJESTRACYJNY], ale to nie całe słowa etykiety. „MAC" jest
+  // całym słowem etykiety [MAC], więc zostaje odrzucony (model myli etykietę z daną).
+  const text =
+    'Świadkowie: TRACY, REJ i MAC; pojazd [NR-REJESTRACYJNY], karta [NR-KARTY], host [MAC].';
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async () => ollamaResponse(JSON.stringify({ pii: ['TRACY', 'REJ', 'MAC', 'PESEL', 'NR'] }))),
+  );
+  const r = await llmRedact(text, CFG);
+  expect(r?.redacted).toBe(
+    'Świadkowie: [IMIĘ I NAZWISKO], [IMIĘ I NAZWISKO] i MAC; pojazd [NR-REJESTRACYJNY], karta [NR-KARTY], host [MAC].',
+  );
+  expect(r?.found).toEqual([{ type: 'IMIE', count: 2 }]);
+});
+
 test('llmRedact — zły JSON lub brak listy "pii" → null (fail-safe)', async () => {
   vi.stubGlobal('fetch', vi.fn(async () => ollamaResponse('to nie jest {json')));
   expect(await llmRedact('Pan Iksiński', CFG)).toBeNull();
