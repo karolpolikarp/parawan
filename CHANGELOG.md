@@ -24,11 +24,6 @@ Silnik:
   wersalikami nie są stroną pisma (np. „LIST ADAMA MICKIEWICZA”), miała złe formy dla Orzeszkowej,
   Jagiełły i Fredry („ORZESZKOWAA”, „JAGIEŁŁI”, „FREDRI”). Teraz są poprawne. Dziś te trzy nazwiska
   nie są rozpoznawane jako osoby, więc wynik się nie zmienia; poprawka chroni je na przyszłość.
-- **„Tarnowski” jako nazwa miejsca zostaje jawny.** Wyraz był jednocześnie w słowniku nazwisk
-  i na liście przymiotników od nazw miast, a słownik wygrywał. Dlatego „Starosta Tarnowski”,
-  „Tarnowski Sąd”, „Ziemia Tarnowska” czy „Tarnowskie Góry” dostawały maskę osoby. Teraz działa
-  tak jak „krakowski” i „warszawski”: osoba jest maskowana z imieniem albo po „Pan/Pani” lub roli
-  („Świadek Tarnowski”), a samo nazwisko bez takiego kontekstu zostaje jawne.
 - **Warstwa LLM nie psuje nowszych znaczników.** Biblioteczny klient lokalnego modelu
   (`anonimizator/llm`) znał tylko część masek, więc kandydat „VIN” albo „TOKEN” zamieniał środek
   `[VIN]` czy `[TOKEN]` na maskę osoby, a litery etykiety `[OSOBA-AB]` też były do wzięcia. Teraz
