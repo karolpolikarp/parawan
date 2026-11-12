@@ -108,9 +108,18 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 - Gałąź `refactor/rdzen-czysty`: podział i sprzątanie rdzenia (dawny `index.ts` rozbity na moduły,
   patrz Struktura). Zachowanie domyślne, z pseudonimami i z filtrem `types` identyczne z `main`
   (golden bez zmian). Świadome zmiany: własne maski podstawiane po wykryciu, poprawki warstwy LLM,
-  dopełniacze postaci historycznych (CHANGELOG `[Unreleased]`).
+  dopełniacze postaci historycznych (CHANGELOG `[Unreleased]`). Wypchnięta, czeka na decyzję
+  o merge. Handoff: `docs/handoff-2026-11-12.md`.
 - W toku: nowy landing (`/frontend`), kierunek „Sosna o poranku”. Próbki poza repo w
   `E:\parawan-landing-proby\`. Handoff: `docs/handoff-2026-11-01.md`.
+
+## Deploy
+
+- Aplikacja: wydanie przez tag `vX.Y.Z` (workflow `release.yml` buduje `Parawan.html` + `JAK-UZYC.txt`
+  do GitHub Release); pełna lista kroków w `docs/WYDANIE.md`.
+- Landing: `deploy-landing.yml` na GitHub Pages po pushu na `main` w `apps/landing` albo `ROADMAP.md`.
+- npm: `npm publish -w anonimizator`, potem `-w parawan` (ręcznie, przy wydaniu rdzenia).
+- Brak Pi, Vercela i bazy.
 
 ## Backlog
 
@@ -120,6 +129,7 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 3. „tarnowski” w słowniku nazwisk i na liście przymiotników: rozróżnienie przez regułę kontekstową
    (nazwa instytucji lub geografii po przymiotniku, np. „Starosta Tarnowski”, „Ziemia Tarnowska”).
    Usunięcie ze słownika dawało wycieki („Sędzia Tarnowski”), cofnięte w 380586a.
+4. Merge `refactor/rdzen-czysty` do `main` i wydanie v0.46.27 / rdzeń 0.29.14. Powrót: „merguj”.
 
 ## Znane problemy
 
