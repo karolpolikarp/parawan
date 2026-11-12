@@ -1,24 +1,13 @@
 /**
- * EKSPERYMENTALNA warstwa LLM przez LOKALNE Ollama (np. Bielik) — tryb SPAN-EXTRACTION.
+ * Eksperymentalna warstwa LLM przez lokalną Ollamę (np. Bielik) w trybie wskazywania fragmentów.
  *
- * LLM wyłącznie WSKAZUJE kandydatów (fragmenty tekstu wyglądające na dane osobowe),
- * a maskowanie wykonuje kod biblioteki po TWARDEJ walidacji. LLM NIGDY nie przepisuje
- * tekstu — jego ewentualna „propozycja" zredagowanej wersji jest ignorowana. To zamyka
- * dwie klasy ryzyk naraz: halucynację (kandydat nieobecny w tekście jest odrzucany)
- * i prompt-injection (złośliwy tekst może co najwyżej skłonić model do wskazania
- * niewinnych fragmentów → NADmaskowanie, nigdy ODmaskowanie).
- *
- * FAIL-SAFE (nie fail-open): gdy Ollama jest niedostępna, przekroczy timeout, zwróci
- * zły JSON albo circuit breaker jest otwarty — `llmRedact` zwraca `null`, a wołający
- * ZOSTAJE przy wyniku wcześniejszych warstw. Awaria LLM nigdy nie obniża ochrony.
- *
- * Zero zależności: `fetch`/`AbortController` są standardem w Node 18+, Deno, Bun
- * i przeglądarce. Konfiguracja jest JAWNA (parametr), nie z env — biblioteka nie czyta
- * środowiska.
+ * LLM tylko wskazuje kandydatów, a maskuje kod po twardej walidacji; tekstu od modelu nie bierzemy.
+ * Halucynację odcina wymóg dosłownego wystąpienia w tekście, a prompt-injection może co najwyżej
+ * nadmaskować. Fail-safe: każda awaria daje `null` i wynik wcześniejszych warstw.
  */
 
-import { redactPII, type PiiFinding, type RedactionResult } from './index.js';
-import { mergeFindings, nerRedact, type NerConfig } from './ner-client.js';
+import type { PiiFinding, RedactionResult } from './index.js';
+import { mergeFindings, redactPIIFull, type NerConfig } from './ner-client.js';
 import { createBreaker } from './breaker.js';
 
 export interface LlmConfig {
@@ -28,7 +17,7 @@ export interface LlmConfig {
   model: string;
   /** Twarda granica oczekiwania na LLM (lokalne modele bywają wolne). Domyślnie 60 000 ms. */
   timeoutMs?: number;
-  /** Limit znaków wysyłanych do LLM — ogon dłuższego tekstu zostaje przy wcześniejszych warstwach. Domyślnie 6000. */
+  /** Limit znaków wysyłanych do LLM; ogon dłuższego tekstu zostaje przy wcześniejszych warstwach. Domyślnie 6000. */
   maxChars?: number;
 }
 
@@ -36,20 +25,14 @@ const DEFAULT_URL = 'http://127.0.0.1:11434';
 const DEFAULT_TIMEOUT_MS = 60000;
 const DEFAULT_MAX_CHARS = 6000;
 
-// ── Twarde granice walidacji kandydatów (obrona przed halucynacją/injection) ──
 const MAX_CANDIDATES = 100;
 const MIN_CANDIDATE_LEN = 2;
 const MAX_CANDIDATE_LEN = 80;
 
-/** Kandydat będący W CAŁOŚCI placeholderem w nawiasach kwadratowych — odrzucany. */
 const PLACEHOLDER_ONLY = /^\[[^\[\]]*\]$/;
 
-/**
- * Lustro placeholderów `MASK` z `index.ts` (+ maska osób z pseudonimizacji).
- * Kandydat będący placeholderem lub jego fragmentem (np. `PESEL`, `IMIĘ I NAZWISKO`)
- * jest odrzucany — chroni idempotencję: LLM nie może „przemaskować" wyników
- * wcześniejszych warstw ani rozbić istniejących masek.
- */
+// Kandydat będący fragmentem maski („PESEL") rozbiłby ją przy zamianie. Ręczna kopia części
+// placeholderów `MASK` z index.ts.
 const KNOWN_MASKS = [
   '[EMAIL]',
   '[NR-KONTA]',
@@ -67,7 +50,6 @@ const KNOWN_MASKS = [
   '[IMIĘ I NAZWISKO]',
 ];
 
-/** Maska nakładana na kandydatów LLM — spójna z `MASK.IMIE` z `index.ts`. */
 const LLM_MASK = '[IMIĘ I NAZWISKO]';
 
 const SYSTEM_PROMPT =
@@ -78,20 +60,14 @@ const SYSTEM_PROMPT =
   'Jeśli w tekście nie ma danych osobowych, zwróć {"pii": []}. ' +
   'Nie dodawaj wyjaśnień ani żadnego tekstu poza JSON.';
 
-// ── Minimalny circuit breaker (per URL) ──
-// Circuit breaker (per URL) — wspólna implementacja, osobna mapa dla LLM (patrz breaker.ts).
 const breaker = createBreaker();
 
-/** Testy/diagnostyka: wyzeruj stan breakerów LLM. */
+/** Testy i diagnostyka: wyzeruj stan breakerów LLM. */
 export function resetLlmBreakers(): void {
   breaker.reset();
 }
 
-/**
- * Zwaliduj surową listę kandydatów z LLM przeciwko PEŁNEMU tekstowi.
- * Akceptowane są wyłącznie stringi 2..80 znaków, występujące w tekście DOSŁOWNIE
- * (indexOf), niebędące placeholderem ani jego fragmentem; max 100 sztuk, bez duplikatów.
- */
+/** Przepuszcza tylko stringi o dopuszczalnej długości, obecne dosłownie w pełnym tekście, bez masek i duplikatów. */
 function validateCandidates(raw: unknown[], text: string): string[] {
   const accepted: string[] = [];
   const seen = new Set<string>();
@@ -101,7 +77,7 @@ function validateCandidates(raw: unknown[], text: string): string[] {
     if (c.length < MIN_CANDIDATE_LEN || c.length > MAX_CANDIDATE_LEN) continue;
     if (PLACEHOLDER_ONLY.test(c)) continue;
     if (KNOWN_MASKS.some((m) => m.includes(c))) continue;
-    if (text.indexOf(c) === -1) continue; // halucynacja — fragment nie występuje w tekście
+    if (text.indexOf(c) === -1) continue;
     if (seen.has(c)) continue;
     seen.add(c);
     accepted.push(c);
@@ -110,19 +86,14 @@ function validateCandidates(raw: unknown[], text: string): string[] {
 }
 
 /**
- * Wskaż i zamaskuj dane osobowe przez lokalny LLM (Ollama, span-extraction).
- * Zwraca `null` przy JAKIMKOLWIEK problemie (niedostępna/timeout/zły JSON/pusty wynik/
- * otwarty breaker) — wołający zostaje przy wyniku wcześniejszych warstw.
- *
- * Tekst wysyłany do LLM jest przycinany do `maxChars`, ale zamiana kandydatów obejmuje
- * CAŁY tekst (maskowanie nigdy nie zmniejsza ochrony). Zamianę wykonuje kod: wszystkie
- * wystąpienia każdego zaakceptowanego kandydata → `[IMIĘ I NAZWISKO]`.
+ * Wskaż i zamaskuj dane osobowe przez lokalny LLM. Model widzi najwyżej `maxChars` znaków,
+ * ale zamiana obejmuje wszystkie wystąpienia kandydata w całym tekście.
  */
 export async function llmRedact(
   text: string,
   config: LlmConfig,
 ): Promise<{ redacted: string; found: PiiFinding[] } | null> {
-  if (!config?.model || !text || text.length === 0) return null;
+  if (!config?.model || !text) return null;
 
   const url = (config.url && config.url.length > 0 ? config.url : DEFAULT_URL).replace(/\/$/, '');
   if (breaker.isOpen(url)) return null;
@@ -130,9 +101,7 @@ export async function llmRedact(
   const timeoutMs = config.timeoutMs && config.timeoutMs > 0 ? config.timeoutMs : DEFAULT_TIMEOUT_MS;
   const maxChars = config.maxChars && config.maxChars > 0 ? config.maxChars : DEFAULT_MAX_CHARS;
 
-  // Ogranicz koszt/latencję: LLM widzi tylko pierwsze N znaków. Ogon dłuższego dokumentu
-  // pozostaje pod ochroną wcześniejszych warstw (regex + sumy kontrolne, ew. NER).
-  const head = text.length > maxChars ? text.slice(0, maxChars) : text;
+  const head = text.slice(0, maxChars);
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -160,29 +129,25 @@ export async function llmRedact(
       throw new Error('Nieprawidłowa odpowiedź Ollamy');
     }
 
-    // Parsowanie defensywne: model MA zwrócić {"pii": [...]} — wszystko inne to błąd.
-    // Ewentualne dodatkowe pola (np. „redacted" od nadgorliwego modelu) są IGNOROWANE:
-    // LLM nigdy nie przepisuje tekstu.
+    // Pola inne niż `pii` (np. „redacted" od nadgorliwego modelu) ignorujemy.
     const parsed = JSON.parse(content) as unknown;
     const pii = (parsed as { pii?: unknown })?.pii;
     if (!Array.isArray(pii)) throw new Error('Brak listy "pii" w odpowiedzi LLM');
 
-    // Sukces protokołu (nawet jeśli lista pusta) — breaker się zamyka.
     breaker.recordSuccess(url);
 
     const candidates = validateCandidates(pii, text);
 
-    // Maskowanie robi KOD, nie LLM: wszystkie wystąpienia kandydata w całym tekście.
     let redacted = text;
     let count = 0;
     for (const c of candidates) {
       const parts = redacted.split(c);
-      if (parts.length === 1) continue; // zniknął po wcześniejszej zamianie (nakładanie)
+      if (parts.length === 1) continue; // zniknął w poprzedniej zamianie (nakładanie)
       count += parts.length - 1;
       redacted = parts.join(LLM_MASK);
     }
 
-    if (count === 0) return null; // pusty wynik — nic do zamiany, zostajemy przy wejściu
+    if (count === 0) return null;
     return { redacted, found: [{ type: 'IMIE', count }] };
   } catch {
     breaker.recordFailure(url);
@@ -193,38 +158,17 @@ export async function llmRedact(
 }
 
 /**
- * Maksymalna redakcja: in-process (ZAWSZE) → NER (gdy skonfigurowany) → LLM (gdy
- * skonfigurowany). Kolejność jest istotna: LLM widzi tekst JUŻ po redakcji strukturalnej
- * (i ewentualnym NER) — surowy PESEL/NIP nigdy nie trafia do modelu, nawet na localhost.
- *
- * Każda warstwa jest fail-safe: jej awaria zostawia wynik warstw wcześniejszych.
- * Bez `opts` zachowuje się IDENTYCZNIE jak `redactPII` (gwarancja fail-safe).
+ * Redakcja in-process, potem NER i LLM, każda warstwa opcjonalna i fail-safe. LLM widzi tekst już
+ * po wcześniejszych warstwach, więc surowy PESEL/NIP do modelu nie trafia. Bez `opts` jak `redactPII`.
  */
 export async function redactPIIUltra(
   input: string,
   opts?: { ner?: NerConfig; llm?: LlmConfig },
 ): Promise<RedactionResult> {
-  const base = redactPII(input);
-  if (!input || input.length === 0) return base;
+  const base = await redactPIIFull(input, opts?.ner);
+  if (!input || !opts?.llm?.model) return base;
 
-  let redacted = base.redacted;
-  let found = base.found;
-
-  if (opts?.ner?.url) {
-    const ner = await nerRedact(redacted, opts.ner);
-    if (ner) {
-      redacted = ner.redacted;
-      found = mergeFindings(found, ner.found);
-    }
-  }
-
-  if (opts?.llm?.model) {
-    const llm = await llmRedact(redacted, opts.llm);
-    if (llm) {
-      redacted = llm.redacted;
-      found = mergeFindings(found, llm.found);
-    }
-  }
-
-  return { redacted, found };
+  const llm = await llmRedact(base.redacted, opts.llm);
+  if (!llm) return base;
+  return { redacted: llm.redacted, found: mergeFindings(base.found, llm.found) };
 }

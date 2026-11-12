@@ -1,31 +1,10 @@
 /**
- * Benchmark precision/recall anonimizacji polskiego PII — runner (Node ESM, zero zależności).
+ * Benchmark anonimizacji: recall (odsetek mustMask usuniętych) i precision-proxy (odsetek
+ * mustKeep zachowanych) dla rdzenia i opcjonalnych warstw NER. Warstwa NER widzi tekst po
+ * redakcji strukturalnej; niedostępna (health-check, brak modelu) jest pomijana z adnotacją.
+ * Wynik: tabele na stdout, docs/BENCHMARK.md i results.json. `--check` to bramka regresji w CI.
  *
- * Warstwy porównywane:
- *   1. "T0+T1 core"   — czysta redakcja in-process: redactPII() (regex + sumy kontrolne
- *      + słownik imion/nazwisk); działa zawsze, offline.
- *   2. "core+spacy"   — redactPIIFull() z usługą NER spaCy (pl_core_news_lg) na
- *      http://127.0.0.1:8090 — NER widzi tekst PO redakcji strukturalnej.
- *   3. "core+fastpdn" — redactPIIFull() z usługą NER FastPDN/HerBERT (clarin-pl/FastPDN)
- *      na http://127.0.0.1:8091.
- *
- * Usługi NER są opcjonalne: przed startem robimy health-check (GET /health); niedostępna
- * warstwa jest pomijana z adnotacją w raporcie (fail-safe — dokładnie jak w bibliotece).
- *
- * Metryki (na poziomie POJEDYNCZYCH podłańcuchów, nie całych zdań):
- *   - recall           = odsetek elementów mustMask NIEOBECNYCH w wyniku redakcji
- *                        (element „przeszedł" = wyciek PII);
- *   - precision-proxy  = odsetek elementów mustKeep ZACHOWANYCH w wyniku
- *                        (element „zjedzony" = fałszywy pozytyw / nadmaskowanie).
- *
- * Wyjście:
- *   - czytelne tabele na stdout,
- *   - docs/BENCHMARK.md (tabele, metodologia, sekcja „Najczęstsze porażki"),
- *   - scripts/benchmark/results.json (pełny zrzut per przypadek).
- *
- * Uruchomienie (z katalogu głównego repo, po zbudowaniu rdzenia):
- *   npm run build -w anonimizator
- *   node scripts/benchmark/run.mjs
+ *   npm run build -w anonimizator && node scripts/benchmark/run.mjs [--check]
  */
 
 import { writeFileSync, readFileSync, existsSync } from 'node:fs';
@@ -36,47 +15,45 @@ import { redactPII } from '../../packages/core/dist/index.js';
 import { redactPIIFull, nerHealthCheck } from '../../packages/core/dist/ner-client.js';
 import { applyNerPersons } from '../../packages/core/dist/ner-postprocess.js';
 
-// ── Ścieżki wyjściowe (względem pliku, nie CWD — runner działa z dowolnego katalogu) ──
+// Ścieżki względem pliku: runner działa z dowolnego CWD.
 const RESULTS_JSON = fileURLToPath(new URL('./results.json', import.meta.url));
 const BENCHMARK_MD = fileURLToPath(new URL('../../docs/BENCHMARK.md', import.meta.url));
 const CORE_PKG = fileURLToPath(new URL('../../packages/core/package.json', import.meta.url));
 
-/** Timeout pojedynczego wywołania NER — hojny, bo HerBERT na CPU bywa wolny. */
-const NER_TIMEOUT_MS = 20000;
-/** Równoległość zapytań do usługi NER (lokalna usługa, nie przeciążamy). */
-const CONCURRENCY = 4;
+const NER_TIMEOUT_MS = 20000; // hojny, bo HerBERT na CPU bywa wolny
+const HEALTH_TIMEOUT_MS = 5000;
+const WARMUP_TIMEOUT_MS = 60000;
+const CONCURRENCY = 4; // lokalna usługa NER, nie przeciążamy
 
-// ── Warstwa ONNX w Node (bez Dockera) — ta sama ścieżka co w przeglądarce ───────────────
-// Aktywuje się TYLKO gdy zainstalowany jest `@huggingface/transformers` i lokalnie leży model
-// (domyślnie scripts/benchmark/models/<id>/, nadpisywalne przez ONNX_MODELS_DIR/ONNX_MODEL_ID).
-// Brak biblioteki lub modelu ⇒ warstwa pominięta z adnotacją — dokładnie jak warstwy HTTP.
+// Wymaga @huggingface/transformers i modelu w ONNX_MODELS_DIR/<ONNX_MODEL_ID>.
 const ONNX_MODELS_DIR = process.env.ONNX_MODELS_DIR
   ? process.env.ONNX_MODELS_DIR
   : fileURLToPath(new URL('./models/', import.meta.url));
 const ONNX_MODEL_ID = process.env.ONNX_MODEL_ID || 'fastpdn';
 
 let onnxPipe = null;
-let onnxProbe = null; // memoizacja: null=niesprawdzone, true/false=wynik
 
 async function onnxAvailable() {
-  if (onnxProbe !== null) return onnxProbe;
-  onnxProbe = await (async () => {
-    const cfg = `${ONNX_MODELS_DIR.replace(/[\\/]$/, '')}/${ONNX_MODEL_ID}/config.json`;
-    if (!existsSync(cfg)) return false; // model nie leży lokalnie
-    try {
-      const T = await import('@huggingface/transformers');
-      T.env.allowRemoteModels = false; // zero sieci — model tylko lokalny
-      T.env.localModelPath = ONNX_MODELS_DIR;
-      onnxPipe = await T.pipeline('token-classification', ONNX_MODEL_ID, { dtype: 'q8' });
-      return true;
-    } catch {
-      return false; // brak @huggingface/transformers albo błąd ładowania modelu
-    }
-  })();
-  return onnxProbe;
+  const cfg = `${ONNX_MODELS_DIR.replace(/[\\/]$/, '')}/${ONNX_MODEL_ID}/config.json`;
+  if (!existsSync(cfg)) return false;
+  try {
+    const T = await import('@huggingface/transformers');
+    T.env.allowRemoteModels = false; // model tylko lokalny, zero sieci
+    T.env.localModelPath = ONNX_MODELS_DIR;
+    onnxPipe = await T.pipeline('token-classification', ONNX_MODEL_ID, { dtype: 'q8' });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
-// ── Definicje warstw ──
+const httpNerLayer = (name, desc, url) => ({
+  name,
+  desc,
+  url,
+  run: async (text) => (await redactPIIFull(text, { url, timeoutMs: NER_TIMEOUT_MS })).redacted,
+});
+
 const LAYERS = [
   {
     name: 'T0+T1 core',
@@ -84,20 +61,8 @@ const LAYERS = [
     url: null,
     run: async (text) => redactPII(text).redacted,
   },
-  {
-    name: 'core+spacy',
-    desc: 'redactPIIFull() + NER spaCy pl_core_news_lg (127.0.0.1:8090)',
-    url: 'http://127.0.0.1:8090',
-    run: async (text) =>
-      (await redactPIIFull(text, { url: 'http://127.0.0.1:8090', timeoutMs: NER_TIMEOUT_MS })).redacted,
-  },
-  {
-    name: 'core+fastpdn',
-    desc: 'redactPIIFull() + NER FastPDN/HerBERT (127.0.0.1:8091)',
-    url: 'http://127.0.0.1:8091',
-    run: async (text) =>
-      (await redactPIIFull(text, { url: 'http://127.0.0.1:8091', timeoutMs: NER_TIMEOUT_MS })).redacted,
-  },
+  httpNerLayer('core+spacy', 'redactPIIFull() + NER spaCy pl_core_news_lg (127.0.0.1:8090)', 'http://127.0.0.1:8090'),
+  httpNerLayer('core+fastpdn', 'redactPIIFull() + NER FastPDN/HerBERT (127.0.0.1:8091)', 'http://127.0.0.1:8091'),
   {
     name: 'core+onnx (Node)',
     desc: 'redactPII() + FastPDN ONNX int8 (q8) w Node przez @huggingface/transformers — bez Dockera',
@@ -105,16 +70,25 @@ const LAYERS = [
     probe: onnxAvailable,
     skipReason: 'biblioteka @huggingface/transformers lub lokalny model ONNX niedostępne',
     run: async (text) => {
-      const base = redactPII(text).redacted; // NER widzi tekst PO redakcji strukturalnej
+      const base = redactPII(text).redacted;
       const tokens = await onnxPipe(base, { ignore_labels: [] });
       return applyNerPersons(base, tokens).redacted;
     },
   },
 ];
 
-// ── Pomocnicze ──
+const isNer = (layer) => Boolean(layer.url || layer.probe);
 
-/** Prosty limiter równoległości (bez zależności zewnętrznych). */
+const CAT_SHORT = {
+  'osoby-podstawowe': 'os-podst',
+  'osoby-odmiana': 'os-odmiana',
+  'osoby-rzadkie': 'os-rzadkie',
+  'osoby-rzadkie-ner': 'os-rz-ner',
+  'osoby-slownik': 'os-slownik',
+  strukturalne: 'struktur.',
+  negatywy: 'negatywy',
+};
+
 async function mapPool(items, limit, fn) {
   const results = new Array(items.length);
   let next = 0;
@@ -122,7 +96,7 @@ async function mapPool(items, limit, fn) {
     for (;;) {
       const i = next++;
       if (i >= items.length) return;
-      results[i] = await fn(items[i], i);
+      results[i] = await fn(items[i]);
     }
   }
   await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
@@ -131,18 +105,20 @@ async function mapPool(items, limit, fn) {
 
 const pct = (num, den) => (den === 0 ? null : num / den);
 const fmtPct = (v) => (v === null ? '—' : `${(v * 100).toFixed(1)}%`);
-// F1 = średnia harmoniczna recall i precision-proxy. Null, gdy którakolwiek składowa nie istnieje
-// (np. negatywy nie mają recall) — F1 nie jest wtedy zdefiniowane.
+// F1 nie jest zdefiniowane, gdy brakuje składowej (negatywy nie mają recall).
 const f1 = (r, p) => (r === null || p === null || r + p === 0 ? null : (2 * r * p) / (r + p));
+const emptyCounts = () => ({ maskTotal: 0, maskHit: 0, keepTotal: 0, keepHit: 0 });
+const scores = (v) => {
+  const recall = pct(v.maskHit, v.maskTotal);
+  const precision = pct(v.keepHit, v.keepTotal);
+  return { recall, precision, f1: f1(recall, precision) };
+};
 
-/** Ocena jednego przypadku: co przeszło (wyciek) i co zostało zjedzone (nadmaskowanie). */
 function evaluateCase(c, redacted) {
   const leaked = c.mustMask.filter((s) => redacted.includes(s));
   const eaten = c.mustKeep.filter((s) => !redacted.includes(s));
   return { leaked, eaten };
 }
-
-// ── Główny przebieg ──
 
 async function main() {
   const startedAt = new Date();
@@ -152,22 +128,20 @@ async function main() {
 
   console.log(`Benchmark anonimizatora — ${cases.length} przypadków (seed ${SEED}), core v${coreVersion}\n`);
 
-  // Sonda dostępności warstw NER (HTTP: health-check; ONNX-Node: import biblioteki + lokalny
-  // model). Warstwa niedostępna jest pomijana z adnotacją — fail-safe, jak w bibliotece.
   const activeLayers = [];
   const skippedLayers = [];
   const WARMUP = 'Rozgrzewka modelu: Jan Testowy z Warszawy.';
   for (const layer of LAYERS) {
-    if (!layer.url && !layer.probe) {
-      activeLayers.push(layer); // czysty rdzeń — zawsze dostępny, offline
+    if (!isNer(layer)) {
+      activeLayers.push(layer);
       continue;
     }
-    const ok = layer.probe ? await layer.probe() : await nerHealthCheck({ url: layer.url, timeoutMs: 5000 });
+    const ok = layer.probe ? await layer.probe() : await nerHealthCheck({ url: layer.url, timeoutMs: HEALTH_TIMEOUT_MS });
     if (ok) {
-      // Rozgrzewka: pierwsze wywołanie modelu bywa wolne (ładowanie/JIT) — nie chcemy fałszywego
-      // timeoutu ani otwarcia circuit breakera na starcie pomiaru.
+      // Pierwsze wywołanie modelu bywa wolne (ładowanie, JIT): bez rozgrzewki pomiar startowałby
+      // od fałszywego timeoutu albo otwartego circuit breakera.
       if (layer.url) {
-        await redactPIIFull(WARMUP, { url: layer.url, timeoutMs: 60000 });
+        await redactPIIFull(WARMUP, { url: layer.url, timeoutMs: WARMUP_TIMEOUT_MS });
       } else {
         try {
           await layer.run(WARMUP);
@@ -184,19 +158,18 @@ async function main() {
   }
   console.log('');
 
-  // Pomiar per warstwa.
   const layerResults = [];
+  let coreOutputs = null; // rdzeń jest zawsze pierwszy na liście aktywnych warstw
   for (const layer of activeLayers) {
-    const isNer = Boolean(layer.url || layer.probe);
+    const ner = isNer(layer);
     const t0 = Date.now();
-    const coreOutputs = isNer ? await mapPool(cases, 1, async (c) => redactPII(c.text).redacted) : null;
-    // ONNX-Node ma jeden pipeline (CPU, nie zrównoleglamy) → concurrency 1; HTTP → CONCURRENCY.
+    // ONNX-Node ma jeden pipeline na CPU, więc bez równoległości.
     const outputs = await mapPool(cases, layer.url ? CONCURRENCY : 1, (c) => layer.run(c.text));
     const elapsedMs = Date.now() - t0;
+    if (!ner) coreOutputs = outputs;
 
-    // Agregacja metryk: globalnie i per kategoria.
-    const agg = { maskTotal: 0, maskHit: 0, keepTotal: 0, keepHit: 0 };
-    const perCat = new Map(categories.map((cat) => [cat, { maskTotal: 0, maskHit: 0, keepTotal: 0, keepHit: 0 }]));
+    const agg = emptyCounts();
+    const perCat = new Map(categories.map((cat) => [cat, emptyCounts()]));
     const failures = [];
     const perCase = [];
     let changedVsCore = 0;
@@ -204,125 +177,93 @@ async function main() {
     cases.forEach((c, i) => {
       const redacted = outputs[i];
       const { leaked, eaten } = evaluateCase(c, redacted);
-      const cat = perCat.get(c.category);
-      agg.maskTotal += c.mustMask.length;
-      agg.maskHit += c.mustMask.length - leaked.length;
-      agg.keepTotal += c.mustKeep.length;
-      agg.keepHit += c.mustKeep.length - eaten.length;
-      cat.maskTotal += c.mustMask.length;
-      cat.maskHit += c.mustMask.length - leaked.length;
-      cat.keepTotal += c.mustKeep.length;
-      cat.keepHit += c.mustKeep.length - eaten.length;
-      if (coreOutputs && redacted !== coreOutputs[i]) changedVsCore++;
+      for (const t of [agg, perCat.get(c.category)]) {
+        t.maskTotal += c.mustMask.length;
+        t.maskHit += c.mustMask.length - leaked.length;
+        t.keepTotal += c.mustKeep.length;
+        t.keepHit += c.mustKeep.length - eaten.length;
+      }
+      if (ner && redacted !== coreOutputs[i]) changedVsCore++;
       if (leaked.length > 0 || eaten.length > 0) {
         failures.push({ id: c.id, category: c.category, text: c.text, leaked, eaten, redacted });
       }
       perCase.push({ id: c.id, leaked, eaten });
     });
 
-    layerResults.push({
+    const lr = {
       name: layer.name,
       desc: layer.desc,
       elapsedMs,
-      changedVsCore: isNer ? changedVsCore : null,
-      recall: pct(agg.maskHit, agg.maskTotal),
-      precision: pct(agg.keepHit, agg.keepTotal),
-      f1: f1(pct(agg.maskHit, agg.maskTotal), pct(agg.keepHit, agg.keepTotal)),
+      changedVsCore: ner ? changedVsCore : null,
+      ...scores(agg),
       agg,
-      perCategory: Object.fromEntries(
-        [...perCat.entries()].map(([cat, v]) => [
-          cat,
-          {
-            recall: pct(v.maskHit, v.maskTotal),
-            precision: pct(v.keepHit, v.keepTotal),
-            f1: f1(pct(v.maskHit, v.maskTotal), pct(v.keepHit, v.keepTotal)),
-            ...v,
-          },
-        ]),
-      ),
+      perCategory: Object.fromEntries([...perCat.entries()].map(([cat, v]) => [cat, { ...scores(v), ...v }])),
       failures,
       perCase,
-    });
+    };
+    layerResults.push(lr);
 
     console.log(
-      `${layer.name}: recall ${fmtPct(pct(agg.maskHit, agg.maskTotal))}, ` +
-        `precision ${fmtPct(pct(agg.keepHit, agg.keepTotal))}, ` +
-        `F1 ${fmtPct(f1(pct(agg.maskHit, agg.maskTotal), pct(agg.keepHit, agg.keepTotal)))}, ` +
+      `${layer.name}: recall ${fmtPct(lr.recall)}, ` +
+        `precision ${fmtPct(lr.precision)}, ` +
+        `F1 ${fmtPct(lr.f1)}, ` +
         `porażek: ${failures.length}, czas: ${(elapsedMs / 1000).toFixed(1)} s` +
-        (isNer ? `, wynik różny od core w ${changedVsCore} przypadkach` : ''),
+        (ner ? `, wynik różny od core w ${changedVsCore} przypadkach` : ''),
     );
   }
 
-  // ── Tabele na stdout ──
-  const catShort = {
-    'osoby-podstawowe': 'os-podst',
-    'osoby-odmiana': 'os-odmiana',
-    'osoby-rzadkie': 'os-rzadkie',
-    'osoby-rzadkie-ner': 'os-rz-ner',
-    'osoby-slownik': 'os-slownik',
-    strukturalne: 'struktur.',
-    negatywy: 'negatywy',
-  };
-
   console.log('\n=== RECALL (odsetek mustMask usuniętych) ===');
-  printTable(layerResults, categories, catShort, 'recall');
+  printTable(layerResults, categories, 'recall');
   console.log('\n=== PRECISION-PROXY (odsetek mustKeep zachowanych) ===');
-  printTable(layerResults, categories, catShort, 'precision');
+  printTable(layerResults, categories, 'precision');
   console.log('\n=== F1 (średnia harmoniczna recall i precision-proxy) ===');
-  printTable(layerResults, categories, catShort, 'f1');
+  printTable(layerResults, categories, 'f1');
 
-  // ── Zapis results.json ──
+  const mustMaskTotal = cases.reduce((a, c) => a + c.mustMask.length, 0);
+  const mustKeepTotal = cases.reduce((a, c) => a + c.mustKeep.length, 0);
   const resultsPayload = {
     generatedAt: startedAt.toISOString(),
     seed: SEED,
     coreVersion,
     casesTotal: cases.length,
-    mustMaskTotal: cases.reduce((a, c) => a + c.mustMask.length, 0),
-    mustKeepTotal: cases.reduce((a, c) => a + c.mustKeep.length, 0),
+    mustMaskTotal,
+    mustKeepTotal,
     skippedLayers: skippedLayers.map((l) => ({
       name: l.name,
       url: l.url,
       reason: l.skipReason ?? 'usługa niedostępna (health-check)',
     })),
-    layers: layerResults.map(({ perCase, failures, ...rest }) => ({
-      ...rest,
-      failures,
-      perCase,
-    })),
+    layers: layerResults,
   };
   writeFileSync(RESULTS_JSON, JSON.stringify(resultsPayload, null, 2) + '\n', 'utf8');
   console.log(`\nZapisano: ${RESULTS_JSON}`);
 
-  // ── Zapis docs/BENCHMARK.md ──
-  writeFileSync(BENCHMARK_MD, buildMarkdown({ startedAt, coreVersion, cases, categories, layerResults, skippedLayers }), 'utf8');
+  writeFileSync(
+    BENCHMARK_MD,
+    buildMarkdown({ startedAt, coreVersion, cases, mustMaskTotal, mustKeepTotal, categories, layerResults, skippedLayers }),
+    'utf8',
+  );
   console.log(`Zapisano: ${BENCHMARK_MD}`);
 
-  // ── Bramka regresji (--check): gwarancje na warstwie DETERMINISTYCZNEJ (core), niezależne od
-  //    modelu — działa w CI bez pobierania ONNX. Warstwy NER (gdy obecne) nie mogą OBNIŻYĆ recall
-  //    ani precyzji względem core. ──
+  // --check: progi rdzenia (bez modelu, działa w CI); warstwy NER nie mogą obniżyć recall ani precyzji rdzenia.
   if (process.argv.includes('--check')) {
-    const core = layerResults.find((l) => l.changedVsCore === null); // tylko rdzeń nie jest warstwą NER
+    const core = layerResults[0];
     const violations = [];
-    if (!core) {
-      violations.push('brak warstwy rdzenia (core) w wynikach');
-    } else {
-      // rdzeń MUSI utrzymać 100% recall tam, gdzie działa deterministycznie
-      for (const cat of ['osoby-podstawowe', 'osoby-odmiana', 'osoby-rzadkie', 'osoby-slownik', 'strukturalne']) {
-        const r = core.perCategory[cat]?.recall;
-        if (r !== null && r !== undefined && r < 1) violations.push(`recall[${cat}] = ${fmtPct(r)} < 100% (regresja detekcji)`);
+    // Bez osoby-rzadkie-ner (rdzeń z założenia ich nie łapie) i negatywów (brak mustMask).
+    for (const cat of ['osoby-podstawowe', 'osoby-odmiana', 'osoby-rzadkie', 'osoby-slownik', 'strukturalne']) {
+      const r = core.perCategory[cat]?.recall;
+      if (r != null && r < 1) violations.push(`recall[${cat}] = ${fmtPct(r)} < 100% (regresja detekcji)`);
+    }
+    if (core.precision !== null && core.precision < 0.98) {
+      violations.push(`precision-proxy = ${fmtPct(core.precision)} < 98% (nadmaskowanie)`);
+    }
+    for (const lr of layerResults) {
+      if (lr === core) continue;
+      if (lr.recall !== null && lr.recall < core.recall - 1e-9) {
+        violations.push(`${lr.name}: recall ${fmtPct(lr.recall)} < core ${fmtPct(core.recall)} (warstwa NER obniża ochronę)`);
       }
-      if (core.precision !== null && core.precision < 0.98) {
-        violations.push(`precision-proxy = ${fmtPct(core.precision)} < 98% (nadmaskowanie)`);
-      }
-      // warstwy NER nie mogą pogorszyć core (recall ani precyzji łącznej)
-      for (const lr of layerResults) {
-        if (lr === core) continue;
-        if (lr.recall !== null && core.recall !== null && lr.recall < core.recall - 1e-9) {
-          violations.push(`${lr.name}: recall ${fmtPct(lr.recall)} < core ${fmtPct(core.recall)} (warstwa NER obniża ochronę)`);
-        }
-        if (lr.precision !== null && core.precision !== null && lr.precision < core.precision - 1e-9) {
-          violations.push(`${lr.name}: precision ${fmtPct(lr.precision)} < core ${fmtPct(core.precision)} (warstwa NER nadmaskowuje)`);
-        }
+      if (lr.precision !== null && lr.precision < core.precision - 1e-9) {
+        violations.push(`${lr.name}: precision ${fmtPct(lr.precision)} < core ${fmtPct(core.precision)} (warstwa NER nadmaskowuje)`);
       }
     }
     if (violations.length) {
@@ -334,8 +275,8 @@ async function main() {
   }
 }
 
-function printTable(layerResults, categories, catShort, metric) {
-  const col = (c) => (catShort[c] ?? c).padStart(11);
+function printTable(layerResults, categories, metric) {
+  const col = (c) => (CAT_SHORT[c] ?? c).padStart(11);
   const header = ['Warstwa'.padEnd(16), 'ŁĄCZNIE'.padStart(8), ...categories.map(col)].join(' | ');
   console.log(header);
   console.log('-'.repeat(header.length));
@@ -345,14 +286,10 @@ function printTable(layerResults, categories, catShort, metric) {
   }
 }
 
-// ── Generowanie raportu Markdown ──
-
-function buildMarkdown({ startedAt, coreVersion, cases, categories, layerResults, skippedLayers }) {
+function buildMarkdown({ startedAt, coreVersion, cases, mustMaskTotal, mustKeepTotal, categories, layerResults, skippedLayers }) {
   const date = startedAt.toISOString().slice(0, 10);
   const perCatCount = new Map();
   for (const c of cases) perCatCount.set(c.category, (perCatCount.get(c.category) ?? 0) + 1);
-  const mustMaskTotal = cases.reduce((a, c) => a + c.mustMask.length, 0);
-  const mustKeepTotal = cases.reduce((a, c) => a + c.mustKeep.length, 0);
 
   const lines = [];
   const push = (...xs) => lines.push(...xs);
@@ -405,30 +342,17 @@ function buildMarkdown({ startedAt, coreVersion, cases, categories, layerResults
   push(`F1 liczone jako średnia harmoniczna recall i precision-proxy (łącznie po wszystkich kategoriach`);
   push(`z oboma rodzajami elementów; kategoria „negatywy" nie ma recall, więc nie wchodzi do składowej recall).`);
   push('');
-  push(`### Recall per kategoria`);
-  push('');
-  push(`| Warstwa | ${categories.join(' | ')} |`);
-  push(`|---|${categories.map(() => '---').join('|')}|`);
-  for (const lr of layerResults) {
-    push(`| ${lr.name} | ${categories.map((c) => fmtPct(lr.perCategory[c].recall)).join(' | ')} |`);
+  // Kolejność tabel czytają landing.test.ts i release-docs.test.ts.
+  for (const [label, key] of [['Recall', 'recall'], ['F1', 'f1'], ['Precision-proxy', 'precision']]) {
+    push(`### ${label} per kategoria`);
+    push('');
+    push(`| Warstwa | ${categories.join(' | ')} |`);
+    push(`|---|${categories.map(() => '---').join('|')}|`);
+    for (const lr of layerResults) {
+      push(`| ${lr.name} | ${categories.map((c) => fmtPct(lr.perCategory[c][key])).join(' | ')} |`);
+    }
+    push('');
   }
-  push('');
-  push(`### F1 per kategoria`);
-  push('');
-  push(`| Warstwa | ${categories.join(' | ')} |`);
-  push(`|---|${categories.map(() => '---').join('|')}|`);
-  for (const lr of layerResults) {
-    push(`| ${lr.name} | ${categories.map((c) => fmtPct(lr.perCategory[c].f1)).join(' | ')} |`);
-  }
-  push('');
-  push(`### Precision-proxy per kategoria`);
-  push('');
-  push(`| Warstwa | ${categories.join(' | ')} |`);
-  push(`|---|${categories.map(() => '---').join('|')}|`);
-  for (const lr of layerResults) {
-    push(`| ${lr.name} | ${categories.map((c) => fmtPct(lr.perCategory[c].precision)).join(' | ')} |`);
-  }
-  push('');
   push(`(„—" = brak elementów danego rodzaju w kategorii, np. negatywy nie mają mustMask.)`);
   push('');
   push(`## Najczęstsze porażki`);

@@ -1,24 +1,18 @@
 /**
- * Słownik najczęstszych polskich nazwisk (wg statystyk rejestru PESEL) + obsługa fleksji.
+ * Słownik polskich nazwisk z fleksją, stoplisty przymiotników i rozpoznawacz morfologiczny.
+ * Służy do maskowania nazwiska bez pary z imieniem i bez tytułu („Sprawę Kowalskiego przekazano…").
  *
- * Cel: maskować nazwisko WYSTĘPUJĄCE SAMODZIELNIE („Sprawę Kowalskiego przekazano…"),
- * którego nie złapie ani para „Imię Nazwisko", ani wyzwalacz „Pan/Pani…".
- *
- * Zasada bezpieczeństwa: słownik zawiera WYŁĄCZNIE nazwiska jednoznaczne.
- * Nazwiska-homonimy rzeczowników pospolitych (Baran, Wilk, Lis, Mazur, Sowa, Mucha,
- * Kot, Król, Duda, Mróz, Piątek, Kwiecień…) są ŚWIADOMIE pominięte — samodzielne
- * „Wilk biegał po lesie" nie może być maskowane. Te nazwiska i tak są chronione
- * w kontekście (para z imieniem — krok 13a, wyzwalacz „Pan/Pani" — krok 13b),
- * a pełne pokrycie daje opcjonalna warstwa NER. Świadomy kompromis precyzja>recall.
- *
- * Fleksja: odmiana przymiotnikowa (-ski/-cki/-dzki: Kowalskiego→kowalski,
- * Wiśniewskiej→wiśniewski, Kowalscy→kowalski) oraz rzeczownikowa przez odcięcie
- * końcówki (Nowaka→nowak, Wójcikowi→wójcik) z ruchomym „e" (Dudka→dudek — tu akurat
- * homonim, ale mechanizm działa dla Kurka→kurek itd.).
+ * Słownik ma tylko nazwiska jednoznaczne. Homonimy wyrazów pospolitych (Wilk, Baran, Piątek) są
+ * w HOMOGRAPH_SURNAMES i maskuje się je tylko z kotwicą (imię, „Pan/Pani"), żeby nie ruszać zdań
+ * typu „Wilk biegał po lesie".
+ * Fleksja: przymiotnikowa (Kowalskiego, Wiśniewskiej, Kowalscy → -ski) i rzeczownikowa przez odcięcie
+ * końcówki z ruchomym „e" (Nowaka → nowak, Wieczorka → wieczorek).
  */
 
-/** Nazwiska jednoznaczne — lowercase, mianownik (forma męska dla -ski/-cki/-dzki). */
-const SURNAMES = new Set<string>((
+const wordSet = (s: string): Set<string> => new Set(s.trim().split(/\s+/));
+
+/** Nazwiska jednoznaczne: małe litery, mianownik (forma męska dla -ski/-cki/-dzki). */
+const SURNAMES = wordSet(
   'nowak kowalski wiśniewski wójcik kowalczyk kamiński lewandowski zieliński szymański ' +
   'woźniak dąbrowski kozłowski jankowski wojciechowski kwiatkowski krawczyk kaczmarek ' +
   'piotrowski grabowski pawłowski michalski nowakowski wieczorek jabłoński adamczyk ' +
@@ -44,34 +38,42 @@ const SURNAMES = new Set<string>((
   'żebrowski żurawski cichocki głogowski świderski stec ' +
   'krzemiński krzyżanowski kurowski lewicki mielczarek niemczyk pilarski ' +
   'raczyński radecki rogalski rosiński różycki sieradzki wachowiak ' +
-  // ── Rozszerzenie: ~900 najczęstszych nazwisk z rejestru PESEL (dane.gov.pl 2023, osoby żyjące,
-  //    licencja CC0), BEZ sufiksu -ski/-cki/-icz/-czyk (te i tak łapie morfologia looksLikeSurname).
-  //    Odsiane homonimy wyrazów pospolitych: filtr listy częstości korpusu + wieloagentowa
-  //    klasyfikacja nazwisko/wyraz (precyzja > recall — „górka/zięba/żurek/bednarz" świadomie
-  //    pominięte, łapie je warstwa kontekstowa). Zawiera częste nazwiska obce (ukraińskie,
-  //    niemieckie, wietnamskie) — realne w dzisiejszej Polsce. Recall single-HTML bez AI.
-  'adach adamczak adamczuk adamek adamiak adamiec adamus ambroziak andrzejak andrzejczak antczak antkowiak antoniak antoniuk antosik augustyniak badura bajorek bakuła balcer balcerek balcerzak banach banasiak banasik banaszak banaszek banaś baraniak barczak barnaś bartczak bartkowiak bartos bartosiak bartosik bartoszek bartyzel basiak batko bator bazan bałdyga bereza bernaś białowąs białoń biedroń bielec bienias bieniek biernat bień bieńko biniek bizoń blicharz bloch bodnar bodziony bogusz boichuk boiko bojko bondar bondarenko bonk borowiak boroń boruta brodziak brożek brożyna bryl bryś brzostek buczak budnik budny bukała błach błachut błasiak błaszak błaszczak błoch cabaj caban cedro ceglarek chmielowiec choma chornyi chowaniec chołuj chrapek chyła cichosz cichoń cierniak cieślar cieślik ciok ciosek cisek ciszek curyło cwalina cwynar cyran czachor czaja czarnik czernik czubak danielak daniluk depta deptuła derda dobek dolata domin dominiak dopierała dorosz dołęga drabik dragan drzymała drężek dudziak dudzic dudzik dulęba dura duraj dutka dybała dyrda dziadosz dębiec fabisiak faron ferenc ficek fila filipczak filipiak firlej fiszer florczak florek fojcik foks foltyn formela formella foryś franczak frontczak frydrych frąckowiak frączek frąszczak frątczak fuchs furmanek furtak fąfara gabor gabrysiak gaca gajos galus gancarz gawin gawor gawryś gałuszka giemza gierczak ginter giza godek golik gondek gonera gontarz gozdek gołda gołdyn gościniak grabiec gralak grela grenda greń grobelny grochal gromek grygiel grzegorek grzelak grzesiak grzesik grzeszczak grzeszczuk grześkowiak gręda gubała gucwa gurgul górak górniak góźdź gądek gębala głodek głuch głuszek havryliuk hawryluk hebda hernik hinc hinz hoffmann hofman hoppe hołda humeniuk hyla idziak idzik ignaczak ignasiak ivanov iwaniec iwaniuk jach jadczak jagieła jagiełło jakubczak jakubek jakubiak jakubiec jakubik jamrozik jamróz janas janczak janeczek janeczko jania janiak janiec jankowiak janota janus jaromin jaros jaroszek jaroń jasek jasiak jasik jaskuła jaszczak jaszczuk jaworek jałocha jańczak jaśkowiak jopek juraszek jurczak jurga juszczak józefiak jóźwiak jóźwik jędrasik jędrzejak jędrzejczak kachel kacprzak kacprzyk kaczmarzyk kaim kalata kalemba kalita karbowiak karbownik kardas kardasz karolak karolczak karpiuk karwat kasperek kasprzyk kazimierczak kałużny kempa kharchenko kielar kiełtyka kijak klich klim klimas kliś kluba kluz klymenko kmieciak kmita knap knapik knop kobiela kobus kobylarz koch kochan kocjan kocot kocoń kolenda kondraciuk kondrat kondratiuk konefał konieczka konior konkel konkol konopko kopera korcz korczak kordek korol korus kosek kosiba kosik kosior kosiorek kosmala kostiuk kotarba kotas kotula koval kovalchuk kovalenko kovalov kowol kozub kozyra kołodziejczak kończak kościelniak kośmider koźlik krasoń kraus krause krauze kravchenko kravchuk kravets krawczak krawczuk kreft kryczka krygier krysa krysiak krystek krysztofiak krzysztofik krzysztoń krzyżaniak królak krężel kubala kubas kubat kubera kubica kubis kubiś kuczek kuczera kujawa kulawik kuleta kuliś kulpa kulyk kumor kupczak kupis kuras kuraś kurdziel kuriata kurzeja kushnir kusiak kustra kusz kuzmenko kułaga kuśmierek kuśmierz kuźma kuźniar kuźnik kwapisz kwaśniak kwaśnik kwiek kwolek kądziela kądziołka kędra kędzia kłusek kłys labuda langer langner lasota latos lehmann leja lenart lesiak levchenko lewczuk leśniak libera ligęza lorek lorenc ludwiczak lysenko machnik machura maciak maciaszek maciejak maciołek maciąg madej madeja magdziak magdziarz magiera majda majer majkut maksymiuk malek malesa marchenko marchuk marcisz marczak marczuk marszał martyniak martyniuk maruszak marut mastalerz masternak matczak mateja matejko matras matusik matuszak matuszczak matuszek matuła matyja matys matysek matysiak matysik mazurczak maćkowiak małek małolepszy małysz meller melnychuk melnyk mentel michalczuk michalec michalik michna michno michoń michta mielcarek mielniczuk mielnik migas mikos mikołajczak mikołajczuk mikrut mikuła milczarek miotk mirga misiura miszczak miszczuk misztal mitura mizera molenda momot morawiec moroz mroczka mrowiec mrozek mrozik mrożek mrzygłód muras musialik musielak musioł nadolny najda nakonieczny nalepa napora narloch nawara nawrat nazaruk nejman neumann nguyen nocoń nogaj nosal nowik nowosad nycz nykiel obara ochman ociepa ogorzałek olczak olech oleksiak oleksiuk oleksy oleszczuk oliinyk olszak orzoł osiak osuch owczarzak ozga ozimek ołdak ożga pabian pacek paduch pajor panasiuk papis parys parzych pasik pastuszak paszek paszko paterek pavlenko pavliuk pawluczuk pawluk pawlus pałys paździor pelc pelczar petrenko petrov pełka piech piecha piechaczek piechnik piechowiak piekut piela pietras pietrasik pietraszek pietraszko pietrucha pietryka pikul pikuła piontek pisarek pisula piszczek piękoś piłat plata plichta podolak podsiadło podsiadły polishchuk polit poloczek polok ponomarenko popek popiel popov potrykus poźniak prokop prokopiuk przybylak przybyłek puchała puzio pyrek pytka pytlak pytlik pyzik pękala rachwał radoń radwan radzik rakoczy rapacz ratajczak rejman richert rojek romanek romaniuk romańczuk rosiak rosiek rosik roszak rozmus rudenko rudnik rusinek rychlik rychter ryczek ryszka rzeszutek rząsa rębisz sajdak salamon samek samsel sasin savchenko savchuk sawa sawczuk sałek schulz sekuła semeniuk sereda shevchenko shevchuk shvets sidor siek sieńko siuda siuta siwiec siwik skoczeń skoczylas skoneczny skonieczny skrzyniarz skrzypczak skupień skuza smolak smolarek smoleń sobala sobiech sobieraj sobik sobkowiak soboń solarz soroka sołtysik spyra stachera stachyra stadnik stanek staniak staniek stanisz staroń starzyk stasik stasiuk staszak stawarz stańczak stańczuk stańko stefaniak stefaniuk stencel stenka stepaniuk steć stolarek struzik stróżyk styś stępniak suder sudoł sulej suliga sulima surmacz suszek sułek sydorenko syrek szafraniec szarek szczepanek szczepaniak szczepanik szcześniak szczypka szczęch szczęśniak szeliga szewczak szewczuk szkudlarek szmidt szmigiel szmit szmyd szmyt sznajder szostek szreder szubert szulik szustak szwarc szydlik szymanek szymaniak szymoniak szymura szyszko talaga tarasiuk targosz tkach tkachenko tkachuk tkocz tomala tomasiak tomasik tomczuk treder trela tworek tyszka urbanek urbanik vasylenko volkov voloshyn wach wadas wajda wajs walas walasek walaszek walczuk waliczek walkowiak wanat wasiak wasiluk waszak waszczuk wawer wawro waśko wcisło wdowiak wegner wencel wenta widera wielgosz wielgus wieliczko wiercioch wilkosz winkler wiszowaty witczak wiącek więch więcław wnęk woch wojas wojcieszak wojda wojdyła wojnar wojtal wojtala wojtasik wojtaszek wojtaś wojtysiak wojtyła wolak wolanin wołoszyn wołowiec woźniczka wrzosek wszołek wypych wójciak włodarczak zadrożny zajdel zapart zaremba zarychta zawadka zawisza zawiślak zdeb zdunek zelek zhuk ziaja ziemba zimoch ziobro zięcina ziętara ziętek zych łabuz łada ławniczak łojek łukasiak łukaszuk łuszcz ślęzak śmigiel świercz świąder święch świętek żygadło'
-).split(/\s+/).filter(Boolean));
+  // ~900 najczęstszych nazwisk z rejestru PESEL (dane.gov.pl 2023, CC0), bez -ski/-cki/-icz/-czyk,
+  // bo te łapie looksLikeSurname. Homonimy wyrazów pospolitych („górka", „żurek") pominięte.
+  'adach adamczak adamczuk adamek adamiak adamiec adamus ambroziak andrzejak andrzejczak antczak antkowiak antoniak antoniuk antosik augustyniak badura bajorek bakuła balcer balcerek balcerzak banach banasiak banasik banaszak banaszek banaś baraniak barczak barnaś bartczak bartkowiak bartos bartosiak bartosik bartoszek bartyzel basiak batko bator bazan bałdyga bereza bernaś białowąs białoń biedroń bielec bienias bieniek biernat bień bieńko biniek bizoń blicharz bloch bodnar bodziony bogusz boichuk boiko bojko bondar bondarenko bonk borowiak boroń boruta brodziak brożek brożyna bryl bryś brzostek buczak budnik budny bukała błach błachut błasiak błaszak błaszczak błoch cabaj caban cedro ceglarek chmielowiec choma chornyi chowaniec chołuj chrapek chyła cichosz cichoń cierniak cieślar cieślik ciok ciosek cisek ciszek curyło cwalina cwynar cyran czachor czaja czarnik czernik czubak danielak daniluk depta deptuła derda dobek dolata domin dominiak dopierała dorosz dołęga drabik dragan drzymała drężek dudziak dudzic dudzik dulęba dura duraj dutka dybała dyrda dziadosz dębiec fabisiak faron ferenc ficek fila filipczak filipiak firlej fiszer florczak florek fojcik foks foltyn formela formella foryś franczak frontczak frydrych frąckowiak frączek frąszczak frątczak fuchs furmanek furtak fąfara gabor gabrysiak gaca gajos galus gancarz gawin gawor gawryś gałuszka giemza gierczak ginter giza godek golik gondek gonera gontarz gozdek gołda gołdyn gościniak grabiec gralak grela grenda greń grobelny grochal gromek grygiel grzegorek grzelak grzesiak grzesik grzeszczak grzeszczuk grześkowiak gręda gubała gucwa gurgul górak górniak góźdź gądek gębala głodek głuch głuszek havryliuk hawryluk hebda hernik hinc hinz hoffmann hofman hoppe hołda humeniuk hyla idziak idzik ignaczak ignasiak ivanov iwaniec iwaniuk jach jadczak jagieła jagiełło jakubczak jakubek jakubiak jakubiec jakubik jamrozik jamróz janas janczak janeczek janeczko jania janiak janiec jankowiak janota janus jaromin jaros jaroszek jaroń jasek jasiak jasik jaskuła jaszczak jaszczuk jaworek jałocha jańczak jaśkowiak jopek juraszek jurczak jurga juszczak józefiak jóźwiak jóźwik jędrasik jędrzejak jędrzejczak kachel kacprzak kacprzyk kaczmarzyk kaim kalata kalemba kalita karbowiak karbownik kardas kardasz karolak karolczak karpiuk karwat kasperek kasprzyk kazimierczak kałużny kempa kharchenko kielar kiełtyka kijak klich klim klimas kliś kluba kluz klymenko kmieciak kmita knap knapik knop kobiela kobus kobylarz koch kochan kocjan kocot kocoń kolenda kondraciuk kondrat kondratiuk konefał konieczka konior konkel konkol konopko kopera korcz korczak kordek korol korus kosek kosiba kosik kosior kosiorek kosmala kostiuk kotarba kotas kotula koval kovalchuk kovalenko kovalov kowol kozub kozyra kołodziejczak kończak kościelniak kośmider koźlik krasoń kraus krause krauze kravchenko kravchuk kravets krawczak krawczuk kreft kryczka krygier krysa krysiak krystek krysztofiak krzysztofik krzysztoń krzyżaniak królak krężel kubala kubas kubat kubera kubica kubis kubiś kuczek kuczera kujawa kulawik kuleta kuliś kulpa kulyk kumor kupczak kupis kuras kuraś kurdziel kuriata kurzeja kushnir kusiak kustra kusz kuzmenko kułaga kuśmierek kuśmierz kuźma kuźniar kuźnik kwapisz kwaśniak kwaśnik kwiek kwolek kądziela kądziołka kędra kędzia kłusek kłys labuda langer langner lasota latos lehmann leja lenart lesiak levchenko lewczuk leśniak libera ligęza lorek lorenc ludwiczak lysenko machnik machura maciak maciaszek maciejak maciołek maciąg madej madeja magdziak magdziarz magiera majda majer majkut maksymiuk malek malesa marchenko marchuk marcisz marczak marczuk marszał martyniak martyniuk maruszak marut mastalerz masternak matczak mateja matejko matras matusik matuszak matuszczak matuszek matuła matyja matys matysek matysiak matysik mazurczak maćkowiak małek małolepszy małysz meller melnychuk melnyk mentel michalczuk michalec michalik michna michno michoń michta mielcarek mielniczuk mielnik migas mikos mikołajczak mikołajczuk mikrut mikuła milczarek miotk mirga misiura miszczak miszczuk misztal mitura mizera molenda momot morawiec moroz mroczka mrowiec mrozek mrozik mrożek mrzygłód muras musialik musielak musioł nadolny najda nakonieczny nalepa napora narloch nawara nawrat nazaruk nejman neumann nguyen nocoń nogaj nosal nowik nowosad nycz nykiel obara ochman ociepa ogorzałek olczak olech oleksiak oleksiuk oleksy oleszczuk oliinyk olszak orzoł osiak osuch owczarzak ozga ozimek ołdak ożga pabian pacek paduch pajor panasiuk papis parys parzych pasik pastuszak paszek paszko paterek pavlenko pavliuk pawluczuk pawluk pawlus pałys paździor pelc pelczar petrenko petrov pełka piech piecha piechaczek piechnik piechowiak piekut piela pietras pietrasik pietraszek pietraszko pietrucha pietryka pikul pikuła piontek pisarek pisula piszczek piękoś piłat plata plichta podolak podsiadło podsiadły polishchuk polit poloczek polok ponomarenko popek popiel popov potrykus poźniak prokop prokopiuk przybylak przybyłek puchała puzio pyrek pytka pytlak pytlik pyzik pękala rachwał radoń radwan radzik rakoczy rapacz ratajczak rejman richert rojek romanek romaniuk romańczuk rosiak rosiek rosik roszak rozmus rudenko rudnik rusinek rychlik rychter ryczek ryszka rzeszutek rząsa rębisz sajdak salamon samek samsel sasin savchenko savchuk sawa sawczuk sałek schulz sekuła semeniuk sereda shevchenko shevchuk shvets sidor siek sieńko siuda siuta siwiec siwik skoczeń skoczylas skoneczny skonieczny skrzyniarz skrzypczak skupień skuza smolak smolarek smoleń sobala sobiech sobieraj sobik sobkowiak soboń solarz soroka sołtysik spyra stachera stachyra stadnik stanek staniak staniek stanisz staroń starzyk stasik stasiuk staszak stawarz stańczak stańczuk stańko stefaniak stefaniuk stencel stenka stepaniuk steć stolarek struzik stróżyk styś stępniak suder sudoł sulej suliga sulima surmacz suszek sułek sydorenko syrek szafraniec szarek szczepanek szczepaniak szczepanik szcześniak szczypka szczęch szczęśniak szeliga szewczak szewczuk szkudlarek szmidt szmigiel szmit szmyd szmyt sznajder szostek szreder szubert szulik szustak szwarc szydlik szymanek szymaniak szymoniak szymura szyszko talaga tarasiuk targosz tkach tkachenko tkachuk tkocz tomala tomasiak tomasik tomczuk treder trela tworek tyszka urbanek urbanik vasylenko volkov voloshyn wach wadas wajda wajs walas walasek walaszek walczuk waliczek walkowiak wanat wasiak wasiluk waszak waszczuk wawer wawro waśko wcisło wdowiak wegner wencel wenta widera wielgosz wielgus wieliczko wiercioch wilkosz winkler wiszowaty witczak wiącek więch więcław wnęk woch wojas wojcieszak wojda wojdyła wojnar wojtal wojtala wojtasik wojtaszek wojtaś wojtysiak wojtyła wolak wolanin wołoszyn wołowiec woźniczka wrzosek wszołek wypych wójciak włodarczak zadrożny zajdel zapart zaremba zarychta zawadka zawisza zawiślak zdeb zdunek zelek zhuk ziaja ziemba zimoch ziobro zięcina ziętara ziętek zych łabuz łada ławniczak łojek łukasiak łukaszuk łuszcz ślęzak śmigiel świercz świąder święch świętek żygadło',
+);
 
-/**
- * Homonimy rzeczowników pospolitych / dni / miesięcy — NIE maskujemy samodzielnie.
- * Trzymane osobno: dokumentacja kompromisu + punkt zaczepienia dla przyszłej reguły
- * kontekstowej (np. „sędzia Wilk" → maska).
- */
-export const HOMOGRAPH_SURNAMES = new Set<string>((
+/** Nazwiska będące też rzeczownikami, dniami lub miesiącami: maskowane tylko z kotwicą, nigdy samodzielnie. */
+export const HOMOGRAPH_SURNAMES = wordSet(
   'mazur mazurek zając baran wilk lis kot kruk sowa mucha wrona sroka czajka gołąb dudek ' +
   'wróbel sikora kania szczygieł skowronek orzeł kaczor piątek sobota niedziela środa ' +
   'kwiecień maj marzec styczeń grudzień lipiec sierpień król kowal rybak krawiec cieśla ' +
   'sołtys turek czech niemiec prus cygan góral polak socha skiba krupa paluch noga żyła ' +
   'duda bąk mróz rak ptak drozd okoń szpak pająk motyl żuk chmiel kalina jagoda gruszka ' +
-  'żak kurek sitek gajda jarosz marek bober przybysz dziedzic mroczek starosta'
-).split(/\s+/));
+  'żak kurek sitek gajda jarosz marek bober przybysz dziedzic mroczek starosta',
+);
+
+// Odmiana przymiotnikowa -ski/-cki/-dzki: przypadki zależne i żeńskie oraz liczba mnoga -scy/-ccy/-dzcy.
+const RE_ADJ_OBLIQUE = /(sk|ck|dzk)(?:iego|iemu|imi|ich|im|iej|ą|a)$/;
+const RE_ADJ_PLURAL = /(c|dz|s)cy$/;
+
+/** Mianownik męski odmienionego przymiotnika na -ski/-cki/-dzki albo null. */
+const adjBase = (w: string): string | null =>
+  RE_ADJ_OBLIQUE.test(w)
+    ? w.replace(RE_ADJ_OBLIQUE, '$1i')
+    : RE_ADJ_PLURAL.test(w)
+      ? w.replace(RE_ADJ_PLURAL, '$1ki')
+      : null;
+
+// Od najdłuższej, bo wygrywa pierwsza pasująca: Nowakowie, Nowakowi, Nowakiem, Nowaka.
+const NOUN_ENDINGS = ['owie', 'ował', 'owi', 'iem', 'ami', 'ach', 'em', 'om', 'ów', 'u', 'a', 'ą', 'ę', 'y', 'o', 'e'];
+
+const NO_E = /([^aeiouąęóy])([^aeiouąęóy])$/; // ruchome „e": kurk → kurek, wróbl → wróbel
+const RE_O_OO = /o([^aeiouąęóy]+)$/; // o → ó w temacie: mroz → mróz
 
 /**
- * Forma bazowa nazwiska-homografu z HOMOGRAPH_SURNAMES albo null — także w przypadku zależnym
- * („Wróbla" → wróbel, „Sikory"/„Sikorą" → sikora, „Mroza" → mróz, „Wilkiem" → wilk). Klucz
- * normalizeSurnameKey nie przywracał ruchomego „e" ani końcowego „-a", więc homograf przy kotwicy
- * w odmianie zostawał jawny. Sama forma nie przesądza o osobie — decyduje kotwica wywołującego.
+ * Forma bazowa homografu, także odmienionego („Wróbla" → wróbel, „Sikorą" → sikora, „Mroza" → mróz),
+ * albo null. O tym, czy to osoba, decyduje kotwica wywołującego.
  */
 export function homographBase(word: string): string | null {
   const w = word.toLowerCase();
@@ -79,97 +81,49 @@ export function homographBase(word: string): string | null {
   for (const end of NOUN_ENDINGS) {
     if (w.length - end.length < 2 || !w.endsWith(end)) continue;
     const stem = w.slice(0, -end.length);
-    const oo = stem.replace(/o([^aeiouąęóy]+)$/, 'ó$1');
-    for (const c of [stem, stem.replace(NO_E, '$1e$2'), `${stem}a`, oo]) if (HOMOGRAPH_SURNAMES.has(c)) return c;
+    for (const c of [stem, stem.replace(NO_E, '$1e$2'), `${stem}a`, stem.replace(RE_O_OO, 'ó$1')]) {
+      if (HOMOGRAPH_SURNAMES.has(c)) return c;
+    }
   }
-  return null;
-}
-
-// Odmiana przymiotnikowa nazwisk na -ski/-cki/-dzki (też żeńska i mnoga).
-const ADJ_RULES: Array<[RegExp, string]> = [
-  [/(sk|ck|dzk)iego$/, '$1i'],
-  [/(sk|ck|dzk)iemu$/, '$1i'],
-  [/(sk|ck|dzk)imi$/, '$1i'],
-  [/(sk|ck|dzk)ich$/, '$1i'],
-  [/(sk|ck|dzk)im$/, '$1i'],
-  [/(sk|ck|dzk)iej$/, '$1i'],
-  [/(sk|ck|dzk)ą$/, '$1i'],
-  [/(sk|ck|dzk)a$/, '$1i'],
-  [/ccy$/, 'cki'],
-  [/dzcy$/, 'dzki'],
-  [/scy$/, 'ski'],
-];
-
-// Końcówki rzeczownikowe (od najdłuższej): Nowakowi, Nowakiem, Nowakowie, Nowaka…
-const NOUN_ENDINGS = ['owie', 'ował', 'owi', 'iem', 'ami', 'ach', 'em', 'om', 'ów', 'u', 'a', 'ą', 'ę', 'y', 'o', 'e'];
-
-const NO_E = /([^aeiouąęóy])([^aeiouąęóy])$/; // ruchome „e”: kurk→kurek, wróbl→wróbel
-
-function lookup(candidate: string): string | null {
-  if (SURNAMES.has(candidate)) return candidate;
   return null;
 }
 
 /**
- * Deterministyczny klucz tożsamości dla pseudonimizacji: forma bazowa ze słownika,
- * a dla nazwisk spoza słownika — normalizacja czysto morfologiczna (reguły przymiotnikowe,
- * potem odcięcie typowej końcówki). Nie musi być poprawna językowo — musi być STABILNA
- * (te same formy tej samej osoby → ten sam klucz). Alternacje tematu (Stępień/Stępnia)
- * mogą dać różne klucze — udokumentowane ograniczenie.
+ * Klucz tożsamości do pseudonimizacji: ten sam dla wszystkich form jednej osoby, niekoniecznie
+ * poprawny językowo. Alternacje tematu (Stępień/Stępnia) dają różne klucze.
  */
 export function normalizeSurnameKey(word: string): string {
   const w = word.toLowerCase();
-  const base = surnameBase(w);
+  const base = surnameBase(w) ?? adjBase(w);
   if (base) return base;
-  for (const [re, rep] of ADJ_RULES) {
-    if (re.test(w)) return w.replace(re, rep);
-  }
   for (const end of NOUN_ENDINGS) {
     if (w.length - end.length >= 4 && w.endsWith(end)) return w.slice(0, -end.length);
   }
   return w;
 }
 
-/**
- * Zwraca formę bazową nazwiska ze słownika (lowercase) albo null.
- * `word` — pojedynczy token (bez spacji), wielkość liter dowolna.
- */
+/** Forma bazowa nazwiska ze słownika (małe litery) albo null. `word` to jeden token. */
 export function surnameBase(word: string): string | null {
   const w = word.toLowerCase();
   if (w.length < 3) return null;
-
-  const direct = lookup(w);
-  if (direct) return direct;
-
-  for (const [re, rep] of ADJ_RULES) {
-    if (re.test(w)) {
-      const base = lookup(w.replace(re, rep));
-      if (base) return base;
-    }
-  }
-
+  if (SURNAMES.has(w)) return w;
+  const adj = adjBase(w);
+  if (adj !== null && SURNAMES.has(adj)) return adj;
   for (const end of NOUN_ENDINGS) {
     if (w.length - end.length >= 3 && w.endsWith(end)) {
       const stem = w.slice(0, -end.length);
-      const base = lookup(stem) ?? lookup(stem.replace(NO_E, '$1e$2'));
-      if (base) return base;
+      for (const c of [stem, stem.replace(NO_E, '$1e$2')]) if (SURNAMES.has(c)) return c;
     }
   }
-
   return null;
 }
 
-/**
- * Indeks słownika bez ogonków („kaminski", „wozniak") — loginy, ścieżki profili i nazwy kont
- * są ASCII, więc „jkaminski" nie trafiał w „kamiński". Budowany leniwie przy pierwszym użyciu:
- * zwykły tekst bez loginów nie płaci za kopię słownika.
- */
 let asciiSurnames: Set<string> | null = null;
-/** Zapis bez polskich znaków, tak jak w loginach i nazwach katalogów („kamiński" → „kaminski"). */
+/** Zapis bez polskich znaków, jak w loginach i nazwach katalogów („kamiński" → „kaminski"). */
 export const foldAscii = (s: string): string => s.replace(/[ąćęłńóśźż]/g, (c) => 'acelnoszz'['ąćęłńóśźż'.indexOf(c)]);
 /**
- * Czy wyraz z samych liter ASCII to mianownik nazwiska ze słownika (też forma żeńska -ska/-cka/-dzka),
- * zapisany bez polskich znaków. Bez reszty odmiany: login to forma słownikowa, nie przypadek zależny.
+ * Czy wyraz ASCII to mianownik nazwiska ze słownika (też żeński -ska/-cka/-dzka)? Loginy i ścieżki
+ * profili nie mają ogonków ani odmiany. Indeks budowany leniwie, żeby tekst bez loginów go nie płacił.
  */
 export function isAsciiSurname(word: string): boolean {
   const w = word.toLowerCase();
@@ -179,29 +133,19 @@ export function isAsciiSurname(word: string): boolean {
   return /(?:sk|ck|dzk)a$/.test(w) && asciiSurnames.has(`${w.slice(0, -1)}i`);
 }
 
-// ============================================================================
-// Morfologiczny rozpoznawacz nazwisk (poza słownikiem) — recall dla rzadkich nazwisk
-// ============================================================================
-
 /**
- * Charakterystyczne polskie sufiksy nazwiskowe (mianownik + częste formy odmienione):
- *  - przymiotnikowe -ski/-cki/-dzki (rodz. żeński -ska, mnogie -scy, przypadki zależne),
- *  - patronimiczne -icz/-wicz/-owicz/-ewicz (+ odmiana),
- *  - -czyk (+ odmiana).
- * To sygnał o wysokiej precyzji: takich końcówek prawie nie mają wyrazy pospolite (poza
- * przymiotnikami geo/narodowymi — te odsiewa NON_SURNAME_ADJ + kontekst w index.ts).
+ * Sufiksy nazwiskowe w mianowniku i częstych przypadkach: -ski/-cki/-dzki, -icz (z -wicz/-owicz/-ewicz),
+ * -czyk. Wyrazy pospolite prawie ich nie mają, poza przymiotnikami, które odsiewa NON_SURNAME_ADJ.
  */
 const SURNAME_SUFFIX =
   /(?:sk|ck|dzk)(?:i|a|iego|iej|iemu|im|imi|ich|ą)$|(?:scy|ccy|dzcy)$|icz(?:a|owi|em|owie|ami|ach)?$|czyk(?:a|owi|iem|ami|ach|owie)?$/;
 
 /**
- * Wyrazy z wielkiej litery o końcówce „nazwiskowej", które nazwiskami NIE są:
- * przymiotniki narodowe, regionalne i miejskie (formy bazowe -ski/-cki/-dzki — odmienione
- * warianty sprowadzamy do bazy regułami ADJ_RULES przed sprawdzeniem). Bez tego rozpoznawacz
- * pożerałby „Polski", „Śląski", „Warszawski", „Mazowiecki" w nazwach własnych.
- * UWAGA: nie wpisujemy tu nazwisk-przymiotników (np. „Górski") — te mają zostać maskowane.
+ * Wyrazy o końcówce nazwiskowej, które nazwiskami nie są, w formie bazowej (odmianę sprowadza adjBase):
+ * „Polski", „Mazowiecki", „Warszawski" w nazwach własnych. Nie wpisywać tu nazwisk-przymiotników
+ * („Górski"), bo mają być maskowane.
  */
-export const NON_SURNAME_ADJ = new Set<string>((
+export const NON_SURNAME_ADJ = wordSet(
   // narodowe / etniczne
   'polski niemiecki francuski rosyjski angielski brytyjski amerykański włoski hiszpański ' +
   'portugalski czeski słowacki ukraiński białoruski litewski łotewski estoński fiński ' +
@@ -215,69 +159,60 @@ export const NON_SURNAME_ADJ = new Set<string>((
   // miejskie
   'warszawski krakowski gdański poznański wrocławski szczeciński bydgoski katowicki radomski ' +
   'toruński kielecki rzeszowski olsztyński gliwicki tarnowski płocki częstochowski gdyński ' +
-  // ogólne / instytucjonalne / relacyjne przymiotniki na -ski/-cki/-dzki
-  // „marszałkowski" — przymiotnik URZĘDOWY (Urząd/Sejmik/Zarząd Marszałkowski), nie nazwisko;
-  //   realny FP na pismach samorządu wojewódzkiego („Urzędu Marszałkowskiego" → osoba). Osoba
-  //   nazwiskiem „Marszałkowski" NADAL łapana w parze z imieniem (słownikowy pas imię+nazwisko).
+  // ogólne i instytucjonalne; „marszałkowski" to Urząd Marszałkowski, osoba o tym nazwisku
+  // jest maskowana w parze z imieniem
   'miejski wiejski wojewódzki marszałkowski morski nadmorski królewski cesarski papieski biskupi diecezjalny ' +
   'boski niebiański ziemski świecki damski męski żeński ludzki dziecięcy ojcowski macierzyński ' +
   'lekarski adwokacki nauczycielski rybacki rycerski sąsiedzki ' +
-  // zawodowe i relacyjne z nazw usług, urzędów i projektów: „Opieka Pielęgniarska", „Poselski
-  // projekt", „Władza Rodzicielska". Żaden nie jest znanym nazwiskiem, a na początku zdania albo
-  // po rzeczowniku z wielkiej litery szły jako osoba. Para z imieniem („Jan Poselski") dalej maskuje.
+  // zawodowe w nazwach usług i urzędów: „Opieka Pielęgniarska", „Poselski projekt"
   'pielęgniarski aptekarski felczerski poselski prezydencki senacki prokuratorski strażacki ' +
   'olimpijski piłkarski literacki rodzicielski diabelski ' +
-  // nazwy zakładów usługowych: „Salon Fryzjerski Ewa zaprasza" szło jako osoba, a imię z nazwy
-  // salonu domykało maskę („[IMIĘ I NAZWISKO] zaprasza")
   'fryzjerski ' +
-  // „Ochrony Środowiska" (RDOŚ, WIOŚ, WFOŚiGW): dopełniacz rzeczownika „środowisko" ma końcówkę
-  // -ska, a reguła odmiany sprowadza go do „środowiski" — bez wpisu każdy taki urząd dawał osobę
+  // „Ochrony Środowiska": dopełniacz rzeczownika ma końcówkę -ska, którą adjBase sprowadza do „środowiski"
   'środowiski ' +
-  // relacyjne (nazwy komitetów/związków/funduszy): „Komitet Obywatelski", „Hufiec Harcerski"
+  // komitety, związki, fundusze: „Komitet Obywatelski", „Hufiec Harcerski"
   'obywatelski harcerski sołecki chłopski pański szlachecki żołnierski marynarski kupiecki ' +
   'związkowski ' +
-  // ogólnokrajowe / uczelniane (nazwy instytucji): „Ogólnopolski Związek", „Uniwersytet Jagielloński"
+  // ogólnokrajowe i uczelniane: „Ogólnopolski Związek", „Uniwersytet Jagielloński"
   'ogólnopolski wszechpolski ogólnokrajowy jagielloński akademicki uniwersytecki ' +
   'studencki pracowniczy związkowy ' +
-  // dalsze regiony / pasma / parki: „Bieszczadzki Park", „Podhalański", „Sądecki"
+  // regiony, pasma, parki: „Bieszczadzki Park", „Sądecki"
   'podhalański bieszczadzki karkonoski sądecki gorczański elbląski nadwiślański nadbużański ' +
-  // pozostałe parki narodowe. BEZ homografów nazwisk (słowiński, woliński, magurski) — te chroni
-  // prawy kontekst „… Park Narodowy" w index.ts, a samodzielne „Słowiński" ma zostać maskowane
+  // parki narodowe bez homografów nazwisk (słowiński, woliński, magurski): te chroni prawy kontekst
+  // „… Park Narodowy", a samodzielne „Słowiński" ma być maskowane
   'białowieski biebrzański pieniński kampinoski babiogórski wigierski drawieński poleski narwiański ' +
   'kołobrzeski koszaliński słupski legnicki wałbrzyski jeleniogórski nowosądecki ' +
-  // PRZYMIOTNIKI ODMIEJSCOWE od nazw POWIATÓW/regionów/miast („Starosta Wołomiński", „powiat
-  // grójecki") — to nazwy jednostek, NIE nazwiska. Lista wygenerowana i zweryfikowana adwersarialnie
-  // (v0.46.19): wykluczono formy będące częstym NAZWISKIEM (bielski, sokołowski, dąbrowski, krakowski,
-  // warszawski…) — te zostają maskowalne. Osoba w parze „Jan <-ski>" i tak maskowana (detektor par).
+  // powiaty („Starosta Wołomiński", „powiat grójecki") bez form, które są częstym nazwiskiem
+  // (bielski, sokołowski, dąbrowski); osobę w parze z imieniem i tak maskuje detektor par
   'aleksandrowski andrychowski augustowski barliński bartoszycki bełchatowski bialski ' +
   'bialskopodlaski białobrzeski białogardzki bieruński biskupiecki biłgorajski ' +
-  'bogatyński bolesławiecki braniewski buski bydgoski bystrzycki bytomski bytowski będziński ' +
+  'bogatyński bolesławiecki braniewski buski bystrzycki bytomski bytowski będziński ' +
   'chodzieski chojnicki chorzowski choszczeński ciechociński czarnkowski czechowicki człuchowski ' +
   'dobromiejski drawski drezdenecki działdowski dzierżoniowski dębliński ełcki garwoliński ' +
-  'gdyński giżycki gliwicki gnieźnieński goleniowski golubski gorlicki gorzowski gostyniński gołdapski ' +
+  'giżycki gnieźnieński goleniowski golubski gorlicki gorzowski gostyniński gołdapski ' +
   'gośliński grodziski grudziądzki gryficki gryfiński grójecki gubiński górowski głubczycki ' +
   'hajnowski helski hrubieszowski inowrocławski iławski jarociński jasielski jaworznicki jelczański ' +
-  'jędrzejowski kamiennogórski kartuski katowicki kazimierski kielecki kleczewski ' +
+  'jędrzejowski kamiennogórski kartuski kazimierski kleczewski ' +
   'kluczborski kolbuszowski kolneński konecki koniński konstantynowski koronowski kostrzyński ' +
-  'kowarski kozielski kozienicki kołobrzeski kościański kościerski krajeński krapkowicki ' +
+  'kowarski kozielski kozienicki kościański kościerski krajeński krapkowicki ' +
   'krasnostawski kraśnicki krotoszyński krośnieński kutnowski kwidzyński kórnicki kędzierzyński kętrzyński ' +
   'kłobucki kłodzki legionowski leski leżajski lidzbarski limanowski lipnowski lubaczowski lubartowski ' +
   'lubawski lubliniecki luboński lwówecki lęborski lędziński malborski miechowski ' +
   'mikołowski milicki międzychodzki międzyrzecki miński mogileński moniecki morąski mosiński mrągowski ' +
   'mysłowicki myślenicki myśliborski mławski nadnotecki nakielski nidzicki niżański nowogardzki nowomiejski ' +
   'noworudzki nowosolski nowotarski nowotomyski nyski obornicki olecki oleski oleśnicki olkuski ' +
-  'olsztyński opalenicki opatowski opoczyński ostrowiecki ostrołęcki ostrzeszowski ostródzki otwocki ozorkowski ' +
+  'opalenicki opatowski opoczyński ostrowiecki ostrołęcki ostrzeszowski ostródzki otwocki ozorkowski ' +
   'oławski oświęcimski ożarowski pabianicki pajęczański parczewski pałucki piaseczyński piastowski pilski piski ' +
   'pińczowski pleszewski pniewski podbeskidzki poddębicki policki polkowicki ' +
   'proszowicki prudnicki pruszczański pruszkowski przasnyski przemyski przeworski przysuski pszczyński pucki ' +
-  'puszczykowski puławski pułtuski pyrzycki płocki płoński radomszczański radziejowski radzyński rawicki redzki ' +
-  'ropczycki roztoczański rumski rybnicki rycki rypiński rzeszowski sandomierski sejneński siemianowicki ' +
+  'puszczykowski puławski pułtuski pyrzycki płoński radomszczański radziejowski radzyński rawicki redzki ' +
+  'ropczycki roztoczański rumski rybnicki rycki rypiński sandomierski sejneński siemianowicki ' +
   'siemiatycki sierpecki skarżyski skierniewicki sochaczewski sokólski sopocki sosnowiecki stalowowolski ' +
   'starachowicki stargardzki starogardzki staszowski strzegomski strzeliński strzyżowski stęszewski ' +
-  'sulechowski sulejówecki sulęciński suwalski swarzędzki szamotulski szczecinecki szczeciński szczycieński ' +
+  'sulechowski sulejówecki sulęciński suwalski swarzędzki szamotulski szczecinecki szczycieński ' +
   'sztumski szydłowiecki sędziszowski sępoleński sławieński słubicki słupecki tarnobrzeski tarnogórski ' +
-  'tczewski tomaszowski toruński trzcianecki trzebnicki tyski ustecki ustrzycki wadowicki ' +
-  'wałbrzyski wałecki wejherowski wieluński wieruszowski wodzisławski wolsztyński wołomiński ' +
+  'tczewski tomaszowski trzcianecki trzebnicki tyski ustecki ustrzycki wadowicki ' +
+  'wałecki wejherowski wieluński wieruszowski wodzisławski wolsztyński wołomiński ' +
   'wronecki wrzesiński wschowski wysokomazowiecki wąbrzeski wągrowiecki węgorzewski węgrowski ' +
   'władysławowski włocławski włodawski włoszczowski zabrzański zagłębiowski zakopiański ' +
   'zambrowski zawierciański zbąszyński zduńskowolski zgorzelecki zielonogórski zwoleński ząbkowicki złotoryjski ' +
@@ -286,50 +221,45 @@ export const NON_SURNAME_ADJ = new Set<string>((
   'żuromiński żyrardowski żywiecki ' +
   // pospolite przymiotniki na -ski/-cki: „Niski poziom", „wąski", „bliski"
   'niski wąski płaski bliski śliski grząski ' +
-  // rzeczowniki pospolite w liczbie mnogiej o końcówce -ski (lm. od -sek/-sk/-ska):
-  // „Wnioski stron oddalono", „Zapiski z narady" — kapitalizowane na początku zdania
-  // pożerane były jako nazwiska (realny, dotkliwy fałszywy pozytyw w pismach urzędowych)
+  // rzeczowniki w liczbie mnogiej na -ski, wielką literą na początku zdania: „Wnioski stron oddalono"
   'wnioski zapiski odpiski przypiski wypiski dopiski naciski zaciski dociski przyciski ' +
   'pociski odciski wyciski uciski uściski ściski zyski uzyski wrzaski trzaski potrzaski ' +
   'błyski przebłyski rozbłyski blaski odblaski odgłoski kioski maski paski laski obcaski ' +
-  'deski miski piaski wioski troski kreski łuski pyski piski odpryski wypryski obeliski ' +
+  'deski miski piaski wioski troski kreski łuski pyski odpryski wypryski obeliski ' +
   'spiski półmiski meniski kluski pieski noski klocki ' +
   'kaski dyski placki kiełbaski freski kąski kęski kłoski woski pluski brzaski kołyski ' +
-  // przymiotniki wyznaniowe ze złożeń („Kościół Ewangelicko-Augsburski", „Parafia Rzymsko-Katolicka")
+  // wyznaniowe ze złożeń: „Kościół Ewangelicko-Augsburski"
   'katolicki ewangelicki augsburski ' +
-  // „Dziecka" (Instytut Matki i Dziecka, Rzecznik Praw Dziecka, „Dane Dziecka:") — dopełniacz
-  // rzeczownika z końcówką -cka, który reguła odmiany brała za żeńskie nazwisko na -cka
+  // „Dziecka" (Rzecznik Praw Dziecka): dopełniacz na -cka, który adjBase bierze za żeńskie nazwisko
   'dziecka ' +
-  // wieloznaczny wyraz o końcówce nazwiskowej, który nazwiskiem nie jest (Znicz Pruszków itp.)
-  'znicz'
-).split(/\s+/).filter(Boolean));
+  // „Znicz Pruszków": końcówka -icz
+  'znicz',
+);
 
 /**
- * Rzeczowniki w liczbie mnogiej z NON_SURNAME_ADJ, które chronimy TYLKO w tej dokładnej formie
- * („Placki ziemniaczane", „Kłoski zboża"). Reguła odmiany sprowadzała do nich dopełniacz nazwisk
- * na -ek („Placka", „Kłoska", „Kąska" od Placek, Kłosek, Kąsek), więc „Pełnomocnik Placka wniósł"
- * zostawało jawne. Bez „kiełbaski/kołyski/kaski": „Kiełbaska", „Kołyska", „Kaska" to rzeczowniki
- * w mianowniku. Koszt: „Placka nie zjadłem." na początku zdania znów w masce, jak przed partią b3.
+ * Rzeczowniki lm. ze stoplisty chronione tylko w tej dokładnej formie („Placki ziemniaczane"),
+ * bo adjBase sprowadza do nich dopełniacz nazwisk na -ek („Pełnomocnik Placka wniósł").
  */
-const NOUN_PLURAL_ONLY = new Set<string>('kąski kęski kłoski woski placki'.split(' '));
-/** Czy sprowadzona reguła odmiany forma bazowa `base` blokuje wyraz jako przymiotnik ze stoplisty? */
+const NOUN_PLURAL_ONLY = wordSet('kąski kęski kłoski woski placki');
 const blocksAsAdjective = (base: string): boolean => NON_SURNAME_ADJ.has(base) && !NOUN_PLURAL_ONLY.has(base);
 
-// Złożenie przymiotnikowe z łącznikiem: człony na -sko/-cko/-dzko + ostatni człon („Kujawsko-
-// Pomorski", „Warmińsko-Mazurskiego", „Polsko-Niemiecka"). Każdy człon kończy się łącznikiem,
-// więc powtórzenie nie cofa się kwadratowo.
+// Człony na -sko/-cko/-dzko i ostatni człon („Kujawsko-Pomorski", „Polsko-Niemiecka"). Każdy człon
+// kończy się łącznikiem, więc powtórzenie nie cofa się kwadratowo.
 const RE_COMPOUND_ADJ = /^(?:[a-ząćęłńóśźż]+(?:sk|ck|dzk)o-)+[a-ząćęłńóśźż]+$/;
 
+// Lista zamknięta, bo „pasko", „dacko", „lisko" to człony nazwisk dwuczłonowych.
+const COMPOUND_ADJ_HEADS = wordSet(
+  'polsko kujawsko warmińsko śląsko dolnośląsko łódzko wrocławsko mazowiecko pomorsko ' +
+    'zachodniopomorsko wielkopolsko małopolsko lubusko lubelsko podlasko podkarpacko opolsko ' +
+    'świętokrzysko rzymsko grecko ewangelicko słowacko czesko niemiecko rosyjsko ukraińsko litewsko ' +
+    'angielsko francusko włosko hiszpańsko europejsko amerykańsko',
+);
+
 /**
- * Czy wyraz to złożony przymiotnik regionalny/relacyjny z łącznikiem (Kujawsko-Pomorski Oddział
- * NFZ, Urząd Warmińsko-Mazurski), a nie nazwisko dwuczłonowe? NON_SURNAME_ADJ zna tylko człony
- * osobno, więc całość szła jako nazwisko. Ostatni człon musi być ZNANYM przymiotnikiem ze stoplisty
- * (pomorski, mazurskiego, niemiecka): sam brak w słowniku nazwisk odsłaniał nazwiska dwuczłonowe
- * z członem na -sko/-cko („Pasko-Gzowska", „Dacko-Brzęczyk", „Lisko-Brzozowska"). Albo pierwsze
- * człony to typowy początek złożenia (COMPOUND_ADJ_HEADS: „polsko", „kujawsko"), a ostatni nie jest
- * nazwiskiem ze słownika: stoplista nie zna każdej narodowości („Polsko-Szwedzka Izba",
- * „Polsko-Kanadyjska Rada"). Świadoma luka: „Śląsko-Dąbrowska" (dąbrowski to częste nazwisko) dalej
- * wygląda na osobę.
+ * Czy wyraz to złożony przymiotnik z łącznikiem (Urząd Warmińsko-Mazurski), a nie nazwisko
+ * dwuczłonowe? Tak, gdy ostatni człon jest w stopliście („Pasko-Gzowska" odpada) albo wszystkie
+ * pierwsze człony są w COMPOUND_ADJ_HEADS, a ostatni nie jest nazwiskiem („Polsko-Szwedzka").
+ * Znana luka: „Śląsko-Dąbrowska" wygląda na osobę, bo dąbrowski to częste nazwisko.
  */
 export function isCompoundAdjective(word: string): boolean {
   const w = word.toLowerCase();
@@ -337,80 +267,46 @@ export function isCompoundAdjective(word: string): boolean {
   const parts = w.split('-');
   const last = parts.pop() as string;
   if (blocksAsAdjective(last)) return true;
-  const rule = ADJ_RULES.find(([re]) => re.test(last));
-  if (rule && blocksAsAdjective(last.replace(rule[0], rule[1]))) return true;
+  const adj = adjBase(last);
+  if (adj !== null && blocksAsAdjective(adj)) return true;
   return parts.every((p) => COMPOUND_ADJ_HEADS.has(p)) && !surnameBase(last);
 }
-// Pierwsze człony złożeń przymiotnikowych: państwo i województwa („Polsko-Szwedzka", „Kujawsko-
-// Pomorski", „Śląsko-…"), wyznania. Lista zamknięta, bo „pasko", „dacko", „lisko" to człony nazwisk.
-const COMPOUND_ADJ_HEADS = new Set<string>(
-  (
-    'polsko kujawsko warmińsko śląsko dolnośląsko łódzko wrocławsko mazowiecko pomorsko ' +
-    'zachodniopomorsko wielkopolsko małopolsko lubusko lubelsko podlasko podkarpacko opolsko ' +
-    'świętokrzysko rzymsko grecko ewangelicko słowacko czesko niemiecko rosyjsko ukraińsko litewsko ' +
-    'angielsko francusko włosko hiszpańsko europejsko amerykańsko'
-  ).split(/\s+/),
-);
 
 /**
- * Rzeczowniki pospolite z końcówką -czyk (zdrobnienia i nazwy mieszkańców: Kluczyk, Słowniczyk,
- * Chińczyk) — wyglądają jak nazwisko, a na początku zdania pisze się je wielką literą. NIE są
- * w NON_SURNAME_ADJ, bo ta lista wyłącza też kotwice („Pan Kluczyk", „J. Kluczyk" to nazwiska),
- * tylko w przebiegu samodzielnego nazwiska bez żadnej kotwicy (index.ts, passPersonSoloMorph).
+ * Rzeczowniki na -czyk (zdrobnienia, nazwy mieszkańców) pisane wielką literą na początku zdania.
+ * Nie w NON_SURNAME_ADJ, bo stoplista wyłącza też kotwice („Pan Kluczyk" to nazwisko).
  */
-export const COMMON_NOUN_LOOKALIKES = new Set<string>((
+export const COMMON_NOUN_LOOKALIKES = wordSet(
   'słowniczyk krzaczyk kluczyk chłopczyk mieczyk ' +
-  'chińczyk japończyk koreańczyk wietnamczyk tajwańczyk europejczyk kanadyjczyk australijczyk ' +
-  'brazylijczyk argentyńczyk chilijczyk kubańczyk irlandczyk islandczyk duńczyk nowozelandczyk ' +
-  'izraelczyk libańczyk syryjczyk irańczyk afgańczyk pakistańczyk nepalczyk'
-).split(/\s+/));
-/**
- * Zdrobnienia z COMMON_NOUN_LOOKALIKES, które są też prawdziwymi nazwiskami (Kluczyk, Mieczyk,
- * Krzaczyk). Rzeczownik pospolity pisze się wielką literą tylko na początku zdania, więc w środku
- * zdania („świadek Krzaczyk potwierdził", „Odebrał: Kluczyk") to nazwisko — index.ts rozstrzyga
- * po pozycji. Nazwy mieszkańców (Chińczyk) oraz „Chłopczyk" i „Słowniczyk" zostają rzeczownikiem
- * wszędzie („Chłopczyk bawił się w piaskownicy").
- */
-export const DIMINUTIVE_LOOKALIKES = new Set<string>('krzaczyk kluczyk mieczyk'.split(' '));
+    'chińczyk japończyk koreańczyk wietnamczyk tajwańczyk europejczyk kanadyjczyk australijczyk ' +
+    'brazylijczyk argentyńczyk chilijczyk kubańczyk irlandczyk islandczyk duńczyk nowozelandczyk ' +
+    'izraelczyk libańczyk syryjczyk irańczyk afgańczyk pakistańczyk nepalczyk',
+);
+/** Wyrazy z COMMON_NOUN_LOOKALIKES, które są też nazwiskami; rozstrzyga pozycja w zdaniu (person-triggers.ts). */
+export const DIMINUTIVE_LOOKALIKES = wordSet('krzaczyk kluczyk mieczyk');
 
-/**
- * Czy wyraz WYGLĄDA na polskie nazwisko po samej morfologii (bez słownika)?
- * Precyzja: końcówka nazwiskowa + odsianie przymiotników geo/narodowych + min. długość.
- * Kontekst (poprzedzający wyraz, pozycja) rozstrzyga index.ts — tu tylko warstwa leksykalna.
- */
+// Żeńskie przymiotniki na -nicza (Komornicza, Rolnicza) i czasowniki „zalicza/oblicza". Spółgłoska
+// przed -nicza odróżnia je od dopełniacza nazwiska (Iwanicza, Romanicza, -owicza). Koszt: „Pozew
+// Bartnicza" bez kotwicy zostaje jawny.
+const RE_NICZA_ADJ = /[^aeiouyąęó]nicza$/;
+const RE_LICZA_VERB = /^(?:za|ob|na|wy|prze|od|roz|z|do|w|u)licza$/;
+
+/** Czy wyraz wygląda na nazwisko po samej morfologii? O kontekście decydują przebiegi. */
 export function looksLikeSurname(word: string): boolean {
   const w = word.toLowerCase();
-  if (w.length < 5) return false;
-  if (!SURNAME_SUFFIX.test(w)) return false;
-  if (NON_SURNAME_ADJ.has(w)) return false;
-  // „-icza" to też mianownik żeńskich przymiotników na -niczy (Komornicza, Rolnicza, Ochotnicza,
-  // Górniczo-Hutnicza) i czasowniki „zalicza/oblicza/nalicza". Słowotwórstwo jest produktywne,
-  // więc reguła zamiast listy. Spółgłoska przed „-nicza" odróżnia przymiotnik od dopełniacza
-  // nazwiska z samogłoską (Iwanicza, Romanicza) i od -owicza/-ewicza, które zostają nazwiskami.
-  // Koszt: dopełniacz rzadkiego nazwiska „…nicz" bez kotwicy („Pozew Bartnicza") — z imieniem,
-  // „Pan/Pani" albo rolą dalej jest maskowany.
-  if (/[^aeiouyąęó]nicza$/.test(w) || /^(?:za|ob|na|wy|prze|od|roz|z|do|w|u)licza$/.test(w)) return false;
-  if (isCompoundAdjective(w)) return false;
-  // sprowadź odmieniony przymiotnik do bazy -ski i sprawdź stoplistę raz jeszcze
-  for (const [re, rep] of ADJ_RULES) {
-    if (re.test(w)) return !blocksAsAdjective(w.replace(re, rep));
-  }
-  return true;
+  if (w.length < 5 || !SURNAME_SUFFIX.test(w)) return false;
+  if (RE_NICZA_ADJ.test(w) || RE_LICZA_VERB.test(w)) return false;
+  return !isGeoAdjective(w);
 }
 
 /**
- * Czy wyraz to przymiotnik geograficzny/narodowy/instytucjonalny (Polski, Warszawski,
- * Mazowiecki, Warmińskiego, Jagiellońskiej…), a więc NIE nazwisko? Sprowadza odmianę
- * przymiotnikową do bazy -ski/-cki/-dzki (reguły ADJ_RULES) i sprawdza stoplistę
- * NON_SURNAME_ADJ. Filtr precyzji dla kandydatów z warstwy NER (patrz ner-postprocess.ts).
- * UWAGA: nazwiska-przymiotniki (np. „Górski") NIE są w NON_SURNAME_ADJ → zwraca false.
+ * Czy wyraz (też odmieniony albo złożony z łącznikiem) to przymiotnik ze stoplisty, a nie nazwisko?
+ * Nazwiska-przymiotniki („Górski") dają false.
  */
 export function isGeoAdjective(word: string): boolean {
   const w = word.toLowerCase();
   if (NON_SURNAME_ADJ.has(w)) return true;
   if (isCompoundAdjective(w)) return true;
-  for (const [re, rep] of ADJ_RULES) {
-    if (re.test(w) && blocksAsAdjective(w.replace(re, rep))) return true;
-  }
-  return false;
+  const adj = adjBase(w);
+  return adj !== null && blocksAsAdjective(adj);
 }

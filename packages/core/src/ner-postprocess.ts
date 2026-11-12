@@ -1,30 +1,11 @@
 /**
- * Wspólny post-processing wyjścia neuronowego NER (token-classification) → maski osobowe.
+ * Post-processing wyjścia neuronowego NER (token-classification) na maski osobowe; szew dla dodatku AI.
  *
- * JEDNO źródło prawdy dla trzech miejsc, które wcześniej duplikowały tę logikę:
- *  - warstwa przeglądarki   apps/web/src/ner-browser.ts
- *  - przykład Node          examples/ner-onnx-node.mjs
- *  - benchmark              scripts/benchmark/run.mjs
+ * `token-classification` w transformers.js nie zwraca offsetów `start`/`end` (issue #359), a `word`
+ * to fragment subword. Dlatego kandydata lokalizujemy sami: w strumieniu liter z mapą na pozycje
+ * oryginału, potem rozszerzamy do granic słowa. Gdy offsety są, używamy ich zamiast skanu.
  *
- * KLUCZOWE OGRANICZENIE (zweryfikowane w @huggingface/transformers 3.7.6, issue #359):
- * przeglądarkowy `token-classification` NIE zwraca offsetów `start`/`end` ani nie wspiera
- * `aggregation_strategy` — encja to tylko `{ entity, score, index, word }`, gdzie `word` to
- * fragment subword. Dlatego kandydata LOKALIZUJEMY w tekście sami: przez strumień liter
- * (ignorujący spacje/interpunkcję) z mapą na pozycje oryginału, potem rozszerzamy do granic
- * słowa (odpowiednik `_expand_to_word` z services/ner/app.py). Gdy offsety kiedyś się pojawią
- * (pola `start`/`end`), używamy ich zamiast skanu.
- *
- * FILOZOFIA PROJEKTU: precyzja > recall. Model dokłada tylko PEWNE osoby:
- *  - próg pewności `score` (jak PII_NER_MIN_SCORE w app.py),
- *  - reużyte stoplisty rdzenia (przymiotniki geo/narodowe, słowa instytucji),
- *  - homonimy rzeczowników pospolitych (Wilk, Baran, Lis…) maskowane WYŁĄCZNIE przy bardzo
- *    wysokiej pewności — „Wilk biegał po lesie" nie może zniknąć,
- *  - „prefix-grow" (rozszerzenie krótkiego trafienia na dłuższe słowo) maskuje tylko, gdy
- *    powstałe słowo WYGLĄDA na nazwisko — żeby „Kot"→„Kotłownia" nie zjadło zwykłego wyrazu,
- *  - istniejące placeholdery ([PESEL], [IMIĘ I NAZWISKO]…) są nietykalne (idempotencja).
- *
- * Bez zależności zewnętrznych i bez `throw` — kontrakt fail-safe (`null`) zostaje u wołających
- * (ner-browser.ts / nerRedact), które łapią wyjątki modelu. Działa w Node/przeglądarce/CLI.
+ * Bez `throw`: wyjątki modelu łapie wołający (dodatek AI, benchmark).
  */
 
 import { NON_SURNAME_ADJ, HOMOGRAPH_SURNAMES, isGeoAdjective, normalizeSurnameKey } from './surnames.js';
@@ -32,33 +13,24 @@ import { NON_PERSON_CONTEXT } from './guards/eponyms.js';
 import { LEGAL_ENTITY_WORDS } from './guards/roles.js';
 
 const DEFAULT_MASK = '[IMIĘ I NAZWISKO]';
-const DEFAULT_MIN_SCORE = 0.5; // == PII_NER_MIN_SCORE (services/ner/app.py)
-// Domyślnie NIE maskujemy gołych homonimów rzeczowników (Wilk/Lis/Baran…) — nawet przy wysokim
-// score. Empirycznie int8 FastPDN daje „Lis przemknął przez drogę" score ≥0.9 (fałszywy pozytyw).
-// Homonim będący realną osobą z kontekstem (imię obok / „Pan") łapie rdzeń PRZED warstwą NER,
-// więc model widzi już placeholder. Opt-in przez `homographMinScore` (np. 0.9). Precyzja > recall.
+const DEFAULT_MIN_SCORE = 0.5;
+// Gołych homonimów (Wilk, Lis) nie maskujemy nawet przy wysokim score: model daje „Lis przemknął
+// przez drogę" ≥0.9. Osobę z kontekstem (imię obok, „Pan") łapie wcześniej rdzeń.
 const DEFAULT_HOMOGRAPH_MIN_SCORE = Infinity;
 
-// Dowolna litera Unicode (nie tylko polska) — strumień liter + boundary. Dzięki temu obce
-// nazwiska (Müller, Kovač, Nguyễn) nie gubią końcówek przy dopasowaniu/rozszerzaniu.
+// Dowolna litera Unicode, żeby obce nazwiska (Müller, Nguyễn) nie gubiły końcówek.
 const LETTER = /\p{L}/u;
-// Wszystko, co NIE jest literą — do wydobycia „gołych" liter kandydata do lokalizacji.
 const NON_LETTER_G = /\P{L}/gu;
-// Znak „słowa": litera LUB myślnik — do rozszerzania spanu na całe słowo (Nowak-Schmidt, Gz→Gzowski).
-// (Nazwiska z apostrofem, np. O'Brien, obejmuje sam strumień liter — obie części są w kandydacie,
-// a apostrof leży między dopasowanymi literami; nie trzeba go tu dodawać.)
+const UPPER_START = /^\p{Lu}/u;
+// Litera albo myślnik: rozszerzanie spanu na całe słowo (Nowak-Schmidt, „Gz" do „Gzowski").
 const WORD_CHAR = /[\p{L}-]/u;
-// Istniejące placeholdery rdzenia ([PESEL], [IMIĘ I NAZWISKO], [OSOBA-A]…) — NIE tykać (idempotencja).
+// Placeholdery rdzenia są nietykalne (idempotencja).
 const MASK_SPAN = /\[[^\][\n]*\]/gu;
-// Znaczniki XML/HTML — jak placeholdery: NIETYKALNE. Model potrafił otagować „Customer"
-// w „</Customer>" jako osobę i maska rozrywała strukturę dokumentu; wartości elementów
-// osobowych maskuje RDZEŃ kotwicami strukturalnymi, zanim warstwa NER zobaczy tekst.
+// Znaczniki XML/HTML nietykalne: model taguje nazwy elementów (</Customer>) jako osoby.
 const TAG_SPAN = /<[^<>\n]{1,80}>/gu;
 
-// Częste polskie rzeczowniki pospolite z wielkiej litery na początku zdania (kontekst urzędowy/
-// prawny), które model NER bywa fałszywie taguje jako osobę. Bramka „capitalized ⇒ akceptuj"
-// (potrzebna, by obce nazwiska bez polskiej morfologii przeszły) sama ich nie odrzuci — stąd wąska,
-// dziedzinowa stoplista. Żaden z tych wyrazów nie jest polskim nazwiskiem.
+// Rzeczowniki pospolite z wielkiej litery na początku zdania, które model taguje jako osobę.
+// Bramka „wielka litera" (potrzebna obcym nazwiskom) ich nie odrzuci; żaden nie jest nazwiskiem.
 const NER_COMMON_NOUNS = new Set<string>(
   (
     'sprawa sprawie sprawy sprawą sprawozdanie postanowienie postanowieniu rozpoznanie ' +
@@ -68,11 +40,12 @@ const NER_COMMON_NOUNS = new Set<string>(
   ).split(/\s+/),
 );
 
-/** Pojedyncza encja z pipeline `token-classification`. `start`/`end` future-proof (dziś brak). */
+/** Pojedyncza encja z pipeline `token-classification`. `start`/`end` na przyszłość (dziś brak). */
 export interface NerToken {
   entity: string;
   word: string;
   score?: number;
+  /** Nieużywane, zgodność z wyjściem transformers.js. */
   index?: number;
   start?: number;
   end?: number;
@@ -85,11 +58,11 @@ export interface NerPostprocessOptions {
   minScore?: number;
   /** Czy etykieta oznacza osobę. Domyślnie: `nam_liv_person` / `PER` / `persName`. */
   isPersonLabel?: (entity: string) => boolean;
-  /** Odrzuć kandydata (true ⇒ NIE maskuj). Domyślnie: przymiotniki geo + słowa instytucji. */
+  /** Odrzuć kandydata (true: nie maskuj). Domyślnie: przymiotniki geo i słowa instytucji. */
   isStopword?: (candidate: string) => boolean;
-  /** Czy kandydat to homonim rzeczownika pospolitego (Wilk, Baran…). Domyślnie: HOMOGRAPH_SURNAMES. */
+  /** Czy kandydat to homonim rzeczownika pospolitego (Wilk, Baran). Domyślnie: HOMOGRAPH_SURNAMES. */
   isHomograph?: (candidate: string) => boolean;
-  /** Homonim maskujemy tylko przy score >= tej wartości. Domyślnie Infinity = NIGDY (opt-in np. 0.9). */
+  /** Homonim maskujemy tylko przy score >= tej wartości. Domyślnie Infinity, czyli nigdy (opt-in np. 0.9). */
   homographMinScore?: number;
 }
 
@@ -98,31 +71,27 @@ export interface NerPostprocessResult {
   found: { type: 'IMIE'; count: number }[];
 }
 
-/** Domyślny predykat etykiety osobowej — obejmuje FastPDN (nam_liv_person), wikiann (PER), spaCy. */
+/** Domyślny predykat etykiety osobowej: FastPDN (nam_liv_person), wikiann (PER), spaCy. */
 export function defaultIsPersonLabel(entity: string): boolean {
   const e = String(entity ?? '');
   return e.includes('nam_liv_person') || e.endsWith('PER') || e.includes('persName');
 }
 
 /**
- * Domyślny filtr precyzji: odrzuca kandydatów będących przymiotnikami geo/narodowymi
- * (Warszawski, Mazowiecki, Jagielloński — także w odmianie) lub słowami instytucji
- * (Sąd, Trybunał, Ministerstwo, Najwyższy). Reużywa stoplist rdzenia — brak duplikacji list.
- * Wielowyrazowca odrzuca, gdy KTÓRYKOLWIEK człon jest stoplistą (chroni „Sąd Najwyższy",
- * „Uniwersytet Warszawski" — instytucji model nie ma prawa maskować jako osoby).
+ * Odrzuca przymiotniki geo/narodowe (Warszawski, też w odmianie) i słowa instytucji. Wielowyrazowca
+ * odrzuca, gdy którykolwiek człon pasuje, żeby „Sąd Najwyższy" nie został zamaskowany jako osoba.
  */
 export function defaultIsStopword(candidate: string): boolean {
   const w = candidate.toLowerCase().trim();
   if (!w) return true;
-  const parts = w.split(/\s+/).filter(Boolean);
-  for (const p of parts) {
+  for (const p of w.split(/\s+/)) {
     if (LEGAL_ENTITY_WORDS.has(p) || NON_PERSON_CONTEXT.has(p) || NER_COMMON_NOUNS.has(p)) return true;
     if (NON_SURNAME_ADJ.has(p) || isGeoAdjective(p)) return true;
   }
   return false;
 }
 
-/** Domyślny predykat homonimu — sprawdza ostatni człon (pozycję nazwiska), też w odmianie. */
+/** Domyślny predykat homonimu: sprawdza ostatni człon (pozycję nazwiska), też w odmianie. */
 export function defaultIsHomograph(candidate: string): boolean {
   const parts = candidate.toLowerCase().split(/\s+/).filter(Boolean);
   const last = parts[parts.length - 1] ?? '';
@@ -136,7 +105,7 @@ interface Group {
   end?: number;
 }
 
-/** Strumień liter (bez spacji/interpunkcji/myślnika) + mapa na pozycje w oryginale. */
+/** Strumień samych liter (małych) i mapa na pozycje w oryginale. */
 function buildLetterStream(text: string): { stream: string; pos: number[] } {
   let stream = '';
   const pos: number[] = [];
@@ -144,7 +113,7 @@ function buildLetterStream(text: string): { stream: string; pos: number[] } {
     const ch = text[i];
     if (LETTER.test(ch)) {
       const lo = ch.toLowerCase();
-      // Utrzymaj mapę 1:1: gdy toLowerCase rozwija znak (np. „İ"→2 znaki), bierz pierwszy.
+      // Mapa 1:1: gdy toLowerCase rozwija znak („İ" na 2 znaki), bierzemy pierwszy.
       stream += lo.length === 1 ? lo : lo[0];
       pos.push(i);
     }
@@ -152,7 +121,7 @@ function buildLetterStream(text: string): { stream: string; pos: number[] } {
   return { stream, pos };
 }
 
-/** Rozszerz [s,e) do granic słowa — subwordowy match potrafi uciąć „Gz|owski". */
+/** Rozszerz [s,e) do granic słowa, bo dopasowanie subwordów potrafi uciąć „Gz|owski". */
 function expandToWord(text: string, s: number, e: number): [number, number] {
   while (s > 0 && WORD_CHAR.test(text[s - 1])) s--;
   while (e < text.length && WORD_CHAR.test(text[e])) e++;
@@ -160,9 +129,8 @@ function expandToWord(text: string, s: number, e: number): [number, number] {
 }
 
 /**
- * Znajdź kandydata w strumieniu liter od indeksu `fromLi`, tylko na GRANICY SŁOWA (poprzedni
- * znak w oryginale nie jest literą — chroni przed „panna" → „annanowak" w środku wyrazu).
- * Zwraca SUROWY span liter (przed rozszerzeniem) w pozycjach oryginału + następny indeks litery.
+ * Szuka kandydata w strumieniu od `fromLi`, tylko na granicy słowa, żeby „anna" nie trafiła w środek
+ * „panna". Zwraca surowy span w pozycjach oryginału i indeks następnej litery.
  */
 function locate(
   stream: string,
@@ -186,7 +154,7 @@ function locate(
 /**
  * Zamień wyjście NER na tekst z zamaskowanymi osobami. Deterministyczne, bez `throw`.
  *
- * @param text   tekst wejściowy (u nas: JUŻ po redakcji strukturalnej — patrz scheduleNer/app.py).
+ * @param text   tekst wejściowy, zwykle już po redakcji strukturalnej (redactPII).
  * @param tokens surowe encje z pipeline `token-classification`.
  */
 export function applyNerPersons(
@@ -204,15 +172,13 @@ export function applyNerPersons(
   const isStopword = options.isStopword ?? defaultIsStopword;
   const isHomograph = options.isHomograph ?? defaultIsHomograph;
 
-  // 1) Grupowanie KOLEJNYCH tokenów osobowych (bez dzielenia po B-/I-). FastPDN int8 znakuje
-  //    subwordy jako osobne B- (np. „Achtelika" = A|ch|te|lika, każdy B-), więc dzielenie po B-
-  //    fragmentowałoby jedno nazwisko i gubiło je. Sąsiednie osoby bez separatora scalą się w jedną
-  //    maskę — bezpieczne dla anonimizacji (oba nazwiska ukryte); w piśmie ludzie są i tak
-  //    rozdzieleni interpunkcją (przecinek/„i" = token nie-osobowy, który zamyka grupę).
+  // Grupujemy kolejne tokeny osobowe bez dzielenia po B-/I-: FastPDN int8 znakuje subwordy jako
+  // osobne B- („Achtelika" = A|ch|te|lika), więc podział gubiłby nazwisko. Sąsiednie osoby bez
+  // separatora scalą się w jedną maskę, co dla anonimizacji jest bezpieczne.
   const groups: Group[] = [];
   let cur: Group | null = null;
   const flush = () => {
-    if (cur && cur.words.length) groups.push(cur);
+    if (cur) groups.push(cur);
     cur = null;
   };
   for (const t of tokens) {
@@ -228,23 +194,23 @@ export function applyNerPersons(
   }
   flush();
 
-  // Zakresy istniejących placeholderów I znaczników XML/HTML — kandydat nachodzący na nie
-  // jest ODRZUCANY (idempotencja + nienaruszalność struktury dokumentu).
-  const maskRanges = [...text.matchAll(MASK_SPAN), ...text.matchAll(TAG_SPAN)].map(
-    (m) => [m.index ?? 0, (m.index ?? 0) + m[0].length],
-  );
+  const maskRanges = [...text.matchAll(MASK_SPAN), ...text.matchAll(TAG_SPAN)].map((m) => [
+    m.index!,
+    m.index! + m[0].length,
+  ]);
   const inMask = (s: number, e: number) => maskRanges.some(([ms, me]) => s < me && e > ms);
 
-  // 2) Selekcja + lokalizacja. Skan kursorowy zamiast globalnego indexOf-od-0 (naprawia duplikaty).
+  // Skan kursorowy: kolejne wystąpienia, nie zawsze od 0.
   const { stream, pos } = buildLetterStream(text);
   const spans: Array<[number, number]> = [];
   let cursorLi = 0;
   const overlaps = (s: number, e: number) => spans.some(([ps, pe]) => s < pe && e > ps);
 
   for (const g of groups) {
-    if (g.headScore < minScore) continue; // próg pewności (precyzja > recall)
+    if (g.headScore < minScore) continue;
+    const rejected = (w: string) =>
+      isStopword(w) || (isHomograph(w) && g.headScore < homographMinScore);
 
-    // Future-proof: jeśli model dostarczył offsety znakowe, użyj ich zamiast skanu.
     if (typeof g.start === 'number' && typeof g.end === 'number' && g.end > g.start) {
       const [s, e] = expandToWord(text, g.start, g.end);
       if (!inMask(s, e) && !overlaps(s, e)) spans.push([s, e]);
@@ -254,44 +220,32 @@ export function applyNerPersons(
     const cand = g.words.join(' ').replace(/\s+/g, ' ').trim();
     const candLetters = cand.toLowerCase().replace(NON_LETTER_G, '');
     if (candLetters.length < 2) continue;
-    if (isStopword(cand)) continue; // przymiotnik geo / instytucja → nie osoba
-    if (isHomograph(cand) && g.headScore < homographMinScore) continue; // homonim tylko przy pewności
+    if (rejected(cand)) continue;
 
-    // Lokalizacja: przejdź KOLEJNE wystąpienia od kursora (fallback od 0). Trafienie w istniejącym
-    // placeholderze albo nachodzące na już zajęty span POMIJAMY i próbujemy następne wystąpienie —
-    // nie porzucamy całego kandydata, inaczej realne późniejsze nazwisko by wyciekło.
+    // Trafienie w placeholderze albo w zajętym spanie pomijamy i szukamy dalej; porzucenie
+    // kandydata zostawiłoby jawne późniejsze wystąpienie nazwiska. Fallback od 0 na rozjazd kolejności.
     let hit = locate(stream, pos, text, candLetters, cursorLi);
-    if (!hit) hit = locate(stream, pos, text, candLetters, 0); // rozjazd kolejności
+    if (!hit) hit = locate(stream, pos, text, candLetters, 0);
     while (hit) {
       cursorLi = Math.max(cursorLi, hit.nextLi);
       const [s, e] = expandToWord(text, hit.rawS, hit.rawE);
       if (inMask(s, e) || overlaps(s, e)) {
-        hit = locate(stream, pos, text, candLetters, hit.nextLi); // zajęte/w masce → następne wystąpienie
+        hit = locate(stream, pos, text, candLetters, hit.nextLi);
         continue;
       }
-      // Filtry precyzji na słowie POWIERZCHNIOWYM — dotyczą KANDYDATA (nie pojedynczego wystąpienia),
-      // więc gdy odrzucą, kandydat odpada w całości:
-      //  - instytucja / przymiotnik geo / częsty rzeczownik dokumentowy (stoplista),
-      //  - homonim rzeczownika pospolitego (wg progu; domyślnie Infinity = zawsze odrzuć),
-      //  - „prefix-grow" na słowo pisane z MAŁEJ litery („mai"→„maila") — zwykły wyraz, nie nazwisko.
-      //    (Obce nazwiska tagowane krótkim prefiksem, np. Schmidt←„Schmi", zaczynają się z wielkiej.)
+      // Filtry na słowie powierzchniowym odrzucają cały kandydat. Rozszerzenie na słowo z małej
+      // litery („mai" do „maila") to zwykły wyraz; obce nazwiska z krótkiego prefiksu mają wielką.
       const surf = text.slice(s, e).trim();
       const surfLetters = surf.toLowerCase().replace(NON_LETTER_G, '');
-      if (
-        isStopword(surf) ||
-        (isHomograph(surf) && g.headScore < homographMinScore) ||
-        (surfLetters !== candLetters && !/^\p{Lu}/u.test(surf))
-      ) {
-        break;
+      if (!rejected(surf) && (surfLetters === candLetters || UPPER_START.test(surf))) {
+        spans.push([s, e]);
       }
-      spans.push([s, e]);
       break;
     }
   }
 
   if (spans.length === 0) return empty;
 
-  // 3) Scal nachodzące/duplikaty (jak app.py).
   spans.sort((a, b) => a[0] - b[0]);
   const merged: Array<[number, number]> = [];
   for (const [s, e] of spans) {
@@ -300,7 +254,7 @@ export function applyNerPersons(
     else merged.push([s, e]);
   }
 
-  // 4) Podmiana OD KOŃCA (malejące offsety) — pozycje wcześniejszych spanów się nie przesuwają.
+  // Podmiana od końca, żeby offsety wcześniejszych spanów się nie przesuwały.
   let redacted = text;
   for (let i = merged.length - 1; i >= 0; i--) {
     const [s, e] = merged[i];

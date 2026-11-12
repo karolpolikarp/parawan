@@ -1,11 +1,9 @@
+// Słowniki polskich miejscowości dla passCity: nazwy wielowyrazowe i miasta przed adresem bez kodu.
+
 /**
- * Polskie miejscowości WIELOWYRAZOWE (człony rozdzielone spacją) — używane WYŁĄCZNIE do
- * rozstrzygnięcia, ile słów za kodem pocztowym doklejać do maski miejscowości (krok 12c).
- * Miasta jednowyrazowe NIE muszą tu być — pierwszy wyraz po kodzie i tak jest maskowany
- * pozycyjnie. Nazwy z myślnikiem („Bielsko-Biała") to jeden token, więc też nie wymagają
- * wpisu — dodajemy jednak ich wariant zapisany spacją („bielsko biała"), bo bywa pisany
- * rozłącznie. Nietrafiona/brakująca pozycja degraduje łagodnie: maskujemy sam pierwszy
- * (główny) człon, a zostaje przymiotnik regionalny („[MIEJSCOWOŚĆ] Wielkopolski").
+ * Miejscowości wielowyrazowe: ile słów za kodem pocztowym dołączyć do maski (passCity, miejscowość
+ * po kodzie). Jednowyrazowe i z myślnikiem są jednym tokenem, więc nie wymagają wpisu; wariant
+ * ze spacją („bielsko biała”) jest, bo bywa pisany rozłącznie. Brak wpisu maskuje sam pierwszy człon.
  */
 export const MULTIWORD_CITIES = new Set<string>(
   (
@@ -23,10 +21,9 @@ export const MULTIWORD_CITIES = new Set<string>(
     'skarżysko kamienna|murowana goślina|miasteczko śląskie|ożarów mazowiecki|kędzierzyn koźle|' +
     'duszniki zdrój|kudowa zdrój|polanica zdrój|lądek zdrój|busko zdrój|rabka zdrój|iwonicz zdrój|' +
     'konstancin jeziorna|jastrzębie zdrój|goczałkowice zdrój|połczyn zdrój|świeradów zdrój|' +
-    // toponimy w kształcie „imię + przymiotnik" — bez wpisu para szła w kroku (a) jako osoba
+    // toponimy „imię + przymiotnik”: bez wpisu para wygląda na osobę
     'kazimierz dolny|kazimierza wielka|' +
-    // człon przymiotnikowy zostawał jawny za maską („55-080 [MIEJSCOWOŚĆ] Wrocławskie"), a nazwisko-
-    // podobny („Zebrzydowska") dostawał maskę osoby
+    // człon przymiotnikowy o końcówce nazwiskowej („Zebrzydowska”) bez wpisu dostałby maskę osoby
     'kąty wrocławskie|pruszcz gdański|kalisz pomorski|siemianowice śląskie|strzelce opolskie|' +
     'strzelce krajeńskie|zalesie górne|stare babice|żabia wola|wiązowna kościelna|kalwaria zebrzydowska|' +
     'biały dunajec|czarny dunajec|tarnowo podgórne|łomianki dolne|dobre miasto|zduńska wola|' +
@@ -38,11 +35,8 @@ export const MULTIWORD_CITIES = new Set<string>(
     'rudnik nad sanem|krościenko nad dunajcem'
   ).split('|'),
 );
-/**
- * Miejscowniki nazw wielowyrazowych („zam. w Dąbrowie Górniczej", „ur. w Piotrkowie Trybunalskim").
- * POLISH_CITIES znało tylko pierwszy człon („dąbrowie"), więc przymiotnik zostawał jawny za maską,
- * a ten o końcówce nazwiskowej („Trybunalskim", „Tarnowskiej") dostawał maskę osoby.
- */
+// Miejscowniki nazw wielowyrazowych („zam. w Piotrkowie Trybunalskim”): bez nich przymiotnik
+// o końcówce nazwiskowej dostawałby maskę osoby.
 const MULTIWORD_CITIES_LOC = (
   'dąbrowie górniczej|dąbrowie tarnowskiej|dąbrowie białostockiej|rudzie śląskiej|stalowej woli|' +
   'piotrkowie trybunalskim|gorzowie wielkopolskim|ostrowie wielkopolskim|ostrowi mazowieckiej|' +
@@ -63,19 +57,16 @@ const MULTIWORD_CITIES_LOC = (
 ).split('|');
 
 /**
- * Słownik polskich MIAST (mianownik + częste formy zależne dużych miast) — używany WYŁĄCZNIE
- * do rozpoznania miejscowości stojącej PRZED adresem BEZ kodu pocztowego („Warszawa, ul. …",
- * „w Poznaniu, ul. …"), krok 12d. Kotwicą jest wtedy sam wskaźnik adresu (nie kod), więc bez
- * słownika nie odróżnilibyśmy miasta od ogona nazwy instytucji („Zarząd Dróg Miejskich, ul. …").
- * Słownik NIE działa w wolnym tekście — tylko w pozycji „…, ul./[ADRES]" — więc „mieszka w
- * Warszawie" pozostaje nietknięte (zero nadmaskowania). Krótkie, wieloznaczne nazwy (Biała,
- * Wola, Góra, Nowe) celowo POMINIĘTE jako samodzielne — łapiemy je tylko w formie wielowyrazowej.
+ * Miasta przed adresem bez kodu pocztowego („Warszawa, ul. …”; passCity). Kotwicą jest sam
+ * wskaźnik adresu, więc bez słownika miasto nie odróżniłoby się od ogona nazwy instytucji
+ * („Zarząd Dróg Miejskich, ul. …”). Nie działa w wolnym tekście. Krótkie, wieloznaczne nazwy
+ * (Biała, Wola, Góra) są tylko w formie wielowyrazowej.
  */
 export const POLISH_CITIES = new Set<string>([
   ...MULTIWORD_CITIES,
   ...MULTIWORD_CITIES_LOC,
   ...(
-    // mianownik — miasta wojewódzkie, na prawach powiatu i większe ośrodki
+    // mianownik: miasta wojewódzkie, na prawach powiatu i większe ośrodki
     'warszawa|kraków|łódź|wrocław|poznań|gdańsk|szczecin|bydgoszcz|lublin|białystok|katowice|' +
     'gdynia|częstochowa|radom|sosnowiec|toruń|kielce|rzeszów|gliwice|zabrze|olsztyn|bytom|rybnik|' +
     'opole|tychy|elbląg|płock|wałbrzych|włocławek|tarnów|chorzów|koszalin|kalisz|legnica|grudziądz|' +
@@ -90,29 +81,27 @@ export const POLISH_CITIES = new Set<string>([
     'wieliczka|myślenice|gorlice|limanowa|zakopane|trzebinia|libiąż|wadowice|żywiec|pszczyna|mikołów|' +
     'lubliniec|knurów|pyskowice|nowogard|police|goleniów|gryfino|choszczno|wałcz|złotów|chodzież|' +
     'oborniki|wolsztyn|września|środa|krapkowice|kędzierzyn|namysłów|prudnik|strzelce|ozimek|' +
-    // miasta z myślnikiem (jeden token — słownik musi mieć formę z myślnikiem)
+    // miasta z myślnikiem są jednym tokenem, więc potrzebują formy z myślnikiem
     'bielsko-biała|kędzierzyn-koźle|jastrzębie-zdrój|skarżysko-kamienna|konstancin-jeziorna|' +
     'kudowa-zdrój|polanica-zdrój|duszniki-zdrój|lądek-zdrój|busko-zdrój|rabka-zdrój|iwonicz-zdrój|' +
     'świeradów-zdrój|połczyn-zdrój|goczałkowice-zdrój|' +
-    // formy zależne miast z myślnikiem („ur. w Bielsku-Białej", „zam. w Jastrzębiu-Zdroju")
+    // ich formy zależne („ur. w Bielsku-Białej”)
     'bielsku-białej|bielska-białej|kędzierzynie-koźlu|kędzierzyna-koźla|jastrzębiu-zdroju|' +
     'skarżysku-kamiennej|konstancinie-jeziornie|' +
-    // częste formy zależne dużych miast (pozycja „w <mieście>, ul. …")
+    // formy zależne dużych miast
     'warszawie|warszawy|krakowie|krakowa|łodzi|wrocławiu|wrocławia|poznaniu|poznania|gdańsku|gdańska|' +
     'szczecinie|bydgoszczy|lublinie|lublina|katowicach|gdyni|częstochowie|radomiu|radomia|sosnowcu|' +
     'toruniu|torunia|kielcach|rzeszowie|olsztynie|opolu|płocku|tarnowie|koszalinie|kaliszu|legnicy|' +
     'słupsku|zamościu|chełmie|elblągu|gliwicach|bytomiu|rybniku|' +
-    // miejscownik częstych średnich miast (pozycja „zamieszkały/mieszka w <mieście>")
+    // miejscownik średnich miast
     'sopocie|gnieźnie|inowrocławiu|koninie|głogowie|lesznie|ełku|mielcu|tczewie|będzinie|zgierzu|' +
     'raciborzu|zawierciu|wejherowie|świnoujściu|puławach|kutnie|nysie|ciechanowie|sieradzu|kołobrzegu|' +
     'otwocku|oświęcimiu|krośnie|sanoku|cieszynie|jarosławiu|zakopanem|żywcu|wieliczce|wadowicach|' +
     'pszczynie|mikołowie|jaworznie|dąbrowie|chorzowie|zabrzu|jastrzębiu|tychach|wałbrzychu|włocławku|' +
     'grudziądzu|jeleniej górze|zielonej górze|nowym sączu|nowym targu|nowym dworze|gorzowie|' +
     'stargardzie|świdnicy|piotrkowie|ostrowie|suwałkach|starachowicach|skierniewicach|tarnobrzegu|' +
-    // Białystok był jedynym miastem wojewódzkim bez formy zależnej, Siedlce — nawet bez mianownika
-    // („zam. w Białymstoku", „ur. w Siedlcach")
     'białymstoku|białegostoku|pruszkowie|pruszkowa|legionowie|legionowa|siedlce|siedlcach|siedlec|' +
-    // formy zależne toponimów „imię + przymiotnik" (BEZ „kazimierza wielkiego" — król i patron ulic)
+    // toponimy „imię + przymiotnik” bez „kazimierza wielkiego” (król, patron ulic)
     'kazimierzu dolnym|kazimierza dolnego|kazimierzem dolnym|kazimierzy wielkiej'
   ).split('|'),
 ]);

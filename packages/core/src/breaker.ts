@@ -1,9 +1,7 @@
 /**
- * Minimalny circuit breaker (per URL). Wrażliwy: 3 porażki → otwarcie na 30 s.
- * NER/LLM to WZBOGACENIE, nie ścieżka krytyczna — gdy usługa pada, szybko przestajemy
- * ją odpytywać i jedziemy na redakcji in-process. Fabryka daje OSOBNĄ mapę stanu per
- * moduł, więc reset breakerów NER i LLM działa niezależnie (istotne w testach).
- * Stan jest w pełni zamknięty w domknięciu — klient nie dotyka pól bezpośrednio.
+ * Circuit breaker per URL dla usług NER/LLM: 3 porażki z rzędu otwierają obwód na 30 s.
+ * Usługi nie są ścieżką krytyczną, więc przy awarii od razu zostaje redakcja in-process.
+ * Każde wywołanie fabryki ma osobny stan, żeby breakery NER i LLM resetowały się niezależnie.
  */
 const FAILURE_THRESHOLD = 3;
 const RESET_TIMEOUT_MS = 30000;
@@ -14,13 +12,11 @@ interface BreakerState {
 }
 
 export interface Breaker {
-  /** Czy obwód jest otwarty (usługę pomijamy)? Obsługuje przejście half-open. */
+  /** Czy obwód jest otwarty (usługę pomijamy)? Po czasie przepuszcza jedną próbę (half-open). */
   isOpen(url: string): boolean;
-  /** Udana odpowiedź — zeruje licznik porażek. */
   recordSuccess(url: string): void;
-  /** Porażka — po FAILURE_THRESHOLD z rzędu otwiera obwód na RESET_TIMEOUT_MS. */
+  /** Po FAILURE_THRESHOLD porażkach z rzędu otwiera obwód na RESET_TIMEOUT_MS. */
   recordFailure(url: string): void;
-  /** Testy/diagnostyka: wyzeruj cały stan. */
   reset(): void;
 }
 
@@ -39,7 +35,8 @@ export function createBreaker(): Breaker {
       const b = stateFor(url);
       if (b.openedAt === null) return false;
       if (Date.now() - b.openedAt >= RESET_TIMEOUT_MS) {
-        b.openedAt = null; // half-open: przepuść jedną próbę
+        // half-open: jedna kolejna porażka od razu otwiera obwód ponownie
+        b.openedAt = null;
         b.failures = FAILURE_THRESHOLD - 1;
         return false;
       }

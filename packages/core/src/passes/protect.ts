@@ -1,3 +1,4 @@
+// Faza 0: ucieczki JSON i ochrona URL-i sentinelem, z maskowaniem PII wewnątrz adresu.
 import { looksLikeSurname, surnameBase } from '../surnames.js';
 import { PL_LO, PL_UP } from '../charset.js';
 import { indexToLetters, JSON_ESC_TO_PUA, maskConst, type RedactCtx, URL_SENTINEL_CLOSE, URL_SENTINEL_OPEN } from '../context.js';
@@ -5,43 +6,35 @@ import { isPropagatableLogin } from '../dict/forms.js';
 import { POLISH_FIRST_NAMES } from '../dict/names.js';
 import { RE_EMAIL, RE_EMAIL_CHAIN, RE_EMAIL_URLENC, RE_EMAIL_URLENC_CHAIN, replaceEmails, URL_PARAM_RULES, URL_PROFILE_PATH_RULES } from './email.js';
 import { hasKsefAnchor, maskKsefMatch, maskKwMatch, RE_KSEF_VALUE, RE_KW_VALUE } from './kw-ksef-case.js';
+import { JWT_SRC } from './network.js';
 
-
-// ═══════════════════════ FAZA 0 · OCHRONA URL (sentinel) ═══════════════════════
-// Dosłowne ucieczki „\n/\r/\t" (patrz JSON_ESC_TO_PUA). Tylko NIEucieczone (parzysta liczba
-// backslashy przed — „C:\\nowy" w JSON-ie to ścieżka, nie nowa linia) i tylko sklejone z treścią
-// (litera, cyfra, kolejny backslash): „"\n"" czy „\n " niczego nie sklejają. Długość tekstu bez
-// zmian. Tekst, który już zawiera te znaki PUA, zostawiamy w spokoju — przywrócenie byłoby niejednoznaczne.
-// Ścieżki Windows („C:\Users\tkaminski", „\\FS01\home$\tkaminski") to NIE ucieczki: wyraz (ciąg bez
-// białych znaków) z backslashem, którego nie da się odczytać jako ucieczki JSON („\U", „\h", „\D"),
-// zostaje nietknięty — inaczej login „tkaminski" rozpadał się na „\t" + „kaminski" i wyciekał.
+// Dosłowne ucieczki „\n/\r/\t" (patrz JSON_ESC_TO_PUA), tylko nieucieczone (parzysta liczba
+// backslashy: „C:\\nowy" to ścieżka) i sklejone z treścią. Długość tekstu bez zmian. Tekst, który
+// już zawiera te znaki PUA, zostawiamy, bo przywrócenie byłoby niejednoznaczne. Wyraz z backslashem
+// spoza ucieczek JSON to ścieżka Windows („C:\Users\tkaminski"): zostaje, żeby „\t" nie urwało loginu.
 const RE_JSON_VALID_ESCAPE = /\\(?:u[0-9A-Fa-f]{4}|["\\/bfnrt])/g;
+const RE_JSON_GLUED_ESCAPE = /(?<!\\)((?:\\\\)*)\\([nrt])(?=[\p{L}\p{N}\\])/gu;
 export function passProtectJsonEscapes(ctx: RedactCtx): void {
   if (!ctx.text.includes('\\') || /[\uE009\uE00A\uE00D]/.test(ctx.text)) return;
   ctx.text = ctx.text.replace(/\S+/g, (tok) => {
     if (!tok.includes('\\') || tok.replace(RE_JSON_VALID_ESCAPE, '').includes('\\')) return tok;
-    return tok.replace(/(?<!\\)((?:\\\\)*)\\([nrt])(?=[\p{L}\p{N}\\])/gu, (_m, bs: string, l: string) => {
+    return tok.replace(RE_JSON_GLUED_ESCAPE, (_m, bs: string, l: string) => {
       ctx.jsonEscapes = true;
       return `${bs}\\${JSON_ESC_TO_PUA[l]}`;
     });
   });
 }
 
-// CHRONIMY całe adresy przed pozostałymi przebiegami: bez tego detektory nazwisk/telefonów/
-// PESEL gryzły fragmenty URL-a. Najpierw maskujemy PII WEWNĄTRZ (e-maile, wartości parametrów
-// ?user=/?email=…), potem podmieniamy URL na sentinel U+E000<litery>U+E001 i przywracamy na
-// końcu (finalizePersons). Drugi przebieg jest idempotentny: klasy wartości wykluczają „[".
-// Adres profilu bywa wklejony bez schematu („pl.linkedin.com/in/…" w stopce CV) — dla tych kilku
-// hostów z regułą profilu (URL_PROFILE_PATH_RULES) to też adres. Lewa granica bez kropki, „@"
-// i ukośnika: „jan@linkedin.com/…" to e-mail, a „x.pl/linkedin.com/…" część innej ścieżki.
-// Adres bez schematu kończy się na samym profilu (segment, krótkie człony „/pub/…/12/345",
-// parametry bez „,;|"). W stopce CV i w polu z OCR sklejone z nim „;501-234-567", „,PESEL:…"
-// czy „/Documents/PESEL_….pdf" trafiały do chronionego adresu i wychodziły jawne.
+// Cały adres chronimy przed pozostałymi przebiegami, żeby detektory nazwisk, telefonów i PESEL
+// nie gryzły jego fragmentów: PII wewnątrz maskujemy tutaj, potem URL idzie pod sentinel
+// U+E000<litery>U+E001 i wraca na końcu (finalizePersons). Klasy wartości wykluczają „[", więc
+// drugi przebieg jest idempotentny.
+// Bez schematu adresem jest tylko profil z URL_PROFILE_PATH_RULES („pl.linkedin.com/in/…"). Lewa
+// granica bez kropki, „@" i ukośnika („jan@linkedin.com/…" to e-mail). Adres kończy się na samym
+// profilu, żeby doklejone „;501-234-567" czy „,PESEL:…" czytały zwykłe przebiegi.
 const URL_BARE_SEG = String.raw`[^/?#\s<>"'„”()[\],;|]+`;
-// Z parametrów tylko te znane z linków tych serwisów („?trk=…&originalSubdomain=pl",
-// „?id=…&sk=about"), a kropka w wartości tylko przed małą literą. Doklejone bez spacji
-// „.Anna Nowak", „.Tel.501234567", „&Anna=Nowak" czy „?iban=PL61…" wchodziły do chronionego
-// adresu i zostawały jawne; teraz adres kończy się przed nimi i resztę czytają zwykłe przebiegi.
+// Z parametrów tylko znane z linków tych serwisów („?trk=…&originalSubdomain=pl"), a kropka
+// w wartości tylko przed małą literą, żeby doklejone „.Anna Nowak" czy „&Anna=Nowak" zostały poza adresem.
 const URL_BARE_PARAM =
   '(?:id|sk|ref|refid|fref|hc_ref|__tn__|mibextid|rdid|trk|trkInfo|locale|originalSubdomain|lipi|utm_[a-z]+)' +
   String.raw`=[A-Za-z0-9_%+~-]*(?:\.[a-z][A-Za-z0-9_%+~-]*)*`;
@@ -58,32 +51,29 @@ const RE_URL_PARAM_PERSON = new RegExp(
 );
 const RE_URL_CONTENT_PARAM =
   /^(?:t|q|p|c|s|cat|category|categories|kategoria|kategorie|kolekcja|collection|produkt|product|item|firma|company|brand|marka|shop|sklep|store|title|tytul|tytuł|tag|tags|page|strona|article|artykul|film|movie|book|ksiazka|search|szukaj|query|haslo|wiki|topic|temat|serial|show|album|song|track)$/i;
+// Bez \b: JWT stoi w adresie po „=" albo „#" („#access_token=eyJ…").
+const RE_JWT_IN_URL = new RegExp(JWT_SRC, 'g');
+// Interpunkcja zdania za adresem nie należy do URL-a.
+const RE_URL_TRAIL = /[.,;:!?\]]+$/;
 export function passProtectUrls(ctx: RedactCtx): void {
-  // Kotwica KSeF liczona RAZ: to skan całego wejścia, a wewnątrz callbacku wykonywałby się
-  // dla każdego adresu z osobna (dokument z tysiącami linków rósł kwadratowo — 3,7 s na 1 MB).
+  // Kotwica KSeF to skan całego wejścia: liczona raz, nie dla każdego adresu (koszt kwadratowy).
   const ksefInUrls = ctx.on('KSEF') && hasKsefAnchor(ctx);
-  // Podmieniona ucieczka „\n/\t" kończy adres (w JSON-ie „…/x\nKowalski Jan" nazwisko nie należy do URL-a).
+  // Adres jest chroniony przed resztą przebiegów, więc PII w nim (e-mail, JWT, KSeF, KW, profil,
+  // parametry, imię) maskujemy tutaj. Podmieniona ucieczka „\n/\t" kończy adres.
   ctx.text = ctx.text.replace(RE_URL_PROTECT, (raw) => {
-    const trailMatch = raw.match(/[.,;:!?\]]+$/); // interpunkcja zdania nie należy do URL-a
-    const trail = trailMatch ? trailMatch[0] : '';
-    let url = trail ? raw.slice(0, raw.length - trail.length) : raw;
+    const trail = RE_URL_TRAIL.exec(raw)?.[0] ?? '';
+    let url = raw.slice(0, raw.length - trail.length);
     if (ctx.on('EMAIL')) {
       url = replaceEmails(url, RE_EMAIL_CHAIN, RE_EMAIL, maskConst(ctx, 'EMAIL'));
       url = replaceEmails(url, RE_EMAIL_URLENC_CHAIN, RE_EMAIL_URLENC, maskConst(ctx, 'EMAIL'));
     }
     if (ctx.on('TOKEN')) {
-      // JWT w URL-u (fragment „#access_token=eyJ…") — poza URL-em łapie go passTokens,
-      // ale URL jest sentinelowany WCZEŚNIEJ, więc token trzeba zdjąć już tutaj.
-      url = url.replace(/eyJ[A-Za-z0-9_-]{5,}\.[A-Za-z0-9_-]{5,}\.[A-Za-z0-9_-]{2,}/g, maskConst(ctx, 'TOKEN'));
+      url = url.replace(RE_JWT_IN_URL, maskConst(ctx, 'TOKEN'));
     }
-    // Numer KSeF w ŚCIEŻCE URL-a („…/faktura/5265877635-20250826-0100001AF629-AF/upo") — URL
-    // jest sentinelowany zanim ruszy passKsef, więc numer trzeba zdjąć już tutaj; inaczej NIP
-    // wystawcy zostawał jawny w linku.
     if (ksefInUrls) {
       url = url.replace(RE_KSEF_VALUE, maskKsefMatch(ctx));
     }
-    // Numer księgi w linku do przeglądarki ksiąg („…?kw=KR1P/00234567/6") — URL jest
-    // sentinelowany przed passKw, a z takim linkiem numer prowadzi wprost do odpisu.
+    // Z linkiem do przeglądarki ksiąg („…?kw=KR1P/00234567/6") numer prowadzi wprost do odpisu.
     if (ctx.on('KW')) {
       url = url.replace(RE_KW_VALUE, maskKwMatch(ctx, true));
     }
@@ -104,22 +94,18 @@ export function passProtectUrls(ctx: RedactCtx): void {
         return `${key}${ctx.M[rule.type]}`;
       });
     }
-    // Imię i nazwisko sklejone podkreślnikiem, kropką albo plusem w wartości DOWOLNEGO parametru
-    // („profile.php?ref=Anna_Nowak", „?from=Jan.Kowalski"): adres jest chroniony przed przebiegami
-    // osób, więc takie imię wychodziło jawne. Kotwicą jest imię ze słownika i drugi człon od
-    // wielkiej litery, cała wartość parametru (nie fragment wyrazu).
+    // Imię i nazwisko sklejone „_", „." albo „+" jako cała wartość dowolnego parametru
+    // („?ref=Anna_Nowak"). Kotwicą jest imię ze słownika i drugi człon od wielkiej litery.
     if (ctx.on('IMIE')) {
       url = url.replace(RE_URL_PARAM_PERSON, (pm, key: string, first: string, val: string) => {
         if (!POLISH_FIRST_NAMES.has(first.toLowerCase())) return pm;
-        // Parametr treści sklepu albo serwisu („?kategoria=Anna_Karenina", „?produkt=Maria_Plus",
-        // „?title=Jan_Matejko") to nazwa produktu, kolekcji albo hasła, a drugi człon musi mieć
-        // kształt nazwiska („Maja_Summer", „Anna_Moda" — nie). Precyzja przed nadmaskowaniem.
+        // Parametr treści („?kategoria=Anna_Karenina") to nazwa, nie osoba; drugi człon musi mieć
+        // kształt nazwiska („Anna_Moda" zostaje).
         if (RE_URL_CONTENT_PARAM.test(key.slice(1, -1))) return pm;
         const last = val.split(/[._+]/).pop() ?? '';
         if (!surnameBase(last) && !looksLikeSurname(last)) return pm;
         ctx.bump('IMIE');
-        // w trybie pseudonimów ta sama osoba co w treści („Anna Nowak" → [OSOBA-A])
-        return `${key}${ctx.personMask(val.split(/[._+]/).pop() ?? val)}`;
+        return `${key}${ctx.personMask(last)}`;
       });
     }
     const sentinel = `${URL_SENTINEL_OPEN}${indexToLetters(ctx.protectedUrls.length)}${URL_SENTINEL_CLOSE}`;

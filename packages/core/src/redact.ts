@@ -1,3 +1,4 @@
+// Orkiestrator redakcji: przygotowuje kontekst i woła przebiegi w ustalonej kolejności.
 import { normalizeSurnameKey } from './surnames.js';
 import { indexToLetters, type RedactCtx } from './context.js';
 import { passAddress, passAddressAfterResidenceLabel, passPostalNoHyphen } from './passes/address.js';
@@ -18,11 +19,6 @@ import { passProtectJsonEscapes, passProtectUrls } from './passes/protect.js';
 import { passDelimitedTable, passStructured } from './passes/structured.js';
 import { HUMAN_LABEL, MASK, type PiiFinding, type PiiType, type RedactionResult, type RedactOptions } from './types.js';
 
-
-// ============================================================================
-// Główna funkcja redakcji
-// ============================================================================
-
 export function redactPII(input: string, options?: RedactOptions): RedactionResult {
   if (!input || typeof input !== 'string') {
     return { redacted: input ?? '', found: [] };
@@ -36,8 +32,7 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   const on = (t: PiiType) => enabled === null || enabled.has(t);
   const M: Record<PiiType, string> = options?.masks ? { ...MASK, ...options.masks } : MASK;
 
-  // Pseudonimizacja: klucz (znormalizowane nazwisko) → stała etykieta [OSOBA-X].
-  // Etykiety przydzielane w kolejności WYKRYCIA (pary → wyzwalacze → solo), deterministycznie.
+  // Klucz nazwiska → etykieta tymczasowa; ostateczną numerację nadaje finalizePersons.
   const personLabels = options?.pseudonyms ? new Map<string, string>() : null;
   const maskedSurnames = new Set<string>();
   const personMask = (surnameToken: string): string => {
@@ -54,14 +49,14 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
 
   const ctx: RedactCtx = { text: input, raw: input, on, bump, M, personMask, pseudonyms: !!personLabels, maskedSurnames, protectedUrls: [], jsonEscapes: false, loginSeeds: new Set() };
 
-  // Kolejność MA znaczenie: przebiegi czytają placeholdery poprzednich, a kolejność pierwszego
-  // bump danego typu wyznacza kolejność listy `found`. Sekwencja = dawna kolejność fizyczna 1:1.
+  // Kolejność ma znaczenie: przebiegi czytają placeholdery poprzednich, a pierwszy bump typu
+  // ustala kolejność `found`.
 
-  // ═══════════════════════ FAZA 0 · OCHRONA URL (sentinel) ═══════════════════════
-  passProtectJsonEscapes(ctx); // PRZED URL-ami: podmieniona ucieczka kończy adres
+  // Faza 0: ochrona URL (sentinel)
+  passProtectJsonEscapes(ctx); // przed URL-ami: podmieniona ucieczka kończy adres
   passProtectUrls(ctx);
 
-  // ═════════ FAZA 1 · STRUKTURALNE WYSOKIEJ PRECYZJI (etykieta / wzorzec) ═════════
+  // Faza 1: strukturalne, wysoka precyzja (etykieta, wzorzec)
   passEmail(ctx);
   passTokens(ctx);
   passMac(ctx);
@@ -71,13 +66,12 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   passStructured(ctx);
   passDelimitedTable(ctx);
   passLogin(ctx);
-  // PRZED passZnakSprawy (kształt numeru KSeF pasuje do wzorca znaku sprawy — dostawał wtedy
-  // maskę [ZNAK-SPRAWY]) i PRZED passNip (inaczej znika sam NIP, reszta numeru zostaje jawna).
+  // KSeF przed znakiem sprawy i NIP: numer KSeF zawiera NIP i pasuje do wzorca znaku sprawy.
   passKsef(ctx);
-  passKw(ctx); // PRZED passZnakSprawy: numer KW po „Sygn."/„Znak:" dostawał maskę znaku sprawy
+  passKw(ctx); // przed znakiem sprawy: numer KW stoi po „Sygn.” albo „Znak:”
   passZnakSprawy(ctx);
 
-  // ═════ FAZA 2 · IDENTYFIKATORY NUMERYCZNE (suma kontrolna / etykieta / długość) ═════
+  // Faza 2: identyfikatory numeryczne (suma kontrolna, etykieta, długość)
   passIban(ctx);
   passAccount(ctx);
   passPesel(ctx);
@@ -92,16 +86,16 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   passPlate(ctx);
   passPostal(ctx);
 
-  // ═══════════════════ FAZA 3 · DATA I ADRES / MIEJSCOWOŚĆ ═══════════════════
+  // Faza 3: data urodzenia, adres, miejscowość
   passBirthDate(ctx);
   passAddress(ctx);
   passAddressAfterResidenceLabel(ctx);
   passPostalNoHyphen(ctx);
   passCity(ctx);
 
-  // ═══════════════════ FAZA 4 · IMIĘ I NAZWISKO (heurystyka) ═══════════════════
+  // Faza 4: imię i nazwisko (heurystyka)
   passProtectFictional(ctx);
-  passPersonMixedCase(ctx); // PRZED wyzwalaczem „Pan/Pani" (zjadał imię, nazwisko zostawało jawne)
+  passPersonMixedCase(ctx); // przed wyzwalaczem „Pan/Pani”: inaczej wyzwalacz bierze imię, a nazwisko zostaje jawne
   passPersonRoleComplement(ctx);
   passPersonPairs(ctx);
   passPersonTrigger(ctx);
@@ -117,7 +111,7 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   passPersonMaidenAfterMask(ctx);
   passPersonParents(ctx);
 
-  // ══════ FAZA 5 · DOMKNIĘCIA OSÓB · STABILNA NUMERACJA · PRZYWRÓCENIE URL ══════
+  // Faza 5: domknięcia osób, stabilna numeracja, przywrócenie URL i ucieczek
   finalizePersons(ctx);
   passRestoreJsonEscapes(ctx);
   passJsonRequote(ctx); // na samym końcu: widzi tekst z przywróconymi ucieczkami
@@ -126,20 +120,12 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   return { redacted: ctx.text, found };
 }
 
-/** Wygodny skrót: czy tekst zawiera jakiekolwiek PII (np. do ostrzeżeń UI). */
+/** Czy tekst zawiera jakiekolwiek PII (np. do ostrzeżeń UI). */
 export function hasPII(text: string): boolean {
   return redactPII(text).found.length > 0;
 }
 
+/** Unikalne etykiety dla ludzi, w kolejności wykrycia (kilka typów może mieć tę samą). */
 export function describeFindings(found: PiiFinding[]): string[] {
-  const seen = new Set<string>();
-  const labels: string[] = [];
-  for (const f of found) {
-    const label = HUMAN_LABEL[f.type];
-    if (!seen.has(label)) {
-      seen.add(label);
-      labels.push(label);
-    }
-  }
-  return labels;
+  return [...new Set(found.map((f) => HUMAN_LABEL[f.type]))];
 }

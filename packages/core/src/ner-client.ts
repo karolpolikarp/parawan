@@ -1,18 +1,9 @@
 /**
- * Klient opcjonalnej usługi NER (spaCy PL, `services/ner/`) — PODNOSI recall imion/nazwisk
- * ponad heurystykę słownikową z `index.ts` (rzadkie/odmienione nazwiska bez wyzwalacza).
+ * Klient opcjonalnej usługi NER, która podnosi recall imion i nazwisk ponad heurystykę słownikową.
  *
- * Usługa NER widzi tekst JUŻ po redakcji strukturalnej (PESEL/NIP/IBAN zamaskowane
- * in-process), więc wykrywa wyłącznie dodatkowe encje osobowe i zwraca tekst z maską
- * `[IMIĘ I NAZWISKO]`.
- *
- * FAIL-SAFE (nie fail-open): gdy usługa jest niedostępna, przekroczy timeout albo circuit
- * breaker jest otwarty — `nerRedact` zwraca `null`, a wołający ZOSTAJE przy wyniku
- * in-process. Ochrona nigdy nie spada poniżej warstwy regex+sumy kontrolne.
- *
- * Zero zależności: `fetch`/`AbortController` są standardem w Node 18+, Deno, Bun
- * i przeglądarce. Konfiguracja jest JAWNA (parametr), nie z env — biblioteka nie czyta
- * środowiska.
+ * Usługa widzi tekst już po redakcji strukturalnej, więc surowy PESEL/NIP nie wychodzi przez sieć.
+ * Fail-safe: przy niedostępności, timeoucie albo otwartym breakerze `nerRedact` zwraca `null`,
+ * a wołający zostaje przy wyniku in-process. Konfiguracja przez parametr, biblioteka nie czyta env.
  */
 
 import { redactPII, type PiiFinding, type PiiType, type RedactionResult } from './index.js';
@@ -21,21 +12,20 @@ import { createBreaker } from './breaker.js';
 export interface NerConfig {
   /** Bazowy URL usługi NER, np. `http://127.0.0.1:8090`. */
   url: string;
-  /** Opcjonalny sekret — nagłówek `Authorization: Bearer …`. */
+  /** Opcjonalny sekret, nagłówek `Authorization: Bearer …`. */
   apiKey?: string;
   /** Twarda granica oczekiwania na NER; po niej fallback do in-process. Domyślnie 3000 ms. */
   timeoutMs?: number;
-  /** Limit znaków wysyłanych do NER — ogon dłuższego tekstu zostaje przy in-process. Domyślnie 20 000. */
+  /** Limit znaków wysyłanych do NER; ogon dłuższego tekstu zostaje przy in-process. Domyślnie 20 000. */
   maxChars?: number;
 }
 
 const DEFAULT_TIMEOUT_MS = 3000;
 const DEFAULT_MAX_CHARS = 20000;
 
-// Circuit breaker (per URL) — wspólna implementacja, osobna mapa dla NER (patrz breaker.ts).
 const breaker = createBreaker();
 
-/** Testy/diagnostyka: wyzeruj stan breakerów NER. */
+/** Testy i diagnostyka: wyzeruj stan breakerów NER. */
 export function resetNerBreakers(): void {
   breaker.reset();
 }
@@ -45,32 +35,28 @@ interface NerResponse {
   found?: PiiFinding[];
 }
 
-/** Scal zliczenia znalezisk z dwóch przebiegów (in-process + NER). */
+/** Scal zliczenia znalezisk z dwóch przebiegów. */
 export function mergeFindings(a: PiiFinding[], b: PiiFinding[]): PiiFinding[] {
   const map = new Map<PiiType, number>();
   for (const f of [...a, ...b]) map.set(f.type, (map.get(f.type) ?? 0) + f.count);
   return [...map.entries()].map(([type, count]) => ({ type, count }));
 }
 
-/**
- * Zredaguj imiona/nazwiska przez usługę NER. Zwraca `null` przy JAKIMKOLWIEK problemie
- * (niedostępna/timeout/zła odpowiedź/otwarty breaker) — wołający zostaje przy in-process.
- */
+/** Zredaguj imiona i nazwiska przez usługę NER. Przy jakimkolwiek problemie zwraca `null`. */
 export async function nerRedact(
   text: string,
   config: NerConfig,
 ): Promise<{ redacted: string; found: PiiFinding[] } | null> {
-  if (!config?.url || !text || text.length === 0) return null;
+  if (!config?.url || !text) return null;
 
   if (breaker.isOpen(config.url)) return null;
 
   const timeoutMs = config.timeoutMs && config.timeoutMs > 0 ? config.timeoutMs : DEFAULT_TIMEOUT_MS;
   const maxChars = config.maxChars && config.maxChars > 0 ? config.maxChars : DEFAULT_MAX_CHARS;
 
-  // Ogranicz latencję: NER tylko pierwsze N znaków; ogon dłuższego dokumentu zostaje
-  // przy redakcji in-process (i tak już strukturalnie/heurystycznie zamaskowany).
-  const head = text.length > maxChars ? text.slice(0, maxChars) : text;
-  const tail = text.length > maxChars ? text.slice(maxChars) : '';
+  // NER dostaje tylko początek tekstu (latencja); ogon zostaje zamaskowany in-process.
+  const head = text.slice(0, maxChars);
+  const tail = text.slice(maxChars);
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -100,17 +86,15 @@ export async function nerRedact(
 }
 
 /**
- * Pełna redakcja: in-process (ZAWSZE) + NER (gdy skonfigurowany i dostępny).
- * Kolejność jest istotna: NER nigdy nie widzi surowego PESEL/NIP — te są maskowane
- * in-process, zanim cokolwiek wyjdzie przez sieć (nawet na localhost).
- * Bez `config` zachowuje się IDENTYCZNIE jak `redactPII` (gwarancja fail-safe).
+ * Redakcja in-process, a potem NER, gdy skonfigurowany i dostępny. Kolejność chroni surowe
+ * identyfikatory przed wysłaniem. Bez `config` wynik jest identyczny z `redactPII`.
  */
 export async function redactPIIFull(input: string, config?: NerConfig): Promise<RedactionResult> {
   const base = redactPII(input);
-  if (!config?.url || !input || input.length === 0) return base;
+  if (!config?.url || !input) return base;
 
   const ner = await nerRedact(base.redacted, config);
-  if (!ner) return base; // NER niedostępny — zostajemy przy in-process
+  if (!ner) return base;
 
   return { redacted: ner.redacted, found: mergeFindings(base.found, ner.found) };
 }
@@ -119,7 +103,7 @@ export async function redactPIIFull(input: string, config?: NerConfig): Promise<
 export async function nerHealthCheck(config: NerConfig): Promise<boolean> {
   if (!config?.url) return false;
   const controller = new AbortController();
-  // spójnie z nerRedact: timeoutMs <= 0 traktujemy jak brak → DEFAULT (nie 0 ms = natychmiastowy abort)
+  // timeoutMs <= 0 jak brak wartości, a nie natychmiastowy abort.
   const timeoutMs = config.timeoutMs && config.timeoutMs > 0 ? config.timeoutMs : DEFAULT_TIMEOUT_MS;
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {

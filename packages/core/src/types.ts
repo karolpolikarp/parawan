@@ -1,3 +1,5 @@
+// Publiczne typy redakcji oraz placeholdery i czytelne nazwy każdego typu PII.
+
 export type PiiType =
   | 'EMAIL'
   | 'IBAN'
@@ -28,7 +30,7 @@ export type PiiType =
 
 export interface PiiFinding {
   type: PiiType;
-  /** liczba wystąpień zredagowanych w tekście (NIGDY nie zapisujemy oryginalnej wartości) */
+  /** Liczba zredagowanych wystąpień; oryginalnej wartości nigdy nie zapisujemy. */
   count: number;
 }
 
@@ -38,24 +40,21 @@ export interface RedactionResult {
 }
 
 export interface RedactOptions {
-  /** Typy do maskowania. Domyślnie (brak pola) — WSZYSTKIE. Pusta lista = nic nie maskuj. */
+  /** Typy do maskowania. Bez pola maskowane są wszystkie, pusta lista nie maskuje niczego. */
   types?: PiiType[];
   /**
-   * Własne placeholdery per typ. UWAGA na idempotencję: placeholder nie może zawierać cyfr
-   * ani „@" — inaczej ponowny przebieg redakcji mógłby go pożreć jako PII.
+   * Własne placeholdery dla typów. Placeholder nie może zawierać cyfr ani „@”, bo ponowny
+   * przebieg redakcji wziąłby go za dane osobowe.
    */
   masks?: Partial<Record<PiiType, string>>;
   /**
-   * Spójna pseudonimizacja osób: zamiast jednej maski [IMIĘ I NAZWISKO] każda osoba
-   * dostaje stałą etykietę [OSOBA-A], [OSOBA-B]… — ta sama osoba (także w odmianie:
-   * Kowalski/Kowalskiego/Kowalskiemu) zachowuje tę samą literę. Zachowuje strukturę
-   * relacji w dokumencie. Klucz tożsamości = znormalizowane nazwisko, więc osoby
-   * o tym samym nazwisku (Jan i Anna Kowalscy) dostają wspólną etykietę — ograniczenie.
+   * Zamiast jednej maski każda osoba dostaje stałą etykietę [OSOBA-A], [OSOBA-B]…, także w odmianie.
+   * Kluczem jest znormalizowane nazwisko, więc Jan i Anna Kowalscy dzielą jedną etykietę.
    */
   pseudonyms?: boolean;
 }
 
-/** Etykiety placeholderów (czytelne dla człowieka i modelu, bez cyfr → idempotentne). */
+/** Placeholdery czytelne dla człowieka i modelu; bez cyfr, więc redakcja jest idempotentna. */
 export const MASK: Record<PiiType, string> = {
   EMAIL: '[EMAIL]',
   IBAN: '[NR-KONTA]',

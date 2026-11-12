@@ -21,7 +21,7 @@ Redakcja jest idempotentna.
 npm install anonimizator
 ```
 
-CLI bez instalacji: `npx anonimizator pismo.txt` (opcje: `npx anonimizator --help`).
+CLI bez instalacji: `npx anonimizator pismo.txt --out czysty.txt` (opcje: `npx anonimizator --help`).
 
 ```ts
 import { redactPII } from 'anonimizator';
@@ -30,12 +30,6 @@ const { redacted, found } = redactPII('Mój PESEL to 44051401359, mail jan@examp
 // redacted → 'Mój PESEL to [PESEL], mail [EMAIL]'
 // found    → [{ type: 'EMAIL', count: 1 }, { type: 'PESEL', count: 1 }]
 //            (kolejność elementów found nie jest częścią kontraktu)
-```
-
-CLI (z katalogu repozytorium, po zbudowaniu rdzenia):
-
-```bash
-node packages/core/bin/anonimizator.js dokument.txt --out czysty.txt
 ```
 
 **Ograniczenie:** wykrywanie imion i nazwisk warstwą podstawową jest heurystyczne (słownik

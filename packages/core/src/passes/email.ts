@@ -1,39 +1,34 @@
+// Wzorce e-maila, reguły PII wewnątrz URL-i (parametry, ścieżki profili) i przebieg passEmail.
 import { type RedactCtx } from '../context.js';
 import { type PiiType } from '../types.js';
 
+// Polskie litery w części lokalnej i domenie: „piotr.wiśniewski@…" maskujemy w całości, a nie od „ś".
+const EMAIL_CH = '[A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ._%+-]';
+const EMAIL_DOMAIN = String.raw`[A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ.-]+\.[A-Za-z]{2,}`;
+const emailSrc = (at: string): string => `${EMAIL_CH}+${at}${EMAIL_DOMAIN}`;
+const emailChainSrc = (at: string): string => `(?<!${EMAIL_CH})(?:${emailSrc(at)})+`;
 
-// ── URL: ochrona + maskowanie WEWNĄTRZ ────────────────────────────────────────
-// E-mail — wzorzec współdzielony przez krok 1 i maskowanie wewnątrz URL-i.
-// Część lokalna i domena DOPUSZCZAJĄ polskie litery (ąćęłńóśźż…): adres „piotr.wiśniewski@…" musi
-// zostać zamaskowany W CAŁOŚCI. Bez tego klasa ASCII zatrzymywała się na „ś" i zostawiała jawny
-// fragment nazwiska („piotr.wiś") przed [EMAIL] — wyciek (patrz „maskuj całość, nie fragment").
-export const RE_EMAIL = /[A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ._%+-]+@[A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ.-]+\.[A-Za-z]{2,}/g;
-// E-mail zakodowany jak w URL-u („%40" zamiast „@"). Bywa też POZA adresem ze schematem: ścieżka
-// względna w logu dostępowym („GET /api?email=jan%40x.pl"), ciało formularza, URL z ukośnikami
-// ucieczonymi przez json_encode („https:\/\/…") — dlatego passEmail stosuje go także globalnie.
-export const RE_EMAIL_URLENC = /[A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ._%+-]+%40[A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ.-]+\.[A-Za-z]{2,}/g;
-// WYDAJNOŚĆ: RE_EMAIL puszczony wprost po tekście jest KWADRATOWY — w długim ciągu znaków
-// części lokalnej bez „@" (100 tys. liter, cyfr, „Ż", „a.a.a…") każda pozycja startowa skanuje
-// ciąg do końca (5–15 s, karta przeglądarki zamarza). Najpierw szukamy więc ŁAŃCUCHA adresów
-// zaczynającego się na POCZĄTKU ciągu znaków lokalnych (lookbehind: start w środku ciągu
-// odpada), a dopiero wewnątrz znalezionego fragmentu stosujemy RE_EMAIL. Wynik jest identyczny
-// z RE_EMAIL po całym tekście: dopasowanie startujące w środku ciągu zawsze da się przedłużyć
-// w lewo do jego początku, a sklejone adresy („a@b.pl.c@d.pl") obejmuje powtórzenie grupy.
-export const RE_EMAIL_CHAIN =
-  /(?<![A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ._%+-])(?:[A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ._%+-]+@[A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ.-]+\.[A-Za-z]{2,})+/g;
-export const RE_EMAIL_URLENC_CHAIN =
-  /(?<![A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ._%+-])(?:[A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ._%+-]+%40[A-Za-z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ.-]+\.[A-Za-z]{2,})+/g;
-/** Maskuje e-maile w czasie liniowym: łańcuch → RE_EMAIL wewnątrz (patrz RE_EMAIL_CHAIN). */
+export const RE_EMAIL = new RegExp(emailSrc('@'), 'g');
+// „%40" zamiast „@" bywa też poza adresem ze schematem (ścieżka względna w logu, ciało formularza,
+// „https:\/\/…" z json_encode), dlatego passEmail stosuje go także globalnie.
+export const RE_EMAIL_URLENC = new RegExp(emailSrc('%40'), 'g');
+// RE_EMAIL puszczony wprost po tekście jest kwadratowy: w długim ciągu znaków lokalnych bez „@"
+// każda pozycja startowa skanuje go do końca. Łańcuch startuje tylko na początku takiego ciągu
+// (lookbehind), a RE_EMAIL działa dopiero wewnątrz. Wynik jest ten sam: dopasowanie ze środka ciągu
+// da się przedłużyć w lewo do jego początku, a sklejone adresy obejmuje powtórzenie grupy.
+export const RE_EMAIL_CHAIN = new RegExp(emailChainSrc('@'), 'g');
+export const RE_EMAIL_URLENC_CHAIN = new RegExp(emailChainSrc('%40'), 'g');
+
+/** Maskuje e-maile w czasie liniowym: łańcuch, potem pojedynczy wzorzec wewnątrz. */
 export function replaceEmails(s: string, chain: RegExp, single: RegExp, mask: (m: string) => string): string {
   return s.replace(chain, (m) => m.replace(single, mask));
 }
+
 /**
- * Parametry query URL-a o kluczach OSOBOWYCH — klucz to mocna kotwica, maskujemy samą
- * wartość wg typu (?user=[LOGIN]&email=[EMAIL]), struktura URL-a zostaje. Klasa wartości
- * wyklucza „[" — placeholder z poprzedniego przebiegu nie jest ponownie maskowany.
+ * Parametry URL-a o kluczach osobowych: klucz jest kotwicą, maskujemy samą wartość wg typu
+ * (?user=[LOGIN]&email=[EMAIL]). Prefiks „#" obejmuje fragment adresu („callback#access_token=…").
+ * Klasa wartości wyklucza „[", więc placeholder z poprzedniego przebiegu zostaje.
  */
-// Prefiks klucza obejmuje też „#" — parametry bywają we FRAGMENCIE URL-a (OAuth implicit
-// flow: „callback#access_token=…"), który wcześniej wyciekał.
 export const URL_PARAM_RULES: Array<{ re: RegExp; type: PiiType }> = [
   { re: /([?&#](?:user(?:name|id)?|login|usr|uid)=)([^&#\s\[\]]+)/gi, type: 'LOGIN' },
   { re: /([?&#](?:e-?mail|mail)=)([^&#\s\[\]]+)/gi, type: 'EMAIL' },
@@ -45,13 +40,10 @@ export const URL_PARAM_RULES: Array<{ re: RegExp; type: PiiType }> = [
   { re: /([?&#](?:ksef(?:_?number)?|nr_?ksef|numer_?ksef)=)([^&#\s\[\]]+)/gi, type: 'KSEF' },
 ];
 /**
- * Segmenty ścieżki, które z samej budowy adresu są identyfikatorem osoby: profil LinkedIn
- * („/in/joanna-pietrzak-hr", „/pub/joanna-pietrzak/12/345/678"), osobisty OneDrive
- * („firma-my.sharepoint.com/personal/jan_kowalski_firma_pl" — to zawsze UPN użytkownika)
- * i numeryczny profil Facebooka („profile.php?id=…"). Strony firm, szkół i ofert
- * („/company/", „/school/", „/jobs/") oraz witryny zespołów („firma.sharepoint.com/sites/")
- * mają inną ścieżkę i zostają. Gołe „github.com/x", „facebook.com/x" — bez reguły: tam ten sam
- * kształt ma organizacja, projekt i podstrona serwisu.
+ * Segmenty ścieżki, które z samej budowy adresu wskazują osobę: profil LinkedIn („/in/…", „/pub/…"),
+ * osobisty OneDrive („-my.sharepoint.com/personal/" to zawsze UPN) i „facebook.com/profile.php?id=".
+ * Strony firm, szkół, ofert i witryny zespołów mają inną ścieżkę. Gołe „github.com/x" czy
+ * „facebook.com/x" bez reguły: ten sam kształt ma organizacja, projekt i podstrona serwisu.
  */
 export const URL_PROFILE_PATH_RULES: RegExp[] = [
   /(\blinkedin\.com\/(?:in|pub)\/)([^/?#\s[\]]+(?:\/[0-9a-z]{1,3}(?=[/?#]|$)){0,3})/gi,
@@ -59,8 +51,9 @@ export const URL_PROFILE_PATH_RULES: RegExp[] = [
   /(\bfacebook\.com\/profile\.php\?(?:[^#\s]*?&)?id=)(\d+)/gi,
 ];
 
-// ═════════ FAZA 1 · STRUKTURALNE WYSOKIEJ PRECYZJI (etykieta / wzorzec) ═════════
-// 1) E-MAIL
+// Domena z samych cyfr przed rozszerzeniem („raport%402024.pdf") to nazwa pliku, nie adres.
+const RE_URLENC_FILE_NAME = /%40[\d.-]+\.[A-Za-z]{2,}$/;
+
 export function passEmail(ctx: RedactCtx): void {
   if (!ctx.on('EMAIL')) return;
   const full = ctx.text;
@@ -71,19 +64,17 @@ export function passEmail(ctx: RedactCtx): void {
       return ctx.M.EMAIL;
     }),
   );
-  // URL-e są już za sentinelem, więc to tylko „%40" poza nimi — bez podwójnego maskowania.
-  // Domena z samych cyfr przed „rozszerzeniem" („raport%402024.pdf") to nazwa pliku, nie adres.
+  // URL-e są już za sentinelem, więc zostaje tylko „%40" poza nimi.
   ctx.text = replaceEmails(ctx.text, RE_EMAIL_URLENC_CHAIN, RE_EMAIL_URLENC, (m: string) => {
-    if (/%40[\d.-]+\.[A-Za-z]{2,}$/.test(m)) return m;
+    if (RE_URLENC_FILE_NAME.test(m)) return m;
     ctx.bump('EMAIL');
     return ctx.M.EMAIL;
   });
 }
+
 /**
- * Adres zdalnego repozytorium „git@host:ścieżka" (forma scp) albo „ssh://git@host/…" — „git" to
- * stałe konto usługi hostingu kodu, nie skrzynka osoby, a maska zjadała nazwę serwera. TYLKO
- * „git@": skrzynki funkcyjne (biuro@, noreply@) i loginy osób w formie scp („jan.kowalski@
- * serwer:/home") maskujemy jak dotąd. Dwukropek ze spacją („git@firma.pl: dział IT") to proza.
+ * „git@host:ścieżka" (forma scp) albo „ssh://git@host/…" to konto usługi hostingu kodu, nie skrzynka.
+ * Tylko „git@": skrzynki funkcyjne i loginy osób w formie scp maskujemy. „git@firma.pl: dział IT" to proza.
  */
 function isGitRemote(full: string, at: number, m: string): boolean {
   if (!m.startsWith('git@')) return false;

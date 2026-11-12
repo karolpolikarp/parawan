@@ -1,8 +1,8 @@
+// Kontekst redakcji współdzielony przez przebiegi, sentinele PUA i wspólne helpery masek.
 import { POLISH_CITIES } from './dict/places.js';
 import { type PiiType } from './types.js';
 
-
-/** 0→A, 1→B… 25→Z, 26→AA… (etykiety bez cyfr — idempotencja placeholderów). */
+/** 0→A, 1→B… 25→Z, 26→AA… Etykiety bez cyfr, żeby placeholdery były idempotentne. */
 export function indexToLetters(i: number): string {
   let s = '';
   let n = i;
@@ -13,27 +13,18 @@ export function indexToLetters(i: number): string {
   return s;
 }
 
-/** Odwrotność indexToLetters (A→0, B→1… AA→26) — przywracanie sentineli URL. */
+/** Odwrotność indexToLetters (A→0, AA→26), do przywracania sentineli URL. */
 export function lettersToIndex(s: string): number {
   let n = 0;
   for (let i = 0; i < s.length; i++) n = n * 26 + (s.charCodeAt(i) - 64);
   return n - 1;
 }
 
-// ============================================================================
-// Kontekst redakcji + przebiegi (top-level; orkiestrowane przez redactPII)
-// ============================================================================
-
-/**
- * Wspólny kontekst przebiegów. `text` jest MUTOWALNE — każdy przebieg robi
- * `ctx.text = ctx.text.replace(...)`. Reszta pól to domknięcia/tablice przygotowane
- * raz w `redactPII` (bump/on/M/personMask) plus bufor sentineli URL.
- */
+/** Stan jednego wywołania redactPII; każdy przebieg nadpisuje `text`. */
 export interface RedactCtx {
   text: string;
-  /** Oryginalne wejście. Kotwice DOKUMENTOWE liczymy na nim, nie na `text`: wcześniejsze
-   *  przebiegi kasują adresy (URL → sentinel, e-mail → [EMAIL]), a słowo „KSeF" bywa właśnie
-   *  tam jedyne („ksef@mf.gov.pl", „ksef.mf.gov.pl") — wtedy kotwica ginęła. */
+  /** Oryginalne wejście. Kotwice dokumentowe liczy się na nim, bo wcześniejsze przebiegi
+   *  zamieniają adresy na sentinel albo [EMAIL], a „KSeF" bywa tylko tam („ksef@mf.gov.pl"). */
   raw: string;
   on: (t: PiiType) => boolean;
   bump: (t: PiiType) => void;
@@ -41,35 +32,28 @@ export interface RedactCtx {
   personMask: (surnameToken: string) => string;
   /** Czy włączona pseudonimizacja (etykiety [OSOBA-X]). */
   pseudonyms: boolean;
-  /** Klucze nazwisk już zamaskowanych w dokumencie (normalizeSurnameKey) — także bez pseudonimów. */
+  /** Klucze nazwisk już zamaskowanych (normalizeSurnameKey), także bez pseudonimów. */
   maskedSurnames: Set<string>;
   protectedUrls: string[];
-  /** Czy passProtectJsonEscapes podmienił ucieczki „\n/\r/\t" (wtedy trzeba je przywrócić). */
+  /** Czy passProtectJsonEscapes podmienił ucieczki „\n/\r/\t" i trzeba je przywrócić. */
   jsonEscapes: boolean;
-  /** Loginy z kotwic poza etykietą „Login:" (parametr URL-a, klucz JSON/XML, ścieżka profilu,
-   *  udział domowy, log sshd) — passLogin rozlewa je na resztę dokumentu i na zapamiętane URL-e. */
+  /** Loginy z kotwic innych niż etykieta „Login:" (parametr URL-a, klucz JSON/XML, ścieżka
+   *  profilu, log sshd); passLogin rozlewa je na resztę dokumentu i zapamiętane URL-e. */
   loginSeeds: Set<string>;
 }
 
-// Sentinel URL: znaki z Prywatnego Obszaru Użytku (U+E000/U+E001) — bez cyfr, „@" i liter
-// słownikowych, więc żaden przebieg go nie rusza. Definiowane przez fromCharCode (identyczne
-// z literałami „"/„"), by uniknąć niejednoznaczności escape'ów w narzędziach.
-export const URL_SENTINEL_OPEN = String.fromCharCode(0xe000);
-export const URL_SENTINEL_CLOSE = String.fromCharCode(0xe001);
+// Sentinel URL ze znaków Prywatnego Obszaru Użytku: bez cyfr, „@" i liter, więc żaden przebieg go nie rusza.
+export const URL_SENTINEL_OPEN = '\uE000';
+export const URL_SENTINEL_CLOSE = '\uE001';
 export const RE_URL_SENTINEL = new RegExp(`${URL_SENTINEL_OPEN}([A-Z]+)${URL_SENTINEL_CLOSE}`, 'g');
 
-// Ucieczki JSON/łańcuchów „\n", „\r", „\t" zapisane DOSŁOWNIE („Dane:\n85031412347" w polu
-// JSON-a albo w logu). Litera ucieczki sklejała się z wartością: „n85031412347" nie ma lewej
-// granicy PESEL-u, „nKowalski" nie jest wyrazem z wielkiej litery, a maska e-maila zjadała „n"
-// (wynik „\[EMAIL]" przestawał się parsować). Na czas detekcji litera ucieczki zamienia się w znak
-// z Prywatnego Obszaru Użytku — nie jest literą, cyfrą ani białym znakiem, więc każdy przebieg
-// widzi przed wartością zwykłą granicę — a na końcu wraca. Inne znaki PUA niż sentinel URL.
+// Dosłowne ucieczki „\n", „\r", „\t" (pole JSON, log) sklejają literę z wartością: „n85031412347"
+// nie ma lewej granicy PESEL-u. Na czas detekcji litera ucieczki staje się znakiem PUA (nie litera,
+// cyfra ani biały znak), a na końcu wraca. Inne znaki PUA niż sentinel URL.
 export const JSON_ESC_TO_PUA: Record<string, string> = { n: '\uE00A', r: '\uE00D', t: '\uE009' };
 export const JSON_ESC_FROM_PUA: Record<string, string> = { '\uE00A': 'n', '\uE00D': 'r', '\uE009': 't' };
 
-// Fabryka przebiegu „etykieta + separator + wartość": słowo-etykieta (grupa 1) i separator
-// (grupa 2) zostają, a wartość (grupa 3) znika pod maską typu. Wspólny kształt dla
-// NR-KONTA / PESEL / NIP / REGON / ZNAK-SPRAWY / DATA-UR — regex różny, callback identyczny.
+// Przebieg „etykieta + separator + wartość": grupy 1 i 2 zostają, grupa 3 idzie pod maskę typu.
 export function maskAfterLabel(ctx: RedactCtx, re: RegExp, type: PiiType): void {
   ctx.text = ctx.text.replace(re, (_m, kw: string, sep: string) => {
     ctx.bump(type);
@@ -77,8 +61,7 @@ export function maskAfterLabel(ctx: RedactCtx, re: RegExp, type: PiiType): void 
   });
 }
 
-// Callback stałej maski: bump typu + zwrot placeholdera — dla przebiegów BEZ strażnika i BEZ
-// użycia dopasowania (EMAIL/TOKEN/MAC/LOGIN/ADRES/ZNAK…). Zwraca funkcję gotową dla .replace().
+// Callback .replace() ze stałą maską, dla przebiegów bez strażnika i bez użycia dopasowania.
 export function maskConst(ctx: RedactCtx, type: PiiType) {
   return (): string => {
     ctx.bump(type);
@@ -86,13 +69,9 @@ export function maskConst(ctx: RedactCtx, type: PiiType) {
   };
 }
 
-// Dwa wspólne skanery słownika miast (POLISH_CITIES) dla przebiegu MIEJSCOWOŚĆ: najdłuższe
-// (do 3 słów) dopasowanie na PREFIKSIE lub SUFIKSIE ciągu wyrazów z wielkiej litery. Zwracają
-// część NIEzamaskowaną (leftover/prefix) albo null, gdy żadne znane miasto nie pasuje. bump()
-// woła się dokładnie wtedy, gdy miasto trafione. Ciąg przychodzi SUROWY i jest dzielony
-// z zachowaniem odstępów (parzyste = wyrazy, nieparzyste = separatory): `leftover` zaczyna się
-// od oryginalnego odstępu, `prefix` się nim kończy. Sklejanie reszty spacją zamieniało tabulator
-// między kolumnami („[MIEJSCOWOŚĆ]\tPolska") w spację i scalało kolumny TSV.
+// Najdłuższe (do 3 wyrazów) miasto ze słownika na początku albo końcu ciągu wyrazów; null, gdy brak.
+// Ciąg dzieli się z zachowaniem odstępów (parzyste = wyrazy), żeby reszta zachowała oryginalny
+// separator: tabulator to granica kolumny TSV i nie może zamienić się w spację.
 export function cityByPrefix(ctx: RedactCtx, run: string): { leftover: string } | null {
   const parts = run.split(/([ \t]+)/);
   const words = parts.filter((_, i) => i % 2 === 0);

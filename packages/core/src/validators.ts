@@ -1,15 +1,12 @@
-// ============================================================================
-// Sumy kontrolne (walidacja tnie false-positive do <5%)
-// ============================================================================
+// Sumy kontrolne numerów (PESEL, NIP, REGON, IBAN, dowód, księga wieczysta, karta) i strażniki
+// kontekstu, które odróżniają numer przepisu albo etykietę techniczną od danej osobowej.
 
 const onlyDigits = (s: string): number[] =>
   s.replace(/\D/g, '').split('').map((d) => parseInt(d, 10));
 
 /**
- * Wspólny szkielet walidacji sumy kontrolnej „waga × cyfra" (PESEL/NIP/REGON).
- * Sumujemy iloczyny cyfr 0..len-2 z `weights`, a `control(sum)` zwraca oczekiwaną OSTATNIĄ
- * cyfrę kontrolną — albo `null`, gdy dana suma czyni numer nieważnym (wtedy `null === d[…]`
- * jest zawsze fałszem). Cztery walidatory różnią się tylko długością, wagami i regułą kontroli.
+ * Suma ważona cyfr 0..len-2; `control(sum)` zwraca oczekiwaną ostatnią cyfrę albo `null`,
+ * gdy taka suma unieważnia numer (porównanie z cyfrą wtedy zawsze daje fałsz).
  */
 function weightedChecksum(
   s: string,
@@ -24,12 +21,12 @@ function weightedChecksum(
   return control(sum) === d[len - 1];
 }
 
-/** PESEL: 11 cyfr, wagi [1,3,7,9,1,3,7,9,1,3], cyfra kontrolna = (10 − sum%10)%10. */
+const regonControl = (sum: number): number => (sum % 11 === 10 ? 0 : sum % 11);
+
 export function isValidPesel(s: string): boolean {
   return weightedChecksum(s, 11, [1, 3, 7, 9, 1, 3, 7, 9, 1, 3], (sum) => (10 - (sum % 10)) % 10);
 }
 
-/** NIP: 10 cyfr, wagi [6,5,7,2,3,4,5,6,7], kontrola = sum%11 (10 → numer nieważny). */
 export function isValidNip(s: string): boolean {
   return weightedChecksum(s, 10, [6, 5, 7, 2, 3, 4, 5, 6, 7], (sum) => {
     const c = sum % 11;
@@ -37,24 +34,17 @@ export function isValidNip(s: string): boolean {
   });
 }
 
-/** REGON 9-cyfrowy: wagi [8,9,2,3,4,5,6,7], kontrola = sum%11 (10 → 0). */
 export function isValidRegon9(s: string): boolean {
-  return weightedChecksum(s, 9, [8, 9, 2, 3, 4, 5, 6, 7], (sum) => (sum % 11 === 10 ? 0 : sum % 11));
+  return weightedChecksum(s, 9, [8, 9, 2, 3, 4, 5, 6, 7], regonControl);
 }
 
-/** REGON 14-cyfrowy: wagi [2,4,8,5,0,9,7,3,6,1,2,4,8], kontrola = sum%11 (10 → 0). */
 export function isValidRegon14(s: string): boolean {
-  return weightedChecksum(
-    s,
-    14,
-    [2, 4, 8, 5, 0, 9, 7, 3, 6, 1, 2, 4, 8],
-    (sum) => (sum % 11 === 10 ? 0 : sum % 11),
-  );
+  return weightedChecksum(s, 14, [2, 4, 8, 5, 0, 9, 7, 3, 6, 1, 2, 4, 8], regonControl);
 }
 
-/** IBAN (dowolny kraj): przenieś 4 pierwsze znaki na koniec, litery→liczby (A=10), mod 97 == 1. */
+/** IBAN dowolnego kraju: 4 pierwsze znaki na koniec, litery na liczby (A=10), reszta mod 97 równa 1. */
 export function isValidIban(raw: string): boolean {
-  // łączniki z kanonicznego zapisu grupami („PL57-1140-2004-…") jak odstępy
+  // Łączniki z zapisu grupami („PL57-1140-2004-…”) traktujemy jak odstępy.
   const s = raw.replace(/[\s-]/g, '').toUpperCase();
   if (!/^[A-Z]{2}\d{2}[A-Z0-9]+$/.test(s)) return false;
   if (s.length < 15 || s.length > 34) return false;
@@ -70,12 +60,8 @@ export function isValidIban(raw: string): boolean {
 }
 
 /**
- * Nr dowodu osobistego: 3 litery + 6 cyfr, wagi [7,3,1,9,7,3,1,7,3] (litera A=10…Z=35),
- * suma ważona WSZYSTKICH 9 znaków (cyfra kontrolna na pozycji 4, waga 9) % 10 == 0.
- * Wektory kontrolne: ABA300000 (7·10+3·11+1·10+9·3 = 140) oraz wzór z materiałów MSWiA
- * ABS123456 (70+33+28+9+14+9+4+35+18 = 220). Do v0.46.22 wagi części cyfrowej były
- * przesunięte ([…,9,1,7,3,1,7]) — ABA300000 to nie wykrywał (same zera), ale ~9 na 10
- * prawdziwych numerów odpadało, więc dowód bez słowa „dowód" obok wyciekał.
+ * Dowód osobisty: 3 litery i 6 cyfr, suma ważona wszystkich 9 znaków (A=10…Z=35) mod 10 równa 0.
+ * Cyfra kontrolna stoi na pozycji 4 z wagą 9, np. „ABS123456”.
  */
 export function isValidDowod(raw: string): boolean {
   const s = raw.replace(/\s/g, '').toUpperCase();
@@ -91,12 +77,8 @@ export function isValidDowod(raw: string): boolean {
 }
 
 /**
- * Numer księgi wieczystej: kod wydziału (dwie litery, cyfra, litera), 8 cyfr i cyfra kontrolna,
- * np. „WA1M/00166077/5". Cyfra kontrolna = suma 12 pierwszych znaków z wagami 1, 3, 7 (powtarzanymi)
- * modulo 10; cyfra to swoja wartość, litery mają X=10, A=11, B=12… z pominięciem Q i V (nie występują
- * w kodach wydziałów), więc R=27, S=28, T=29, U=30, W=31, Y=32, Z=33. Algorytm potwierdzony
- * 24.10.2026 na 17 prawdziwych numerach z publicznych ogłoszeń o przetargach (kody KR1P, GD1G,
- * WR1K, WA1M, LD1M, SZ1S, LU1P): wszystkie przechodzą.
+ * Księga wieczysta, np. „WA1M/00166077/5”: cyfra kontrolna to suma 12 znaków z wagami 1, 3, 7
+ * modulo 10. Litery liczą się od X=10, A=11, B=12… z pominięciem Q i V (nie ma ich w kodach wydziałów).
  */
 const KW_ALPHABET = '0123456789XABCDEFGHIJKLMNOPRSTUWYZ';
 export function isValidKw(raw: string): boolean {
@@ -112,7 +94,6 @@ export function isValidKw(raw: string): boolean {
   return sum % 10 === Number(s[12]);
 }
 
-/** Suma Luhna (mod 10) — walidacja numerów kart płatniczych. */
 function luhnValid(digits: number[]): boolean {
   let sum = 0;
   let double = false;
@@ -129,10 +110,8 @@ function luhnValid(digits: number[]): boolean {
 }
 
 /**
- * Prefiks (IIN) znanej sieci: Visa/Mastercard/Amex/Discover/Diners/JCB. Sam Luhn przepuszcza
- * ~1/10 losowych ciągów — dopiero prefiks + długość + Luhn dają pewność „to naprawdę karta".
- * Maestro i rzadkie sieci (szeroki, mało specyficzny prefiks 50/56–69) celowo pomijamy: ich
- * dodanie zawyżyłoby liczbę fałszywych trafień (precyzja > nadmaskowanie).
+ * Prefiks IIN znanej sieci (Visa, Mastercard, Amex, Diners, JCB, Maestro). Maestro (50, 56–69)
+ * jest szeroki i pokrywa też Discover, więc bezpieczny tylko z kontekstem karty, który wymusza passCard.
  */
 function hasCardPrefix(d: number[]): boolean {
   const p2 = d[0] * 10 + d[1];
@@ -143,16 +122,14 @@ function hasCardPrefix(d: number[]): boolean {
   if (p2 === 34 || p2 === 37) return true; // American Express
   if (p2 === 36 || p2 === 38 || p2 === 39) return true; // Diners Club
   if (d[0] === 3 && d[1] === 0 && d[2] <= 5) return true; // Diners 300–305
-  if (p4 === 6011 || p2 === 65) return true; // Discover
-  if (p2 === 64 && d[2] >= 4 && d[2] <= 9) return true; // Discover 644–649
   if (p4 >= 3528 && p4 <= 3589) return true; // JCB
-  if (p2 === 50 || (p2 >= 56 && p2 <= 69)) return true; // Maestro (szeroki prefiks — bezpieczny TYLKO z kontekstem karty)
+  if (p2 === 50 || (p2 >= 56 && p2 <= 69)) return true; // Maestro i Discover
   return false;
 }
 
 /**
- * Numer karty płatniczej: 13–19 cyfr, prefiks znanej sieci + suma Luhna. Kombinacja tych trzech
- * cech jest bardzo specyficzna (jak IBAN mod-97), więc wystarcza SAMODZIELNIE, bez etykiety.
+ * Karta płatnicza: 13–19 cyfr, prefiks znanej sieci i suma Luhna. To nie wystarcza (IMEI też ma
+ * Luhna), więc wołać tylko z kontekstem karty.
  */
 export function isValidCard(raw: string): boolean {
   const d = onlyDigits(raw);
@@ -161,34 +138,22 @@ export function isValidCard(raw: string): boolean {
   return luhnValid(d);
 }
 
-// ============================================================================
-// Strażniki kontekstu — nie myl numeru przepisu z numerem identyfikacyjnym
-// ============================================================================
-
 /**
- * Czy dopasowanie jest poprzedzone odwołaniem do aktu/przepisu (art., §, ust., poz., Dz.U., sygn.)?
- * Wtedy ciąg cyfr to numer artykułu/pozycji, NIE telefon/PESEL — nie redagujemy.
- * (Dokumenty urzędowe i prawne są pełne takich odwołań — bez tego strażnika toną w maskach.)
+ * Czy tuż przed dopasowaniem stoi odwołanie do przepisu albo rejestru (art., §, poz., Dz.U., sygn.)?
+ * Wtedy liczba to numer artykułu lub pozycji, nie telefon ani PESEL.
  */
 export function precededByLegalRef(full: string, offset: number): boolean {
-  // Okno 24 znaki — mieści dłuższe frazy jak „w rejestrze " czy „porządkowy ".
+  // Okno 24 znaków mieści dłuższe frazy, np. „w rejestrze ”.
   const before = full.slice(Math.max(0, offset - 24), offset);
-  // „regon": ciąg po tej kotwicy to (nie)poprawny REGON — obsłużony (albo słusznie
-  // odrzucony) przez krok REGON; detektor telefonu nie może go pożerać (bug z benchmarku).
-  // „lp./porządkow…/rejestr…": numer porządkowy pozycji w rejestrze ≠ telefon.
-  // „seryjn…/wersj…": numer seryjny urządzenia i numer wersji ≠ telefon/IP.
+  // Po „regon” numer obsługuje (albo słusznie odrzuca) przebieg REGON, nie telefon.
+  // „lp./porządkow…/rejestr…” to numer pozycji, „seryjn…/wersj…” numer urządzenia lub wersji.
   return /(art\.?|§|ust\.?|pkt|poz\.?|sygn\.?|nr\s|dz\.?\s?u|regon|lp\.?|porządkow\w+|rejestr\w*|seryjn\w+|wersj\w+)\s*$/i.test(before);
 }
 
 /**
- * Czy tuż przed liczbą stoi etykieta numeru, który z definicji NIE jest telefonem („Nr seryjny:",
- * „Numer zamówienia", „Kod kreskowy:", „S/N:", „Zamówienie #", „(build")? precededByLegalRef
- * wymaga etykiety bezpośrednio przed cyframi, więc dwukropek albo rzeczownik po „nr" ją omijały,
- * a to najczęstszy zapis w formularzach, fakturach i zleceniach badań. Tylko dla trybu (c)
- * telefonu — inne przebiegi (PESEL/NIP/IP) mają własne kotwice. Etykieta stoi w TEJ SAMEJ linii.
- * Świadomie bez „pacjenta/klienta" (to identyfikatory osoby) i bez gołego „Numer:" — tam bywa telefon.
- * Jeden wyraz dopowiedzenia wolno („Numer seryjny urządzenia"), ale nie „telefon…/kontakt…"
- * („Nr zamówień telefonicznych: 512 345 678" to infolinia, czyli telefon).
+ * Etykieta numeru, który nie jest telefonem („Nr seryjny:”), w tej samej linii co liczba. Celowo bez
+ * „pacjenta/klienta” (identyfikują osobę) i bez gołego „Numer:”, gdzie bywa telefon. Dopowiedzenie
+ * po etykiecie nie może zaczynać się od tel/kom/kontakt („Nr zamówień telefonicznych” to infolinia).
  */
 const RE_NON_PHONE_LABEL = new RegExp(
   '(?:(?<![\\p{L}\\d])(?:nr|numer|kod|id|identyfikator)\\.?[ \\t]+' +

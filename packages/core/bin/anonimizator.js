@@ -8,7 +8,7 @@
  *   type dokument.txt | anonimizator     # (Windows) stdin → stdout
  *   cat dokument.txt | anonimizator      # (Linux/macOS)
  *   anonimizator plik.txt --cicho        # bez statystyk na stderr
- *   anonimizator --jsonl --bez-tekstu    # most dla wywolan programowych, patrz nizej
+ *   anonimizator --jsonl --bez-tekstu    # most dla wywołań programowych, patrz niżej
  */
 
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -16,7 +16,7 @@ import { createInterface } from 'node:readline';
 import process from 'node:process';
 import { redactPII, describeFindings } from '../dist/index.js';
 
-const HELP = `anonimizator — lokalna redakcja polskich danych osobowych (PII)
+const HELP = `anonimizator: lokalna redakcja polskich danych osobowych (PII)
 
 Użycie:
   anonimizator [plik...]           zredaguj pliki, wynik na stdout
@@ -27,7 +27,7 @@ Użycie:
   anonimizator --bez-tekstu        z --jsonl: nie odsyłaj zredagowanego tekstu
   anonimizator --help              ta pomoc
 
-Bez argumentów czyta ze stdin. Nic nie jest wysyłane przez sieć —
+Bez argumentów czyta ze stdin. Nic nie jest wysyłane przez sieć,
 cała redakcja odbywa się lokalnie.
 
 Tryb --jsonl (dla wywołań programowych, proces trwały):
@@ -35,11 +35,10 @@ Tryb --jsonl (dla wywołań programowych, proces trwały):
   na stdout jedna linia JSON na odpowiedź, w tej samej kolejności:
     {"id": 0, "found": [{"type": "PESEL", "count": 1}, ...]}
     (albo {"id": 0, "redacted": "...", "found": [...]} bez --bez-tekstu)
-  Proces kończy się, gdy stdin się zamknie. Brak obsługi tego trybu w starszych
-  wydaniach kończy się natychmiast kodem wyjścia 2 (nieznana opcja) — to jest
-  celowo wykorzystywane jako sonda wersji po drugiej stronie mostu.`;
+  Proces kończy się, gdy stdin się zamknie. Wydania bez --jsonl kończą się
+  natychmiast kodem wyjścia 2 (nieznana opcja).`;
 
-// Odmiana liczebnika: 1 wystąpienie, 2–4 (poza 12–14) wystąpienia, reszta wystąpień.
+// Kopia apps/web/src/plural.ts: rdzeń nie eksportuje helperów UI.
 function plural(n, one, few, many) {
   if (n === 1) return one;
   const d = n % 10;
@@ -53,7 +52,7 @@ let outPath = null;
 let quiet = false;
 let pseudonyms = false;
 let jsonl = false;
-let bezTekstu = false;
+let omitText = false;
 
 for (let i = 0; i < args.length; i++) {
   const a = args[i];
@@ -73,8 +72,9 @@ for (let i = 0; i < args.length; i++) {
   } else if (a === '--jsonl') {
     jsonl = true;
   } else if (a === '--bez-tekstu') {
-    bezTekstu = true;
+    omitText = true;
   } else if (a.startsWith('-')) {
+    // Kod 2 jest kontraktem: most rozpoznaje po nim wydanie bez --jsonl.
     console.error(`Nieznana opcja: ${a}\n`);
     console.error(HELP);
     process.exit(2);
@@ -84,37 +84,33 @@ for (let i = 0; i < args.length; i++) {
 }
 
 if (jsonl) {
-  // Most dla wywolan programowych (patrz generator/quality/pii.py w pl-urzed-synth):
-  // proces trwaly, jedna linia JSON na wejsciu = jedna linia JSON na wyjsciu, w TEJ
-  // SAMEJ kolejnosci. Bez tego kazde wywolanie placiloby za start interpretera Node.
+  // Proces trwały: linia JSON na wejściu = linia JSON na wyjściu, w tej samej kolejności
+  // (bez kosztu startu Node przy każdym tekście).
   const rl = createInterface({ input: process.stdin, terminal: false });
-  rl.on('line', (linia) => {
-    if (!linia.trim()) return;
-    // Zly wiersz nie moze zabic procesu trwalego: odpowiadamy linia z "error" (kolejnosc
-    // odpowiedzi zostaje 1:1 z wejsciem), a id oddajemy, jesli dalo sie je odczytac.
+  rl.on('line', (line) => {
+    if (!line.trim()) return;
+    // Zły wiersz nie może zabić procesu: odpowiedź z "error" trzyma kolejność 1:1,
+    // a id oddajemy, jeśli dało się je odczytać.
     let id = null;
     try {
-      const wejscie = JSON.parse(linia);
-      id = wejscie?.id ?? null;
-      const text = wejscie?.text ?? '';
+      const req = JSON.parse(line);
+      id = req?.id ?? null;
+      const text = req?.text ?? '';
       if (typeof text !== 'string') throw new TypeError('pole "text" musi być napisem');
       const { redacted, found } = redactPII(text, { pseudonyms });
-      const odpowiedz = bezTekstu ? { id, found } : { id, redacted, found };
-      process.stdout.write(JSON.stringify(odpowiedz) + '\n');
+      const res = omitText ? { id, found } : { id, redacted, found };
+      process.stdout.write(JSON.stringify(res) + '\n');
     } catch (err) {
       process.stdout.write(JSON.stringify({ id, error: err.message }) + '\n');
     }
   });
   rl.on('close', () => process.exit(0));
-  // Skrypt konczy sie razem z zamknieciem stdin (most zamyka je jawnie po stronie
-  // Pythona) - nic wiecej nie musi trzymac petli zdarzen przy zyciu.
 } else {
-  glowna();
+  main();
 }
 
-function glowna() {
-  // BOM (﻿) zdejmujemy: pliki UTF-8 zapisane na Windows (np. przez Out-File)
-  // zaczynają się od niego, a nie jest treścią.
+function main() {
+  // Pliki UTF-8 zapisane na Windows (np. przez Out-File) zaczynają się od BOM, który nie jest treścią.
   const stripBom = (s) => s.replace(/^﻿/, '');
 
   let input;
