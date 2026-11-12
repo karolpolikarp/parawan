@@ -17,9 +17,21 @@ NIGDY zewnętrzny `<link>`. Warstwa AI (NER/LLM) mieszka w OSOBNYM repo-dodatku
 ## Struktura (monorepo, npm workspaces)
 
 - `packages/core/` — pakiet npm `anonimizator`. **Jedyne źródło prawdy logiki**, ZERO zależności,
-  działa w Node/Deno/Bun/przeglądarce. `src/index.ts` = silnik `redactPII()` (regexy + sumy
-  kontrolne + kotwice kontekstowe). `src/surnames.ts` = słownik nazwisk (+ rozszerzenie z PESEL) i
-  morfologia. `src/ner-postprocess.ts` / `src/ner-client.ts` / `src/llm-client.ts` = eksporty
+  działa w Node/Deno/Bun/przeglądarce. Moduły `src/`:
+  - `redact.ts`: orkiestrator `redactPII()`, kolejność przebiegów i podstawianie własnych masek;
+  - `passes/*.ts`: przebiegi według rodzaju danych (numeric, email, network, forms, address, city,
+    person-*, finalize…);
+  - `guards/*.ts`: strażniki kontekstu wspólne dla kilku przebiegów;
+  - `dict/*.ts` i `surnames.ts`: słowniki (imiona, miejscowości, pola formularzy, konta, nagłówki
+    kolumn) oraz nazwiska z morfologią;
+  - `validators.ts`: sumy kontrolne; `charset.ts`, `person-patterns.ts`, `util.ts`: wspólne wzorce
+    i narzędzia tekstowe; `struct-keys.ts`: klucze XML/JSON; `context.ts`: stan redakcji
+    (`RedactCtx`) i sentinele PUA; `types.ts`: `PiiType`, `MASK`, `HUMAN_LABEL`, opcje;
+  - `http.ts`, `breaker.ts`: wspólne wywołania HTTP i wyłącznik awaryjny klientów NER/LLM;
+  - `index.ts`: tylko reeksporty publicznego API. Zbiór eksportów i graf importów (tylko w dół,
+    bez cykli) pilnuje `struktura.test.ts`, a wynik `redactPII` zamraża `redact-golden.test.ts`.
+
+  `src/ner-postprocess.ts` / `src/ner-client.ts` / `src/llm-client.ts` = eksporty
   npm (`anonimizator/ner-postprocess`, `/ner`, `/llm`) — SZEW, w który wpina się dodatek AI;
   zostają tu jako część biblioteki, single-HTML ich NIE importuje.
 - `packages/parawan/` — pakiet npm `parawan`: nazwa marki dla `anonimizator`, BEZ własnego kodu
@@ -45,17 +57,19 @@ node scripts/benchmark/run.mjs --check            # BRAMKA regresji rdzenia (uż
 CI (`.github/workflows/ci.yml`): build+test core → tsc web → test web → build web → bramka benchmarku.
 Release (`.github/workflows/release.yml`, tag `v*`): jeden artefakt — `Parawan.html` + `JAK-UZYC.txt`.
 
-## Konwencje detekcji (index.ts)
+## Konwencje detekcji
 
 - **Sumy kontrolne** (PESEL/NIP/REGON/IBAN/dowód) tną fałszywe trafienia. Ale przy **silnej etykiecie**
   („PESEL:", „NIP", „REGON", „konto/rachunek/IBAN") maskujemy MIMO złej sumy (numer bywa z literówką).
 - **Kotwice kontekstowe** dla typów bez sumy (paszport, KRS, prawo jazdy, nr rejestracyjny, VIN, data ur.).
-- **Kolejność przebiegów ma znaczenie**: ochrona URL-i (sentinel + maskowanie parametrów wewnątrz)
+- **Kolejność przebiegów ma znaczenie** (zapisana w `redact.ts`): ochrona URL-i (sentinel + maskowanie parametrów wewnątrz)
   → e-mail → identyfikatory techniczne (token/MAC/IP/VIN) → pola formularza/XML/JSON/login →
   najdłuższe ciągi cyfr (IBAN 26 → PESEL 11 → NIP 10 → REGON) → krótsze (telefon 9, kod 5). MAC PRZED IPv6.
   W telefonie tryb KOTWICOWY przed prefiksowym „+48" (placeholder nie może przerwać łańcucha wyliczenia).
 - **Idempotencja**: placeholdery nie zawierają cyfr ani „@", więc ponowny przebieg ich nie pożre.
-- Nowy typ PII = dodać do `PiiType`, `MASK`, `HUMAN_LABEL` (index.ts), w aplikacji do `PII_TOKENS`,
+- Nowy typ PII = dodać do `PiiType`, `MASK`, `HUMAN_LABEL` (types.ts), przebieg w `passes/<rodzaj>.ts`
+  i jego wywołanie w `redact.ts` we właściwym miejscu kolejności (lista masek warstwy LLM bierze się
+  z `MASK` sama; nowy publiczny eksport wymaga zmiany listy w `struktura.test.ts`), w aplikacji do `PII_TOKENS`,
   `MASK_GROUP_DEFS`, `CHIP_LABELS` i `WYKRYWA_ROWS` (apps/web/src/pii-meta.ts), na landingu do
   `TYPE_MASK` (apps/landing/src/tokens.ts) i na stronę (apps/landing/index.html: chip i liczba
   w tabeli `.kategorie` sekcji `#typy`, nazwa typu w zdaniu właściwego bloku `.metoda`, nagłówek
@@ -88,9 +102,13 @@ Sam benchmark nie wystarcza — sprawdzaj zmiany wieloagentowo/adwersarialnie na
 
 Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i diakrytyką).
 
-## Stan (2026-11-01)
+## Stan (2026-11-12)
 
 - `main` = v0.46.26 + roadmapa, czysty.
+- Gałąź `refactor/rdzen-czysty`: podział i sprzątanie rdzenia (dawny `index.ts` rozbity na moduły,
+  patrz Struktura). Zachowanie domyślne, z pseudonimami i z filtrem `types` identyczne z `main`
+  (golden bez zmian). Świadome zmiany: własne maski podstawiane po wykryciu, poprawki warstwy LLM,
+  dopełniacze postaci historycznych (CHANGELOG `[Unreleased]`).
 - W toku: nowy landing (`/frontend`), kierunek „Sosna o poranku”. Próbki poza repo w
   `E:\parawan-landing-proby\`. Handoff: `docs/handoff-2026-11-01.md`.
 
@@ -99,3 +117,14 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 1. Wybór y/u (kolory kategorii jak w aplikacji czy nowa paleta), potem `DESIGN.md` i przeniesienie
    próbki do `apps/landing` na gałęzi `feat/landing-sosna`. Powrót: odpowiedź użytkownika.
 2. Przy wyborze „u”: nowa paleta kategorii w `apps/web/src/style.css` (kolory w handoffie).
+3. „tarnowski” w słowniku nazwisk i na liście przymiotników: rozróżnienie przez regułę kontekstową
+   (nazwa instytucji lub geografii po przymiotniku, np. „Starosta Tarnowski”, „Ziemia Tarnowska”).
+   Usunięcie ze słownika dawało wycieki („Sędzia Tarnowski”), cofnięte w 380586a.
+
+## Znane problemy
+
+- Klasy znanych regresji z v0.46.24: formularz z TAB-em z rolą jako etykietą, pierwsza osoba
+  wyliczenia w celowniku, dwa imiona bez nazwiska, patron wersalikami (ROADMAP poz. 1, 2 i 13).
+- REGON z długim wtrąceniem po etykiecie dostaje znacznik `[TELEFON]` (ROADMAP poz. 7).
+- Login w ścieżce URL typu `/user/akowalski` przechodzi jawny (ROADMAP poz. 15).
+- „tarnowski” bywa nazwiskiem i przymiotnikiem (Backlog 3).
