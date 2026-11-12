@@ -2,16 +2,10 @@
 // a także kod pocztowy.
 import { REJ_MASK_SRC } from '../charset.js';
 import { maskAfterLabel, maskKeepPrefix, type RedactCtx } from '../context.js';
+import { PLATE_NOT_ACRONYM, PLATE_VOIV_LETTERS, PLATE_YEAR_ABBR, plateYearEndsList, RE_PLATE_ACRONYM_HEAD, RE_PLATE_YEAR_SHAPE } from '../guards/plates.js';
 import { type PiiType } from '../types.js';
 import { CURRENCY_CODES, isValidDowod, precededByLegalRef } from '../validators.js';
 
-/** Pierwsze litery wyróżników wojewódzkich tablic (H i U to służby i wojsko). Walidują człony
- *  wyliczenia i tablice po kotwicy z przerwą („ISO 9001" to nie tablica). */
-export const PLATE_VOIV_LETTERS = 'BCDEFGHKLNOPRSTUWZ';
-/** Skróty od litery wojewódzkiej, które nie są wyróżnikiem: marki i modele, parametry pojazdu
- *  (DMC/DMR), normy, PKD i numer UN materiału niebezpiecznego (cztery cyfry, wojskowe „U…" mają
- *  pięć). „PN" celowo nie, bo to Konin. Wstawiany na początku kandydata tablicy. */
-const PLATE_NOT_ACRONYM = '(?!(?:BMW|DMC|DMR|RAL|DIN|DOT|EN|PKD|KTM|RAM|FSO)(?![A-Z])|UN[\\s-]?\\d{4}(?![\\dA-Z]))';
 /** Kod waluty albo jednostki ilości na początku kandydata tablicy to kwota lub liczba sztuk. Bez RUB:
  *  „RUB” może zaczynać tablicę podkarpacką, więc taki kandydat idzie dalej do strażników tablicy. */
 const RE_PLATE_CURRENCY_HEAD = new RegExp(
@@ -108,23 +102,11 @@ const RE_PLATE_AFTER_MODEL = new RegExp(`(?:^|\\s)marki\\s+[A-ZĄĆĘŁŃÓŚŹ�
 const PLATE_ITEM = `${PLATE_NOT_ACRONYM}[A-Z]{2,3}[\\s-]?\\d[A-Z0-9]{3,4}`;
 // Skan ogona wyliczenia startuje tylko na początku tokenu, nie w środku odrzuconego skrótu.
 const RE_PLATE_ITEM_SCAN = new RegExp(`(?<![A-Z])${PLATE_ITEM}`, 'g');
-export const RE_PLATE_ACRONYM_HEAD = new RegExp(`^${PLATE_NOT_ACRONYM}`);
-// Skrót z rokiem („PIT 2024", „SN 2020") ma kształt tablicy, ale w prozie to temat albo sygnatura.
-const RE_PLATE_YEAR_SHAPE = /^[A-Z]{2,3}[\s-]?(?:19|20)\d{2}$/;
 // Trzyliterowe marki pojazdów, które z rocznikiem udają tablicę („KIA 2019", „DAF 2018").
 const PLATE_VEHICLE_BRANDS = new Set<string>('KIA DAF SAM MAN BMW FSO FSM GAZ UAZ MAZ ZIL JCB FAW BYD DFM KTM SAF BPW'.split(' '));
 // Kody typu pojazdu i nadwozia (straż, transport, rolnictwo): z rocznikiem to opis floty.
 const PLATE_VEHICLE_TYPE_CODES = new Set<string>('GBA GCB SLR SLB SUV TIR BUS VAN ATV UTV TPV MPV SCD GLM GLB SRT'.split(' '));
 const RE_PLATE_GAP_PREP = /^(?:w|we|do|z|ze|od|na|dla|po|przez|przy|o|u|według|wg|wobec|między|pod|nad|za)$/;
-// Trzyliterowe skróty, które z rokiem są tematem, polisą czy programem („/ PZU 2024", „; RPO 2021").
-// Inny trzyliterowy powiat z rokiem to zwykła tablica („nr rej. WPI 12345, WPI 2019").
-const PLATE_YEAR_ABBR = new Set<string>(
-  'PIT CIT VAT RPO WPF KPO ZUS KRS NIP PZU SKO PKD ISO LGD WSA NSA KIO UZP GUS NFZ BIP EFS PFR PUP WUP OSP ZHP PKP PKS'.split(' '),
-);
-/** Czy człon wyliczenia to skrót z rokiem, który kończy listę tablic? Dwie litery z czterema cyframi
- *  to w ogóle nie polska tablica („OC 2024"); trzy tylko wtedy, gdy skrót jest w PLATE_YEAR_ABBR. */
-export const plateYearEndsList = (p: string): boolean =>
-  RE_PLATE_YEAR_SHAPE.test(p) && (/^[A-Z]{2}(?![A-Z])/.test(p) || PLATE_YEAR_ABBR.has(p.slice(0, 3)));
 // Kod silnika lub wersji z pojemnością („Golf TDI 1896", „Agrotron TTV 1130") ma kształt powiatu
 // z czterema cyframi, ale opisuje pojazd. Wśród nich tylko GTC jest wyróżnikiem (Tczew), który za
 // modelem i tak częściej oznacza wersję („Astra GTC").
