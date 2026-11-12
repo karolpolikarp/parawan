@@ -1,7 +1,7 @@
 // Maskowanie miejscowości: po kodzie pocztowym, przy adresie, z etykietą TERYT oraz po markerze
 // zamieszkania lub urodzenia.
-import { HOMOGRAPH_SURNAMES, NON_SURNAME_ADJ, looksLikeSurname, surnameBase } from '../surnames.js';
-import { CAP_CITY, CITY_RUN, CITY_START, escapeRe, PL_LO, PL_UP, RE_CHAR_LL } from '../charset.js';
+import { HOMOGRAPH_SURNAMES, isConfirmedSurname, looksLikeSurname, NON_SURNAME_ADJ, surnameBase } from '../surnames.js';
+import { CAP_CITY, CITY_RUN, CITY_START, escapeRe, PL_LO, PL_UP, RE_CHAR_LL, splitWords } from '../charset.js';
 import { type RedactCtx } from '../context.js';
 import { FORM_LABEL_WORDS } from '../dict/forms.js';
 import { isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
@@ -9,7 +9,6 @@ import { MULTIWORD_CITIES, POLISH_CITIES } from '../dict/places.js';
 import { saintWithContext } from '../guards/eponyms.js';
 import { LEGAL_ENTITY_WORDS, PARTY_ROLE_WORDS, ROLE_WORDS } from '../guards/roles.js';
 import { BIRTH_COMBO, birthVerbAboutPerson } from './birth-date.js';
-import { isConfirmedSurname } from './forms.js';
 import { precededByLegalRef } from '../validators.js';
 
 /** Rok sprzed 1900 jako osobny wyraz („w 1867 r.”). */
@@ -292,8 +291,7 @@ function multiwordTake(first: string, parts: string[]): number {
 // ciągu z oryginalnymi odstępami (tabulator to granica kolumny TSV), a null, gdy miasta nie ma.
 // Pusta reszta to też trafienie, więc wynik porównuje się z null.
 function cityAtEdge(ctx: RedactCtx, run: string, edge: 'start' | 'end'): string | null {
-  const parts = run.split(/([ \t]+)/);
-  const words = parts.filter((_, i) => i % 2 === 0);
+  const { parts, words } = splitWords(run);
   for (let n = Math.min(3, words.length); n >= 1; n--) {
     const city = edge === 'start' ? words.slice(0, n) : words.slice(words.length - n);
     if (POLISH_CITIES.has(city.join(' ').toLowerCase())) {

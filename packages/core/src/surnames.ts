@@ -310,3 +310,8 @@ export function isGeoAdjective(word: string): boolean {
   const adj = adjBase(w);
   return adj !== null && blocksAsAdjective(adj);
 }
+
+/** Nazwisko ze słownika albo z samej morfologii. */
+export const surnameShaped = (w: string): boolean => !!surnameBase(w) || looksLikeSurname(w);
+/** Jak surnameShaped, ale także homograf nazwiska („Piątek", „Mazur"). */
+export const isConfirmedSurname = (w: string): boolean => surnameShaped(w) || HOMOGRAPH_SURNAMES.has(normalizeSurnameKey(w));

@@ -1,6 +1,6 @@
 // Pola formularza („Etykieta: wartość", wartość w następnej linii, wiersze z TAB-em) i bramki wartości
 // osoby, z których korzysta też przebieg danych strukturalnych.
-import { foldAscii, HOMOGRAPH_SURNAMES, looksLikeSurname, normalizeSurnameKey, surnameBase } from '../surnames.js';
+import { foldAscii, HOMOGRAPH_SURNAMES, isConfirmedSurname, normalizeSurnameKey, surnameShaped } from '../surnames.js';
 import { escapeRe } from '../charset.js';
 import { type RedactCtx } from '../context.js';
 import { FORM_FIELDS, FORM_LABEL_WORDS, type FormField, formLabelOf, GENERIC_LOGINS, isFormLabelLine, isValidFormValue, RE_DATE_VALUE, RE_PROPER_WORDS, stripFormPrefix, TAB_ROLE_LABELS } from '../dict/forms.js';
@@ -8,8 +8,6 @@ import { isFirstNameLike, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../d
 import { LEGAL_ENTITY_WORDS, ROLE_WORDS, TITLE_WORDS } from '../guards/roles.js';
 
 
-export const isConfirmedSurname = (w: string): boolean =>
-  !!surnameBase(w) || looksLikeSurname(w) || HOMOGRAPH_SURNAMES.has(normalizeSurnameKey(w));
 // Wyraz z wielkiej litery sam po tytule („Pani Nguyen") wskazuje, który wyraz wartości z nierozpoznanym
 // imieniem i nazwiskiem jest nazwiskiem.
 const RE_TITLED_SINGLE = /(?<!\p{L})(?:Pan(?:i|a|u|ią|em|ie)?|dr|prof|mgr)\.?[ \t]+(\p{Lu}[\p{Ll}'’-]+)(?![\p{L}'’-])(?![ \t]+\p{Lu})/gu;
@@ -632,7 +630,7 @@ export function lowercaseNameLooksLikePerson(words: string[]): boolean {
   const lower = words.map((w) => w.toLowerCase()).filter((w) => !SURNAME_PARTICLES.has(w));
   const ws = lower.filter((w) => !RE_VALUE_TITLE_OR_INITIAL.test(w));
   if (!ws.length) return false;
-  const confirmed = (w: string): boolean => !!surnameBase(w) || looksLikeSurname(w) || HOMOGRAPH_SURNAMES.has(w);
+  const confirmed = (w: string): boolean => surnameShaped(w) || HOMOGRAPH_SURNAMES.has(w);
   const plausible = (w: string): boolean => confirmed(w) || POLISH_FIRST_NAMES.has(w) || (w.length >= 3 && !RE_LOWER_NOT_SURNAME.test(w));
   const [first] = ws;
   const last = ws[ws.length - 1];
@@ -640,7 +638,7 @@ export function lowercaseNameLooksLikePerson(words: string[]): boolean {
   // nazwa. Po inicjale albo tytule każdy wyraz o kształcie nazwiska, bo inicjał to kotwica osoby.
   if (ws.length === 1) {
     if (ws.length < lower.length && plausible(first) && !isPersonRoleValue(first)) return true;
-    return !!surnameBase(first) || looksLikeSurname(first) || (POLISH_FIRST_NAMES.has(first) && !NOUN_LIKE_FIRST_NAMES.has(first));
+    return surnameShaped(first) || (POLISH_FIRST_NAMES.has(first) && !NOUN_LIKE_FIRST_NAMES.has(first));
   }
   const rest = ws.slice(1);
   if (POLISH_FIRST_NAMES.has(first)) {

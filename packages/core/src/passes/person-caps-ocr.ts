@@ -1,14 +1,13 @@
 // Osoby zapisane wersalikami, zapisem mieszanym i z homoglifami OCR, a także imiona rodziców
 // i nazwisko panieńskie tuż za maską osoby.
-import { HOMOGRAPH_SURNAMES, NON_SURNAME_ADJ, homographBase, isGeoAdjective, looksLikeSurname, normalizeSurnameKey, surnameBase } from '../surnames.js';
+import { homographBase, isConfirmedSurname, isGeoAdjective, looksLikeSurname, NON_SURNAME_ADJ, surnameBase, surnameShaped } from '../surnames.js';
 import { CAP_WORD, escapeRe, NM_BOUND, PERSON_MASK, PL_LO, PL_UP } from '../charset.js';
 import { type RedactCtx } from '../context.js';
 import { isFirstNameGenitive, isFirstNameLike, isMaleFirstNameGenitive, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
-import { egoNameGenitive, precededByPatron, precededByStreetEponym } from '../guards/eponyms.js';
+import { egoNameGenitive, precededByEponym, precededByPatron } from '../guards/eponyms.js';
 import { HOMOGRAPH_PAIR_EXCL, institutionBeforeAddr, ORG_HEAD_WORDS, PATRON_GEN_HEADS, RE_CAPS_WORK_HEAD, RE_PUBLIC_FACILITY_WORD } from '../guards/person-context.js';
 import { LEGAL_ENTITY_WORDS, ROLE_WORDS, TITLE_WORDS } from '../guards/roles.js';
-import { isConfirmedSurname } from './forms.js';
 import { RE_SURNAME_OBLIQUE } from '../person-patterns.js';
 
 
@@ -28,10 +27,7 @@ export function passPersonOcrTitle(ctx: RedactCtx): void {
   if (!ctx.on('IMIE')) return;
   const UPW = `[${PL_UP}]{2,}`;
   const NAMEW = `[${PL_UP}]{2,}(?:-[${PL_UP}]{2,})?`;
-  const confirmedSurname = (l: string): boolean =>
-    !!surnameBase(l) ||
-    looksLikeSurname(l) ||
-    (l.includes('-') && l.split('-').some((p) => !!surnameBase(p) || looksLikeSurname(p)));
+  const confirmedSurname = (l: string): boolean => surnameShaped(l) || (l.includes('-') && l.split('-').some(surnameShaped));
   ctx.text = ctx.text.replace(
     new RegExp(
       `(?<![${PL_UP}${PL_LO}0-9.\\-])(${UPW})([ \\t]+)(${NAMEW}(?:[ \\t]+${NAMEW})?)(?![${PL_UP}${PL_LO}0-9\\-])`,
@@ -39,7 +35,7 @@ export function passPersonOcrTitle(ctx: RedactCtx): void {
     ),
     (m, title: string, sep: string, name: string, offset: number) => {
       if (!ALLCAPS_TITLES.has(title.toLowerCase())) return m;
-      if (precededByPatron(ctx.text, offset) || precededByStreetEponym(ctx.text, offset)) return m;
+      if (precededByEponym(ctx.text, offset)) return m;
       const nameWords = name.split(/[ \t]+/);
       // chroni „PREZES ZARZĄDU SPÓŁKI"
       if (
@@ -171,7 +167,7 @@ const RE_CAPS_HOUSE_NO_AFTER = new RegExp(RE_CAPS_NUMBER_AFTER.source + String.r
  * Numer domu za parą rozstrzyga patronStreetWithNumber, więc para, z której adres nie powstał,
  * zostaje osobą. Wyjątek: prawdziwa głowa nazwy instytucji albo obiektu („SZKOŁA …").
  */
-function capsNameHeadBefore(t: string, offset: number, end?: number, n1?: string): boolean {
+function capsNameHeadBefore(t: string, offset: number, end: number, n1: string): boolean {
   const before = t.slice(Math.max(0, offset - 60), offset);
   const w = RE_CAPS_WORD_BEFORE.exec(before.slice(-30))?.[1];
   if (!w) return false;
@@ -180,7 +176,6 @@ function capsNameHeadBefore(t: string, offset: number, end?: number, n1?: string
   // Dokument przed postacią historyczną („LIST ADAMA MICKIEWICZA DO …") to dzieło albo odsyłacz,
   // nie dokument strony pisma.
   if (capsDocRunBefore(before) && !(/^list(?:y|u|ów)?$/.test(wl) && historicGenPairAt(t, offset))) return false;
-  if (end === undefined) return !CAPS_HEAD_NOT_NAME.has(wl);
   const after = t.slice(end, end + 40);
   // obiekt publiczny przy ulicy z patronem („SALA GIMNASTYCZNA PRZY ADAMA MICKIEWICZA 5"): adres obiektu
   if (wl === 'przy' && institutionBeforeAddr(before.slice(before.lastIndexOf('\n') + 1).replace(/[ \t]*PRZY[ \t]*$/u, ''))) return true;
@@ -201,7 +196,7 @@ function capsNameHeadBefore(t: string, offset: number, end?: number, n1?: string
   // po przyimku albo roli każda liczba zdejmuje ochronę („DZIAŁAJĄC PRZY ADAMA NOWAKA 5 RAZY")
   if ((CAPS_HEAD_NOT_NAME.has(wl) ? /^[ \t]+\d/ : RE_CAPS_HOUSE_NO_AFTER).test(after) && !capsOrgHead(wl)) return false;
   if (!CAPS_HEAD_NOT_NAME.has(wl)) return true;
-  if (!n1 || !isFirstNameGenitive(n1) || !/^(?:przy|od|do)$/.test(wl)) return false;
+  if (!isFirstNameGenitive(n1) || !/^(?:przy|od|do)$/.test(wl)) return false;
   // „PRZY ADAMA MICKIEWICZA" bez numeru to ulica
   if (wl === 'przy') return true;
   const line = before.slice(before.lastIndexOf('\n') + 1);
@@ -251,18 +246,18 @@ function capsReversedPair(t: string, offset: number, n1: string, n2: string, end
   if (!POLISH_FIRST_NAMES.has(n2) || isMaleFirstNameGenitive(n2) || NOUN_LIKE_FIRST_NAMES.has(n2)) return false;
   if (isFirstNameLike(n1) || CAPS_REVERSED_HEAD_EXCL.has(n1) || HOMOGRAPH_PAIR_EXCL.has(n1) || HISTORIC_SURNAMES.has(n1)) return false;
   const parts = n1.split('-');
-  if (parts.some((p) => LEGAL_ENTITY_WORDS.has(p) || NON_SURNAME_ADJ.has(p) || isGeoAdjective(p) || RE_SURNAME_OBLIQUE.test(p))) return false;
+  if (parts.some((p) => LEGAL_ENTITY_WORDS.has(p) || isGeoAdjective(p) || RE_SURNAME_OBLIQUE.test(p))) return false;
   if (/^[ \t]+[IVX]{1,4}(?![\p{L}\p{N}])/u.test(t.slice(end, end + 8))) return false;
   if (capsStreetBefore(t, offset)) return false;
   if (parts.every((p) => !!surnameBase(p))) return true;
-  return parts.every((p) => !!surnameBase(p) || looksLikeSurname(p) || !!homographBase(p)) && personSlotBefore(t, offset);
+  return parts.every((p) => surnameShaped(p) || !!homographBase(p)) && personSlotBefore(t, offset);
 }
 
 /** Nazwisko wersalikami potwierdzone słownikiem albo morfologią (każdy człon dwuczłonowego). */
 function capsSurnameConfirmed(l: string): boolean {
   const parts = l.split('-');
-  if (parts.some((p) => LEGAL_ENTITY_WORDS.has(p) || NON_SURNAME_ADJ.has(p) || isGeoAdjective(p))) return false;
-  return parts.every((p) => !!surnameBase(p) || looksLikeSurname(p));
+  if (parts.some((p) => LEGAL_ENTITY_WORDS.has(p) || isGeoAdjective(p))) return false;
+  return parts.every(surnameShaped);
 }
 // Imię w Titlecase obok nazwiska wersalikami („Anna KOWALSKA", „KOWALSKA Anna"): zapis kart pacjenta
 // i pism z systemów dziedzinowych.
@@ -303,7 +298,7 @@ export function passPersonMixedCase(ctx: RedactCtx): void {
     if (!POLISH_FIRST_NAMES.has(w1l) || isFirstNameGenitive(w1l) || LEGAL_ENTITY_WORDS.has(w1l) || ROLE_WORDS.has(w1l) || TITLE_WORDS.has(w1l) || NOUN_LIKE_FIRST_NAMES.has(w1l)) return m;
     // postać historyczna w spisie lektur czy programie koncertu („Henryk SIENKIEWICZ")
     if (isFirstNameLike(w2l) || !capsSurnameConfirmed(w2l) || HISTORIC_SURNAMES.has(w2l)) return m;
-    if (precededByPatron(t, offset) || precededByStreetEponym(t, offset) || capsStreetBefore(t, offset)) return m;
+    if (precededByEponym(t, offset) || capsStreetBefore(t, offset)) return m;
     ctx.bump('IMIE');
     return ctx.personMask(w2);
   });
@@ -431,8 +426,8 @@ export function passPersonOcrPair(ctx: RedactCtx): void {
     // przeszłoby przez „skłodowskiej", a „ADAM MIŃSKI-MAZOWIECKI" to miejscowość.
     const parts2 = n2.split('-');
     if (parts2.length > 1 && parts2.some((p) => LEGAL_ENTITY_WORDS.has(p) || isGeoAdjective(p))) return null;
-    if (!parts2.every((p) => !!surnameBase(p) || looksLikeSurname(p))) return null;
-    if (precededByPatron(src, offset) || precededByStreetEponym(src, offset)) return null;
+    if (!parts2.every(surnameShaped)) return null;
+    if (precededByEponym(src, offset)) return null;
     if (!isFirstNameLike(n1) && !homo1) {
       // pierwszy token to nie imię: maskujemy samo nazwisko, o ile zawiera homoglif
       if (!homo2) return null;
@@ -497,7 +492,7 @@ const RE_MAIDEN_NEXT_CONTINUES = /(?:ych|ich|ów|ców|ego|iej|ej|er|ey|ay|th|son
 function maidenNameContinues(sur: string, next: string): boolean {
   const sl = sur.toLowerCase();
   if (isFirstNameGenitive(sl) && !POLISH_FIRST_NAMES.has(sl)) return true;
-  if (isConfirmedSurname(sur) || HOMOGRAPH_SURNAMES.has(normalizeSurnameKey(sur))) return false;
+  if (isConfirmedSurname(sur)) return false;
   return RE_MAIDEN_NEXT_CONTINUES.test(next) || /^(?:Mc|Mac|O')\p{Lu}/u.test(next) || /ów$/u.test(sur);
 }
 // …chyba że ten wyraz to już następne pole spłaszczonego formularza albo zdania: skrót z kropką
@@ -526,7 +521,7 @@ export function passPersonMaidenAfterMask(ctx: RedactCtx): void {
     (m, mask: string, mid: string, sur: string, offset: number, str: string) => {
       const parts = sur.toLowerCase().split('-');
       if (parts.some((p) => LEGAL_ENTITY_WORDS.has(p) || ROLE_WORDS.has(p) || TITLE_WORDS.has(p) || NON_SURNAME_ADJ.has(p) || maidenNotSurname(p))) return m;
-      if (sur === sur.toUpperCase() && !parts.some((p) => !!surnameBase(p) || looksLikeSurname(p) || HOMOGRAPH_SURNAMES.has(normalizeSurnameKey(p)))) return m;
+      if (sur === sur.toUpperCase() && !parts.some(isConfirmedSurname)) return m;
       // …chyba że dalej stoi imię: szyk „Kowalska z d. Sikora Anna"
       const after = str.slice(offset + m.length, offset + m.length + 40);
       const nextWord = /^ (\S+)/.exec(after)?.[1].replace(/[.,;:)]+$/, '') ?? '';
@@ -552,7 +547,7 @@ export function passPersonOcrMix(ctx: RedactCtx): void {
     new RegExp(`(?<![${PL_UP}${PL_LO}0-9-])(?:(${CAP_WORD})([ \\t]+))?(${OCR_MIX})(?![${PL_UP}${PL_LO}0-9-])`, 'g'),
     (m, w1: string | undefined, sep: string | undefined, w2: string) => {
       const n2 = w2[0].toLowerCase() + w2.slice(1).replace(/[I1]/g, 'l').replace(/0/g, 'o').toLowerCase();
-      if (!surnameBase(n2) && !looksLikeSurname(n2)) return m;
+      if (!surnameShaped(n2)) return m;
       ctx.bump('IMIE');
       // znane imię przed nazwiskiem wchodzi do maski, inny wyraz („Firma") zostaje
       if (w1 && isFirstNameLike(w1)) return ctx.personMask(n2);

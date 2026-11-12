@@ -1,6 +1,6 @@
 // Adresy: ulice ze skrótem i bez, ulice z patronem w dopełniaczu, adres po etykiecie zamieszkania
 // i przed kodem pocztowym, kod pocztowy bez myślnika.
-import { looksLikeSurname, surnameBase } from '../surnames.js';
+import { surnameShaped } from '../surnames.js';
 import { CAP_CITY, countOf, escapeRe, MONTHS_GEN, PL_LO, PL_UP } from '../charset.js';
 import { maskKeepPrefix, type RedactCtx } from '../context.js';
 import { isFirstNameGenitive, isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
@@ -433,7 +433,7 @@ function capsPersonPairBefore(before: string): boolean {
   if (!mm) return false;
   const [a, b] = [mm[1].toLowerCase(), mm[2].toLowerCase()];
   const nom = (w: string): boolean => POLISH_FIRST_NAMES.has(w) && !isFirstNameGenitive(w);
-  const sur = (w: string): boolean => !isFirstNameLike(w) && !LEGAL_ENTITY_WORDS.has(w) && (!!surnameBase(w) || looksLikeSurname(w));
+  const sur = (w: string): boolean => !isFirstNameLike(w) && !LEGAL_ENTITY_WORDS.has(w) && surnameShaped(w);
   return (nom(a) && sur(b)) || (sur(a) && nom(b));
 }
 // Tryby ulicy z patronem: '' adres na końcu zdania albo komórki; „loose" z dalszym ciągiem zdania

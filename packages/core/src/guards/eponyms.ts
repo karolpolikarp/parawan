@@ -351,6 +351,8 @@ export const precededByStreetEponym = (t: string, offset: number): boolean => {
     !nominativePersonAhead(t, offset, false)
   );
 };
+/** Patron w nazwie (skrót „im.”, „św.”) albo w nazwie ulicy czy obiektu. */
+export const precededByEponym = (t: string, offset: number): boolean => precededByPatron(t, offset) || precededByStreetEponym(t, offset);
 /** Pojedynczy wyraz uliczny (ta sama zamknięta odmiana co STREET_ANCHOR_SRC). Stoi tuż przed imieniem
  *  wciągniętym do pary („Rondo Romana Dmowskiego"), więc para to patron. */
 export const RE_STREET_WORD = new RegExp(`^${STREET_ANCHOR_SRC.replace('(?=\\.)', '')}$`, 'iu');

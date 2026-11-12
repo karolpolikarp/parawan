@@ -1,5 +1,5 @@
 // Faza 0: ucieczki JSON i ochrona URL-i sentinelem, z maskowaniem PII wewnątrz adresu.
-import { looksLikeSurname, surnameBase } from '../surnames.js';
+import { surnameShaped } from '../surnames.js';
 import { JSON_ESC_PUA, PL_LO, PL_UP } from '../charset.js';
 import { JSON_ESC_TO_PUA, maskKeepPrefix, protectSpan, type RedactCtx } from '../context.js';
 import { isPropagatableLogin } from '../dict/forms.js';
@@ -98,7 +98,7 @@ export function passProtectUrls(ctx: RedactCtx): void {
         // kształt nazwiska („Anna_Moda" zostaje).
         if (RE_URL_CONTENT_PARAM.test(key.slice(1, -1))) return pm;
         const last = val.split(/[._+]/).pop() ?? '';
-        if (!surnameBase(last) && !looksLikeSurname(last)) return pm;
+        if (!surnameShaped(last)) return pm;
         ctx.bump('IMIE');
         return `${key}${ctx.personMask(last)}`;
       });

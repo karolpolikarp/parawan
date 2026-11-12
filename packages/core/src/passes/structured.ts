@@ -1,14 +1,14 @@
 // Kotwice strukturalne: wartości pod kluczem XML (tag i atrybut), JSON i pod nagłówkiem tabeli
 // (CSV, TSV, Markdown), z bramką kształtu dla każdego rodzaju pola.
-import { isAsciiSurname, looksLikeSurname, surnameBase } from '../surnames.js';
+import { isAsciiSurname, isConfirmedSurname, surnameShaped } from '../surnames.js';
 import { type RedactCtx, URL_SENTINEL_CLOSE, URL_SENTINEL_OPEN } from '../context.js';
 import { FORM_LABEL_WORDS, isEmptyFormValue, isPropagatableLogin, isSystemAccount, isValidFormValue, loginUserPart, RE_BUILTIN_ACCOUNT, RE_DATE_VALUE, RE_PROPER_WORDS, RE_WELL_KNOWN_ACCOUNT } from '../dict/forms.js';
 import { isFirstNameLike } from '../dict/names.js';
 import { ORG_HEAD_WORDS } from '../guards/person-context.js';
 import { LEGAL_ENTITY_WORDS, ROLE_WORDS } from '../guards/roles.js';
 import { PLATE_VOIV_LETTERS, plateYearEndsList, RE_PLATE_ACRONYM_HEAD } from './documents.js';
-import { isConfirmedSurname, isPersonRoleValue, lowercaseNameLooksLikePerson, PERSON_CATEGORY_VALUES, RE_LOWER_NOT_SURNAME, RE_VALUE_TITLE_OR_INITIAL, SURNAME_PARTICLES } from './forms.js';
-import { TSV_NOT_SURNAME, tsvSurnameProof } from './person-pairs.js';
+import { isPersonRoleValue, lowercaseNameLooksLikePerson, PERSON_CATEGORY_VALUES, RE_LOWER_NOT_SURNAME, RE_VALUE_TITLE_OR_INITIAL, SURNAME_PARTICLES } from './forms.js';
+import { TSV_NOT_SURNAME } from './person-pairs.js';
 import { normStructKey, STRUCT_KEYS, STRUCT_KIND_TYPE, type StructKind, structKindOf } from '../struct-keys.js';
 import { isValidIban } from '../validators.js';
 
@@ -128,7 +128,7 @@ function structMasker(ctx: RedactCtx): (kind: StructKind, value: string, key?: s
         }
         // „name" od wielkiej litery: pierwszy wyraz to imię albo ostatni to nazwisko
         const last = ws[ws.length - 1];
-        if (!isFirstNameLike(ws[0]) && !surnameBase(last) && !looksLikeSurname(last)) return null;
+        if (!isFirstNameLike(ws[0]) && !surnameShaped(last)) return null;
         break;
       }
       case 'phone':
@@ -324,7 +324,7 @@ function tableProseCell(v: string): boolean {
   if (
     ws.length >= 2 &&
     ws.every((w) => /^\p{Ll}/u.test(w)) &&
-    ws.some((w) => !SURNAME_PARTICLES.has(w) && !RE_VALUE_TITLE_OR_INITIAL.test(w) && !isFirstNameLike(w) && !tsvSurnameProof(w))
+    ws.some((w) => !SURNAME_PARTICLES.has(w) && !RE_VALUE_TITLE_OR_INITIAL.test(w) && !isFirstNameLike(w) && !isConfirmedSurname(w))
   )
     return true;
   return (
@@ -385,7 +385,7 @@ export function passDelimitedTable(ctx: RedactCtx): void {
         if (!tablePersonCell(kinds[i]) || tableOfficeCell(v)) return false;
         const ws = v.trim().split(/ +/);
         // dzień albo miesiąc małą literą („Dzień Matki;maj") to kalendarz, nie nazwisko „Maj"
-        return ws.some((w) => isFirstNameLike(w) || (tsvSurnameProof(w) && !(/^\p{Ll}/u.test(w) && TSV_NOT_SURNAME.has(w))));
+        return ws.some((w) => isFirstNameLike(w) || (isConfirmedSurname(w) && !(/^\p{Ll}/u.test(w) && TSV_NOT_SURNAME.has(w))));
       });
       // Wiersz instytucji („Urząd Miasta,Łódź") zostaje, ale tylko z wyrazem instytucji w komórce
       // osoby: obce imię spoza słownika („Liu Wei;Lipowa 5") nie potwierdza osoby, a jego adres dalej

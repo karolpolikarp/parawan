@@ -8,7 +8,7 @@
  * Bez `throw`: wyjątki modelu łapie wołający (dodatek AI, benchmark).
  */
 
-import { NON_SURNAME_ADJ, HOMOGRAPH_SURNAMES, isGeoAdjective, normalizeSurnameKey } from './surnames.js';
+import { HOMOGRAPH_SURNAMES, isGeoAdjective, normalizeSurnameKey } from './surnames.js';
 import { NON_PERSON_CONTEXT } from './guards/eponyms.js';
 import { LEGAL_ENTITY_WORDS } from './guards/roles.js';
 
@@ -86,7 +86,7 @@ export function defaultIsStopword(candidate: string): boolean {
   if (!w) return true;
   for (const p of w.split(/\s+/)) {
     if (LEGAL_ENTITY_WORDS.has(p) || NON_PERSON_CONTEXT.has(p) || NER_COMMON_NOUNS.has(p)) return true;
-    if (NON_SURNAME_ADJ.has(p) || isGeoAdjective(p)) return true;
+    if (isGeoAdjective(p)) return true;
   }
   return false;
 }

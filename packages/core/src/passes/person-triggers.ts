@@ -1,12 +1,12 @@
 // Przebiegi osobowe z kotwicą: „Pan/Pani” i rola, self-ID, inicjał, tytuł przed homografem, obce imię
 // z łącznikiem oraz samodzielne nazwisko ze słownika albo z morfologii.
-import { COMMON_NOUN_LOOKALIKES, DIMINUTIVE_LOOKALIKES, HOMOGRAPH_SURNAMES, NON_SURNAME_ADJ, homographBase, isCompoundAdjective, isGeoAdjective, looksLikeSurname, normalizeSurnameKey, surnameBase } from '../surnames.js';
-import { CAP_WORD, NM_BOUND, NM_LO, NM_UP, PL_LO, PL_UP, PRECEDED_BY_CAP } from '../charset.js';
+import { COMMON_NOUN_LOOKALIKES, DIMINUTIVE_LOOKALIKES, homographBase, isCompoundAdjective, isConfirmedSurname, isGeoAdjective, looksLikeSurname, NON_SURNAME_ADJ, normalizeSurnameKey, surnameBase, surnameShaped } from '../surnames.js';
+import { CAP_WORD, NM_BOUND, NM_LO, NM_UP, PL_LO, PL_UP, PRECEDED_BY_CAP, splitWords } from '../charset.js';
 import { type RedactCtx } from '../context.js';
 import { FORM_LABEL_WORDS, isEmptyFormValue } from '../dict/forms.js';
 import { FOREIGN_GIVEN_NAMES, isFirstNameGenitive, isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
-import { afterNonPersonContext, isObliqueSurnameForm, precededByAdminLabel, precededByPatron, precededByStreetEponym, STREET_RANK } from '../guards/eponyms.js';
+import { afterNonPersonContext, isObliqueSurnameForm, precededByAdminLabel, precededByEponym, STREET_RANK } from '../guards/eponyms.js';
 import { DOT_CHAIN, dotChainKind, HOMOGRAPH_PAIR_EXCL, INITIAL_START, isHonorificP, RE_PAST_VERB_AFTER } from '../guards/person-context.js';
 import { LEGAL_ENTITY_WORDS, RE_FOLLOWED_BY_PARK, ROLE_COMPLEMENT_GEN, ROLE_WORDS, TITLE_WORDS } from '../guards/roles.js';
 import { RE_FOREIGN_BRAND_WORD, RE_FOREIGN_TAIL_START, RE_NON_PL_LETTER, RE_PL_OBLIQUE_ENDING, RE_SLAVIC_TAIL_START, RE_SOLO_DICT, RE_SOLO_MORPH } from '../person-patterns.js';
@@ -15,8 +15,7 @@ const isNonPersonWord = (l: string): boolean => LEGAL_ENTITY_WORDS.has(l) || NON
 
 /** Dzieli kandydata na wyrazy (parzyste indeksy `parts`) i odstępy; `s` to pierwszy wyraz po wiodących rolach i tytułach („Pan Dyrektor Kowalski” zachowuje „Dyrektor”). */
 function splitAfterRoles(name: string): { parts: string[]; words: string[]; s: number } {
-  const parts = name.split(/([ \t]+)/);
-  const words = parts.filter((_, i) => i % 2 === 0);
+  const { parts, words } = splitWords(name);
   let s = 0;
   while (s < words.length && (ROLE_WORDS.has(words[s].toLowerCase()) || TITLE_WORDS.has(words[s].toLowerCase()))) s++;
   return { parts, words, s };
@@ -43,8 +42,7 @@ export function passPersonRoleComplement(ctx: RedactCtx): void {
     const sl = sur.toLowerCase();
     if (LEGAL_ENTITY_WORDS.has(sl) || ROLE_COMPLEMENT_GEN.has(sl) || ROLE_WORDS.has(sl) || isGeoAdjective(sl)) return m;
     // nazwisko dwuczłonowe („Kowalska-Nowak”) rozstrzyga każdy z członów osobno
-    const surnameLike = (p: string): boolean => !!surnameBase(p) || looksLikeSurname(p) || HOMOGRAPH_SURNAMES.has(normalizeSurnameKey(p));
-    if (!surnameLike(sl) && !(sl.includes('-') && sl.split('-').every((p) => p.length > 1) && sl.split('-').some(surnameLike))) return m;
+    if (!isConfirmedSurname(sl) && !(sl.includes('-') && sl.split('-').every((p) => p.length > 1) && sl.split('-').some(isConfirmedSurname))) return m;
     // „Pani Wójt Gminy Kalisz”: nazwa miejscowości, nie nazwisko
     if (/(?<!\p{L})(?:miasta|miast|wsi|gminy|dzielnicy)[ \t]/iu.test(mid) && POLISH_CITIES.has(sl)) return m;
     // Po „Pan/Pani” w mianowniku nazwisko adresata też stoi w mianowniku; męska forma zależna to nazwa
@@ -119,7 +117,7 @@ export function passPersonTrigger(ctx: RedactCtx): void {
       (RE_FOREIGN_BRAND_WORD.test(lastWord) || RE_PL_OBLIQUE_ENDING.test(lastWord))
     ) {
       const w0 = words[s];
-      if (surnameBase(w0) || looksLikeSurname(w0) || HOMOGRAPH_SURNAMES.has(normalizeSurnameKey(w0))) {
+      if (isConfirmedSurname(w0)) {
         tail = parts.splice(-2).join('');
         words.pop();
       }
@@ -136,7 +134,7 @@ export function passPersonTrigger(ctx: RedactCtx): void {
         viGiven = VI_GIVEN_SENTINEL;
         viTail = true;
       } else if (triggerGivenName(w1) && !triggerGivenName(w0)) keyWord = w0;
-      else if (RE_NON_PL_LETTER.test(w1) && !RE_NON_PL_LETTER.test(w0) && (surnameBase(w0) || looksLikeSurname(w0))) keyWord = w0;
+      else if (RE_NON_PL_LETTER.test(w1) && !RE_NON_PL_LETTER.test(w0) && surnameShaped(w0)) keyWord = w0;
     }
     const surname = words[words.length - 1];
     const sl = surname.toLowerCase();
@@ -162,7 +160,7 @@ export function passPersonTrigger(ctx: RedactCtx): void {
         !isFirstNameGenitive(w1l) &&
         // przydomek w dopełniaczu to dalszy ciąg imienia („Pana Jezusa Frasobliwego”)
         !/(?:ego|emu|ym|ej)$/.test(w1l) &&
-        (!!surnameBase(w1) || looksLikeSurname(w1) || RE_PAST_VERB_AFTER.test(str.slice(offset + m.length, offset + m.length + 24)))
+        (surnameShaped(w1) || RE_PAST_VERB_AFTER.test(str.slice(offset + m.length, offset + m.length + 24)))
       ) {
         ctx.bump('IMIE');
         return `${kw}${sep}${parts.slice(0, 2 * s + 2).join('')}${ctx.personMask(w1)}`;
@@ -183,6 +181,7 @@ const RE_STRONG_TRIGGER = new RegExp(
   'gi',
 );
 const RE_STARTS_PL_UP = new RegExp(`^[${PL_UP}]`);
+const startsUpper = (w: string): boolean => RE_STARTS_PL_UP.test(w.split('-')[0]);
 /**
  * Po „nazywam się”, „mam na imię” zawsze stoi nazwa, więc wielkość liter nie ma znaczenia („nazywam się
  * pamela nowak”). Kandydat musi mieć wielką literę albo potwierdzenie słownikowe. Bez „Pan/Pani”, bo po
@@ -190,7 +189,6 @@ const RE_STARTS_PL_UP = new RegExp(`^[${PL_UP}]`);
  */
 export function passPersonStrongTrigger(ctx: RedactCtx): void {
   if (!ctx.on('IMIE')) return;
-  const startsUpper = (w: string): boolean => RE_STARTS_PL_UP.test(w.split('-')[0]);
   ctx.text = ctx.text.replace(RE_STRONG_TRIGGER, (m, kw: string, sep: string, name: string) => {
     const { parts, words, s } = splitAfterRoles(name);
     if (s >= words.length) return m;
@@ -199,7 +197,7 @@ export function passPersonStrongTrigger(ctx: RedactCtx): void {
     if (LEGAL_ENTITY_WORDS.has(words[s].toLowerCase()) || LEGAL_ENTITY_WORDS.has(ll) || NON_SURNAME_ADJ.has(ll)) return m;
     const cand = words.slice(s);
     const properCase = cand.some(startsUpper);
-    const dictOk = cand.some((w) => isFirstNameLike(w)) || !!surnameBase(last) || looksLikeSurname(last);
+    const dictOk = cand.some((w) => isFirstNameLike(w)) || surnameShaped(last);
     if (!properCase && !dictOk) return m;
     ctx.bump('IMIE');
     return `${kw}${sep}${parts.slice(0, 2 * s).join('')}${ctx.personMask(last)}`;
@@ -217,7 +215,7 @@ export function passPersonSoloDict(ctx: RedactCtx): void {
       if (tailAt < 4 || !RE_SLAVIC_TAIL_START.test(m.slice(tailAt)) || !surnameBase(m.slice(0, tailAt))) return m;
     } else if (!surnameBase(m)) return m;
     // „choroba Kowalskiego”, „ulica Kwiatkowska”, „im. Mickiewicza”: kontekst nie-osobowy
-    if (precededByPatron(ctx.text, offset) || precededByStreetEponym(ctx.text, offset)) return m;
+    if (precededByEponym(ctx.text, offset)) return m;
     if (precededByAdminLabel(ctx.text, offset)) return m; // „Powiat: …”, „Gmina: …”
     if (afterNonPersonContext(ctx.text, offset, m, ctx.maskedSurnames)) return m;
     ctx.bump('IMIE');
@@ -228,9 +226,9 @@ export function passPersonSoloDict(ctx: RedactCtx): void {
 /** Czy `w2` po kotwicy inicjału to nazwisko (słownik, końcówka, homograf) w kontekście osobowym? */
 function initialAnchorsSurname(ctx: RedactCtx, w2: string, offset: number): boolean {
   if (isNonPersonWord(w2.toLowerCase())) return false;
-  if (precededByPatron(ctx.text, offset) || precededByStreetEponym(ctx.text, offset)) return false;
+  if (precededByEponym(ctx.text, offset)) return false;
   if (afterNonPersonContext(ctx.text, offset, w2)) return false;
-  return !!surnameBase(w2) || looksLikeSurname(w2) || !!homographBase(w2);
+  return surnameShaped(w2) || !!homographBase(w2);
 }
 
 // Tanie warunki najpierw (granica i lookahead na „X. ”): lookbehindy o zmiennej długości (początek wiersza,
@@ -384,7 +382,7 @@ export function passPersonSoloMorph(ctx: RedactCtx): void {
     if (!csvSurname && !looksLikeSurname(m) && !looksLikeSurname(first) && !surnameBase(m) && !surnameBase(first)) return m;
     // drugi człon złożenia z wielkiej litery („… Warszawski”) to przymiotnik nazwy
     if (PRECEDED_BY_CAP.test(t.slice(Math.max(0, offset - 40), offset))) return m;
-    if (precededByPatron(t, offset) || precededByStreetEponym(t, offset)) return m;
+    if (precededByEponym(t, offset)) return m;
     if (precededByAdminLabel(t, offset)) return m;
     if (afterNonPersonContext(t, offset, m, ctx.maskedSurnames)) return m;
     ctx.bump('IMIE');

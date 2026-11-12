@@ -1,7 +1,7 @@
 // Przebieg LOGIN: pola loginu z etykietą, osoba wersalikami w takim polu, loginy z kotwic budowy
 // tekstu (ścieżka profilu, udział domowy, logi sshd/sudo) i propagacja znalezionych wartości.
-import { HOMOGRAPH_SURNAMES, foldAscii, homographBase, isAsciiSurname, looksLikeSurname, surnameBase } from '../surnames.js';
-import { escapeRe, NM_BOUND, PL_LO, PL_UP } from '../charset.js';
+import { foldAscii, HOMOGRAPH_SURNAMES, homographBase, isAsciiSurname, surnameShaped } from '../surnames.js';
+import { escapeRe, NM_BOUND, PL_LO, PL_UP, splitWords } from '../charset.js';
 import { type RedactCtx } from '../context.js';
 import { FORM_LABEL_WORDS, GENERIC_LOGINS, isAsciiFirstName, isEmptyFormValue, isNameishPart, isPersonalSegment, isPropagatableLogin, isSystemAccount, loginUserPart, RE_BUILTIN_ACCOUNT, RE_DOTTED_PERSON } from '../dict/forms.js';
 import { isFirstNameLike } from '../dict/names.js';
@@ -22,8 +22,7 @@ function loginValueIsPersonPair(val: string, after: string): boolean {
   if (!RE_ASCII_CAP_WORD.test(val)) return false;
   const next = RE_NAME_AFTER_LOGIN.exec(after)?.[1];
   if (!next) return false;
-  const surname = (w: string): boolean => !!surnameBase(w) || looksLikeSurname(w);
-  return (isFirstNameLike(val) && surname(next)) || (surname(val) && isFirstNameLike(next));
+  return (isFirstNameLike(val) && surnameShaped(next)) || (surnameShaped(val) && isFirstNameLike(next));
 }
 const RE_NAME_BEFORE_LOGIN_WORD = new RegExp(`(?<![${NM_BOUND}])([${PL_UP}][${PL_LO}]+)[ \\t]+$`);
 function loginWordInPersonPair(t: string, offset: number, v: string): boolean {
@@ -215,8 +214,7 @@ function nameHeadBefore(prev: string | undefined): boolean {
  */
 function spillCapsPersons(ctx: RedactCtx, capsPersons: Map<string, string>): void {
   ctx.text = ctx.text.replace(RE_CAPS_RUN, (run: string, offset: number, t: string) => {
-    const ws = run.split(/([ \t]+)/);
-    const words = ws.filter((_w, i) => i % 2 === 0);
+    const { parts: ws, words } = splitWords(run);
     const prevWord = /(\p{L}+)\.?[ \t]+$/u.exec(t.slice(Math.max(0, offset - 16), offset))?.[1];
     if (words.length === 1) {
       const sur = capsPersons.get(run);

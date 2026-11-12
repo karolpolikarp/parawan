@@ -1,6 +1,12 @@
 // Klasy liter (polskie, obce w nazwiskach, granice wyrazu) i wspólne fragmenty wzorców
 // wyrazów, z których budowane są regexy przebiegów.
 
+/** Wyrazy (parzyste indeksy `parts`) i zachowane odstępy między nimi; `words` to same wyrazy. */
+export function splitWords(s: string): { parts: string[]; words: string[] } {
+  const parts = s.split(/([ \t]+)/);
+  return { parts, words: parts.filter((_, i) => i % 2 === 0) };
+}
+
 export const PL_UP = 'A-ZĄĆĘŁŃÓŚŹŻ';
 export const PL_LO = 'a-ząćęłńóśźż';
 // Litery obcych nazwisk („Schröder”, „Dvořák”, „Mureșan”, „Thị”) wchodzą tylko w człony osoby

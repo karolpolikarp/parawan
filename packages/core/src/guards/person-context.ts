@@ -51,10 +51,12 @@ export function cellEndsAt(t: string, end: number): boolean {
   if (c === '\\' && RE_JSON_ESC_PUA.test(t[i + 1] ?? '')) return true;
   return /[\r\n;|\t"'”)<>(]/.test(c);
 }
+// Etykieta z dwukropkiem tuż przed wpisem („Wnioskodawca: ”, „Szpital: ”).
+export const RE_ROLE_LABEL_BEFORE = /(\p{L}+)[ \t]*:[ \t]*$/u;
 /** Czy komórkę otwiera etykieta-placówka („Szpital: Bielański, Marta”)? Przymiotnik po niej to
  *  nazwa placówki, nie nazwisko, więc imię za przecinkiem nie tworzy z nim osoby. */
 export function institutionLabelBefore(t: string, offset: number): boolean {
-  const label = /(\p{L}+)[ \t]*:[ \t]*$/u.exec(t.slice(Math.max(0, offset - 40), offset))?.[1];
+  const label = RE_ROLE_LABEL_BEFORE.exec(t.slice(Math.max(0, offset - 40), offset))?.[1];
   return !!label && (RE_INSTITUTION_WORD.test(label) || LEGAL_ENTITY_WORDS.has(label.toLowerCase()));
 }
 

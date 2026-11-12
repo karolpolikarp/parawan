@@ -1,6 +1,6 @@
 // Ostatnia faza: domknięcia masek osób (imię, inicjał, ogon przeniesienia), stabilna numeracja
 // etykiet, przywrócenie URL-i i ucieczek JSON oraz cudzysłowy wokół masek w dokumencie JSON.
-import { HOMOGRAPH_SURNAMES, NON_SURNAME_ADJ, isGeoAdjective, looksLikeSurname, surnameBase } from '../surnames.js';
+import { HOMOGRAPH_SURNAMES, isGeoAdjective, looksLikeSurname, NON_SURNAME_ADJ, surnameBase, surnameShaped } from '../surnames.js';
 import { CAP_WORD, ESC_WS, escapeRe, JSON_ESC_PUA, LIST_BULLET, NM_BOUND, PERSON_MASK, PL_LO, PL_UP, RE_CHAR_LU } from '../charset.js';
 import { indexToLetters, JSON_ESC_FROM_PUA, lettersToIndex, RE_URL_SENTINEL, type RedactCtx } from '../context.js';
 import { COLLIDING_NAME_FORMS, isFirstNameGenitive, isFirstNameLike, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
@@ -30,7 +30,7 @@ function isListEntrySurname(word: string): boolean {
     const w = part.toLowerCase();
     if (TITLE_WORDS.has(w) || ROLE_WORDS.has(w) || LIST_HEAD_NOT_SURNAME.has(w)) return false;
     if (LEGAL_ENTITY_WORDS.has(w) || NON_SURNAME_ADJ.has(w)) return false;
-    return !!surnameBase(w) || looksLikeSurname(w) || HOMOGRAPH_SURNAMES.has(w);
+    return surnameShaped(w) || HOMOGRAPH_SURNAMES.has(w);
   });
 }
 /**
