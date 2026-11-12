@@ -1,6 +1,5 @@
 // Kontekst redakcji współdzielony przez przebiegi, sentinele PUA i wspólne helpery masek.
-import { escapeRe } from './charset.js';
-import { MASK, type PiiType } from './types.js';
+import type { PiiType } from './types.js';
 
 /** 0→A, 1→B… 25→Z, 26→AA… Etykiety bez cyfr, żeby placeholdery były idempotentne. */
 export function indexToLetters(i: number): string {
@@ -20,58 +19,6 @@ export function lettersToIndex(s: string): number {
   return n - 1;
 }
 
-/** Placeholdery wszystkich typów (domyślne albo z options.masks). */
-export type Masks = Record<PiiType, string>;
-
-/**
- * Wzorce, które czytają już wstawione maski, kompilowane raz na zestaw masek. redactPII podaje
- * ten sam obiekt dla tych samych masek, więc domyślna ścieżka kompiluje je raz na cały proces.
- */
-export function perMasks<T>(build: (M: Masks) => T): (M: Masks) => T {
-  const cache = new WeakMap<Masks, T>();
-  return (M) => {
-    let v = cache.get(M);
-    if (v === undefined) {
-      v = build(M);
-      cache.set(M, v);
-    }
-    return v;
-  };
-}
-
-const PII_TYPES = Object.keys(MASK) as PiiType[];
-/**
- * Maski, które reguły mogą czytać w tekście jako kotwicę: niepuste i różne od masek innych typów
- * (IBAN i NR-KONTA mają wspólną maskę z założenia). Pusta maska pasuje w każdym miejscu, a wspólna
- * maska kilku typów myli adres czy miasto z osobą, więc taka kotwica jest wyłączona (null).
- */
-const anchorMasks = perMasks((M) => {
-  const out = {} as Record<PiiType, string | null>;
-  for (const t of PII_TYPES) {
-    const m = M[t];
-    out[t] = m && !PII_TYPES.some((u) => u !== t && M[u] === m && MASK[u] !== MASK[t]) ? m : null;
-  }
-  return out;
-});
-/** Maska typu jako kotwica albo null, gdy nie da się jej jednoznacznie rozpoznać (patrz anchorMasks). */
-export const anchorMask = (M: Masks, t: PiiType): string | null => anchorMasks(M)[t];
-/** Wzorzec maski typu jako kotwicy; bez jednoznacznej maski wzorzec, który nigdy nie pasuje. */
-export const anchorMaskSrc = (M: Masks, t: PiiType): string => {
-  const m = anchorMask(M, t);
-  return m === null ? '(?!)' : escapeRe(m);
-};
-/**
- * Łagodniejszy wariant dla kotwic adresowych, które od zawsze czytały maskę z options.masks (miasto za
- * kodem, kod bez myślnika za adresem, kolejna ulica i tablica w wyliczeniu): wspólna maska kilku typów
- * zostaje kotwicą jak dotąd, bo bez niej miasto za zamaskowanym kodem by wyciekło. Pusta nigdy.
- */
-export const maskSrc = (M: Masks, t: PiiType): string => (M[t] ? escapeRe(M[t]) : '(?!)');
-/** Wzorzec maski osoby: etykieta pseudonimu [OSOBA-X] albo maska IMIE, gdy jest kotwicą. */
-export const personMaskSrc = (M: Masks): string => {
-  const m = anchorMask(M, 'IMIE');
-  return m === null ? '\\[OSOBA-[A-Z]+\\]' : `\\[OSOBA-[A-Z]+\\]|${escapeRe(m)}`;
-};
-
 /** Stan jednego wywołania redactPII; każdy przebieg nadpisuje `text`. */
 export interface RedactCtx {
   text: string;
@@ -84,7 +31,7 @@ export interface RedactCtx {
   bump: (t: PiiType) => void;
   /** bump i maska typu w jednym, dla callbacków .replace(). */
   hit: (t: PiiType) => string;
-  M: Masks;
+  M: Record<PiiType, string>;
   personMask: (surnameToken: string) => string;
   /** Czy włączona pseudonimizacja (etykiety [OSOBA-X]). */
   pseudonyms: boolean;

@@ -18,10 +18,10 @@ Silnik:
   w tekście domyślnych znaczników, np. `[IMIĘ I NAZWISKO]` czy `[ADRES]`, więc nie widziała maski
   podanej przez użytkownika. Imię nad nazwiskiem albo imiona rodziców zostawały wtedy jawne obok
   maski, a miasto przed zamaskowaną ulicą nie było maskowane. Pola formularza („Imię i nazwisko:”,
-  „Ulica:”) wstawiały domyślną maskę zamiast własnej. Teraz wynik z własnymi maskami różni się od
-  domyślnego tylko tekstem znaczników, o ile każdy typ ma inny, niepusty znacznik. Pustego albo
-  wspólnego dla kilku typów (np. wszędzie `[UKRYTE]`) reguły osób nie biorą za maskę osoby, więc nie
-  zjadają imion w nazwach firm („Sklep Jagoda”), inicjałów ani imion rodziców po masce adresu.
+  „Ulica:”) wstawiały domyślną maskę zamiast własnej. Teraz własne maski są podstawiane dopiero po
+  wykryciu, więc wynik różni się od domyślnego tylko tekstem znaczników, a lista `found` jest ta
+  sama. Dotyczy to też znaczników pustych, z samej interpunkcji i wspólnych dla kilku typów (np.
+  wszędzie `[UKRYTE]`). IBAN i numer konta mogą mieć różne znaczniki.
 - **Poprawne dopełniacze trzech postaci historycznych.** Lista znanych postaci, które w nazwach
   wersalikami nie są stroną pisma (np. „LIST ADAMA MICKIEWICZA”), miała złe formy dla Orzeszkowej,
   Jagiełły i Fredry („ORZESZKOWAA”, „JAGIEŁŁI”, „FREDRI”). Teraz są poprawne. Dziś te trzy nazwiska

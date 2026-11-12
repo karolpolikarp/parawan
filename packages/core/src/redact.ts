@@ -1,6 +1,6 @@
 // Orkiestrator redakcji: przygotowuje kontekst i woła przebiegi w ustalonej kolejności.
 import { normalizeSurnameKey } from './surnames.js';
-import { indexToLetters, type Masks, type RedactCtx } from './context.js';
+import { indexToLetters, type RedactCtx } from './context.js';
 import { passAddress, passAddressAfterResidenceLabel, passPostalNoHyphen } from './passes/address.js';
 import { passBirthDate } from './passes/birth-date.js';
 import { passCity } from './passes/city.js';
@@ -19,20 +19,27 @@ import { passProtectJsonEscapes, passProtectUrls } from './passes/protect.js';
 import { passDelimitedTable, passStructured } from './passes/structured.js';
 import { HUMAN_LABEL, MASK, type PiiFinding, type PiiType, type RedactionResult, type RedactOptions } from './types.js';
 
-// Te same własne maski dają ten sam obiekt, żeby wzorce zależne od masek (perMasks) nie kompilowały
-// się przy każdym wywołaniu. Kilka ostatnich zestawów wystarcza: maski zmienia się rzadko.
-const MERGED_MASKS = new Map<string, Masks>();
-function mergedMasks(custom: Partial<Masks>): Masks {
-  const key = JSON.stringify(custom);
-  let M = MERGED_MASKS.get(key);
-  if (!M) {
-    if (MERGED_MASKS.size >= 16) MERGED_MASKS.clear();
-    M = { ...MASK };
-    // pole z undefined zostawia maskę domyślną (JSON.stringify i tak je pomija w kluczu)
-    for (const [t, v] of Object.entries(custom) as [PiiType, string | undefined][]) if (v !== undefined) M[t] = v;
-    MERGED_MASKS.set(key, M);
+/**
+ * Maski, z którymi biegną przebiegi, i podmiana ich na własne z options.masks. Przebiegi zawsze
+ * wstawiają maski domyślne, bo część reguł czyta je w tekście jako kotwice; własne maski podstawia
+ * dopiero passJsonRequote. Typy o wspólnej masce domyślnej (IBAN i NR-KONTA), którym podano różne
+ * własne maski, dostają osobny znacznik przebiegu: domyślny z U+2060 przed „]". Żaden przebieg nie
+ * czyta „[NR-KONTA]" jako kotwicy, więc znacznik niczego nie zmienia w wykrywaniu.
+ */
+function passMasks(custom: RedactOptions['masks']): { M: Record<PiiType, string>; own: Map<string, string> | null } {
+  if (!custom) return { M: MASK, own: null };
+  const M = { ...MASK };
+  const own = new Map<string, string>();
+  const final = new Map<string, string>();
+  for (const t of Object.keys(MASK) as PiiType[]) {
+    const want = custom[t] ?? MASK[t];
+    let m = MASK[t];
+    while (final.has(m) && final.get(m) !== want) m = `${m.slice(0, -1)}\u2060]`;
+    final.set(m, want);
+    M[t] = m;
+    if (m !== want) own.set(m, want);
   }
-  return M;
+  return { M, own: own.size > 0 ? own : null };
 }
 
 export function redactPII(input: string, options?: RedactOptions): RedactionResult {
@@ -46,7 +53,7 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   // Filtr typów (brak = wszystkie) i ewentualne własne placeholdery.
   const enabled = options?.types ? new Set(options.types) : null;
   const on = (t: PiiType) => enabled === null || enabled.has(t);
-  const M = options?.masks ? mergedMasks(options.masks) : MASK;
+  const { M, own } = passMasks(options?.masks);
   const hit = (t: PiiType): string => {
     bump(t);
     return M[t];
@@ -136,7 +143,7 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   // Faza 5: domknięcia osób, stabilna numeracja, przywrócenie URL-i i ucieczek
   finalizePersons(ctx);
   passRestoreJsonEscapes(ctx);
-  passJsonRequote(ctx); // na samym końcu: widzi tekst z przywróconymi ucieczkami
+  passJsonRequote(ctx, own); // na samym końcu: widzi tekst z przywróconymi ucieczkami; podstawia własne maski
 
   const found: PiiFinding[] = [...counts.entries()].map(([type, count]) => ({ type, count }));
   return { redacted: ctx.text, found };

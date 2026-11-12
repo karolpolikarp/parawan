@@ -1,8 +1,8 @@
 // Osoby zapisane wersalikami, zapisem mieszanym i z homoglifami OCR, a także imiona rodziców
 // i nazwisko panieńskie tuż za maską osoby.
 import { homographBase, isConfirmedSurname, isGeoAdjective, looksLikeSurname, NON_SURNAME_ADJ, surnameBase, surnameShaped } from '../surnames.js';
-import { CAP_WORD, NM_BOUND, PL_LO, PL_UP } from '../charset.js';
-import { perMasks, personMaskSrc, type RedactCtx } from '../context.js';
+import { CAP_WORD, NM_BOUND, PERSON_MASK_SRC, PL_LO, PL_UP } from '../charset.js';
+import type { RedactCtx } from '../context.js';
 import { isFirstNameGenitive, isFirstNameLike, isMaleFirstNameGenitive, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
 import { egoNameGenitive, precededByEponym, precededByPatron } from '../guards/eponyms.js';
@@ -330,19 +330,16 @@ export function passPersonMixedCase(ctx: RedactCtx): void {
 // Imiona rodziców tuż za maską osoby („[..], syn Józefa i Marii", „[..] s. Stanisława i Haliny"):
 // razem z datą i miejscem urodzenia identyfikują osobę. Tylko imiona ze słownika; po skrócie
 // „s."/„c." wymagane oba imiona („[..], s. 15 protokołu").
-const reParentsAfterMask = perMasks(
-  (M) =>
-    new RegExp(
-      `(${personMaskSrc(M)})(,?[ \\t]+)(syn(?:a|owi|em)?|córk(?:a|i|ą|ę)|SYN|CÓRKA|s\\.|c\\.)([ \\t]+)` +
-        `([${PL_UP}][${PL_UP}${PL_LO}]+)(?:([ \\t]+)([${PL_UP}][${PL_UP}${PL_LO}]+))?` +
-        `(?:((?:[ \\t]+i|,)[ \\t]+)([${PL_UP}][${PL_UP}${PL_LO}]+)(?:([ \\t]+)([${PL_UP}][${PL_UP}${PL_LO}]+))?)?(?![${NM_BOUND}])`,
-      'g',
-    ),
+const RE_PARENTS_AFTER_MASK = new RegExp(
+  `(${PERSON_MASK_SRC})(,?[ \\t]+)(syn(?:a|owi|em)?|córk(?:a|i|ą|ę)|SYN|CÓRKA|s\\.|c\\.)([ \\t]+)` +
+    `([${PL_UP}][${PL_UP}${PL_LO}]+)(?:([ \\t]+)([${PL_UP}][${PL_UP}${PL_LO}]+))?` +
+    `(?:((?:[ \\t]+i|,)[ \\t]+)([${PL_UP}][${PL_UP}${PL_LO}]+)(?:([ \\t]+)([${PL_UP}][${PL_UP}${PL_LO}]+))?)?(?![${NM_BOUND}])`,
+  'g',
 );
 export function passPersonParents(ctx: RedactCtx): void {
   if (!ctx.on('IMIE')) return;
   ctx.text = ctx.text.replace(
-    reParentsAfterMask(ctx.M),
+    RE_PARENTS_AFTER_MASK,
     (
       m,
       mask: string,
@@ -523,18 +520,15 @@ export const MAIDEN_D_SENTINEL = String.fromCharCode(0xe0d0);
 // reguła par z „z domu" jej nie widzi. Po masce „z domu" to jawna kotwica: Titlecase przechodzi po
 // stopliście instytucji, wersaliki muszą być potwierdzone („JAN KOWALSKI Z DOMU WYSZEDŁ RANO" to zdanie).
 // „domu" tylko małymi albo wielkimi literami: „z Domu Pomocy Społecznej" to instytucja.
-const reMaidenAfterMask = perMasks(
-  (M) =>
-    new RegExp(
-      `(${personMaskSrc(M)})([ \\t]*[,(]?[ \\t\\n]*[Zz][ \\t\\n]+(?:domu|DOMU|d\\.|D\\.)[ \\t]+)` +
-        `([${PL_UP}][${PL_LO}]+(?:-[${PL_UP}][${PL_LO}]+)?|[${PL_UP}]{2,}(?:-[${PL_UP}]{2,})?)(?![${NM_BOUND}0-9-])`,
-      'g',
-    ),
+const RE_MAIDEN_AFTER_MASK = new RegExp(
+  `(${PERSON_MASK_SRC})([ \\t]*[,(]?[ \\t\\n]*[Zz][ \\t\\n]+(?:domu|DOMU|d\\.|D\\.)[ \\t]+)` +
+    `([${PL_UP}][${PL_LO}]+(?:-[${PL_UP}][${PL_LO}]+)?|[${PL_UP}]{2,}(?:-[${PL_UP}]{2,})?)(?![${NM_BOUND}0-9-])`,
+  'g',
 );
 export function passPersonMaidenAfterMask(ctx: RedactCtx): void {
   if (!ctx.on('IMIE')) return;
   ctx.text = ctx.text.replace(
-    reMaidenAfterMask(ctx.M),
+    RE_MAIDEN_AFTER_MASK,
     (m, mask: string, mid: string, sur: string, offset: number, str: string) => {
       const parts = sur.toLowerCase().split('-');
       if (parts.some((p) => LEGAL_ENTITY_WORDS.has(p) || ROLE_WORDS.has(p) || TITLE_WORDS.has(p) || NON_SURNAME_ADJ.has(p) || maidenNotSurname(p))) return m;

@@ -1,7 +1,7 @@
 // Data urodzenia: maskowana tylko za jawną kotwicą („ur.”, etykieta, imiesłów, „urodził się”).
 // Tu też test, czy „urodził się” mówi o osobie, z którego korzysta passCity.
-import { CITY_RUN, MONTHS_GEN } from '../charset.js';
-import { maskAfterLabel, type Masks, perMasks, personMaskSrc, type RedactCtx } from '../context.js';
+import { CITY_RUN, MONTHS_GEN, PERSON_MASK_SRC } from '../charset.js';
+import { maskAfterLabel, type RedactCtx } from '../context.js';
 
 const BIRTH_DATE_SRC = String.raw`\d{1,2}[.\-/]\d{1,2}[.\-/]\d{2,4}|\d{4}-\d{2}-\d{2}|\d{1,2}\s+(?:[IVX]{1,4}|${MONTHS_GEN})\s+\d{4}`;
 const BIRTH_DATA_LABEL = String.raw`data\s+(?:urodzenia|urodz\.|ur\.)`;
@@ -70,8 +70,9 @@ const RE_BIRTH_VERB_NEUTER = /^urodziło[ \t]/i;
 const RE_BIRTH_VERB_PLURAL = /^urodzi(?:li|ły)[ \t]/i;
 const RE_BIRTH_SUBJECT_THING =
   /(?<!\p{L})(?:pomysł|projekt|idea|koncepcja|myśl|plan|inicjatywa|przedsięwzięcie|festiwal|ruch|zespół|firma|marka|akcja|tradycja|zwyczaj|impreza|wydarzenie|program|konkurs|stowarzyszenie|fundacja|spółka|teatr|kabaret|cielę|źrebię|źrebak|szczenię|szczeniak|kocię|jagnię|prosię|koźlę|zwierzę|pies|kot|klacz|jałówka|młode|najwięcej|najmniej|łącznie|ogółem|dzieci|noworodków|osób)(?!\p{L})/iu;
-const reBirthSubjectChild = perMasks(
-  (M) => new RegExp(String.raw`${personMaskSrc(M)}|(?<!\p{L})(?:dziecko|dziecię|niemowlę|małoletnie|wnuczę|bliźnię)(?!\p{L})`, 'iu'),
+const RE_BIRTH_SUBJECT_CHILD = new RegExp(
+  String.raw`${PERSON_MASK_SRC}|(?<!\p{L})(?:dziecko|dziecię|niemowlę|małoletnie|wnuczę|bliźnię)(?!\p{L})`,
+  'iu',
 );
 const RE_BIRTH_SUBJECT_TWINS = /(?<!\p{L})(?:bliźnięta|bliźniaki|bliźniaczki|bliźniacy|trojaczki)(?!\p{L})/iu;
 const RE_BIRTH_SUBJECT_PUBLIC =
@@ -85,7 +86,7 @@ const RE_BIRTH_HYPOTHETICAL =
 const RE_BIRTH_GENERIC_SUBJECT =
   /(?:^|[^\p{L}])(?:(?:osoba|każdy|każda|ten|ta)[ \t]*,?[ \t]*(?:któr[ay]|kto)|(?:uczeń|uczennica|senior|seniorka|mieszkaniec|mieszkanka|kandydat|kandydatka)[ \t]*,[ \t]*któr[ay]|kto|ktokolwiek|nikt)[ \t]*(?:nie[ \t]+)?$/iu;
 /** `kw` zaczyna się od „urodzi” (sprawdzają to obaj wołający), `before` to tekst przed kotwicą. */
-export function birthVerbAboutPerson(kw: string, before: string, M: Masks): boolean {
+export function birthVerbAboutPerson(kw: string, before: string): boolean {
   if (RE_BIRTH_VERB_SELF.test(kw)) return true;
   const seg0 = before.slice(-120);
   const seg = seg0.slice(Math.max(seg0.lastIndexOf('.'), seg0.lastIndexOf('!'), seg0.lastIndexOf('?'), seg0.lastIndexOf('\n')) + 1);
@@ -98,7 +99,7 @@ export function birthVerbAboutPerson(kw: string, before: string, M: Masks): bool
   // Pouczenie, przykład obliczeniowy i reguła ogólna mówią o osobie hipotetycznej
   // („Jeżeli dziecko urodziło się 1 czerwca 2026 r., …”).
   if (RE_BIRTH_HYPOTHETICAL.test(seg) || RE_BIRTH_GENERIC_SUBJECT.test(seg)) return false;
-  if (RE_BIRTH_VERB_NEUTER.test(kw)) return reBirthSubjectChild(M).test(seg) && !RE_BIRTH_SUBJECT_THING.test(seg);
+  if (RE_BIRTH_VERB_NEUTER.test(kw)) return RE_BIRTH_SUBJECT_CHILD.test(seg) && !RE_BIRTH_SUBJECT_THING.test(seg);
   if (RE_BIRTH_VERB_PLURAL.test(kw)) return RE_BIRTH_SUBJECT_TWINS.test(seg);
   if (!RE_BIRTH_VERB_3SG.test(kw)) return false;
   // Rzeczownik na „-ość” tuż przed czasownikiem to organizacja albo idea („Solidarność urodziła się …”).
@@ -114,7 +115,7 @@ export function passBirthDate(ctx: RedactCtx): void {
     if (RE_BIRTH_THRESHOLD_AFTER.test(after) && (oblique || !RE_BIRTH_THRESHOLD_PAST.test(after))) return m;
     if (oblique && RE_BIRTH_THRESHOLD_AND_AFTER.test(after)) return m;
     if (/^urodzi/i.test(kw)) {
-      if (!birthVerbAboutPerson(kw, str.slice(Math.max(0, offset - 320), offset), ctx.M)) return m;
+      if (!birthVerbAboutPerson(kw, str.slice(Math.max(0, offset - 320), offset))) return m;
       // Rok sprzed 1900 to biogram („Mikołaj Kopernik urodził się 19 lutego 1473 r.”), nie dane osoby.
       const year = /(\d{4})$/.exec(d)?.[1];
       if (year && +year < 1900) return m;

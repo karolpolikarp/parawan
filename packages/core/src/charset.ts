@@ -1,5 +1,6 @@
 // Klasy liter (polskie, obce w nazwiskach, granice wyrazu) i wspólne fragmenty wzorców
 // wyrazów, z których budowane są regexy przebiegów.
+import { MASK } from './types.js';
 
 /** Wyrazy (parzyste indeksy `parts`) i zachowane odstępy między nimi; `words` to same wyrazy. */
 export function splitWords(s: string): { parts: string[]; words: string[] } {
@@ -51,6 +52,9 @@ export const CITY_START = `(?<![${PL_UP}${PL_LO}]|[${PL_UP}${PL_LO}]-)`;
 export const LIST_BULLET = '(?:(?:\\d{1,4}[.)]|[-*•–])[ \\t]*)?';
 export const MONTHS_GEN = 'stycznia|lutego|marca|kwietnia|maja|czerwca|lipca|sierpnia|września|października|listopada|grudnia';
 export const escapeRe = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+// Wzorzec maski osoby: etykieta pseudonimu albo maska IMIE. Przebiegi wstawiają zawsze maski domyślne
+// (własne z options.masks podstawia redactPII dopiero na końcu), więc wzorzec jest stały.
+export const PERSON_MASK_SRC = `\\[OSOBA-[A-Z]+\\]|${escapeRe(MASK.IMIE)}`;
 export const countOf = (s: string, ch: string): number => s.split(ch).length - 1;
 
 export const RE_CHAR_LL = /\p{Ll}/u;

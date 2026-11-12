@@ -19,6 +19,7 @@
  */
 import { expect, test } from 'vitest';
 import { redactPII, type PiiType } from './index';
+import { escapeRe } from './charset';
 import { MASK } from './types';
 // dataset.mjs to plain-JS oracle benchmarku (bez deklaracji typów) — import bez typowania.
 // @ts-expect-error — brak pliku deklaracji dla modułu .mjs (świadomie, to skrypt benchmarku)
@@ -181,5 +182,64 @@ test.each([
   const texts = [...cases.map((c) => c.text), ...Object.values(ADVERSARIAL)];
   for (const text of texts) {
     expect(backToDefault(redactPII(text, { ...opts, masks: RENAMED_MASKS }).redacted)).toBe(redactPII(text, opts).redacted);
+  }
+});
+
+// Własne maski podstawia redactPII dopiero po wykryciu, więc wynik z dowolnym zestawem masek to wynik
+// domyślny z podmienionymi maskami, a lista found się nie zmienia. Także dla masek, których nie da się
+// rozpoznać w tekście: pustych, z samej spacji albo interpunkcji, wspólnych dla wszystkich typów,
+// ze znakami specjalnymi zamiany ('$&').
+const ALL_TYPES = Object.keys(MASK) as PiiType[];
+const sameMask = (m: string): Record<PiiType, string> => Object.fromEntries(ALL_TYPES.map((t) => [t, m])) as Record<PiiType, string>;
+/** Wynik domyślny z maskami domyślnymi zamienionymi na własne (najdłuższe pierwsze, jedno przejście). */
+function withOwn(defaultOut: string, masks: Partial<Record<PiiType, string>>): string {
+  const swap = new Map<string, string>();
+  for (const t of ALL_TYPES) swap.set(MASK[t], masks[t] ?? MASK[t]);
+  const alt = [...swap.keys()].sort((a, b) => b.length - a.length).map(escapeRe);
+  return defaultOut.replace(new RegExp(alt.join('|'), 'g'), (m) => swap.get(m) ?? m);
+}
+const OWN_MASK_SETS: [string, Partial<Record<PiiType, string>>][] = [
+  ['pusta maska osoby', { IMIE: '' }],
+  ['puste maski wszystkich typów', sameMask('')],
+  ['spacja', sameMask(' ')],
+  ['łącznik', sameMask('-')],
+  ['kropka', sameMask('.')],
+  ['gwiazdki', sameMask('***')],
+  ['wspólna [UKRYTE]', sameMask('[UKRYTE]')],
+  ['maska z „$&”', { IMIE: '<$&>', ADRES: '$&', PESEL: "$'$`" }],
+];
+test.each(OWN_MASK_SETS)('własne maski (%s): wynik = domyślny z podmienionymi maskami, found bez zmian', (_n, masks) => {
+  const texts = [...cases.map((c) => c.text), ...Object.values(ADVERSARIAL)];
+  for (const opts of [{}, { pseudonyms: true }]) {
+    for (const text of texts) {
+      const def = redactPII(text, opts);
+      const own = redactPII(text, { ...opts, masks });
+      expect(own.redacted).toBe(withOwn(def.redacted, masks));
+      expect(own.found).toEqual(def.found);
+    }
+  }
+});
+
+// IBAN i NR-KONTA mają wspólną maskę domyślną; różne maski własne trafiają do właściwego typu.
+test('własne maski: różne maski dla IBAN i NR-KONTA', () => {
+  const masks = { IBAN: '[IBAN]', 'NR-KONTA': '[KONTO]' };
+  const text = 'Wpłata na PL61109010140000071219812874, nr konta: 61 1090 1014 0000 0712 1981 2875.';
+  const r = redactPII(text, { masks });
+  expect(r.redacted).toBe('Wpłata na [IBAN], nr konta: [KONTO].');
+  expect(r.found).toEqual(redactPII(text).found);
+  const texts = [...cases.map((c) => c.text), ...Object.values(ADVERSARIAL)];
+  for (const t of texts) {
+    expect(redactPII(t, { masks }).redacted.replace(/\[IBAN\]|\[KONTO\]/g, MASK.IBAN)).toBe(redactPII(t).redacted);
+  }
+});
+
+// Ponowny przebieg z tymi samymi maskami: maski rozpoznawalne jak tekst (bez cyfr i „@”) nie są
+// danymi, więc wynik się nie zmienia. Zestaw sprawdzany na całym korpusie.
+test('własne maski: ponowny przebieg nie zmienia wyniku (maski w nawiasach)', () => {
+  const masks = Object.fromEntries(ALL_TYPES.map((t) => [t, `[UKRYTE ${t}]`])) as Record<PiiType, string>;
+  const texts = [...cases.map((c) => c.text), ...Object.values(ADVERSARIAL)];
+  for (const t of texts) {
+    const once = redactPII(t, { masks }).redacted;
+    expect(redactPII(once, { masks }).redacted).toBe(once);
   }
 });

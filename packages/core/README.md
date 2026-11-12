@@ -33,10 +33,10 @@ const { redacted, found } = redactPII('Mój PESEL to 44051401359, mail jan@examp
 ```
 
 Własne znaczniki podaje opcja `masks`, np. `redactPII(tekst, { masks: { IMIE: '[OSOBA]' } })`.
-Znacznik nie może zawierać cyfr ani „@”. Daj każdemu typowi inny, niepusty znacznik: część reguł
-czyta już wstawione znaczniki (np. imię obok zamaskowanego nazwiska, miasto przy zamaskowanej
-ulicy), a pustego albo wspólnego dla kilku typów nie da się rozpoznać, więc te reguły wtedy nie
-działają.
+Własne znaczniki są podstawiane na końcu, po wykryciu, więc nie wpływają na to, co zostanie
+zamaskowane: wynik to wynik domyślny z innym tekstem znaczników. Znacznik może być pusty albo
+wspólny dla kilku typów. Bez cyfr i „@” ponowny przebieg nie weźmie go za dane osobowe, ale
+znacznika pustego albo z samej interpunkcji ponowny przebieg nie rozpozna jako maski.
 
 **Ograniczenie:** wykrywanie imion i nazwisk warstwą podstawową jest heurystyczne (słownik
 imion i nazwisk, morfologia, wyzwalacze kontekstu), więc zawsze przejrzyj wynik przed

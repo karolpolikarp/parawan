@@ -43,10 +43,13 @@ export interface RedactOptions {
   /** Typy do maskowania. Bez pola maskowane są wszystkie, pusta lista nie maskuje niczego. */
   types?: PiiType[];
   /**
-   * Własne placeholdery dla typów. Placeholder nie może zawierać cyfr ani „@”, bo ponowny
-   * przebieg redakcji wziąłby go za dane osobowe. Placeholdery powinny być niepuste i różne dla
-   * różnych typów: reguły czytające już wstawione maski (np. imię przy masce osoby, miasto przy
-   * masce ulicy) pomijają maskę pustą albo wspólną z innym typem.
+   * Własne placeholdery dla typów. redactPII wykrywa dane z maskami domyślnymi i podstawia własne
+   * dopiero na końcu, więc nie wpływają one na wykrywanie ani na listę `found`: wynik to wynik
+   * domyślny z innym tekstem masek. Placeholder może być pusty albo wspólny dla kilku typów.
+   * Idempotencja: placeholder bez cyfr i „@” nie zostanie w ponownym przebiegu wzięty za dane, ale
+   * ponowny przebieg nie rozpozna go jako maski, więc reguły czytające wstawione maski (np. imię
+   * obok zamaskowanego nazwiska) mogą wtedy zamaskować coś jeszcze. Przy maskach domyślnych
+   * i rozpoznawalnych tekstowo (np. „[UKRYTE IMIE]”) wynik drugiego przebiegu się nie zmienia.
    */
   masks?: Partial<Record<PiiType, string>>;
   /**

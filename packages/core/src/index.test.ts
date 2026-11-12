@@ -1421,8 +1421,31 @@ test('options.masks — wspólna maska: adres, kod i miasto dalej zamaskowane, n
   );
 });
 
-test('options.masks — pusta maska miasta nie wciąga ogona przeniesienia', () => {
-  expect(redactPII('Kod: 00-950 Warsza-\nwa', { masks: { MIEJSCOWOSC: '' } }).redacted).toBe('Kod: [KOD-POCZTOWY] -\nwa');
+// Własne maski podstawiane są po wykryciu: wynik to wynik domyślny z innym tekstem masek.
+test.each([
+  ['pusta maska osoby', { IMIE: '' }, 'Jan Kowalski, syn Józefa i Marii, stawił się.', ', syn  i , stawił się.'],
+  ['puste maski', SAME_MASK(''), 'Sporządził Jan\nKowalski, ul. Polna 5, 30-001 Kraków.', 'Sporządził , ,  .'],
+  ['spacja', SAME_MASK(' '), 'Hotel Maria, PESEL 44051401359.', 'Hotel Maria, PESEL  .'],
+  ['łącznik', SAME_MASK('-'), 'Pan Jan Kowalski, tel. 512 345 678', 'Pan -, tel. -'],
+  ['kropka', SAME_MASK('.'), 'Konto Kowalski.Jan, e-mail jan@x.pl', 'Konto ., e-mail .'],
+  ['gwiazdki', SAME_MASK('***'), 'Anna Nowak z domu Wiśniewska', '*** z domu ***'],
+  ['wspólna [UKRYTE]', SAME_MASK('[UKRYTE]'), 'Sklep Jagoda\nul. Polna 5\n30-001 Kraków', 'Sklep Jagoda\n[UKRYTE]\n[UKRYTE] [UKRYTE]'],
+  ['maska z „$&”', { IMIE: '<$&>', PESEL: "$'" }, 'Jan Kowalski, PESEL 44051401359', "<$&>, PESEL $'"],
+] as const)('options.masks — %s', (_n, masks, input, want) => {
+  expect(redactPII(input, { masks }).redacted).toBe(want);
+  expect(redactPII(input, { masks }).found).toEqual(redactPII(input).found);
+});
+
+test('options.masks — różne maski dla IBAN i NR-KONTA', () => {
+  const masks = { IBAN: '[IBAN]', 'NR-KONTA': '[KONTO]' };
+  expect(redactPII('IBAN PL61109010140000071219812874, nr konta: 61 1090 1014 0000 0712 1981 2875', { masks }).redacted).toBe(
+    'IBAN [IBAN], nr konta: [KONTO]',
+  );
+});
+
+// Ogon przeniesienia należy do nazwy miasta, więc znika razem z nią także przy pustej masce.
+test('options.masks — pusta maska miasta obejmuje też ogon przeniesienia', () => {
+  expect(redactPII('Kod: 00-950 Warsza-\nwa', { masks: { MIEJSCOWOSC: '' } }).redacted).toBe('Kod: [KOD-POCZTOWY] ');
 });
 
 test('options.masks — pusta maska adresu nie jest kotwicą kodu pocztowego bez myślnika', () => {
