@@ -527,8 +527,12 @@ export function passJsonRequote(ctx: RedactCtx, own: Map<string, string> | null)
     ctx.text = swap(ctx.text);
     return;
   }
-  // Literał łańcuchowy pochłaniany w całości (z podmianą masek w środku). JSON.stringify na wypadek
-  // własnej maski z cudzysłowem albo backslashem.
+  // Literał łańcuchowy pochłaniany w całości. Własna maska z cudzysłowem, backslashem albo znakiem
+  // sterującym trafia do JSON z ucieczkami: jako nowy literał albo wewnątrz istniejącego.
   const re = new RegExp(`"(?:[^"\\\\\\n]|\\\\.)*"|(${altOf(new Set(Object.values(ctx.M)))}|\\[OSOBA-[A-Z]+\\])`, 'g');
-  ctx.text = ctx.text.replace(re, (m, mask: string | undefined) => (mask ? JSON.stringify(toOwn(mask)) : swap(m)));
+  const inString = (m: string): string => JSON.stringify(toOwn(m)).slice(1, -1);
+  ctx.text = ctx.text.replace(re, (m, mask: string | undefined) => {
+    if (mask) return JSON.stringify(toOwn(mask));
+    return ownRe ? m.replace(ownRe, inString) : m;
+  });
 }

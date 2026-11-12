@@ -8426,3 +8426,11 @@ test('dom4-fix2: ogłoszenie WERSALIKAMI — osoba za rzeczownikiem grafiku i za
     'STADION KAZIMIERZA GÓRSKIEGO 15 TYS. MIEJSC',
   ]);
 });
+
+test('options.masks — maska z cudzysłowem, backslashem i nową linią nie psuje JSON', () => {
+  const masks = { IMIE: 'a"b\c', PESEL: 'x\ny\tz' } as const;
+  const input = '{"opis":"Jan Kowalski, PESEL 44051401359","pesel":44051401359}';
+  const out = redactPII(input, { masks }).redacted;
+  expect(() => JSON.parse(out)).not.toThrow();
+  expect(JSON.parse(out)).toEqual({ opis: `${masks.IMIE}, PESEL ${masks.PESEL}`, pesel: masks.PESEL });
+});
