@@ -2129,6 +2129,13 @@ test('telefon po „kontaktować się ze mną pod numerem" i podobnych zwrotach 
     ['Proszę kontaktować się ze mną pod numerami 22 379 56 66 lub 22 379 56 67.', `Proszę kontaktować się ze mną pod numerami ${T} lub ${T}.`],
     ['Jestem osiągalna pod numerem 22 379 56 66.', `Jestem osiągalna pod numerem ${T}.`],
     ['Biuro jest dostępne telefonicznie pod numerem 22 379 56 66.', `Biuro jest dostępne telefonicznie pod numerem ${T}.`],
+    // „W razie pytań" bez czasownika i osoba po „Pan/Pani" przed „dostępny/osiągalna"
+    ['W razie pytań pod numerem 22 123 45 67.', `W razie pytań pod numerem ${T}.`],
+    ['W razie pytań lub wątpliwości, pod nr 22 123 45 67.', `W razie pytań lub wątpliwości, pod nr ${T}.`],
+    ['W razie pytań pod numerem 221234567.', `W razie pytań pod numerem ${T}.`],
+    ['Pan Nowak dostępny jest pod numerem 22 123 45 67.', `Pan [IMIĘ I NAZWISKO] dostępny jest pod numerem ${T}.`],
+    ['Pani Anna Kos będzie osiągalna pod numerem 22 123 45 67.', `Pani [IMIĘ I NAZWISKO] będzie osiągalna pod numerem ${T}.`],
+    ['Pani Kierownik jest dostępna telefonicznie pod numerem 22 123 45 67.', `Pani Kierownik jest dostępna telefonicznie pod numerem ${T}.`],
   ];
   for (const [inp, out] of cases) expect(redactPII(inp).redacted).toBe(out);
 });
@@ -2145,6 +2152,12 @@ test('REGRESJA: „dostępny pod numerem" przy rzeczy (dokument, faktura, wpis) 
     'Pozycja dostępna pod numerem 22 379 56 66, w wykazie.',
     'Proszę kontaktować się ze mną pod numerem 22 379 56 66/2024.',
     'Kontaktował się z urzędem w sprawie wpisu pod numerem 22 379 56 66.',
+    // „Pan/Pani" z wyrazem małą literą, rzecz osoby, „w razie pytań" z dalszym opisem sprawy
+    'Pani sprawa dostępna jest pod numerem 12 345 67 89.',
+    'W razie pytań dotyczących sprawy prowadzonej pod numerem 12 345 67 89.',
+    'W razie pytań w sprawie pod numerem 12 345 67 89.',
+    'W razie pytań pod numerem 22 379 56 66/2024.',
+    'W razie pytań pod numerem 12 345 67 89 zł.',
   ];
   for (const t of keep) expect(redactPII(t).redacted).toBe(t);
 });
@@ -2160,7 +2173,35 @@ test('REGRESJA: „pod numerem" bez zwrotu kontaktu albo przy rejestrze, sprawie
     'Środki dostępne pod numerem 12 345 67 89 zł.',
   ];
   for (const t of keep) expect(redactPII(t).redacted).toBe(t);
+  // Rzecz osoby („Akta Pana Nowaka dostępne są …") to numer akt, nie telefon tej osoby.
+  expect(redactPII('Akta Pana Nowaka dostępne są pod numerem 12 345 67 89.').redacted).toBe(
+    'Akta Pana [IMIĘ I NAZWISKO] dostępne są pod numerem 12 345 67 89.',
+  );
   expect(redactPII('Spółka wpisana do KRS pod numerem 0000123456.').redacted).toBe('Spółka wpisana do KRS pod numerem [KRS].');
+});
+test('REGRESJA: „W razie pytań" i „Pan/Pani … dostępny" przed „pod numerem" przy numerze, który telefonem nie jest', () => {
+  // Dłuższy ciąg cyfr, 9 cyfr od zera, numer sprawy, kwota, data albo rzecz po „Pan/Pani" zostają jawne.
+  const keep = [
+    'W razie pytań pod numerem 1234/2024.',
+    'W razie pytań pod numerem 22 123 45 67 zł.',
+    'W razie pytań pod numerem sprawy 22 123 45 67.',
+    'W razie wątpliwości co do wpisu pod numerem 12 345 67 89.',
+    'W razie pytań dotyczących faktury pod numerem 12 345 67 89.',
+    'W razie problemów z dostawą pod numerem 22 123 45 67.',
+    'W razie pytań z zakresu podatków pod numerem 22 123 45 67.',
+    'Pani decyzja dostępna jest pod numerem 12 345 67 89.',
+    'Pan wniosek dostępny jest pod numerem 12 345 67 89.',
+    'W razie pytań pod numerem 01 123 45 67.',
+    'W razie pytań pod numerem 22 123 45 67 89 10.',
+    'W razie pytań pod numerem 12.03.2024.',
+    'W razie pytań pod numerem 22-123-45-67/2024.',
+    'W razie pytań pod numerem 123456789 zł.',
+    'Jestem dostępny pod numerem 2024 123 45 67.',
+  ];
+  for (const t of keep) expect(redactPII(t).redacted).toBe(t);
+  expect(redactPII('Pan Nowak dostępny jest pod numerem 2024 123 45 67.').redacted).toBe(
+    'Pan [IMIĘ I NAZWISKO] dostępny jest pod numerem 2024 123 45 67.',
+  );
 });
 test('REGRESJA: „kontakt z …" w opisie zdarzenia albo przy imiesłowie przed „pod numerem" nie robi telefonu', () => {
   // Adresat po „z/ze" liczy się tylko po prośbie o kontakt i bez imiesłowu („wpisaną", „prowadzonego"):

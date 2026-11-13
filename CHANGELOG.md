@@ -224,7 +224,12 @@ działają na GitHubie od chwili wypchnięcia tagów.
   „dzwonić pod”. Teraz numer trafia pod znacznik `[TELEFON]`, gdy przed „pod numerem”, „pod numerami”,
   „pod nr” albo „pod wskazanym numerem” stoi zwrot kontaktu („kontaktować się ze mną”, „kontakt
   z sekretariatem”, „dzwonić do mnie w godzinach 8-16”, „telefonować”, „jestem dostępny”, „jestem
-  osiągalna”). Między nimi mogą stać tylko krótkie wyrazy w rodzaju „się”, „ze mną”, „wyłącznie”,
+  osiągalna”, „W razie pytań”, „Pan Nowak dostępny jest”, „Pani Anna Kos będzie osiągalna”). Osoba
+  przy „dostępny” liczy się tylko po „Pan/Pani” z imieniem lub nazwiskiem wielką literą, więc „Pani
+  sprawa dostępna jest pod numerem …” i „Akta Pana Nowaka dostępne są pod numerem …” zostają jawne,
+  tak samo jak „W razie pytań dotyczących sprawy prowadzonej pod numerem …”. Po „pod numerem” zostaje
+  jawny też dłuższy ciąg cyfr („22 123 45 67 89 10”, „2024 123 45 67”) i 9 cyfr od zera („01 123 45 67”),
+  bo maska objęłaby tylko część numeru albo numer bez kierunkowego. Między nimi mogą stać tylko krótkie wyrazy w rodzaju „się”, „ze mną”, „wyłącznie”,
   „telefonicznie lub mailowo” albo adresat po „z” („z Panią Kierownik”). Adresat liczy się tylko
   w prośbie o kontakt („proszę kontaktować się z działem kadr”, „proszę o kontakt z sekretariatem”),
   więc opis zdarzenia („Kontakt z firmą wpisaną pod numerem …”, „Kontaktowano się z lokatorem

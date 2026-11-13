@@ -1136,6 +1136,11 @@ export function buildDataset() {
   osp('Pismo od Marka Sowy z 3 marca. Pozew Marka Gołębia wpłynął.', ['Marka Sowy', 'Marka Gołębia'], ['Pismo od', 'z 3 marca', 'Pozew', 'wpłynął']);
   neg('Pismo od Marka do piątku. Gniazdo sowy i lisa w lesie. Msza w kościele pw. Najświętszej Maryi Panny.', ['Marka do piątku', 'sowy i lisa', 'Najświętszej Maryi Panny']);
 
+  // Grupa G2 (telefon pod numerem): stacjonarny 2-3-2-2 po „W razie pytań” i po osobie z „Pan/Pani”
+  // przed „dostępny/osiągalna”; „Pani sprawa”, „Akta Pana …” i „w razie pytań” o sprawie zostają.
+  str('W razie pytań pod numerem 22 123 45 67. Pan Nowak dostępny jest pod numerem 61 262 16 30.', ['22 123 45 67', 'Nowak', '61 262 16 30'], ['W razie pytań', 'dostępny jest pod numerem']);
+  neg('Pani sprawa dostępna jest pod numerem 12 345 67 89. W razie pytań dotyczących sprawy prowadzonej pod numerem 22 379 56 66 proszę pisać.', ['12 345 67 89', '22 379 56 66']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {

@@ -330,10 +330,24 @@ const PHONE_CONTACT_GAP =
   String.raw`w[ \t]+godz(?:inach|\.)[ \t]*\d{1,2}(?:[:.]\d{2})?[ \t]*[-–][ \t]*\d{1,2}(?:[:.]\d{2})?)`;
 const PHONE_CONTACT_ADJ =
   '(?:wskazanym|podanym|poniższym|powyższym|następującym|tym|moim|naszym|bezpośrednim|służbowym|prywatnym|komórkowym|stacjonarnym)';
+// „W razie pytań pod numerem …" to zaproszenie do kontaktu, tak jak „proszę dzwonić".
+const PHONE_CONTACT_DOUBT = '(?:pytań|wątpliwości|problemów|trudności)';
+// Osoba po „Pan/Pani" przed „dostępny/osiągalna" („Pan Nowak dostępny jest pod numerem …", „Pani Anna
+// Kos będzie osiągalna …"). Regex ma flagę „i", więc wielkie litery imienia i nazwiska sprawdza
+// RE_PHONE_PERSON_HEAD w callbacku: „Pani sprawa dostępna jest pod numerem …" to numer sprawy.
+const PHONE_CONTACT_NAME = `[${PHONE_CONTACT_LETTER}]{2,20}(?:-[${PHONE_CONTACT_LETTER}]{2,20})?`;
+const PHONE_CONTACT_PERSON =
+  String.raw`pani?[ \t]+${PHONE_CONTACT_NAME}(?:[ \t]+${PHONE_CONTACT_NAME})?[ \t]+(?:(?:jest|będzie|pozostaje)[ \t]+)?` +
+  String.raw`(?:dostępn|osiągaln)[a-ząćęłńóśźż]*(?:[ \t]+(?:jest|będzie|pozostaje))?`;
+const RE_PHONE_PERSON_HEAD_START = /^pani?[ \t]/i;
+const RE_PHONE_PERSON_HEAD =
+  /^[Pp]ani?[ \t]+\p{Lu}\p{Ll}+(?:-\p{Lu}\p{Ll}+)?(?:[ \t]+\p{Lu}\p{Ll}+(?:-\p{Lu}\p{Ll}+)?)?[ \t]+(?:(?:jest|będzie|pozostaje)[ \t]+)?(?:dostępn|osiągaln)/u;
 const PHONE_CONTACT_HEAD =
   '(?:(?:s?kontakt|(?:za|od|prze)?dzwo|telefonow|sms(?:-(?=[a-z]))?)[a-ząćęłńóśźż]*' +
   String.raw`|(?:jestem|jesteśmy|będę|będziemy|pozostaję|pozostajemy)(?:[ \t]+(?:też|także|również|zawsze))?[ \t]+(?:dostępn|osiągaln)[a-ząćęłńóśźż]*` +
-  String.raw`|(?:dostępn|osiągaln)[a-ząćęłńóśźż]*[ \t]+telefonicznie)`;
+  String.raw`|(?:dostępn|osiągaln)[a-ząćęłńóśźż]*[ \t]+telefonicznie` +
+  String.raw`|w[ \t]+razie[ \t]+${PHONE_CONTACT_DOUBT}(?:[ \t]+(?:lub|i|albo|bądź)[ \t]+${PHONE_CONTACT_DOUBT})?` +
+  String.raw`|${PHONE_CONTACT_PERSON})`;
 // Prośba o kontakt: bezokolicznik, tryb rozkazujący albo „o kontakt" („Proszę o kontakt z …").
 const PHONE_CONTACT_REQUEST =
   String.raw`(?:s?kontaktowa[ćc]|s?kontaktuj(?:cie|my)?|o[ \t]+s?kontakt|(?:za)?dzwoni[ćc]|(?:za)?dzwoń(?:cie)?|telefonowa[ćc])(?![${PHONE_CONTACT_LETTER}])`;
@@ -513,6 +527,8 @@ export function passPhone(ctx: RedactCtx): void {
   // („Kontakt nr 512 345 678, tel. 22 843 21 09") ma własną kotwicę.
   const anchored = (m: string, kw: string, sep: string, nums: string, offset: number, str: string): string => {
     if (rejectPhoneNrFiller(kw, sep, str, offset)) return `${kw}${sep}${nums.replace(RE_PHONE_ANCHORED, anchored)}`;
+    // „Pan/Pani" z wyrazem małą literą („Pani sprawa dostępna jest pod numerem …") to nie osoba.
+    if (RE_PHONE_PERSON_HEAD_START.test(kw) && !RE_PHONE_PERSON_HEAD.test(kw)) return m;
     const parts = nums.split(RE_PHONE_ENUM_SPLIT);
     if (!parts.every((p) => phoneDigitsValid(p.replace(/\D/g, '')))) return m;
     if (parts.some((p) => RE_PHONE_DATE_SHAPE.test(p))) return m;
@@ -524,6 +540,11 @@ export function passPhone(ctx: RedactCtx): void {
     // („… pod numerem 22 379 56 66/2024"). Maska objęłaby tylko część numeru, więc zostaje cały.
     // Pełny drugi numer po „/" („/501 601 701") dalej jest wyliczeniem telefonów.
     if (podAnchor && /^[/-]\d{1,4}(?![\d \t-]?\d)/.test(str.slice(offset + m.length, offset + m.length + 8))) return m;
+    // Po „pod numerem" dalsze cyfry za oknem 9 cyfr („… pod numerem 22 123 45 67 89 10") to dłuższy
+    // numer rekordu, a 9 cyfr od zera („01 123 45 67") nie ma kierunkowego 12–99 ani prefiksu komórki.
+    // Maska objęłaby tylko część numeru albo numer, który telefonem nie jest, więc zostaje cały.
+    if (podAnchor && /^[ \t-]?\d/.test(str.slice(offset + m.length, offset + m.length + 2))) return m;
+    if (podAnchor && parts.some((p) => /^0\d{8}$/.test(p.replace(/\D/g, '')))) return m;
     if (/^komór/i.test(kw) || RE_PHONE_KW_WEAK.test(kw) || podAnchor) {
       const after = str.slice(offset + m.length, offset + m.length + 16);
       if ((RE_PHONE_AMOUNT_AFTER.test(after) || RE_PHONE_ZL_AFTER.test(after)) && !RE_CURRENCY_BEFORE_NUMBER.test(after)) return m;
