@@ -3386,7 +3386,8 @@ test('K07 pułapki: adres bez „ul." przy kodzie nadal w masce (numer w następ
   ]);
   // nazwa i wiersz, które tylko sąsiadują z adresem, zostają
   masked([
-    ['Wydział Kontroli\nul. Długa 5', `Wydział Kontroli\n${A}`],
+    // ulica pod samą nazwą jednostki to siedziba instytucji i zostaje jawna (grupa G ewaluacji)
+    ['Wydział Kontroli\nul. Długa 5', 'Wydział Kontroli\nul. Długa 5'],
     ['Jan Turek\nul. Długa 5', `${N}\n${A}`],
   ]);
 });
@@ -3767,7 +3768,8 @@ test('K22 pułapki: samo miasto, nazwa instytucji i patron przed adresem dalej d
     ['Warszawa, ul. Marszałkowska 10', `${C}, ${A}`],
     ['Nowa Sól, ul. Długa 5', `${C}, ${A}`],
     ['Bielsko-Biała, ul. Długa 5', `${C}, ${A}`],
-    ['Starostwo Powiatowe Turek, ul. Kaliska 59', `Starostwo Powiatowe ${C}, ${A}`],
+    // ulica za nazwą instytucji to jej siedziba i zostaje jawna (grupa G ewaluacji)
+    ['Starostwo Powiatowe Turek, ul. Kaliska 59', `Starostwo Powiatowe ${C}, ul. Kaliska 59`],
     ['Parafia pw. św. Stanisława Kalisz, ul. Polna 3', `Parafia pw. św. Stanisława ${C}, ${A}`],
     ['Pensjonat Maria Zakopane, ul. Kościeliska 5', `Pensjonat Maria ${C}, ${A}`],
     ['Pan Jan Kowalski w Gdańsku, ul. Długa 5', `Pan ${N} w ${C}, ${A}`],
@@ -9433,5 +9435,171 @@ test('G1 druga weryfikacja: wyliczenie numerów w jednym przejściu', () => {
     const out = redactPII(head + item.repeat(n)).redacted;
     expect(performance.now() - t0, head).toBeLessThan(2000);
     expect(out.match(/\[NR-/g)?.length, head).toBe(n + 1);
+  }
+});
+
+// ── Ewaluacja, grupa G: adres siedziby instytucji w nagłówku pisma zostaje ──
+test('G: ulica, kod i miejscowość pod nazwą instytucji albo jej jednostki zostają jawne', () => {
+  masked([
+    ['Urząd Miasta Łodzi\nWydział Finansowy\nul. Piotrkowska 104\n90-926 Łódź', 'Urząd Miasta Łodzi\nWydział Finansowy\nul. Piotrkowska 104\n90-926 Łódź'],
+    [
+      'Instytut Rozwoju Technologii Cyfrowych\nDział Kadr i Płac\nul. Stanisława Moniuszki 3\n00-009 Warszawa',
+      'Instytut Rozwoju Technologii Cyfrowych\nDział Kadr i Płac\nul. Stanisława Moniuszki 3\n00-009 Warszawa',
+    ],
+    [
+      'Urząd m.st. Warszawy\nDzielnica Mokotów\nWydział Obsługi Mieszkańców\nul. Rakowiecka 25/27\n02-517 Warszawa',
+      'Urząd m.st. Warszawy\nDzielnica Mokotów\nWydział Obsługi Mieszkańców\nul. Rakowiecka 25/27\n02-517 Warszawa',
+    ],
+    ['Urząd Miejski w Gdańsku\r\nWydział Gospodarki Komunalnej\r\nul. Nowe Ogrody 8/12\r\n80-803 Gdańsk', 'Urząd Miejski w Gdańsku\r\nWydział Gospodarki Komunalnej\r\nul. Nowe Ogrody 8/12\r\n80-803 Gdańsk'],
+    ['Powiatowy Urząd Pracy\nul. Polna 5, 00-001 Warszawa', 'Powiatowy Urząd Pracy\nul. Polna 5, 00-001 Warszawa'],
+    ['Szkoła Podstawowa nr 12\nul. Szkolna 3\n00-950 Warszawa', 'Szkoła Podstawowa nr 12\nul. Szkolna 3\n00-950 Warszawa'],
+    [
+      'administratorem budynku (Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1).',
+      'administratorem budynku (Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1).',
+    ],
+    ['Sąd Rejonowy dla Krakowa-Śródmieścia, ul. Przy Rondzie 7, 31-547 Kraków', 'Sąd Rejonowy dla Krakowa-Śródmieścia, ul. Przy Rondzie 7, 31-547 Kraków'],
+    [
+      'ze spotkania w dniu 2 czerwca 2026 r., sala 214, budynek przy ul. Królewskiej 27 w Warszawie',
+      'ze spotkania w dniu 2 czerwca 2026 r., sala 214, budynek przy ul. Królewskiej 27 w Warszawie',
+    ],
+  ]);
+});
+test('G pułapki: adres osoby przy nazwie instytucji albo firmy dalej w masce', () => {
+  masked([
+    // nagłówek pracodawcy, a pod nim adresat pisma: adres pod osobą to adres osoby
+    [
+      'Dział Kadr i Płac\nul. Moniuszki 3\n00-009 Warszawa\nPani\nJoanna Zawadzka\nul. Krótka 115A lok. 9\n03-283 Warszawa',
+      `Dział Kadr i Płac\nul. Moniuszki 3\n00-009 Warszawa\nPani\n${N}\n${A}\n${KOD} ${C}`,
+    ],
+    ['Dział Kadr\nPani\nJoanna Zawadzka\nul. Krótka 115A\n03-283 Warszawa', `Dział Kadr\nPani\n${N}\n${A}\n${KOD} ${C}`],
+    ['Urząd Miasta\nAnna Nowak\nul. Lipowa 3\n00-950 Warszawa', `Urząd Miasta\n${N}\n${A}\n${KOD} ${C}`],
+    // firma jednoosobowa z imieniem i nazwiskiem właściciela
+    ['Zakład Usług Remontowych Jan Kowalski\nul. Polna 5\n00-001 Warszawa', `Zakład Usług Remontowych ${N}\n${A}\n${KOD} ${C}`],
+    ['Biuro Rachunkowe Anna Nowak\nul. Lipowa 3\n00-950 Warszawa', `Biuro Rachunkowe ${N}\n${A}\n${KOD} ${C}`],
+    // etykieta zamieszkania i lokal mieszkalny
+    [
+      'Jan Kowalski, członek Spółdzielni Mieszkaniowej „Lipa”, zam. ul. Polna 5, 00-001 Warszawa',
+      `${N}, członek Spółdzielni Mieszkaniowej „Lipa”, zam. ${A}, ${KOD} ${C}`,
+    ],
+    ['Spółdzielnia Mieszkaniowa „Lipa”, ul. Polna 5 m. 3', `Spółdzielnia Mieszkaniowa „Lipa”, ${A}`],
+    ['Szpital Bielański\nAdres zamieszkania pacjenta:\nul. Lipowa 3\n00-950 Warszawa', `Szpital Bielański\nAdres zamieszkania pacjenta:\n${A}\n${KOD} ${C}`],
+    // pusta linia przerywa blok nagłówka
+    ['Urząd Miasta Łodzi\n\nul. Lipowa 3\n00-950 Warszawa', `Urząd Miasta Łodzi\n\n${A}\n${KOD} ${C}`],
+    // budynek bez sali to zwykły adres
+    ['mieszka w budynku przy ul. Lipowej 3 w Warszawie', `mieszka w budynku przy ${A} w ${C}`],
+  ]);
+});
+test('G po weryfikacji: instytucja jako podmiot zdania nie chroni adresu osoby za przecinkiem', () => {
+  masked([
+    ['Szpital przyjął pacjenta Jana Kowalskiego, ul. Polna 3, 00-950 Warszawa.', `Szpital przyjął pacjenta ${N}, ${A}, ${KOD} ${C}.`],
+    ['Ośrodek Pomocy Społecznej przyznał zasiłek Annie Nowak, ul. Polna 3, 00-950 Warszawa.', `Ośrodek Pomocy Społecznej przyznał zasiłek ${N}, ${A}, ${KOD} ${C}.`],
+    ['Dział Kadr wysłał świadectwo pracy do Jana Kowalskiego, ul. Polna 3, 00-950 Warszawa.', `Dział Kadr wysłał świadectwo pracy do ${N}, ${A}, ${KOD} ${C}.`],
+    ['Sąd Rejonowy przesłał odpis Annie Kowalskiej, ul. Polna 3.', `Sąd Rejonowy przesłał odpis ${N}, ${A}.`],
+    ['Urząd Pracy skierował bezrobotnego Piotra Zielińskiego, ul. Polna 3, do pracy.', `Urząd Pracy skierował bezrobotnego ${N}, ${A}, do pracy.`],
+    ['Przychodnia skierowała pacjentkę Marię Wiśniewską, al. Jerozolimskie 44, na badania.', `Przychodnia skierowała pacjentkę ${N}, ${A}, na badania.`],
+    ['Sąd ustalił, ul. Polna 5 to miejsce zamieszkania powoda.', `Sąd ustalił, ${A} to miejsce zamieszkania powoda.`],
+    ['Spółdzielnia wypowiedziała najem, ul. Polna 5, 00-001 Warszawa', `Spółdzielnia wypowiedziała najem, ${A}, ${KOD} ${C}`],
+  ]);
+});
+test('G po weryfikacji: gmina, dzielnica, osoba albo etykieta nad blokiem to adres osoby', () => {
+  masked([
+    ['Miejsce zamieszkania\nGmina Kobylnica\nul. Polna 3\n76-251 Kobylnica', `Miejsce zamieszkania\nGmina Kobylnica\n${A}\n${KOD} ${C}`],
+    ['Adres do korespondencji\nDzielnica Bemowo\nul. Polna 3\n01-100 Warszawa', `Adres do korespondencji\nDzielnica Bemowo\n${A}\n${KOD} ${C}`],
+    ['Jan Kowalski\nGmina Kobylnica\nul. Polna 3\n76-251 Kobylnica', `${N}\nGmina Kobylnica\n${A}\n${KOD} ${C}`],
+    ['Wnioskodawca\nJan Kowalski\nGmina Kobylnica, ul. Polna 3, 76-251 Kobylnica', `Wnioskodawca\n${N}\nGmina Kobylnica, ${A}, ${KOD} ${C}`],
+    ['Gmina Kobylnica\nul. Polna 3/5\n76-251 Kobylnica', `Gmina Kobylnica\n${A}\n${KOD} ${C}`],
+    // osoba albo etykieta nad nagłówkiem instytucji
+    ['Anna Nowak\nSpółdzielnia Mieszkaniowa „Lipa”\nul. Wspólna 1\n00-950 Warszawa', `${N}\nSpółdzielnia Mieszkaniowa „Lipa”\n${A}\n${KOD} ${C}`],
+    [
+      'Pacjentka zamieszkała\nSpółdzielnia Mieszkaniowa „Lipa”\nul. Wspólna 1\n00-950 Warszawa',
+      `Pacjentka zamieszkała\nSpółdzielnia Mieszkaniowa „Lipa”\n${A}\n${KOD} ${C}`,
+    ],
+    // numer lokalu po ukośniku
+    ['Oddział Pediatryczny, ul. Lipowa 12/4, 00-950 Warszawa', `Oddział Pediatryczny, ${A}, ${KOD} ${C}`],
+    ['Spółdzielnia Mieszkaniowa „Przyszłość”\nul. Wspólna 1/15', `Spółdzielnia Mieszkaniowa „Przyszłość”\n${A}`],
+  ]);
+});
+test('G po weryfikacji: imię w nazwie w każdym zapisie wskazuje osobę', () => {
+  masked([
+    ['Rada Anna\nul. Polna 5\n00-001 Warszawa', `Rada Anna\n${A}\n${KOD} ${C}`],
+    ['Zarząd Jan\nul. Polna 5\n00-001 Warszawa', `Zarząd Jan\n${A}\n${KOD} ${C}`],
+    ['PRZYCHODNIA LEKARSKA JAN KOWALSKI\nul. Polna 5\n00-001 Warszawa', `PRZYCHODNIA LEKARSKA ${N}\n${A}\n${KOD} ${C}`],
+    ['Przychodnia Lekarska Kowalski Jan\nul. Polna 5\n00-001 Warszawa', `Przychodnia Lekarska ${N}\n${A}\n${KOD} ${C}`],
+  ]);
+  // patron po „im.” i nazwa z łącznikiem dalej są nazwą instytucji
+  masked([
+    ['Szkoła Podstawowa nr 5 im. Marii Konopnickiej\nul. Szkolna 3\n00-950 Warszawa', 'Szkoła Podstawowa nr 5 im. Marii Konopnickiej\nul. Szkolna 3\n00-950 Warszawa'],
+    ['Sąd Rejonowy dla Łodzi-Śródmieścia w Łodzi\nul. Kopcińskiego 56\n90-032 Łódź', 'Sąd Rejonowy dla Łodzi-Śródmieścia w Łodzi\nul. Kopcińskiego 56\n90-032 Łódź'],
+  ]);
+});
+test('G po weryfikacji: drugi przebieg daje ten sam wynik', () => {
+  for (const t of [
+    'Starostwo Powiatowe Turek, ul. Kaliska 59',
+    'Szpital przyjął pacjenta Jana Kowalskiego, ul. Polna 3, 00-950 Warszawa.',
+    'PRZYCHODNIA LEKARSKA JAN KOWALSKI\nul. Polna 5\n00-001 Warszawa',
+    'Urząd Miasta Łodzi\nWydział Finansowy\nul. Piotrkowska 104\n90-926 Łódź',
+  ]) {
+    const once = redactPII(t).redacted;
+    expect(redactPII(once).redacted, t).toBe(once);
+  }
+});
+test('G po drugiej weryfikacji: osoba, którą silnik rozpoznaje w nazwie albo nad nią, odbiera adresowi charakter siedziby', () => {
+  masked([
+    // imię w dopełniaczu albo samo nazwisko w nazwie firmy jednoosobowej
+    ['Przychodnia Lekarska Ewy Nowak\nul. Lipowa 5\n90-001 Łódź', `Przychodnia Lekarska ${N}\n${A}\n${KOD} ${C}`],
+    ['Przychodnia Weterynaryjna Anny Nowak\nul. Lipowa 5\n90-001 Łódź', `Przychodnia Weterynaryjna ${N}\n${A}\n${KOD} ${C}`],
+    ['Przychodnia Rodzinna Kowalska\nul. Lipowa 5\n90-001 Łódź', `Przychodnia Rodzinna ${N}\n${A}\n${KOD} ${C}`],
+    ['Szkoła Jazdy Kowalski\nul. Polna 3\n00-001 Warszawa', `Szkoła Jazdy ${N}\n${A}\n${KOD} ${C}`],
+    ['Ośrodek Rehabilitacji Wiśniewski i Syn\nul. Lipowa 5\n90-001 Łódź', `Ośrodek Rehabilitacji ${N} i Syn\n${A}\n${KOD} ${C}`],
+    [
+      'Dane do faktury:\nSzkoła Językowa Kowalski\nul. Kwiatowa 18\n95-200 Pabianice\nNIP 7251234567',
+      `Dane do faktury:\nSzkoła Językowa ${N}\n${A}\n${KOD} ${C}\nNIP [NIP]`,
+    ],
+    // osoba nad nagłówkiem: inicjał, imię spoza słownika pod „Sz. Pan”, samo nazwisko
+    ['Odbiorca:\nW. Nowak\nDział Kadr\nul. Kwiatowa 18', `Odbiorca:\nW. ${N}\nDział Kadr\n${A}`],
+    [
+      'Sz. Pan\nOłeksandr Bondarenko\nOśrodek Szkolenia Kierowców\nul. Kwiatowa 18\n95-200 Pabianice',
+      `Sz. Pan\nOłeksandr ${N}\nOśrodek Szkolenia Kierowców\n${A}\n${KOD} ${C}`,
+    ],
+    ['Kowalska\nSzkoła Podstawowa nr 5\nul. Lipowa 9\n00-950 Warszawa', `${N}\nSzkoła Podstawowa nr 5\n${A}\n${KOD} ${C}`],
+    // adres osoby nad nagłówkiem urzędu nie odbiera jawności siedzibie pod nim
+    ['Pan Jan Kowalski\nul. Polna 3\nUrząd Pracy\nul. Lipowa 9', `Pan ${N}\n${A}\nUrząd Pracy\nul. Lipowa 9`],
+  ]);
+});
+test('G po drugiej weryfikacji: ulica siedziby z patronem, stopniem albo liczbą zostaje w całości', () => {
+  masked([
+    ['Kuratorium Oświaty\nal. Marszałka Józefa Piłsudskiego 7/9\n90-368 Łódź', 'Kuratorium Oświaty\nal. Marszałka Józefa Piłsudskiego 7/9\n90-368 Łódź'],
+    ['Wydział Komunikacji\nul. Kardynała Stefana Wyszyńskiego 3\n95-100 Zgierz', 'Wydział Komunikacji\nul. Kardynała Stefana Wyszyńskiego 3\n95-100 Zgierz'],
+    ['Urząd Miejski\nul. gen. Władysława Andersa 5\n87-100 Toruń', 'Urząd Miejski\nul. gen. Władysława Andersa 5\n87-100 Toruń'],
+    ['Prokuratura Rejonowa\nul. ks. Jerzego Popiełuszki 3\n01-501 Warszawa', 'Prokuratura Rejonowa\nul. ks. Jerzego Popiełuszki 3\n01-501 Warszawa'],
+    ['Sąd Rejonowy\nul. św. Jana 5\n31-017 Kraków', 'Sąd Rejonowy\nul. św. Jana 5\n31-017 Kraków'],
+    ['Starostwo Powiatowe\nul. 3 Maja 5\n37-450 Stalowa Wola', 'Starostwo Powiatowe\nul. 3 Maja 5\n37-450 Stalowa Wola'],
+    ['Urząd Miejski\nul. Piotrkowska 104, pok. 12\n90-926 Łódź', 'Urząd Miejski\nul. Piotrkowska 104, pok. 12\n90-926 Łódź'],
+  ]);
+});
+test('G po drugiej weryfikacji: numer lokalu po przecinku i pełnym słowem to adres osoby', () => {
+  masked([
+    ['Spółdzielnia Mieszkaniowa Lipa\nul. Polna 3, m. 14', `Spółdzielnia Mieszkaniowa Lipa\n${A}`],
+    ['Urząd Gminy\nul. Polna 3, lok. 2', `Urząd Gminy\n${A}`],
+    ['Spółdzielnia Mieszkaniowa Lipa\nul. Polna 3 lokal 4', `Spółdzielnia Mieszkaniowa Lipa\n${A}`],
+    ['Szkoła Podstawowa nr 3\nul. Polna 3, lok. 4\n90-001 Łódź', `Szkoła Podstawowa nr 3\n${A}\n${KOD} ${C}`],
+    ['Wydział Finansowy\nul. Polna 3, m. 14\n00-001 Warszawa', `Wydział Finansowy\n${A}\n${KOD} ${C}`],
+  ]);
+});
+test('G po drugiej weryfikacji: drugi przebieg daje ten sam wynik także w pseudonimach', () => {
+  for (const t of [
+    'Przychodnia Lekarska Ewy Nowak\nul. Lipowa 5\n90-001 Łódź',
+    'Przychodnia Rodzinna Nowak\nul. Polna 3\n00-001 Warszawa',
+    'Odbiorca:\nW. Nowak\nDział Kadr\nul. Kwiatowa 18',
+    'Sz. Pan\nOłeksandr Bondarenko\nOśrodek Szkolenia Kierowców\nul. Kwiatowa 18\n95-200 Pabianice',
+    'Kowalska\nSzkoła Podstawowa nr 5\nul. Lipowa 9\n00-950 Warszawa',
+    'Pan Jan Kowalski\nul. Polna 3\nUrząd Pracy\nul. Lipowa 9',
+    'Kuratorium Oświaty\nal. Marszałka Józefa Piłsudskiego 7/9\n90-368 Łódź',
+    'Urząd Miejski\nul. gen. Władysława Andersa 5\n87-100 Toruń',
+  ]) {
+    for (const opts of [undefined, { pseudonyms: true }]) {
+      const once = redactPII(t, opts).redacted;
+      expect(redactPII(once, opts).redacted, t).toBe(once);
+    }
   }
 });

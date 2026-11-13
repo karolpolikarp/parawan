@@ -1,7 +1,7 @@
 // Orkiestrator redakcji: przygotowuje kontekst i woła przebiegi w ustalonej kolejności.
 import { normalizeSurnameKey } from './surnames.js';
 import { indexToLetters, type RedactCtx } from './context.js';
-import { passAddress, passAddressAfterResidenceLabel, passPostalNoHyphen } from './passes/address.js';
+import { passAddress, passAddressAfterResidenceLabel, passPostalNoHyphen, passProtectInstitutionStreets, passRestoreInstitutionStreets } from './passes/address.js';
 import { passBirthDate } from './passes/birth-date.js';
 import { passCity } from './passes/city.js';
 import { passDriverLicense, passIdCard, passKrs, passPassport, passPlate, passPostal } from './passes/documents.js';
@@ -46,6 +46,10 @@ function resolveMasks(custom: RedactOptions['masks']): { M: Record<PiiType, stri
 }
 
 export function redactPII(input: string, options?: RedactOptions): RedactionResult {
+  return redactWith(input, options, true);
+}
+
+function redactWith(input: string, options: RedactOptions | undefined, withProbe: boolean): RedactionResult {
   if (!input || typeof input !== 'string') {
     return { redacted: input ?? '', found: [] };
   }
@@ -77,7 +81,21 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
     return `[OSOBA-${label}]`;
   };
 
-  const ctx: RedactCtx = { text: input, raw: input, ksefAnchor: hasKsefAnchor(input), on, bump, hit, M, personMask, pseudonyms: !!personLabels, maskedSurnames, protectedUrls: [], jsonEscapes: false, loginSeeds: new Set() };
+  const ctx: RedactCtx = { text: input, raw: input, ksefAnchor: hasKsefAnchor(input), on, bump, hit, M, personMask, pseudonyms: !!personLabels, maskedSurnames, protectedUrls: [], jsonEscapes: false, loginSeeds: new Set(), institutionStreets: [] };
+  // Sonda osób dla strażnika siedziby instytucji: te same typy, bez pseudonimów i własnych masek,
+  // bez kolejnej sondy w środku. Wynik zapamiętany, bo kod, ulica i miejscowość pytają o te same wiersze.
+  if (withProbe) {
+    const memo = new Map<string, string>();
+    const probeOptions: RedactOptions | undefined = options?.types ? { types: options.types } : undefined;
+    ctx.personProbe = (s: string): string => {
+      let r = memo.get(s);
+      if (r === undefined) {
+        r = redactWith(s, probeOptions, false).redacted;
+        memo.set(s, r);
+      }
+      return r;
+    };
+  }
 
   // Kolejność ma znaczenie: przebiegi czytają placeholdery poprzednich, a pierwszy bump typu
   // ustala kolejność `found`.
@@ -123,8 +141,13 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
 
   // Faza 3: data urodzenia, adres, miejscowość
   passBirthDate(ctx);
+  passProtectInstitutionStreets(ctx); // ulica siedziby w całości poza zasięgiem wzorców adresu
   passAddress(ctx);
   passAddressAfterResidenceLabel(ctx);
+  passRestoreInstitutionStreets(ctx);
+  // Kod pod ulicą, która mimo to trafiła pod maskę adresu, też znika: jawny kod przy zakrytej ulicy
+  // zmieniałby wynik drugiego przebiegu.
+  passPostal(ctx);
   // Kod bez myślnika i miejscowość kotwiczą na już zamaskowanym [ADRES] i [KOD-POCZTOWY],
   // dlatego biegną po adresie.
   passPostalNoHyphen(ctx);

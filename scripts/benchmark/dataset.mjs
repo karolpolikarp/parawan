@@ -1040,6 +1040,16 @@ export function buildDataset() {
   neg('Zerwanie umowy i złamanie przepisów nie są urazem. Brak przeciwwskazań do pracy. Centrum Leczenia Stwardnienia Rozsianego przyjmuje.', ['Zerwanie umowy', 'złamanie przepisów', 'Brak przeciwwskazań do pracy', 'Centrum Leczenia Stwardnienia Rozsianego']);
   neg('Rozpoznanie sprawy nastąpi na posiedzeniu, a osoba uzależniona od alkoholu nie może prowadzić pojazdu.', ['Rozpoznanie sprawy', 'osoba uzależniona od alkoholu']);
 
+  // Grupa G ewaluacji: adres siedziby instytucji w nagłówku pisma zostaje, adres osoby pod nim nie.
+  neg('Urząd Miasta Łodzi\nWydział Finansowy\nul. Piotrkowska 104\n90-926 Łódź', ['ul. Piotrkowska 104', '90-926 Łódź']);
+  neg('W sprawach awarii proszę o kontakt z administratorem (Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1).', ['ul. Wspólna 1']);
+  str(
+    'Dział Kadr i Płac\nul. Moniuszki 3\n00-009 Warszawa\nPani\nJoanna Zawadzka\nul. Krótka 115A lok. 9\n03-283 Warszawa',
+    ['Joanna Zawadzka', 'ul. Krótka 115A lok. 9', '03-283'],
+    ['ul. Moniuszki 3', '00-009'],
+  );
+  str('Zakład Usług Remontowych Jan Kowalski\nul. Polna 5\n00-001 Warszawa', ['Jan Kowalski', 'ul. Polna 5', '00-001'], ['Zakład Usług Remontowych']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {

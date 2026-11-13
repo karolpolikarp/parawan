@@ -154,7 +154,12 @@ W dniu przyjęcia wyk. RTG, USG.",
   "neg-196": "Program profilaktyki cukrzycy realizuje gmina, a apteka sprzedaje paracetamol 500 mg za 9,99 zł.",
   "neg-197": "Zerwanie umowy i złamanie przepisów nie są urazem. Brak przeciwwskazań do pracy. Centrum Leczenia Stwardnienia Rozsianego przyjmuje.",
   "neg-198": "Rozpoznanie sprawy nastąpi na posiedzeniu, a osoba uzależniona od alkoholu nie może prowadzić pojazdu.",
+  "neg-199": "Urząd Miasta Łodzi
+Wydział Finansowy
+ul. Piotrkowska 104
+90-926 Łódź",
   "neg-20": "Wilk biegał po lesie za sarną.",
+  "neg-200": "W sprawach awarii proszę o kontakt z administratorem (Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1).",
   "neg-21": "Lis przemknął przez drogę tuż przed autem.",
   "neg-22": "Baran to pierwszy znak zodiaku.",
   "neg-23": "Mazurek wielkanocny stygł na parapecie.",
@@ -595,6 +600,16 @@ kontrola w poradni za 4 tygodnie",
   "str-181": "Zgodnie z zaświadczeniem lekarskim po porodzie przez cesarskie cięcie przeciwwskazane jest dźwiganie ciężarów do końca roku.",
   "str-182": "Od dwóch lat pozwany nadużywa alkoholu. W wyniku zdarzenia doznałem stłuczenia klatki piersiowej.",
   "str-183": "Potrzeba wynika z rozpoznania cukrzycy typu 1 i leczenia epizodu depresyjnego, potwierdzonego zaświadczeniem lekarza.",
+  "str-184": "Dział Kadr i Płac
+ul. Moniuszki 3
+00-009 Warszawa
+Pani
+Joanna Zawadzka
+ul. Krótka 115A lok. 9
+03-283 Warszawa",
+  "str-185": "Zakład Usług Remontowych Jan Kowalski
+ul. Polna 5
+00-001 Warszawa",
   "str-19": "sms na [TELEFON] nie doszedł",
   "str-20": "Infolinia oddzwoni z [TELEFON].",
   "str-21": "Proszę o odpowiedź na [EMAIL] w tym tygodniu.",
@@ -834,7 +849,12 @@ W dniu przyjęcia wyk. RTG, USG.",
   "neg-196": "Program profilaktyki cukrzycy realizuje gmina, a apteka sprzedaje paracetamol 500 mg za 9,99 zł.",
   "neg-197": "Zerwanie umowy i złamanie przepisów nie są urazem. Brak przeciwwskazań do pracy. Centrum Leczenia Stwardnienia Rozsianego przyjmuje.",
   "neg-198": "Rozpoznanie sprawy nastąpi na posiedzeniu, a osoba uzależniona od alkoholu nie może prowadzić pojazdu.",
+  "neg-199": "Urząd Miasta Łodzi
+Wydział Finansowy
+ul. Piotrkowska 104
+90-926 Łódź",
   "neg-20": "Wilk biegał po lesie za sarną.",
+  "neg-200": "W sprawach awarii proszę o kontakt z administratorem (Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1).",
   "neg-21": "Lis przemknął przez drogę tuż przed autem.",
   "neg-22": "Baran to pierwszy znak zodiaku.",
   "neg-23": "Mazurek wielkanocny stygł na parapecie.",
@@ -1273,6 +1293,16 @@ kontrola w poradni za 4 tygodnie",
   "str-181": "Zgodnie z zaświadczeniem lekarskim po porodzie przez [DANE O ZDROWIU] przeciwwskazane jest [DANE O ZDROWIU] do końca roku.",
   "str-182": "Od dwóch lat pozwany [DANE O ZDROWIU]. W wyniku zdarzenia doznałem [DANE O ZDROWIU].",
   "str-183": "Potrzeba wynika z rozpoznania [DANE O ZDROWIU] i leczenia [DANE O ZDROWIU], potwierdzonego zaświadczeniem lekarza.",
+  "str-184": "Dział Kadr i Płac
+ul. Moniuszki 3
+00-009 Warszawa
+Pani
+[OSOBA-A]
+[ADRES]
+[KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-185": "Zakład Usług Remontowych [OSOBA-A]
+[ADRES]
+[KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
   "str-19": "sms na [TELEFON] nie doszedł",
   "str-20": "Infolinia oddzwoni z [TELEFON].",
   "str-21": "Proszę o odpowiedź na [EMAIL] w tym tygodniu.",
@@ -1512,7 +1542,12 @@ W dniu przyjęcia wyk. RTG, USG.",
   "neg-196": "Program profilaktyki cukrzycy realizuje gmina, a apteka sprzedaje paracetamol 500 mg za 9,99 zł.",
   "neg-197": "Zerwanie umowy i złamanie przepisów nie są urazem. Brak przeciwwskazań do pracy. Centrum Leczenia Stwardnienia Rozsianego przyjmuje.",
   "neg-198": "Rozpoznanie sprawy nastąpi na posiedzeniu, a osoba uzależniona od alkoholu nie może prowadzić pojazdu.",
+  "neg-199": "Urząd Miasta Łodzi
+Wydział Finansowy
+ul. Piotrkowska 104
+90-926 Łódź",
   "neg-20": "Wilk biegał po lesie za sarną.",
+  "neg-200": "W sprawach awarii proszę o kontakt z administratorem (Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1).",
   "neg-21": "Lis przemknął przez drogę tuż przed autem.",
   "neg-22": "Baran to pierwszy znak zodiaku.",
   "neg-23": "Mazurek wielkanocny stygł na parapecie.",
@@ -1951,6 +1986,16 @@ kontrola w poradni za 4 tygodnie",
   "str-181": "Zgodnie z zaświadczeniem lekarskim po porodzie przez [DANE O ZDROWIU] przeciwwskazane jest [DANE O ZDROWIU] do końca roku.",
   "str-182": "Od dwóch lat pozwany [DANE O ZDROWIU]. W wyniku zdarzenia doznałem [DANE O ZDROWIU].",
   "str-183": "Potrzeba wynika z rozpoznania [DANE O ZDROWIU] i leczenia [DANE O ZDROWIU], potwierdzonego zaświadczeniem lekarza.",
+  "str-184": "Dział Kadr i Płac
+ul. Moniuszki 3
+00-009 Warszawa
+Pani
+[IMIĘ I NAZWISKO]
+[ADRES]
+[KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-185": "Zakład Usług Remontowych [IMIĘ I NAZWISKO]
+[ADRES]
+[KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
   "str-19": "sms na [TELEFON] nie doszedł",
   "str-20": "Infolinia oddzwoni z [TELEFON].",
   "str-21": "Proszę o odpowiedź na [EMAIL] w tym tygodniu.",
@@ -2239,7 +2284,12 @@ W dniu przyjęcia wyk. RTG, USG.",
   "neg-196": "Program profilaktyki cukrzycy realizuje gmina, a apteka sprzedaje paracetamol 500 mg za 9,99 zł.",
   "neg-197": "Zerwanie umowy i złamanie przepisów nie są urazem. Brak przeciwwskazań do pracy. Centrum Leczenia Stwardnienia Rozsianego przyjmuje.",
   "neg-198": "Rozpoznanie sprawy nastąpi na posiedzeniu, a osoba uzależniona od alkoholu nie może prowadzić pojazdu.",
+  "neg-199": "Urząd Miasta Łodzi
+Wydział Finansowy
+ul. Piotrkowska 104
+90-926 Łódź",
   "neg-20": "Wilk biegał po lesie za sarną.",
+  "neg-200": "W sprawach awarii proszę o kontakt z administratorem (Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1).",
   "neg-21": "Lis przemknął przez drogę tuż przed autem.",
   "neg-22": "Baran to pierwszy znak zodiaku.",
   "neg-23": "Mazurek wielkanocny stygł na parapecie.",
@@ -2678,6 +2728,16 @@ kontrola w poradni za 4 tygodnie",
   "str-181": "Zgodnie z zaświadczeniem lekarskim po porodzie przez [DANE O ZDROWIU] przeciwwskazane jest [DANE O ZDROWIU] do końca roku.",
   "str-182": "Od dwóch lat pozwany [DANE O ZDROWIU]. W wyniku zdarzenia doznałem [DANE O ZDROWIU].",
   "str-183": "Potrzeba wynika z rozpoznania [DANE O ZDROWIU] i leczenia [DANE O ZDROWIU], potwierdzonego zaświadczeniem lekarza.",
+  "str-184": "Dział Kadr i Płac
+ul. Moniuszki 3
+00-009 Warszawa
+Pani
+<<osoba>>
+<<adres>>
+<<kod>> <<miejsce>>",
+  "str-185": "Zakład Usług Remontowych <<osoba>>
+<<adres>>
+<<kod>> <<miejsce>>",
   "str-19": "sms na [TELEFON] nie doszedł",
   "str-20": "Infolinia oddzwoni z [TELEFON].",
   "str-21": "Proszę o odpowiedź na [EMAIL] w tym tygodniu.",
@@ -2927,7 +2987,9 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "neg-196": "",
   "neg-197": "",
   "neg-198": "",
+  "neg-199": "",
   "neg-20": "",
+  "neg-200": "",
   "neg-21": "",
   "neg-22": "",
   "neg-23": "",
@@ -3291,6 +3353,8 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "str-181": "ZDROWIE:2",
   "str-182": "ZDROWIE:2",
   "str-183": "ZDROWIE:2",
+  "str-184": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-185": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
   "str-19": "TELEFON:1",
   "str-20": "TELEFON:1",
   "str-21": "EMAIL:1",
@@ -3539,7 +3603,9 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "neg-196": "",
   "neg-197": "",
   "neg-198": "",
+  "neg-199": "",
   "neg-20": "",
+  "neg-200": "",
   "neg-21": "",
   "neg-22": "",
   "neg-23": "",
@@ -3903,6 +3969,8 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "str-181": "ZDROWIE:2",
   "str-182": "ZDROWIE:2",
   "str-183": "ZDROWIE:2",
+  "str-184": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-185": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
   "str-19": "TELEFON:1",
   "str-20": "TELEFON:1",
   "str-21": "EMAIL:1",

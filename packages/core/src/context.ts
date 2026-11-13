@@ -1,4 +1,5 @@
 // Kontekst redakcji współdzielony przez przebiegi, sentinele PUA i wspólne helpery masek.
+import type { PersonProbe } from './guards/institution-address.js';
 import type { PiiType } from './types.js';
 
 /** 0→A, 1→B… 25→Z, 26→AA… Etykiety bez cyfr, żeby placeholdery były idempotentne. */
@@ -43,11 +44,16 @@ export interface RedactCtx {
   /** Loginy z kotwic innych niż etykieta „Login:" (parametr URL-a, klucz JSON/XML, ścieżka
    *  profilu, log sshd); passLogin rozlewa je na resztę dokumentu i zapamiętane URL-e. */
   loginSeeds: Set<string>;
+  /** Ulice siedzib instytucji schowane pod sentinelem na czas przebiegów adresu. */
+  institutionStreets: string[];
+  /** Sonda osób dla strażnika siedziby instytucji (brak w samej sondzie, żeby nie było rekurencji). */
+  personProbe?: PersonProbe;
 }
 
 // Znaki Prywatnego Obszaru Użytku (PUA) to sentinele: bez cyfr, „@" i liter, więc żaden przebieg ich
 // nie rusza. Wszystkie są tutaj, każdy z innym kodem: U+E000/E001 URL, U+E009/E00A/E00D ucieczki JSON,
-// U+E0D0 „D." z „z d.", U+E0D2 wietnamskie imię, U+E0F1 znacznik ulicy z patronem.
+// U+E0D0 „D." z „z d.", U+E0D2 wietnamskie imię, U+E0F1 znacznik ulicy z patronem, U+E0F2/E0F3
+// ulica siedziby instytucji.
 
 export const URL_SENTINEL_OPEN = '\uE000';
 export const URL_SENTINEL_CLOSE = '\uE001';
@@ -70,6 +76,10 @@ export const MAIDEN_D_SENTINEL = '\uE0D0';
 export const VI_GIVEN_SENTINEL = '\uE0D2';
 // Znacznik przed maską adresu z przebiegu ulic z patronem (patrz passes/address.ts).
 export const PATRON_STREET_MARK = '\uE0F1';
+// Ulica siedziby instytucji schowana na czas przebiegów adresu (patrz passProtectInstitutionStreets).
+export const INSTITUTION_STREET_OPEN = '\uE0F2';
+export const INSTITUTION_STREET_CLOSE = '\uE0F3';
+export const RE_INSTITUTION_STREET_SENTINEL = new RegExp(`${INSTITUTION_STREET_OPEN}([A-Z]+)${INSTITUTION_STREET_CLOSE}`, 'g');
 
 // Przebieg „etykieta + separator + wartość": grupy 1 i 2 zostają, grupa 3 idzie pod maskę typu.
 export function maskAfterLabel(ctx: RedactCtx, re: RegExp, type: PiiType): void {

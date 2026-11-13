@@ -2,10 +2,11 @@
 // i przed kodem pocztowym, kod pocztowy bez myślnika.
 import { surnameShaped } from '../surnames.js';
 import { ADR_MASK_SRC, CAP_CITY, KOD_MASK_SRC, MONTHS_GEN, PL_LO, PL_UP } from '../charset.js';
-import { maskKeepPrefix, PATRON_STREET_MARK, type RedactCtx } from '../context.js';
+import { indexToLetters, INSTITUTION_STREET_CLOSE, INSTITUTION_STREET_OPEN, lettersToIndex, maskKeepPrefix, PATRON_STREET_MARK, RE_INSTITUTION_STREET_SENTINEL, type RedactCtx } from '../context.js';
 import { isFirstNameGenitive, isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
 import { egoNameGenitive, RE_STREET_WORD, STREET_RANK_WORDS } from '../guards/eponyms.js';
+import { institutionStreetAt, STREET_SRC } from '../guards/institution-address.js';
 import { ADDR_PLACE_ADJ_OK, institutionBeforeAddr, PATRON_GEN_HEADS, RE_CAPS_WORK_HEAD, RE_PERSON_MASK_BEFORE } from '../guards/person-context.js';
 import { monthAhead, RE_PATRON_ROMAN_REF_BEFORE, RE_QUANTITY_AFTER } from '../guards/address-context.js';
 import { LEGAL_ENTITY_WORDS } from '../guards/roles.js';
@@ -807,6 +808,25 @@ function maskStreetBeforePostalCode(ctx: RedactCtx): void {
 }
 // Adres ze skrótem albo typem ulicy, nazwą i numerem, potem drugi adres w wyliczeniu i adres bez
 // „ul." przed zamaskowanym kodem pocztowym.
+// Siedziba instytucji w nagłówku pisma albo tuż za jej nazwą („Urząd Miejski⏎ul. gen. Władysława
+// Andersa 5”): adres podmiotu, nie osoby. Cała ulica z numerem znika pod sentinelem na czas przebiegów
+// adresu, żeby krótszy wzorzec (od imienia patrona, od „Maja 5”) nie zamaskował jej fragmentu.
+const RE_INSTITUTION_STREET = new RegExp(STREET_SRC, 'gu');
+export function passProtectInstitutionStreets(ctx: RedactCtx): void {
+  if (!ctx.on('ADRES')) return;
+  ctx.text = ctx.text.replace(RE_INSTITUTION_STREET, (m: string, offset: number, str: string) => {
+    if (RE_STRONG_ADDR_LABEL.test(str.slice(Math.max(0, offset - 30), offset))) return m;
+    if (!institutionStreetAt(str, offset, ctx.personProbe)) return m;
+    ctx.institutionStreets.push(m);
+    return `${INSTITUTION_STREET_OPEN}${indexToLetters(ctx.institutionStreets.length - 1)}${INSTITUTION_STREET_CLOSE}`;
+  });
+}
+/** Przywraca ulice siedzib po przebiegach adresu (przed kodem bez myślnika i miejscowością). */
+export function passRestoreInstitutionStreets(ctx: RedactCtx): void {
+  if (!ctx.institutionStreets.length) return;
+  ctx.text = ctx.text.replace(RE_INSTITUTION_STREET_SENTINEL, (mm, letters: string) => ctx.institutionStreets[lettersToIndex(letters)] ?? mm);
+}
+
 export function passAddress(ctx: RedactCtx): void {
   if (!ctx.on('ADRES')) return;
   maskStreetAddresses(ctx);

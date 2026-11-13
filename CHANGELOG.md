@@ -12,6 +12,20 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+- **Adres urzędu, sądu czy działu pracodawcy w nagłówku pisma zostaje jawny.** Ulica, kod
+  pocztowy i miejscowość pod nazwą instytucji („Urząd Miasta Łodzi⏎Wydział Finansowy⏎ul. Piotrkowska
+  104⏎90-926 Łódź”, „Dział Kadr i Płac⏎ul. Stanisława Moniuszki 3”), ulica tuż za nazwą instytucji
+  z przecinkiem („(Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1)”) i budynek z salą
+  spotkania („sala 214, budynek przy ul. Królewskiej 27”) były zakrywane jak adres osoby. To adres
+  siedziby, więc zostaje, także ulica z patronem, stopniem albo liczbą („ul. gen. Władysława
+  Andersa 5”, „ul. 3 Maja 5”) w całości. Adres osoby dalej znika: pod imieniem i nazwiskiem albo
+  pod „Pani”, „Pan” i „Sz. Pan”, pod inicjałem z nazwiskiem („W. Nowak”), w nazwie firmy
+  z imieniem albo nazwiskiem właściciela w każdym zapisie i odmianie („Zakład Usług Remontowych Jan
+  Kowalski”, „Przychodnia Lekarska Ewy Nowak”, „Szkoła Jazdy Kowalski”, wersalikami), po „zam.”,
+  „adres zamieszkania” i „miejsce zamieszkania” nad blokiem, pod „Gmina” albo „Dzielnica”
+  z nazwą miejscowości, z numerem mieszkania („m. 3”, „lok. 9”, „12/4”, „ul. Polna 3, m. 14”,
+  „lokal 4”), po pustej linii pod nagłówkiem instytucji oraz w zdaniu, w którym instytucja coś robi z osobą („Szpital przyjął
+  pacjenta Jana Kowalskiego, ul. Polna 3”).
 - **Nowy rodzaj danych: dane o zdrowiu.** Rozpoznania, kody chorób, leki, urazy i nałogi
   zostawały jawne w kartach informacyjnych ze szpitala, pismach kadrowych, pozwach i zgłoszeniach
   szkody. Teraz dostają znacznik `[DANE O ZDROWIU]`, zawsze tylko wtedy, gdy tekst mówi o konkretnej

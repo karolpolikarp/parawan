@@ -11,6 +11,7 @@ import { BIRTH_COMBO, birthVerbAboutPerson } from '../guards/birth.js';
 import { saintWithContext } from '../guards/eponyms.js';
 import { LEGAL_ENTITY_WORDS, PARTY_ROLE_WORDS, ROLE_WORDS } from '../guards/roles.js';
 import { precededByLegalRef } from '../guards/numbers.js';
+import { institutionPostalAt } from '../guards/institution-address.js';
 import { splitWords } from '../util.js';
 
 /** Rok sprzed 1900 jako osobny wyraz („w 1867 r.”). */
@@ -330,6 +331,8 @@ function maskCityAfterPostalCode(ctx: RedactCtx): void {
     (m, anchor: string, sep: string, first: string, restRaw: string, offset: number, str: string) => {
       // surowy kod poprzedzony odwołaniem prawnym („poz. 12-345 Rejestr") to nie adres
       if (anchor !== MASK['KOD-POCZTOWY'] && precededByLegalRef(str, offset)) return m;
+      // Miejscowość siedziby instytucji zostaje razem z jej ulicą i kodem.
+      if (anchor !== MASK['KOD-POCZTOWY'] && institutionPostalAt(str, offset, ctx.personProbe)) return m;
       const restParts = splitTail(restRaw);
       let take = multiwordTake(first, restParts);
       // Przymiotnik-człon spoza słownika („05-082 Stare Babice") dokleja drugi wyraz tylko po jednej
@@ -377,7 +380,7 @@ function maskCapsCityAfterPostalCode(ctx: RedactCtx): void {
     RE_CAPS_CITY_AFTER_POSTAL,
     (m, anchor: string, sep: string, first: string, restRaw: string, offset: number, str: string) => {
       const masked = anchor === MASK['KOD-POCZTOWY'];
-      if (!masked && precededByLegalRef(str, offset)) return m;
+      if (!masked && (precededByLegalRef(str, offset) || institutionPostalAt(str, offset, ctx.personProbe))) return m;
       const lo = first.toLowerCase();
       if (CAPS_CITY_STOP.has(lo)) return m;
       const tailParts = splitTail(restRaw);
