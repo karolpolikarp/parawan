@@ -999,6 +999,11 @@ export function buildDataset() {
   osp('Firma: EKO-TRANS Jan Kowalski (osoba kontaktowa) odpowie na pismo.', ['Jan', 'Kowalski'], ['Firma: EKO-TRANS', 'osoba kontaktowa']);
   neg('Serwis AGD-SERWIS i spółka NOWAK-BUD Sp. z o.o. oraz norma PN-EN zostają.', ['AGD-SERWIS', 'NOWAK-BUD Sp. z o.o.', 'PN-EN']);
 
+  // data po rzeczowniku „urodzenie” z dopełniaczem dziecka, z osobą i numerem pomiędzy
+  str('Urlop w związku z urodzeniem syna, Marka Nowaka (PESEL 26261702538), w dniu 17 czerwca 2026 r.', ['17 czerwca 2026', '26261702538'], ['urodzeniem syna']);
+  neg('Zasiłek z tytułu urodzenia dziecka wypłacony w dniu 5 maja 2026 r., wypłata do dnia 31.12.2026.', ['5 maja 2026', '31.12.2026']);
+  neg('Zgłoszenie urodzenia dziecka nastąpiło w dniu 10.06.2026 r., a po urodzeniu córki szczepienie wykonano dnia 3.05.2026 r.', ['10.06.2026', '3.05.2026']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {

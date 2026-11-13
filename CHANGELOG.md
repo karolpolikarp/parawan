@@ -12,6 +12,19 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+- **Data urodzenia dziecka po słowie „urodzenie” jest zakryta.** W piśmie kadrowym „w związku
+  z urodzeniem syna, Marka Nowaka (PESEL …), w dniu 17 czerwca 2026 r.” data zostawała jawna, bo
+  między „urodzeniem” a datą stały imię, nazwisko i numer. Teraz data dostaje znacznik daty
+  urodzenia, gdy po „urodzeniu”, „urodzenia” albo „urodzeniem” stoi syn, córka, dziecko czy wnuk,
+  a dalej tylko imię i nazwisko dziecka, nawias z numerem, przecinek, złamanie wiersza albo „które
+  przyszło na świat”, po czym „w dniu”, „dnia” lub „dn.” z datą. Każde inne słowo pomiędzy
+  oznacza datę innego zdarzenia, więc zostaje jawna: wypłata zasiłku, termin wizyty, decyzja,
+  powrót do pracy, koniec urlopu („po urodzeniu dziecka wraca do pracy dnia 1.09.2026”). Tak samo,
+  gdy przed datą stoi urząd, sąd, pracodawca albo osoba z tytułem („Po urodzeniu dziecka ZUS
+  w dniu 10.08.2026 r. wypłacił zasiłek”), gdy zaraz po dacie stoi czasownik w czasie przeszłym
+  i gdy zdanie zaczyna się od „Przed urodzeniem”. Jawne
+  zostają też daty przy „Zgłoszeniu” czy „Transkrypcji aktu urodzenia”, przepisy „w przypadku
+  urodzenia dziecka w dniu … i później”, termin „6 tygodni po urodzeniu” i rok sprzed 1900.
 - **Nazwa firmy jednoosobowej z nazwiskiem właściciela znika razem z osobą.** W piśmie „prowadząca
   działalność gospodarczą pod firmą LIS-BUD Jadwiga Lis” imię i nazwisko były zakryte, ale „LIS-BUD”
   zostawało jawne i zdradzało nazwisko. Teraz nazwa firmy z wielkich liter z łącznikiem wchodzi do

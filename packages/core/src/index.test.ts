@@ -9019,3 +9019,129 @@ test('tytuł urzędu w odmianie: regresje z weryfikacji (nazwisko-przymiotnik, h
     ['Pani Niebieska Karta? To nazwisko.', `Pani ${N} Karta? To nazwisko.`],
   ]);
 });
+test('G5: data urodzenia po rzeczowniku „urodzenie” z dopełniaczem dziecka', () => {
+  masked([
+    [
+      'udzielono urlopu rodzicielskiego w związku z urodzeniem syna, Marka Nowaka (PESEL 26261702538), w dniu 17 czerwca 2026 r.',
+      `udzielono urlopu rodzicielskiego w związku z urodzeniem syna, ${N} (PESEL ${PS}), w dniu ${DU} r.`,
+    ],
+    [
+      'w związku z urodzeniem córki, Marty Wójcik (PESEL 26290179385), w dniu 1 września 2026 r.',
+      `w związku z urodzeniem córki, ${N} (PESEL ${PS}), w dniu ${DU} r.`,
+    ],
+    ['Urlop po urodzeniu dziecka w dniu 12.03.2025 r. trwa 20 tygodni.', `Urlop po urodzeniu dziecka w dniu ${DU} r. trwa 20 tygodni.`],
+    [
+      'w związku z urodzeniem drugiego dziecka dnia 4 marca 2024 r. pracownica złożyła wniosek',
+      `w związku z urodzeniem drugiego dziecka dnia ${DU} r. pracownica złożyła wniosek`,
+    ],
+    ['w związku z urodzeniem syna, które nastąpiło w dniu 5.06.2026 r.', `w związku z urodzeniem syna, które nastąpiło w dniu ${DU} r.`],
+  ]);
+});
+test('G5 regresje: data przy „urodzeniu” bez frazy urodzenia zostaje (wypłata, wniosek, granica okresu, próg, biogram)', () => {
+  keep([
+    'Zasiłek przysługuje od dnia urodzenia dziecka do dnia 31.12.2026.',
+    'zasiłek z tytułu urodzenia dziecka wypłacony w dniu 5 maja 2026 r.',
+    'wniosek w sprawie urodzenia dziecka złożony dnia 3.04.2026 r.',
+    'Kobiecie w związku z urodzeniem dziecka dnia 1 stycznia 1953 r. lub później przysługuje świadczenie.',
+    'kronika: z okazji urodzenia syna w dniu 3 maja 1850 r.',
+    'urodzenia dziecka. Wniosek wpłynął dnia 3.04.2026 r.',
+    'akt urodzenia dziecka z dnia 03.04.2020',
+    'Po urodzeniu dziecka pracownik złożył wniosek w dniu 10.07.2026.',
+  ]);
+});
+test('G5 po weryfikacji: data innego zdarzenia przy „urodzeniu” zostaje (zgłoszenie, termin, hipoteza, odstęp, czasownik)', () => {
+  keep([
+    'Zgłoszenie urodzenia dziecka nastąpiło w dniu 10.06.2026 r. w Urzędzie Stanu Cywilnego w Krakowie.',
+    'Rejestracja urodzenia syna nastąpiła dnia 12 czerwca 2026 r.',
+    'Transkrypcja aktu urodzenia dziecka w dniu 14.09.2026 r. w USC Gdańsk.',
+    'Kwestię urodzenia dziecka omówiono na spotkaniu w dniu 3.03.2026 r.',
+    'Zasiłek macierzyński z tytułu urodzenia dziecka przysługuje w dniu 1.06.2026 r.',
+    'W związku z urodzeniem dziecka spotkanie zespołu odbędzie się w dniu 20.05.2026 r.',
+    'Po urodzeniu córki szczepienie BCG wykonano dnia 3.05.2026 r.',
+    'Z tytułu urodzenia dziecka pracownica korzysta z urlopu macierzyńskiego, który kończy się w dniu 15.10.2026 r.',
+    'Pracodawca w związku z urodzeniem dziecka pracownika ustala, iż urlop rozpocznie się w dniu 2.06.2026 r.',
+    'Zgłoszenia urodzenia dziecka należy dokonać najpóźniej w dniu 30.06.2026 r.',
+    'Po urodzeniu dziecka pracownica wraca do pracy dnia 1.09.2026 r.',
+    'Po urodzeniu dziecka urlop macierzyński kończy się w dniu 20.08.2026 r.',
+    'Wniosek o zasiłek z tytułu urodzenia dziecka rozpatrzy komisja na posiedzeniu w dniu 12.05.2026 r.',
+    'zapomoga z tytułu urodzenia dziecka, data wpływu dnia 5.05.2026 r.',
+    'w związku z urodzeniem dziecka zmienia się wymiar etatu w dniu 7.07.2026',
+    'Wizyta patronażowa 6 tygodni po urodzeniu dziecka, tj. dnia 15.07.2026 r., odbędzie się w domu pacjentki.',
+    'Wizyta patronażowa 6 tygodni po urodzeniu dziecka w dniu 15.07.2026 r. odbędzie się w domu.',
+    'Rodzicom urodzenia bliźniąt w dniu wejścia w życie ustawy, tj. dnia 1.07.2026 r.',
+    'Urlop okolicznościowy z tytułu urodzenia dziecka – termin: w dniu 18.05.2026 r.',
+    'Kontrola u neonatologa po urodzeniu dziecka – termin dnia 22.05.2026 r., gabinet nr 4.',
+    'Świadczenie przysługuje w przypadku urodzenia dziecka w dniu 1 stycznia 2026 r. i później.',
+    'Prawo do dodatku przysługuje w razie urodzenia dziecka w dniu 1 stycznia 2026 r. albo po tej dacie.',
+    'W przypadku urodzenia dziecka w dniu 31 grudnia 2025 r. stosuje się przepisy dotychczasowe.',
+  ]);
+  masked([
+    [
+      'Wniosek o becikowe z tytułu urodzenia dziecka, sprawa nr SR.5131.12.2026, decyzja w dniu 5.08.2026 r.',
+      'Wniosek o becikowe z tytułu urodzenia dziecka, sprawa nr [ZNAK-SPRAWY], decyzja w dniu 5.08.2026 r.',
+    ],
+  ]);
+});
+test('G5 po weryfikacji: data urodzenia za złamaniem wiersza, „dn.”, wtrąceniem o dziecku i rolą osoby', () => {
+  masked([
+    ['W związku z urodzeniem dziecka\nw dniu 12.05.2026 r. proszę o urlop ojcowski.', `W związku z urodzeniem dziecka\nw dniu ${DU} r. proszę o urlop ojcowski.`],
+    [
+      'W związku z urodzeniem dziecka, które przyszło na świat w dniu 12.05.2026 r., proszę o urlop.',
+      `W związku z urodzeniem dziecka, które przyszło na świat w dniu ${DU} r., proszę o urlop.`,
+    ],
+    ['W związku z urodzeniem dziecka pacjenta w dniu 12.05.2026 r. proszę o urlop.', `W związku z urodzeniem dziecka pacjenta w dniu ${DU} r. proszę o urlop.`],
+    ['W związku z urodzeniem dziecka w dn. 12.05.2026 r. proszę o urlop ojcowski.', `W związku z urodzeniem dziecka w dn. ${DU} r. proszę o urlop ojcowski.`],
+    ['W związku z urodzeniem trojaczków w dniu 12.05.2026 r. proszę o urlop.', `W związku z urodzeniem trojaczków w dniu ${DU} r. proszę o urlop.`],
+    ['Urodzenie dziecka nastąpiło w dniu 5.06.2026 r.', `Urodzenie dziecka nastąpiło w dniu ${DU} r.`],
+    ['z tytułu urodzenia dziecka w dniu 5.06.2026 r. wnoszę o zasiłek', `z tytułu urodzenia dziecka w dniu ${DU} r. wnoszę o zasiłek`],
+  ]);
+  keep(['W związku z urodzeniem dziecka\n\nw dniu 12.05.2026 r. odbyło się zebranie.']);
+});
+test('G5 po drugiej weryfikacji: podmiot zdania i czasownik za datą to inne zdarzenie niż urodzenie', () => {
+  keep([
+    'Po urodzeniu dziecka ZUS w dniu 10.08.2026 r. wypłacił zasiłek macierzyński.',
+    'Przed urodzeniem dziecka Wnioskodawczyni w dniu 02.02.2026 złożyła wniosek o urlop.',
+    'Przed urodzeniem dziecka w dniu 02.02.2026 złożyła wniosek o urlop.',
+    'Po urodzeniu dziecka Ubezpieczona dnia 30.06.2026 r. wystąpiła o zasiłek.',
+    'Po urodzeniu syna Pracodawca dnia 01.09.2026 udzielił urlopu ojcowskiego.',
+    'W związku z urodzeniem dziecka Sąd Rejonowy w Krakowie w dniu 14.07.2026 r. wydał postanowienie.',
+    'W związku z urodzeniem syna Zarząd Spółki w dniu 15.05.2026 r. zatwierdził premię.',
+    'Po urodzeniu bliźniąt Rada Gminy dnia 12.12.2026 przyznała becikowe.',
+    'Z okazji urodzenia wnuka Dyrektor Szkoły dnia 10.10.2026 wręczył gratulacje.',
+    'Po urodzeniu dziecka, Kierownik Działu Kadr w dniu 3 marca 2026 r. przyjął wniosek.',
+    'Urodzenie dziecka, Zgłoszenie w USC dnia 05.05.2026 r.',
+    'Przyczyna: urodzenie dziecka\nZUS Oddział w Krakowie\nPismo w dniu 12.05.2026 r.',
+    'Po urodzeniu dziecka (urlop macierzyński) w dniu 01.03.2026 r. Pracownica rozpoczęła urlop wychowawczy.',
+    'W związku z urodzeniem dziecka ZUS w dniu 10.06.2026 r. wydał decyzję.',
+    'W związku z urodzeniem dziecka Zakład Ubezpieczeń Społecznych w dniu 10.06.2026 r. wypłacił zasiłek.',
+    'Po urodzeniu dziecka Pracodawca w dniu 10.06.2026 r. udzielił urlopu.',
+    'W związku z urodzeniem dziecka, Dyrektor w dniu 3.07.2026 r. przyznał zapomogę.',
+    'Urodzenie dziecka, Decyzja ZUS w dniu 3.07.2026',
+  ]);
+  masked([
+    [
+      'Po urodzeniu dziecka Pani Anna Nowak w dniu 10.09.2026 r. powróciła do pracy.',
+      `Po urodzeniu dziecka Pani ${N} w dniu 10.09.2026 r. powróciła do pracy.`,
+    ],
+    [
+      'Po urodzeniu córki Pan Jan Nowak w dniu 20.06.2026 r. zatrudnił się w Firmie ABC.',
+      `Po urodzeniu córki Pan ${N} w dniu 20.06.2026 r. zatrudnił się w Firmie ABC.`,
+    ],
+    [
+      'Po urodzeniu dziecka Anna Nowak w dniu 10.09.2026 r. powróciła do pracy.',
+      `Po urodzeniu dziecka ${N} w dniu 10.09.2026 r. powróciła do pracy.`,
+    ],
+    [
+      'Z tytułu urodzenia dziecka Pani Maria Kowalska (wniosek) w dniu 03.07.2026 r. wpłynął do ZUS.',
+      `Z tytułu urodzenia dziecka Pani ${N} (wniosek) w dniu 03.07.2026 r. wpłynął do ZUS.`,
+    ],
+    [
+      'w związku z urodzeniem syna w Szpitalu Miejskim w Krakowie w dniu 3.05.2026 r. proszę o urlop',
+      `w związku z urodzeniem syna w Szpitalu Miejskim w Krakowie w dniu ${DU} r. proszę o urlop`,
+    ],
+    [
+      'w związku z urodzeniem syna Jana Nowaka w dniu 3.05.2026 r. proszę o urlop',
+      `w związku z urodzeniem syna ${N} w dniu ${DU} r. proszę o urlop`,
+    ],
+  ]);
+});
