@@ -12,6 +12,18 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+- **Inicjały osoby w liście zadań są zamaskowane.** Gdy w piśmie jest osoba, na przykład Anna
+  Sadowska na liście uczestników, jej inicjały po „odp.” w punkcie notatki („(odp. AS)”,
+  „(odp. MK, kontakt …)”, „odp. AS – termin 15.12”) i w stopce („Sporządził(a): AS”,
+  „Odpowiedzialny – AS”, „Prowadzący: AS”, „Sporządziła: mgr AS”) oraz w kolumnie „Odp.” tabeli
+  zadań trafiają pod znacznik osoby. Z pseudonimami dostają tę samą etykietę co pełne imię
+  i nazwisko. Inicjały z kropkami („Sporządziła: A.S.”, „(odp. A.S., M.K.)”) są maskowane także bez
+  takiej osoby, a „A.S. Nowak” to nadal jedna osoba. Zostają jawne odpowiedzi w ankietach
+  i wyjaśnieniach („Odp. TAK”, „Sprawdził: NOK”, „B.D.”), badania („wyk. EKG, RTG”, „badanie wyk.
+  MR”), funkcje („Zatwierdził: DG”), instytucje i firmy („oprac. PWN”, „Wykonał: ZDM”, „Wykonał:
+  F.H.U. „Budmax””, „do akceptacji MZ”), numery etapów („odp. II”) i kody („odp. AS12”). Gołe
+  inicjały w notatce, w której nie ma pełnego imienia i nazwiska tej osoby, nadal zostają jawne,
+  bo nie da się ich odróżnić od skrótu.
 - **PESEL z literówką w długości jest zamaskowany.** Po etykiecie „PESEL” numer z jedną cyfrą
   za mało albo za dużo („PESEL: 8909150266”, „PESEL Pacjenta: 890915026670”, pole `"pesel"` w JSON
   lub XML) trafia pod znacznik `[PESEL]`. Wcześniej maska obejmowała tylko dokładnie 11 cyfr. Działa też

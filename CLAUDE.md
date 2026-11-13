@@ -137,3 +137,5 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 - REGON z długim wtrąceniem po etykiecie dostaje znacznik `[TELEFON]` (ROADMAP poz. 7).
 - Login w ścieżce URL typu `/user/akowalski` przechodzi jawny (ROADMAP poz. 15).
 - „tarnowski” bywa nazwiskiem i przymiotnikiem (Backlog 3).
+- Gołe inicjały po „odp.” („(odp. AS)”) są maskowane tylko, gdy w piśmie jest pełne imię i nazwisko
+  tej osoby; notatka z samymi inicjałami albo z „Pani Sadowska” zostawia je jawne (świadomie, precyzja).

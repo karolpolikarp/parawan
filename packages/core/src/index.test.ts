@@ -8620,3 +8620,156 @@ test('PESEL z literówką długości po „Nr PESEL” i „Lp. PESEL”, bez ma
   ];
   for (const t of keep) expect(redactPII(t).redacted).toBe(t);
 });
+
+test('inicjały osoby po kotwicy odpowiedzialności w liście zadań i stopce notatki', () => {
+  const P = MASK.IMIE;
+  // Gołe wersaliki to inicjały tylko wtedy, gdy w piśmie jest zamaskowana osoba o tych inicjałach.
+  const U = 'Uczestnicy: Anna Sadowska, Magdalena Kamińska, Katarzyna Kot, Lena Sowa-Kowal.\n';
+  const UM = `Uczestnicy: ${P}, ${P}, ${P}, ${P}.\n`;
+  const masked: [string, string][] = [
+    [`${U}1. Harmonogram odbioru do 5 dni roboczych (odp. AS).`, `${UM}1. Harmonogram odbioru do 5 dni roboczych (odp. ${P}).`],
+    [`${U}2. Uzupełnienie raportu (odp. MK, kontakt m@coi-test.gov.pl).`, `${UM}2. Uzupełnienie raportu (odp. ${P}, kontakt [EMAIL]).`],
+    [`${U}3. Zaproszenie na kolejne spotkanie (odp. KK).`, `${UM}3. Zaproszenie na kolejne spotkanie (odp. ${P}).`],
+    [`${U}Wdrożenie (odp. AS, MK)`, `${UM}Wdrożenie (odp. ${P}, ${P})`],
+    [`${U}Wdrożenie (odp. AS i KK).`, `${UM}Wdrożenie (odp. ${P} i ${P}).`],
+    [`${U}Wdrożenie (odp. LS-K), (odp. LSK)`, `${UM}Wdrożenie (odp. ${P}), (odp. ${P})`],
+    [`${U}Sporządził: AS`, `${UM}Sporządził: ${P}`],
+    [`${U}oprac. MK`, `${UM}oprac. ${P}`],
+    [`${U}Odpowiedzialny: MK.`, `${UM}Odpowiedzialny: ${P}.`],
+    [`${U}(odp. ZUS, AS)`, `${UM}(odp. ZUS, ${P})`],
+    // szyki z uwag weryfikacji: „(a)”, myślnik, „do”, „dnia”, nawias z rolą, „&”, słowa przed dwukropkiem
+    [`${U}Wykonał(a): AS\nSporządził(a): MK`, `${UM}Wykonał(a): ${P}\nSporządził(a): ${P}`],
+    [`${U}2. Raport kwartalny – odp. AS – termin 15.12`, `${UM}2. Raport kwartalny – odp. ${P} – termin 15.12`],
+    [`${U}3. Umowa z dostawcą, odp. AS do 15.12`, `${UM}3. Umowa z dostawcą, odp. ${P} do 15.12`],
+    [`${U}odp. AS (koordynacja), MK (budżet)`, `${UM}odp. ${P} (koordynacja), ${P} (budżet)`],
+    [`${U}Sporządziła: AS dnia 12.11.2026`, `${UM}Sporządziła: ${P} dnia 12.11.2026`],
+    [`${U}Odpowiedzialny – AS`, `${UM}Odpowiedzialny – ${P}`],
+    [`${U}Osoba odpowiedzialna za realizację: AS`, `${UM}Osoba odpowiedzialna za realizację: ${P}`],
+    [`${U}Prowadzący: AS\nPrzygotował: MK`, `${UM}Prowadzący: ${P}\nPrzygotował: ${P}`],
+    [`${U}Odpowiedzialni: AS & MK`, `${UM}Odpowiedzialni: ${P} & ${P}`],
+    // zapis z kropkami ma kształt inicjałów: tuż po kotwicy wystarcza sama kotwica
+    ['Wdrożenie (odp. A.S.)', `Wdrożenie (odp. ${P})`],
+    ['Sporządziła: A.S.\nData: 3.11.2026', `Sporządziła: ${P}\nData: 3.11.2026`],
+    ['1. Raport kwartalny (odp. A.S)', `1. Raport kwartalny (odp. ${P})`],
+    ['Sporządził: A.S, 12.11.2026', `Sporządził: ${P}, 12.11.2026`],
+  ];
+  for (const [t, want] of masked) expect(redactPII(t).redacted).toBe(want);
+  // pseudonimy: inicjały dostają etykietę osoby z pisma, „A.S.” i „AS” to ta sama osoba
+  expect(
+    redactPII('Uczestnicy: Anna Sadowska, Marek Kot.\n1. Termin (odp. AS).\n2. Raport (odp. MK).\n3. Druga (odp. A.S.)', { pseudonyms: true }).redacted,
+  ).toBe('Uczestnicy: [OSOBA-A], [OSOBA-B].\n1. Termin (odp. [OSOBA-A]).\n2. Raport (odp. [OSOBA-B]).\n3. Druga (odp. [OSOBA-A])');
+  // odmiana tego samego nazwiska w piśmie to nadal jedna osoba
+  expect(
+    redactPII('Uczestnicy: Magdalena Kamińska, Jan Lis.\nTesty wykonał zespół Magdaleny Kamińskiej.\n1. Raport (odp. MK).', { pseudonyms: true }).redacted,
+  ).toBe('Uczestnicy: [OSOBA-A], [OSOBA-B].\nTesty wykonał zespół [OSOBA-A].\n1. Raport (odp. [OSOBA-A]).');
+  const keep = [
+    // gołe wersaliki bez osoby o tych inicjałach w piśmie
+    'Sporządził: AS',
+    'Wdrożenie (odp. AS, MK)',
+    'Wykonał(a): AS',
+    // odpowiedzi w ankiecie, wyjaśnieniach SWZ i listach kontrolnych
+    'Pytanie 3: Czy Zamawiający dopuszcza dostawę w dwóch partiach? Odp. TAK.',
+    'Pytanie 4: Czy wymagane jest wadium? Odp.: NIE',
+    'Ankieta, pyt. 7 (odp. TAK), pyt. 8 (odp. NIE).',
+    'Wykonał: TAK',
+    'Sprawdził: TAK\nSprawdził: NOK\nSprawdził: DKJ\nZatwierdził: DG\nZatwierdziła: GK',
+    // badania w dokumentacji medycznej („wyk.” = wykonano)
+    'Wyk. EKG.\nBadania wyk.: CRP, OB\nW dniu przyjęcia wyk. RTG, USG.',
+    // instytucje i firmy jako źródło albo wykonawca
+    'Źródło: opr. PWN.\nŹródło: oprac. PIE,\nTabela 2. Wskaźniki zatrudnienia (oprac. KE)',
+    'Zatwierdził: MZ\nOpracował: RCL\nWykonał: ZDM\nWykonał: PZD\nWykonał: ABB\nOpracował: BDO',
+    'Kontrola: wyk. MPO, odbiór (odp. ZGM).\n- przegląd umów (odp. MF)',
+    // skróty instytucji, działów i ról po kotwicy
+    'Zadanie (odp. ZUS).',
+    'Zadanie (odp. IT)',
+    'Szkolenie (odp. HR).',
+    'Przegląd (odp. BHP)',
+    'Audyt (wyk. NASK)',
+    'Dane (opr. GUS).',
+    // rzymskie liczby i kody
+    'etap (odp. II)',
+    'część (odp. IV).',
+    'pozycja odp. AS12',
+    'próbka wyk. AB-123',
+    // bez kotwicy albo bez końca wpisu
+    'w odp. na pismo AS',
+    'Sporządził AS dnia 3 listopada',
+    'Projekt zatwierdził RIO.',
+    'kontakt: BOK',
+    'Zgodnie z art. 148 KK.',
+  ];
+  for (const t of keep) expect(redactPII(t).redacted).toBe(t);
+  // skróty i odpowiedzi zostają także wtedy, gdy w piśmie są osoby
+  const keepWithPersons: [string, string][] = [
+    [`${U}Odp. TAK. Wyk. EKG. oprac. PWN. Sprawdził: NOK. (odp. MF)`, `${UM}Odp. TAK. Wyk. EKG. oprac. PWN. Sprawdził: NOK. (odp. MF)`],
+    [`${U}Badania wyk.: CRP, OB, RTG. Zgodnie z art. 148 KK.`, `${UM}Badania wyk.: CRP, OB, RTG. Zgodnie z art. 148 KK.`],
+    [`${U}odp. AS, firma XYZ S.A.`, `${UM}odp. ${P}, firma XYZ S.A.`],
+  ];
+  for (const [t, want] of keepWithPersons) expect(redactPII(t).redacted).toBe(want);
+});
+
+test('inicjały po kotwicy: regresje z weryfikacji (firmy, skróty, tytuły, tabela, scalenie z nazwiskiem)', () => {
+  const P = MASK.IMIE;
+  const keep = [
+    // formy prawne firm z kropkami po „Wykonał:” to nie osoba
+    'Protokół odbioru robót.\nWykonał: F.H.U. „Budmax” z Tarnowa, zgodnie z umową nr 14/2026.',
+    'Wykonał: P.H.U. Remex, ul. Długa',
+    'Naprawę dachu wykonał: F.H. Dombud',
+    // „brak danych” w liście kontrolnej
+    'Lista kontrolna BHP\nGaśnica: sprawdzona\nSprawdził: N.D.\nZatwierdził: B.D.',
+    'Wykonał: P.P.H.U. Remex',
+    // znane ograniczenie (świadome): gołe inicjały bez pełnego imienia i nazwiska osoby w piśmie
+    'Notatka służbowa z 12.11.2026\nZadania:\n1. Raport kwartalny (odp. AS) do 30.11.\n2. Budżet (odp. MK) do 15.12.',
+  ];
+  for (const t of keep) expect(redactPII(t).redacted).toBe(t);
+  const cases: [string, string][] = [
+    // proza po przecinku kończy wpis: skrót urzędu albo komórki zostaje mimo zgodności liter z osobą
+    [
+      'Uczestnicy: Marek Zieliński, Anna Sadowska.\n1. Projekt rozporządzenia (odp. AS, do akceptacji MZ).',
+      `Uczestnicy: ${P}, ${P}.\n1. Projekt rozporządzenia (odp. ${P}, do akceptacji MZ).`,
+    ],
+    ['Obecni: Barbara Pawlak, Anna Sadowska.\nSporządziła: AS, uzgodniono z BP i DK.', `Obecni: ${P}, ${P}.\nSporządziła: ${P}, uzgodniono z BP i DK.`],
+    // funkcja i badania zostają także przy osobie o tych inicjałach
+    ['Spotkanie z udziałem Daniela Gajewskiego i Anny Sadowskiej.\nZatwierdził: DG', `Spotkanie z udziałem ${P} i ${P}.\nZatwierdził: DG`],
+    ['Pacjentka Monika Rogalska, lat 54.\nBadanie wyk. MR, opis w załączeniu.', `Pacjentka ${P}, lat 54.\nBadanie wyk. MR, opis w załączeniu.`],
+    ['Pacjent Cezary Tomczak.\nZlecono tomografię, badanie wyk. CT w dniu 3.11.2026.', `Pacjent ${P}.\nZlecono tomografię, badanie wyk. CT w dniu 3.11.2026.`],
+    // częste pary inicjałów, które są też skrótami, ustępują osobie z pisma
+    [
+      'Obecni: Paweł Wróbel, Sylwia Malinowska, Piotr Lewandowski, Robert Pawlak.\nSporządził: PW\nSprawdziła: SM\nZatwierdził: PL\nWykonał: RP',
+      `Obecni: ${P}, ${P}, ${P}, ${P}.\nSporządził: ${P}\nSprawdziła: ${P}\nZatwierdził: ${P}\nWykonał: ${P}`,
+    ],
+    ['Obecni: Karolina Kowalska, Kamil Wójcik.\nSporządziła: KK\nSprawdził: KW', `Obecni: ${P}, ${P}.\nSporządziła: ${P}\nSprawdził: ${P}`],
+    [
+      'Obecni: Oliwia Kubiak, Natalia Nowak, Szymon Rogalski.\n1. Wniosek (odp. OK)\n2. Umowa (odp. NN)\n3. Raport (odp. SR)',
+      `Obecni: ${P}, ${P}, ${P}.\n1. Wniosek (odp. ${P})\n2. Umowa (odp. ${P})\n3. Raport (odp. ${P})`,
+    ],
+    // „OK” poza „odp.” to status
+    ['Obecni: Oliwia Kubiak.\nSprawdził: OK', `Obecni: ${P}.\nSprawdził: OK`],
+    // kilka inicjałów z kropkami w jednym wpisie
+    ['Zadania:\n1. Raport (odp. A.S., M.K.)', `Zadania:\n1. Raport (odp. ${P}, ${P})`],
+    ['Zadania:\n1. Raport (odp. A.S./M.K.)', `Zadania:\n1. Raport (odp. ${P}/${P})`],
+    // tytuł między kotwicą a inicjałami
+    ['Anna Sadowska, Marek Kowal.\nSporządziła: mgr A.S.\nSprawdził: insp. MK', `${P}, ${P}.\nSporządziła: mgr ${P}\nSprawdził: insp. ${P}`],
+    // kolumna „Odp.” w tabeli zadań
+    [
+      'Uczestnicy: Anna Sadowska, Marek Kowal.\nZadanie | Termin | Odp.\nRaport | 30.11 | AS\nBudżet | 15.12 | MK',
+      `Uczestnicy: ${P}, ${P}.\nZadanie | Termin | Odp.\nRaport | 30.11 | ${P}\nBudżet | 15.12 | ${P}`,
+    ],
+    [
+      'Uczestnicy: Anna Sadowska, Marek Kowal.\nZadanie\tTermin\tOdpowiedzialny\nRaport\t30.11\tAS\nBudżet\t15.12\tMK',
+      `Uczestnicy: ${P}, ${P}.\nZadanie\tTermin\tOdpowiedzialny\nRaport\t30.11\t${P}\nBudżet\t15.12\t${P}`,
+    ],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t).redacted).toBe(want);
+  // tabela bez osoby w piśmie: gołe skróty w kolumnie zostają
+  const tab = 'Zadanie | Odp.\nKonta | IT\nSzkolenie | BHP\nRaport | AS';
+  expect(redactPII(tab).redacted).toBe(tab);
+  // inicjały przed nazwiskiem to jedna osoba: jedna maska, jedna etykieta pseudonimu
+  for (const t of ['Sporządził: A.S. Nowak', 'Sporządziła: J.K. Kowalska\nData: 3.11.2026', '(odp. M.K. Kamińska)', 'Wykonał: A.S. Nowak, 12.11.2026']) {
+    const r = redactPII(t);
+    expect(r.found).toEqual([{ type: 'IMIE', count: 1 }]);
+    const p = redactPII(t, { pseudonyms: true }).redacted;
+    expect(p).toContain('[OSOBA-A]');
+    expect(p).not.toContain('[OSOBA-B]');
+  }
+});

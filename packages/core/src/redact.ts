@@ -12,6 +12,7 @@ import { hasKsefAnchor, passKsef, passKw, passZnakSprawy } from './passes/kw-kse
 import { passLogin } from './passes/login.js';
 import { passIp, passMac, passTokens, passVin } from './passes/network.js';
 import { passAccount, passCard, passIban, passNip, passPesel, passPhone, passRegon } from './passes/numeric.js';
+import { passPersonInitialsAfterAnchor } from './passes/person-initials.js';
 import { passPersonMaidenAfterMask, passPersonMixedCase, passPersonOcrMix, passPersonOcrPair, passPersonOcrTitle, passPersonParents } from './passes/person-caps-ocr.js';
 import { passPersonPairs, passProtectFictional } from './passes/person-pairs.js';
 import { passPersonForeign, passPersonHomographAnchor, passPersonInitial, passPersonRoleComplement, passPersonSoloDict, passPersonSoloMorph, passPersonStrongTrigger, passPersonTrigger } from './passes/person-triggers.js';
@@ -139,6 +140,7 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   passPersonOcrMix(ctx);
   passPersonMaidenAfterMask(ctx);
   passPersonParents(ctx);
+  passPersonInitialsAfterAnchor(ctx); // po osobach, przed finalizePersons: relabelPersons numeruje też te maski
 
   // Faza 5: domknięcia osób, stabilna numeracja, przywrócenie URL-i i ucieczek
   finalizePersons(ctx);

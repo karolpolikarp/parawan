@@ -973,6 +973,17 @@ export function buildDataset() {
   neg('Kontaktowano się ze stroną postępowania zarejestrowanego pod nr 12 345 67 89.', ['12 345 67 89']);
   neg('Sprawa o kontakty z dzieckiem prowadzona pod numerem 12 345 67 89.', ['12 345 67 89']);
   neg('Kontakt ze strony urzędu pod numerem 12 345 67 89.', ['12 345 67 89']);
+  // ewaluacja G10: inicjały osoby po kotwicy odpowiedzialności („odp.”, „Sporządził:”). Gołe wersaliki
+  // tylko przy osobie o tych inicjałach w piśmie; skróty instytucji, odpowiedzi, badania i rzymskie
+  // numery etapów zostają
+  osp('Uczestnicy: Anna Sadowska, Marek Kot, Jan Tomczak.\nUstalenia:\n1. Harmonogram odbioru do 5 dni roboczych (odp. AS).\n2. Raport z testów (odp. MK, JT).', ['Anna Sadowska', 'Marek Kot', 'Jan Tomczak', '(odp. AS)', 'MK, JT'], ['Harmonogram odbioru', '(odp. ']);
+  osp('Notatkę opracowano w Wydziale Kadr.\nSporządziła: A.Ł.', ['A.Ł.'], ['Sporządziła:', 'Wydziale Kadr']);
+  neg('Ustalenia:\n1. Zgłoszenie do ZUS (odp. ZUS).\n2. Konta w systemie (odp. IT).\n3. Szkolenie (odp. BHP, etap II).', ['(odp. ZUS)', '(odp. IT)', '(odp. BHP, etap II)']);
+  neg('Audyt bezpieczeństwa (wyk. NASK), dane (opr. GUS). Etap (odp. IV).', ['(wyk. NASK)', '(opr. GUS)', '(odp. IV)']);
+  neg('Pytanie 3: Czy Zamawiający dopuszcza dostawę w dwóch partiach? Odp. TAK.\nPytanie 4: Czy wymagane jest wadium? Odp.: NIE\nAnkieta, pyt. 7 (odp. TAK).', ['Odp. TAK.', 'Odp.: NIE', '(odp. TAK)']);
+  neg('Wyk. EKG.\nBadania wyk.: CRP, OB\nW dniu przyjęcia wyk. RTG, USG.', ['Wyk. EKG.', 'wyk.: CRP, OB', 'wyk. RTG, USG.']);
+  neg('Źródło: opr. PWN. Wykonał: ZDM. Sprawdził: NOK. Zatwierdził: DG. Kontrola (odp. MF).', ['opr. PWN', 'Wykonał: ZDM', 'Sprawdził: NOK', 'Zatwierdził: DG', '(odp. MF)']);
+  neg('Sporządził: AS', ['Sporządził: AS']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

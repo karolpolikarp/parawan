@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-11-13T09:21:31.673Z",
+  "generatedAt": "2026-11-13T10:09:29.627Z",
   "seed": 20260704,
   "coreVersion": "0.29.14",
-  "casesTotal": 511,
-  "mustMaskTotal": 689,
-  "mustKeepTotal": 794,
+  "casesTotal": 519,
+  "mustMaskTotal": 695,
+  "mustKeepTotal": 816,
   "skippedLayers": [
     {
       "name": "core+spacy",
@@ -26,26 +26,26 @@
     {
       "name": "T0+T1 core",
       "desc": "redactPII(): regex, sumy kontrolne i słownik (in-process, offline)",
-      "elapsedMs": 475,
+      "elapsedMs": 355,
       "changedVsCore": null,
-      "recall": 0.9782293178519593,
-      "precision": 0.9987405541561712,
-      "f1": 0.988378533063716,
+      "recall": 0.9784172661870504,
+      "precision": 0.9987745098039216,
+      "f1": 0.988491088508479,
       "agg": {
-        "maskTotal": 689,
-        "maskHit": 674,
-        "keepTotal": 794,
-        "keepHit": 793
+        "maskTotal": 695,
+        "maskHit": 680,
+        "keepTotal": 816,
+        "keepHit": 815
       },
       "perCategory": {
         "osoby-podstawowe": {
           "recall": 1,
           "precision": 1,
           "f1": 1,
-          "maskTotal": 202,
-          "maskHit": 202,
-          "keepTotal": 120,
-          "keepHit": 120
+          "maskTotal": 208,
+          "maskHit": 208,
+          "keepTotal": 124,
+          "keepHit": 124
         },
         "osoby-odmiana": {
           "recall": 1,
@@ -76,12 +76,12 @@
         },
         "negatywy": {
           "recall": null,
-          "precision": 0.9969135802469136,
+          "precision": 0.9970760233918129,
           "f1": null,
           "maskTotal": 0,
           "maskHit": 0,
-          "keepTotal": 324,
-          "keepHit": 323
+          "keepTotal": 342,
+          "keepHit": 341
         },
         "osoby-rzadkie-ner": {
           "recall": 0.21052631578947367,
@@ -2849,6 +2849,46 @@
         },
         {
           "id": "neg-173",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-p-75",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-p-76",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-174",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-175",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-176",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-177",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-178",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-179",
           "leaked": [],
           "eaten": []
         }

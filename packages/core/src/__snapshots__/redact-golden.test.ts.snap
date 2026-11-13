@@ -120,6 +120,19 @@ Sąd Rejonowy	Wydział Cywilny",
   "neg-171": "Kontaktowano się ze stroną postępowania zarejestrowanego pod nr 12 345 67 89.",
   "neg-172": "Sprawa o kontakty z dzieckiem prowadzona pod numerem 12 345 67 89.",
   "neg-173": "Kontakt ze strony urzędu pod numerem 12 345 67 89.",
+  "neg-174": "Ustalenia:
+1. Zgłoszenie do ZUS (odp. ZUS).
+2. Konta w systemie (odp. IT).
+3. Szkolenie (odp. BHP, etap II).",
+  "neg-175": "Audyt bezpieczeństwa (wyk. NASK), dane (opr. GUS). Etap (odp. IV).",
+  "neg-176": "Pytanie 3: Czy Zamawiający dopuszcza dostawę w dwóch partiach? Odp. TAK.
+Pytanie 4: Czy wymagane jest wadium? Odp.: NIE
+Ankieta, pyt. 7 (odp. TAK).",
+  "neg-177": "Wyk. EKG.
+Badania wyk.: CRP, OB
+W dniu przyjęcia wyk. RTG, USG.",
+  "neg-178": "Źródło: opr. PWN. Wykonał: ZDM. Sprawdził: NOK. Zatwierdził: DG. Kontrola (odp. MF).",
+  "neg-179": "Sporządził: AS",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
   "neg-19": "Rzecznik Praw Obywatelskich zabrał głos w debacie.",
   "neg-20": "Wilk biegał po lesie za sarną.",
@@ -328,6 +341,12 @@ Anna Kowalska z domu Sikora
 Kierownik Działu Kadr Grzegorz Mazur",
   "os-p-73": "Świadek Poleski zeznał. Mieczyk zatrudniony od 01.02.2010 r. Szanowna Pani Dyrektor Szkoły Kowalska-Nowak. Grafik: Dzień Lisiecka, Noc Brzozowska. Do kościoła wraz ze św. Kowalskim wszedł sprawca.",
   "os-p-74": "Michal Nowak napisal, ze Lukasz Wisniewski bedzie o 18. Krzysztof Wróbel, syn Józefa i Marii, stawił się.",
+  "os-p-75": "Uczestnicy: Anna Sadowska, Marek Kot, Jan Tomczak.
+Ustalenia:
+1. Harmonogram odbioru do 5 dni roboczych (odp. AS).
+2. Raport z testów (odp. MK, JT).",
+  "os-p-76": "Notatkę opracowano w Wydziale Kadr.
+Sporządziła: A.Ł.",
   "os-r-01": "Marek Bąkiewicz podpisał protokół odbioru.",
   "os-r-02": "Alicja Krzemieniecka złożyła wniosek o urlop.",
   "os-r-03": "Tadeusz Gzowski wynajął magazyn pod miastem.",
@@ -725,6 +744,19 @@ Sąd Rejonowy	Wydział Cywilny",
   "neg-171": "Kontaktowano się ze stroną postępowania zarejestrowanego pod nr 12 345 67 89.",
   "neg-172": "Sprawa o kontakty z dzieckiem prowadzona pod numerem 12 345 67 89.",
   "neg-173": "Kontakt ze strony urzędu pod numerem 12 345 67 89.",
+  "neg-174": "Ustalenia:
+1. Zgłoszenie do ZUS (odp. ZUS).
+2. Konta w systemie (odp. IT).
+3. Szkolenie (odp. BHP, etap II).",
+  "neg-175": "Audyt bezpieczeństwa (wyk. NASK), dane (opr. GUS). Etap (odp. IV).",
+  "neg-176": "Pytanie 3: Czy Zamawiający dopuszcza dostawę w dwóch partiach? Odp. TAK.
+Pytanie 4: Czy wymagane jest wadium? Odp.: NIE
+Ankieta, pyt. 7 (odp. TAK).",
+  "neg-177": "Wyk. EKG.
+Badania wyk.: CRP, OB
+W dniu przyjęcia wyk. RTG, USG.",
+  "neg-178": "Źródło: opr. PWN. Wykonał: ZDM. Sprawdził: NOK. Zatwierdził: DG. Kontrola (odp. MF).",
+  "neg-179": "Sporządził: AS",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
   "neg-19": "Rzecznik Praw Obywatelskich zabrał głos w debacie.",
   "neg-20": "Wilk biegał po lesie za sarną.",
@@ -931,6 +963,12 @@ Pozwany [OSOBA-C] Annie groził.",
 Kierownik Działu Kadr [OSOBA-D]",
   "os-p-73": "Świadek [OSOBA-A] zeznał. [OSOBA-B] zatrudniony od 01.02.2010 r. Szanowna Pani Dyrektor Szkoły [OSOBA-C]. Grafik: Dzień [OSOBA-D], Noc [OSOBA-E]. Do kościoła wraz ze św. [OSOBA-F] wszedł sprawca.",
   "os-p-74": "[OSOBA-A] napisal, ze [OSOBA-B] bedzie o 18. [OSOBA-C], syn [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO], stawił się.",
+  "os-p-75": "Uczestnicy: [OSOBA-A], [OSOBA-B], [OSOBA-C].
+Ustalenia:
+1. Harmonogram odbioru do 5 dni roboczych (odp. [OSOBA-A]).
+2. Raport z testów (odp. [OSOBA-B], [OSOBA-C]).",
+  "os-p-76": "Notatkę opracowano w Wydziale Kadr.
+Sporządziła: [OSOBA-A]",
   "os-r-01": "[OSOBA-A] podpisał protokół odbioru.",
   "os-r-02": "[OSOBA-A] złożyła wniosek o urlop.",
   "os-r-03": "[OSOBA-A] wynajął magazyn pod miastem.",
@@ -1328,6 +1366,19 @@ Sąd Rejonowy	Wydział Cywilny",
   "neg-171": "Kontaktowano się ze stroną postępowania zarejestrowanego pod nr 12 345 67 89.",
   "neg-172": "Sprawa o kontakty z dzieckiem prowadzona pod numerem 12 345 67 89.",
   "neg-173": "Kontakt ze strony urzędu pod numerem 12 345 67 89.",
+  "neg-174": "Ustalenia:
+1. Zgłoszenie do ZUS (odp. ZUS).
+2. Konta w systemie (odp. IT).
+3. Szkolenie (odp. BHP, etap II).",
+  "neg-175": "Audyt bezpieczeństwa (wyk. NASK), dane (opr. GUS). Etap (odp. IV).",
+  "neg-176": "Pytanie 3: Czy Zamawiający dopuszcza dostawę w dwóch partiach? Odp. TAK.
+Pytanie 4: Czy wymagane jest wadium? Odp.: NIE
+Ankieta, pyt. 7 (odp. TAK).",
+  "neg-177": "Wyk. EKG.
+Badania wyk.: CRP, OB
+W dniu przyjęcia wyk. RTG, USG.",
+  "neg-178": "Źródło: opr. PWN. Wykonał: ZDM. Sprawdził: NOK. Zatwierdził: DG. Kontrola (odp. MF).",
+  "neg-179": "Sporządził: AS",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
   "neg-19": "Rzecznik Praw Obywatelskich zabrał głos w debacie.",
   "neg-20": "Wilk biegał po lesie za sarną.",
@@ -1534,6 +1585,12 @@ Pozwany [IMIĘ I NAZWISKO] Annie groził.",
 Kierownik Działu Kadr [IMIĘ I NAZWISKO]",
   "os-p-73": "Świadek [IMIĘ I NAZWISKO] zeznał. [IMIĘ I NAZWISKO] zatrudniony od 01.02.2010 r. Szanowna Pani Dyrektor Szkoły [IMIĘ I NAZWISKO]. Grafik: Dzień [IMIĘ I NAZWISKO], Noc [IMIĘ I NAZWISKO]. Do kościoła wraz ze św. [IMIĘ I NAZWISKO] wszedł sprawca.",
   "os-p-74": "[IMIĘ I NAZWISKO] napisal, ze [IMIĘ I NAZWISKO] bedzie o 18. [IMIĘ I NAZWISKO], syn [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO], stawił się.",
+  "os-p-75": "Uczestnicy: [IMIĘ I NAZWISKO], [IMIĘ I NAZWISKO], [IMIĘ I NAZWISKO].
+Ustalenia:
+1. Harmonogram odbioru do 5 dni roboczych (odp. [IMIĘ I NAZWISKO]).
+2. Raport z testów (odp. [IMIĘ I NAZWISKO], [IMIĘ I NAZWISKO]).",
+  "os-p-76": "Notatkę opracowano w Wydziale Kadr.
+Sporządziła: [IMIĘ I NAZWISKO]",
   "os-r-01": "[IMIĘ I NAZWISKO] podpisał protokół odbioru.",
   "os-r-02": "[IMIĘ I NAZWISKO] złożyła wniosek o urlop.",
   "os-r-03": "[IMIĘ I NAZWISKO] wynajął magazyn pod miastem.",
@@ -1980,6 +2037,19 @@ Sąd Rejonowy	Wydział Cywilny",
   "neg-171": "Kontaktowano się ze stroną postępowania zarejestrowanego pod nr 12 345 67 89.",
   "neg-172": "Sprawa o kontakty z dzieckiem prowadzona pod numerem 12 345 67 89.",
   "neg-173": "Kontakt ze strony urzędu pod numerem 12 345 67 89.",
+  "neg-174": "Ustalenia:
+1. Zgłoszenie do ZUS (odp. ZUS).
+2. Konta w systemie (odp. IT).
+3. Szkolenie (odp. BHP, etap II).",
+  "neg-175": "Audyt bezpieczeństwa (wyk. NASK), dane (opr. GUS). Etap (odp. IV).",
+  "neg-176": "Pytanie 3: Czy Zamawiający dopuszcza dostawę w dwóch partiach? Odp. TAK.
+Pytanie 4: Czy wymagane jest wadium? Odp.: NIE
+Ankieta, pyt. 7 (odp. TAK).",
+  "neg-177": "Wyk. EKG.
+Badania wyk.: CRP, OB
+W dniu przyjęcia wyk. RTG, USG.",
+  "neg-178": "Źródło: opr. PWN. Wykonał: ZDM. Sprawdził: NOK. Zatwierdził: DG. Kontrola (odp. MF).",
+  "neg-179": "Sporządził: AS",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
   "neg-19": "Rzecznik Praw Obywatelskich zabrał głos w debacie.",
   "neg-20": "Wilk biegał po lesie za sarną.",
@@ -2186,6 +2256,12 @@ Pozwany <<osoba>> Annie groził.",
 Kierownik Działu Kadr <<osoba>>",
   "os-p-73": "Świadek <<osoba>> zeznał. <<osoba>> zatrudniony od 01.02.2010 r. Szanowna Pani Dyrektor Szkoły <<osoba>>. Grafik: Dzień <<osoba>>, Noc <<osoba>>. Do kościoła wraz ze św. <<osoba>> wszedł sprawca.",
   "os-p-74": "<<osoba>> napisal, ze <<osoba>> bedzie o 18. <<osoba>>, syn <<osoba>> i <<osoba>>, stawił się.",
+  "os-p-75": "Uczestnicy: <<osoba>>, <<osoba>>, <<osoba>>.
+Ustalenia:
+1. Harmonogram odbioru do 5 dni roboczych (odp. <<osoba>>).
+2. Raport z testów (odp. <<osoba>>, <<osoba>>).",
+  "os-p-76": "Notatkę opracowano w Wydziale Kadr.
+Sporządziła: <<osoba>>",
   "os-r-01": "<<osoba>> podpisał protokół odbioru.",
   "os-r-02": "<<osoba>> złożyła wniosek o urlop.",
   "os-r-03": "<<osoba>> wynajął magazyn pod miastem.",
@@ -2600,6 +2676,12 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "neg-171": "",
   "neg-172": "",
   "neg-173": "",
+  "neg-174": "",
+  "neg-175": "",
+  "neg-176": "",
+  "neg-177": "",
+  "neg-178": "",
+  "neg-179": "",
   "neg-18": "",
   "neg-19": "",
   "neg-20": "",
@@ -2791,6 +2873,8 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "os-p-72": "IMIE:4",
   "os-p-73": "IMIE:6",
   "os-p-74": "IMIE:4",
+  "os-p-75": "IMIE:6",
+  "os-p-76": "IMIE:1",
   "os-r-01": "IMIE:1",
   "os-r-02": "IMIE:1",
   "os-r-03": "IMIE:1",
@@ -3160,6 +3244,12 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "neg-171": "",
   "neg-172": "",
   "neg-173": "",
+  "neg-174": "",
+  "neg-175": "",
+  "neg-176": "",
+  "neg-177": "",
+  "neg-178": "",
+  "neg-179": "",
   "neg-18": "",
   "neg-19": "",
   "neg-20": "",
@@ -3351,6 +3441,8 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "os-p-72": "IMIE:4",
   "os-p-73": "IMIE:6",
   "os-p-74": "IMIE:4",
+  "os-p-75": "IMIE:6",
+  "os-p-76": "IMIE:1",
   "os-r-01": "IMIE:1",
   "os-r-02": "IMIE:1",
   "os-r-03": "IMIE:1",
