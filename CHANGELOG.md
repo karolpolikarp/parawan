@@ -71,8 +71,9 @@ działają na GitHubie od chwili wypchnięcia tagów.
   tytuł ustawy o przeciwdziałaniu alkoholizmowi, „depresja na rynku nieruchomości” oraz protokół
   budowlany i techniczny („pęknięcie stopy słupa”, „nadciśnienie w przewodzie”). Kod choroby
   z opisem („J45.0 Astma oskrzelowa”) znika razem z opisem, rozpoznanie z kodem w nawiasie
-  w kolejnym wierszu karty też, a uraz ze stroną ciała („złamanie prawej nogi”) w całości. Procedura „Niebieskiej Karty” nie jest daną o zdrowiu i dalej zostaje
-  jawna. Poza etykietą formularza na początku wiersza każde słowo, które zapowiada chorobę albo
+  w kolejnym wierszu karty też, a uraz ze stroną ciała („złamanie prawej nogi”) w całości.
+  Procedura „Niebieskiej Karty” nie jest daną o zdrowiu i dalej zostaje jawna (osoba w zdaniu jest
+  zakryta, jawny zostaje sam fakt procedury; osobny typ jest w planie, ROADMAP.md poz. 28). Poza etykietą formularza na początku wiersza każde słowo, które zapowiada chorobę albo
   kod, potrzebuje w zdaniu konkretnej osoby (imię i nazwisko, „Pan”, „Pani”, „mu”, „u niego”,
   rola, PESEL), więc zostają jawne: zdanie ze słownika albo statystyki („Kod choroby J18.9
   oznacza zapalenie płuc”, „Kod choroby E11 dotyczy cukrzycy typu 2; w 2025 r. zgłoszono 1,2 mln

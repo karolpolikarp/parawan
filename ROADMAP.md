@@ -131,6 +131,20 @@ v0.46.25. Dlatego następna fala (A10, A11 i L02) przesuwa się z v0.47.1 na v0.
     `github.com/akowalski` świadomie zostaje bez reguły, bo ten sam kształt ma organizacja i projekt
     (komentarz przy `URL_PROFILE_PATH_RULES`). Źródło: docs/SCENARIUSZ-TESTOW-v0.45.md, sekcja 4.
 
+28. **Procedura „Niebieskiej Karty” jako osobny typ danych**
+    v0.47.x / rdzeń 0.30.x · M
+    Zdanie „Pani Nowak jest objęta procedurą Niebieskiej Karty.” zakrywa dziś osobę, ale fakt
+    procedury zostaje jawny. Na zestawie odłożonym ewaluacji to 0 z 5 takich miejsc. Podpięcie
+    pod `[DANE O ZDROWIU]` dawałoby błędną etykietę, więc potrzebny jest nowy typ (roboczo
+    `[PRZEMOC-DOMOWA]`) z kotwicą: osoba w zdaniu, czasownik albo rzeczownik procedury
+    (`procedur*`, `założon*`, `objęt*`, `wszczęt*`) i „Niebiesk* Kart*” albo „NK”. Przypadki do
+    testów: „W sprawie Jana Nowaka założono Niebieską Kartę w 2023 r.”, „Wobec Jana Nowaka
+    wszczęto procedurę „Niebieskiej Karty”.”, „procedurę NK wobec rodziny Kowalskich”. Typ
+    przechodzi przez pełną listę z CLAUDE.md (types.ts, pii-meta.ts, tokens.ts i index.html
+    landingu, README, testy, dataset.mjs). „NK” jest skrótem wieloznacznym, więc wymaga
+    osobnego audytu precyzji (np. „NK” jako inicjały osoby albo skrót nazwy firmy). Źródło:
+    docs/EWALUACJA.md i raport zestawu odłożonego (ziarna 7001–7050).
+
 ### Propozycje
 
 16. **Podział `index.ts` na moduły według faz (wydane w v0.46.27)**
