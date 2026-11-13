@@ -18,10 +18,19 @@ działają na GitHubie od chwili wypchnięcia tagów.
   z przecinkiem („(Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1)”) i budynek z salą
   spotkania („sala 214, budynek przy ul. Królewskiej 27”) były zakrywane jak adres osoby. To adres
   siedziby, więc zostaje, także ulica z patronem, stopniem albo liczbą („ul. gen. Władysława
-  Andersa 5”, „ul. 3 Maja 5”) w całości. Adres osoby dalej znika: pod imieniem i nazwiskiem albo
-  pod „Pani”, „Pan” i „Sz. Pan”, pod inicjałem z nazwiskiem („W. Nowak”), w nazwie firmy
-  z imieniem albo nazwiskiem właściciela w każdym zapisie i odmianie („Zakład Usług Remontowych Jan
-  Kowalski”, „Przychodnia Lekarska Ewy Nowak”, „Szkoła Jazdy Kowalski”, wersalikami), po „zam.”,
+  Andersa 5”, „ul. 3 Maja 5”) w całości, również pod organem („Prezydent Miasta⏎Wydział
+  Komunikacji”, „Wójt Gminy”), z dzielnicą po łączniku („Urząd Skarbowy Warszawa-Targówek”) i ze
+  skrótem („Oddział PKO”, „Delegatura NIK”, „Oddział Regionalny ARiMR”). Szkoła, przedszkole, żłobek, przychodnia, poradnia,
+  ośrodek, instytut czy akademia liczą się jako siedziba tylko z numerem, patronem, miejscowością
+  po „w” albo słowem „Miejski”, „Gminny”, „Powiatowy”, „Publiczny”, „SP ZOZ” („Szkoła Podstawowa
+  nr 5 im. Marii Konopnickiej”, „Przedszkole Miejskie nr 3 w Turku”, także
+  wersalikami: „SZKOŁA PODSTAWOWA NR 5”), bo tak samo zaczyna się
+  nazwa firmy jednoosobowej. Adres osoby dalej znika: pod imieniem i nazwiskiem (także spoza
+  słownika imion, „Marianna Zięba-Kot”) albo pod „Pani”, „Pan”, „Sz. Pan” i „Dla:”, pod inicjałem
+  z nazwiskiem („W. Nowak”), w nazwie firmy z imieniem albo nazwiskiem właściciela w każdym zapisie
+  i odmianie, także pisanym wersalikami albo będącym zwykłym słowem („Zakład Usług Remontowych Jan
+  Kowalski”, „Przychodnia Lekarska Ewy Nowak”, „Szkoła Jazdy KOWALSKI”, „Ośrodek Szkolenia
+  Kierowców KOS”, „Przychodnia Weterynaryjna Wilk”, „Żłobek Domowy Ewy”), po „zam.”,
   „adres zamieszkania” i „miejsce zamieszkania” nad blokiem, pod „Gmina” albo „Dzielnica”
   z nazwą miejscowości, z numerem mieszkania („m. 3”, „lok. 9”, „12/4”, „ul. Polna 3, m. 14”,
   „lokal 4”), po pustej linii pod nagłówkiem instytucji oraz w zdaniu, w którym instytucja coś robi z osobą („Szpital przyjął

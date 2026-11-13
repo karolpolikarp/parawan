@@ -160,6 +160,20 @@ ul. Piotrkowska 104
 90-926 Łódź",
   "neg-20": "Wilk biegał po lesie za sarną.",
   "neg-200": "W sprawach awarii proszę o kontakt z administratorem (Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1).",
+  "neg-201": "Przedszkole Miejskie nr 3 w Turku
+ul. Lipowa 8
+62-700 Turek",
+  "neg-202": "Szkoła Podstawowa nr 5 im. Marii Konopnickiej, ul. Lipowa 8, 20-001 Lublin",
+  "neg-203": "Prezydent Miasta
+Wydział Komunikacji
+ul. Lipowa 8
+20-001 Lublin",
+  "neg-204": "Urząd Skarbowy Warszawa-Targówek
+ul. Lipowa 8
+20-001 Lublin",
+  "neg-205": "SZKOŁA PODSTAWOWA NR 5
+ul. Lipowa 8
+20-001 Lublin",
   "neg-21": "Lis przemknął przez drogę tuż przed autem.",
   "neg-22": "Baran to pierwszy znak zodiaku.",
   "neg-23": "Mazurek wielkanocny stygł na parapecie.",
@@ -619,7 +633,19 @@ W. Nowak
 Przychodnia Rodzinna
 ul. Lipowa 7",
   "str-187": "Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Urząd Gminy, ul. Lipowa 9, 05-500 Piaseczno; Jan Kowalski, ul. Polna 3, 05-500 Piaseczno.",
+  "str-188": "Szkoła Jazdy KOWALSKI
+ul. Lipowa 8
+20-001 Lublin",
+  "str-189": "Przychodnia Weterynaryjna Wilk, ul. Lipowa 8, 20-001 Lublin",
   "str-19": "sms na [TELEFON] nie doszedł",
+  "str-190": "Żłobek Domowy Ewy
+ul. Lipowa 8
+20-001 Lublin",
+  "str-191": "Dla:
+Marianna Zięba-Kot
+Wydział Komunikacji
+ul. Lipowa 8
+20-001 Lublin",
   "str-20": "Infolinia oddzwoni z [TELEFON].",
   "str-21": "Proszę o odpowiedź na [EMAIL] w tym tygodniu.",
   "str-22": "Zgłoszenia przyjmujemy pod adresem [EMAIL].",
@@ -864,6 +890,20 @@ ul. Piotrkowska 104
 90-926 Łódź",
   "neg-20": "Wilk biegał po lesie za sarną.",
   "neg-200": "W sprawach awarii proszę o kontakt z administratorem (Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1).",
+  "neg-201": "Przedszkole Miejskie nr 3 w Turku
+ul. Lipowa 8
+62-700 Turek",
+  "neg-202": "Szkoła Podstawowa nr 5 im. Marii Konopnickiej, ul. Lipowa 8, 20-001 Lublin",
+  "neg-203": "Prezydent Miasta
+Wydział Komunikacji
+ul. Lipowa 8
+20-001 Lublin",
+  "neg-204": "Urząd Skarbowy Warszawa-Targówek
+ul. Lipowa 8
+20-001 Lublin",
+  "neg-205": "SZKOŁA PODSTAWOWA NR 5
+ul. Lipowa 8
+20-001 Lublin",
   "neg-21": "Lis przemknął przez drogę tuż przed autem.",
   "neg-22": "Baran to pierwszy znak zodiaku.",
   "neg-23": "Mazurek wielkanocny stygł na parapecie.",
@@ -1321,7 +1361,19 @@ W. [OSOBA-A]
 Przychodnia Rodzinna
 [ADRES]",
   "str-187": "Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Urząd Gminy, ul. Lipowa 9, 05-500 Piaseczno; [OSOBA-A], [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ].",
+  "str-188": "Szkoła Jazdy KOWALSKI
+[ADRES]
+[KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-189": "Przychodnia Weterynaryjna Wilk, [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
   "str-19": "sms na [TELEFON] nie doszedł",
+  "str-190": "Żłobek Domowy Ewy
+[ADRES]
+[KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-191": "Dla:
+Marianna Zięba-Kot
+Wydział Komunikacji
+[ADRES]
+[KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
   "str-20": "Infolinia oddzwoni z [TELEFON].",
   "str-21": "Proszę o odpowiedź na [EMAIL] w tym tygodniu.",
   "str-22": "Zgłoszenia przyjmujemy pod adresem [EMAIL].",
@@ -1566,6 +1618,20 @@ ul. Piotrkowska 104
 90-926 Łódź",
   "neg-20": "Wilk biegał po lesie za sarną.",
   "neg-200": "W sprawach awarii proszę o kontakt z administratorem (Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1).",
+  "neg-201": "Przedszkole Miejskie nr 3 w Turku
+ul. Lipowa 8
+62-700 Turek",
+  "neg-202": "Szkoła Podstawowa nr 5 im. Marii Konopnickiej, ul. Lipowa 8, 20-001 Lublin",
+  "neg-203": "Prezydent Miasta
+Wydział Komunikacji
+ul. Lipowa 8
+20-001 Lublin",
+  "neg-204": "Urząd Skarbowy Warszawa-Targówek
+ul. Lipowa 8
+20-001 Lublin",
+  "neg-205": "SZKOŁA PODSTAWOWA NR 5
+ul. Lipowa 8
+20-001 Lublin",
   "neg-21": "Lis przemknął przez drogę tuż przed autem.",
   "neg-22": "Baran to pierwszy znak zodiaku.",
   "neg-23": "Mazurek wielkanocny stygł na parapecie.",
@@ -2023,7 +2089,19 @@ W. [IMIĘ I NAZWISKO]
 Przychodnia Rodzinna
 [ADRES]",
   "str-187": "Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Urząd Gminy, ul. Lipowa 9, 05-500 Piaseczno; [IMIĘ I NAZWISKO], [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ].",
+  "str-188": "Szkoła Jazdy KOWALSKI
+[ADRES]
+[KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-189": "Przychodnia Weterynaryjna Wilk, [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
   "str-19": "sms na [TELEFON] nie doszedł",
+  "str-190": "Żłobek Domowy Ewy
+[ADRES]
+[KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-191": "Dla:
+Marianna Zięba-Kot
+Wydział Komunikacji
+[ADRES]
+[KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
   "str-20": "Infolinia oddzwoni z [TELEFON].",
   "str-21": "Proszę o odpowiedź na [EMAIL] w tym tygodniu.",
   "str-22": "Zgłoszenia przyjmujemy pod adresem [EMAIL].",
@@ -2317,6 +2395,20 @@ ul. Piotrkowska 104
 90-926 Łódź",
   "neg-20": "Wilk biegał po lesie za sarną.",
   "neg-200": "W sprawach awarii proszę o kontakt z administratorem (Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1).",
+  "neg-201": "Przedszkole Miejskie nr 3 w Turku
+ul. Lipowa 8
+62-700 Turek",
+  "neg-202": "Szkoła Podstawowa nr 5 im. Marii Konopnickiej, ul. Lipowa 8, 20-001 Lublin",
+  "neg-203": "Prezydent Miasta
+Wydział Komunikacji
+ul. Lipowa 8
+20-001 Lublin",
+  "neg-204": "Urząd Skarbowy Warszawa-Targówek
+ul. Lipowa 8
+20-001 Lublin",
+  "neg-205": "SZKOŁA PODSTAWOWA NR 5
+ul. Lipowa 8
+20-001 Lublin",
   "neg-21": "Lis przemknął przez drogę tuż przed autem.",
   "neg-22": "Baran to pierwszy znak zodiaku.",
   "neg-23": "Mazurek wielkanocny stygł na parapecie.",
@@ -2774,7 +2866,19 @@ W. <<osoba>>
 Przychodnia Rodzinna
 <<adres>>",
   "str-187": "Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Urząd Gminy, ul. Lipowa 9, 05-500 Piaseczno; <<osoba>>, <<adres>>, <<kod>> <<miejsce>>.",
+  "str-188": "Szkoła Jazdy KOWALSKI
+<<adres>>
+<<kod>> <<miejsce>>",
+  "str-189": "Przychodnia Weterynaryjna Wilk, <<adres>>, <<kod>> <<miejsce>>",
   "str-19": "sms na [TELEFON] nie doszedł",
+  "str-190": "Żłobek Domowy Ewy
+<<adres>>
+<<kod>> <<miejsce>>",
+  "str-191": "Dla:
+Marianna Zięba-Kot
+Wydział Komunikacji
+<<adres>>
+<<kod>> <<miejsce>>",
   "str-20": "Infolinia oddzwoni z [TELEFON].",
   "str-21": "Proszę o odpowiedź na [EMAIL] w tym tygodniu.",
   "str-22": "Zgłoszenia przyjmujemy pod adresem [EMAIL].",
@@ -3026,6 +3130,11 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "neg-199": "",
   "neg-20": "",
   "neg-200": "",
+  "neg-201": "",
+  "neg-202": "",
+  "neg-203": "",
+  "neg-204": "",
+  "neg-205": "",
   "neg-21": "",
   "neg-22": "",
   "neg-23": "",
@@ -3393,7 +3502,11 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "str-185": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
   "str-186": "ADRES:1 IMIE:1",
   "str-187": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-188": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
+  "str-189": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
   "str-19": "TELEFON:1",
+  "str-190": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
+  "str-191": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
   "str-20": "TELEFON:1",
   "str-21": "EMAIL:1",
   "str-22": "EMAIL:1",
@@ -3644,6 +3757,11 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "neg-199": "",
   "neg-20": "",
   "neg-200": "",
+  "neg-201": "",
+  "neg-202": "",
+  "neg-203": "",
+  "neg-204": "",
+  "neg-205": "",
   "neg-21": "",
   "neg-22": "",
   "neg-23": "",
@@ -4011,7 +4129,11 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "str-185": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
   "str-186": "ADRES:1 IMIE:1",
   "str-187": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-188": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
+  "str-189": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
   "str-19": "TELEFON:1",
+  "str-190": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
+  "str-191": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
   "str-20": "TELEFON:1",
   "str-21": "EMAIL:1",
   "str-22": "EMAIL:1",

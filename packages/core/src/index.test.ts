@@ -9684,3 +9684,95 @@ test('G7 po weryfikacji: adresy siedzib zostają jawne przy oknie i nagłówku p
   ];
   masked(keep.map((s) => [s, s]));
 });
+
+// ── Ewaluacja, grupa G7: adres firmy jednoosobowej i nierozpoznanej osoby pod nazwą „instytucji” ──
+test('G7 regresja: słaby człon (szkoła, ośrodek, przychodnia…) bez znacznika placówki publicznej albo z ogonem właściciela nie robi siedziby', () => {
+  const owners = [
+    'Szkoła Jazdy KOWALSKI',
+    'SZKOŁA JAZDY KOWALSKI',
+    'Ośrodek Szkolenia Kierowców NOWAK',
+    'Szkoła Jazdy Lis',
+    'Szkoła Jazdy Wróbel',
+    'Szkoła Tańca Sowa',
+    'Przychodnia Weterynaryjna Wilk',
+    'Akademia Piłkarska Wilk',
+    'Ośrodek Szkolenia Kierowców KOS',
+    'Szkoła Językowa MAZUR',
+    'Instytut Urody NOWAKOWSKA',
+    'Instytut Psychoterapii Ptak',
+    'Przychodnia Rodzinna Ptakowie',
+    'Żłobek Domowy Ewy',
+    'Przedszkole Niepubliczne u Ani',
+    // ogon właściciela przed dopowiedzeniem miejscowości odbiera znacznik „w Lublinie”
+    'Szkoła Jazdy Lis w Lublinie',
+  ];
+  for (const name of owners) {
+    expect(redactPII(`${name}\nul. Lipowa 8\n20-001 Lublin`).redacted, name).toBe(`${name}\n${A}\n${KOD} ${C}`);
+    // miejscowość po „w” w tym samym wierszu co adres zakrywa przebieg miejscowości, jak przed strażnikiem
+    expect(redactPII(`${name}, ul. Lipowa 8, 20-001 Lublin`).redacted, name).toBe(`${name.replace(/ w Lublinie$/u, ` w ${C}`)}, ${A}, ${KOD} ${C}`);
+  }
+});
+test('G7 regresja: osoba w postaci „Imię Nazwisko” nad blokiem albo etykieta „Dla:” w bloku blokuje strażnika siedziby', () => {
+  masked([
+    ['Dla:\nMarianna Zięba-Kot\nWydział Komunikacji\nul. Lipowa 8\n20-001 Lublin', 'Dla:\nMarianna Zięba-Kot\nWydział Komunikacji\n[ADRES]\n[KOD-POCZTOWY] [MIEJSCOWOŚĆ]'],
+    ['Marianna Zięba-Kot\nWydział Komunikacji\nul. Lipowa 8\n20-001 Lublin', `Marianna Zięba-Kot\nWydział Komunikacji\n${A}\n${KOD} ${C}`],
+    ['Adresat:\nUrząd Skarbowy\nul. Lipowa 8', `Adresat:\nUrząd Skarbowy\n${A}`],
+    ['Do:\nWydział Komunikacji, ul. Lipowa 8', `Do:\nWydział Komunikacji, ${A}`],
+  ]);
+});
+test('G7 regresja, kontrola precyzji: placówka publiczna ze słabym członem i urzędy dalej jawne', () => {
+  const keep = [
+    'Szkoła Podstawowa nr 5 im. Marii Konopnickiej\nul. Lipowa 8\n20-001 Lublin',
+    'Przedszkole Miejskie nr 3 w Turku\nul. Lipowa 8\n20-001 Lublin',
+    'Przychodnia SP ZOZ w Kole\nul. Lipowa 8\n20-001 Lublin',
+    'Miejski Ośrodek Pomocy Społecznej\nul. Lipowa 8\n20-001 Lublin',
+    'Szpital Bielański\nul. Cegłowska 80\n01-809 Warszawa',
+    'Oddział ZUS\nul. Lipowa 8\n20-001 Lublin',
+    'Urząd Skarbowy Lublin-Wschód\nul. Lipowa 8',
+    'URZĄD SKARBOWY\nul. Lipowa 8\n20-001 Lublin',
+    'Dzielnica Mokotów\nWydział Obsługi Mieszkańców\nul. Rakowiecka 25/27\n02-517 Warszawa',
+    'Szkoła Podstawowa nr 5 im. Marii Konopnickiej, ul. Lipowa 8, 20-001 Lublin',
+    'Przedszkole Miejskie nr 3 w Turku, ul. Lipowa 8',
+  ];
+  masked(keep.map((s) => [s, s]));
+  for (const t of [...keep, 'Szkoła Jazdy KOWALSKI\nul. Lipowa 8\n20-001 Lublin', 'Dla:\nMarianna Zięba-Kot\nWydział Komunikacji\nul. Lipowa 8\n20-001 Lublin']) {
+    for (const opts of [undefined, { pseudonyms: true }]) {
+      const once = redactPII(t, opts).redacted;
+      expect(redactPII(once, opts).redacted, t).toBe(once);
+    }
+  }
+});
+test('G7 regresja, kontrola precyzji po weryfikacji: organ nad urzędem, dzielnica po łączniku, skróty urzędów i znacznik wersalikami zostają jawne', () => {
+  const tail = '\nul. Lipowa 8\n20-001 Lublin';
+  const keep = [
+    // wiersz nad nagłówkiem: organ albo nazwa instytucji z przymiotnikiem, nie „Imię Nazwisko”
+    'Prezydent Miasta\nWydział Komunikacji',
+    'Wójt Gminy\nUrząd Gminy',
+    'Starosta Lubelski\nWydział Komunikacji',
+    'Poczta Polska\nOddział Regionalny',
+    'Straż Miejska\nWydział Prewencji',
+    'Wody Polskie\nZarząd Zlewni',
+    // „Miasto-Dzielnica” przy mocnym członie to jednostka terenowa, nie nazwisko dwuczłonowe
+    'Urząd Skarbowy Warszawa-Targówek',
+    'Urząd Skarbowy Kraków-Prądnik',
+    'Sąd Rejonowy Poznań-Grunwald',
+    'URZĄD SKARBOWY WARSZAWA-WAWER',
+    // skrót wersalikami albo pisany mieszanie przy mocnym członie
+    'Oddział PKO',
+    'Delegatura NIK',
+    'Oddział PFRON',
+    'Oddział Regionalny ARiMR',
+    // znacznik placówki publicznej niezależnie od wielkości liter
+    'SZKOŁA PODSTAWOWA NR 5',
+    'Szkoła Podstawowa Nr 12',
+    'PRZEDSZKOLE MIEJSKIE NR 3',
+  ].map((s) => s + tail);
+  masked(keep.map((s) => [s, s]));
+  // ogon właściciela dalej zakrywa adres mimo tych wyjątków
+  masked([
+    [`Szkoła Jazdy KOWALSKI nr 2${tail}`, `Szkoła Jazdy KOWALSKI nr 2\n${A}\n${KOD} ${C}`],
+    [`SZKOŁA JAZDY KOWALSKI W LUBLINIE${tail}`, `SZKOŁA JAZDY KOWALSKI W LUBLINIE\n${A}\n${KOD} ${C}`],
+    [`Gabinet Weterynaryjny Wilk w Kole${tail}`, `Gabinet Weterynaryjny Wilk w Kole\n${A}\n${KOD} ${C}`],
+    [`Oddział NOWAK${tail}`, `Oddział NOWAK\n${A}\n${KOD} ${C}`],
+  ]);
+});

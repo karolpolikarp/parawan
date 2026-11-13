@@ -1060,6 +1060,16 @@ export function buildDataset() {
     ['Jan Kowalski', 'ul. Polna 3'],
     ['ul. Lipowa 9'],
   );
+  // Grupa G7 (regresja): firma jednoosobowa ze słabym członem i osoba nad nagłówkiem działu to adres osoby.
+  str('Szkoła Jazdy KOWALSKI\nul. Lipowa 8\n20-001 Lublin', ['ul. Lipowa 8', '20-001'], ['Szkoła Jazdy']);
+  str('Przychodnia Weterynaryjna Wilk, ul. Lipowa 8, 20-001 Lublin', ['ul. Lipowa 8', '20-001'], ['Przychodnia Weterynaryjna']);
+  str('Żłobek Domowy Ewy\nul. Lipowa 8\n20-001 Lublin', ['ul. Lipowa 8', '20-001'], ['Żłobek Domowy']);
+  str('Dla:\nMarianna Zięba-Kot\nWydział Komunikacji\nul. Lipowa 8\n20-001 Lublin', ['ul. Lipowa 8', '20-001'], ['Wydział Komunikacji']);
+  neg('Przedszkole Miejskie nr 3 w Turku\nul. Lipowa 8\n62-700 Turek', ['ul. Lipowa 8', '62-700 Turek']);
+  neg('Szkoła Podstawowa nr 5 im. Marii Konopnickiej, ul. Lipowa 8, 20-001 Lublin', ['ul. Lipowa 8', '20-001 Lublin']);
+  neg('Prezydent Miasta\nWydział Komunikacji\nul. Lipowa 8\n20-001 Lublin', ['ul. Lipowa 8', '20-001 Lublin']);
+  neg('Urząd Skarbowy Warszawa-Targówek\nul. Lipowa 8\n20-001 Lublin', ['ul. Lipowa 8', '20-001 Lublin']);
+  neg('SZKOŁA PODSTAWOWA NR 5\nul. Lipowa 8\n20-001 Lublin', ['ul. Lipowa 8', '20-001 Lublin']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
