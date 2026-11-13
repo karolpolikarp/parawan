@@ -991,6 +991,14 @@ export function buildDataset() {
   oso('Zgodnie z ustaleniami z Panem Ministrem Kowalskim termin zostaje.', ['Kowalskim'], ['Panem Ministrem']);
   oso('Dziękuję Panu Dyrektorowi Nowakowi za pomoc.', ['Nowakowi'], ['Panu Dyrektorowi']);
 
+  // Firma jednoosobowa z nazwiskiem właściciela (ewaluacja 50 pism, grupa E): nazwa firmy to dana osoby.
+  osp('Jadwiga Lis\nprowadząca działalność gospodarczą pod firmą\nLIS-BUD Jadwiga Lis\nwzywa do zapłaty.', ['LIS-BUD', 'Jadwiga', 'Lis'], ['prowadząca działalność gospodarczą pod firmą', 'wzywa do zapłaty']);
+  osp('Antoni Jabłoński, prowadzący działalność pod firmą JABŁOŃS-TRANS Antoni Jabłoński, wzywa.', ['JABŁOŃS-TRANS', 'Antoni', 'Jabłoński'], ['prowadzący działalność pod firmą', 'wzywa']);
+  osp('Odbiorca: ZIELIŃS-BUD Monika Zielińska, ul. w załączeniu.', ['ZIELIŃS-BUD', 'Monika', 'Zielińska'], ['Odbiorca:']);
+  osp('Umowa z Jadwigą Lis prowadzącą działalność pod firmą LIS-BUD Jadwiga Lis. Za opóźnienie LIS-BUD zapłaci karę.', ['LIS-BUD', 'Jadwigą', 'Lis'], ['Za opóźnienie', 'zapłaci karę']);
+  osp('Firma: EKO-TRANS Jan Kowalski (osoba kontaktowa) odpowie na pismo.', ['Jan', 'Kowalski'], ['Firma: EKO-TRANS', 'osoba kontaktowa']);
+  neg('Serwis AGD-SERWIS i spółka NOWAK-BUD Sp. z o.o. oraz norma PN-EN zostają.', ['AGD-SERWIS', 'NOWAK-BUD Sp. z o.o.', 'PN-EN']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {

@@ -12,6 +12,19 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+- **Nazwa firmy jednoosobowej z nazwiskiem właściciela znika razem z osobą.** W piśmie „prowadząca
+  działalność gospodarczą pod firmą LIS-BUD Jadwiga Lis” imię i nazwisko były zakryte, ale „LIS-BUD”
+  zostawało jawne i zdradzało nazwisko. Teraz nazwa firmy z wielkich liter z łącznikiem wchodzi do
+  znacznika osoby, gdy jej pierwszy człon to nazwisko zakrytej osoby, także skrócone („JABŁOŃS-TRANS”,
+  „ZIELIŃS-BUD”) albo zapisane ze spacjami wokół łącznika („NOWAK - POL”), a do tego przed nazwą stoi
+  „pod firmą”, „Firma:” czy „w firmie” albo nazwa kończy się typowym członem branżowym („-BUD”,
+  „-TRANS”, „-POL”, „-MED”). Dzięki temu znika też nazwa w nagłówku faktury („Sprzedawca:”, niżej
+  „LIS-BUD” i „Jadwiga Lis”). Nazwa w cudzysłowie też jest zakrywana, a raz rozpoznana firma znika przy
+  każdej kolejnej wzmiance w piśmie, także odmienionej („LIS-BUDU”, „LIS-BUDEM”). Spółki („NOWAK-BUD
+  Sp. z o.o.”, „spółki NOWAK-POL”), nazwy bez nazwiska („Firma: PKO-BP Jan Kowalski”, „pod nazwą
+  NFZ-POZ”) i zwykłe zapisy wersalikami, w których pierwszy człon tylko przypadkiem równa się nazwisku
+  („Jan Rak, RAK-JELITA w wywiadzie”, „Anna Maj, MAJ-CZERWIEC: urlop”), zostają, tak samo nazwa firmy
+  z sąsiedniej kolumny tabeli.
 - **Tytuł urzędu po „Panem” i „Panu” nie jest już brany za nazwisko.** Zdanie „Zgodnie z ustaleniami
   z Panem Ministrem termin nie może zostać przesunięty.” zamieniało „Ministrem” na znacznik osoby.
   Teraz tytuły urzędów i funkcji w każdej odmianie („z Panem Ministrem”, „Panu Dyrektorowi”, „z Panem

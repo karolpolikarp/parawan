@@ -2440,6 +2440,121 @@ test('K05: po skrócie formy działalności i „W.P./Ś.P./Sz.P." nazwisko w ma
   ];
   for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
 });
+test('firma jednoosobowa z nazwiskiem właściciela wchodzi do maski osoby, spółka i marka zostają', () => {
+  const cases: [string, string][] = [
+    // przykłady z ewaluacji 50 pism (grupa E): człon z nazwiskiem, także obciętym o końcówkę
+    ['Jadwiga Lis\nprowadząca działalność gospodarczą pod firmą\nLIS-BUD Jadwiga Lis\nul. Leśna 118 m. 21', '[IMIĘ I NAZWISKO]\nprowadząca działalność gospodarczą pod firmą\n[IMIĘ I NAZWISKO]\n[ADRES]'],
+    ['Jadwiga Wrzosek\nprowadząca działalność gospodarczą pod firmą\nWRZOSEK-BUD Jadwiga Wrzosek', '[IMIĘ I NAZWISKO]\nprowadząca działalność gospodarczą pod firmą\n[IMIĘ I NAZWISKO]'],
+    ['Antoni Jabłoński\nprowadzący działalność gospodarczą pod firmą\nJABŁOŃS-TRANS Antoni Jabłoński', '[IMIĘ I NAZWISKO]\nprowadzący działalność gospodarczą pod firmą\n[IMIĘ I NAZWISKO]'],
+    ['Monika Zielińska\nprowadząca działalność gospodarczą pod firmą\nZIELIŃS-BUD Monika Zielińska', '[IMIĘ I NAZWISKO]\nprowadząca działalność gospodarczą pod firmą\n[IMIĘ I NAZWISKO]'],
+    ['Ewa Polak\nprowadząca działalność gospodarczą pod firmą\nPOLAK-POL Ewa Polak', '[IMIĘ I NAZWISKO]\nprowadząca działalność gospodarczą pod firmą\n[IMIĘ I NAZWISKO]'],
+    // nazwisko w pierwszym członie bez kotwicy „pod firmą”
+    ['Odbiorca: ZIELIŃS-BUD Monika Zielińska', 'Odbiorca: [IMIĘ I NAZWISKO]'],
+    // sama kotwica bez nazwiska w nazwie nie wystarcza: marka bez danej osoby zostaje
+    ['prowadzący działalność pod firmą AGD-SERWIS Jan Kowalski', 'prowadzący działalność pod firmą AGD-SERWIS [IMIĘ I NAZWISKO]'],
+    // kotwica i nazwisko właściciela bez osoby za nazwą
+    ['Jan Nowak prowadzi działalność pod firmą NOWAK-BUD w Radomiu.', '[IMIĘ I NAZWISKO] prowadzi działalność pod firmą [IMIĘ I NAZWISKO] w Radomiu.'],
+    // przypadki ujemne: marka bez nazwiska i bez kotwicy, spółka z formą prawną, norma, skrót banku
+    ['AGD-SERWIS Jan Kowalski', 'AGD-SERWIS [IMIĘ I NAZWISKO]'],
+    ['PKO-BP Jan Kowalski', 'PKO-BP [IMIĘ I NAZWISKO]'],
+    ['Jan Nowak jest prezesem. NOWAK-BUD Sp. z o.o. ma siedzibę w Radomiu.', '[IMIĘ I NAZWISKO] jest prezesem. NOWAK-BUD Sp. z o.o. ma siedzibę w Radomiu.'],
+    ['Firma: KOWALSKI-TRANS Sp. z o.o.', 'Firma: KOWALSKI-TRANS Sp. z o.o.'],
+    ['Jan Nowak działa pod firmą NOWAK-BUD S.A.', '[IMIĘ I NAZWISKO] działa pod firmą NOWAK-BUD S.A.'],
+    ['Norma PN-EN 1090 i Jan Kowalski.', 'Norma PN-EN 1090 i [IMIĘ I NAZWISKO].'],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
+  expect(redactPII('Ewa Polak, pod firmą POLAK-POL Ewa Polak', { pseudonyms: true }).redacted).toBe('[OSOBA-A], pod firmą [OSOBA-A]');
+  // człon branżowy „-BUD” rozpoznaje firmę także bez kotwicy, każda nazwa dostaje maskę swojej właścicielki
+  expect(redactPII('Jan Nowak i Anna Lis, pod firmą NOWAK-BUD, oraz LIS-BUD.', { pseudonyms: true }).redacted).toBe(
+    '[OSOBA-A] i [OSOBA-B], pod firmą [OSOBA-A], oraz [OSOBA-B].',
+  );
+});
+test('firma jednoosobowa: kotwica bez nazwiska, tabela, cudzysłów, kolejne wzmianki i spółka', () => {
+  const cases: [string, string][] = [
+    // kotwica „Firma:”, „pod nazwą”, „pod firmą:” bez nazwiska w nazwie: skrót instytucji i marka zostają
+    ['Firma: EKO-TRANS Jan Kowalski (osoba kontaktowa), tel. 600 100 200.', 'Firma: EKO-TRANS [IMIĘ I NAZWISKO] (osoba kontaktowa), tel. [TELEFON].'],
+    ['Firma: PKO-BP Jan Kowalski, oddział w Krakowie', 'Firma: PKO-BP [IMIĘ I NAZWISKO], oddział w Krakowie'],
+    ['Podwykonawca: firma: DACH-POL Jan Dachowski.', 'Podwykonawca: firma: DACH-POL [IMIĘ I NAZWISKO].'],
+    ['pod firmą: BHP-SERWIS Jan Kowalski', 'pod firmą: BHP-SERWIS [IMIĘ I NAZWISKO]'],
+    ['Firma:\nPKO-BP Jan Kowalski', 'Firma:\nPKO-BP [IMIĘ I NAZWISKO]'],
+    ['Świadczenia udzielane pod nazwą NFZ-POZ Anna Nowak, lekarz rodzinny.', 'Świadczenia udzielane pod nazwą NFZ-POZ [IMIĘ I NAZWISKO], lekarz rodzinny.'],
+    ['Lek dostępny pod nazwą ACC-MAX Jan Kowalski przyjmował codziennie.', 'Lek dostępny pod nazwą ACC-MAX [IMIĘ I NAZWISKO] przyjmował codziennie.'],
+    ['Pod nazwą: UE-PL Jan Kowalski przekazano środki.', 'Pod nazwą: UE-PL [IMIĘ I NAZWISKO] przekazano środki.'],
+    ['Jan Kowalski, firma: PKO-BP Jan Nowak', '[IMIĘ I NAZWISKO], firma: PKO-BP [IMIĘ I NAZWISKO]'],
+    ['Spółka występuje pod nazwą ABC-XYZ Jan Kowalski.', 'Spółka występuje pod nazwą ABC-XYZ [IMIĘ I NAZWISKO].'],
+    // tabulator to granica kolumn: nazwa z kolumny „Firma” zostaje
+    ['Kontrahent\tFirma\tOsoba\n1\tFirma: MEDI-LAB\tJan Kowalski', 'Kontrahent\tFirma\tOsoba\n1\tFirma: MEDI-LAB\t[IMIĘ I NAZWISKO]'],
+    // raz rozpoznana nazwa firmy właściciela znika przy każdej wzmiance
+    [
+      'Umowa z Jadwigą Lis prowadzącą działalność pod firmą LIS-BUD Jadwiga Lis. Firma LIS-BUD zobowiązuje się wykonać prace. Za opóźnienie LIS-BUD zapłaci karę.',
+      'Umowa z [IMIĘ I NAZWISKO] prowadzącą działalność pod firmą [IMIĘ I NAZWISKO]. Firma [IMIĘ I NAZWISKO] zobowiązuje się wykonać prace. Za opóźnienie [IMIĘ I NAZWISKO] zapłaci karę.',
+    ],
+    ['Świadek Marek Polak zeznał, że pracował w firmie POLAK-TRANS.', 'Świadek [IMIĘ I NAZWISKO] zeznał, że pracował w firmie [IMIĘ I NAZWISKO].'],
+    // nazwa w cudzysłowie i nazwa po przecinku za osobą
+    [
+      'Wykonawca: Jan Kowalski prowadzący działalność gospodarczą pod firmą „KOWAL-BUD” Jan Kowalski, NIP 5261040828.',
+      'Wykonawca: [IMIĘ I NAZWISKO] prowadzący działalność gospodarczą pod firmą „[IMIĘ I NAZWISKO]” [IMIĘ I NAZWISKO], NIP [NIP].',
+    ],
+    ['Wykonawca: Jadwiga Lis, LIS-BUD, ul. Polna 3', 'Wykonawca: [IMIĘ I NAZWISKO], [IMIĘ I NAZWISKO], [ADRES]'],
+    // łącznik ze spacjami (OCR)
+    [
+      'Pozwany: Jan Nowak prowadzący działalność gospodarczą pod firmą NOWAK - POL Jan Nowak.',
+      'Pozwany: [IMIĘ I NAZWISKO] prowadzący działalność gospodarczą pod firmą [IMIĘ I NAZWISKO].',
+    ],
+    // spółka: słowo „spółki” przed nazwą albo forma prawna za nią, obie wzmianki spójnie jawne
+    [
+      'Prezes zarządu spółki NOWAK-POL Jan Nowak podpisał umowę w imieniu spółki NOWAK-POL Sp. z o.o.',
+      'Prezes zarządu spółki NOWAK-POL [IMIĘ I NAZWISKO] podpisał umowę w imieniu spółki NOWAK-POL Sp. z o.o.',
+    ],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
+  const ps = (t: string) => redactPII(t, { pseudonyms: true }).redacted;
+  expect(ps('Umowa z Jadwigą Lis prowadzącą działalność pod firmą LIS-BUD Jadwiga Lis. Za opóźnienie LIS-BUD zapłaci karę.')).toBe(
+    'Umowa z [OSOBA-A] prowadzącą działalność pod firmą [OSOBA-A]. Za opóźnienie [OSOBA-A] zapłaci karę.',
+  );
+  // obcięty człon pasujący do dwóch nazwisk: firma należy do osoby wspomnianej tuż przed nią
+  expect(ps('Jan Wójcik i Ewa Wójcicka. Ewa Wójcicka prowadzi działalność pod firmą WÓJCI-MED.')).toBe(
+    '[OSOBA-A] i [OSOBA-B]. [OSOBA-B] prowadzi działalność pod firmą [OSOBA-B].',
+  );
+  // nazwa wskazuje inną osobę niż maska za nią: osobna maska właściciela, bez fałszywego związku
+  expect(ps('Jan Nowak. Umowa z NOWAK-BUD Anna Kowalska.')).toBe('[OSOBA-A]. Umowa z [OSOBA-A] [OSOBA-B].');
+});
+test('firma jednoosobowa: zapis wersalikami bez kotwicy i bez członu branżowego zostaje, faktura i odmiana', () => {
+  const cases: [string, string][] = [
+    // pierwszy człon równy nazwisku to za mało: bez kotwicy firmy i bez członu branżowego to nie firma
+    ['Pacjent Jan Rak, RAK-JELITA w wywiadzie rodzinnym. Kontrola: RAK-JELITA wykluczony u brata.', 'Pacjent [IMIĘ I NAZWISKO], RAK-JELITA w wywiadzie rodzinnym. Kontrola: RAK-JELITA wykluczony u brata.'],
+    ['Anna Maj, MAJ-CZERWIEC: urlop', '[IMIĘ I NAZWISKO], MAJ-CZERWIEC: urlop'],
+    ['Jan Mazur, MAZUR-WARMIA region', '[IMIĘ I NAZWISKO], MAZUR-WARMIA region'],
+    ['Jan Polak, POLAK-UKRAINA mecz', '[IMIĘ I NAZWISKO], POLAK-UKRAINA mecz'],
+    ['Jan Nowak, NOWAK-KIEROWNIK BUDOWY', '[IMIĘ I NAZWISKO], NOWAK-KIEROWNIK BUDOWY'],
+    ['Adam Krakowski. Inwestycja KRAKOWSKA-HUTA Jan Nowak.', '[IMIĘ I NAZWISKO]. Inwestycja KRAKOWSKA-HUTA [IMIĘ I NAZWISKO].'],
+    ['ul. WILK-ŁĄKA Anna Wilk', 'ul. WILK-ŁĄKA [IMIĘ I NAZWISKO]'],
+    // faktura i inne układy: człon branżowy wystarcza, gdy pierwszy człon to nazwisko zakrytej osoby
+    [
+      'FAKTURA VAT nr 12/11/2026\nSprzedawca:\nLIS-BUD\nJadwiga Lis\nul. Polna 3, 00-001 Warszawa',
+      'FAKTURA VAT nr 12/11/2026\nSprzedawca:\n[IMIĘ I NAZWISKO]\n[IMIĘ I NAZWISKO]\n[ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]',
+    ],
+    ['Sprzedawca: LIS-BUD; właściciel: Jadwiga Lis', 'Sprzedawca: [IMIĘ I NAZWISKO]; właściciel: [IMIĘ I NAZWISKO]'],
+    ['oferta od LIS-BUD. Pozdrawiam, Jadwiga Lis', 'oferta od [IMIĘ I NAZWISKO]. Pozdrawiam, [IMIĘ I NAZWISKO]'],
+    ['do J. Lis, właścicielki LIS-BUD.', 'do [IMIĘ I NAZWISKO], właścicielki [IMIĘ I NAZWISKO].'],
+    // odmiana rozpoznanej nazwy też znika
+    [
+      'Wykonawca: Jadwiga Lis prowadząca działalność gospodarczą pod firmą LIS-BUD Jadwiga Lis z siedzibą w Radomiu. Dalej LIS-BUDU nie obciąża się. Z LIS-BUDEM umowa.',
+      'Wykonawca: [IMIĘ I NAZWISKO] prowadząca działalność gospodarczą pod firmą [IMIĘ I NAZWISKO] z siedzibą w Radomiu. Dalej [IMIĘ I NAZWISKO] nie obciąża się. Z [IMIĘ I NAZWISKO] umowa.',
+    ],
+    ['Jan Kowal prowadzi działalność pod firmą KOWAL-ZET. Dalej KOWAL-ZETU nie obciąża się.', '[IMIĘ I NAZWISKO] prowadzi działalność pod firmą [IMIĘ I NAZWISKO]. Dalej [IMIĘ I NAZWISKO] nie obciąża się.'],
+    // spółka zostaje przy każdej wzmiance, także odmienionej
+    ['Jan Nowak. NOWAK-BUD Sp. z o.o.; potem NOWAK-BUDU nic.', '[IMIĘ I NAZWISKO]. NOWAK-BUD Sp. z o.o.; potem NOWAK-BUDU nic.'],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
+  const ps = (t: string) => redactPII(t, { pseudonyms: true }).redacted;
+  expect(ps('Lekarz prowadzący: dr Tomasz Rak\nRozpoznanie: RAK-JELITA Jan Kowalski, lat 54')).toBe(
+    'Lekarz prowadzący: dr [OSOBA-A]\nRozpoznanie: RAK-JELITA [OSOBA-B], lat 54',
+  );
+  expect(ps('Anna Maj, MAJ-CZERWIEC: urlop. Jan Kowalski, MAJ-CZERWIEC: delegacja.')).toBe(
+    '[OSOBA-A], MAJ-CZERWIEC: urlop. [OSOBA-B], MAJ-CZERWIEC: delegacja.',
+  );
+});
 test('K05: tytuł sklejony z inicjałem („Dr.J.") — inicjał w masce, tytuł zostaje', () => {
   const cases: [string, string][] = [
     ['Dr.J. Kowalski zeznał.', 'Dr.[IMIĘ I NAZWISKO] zeznał.'],

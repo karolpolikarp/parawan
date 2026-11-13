@@ -263,12 +263,12 @@ npm run build -w anonimizator-web</code></pre>
             <table class="miary" role="table">
               <caption class="vh">Wyniki pomiaru skuteczności</caption>
               <tbody role="rowgroup">
-                <tr role="row"><th scope="row" role="rowheader">Wykrywalność</th><td class="m-val" role="cell">97,8%</td><td class="m-opis" role="cell">Z 697 fragmentów, które miały zniknąć, zniknęło 682.</td></tr>
-                <tr role="row"><th scope="row" role="rowheader">Trafność</th><td class="m-val" role="cell">99,9%</td><td class="m-opis" role="cell">Z 823 fragmentów, które miały zostać, zostało 822.</td></tr>
+                <tr role="row"><th scope="row" role="rowheader">Wykrywalność</th><td class="m-val" role="cell">97,9%</td><td class="m-opis" role="cell">Z 711 fragmentów, które miały zniknąć, zniknęło 696.</td></tr>
+                <tr role="row"><th scope="row" role="rowheader">Trafność</th><td class="m-val" role="cell">99,9%</td><td class="m-opis" role="cell">Z 835 fragmentów, które miały zostać, zostało 834.</td></tr>
                 <tr role="row"><th scope="row" role="rowheader">F1</th><td class="m-val" role="cell">98,9%</td><td class="m-opis" role="cell">Obie miary w jednej liczbie (średnia harmoniczna).</td></tr>
               </tbody>
             </table>
-            <p class="notka">Pomiar na deterministycznym zbiorze 524 syntetycznych zdań (rdzeń <code>anonimizator</code> 0.29.14). Dane w zbiorze są wymyślone, a trafność liczy tylko wskazane fragmenty, więc to przybliżenie. Na własnych pismach wynik może wyjść inaczej. Metodologia i wszystkie porażki: <a href="https://github.com/karolpolikarp/parawan/blob/main/docs/BENCHMARK.md" target="_blank" rel="noopener noreferrer">docs/BENCHMARK.md</a>.</p>
+            <p class="notka">Pomiar na deterministycznym zbiorze 530 syntetycznych zdań (rdzeń <code>anonimizator</code> 0.29.14). Dane w zbiorze są wymyślone, a trafność liczy tylko wskazane fragmenty, więc to przybliżenie. Na własnych pismach wynik może wyjść inaczej. Metodologia i wszystkie porażki: <a href="https://github.com/karolpolikarp/parawan/blob/main/docs/BENCHMARK.md" target="_blank" rel="noopener noreferrer">docs/BENCHMARK.md</a>.</p>
 
             <h3 class="ogr-tyt" id="ograniczenia">Ograniczenia</h3>
             <div class="sciema">
@@ -345,7 +345,7 @@ npm run build -w anonimizator-web</code></pre>
               <dt>Czy autor ma dostęp do danych</dt><dd>Nie. Autor nie otrzymuje żadnych danych i nie ma dostępu do komputerów urzędu. Czy potrzebna jest umowa powierzenia, wpis w rejestrze czynności albo ocena skutków, rozstrzyga inspektor ochrony danych.</dd>
               <dt>Co zostaje na komputerze</dt><dd>W pamięci przeglądarki (localStorage) tylko ustawienia, bez treści pism: <code class="klucz">mask-disabled</code> to typy odznaczone w „Co maskować”, <code class="klucz">pseudonyms</code> to tryb „Rozróżniaj osoby”, a <code class="klucz">motion</code> to zatrzymana animacja przykładu. Klucz <code class="klucz">adnotacja</code> z organem i osobą do adnotacji o wyłączeniu jawności powstaje tylko wtedy, gdy pracownik zaznaczy „Pamiętaj organ i osobę na tym komputerze”. Jeśli zasłanianie części danych jest wyłączone, Parawan pokazuje to przy starcie. Wynik trafia do schowka albo do pliku tylko po kliknięciu, a po zamknięciu karty tekst i wynik znikają.</dd>
               <dt>Anonimizacja czy pseudonimizacja</dt><dd>Parawan zastępuje identyfikatory znacznikami, np. <code>[PESEL]</code>. Czy wynik jest anonimowy w rozumieniu motywu 26 RODO, zależy od reszty treści (opis zdarzenia, stanowisko, nazwa małej miejscowości) i ocenia to pracownik, który czyta wynik. W trybie „Rozróżniaj osoby” wynik to dane spseudonimizowane.</dd>
-              <dt>Czego Parawan nie rozpozna</dt><dd>Nazwiska spoza słownika, gdy obok nie ma imienia ani słów Pan czy Pani, numeru w nietypowym zapisie i tekstu na skanach. Numeru działki celowo nie zasłania. W pomiarze na 524 syntetycznych zdaniach zniknęło 682 z 697 fragmentów, które miały zniknąć, i zostało 822 z 823, które miały zostać.</dd>
+              <dt>Czego Parawan nie rozpozna</dt><dd>Nazwiska spoza słownika, gdy obok nie ma imienia ani słów Pan czy Pani, numeru w nietypowym zapisie i tekstu na skanach. Numeru działki celowo nie zasłania. W pomiarze na 530 syntetycznych zdaniach zniknęło 696 z 711 fragmentów, które miały zniknąć, i zostało 834 z 835, które miały zostać.</dd>
               <dt>Czego nie obejmuje CSP pliku</dt><dd>CSP ogranicza stronę, a nie przeglądarkę. Pola z tekstem mają <code>translate="no"</code> i <code>spellcheck="false"</code>, a usługi w chmurze, które przeglądarka uruchamia sama, wyłączają zasady grupy:
                 <ul class="zasady">
                   <li>tłumaczenie strony: <code>TranslateEnabled</code> (Edge i Chrome);</li>
