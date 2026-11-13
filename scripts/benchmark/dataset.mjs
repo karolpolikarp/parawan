@@ -1109,6 +1109,27 @@ export function buildDataset() {
   neg('Wniosek dotyczący PESEL nr 2024000123 rozpatrzono. Pismo ws. PESEL nr 2024000124 przekazano. Korekta PESEL nr 1000234567 z dnia 3.11.2026.', ['2024000123', '2024000124', '1000234567']);
   str('Nr PESEL: 8909150266, PESEL nr 44051401359', ['8909150266', '44051401359'], ['Nr PESEL:', 'PESEL nr']);
 
+  // Grupa G9 (dane o zdrowiu, częste zapisy): etykieta ICD-10, rozpoznania w wierszach karty osoby,
+  // lek spoza słownika z dawką po czasowniku, dopełnienie „choruje na”, operacja, ciąża, pobyt
+  // w szpitalu psychiatrycznym, plik z końcami wierszy Windows. Ujemne: podmiot ogólny, ulotka,
+  // „przyjmuje leki” bez dawki, nawóz w gramach, protokół serwisowy z „Rozpoznanie:”.
+  str('ICD10: F32.1\nICD-10: I10\nRozpoznanie: ICD10 K21.0', ['F32.1', 'I10', 'K21.0'], ['ICD10:', 'ICD-10:', 'Rozpoznanie:']);
+  str('Pracownik leczony z powodu S82.6.', ['S82.6'], ['Pracownik leczony z powodu']);
+  str('Pacjent: Jan Nowak\nRozpoznanie:\nNiewydolność serca\nMigotanie przedsionków\nPacjent wypisany do domu', ['Jan Nowak', 'Niewydolność serca', 'Migotanie przedsionków'], ['Rozpoznanie:', 'Pacjent wypisany do domu']);
+  str('PESEL: 44051401359\nRozpoznanie:\nPrzewlekła obturacyjna choroba płuc', ['44051401359', 'Przewlekła obturacyjna choroba płuc'], ['Rozpoznanie:']);
+  str('Pracownik choruje na nadciśnienie, przyjmuje Augmentin 875 mg. Przyjmuje Lorafen 1 mg na noc.', ['nadciśnienie', 'Augmentin 875 mg', 'Lorafen 1 mg na noc'], ['Pracownik choruje na', 'przyjmuje', 'Przyjmuje']);
+  str('Zalecono syrop Mucosolvan 5 ml 3x dziennie.\nZalecenia:\nLetrox 75 µg rano na czczo', ['Mucosolvan 5 ml 3x dziennie', 'Letrox 75 µg rano na czczo'], ['Zalecono', 'Zalecenia:']);
+  str('Pacjent: Jan Nowak\r\nZalecenia przy wypisie:\r\nmesalazyna 1 g\r\ninsulina aspart\r\nperyndopryl 5 mg\r\nkontrola w poradni za 4 tygodnie', ['Jan Nowak', 'mesalazyna 1 g', 'insulina aspart', 'peryndopryl 5 mg'], ['Zalecenia przy wypisie:', 'kontrola w poradni za 4 tygodnie']);
+  str('Syn wnioskodawcy choruje na autyzm. Ubezpieczony choruje na przewlekłą obturacyjną chorobę płuc.', ['autyzm', 'przewlekłą obturacyjną chorobę płuc'], ['Syn wnioskodawcy choruje na', 'Ubezpieczony choruje na']);
+  str('Pracownik przeszedł operację kręgosłupa w marcu. Pracownik przebywał w szpitalu psychiatrycznym. Pani Nowak jest w 5. miesiącu ciąży.', ['operację kręgosłupa', 'szpitalu psychiatrycznym', '5. miesiącu ciąży'], ['w marcu', 'Pracownik przebywał w', 'jest']);
+  neg('Pacjenci, którzy chorują na astmę, mogą otrzymać refundację. Kto choruje na grypę, powinien zostać w domu.', ['astmę', 'grypę']);
+  neg('Ulotka: Augmentin 875 mg, tabletki powlekane. Dorośli: przyjmuje się 500 mg dwa razy dziennie.', ['Augmentin 875 mg', '500 mg dwa razy dziennie']);
+  neg('Pacjent przyjmuje leki w obecności pielęgniarki. Zalecono nawóz 30 g na metr kwadratowy.', ['przyjmuje leki', 'nawóz 30 g']);
+  neg('Jeżeli pracownica jest w ciąży, pracodawca nie może jej zwolnić. Pielęgniarka pracuje w szpitalu psychiatrycznym.', ['w ciąży', 'szpitalu psychiatrycznym']);
+  neg('Protokół serwisowy\nImię i nazwisko klienta: Adam Lis\nRozpoznanie:\nUszkodzenie łożyska\nZużycie paska', ['Uszkodzenie łożyska', 'Zużycie paska']);
+  neg('Program lekowy B.29 (ICD-10: G35) finansuje NFZ. Pociąg opóźniony z powodu S12 awarii. Firma przeszła operację restrukturyzacji.', ['G35', 'S12', 'operację restrukturyzacji']);
+  neg('Wiele osób choruje na cukrzycę. Co trzeci Polak choruje na nadciśnienie. Większość pacjentów przyjmuje Xyzanol 5 mg rano.', ['cukrzycę', 'nadciśnienie', 'Xyzanol 5 mg rano']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {

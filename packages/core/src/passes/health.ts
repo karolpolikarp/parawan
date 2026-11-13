@@ -38,7 +38,9 @@ const ICD_FLEX = String.raw`[A-TV-Z][ \t]?\d{2}(?:[.,]\d{1,2})?`;
 const ICD_ONLY = new RegExp(`^${ICD_FLEX}$`);
 /** Po kodzie nie może stać cyfra, litera ani „/” (sygnatura „K 12/24” to nie kod choroby). */
 const ICD_END = String.raw`(?![\d${LETTER}/]|[.,]\d)`;
-const ICD_AT_START = new RegExp(`^${ICD}${ICD_END}`);
+/** Etykieta przed kodem („ICD-10: I10”, „ICD10 F32.1”) należy do zapisu kodu. */
+const ICD_LABEL = String.raw`ICD(?:-?10)?[ \t]*:?[ \t]*`;
+const ICD_AT_START = new RegExp(`^(?:${ICD_LABEL})?${ICD}${ICD_END}`);
 /** Kod w nawiasie na końcu wiersza („Zapalenie płuc (J18.9)”), najczęstszy układ karty. */
 const ICD_PAREN_END = new RegExp(String.raw`\([ \t]*(?:ICD(?:-?10)?[ \t]*:?[ \t]*)?${ICD}(?:[ \t]*[,;][ \t]*${ICD})*[ \t]*\)[ \t.;,]*$`);
 const hasIcd = (body: string): boolean => ICD_AT_START.test(body) || ICD_PAREN_END.test(body);
@@ -52,6 +54,16 @@ const hasIcd = (body: string): boolean => ICD_AT_START.test(body) || ICD_PAREN_E
  */
 const GENERIC_SUBJECT = `(?:osob${L}|każd${L}(?:[ \\t]+[${LO}]+)?|ktoś|człowiek|ten|ta|ci|te|wszys${L}|ludzie|pacjenci|chorzy)`;
 const NOT_GENERIC_SUBJECT = `(?<!(?:${GENERIC_SUBJECT}[ \\t]*,?[ \\t]*któr${L}|kto|każd${L})[ \\t]+)`;
+/**
+ * Podmiot liczony w populacji przed czasownikiem („Wiele osób choruje na…”, „Co trzeci Polak…”,
+ * „Większość pacjentów przyjmuje…”, „Każdy chory przyjmuje…”): statystyka albo reguła, a nie
+ * konkretna osoba. „Każdego dnia przyjmuje…” nie ma rzeczownika osobowego, więc zostaje osobą.
+ */
+const RE_POPULATION_SUBJECT = new RegExp(
+  `${NOT_LETTER_BEFORE}(?:każd${L}|większoś${L}|wiel(?:e|u)|wszys${L}|niektór${L}|część|połow${L}|coraz[ \\t]+więcej|co[ \\t]+[${LO}]+[iy]|około|ok\\.|blisko|ponad|prawie|kilk${L}|\\d[\\d \\t,.%]*(?:mln|tys\\.)?)[ \\t]+(?:[${LO}]+(?:ych|ich|ej|y|a|e)[ \\t]+)?` +
+    `(?:osób|osoby|ludzi|pacjent${L}|chor(?:y|zy|ych)|Pola(?:k|ków|cy)|Polek|dzieci|kobiet${L}|mężczy(?:zn|źni)|pracowni(?:k|ków|cy)|mieszkańc${L}|seniorów|dorosłych|uczniów|ubezpieczon(?:y|ych))(?:[ \\t]+[${LETTER}]+){0,3}[ \\t]*$`,
+  'i',
+);
 
 /** Kotwica silna: zdarzenie zdrowotne konkretnej osoby albo dokument lekarski wystawiony dla niej. */
 const STRONG = [
@@ -242,8 +254,8 @@ const doseOf = (unit: string): string =>
   String.raw`${NUM}(?:[ \t]*\/[ \t]*${NUM})?[ \t]?${unit}(?:[ \t]*\/[ \t]*(?:ml|dobę|d|24[ \t]?h))?(?![${LETTER}])`;
 const DOSE = doseOf(UNIT);
 const DOSE_DRUG = doseOf(UNIT_DRUG);
-/** Pozycja dawkowania: „2 x dziennie”, „1-0-1”, „raz dziennie”, „rano”, „na noc”, „doraźnie”. */
-const DOSING_ITEM = String.raw`(?:\d[ \t]?x[ \t]?(?:dziennie|\d+|na[ \t]+dobę)|\d(?:-\d){2}|(?:raz|dwa[ \t]+razy|trzy[ \t]+razy)[ \t]+(?:dziennie|na[ \t]+dobę)|rano|wieczorem|na[ \t]+noc|dziennie|doraźnie)(?![${LETTER}])`;
+/** Pozycja dawkowania: „2 x dziennie”, „1-0-1”, „raz dziennie”, „rano”, „na noc”, „na czczo”, „co 8 godzin”, „doraźnie”. */
+const DOSING_ITEM = String.raw`(?:\d[ \t]?x[ \t]?(?:dziennie|\d+|na[ \t]+dobę)|\d(?:-\d){2}|(?:raz|dwa[ \t]+razy|trzy[ \t]+razy)[ \t]+(?:dziennie|na[ \t]+dobę)|rano|wieczorem|na[ \t]+noc|na[ \t]+czczo|co[ \t]+\d{1,2}[ \t]?(?:godzin[ay]?|h)|dziennie|doraźnie)(?![${LETTER}])`;
 // Jeden odstęp z opcjonalnym przecinkiem: dwa sąsiednie [ \t]* dawały wykładnicze cofanie na długich ciągach spacji.
 const DOSING = String.raw`(?:[ \t]*(?:,[ \t]*)?${DOSING_ITEM})*`;
 const DOSING_REQ = String.raw`(?:[ \t]*(?:,[ \t]*)?${DOSING_ITEM})+`;
@@ -290,13 +302,42 @@ const SPECIALIST =
   'dermatologa alergologa okulisty laryngologa seksuologa';
 const SPEC_RE = SPECIALIST.split(' ').join('|');
 
+type Anchor = (text: string, starts: number[], from: number, to: number, mask: string) => boolean;
+
 interface Phrase {
   re: RegExp;
   /** Czy fraza sama wskazuje osobę i nie potrzebuje kotwicy w zdaniu. */
   self?: boolean;
+  /** Własna kotwica zamiast medycznej (ciąża, pobyt w szpitalu psychiatrycznym). */
+  anchor?: Anchor;
 }
 
-const phrase = (src: string, self = false): Phrase => ({ re: new RegExp(`${NOT_LETTER_BEFORE}(?:${src})${NOT_LETTER_AFTER}`, 'gi'), self });
+const phrase = (src: string, self = false, anchor?: Anchor): Phrase => ({
+  re: new RegExp(`${NOT_LETTER_BEFORE}(?:${src})${NOT_LETTER_AFTER}`, 'gi'),
+  self,
+  anchor,
+});
+
+/** Zdanie warunkowe albo względne przed frazą („Jeżeli pracownica jest w ciąży…”, „która jest w ciąży”). */
+const RE_CONDITIONAL = new RegExp(`${NOT_LETTER_BEFORE}(?:jeżeli|jeśli|gdy|gdyby|kiedy|o[ \\t]+ile|któr${L}|kto)${NOT_LETTER_AFTER}`, 'i');
+const sentenceHead = (text: string, starts: number[], from: number): string =>
+  text.slice(Math.max(starts[sentenceIndex(starts, from)], from - SPAN), from);
+const populationSubject = (text: string, starts: number[], from: number): boolean =>
+  RE_POPULATION_SUBJECT.test(sentenceHead(text, starts, from));
+/** Kotwica medyczna albo konkretna osoba w zdaniu, ale nie w regule ogólnej ani zdaniu warunkowym. */
+const personAnchor: Anchor = (text, starts, from, to, mask) => {
+  if (medicalAnchored(text, starts, from, to, mask)) return true;
+  const sentence = sentenceAt(text, starts, from, to);
+  if (RE_CONDITIONAL.test(sentenceHead(text, starts, from)) || isGenericRule(sentence)) return false;
+  return personNear(text, sentence, from, to);
+};
+/** Personel szpitala („pielęgniarka w szpitalu psychiatrycznym”, „pracuje w…”) to miejsce pracy, a nie pobyt. */
+const RE_HOSPITAL_STAFF = new RegExp(
+  `${NOT_LETTER_BEFORE}(?:pracuj${L}|pracował${L}|zatrudni${L}|praktyk${L}|staż${L}|dyżur${L}|wolontariu${L}|lekar${L}|lekark${L}|pielęgniar${L}|ordynator${L}|kierowni${L}|dyrektor${L}|psycholog${L}|terapeut${L}|personel${L}|ratowni${L}|salow${L}|sanitariusz${L})${NOT_LETTER_AFTER}`,
+  'i',
+);
+const stayAnchor: Anchor = (text, starts, from, to, mask) =>
+  !RE_HOSPITAL_STAFF.test(sentenceHead(text, starts, from)) && personAnchor(text, starts, from, to, mask);
 
 // Frazy, które same wskazują osobę, idą pierwsze: ich maska jest kotwicą dla fraz dalej.
 const PHRASES: Phrase[] = [
@@ -334,7 +375,14 @@ const PHRASES: Phrase[] = [
     String.raw`zapaleni${L}[ \t]+(?:płuc|oskrzeli|wyrostka(?:[ \t]+robaczkowego)?|opon[ \t]+mózgowo-rdzeniowych|trzustki|wątroby|stawów|ucha|zatok|pęcherza(?:[ \t]+moczowego)?|nerek|mięśnia[ \t]+sercowego)`,
   ),
   phrase(`COVID(?:-19)?|SARS-CoV-2|koronawirus${L}`),
-  phrase(String.raw`(?<=(?:jest|była|będąc${L})[ \t]+)w[ \t]+ciąży`),
+  // „jest w ciąży”, „jest w 5. miesiącu ciąży”, „była w piątym tygodniu ciąży”
+  phrase(
+    String.raw`(?<=(?:jest|była|będąc${L})[ \t]+)w[ \t]+(?:(?:\d{1,2}\.?|[${LO}]{3,}(?:ym|im))[ \t]+(?:miesiącu|tygodniu)[ \t]+)?ciąży`,
+    false,
+    personAnchor,
+  ),
+  // pobyt w szpitalu psychiatrycznym; sam „szpital” bez przymiotnika zostaje jawny
+  phrase(String.raw`(?<=(?:w|we|do|ze|z)[ \t]+)szpital(?:u|a|em)?[ \t]+psychiatryczn(?:ym|ego|y)`, false, stayAnchor),
   phrase(
     String.raw`udar${L}[ \t]+mózgu|zawał${L}[ \t]+(?:serca|mięśnia[ \t]+sercowego)|niedoczynnoś${L}[ \t]+tarczycy|nadczynnoś${L}[ \t]+tarczycy|(?:zakażeni|zakażon)${L}[ \t]+(?:wirusem[ \t]+)?(?:HIV|HCV|HBV)|nosiciel${L}[ \t]+(?:wirusa[ \t]+)?(?:HCV|HBV|HIV)`,
   ),
@@ -419,7 +467,7 @@ function medicalAnchored(text: string, starts: number[], from: number, to: numbe
   const w = windowAt(text, starts, from, to);
   const sentence = sentenceAt(text, starts, from, to);
   if (mask !== undefined && w.includes(mask)) return true;
-  if (isGenericRule(sentence)) return false;
+  if (isGenericRule(sentence) || populationSubject(text, starts, from)) return false;
   if (RE_STRONG.test(w)) return true;
   return RE_WEAK.test(w) && personNear(text, sentence, from, to);
 }
@@ -506,10 +554,46 @@ function valueIsHealth(mode: Mode, value: string, strict: boolean, medCtx: boole
   return hasIcd(body) || medCtx;
 }
 
+/**
+ * Karta konkretnej osoby: pole „Pacjent:” wystarcza samo. PESEL, „Imię i nazwisko:” i zakryta osoba
+ * stoją też w pozwie, protokole serwisowym czy zgłoszeniu awarii („Rozpoznanie:\nSprawa o zapłatę”,
+ * „Uszkodzenie łożyska”), więc wtedy potrzebne jest słownictwo medyczne obok albo słowo choroby
+ * w samym wierszu. 2 = karta pacjenta, 1 = karta osoby, 0 = brak.
+ */
+const RE_CARD_PATIENT = /(?:^|\n)[ \t]*pacjent(?:ka)?[ \t]*:/i;
+const RE_CARD_PERSON = /(?:^|\n)[ \t]*(?:PESEL|imię[ \t]+i[ \t]+nazwisko|nazwisko[ \t]+i[ \t]+imię)(?:[ \t]+(?:pacjent|chor)\S*)?[ \t]*:/i;
+function cardSignal(ctx: RedactCtx, near: string): 0 | 1 | 2 {
+  const t = ctx.text;
+  if (RE_CARD_PATIENT.test(t)) return 2;
+  if (!(RE_CARD_PERSON.test(t) || t.includes(ctx.M.PESEL) || near.includes(ctx.M.IMIE))) return 0;
+  return hasMedVocab(near) ? 2 : 1;
+}
+/** Rdzenie słów nazw chorób w wierszu rozpoznania (bez słownika całych nazw). */
+const RE_DIAG_WORD = new RegExp(
+  `${NOT_LETTER_BEFORE}(?:chor(?:oba|oby|obę|obą|obie|ób)|zesp[oó]ł${L}|zaburzeni${L}|niewydolnoś${L}|zapaleni${L}|migotani${L}|przewlekł${L}|nadciśnieni${L}|niedokrwi${L}|miażdżyc${L}|otyłoś${L}|niedokrwistoś${L}|anemi${L}|zawał${L}|udar${L}|przepuklin${L}|kamic${L}|marskoś${L}|refluks${L}|dyskopati${L}|zwyrodnieni${L}|nerwic${L}|psychoz${L}|otępieni${L}|demencj${L}|niedoczynnoś${L}|nadczynnoś${L}|łuszczyc${L}|autyzm${L}|nowotw${L}|guz${L}|alergi${L}|astm${L}|cukrzyc${L}|depresj${L}|epizod${L})${NOT_LETTER_AFTER}`,
+  'i',
+);
+/**
+ * Wiersz rozpoznania bez kodu w karcie osoby („Niewydolność serca”, „Zaburzenia lękowe”): od wielkiej
+ * litery, najwyżej osiem wyrazów, bez cyfr, dwukropka i kropki na końcu. Wiersz opisu („Pacjent
+ * wypisany do domu”, „Stan dobry”) i podpis z imieniem i nazwiskiem to już nie rozpoznanie.
+ */
+const RE_DIAG_LINE = new RegExp(`^[${UP}][${LO}]+(?:-[${LETTER}][${LO}]+)?(?:[ \\t]+[${LETTER}][${LETTER}-]*){0,7}$`);
+const RE_DIAG_LINE_NOT = new RegExp(
+  `^(?:pacjent${L}|chor(?:y|a|ego|ej)|stan|wypis${L}|przyjęt${L}|zalecen${L}|kontrol${L}|lek|leki|badani${L}|wywiad${L}|przebieg${L}|epikryz${L}|data|podpis${L}|lekarz${L}|ordynator${L}|oddział${L}|szpital${L}|informacj${L}|skierowan${L}|wynik${L}|bez|brak${L})(?![${LETTER}])`,
+  'i',
+);
+const isCardDiagLine = (body: string): boolean =>
+  RE_DIAG_LINE.test(body) && !RE_DIAG_LINE_NOT.test(body) && !RE_NEGATIVE.test(body) && namePairAt(body) < 0;
+
 /** Rozpoznania i leki w sekcjach karty. Zalecenia nie są maskowane w całości, tylko wiersze z lekiem. */
 function maskSections(ctx: RedactCtx): void {
-  const lines = ctx.text.split('\n');
+  // Wiersze bez „\r” (plik z Windows): inaczej „$” w regułach wiersza nie trafia, a maska zjada „\r”.
+  const raw = ctx.text.split('\n');
+  const cr = raw.map((l) => l.endsWith('\r'));
+  const lines = raw.map((l, i) => (cr[i] ? l.slice(0, -1) : l));
   let mode: Mode | null = null;
+  let card: 0 | 1 | 2 = 0;
   let strict = false;
   let medCtx = false;
   const out: string[] = [];
@@ -522,6 +606,7 @@ function maskSections(ctx: RedactCtx): void {
       strict = RE_STRICT_HEAD.test(name);
       // Nagłówek wieloznaczny („Rozpoznanie:”, „Leki:”) potrzebuje słownictwa medycznego obok.
       medCtx = RE_MEDICAL_HEAD.test(name) || hasMedVocab(headerContext(lines, i));
+      card = mode === 'diag' && !strict ? cardSignal(ctx, headerContext(lines, i)) : 0;
       const value = head[3];
       const lead = /^[ \t]*/.exec(value)?.[0] ?? '';
       const rest = value.slice(lead.length);
@@ -560,7 +645,9 @@ function maskSections(ctx: RedactCtx): void {
     }
     const body = line.replace(RE_LIST_MARK, '').trim();
     const item = strict ? hasIcd(body) || hasDisease(body) : isListItem(line, mode === 'drug');
-    if (item && !RE_OTHER_LABEL.test(line) && valueIsHealth(mode, line, strict, medCtx)) {
+    const health = item && !RE_OTHER_LABEL.test(line) && valueIsHealth(mode, line, strict, medCtx);
+    const cardDiag = mode === 'diag' && card > 0 && isCardDiagLine(body) && (card === 2 || RE_DIAG_WORD.test(body));
+    if (health || cardDiag) {
       const m = RE_LIST_MARK.exec(line)?.[0] ?? (/^[ \t]*/.exec(line)?.[0] ?? '');
       const trail = /[ \t]*$/.exec(line)?.[0] ?? '';
       out.push(`${m}${ctx.hit('ZDROWIE')}${trail}`);
@@ -569,7 +656,7 @@ function maskSections(ctx: RedactCtx): void {
     mode = null;
     out.push(line);
   }
-  ctx.text = out.join('\n');
+  ctx.text = out.map((l, i) => (cr[i] ? `${l}\r` : l)).join('\n');
 }
 
 /* ── Kody ICD-10 ── */
@@ -604,6 +691,8 @@ const RE_ICD_GENERAL = new RegExp(
 );
 /** Etykieta formularza na początku wiersza („Kod choroby: F32”, „Rozpoznanie: J45.0”). */
 const RE_LINE_LABEL_BEFORE = /(?:^|\n)[ \t]*(?:[-•*][ \t]*|\d{1,2}[.)][ \t]*)?$/;
+/** „Rozpoznanie:” tuż przed etykietą ICD („Rozpoznanie: ICD10 F32.1”). */
+const RE_DIAG_LABEL_BEFORE = /rozpoznani[ea][ \t]*:[ \t]*$/i;
 /** e-ZLA: „niezdolność do pracy (kod choroby: …)” to zwolnienie konkretnej osoby. */
 const RE_SICK_LEAVE = new RegExp(`${NOT_LETTER_BEFORE}niezdolnoś${L}[ \\t]+do[ \\t]+pracy${NOT_LETTER_AFTER}`, 'i');
 
@@ -621,8 +710,11 @@ function icdAnchorOk(whole: string, starts: number[], offset: number, end: numbe
   // samo „kod”/„z kodem” (bez „choroby”); „kodem choroby” nie może cofnąć się do „kod” + „em…”
   if (/^kod(?:em|u)?(?![a-z]|[ \t]+[a-zA-Z])/i.test(a)) return RE_STRONG.test(w);
   if (/^(?:diagnoz|rozp\.)/i.test(a) && !hasMedVocab(w)) return false;
-  const label = a.endsWith(':') && RE_LINE_LABEL_BEFORE.test(whole.slice(Math.max(0, offset - 12), offset));
-  if (label && !/^ICD/.test(a)) return true;
+  const lineStart = RE_LINE_LABEL_BEFORE.test(whole.slice(Math.max(0, offset - 12), offset));
+  // Etykieta „ICD-10:”, „ICD10” na początku wiersza albo zaraz po „Rozpoznanie:” to pole karty;
+  // w zdaniu („program B.29 (ICD-10: G35)”) dalej potrzebuje osoby albo kotwicy silnej.
+  if (/^ICD/.test(a) && (lineStart || RE_DIAG_LABEL_BEFORE.test(whole.slice(Math.max(0, offset - 30), offset)))) return true;
+  if (a.endsWith(':') && lineStart && !/^ICD/.test(a)) return true;
   if (RE_STRONG.test(w) || w.includes(mask) || personNear(whole, sentenceAt(whole, starts, offset, end), offset, end)) return true;
   return /^kod/i.test(a) && RE_SICK_LEAVE.test(w);
 }
@@ -634,7 +726,19 @@ function maskIcdAnchored(ctx: RedactCtx): void {
     const masked = codes.replace(RE_ICD_CODE, (c) => (ICD_ONLY.test(c) ? ctx.hit('ZDROWIE') : c));
     return `${pre}${masked}`;
   });
+  // „leczony z powodu S82.6”: kod bez spacji po literze, przy osobie albo słowie medycznym w zdaniu
+  // („z powodu W 12 godzin opóźnienia” to nie kod).
+  const starts2 = sentenceStarts(ctx.text);
+  ctx.text = ctx.text.replace(RE_ICD_CAUSE, (m: string, pre: string, codes: string, offset: number, whole: string) => {
+    const end = offset + m.length;
+    const sentence = sentenceAt(whole, starts2, offset, end);
+    if (RE_ICD_GENERAL.test(sentence) || isGenericRule(sentence)) return m;
+    const w = windowAt(whole, starts2, offset, end);
+    if (!(RE_STRONG.test(w) || RE_WEAK.test(sentence.replace(m, ' ')) || personNear(whole, sentence, offset, end))) return m;
+    return `${pre}${codes.replace(new RegExp(ICD, 'g'), () => ctx.hit('ZDROWIE'))}`;
+  });
 }
+const RE_ICD_CAUSE = new RegExp(String.raw`(${NOT_LETTER_BEFORE}[Zz][ \t]+powodu[ \t]+)(${ICD}(?:${ICD_SEP}${ICD})*)${ICD_END}`, 'g');
 
 /** Kod w nawiasie zaraz po zamaskowanej chorobie („astma oskrzelowa (J45.0)”) wchodzi do tej maski. */
 function mergeIcdInParens(ctx: RedactCtx, mask: string): void {
@@ -680,6 +784,28 @@ const RE_GENERIC_BEFORE = new RegExp(
 );
 const genericBefore = (whole: string, offset: number): boolean => RE_GENERIC_BEFORE.test(whole.slice(Math.max(0, offset - 80), offset));
 
+/**
+ * Dopełnienie po „choruje na”, „cierpi na” (do sześciu wyrazów) i „przeszedł operację” (do czterech):
+ * nazwa choroby albo zabiegu spoza listy fraz („choruje na łuszczycę”, „przeszedł operację kręgosłupa”).
+ * Kończy je znak interpunkcji, spójnik albo przyimek („choruje na astmę od dzieciństwa”). Tylko przy
+ * konkretnej osobie w liczbie pojedynczej; podmiot ogólny („Pacjenci, którzy chorują…”, „kto choruje…”)
+ * i reguła ogólna zostają, a „cierpi na brak czasu” to nie choroba.
+ */
+const OBJ_STOP = '(?:i|oraz|a|ale|lecz|lub|albo|od|przez|w|we|z|ze|po|do|na|u|dla|co|jak|już|się|nie|bo|więc|ponieważ|któr[a-ząćęłńóśźż]*|według|mimo)';
+const OBJ_WORD = `(?!${OBJ_STOP}(?![${LETTER}]))[${LETTER}][${LETTER}-]*`;
+const OBJ_NOT = `(?!(?:to|coś|nic|wszystko|brak${L}|nią|niego|nie|tym|tę|tą|ten)(?![${LETTER}]))`;
+const RE_SUFFER = new RegExp(
+  String.raw`(${NOT_LETTER_BEFORE}${NOT_GENERIC_SUBJECT}(?:choruj(?:e|ę)|chorował(?:a|em|am)?|cierpi(?:ał|ała|ałem|ałam|ę)?)[ \t]+na[ \t]+)${OBJ_NOT}(${OBJ_WORD}(?:[ \t]+${OBJ_WORD}){0,5})(?![${LETTER}\d])`,
+  'gi',
+);
+const RE_SURGERY = new RegExp(
+  String.raw`(${NOT_LETTER_BEFORE}${NOT_GENERIC_SUBJECT}(?:przeszedł(?:em)?|przeszła(?:m)?)[ \t]+)(operacj(?:ę|e)(?:[ \t]+${OBJ_WORD}){0,4})(?![${LETTER}\d])`,
+  'gi',
+);
+/** Czasownik w pierwszej osobie („choruję”, „chorowałam”, „przeszedłem”) wskazuje autora pisma. */
+const RE_FIRST_PERSON_VERB = /(?:ę|łem|łam|szedłem|szłam)[ \t]/i;
+const RE_PATIENT_WORD = new RegExp(`${NOT_LETTER_BEFORE}pacjent(?:ka)?${NOT_LETTER_AFTER}`, 'i');
+
 /** Jeden przebieg fraz i przeciwwskazań; zwraca, czy coś zamaskował. */
 function maskPhrasesOnce(ctx: RedactCtx, mask: string): boolean {
   const before = ctx.text;
@@ -690,8 +816,21 @@ function maskPhrasesOnce(ctx: RedactCtx, mask: string): boolean {
       const whole = args[args.length - 1] as string;
       if (inProperName(whole, offset, m)) return m;
       if (!p.self && genericBefore(whole, offset)) return m;
-      if (!p.self && !medicalAnchored(whole, starts, offset, offset + m.length, mask)) return m;
+      if (p.anchor) {
+        if (!p.anchor(whole, starts, offset, offset + m.length, mask)) return m;
+      } else if (!p.self && !medicalAnchored(whole, starts, offset, offset + m.length, mask)) return m;
       return ctx.hit('ZDROWIE');
+    });
+  }
+  for (const re of [RE_SUFFER, RE_SURGERY]) {
+    const st = sentenceStarts(ctx.text);
+    ctx.text = ctx.text.replace(re, (m: string, pre: string, obj: string, offset: number, whole: string) => {
+      const from = offset + pre.length;
+      const to = from + obj.length;
+      const sentence = sentenceAt(whole, st, from, to);
+      if (isGenericRule(sentence) || populationSubject(whole, st, from)) return m;
+      const person = RE_FIRST_PERSON_VERB.test(pre) || RE_PATIENT_WORD.test(sentence) || personNear(whole, sentence, from, to);
+      return person ? `${pre}${ctx.hit('ZDROWIE')}` : m;
     });
   }
   const starts = sentenceStarts(ctx.text);
@@ -761,8 +900,53 @@ function maskDrugs(ctx: RedactCtx): void {
     if (RE_PRICE.test(sentence)) return m;
     if (RE_DRUG_EXAMPLE_BEFORE.test(whole.slice(Math.max(0, offset - 80), offset))) return m;
     if (RE_DRUG_GENERAL.test(sentence) && !hasPerson(sentence) && namePairAt(sentence) < 0) return m;
+    if (populationSubject(whole, starts, offset)) return m;
     return medicalAnchored(whole, starts, offset, to) || RE_DRUG_VERB.test(windowAt(whole, starts, offset, to)) ? ctx.hit('ZDROWIE') : m;
   });
+}
+
+/**
+ * Lek spoza słownika w zdaniu: czasownik przyjmowania albo zalecenia, 1–3 wyrazy nazwy, dawka
+ * z jednostką i ewentualnie dawkowanie („przyjmuje Augmentin 875 mg”, „Zalecono syrop Mucosolvan
+ * 5 ml 3x dziennie”, „zalecił mu Lorafen 1 mg na noc”). Samo „zalecił” bez osoby po nim bywa
+ * zaleceniem pokontrolnym, więc tu wymaga dopełnienia osobowego. „Przyjmuje się”, „stosuje się”
+ * (ulotka, instrukcja) i podmiot ogólny („kto przyjmuje…”) zostają.
+ */
+const DOSE_VERB = String.raw`${NOT_GENERIC_SUBJECT}(?:przyjmuj(?:e|ę)|przyjmował(?:a|em|am)?|zażyw(?:a|am)|zażywał(?:a|em|am)?|stosuj(?:e|ę)|stosował(?:a|em|am)?|otrzymuj(?:e|ę)|otrzymywał(?:a|em|am)?|zalecono|zalecił(?:a)?[ \t]+(?:mu|jej|mi|mnie|pacjent(?:owi|ce)|choremu|chorej|synowi|córce|dziecku|pracowni(?:kowi|cy)|wnioskodaw(?:cy|czyni)|ubezpieczon(?:emu|ej)|poszkodowan(?:emu|ej)))(?![ \t]+się)`;
+const DOSE_WORD = `(?!(?:się|w|we|z|ze|na|do|po|od|i|oraz|lub|albo|nie|co|to|jest|był|była|dawk${L}|ilości|ok|około)(?![${LETTER}]))[${LETTER}][${LETTER}-]{1,30}`;
+const RE_DOSE_SENTENCE = new RegExp(
+  String.raw`(${NOT_LETTER_BEFORE}(?:${DOSE_VERB})[ \t]+)((?:${DOSE_WORD}[ \t]+){0,2}${DOSE_WORD}${DRUG_FORM}[ \t]+(${NUM}(?:[ \t]*\/[ \t]*${NUM})?[ \t]?(${UNIT})(?:[ \t]*\/[ \t]*(?:ml|dobę|d|24[ \t]?h))?(?![${LETTER}]))(${DOSING}))`,
+  'gi',
+);
+/** Postać leku w nazwie („syrop”, „krople”): przy „g” i „ml” odróżnia lek od nawozu czy kleju. */
+const RE_DRUG_FORM_WORD = new RegExp(
+  `${NOT_LETTER_BEFORE}(?:syrop${L}|krop(?:le|li)|tabletk${L}|kapsułk${L}|zastrzyk${L}|maś(?:ć|ci)|zawiesin${L}|aerozol${L}|inhalacj${L}|wlew${L}|czopk${L}|insulin${L})${NOT_LETTER_AFTER}`,
+  'i',
+);
+const RE_HAS_UPPER = new RegExp(`[${UP}]`);
+const RE_UNIT_DRUG_ONLY = new RegExp(`^${UNIT_DRUG}$`, 'i');
+
+function maskDoseSentences(ctx: RedactCtx): void {
+  const starts = sentenceStarts(ctx.text);
+  ctx.text = ctx.text.replace(
+    RE_DOSE_SENTENCE,
+    (m: string, pre: string, drug: string, _dose: string, unit: string, tail: string, offset: number, whole: string) => {
+      const from = offset + pre.length;
+      const to = offset + m.length;
+      const sentence = sentenceAt(whole, starts, from, to);
+      if (RE_PRICE.test(sentence) || isGenericRule(sentence) || populationSubject(whole, starts, from)) return m;
+      if (RE_DRUG_EXAMPLE_BEFORE.test(whole.slice(Math.max(0, offset - 80), offset))) return m;
+      if (RE_DRUG_GENERAL.test(sentence) && !hasPerson(sentence) && namePairAt(sentence) < 0) return m;
+      // „g” i „ml” stoją też w dawkach nawozu, smaru, mleka czy diety: potrzebna postać leku („syrop”),
+      // lek ze słownika albo nazwa handlowa (wielka litera) przy słownictwie medycznym w oknie.
+      if (!RE_UNIT_DRUG_ONLY.test(unit)) {
+        const name = drug.slice(0, drug.length - tail.length);
+        const medical = RE_HAS_UPPER.test(name) && (medicalAnchored(whole, starts, from, to) || hasMedVocab(windowAt(whole, starts, from, to)));
+        if (!(RE_DRUG_FORM_WORD.test(name) || RE_DRUG_NAME.test(name) || medical)) return m;
+      }
+      return `${pre}${ctx.hit('ZDROWIE')}`;
+    },
+  );
 }
 
 export function passHealth(ctx: RedactCtx): void {
@@ -770,6 +954,7 @@ export function passHealth(ctx: RedactCtx): void {
   const mask = ctx.M.ZDROWIE;
   maskSections(ctx);
   maskDrugs(ctx);
+  maskDoseSentences(ctx);
   maskIcdAnchored(ctx);
   maskPhrases(ctx, mask);
   mergeIcdInParens(ctx, mask);

@@ -270,6 +270,9 @@ test('dane o zdrowiu: uwagi weryfikacji, korespondencja, komunikaty i protokoły
     // osoba dalej kotwiczy: list do adresata z urzędem, ale pisany w pierwszej osobie o sobie
     ['Szanowna Pani Dyrektor, informuję, że choruję na cukrzycę typu 1.', `Szanowna Pani Dyrektor, informuję, że choruję na ${Z}.`],
     ['Pacjentka leczona z powodu nowotworu złośliwego piersi.', `Pacjentka leczona z powodu ${Z}.`],
+    // imię i nazwisko tuż przed imiesłowem „leczony” to osoba (przypadek męski)
+    ['Pacjent Jan Nowak leczony z powodu cukrzycy typu 2.', `Pacjent [IMIĘ I NAZWISKO] leczony z powodu ${Z}.`],
+    ['Jan Nowak leczony z powodu astmy oskrzelowej.', `[IMIĘ I NAZWISKO] leczony z powodu ${Z}.`],
   ];
   for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
   expect(redactPII('Pacjentka Maria Kowalska, lat 40. Rozpoznanie: J45.0 Astma oskrzelowa').redacted).toBe(
@@ -380,4 +383,126 @@ test('dane o zdrowiu: reguła ogólna, populacja i słownik przy imieniu prelege
     ['Jan Kowalski ma rozpoznanie astmy oskrzelowej.', `[IMIĘ I NAZWISKO] ma rozpoznanie ${Z}.`],
   ];
   for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
+});
+
+test('dane o zdrowiu: częste zapisy (etykieta ICD-10, rozpoznania w wierszach, lek spoza słownika, „choruje na”)', () => {
+  const cases: [string, string][] = [
+    // etykieta ICD-10 na początku wiersza albo po „Rozpoznanie:”, kod po „z powodu” przy osobie
+    ['ICD10: F32.1', `ICD10: ${Z}`],
+    ['ICD-10: I10', `ICD-10: ${Z}`],
+    ['Skierowanie\nICD-10: K21.0\nlek. Jan Nowak', `Skierowanie\nICD-10: ${Z}\nlek. [IMIĘ I NAZWISKO]`],
+    ['ICD-10 J45.0', `ICD-10 ${Z}`],
+    ['Rozpoznanie: ICD10 F32.1', `Rozpoznanie: ${Z}`],
+    ['Pracownik leczony z powodu S82.6.', `Pracownik leczony z powodu ${Z}.`],
+    // rozpoznania bez kodu w kolejnych wierszach karty osoby, do wiersza opisu
+    [
+      'Pacjent: Jan Nowak\nRozpoznanie:\nNiewydolność serca\nMigotanie przedsionków\nPacjent wypisany do domu',
+      `Pacjent: [IMIĘ I NAZWISKO]\nRozpoznanie:\n${Z}\n${Z}\nPacjent wypisany do domu`,
+    ],
+    ['Pacjentka: Anna Lis\nRozpoznanie:\nZespół depresyjny\nZaburzenia lękowe\n\nStan dobry', `Pacjentka: [IMIĘ I NAZWISKO]\nRozpoznanie:\n${Z}\n${Z}\n\nStan dobry`],
+    ['PESEL: 44051401359\nRozpoznanie:\nPrzewlekła obturacyjna choroba płuc', `PESEL: [PESEL]\nRozpoznanie:\n${Z}`],
+    // lek spoza słownika z dawką i dawkowaniem po czasowniku przyjmowania lub zalecenia
+    ['Pracownik choruje na nadciśnienie, przyjmuje Augmentin 875 mg.', `Pracownik choruje na ${Z}, przyjmuje ${Z}.`],
+    ['Przyjmuje Duphaston 10 mg 2 x dziennie.', `Przyjmuje ${Z}.`],
+    ['Przyjmuje Lorafen 1 mg na noc.', `Przyjmuje ${Z}.`],
+    ['Przyjmuje Tramal 50 mg doraźnie.', `Przyjmuje ${Z}.`],
+    ['Zalecono syrop Mucosolvan 5 ml 3x dziennie.', `Zalecono ${Z}.`],
+    ['Lekarz zalecił mu Xyzanol 20 mg co 8 godzin.', `Lekarz zalecił mu ${Z}.`],
+    ['Zalecenia:\nLetrox 75 µg rano na czczo', `Zalecenia:\n${Z}`],
+    // „choruje na”, „cierpi na”, operacja, ciąża, szpital psychiatryczny przy konkretnej osobie
+    ['Syn wnioskodawcy choruje na autyzm.', `Syn wnioskodawcy choruje na ${Z}.`],
+    ['Syn wnioskodawcy choruje na łuszczycę.', `Syn wnioskodawcy choruje na ${Z}.`],
+    ['Syn wnioskodawcy choruje na chorobę dwubiegunową.', `Syn wnioskodawcy choruje na ${Z}.`],
+    ['Ubezpieczony choruje na przewlekłą obturacyjną chorobę płuc.', `Ubezpieczony choruje na ${Z}.`],
+    ['Cierpię na bezsenność i nie mogę pracować.', `Cierpię na ${Z} i nie mogę pracować.`],
+    ['Pracownik przeszedł operację kręgosłupa w marcu.', `Pracownik przeszedł ${Z} w marcu.`],
+    ['Pracownik przebywał w szpitalu psychiatrycznym.', `Pracownik przebywał w ${Z}.`],
+    ['Pani Nowak jest w 5. miesiącu ciąży.', `Pani [IMIĘ I NAZWISKO] jest ${Z}.`],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
+  const same = [
+    // podmiot ogólny, ulotka, lek bez dawki, przyjmowanie spraw w urzędzie
+    'Pacjenci, którzy chorują na astmę, mogą otrzymać refundację.',
+    'Osoba, która choruje na autyzm, ma prawo do wsparcia.',
+    'Ulotka: Augmentin 875 mg, tabletki powlekane.',
+    'Ulotka: przyjmuje się 500 mg dwa razy dziennie.',
+    'Pacjent przyjmuje leki w obecności pielęgniarki.',
+    'Kto przyjmuje Xyzanol 10 mg, powinien unikać alkoholu.',
+    'Apteka: pacjent przyjmuje Augmentin 875 mg, cena 25 zł.',
+    'Urząd przyjmuje wnioski do 30 czerwca.',
+    // „g” i „ml” w nawozie, kleju i mleku
+    'Zalecono nawóz 30 g na metr kwadratowy.',
+    'Firma stosuje klej 50 ml na metr kwadratowy.',
+    'Ogrodnik stosuje nawóz Azofoska 50 g na m2.',
+    'Dziecko otrzymuje mleko modyfikowane 150 ml 5 x dziennie.',
+    // przenośnia, firma, warunek, personel szpitala, sam pobyt w szpitalu
+    'Polska gospodarka choruje na biurokrację.',
+    'Pracownik cierpi na brak czasu.',
+    'Firma przeszła operację restrukturyzacji.',
+    'Jeżeli pracownica jest w ciąży, pracodawca nie może jej zwolnić.',
+    'Pracownica, która jest w ciąży, ma prawo do urlopu.',
+    'Pielęgniarka pracuje w szpitalu psychiatrycznym od lat.',
+    'Przebywał w szpitalu przez tydzień.',
+    // etykieta ICD w zdaniu, kod błędu po „z powodu”, protokół serwisowy z „Rozpoznanie:”
+    'Program lekowy B.29: leczenie chorych na stwardnienie rozsiane (ICD-10: G35) finansowany przez NFZ.',
+    'ICD-10: J45 oznacza astmę oskrzelową.',
+    'Pociąg opóźniony z powodu S12 awarii.',
+    'Rozpoznanie:\nAwaria sterownika\nUszkodzenie łożyska',
+  ];
+  for (const t of same) expect(redactPII(t, { types: ['ZDROWIE'] }).redacted, t).toBe(t);
+  // protokół serwisowy z polem „Imię i nazwisko” i pozew z PESEL: „Rozpoznanie:” to nie karta pacjenta
+  for (const t of [
+    'Protokół serwisowy\nImię i nazwisko klienta: Jan Nowak\nRozpoznanie:\nUszkodzenie łożyska\nZużycie paska',
+    'PESEL: 44051401359\nRozpoznanie:\nSprawa o zapłatę',
+  ])
+    expect(redactPII(t).redacted, t).not.toContain(Z);
+});
+
+test('dane o zdrowiu: plik z końcami wierszy Windows (CRLF) w sekcjach karty', () => {
+  const t = 'Pacjent: Jan Nowak\r\nRozpoznanie:\r\nK50.0 choroba Leśniowskiego-Crohna\r\nZalecenia przy wypisie:\r\nmesalazyna 1 g\r\ninsulina aspart\r\nperyndopryl 5 mg\r\nkontrola w poradni\r\nLeki:\r\nXyzanol 10 mg\r\n';
+  expect(redactPII(t).redacted).toBe(
+    `Pacjent: [IMIĘ I NAZWISKO]\r\nRozpoznanie:\r\n${Z}\r\nZalecenia przy wypisie:\r\n${Z}\r\n${Z}\r\n${Z}\r\nkontrola w poradni\r\nLeki:\r\n${Z}\r\n`,
+  );
+});
+
+test('dane o zdrowiu: końcowa weryfikacja G9, populacja przed czasownikiem i zapisy bez osoby zostają jawne', () => {
+  const same = [
+    // podmiot liczony w populacji: statystyka albo reguła, a nie konkretna osoba
+    'Wiele osób choruje na cukrzycę.',
+    'Co trzeci Polak choruje na nadciśnienie.',
+    'Około miliona Polaków choruje na łuszczycę.',
+    'Każdy chory przyjmuje Xyzanol 500 mg.',
+    'Większość pacjentów przyjmuje Xyzanol 5 mg rano.',
+    'Każdy pacjent przyjmuje Paracetamol 500 mg według ulotki.',
+    // czasownik przyjmowania bez leku, towar z wielkiej litery w kilogramach i gramach
+    'Kierownik przyjmuje interesantów 2 x dziennie.',
+    'Pacjent przyjmuje 2 x dziennie gości.',
+    'Magazyn przyjmuje Cement 25 kg codziennie.',
+    'Zalecono dostawę Kawa 500 g rano.',
+    'Pracownik stosuje Loctite 5 ml na każdą śrubę.',
+    'Spółka stosuje Ecoline 20 g na metr kwadratowy.',
+    // „Rozpoznanie:” w piśmie urzędowym albo protokole kontroli
+    'Rozpoznanie:\nWniosek zasadny\nOdmowa nieuzasadniona',
+    'Imię i nazwisko: Jan Nowak\nRozpoznanie:\nSprawa wymaga uzupełnienia\nBrak dokumentów',
+    'Rozpoznanie:\nUstalenia kontroli\nZalecenia pokontrolne',
+    // przenośnia, podmiot ogólny, instytucja, klasyfikacja
+    'Każdy, kto choruje na grypę, powinien zostać w domu.',
+    'Firma cierpi na brak rąk do pracy.',
+    'Miasto przeszło operację zmiany nazwy ulic.',
+    'Teatr przeszedł operację plastyczną fasady budynku.',
+    'Szpital psychiatryczny ogłasza przetarg na dostawę leków.',
+    'ICD-10 to klasyfikacja chorób WHO.',
+    'Pociąg opóźniony z powodu K12 przy Ruchu.',
+  ];
+  for (const t of same) expect(redactPII(t, { types: ['ZDROWIE'] }).redacted, t).toBe(t);
+  // konkretna osoba z okolicznikiem czasu albo w porównaniu dalej jest zakryta
+  const cases: [string, string][] = [
+    ['Co roku pracownik przyjmuje Xyzanol 5 mg.', `Co roku pracownik przyjmuje ${Z}.`],
+    ['Od kilku dni pracownik przyjmuje Xyzanol 5 mg rano.', `Od kilku dni pracownik przyjmuje ${Z}.`],
+    ['Od kilku lat syn choruje na łuszczycę.', `Od kilku lat syn choruje na ${Z}.`],
+    ['Wnioskodawca, jak wielu pacjentów, choruje na łuszczycę.', `Wnioskodawca, jak wielu pacjentów, choruje na ${Z}.`],
+    ['Pacjentka przyjmuje mesalazynę 1 g dwa razy dziennie.', `Pacjentka przyjmuje ${Z}.`],
+    ['Pacjent przyjmuje peryndopryl 5 mg rano.', `Pacjent przyjmuje ${Z}.`],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t, { types: ['ZDROWIE'] }).redacted, t).toBe(want);
 });

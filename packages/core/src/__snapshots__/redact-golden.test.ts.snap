@@ -199,7 +199,18 @@ ul. Lipowa 8
   "neg-226": "Po urodzeniu dziecka, w dniu 1 września 2026 r., wejdą w życie nowe przepisy. Po urodzeniu dziecka, dnia 15 stycznia 2027 r. upływa termin na zgłoszenie.",
   "neg-227": "Po urodzeniu dziecka w dniu 3 marca 2026 r. przysługuje zasiłek, a po urodzeniu córki w dniu 4.04.2026 r. kończy się okres ochronny.",
   "neg-228": "Wniosek dotyczący PESEL nr 2024000123 rozpatrzono. Pismo ws. PESEL nr 2024000124 przekazano. Korekta PESEL nr 1000234567 z dnia 3.11.2026.",
+  "neg-229": "Pacjenci, którzy chorują na astmę, mogą otrzymać refundację. Kto choruje na grypę, powinien zostać w domu.",
   "neg-23": "Mazurek wielkanocny stygł na parapecie.",
+  "neg-230": "Ulotka: Augmentin 875 mg, tabletki powlekane. Dorośli: przyjmuje się 500 mg dwa razy dziennie.",
+  "neg-231": "Pacjent przyjmuje leki w obecności pielęgniarki. Zalecono nawóz 30 g na metr kwadratowy.",
+  "neg-232": "Jeżeli pracownica jest w ciąży, pracodawca nie może jej zwolnić. Pielęgniarka pracuje w szpitalu psychiatrycznym.",
+  "neg-233": "Protokół serwisowy
+Imię i nazwisko klienta: Adam Lis
+Rozpoznanie:
+Uszkodzenie łożyska
+Zużycie paska",
+  "neg-234": "Program lekowy B.29 (ICD-10: G35) finansuje NFZ. Pociąg opóźniony z powodu S12 awarii. Firma przeszła operację restrukturyzacji.",
+  "neg-235": "Wiele osób choruje na cukrzycę. Co trzeci Polak choruje na nadciśnienie. Większość pacjentów przyjmuje Xyzanol 5 mg rano.",
   "neg-24": "Sowa hukała całą noc pod oknem.",
   "neg-25": "Kruk krukowi oka nie wykole, jak mówi przysłowie.",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
@@ -685,7 +696,31 @@ Nr wpisu: KR-1234",
 Data urodzenia dziecka — 07.08.2019",
   "str-201": "Wnoszę o zasiłek z tytułu urodzenia syna, w dniu 5.06.2026 r., w Szpitalu Wojewódzkim. W związku z urodzeniem córki w dniu 3 marca 2026 r. przysługuje mi zasiłek.",
   "str-202": "Nr PESEL: [PESEL], PESEL nr [PESEL]",
+  "str-203": "ICD10: F32.1
+ICD-10: I10
+Rozpoznanie: ICD10 K21.0",
+  "str-204": "Pracownik leczony z powodu S82.6.",
+  "str-205": "Pacjent: Jan Nowak
+Rozpoznanie:
+Niewydolność serca
+Migotanie przedsionków
+Pacjent wypisany do domu",
+  "str-206": "PESEL: [PESEL]
+Rozpoznanie:
+Przewlekła obturacyjna choroba płuc",
+  "str-207": "Pracownik choruje na nadciśnienie, przyjmuje Augmentin 875 mg. Przyjmuje Lorafen 1 mg na noc.",
+  "str-208": "Zalecono syrop Mucosolvan 5 ml 3x dziennie.
+Zalecenia:
+Letrox 75 µg rano na czczo",
+  "str-209": "Pacjent: Jan Nowak
+Zalecenia przy wypisie:
+mesalazyna 1 g
+insulina aspart
+peryndopryl 5 mg
+kontrola w poradni za 4 tygodnie",
   "str-21": "Proszę o odpowiedź na [EMAIL] w tym tygodniu.",
+  "str-210": "Syn wnioskodawcy choruje na autyzm. Ubezpieczony choruje na przewlekłą obturacyjną chorobę płuc.",
+  "str-211": "Pracownik przeszedł operację kręgosłupa w marcu. Pracownik przebywał w szpitalu psychiatrycznym. Pani Nowak jest w 5. miesiącu ciąży.",
   "str-22": "Zgłoszenia przyjmujemy pod adresem [EMAIL].",
   "str-23": "e-mail: [EMAIL] (służbowy)",
   "str-24": "Adres do doręczeń: 00-950 Warszawa, skrytka 21.",
@@ -967,7 +1002,18 @@ ul. Lipowa 8
   "neg-226": "Po urodzeniu dziecka, w dniu 1 września 2026 r., wejdą w życie nowe przepisy. Po urodzeniu dziecka, dnia 15 stycznia 2027 r. upływa termin na zgłoszenie.",
   "neg-227": "Po urodzeniu dziecka w dniu 3 marca 2026 r. przysługuje zasiłek, a po urodzeniu córki w dniu 4.04.2026 r. kończy się okres ochronny.",
   "neg-228": "Wniosek dotyczący PESEL nr 2024000123 rozpatrzono. Pismo ws. PESEL nr 2024000124 przekazano. Korekta PESEL nr 1000234567 z dnia 3.11.2026.",
+  "neg-229": "Pacjenci, którzy chorują na astmę, mogą otrzymać refundację. Kto choruje na grypę, powinien zostać w domu.",
   "neg-23": "Mazurek wielkanocny stygł na parapecie.",
+  "neg-230": "Ulotka: Augmentin 875 mg, tabletki powlekane. Dorośli: przyjmuje się 500 mg dwa razy dziennie.",
+  "neg-231": "Pacjent przyjmuje leki w obecności pielęgniarki. Zalecono nawóz 30 g na metr kwadratowy.",
+  "neg-232": "Jeżeli pracownica jest w ciąży, pracodawca nie może jej zwolnić. Pielęgniarka pracuje w szpitalu psychiatrycznym.",
+  "neg-233": "Protokół serwisowy
+Imię i nazwisko klienta: [OSOBA-A]
+Rozpoznanie:
+Uszkodzenie łożyska
+Zużycie paska",
+  "neg-234": "Program lekowy B.29 (ICD-10: G35) finansuje NFZ. Pociąg opóźniony z powodu S12 awarii. Firma przeszła operację restrukturyzacji.",
+  "neg-235": "Wiele osób choruje na cukrzycę. Co trzeci Polak choruje na nadciśnienie. Większość pacjentów przyjmuje Xyzanol 5 mg rano.",
   "neg-24": "Sowa hukała całą noc pod oknem.",
   "neg-25": "Kruk krukowi oka nie wykole, jak mówi przysłowie.",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
@@ -1451,7 +1497,31 @@ Nr wpisu: [NR-UPRAWNIEŃ]",
 Data urodzenia dziecka — [DATA-URODZENIA]",
   "str-201": "Wnoszę o zasiłek z tytułu urodzenia syna, w dniu [DATA-URODZENIA] r., w Szpitalu Wojewódzkim. W związku z urodzeniem córki w dniu [DATA-URODZENIA] r. przysługuje mi zasiłek.",
   "str-202": "Nr PESEL: [PESEL], PESEL nr [PESEL]",
+  "str-203": "ICD10: [DANE O ZDROWIU]
+ICD-10: [DANE O ZDROWIU]
+Rozpoznanie: [DANE O ZDROWIU]",
+  "str-204": "Pracownik leczony z powodu [DANE O ZDROWIU].",
+  "str-205": "Pacjent: [OSOBA-A]
+Rozpoznanie:
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+Pacjent wypisany do domu",
+  "str-206": "PESEL: [PESEL]
+Rozpoznanie:
+[DANE O ZDROWIU]",
+  "str-207": "Pracownik choruje na [DANE O ZDROWIU], przyjmuje [DANE O ZDROWIU]. Przyjmuje [DANE O ZDROWIU].",
+  "str-208": "Zalecono [DANE O ZDROWIU].
+Zalecenia:
+[DANE O ZDROWIU]",
+  "str-209": "Pacjent: [OSOBA-A]
+Zalecenia przy wypisie:
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+kontrola w poradni za 4 tygodnie",
   "str-21": "Proszę o odpowiedź na [EMAIL] w tym tygodniu.",
+  "str-210": "Syn wnioskodawcy choruje na [DANE O ZDROWIU]. Ubezpieczony choruje na [DANE O ZDROWIU].",
+  "str-211": "Pracownik przeszedł [DANE O ZDROWIU] w marcu. Pracownik przebywał w [DANE O ZDROWIU]. Pani [OSOBA-A] jest [DANE O ZDROWIU].",
   "str-22": "Zgłoszenia przyjmujemy pod adresem [EMAIL].",
   "str-23": "e-mail: [EMAIL] (służbowy)",
   "str-24": "Adres do doręczeń: [KOD-POCZTOWY] [MIEJSCOWOŚĆ], skrytka 21.",
@@ -1733,7 +1803,18 @@ ul. Lipowa 8
   "neg-226": "Po urodzeniu dziecka, w dniu 1 września 2026 r., wejdą w życie nowe przepisy. Po urodzeniu dziecka, dnia 15 stycznia 2027 r. upływa termin na zgłoszenie.",
   "neg-227": "Po urodzeniu dziecka w dniu 3 marca 2026 r. przysługuje zasiłek, a po urodzeniu córki w dniu 4.04.2026 r. kończy się okres ochronny.",
   "neg-228": "Wniosek dotyczący PESEL nr 2024000123 rozpatrzono. Pismo ws. PESEL nr 2024000124 przekazano. Korekta PESEL nr 1000234567 z dnia 3.11.2026.",
+  "neg-229": "Pacjenci, którzy chorują na astmę, mogą otrzymać refundację. Kto choruje na grypę, powinien zostać w domu.",
   "neg-23": "Mazurek wielkanocny stygł na parapecie.",
+  "neg-230": "Ulotka: Augmentin 875 mg, tabletki powlekane. Dorośli: przyjmuje się 500 mg dwa razy dziennie.",
+  "neg-231": "Pacjent przyjmuje leki w obecności pielęgniarki. Zalecono nawóz 30 g na metr kwadratowy.",
+  "neg-232": "Jeżeli pracownica jest w ciąży, pracodawca nie może jej zwolnić. Pielęgniarka pracuje w szpitalu psychiatrycznym.",
+  "neg-233": "Protokół serwisowy
+Imię i nazwisko klienta: [IMIĘ I NAZWISKO]
+Rozpoznanie:
+Uszkodzenie łożyska
+Zużycie paska",
+  "neg-234": "Program lekowy B.29 (ICD-10: G35) finansuje NFZ. Pociąg opóźniony z powodu S12 awarii. Firma przeszła operację restrukturyzacji.",
+  "neg-235": "Wiele osób choruje na cukrzycę. Co trzeci Polak choruje na nadciśnienie. Większość pacjentów przyjmuje Xyzanol 5 mg rano.",
   "neg-24": "Sowa hukała całą noc pod oknem.",
   "neg-25": "Kruk krukowi oka nie wykole, jak mówi przysłowie.",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
@@ -2217,7 +2298,31 @@ Nr wpisu: [NR-UPRAWNIEŃ]",
 Data urodzenia dziecka — [DATA-URODZENIA]",
   "str-201": "Wnoszę o zasiłek z tytułu urodzenia syna, w dniu [DATA-URODZENIA] r., w Szpitalu Wojewódzkim. W związku z urodzeniem córki w dniu [DATA-URODZENIA] r. przysługuje mi zasiłek.",
   "str-202": "Nr PESEL: [PESEL], PESEL nr [PESEL]",
+  "str-203": "ICD10: [DANE O ZDROWIU]
+ICD-10: [DANE O ZDROWIU]
+Rozpoznanie: [DANE O ZDROWIU]",
+  "str-204": "Pracownik leczony z powodu [DANE O ZDROWIU].",
+  "str-205": "Pacjent: [IMIĘ I NAZWISKO]
+Rozpoznanie:
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+Pacjent wypisany do domu",
+  "str-206": "PESEL: [PESEL]
+Rozpoznanie:
+[DANE O ZDROWIU]",
+  "str-207": "Pracownik choruje na [DANE O ZDROWIU], przyjmuje [DANE O ZDROWIU]. Przyjmuje [DANE O ZDROWIU].",
+  "str-208": "Zalecono [DANE O ZDROWIU].
+Zalecenia:
+[DANE O ZDROWIU]",
+  "str-209": "Pacjent: [IMIĘ I NAZWISKO]
+Zalecenia przy wypisie:
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+kontrola w poradni za 4 tygodnie",
   "str-21": "Proszę o odpowiedź na [EMAIL] w tym tygodniu.",
+  "str-210": "Syn wnioskodawcy choruje na [DANE O ZDROWIU]. Ubezpieczony choruje na [DANE O ZDROWIU].",
+  "str-211": "Pracownik przeszedł [DANE O ZDROWIU] w marcu. Pracownik przebywał w [DANE O ZDROWIU]. Pani [IMIĘ I NAZWISKO] jest [DANE O ZDROWIU].",
   "str-22": "Zgłoszenia przyjmujemy pod adresem [EMAIL].",
   "str-23": "e-mail: [EMAIL] (służbowy)",
   "str-24": "Adres do doręczeń: [KOD-POCZTOWY] [MIEJSCOWOŚĆ], skrytka 21.",
@@ -2548,7 +2653,18 @@ ul. Lipowa 8
   "neg-226": "Po urodzeniu dziecka, w dniu 1 września 2026 r., wejdą w życie nowe przepisy. Po urodzeniu dziecka, dnia 15 stycznia 2027 r. upływa termin na zgłoszenie.",
   "neg-227": "Po urodzeniu dziecka w dniu 3 marca 2026 r. przysługuje zasiłek, a po urodzeniu córki w dniu 4.04.2026 r. kończy się okres ochronny.",
   "neg-228": "Wniosek dotyczący PESEL nr 2024000123 rozpatrzono. Pismo ws. PESEL nr 2024000124 przekazano. Korekta PESEL nr 1000234567 z dnia 3.11.2026.",
+  "neg-229": "Pacjenci, którzy chorują na astmę, mogą otrzymać refundację. Kto choruje na grypę, powinien zostać w domu.",
   "neg-23": "Mazurek wielkanocny stygł na parapecie.",
+  "neg-230": "Ulotka: Augmentin 875 mg, tabletki powlekane. Dorośli: przyjmuje się 500 mg dwa razy dziennie.",
+  "neg-231": "Pacjent przyjmuje leki w obecności pielęgniarki. Zalecono nawóz 30 g na metr kwadratowy.",
+  "neg-232": "Jeżeli pracownica jest w ciąży, pracodawca nie może jej zwolnić. Pielęgniarka pracuje w szpitalu psychiatrycznym.",
+  "neg-233": "Protokół serwisowy
+Imię i nazwisko klienta: <<osoba>>
+Rozpoznanie:
+Uszkodzenie łożyska
+Zużycie paska",
+  "neg-234": "Program lekowy B.29 (ICD-10: G35) finansuje NFZ. Pociąg opóźniony z powodu S12 awarii. Firma przeszła operację restrukturyzacji.",
+  "neg-235": "Wiele osób choruje na cukrzycę. Co trzeci Polak choruje na nadciśnienie. Większość pacjentów przyjmuje Xyzanol 5 mg rano.",
   "neg-24": "Sowa hukała całą noc pod oknem.",
   "neg-25": "Kruk krukowi oka nie wykole, jak mówi przysłowie.",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
@@ -3032,7 +3148,31 @@ Nr wpisu: [NR-UPRAWNIEŃ]",
 Data urodzenia dziecka — <<data>>",
   "str-201": "Wnoszę o zasiłek z tytułu urodzenia syna, w dniu <<data>> r., w Szpitalu Wojewódzkim. W związku z urodzeniem córki w dniu <<data>> r. przysługuje mi zasiłek.",
   "str-202": "Nr PESEL: <<pesel>>, PESEL nr <<pesel>>",
+  "str-203": "ICD10: [DANE O ZDROWIU]
+ICD-10: [DANE O ZDROWIU]
+Rozpoznanie: [DANE O ZDROWIU]",
+  "str-204": "Pracownik leczony z powodu [DANE O ZDROWIU].",
+  "str-205": "Pacjent: <<osoba>>
+Rozpoznanie:
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+Pacjent wypisany do domu",
+  "str-206": "PESEL: <<pesel>>
+Rozpoznanie:
+[DANE O ZDROWIU]",
+  "str-207": "Pracownik choruje na [DANE O ZDROWIU], przyjmuje [DANE O ZDROWIU]. Przyjmuje [DANE O ZDROWIU].",
+  "str-208": "Zalecono [DANE O ZDROWIU].
+Zalecenia:
+[DANE O ZDROWIU]",
+  "str-209": "Pacjent: <<osoba>>
+Zalecenia przy wypisie:
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+kontrola w poradni za 4 tygodnie",
   "str-21": "Proszę o odpowiedź na [EMAIL] w tym tygodniu.",
+  "str-210": "Syn wnioskodawcy choruje na [DANE O ZDROWIU]. Ubezpieczony choruje na [DANE O ZDROWIU].",
+  "str-211": "Pracownik przeszedł [DANE O ZDROWIU] w marcu. Pracownik przebywał w [DANE O ZDROWIU]. Pani <<osoba>> jest [DANE O ZDROWIU].",
   "str-22": "Zgłoszenia przyjmujemy pod adresem [EMAIL].",
   "str-23": "e-mail: [EMAIL] (służbowy)",
   "str-24": "Adres do doręczeń: <<kod>> <<miejsce>>, skrytka 21.",
@@ -3312,7 +3452,14 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "neg-226": "",
   "neg-227": "",
   "neg-228": "",
+  "neg-229": "",
   "neg-23": "",
+  "neg-230": "",
+  "neg-231": "",
+  "neg-232": "",
+  "neg-233": "IMIE:1",
+  "neg-234": "",
+  "neg-235": "",
   "neg-24": "",
   "neg-25": "",
   "neg-26": "",
@@ -3694,7 +3841,16 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "str-200": "DATA-UR:2",
   "str-201": "DATA-UR:2",
   "str-202": "PESEL:2",
+  "str-203": "ZDROWIE:3",
+  "str-204": "ZDROWIE:1",
+  "str-205": "ZDROWIE:2 IMIE:1",
+  "str-206": "PESEL:1 ZDROWIE:1",
+  "str-207": "ZDROWIE:3",
+  "str-208": "ZDROWIE:2",
+  "str-209": "ZDROWIE:3 IMIE:1",
   "str-21": "EMAIL:1",
+  "str-210": "ZDROWIE:2",
+  "str-211": "ZDROWIE:3 IMIE:1",
   "str-22": "EMAIL:1",
   "str-23": "EMAIL:1",
   "str-24": "KOD-POCZTOWY:1 MIEJSCOWOSC:1",
@@ -3973,7 +4129,14 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "neg-226": "",
   "neg-227": "",
   "neg-228": "",
+  "neg-229": "",
   "neg-23": "",
+  "neg-230": "",
+  "neg-231": "",
+  "neg-232": "",
+  "neg-233": "IMIE:1",
+  "neg-234": "",
+  "neg-235": "",
   "neg-24": "",
   "neg-25": "",
   "neg-26": "",
@@ -4355,7 +4518,16 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "str-200": "DATA-UR:2",
   "str-201": "DATA-UR:2",
   "str-202": "PESEL:2",
+  "str-203": "ZDROWIE:3",
+  "str-204": "ZDROWIE:1",
+  "str-205": "ZDROWIE:2 IMIE:1",
+  "str-206": "PESEL:1 ZDROWIE:1",
+  "str-207": "ZDROWIE:3",
+  "str-208": "ZDROWIE:2",
+  "str-209": "ZDROWIE:3 IMIE:1",
   "str-21": "EMAIL:1",
+  "str-210": "ZDROWIE:2",
+  "str-211": "ZDROWIE:3 IMIE:1",
   "str-22": "EMAIL:1",
   "str-23": "EMAIL:1",
   "str-24": "KOD-POCZTOWY:1 MIEJSCOWOSC:1",

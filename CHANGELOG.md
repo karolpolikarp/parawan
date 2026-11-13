@@ -76,7 +76,23 @@ działają na GitHubie od chwili wypchnięcia tagów.
   brak danych.”, „b.d.”), definicja po etykiecie („Rozpoznanie: w rozumieniu art. 5 ustawy…”)
   i „Rozpoznanie E11 nie jest wymagane do refundacji”. „Lekarz zalecił mu sertralinę 50 mg” dalej
   jest zakryte. Wartość po „Rozpoznanie:” kończy się na końcu zdania i przed imieniem
-  i nazwiskiem pacjenta, który w trybie „Rozróżniaj osoby” zachowuje swoją etykietę. To dane szczególnej kategorii (art. 9 RODO), dlatego typ jest domyślnie włączony; można
+  i nazwiskiem pacjenta, który w trybie „Rozróżniaj osoby” zachowuje swoją etykietę. Zakryte są
+  też częste zapisy spoza listy chorób i leków, zawsze z kotwicą: kod po etykiecie „ICD-10:”,
+  „ICD10” na początku wiersza albo po „Rozpoznanie:” („ICD-10: K21.0”, „Rozpoznanie: ICD10
+  F32.1”), kod po „z powodu” przy osobie („leczony z powodu S82.6”), rozpoznania bez kodu
+  w kolejnych wierszach pod „Rozpoznanie:” w karcie pacjenta („Niewydolność serca⏎Migotanie
+  przedsionków”), lek spoza słownika z dawką po „przyjmuje”, „stosuje”, „zalecono” czy „zalecił
+  mu” razem z dawkowaniem („Augmentin 875 mg”, „Lorafen 1 mg na noc”, „syrop Mucosolvan 5 ml 3x
+  dziennie”, „Letrox 75 µg rano na czczo”), dopełnienie po „choruje na” i „cierpi na” („autyzm”,
+  „łuszczycę”, „chorobę dwubiegunową”), „przeszedł operację kręgosłupa”, „jest w 5. miesiącu
+  ciąży” i pobyt w szpitalu psychiatrycznym. Sekcje karty z pliku zapisanego w Windows (końce
+  wierszy CRLF) są zakrywane tak samo jak z innych plików: wcześniej leki w „Zaleceniach przy
+  wypisie” („mesalazyna 1 g”, „insulina aspart”) zostawały w nich jawne. Jawne zostają podmiot
+  ogólny („Pacjenci, którzy chorują na astmę…”), populacja liczona przed czasownikiem („Wiele osób
+  choruje na cukrzycę”, „Co trzeci Polak…”, „Większość pacjentów przyjmuje…”), ulotka („przyjmuje się 500 mg”), „przyjmuje leki”
+  bez dawki, nawóz czy klej w gramach i mililitrach, zdanie warunkowe („Jeżeli pracownica jest
+  w ciąży…”), personel szpitala psychiatrycznego, sam pobyt „w szpitalu” i „Rozpoznanie:”
+  w protokole serwisowym („Uszkodzenie łożyska”). To dane szczególnej kategorii (art. 9 RODO), dlatego typ jest domyślnie włączony; można
   go wyłączyć w panelu „Co maskować”.
 - **Trzy nowe rodzaje danych: numer uprawnień zawodowych, numer karty pobytu i numer aktu stanu
   cywilnego.** Numer prawa wykonywania zawodu („PWZ 2663347”), numer wpisu radcy prawnego albo

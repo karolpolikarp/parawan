@@ -9970,3 +9970,25 @@ test('G1 końcowa weryfikacja: zawód z kodem izby bez numeru wpisu zostaje jawn
     ['Adwokat Ewa Lis, wpisana na listę ORA w Lublinie pod nr LUB/Adw/456.', `Adwokat ${N}, wpisana na listę ORA w Lublinie pod nr ${U}.`],
   ]);
 });
+
+test('dane o zdrowiu G9: etykieta ICD-10, rozpoznania w wierszach karty, lek spoza słownika, „choruje na”, CRLF (regresja, idempotencja)', () => {
+  const Z = '[DANE O ZDROWIU]';
+  const cases: [string, string][] = [
+    ['ICD-10: K21.0', `ICD-10: ${Z}`],
+    ['Rozpoznanie: ICD10 F32.1', `Rozpoznanie: ${Z}`],
+    ['Pracownik leczony z powodu S82.6.', `Pracownik leczony z powodu ${Z}.`],
+    ['Pacjent: Jan Nowak\nRozpoznanie:\nNiewydolność serca\nMigotanie przedsionków', `Pacjent: [IMIĘ I NAZWISKO]\nRozpoznanie:\n${Z}\n${Z}`],
+    ['Przyjmuje Duphaston 10 mg 2 x dziennie.', `Przyjmuje ${Z}.`],
+    ['Syn wnioskodawcy choruje na chorobę dwubiegunową.', `Syn wnioskodawcy choruje na ${Z}.`],
+    ['Pracownik przeszedł operację kręgosłupa w marcu.', `Pracownik przeszedł ${Z} w marcu.`],
+    ['Pani Nowak jest w 5. miesiącu ciąży.', `Pani [IMIĘ I NAZWISKO] jest ${Z}.`],
+    ['Zalecenia przy wypisie:\r\nmesalazyna 1 g\r\ninsulina aspart\r\nkontrola', `Zalecenia przy wypisie:\r\n${Z}\r\n${Z}\r\nkontrola`],
+  ];
+  for (const [t, want] of cases) {
+    const once = redactPII(t).redacted;
+    expect(once, t).toBe(want);
+    expect(redactPII(once).redacted, `idempotencja: ${t}`).toBe(once);
+  }
+  for (const t of ['Pacjenci, którzy chorują na astmę, mogą otrzymać refundację.', 'Pacjent przyjmuje leki w obecności pielęgniarki.', 'Ulotka: przyjmuje się 500 mg dwa razy dziennie.'])
+    expect(redactPII(t).redacted, t).toBe(t);
+});
