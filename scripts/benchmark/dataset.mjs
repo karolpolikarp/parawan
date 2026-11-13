@@ -1130,6 +1130,12 @@ export function buildDataset() {
   neg('Program lekowy B.29 (ICD-10: G35) finansuje NFZ. Pociąg opóźniony z powodu S12 awarii. Firma przeszła operację restrukturyzacji.', ['G35', 'S12', 'operację restrukturyzacji']);
   neg('Wiele osób choruje na cukrzycę. Co trzeci Polak choruje na nadciśnienie. Większość pacjentów przyjmuje Xyzanol 5 mg rano.', ['cukrzycę', 'nadciśnienie', 'Xyzanol 5 mg rano']);
 
+  // Grupa G6 (homograf w dopełniaczu): forma imienia będąca słowem („Marka”, „Ani”) z nazwiskiem-homografem
+  // po zamaskowanej osobie i spójniku, po przyimku z dopełniaczem i po nazwie pisma; oboczność ą→ę.
+  osp('Odpis aktu małżeństwa Marty Sowy i Marka Sowy, zawartego w Krakowie.', ['Marty Sowy', 'Marka Sowy'], ['Odpis aktu małżeństwa', 'zawartego w Krakowie']);
+  osp('Pismo od Marka Sowy z 3 marca. Pozew Marka Gołębia wpłynął.', ['Marka Sowy', 'Marka Gołębia'], ['Pismo od', 'z 3 marca', 'Pozew', 'wpłynął']);
+  neg('Pismo od Marka do piątku. Gniazdo sowy i lisa w lesie. Msza w kościele pw. Najświętszej Maryi Panny.', ['Marka do piątku', 'sowy i lisa', 'Najświętszej Maryi Panny']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {

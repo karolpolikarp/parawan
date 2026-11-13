@@ -43,7 +43,7 @@ export const HOMOGRAPH_SURNAMES = wordSet(
   'kwiecień maj marzec styczeń grudzień lipiec sierpień król kowal rybak krawiec cieśla ' +
   'sołtys turek czech niemiec prus cygan góral polak socha skiba krupa paluch noga żyła ' +
   'duda bąk mróz rak ptak drozd okoń szpak pająk motyl żuk chmiel kalina jagoda gruszka ' +
-  'żak kurek sitek gajda jarosz marek bober przybysz dziedzic mroczek starosta',
+  'żak kurek sitek gajda jarosz marek bober przybysz dziedzic mroczek starosta dąb',
 );
 
 // Odmiana przymiotnikowa -ski/-cki/-dzki: przypadki zależne i żeńskie oraz liczba mnoga -scy/-ccy/-dzcy.
@@ -65,6 +65,8 @@ const NOUN_ENDINGS = ['owie', 'ował', 'owi', 'iem', 'ami', 'ach', 'em', 'om', '
 
 export const NO_E = /([^aeiouąęóy])([^aeiouąęóy])$/; // ruchome „e": kurk → kurek, wróbl → wróbel
 const RE_O_OO = /o([^aeiouąęóy]+)$/; // o → ó w temacie: mroz → mróz
+// ę → ą w temacie, także po zmiękczeniu „i” (gołębi → gołąb, dęb → dąb)
+const RE_E_A = /ę([^aeiouąęóy]+)i?$/;
 
 /**
  * Forma bazowa homografu, także odmienionego („Wróbla" → wróbel, „Sikorą" → sikora, „Mroza" → mróz),
@@ -76,7 +78,7 @@ export function homographBase(word: string): string | null {
   for (const end of NOUN_ENDINGS) {
     if (w.length - end.length < 2 || !w.endsWith(end)) continue;
     const stem = w.slice(0, -end.length);
-    for (const c of [stem, stem.replace(NO_E, '$1e$2'), `${stem}a`, stem.replace(RE_O_OO, 'ó$1')]) {
+    for (const c of [stem, stem.replace(NO_E, '$1e$2'), `${stem}a`, stem.replace(RE_O_OO, 'ó$1'), stem.replace(RE_E_A, 'ą$1')]) {
       if (HOMOGRAPH_SURNAMES.has(c)) return c;
     }
   }

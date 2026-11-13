@@ -133,7 +133,16 @@ działają na GitHubie od chwili wypchnięcia tagów.
   Nowak-Lis”). Znani patroni i kluby zostają jawni („zespół Marii Skłodowskiej-Curie”, „drużyna
   Wisły Kraków”). Przy okazji „Najświętszej Marii Panny” i „kościół Marii Panny” nie są już brane
   za imię i nazwisko, a „Wezwano Marię Pannę na rozprawę”, „W kościele Maria Panna zauważyła
-  sprawcę” i „Maria Panna, PESEL …” nadal są zakryte.
+  sprawcę” i „Maria Panna, PESEL …” nadal są zakryte. Zakryta jest też osoba, której imię
+  w dopełniaczu jest zarazem zwykłym słowem („Marka”, „Ani”, „Arka”, „Witka”), a nazwisko nazwą
+  zwierzęcia czy zawodu: w drugim członie wyliczenia za zakrytą osobą („akt małżeństwa Marty Sowy
+  i Marka Sowy”, „Marty Lis i Marka Lisa”), po „od”, „dla”, „do”, „u”, „wobec”, „według”,
+  „przeciwko” i „z udziałem” („Pismo od Marka Sowy z 3 marca”), po nazwie pisma („Pozew Marka
+  Gołębia”, „wniosek Ani Sowy”) i po „zespół”, „drużyna”, „komitet”. Wcześniej takie imię
+  i nazwisko zostawały jawne. Nazwisko „Gołąb” i „Dąb” jest rozpoznawane we wszystkich odmianach
+  („Gołębia”, „Gołębiowi”, „Gołębiem”, „Dęba”). Jawne zostają „od Marka do piątku”, „gniazdo
+  sowy i lisa”, „Marka Sowy nie znam” bez słowa przed parą i „Msza w kościele pw. Najświętszej
+  Maryi Panny”.
 - **Data urodzenia dziecka po słowie „urodzenie” jest zakryta.** W piśmie kadrowym „w związku
   z urodzeniem syna, Marka Nowaka (PESEL …), w dniu 17 czerwca 2026 r.” data zostawała jawna, bo
   między „urodzeniem” a datą stały imię, nazwisko i numer. Teraz data dostaje znacznik daty

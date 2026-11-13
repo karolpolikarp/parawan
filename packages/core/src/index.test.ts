@@ -9992,3 +9992,54 @@ test('dane o zdrowiu G9: etykieta ICD-10, rozpoznania w wierszach karty, lek spo
   for (const t of ['Pacjenci, którzy chorują na astmę, mogą otrzymać refundację.', 'Pacjent przyjmuje leki w obecności pielęgniarki.', 'Ulotka: przyjmuje się 500 mg dwa razy dziennie.'])
     expect(redactPII(t).redacted, t).toBe(t);
 });
+
+test('ewaluacja G6: forma imienia będąca słowem z nazwiskiem-homografem w dopełniaczu, oboczność ą→ę (regresja, idempotencja)', () => {
+  masked([
+    ['Akt małżeństwa Marty Sowy i Marka Sowy, zawartego w Krakowie.', `Akt małżeństwa ${N} i ${N}, zawartego w Krakowie.`],
+    ['Wniosek Marty Kowal i Marka Kowala został złożony.', `Wniosek ${N} i ${N} został złożony.`],
+    ['Wniosek Marty Lis i Marka Lisa został złożony.', `Wniosek ${N} i ${N} został złożony.`],
+    ['Pismo od Marka Sowy z 3 marca.', `Pismo od ${N} z 3 marca.`],
+    ['Pismo dla Arka Wilka.', `Pismo dla ${N}.`],
+    ['Spotkanie u Ani Lis.', `Spotkanie u ${N}.`],
+    ['Rozprawa z udziałem Ani Sowy.', `Rozprawa z udziałem ${N}.`],
+    ['Raport przygotował zespół Marka Lisa.', `Raport przygotował zespół ${N}.`],
+    ['Pozew Marka Gołębia.', `Pozew ${N}.`],
+    ['Wniosek Marka Zająca został przyjęty.', `Wniosek ${N} został przyjęty.`],
+    ['Rozmowa z Markiem Gołębiem i Janem Dębem.', `Rozmowa z ${N} i ${N}.`],
+    ['Pismo przekazano Janowi Gołębiowi.', `Pismo przekazano ${N}.`],
+    ['Pozew Jana Dęba.', `Pozew ${N}.`],
+  ]);
+  for (const t of ['Pismo od Marka Sowy z 3 marca.', 'Akt małżeństwa Marty Sowy i Marka Sowy, zawartego w Krakowie.']) {
+    const once = redactPII(t).redacted;
+    expect(redactPII(once).redacted, `idempotencja: ${t}`).toBe(once);
+  }
+  keep([
+    'Pismo od Marka do piątku.',
+    'Gniazdo sowy i lisa w lesie.',
+    'Msza w kościele pw. Najświętszej Maryi Panny.',
+    // bez kotwicy przed parą i marka w mianowniku
+    'Marka Sowy nie znam.',
+    'Sprzedaż w sklepie: Marka Sowa, cena 5 zł.',
+    // sam homograf bez imienia
+    'Dąb rośnie w parku, a gołębie siedzą na dachu.',
+    // przyimek lub pismo przed parą, ale drugi wyraz nie jest homografem w dopełniaczu
+    'Według Arka Noego legendy ludzie przetrwali.',
+    'Czytanie od Marka Ewangelii.',
+    'Mecz z udziałem Arka Gdynia.',
+    'Spotkanie u Ani w poniedziałek.',
+    'Od Witka do witki.',
+    // „ani” jako spójnik i „marka” jako słowo pospolite
+    'Ani Lis, ani Wilk nie byli winni.',
+    'Nie było ani Lisa, ani Wilka.',
+    'Wniosek dotyczący marki Sowa.',
+    // homograf w złym przypadku lub rodzaju po kotwicy
+    'Dla Ani Gołębie przyniosły list.',
+    'U Ani Wilka nie było.',
+    'Wniosek do Marka Lis.',
+    'Pozew Ani Sowa.',
+    'Od Marka Gołąb poleciał.',
+    // oboczność ą→ę bez imienia
+    'Rosną tu Dęby i Gołębie.',
+    'Gołębia Pocztowego wypuszczono od Marka.',
+  ]);
+});

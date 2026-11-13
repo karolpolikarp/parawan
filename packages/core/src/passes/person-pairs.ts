@@ -1,11 +1,11 @@
 // Imię i nazwisko z heurystyk par: małżonkowie, ciągi imion, zdrobnienia, szyk „Nazwisko Imię",
 // zapis rekordu, małe litery i nazwisko panieńskie; ochrona postaci literackich.
 import { foldAsciiChar, HOMOGRAPH_SURNAMES, homographBase, isConfirmedSurname, isGeoAdjective, looksLikeSurname, NON_SURNAME_ADJ, normalizeSurnameKey, RE_PL_DIACRITIC_G, surnameBase, surnameShaped } from '../surnames.js';
-import { CAP_WORD, LIST_BULLET, NM_BOUND, PL_LO, PL_UP } from '../charset.js';
+import { CAP_WORD, LIST_BULLET, NM_BOUND, PERSON_MASK_SRC, PL_LO, PL_UP } from '../charset.js';
 import { protectSpan, type RedactCtx } from '../context.js';
 import { FORM_LABEL_WORDS } from '../dict/forms.js';
 import { TABLE_HEADER_WORDS, TSV_NOT_SURNAME } from '../dict/headers.js';
-import { EXTRA_NAME_FORMS, FOREIGN_GIVEN_NAMES, isFirstNameGenitive, isFirstNameLike, isMaleFirstNameGenitive, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
+import { COLLIDING_NAME_FORMS, EXTRA_NAME_FORMS, FOREIGN_GIVEN_NAMES, isFirstNameGenitive, isFirstNameLike, isMaleFirstNameGenitive, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
 import { afterNonPersonContext, EPONYM_HEADS, eponymFits, precededByAdminLabel, precededByEponym, RE_STREET_WORD } from '../guards/eponyms.js';
 import { CAPS_REVERSED_HEAD_EXCL, CAPS_ROLE_OBLIQUE, capsOrgHead, cellEndsAt, cellStartsBefore, HOMOGRAPH_PAIR_EXCL, institutionLabelBefore, LIST_HEAD_NOT_SURNAME, MAIDEN_NOT_SURNAME, ORG_HEAD_WORDS, PATRON_GEN_HEADS, personSlotBefore, RE_PAST_VERB_AFTER, RE_ROLE_LABEL_BEFORE, RE_SAINT_WORD_BEFORE } from '../guards/person-context.js';
@@ -615,6 +615,53 @@ function maskNameSequences(ctx: RedactCtx): void {
   RE_NAME_SEQ.lastIndex = 0;
   ctx.text = out + src.slice(last);
 }
+// Formy imienia, które są też słowem pospolitym („Marka”, „Ani”), w parze z nazwiskiem-homografem
+// („Marka Sowy”, „Ani Lis”): żadnego z wyrazów nie da się rozpoznać osobno, więc para potrzebuje
+// kotwicy tuż przed nią (patrz collidingHomographPairAnchored).
+const RE_COLLIDING_HOMOGRAPH_PAIR = new RegExp(`(?<![${NM_BOUND}-])(Marka|Arka|Witka|Ani)[ \t]+(${CAP_WORD})(?![${NM_BOUND}])`, 'g');
+// Drugi człon wyliczenia za zamaskowaną osobą („małżeństwa [OSOBA] i Marka Sowy”).
+const RE_MASK_AND_BEFORE = new RegExp(`(?:${PERSON_MASK_SRC})[ \t]+(?:i|oraz)[ \t]+$`);
+// Przyimek rządzący dopełniaczem („Pismo od Marka Sowy”, „dla Ani Lis”, „z udziałem Marka Wilka”).
+const RE_GEN_PREP_BEFORE = /(?<!\p{L})(?:od|dla|do|u|wobec|według|przeciwko|z[ \t]+udziałem)[ \t]+$/iu;
+// Rzeczownik odczasownikowy albo nazwa pisma przed osobą w dopełniaczu („Pozew Marka Gołębia”,
+// „wniosku Ani Sowy”, „akt małżeństwa”).
+const RE_DEVERBAL_BEFORE =
+  /(?<!\p{L})(?:wnios(?:ek|ku)|poz(?:ew|wu)|pism(?:o|a)|skarg[aię]|zeznani[ae]|oświadczeni[ae]|odwołani[ae]|zażaleni[ae]|pełnomocnictw[oa]|wezwani[ae]|sprzeciw(?:u)?|apelacj[aię]|zawiadomieni[ae]|zgłoszeni[ae]|wypowiedzeni[ae]|przesłuchani[ae]|powództw[oa]|podpis(?:u)?|zgod[ay]|małżeństw[oa])[ \t]+$/iu;
+// Głowa grupy roboczej małą literą jak w peopleGroupHeadBefore („zespół Marka Lisa”).
+const RE_WORK_GROUP_BEFORE = /(?<!\p{L})(?:zespół|drużyna|komitet)[ \t]+$/u;
+/**
+ * Czy wyraz to nazwisko-homograf w dopełniaczu zgodnym z imieniem: męskim („Marka Lisa”, „Marka
+ * Sowy”, „Marka Gołębia”) albo żeńskim („Ani Sowy”, „Ani Lis”)? Dzień, miesiąc i urząd
+ * (HOMOGRAPH_PAIR_EXCL) nie są tu nazwiskiem.
+ */
+function homographGenitive(w: string, feminine: boolean): boolean {
+  const wl = w.toLowerCase();
+  const base = homographBase(wl);
+  if (!base || HOMOGRAPH_PAIR_EXCL.has(base) || isFirstNameLike(wl)) return false;
+  const aStem = base.endsWith('a');
+  if (aStem) return wl !== base && /[yi]$/.test(wl);
+  return feminine ? wl === base : wl !== base && wl.endsWith('a');
+}
+/**
+ * Czy para „Marka Sowy” to osoba? Tylko z kotwicą tuż przed nią: zamaskowana osoba i spójnik
+ * („Marty Sowy i Marka Sowy”), przyimek z dopełniaczem („od Marka Sowy”) albo rzeczownik
+ * odczasownikowy i nazwa pisma („Pozew Marka Gołębia”). Bez niej („Marka Sowy nie znam”) zostaje.
+ */
+function collidingHomographPairAnchored(t: string, offset: number, first: string, surname: string): boolean {
+  const feminine = first === 'Ani';
+  const members = surname.split('-');
+  if (!members.some((p) => homographGenitive(p, feminine))) return false;
+  if (!members.every((p) => homographGenitive(p, feminine) || surnameShaped(p.toLowerCase()))) return false;
+  const before = t.slice(Math.max(0, offset - 40), offset);
+  return RE_MASK_AND_BEFORE.test(before) || RE_GEN_PREP_BEFORE.test(before) || RE_DEVERBAL_BEFORE.test(before) || RE_WORK_GROUP_BEFORE.test(before);
+}
+function maskCollidingHomographPairs(ctx: RedactCtx): void {
+  ctx.text = ctx.text.replace(RE_COLLIDING_HOMOGRAPH_PAIR, (m, w1: string, w2: string, offset: number, t: string) => {
+    if (!COLLIDING_NAME_FORMS.has(w1.toLowerCase()) || !collidingHomographPairAnchored(t, offset, w1, w2)) return m;
+    ctx.bump('IMIE');
+    return ctx.personMask(w2);
+  });
+}
 // Zdrobnienie spoza słownika imion i potwierdzone nazwisko („[12:10] Kuba Nowak: siema"). Przed parą
 // RE_PAIR, bo ta zużywa „Napisał Kuba" i „Kowalski" zostaje sam. Nazwisko zamaskowałby też przebieg
 // samodzielny; ten krok wciąga do maski zdrobnienie.
@@ -778,6 +825,7 @@ export function passPersonPairs(ctx: RedactCtx): void {
   if (!ctx.on('IMIE')) return;
   maskSpouses(ctx);
   maskNameSequences(ctx);
+  maskCollidingHomographPairs(ctx);
   maskNicknamePairs(ctx);
   maskSuffixSurnamePairs(ctx);
   maskReversedPairs(ctx);
