@@ -10,7 +10,7 @@
     <title>Parawan: anonimizacja polskich danych osobowych offline</title>
     <meta
       name="description"
-      content="Parawan zasłania polskie dane osobowe (PESEL, NIP, numer KSeF, e-mail, adres i 23 innych typów), zanim tekst trafi do czatu AI. Jeden plik HTML, działa bez internetu."
+      content="Parawan zasłania polskie dane osobowe (PESEL, NIP, numer KSeF, e-mail, adres i 24 innych typów), zanim tekst trafi do czatu AI. Jeden plik HTML, działa bez internetu."
     />
     <link rel="canonical" href="https://parawan.karolwilczynski.com/" />
     <meta property="og:title" content="Parawan zasłania polskie dane osobowe, zanim wkleisz tekst do czatu AI" />
@@ -31,7 +31,7 @@
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "Parawan",
-        "description": "Anonimizator polskich danych osobowych w jednym pliku HTML. Rozpoznaje 28 typów danych regułami, słownikami i sumami kontrolnymi, bez modelu AI, i działa w przeglądarce bez internetu.",
+        "description": "Anonimizator polskich danych osobowych w jednym pliku HTML. Rozpoznaje 29 typów danych regułami, słownikami i sumami kontrolnymi, bez modelu AI, i działa w przeglądarce bez internetu.",
         "url": "https://parawan.karolwilczynski.com/",
         "downloadUrl": "https://github.com/karolpolikarp/parawan/releases/latest/download/Parawan.html",
         "applicationCategory": "UtilitiesApplication",
@@ -149,7 +149,7 @@
       <section class="dok" id="typy">
         <div class="wrap dok-siatka">
           <div class="dok-bok">
-            <h2>28 typów polskich danych w 5 kategoriach</h2>
+            <h2>29 typów polskich danych w 5 kategoriach</h2>
             <p>Parawan nie używa modelu AI. O każdym fragmencie rozstrzyga reguła, słownik albo suma kontrolna, więc ten sam tekst zawsze daje ten sam wynik. W pobranym pliku wybierasz, które typy zasłaniać.</p>
           </div>
           <div class="dok-tresc">
@@ -160,7 +160,7 @@
                 <tr role="row"><th scope="row" role="rowheader"><span class="tl ct-fin">Finanse · 2</span></th><td role="cell"><span class="chip-t ct-fin">IBAN / nr konta</span> <span class="chip-t ct-fin">nr karty płatniczej</span></td></tr>
                 <tr role="row"><th scope="row" role="rowheader"><span class="tl ct-contact">Kontakt · 2</span></th><td role="cell"><span class="chip-t ct-contact">e-mail</span> <span class="chip-t ct-contact">telefon</span></td></tr>
                 <tr role="row"><th scope="row" role="rowheader"><span class="tl ct-place">Adres · 3</span></th><td role="cell"><span class="chip-t ct-place">adres</span> <span class="chip-t ct-place">kod pocztowy</span> <span class="chip-t ct-place">miejscowość</span></td></tr>
-                <tr role="row"><th scope="row" role="rowheader"><span class="tl ct-person">Osoby · 2</span></th><td role="cell"><span class="chip-t ct-person">imię i nazwisko</span> <span class="chip-t ct-person">data urodzenia</span></td></tr>
+                <tr role="row"><th scope="row" role="rowheader"><span class="tl ct-person">Osoby · 3</span></th><td role="cell"><span class="chip-t ct-person">imię i nazwisko</span> <span class="chip-t ct-person">data urodzenia</span> <span class="chip-t ct-person">dane o zdrowiu</span></td></tr>
               </tbody>
             </table>
 
@@ -181,7 +181,7 @@
             <div class="metoda">
               <div class="m-opis">
                 <h3>Słowo obok numeru</h3>
-                <p>Numer paszportu łatwo pomylić z kodem produktu, a datę urodzenia ze zwykłą datą. Te i kilka innych typów Parawan zasłania, gdy obok stoi słowo, które je zapowiada: „paszport”, „KRS”, „prawo jazdy”, „nr rej.”, „Login:”, „ur.”. Tak samo numer uprawnień zawodowych po „PWZ” albo „radca prawny”, numer karty pobytu po „karta pobytu” i numer aktu stanu cywilnego po „akt małżeństwa nr”. Znak sprawy rozpoznaje po „sygn.” lub „Sygn. akt” przed numerem albo po urzędowym układzie, np. <span class="nw">OR-II.1431.12.2024</span>.</p>
+                <p>Numer paszportu łatwo pomylić z kodem produktu, a datę urodzenia ze zwykłą datą. Te i kilka innych typów Parawan zasłania, gdy obok stoi słowo, które je zapowiada: „paszport”, „KRS”, „prawo jazdy”, „nr rej.”, „Login:”, „ur.”. Tak samo numer uprawnień zawodowych po „PWZ” albo „radca prawny”, numer karty pobytu po „karta pobytu” i numer aktu stanu cywilnego po „akt małżeństwa nr”. Dane o zdrowiu zasłania po „Rozpoznanie:” i „Leki:” w karcie, kod ICD-10 po „rozpoznanie” albo „ICD-10”, lek z dawką, a nazwę choroby czy urazu tylko wtedy, gdy obok stoi zaświadczenie lekarskie, leczenie albo podobne słowo. Znak sprawy rozpoznaje po „sygn.” lub „Sygn. akt” przed numerem albo po urzędowym układzie, np. <span class="nw">OR-II.1431.12.2024</span>.</p>
               </div>
               <div class="para">
                 <dl>
@@ -263,12 +263,12 @@ npm run build -w anonimizator-web</code></pre>
             <table class="miary" role="table">
               <caption class="vh">Wyniki pomiaru skuteczności</caption>
               <tbody role="rowgroup">
-                <tr role="row"><th scope="row" role="rowheader">Wykrywalność</th><td class="m-val" role="cell">98,0%</td><td class="m-opis" role="cell">Z 737 fragmentów, które miały zniknąć, zniknęło 722.</td></tr>
-                <tr role="row"><th scope="row" role="rowheader">Trafność</th><td class="m-val" role="cell">99,9%</td><td class="m-opis" role="cell">Z 879 fragmentów, które miały zostać, zostało 878.</td></tr>
+                <tr role="row"><th scope="row" role="rowheader">Wykrywalność</th><td class="m-val" role="cell">98,0%</td><td class="m-opis" role="cell">Z 751 fragmentów, które miały zniknąć, zniknęło 736.</td></tr>
+                <tr role="row"><th scope="row" role="rowheader">Trafność</th><td class="m-val" role="cell">99,9%</td><td class="m-opis" role="cell">Z 902 fragmentów, które miały zostać, zostało 901.</td></tr>
                 <tr role="row"><th scope="row" role="rowheader">F1</th><td class="m-val" role="cell">98,9%</td><td class="m-opis" role="cell">Obie miary w jednej liczbie (średnia harmoniczna).</td></tr>
               </tbody>
             </table>
-            <p class="notka">Pomiar na deterministycznym zbiorze 554 syntetycznych zdań (rdzeń <code>anonimizator</code> 0.29.14). Dane w zbiorze są wymyślone, a trafność liczy tylko wskazane fragmenty, więc to przybliżenie. Na własnych pismach wynik może wyjść inaczej. Metodologia i wszystkie porażki: <a href="https://github.com/karolpolikarp/parawan/blob/main/docs/BENCHMARK.md" target="_blank" rel="noopener noreferrer">docs/BENCHMARK.md</a>.</p>
+            <p class="notka">Pomiar na deterministycznym zbiorze 563 syntetycznych zdań (rdzeń <code>anonimizator</code> 0.29.14). Dane w zbiorze są wymyślone, a trafność liczy tylko wskazane fragmenty, więc to przybliżenie. Na własnych pismach wynik może wyjść inaczej. Metodologia i wszystkie porażki: <a href="https://github.com/karolpolikarp/parawan/blob/main/docs/BENCHMARK.md" target="_blank" rel="noopener noreferrer">docs/BENCHMARK.md</a>.</p>
 
             <h3 class="ogr-tyt" id="ograniczenia">Ograniczenia</h3>
             <div class="sciema">
@@ -345,7 +345,7 @@ npm run build -w anonimizator-web</code></pre>
               <dt>Czy autor ma dostęp do danych</dt><dd>Nie. Autor nie otrzymuje żadnych danych i nie ma dostępu do komputerów urzędu. Czy potrzebna jest umowa powierzenia, wpis w rejestrze czynności albo ocena skutków, rozstrzyga inspektor ochrony danych.</dd>
               <dt>Co zostaje na komputerze</dt><dd>W pamięci przeglądarki (localStorage) tylko ustawienia, bez treści pism: <code class="klucz">mask-disabled</code> to typy odznaczone w „Co maskować”, <code class="klucz">pseudonyms</code> to tryb „Rozróżniaj osoby”, a <code class="klucz">motion</code> to zatrzymana animacja przykładu. Klucz <code class="klucz">adnotacja</code> z organem i osobą do adnotacji o wyłączeniu jawności powstaje tylko wtedy, gdy pracownik zaznaczy „Pamiętaj organ i osobę na tym komputerze”. Jeśli zasłanianie części danych jest wyłączone, Parawan pokazuje to przy starcie. Wynik trafia do schowka albo do pliku tylko po kliknięciu, a po zamknięciu karty tekst i wynik znikają.</dd>
               <dt>Anonimizacja czy pseudonimizacja</dt><dd>Parawan zastępuje identyfikatory znacznikami, np. <code>[PESEL]</code>. Czy wynik jest anonimowy w rozumieniu motywu 26 RODO, zależy od reszty treści (opis zdarzenia, stanowisko, nazwa małej miejscowości) i ocenia to pracownik, który czyta wynik. W trybie „Rozróżniaj osoby” wynik to dane spseudonimizowane.</dd>
-              <dt>Czego Parawan nie rozpozna</dt><dd>Nazwiska spoza słownika, gdy obok nie ma imienia ani słów Pan czy Pani, numeru w nietypowym zapisie i tekstu na skanach. Numeru działki celowo nie zasłania. W pomiarze na 554 syntetycznych zdaniach zniknęło 722 z 737 fragmentów, które miały zniknąć, i zostało 878 z 879, które miały zostać.</dd>
+              <dt>Czego Parawan nie rozpozna</dt><dd>Nazwiska spoza słownika, gdy obok nie ma imienia ani słów Pan czy Pani, numeru w nietypowym zapisie i tekstu na skanach. Numeru działki celowo nie zasłania. W pomiarze na 563 syntetycznych zdaniach zniknęło 736 z 751 fragmentów, które miały zniknąć, i zostało 901 z 902, które miały zostać.</dd>
               <dt>Czego nie obejmuje CSP pliku</dt><dd>CSP ogranicza stronę, a nie przeglądarkę. Pola z tekstem mają <code>translate="no"</code> i <code>spellcheck="false"</code>, a usługi w chmurze, które przeglądarka uruchamia sama, wyłączają zasady grupy:
                 <ul class="zasady">
                   <li>tłumaczenie strony: <code>TranslateEnabled</code> (Edge i Chrome);</li>

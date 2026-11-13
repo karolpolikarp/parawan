@@ -177,6 +177,7 @@ rozpoznaje charakterystyczny zapis (kolumna „Metoda”).
 | 📍 Adres | ul./al./os./pl. + nazwa + numer (też „3 Maja”, „gen./ks./św.”); bez „ul.” po etykiecie zamieszkania („Adres zamieszkania: Lipowa 14/3”) | `[ADRES]` |
 | 📍 Miejscowość | w adresie i przy zamieszkaniu; **nie** w prozie/instytucji | `[MIEJSCOWOŚĆ]` |
 | 🟣 Imię i nazwisko | słownik imion + nazwisk (z odmianą), **morfologia** (-ski/-cki/-icz/-czyk), kolejność odwrócona, wyzwalacze kontekstu | `[IMIĘ I NAZWISKO]` |
+| 🟣 Dane o zdrowiu | zawsze z kotwicą: wartość po „Rozpoznanie:”, „Leki:” i wiersz z lekiem w zaleceniach karty; kod ICD-10 po „rozpoznanie”, „ICD-10”, „kod choroby” (`I10` bez kotwicy zostaje); lek ze słownika z dawką (`sertralina 50 mg`) przy „zalecił”, „przyjmuje” itp.; choroba, uraz z częścią ciała, zabieg, wizyta u specjalisty tylko przy kotwicy medycznej w zdaniu albo w zdaniu obok („zaświadczenie lekarskie”, „leczenie”, „rozpoznano”, „doznał”); „nadużywa alkoholu” zawsze | `[DANE O ZDROWIU]` |
 | 🧩 Pola formularza / XML / JSON | „Nazwisko:”, tag `<Surname>`, klucz `"lastName"` jako kotwica, maskowana sama wartość, struktura zostaje | wg typu |
 | 🔎 Błędy OCR | homoglify 0→O / 1→l walidowane słownikiem („J0AN K0WALSKI”, „uI. Lip0wa 15”) | wg typu |
 

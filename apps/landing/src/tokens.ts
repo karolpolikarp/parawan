@@ -41,6 +41,7 @@ export const TYPE_MASK: Record<PiiType, { token: string; cat: Cat }> = {
   MIEJSCOWOSC: { token: 'MIEJSCOWOŚĆ', cat: 'place' },
   IMIE: { token: 'IMIĘ I NAZWISKO', cat: 'person' },
   'DATA-UR': { token: 'DATA-URODZENIA', cat: 'person' },
+  ZDROWIE: { token: 'DANE O ZDROWIU', cat: 'person' },
 };
 
 const TOKEN_CAT = new Map(Object.values(TYPE_MASK).map((m) => [m.token, m.cat]));

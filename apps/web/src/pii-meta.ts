@@ -62,6 +62,7 @@ export const PII_TOKENS: Record<string, TokenMeta> = {
   // Osoby
   'IMIĘ I NAZWISKO': { cat: 'person', icon: 'dane-osobowe', tip: 'słownik imion/nazwisk lub wyzwalacz kontekstu' },
   'DATA-URODZENIA': { cat: 'person', icon: 'kalendarz', tip: 'data z kontekstem „ur./urodzony”' },
+  'DANE O ZDROWIU': { cat: 'person', icon: 'dane-osobowe', tip: 'rozpoznanie, kod ICD-10 albo lek z dawką w karcie; choroba lub uraz tylko przy kotwicy medycznej' },
   // Znacznik ręczny (corrections.ts), nie typ rdzenia: nie ma przełącznika ani wiersza „Co wykrywa”.
   DANE: { cat: 'ident', icon: 'dane-id', tip: 'fragment zasłonięty ręcznie albo z listy' },
 };
@@ -100,6 +101,7 @@ export function maskTip(name: string): string {
 export const GENITIVE_LABEL: Record<string, readonly [string, string]> = {
   'IMIĘ I NAZWISKO': ['imienia i nazwiska', 'imion i nazwisk'],
   'DATA-URODZENIA': ['daty urodzenia', 'dat urodzenia'],
+  'DANE O ZDROWIU': ['danej o zdrowiu', 'danych o zdrowiu'],
   ADRES: ['adresu', 'adresów'],
   'KOD-POCZTOWY': ['kodu pocztowego', 'kodów pocztowych'],
   'MIEJSCOWOŚĆ': ['nazwy miejscowości', 'nazw miejscowości'],
@@ -174,6 +176,7 @@ export const MASK_GROUP_DEFS: MaskGroupDef[] = [
   { key: 'miejscowosc', label: 'Miejscowość', types: ['MIEJSCOWOSC'], code: '[MIEJSCOWOŚĆ]', tip: 'Miejscowość przy adresie (przed nim lub po nim), po kodzie pocztowym albo przy zamieszkaniu lub urodzeniu; nie w zwykłym tekście' },
   { key: 'imie', label: 'Imię i nazwisko', types: ['IMIE'], code: '[IMIĘ I NAZWISKO]', tip: 'Słownik imion i nazwisk z odmianą, morfologia (-ski/-cki/-icz/-czyk) i wyzwalacze kontekstu; wykrywanie heurystyczne' },
   { key: 'dataur', label: 'Data urodzenia', types: ['DATA-UR'], code: '[DATA-URODZENIA]', tip: 'Data z kontekstem „ur./urodzony”' },
+  { key: 'zdrowie', label: 'Dane o zdrowiu', types: ['ZDROWIE'], code: '[DANE O ZDROWIU]', tip: 'Dane szczególnej kategorii (art. 9 RODO), zawsze z kotwicą: wartość po „Rozpoznanie:” i „Leki:”, lek z dawką w zaleceniach karty, kod ICD-10 po „rozpoznanie” lub „ICD-10”, lek z dawką przy „zalecił” lub „przyjmuje”, a choroba, uraz, zabieg czy wizyta u specjalisty tylko obok słów „zaświadczenie lekarskie”, „leczenie”, „rozpoznano”, „doznał” i podobnych; „nadużywa alkoholu” zawsze' },
 ];
 
 /** Token wewnątrz [...] z kodu znacznika, np. „[NR-KONTA]” → „NR-KONTA”. */
@@ -229,6 +232,7 @@ export const WYKRYWA_ROWS: Array<{ code: string; how: string }> = [
   { code: '[KOD-POCZTOWY]', how: 'XX-XXX' },
   { code: '[MIEJSCOWOŚĆ]', how: 'miejscowość przy adresie, po kodzie pocztowym albo przy zamieszkaniu lub urodzeniu (nie w zwykłym tekście ani w nazwie instytucji)' },
   { code: '[DATA-URODZENIA]', how: 'data z kontekstem „ur./urodzony”' },
+  { code: '[DANE O ZDROWIU]', how: 'wartość po „Rozpoznanie:” i „Leki:” w karcie, kod ICD-10 po „rozpoznanie” lub „ICD-10”, lek z dawką (<code>sertralina 50 mg</code>); choroba lub uraz tylko przy <strong>kotwicy medycznej</strong> w zdaniu albo w zdaniu obok' },
   { code: '[IMIĘ I NAZWISKO]', how: 'słownik imion i nazwisk (z odmianą), morfologia (-ski/-cki/-icz/-czyk), wyzwalacze („nazywam się”, „Pan/Pani”)' },
 ];
 
@@ -267,6 +271,7 @@ const CHIP_LABELS: Record<PiiType, string> = {
   'KOD-POCZTOWY': 'kod pocztowy',
   MIEJSCOWOSC: 'miejscowość',
   'DATA-UR': 'data urodzenia',
+  ZDROWIE: 'dane o zdrowiu',
 };
 
 export interface ChipMeta {

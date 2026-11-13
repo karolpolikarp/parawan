@@ -12,6 +12,35 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+- **Nowy rodzaj danych: dane o zdrowiu.** Rozpoznania, kody chorób, leki, urazy i nałogi
+  zostawały jawne w kartach informacyjnych ze szpitala, pismach kadrowych, pozwach i zgłoszeniach
+  szkody. Teraz dostają znacznik `[DANE O ZDROWIU]`, zawsze tylko wtedy, gdy tekst mówi o konkretnej
+  osobie: wartość po „Rozpoznanie:”, „Choroby współistniejące:” i „Leki:” oraz wiersz z lekiem
+  w „Zaleceniach” karty, kod choroby ICD-10 po „rozpoznanie” albo „kod choroby” („F32.1”, „F 32.1”),
+  kod przy „L4”, lek z dawką („sertralina 50 mg”, „Concor 5 raz dziennie”, „salbutamol doraźnie”)
+  przy „zalecił”, „przyjmuje” i podobnych słowach. Nazwa choroby, uraz („stłuczenie klatki
+  piersiowej”, „złamał nogę w kostce”), zabieg, chemioterapia, ciąża, rehabilitacja, wizyta
+  u psychiatry i przeciwwskazanie lekarskie są zakryte przy zaświadczeniu lekarskim, zwolnieniu
+  lekarskim, „choruje”, „doznał” albo przy słowie „leczenie” czy „pacjentka”, jeśli obok stoi
+  osoba („Pani”, „pracownik”, „pozwany”, „doznałem”). „Pozwany nadużywa alkoholu” jest zakryte
+  zawsze. Jawne zostają teksty ogólne bez konkretnej osoby: poradnik dla pracodawcy, przepis
+  („osoba uzależniona od alkoholu… wymaga leczenia”), ogólne warunki ubezpieczenia, przetarg na
+  glukometry, program lekowy NFZ, regulamin oddziału, raport („leczenie nowotworów w Polsce”),
+  a także faktura i cennik apteki, ulotka, lista refundacyjna, wykaz kosztów („Leki: 450,00 zł”),
+  odpowiedź „nie” w ankiecie, kod błędu pralki czy kotła („Diagnoza: F28 – brak zapłonu”),
+  sygnatura („po rozpoznaniu K 12/24”), „depresja terenu”, „depresja gospodarcza”, szkoda
+  w budynku („pęknięcia klatki schodowej”, „pęknięcie kostki brukowej”), „I10” bez słowa obok
+  (sala, formularz), „lek.” przed nazwiskiem lekarza, nazwa instytucji („Centrum Leczenia
+  Stwardnienia Rozsianego”), „rozpoznanie sprawy” i „Rozpoznanie: atak phishingowy”. Nazwisko
+  w nazwie choroby („choroba Leśniowskiego-Crohna”) znika razem z chorobą, a nie jako osoba,
+  a patron szpitala zostaje. Jawne zostają też list przewodni z ofertą programu leczenia, komunikat
+  poradni o przyjmowaniu pacjentów z cukrzycą, pandemia COVID-19 w sprawozdaniu finansowym,
+  tytuł ustawy o przeciwdziałaniu alkoholizmowi, „depresja na rynku nieruchomości” oraz protokół
+  budowlany i techniczny („pęknięcie stopy słupa”, „nadciśnienie w przewodzie”). Kod choroby
+  z opisem („J45.0 Astma oskrzelowa”) znika razem z opisem, rozpoznanie z kodem w nawiasie
+  w kolejnym wierszu karty też, a uraz ze stroną ciała („złamanie prawej nogi”) w całości. Procedura „Niebieskiej Karty” nie jest daną o zdrowiu i dalej zostaje
+  jawna. To dane szczególnej kategorii (art. 9 RODO), dlatego typ jest domyślnie włączony; można
+  go wyłączyć w panelu „Co maskować”.
 - **Trzy nowe rodzaje danych: numer uprawnień zawodowych, numer karty pobytu i numer aktu stanu
   cywilnego.** Numer prawa wykonywania zawodu („PWZ 2663347”), numer wpisu radcy prawnego albo
   adwokata w podpisie („radca prawny, WA-3516”, „radcę prawnego Jana Nowaka (KR-4222)”), numer

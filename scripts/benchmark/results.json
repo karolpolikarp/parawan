@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-11-13T12:24:00.427Z",
+  "generatedAt": "2026-11-13T13:16:32.368Z",
   "seed": 20260704,
   "coreVersion": "0.29.14",
-  "casesTotal": 554,
-  "mustMaskTotal": 737,
-  "mustKeepTotal": 879,
+  "casesTotal": 563,
+  "mustMaskTotal": 751,
+  "mustKeepTotal": 902,
   "skippedLayers": [
     {
       "name": "core+spacy",
@@ -26,16 +26,16 @@
     {
       "name": "T0+T1 core",
       "desc": "redactPII(): regex, sumy kontrolne i słownik (in-process, offline)",
-      "elapsedMs": 404,
+      "elapsedMs": 418,
       "changedVsCore": null,
-      "recall": 0.9796472184531886,
-      "precision": 0.9988623435722411,
-      "f1": 0.9891614731408634,
+      "recall": 0.9800266311584553,
+      "precision": 0.9988913525498891,
+      "f1": 0.9893690746074479,
       "agg": {
-        "maskTotal": 737,
-        "maskHit": 722,
-        "keepTotal": 879,
-        "keepHit": 878
+        "maskTotal": 751,
+        "maskHit": 736,
+        "keepTotal": 902,
+        "keepHit": 901
       },
       "perCategory": {
         "osoby-podstawowe": {
@@ -69,19 +69,19 @@
           "recall": 1,
           "precision": 1,
           "f1": 1,
-          "maskTotal": 373,
-          "maskHit": 373,
-          "keepTotal": 259,
-          "keepHit": 259
+          "maskTotal": 387,
+          "maskHit": 387,
+          "keepTotal": 271,
+          "keepHit": 271
         },
         "negatywy": {
           "recall": null,
-          "precision": 0.9973190348525469,
+          "precision": 0.9973958333333334,
           "f1": null,
           "maskTotal": 0,
           "maskHit": 0,
-          "keepTotal": 373,
-          "keepHit": 372
+          "keepTotal": 384,
+          "keepHit": 383
         },
         "osoby-rzadkie-ner": {
           "recall": 0.21052631578947367,
@@ -3064,6 +3064,51 @@
         },
         {
           "id": "neg-194",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-179",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-180",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-181",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-182",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-183",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-195",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-196",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-197",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-198",
           "leaked": [],
           "eaten": []
         }

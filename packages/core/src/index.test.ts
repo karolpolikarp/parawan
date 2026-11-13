@@ -15,6 +15,10 @@ import {
 import { HISTORIC_SURNAMES_GEN, historicSurnameGenitive } from './passes/person-caps-ocr';
 import { MASK, type PiiType } from './types';
 
+// Wszystkie typy oprócz danych o zdrowiu: dla testów reguł osób i formularzy na tekstach z nazwą
+// choroby, którą przy ustawieniach domyślnych zakrywa maska [DANE O ZDROWIU].
+const BEZ_ZDROWIA = { types: (Object.keys(MASK) as PiiType[]).filter((t) => t !== 'ZDROWIE') };
+
 // Buduje poprawny IBAN z kodu kraju + BBAN (liczymy cyfry kontrolne mod 97),
 // żeby test nie zależał od zapamiętanego wektora.
 function makeIban(country: string, bban: string): string {
@@ -742,7 +746,9 @@ test('nagłówek pola nad prozą NIE zjada zdania', () => {
 });
 
 test('puste pole formularza NIE przejmuje następnej etykiety/nagłówka', () => {
-  expect(redactPII('Nazwisko:\nRozpoznanie\nastma').redacted).toBe('Nazwisko:\nRozpoznanie\nastma');
+  expect(redactPII('Nazwisko:\nRozpoznanie\nastma', BEZ_ZDROWIA).redacted).toBe('Nazwisko:\nRozpoznanie\nastma');
+  // z danymi o zdrowiu nazwisko dalej nie przejmuje nagłówka, a choroba po „Rozpoznanie” znika
+  expect(redactPII('Nazwisko:\nRozpoznanie\nastma').redacted).toBe('Nazwisko:\nRozpoznanie\n[DANE O ZDROWIU]');
   expect(redactPII('Miejsce urodzenia:\nOddział Kardiologiczny').redacted).toBe(
     'Miejsce urodzenia:\nOddział Kardiologiczny',
   );
@@ -764,9 +770,11 @@ test('para „rzeczownik/rola + nazwisko" zostawia rzeczownik, maskuje nazwisko'
 });
 
 test('eponimy medyczne i nazwy ulic (sufiks -ski) NIE są maskowane jako osoby', () => {
-  expect(redactPII('Zdiagnozowano chorobę Leśniowskiego-Crohna.').redacted).toBe(
+  expect(redactPII('Zdiagnozowano chorobę Leśniowskiego-Crohna.', BEZ_ZDROWIA).redacted).toBe(
     'Zdiagnozowano chorobę Leśniowskiego-Crohna.',
   );
+  // z danymi o zdrowiu eponim znika jako choroba, nie jako osoba
+  expect(redactPII('Zdiagnozowano chorobę Leśniowskiego-Crohna.').redacted).toBe('Zdiagnozowano [DANE O ZDROWIU].');
   expect(redactPII('Dodatni objaw Babińskiego.').redacted).toBe('Dodatni objaw Babińskiego.');
   expect(redactPII('Mieszka przy ulica Puławska.').redacted).toBe('Mieszka przy ulica Puławska.');
   // kontrola: prawdziwe nazwisko w odmianie nadal łapane
@@ -2549,8 +2557,12 @@ test('firma jednoosobowa: zapis wersalikami bez kotwicy i bez członu branżoweg
   ];
   for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
   const ps = (t: string) => redactPII(t, { pseudonyms: true }).redacted;
+  expect(
+    redactPII('Lekarz prowadzący: dr Tomasz Rak\nRozpoznanie: RAK-JELITA Jan Kowalski, lat 54', { ...BEZ_ZDROWIA, pseudonyms: true }).redacted,
+  ).toBe('Lekarz prowadzący: dr [OSOBA-A]\nRozpoznanie: RAK-JELITA [OSOBA-B], lat 54');
+  // z danymi o zdrowiu wartość po „Rozpoznanie:” znika do końca wiersza, lekarz zostaje osobą
   expect(ps('Lekarz prowadzący: dr Tomasz Rak\nRozpoznanie: RAK-JELITA Jan Kowalski, lat 54')).toBe(
-    'Lekarz prowadzący: dr [OSOBA-A]\nRozpoznanie: RAK-JELITA [OSOBA-B], lat 54',
+    'Lekarz prowadzący: dr [OSOBA-A]\nRozpoznanie: [DANE O ZDROWIU]',
   );
   expect(ps('Anna Maj, MAJ-CZERWIEC: urlop. Jan Kowalski, MAJ-CZERWIEC: delegacja.')).toBe(
     '[OSOBA-A], MAJ-CZERWIEC: urlop. [OSOBA-B], MAJ-CZERWIEC: delegacja.',

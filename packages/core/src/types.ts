@@ -27,6 +27,7 @@ export type PiiType =
   | 'ZNAK-SPRAWY'
   | 'KOD-POCZTOWY'
   | 'DATA-UR'
+  | 'ZDROWIE'
   | 'ADRES'
   | 'MIEJSCOWOSC'
   | 'IMIE';
@@ -90,6 +91,7 @@ export const MASK: Record<PiiType, string> = {
   'ZNAK-SPRAWY': '[ZNAK-SPRAWY]',
   'KOD-POCZTOWY': '[KOD-POCZTOWY]',
   'DATA-UR': '[DATA-URODZENIA]',
+  ZDROWIE: '[DANE O ZDROWIU]',
   ADRES: '[ADRES]',
   MIEJSCOWOSC: '[MIEJSCOWOŚĆ]',
   IMIE: '[IMIĘ I NAZWISKO]',
@@ -126,6 +128,7 @@ export const HUMAN_LABEL: Record<PiiType, string> = {
   'ZNAK-SPRAWY': 'znak sprawy',
   'KOD-POCZTOWY': 'kod pocztowy',
   'DATA-UR': 'datę urodzenia',
+  ZDROWIE: 'dane o zdrowiu',
   ADRES: 'adres',
   MIEJSCOWOSC: 'miejscowość',
   IMIE: 'imię i nazwisko',

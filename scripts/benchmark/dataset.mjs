@@ -1029,6 +1029,17 @@ export function buildDataset() {
   str('AKT URODZENIA NR 123/2020, Karta Pobytu RP1234567', ['123/2020', 'RP1234567'], ['AKT URODZENIA NR', 'Karta Pobytu']);
   neg('Izba wydała PWZ 12345 lekarzom, a wynagrodzenia lekarzy, 1340517 zł, rosną. Adwokat, KR-2020 to numer sprawy, akty urodzenia 2019/2020 omówiono.', ['PWZ 12345 lekarzom', '1340517', 'KR-2020', '2019/2020']);
 
+  // dane o zdrowiu z kotwicą (ewaluacja 50 pism, grupa G9)
+  str('Rozpoznanie:\nF32.1 epizod depresyjny umiarkowany\nJ45.0 astma oskrzelowa\nZalecenia przy wypisie:\nsertralina 50 mg\nsalbutamol doraźnie\nkontrola w poradni za 4 tygodnie', ['F32.1', 'epizod depresyjny', 'J45.0', 'astma oskrzelowa', 'sertralina', 'salbutamol'], ['Rozpoznanie:', 'Zalecenia przy wypisie:', 'kontrola w poradni za 4 tygodnie']);
+  str('Pacjent z rozpoznaniem K50.0, przyjmuje mesalazynę 1 g dziennie.', ['K50.0', 'mesalazynę 1 g'], ['Pacjent z rozpoznaniem', 'przyjmuje']);
+  str('Zgodnie z zaświadczeniem lekarskim po porodzie przez cesarskie cięcie przeciwwskazane jest dźwiganie ciężarów do końca roku.', ['cesarskie cięcie', 'dźwiganie ciężarów'], ['Zgodnie z zaświadczeniem lekarskim', 'przeciwwskazane jest', 'do końca roku']);
+  str('Od dwóch lat pozwany nadużywa alkoholu. W wyniku zdarzenia doznałem stłuczenia klatki piersiowej.', ['nadużywa alkoholu', 'stłuczenia klatki piersiowej'], ['Od dwóch lat pozwany', 'W wyniku zdarzenia doznałem']);
+  str('Potrzeba wynika z rozpoznania cukrzycy typu 1 i leczenia epizodu depresyjnego, potwierdzonego zaświadczeniem lekarza.', ['cukrzycy typu 1', 'epizodu depresyjnego'], ['Potrzeba wynika z rozpoznania', 'potwierdzonego zaświadczeniem lekarza']);
+  neg('Spotkanie w sali I10. Dane o zdrowiu pacjenta przetwarza szpital zgodnie z art. 9 RODO. Podpisał lek. med. dyżurny.', ['sali I10', 'Dane o zdrowiu pacjenta przetwarza szpital', 'lek. med. dyżurny']);
+  neg('Program profilaktyki cukrzycy realizuje gmina, a apteka sprzedaje paracetamol 500 mg za 9,99 zł.', ['profilaktyki cukrzycy', 'paracetamol 500 mg']);
+  neg('Zerwanie umowy i złamanie przepisów nie są urazem. Brak przeciwwskazań do pracy. Centrum Leczenia Stwardnienia Rozsianego przyjmuje.', ['Zerwanie umowy', 'złamanie przepisów', 'Brak przeciwwskazań do pracy', 'Centrum Leczenia Stwardnienia Rozsianego']);
+  neg('Rozpoznanie sprawy nastąpi na posiedzeniu, a osoba uzależniona od alkoholu nie może prowadzić pojazdu.', ['Rozpoznanie sprawy', 'osoba uzależniona od alkoholu']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {

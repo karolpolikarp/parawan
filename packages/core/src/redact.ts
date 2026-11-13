@@ -8,6 +8,7 @@ import { passDriverLicense, passIdCard, passKrs, passPassport, passPlate, passPo
 import { passEmail } from './passes/email.js';
 import { finalizePersons, passApplyOwnMasks, passJsonRequote, passRestoreJsonEscapes, passRestoreUrls } from './passes/finalize.js';
 import { passFormFields } from './passes/forms.js';
+import { passHealth } from './passes/health.js';
 import { hasKsefAnchor, passKsef, passKw, passZnakSprawy } from './passes/kw-ksef-case.js';
 import { passLogin } from './passes/login.js';
 import { passIp, passMac, passTokens, passVin } from './passes/network.js';
@@ -128,6 +129,9 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   // dlatego biegną po adresie.
   passPostalNoHyphen(ctx);
   passCity(ctx);
+  // Dane o zdrowiu przed osobami: eponim w nazwie choroby („choroba Leśniowskiego-Crohna”) znika
+  // pod maską zdrowia, zanim reguły osobowe wezmą go za nazwisko. Numery i adresy są już zakryte.
+  passHealth(ctx);
 
   // Faza 4: imię i nazwisko (heurystyka)
   passProtectFictional(ctx);
