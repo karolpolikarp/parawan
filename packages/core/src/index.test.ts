@@ -8657,7 +8657,6 @@ test('PESEL po etykiecie z literówką zmieniającą długość (10 albo 12 cyfr
     ['PESEL 890915026670', 'PESEL [PESEL]'],
     ['Wnioskodawczyni (PESEL 8909150266), urodzona w 1989 r.', 'Wnioskodawczyni (PESEL [PESEL]), urodzona w 1989 r.'],
     ['PESEL pacjenta: 890915026670, oddział', 'PESEL pacjenta: [PESEL], oddział'],
-    ['pesel nr 8909150266', 'pesel nr [PESEL]'],
   ];
   for (const [t, want] of masked) expect(redactPII(t).redacted).toBe(want);
   // 11 cyfr ze złą sumą po etykiecie dalej pod maską (bez zmian)
@@ -8687,13 +8686,10 @@ test('PESEL z literówką długości: koniec zdania, obce słowa, twarda spacja,
   const masked: [string, string][] = [
     // twarda spacja z tekstu .docx
     [`PESEL:${N}8909150266`, `PESEL:${N}[PESEL]`],
-    [`PESEL nr${N}8909150266`, `PESEL nr${N}[PESEL]`],
     // określenie osoby wielką literą (formularze medyczne i ZUS)
     ['PESEL Pacjenta: 8909150266', 'PESEL Pacjenta: [PESEL]'],
     ['PESEL PACJENTA: 890915026670', 'PESEL PACJENTA: [PESEL]'],
     ['PESEL Ubezpieczonego 8909150266', 'PESEL Ubezpieczonego [PESEL]'],
-    ['PESEL Nr 8909150266', 'PESEL Nr [PESEL]'],
-    ['PESEL nr. 8909150266', 'PESEL nr. [PESEL]'],
     // klucz JSON i znacznik XML
     ['"pesel": "8909150266"', '"pesel": "[PESEL]"'],
     ['{"pesel":"890915026670"}', '{"pesel":"[PESEL]"}'],
@@ -8736,7 +8732,6 @@ test('PESEL z literówką długości po „Nr PESEL” i „Lp. PESEL”, bez ma
     ['Wnioskodawca (nr PESEL: 8909150266) wnosi o', 'Wnioskodawca (nr PESEL: [PESEL]) wnosi o'],
     ['Pacjent Jan, nr PESEL 8909150266.', 'Pacjent Jan, nr PESEL [PESEL].'],
     ['Lp. PESEL: 8909150266', 'Lp. PESEL: [PESEL]'],
-    ['Osoba o PESEL nr 8909150266', 'Osoba o PESEL nr [PESEL]'],
   ];
   for (const [t, want] of masked) expect(redactPII(t).redacted).toBe(want);
   const keep = [
@@ -8748,6 +8743,62 @@ test('PESEL z literówką długości po „Nr PESEL” i „Lp. PESEL”, bez ma
     // odwołanie do przepisu albo rejestru tuż przed etykietą dalej blokuje
     'art. PESEL 1234567890',
     'rejestru PESEL 1234567890',
+  ];
+  for (const t of keep) expect(redactPII(t).redacted).toBe(t);
+});
+
+test('PESEL nr: reguła literówki długości nie działa po „PESEL nr”, pełny PESEL dalej pod maską', () => {
+  const N = ' ';
+  // „PESEL nr X”: PESEL to nazwa rejestru, X to numer wniosku, sprawy albo korekty
+  const keep = [
+    'Wniosek dotyczący PESEL nr 2024000123 rozpatrzono pozytywnie.',
+    'Pismo ws. PESEL nr 2024000123 przekazano do wydziału.',
+    'Korekta PESEL nr 1000234567 z dnia 3.11.2026.',
+    'pesel nr 8909150266',
+    `PESEL nr${N}8909150266`,
+    'PESEL Nr 8909150266',
+    'PESEL nr. 8909150266',
+    'PESEL nr: 890915026670',
+    'PESEL numer 8909150266',
+    'PESEL ojca nr 8909150266',
+    'Osoba o PESEL nr 8909150266',
+    // świadomie: rzadki szyk „Numer PESEL nr” też zostaje jawny
+    'Numer PESEL nr 8909150266',
+  ];
+  for (const t of keep) expect(redactPII(t).redacted).toBe(t);
+  const masked: [string, string][] = [
+    // etykieta „nr PESEL” i sama etykieta „PESEL” dalej działają
+    ['Nr PESEL: 8909150266', 'Nr PESEL: [PESEL]'],
+    ['nr PESEL 890915026670', 'nr PESEL [PESEL]'],
+    ['PESEL: 8909150266', 'PESEL: [PESEL]'],
+    ['PESEL ojca: 8909150266', 'PESEL ojca: [PESEL]'],
+    // pełne 11 cyfr po „PESEL nr” jak dotąd: z poprawną sumą i z literówką w cyfrze
+    ['PESEL nr 44051401359', 'PESEL nr [PESEL]'],
+    ['PESEL nr 89091502660', 'PESEL nr [PESEL]'],
+    ['Wniosek dotyczący PESEL nr 44051401359', 'Wniosek dotyczący PESEL nr [PESEL]'],
+    // świadomie: silna etykieta tuż przed numerem, nawet w przykładzie
+    ['np. PESEL 1234567890 ma o jedną za mało', 'np. PESEL [PESEL] ma o jedną za mało'],
+  ];
+  for (const [t, want] of masked) expect(redactPII(t).redacted).toBe(want);
+});
+
+test('PESEL nr: numery spraw, zgłoszeń i raportów w rejestrze PESEL zostają jawne', () => {
+  const keep = [
+    'Zgłoszenie PESEL nr 2024000123 przyjęto.',
+    'Sprawa PESEL nr 2026111301 zakończona.',
+    'Dot.: PESEL nr 2024100123',
+    'W sprawie PESEL nr 202400012345 proszę o informację.',
+    'Odpowiedź na zapytanie PESEL nr 1000234567.',
+    'Rejestr PESEL nr 2024000123/2026',
+    'Decyzja PESEL Nr 2024000123 z dnia 1.02.2026',
+    'Aktualizacja PESEL numer 2024000123 w toku.',
+    'Zlecenie PESEL nr. 2024000123',
+    'PESEL nr: 2024000123 (numer wniosku)',
+    'Moduł PESEL nr 2 wersja 1234567890',
+    'Usterka systemu PESEL nr 2024000123 zgłoszona do helpdesku.',
+    'Zapytanie nr 2024000123 do rejestru PESEL',
+    'PESEL nr zgłoszenia 2024000123',
+    'Raport PESEL nr 202611130001 wygenerowano.',
   ];
   for (const t of keep) expect(redactPII(t).redacted).toBe(t);
 });

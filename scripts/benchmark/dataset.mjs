@@ -1105,6 +1105,9 @@ export function buildDataset() {
   str('W związku z urodzeniem dziecka w dniu 3 marca 2026 r. pracownica złożyła wniosek o urlop.', ['3 marca 2026'], ['pracownica złożyła wniosek']);
   str('Data urodzenia – 05.06.2018\nData urodzenia dziecka — 07.08.2019', ['05.06.2018', '07.08.2019'], ['Data urodzenia dziecka']);
   str('Wnoszę o zasiłek z tytułu urodzenia syna, w dniu 5.06.2026 r., w Szpitalu Wojewódzkim. W związku z urodzeniem córki w dniu 3 marca 2026 r. przysługuje mi zasiłek.', ['5.06.2026', '3 marca 2026'], ['Szpitalu Wojewódzkim', 'przysługuje mi zasiłek']);
+  // Grupa G4 (regresja): po „PESEL nr” 10 albo 12 cyfr to numer sprawy w rejestrze; „Nr PESEL:” i pełne 11 cyfr dalej pod maską.
+  neg('Wniosek dotyczący PESEL nr 2024000123 rozpatrzono. Pismo ws. PESEL nr 2024000124 przekazano. Korekta PESEL nr 1000234567 z dnia 3.11.2026.', ['2024000123', '2024000124', '1000234567']);
+  str('Nr PESEL: 8909150266, PESEL nr 44051401359', ['8909150266', '44051401359'], ['Nr PESEL:', 'PESEL nr']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

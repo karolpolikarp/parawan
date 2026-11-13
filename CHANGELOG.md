@@ -186,11 +186,14 @@ działają na GitHubie od chwili wypchnięcia tagów.
 - **PESEL z literówką w długości jest zamaskowany.** Po etykiecie „PESEL” numer z jedną cyfrą
   za mało albo za dużo („PESEL: 8909150266”, „PESEL Pacjenta: 890915026670”, pole `"pesel"` w JSON
   lub XML) trafia pod znacznik `[PESEL]`. Wcześniej maska obejmowała tylko dokładnie 11 cyfr. Działa też
-  po „Nr PESEL:” i „Lp. PESEL:”. Między etykietą a numerem może stać tylko „nr” albo określenie osoby
+  po „Nr PESEL:” i „Lp. PESEL:”. Między etykietą a numerem może stać tylko określenie osoby
   („ojca”, „pacjenta”, „ubezpieczonego”).
   Bez etykiety nic się nie zmienia. Zostają jawne: liczba w następnym zdaniu („PESEL. 2024000123 to
   nr zgłoszenia”), nagłówek tabeli z „PESEL” nad inną kolumną, numer po innym słowie („PESEL
-  zgłoszenie 2024100123”), numer sprawy po nazwie rejestru („zapytanie do bazy PESEL nr 2026111301”), NIP po pustym polu PESEL i dłuższe identyfikatory („1234567890-12”).
+  zgłoszenie 2024100123”), numer sprawy po „PESEL nr”, gdzie PESEL to nazwa rejestru („Wniosek
+  dotyczący PESEL nr 2024000123”, „ws. PESEL nr …”, „Korekta PESEL nr …”, „zapytanie do bazy PESEL
+  nr 2026111301”), NIP po pustym polu PESEL i dłuższe identyfikatory („1234567890-12”). Pełne
+  11 cyfr po „PESEL nr” są zakryte jak dotąd.
 - **Telefon po „pod numerem” w zdaniu o kontakcie jest zamaskowany.** Zdanie „W razie pytań proszę
   kontaktować się z działem kadr pod numerem 22 379 56 66.” zostawiało numer jawny, bo kotwicą było tylko
   „dzwonić pod”. Teraz numer trafia pod znacznik `[TELEFON]`, gdy przed „pod numerem”, „pod numerami”,
