@@ -1014,6 +1014,21 @@ export function buildDataset() {
   osp('W kościele Maria Panna zauważyła sprawcę i wezwała policję.', ['Maria', 'Panna'], ['W kościele', 'zauważyła sprawcę']);
   neg('Mecz rozegrała drużyna Lecha Poznań, a grała orkiestra Jana Kiepury.', ['drużyna Lecha Poznań', 'orkiestra Jana Kiepury']);
 
+  // numery rejestrów zawodowych i urzędowych z kotwicą (ewaluacja 50 pism, grupa G1)
+  str('Agnieszka Kamińska\nradca prawny, GD-8638', ['GD-8638'], ['radca prawny']);
+  str('Powódka reprezentowana przez radczynię prawną Jadwigę Wysocką (GD-8776).', ['GD-8776'], ['reprezentowana przez radczynię prawną']);
+  str('Zaświadczenie wystawił lekarz Jakub Kamiński (PWZ 9488577).', ['9488577'], ['Zaświadczenie wystawił lekarz', 'PWZ']);
+  str('lek. Anna Lis\nspecjalista chorób wewnętrznych\nPWZ 3757956', ['3757956'], ['specjalista chorób wewnętrznych', 'PWZ']);
+  str('Legitymująca się kartą pobytu nr RP6295053, zamieszkała w Warszawie.', ['RP6295053'], ['kartą pobytu nr']);
+  str('Małżeństwo zawarte w Urzędzie Stanu Cywilnego w Warszawie, akt małżeństwa nr 1040/2011.', ['1040/2011'], ['akt małżeństwa nr']);
+  neg('Sygn. akt I C 1040/2011 oraz Dz.U. 2011 nr 1040 poz. 5.', ['Dz.U. 2011 nr 1040 poz. 5']);
+  neg('Kod produktu WA-1234 w magazynie. Lekarz ma numer PWZ, który podaje na recepcie.', ['Kod produktu WA-1234', 'numer PWZ, który']);
+  neg('Karta pobytu jest ważna 3 lata, a akt notarialny Rep. A nr 1234/2020 sporządzono w Krakowie.', ['Karta pobytu jest ważna 3 lata', 'Rep. A nr 1234/2020']);
+  neg('Adwokat przedstawił fakturę FV/1234, a radca prawny złożył deklarację JPK-12 i powołał się na PKD-2007.', ['fakturę FV/1234', 'deklarację JPK-12', 'PKD-2007']);
+  neg('Zgodnie z aktem zgonu ojca udział 1/2 przypada córce.', ['udział 1/2']);
+  str('AKT URODZENIA NR 123/2020, Karta Pobytu RP1234567', ['123/2020', 'RP1234567'], ['AKT URODZENIA NR', 'Karta Pobytu']);
+  neg('Izba wydała PWZ 12345 lekarzom, a wynagrodzenia lekarzy, 1340517 zł, rosną. Adwokat, KR-2020 to numer sprawy, akty urodzenia 2019/2020 omówiono.', ['PWZ 12345 lekarzom', '1340517', 'KR-2020', '2019/2020']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {

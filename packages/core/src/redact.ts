@@ -17,6 +17,7 @@ import { passPersonMaidenAfterMask, passPersonMixedCase, passPersonOcrMix, passP
 import { passPersonPairs, passProtectFictional } from './passes/person-pairs.js';
 import { passPersonForeign, passPersonHomographAnchor, passPersonInitial, passPersonRoleComplement, passPersonSoloDict, passPersonSoloMorph, passPersonStrongTrigger, passPersonTrigger } from './passes/person-triggers.js';
 import { passProtectJsonEscapes, passProtectUrls } from './passes/protect.js';
+import { passCivilRecord, passProfessionalNumber, passResidenceCard } from './passes/registers.js';
 import { passDelimitedTable, passStructured } from './passes/structured.js';
 import { HUMAN_LABEL, MASK, type PiiFinding, type PiiType, type RedactionResult, type RedactOptions } from './types.js';
 
@@ -98,6 +99,11 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   passKsef(ctx);
   passKw(ctx); // przed znakiem sprawy: numer KW stoi po „Sygn.” albo „Znak:”
   passZnakSprawy(ctx);
+  // Numery rejestrów zawodowych i urzędowych po znaku sprawy (sygnatura „akt I C 1040/2011” jest
+  // już zamaskowana), a przed numerami: 7 cyfr PWZ nie może trafić do telefonu ani REGON-u.
+  passProfessionalNumber(ctx);
+  passResidenceCard(ctx);
+  passCivilRecord(ctx);
 
   // Faza 2: identyfikatory numeryczne (suma kontrolna, etykieta, długość)
   passIban(ctx);

@@ -10,6 +10,7 @@ import {
   isValidDowod,
   isValidCard,
   isValidKw,
+  isValidNpwz,
 } from './index';
 import { HISTORIC_SURNAMES_GEN, historicSurnameGenitive } from './passes/person-caps-ocr';
 import { MASK, type PiiType } from './types';
@@ -9235,4 +9236,190 @@ test('ewaluacja G6 po trzeciej weryfikacji: Maria Panna jako osoba przy miejscu 
     'Rozpoznano zespół Aspergera u dziecka.',
     'Pacjent ma zespół Marfana.',
   ]);
+});
+
+// ── Numery rejestrów zawodowych i urzędowych (ewaluacja 50 pism, grupa B / G1) ──
+const U = '[NR-UPRAWNIEŃ]';
+test('isValidNpwz: suma kontrolna numeru prawa wykonywania zawodu lekarza', () => {
+  for (const n of ['2663347', '9488577', '3757956', '2405205', '5579635', '1048162']) expect(isValidNpwz(n), n).toBe(true);
+  expect(isValidNpwz('2663348')).toBe(false); // zła cyfra kontrolna
+  expect(isValidNpwz('0000000')).toBe(false); // kontrola 0 niedozwolona
+  expect(isValidNpwz('266334')).toBe(false); // za krótki
+  expect(isValidNpwz('1234567P')).toBe(false); // numer pielęgniarki nie ma tej sumy
+});
+test('numer wpisu radcy, adwokata i PWZ maskowane z kotwicą zawodu', () => {
+  masked([
+    ['Agnieszka Kamińska\nradca prawny, GD-8638', `${N}\nradca prawny, ${U}`],
+    ['reprezentowana przez radcę prawnego Mariusza Nowakowskiego (KR-4222)', `reprezentowana przez radcę prawnego ${N} (${U})`],
+    ['reprezentowana przez radczynię prawną Jadwigę Wysocką (GD-8776)', `reprezentowana przez radczynię prawną ${N} (${U})`],
+    ['r.pr. Anna Kowalska, nr wpisu WA-12345', `r.pr. ${N}, nr wpisu ${U}`],
+    ['adw. Jan Nowak (WAW/Adw/1234)', `adw. ${N} (${U})`],
+    ['zaświadczeniem lekarza Jakuba Kamińskiego (PWZ 9488577).', `zaświadczeniem lekarza ${N} (PWZ ${U}).`],
+    ['specjalista chorób wewnętrznych\nPWZ 3757956', `specjalista chorób wewnętrznych\nPWZ ${U}`],
+    ['Numer PWZ: 2663348', `Numer PWZ: ${U}`], // zła suma, ale etykieta PWZ
+    ['Pielęgniarka, nr PWZ 1234567P', `Pielęgniarka, nr PWZ ${U}`],
+    ['prawo wykonywania zawodu lekarza nr 1234567 wydane przez OIL', `prawo wykonywania zawodu lekarza nr ${U} wydane przez OIL`],
+    ['lek. Jan Nowak (2663347)', `lek. ${N} (${U})`], // bez etykiety tylko z poprawną sumą
+    ['Numer PWZ farmaceuty: 12345/2010', `Numer PWZ farmaceuty: ${U}`],
+    ['aplikant radcowski Tomasz Wilk (WA-A-1234)', `aplikant radcowski ${N} (${U})`],
+    ['zawód: radca prawny, numer wpisu na listę radców prawnych: GD-1234', `zawód: radca prawny, numer wpisu na listę radców prawnych: ${U}`],
+    ['adwokat Jan Nowak, certyfikat ISO-9001', `adwokat ${N}, certyfikat ISO-9001`], // norma, nie kod izby
+  ]);
+  keep([
+    'Izba wydała PWZ ponad 12345 lekarzom.',
+    'Kod produktu WA-1234 w magazynie.',
+    'Lekarz ma numer PWZ, który podaje na recepcie.',
+    'Prawo wykonywania zawodu od 2010 r.',
+    'Adwokat przyjmuje w piątki. Kod WA-1234 dotyczy innego produktu.',
+  ]);
+  expect(redactPII('lek. Jan Nowak (2663348)').redacted).toContain('2663348'); // bez etykiety zła suma zostaje
+});
+test('numer karty pobytu i aktu stanu cywilnego maskowane z kotwicą', () => {
+  masked([
+    ['legitymująca się kartą pobytu nr RP6295053, zamieszkała', 'legitymująca się kartą pobytu nr [NR-KARTY-POBYTU], zamieszkała'],
+    ['Karta pobytu czasowego: RP 1234567', 'Karta pobytu czasowego: [NR-KARTY-POBYTU]'],
+    ['zawartego w USC w Warszawie, akt małżeństwa nr 1040/2011, z winy pozwanego.', 'zawartego w USC w Warszawie, akt małżeństwa nr [NR-AKTU-USC], z winy pozwanego.'],
+    ['Odpis skrócony aktu urodzenia nr 1465011/00/AU/2016/000123', 'Odpis skrócony aktu urodzenia nr [NR-AKTU-USC]'],
+    ['akt zgonu 868/2009', 'akt zgonu [NR-AKTU-USC]'],
+    ['Pacjentka ma kartę pobytu stałego seria RP numer 1234567.', 'Pacjentka ma kartę pobytu stałego seria [NR-KARTY-POBYTU].'],
+  ]);
+  keep([
+    'Dz.U. 2011 nr 1040 poz. 5',
+    'akt notarialny Rep. A nr 1234/2020',
+    'Karta pobytu jest ważna 3 lata.',
+    'Akt małżeństwa sporządzono w 2011 r.',
+  ]);
+  // sygnatura zostaje znakiem sprawy, a nie aktem stanu cywilnego
+  expect(redactPII('Sygn. akt I C 1040/2011').redacted).toBe('Sygn. akt [ZNAK-SPRAWY]');
+});
+test('G1 po weryfikacji: numer wpisu tylko przy zawodzie lub osobie i z kodem izby', () => {
+  masked([
+    ['Anna Nowak\nradca prawny\nWA-3516', `${N}\nradca prawny\n${U}`], // podpis blokowy
+    ['PWZ 2663347 i 9488577', `PWZ ${U} i ${U}`],
+  ]);
+  keep([
+    'Radca prawny, zgłoszenie w systemie LEG-123 zostało zamknięte.',
+    'Cześć, adwokat odpisał w wątku IT-4521, proszę o review.',
+    'Radca prawny złożył zeznanie PCC-30 oraz deklarację JPK-12 w terminie.',
+    'Notariusz sporządził akt w lokalu nr 4, budynek BC-12, Kraków.',
+    'Notariusz pobrał taksę według stawki z rozporządzenia, pozycja RM-150.',
+    'Adwokat reprezentował spółkę w sprawie dotyczącej dyrektywy WE/2003 i normy DN-100.',
+    'Pełnomocnik (adwokat) wniósł o zwrot kosztów zgodnie z KPC/1964.',
+    'adwokat powołał się na PKD-2007 i GUS-2020 oraz NFZ-12',
+    'radca prawny reprezentuje spółkę ABC-123 sp. z o.o.',
+    'adwokat wskazał, że sprawa dotyczy umowy UM-2023',
+    'adwokat złożył wniosek w sprawie PL-2024 dotyczącej MSZ-123',
+    'adwokat przytoczył normę ISO/IEC 27001 oraz BHP-2020',
+    'adwokat przedstawił fakturę FV/123',
+    'radca prawny zażądał zapłaty 500 zł (PLN-500)',
+    'adwokat, sprawa KR-2020',
+    'nr wpisu do CEIDG: WA-123',
+    'Adwokat\nKR-2020 to kod sprawy',
+  ]);
+  for (const s of [
+    'Kancelaria Radcy Prawnego Anna Nowak, faktura FV/1234 za październik.',
+    'Pełnomocnik: adw. Jan Kowalski, umowa UZ/2023 z dnia 3 marca.',
+    'Notariusz Jan Kowalski, kancelaria w budynku Q-22, numer repertorium GD-1234 nie dotyczy osoby.',
+  ]) {
+    const r = redactPII(s);
+    expect(r.redacted, s).not.toContain(U);
+    expect(r.redacted, s).toMatch(/FV\/1234|UZ\/2023|GD-1234/);
+  }
+});
+test('G1 po weryfikacji: PWZ z nawiasem, skrótem zawodu i cyframi ze spacjami, bez kwot', () => {
+  masked([
+    ['Prawo wykonywania zawodu (PWZ) nr 2663347 wydane przez OIL w Krakowie.', `Prawo wykonywania zawodu (PWZ) nr ${U} wydane przez OIL w Krakowie.`],
+    ['lek. Jan Nowak, PWZ lek. 2663347', `lek. ${N}, PWZ lek. ${U}`],
+    ['Lekarz: Jan Nowak, nr PWZ: 2 663 347', `Lekarz: ${N}, nr PWZ: ${U}`],
+  ]);
+  keep([
+    'Liczba lekarzy posiadających prawo wykonywania zawodu: 152340 (stan na 2023 r.).',
+    'Opłata za wydanie PWZ 12000 zł brutto.',
+    'nr PWZ: 2 663 348', // cyfry ze spacjami bez poprawnej sumy
+  ]);
+});
+test('G1 po weryfikacji: karta pobytu w oknie zdania, seria tylko wersalikami', () => {
+  const K = '[NR-KARTY-POBYTU]';
+  masked([
+    ['Numer karty pobytu cudzoziemca RP1234567, wydanej przez Wojewodę Mazowieckiego.', `Numer karty pobytu cudzoziemca ${K}, wydanej przez Wojewodę Mazowieckiego.`],
+    ['Okazał kartę pobytu (nr RP1234567) wydaną w 2022 r.', `Okazał kartę pobytu (nr ${K}) wydaną w 2022 r.`],
+    ['Karta pobytu czasowego wydana przez Wojewodę Małopolskiego, nr RP1234567.', `Karta pobytu czasowego wydana przez Wojewodę Małopolskiego, nr ${K}.`],
+  ]);
+  keep(['W 2023 r. wydano karty pobytu ok 1234567 razy, łącznie karty pobytu na 2000000 zł.']);
+  expect(redactPII('kartą pobytu oraz paszportem nr PM6550784').redacted).not.toContain(K); // paszport, nie karta
+});
+test('G1 po weryfikacji: akt stanu cywilnego z dwukropkiem, „pod nr” i wyliczeniem, bez ułamków', () => {
+  const A = '[NR-AKTU-USC]';
+  masked([
+    ['Akt urodzenia: nr 123/2020, sporządzony w USC Kraków.', `Akt urodzenia: nr ${A}, sporządzony w USC Kraków.`],
+    ['Akt urodzenia: nr 1234/00/AU/2016/123456 sporządzony w Krakowie.', `Akt urodzenia: nr ${A} sporządzony w Krakowie.`],
+    ['Akt małżeństwa sporządzony w USC Kraków pod nr 1234/2019.', `Akt małżeństwa sporządzony w USC Kraków pod nr ${A}.`],
+    ['Odpis skrócony aktu urodzenia Jana Kowalskiego nr 123/2020.', `Odpis skrócony aktu urodzenia ${N} nr ${A}.`],
+    ['Kopia aktu urodzenia nr AU/123/2020', `Kopia aktu urodzenia nr ${A}`],
+    ['akty urodzenia 12/2010 i 13/2010', `akty urodzenia ${A} i ${A}`],
+  ]);
+  keep([
+    'Zgodnie z aktem zgonu ojca udział 1/2 przypada córce.',
+    'Do wniosku dołączono akt małżeństwa stron 2/3 strony nieczytelne.',
+    'Akt zgonu wydany 05/2020 przez USC w Gdańsku.',
+  ]);
+  expect(redactPII('Akt zgonu ojca i decyzja nr 12/2020.').redacted).not.toContain(A);
+});
+test('G1 druga weryfikacja: kotwice bez względu na wielkość liter', () => {
+  const A = '[NR-AKTU-USC]';
+  const K = '[NR-KARTY-POBYTU]';
+  masked([
+    ['Akt urodzenia Nr 123/2020', `Akt urodzenia Nr ${A}`],
+    ['akt urodzenia Nr AU/123/2020', `akt urodzenia Nr ${A}`],
+    ['AKT URODZENIA NR 123/2020', `AKT URODZENIA NR ${A}`],
+    ['Karta pobytu czasowego Nr RP1234567', `Karta pobytu czasowego Nr ${K}`],
+    ['Karta Pobytu RP1234567', `Karta Pobytu ${K}`],
+    ['KARTA POBYTU: RP1234567', `KARTA POBYTU: ${K}`],
+    ['Radca prawny Jan Kowalski, Nr wpisu WA-1234', `Radca prawny ${N}, Nr wpisu ${U}`],
+    ['Nr prawa wykonywania zawodu: 1234567', `Nr prawa wykonywania zawodu: ${U}`],
+    ['Prawo wykonywania zawodu lekarza: 1234567', `Prawo wykonywania zawodu lekarza: ${U}`],
+  ]);
+  expect(redactPII('RADCA PRAWNY JAN KOWALSKI, WA-1234').redacted).toContain(U);
+});
+test('G1 druga weryfikacja: statystyki, kody spraw i zakresy lat zostają jawne', () => {
+  keep([
+    'W 2023 r. izba wydała PWZ 12345 lekarzom i 2300 pielęgniarkom.',
+    'Okręgowa Izba Pielęgniarek przyznała PWZ 15000 pielęgniarkom.',
+    'Wynagrodzenia lekarzy, 1340517',
+    'Liczba porad udzielonych przez lekarzy POZ w 2023 r. (1855252)',
+    'Zarobki lekarzy w 2024 r. (1047514)',
+    'Lekarz dyżurny, 1855252',
+    'Adwokat przyjął sprawę, KR-2020 to numer sprawy w kancelarii.',
+    'Ustanowiono radcę prawnego, PO-2024 r.',
+    'w obecności adwokata, GD-10 sala rozpraw nr 10',
+    'Radca prawny, ZG-2019 zgromadzenie.',
+    'Wynagrodzenie adwokata: PO-350 zł.',
+    'W latach 2019/2020 liczba aktów urodzenia wzrosła; akty urodzenia 2019/2020 omówiono.',
+  ]);
+  for (const s of ['Adwokat Jan Kowalski, KR-2020 to numer sprawy w kancelarii.', 'Adwokat Jan Kowalski, LU-123 to sygnatura wewnętrzna.']) {
+    expect(redactPII(s).redacted, s).not.toContain(U);
+  }
+  masked([
+    ['lekarz prowadzący Jan Nowak, 2663347', `lekarz prowadzący ${N}, ${U}`],
+    ['PWZ 2663347 lekarz Jan Nowak', `PWZ ${U} lekarz ${N}`],
+  ]);
+});
+test('G1 druga weryfikacja: wyliczenie numerów w jednym przejściu', () => {
+  masked([
+    ['radca prawny, WA-1234 i KR-555', `radca prawny, ${U} i ${U}`],
+    ['PWZ 2663347, 9488577, 2663348', `PWZ ${U}, ${U}, 2663348`], // trzeci bez sumy i bez litery przerywa łańcuch
+    ['akty zgonu 12/2010, 13/2010 i 14/2010 oraz 1/2', 'akty zgonu [NR-AKTU-USC], [NR-AKTU-USC] i [NR-AKTU-USC] oraz 1/2'],
+  ]);
+  // 200 KB wyliczenia: czas liniowy (dawniej kilka sekund przez pętlę „replace do skutku”)
+  for (const [head, item] of [
+    ['PWZ 2663347', ', 2663347'],
+    ['akt zgonu 12/2010', ' i 13/2010'],
+    ['karta pobytu RP1234567', ', RP1234567'],
+  ]) {
+    const n = Math.floor(200_000 / item.length);
+    const t0 = performance.now();
+    const out = redactPII(head + item.repeat(n)).redacted;
+    expect(performance.now() - t0, head).toBeLessThan(2000);
+    expect(out.match(/\[NR-/g)?.length, head).toBe(n + 1);
+  }
 });

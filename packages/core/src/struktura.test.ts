@@ -17,6 +17,7 @@ test('publiczne API rdzenia: stały zbiór eksportów', () => {
     'isValidIban',
     'isValidKw',
     'isValidNip',
+    'isValidNpwz',
     'isValidPesel',
     'isValidRegon14',
     'isValidRegon9',
