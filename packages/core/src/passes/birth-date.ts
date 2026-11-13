@@ -7,14 +7,14 @@ import { BIRTH_COMBO, birthVerbAboutPerson } from '../guards/birth.js';
 const BIRTH_DATE_SRC = String.raw`\d{1,2}[.\-/]\d{1,2}[.\-/]\d{2,4}|\d{4}-\d{2}-\d{2}|\d{1,2}\s+(?:[IVX]{1,4}|${MONTHS_GEN})\s+\d{4}`;
 const BIRTH_DATA_LABEL = String.raw`data\s+(?:urodzenia|urodz\.|ur\.)`;
 const BIRTH_LABEL_PAREN = String.raw`\([^()\n]{1,40}\)`;
-// Etykieta z dopełnieniem musi mieć dwukropek, bo bez niego to proza („Data urodzenia pacjenta
+// Etykieta z dopełnieniem musi mieć dwukropek albo myślnik, bo bez nich to proza („Data urodzenia pacjenta
 // w systemie uzupełniono 14.03.2024”). Imiesłów tylko w liczbie pojedynczej (liczba mnoga to
 // przepis), czasownik bez czasu przyszłego (termin porodu) i bez przyimka przed datą.
 const RE_BIRTH_LABELED = new RegExp(
-  String.raw`\b(${BIRTH_DATA_LABEL}(?:[ \t]+[a-ząćęłńóśźż]{2,}(?:a|y|i|ego|ej)){1,2}(?=[ \t]*(?:${BIRTH_LABEL_PAREN}[ \t]*)?:)` +
+  String.raw`\b(${BIRTH_DATA_LABEL}(?:[ \t]+[a-ząćęłńóśźż]{2,}(?:a|y|i|ego|ej)){1,2}(?=[ \t]*(?:${BIRTH_LABEL_PAREN}[ \t]*)?[:\-–—])` +
     String.raw`|urodzi(?:ł(?:a|am|em|aś|eś|o|y|i)?|liśmy|łyśmy|liście|łyście)[ \t]+się` +
     String.raw`|ur\.|urodz\.|urodzon(?:ego|emu|ej|ym|y|a|ą)|urodzeni[ae]|${BIRTH_DATA_LABEL})` +
-    String.raw`((?:[ \t]*${BIRTH_LABEL_PAREN})?(?:\s+(?:dnia|w\s+dniu))?[\s:.,-]*)(${BIRTH_DATE_SRC})`,
+    String.raw`((?:[ \t]*${BIRTH_LABEL_PAREN})?(?:\s+(?:dnia|w\s+dniu))?[\s:.,\-–—]*)(${BIRTH_DATE_SRC})`,
   'gi',
 );
 // Etykieta łączona z miejscowością przed datą („Data i miejsce urodzenia: Kielce, 12.04.1985”).
@@ -85,6 +85,23 @@ const RE_BIRTH_NOUN_THRESHOLD_AFTER =
 // Czasownik w czasie przeszłym tuż za datą („w dniu 10.08.2026 r. wypłacił zasiłek”): data opisuje
 // czynność podmiotu, nie urodzenie, nawet gdy podmiot stoi przed datą („ZUS”, „Anna Nowak”).
 const RE_BIRTH_NOUN_PAST_VERB_AFTER = /^[ \t]*(?:r\.|roku)?[ \t,]*(?:się[ \t]+)?\p{Ll}{2,}(?:ł|ła|ło|ły|li|no|to)(?!\p{L})/u;
+// Orzeczenie w czasie teraźniejszym albo przyszłym tuż za datą („dnia 15 stycznia 2027 r. upływa
+// termin”, „w dniu 1 września 2026 r. wejdą w życie przepisy”): data to termin albo zdarzenie
+// prawne liczone od porodu, nie dzień urodzenia.
+const RE_BIRTH_NOUN_PRESENT_VERB_AFTER =
+  /^[ \t]*(?:r\.|roku)?[ \t,]*(?:się[ \t]+)?(?:upływa|upływają|upłynie|upłyną|wchodzi|wchodzą|wejdzie|wejdą|obowiązuje|obowiązują|przysługuje|przysługują|przysługiwać|należy|rozpoczyna|rozpoczynają|rozpocznie|rozpoczną|zaczyna|zaczynają|zacznie|zaczną|kończy|kończą|skończy|zakończy|mija|mijają|minie|miną|wygasa|wygasają|wygaśnie|wygasną|będzie|będą)(?!\p{L})/u;
+// Przecinek tuż po „urodzeniu dziecka” i sama data w osobnym wtrąceniu, po którym zdanie
+// biegnie dalej („Po urodzeniu dziecka, w dniu 1 września 2026 r., wejdą …”): wtrącenie należy do
+// orzeczenia za nim, a nie do urodzenia.
+const RE_BIRTH_NOUN_COMMA_ONLY_MID = /^,[ \t]*(?:w[ \t]+dniu|dnia|w[ \t]+dn\.|dn\.)[ \t]*$/u;
+// Miejsce, godzina albo spójnik tuż za datą opisują dalej samo urodzenie („…, w dniu … r.,
+// w Szpitalu Miejskim”, „o godz. 14:30”), więc wtedy wtrącenie nie jest osobne.
+const RE_BIRTH_NOUN_SENTENCE_GOES_ON =
+  /^[ \t]*(?:(?:r\.|roku)(?!\p{L}))?[ \t]*,?[ \t]*(?!(?:r|ok|godz)\.|(?:roku|w|we|o|około|przez|jako|i|oraz|godzinie)(?!\p{L}))\p{Ll}/u;
+// Wyrażenie przyczyny przed rzeczownikiem („z tytułu”, „w związku z”) wiąże datę z samym urodzeniem:
+// „w związku z urodzeniem dziecka w dniu … r. przysługuje mi zasiłek” to dzień porodu, nie termin.
+const RE_BIRTH_NOUN_CAUSAL_BEFORE =
+  /(?:^|[^\p{L}])(?:z[ \t]+tytułu|z[ \t]+okazji|z[ \t]+powodu|z[ \t]+racji|wskutek|na[ \t]+skutek|w[ \t]+następstwie|w[ \t]+wyniku|w[ \t]+związku[ \t]+z|ze[ \t]+względu[ \t]+na|wobec|fakt|faktu|fakcie)[ \t]+$/iu;
 // Ciąg wyrazów z wielkiej litery w odstępie i to, co stoi tuż przed nim (miejsce po „w”, patron po „im.”).
 const RE_BIRTH_NOUN_CAPS_RUN = /(?<![\p{L}'’\-])\p{Lu}[\p{L}'’\-]*(?:[ \t]+\p{Lu}[\p{L}'’\-]*)*/gu;
 const RE_BIRTH_NOUN_PLACE_BEFORE = /(?:^|[^\p{L}])(?:w|we|im\.|św\.)[ \t]+$/u;
@@ -152,6 +169,12 @@ export function passBirthDate(ctx: RedactCtx): void {
     const after = str.slice(offset + m.length, offset + m.length + 60);
     if (RE_BIRTH_THRESHOLD_AFTER.test(after) || RE_BIRTH_NOUN_THRESHOLD_AFTER.test(after)) return m;
     if (RE_BIRTH_NOUN_PAST_VERB_AFTER.test(after)) return m;
+    // Termin w czasie teraźniejszym lub przyszłym i osobne wtrącenie liczą się tylko przy okoliczniku
+    // czasu („Po urodzeniu dziecka, …”); po wyrażeniu przyczyny data należy do samego urodzenia.
+    if (!RE_BIRTH_NOUN_CAUSAL_BEFORE.test(before)) {
+      if (RE_BIRTH_NOUN_PRESENT_VERB_AFTER.test(after)) return m;
+      if (form === 'urodzeniu' && RE_BIRTH_NOUN_COMMA_ONLY_MID.test(mid) && RE_BIRTH_NOUN_SENTENCE_GOES_ON.test(after)) return m;
+    }
     const year = /(\d{4})$/.exec(d)?.[1];
     if (year && +year < 1900) return m;
     return `${kw}${mid}${ctx.hit('DATA-UR')}`;

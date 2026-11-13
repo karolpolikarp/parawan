@@ -9161,6 +9161,62 @@ test('G5 po drugiej weryfikacji: podmiot zdania i czasownik za datą to inne zda
     ],
   ]);
 });
+test('G5 po trzeciej weryfikacji: orzeczenie w czasie teraźniejszym lub przyszłym i data we wtrąceniu to termin, myślnik po etykiecie', () => {
+  keep([
+    'Po urodzeniu dziecka, w dniu 1 września 2026 r., wejdą w życie nowe przepisy.',
+    'Po urodzeniu dziecka, dnia 15 stycznia 2027 r. upływa termin na zgłoszenie.',
+    'Po urodzeniu dziecka w dniu 3 marca 2026 r. mija termin na zgłoszenie.',
+    'Po urodzeniu dziecka w dniu 3 marca 2026 r. przysługuje zasiłek macierzyński.',
+    'Po urodzeniu dziecka w dniu 3 marca 2026 r. kończy się okres ochronny.',
+    'Po urodzeniu dziecka w dniu 3 marca 2026 r. rozpoczyna się urlop rodzicielski.',
+    'Po urodzeniu dziecka w dniu 3 marca 2026 r. obowiązuje nowy wymiar czasu pracy.',
+    'Po urodzeniu dziecka w dniu 3 marca 2026 r. należy złożyć wniosek.',
+    'Po urodzeniu dziecka w dniu 3 marca 2026 r. wchodzi w życie zmiana regulaminu.',
+    'Po urodzeniu dziecka w dniu 3 marca 2026 r. wejdzie w życie zmiana regulaminu.',
+    'Po urodzeniu dziecka, w dniu 1 września 2026 r., zmienią się przepisy o zasiłku.',
+  ]);
+  masked([
+    [
+      'w związku z urodzeniem dziecka w dniu 3 marca 2026 r. pracownica złożyła wniosek o urlop.',
+      `w związku z urodzeniem dziecka w dniu ${DU} r. pracownica złożyła wniosek o urlop.`,
+    ],
+    ['z tytułu urodzenia dziecka, w dniu 5.06.2026 r.', `z tytułu urodzenia dziecka, w dniu ${DU} r.`],
+    ['Data urodzenia – 05.06.2018', `Data urodzenia – ${DU}`],
+    ['Data urodzenia — 05.06.2018', `Data urodzenia — ${DU}`],
+    ['Data urodzenia dziecka – 05.06.2018', `Data urodzenia dziecka – ${DU}`],
+    ['Data urodzenia dziecka — 05.06.2018\nData urodzenia matki - 14.03.1990', `Data urodzenia dziecka — ${DU}\nData urodzenia matki - ${DU}`],
+  ]);
+  keep(['Data urodzenia pacjenta – zgodnie z kartą, wpis z dnia 14.03.2024 r.']);
+});
+test('G5 po końcowej weryfikacji: terminy po „Po urodzeniu dziecka” jawne, data przy wyrażeniu przyczyny, miejscu i godzinie zakryta', () => {
+  keep([
+    'Po urodzeniu dziecka, dnia 30.06.2026 r., upływa termin złożenia oświadczenia.',
+    'Po urodzeniu córki, w dniu 1.07.2026 r., pracodawca zmieni grafik.',
+    'Po urodzeniu dziecka, dnia 2 lutego 2027 r., mija rok urlopu.',
+    'Przy urodzeniu dziecka, w dniu 1 stycznia 2027 r., obowiązują nowe stawki.',
+    'Po urodzeniu dziecka w dniu 10 października 2026 r. wygasa umowa na czas określony.',
+    'Po urodzeniu dziecka dnia 1.10.2026 r. przysługiwać będzie dodatek.',
+    'Po urodzeniu syna, dnia 5 maja 2026 r., ruszy nabór do żłobka.',
+    'Data urodzenia - zgodnie z dokumentem z dnia 12.03.2024 r.',
+    'Data urodzenia — patrz załącznik z dnia 05.06.2018.',
+    'Data urodzenia ustalona – sprawa z dnia 05.06.2018.',
+    'Data urodzenia dziecka – do uzupełnienia, termin 05.06.2026.',
+    'Po urodzeniu dziecka, w dniu 15.09.2026 r., będą obowiązywać nowe zasady.',
+    'Po urodzeniu bliźniąt, w dniu 1 marca 2027 r., kończy się program.',
+    'Po urodzeniu dziecka w dniu 1.09.2026 r. zaczyna się nowy rok szkolny.',
+    'Po urodzeniu dziecka, w dniu 5.06.2026 r., wróciłam do pracy.',
+  ]);
+  masked([
+    ['z tytułu urodzenia syna, w dniu 5.06.2026 r. w Szpitalu Wojewódzkim w Kielcach.', `z tytułu urodzenia syna, w dniu ${DU} r. w Szpitalu Wojewódzkim w Kielcach.`],
+    ['z tytułu urodzenia syna, w dniu 5.06.2026 r., w Szpitalu Wojewódzkim w Kielcach.', `z tytułu urodzenia syna, w dniu ${DU} r., w Szpitalu Wojewódzkim w Kielcach.`],
+    ['Wnoszę o zasiłek z tytułu urodzenia dziecka, w dniu 5.06.2026 r., zgodnie z art. 29.', `Wnoszę o zasiłek z tytułu urodzenia dziecka, w dniu ${DU} r., zgodnie z art. 29.`],
+    ['Wnoszę o zasiłek z tytułu urodzenia córki, dnia 5.06.2026 r. o godz. 14:30.', `Wnoszę o zasiłek z tytułu urodzenia córki, dnia ${DU} r. o godz. 14:30.`],
+    ['w związku z urodzeniem dziecka w dniu 3 marca 2026 r. przysługuje mi zasiłek.', `w związku z urodzeniem dziecka w dniu ${DU} r. przysługuje mi zasiłek.`],
+    ['z tytułu urodzenia dziecka w dniu 3 marca 2026 r. należy mi się zasiłek macierzyński.', `z tytułu urodzenia dziecka w dniu ${DU} r. należy mi się zasiłek macierzyński.`],
+    ['Po urodzeniu syna, w dniu 5.06.2026 r. w Szpitalu Miejskim, złożyła wniosek.', `Po urodzeniu syna, w dniu ${DU} r. w Szpitalu Miejskim, złożyła wniosek.`],
+    ['Po urodzeniu syna, w dniu 5.06.2026 r., o godz. 14:30, zawiadomiono ojca.', `Po urodzeniu syna, w dniu ${DU} r., o godz. 14:30, zawiadomiono ojca.`],
+  ]);
+});
 test('ewaluacja G6: imię i nazwisko-homograf w zgodnym przypadku po rzeczowniku zbiorowym to osoba', () => {
   masked([
     ['Testy obciążeniowe wykonał zespół Joanny Sikory.', `Testy obciążeniowe wykonał zespół ${N}.`],

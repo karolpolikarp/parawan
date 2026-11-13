@@ -1099,6 +1099,12 @@ export function buildDataset() {
   str('Adwokat Jan Kowalski\nNr wpisu: KR-1234', ['KR-1234'], ['Nr wpisu:']);
   neg('Kancelaria radcy prawnego, KR-2026 - plan pracy na rok. Radca prawny, WA-1234 – aplikacja 2026 r. NR WPISU: WA-4321', ['KR-2026', 'WA-1234', 'WA-4321']);
   neg('Radca prawny złożył wniosek o wpis na listę rzeczników patentowych pod nr KR-2020 sprawy. Wpis na listę obecności pod nr LB-12. Adwokat, KRK-2024 - lista spraw.', ['KR-2020', 'LB-12', 'KRK-2024']);
+  // Grupa G5 (regresja): termin w czasie teraźniejszym/przyszłym i data we wtrąceniu to nie urodzenie; myślnik po etykiecie.
+  neg('Po urodzeniu dziecka, w dniu 1 września 2026 r., wejdą w życie nowe przepisy. Po urodzeniu dziecka, dnia 15 stycznia 2027 r. upływa termin na zgłoszenie.', ['1 września 2026', '15 stycznia 2027']);
+  neg('Po urodzeniu dziecka w dniu 3 marca 2026 r. przysługuje zasiłek, a po urodzeniu córki w dniu 4.04.2026 r. kończy się okres ochronny.', ['3 marca 2026', '4.04.2026']);
+  str('W związku z urodzeniem dziecka w dniu 3 marca 2026 r. pracownica złożyła wniosek o urlop.', ['3 marca 2026'], ['pracownica złożyła wniosek']);
+  str('Data urodzenia – 05.06.2018\nData urodzenia dziecka — 07.08.2019', ['05.06.2018', '07.08.2019'], ['Data urodzenia dziecka']);
+  str('Wnoszę o zasiłek z tytułu urodzenia syna, w dniu 5.06.2026 r., w Szpitalu Wojewódzkim. W związku z urodzeniem córki w dniu 3 marca 2026 r. przysługuje mi zasiłek.', ['5.06.2026', '3 marca 2026'], ['Szpitalu Wojewódzkim', 'przysługuje mi zasiłek']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

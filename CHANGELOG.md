@@ -128,9 +128,15 @@ działają na GitHubie od chwili wypchnięcia tagów.
   powrót do pracy, koniec urlopu („po urodzeniu dziecka wraca do pracy dnia 1.09.2026”). Tak samo,
   gdy przed datą stoi urząd, sąd, pracodawca albo osoba z tytułem („Po urodzeniu dziecka ZUS
   w dniu 10.08.2026 r. wypłacił zasiłek”), gdy zaraz po dacie stoi czasownik w czasie przeszłym
-  i gdy zdanie zaczyna się od „Przed urodzeniem”. Jawne
+  albo termin w czasie teraźniejszym lub przyszłym („upływa”, „mija”, „przysługuje”, „wejdą w
+  życie”), gdy data stoi w osobnym wtrąceniu po przecinku, a zdanie biegnie dalej („Po urodzeniu
+  dziecka, w dniu 1 września 2026 r., wejdą w życie nowe przepisy”), i gdy zdanie zaczyna się od
+  „Przed urodzeniem”. Po „z tytułu urodzenia” czy „w związku z urodzeniem” oraz przy miejscu
+  i godzinie porodu („w dniu … r., w Szpitalu Miejskim”, „o godz. 14:30”) data dalej znika. Jawne
   zostają też daty przy „Zgłoszeniu” czy „Transkrypcji aktu urodzenia”, przepisy „w przypadku
   urodzenia dziecka w dniu … i później”, termin „6 tygodni po urodzeniu” i rok sprzed 1900.
+  Przy okazji etykieta z myślnikiem zamiast dwukropka też zakrywa datę („Data urodzenia –
+  05.06.2018”, „Data urodzenia dziecka — 05.06.2018”).
 - **Nazwa firmy jednoosobowej z nazwiskiem właściciela znika razem z osobą.** W piśmie „prowadząca
   działalność gospodarczą pod firmą LIS-BUD Jadwiga Lis” imię i nazwisko były zakryte, ale „LIS-BUD”
   zostawało jawne i zdradzało nazwisko. Teraz nazwa firmy z wielkich liter z łącznikiem wchodzi do
