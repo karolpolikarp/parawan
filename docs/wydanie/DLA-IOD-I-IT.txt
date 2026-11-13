@@ -91,8 +91,8 @@ CZEGO PARAWAN NIE ZROBI
   Zasłania też dane, które w BIP zwykle zostają jawne, np. nazwiska
   urzędników pod pismem i znak sprawy. Nie zmienia oryginalnego pliku.
 
-  W pomiarze na 578 syntetycznych zdaniach zniknęło 754 z 769 fragmentów,
-  które miały zniknąć (98,0%), i zostało 925 z 926, które miały zostać
+  W pomiarze na 599 syntetycznych zdaniach zniknęło 758 z 773 fragmentów,
+  które miały zniknąć (98,1%), i zostało 950 z 951, które miały zostać
   (99,9%). Metodologia: docs/BENCHMARK.md w repozytorium.
 
 DO OCENY INSPEKTORA OCHRONY DANYCH

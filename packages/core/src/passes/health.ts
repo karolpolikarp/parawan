@@ -16,6 +16,7 @@
 //    poradnik, przepis, OWU, przetarg czy raport („leczenie nowotworów w Polsce”) zostają jawne.
 // Ogólne zdania o zdrowiu bez nazwy choroby („Dane o zdrowiu pacjenta przetwarza…”) zostają.
 import type { RedactCtx } from '../context.js';
+import { NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { escapeRe } from '../util.js';
 
 const LO = 'a-ząćęłńóśźż';
@@ -44,6 +45,14 @@ const hasIcd = (body: string): boolean => ICD_AT_START.test(body) || ICD_PAREN_E
 
 /* ── Kotwice ── */
 
+/**
+ * Podmiot ogólny tuż przed czasownikiem („Osoba, która choruje”, „Każdy pacjent, który choruje”,
+ * „Kto choruje”, „Każdy choruje”): mowa o każdym, kogo to dotyczy, a nie o konkretnej osobie.
+ * „Pracownik, który choruje” i „Jan Kowalski, który choruje” to dalej konkretna osoba.
+ */
+const GENERIC_SUBJECT = `(?:osob${L}|każd${L}(?:[ \\t]+[${LO}]+)?|ktoś|człowiek|ten|ta|ci|te|wszys${L}|ludzie|pacjenci|chorzy)`;
+const NOT_GENERIC_SUBJECT = `(?<!(?:${GENERIC_SUBJECT}[ \\t]*,?[ \\t]*któr${L}|kto|każd${L})[ \\t]+)`;
+
 /** Kotwica silna: zdarzenie zdrowotne konkretnej osoby albo dokument lekarski wystawiony dla niej. */
 const STRONG = [
   `zaświadczeni${L}[ \\t]+(?:od[ \\t]+)?lekar${L}`,
@@ -52,19 +61,24 @@ const STRONG = [
   `rozpoznano(?![ \\t]*,?[ \\t]*(?:że|iż|przychod|przychód|koszt|odpis|rezerw|strat|zysk|aktyw|zobowiąz|należnoś|podat|wynik|wartoś|utrat)${L})`,
   'rozpoznan[aoy][ \\t]+u',
   'hospitalizowan(?:y|a|ego|ej)',
-  'choruj(?:e|ę)|chorował(?:a|em|am)?',
-  'cierpi(?:ał|ała|ałem|ałam|ę)?[ \\t]+na',
-  'doznał(?:a|em|am)?',
+  `${NOT_GENERIC_SUBJECT}(?:choruj(?:e|ę)|chorował(?:a|em|am)?)`,
+  `${NOT_GENERIC_SUBJECT}cierpi(?:ał|ała|ałem|ałam|ę)?[ \\t]+na`,
+  `${NOT_GENERIC_SUBJECT}doznał(?:a|em|am)?`,
   // Imiesłów „leczony”, „leczona” stoi też w przepisach i programach („może być leczona”), więc
   // jest kotwicą słabą; silna jest tylko forma zwrotna osoby („leczy się”, „leczyłam się”).
-  'lecz(?:ę[ \\t]+się|y[ \\t]+się|ył(?:a|em|am)?[ \\t]+się)',
+  `${NOT_GENERIC_SUBJECT}lecz(?:ę[ \\t]+się|y[ \\t]+się|ył(?:a|em|am)?[ \\t]+się)`,
   `zwolnieni${L}[ \\t]+lekarsk${L}`,
   `orzeczeni${L}[ \\t]+lekarsk${L}`,
   `wypis${L}[ \\t]+ze[ \\t]+szpitala`,
   // „linia L4”, „hala L4” to oznaczenie miejsca albo wariantu, a nie zwolnienie lekarskie
   `(?<!(?:lini|hal|sektor|stref|poziom|bram|budyn|sal|klas|kondygnacj|piętr|segment|blok|modu|wariant|typ|model|wersj|rząd|rzęd|pol|stanowisk|magazyn|regał|kabin|peron|tor|ciąg|nr)${L}[ \\t]+)L-?4`,
-  `kod(?:em|u)?[ \\t]+choroby`,
 ].join('|');
+
+/**
+ * „Kod choroby” stoi i w zwolnieniu lekarskim, i w słowniku ICD-10 czy statystyce NFZ („Kod
+ * choroby J18.9 oznacza…”), więc jest kotwicą słabą: potrzebuje osoby obok.
+ */
+const ICD_WORD = `kod(?:em|u)?[ \\t]+choroby`;
 
 /** Kotwica słaba: słowo medyczne, które stoi też w poradnikach, przepisach i raportach. */
 const WEAK = [
@@ -82,6 +96,7 @@ const WEAK = [
   'pacjent(?:a|owi|em|cie|ka|ki|ce|kę|ką)?',
   `stan${L}[ \\t]+zdrowia`,
   `niepełnosprawnoś${L}`,
+  ICD_WORD,
 ].join('|');
 
 const RE_STRONG = new RegExp(`${NOT_LETTER_BEFORE}(?:${STRONG})${NOT_LETTER_AFTER}`, 'i');
@@ -105,6 +120,9 @@ const RE_PERSON = new RegExp(
     'syn|syna|synowi|synem|córka|córki|córce|córką|dziecko|dziecka|dziecku|małoletni(?:ego|ej|a)?',
     'pacjentk(?:a|i|ę|ą|ce)|u[ \\t]+pacjenta|pacjentowi',
     'jestem|mój|moja|moje|mojego|mojej|mojemu|moim|moją|u[ \\t]+mnie',
+    // zaimek osobowy w trzeciej osobie („zalecił mu”, „u niego stwierdzono”); samo „jej” bywa
+    // dzierżawcze w przepisie („bez jej zgody”), więc tylko po czasowniku lekarza
+    `mu|jemu|niemu|u[ \\t]+niego|u[ \\t]+niej|(?:zalecił|przepisał|wypisał|podał|podano|zalecono|przepisano)${L}[ \\t]+jej`,
     // pierwsza osoba czasu przeszłego („doznałem”, „chorowałam”); „przesyłam”, „wysyłam”, „działam”
     // i „wołam” to czas teraźniejszy z listu przewodniego, a nie osoba, o której mowa
     `[${LO}]{2,}(?:łem|(?<!(?:sy|dzia|wo))łam)`,
@@ -116,7 +134,50 @@ const OFFICE = `(?:Dyrektor|Prezes|Prezydent|Kierowni|Minist|Burmistrz|Wójt|Sta
 const RE_PERSON_CS = new RegExp(
   `(?<![${LETTER}])(?:Pan|Pani|Panu|Panią|Pana|Panem)[ \\t]+(?!${OFFICE}(?![${LETTER}]))[${UP}]|\\[(?:PESEL|DATA-URODZENIA|NR-DOWODU)\\]`,
 );
+/** Para wyrazów z wielkiej litery, z których jeden jest imieniem („Jan Kowalski”, „Kowalski Jan”). */
+const RE_CAP_PAIR = new RegExp(`(?<![${LETTER}])([${UP}][${LO}]+)[ \\t]+([${UP}][${LO}]+)(?:-[${UP}][${LO}]+)?(?![${LETTER}])`, 'g');
+const isGivenName = (w: string): boolean => {
+  const k = w.toLowerCase();
+  return POLISH_FIRST_NAMES.has(k) && !NOUN_LIKE_FIRST_NAMES.has(k);
+};
+/** Pozycja pierwszej pary „imię nazwisko” w tekście albo -1. */
+function namePairAt(s: string): number {
+  RE_CAP_PAIR.lastIndex = 0;
+  for (let m = RE_CAP_PAIR.exec(s); m; m = RE_CAP_PAIR.exec(s)) {
+    // patron po „im.” („Szpital im. Józefa Babińskiego”) to nazwa instytucji, a nie osoba
+    const patron = /(?:im\.|imienia)[ \t]*$/i.test(s.slice(Math.max(0, m.index - 10), m.index));
+    if (!patron && (isGivenName(m[1]) || isGivenName(m[2]))) return m.index;
+    // para zachodzi na siebie („Pacjentka Maria Kowalska”): następny wyraz zaczyna kolejną parę
+    RE_CAP_PAIR.lastIndex = m.index + m[1].length;
+  }
+  return -1;
+}
 const hasPerson = (w: string): boolean => RE_PERSON.test(w) || RE_PERSON_CS.test(w);
+/**
+ * Osoba przy trafieniu: rola, zaimek, „Pan”, „Pani” w szerszym oknie, a imię z nazwiskiem tylko
+ * w tym samym zdaniu (nazwisko prezesa w zdaniu obok nie robi z raportu karty pacjenta).
+ */
+const personNear = (text: string, sentence: string, from: number, to: number): boolean =>
+  hasPerson(personWindow(text, from, to)) || (namePairAt(sentence) >= 0 && !RE_NAME_NOT_PATIENT.test(sentence));
+/**
+ * Zdanie o grupie ludzi albo o kodzie ze słownika: imię i nazwisko w nim to prelegent czy autor,
+ * a nie pacjent („Jan Kowalski omówił rozpoznanie astmy u dzieci”, „Kod J45 oznacza astmę; Jan
+ * Kowalski jest autorem opracowania”).
+ */
+const RE_NAME_NOT_PATIENT = new RegExp(
+  `${NOT_LETTER_BEFORE}(?:u[ \\t]+(?:dzieci|pacjentów|osób|chorych|kobiet|mężczyzn|seniorów|dorosłych|niemowląt|młodzieży|ludzi)|wśród[ \\t]+[${LO}]+|oznacza(?:ją)?|słownik${L}|klasyfikacj${L}|statystyk${L}|mln)${NOT_LETTER_AFTER}`,
+  'i',
+);
+/**
+ * Reguła ogólna z podmiotem i zdaniem względnym („Pacjent, który choruje na astmę, może otrzymać
+ * refundację”, „Chory, który cierpi na depresję, ma prawo…”): mowa o każdym takim pacjencie.
+ * „Pracownik, który choruje na cukrzycę, przedstawił zaświadczenie” opisuje konkretną osobę.
+ */
+const RE_GENERIC_RULE = new RegExp(
+  `^[ \\t"„(]*[${UP}][${LO}]+(?:[ \\t]+[${LO}]+)?[ \\t]*,[ \\t]*któr${L}[^.!?\\n]{1,100}?,[ \\t]*(?:nie[ \\t]+)?(?:powin${L}|może|mogą|ma[ \\t]+prawo|mają[ \\t]+prawo|musi|muszą|przysługuj${L}|należy)${NOT_LETTER_AFTER}`,
+);
+const isGenericRule = (sentence: string): boolean =>
+  RE_GENERIC_RULE.test(sentence) && !hasPerson(sentence) && namePairAt(sentence) < 0;
 
 /** Czasownik o przyjmowaniu leku przez osobę („przyjmuje”, „zalecił”); „zaleca się” i „stosuje się do” nie. */
 const RE_DRUG_VERB = new RegExp(
@@ -356,8 +417,11 @@ function personWindow(text: string, from: number, to: number): string {
  */
 function medicalAnchored(text: string, starts: number[], from: number, to: number, mask?: string): boolean {
   const w = windowAt(text, starts, from, to);
-  if (RE_STRONG.test(w) || (mask !== undefined && w.includes(mask))) return true;
-  return RE_WEAK.test(w) && hasPerson(personWindow(text, from, to));
+  const sentence = sentenceAt(text, starts, from, to);
+  if (mask !== undefined && w.includes(mask)) return true;
+  if (isGenericRule(sentence)) return false;
+  if (RE_STRONG.test(w)) return true;
+  return RE_WEAK.test(w) && personNear(text, sentence, from, to);
 }
 
 /* ── Sekcje karty informacyjnej ── */
@@ -374,7 +438,12 @@ const RE_STRICT_HEAD = /^(?:diagnoz|rozp\.)/i;
 /** Nagłówek jednoznacznie medyczny: z dopowiedzeniem („Rozpoznanie zasadnicze”, „Leki przyjmowane”, „Choroby przewlekłe”). */
 const RE_MEDICAL_HEAD = /^(?:choroby|rozpoznani[ea] \S|leki \S|przyjmowane|zalecane|leczenie|farmakoterapia|zalecenia \S)/i;
 /** Odpowiedź przecząca w ankiecie („Choroby przewlekłe: nie”) zostaje. */
-const RE_NEGATIVE = /^(?:nie|brak|nie dotyczy|nie przyjmuje|nie choruje|bez|b\/z|-|–|—|żadne|nie ma)[ \t.]*$/i;
+const RE_NEGATIVE = /^(?:nie|brak|brak danych|nie dotyczy|b\.[ \t]?d\.?|bd|nie przyjmuje|nie choruje|bez|b\/z|-|–|—|żadne|nie ma)[ \t.]*$/i;
+/** Wartość z definicji, przepisu albo raportu („w rozumieniu art. 5 ustawy…”), a nie rozpoznanie osoby. */
+const RE_SECTION_GENERAL = new RegExp(
+  `${NOT_LETTER_BEFORE}(?:definicj${L}|w[ \\t]+rozumieniu|rozporządzeni${L}|art\\.|artykuł${L}|epidemiologi${L})(?![${LETTER}\\d])`,
+  'i',
+);
 /** Pozycja listy: kod ICD, znacznik wyliczenia albo mała litera na początku wiersza. */
 const RE_LIST_MARK = /^[ \t]*(?:[-•*][ \t]*|\d{1,2}[.)][ \t]+)/;
 const RE_SENTENCE_BREAK = new RegExp(`[.!?][ \\t]+[${UP}]`);
@@ -408,10 +477,22 @@ function headerContext(lines: string[], i: number): string {
 
 type Mode = 'diag' | 'drug' | 'advice';
 
+/**
+ * Koniec wartości etykiety w wierszu: pierwszy koniec zdania albo para „imię nazwisko”
+ * („Rozpoznanie: astma oskrzelowa Jan Kowalski”), bez odstępów i przecinka przed nią.
+ */
+function valueEnd(rest: string): number {
+  const brk = RE_SENTENCE_BREAK.exec(rest);
+  let cut = brk ? brk.index : rest.replace(/[ \t]+$/, '').length;
+  const name = namePairAt(rest.slice(0, cut));
+  if (name >= 0) cut = rest.slice(0, name).replace(/[ \t,;–-]+$/, '').length;
+  return cut;
+}
+
 /** Czy wartość sekcji (w wierszu nagłówka albo pozycja listy) to dana o zdrowiu. */
 function valueIsHealth(mode: Mode, value: string, strict: boolean, medCtx: boolean): boolean {
   const body = value.replace(RE_LIST_MARK, '').trim();
-  if (!body || RE_NEGATIVE.test(body)) return false;
+  if (!body || RE_NEGATIVE.test(body) || RE_SECTION_GENERAL.test(body)) return false;
   if (mode === 'drug') {
     if (RE_MONEY.test(body)) return false; // „Leki: 450,00 zł” w wykazie kosztów
     return RE_HAS_DOSE.test(body) || RE_DRUG_LINE.test(value) || medCtx;
@@ -444,10 +525,11 @@ function maskSections(ctx: RedactCtx): void {
       const value = head[3];
       const lead = /^[ \t]*/.exec(value)?.[0] ?? '';
       const rest = value.slice(lead.length);
-      if (mode !== 'advice' && rest.trim() && !rest.includes(ctx.M.ZDROWIE) && valueIsHealth(mode, rest, strict, medCtx)) {
-        // Wartość w tym samym wierszu: do końca zdania albo wiersza.
-        const brk = RE_SENTENCE_BREAK.exec(rest);
-        const cut = brk ? brk.index : rest.replace(/[ \t]+$/, '').length;
+      // Wartość w tym samym wierszu: do końca zdania albo wiersza („brak danych. Pacjent wypisany.”
+      // to odpowiedź „brak danych”), a przed imieniem i nazwiskiem, które należy do osoby.
+      const cut = valueEnd(rest);
+      const own = rest.slice(0, cut);
+      if (mode !== 'advice' && own.trim() && !own.includes(ctx.M.ZDROWIE) && valueIsHealth(mode, own, strict, medCtx)) {
         out.push(`${head[1]}${lead}${ctx.hit('ZDROWIE')}${rest.slice(cut)}`);
         mode = null; // lista w kolejnych wierszach następuje tylko po pustym nagłówku
         continue;
@@ -511,18 +593,44 @@ const RE_ICD_CODE = new RegExp(ICD_FLEX, 'g');
  * medycznym obok (kody błędów AGD: „diagnoza: E18”), sama etykieta „ICD-10” tylko przy osobie
  * albo kotwicy silnej (nazwa programu NFZ), samo „kod”/„z kodem” tylko przy kotwicy silnej („L4 z kodem F32”).
  */
-function icdAnchorOk(pre: string, w: string): boolean {
+/**
+ * Zdanie słownikowe, statystyczne albo przepis o kodzie, a nie rozpoznanie osoby: „Kod choroby J18.9
+ * oznacza…”, „(opis w słowniku ICD-10)”, „w 2025 r. zgłoszono 1,2 mln porad”, „Rozpoznanie E11 nie
+ * jest wymagane do refundacji”.
+ */
+const RE_ICD_GENERAL = new RegExp(
+  `${NOT_LETTER_BEFORE}(?:oznacza(?:ją)?|dotycz${L}|opis${L}|słownik${L}|przypadków|porad|mln|liczb(?:a|y|ie|ę|ą)|statystyk${L}|klasyfikacj${L}|(?:nie[ \\t]+)?(?:jest|są)[ \\t]+wymagan${L}|w[ \\t]+\\d{4}[ \\t]*r\\.)${NOT_LETTER_AFTER}`,
+  'i',
+);
+/** Etykieta formularza na początku wiersza („Kod choroby: F32”, „Rozpoznanie: J45.0”). */
+const RE_LINE_LABEL_BEFORE = /(?:^|\n)[ \t]*(?:[-•*][ \t]*|\d{1,2}[.)][ \t]*)?$/;
+/** e-ZLA: „niezdolność do pracy (kod choroby: …)” to zwolnienie konkretnej osoby. */
+const RE_SICK_LEAVE = new RegExp(`${NOT_LETTER_BEFORE}niezdolnoś${L}[ \\t]+do[ \\t]+pracy${NOT_LETTER_AFTER}`, 'i');
+
+/**
+ * Etykieta formularza na początku wiersza zapowiada kod sama, o ile zdanie nie jest słownikowe
+ * ani statystyczne. W zdaniu każda zapowiedź („rozpoznanie”, „kod choroby”) potrzebuje osoby
+ * obok, kotwicy silnej (wypis, zaświadczenie lekarskie) albo zakrytej już danej o zdrowiu. „Diagnoza” i „rozp.” dodatkowo
+ * słownictwa medycznego (kody błędów AGD: „diagnoza: E18”), samo „kod”/„z kodem” kotwicy silnej
+ * („L4 z kodem F32”), a sama etykieta „ICD-10” osoby albo kotwicy silnej (nazwa programu NFZ).
+ */
+function icdAnchorOk(whole: string, starts: number[], offset: number, end: number, pre: string, mask: string): boolean {
   const a = pre.trim();
-  if (/^kod(?:em|u)?(?![ \t]+[a-zA-Z])/i.test(a)) return RE_STRONG.test(w);
-  if (/^ICD/.test(a)) return RE_STRONG.test(w) || hasPerson(w);
-  if (/^(?:diagnoz|rozp\.)/i.test(a)) return hasMedVocab(w);
-  return true;
+  const w = windowAt(whole, starts, offset, end);
+  if (RE_ICD_GENERAL.test(sentenceAt(whole, starts, offset, end))) return false;
+  // samo „kod”/„z kodem” (bez „choroby”); „kodem choroby” nie może cofnąć się do „kod” + „em…”
+  if (/^kod(?:em|u)?(?![a-z]|[ \t]+[a-zA-Z])/i.test(a)) return RE_STRONG.test(w);
+  if (/^(?:diagnoz|rozp\.)/i.test(a) && !hasMedVocab(w)) return false;
+  const label = a.endsWith(':') && RE_LINE_LABEL_BEFORE.test(whole.slice(Math.max(0, offset - 12), offset));
+  if (label && !/^ICD/.test(a)) return true;
+  if (RE_STRONG.test(w) || w.includes(mask) || personNear(whole, sentenceAt(whole, starts, offset, end), offset, end)) return true;
+  return /^kod/i.test(a) && RE_SICK_LEAVE.test(w);
 }
 
 function maskIcdAnchored(ctx: RedactCtx): void {
   const starts = sentenceStarts(ctx.text);
   ctx.text = ctx.text.replace(RE_ICD_ANCHORED, (m: string, pre: string, codes: string, offset: number, whole: string) => {
-    if (!icdAnchorOk(pre, windowAt(whole, starts, offset, offset + m.length))) return m;
+    if (!icdAnchorOk(whole, starts, offset, offset + m.length, pre, ctx.M.ZDROWIE)) return m;
     const masked = codes.replace(RE_ICD_CODE, (c) => (ICD_ONLY.test(c) ? ctx.hit('ZDROWIE') : c));
     return `${pre}${masked}`;
   });
@@ -631,13 +739,28 @@ function mergeAfterMask(ctx: RedactCtx, mask: string): void {
   }
 }
 
+/** Lek jako przykład („np. paracetamol 500 mg”, „leki takie jak…”, „m.in.”), a nie lek osoby. */
+const RE_DRUG_EXAMPLE_BEFORE = new RegExp(
+  `${NOT_LETTER_BEFORE}(?:np\\.|na[ \\t]+przykład|m\\.[ \\t]?in\\.|tak(?:ich|ie|i|imi)[ \\t]+jak)[^.!?;\\n]{0,60}$`,
+  'i',
+);
+/** Instrukcja albo statystyka: „zgodnie z ulotką”, „1,2 mln recept na…”, „stosować paracetamol”. */
+const RE_DRUG_GENERAL = new RegExp(
+  `${NOT_LETTER_BEFORE}(?:zgodnie[ \\t]+z[ \\t]+ulotk${L}|recept[ \\t]+na|mln|stosować)${NOT_LETTER_AFTER}`,
+  'i',
+);
+
 function maskDrugs(ctx: RedactCtx): void {
   // Lek z dawką poza sekcją karty tylko przy kotwicy: cennik apteki („paracetamol 500 mg, 9,99 zł”),
-  // faktura i lista refundacyjna zostają.
+  // faktura i lista refundacyjna zostają, tak samo lek podany jako przykład albo w instrukcji
+  // i statystyce bez osoby („stosować paracetamol 500 mg”, „1,2 mln recept na metforminę 500 mg”).
   const starts = sentenceStarts(ctx.text);
   ctx.text = ctx.text.replace(RE_DRUG, (m: string, offset: number, whole: string) => {
     const to = offset + m.length;
-    if (RE_PRICE.test(sentenceAt(whole, starts, offset, to))) return m;
+    const sentence = sentenceAt(whole, starts, offset, to);
+    if (RE_PRICE.test(sentence)) return m;
+    if (RE_DRUG_EXAMPLE_BEFORE.test(whole.slice(Math.max(0, offset - 80), offset))) return m;
+    if (RE_DRUG_GENERAL.test(sentence) && !hasPerson(sentence) && namePairAt(sentence) < 0) return m;
     return medicalAnchored(whole, starts, offset, to) || RE_DRUG_VERB.test(windowAt(whole, starts, offset, to)) ? ctx.hit('ZDROWIE') : m;
   });
 }

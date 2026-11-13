@@ -291,3 +291,93 @@ test('dane o zdrowiu: długie ciągi odstępów i długie wiersze nie spowalniaj
     expect(Date.now() - t0, t.slice(0, 30)).toBeLessThan(2000);
   }
 });
+
+test('dane o zdrowiu: kotwica w zdaniu wymaga konkretnej osoby (słownik, statystyka, podmiot ogólny, przykład leku, definicja)', () => {
+  const same = [
+    // „kod choroby” i „ICD” w zdaniu słownikowym albo statystycznym
+    'Kod choroby J18.9 oznacza zapalenie płuc, nieokreślone.',
+    'Kod choroby: E11 - cukrzyca typu 2 (opis w słowniku ICD-10).',
+    'Kod choroby E11 dotyczy cukrzycy typu 2; w 2025 r. zgłoszono 1,2 mln porad.',
+    // podmiot ogólny z zaimkiem względnym
+    'Osoba, która choruje na cukrzycę, może skorzystać z ulgi.',
+    'Każdy pacjent, który choruje na cukrzycę, ma prawo do edukacji.',
+    'Kto choruje na astmę oskrzelową, powinien unikać dymu.',
+    // lek jako przykład, w instrukcji albo w statystyce
+    'W razie bólu można przyjąć np. paracetamol 500 mg doraźnie.',
+    'Lekarz zalecił leki przeciwbólowe, np. ibuprofen 200 mg.',
+    'Lekarz POZ zalecił w 2025 r. 1,2 mln recept na metforminę 500 mg.',
+    'Lekarz zalecił, by w przypadku gorączki stosować paracetamol 500 mg (instrukcja w ulotce).',
+    'Lekarz zalecił leki, m.in. ibuprofen 200 mg, zgodnie z ulotką.',
+    // pusta odpowiedź i definicja po etykiecie
+    'Choroby współistniejące: brak danych. Pacjent wypisany.',
+    'Choroby współistniejące: nie dotyczy',
+    'Choroby współistniejące: b.d.',
+    'Rozpoznanie: zgodnie z definicją w rozporządzeniu Ministra Zdrowia.',
+    'Rozpoznanie: w rozumieniu art. 5 ustawy cukrzyca jest chorobą przewlekłą.',
+    // „Rozpoznanie” bez dwukropka z kodem w zdaniu ogólnym
+    'Rozpoznanie E11 nie jest wymagane do refundacji.',
+    'Rozpoznanie J45 jest wymagane przy wniosku.',
+  ];
+  for (const t of same) expect(redactPII(t).redacted, t).toBe(t);
+  const cases: [string, string][] = [
+    // zaimek osobowy po czasowniku lekarza to osoba
+    ['Lekarz zalecił mu sertralinę 50 mg dziennie.', `Lekarz zalecił mu ${Z}.`],
+    // kod choroby przy osobie albo przy zwolnieniu lekarskim
+    ['Pracownik dostarczył zaświadczenie z kodem choroby F32.', `Pracownik dostarczył zaświadczenie z kodem choroby ${Z}.`],
+    ['Kod choroby: F32.1', `Kod choroby: ${Z}`],
+    // wartość etykiety kończy się na końcu zdania i przed imieniem i nazwiskiem
+    ['Choroby współistniejące: nadciśnienie tętnicze. Pacjent wypisany.', `Choroby współistniejące: ${Z}. Pacjent wypisany.`],
+    ['Rozpoznanie: astma oskrzelowa Jan Kowalski', `Rozpoznanie: ${Z} [IMIĘ I NAZWISKO]`],
+    // zdanie względne przy konkretnej osobie dalej wskazuje osobę
+    ['Pracownik, który choruje na cukrzycę, przedstawił zaświadczenie.', `Pracownik, który choruje na ${Z}, przedstawił zaświadczenie.`],
+    ['Jan Kowalski, który choruje na cukrzycę, wnosi o zwolnienie.', `[IMIĘ I NAZWISKO], który choruje na ${Z}, wnosi o zwolnienie.`],
+    // imię i nazwisko w tym samym zdaniu to osoba przy kotwicy słabej
+    ['Jan Kowalski z rozpoznaniem F32.1 wymaga kontroli.', `[IMIĘ I NAZWISKO] z rozpoznaniem ${Z} wymaga kontroli.`],
+    // imię i nazwisko w zdaniu obok nie robi z raportu karty pacjenta
+    ['Fundusz Zdrowia finansuje leczenie cukrzycy. Jan Kowalski jest prezesem.', 'Fundusz Zdrowia finansuje leczenie cukrzycy. [IMIĘ I NAZWISKO] jest prezesem.'],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
+  expect(redactPII('Rozpoznanie: astma oskrzelowa, Jan Kowalski, lat 54', { pseudonyms: true }).redacted).toBe(
+    `Rozpoznanie: ${Z}, [OSOBA-A], lat 54`,
+  );
+});
+
+test('dane o zdrowiu: reguła ogólna, populacja i słownik przy imieniu prelegenta zostają jawne', () => {
+  const same = [
+    'Kod choroby jest wymagany na zwolnieniu, np. J18.9 oznacza zapalenie płuc.',
+    'Każda osoba, która cierpi na astmę, może otrzymać refundację.',
+    'Kto doznał urazu, powinien zgłosić się do SOR.',
+    'Ludzie, którzy chorują na cukrzycę, żyją dłużej niż kiedyś.',
+    'Ulotka: dorośli mogą stosować ibuprofen 200 mg co 6 godzin.',
+    'Na przykład amoksycylina 500 mg bywa stosowana przy anginie.',
+    'W Polsce wystawiono 3 mln recept na sertralinę 50 mg.',
+    'Leki takie jak metformina 500 mg obniżają poziom cukru.',
+    'Rozpoznanie: definicja cukrzycy według WHO.',
+    'Kod choroby F32 oznacza epizod depresyjny według klasyfikacji ICD-10.',
+    'Liczba porad z kodem choroby J45 wzrosła w 2024 r.',
+    'Statystyka NFZ: rozpoznanie E11 postawiono u 3 mln osób.',
+    'Choroby współistniejące: bd',
+    'Program obejmuje leczenie, m.in. insulina glargine 100 j./ml.',
+    // podmiot ze zdaniem względnym i czasownikiem modalnym to reguła o każdym takim pacjencie
+    'Pacjent, który choruje na astmę, może otrzymać refundację leków.',
+    'Pacjent, który choruje na cukrzycę, powinien kontrolować glikemię.',
+    'Chory, który cierpi na depresję, ma prawo do zwolnienia.',
+  ];
+  for (const t of same) expect(redactPII(t).redacted, t).toBe(t);
+  const cases: [string, string][] = [
+    // imię i nazwisko prelegenta czy autora w zdaniu o grupie albo o słowniku nie robi z niego pacjenta
+    [
+      'Na konferencji Jan Kowalski omówił rozpoznanie astmy oskrzelowej u dzieci.',
+      'Na konferencji [IMIĘ I NAZWISKO] omówił rozpoznanie astmy oskrzelowej u dzieci.',
+    ],
+    [
+      'Kod choroby J45 (ICD-10) oznacza astmę; Jan Kowalski jest autorem opracowania.',
+      'Kod choroby J45 (ICD-10) oznacza astmę; [IMIĘ I NAZWISKO] jest autorem opracowania.',
+    ],
+    // bez czasownika modalnego albo z imieniem to dalej konkretna osoba
+    ['Pacjent, który choruje na cukrzycę, otrzymał skierowanie.', `Pacjent, który choruje na ${Z}, otrzymał skierowanie.`],
+    ['Jan Kowalski, który choruje na cukrzycę, może pracować zdalnie.', `[IMIĘ I NAZWISKO], który choruje na ${Z}, może pracować zdalnie.`],
+    ['Jan Kowalski ma rozpoznanie astmy oskrzelowej.', `[IMIĘ I NAZWISKO] ma rozpoznanie ${Z}.`],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
+});

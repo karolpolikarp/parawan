@@ -64,7 +64,19 @@ działają na GitHubie od chwili wypchnięcia tagów.
   budowlany i techniczny („pęknięcie stopy słupa”, „nadciśnienie w przewodzie”). Kod choroby
   z opisem („J45.0 Astma oskrzelowa”) znika razem z opisem, rozpoznanie z kodem w nawiasie
   w kolejnym wierszu karty też, a uraz ze stroną ciała („złamanie prawej nogi”) w całości. Procedura „Niebieskiej Karty” nie jest daną o zdrowiu i dalej zostaje
-  jawna. To dane szczególnej kategorii (art. 9 RODO), dlatego typ jest domyślnie włączony; można
+  jawna. Poza etykietą formularza na początku wiersza każde słowo, które zapowiada chorobę albo
+  kod, potrzebuje w zdaniu konkretnej osoby (imię i nazwisko, „Pan”, „Pani”, „mu”, „u niego”,
+  rola, PESEL), więc zostają jawne: zdanie ze słownika albo statystyki („Kod choroby J18.9
+  oznacza zapalenie płuc”, „Kod choroby E11 dotyczy cukrzycy typu 2; w 2025 r. zgłoszono 1,2 mln
+  porad”), podmiot ogólny („Osoba, która choruje na cukrzycę, może…”, „Każdy pacjent, który…”,
+  „Pacjent, który choruje na astmę, może otrzymać refundację”), imię prelegenta albo autora
+  w zdaniu o grupie („Jan Kowalski omówił rozpoznanie astmy u dzieci”),
+  lek podany jako przykład albo w instrukcji („np. ibuprofen 200 mg”, „stosować paracetamol
+  500 mg”, „1,2 mln recept na metforminę 500 mg”), pusta odpowiedź („Choroby współistniejące:
+  brak danych.”, „b.d.”), definicja po etykiecie („Rozpoznanie: w rozumieniu art. 5 ustawy…”)
+  i „Rozpoznanie E11 nie jest wymagane do refundacji”. „Lekarz zalecił mu sertralinę 50 mg” dalej
+  jest zakryte. Wartość po „Rozpoznanie:” kończy się na końcu zdania i przed imieniem
+  i nazwiskiem pacjenta, który w trybie „Rozróżniaj osoby” zachowuje swoją etykietę. To dane szczególnej kategorii (art. 9 RODO), dlatego typ jest domyślnie włączony; można
   go wyłączyć w panelu „Co maskować”.
 - **Trzy nowe rodzaje danych: numer uprawnień zawodowych, numer karty pobytu i numer aktu stanu
   cywilnego.** Numer prawa wykonywania zawodu („PWZ 2663347”), numer wpisu radcy prawnego albo

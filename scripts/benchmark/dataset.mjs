@@ -1070,6 +1070,28 @@ export function buildDataset() {
   neg('Prezydent Miasta\nWydział Komunikacji\nul. Lipowa 8\n20-001 Lublin', ['ul. Lipowa 8', '20-001 Lublin']);
   neg('Urząd Skarbowy Warszawa-Targówek\nul. Lipowa 8\n20-001 Lublin', ['ul. Lipowa 8', '20-001 Lublin']);
   neg('SZKOŁA PODSTAWOWA NR 5\nul. Lipowa 8\n20-001 Lublin', ['ul. Lipowa 8', '20-001 Lublin']);
+  // Grupa G9 (regresja): kotwica zdrowia w zdaniu bez konkretnej osoby, lek jako przykład, definicja.
+  neg('Kod choroby J18.9 oznacza zapalenie płuc, nieokreślone.', ['J18.9', 'zapalenie płuc']);
+  neg('Kod choroby: E11 - cukrzyca typu 2 (opis w słowniku ICD-10).', ['E11', 'cukrzyca typu 2']);
+  neg('Kod choroby E11 dotyczy cukrzycy typu 2; w 2025 r. zgłoszono 1,2 mln porad.', ['E11', 'cukrzycy typu 2']);
+  neg('Osoba, która choruje na cukrzycę, może skorzystać z ulgi.', ['cukrzycę']);
+  neg('Każdy pacjent, który choruje na cukrzycę, ma prawo do edukacji.', ['cukrzycę']);
+  neg('W razie bólu można przyjąć np. paracetamol 500 mg doraźnie.', ['paracetamol 500 mg']);
+  neg('Lekarz zalecił leki przeciwbólowe, np. ibuprofen 200 mg.', ['ibuprofen 200 mg']);
+  neg('Lekarz POZ zalecił w 2025 r. 1,2 mln recept na metforminę 500 mg.', ['metforminę 500 mg']);
+  neg('Lekarz zalecił, by w przypadku gorączki stosować paracetamol 500 mg (instrukcja w ulotce).', ['paracetamol 500 mg']);
+  neg('Choroby współistniejące: brak danych. Pacjent wypisany.', ['brak danych']);
+  neg('Choroby współistniejące: b.d.', ['b.d.']);
+  neg('Rozpoznanie: w rozumieniu art. 5 ustawy cukrzyca jest chorobą przewlekłą.', ['cukrzyca']);
+  neg('Rozpoznanie E11 nie jest wymagane do refundacji.', ['E11']);
+  neg('Pacjent, który choruje na astmę, może otrzymać refundację leków.', ['astmę']);
+  neg('Chory, który cierpi na depresję, ma prawo do zwolnienia.', ['depresję']);
+  neg('Statystyka NFZ: rozpoznanie E11 postawiono u 3 mln osób.', ['E11']);
+  neg('W Polsce wystawiono 3 mln recept na sertralinę 50 mg.', ['sertralinę 50 mg']);
+  neg('Leki takie jak metformina 500 mg obniżają poziom cukru.', ['metformina 500 mg']);
+  str('Na konferencji Jan Kowalski omówił rozpoznanie astmy oskrzelowej u dzieci.', ['Jan Kowalski'], ['astmy oskrzelowej']);
+  str('Lekarz zalecił mu sertralinę 50 mg dziennie.', ['sertralinę 50 mg'], ['Lekarz zalecił mu']);
+  str('Rozpoznanie: astma oskrzelowa, Jan Kowalski, lat 54', ['astma oskrzelowa', 'Jan Kowalski'], ['Rozpoznanie:', 'lat 54']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

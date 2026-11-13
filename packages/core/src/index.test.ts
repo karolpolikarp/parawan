@@ -2560,9 +2560,10 @@ test('firma jednoosobowa: zapis wersalikami bez kotwicy i bez członu branżoweg
   expect(
     redactPII('Lekarz prowadzący: dr Tomasz Rak\nRozpoznanie: RAK-JELITA Jan Kowalski, lat 54', { ...BEZ_ZDROWIA, pseudonyms: true }).redacted,
   ).toBe('Lekarz prowadzący: dr [OSOBA-A]\nRozpoznanie: RAK-JELITA [OSOBA-B], lat 54');
-  // z danymi o zdrowiu wartość po „Rozpoznanie:” znika do końca wiersza, lekarz zostaje osobą
+  // z danymi o zdrowiu wartość po „Rozpoznanie:” kończy się przed imieniem i nazwiskiem:
+  // lekarz i pacjent zostają osobami z własnymi pseudonimami
   expect(ps('Lekarz prowadzący: dr Tomasz Rak\nRozpoznanie: RAK-JELITA Jan Kowalski, lat 54')).toBe(
-    'Lekarz prowadzący: dr [OSOBA-A]\nRozpoznanie: [DANE O ZDROWIU]',
+    'Lekarz prowadzący: dr [OSOBA-A]\nRozpoznanie: [DANE O ZDROWIU] [OSOBA-B], lat 54',
   );
   expect(ps('Anna Maj, MAJ-CZERWIEC: urlop. Jan Kowalski, MAJ-CZERWIEC: delegacja.')).toBe(
     '[OSOBA-A], MAJ-CZERWIEC: urlop. [OSOBA-B], MAJ-CZERWIEC: delegacja.',
@@ -9775,4 +9776,20 @@ test('G7 regresja, kontrola precyzji po weryfikacji: organ nad urzędem, dzielni
     [`Gabinet Weterynaryjny Wilk w Kole${tail}`, `Gabinet Weterynaryjny Wilk w Kole\n${A}\n${KOD} ${C}`],
     [`Oddział NOWAK${tail}`, `Oddział NOWAK\n${A}\n${KOD} ${C}`],
   ]);
+});
+
+test('dane o zdrowiu (G9): kotwica w zdaniu bez konkretnej osoby zostawia tekst jawny', () => {
+  for (const t of [
+    'Kod choroby J18.9 oznacza zapalenie płuc, nieokreślone.',
+    'Osoba, która choruje na cukrzycę, może skorzystać z ulgi.',
+    'Lekarz zalecił leki przeciwbólowe, np. ibuprofen 200 mg.',
+    'Choroby współistniejące: brak danych. Pacjent wypisany.',
+    'Rozpoznanie E11 nie jest wymagane do refundacji.',
+  ]) {
+    expect(redactPII(t).redacted, t).toBe(t);
+  }
+  expect(redactPII('Lekarz zalecił mu sertralinę 50 mg dziennie.').redacted).toBe('Lekarz zalecił mu [DANE O ZDROWIU].');
+  expect(redactPII('Pracownik dostarczył zaświadczenie z kodem choroby F32.').redacted).toBe(
+    'Pracownik dostarczył zaświadczenie z kodem choroby [DANE O ZDROWIU].',
+  );
 });
