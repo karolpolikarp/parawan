@@ -9145,3 +9145,94 @@ test('G5 po drugiej weryfikacji: podmiot zdania i czasownik za datą to inne zda
     ],
   ]);
 });
+test('ewaluacja G6: imię i nazwisko-homograf w zgodnym przypadku po rzeczowniku zbiorowym to osoba', () => {
+  masked([
+    ['Testy obciążeniowe wykonał zespół Joanny Sikory.', `Testy obciążeniowe wykonał zespół ${N}.`],
+    ['Testy wykonał zespół Jana Wróbla.', `Testy wykonał zespół ${N}.`],
+    ['Raport przygotował zespół Anny Lis.', `Raport przygotował zespół ${N}.`],
+    ['Mecz wygrała drużyna Piotra Wilka.', `Mecz wygrała drużyna ${N}.`],
+    ['Wniosek przygotował komitet Adama Kowala.', `Wniosek przygotował komitet ${N}.`],
+    ['Przekazano dokumenty Joannie Sikorze.', `Przekazano dokumenty ${N}.`],
+    ['Rozmawiałem z Joanną Sikorą wczoraj.', `Rozmawiałem z ${N} wczoraj.`],
+    ['Spotkanie z Janem Wróblem odbyło się.', `Spotkanie z ${N} odbyło się.`],
+    ['Wniosek Wiktorii Kos został przyjęty.', `Wniosek ${N} został przyjęty.`],
+    ['Wniosek Adama Kota został przyjęty.', `Wniosek ${N} został przyjęty.`],
+    ['Wniosek Jana Sowy został przyjęty.', `Wniosek ${N} został przyjęty.`],
+  ]);
+  keep([
+    // „Chór”, „Fundacja”, „Nagroda” wielką literą i „zespół” przy nazwisku spoza słownika zostają
+    'Koncert dał Chór Jana Lisa.',
+    'Chór Jana Lisa wystąpił.',
+    'Wspiera nas Fundacja Joanny Sikory.',
+    'Nagroda Jana Lisa została przyznana.',
+    'Szkoła im. Józefa Wybickiego.',
+    'Zdiagnozowano zespół Downa.',
+    // Matka Boża tylko z kotwicą religijną przed parą
+    'Kościół Najświętszej Marii Panny.',
+    'Msza w kościele Marii Panny.',
+    'Modlitwa do Najświętszej Maryi Panny.',
+    'Parafia pw. Wniebowzięcia Najświętszej Marii Panny w Krakowie.',
+    'Kościół Mariacki pw. Marii Panny.',
+  ]);
+  masked([['Świadek Maria Panna zeznała.', `Świadek ${N} zeznała.`]]);
+});
+test('ewaluacja G6 po weryfikacji: patroni, kluby, grupa robocza na początku zdania i Maria Panna bez kotwicy', () => {
+  // nazwisko, które nie jest zwykłym słowem, po głowie grupy małą literą zostaje jak dotąd
+  keep([
+    'Mecz rozegrała drużyna Lecha Poznań.',
+    'Wczoraj drużyna Lecha Poznań wygrała z drużyną Legii Warszawa.',
+    'W koncercie wziął udział chór Stanisława Moniuszki z Gdańska.',
+    'Na apelu był hufiec Tadeusza Kościuszki.',
+    'Grała orkiestra Jana Kiepury.',
+    'W przeglądzie wystąpił zespół Marii Skłodowskiej-Curie.',
+    'Mecz rozegrała drużyna Lecha Wałęsy.',
+    'Stoi koło Mikołaja Kopernika w Toruniu.',
+  ]);
+  // „Zespół”, „Drużyna”, „Komitet” wielką literą na początku zdania, wiersza albo punktu listy
+  masked([
+    ['Zespół Joanny Sikory przygotował raport dla zarządu.', `Zespół ${N} przygotował raport dla zarządu.`],
+    ['Notatka. Zespół Adama Kota wykonał audyt.', `Notatka. Zespół ${N} wykonał audyt.`],
+    ['- Zespół Anny Lis: 3 osoby', `- Zespół ${N}: 3 osoby`],
+    ['Odpowiedzialny: Zespół Jana Wróbla.', `Odpowiedzialny: Zespół ${N}.`],
+    ['Zespół Jana Wróbla zagrał.', `Zespół ${N} zagrał.`],
+    ['Sprawę prowadzi koło Adama Kota w Lublinie.', `Sprawę prowadzi koło ${N} w Lublinie.`],
+  ]);
+  // Maria Panna bez kotwicy religijnej to osoba
+  masked([
+    ['Wezwano Marię Pannę na rozprawę.', `Wezwano ${N} na rozprawę.`],
+    ['Sprawa z wniosku Marii Panny o alimenty.', `Sprawa z wniosku ${N} o alimenty.`],
+    ['Pozew wniosła Maria Panna przeciwko Janowi Nowakowi.', `Pozew wniosła ${N} przeciwko ${N}.`],
+    ['Parafianka Maria Panna złożyła wniosek.', `Parafianka ${N} złożyła wniosek.`],
+  ]);
+});
+test('ewaluacja G6 po trzeciej weryfikacji: Maria Panna jako osoba przy miejscu kultu, nazwiska spoza słownika po „zespół”', () => {
+  // kotwica z samego miejsca albo modlitwy chroni tylko dopełniacz; dane osoby za parą zawsze wygrywają
+  masked([
+    ['Po modlitwie Maria Panna, PESEL 80031212345, opuściła kaplicę.', `Po modlitwie ${N}, PESEL [PESEL], opuściła kaplicę.`],
+    ['W kościele Maria Panna zauważyła sprawcę i wezwała policję.', `W kościele ${N} zauważyła sprawcę i wezwała policję.`],
+    ['W parafii Maria Panna pracuje jako organistka.', `W parafii ${N} pracuje jako organistka.`],
+  ]);
+  keep([
+    'W parafii Marii Panny odbył się festyn.',
+    'Po modlitwie do Najświętszej Maryi Panny wierni wyszli.',
+  ]);
+  // nazwisko spoza słownika homografów, drugie imię i nazwisko z łącznikiem po głowie grupy roboczej
+  masked([
+    ['Pracę wykonał zespół Ewy Zimy z działu IT.', `Pracę wykonał zespół ${N} z działu IT.`],
+    ['Projekt prowadzi zespół Wiktorii Kos.', `Projekt prowadzi zespół ${N}.`],
+    ['Projekt prowadzi zespół Piotra Kosa.', `Projekt prowadzi zespół ${N}.`],
+    ['Projekt prowadzi zespół Joanny Marii Sikory.', `Projekt prowadzi zespół ${N}.`],
+    ['Projekt prowadzi drużyna Anny Nowak-Lis.', `Projekt prowadzi drużyna ${N}.`],
+    ['Projekt prowadzi zespół Anny Lis-Nowak.', `Projekt prowadzi zespół ${N}.`],
+    ['Projekt prowadzi komitet Jana Lisa-Nowaka.', `Projekt prowadzi komitet ${N}.`],
+  ]);
+  // patroni, kluby i choroby z nazwiskiem nadal jawne
+  keep([
+    'Grała orkiestra Jana Kiepury.',
+    'Chór Jana Kiepury wystąpił.',
+    'Na pielgrzymkę pojechał komitet Jana Pawła II.',
+    'W turnieju wystąpiła drużyna Wisły Kraków.',
+    'Rozpoznano zespół Aspergera u dziecka.',
+    'Pacjent ma zespół Marfana.',
+  ]);
+});

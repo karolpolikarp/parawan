@@ -139,6 +139,65 @@ const RE_LEGAL_FORM_AHEAD = /^[ \t]*(?:\.[ \t]*)?(?:S\.?A\.?|[Ss][Pp]\.|[Ss]\.?[
 // Tytuły duchowne między głową nazwy a imieniem patrona („Muzeum ks. Jerzego Popiełuszki"): głową
 // jest wyraz przed nimi.
 const RE_CLERIC_RANKS_TAIL = /(?:(?<!\p{L})(?:ks|bł|św|sw|bp|abp|kard|o)\.[ \t]*)+$/iu;
+// Głowy nazw z PATRON_GEN_HEADS, które pisane małą literą oznaczają grupę ludzi kierowaną przez osobę
+// w dopełniaczu („zespół Anny Lis”, „drużyna Jana Wróbla”). Bez „nagroda”, „fundacja”, „konkurs”:
+// te nawet małą literą częściej noszą imię patrona.
+const PEOPLE_GROUP_HEADS = new Set<string>('zespół drużyna chór orkiestra komitet hufiec koło kółko'.split(' '));
+// Te z nich, które wielką literą na początku zdania, wiersza albo punktu listy („Zespół Adama Kota
+// wykonał audyt”, „- Zespół Anny Lis: 3 osoby”) też zwykle znaczą grupę roboczą. „Chór”, „Orkiestra”
+// czy „Hufiec” wielką literą to częściej nazwa własna z patronem, więc ich tu nie ma.
+const WORK_GROUP_HEADS = new Set<string>('zespół drużyna komitet'.split(' '));
+// Początek zdania, wiersza albo punktu listy tuż przed głową nazwy (z początkiem tekstu i bez niego).
+const RE_LEAD_START_TEXT = /(?:^|[.!?:;][ \t]+|\n)[ \t]*(?:(?:[-–•*]|\d{1,3}[.)])[ \t]+)?$/u;
+const RE_LEAD_START = /(?:[.!?:;][ \t]+|\n)[ \t]*(?:(?:[-–•*]|\d{1,3}[.)])[ \t]+)?$/u;
+// Nazwiska postaci, od których zespoły, drużyny i komitety biorą nazwę (dopełniacz, małe litery):
+// „zespół Marii Skłodowskiej-Curie”, „drużyna Lecha Wałęsy” to patroni, nie kierownicy grupy.
+const GROUP_PATRON_SURNAMES_GEN = new Set<string>(
+  (
+    'kościuszki moniuszki skłodowskiej curie wałęsy kiepury kopernika chopina mickiewicza słowackiego sienkiewicza ' +
+    'piłsudskiego paderewskiego matejki sobieskiego jagiełły konopnickiej wyspiańskiego kochanowskiego norwida ' +
+    'żeromskiego reymonta szymanowskiego wieniawskiego lutosławskiego fredry krasickiego orzeszkowej popiełuszki ' +
+    'wojtyły korczaka pileckiego andersa sikorskiego dmowskiego traugutta pułaskiego dąbrowskiego'
+  ).split(' '),
+);
+/**
+ * Czy głowa grupy ludzi tuż przed parą „Imię Nazwisko” w dopełniaczu wskazuje osobę („wykonał zespół
+ * Joanny Sikory”), a nie patrona nazwy własnej („Koncert dał Chór Jana Lisa”)? Nazwiskiem jest
+ * pierwszy wyraz za imionami („zespół Joanny Marii Sikory”), a w nazwisku z łącznikiem każdy człon
+ * („drużyna Anny Nowak-Lis”). Po „zespół”, „drużyna”, „komitet” małą literą wystarczy nazwisko spoza
+ * listy patronów i spoza nazw miejscowości („zespół Ewy Zimy”, ale „drużyna Lecha Poznań”). Po
+ * pozostałych głowach i wielką literą na początku zdania tylko nazwisko, które jest też zwykłym słowem
+ * („Sikora”, „Wróbel”, „Lis”): „chór Stanisława Moniuszki”, „hufiec Tadeusza Kościuszki” zostają jawne.
+ */
+function peopleGroupHeadBefore(t: string, offset: number, parts: string[], start: number): boolean {
+  let k = start + 1;
+  while (2 * k < parts.length && isFirstNameGenitive(parts[2 * k].toLowerCase()) && isFirstNameLike(parts[2 * k])) k++;
+  const surname = parts[2 * k];
+  if (!surname || isFirstNameLike(surname)) return false;
+  const members = surname.split('-').filter(Boolean);
+  if (!members.length) return false;
+  const homograph = members.some((p) => !!homographBase(p));
+  const from = Math.max(0, offset - 60);
+  const full = t.slice(from, offset) + parts.slice(0, 2 * start).join('');
+  const hm = /(\p{L}+) +$/u.exec(full);
+  if (!hm) return false;
+  const raw = hm[1];
+  const head = raw.toLowerCase();
+  if (raw === head) {
+    if (!PEOPLE_GROUP_HEADS.has(head)) return false;
+    if (homograph) return true;
+    // nazwisko spoza słownika homografów tylko po głowie grupy roboczej i bez śladu patrona albo klubu
+    return (
+      WORK_GROUP_HEADS.has(head) &&
+      members.every(
+        (p) => /^\p{Lu}\p{Ll}+$/u.test(p) && !GROUP_PATRON_SURNAMES_GEN.has(p.toLowerCase()) && !POLISH_CITIES.has(p.toLowerCase()),
+      )
+    );
+  }
+  if (!homograph) return false;
+  if (!WORK_GROUP_HEADS.has(head) || raw !== raw[0] + raw.slice(1).toLowerCase()) return false;
+  return (from === 0 ? RE_LEAD_START_TEXT : RE_LEAD_START).test(full.slice(0, hm.index));
+}
 /**
  * Czy imię na pozycji `start` ciągu to imię patrona: świętego („Sobór św. Jerzego Zwycięzcy") albo
  * obiektu lub instytucji („Pomnik Jerzego Popiełuszki")? Drugie tylko w przypadku zależnym; osobę
@@ -152,6 +211,8 @@ function patronFirstNameAt(t: string, offset: number, parts: string[], start: nu
   if (POLISH_FIRST_NAMES.has(sw) && !isFirstNameGenitive(sw)) return false;
   // głowa nazwy w tej samej komórce: „Nagroda⇥Jana Lisa⇥Kraków" to kolumna nagrody i laureat
   const prev = /(\p{L}+)\.? +$/u.exec(before)?.[1]?.toLowerCase();
+  // grupa ludzi tej osoby, a nie nazwa własna z patronem („wykonał zespół Joanny Sikory”)
+  if (prev && PEOPLE_GROUP_HEADS.has(prev) && peopleGroupHeadBefore(t, offset, parts, start)) return false;
   if (prev && PATRON_GEN_HEADS.has(prev)) return true;
   const ranks = RE_CLERIC_RANKS_TAIL.exec(before);
   if (ranks) {
@@ -197,6 +258,17 @@ const FICTIONAL_PAIRS_SRC = [
   'ani(?:a|i|ę|ą|u)[ \\t]+shirley',
   'pan(?:a|u|em|ie)?[ \\t]+wołodyjowsk(?:i|iego|iemu|im)',
 ];
+// Matka Boża („Najświętszej Marii Panny”, „kościół Mariacki pw. Marii Panny”) to nie imię z nazwiskiem,
+// ale tylko z kotwicą religijną tuż przed parą: „Wezwano Marię Pannę na rozprawę” to osoba. Kotwica
+// z samego miejsca albo modlitwy („w kościele”, „w parafii”, „po modlitwie”) tylko przed dopełniaczem
+// („Msza w kościele Marii Panny”): w innym przypadku para to zwykle podmiot zdania („W kościele Maria
+// Panna zauważyła sprawcę”). Rola osoby przed parą albo jej dane za parą („, PESEL …”) zawsze wygrywają.
+const RE_MARY_PAIR = /(?<![\p{L}\p{N}])Mar(?:ia|ii|ię|ią|yja|yi|yję|yją)[ \t]+Pann(?:a|y|ie|ę|ą|o)(?![\p{L}\p{N}])/gu;
+const RE_MARY_ANCHOR_BEFORE =
+  /(?<!\p{L})(?:(?:przenajświętsz|najświętsz|świętej|błogosławion|niepokalan|kości(?:ół|oł|el)|bazylik|parafi(?!an)|sanktuari|kaplic|katedr|wezwani|wniebowzięci|zwiastowani|narodzeni|nawiedzeni|ofiarowani|oczyszczeni|modlitw)\p{L}*|najśw\.|św\.|pw\.|p\.[ \t]*w\.)(?:[ \t]+(?:do|pw\.|p\.[ \t]*w\.|najświętszej|świętej|najśw\.|św\.))*[ \t]+$/iu;
+// Kotwica tuż przed parą, która sama wskazuje Matkę Bożą w każdym przypadku („Najświętsza Maria Panna”).
+const RE_MARY_STRONG_BEFORE = /(?<!\p{L})(?:(?:przenajświętsz|najświętsz|świętej|święta|błogosławion|niepokalan)\p{L}*|najśw\.|św\.|pw\.|p\.[ \t]*w\.)[ \t]+$/iu;
+const RE_MARY_GEN = /^Mar(?:ii|yi)[ \t]+Panny$/u;
 // Każda litera z ogonkiem także w zapisie ASCII („Kubus Puchatek").
 const foldClass = (s: string): string => s.replace(RE_PL_DIACRITIC_G, (c) => `[${c}${foldAsciiChar(c)}]`);
 const RE_FICTIONAL_PAIR = new RegExp(`(?<![\\p{L}\\p{N}])(?:${FICTIONAL_PAIRS_SRC.map(foldClass).join('|')})(?![\\p{L}\\p{N}])`, 'giu');
@@ -205,6 +277,13 @@ export function passProtectFictional(ctx: RedactCtx): void {
   ctx.text = ctx.text.replace(RE_FICTIONAL_PAIR, (m, offset: number, t: string) => {
     const prev = RE_PREV_TOKEN.exec(t.slice(Math.max(0, offset - 40), offset))?.[1]?.toLowerCase();
     if (prev && (ROLE_WORDS.has(prev) || TITLE_WORDS.has(prev) || PARTY_ROLE_WORDS.has(prev))) return m;
+    if (personSlotBefore(t, offset) || RE_PERSON_DATA_AHEAD.test(t.slice(offset + m.length, offset + m.length + 24))) return m;
+    return protectSpan(ctx, m);
+  });
+  ctx.text = ctx.text.replace(RE_MARY_PAIR, (m, offset: number, t: string) => {
+    const before = t.slice(Math.max(0, offset - 50), offset);
+    if (!RE_MARY_ANCHOR_BEFORE.test(before)) return m;
+    if (!RE_MARY_GEN.test(m) && !RE_MARY_STRONG_BEFORE.test(before)) return m;
     if (personSlotBefore(t, offset) || RE_PERSON_DATA_AHEAD.test(t.slice(offset + m.length, offset + m.length + 24))) return m;
     return protectSpan(ctx, m);
   });

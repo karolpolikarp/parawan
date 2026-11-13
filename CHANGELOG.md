@@ -12,6 +12,21 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+- **Osoba z nazwiskiem, które jest też zwykłym słowem, jest zakryta po „zespół” czy „drużyna”.**
+  W zdaniu „testy obciążeniowe wykonał zespół Joanny Sikory” imię i nazwisko zostawały jawne, bo
+  „zespół” przed imieniem w dopełniaczu był brany za początek nazwy z patronem, a nazwisko
+  „Sikora” to też nazwa ptaka. Teraz po „zespół”, „drużyna”, „chór”, „orkiestra”, „komitet”,
+  „hufiec” i „koło” pisanych małą literą taka para dostaje znacznik osoby (tak samo „drużyna Piotra
+  Wilka”, „zespół Anny Lis”). „Zespół”, „Drużyna” i „Komitet” wielką literą na początku zdania,
+  wiersza albo punktu listy też („Zespół Adama Kota wykonał audyt”). Patroni i kluby zostają jawni
+  jak dotąd: „chór Stanisława Moniuszki”, „hufiec Tadeusza Kościuszki”, „drużyna Lecha Poznań”,
+  „Koncert dał Chór Jana Lisa”, „Fundacja Joanny Sikory”. Po „zespół”, „drużyna” i „komitet”
+  małą literą zakryte jest też nazwisko spoza słownika („zespół Ewy Zimy”, „zespół Wiktorii Kos”),
+  osoba z dwoma imionami („zespół Joanny Marii Sikory”) i nazwisko z łącznikiem („drużyna Anny
+  Nowak-Lis”). Znani patroni i kluby zostają jawni („zespół Marii Skłodowskiej-Curie”, „drużyna
+  Wisły Kraków”). Przy okazji „Najświętszej Marii Panny” i „kościół Marii Panny” nie są już brane
+  za imię i nazwisko, a „Wezwano Marię Pannę na rozprawę”, „W kościele Maria Panna zauważyła
+  sprawcę” i „Maria Panna, PESEL …” nadal są zakryte.
 - **Data urodzenia dziecka po słowie „urodzenie” jest zakryta.** W piśmie kadrowym „w związku
   z urodzeniem syna, Marka Nowaka (PESEL …), w dniu 17 czerwca 2026 r.” data zostawała jawna, bo
   między „urodzeniem” a datą stały imię, nazwisko i numer. Teraz data dostaje znacznik daty

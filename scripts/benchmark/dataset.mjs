@@ -1004,6 +1004,16 @@ export function buildDataset() {
   neg('Zasiłek z tytułu urodzenia dziecka wypłacony w dniu 5 maja 2026 r., wypłata do dnia 31.12.2026.', ['5 maja 2026', '31.12.2026']);
   neg('Zgłoszenie urodzenia dziecka nastąpiło w dniu 10.06.2026 r., a po urodzeniu córki szczepienie wykonano dnia 3.05.2026 r.', ['10.06.2026', '3.05.2026']);
 
+  // imię i nazwisko-homograf po rzeczowniku zbiorowym małą literą (ewaluacja 50 pism, grupa G6)
+  osp('Testy obciążeniowe wykonał zespół Joanny Sikory.', ['Joanny', 'Sikory'], ['Testy obciążeniowe wykonał zespół']);
+  osp('Mecz wygrała drużyna Piotra Wilka, a raport przygotował zespół Anny Lis.', ['Piotra', 'Wilka', 'Anny', 'Lis'], ['Mecz wygrała drużyna', 'raport przygotował zespół']);
+  neg('Koncert dał Chór Jana Lisa, a Fundacja Joanny Sikory wsparła festiwal.', ['Chór Jana Lisa', 'Fundacja Joanny Sikory']);
+  neg('Msza w kościele Najświętszej Marii Panny, a chór Stanisława Moniuszki zaśpiewał.', ['Najświętszej Marii Panny', 'chór Stanisława Moniuszki']);
+  osp('Notatka. Zespół Adama Kota wykonał audyt, a wezwano Marię Pannę na rozprawę.', ['Adama', 'Kota', 'Marię', 'Pannę'], ['Notatka. Zespół', 'wezwano', 'na rozprawę']);
+  osp('Pracę wykonał zespół Ewy Zimy, a projekt prowadzi drużyna Anny Nowak-Lis.', ['Ewy', 'Zimy', 'Anny', 'Nowak-Lis'], ['Pracę wykonał zespół', 'projekt prowadzi drużyna']);
+  osp('W kościele Maria Panna zauważyła sprawcę i wezwała policję.', ['Maria', 'Panna'], ['W kościele', 'zauważyła sprawcę']);
+  neg('Mecz rozegrała drużyna Lecha Poznań, a grała orkiestra Jana Kiepury.', ['drużyna Lecha Poznań', 'orkiestra Jana Kiepury']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {
