@@ -20,6 +20,22 @@ działają na GitHubie od chwili wypchnięcia tagów.
   Bez etykiety nic się nie zmienia. Zostają jawne: liczba w następnym zdaniu („PESEL. 2024000123 to
   nr zgłoszenia”), nagłówek tabeli z „PESEL” nad inną kolumną, numer po innym słowie („PESEL
   zgłoszenie 2024100123”), numer sprawy po nazwie rejestru („zapytanie do bazy PESEL nr 2026111301”), NIP po pustym polu PESEL i dłuższe identyfikatory („1234567890-12”).
+- **Telefon po „pod numerem” w zdaniu o kontakcie jest zamaskowany.** Zdanie „W razie pytań proszę
+  kontaktować się z działem kadr pod numerem 22 379 56 66.” zostawiało numer jawny, bo kotwicą było tylko
+  „dzwonić pod”. Teraz numer trafia pod znacznik `[TELEFON]`, gdy przed „pod numerem”, „pod numerami”,
+  „pod nr” albo „pod wskazanym numerem” stoi zwrot kontaktu („kontaktować się ze mną”, „kontakt
+  z sekretariatem”, „dzwonić do mnie w godzinach 8-16”, „telefonować”, „jestem dostępny”, „jestem
+  osiągalna”). Między nimi mogą stać tylko krótkie wyrazy w rodzaju „się”, „ze mną”, „wyłącznie”,
+  „telefonicznie lub mailowo” albo adresat po „z” („z Panią Kierownik”). Adresat liczy się tylko
+  w prośbie o kontakt („proszę kontaktować się z działem kadr”, „proszę o kontakt z sekretariatem”),
+  więc opis zdarzenia („Kontakt z firmą wpisaną pod numerem …”, „Kontaktowano się z lokatorem
+  mieszkania pod numerem …”, „Sprawa o kontakty z dzieckiem prowadzona pod numerem …”) zostawia numer
+  jawny. Samo „pod numerem” niczego
+  nie maskuje, więc numer w rejestrze, sprawie, fakturze czy KRS („wpisana do rejestru pod numerem …”,
+  „kontaktowała się w sprawie wpisu pod numerem …”) zostaje jak był. „Dostępny pod numerem” maskuje
+  tylko przy osobie („jestem dostępny”) albo z „telefonicznie”, więc „Dokument dostępny pod numerem …”
+  i „Ogłoszenie jest dostępne pod numerem … w BIP” zostają jawne. Liczba z walutą, data i numer
+  z rokiem po ukośniku („… pod numerem 22 379 56 66/2024”) po tym zwrocie też zostają.
 
 ## v0.46.27 — 2026-11-12
 

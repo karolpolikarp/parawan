@@ -960,6 +960,19 @@ export function buildDataset() {
   neg('Kolumny: PESEL Kwota 1234567890 zł do zapłaty.', ['1234567890']);
   str('Nr PESEL: 8909150266, adres do korespondencji bez zmian.', ['8909150266'], ['adres do korespondencji']);
   neg('Zapytanie do bazy PESEL nr 2026111301 zrealizowano.', ['2026111301']);
+  // ewaluacja G2: telefon po „pod numerem", gdy wcześniej w zdaniu stoi zwrot kontaktu; samo
+  // „pod numerem" przy rejestrze, sprawie albo fakturze zostaje
+  str('W razie pytań proszę kontaktować się ze mną pod numerem 22 379 56 66.', ['22 379 56 66'], ['W razie pytań', 'pod numerem']);
+  str('Jestem dostępny pod nr 12 672 59 69 w dni robocze.', ['12 672 59 69'], ['Jestem dostępny', 'dni robocze']);
+  neg('Spółka wpisana do rejestru pod numerem 22 379 56 66.', ['22 379 56 66']);
+  neg('Spółka kontaktowała się w sprawie wpisu pod numerem 12 345 67 89.', ['12 345 67 89']);
+  str('Proszę kontaktować się z działem kadr pod numerem 61 262 16 30.', ['61 262 16 30'], ['z działem kadr', 'pod numerem']);
+  neg('Ogłoszenie jest dostępne pod numerem 22 379 56 66 w BIP urzędu.', ['22 379 56 66']);
+  // adresat po „z" tylko po prośbie o kontakt i bez imiesłowu: opis zdarzenia to numer wpisu lub sprawy
+  neg('Kontakt z firmą wpisaną pod numerem 12 345 67 89 do rejestru.', ['12 345 67 89']);
+  neg('Kontaktowano się ze stroną postępowania zarejestrowanego pod nr 12 345 67 89.', ['12 345 67 89']);
+  neg('Sprawa o kontakty z dzieckiem prowadzona pod numerem 12 345 67 89.', ['12 345 67 89']);
+  neg('Kontakt ze strony urzędu pod numerem 12 345 67 89.', ['12 345 67 89']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

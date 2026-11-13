@@ -310,7 +310,44 @@ const PHONE_GAP_WORD = String.raw`(?!(?:inw|ewid|fabr|ser|kat|poz|szt|egz|lp)\.)
 // strażnika w callbacku: odrzucone dopasowanie zjadłoby kotwicę leżącą dalej. „kom." (Komisja)
 // i „kontakt" są bez przerwy. \b odcina „iPhone" i „mobbing". Czasownik tylko z „pod/na"
 // („dzwonić pod 512 345⏎678"), bo „Dzwonił w sprawie faktury …" to nie numer.
+// Czasownik albo rzeczownik kontaktu z „pod numerem" dalej w zdaniu („kontaktować się ze mną pod
+// numerem 22 379 56 66", „jestem dostępny pod nr …"). Między nimi tylko wyrazy z zamkniętej listy
+// (zaimki, „się", przysłówki, spójnik między nimi) i godziny („w godzinach 8-16"), bo „kontaktował
+// się w sprawie wpisu pod numerem …" to numer rekordu. Samo „pod numerem" kotwicą nie jest:
+// „wpisana do rejestru pod numerem 123 456 789". „dostępny/osiągalny" tylko z osobą („jestem
+// dostępny") albo z „telefonicznie", bo „Dokument dostępny pod numerem …" to numer dokumentu.
+// Adresat po „z/ze" („z działem kadr", „z Panią Kierownik") tylko po prośbie o kontakt
+// (bezokolicznik, tryb rozkazujący, „o kontakt"): opis zdarzenia („Kontakt z firmą …",
+// „Kontaktowano się z lokatorem mieszkania pod numerem …", „Sprawa o kontakty z dzieckiem …")
+// mówi o numerze wpisu, sprawy albo lokalu. Adresat ma najwyżej dwa wyrazy i żaden nie jest
+// imiesłowem („z osobą ubezpieczoną pod numerem … polisy") ani słowem „nie/strony/sprawie".
+const PHONE_CONTACT_LETTER = 'A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż';
+const PHONE_CONTACT_PARTICIPLE =
+  `[${PHONE_CONTACT_LETTER}]*(?:an|on|ąc|ęt|yt|ut|art|ert|ót|it)(?:[aeyi]|ym|ą|ego|ej|ych)` +
+  `|[${PHONE_CONTACT_LETTER}]*(?:ano|ono|ęto|yto)`;
+const PHONE_CONTACT_ADDR_WORD =
+  `(?!(?:w|we|na|o|od|do|dla|ws|nie|strony|sprawie|tematu?|powodu|pod|nr|numer[${PHONE_CONTACT_LETTER}]*|${PHONE_CONTACT_PARTICIPLE})(?![${PHONE_CONTACT_LETTER}]))` +
+  `[${PHONE_CONTACT_LETTER}]{1,20}(?![${PHONE_CONTACT_LETTER}])`;
+const PHONE_CONTACT_ADDR = String.raw`ze?[ \t]+${PHONE_CONTACT_ADDR_WORD}(?:[ \t]+${PHONE_CONTACT_ADDR_WORD})?`;
+const PHONE_CONTACT_GAP =
+  '(?:się|mną|mnie|nami|nim|nią|nimi|do|bezpośrednio|telefonicznie|mailowo|e-mailowo|osobiście|również|też|także|' +
+  'wyłącznie|tylko|jedynie|najlepiej|lub|albo|bądź|' +
+  String.raw`ze?[ \t]+(?:mną|mnie|nami|nim|nią|nimi)(?![${PHONE_CONTACT_LETTER}])|` +
+  String.raw`w[ \t]+godz(?:inach|\.)[ \t]*\d{1,2}(?:[:.]\d{2})?[ \t]*[-–][ \t]*\d{1,2}(?:[:.]\d{2})?)`;
+const PHONE_CONTACT_ADJ =
+  '(?:wskazanym|podanym|poniższym|powyższym|następującym|tym|moim|naszym|bezpośrednim|służbowym|prywatnym|komórkowym|stacjonarnym)';
+const PHONE_CONTACT_HEAD =
+  '(?:(?:s?kontakt|(?:za|od|prze)?dzwo|telefonow|sms(?:-(?=[a-z]))?)[a-ząćęłńóśźż]*' +
+  String.raw`|(?:jestem|jesteśmy|będę|będziemy|pozostaję|pozostajemy)(?:[ \t]+(?:też|także|również|zawsze))?[ \t]+(?:dostępn|osiągaln)[a-ząćęłńóśźż]*` +
+  String.raw`|(?:dostępn|osiągaln)[a-ząćęłńóśźż]*[ \t]+telefonicznie)`;
+// Prośba o kontakt: bezokolicznik, tryb rozkazujący albo „o kontakt" („Proszę o kontakt z …").
+const PHONE_CONTACT_REQUEST =
+  String.raw`(?:s?kontaktowa[ćc]|s?kontaktuj(?:cie|my)?|o[ \t]+s?kontakt|(?:za)?dzwoni[ćc]|(?:za)?dzwoń(?:cie)?|telefonowa[ćc])(?![${PHONE_CONTACT_LETTER}])`;
+const PHONE_CONTACT_POD =
+  String.raw`(?:${PHONE_CONTACT_REQUEST}(?:,?[ \t]+(?:${PHONE_CONTACT_GAP}|${PHONE_CONTACT_ADDR})){0,4}|${PHONE_CONTACT_HEAD}(?:,?[ \t]+${PHONE_CONTACT_GAP}){0,4})` +
+  String.raw`,?[ \t]+pod[ \t]+(?:${PHONE_CONTACT_ADJ}[ \t]+)?(?:numer(?:em|u|ami)?|nr\.?)(?:[ \t]+telefonu)?(?=[\s:])`;
 const PHONE_ANCHOR =
+  `${PHONE_CONTACT_POD}|` +
   '(?:tel(?:;[A-Za-z-]{1,20}(?:=[A-Za-z0-9,-]{1,40})?){1,4}(?=:))|' +
   String.raw`(?:te[li]\.?|telefon(?:u|y|em|ie)?|nr te[li]\.?|fax|faks)(?:(?:[ \t]+${PHONE_GAP_WORD}\.?)?[ \t]+${PHONE_GAP_WORD}(?:\.|[ \t]*(?=:)))?` +
   String.raw`|telefon(?:\w|[ąćęłńóśźż]){0,6}|kom\.?|komór(?:k(?:\w|[ąćęłńóśźż]){1,5}|ce)|kontakt\w{0,4}|(?:tele)?phone|mobile|mob\.?|gsm` +
@@ -487,7 +524,13 @@ export function passPhone(ctx: RedactCtx): void {
     if (parts.some((p) => RE_PHONE_DATE_SHAPE.test(p))) return m;
     // Waluta za liczbą po „komórce" i „telefoniczne" to kwota (komórka arkusza, pozycja kosztów),
     // a po etykiecie „tel." numer. Waluta przed następną liczbą („603 456 789 zł 30,00") należy do niej.
-    if (/^komór/i.test(kw) || RE_PHONE_KW_WEAK.test(kw)) {
+    // Tak samo po kotwicy z „pod numerem" („dostępny pod numerem … zł" to nie telefon).
+    const podAnchor = /[ \t]pod[ \t]/i.test(kw);
+    // Po „pod numerem" liczba z rokiem albo krótkim członem za „/" lub „-" to numer dokumentu
+    // („… pod numerem 22 379 56 66/2024"). Maska objęłaby tylko część numeru, więc zostaje cały.
+    // Pełny drugi numer po „/" („/501 601 701") dalej jest wyliczeniem telefonów.
+    if (podAnchor && /^[/-]\d{1,4}(?![\d \t-]?\d)/.test(str.slice(offset + m.length, offset + m.length + 8))) return m;
+    if (/^komór/i.test(kw) || RE_PHONE_KW_WEAK.test(kw) || podAnchor) {
       const after = str.slice(offset + m.length, offset + m.length + 16);
       if ((RE_PHONE_AMOUNT_AFTER.test(after) || RE_PHONE_ZL_AFTER.test(after)) && !RE_CURRENCY_BEFORE_NUMBER.test(after)) return m;
     }

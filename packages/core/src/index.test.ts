@@ -2097,6 +2097,91 @@ test('REGRESJA: liczba 2-3-2-2 bez kontekstu telefonicznego NIE jest telefonem',
   const t = 'Pozycja 32 774 91 55 w wykazie inwentarza magazynowego.';
   expect(redactPII(t, { pseudonyms: true }).redacted).toBe(t);
 });
+// ── Telefon: „pod numerem" po czasowniku kontaktu z krótkim wtrąceniem (ewaluacja 50 pism, grupa D) ──
+test('telefon po „kontaktować się ze mną pod numerem" i podobnych zwrotach kontaktu', () => {
+  const T = '[TELEFON]';
+  const cases: Array<[string, string]> = [
+    ['W razie pytań proszę kontaktować się ze mną pod numerem 22 379 56 66.', `W razie pytań proszę kontaktować się ze mną pod numerem ${T}.`],
+    ['Proszę o kontakt ze mną pod nr 12 672 59 69.', `Proszę o kontakt ze mną pod nr ${T}.`],
+    ['Proszę skontaktować się z nami bezpośrednio pod numerem 61 262 16 30 w godzinach pracy.', `Proszę skontaktować się z nami bezpośrednio pod numerem ${T} w godzinach pracy.`],
+    ['Można dzwonić do mnie pod numer telefonu 22 194 50 69.', `Można dzwonić do mnie pod numer telefonu ${T}.`],
+    ['Jestem dostępny pod numerem 12 041 18 95.', `Jestem dostępny pod numerem ${T}.`],
+    ['Proszę telefonować pod numerem\n32 774 91 55.', `Proszę telefonować pod numerem\n${T}.`],
+    ['Proszę kontaktować się ze mną pod numerem\n22 379 56 66.', `Proszę kontaktować się ze mną pod numerem\n${T}.`],
+    // adresat po „z/ze", inne wtrącenia, przecinek, godziny, przymiotnik przed „numerem", liczba mnoga
+    ['W razie pytań proszę kontaktować się z działem kadr pod numerem 22 379 56 66.', `W razie pytań proszę kontaktować się z działem kadr pod numerem ${T}.`],
+    ['Proszę kontaktować się z sekretariatem pod numerem 22 379 56 66.', `Proszę kontaktować się z sekretariatem pod numerem ${T}.`],
+    ['Proszę kontaktować się z Panią Kierownik pod numerem 22 379 56 66.', `Proszę kontaktować się z Panią Kierownik pod numerem ${T}.`],
+    ['Proszę kontaktować się ze mną wyłącznie pod numerem 22 379 56 66.', `Proszę kontaktować się ze mną wyłącznie pod numerem ${T}.`],
+    ['Proszę kontaktować się ze mną telefonicznie lub mailowo pod numerem 22 379 56 66.', `Proszę kontaktować się ze mną telefonicznie lub mailowo pod numerem ${T}.`],
+    ['Proszę kontaktować się ze mną, pod numerem 22 379 56 66.', `Proszę kontaktować się ze mną, pod numerem ${T}.`],
+    ['Proszę dzwonić w godzinach 8-16 pod numer 22 379 56 66.', `Proszę dzwonić w godzinach 8-16 pod numer ${T}.`],
+    ['Proszę o kontakt pod wskazanym numerem 22 379 56 66.', `Proszę o kontakt pod wskazanym numerem ${T}.`],
+    ['Proszę kontaktować się ze mną pod numerami 22 379 56 66 lub 22 379 56 67.', `Proszę kontaktować się ze mną pod numerami ${T} lub ${T}.`],
+    ['Jestem osiągalna pod numerem 22 379 56 66.', `Jestem osiągalna pod numerem ${T}.`],
+    ['Biuro jest dostępne telefonicznie pod numerem 22 379 56 66.', `Biuro jest dostępne telefonicznie pod numerem ${T}.`],
+  ];
+  for (const [inp, out] of cases) expect(redactPII(inp).redacted).toBe(out);
+});
+test('REGRESJA: „dostępny pod numerem" przy rzeczy (dokument, faktura, wpis) i numer z „/rok" nie robią telefonu', () => {
+  const keep = [
+    'Sprawa jest dostępna pod numerem 12 345 67 89 w systemie e-Sąd.',
+    'Ogłoszenie jest dostępne pod numerem 22 379 56 66 w BIP urzędu.',
+    'Druk ZUS jest dostępny pod nr 12 345 67 89 na stronie.',
+    'Dokument dostępny pod numerem 22 379 56 66/2024.',
+    'Wpis dostępny pod nr 22 379 56 66 w rejestrze.',
+    'Lokal dostępny pod numerem 22 379 56 66 przy ul. Długiej.',
+    'Faktura dostępna pod numerem 22 379 56 66.',
+    'Produkt dostępny pod numerem 32 774 91 55 w katalogu.',
+    'Pozycja dostępna pod numerem 22 379 56 66, w wykazie.',
+    'Proszę kontaktować się ze mną pod numerem 22 379 56 66/2024.',
+    'Kontaktował się z urzędem w sprawie wpisu pod numerem 22 379 56 66.',
+  ];
+  for (const t of keep) expect(redactPII(t).redacted).toBe(t);
+});
+test('REGRESJA: „pod numerem" bez zwrotu kontaktu albo przy rejestrze, sprawie, KRS nie robi telefonu', () => {
+  const keep = [
+    'Spółka wpisana do rejestru pod numerem 22 379 56 66.',
+    'Sprawa prowadzona pod numerem 12 345 67 89.',
+    'Spółka kontaktowała się w sprawie wpisu pod numerem 22 379 56 66.',
+    'Kontaktował się z nami w sprawie faktury pod numerem 12 345 67 89.',
+    'Dzwonił w sprawie faktury pod numerem 2024/123/456.',
+    'Lek dostępny pod numerem katalogowym 12 345 67 89.',
+    'Proszę kontaktować się ze mną pod numerem 12.10.2026 9:45.',
+    'Środki dostępne pod numerem 12 345 67 89 zł.',
+  ];
+  for (const t of keep) expect(redactPII(t).redacted).toBe(t);
+  expect(redactPII('Spółka wpisana do KRS pod numerem 0000123456.').redacted).toBe('Spółka wpisana do KRS pod numerem [KRS].');
+});
+test('REGRESJA: „kontakt z …" w opisie zdarzenia albo przy imiesłowie przed „pod numerem" nie robi telefonu', () => {
+  // Adresat po „z/ze" liczy się tylko po prośbie o kontakt i bez imiesłowu („wpisaną", „prowadzonego"):
+  // tu „pod numerem" to numer wpisu, sprawy, polisy, księgi albo lokalu.
+  const keep = [
+    'Skontaktowano się z dłużnikiem figurującym pod numerem 12 345 67 89 w rejestrze BIG.',
+    'Kontakt z firmą wpisaną pod numerem 12 345 67 89 do rejestru.',
+    'Kontakt z wnioskodawcą zarejestrowanym pod numerem 12 345 67 89.',
+    'Kontaktowano się ze stroną postępowania zarejestrowanego pod nr 12 345 67 89.',
+    'Skontaktowano się z osobą ubezpieczoną pod numerem 12 345 67 89 polisy.',
+    'Kontakt z pacjentem przyjętym pod numerem 12 345 67 89 księgi głównej.',
+    'Kontakt z uczestnikiem postępowania prowadzonego pod numerem 22 379 56 66.',
+    'Kontakt z towarem oznaczonym pod numerem 22 379 56 66.',
+    'Kontakt z decyzją wydaną pod numerem 22 379 56 66.',
+    'Kontaktowano się z lokatorem mieszkania pod numerem 12 345 67 89.',
+    'Sprawa o kontakty z dzieckiem prowadzona pod numerem 12 345 67 89.',
+    'Wniosek o ustalenie kontaktów z małoletnim zarejestrowano pod numerem 22 379 56 66.',
+    'Kontakt z dzieckiem ustalony pod numerem 12 345 67 89.',
+    'Kontakty z kontrahentem zarejestrowane pod numerem 12 345 67 89.',
+    'Kontaktów z wnioskodawcą nie odnotowano pod numerem 12 345 67 89.',
+    'Kontakt ze strony urzędu pod numerem 12 345 67 89.',
+    'Proszę kontaktować się z firmą wpisaną pod numerem 12 345 67 89.',
+    'Proszę o kontakt ze stroną postępowania pod numerem 12 345 67 89.',
+  ];
+  for (const t of keep) expect(redactPII(t).redacted).toBe(t);
+  // Prośba o kontakt z adresatem dalej maskuje.
+  expect(redactPII('Proszę o kontakt z sekretariatem pod numerem 22 379 56 66.').redacted).toBe('Proszę o kontakt z sekretariatem pod numerem [TELEFON].');
+  expect(redactPII('Skontaktuj się z nami pod nr 22 379 56 66.').redacted).toBe('Skontaktuj się z nami pod nr [TELEFON].');
+  expect(redactPII('Kontakt ze mną pod numerem 22 379 56 66.').redacted).toBe('Kontakt ze mną pod numerem [TELEFON].');
+});
 
 // ── Wydajność: żadne wejście nie może zamrozić karty (wzorce kwadratowe, audyt UI 2026-10) ──
 test('czas liniowy na patologicznych wejściach (każde < 500 ms przy ~100 tys. znaków)', () => {
