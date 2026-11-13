@@ -12,6 +12,27 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+- **Tytuł urzędu po „Panem” i „Panu” nie jest już brany za nazwisko.** Zdanie „Zgodnie z ustaleniami
+  z Panem Ministrem termin nie może zostać przesunięty.” zamieniało „Ministrem” na znacznik osoby.
+  Teraz tytuły urzędów i funkcji w każdej odmianie („z Panem Ministrem”, „Panu Dyrektorowi”, „z Panem
+  Wojewodą”, „Panu Komornikowi”, „z Panem Notariuszem”, „z Panem Wicestarostą”, „z Panią Dyrektorką”,
+  „Szanowna Pani Sędzio”) zostają jawne. Jawny zostaje też przymiotnik albo drugi człon urzędu
+  („z Panem Wojewodą Mazowieckim”, „z Panem Komendantem Głównym Policji”, „Panu Sędziemu
+  Sprawozdawcy”). Nazwisko za tytułem dalej trafia pod znacznik, a tytuł zostaje („z Panem Ministrem
+  Kowalskim” daje „z Panem Ministrem [IMIĘ I NAZWISKO]”), także w tekście wielkimi literami („Z PANEM
+  MINISTREM [IMIĘ I NAZWISKO]”). Przymiotnik od nazwy miasta zostaje jawny tylko po urzędzie
+  terytorialnym (wojewoda, starosta, komendant, kurator), więc „z Panem Dyrektorem Krakowskim” i „Pismo
+  do Pana Sędziego Krakowskiego” nadal ukrywają nazwisko. Jawny zostaje przymiotnik funkcji („Panu
+  Dyrektorowi Finansowemu”, „z Panem Kierownikiem Technicznym”, „z Panem Kierownikiem Budowy”), a nazwisko
+  za nim i za nazwą urzędu („z Panem Sekretarzem Gminy [IMIĘ I NAZWISKO]”) trafia pod znacznik.
+  Nazwisko brzmiące jak urząd za innym tytułem („z Panem Prezesem Marszałkiem”) też jest ukrywane.
+- **„Niebieska Karta” zostaje jako nazwa procedury.** Zdanie „wszczęto procedurę Niebieskiej Karty”
+  dawało „procedurę [IMIĘ I NAZWISKO] Karty”. Teraz nazwa zostaje jawna w każdym przypadku („Niebieska
+  Karta”, „w Niebieskiej Karcie”, „Założono Niebieską Kartę”, „Niebieskie Karty”), także wielkimi
+  literami i z podziałem wiersza między wyrazami. Osoba o nazwisku Niebieska jest nadal maskowana, gdy
+  nie stoi przed „Kartą” („Pani Niebieska”, „Anna Niebieska”), a także przed zwykłą kartą, gdy przed
+  nazwiskiem stoi imię albo „Pani” lub przypadki się nie zgadzają („Pani Niebieskiej kartę parkingową”,
+  „Joanna Niebieska karta klienta”).
 - **Inicjały osoby w liście zadań są zamaskowane.** Gdy w piśmie jest osoba, na przykład Anna
   Sadowska na liście uczestników, jej inicjały po „odp.” w punkcie notatki („(odp. AS)”,
   „(odp. MK, kontakt …)”, „odp. AS – termin 15.12”) i w stopce („Sporządził(a): AS”,

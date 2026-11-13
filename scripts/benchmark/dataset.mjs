@@ -984,6 +984,12 @@ export function buildDataset() {
   neg('Wyk. EKG.\nBadania wyk.: CRP, OB\nW dniu przyjęcia wyk. RTG, USG.', ['Wyk. EKG.', 'wyk.: CRP, OB', 'wyk. RTG, USG.']);
   neg('Źródło: opr. PWN. Wykonał: ZDM. Sprawdził: NOK. Zatwierdził: DG. Kontrola (odp. MF).', ['opr. PWN', 'Wykonał: ZDM', 'Sprawdził: NOK', 'Zatwierdził: DG', '(odp. MF)']);
   neg('Sporządził: AS', ['Sporządził: AS']);
+  // tytuł urzędu w formie zależnej po „Panem/Panu” i nazwa procedury „Niebieska Karta” to nie osoby
+  neg('Zgodnie z ustaleniami z Panem Ministrem termin nie może zostać przesunięty.', ['Panem Ministrem termin']);
+  neg('W domu dochodziło do awantur, w związku z czym wszczęto procedurę Niebieskiej Karty.', ['procedurę Niebieskiej Karty']);
+  neg('Spotkanie z Panem Wojewodą i Panią Dziekan odbyło się w piątek. Dziękuję Panu Dyrektorowi.', ['Panem Wojewodą', 'Panią Dziekan', 'Panu Dyrektorowi']);
+  oso('Zgodnie z ustaleniami z Panem Ministrem Kowalskim termin zostaje.', ['Kowalskim'], ['Panem Ministrem']);
+  oso('Dziękuję Panu Dyrektorowi Nowakowi za pomoc.', ['Nowakowi'], ['Panu Dyrektorowi']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

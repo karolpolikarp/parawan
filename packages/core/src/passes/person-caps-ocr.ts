@@ -7,7 +7,7 @@ import { isFirstNameGenitive, isFirstNameLike, isMaleFirstNameGenitive, NOUN_LIK
 import { POLISH_CITIES } from '../dict/places.js';
 import { egoNameGenitive, precededByEponym, precededByPatron } from '../guards/eponyms.js';
 import { CAPS_REVERSED_HEAD_EXCL, CAPS_ROLE_OBLIQUE, capsOrgHead, HOMOGRAPH_PAIR_EXCL, institutionBeforeAddr, MAIDEN_NOT_SURNAME, PATRON_GEN_HEADS, personSlotBefore, RE_CAPS_WORK_HEAD, RE_PUBLIC_FACILITY_WORD } from '../guards/person-context.js';
-import { LEGAL_ENTITY_WORDS, ROLE_WORDS, TITLE_WORDS } from '../guards/roles.js';
+import { isOfficeAdjOblique, LEGAL_ENTITY_WORDS, ROLE_WORDS, TITLE_WORDS } from '../guards/roles.js';
 import { OCR_MIX_WORD, RE_SURNAME_OBLIQUE } from '../person-patterns.js';
 
 // Tytuły i role, po których wersalikami stoi osoba. TITLE_WORDS ma tylko mianownik i wołacz „Pan",
@@ -36,7 +36,17 @@ export function passPersonOcrTitle(ctx: RedactCtx): void {
     (m, title: string, sep: string, name: string, offset: number) => {
       if (!ALLCAPS_TITLES.has(title.toLowerCase())) return m;
       if (precededByEponym(ctx.text, offset)) return m;
-      const nameWords = name.split(/[ \t]+/);
+      let nameWords = name.split(/[ \t]+/);
+      // „Z PANEM MINISTREM KOWALSKIM”, „PANU DYREKTOROWI KOWALSKIEMU”: rola za tytułem grzecznościowym
+      // zostaje w tekście, osobą jest dalszy wyraz. Przymiotnik urzędu w odmianie („PANEM WOJEWODĄ
+      // MAZOWIECKIM”) to nie nazwisko.
+      let keep = '';
+      const tl = title.toLowerCase();
+      if ((TITLE_WORDS.has(tl) || tl === 'panem') && nameWords.length === 2 && ROLE_WORDS.has(nameWords[0].toLowerCase())) {
+        if (isOfficeAdjOblique(nameWords[1], nameWords[0])) return m;
+        keep = name.slice(0, name.length - nameWords[1].length);
+        nameWords = [nameWords[1]];
+      }
       // chroni „PREZES ZARZĄDU SPÓŁKI"
       if (
         nameWords.some((w) => {
@@ -54,7 +64,7 @@ export function passPersonOcrTitle(ctx: RedactCtx): void {
         nameWords.length === 2 && POLISH_FIRST_NAMES.has(nameWords[0].toLowerCase()) && !isFirstNameLike(ll) && !!homographBase(ll);
       if (!confirmedSurname(ll) && !homographAfterGiven) return m;
       ctx.bump('IMIE');
-      return `${title}${sep}${ctx.personMask(last)}`;
+      return `${title}${sep}${keep}${ctx.personMask(last)}`;
     },
   );
 }

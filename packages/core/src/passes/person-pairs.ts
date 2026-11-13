@@ -9,7 +9,7 @@ import { EXTRA_NAME_FORMS, FOREIGN_GIVEN_NAMES, isFirstNameGenitive, isFirstName
 import { POLISH_CITIES } from '../dict/places.js';
 import { afterNonPersonContext, EPONYM_HEADS, eponymFits, precededByAdminLabel, precededByEponym, RE_STREET_WORD } from '../guards/eponyms.js';
 import { CAPS_REVERSED_HEAD_EXCL, CAPS_ROLE_OBLIQUE, capsOrgHead, cellEndsAt, cellStartsBefore, HOMOGRAPH_PAIR_EXCL, institutionLabelBefore, LIST_HEAD_NOT_SURNAME, MAIDEN_NOT_SURNAME, ORG_HEAD_WORDS, PATRON_GEN_HEADS, personSlotBefore, RE_PAST_VERB_AFTER, RE_ROLE_LABEL_BEFORE, RE_SAINT_WORD_BEFORE } from '../guards/person-context.js';
-import { columnGapBetween, headAgreesWithAdjective, LEGAL_ENTITY_WORDS, NON_NAME_LEADERS, NOUN_NAME_LEADERS, OWNER_FIRM_HEADS, PARTY_ROLE_WORDS, PROPER_NAME_HEADS, properNamePairIsPerson, RE_AFTER_PARTY_ADJ, RE_FOLLOWED_BY_PARK, RE_NEXT_CAP_WORD_1SP, RE_VERB_1ST_PERSON, ROLE_WORDS, TITLE_WORDS } from '../guards/roles.js';
+import { columnGapBetween, headAgreesWithAdjective, LEGAL_ENTITY_WORDS, NON_NAME_LEADERS, NOUN_NAME_LEADERS, OWNER_FIRM_HEADS, PARTY_ROLE_WORDS, PROPER_NAME_HEADS, properNamePairIsPerson, RE_AFTER_PARTY_ADJ, RE_BLUE_CARD_NAME, blueCardAgrees, RE_FOLLOWED_BY_PARK, RE_NEXT_CAP_WORD_1SP, RE_VERB_1ST_PERSON, ROLE_WORDS, TITLE_WORDS } from '../guards/roles.js';
 import { RE_PATRON_ROMAN_REF_BEFORE, rynekNoNotHouse } from '../guards/address-context.js';
 import { isPersonRoleValue, NOUN_LIKE_NAMES_IN_TITLES } from '../guards/person-values.js';
 import { RE_DECLINED_NOM_SURNAME, RE_LOWER_RUN, RE_NEXT_CAP_WORD_SP, RE_NON_PL_LETTER, RE_PAIR, RE_SPOUSES, RE_SURNAME_OBLIQUE } from '../person-patterns.js';
@@ -206,6 +206,16 @@ export function passProtectFictional(ctx: RedactCtx): void {
     const prev = RE_PREV_TOKEN.exec(t.slice(Math.max(0, offset - 40), offset))?.[1]?.toLowerCase();
     if (prev && (ROLE_WORDS.has(prev) || TITLE_WORDS.has(prev) || PARTY_ROLE_WORDS.has(prev))) return m;
     if (personSlotBefore(t, offset) || RE_PERSON_DATA_AHEAD.test(t.slice(offset + m.length, offset + m.length + 24))) return m;
+    return protectSpan(ctx, m);
+  });
+  // „Niebieska Karta” to nazwa procedury: chroniona przed wszystkimi przebiegami osobowymi naraz
+  // (para „Założono Niebieską”, samodzielny przymiotnik „w Niebieskiej Karcie”).
+  // Nie po tytule grzecznościowym ani imieniu („Pani Niebieska karta klienta”, „Joanna Niebieska karta”):
+  // tam „Niebieska” to nazwisko, a „karta” zwykły rzeczownik.
+  ctx.text = ctx.text.replace(RE_BLUE_CARD_NAME, (m, adjEnd: string, nounEnd: string, offset: number, t: string) => {
+    if (!blueCardAgrees(adjEnd, nounEnd)) return m;
+    const prev = RE_PREV_TOKEN.exec(t.slice(Math.max(0, offset - 40), offset))?.[1];
+    if (prev && (TITLE_WORDS.has(prev.toLowerCase()) || prev.toLowerCase() === 'panem' || (/^\p{Lu}/u.test(prev) && isFirstNameLike(prev)))) return m;
     return protectSpan(ctx, m);
   });
 }

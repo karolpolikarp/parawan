@@ -1,6 +1,6 @@
 // Słowniki ról, instytucji i nazw własnych oraz strażniki pary „Słowo Nazwisko”, które rozstrzygają,
 // czy pierwszy wyraz to imię, rola, czy człon nazwy obiektu.
-import { isGeoAdjective, normalizeSurnameKey } from '../surnames.js';
+import { isConfirmedSurname, isGeoAdjective, normalizeSurnameKey } from '../surnames.js';
 import { CAP_WORD } from '../charset.js';
 import { type RedactCtx } from '../context.js';
 
@@ -56,9 +56,106 @@ export const ROLE_WORDS = new Set<string>(
     // urzędy i mandaty („Pan Komendant Główny Policji”); celowo bez „sołtys”, bo to też nazwisko
     'komendant komendanta zastępca zastępcy poseł posła posłanka senator senatora wiceminister wiceministra ' +
     // rzecznik z dopełniaczem urzędu przed nazwiskiem („Pani Rzecznik Praw Dziecka Gzowska”)
-    'rzecznik rzecznika'
+    'rzecznik rzecznika ' +
+    // premier i kanclerz („Pan Premier”), dotąd bez żadnej formy na liście
+    'premier premiera ' +
+    // Formy zależne urzędów i funkcji po „Panem/Panu/Pana” („z Panem Ministrem”, „Panu Dyrektorowi”).
+    // Bez nich wyzwalacz brał sam tytuł za nazwisko. Nazwisko za tytułem dalej idzie pod maskę
+    // („z Panem Ministrem Kowalskim”). Homografy nazwisk (Starosta, Wojewoda, Sędzia) mają tu formy
+    // zależne na tej samej zasadzie co mianownik, który już był na liście.
+    'ministrowi ministrem ministrze wiceministrowi wiceministrem wiceministrze premierowi premierem ' +
+    'prezesowi prezesem wiceprezesa wiceprezesowi wiceprezesem wiceprezesie dyrektorowi dyrektorem ' +
+    'wicedyrektora wicedyrektorowi wicedyrektorem wicedyrektorze prezydentowi prezydentem prezydencie ' +
+    'wojewodzie wojewodę wojewodą staroście starostę starostą burmistrzowi burmistrzem burmistrzu ' +
+    'wójtowi wójtem marszałkowi marszałkiem marszałku sędziemu sędzią sędzi rzecznikowi rzecznikiem ' +
+    'rzeczniku kierownikowi kierownikiem kierowniku komendantowi komendantem komendancie ' +
+    'naczelnikowi naczelnikiem naczelniku dziekanowi dziekanem dziekanie rektorowi rektorem rektorze ' +
+    'kanclerza kanclerzowi kanclerzem przewodniczącego przewodniczącemu przewodniczącym ' +
+    'przewodniczącej przewodniczącą sekretarza sekretarzowi sekretarzem inspektorowi inspektorem ' +
+    'inspektorze kuratorowi kuratorem kuratorze prokuratorowi prokuratorem prokuratorze zastępcą ' +
+    'zastępcę posłowi posłem pośle senatorowi senatorem senatorze profesorowi profesorem profesorze ' +
+    'doktorowi doktorem doktorze mecenasowi mecenasem ' +
+    'komornikowi komornikiem komorniku notariuszowi notariuszem notariuszu adwokatowi adwokatem ' +
+    'adwokacie radcą radcę skarbnika skarbnikowi skarbnikiem skarbniku pełnomocnika pełnomocnikowi ' +
+    'pełnomocnikiem pełnomocniku biegłego biegłemu biegłym ' +
+    // wice- i formy żeńskie urzędów („z Panem Wicewojewodą”, „z Panią Dyrektorką”)
+    'wicewojewoda wicewojewody wicewojewodzie wicewojewodę wicewojewodą wicestarosta wicestarosty ' +
+    'wicestaroście wicestarostę wicestarostą wiceburmistrz wiceburmistrza wiceburmistrzowi ' +
+    'wiceburmistrzem wiceburmistrzu wiceprezydent wiceprezydenta wiceprezydentowi wiceprezydentem ' +
+    'wiceprezydencie wicemarszałek wicemarszałka wicemarszałkowi wicemarszałkiem wicemarszałku ' +
+    'dyrektorka dyrektorki dyrektorce dyrektorkę dyrektorką kierowniczka kierowniczki kierowniczce ' +
+    'kierowniczkę kierowniczką ' +
+    // wołacze w zwrotach grzecznościowych („Szanowna Pani Sędzio”)
+    'sędzio ' +
+    // drugi człon funkcji („Sędzia Sprawozdawca”, „Pani Sędzia Referendarz”, „Prezydent Elekt”)
+    'sprawozdawca sprawozdawcy sprawozdawcę sprawozdawcą referendarz referendarza referendarzowi ' +
+    'referendarzem elekt elekta elektowi elektem'
   ).split(/\s+/),
 );
+
+// Przymiotniki urzędów spoza NON_SURNAME_ADJ i LEGAL_ENTITY_WORDS w formie bazowej („Komendant Główny”,
+// „Kurator Sądowy”, „Lekarz Powiatowy”).
+const OFFICE_ADJ = new Set<string>(
+  'główny rejonowy okręgowy apelacyjny sądowy gminny powiatowy wojewódzki krajowy generalny naczelny wojskowy skarbowy honorowy zawodowy terenowy'.split(' '),
+);
+// Role, po których przymiotnik od nazwy miejsca albo regionu określa urząd („Wojewoda Mazowiecki”,
+// „Komendant Wojewódzki”, „Kurator Oświaty”). Po pozostałych („Dyrektor”, „Prezes”, „Mecenas”, „Sędzia”)
+// „Krakowski” czy „Poznański” to prawie zawsze nazwisko.
+const RE_TERRITORIAL_ROLE = /^(?:wice)?(?:wojewod|starost|marsza[łl]k|komendan|kurator|prokurator|inspektor|rzeczni|konserwator)/;
+// Przyrostki przymiotników funkcji w formie bazowej („Techniczny”, „Finansowy”, „Prowadzący”, „Zwyczajny”).
+// Bez -ski/-cki/-dzki: tak kończy się większość nazwisk-przymiotników.
+const RE_FUNCTION_ADJ_BASE = /(?:owy|[cz]ny|[aeo]jny|alny|ilny|ywny|ący)$/;
+/**
+ * Przymiotnik urzędu za rolą, zwykle w formie zależnej („z Panem Komendantem Głównym”, „z Panem
+ * Wojewodą Mazowieckim”, „Panu Dyrektorowi Finansowemu”, też „Pan Dyrektor Techniczny”). Mianownik
+ * geograficzny („Pan Wojewoda Mazowiecki”) chronią NON_SURNAME_ADJ i LEGAL_ENTITY_WORDS; tu ta sama
+ * decyzja po sprowadzeniu odmiany do formy bazowej.
+ * Przymiotnik geograficzny tylko po roli terytorialnej (`role` to wyraz roli tuż przed nim), bo
+ * „z Panem Dyrektorem Krakowskim” to nazwisko. Przymiotnik funkcji tylko wtedy, gdy nie jest
+ * nazwiskiem ze słownika i ma co najmniej 7 liter („z Panem Dyrektorem Czarnym”, „Pan Prezes Nowy”
+ * idą pod maskę).
+ */
+export function isOfficeAdjOblique(w: string, role: string): boolean {
+  const m = /^(\p{L}{3,}?)(?:iego|iemu|ego|emu|ym|im|iej|ej|ą|y|a)$/u.exec(w.toLowerCase());
+  if (!m) return false;
+  const base = m[1] + (/[kg]$/.test(m[1]) ? 'i' : 'y');
+  if (OFFICE_ADJ.has(base) || LEGAL_ENTITY_WORDS.has(base)) return true;
+  if (isGeoAdjective(base)) return RE_TERRITORIAL_ROLE.test(role.toLowerCase());
+  return base.length >= 7 && RE_FUNCTION_ADJ_BASE.test(base) && !isConfirmedSurname(w) && !isConfirmedSurname(base);
+}
+
+/**
+ * Formy zależne ról, które są też nazwiskami (Starosta, Wojewoda, Sędzia, Marszałek). Jako PIERWSZY
+ * wyraz po „Panem/Panu” to rola („z Panem Starostą”); za inną rolą to nazwisko („z Panem Prezesem
+ * Marszałkiem”), więc pętla pomijania ról się na nich zatrzymuje.
+ */
+export const ROLE_HOMOGRAPH_OBLIQUE = new Set<string>(
+  'wojewodzie wojewodę wojewodą staroście starostę starostą marszałkowi marszałkiem marszałku sędziemu sędzią sędzi'.split(' '),
+);
+
+/**
+ * Nazwa procedury przemocy domowej („wszczęto procedurę Niebieskiej Karty”, „w Niebieskiej Karcie”):
+ * przymiotnik przed „Kartą” to człon nazwy, nie nazwisko. Wszystkie przypadki obu wyrazów (miejscownik
+ * „Karcie” z obocznością t:c), także z podziałem wiersza między wyrazami i wersalikami. Fraza trafia za
+ * sentinel przed przebiegami osobowymi (passProtectFictional), więc żaden z nich jej nie ruszy. Grupy
+ * 1 i 2 to końcówki obu wyrazów: chroni tylko blueCardAgrees (zgodny przypadek).
+ */
+export const RE_BLUE_CARD_NAME =
+  /(?<![\p{L}\p{N}])niebiesk(a|iej|ą|ę|ie|ich|im|imi)(?:[ \t]+|[ \t]*\r?\n[ \t]*)kar(t(?:a|y|ę|ą|o|om|ami|ach)?|cie)(?![\p{L}\p{N}])/giu;
+// Uzgodnione przypadki przymiotnika i rzeczownika („Niebieskiej Karty/Karcie”, „Niebieską Kartę/Kartą”).
+// Rozjazd („Pani Niebieskiej kartę parkingową”, „Annie Niebieskiej karta”) to nazwisko i zwykła karta.
+const BLUE_CARD_AGREE: Record<string, string[]> = {
+  a: ['ta', 'to'],
+  iej: ['ty', 'cie'],
+  ą: ['tę', 'tą'],
+  ę: ['tę'],
+  ie: ['ty'],
+  ich: ['t', 'tach'],
+  im: ['tom'],
+  imi: ['tami'],
+};
+export const blueCardAgrees = (adjEnd: string, nounEnd: string): boolean =>
+  BLUE_CARD_AGREE[adjEnd.toLowerCase()]?.includes(nounEnd.toLowerCase()) ?? false;
 
 /**
  * Dopełniacz urzędu po roli („Pani Minister Zdrowia”) i imiona sakralne („do Pana Boga”). Wyzwalacz
@@ -72,7 +169,7 @@ export const ROLE_COMPLEMENT_GEN = new Set<string>(
     'gospodarki energii przemysłu transportu sejmu senatu miasta miast województwa wsi dzielnicy ' +
     'departamentu wydziału działu biura gabinetu kancelarii policji straży szkoły przedszkola szpitala ' +
     'instytutu ośrodka oddziału delegatury inspektoratu komisji sekcji referatu kadr ochrony ' +
-    'praw dziecka obywatelskich pacjenta konsumentów ' +
+    'praw dziecka obywatelskich pacjenta konsumentów nadzoru gminy powiatu budowy ' +
     'bóg boga bogu bogiem jezus jezusa jezusowi jezusem chrystus chrystusa chrystusowi chrystusem ' +
     'maryja maryi maryję maryją'
   ).split(/\s+/),

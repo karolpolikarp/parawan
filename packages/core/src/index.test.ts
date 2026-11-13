@@ -8773,3 +8773,134 @@ test('inicjały po kotwicy: regresje z weryfikacji (firmy, skróty, tytuły, tab
     expect(p).not.toContain('[OSOBA-B]');
   }
 });
+
+test('tytuł urzędu w formie zależnej po „Panem/Panu” i „Niebieska Karta” to nie osoby', () => {
+  keep([
+    'Zgodnie z ustaleniami z Panem Ministrem termin nie może zostać przesunięty.',
+    'Spotkanie z Panem Wojewodą odbyło się w piątek.',
+    'Dziękuję Panu Dyrektorowi i Panu Prezesowi za pomoc.',
+    'Rozmawiałam z Panem Rektorem, z Panem Kanclerzem i z Panią Dziekan.',
+    'Sprawę omówiono z Panem Starostą, Panem Burmistrzem i Panem Komendantem.',
+    'Wniosek trafi do Pana Premiera, a kopia do Pana Marszałka.',
+    'W domu dochodziło do awantur, w związku z czym wszczęto procedurę Niebieskiej Karty.',
+    'Niebieska Karta została założona w 2024 r.',
+    'Wypełniono formularz Niebieska Karta – A, a po nim kolejne Niebieskie Karty.',
+    'W ramach Niebieskiej karty zespół spotkał się dwa razy.',
+  ]);
+  masked([
+    // nazwisko za tytułem dalej idzie pod maskę, tytuł zostaje
+    ['Zgodnie z ustaleniami z Panem Ministrem Kowalskim termin zostaje.', `Zgodnie z ustaleniami z Panem Ministrem ${N} termin zostaje.`],
+    ['Dziękuję Panu Dyrektorowi Nowakowi.', `Dziękuję Panu Dyrektorowi ${N}.`],
+    ['z Panem Starostą Nowakiem', `z Panem Starostą ${N}`],
+    ['z Panią Sędzią Gzowską', `z Panią Sędzią ${N}`],
+    ['Pan Minister Kowalski przyszedł.', `Pan Minister ${N} przyszedł.`],
+    // przymiotnik bez „Karty” po nim to nazwisko po kotwicy
+    ['Pani Niebieska przyszła na rozprawę.', `Pani ${N} przyszła na rozprawę.`],
+    ['Anna Niebieska wniosła pozew.', `${N} wniosła pozew.`],
+  ]);
+});
+
+test('tytuł urzędu w odmianie: wersaliki, przymiotnik urzędu, brakujące formy i „Niebieska Karta” w każdym przypadku', () => {
+  keep([
+    // przymiotnik albo drugi człon urzędu w formie zależnej (jak w mianowniku „Pan Wojewoda Mazowiecki”)
+    'Rozmowa z Panem Wojewodą Mazowieckim.',
+    'Rozmowa z Panem Komendantem Miejskim.',
+    'Rozmowa z Panem Komendantem Głównym Policji.',
+    'Rozmowa z Panem Prokuratorem Rejonowym.',
+    'Rozmowa z Panem Kuratorem Sądowym.',
+    'Rozmowa z Panem Inspektorem Nadzoru.',
+    'Rozmowa z Panem Prezydentem Elektem.',
+    'Pismo przekazano Panu Wojewodzie Lubelskiemu.',
+    'Pismo przekazano Panu Sędziemu Sprawozdawcy.',
+    'Pismo przekazano Pani Sędzi Referendarz.',
+    'Z PANEM WOJEWODĄ MAZOWIECKIM ustalono termin.',
+    // formy zależne funkcji, wice- i formy żeńskie
+    'Pismo przekazano Panu Komornikowi.',
+    'Pismo przekazano Panu Notariuszowi.',
+    'Pismo przekazano Panu Biegłemu.',
+    'Rozmowa z Panem Komornikiem, z Panem Notariuszem i z Panem Adwokatem.',
+    'Rozmowa z Panem Radcą, z Panem Skarbnikiem i z Panem Pełnomocnikiem.',
+    'Rozmowa z Panem Biegłym.',
+    'Rozmowa z Panem Wicewojewodą, z Panem Wicestarostą i z Panem Wiceburmistrzem.',
+    'Rozmowa z Panią Dyrektorką i z Panią Kierowniczką.',
+    // wołacz
+    'Szanowna Pani Sędzio,\nw odpowiedzi na zarządzenie z dnia 3 marca 2024 r.',
+    // „Niebieska Karta”: miejscownik „Karcie”, cudzysłów, podział wiersza, początek zdania, wersaliki
+    'Informacje zawarte w Niebieskiej Karcie są poufne.',
+    'Zdarzenie opisano w Niebieskiej Karcie z maja.',
+    'W „Niebieskiej Karcie” zapisano przebieg zdarzenia.',
+    'wszczęto procedurę Niebieskiej\nKarty',
+    'Założono Niebieską Kartę.',
+    'Wszczęto Niebieską Kartę.',
+    'Sporządzono Niebieską Kartę – A.',
+    'NIEBIESKA KARTA – A',
+  ]);
+  masked([
+    // wersaliki: rola zostaje, nazwisko pod maską (przed poprawką zdanie wychodziło jawne)
+    ['Z PANEM MINISTREM KOWALSKIM ustalono termin.', `Z PANEM MINISTREM ${N} ustalono termin.`],
+    ['Z PANEM PREZESEM NOWAKIEM ustalono termin.', `Z PANEM PREZESEM ${N} ustalono termin.`],
+    ['PANU DYREKTOROWI KOWALSKIEMU przekazano pismo.', `PANU DYREKTOROWI ${N} przekazano pismo.`],
+    ['Z PANIĄ SĘDZIĄ KOWALSKĄ ustalono termin.', `Z PANIĄ SĘDZIĄ ${N} ustalono termin.`],
+    ['Z PANEM DOKTOREM WIŚNIEWSKIM ustalono termin.', `Z PANEM DOKTOREM ${N} ustalono termin.`],
+    ['Z PANEM STAROSTĄ NOWAKIEM ustalono termin.', `Z PANEM STAROSTĄ ${N} ustalono termin.`],
+    ['ROZMOWA Z PANEM PROKURATOREM ZIELIŃSKIM', `ROZMOWA Z PANEM PROKURATOREM ${N}`],
+    ['PAN MINISTER KOWALSKI ustalił termin.', `PAN MINISTER ${N} ustalił termin.`],
+    // nazwisko-przymiotnik za rolą w odmianie nie jest przymiotnikiem urzędu
+    ['Rozmowa z Panem Dyrektorem Kowalskim.', `Rozmowa z Panem Dyrektorem ${N}.`],
+    ['Pismo przekazano Panu Komornikowi Nowakowi.', `Pismo przekazano Panu Komornikowi ${N}.`],
+    ['Pismo przekazano Panu Wojewodzie Kowalskiemu.', `Pismo przekazano Panu Wojewodzie ${N}.`],
+    ['Rozmowa z Panem Kuratorem Zawodowym Nowakiem.', `Rozmowa z Panem Kuratorem Zawodowym ${N}.`],
+    ['Szanowna Pani Sędzio Kowalska,', `Szanowna Pani Sędzio ${N},`],
+    ['Pani Niebieska złożyła wniosek.', `Pani ${N} złożyła wniosek.`],
+  ]);
+});
+
+test('tytuł urzędu w odmianie: regresje z weryfikacji (nazwisko-przymiotnik, homograf roli, dopełniacz, „Niebieska” jako nazwisko)', () => {
+  keep([
+    // przymiotnik funkcji za rolą, w odmianie i w mianowniku
+    'Z Panem Kierownikiem Technicznym uzgodniono termin.',
+    'Panu Dyrektorowi Finansowemu przekazano bilans.',
+    'Z Panem Profesorem Zwyczajnym rozmawiano.',
+    'Z Panem Doktorem Prowadzącym ustalono leczenie.',
+    'Z Panią Dyrektorką Medyczną ustalono.',
+    'Z Panem Rzecznikiem Prasowym ustalono.',
+    'Pan Dyrektor Techniczny przyszedł.',
+    // dopełniacz urzędu za rolą
+    'Z Panem Kierownikiem Budowy dokonano odbioru.',
+    // przymiotnik geograficzny po roli terytorialnej
+    'Rozmowa z Panem Komendantem Wojewódzkim Policji.',
+    'Spotkanie z Panem Starostą odbyło się.',
+    // procedura bez tytułu ani imienia przed nią
+    'Wszczęto procedurę Niebieskiej Karty wobec sprawcy.',
+  ]);
+  masked([
+    // przymiotnik od miasta po roli bez urzędu terytorialnego to nazwisko
+    ['Wysłano do Pana Mecenasa Krakowskiego.', `Wysłano do Pana Mecenasa ${N}.`],
+    ['Spotkanie z Panem Dyrektorem Krakowskim odbędzie się w czwartek.', `Spotkanie z Panem Dyrektorem ${N} odbędzie się w czwartek.`],
+    ['Przekazuję Panu Prezesowi Poznańskiemu projekt umowy.', `Przekazuję Panu Prezesowi ${N} projekt umowy.`],
+    ['W rozmowie z Panem Kierownikiem Lubelskim ustalono grafik.', `W rozmowie z Panem Kierownikiem ${N} ustalono grafik.`],
+    ['Z Panią Dyrektorką Warszawską omówiono budżet działu.', `Z Panią Dyrektorką ${N} omówiono budżet działu.`],
+    ['Proszę o kontakt z Panem Mecenasem Gdańskim.', `Proszę o kontakt z Panem Mecenasem ${N}.`],
+    ['Panu Doktorowi Wrocławskiemu dziękujemy za konsultację.', `Panu Doktorowi ${N} dziękujemy za konsultację.`],
+    ['Pismo do Pana Sędziego Krakowskiego.', `Pismo do Pana Sędziego ${N}.`],
+    ['Rozmowa z Panią Sędzią Krakowską.', `Rozmowa z Panią Sędzią ${N}.`],
+    ['Rozmowa z Panem Prezesem Warszawskim.', `Rozmowa z Panem Prezesem ${N}.`],
+    // nazwisko po dopełniaczu urzędu
+    ['Z Panem Sekretarzem Gminy Nowakiem omówiono plan.', `Z Panem Sekretarzem Gminy ${N} omówiono plan.`],
+    ['Pan Sekretarz Gminy Nowak omówił plan.', `Pan Sekretarz Gminy ${N} omówił plan.`],
+    ['Z Panem Kierownikiem Budowy Nowakiem dokonano odbioru.', `Z Panem Kierownikiem Budowy ${N} dokonano odbioru.`],
+    // homograf roli za inną rolą to nazwisko
+    ['Spotkanie z Panem Prezesem Marszałkiem w sprawie dzierżawy.', `Spotkanie z Panem Prezesem ${N} w sprawie dzierżawy.`],
+    ['Rozmowa z Panem Dyrektorem Sędzią o awansie.', `Rozmowa z Panem Dyrektorem ${N} o awansie.`],
+    ['Panu Dyrektorowi Wojewodzie przekazano raport.', `Panu Dyrektorowi ${N} przekazano raport.`],
+    // przymiotnik funkcji ze słownika nazwisk i nazwisko za przymiotnikiem funkcji
+    ['Z Panem Dyrektorem Czarnym ustalono.', `Z Panem Dyrektorem ${N} ustalono.`],
+    ['Z Panem Dyrektorem Technicznym Kowalskim ustalono.', `Z Panem Dyrektorem Technicznym ${N} ustalono.`],
+    // „Niebieska” jako nazwisko przed zwykłą „kartą” (rozjazd przypadków albo tytuł i imię przed nią)
+    ['Wydano Pani Niebieskiej kartę parkingową.', `Wydano Pani ${N} kartę parkingową.`],
+    ['Annie Niebieskiej karta została zablokowana.', `${N} karta została zablokowana.`],
+    ['Pani Niebieska kartę pobytu odebrała osobiście.', `Pani ${N} kartę pobytu odebrała osobiście.`],
+    ['Joanna Niebieska karta klienta jest aktywna.', `${N} karta klienta jest aktywna.`],
+    ['Pani Niebieska Karta? To nazwisko.', `Pani ${N} Karta? To nazwisko.`],
+  ]);
+});
