@@ -87,14 +87,21 @@ działają na GitHubie od chwili wypchnięcia tagów.
   z literówką, a przy samym „lek.” tylko wtedy, gdy zgadza się suma kontrolna numeru lekarza.
   „Sygn. akt I C 1040/2011” dalej jest znakiem sprawy, a „WA-1234” bez słowa „radca” czy „adwokat”
   zostaje, bo może być kodem produktu. Numer wpisu musi stać zaraz po zawodzie albo po imieniu
-  i nazwisku i zaczynać się kodem izby (WA, KR, GD, WAW…), więc faktura „FV/1234”, umowa
+  i nazwisku i zaczynać się kodem izby, więc faktura „FV/1234”, umowa
   „UM-2023”, norma czy zgłoszenie „LEG-123” w zdaniu z adwokatem zostają jawne, tak samo „nr wpisu
-  do CEIDG”. Numer aktu wychodzi też z zapisu „Akt urodzenia: nr …”, „pod nr …” i z wyliczenia
+  do CEIDG”. Znane są kody wszystkich 19 okręgowych izb radców prawnych, także Lublina („LB-1231”)
+  i Białegostoku („BK-1234”), oraz rad adwokackich („WAW”, „KRK/Adw/2345”, „LUB/Adw/456”). Numer
+  jest zakryty także po długiej nazwie izby („nr wpisu na listę radców prawnych OIRP
+  w Warszawie: …”, „wpisana na listę adwokatów ORA w Lublinie pod nr …”, ale nie po „liście
+  obecności” czy „liście uczestników szkolenia”) i w drugim wierszu
+  podpisu („Adwokat Jan Kowalski⏎Nr wpisu: KR-1234”); samo „NR WPISU: WA-1234” bez zawodu zostaje
+  jawne. Numer aktu wychodzi też z zapisu „Akt urodzenia: nr …”, „pod nr …” i z wyliczenia
   („akty urodzenia 12/2010 i 13/2010”), a udział „1/2” obok aktu zgonu zostaje. Słowa zapowiadające
   działają bez względu na wielkość liter („Akt urodzenia Nr …”, „KARTA POBYTU: …”, „Nr prawa
   wykonywania zawodu: …”). Statystyki zostają jawne: „PWZ 12345 lekarzom”, „wynagrodzenia lekarzy,
   1340517”, zakres lat „akty urodzenia 2019/2020” i kod po adwokacie, po którym zdanie biegnie dalej
-  („KR-2020 to numer sprawy”, „PO-350 zł”). Długa lista numerów jest przetwarzana tak samo szybko
+  („KR-2020 to numer sprawy”, „PO-350 zł”), także po myślniku, gdy przed kodem stoi sam zawód
+  („Kancelaria radcy prawnego, KR-2026 - plan pracy na rok”). Długa lista numerów jest przetwarzana tak samo szybko
   jak krótka. Nowe typy można wyłączyć w panelu „Co maskować”.
 - **Osoba z nazwiskiem, które jest też zwykłym słowem, jest zakryta po „zespół” czy „drużyna”.**
   W zdaniu „testy obciążeniowe wykonał zespół Joanny Sikory” imię i nazwisko zostawały jawne, bo

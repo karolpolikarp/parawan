@@ -80,35 +80,56 @@ const RE_PWZ_DOCTOR = new RegExp(
 );
 
 /**
- * Kody okręgowych izb radców prawnych (WA, KR, GD…) i okręgowych rad adwokackich (WAW, KRA…),
- * od których zaczyna się numer wpisu. Zamknięta lista: dowolne wersaliki to też kody faktur
- * (FV/1234), umów, formularzy (PCC-3), norm i spółek (ABC-123).
+ * Kody okręgowych izb radców prawnych i okręgowych rad adwokackich (WAW, KRA, KRK…), od których
+ * zaczyna się numer wpisu. Komplet 19 izb radcowskich: BB BK BY GD KA KI KO KR LB ŁD OL OP PO RZ
+ * SZ TO WA WB WR ZG, do tego zapisy LU, LD i BI spotykane w pismach. Zamknięta lista: dowolne
+ * wersaliki to też kody faktur (FV/1234), umów, formularzy (PCC-3), norm i spółek (ABC-123).
  */
 const CHAMBER_CODES =
-  'WAW WAŁ WAL WRO KRA KAT KIE KOS GDA POZ LUB LOD ŁÓD BIA BYD CZE OLS OPO PŁO PLO RAD RZE SIE SZC TOR ZIE ' +
-  'WA WB WR KR KA KI KO GD PO LU LD ŁD BB BI BY OL OP RZ SZ TO ZG';
+  'WAW WAŁ WAL WRO KRA KRK KAT KIE KOS GDA POZ LUB LOD ŁÓD BIA BYD CZE OLS OPO PŁO PLO RAD RZE SIE SZC TOR ZIE ' +
+  'WA WB WR KR KA KI KO GD PO LB LU LD ŁD BB BK BI BY OL OP RZ SZ TO ZG';
 const LAWYER_NUMBER = String.raw`(?:${CHAMBER_CODES.split(' ').join('|')})(?:[-/][A-Za-z]{1,4})?[-/]\d{2,5}`;
 const L = `[${LETTER}]*`;
 /** Kotwica zawodu: radca prawny, adwokat, aplikant, notariusz, skróty „r.pr.” i „adw.”, też wersalikami. */
 const LAWYER_ANCHOR = String.raw`(?:${ci('radc')}${L}\s+${ci('prawn')}${L}|${ci('radczy')}${L}(?:\s+${ci('prawn')}${L})?|${ci('adwokat')}${L}|${ci('aplikan')}${L}\s+(?:${ciAlt(['radcowsk', 'adwokack', 'notarialn'])})${L}|${ci('notariusz')}${L}|${ci('r')}\.\s?${ci('pr')}\.|${ci('adw')}\.)`;
-/** „nr wpisu”, „Numer wpisu na listę radców prawnych” między osobą a numerem. */
-const LAWYER_ENTRY = String.raw`(?:${ci('nr')}\.?|${ci('numer')}${L})\s+${ci('wpisu')}(?:\s+${ci('na')}\s+${ci('list')}[ęyĘY](?:\s+[${LETTER}]+){1,3})?`;
+/**
+ * „na listę radców prawnych OIRP w Warszawie”: do sześciu słów z nazwą izby i miastem. Pierwsze
+ * słowo nazywa zawód albo izbę, bo „na listę uczestników szkolenia” czy „listę obecności” to nie
+ * lista radców ani adwokatów.
+ */
+const LAWYER_LIST = String.raw`\s+${ci('na')}\s+${ci('list')}[ęyĘY]\s+(?:${ciAlt(['radc', 'adwoka', 'aplikant', 'notariusz', 'okręgow', 'izb', 'oirp', 'ora'])})[${LETTER}]*(?:\s+[${LETTER}]+){0,5}`;
+/**
+ * „nr wpisu”, „Numer wpisu na listę radców prawnych OIRP w Warszawie” między osobą a numerem,
+ * a także szyk „wpis (wpisany) na listę … pod nr”.
+ */
+const LAWYER_ENTRY = String.raw`(?:(?:${ci('nr')}\.?|${ci('numer')}${L})\s+${ci('wpisu')}(?:${LAWYER_LIST})?|${ci('wpis')}(?:${ciAlt(['any', 'ana', 'anym', 'aną'])})?${LAWYER_LIST}\s+${ci('pod')}\s+${NR})`;
 /** Imię albo nazwisko osoby: „Kowalska”, „Nowak-Wilk”, a w nagłówku wersalikami „KOWALSKA”. */
 const PERSON_WORD = `(?:${NAME_WORD}|[${UPPER}]{3,}(?:-[${UPPER}]{3,})?)`;
 /**
  * Po numerze wpisu kończy się wiersz, zdanie albo pozycja wyliczenia. Dalszy ciąg zdania po kodzie
  * („KR-2020 to numer sprawy”, „PO-350 zł”, „PO-2024 r.”, „GD-10 sala rozpraw”) to inne oznaczenie.
+ * Myślnik z dalszym tekstem rozstrzyga `passProfessionalNumber` (patrz `RE_DASH_TAIL`).
  */
-const LAWYER_END = String.raw`(?=[ \t]*(?:[),;:]|\.(?![\d${LETTER}])|\r?\n|$)|[ \t]+(?:i|oraz)[ \t]|[ \t]+[–—-][ \t])`;
+const LAWYER_END = String.raw`(?=[ \t]*(?:[),;:]|\.(?![\d${LETTER}])|\r?\n|$)|[ \t]+(?:i|oraz)[ \t]|[ \t]+[–—-](?:[ \t]|$))`;
+/** Myślnik, po którym zdanie biegnie dalej: „KR-2026 - plan pracy”, „WA-1234 – aplikacja 2026 r.”. */
+const RE_DASH_TAIL = new RegExp(String.raw`^[ \t]+[–—-][ \t]+[\d${LETTER}]`);
+/**
+ * Sam zawód przed numerem, bez imienia, nazwiska i „nr wpisu” („Kancelaria radcy prawnego,
+ * KR-2026”, „Radca prawny, WA-1234”). Taka kotwica jest za słaba, żeby kod przed myślnikiem
+ * z dalszym ciągiem zdania uznać za numer wpisu, tak jak „Adwokat, KR-2020 to numer sprawy”.
+ * Z osobą („radca prawny Jan Nowak, WA-1234 – pełnomocnik powoda”) to podpis.
+ */
+const RE_BARE_ANCHOR = new RegExp(String.raw`^${LAWYER_ANCHOR}[\s,:(]*$`);
 /**
  * Numer wpisu stoi zaraz po kotwicy zawodu albo po imieniu i nazwisku osoby: „radca prawny,
  * GD-8638”, „radcę prawnego Mariusza Nowakowskiego (KR-4222)”, „r.pr. Anna Kowalska, nr wpisu
  * WA-1234”, a w podpisie blokowym w osobnym wierszu („radca prawny\nWA-3516”), gdy ten wiersz
- * to sam numer. Numer dalej w zdaniu („adwokat, sprawa KR-2020”) zostaje jawny. Samo „nr wpisu”
+ * to sam numer albo zaczyna się od „Nr wpisu:” („Adwokat Jan Kowalski\nNr wpisu: KR-1234”). Blok
+ * to najwyżej dwa wiersze bez pustej linii, a wiersz z zawodem kończy się na osobie. Numer dalej w zdaniu („adwokat, sprawa KR-2020”) zostaje jawny. Samo „nr wpisu”
  * bez zawodu to za mało: wpis do CEIDG, BDO czy rejestru żłobków też ma numer.
  */
 const RE_LAWYER = new RegExp(
-  String.raw`((?<![${WORD}])${LAWYER_ANCHOR}(?:[ \t]+${PERSON_WORD}){0,3}(?:[ \t]*[,:]?[ \t]*\(?[ \t]*(?:${LAWYER_ENTRY}[ \t]*:?[ \t]*\(?[ \t]*)?|[ \t]*\r?\n[ \t]*(?=(?:${LAWYER_NUMBER})[ \t]*(?:\r?\n|$))))(${LAWYER_NUMBER})(?![${WORD}]|[-/]\d)${LAWYER_END}`,
+  String.raw`((?<![${WORD}])${LAWYER_ANCHOR}(?:[ \t]+${PERSON_WORD}){0,3}(?:[ \t]*[,:]?[ \t]*\(?[ \t]*(?:${LAWYER_ENTRY}[ \t]*:?[ \t]*\(?[ \t]*)?|[ \t]*\r?\n[ \t]*(?:${LAWYER_ENTRY}[ \t]*:?[ \t]*|(?=(?:${LAWYER_NUMBER})[ \t]*(?:\r?\n|$)))))(${LAWYER_NUMBER})(?![${WORD}]|[-/]\d)${LAWYER_END}`,
   'g',
 );
 
@@ -129,7 +150,9 @@ export function passProfessionalNumber(ctx: RedactCtx): void {
   ctx.text = ctx.text.replace(RE_PWZ_DOCTOR, (m, pre: string, num: string) =>
     isValidNpwz(num) ? `${pre}${ctx.hit('NR-UPRAWNIEN')}` : m,
   );
-  ctx.text = ctx.text.replace(RE_LAWYER, (_m, pre: string) => `${pre}${ctx.hit('NR-UPRAWNIEN')}`);
+  ctx.text = ctx.text.replace(RE_LAWYER, (m: string, pre: string, _num: string, at: number, all: string) =>
+    RE_BARE_ANCHOR.test(pre) && RE_DASH_TAIL.test(all.slice(at + m.length)) ? m : `${pre}${ctx.hit('NR-UPRAWNIEN')}`,
+  );
   // Kilka numerów po jednej etykiecie: PWZ z sumą albo z literą P/A, numer wpisu z kodem izby.
   maskEnumeration(ctx, 'NR-UPRAWNIEN', String.raw`\d{7}[PA]?|${LAWYER_NUMBER}`, (v) => /^\D/.test(v) || /[PA]$/.test(v) || isValidNpwz(v));
 }

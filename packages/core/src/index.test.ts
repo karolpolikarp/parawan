@@ -9793,3 +9793,73 @@ test('dane o zdrowiu (G9): kotwica w zdaniu bez konkretnej osoby zostawia tekst 
     'Pracownik dostarczył zaświadczenie z kodem choroby [DANE O ZDROWIU].',
   );
 });
+test('G1 trzecia weryfikacja: kody wszystkich izb, długa nazwa izby, wpis w drugim wierszu, myślnik', () => {
+  masked([
+    ['radca prawny Jan Nowak (LB-1234)', `radca prawny ${N} (${U})`],
+    ['Mariusz Kos\nradca prawny, LB-1231', `${N}\nradca prawny, ${U}`],
+    ['radca prawny Jan Nowak (BK-1234)', `radca prawny ${N} (${U})`],
+    ['adwokat Anna Nowak, KRK/Adw/2345', `adwokat ${N}, ${U}`],
+    [
+      'Radca prawny Jan Nowak, nr wpisu na listę radców prawnych OIRP w Warszawie: WA-1234',
+      `Radca prawny ${N}, nr wpisu na listę radców prawnych OIRP w Warszawie: ${U}`,
+    ],
+    ['Adwokat Jan Nowak, nr wpisu na listę adwokatów ORA w Lublinie: LUB/Adw/456', `Adwokat ${N}, nr wpisu na listę adwokatów ORA w Lublinie: ${U}`],
+    [
+      'Radca prawny Jan Nowak, wpis na listę radców prawnych OIRP w Krakowie pod nr KR/1234',
+      `Radca prawny ${N}, wpis na listę radców prawnych OIRP w Krakowie pod nr ${U}`,
+    ],
+    [
+      'Radca prawny Jan Nowak, wpisany na listę radców prawnych OIRP w Krakowie pod nr KR/1234.',
+      `Radca prawny ${N}, wpisany na listę radców prawnych OIRP w Krakowie pod nr ${U}.`,
+    ],
+    ['Adwokat Jan Kowalski\nNr wpisu: KR-1234', `Adwokat ${N}\nNr wpisu: ${U}`],
+    ['Radca prawny Jan Kowalski\nNR WPISU: WA-1234', `Radca prawny ${N}\nNR WPISU: ${U}`],
+    // z osobą to podpis, także przed myślnikiem z dalszym tekstem
+    ['radca prawny Jan Nowak, WA-1234 – pełnomocnik powoda', `radca prawny ${N}, ${U} – pełnomocnik powoda`],
+    ['Radca prawny, WA-1234 -', `Radca prawny, ${U} -`],
+  ]);
+  keep([
+    'Kancelaria radcy prawnego, KR-2026 - plan pracy na rok.',
+    'Kancelaria radcy prawnego, KR-2026 – plan pracy na rok.',
+    'Radca prawny, WA-1234 - aplikacja 2026 r.',
+    'Radca prawny, WA-1234 – aplikacja 2026 r.',
+    'Adwokat, KR-2026 — plan',
+    'NR WPISU: WA-1234',
+    'Adwokat przyjął sprawę\nNr wpisu: KR-1234',
+  ]);
+  // pusta linia przerywa blok podpisu, a wpis do innego rejestru to nie numer zawodowy
+  expect(redactPII('Radca prawny Jan Kowalski\n\nNr wpisu: WA-1234').redacted).not.toContain(U);
+  expect(redactPII('Adwokat Jan Kowalski\nNr wpisu do CEIDG: KR-1234').redacted).toContain('KR-1234');
+  expect(redactPII('adwokat Jan Nowak, LB-1234 to sygnatura').redacted).not.toContain(U);
+});
+test('G1 końcowa weryfikacja: zawód z kodem izby bez numeru wpisu zostaje jawny', () => {
+  keep([
+    'Adwokat, LB-2026 - harmonogram szkoleń.',
+    'Radca prawny: BK-2025 – sprawozdanie roczne.',
+    'Kancelaria adwokacka, KRK-2024 - lista spraw.',
+    'Adwokat przegląda akta\nNr wpisu: KR-1234',
+    'Wpis na listę obecności pod nr LB-12 sporządził sekretarz.',
+    'Radca prawny złożył wniosek o wpis na listę rzeczników patentowych pod nr KR-2020 sprawy.',
+    'Faktura LB-1234 za usługi radcy prawnego.',
+    'Notariusz, PO-2024 - protokół z posiedzenia.',
+    'Formularz BK-1234 dla radcy prawnego wypełnia sekretariat.',
+    'Nr wpisu na listę radców prawnych OIRP w Lublinie: LB-1234',
+    'Adwokat, KRK/Adw/2345 – to przykład oznaczenia w regulaminie.',
+  ]);
+  // lista spoza zawodu („uczestników szkolenia”, „obecności”) to nie lista radców ani adwokatów
+  for (const t of [
+    'Radca prawny Jan Kowalski\nNumer wpisu na listę uczestników szkolenia: WA-1234',
+    'Radca prawny Jan Kowalski, nr wpisu na listę obecności: WA-1234 - sala 2',
+    'Adwokat Jan Kowalski\nNr wpisu do rejestru: LB-1234',
+    'Radca prawny Jan Kowalski\nTel. LB-1234 wewn. 12',
+    'Sala BK-12 – adwokat Jan Nowak prowadzi szkolenie.',
+  ])
+    expect(redactPII(t).redacted, t).not.toContain(U);
+  masked([
+    [
+      'Radca prawny Jan Nowak, nr wpisu na listę Okręgowej Izby Radców Prawnych w Lublinie: LB-1231',
+      `Radca prawny ${N}, nr wpisu na listę Okręgowej Izby Radców Prawnych w Lublinie: ${U}`,
+    ],
+    ['Adwokat Ewa Lis, wpisana na listę ORA w Lublinie pod nr LUB/Adw/456.', `Adwokat ${N}, wpisana na listę ORA w Lublinie pod nr ${U}.`],
+  ]);
+});

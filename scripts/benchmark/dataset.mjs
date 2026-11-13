@@ -1092,6 +1092,13 @@ export function buildDataset() {
   str('Na konferencji Jan Kowalski omówił rozpoznanie astmy oskrzelowej u dzieci.', ['Jan Kowalski'], ['astmy oskrzelowej']);
   str('Lekarz zalecił mu sertralinę 50 mg dziennie.', ['sertralinę 50 mg'], ['Lekarz zalecił mu']);
   str('Rozpoznanie: astma oskrzelowa, Jan Kowalski, lat 54', ['astma oskrzelowa', 'Jan Kowalski'], ['Rozpoznanie:', 'lat 54']);
+  // Grupa G1 (regresja): kody wszystkich izb, długa nazwa izby po „na listę”, wpis w drugim wierszu podpisu, myślnik.
+  str('Mariusz Kos\nradca prawny, LB-1231\nKancelaria w Białymstoku, adwokat Anna Lis (BK-1234)', ['LB-1231', 'BK-1234'], ['radca prawny', 'Kancelaria w Białymstoku']);
+  str('Radca prawny Jan Nowak, nr wpisu na listę radców prawnych OIRP w Warszawie: WA-1234', ['WA-1234'], ['nr wpisu na listę radców prawnych OIRP w Warszawie']);
+  str('Adwokat Ewa Lis, wpisana na listę adwokatów ORA w Lublinie pod nr LUB/Adw/456, oraz adwokat Anna Nowak, KRK/Adw/2345.', ['LUB/Adw/456', 'KRK/Adw/2345'], ['wpisana na listę adwokatów ORA w Lublinie pod nr']);
+  str('Adwokat Jan Kowalski\nNr wpisu: KR-1234', ['KR-1234'], ['Nr wpisu:']);
+  neg('Kancelaria radcy prawnego, KR-2026 - plan pracy na rok. Radca prawny, WA-1234 – aplikacja 2026 r. NR WPISU: WA-4321', ['KR-2026', 'WA-1234', 'WA-4321']);
+  neg('Radca prawny złożył wniosek o wpis na listę rzeczników patentowych pod nr KR-2020 sprawy. Wpis na listę obecności pod nr LB-12. Adwokat, KRK-2024 - lista spraw.', ['KR-2020', 'LB-12', 'KRK-2024']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

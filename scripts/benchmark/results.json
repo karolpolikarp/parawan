@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-11-13T22:16:10.009Z",
+  "generatedAt": "2026-11-13T22:30:38.302Z",
   "seed": 20260704,
   "coreVersion": "0.29.14",
-  "casesTotal": 599,
-  "mustMaskTotal": 773,
-  "mustKeepTotal": 951,
+  "casesTotal": 605,
+  "mustMaskTotal": 779,
+  "mustKeepTotal": 962,
   "skippedLayers": [
     {
       "name": "core+spacy",
@@ -26,16 +26,16 @@
     {
       "name": "T0+T1 core",
       "desc": "redactPII(): regex, sumy kontrolne i słownik (in-process, offline)",
-      "elapsedMs": 494,
+      "elapsedMs": 676,
       "changedVsCore": null,
-      "recall": 0.9805950840879689,
-      "precision": 0.9989484752891693,
-      "f1": 0.9896866977091935,
+      "recall": 0.9807445442875481,
+      "precision": 0.998960498960499,
+      "f1": 0.9897687159566645,
       "agg": {
-        "maskTotal": 773,
-        "maskHit": 758,
-        "keepTotal": 951,
-        "keepHit": 950
+        "maskTotal": 779,
+        "maskHit": 764,
+        "keepTotal": 962,
+        "keepHit": 961
       },
       "perCategory": {
         "osoby-podstawowe": {
@@ -69,19 +69,19 @@
           "recall": 1,
           "precision": 1,
           "f1": 1,
-          "maskTotal": 409,
-          "maskHit": 409,
-          "keepTotal": 286,
-          "keepHit": 286
+          "maskTotal": 415,
+          "maskHit": 415,
+          "keepTotal": 291,
+          "keepHit": 291
         },
         "negatywy": {
           "recall": null,
-          "precision": 0.9976076555023924,
+          "precision": 0.9976415094339622,
           "f1": null,
           "maskTotal": 0,
           "maskHit": 0,
-          "keepTotal": 418,
-          "keepHit": 417
+          "keepTotal": 424,
+          "keepHit": 423
         },
         "osoby-rzadkie-ner": {
           "recall": 0.21052631578947367,
@@ -3289,6 +3289,36 @@
         },
         {
           "id": "str-194",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-195",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-196",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-197",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-198",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-224",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-225",
           "leaked": [],
           "eaten": []
         }
