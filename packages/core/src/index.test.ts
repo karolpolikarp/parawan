@@ -958,11 +958,14 @@ test('miasto WIELOWYRAZOWE przed adresem bez kodu (Zielona Góra, ul. …)', () 
   expect(r.redacted.includes('Góra')).toBe(false);
 });
 test('forma zależna miasta przed adresem (w Poznaniu, ul. …)', () => {
-  const r = redactPII('Sąd Okręgowy w Poznaniu, ul. Hejmowskiego 2');
+  const r = redactPII('Lokal w Poznaniu, ul. Długa 5');
   expect(r.redacted).toContain('[MIEJSCOWOŚĆ]');
   expect(r.redacted.includes('Poznaniu')).toBe(false);
-  // nazwa sądu (przed „w") zostaje nietknięta
-  expect(r.redacted).toContain('Sąd Okręgowy w');
+  // Przy lokalu adres sądu nie jest siedzibą, więc znika razem z miastem, a nazwa sądu zostaje.
+  const s = redactPII('Sąd Okręgowy w Poznaniu, ul. Hejmowskiego 2 m. 4');
+  expect(s.redacted).toBe('Sąd Okręgowy w [MIEJSCOWOŚĆ], [ADRES]');
+  // Siedziba sądu (ulica bez lokalu za jego nazwą) zostaje jawna razem z miastem (grupa G7 ewaluacji).
+  expect(redactPII('Sąd Okręgowy w Poznaniu, ul. Hejmowskiego 2').redacted).toBe('Sąd Okręgowy w Poznaniu, ul. Hejmowskiego 2');
 });
 test('miasto z myślnikiem przed adresem (Kędzierzyn-Koźle, ul. …)', () => {
   const r = redactPII('Kędzierzyn-Koźle, ul. Rynek 2');
@@ -3810,8 +3813,8 @@ test('K22 pułapki: samo miasto, nazwa instytucji i patron przed adresem dalej d
     ['Warszawa, ul. Marszałkowska 10', `${C}, ${A}`],
     ['Nowa Sól, ul. Długa 5', `${C}, ${A}`],
     ['Bielsko-Biała, ul. Długa 5', `${C}, ${A}`],
-    // ulica za nazwą instytucji to jej siedziba i zostaje jawna (grupa G ewaluacji)
-    ['Starostwo Powiatowe Turek, ul. Kaliska 59', `Starostwo Powiatowe ${C}, ul. Kaliska 59`],
+    // ulica za nazwą instytucji to jej siedziba i zostaje jawna razem z miastem w nazwie (grupa G7 ewaluacji)
+    ['Starostwo Powiatowe Turek, ul. Kaliska 59', 'Starostwo Powiatowe Turek, ul. Kaliska 59'],
     ['Parafia pw. św. Stanisława Kalisz, ul. Polna 3', `Parafia pw. św. Stanisława ${C}, ${A}`],
     ['Pensjonat Maria Zakopane, ul. Kościeliska 5', `Pensjonat Maria ${C}, ${A}`],
     ['Pan Jan Kowalski w Gdańsku, ul. Długa 5', `Pan ${N} w ${C}, ${A}`],
@@ -10082,5 +10085,84 @@ test('ewaluacja G6: forma imienia będąca słowem z nazwiskiem-homografem w dop
     // oboczność ą→ę bez imienia
     'Rosną tu Dęby i Gołębie.',
     'Gołębia Pocztowego wypuszczono od Marka.',
+  ]);
+});
+
+test('G7: miasto przed ulicą siedziby zostaje jawne jak sama ulica', () => {
+  keep([
+    'Urząd Miasta Łodzi, ul. Piotrkowska 104, 90-926 Łódź',
+    'Sąd Okręgowy w Poznaniu, ul. Hejmowskiego 2',
+    'Starostwo Powiatowe Turek, ul. Kaliska 59',
+    'Wydział Komunikacji, ul. Polna 3, Turek',
+    // kilka siedzib w jednym akapicie: kropka po „ul.” nie zaczyna nazwy następnej instytucji
+    'Urząd Miasta Łodzi, ul. Piotrkowska 104, 90-926 Łódź. Sąd Okręgowy w Poznaniu, ul. Hejmowskiego 2. Starostwo Powiatowe Turek, ul. Kaliska 59.',
+  ]);
+  // Adres osoby dalej znika razem z miastem: samo miasto, osoba przed nim, lokal przy instytucji.
+  masked([
+    ['Turek, ul. Kaliska 59', `${C}, ${A}`],
+    ['Jan Turek, ul. Kaliska 59', `${N}, ${A}`],
+    ['Lokal w Poznaniu, ul. Długa 5', `Lokal w ${C}, ${A}`],
+    ['Starostwo Powiatowe Turek, ul. Kaliska 59 m. 4', `Starostwo Powiatowe ${C}, ${A}`],
+    ['Parafia pw. św. Stanisława Kalisz, ul. Polna 3', `Parafia pw. św. Stanisława ${C}, ${A}`],
+  ]);
+});
+test('G7: miejscowość między ulicą siedziby a kodem pocztowym', () => {
+  keep([
+    'Instytut Badawczy Leśnictwa, ul. Braci Leśnej 3, Sękocin Stary, 05-090 Raszyn.',
+    'Instytut Badawczy Leśnictwa\nul. Braci Leśnej 3\nSękocin Stary\n05-090 Raszyn',
+  ]);
+  masked([
+    // imię i nazwisko w miejscu miejscowości to nie siedziba
+    ['Urząd Gminy, ul. Polna 3, Jan Nowak, 05-090 Raszyn', `Urząd Gminy, ul. Polna 3, ${N}, ${KOD} ${C}`],
+    ['Jan Kowalski\nul. Braci Leśnej 3\nSękocin Stary\n05-090 Raszyn', `${N}\n${A}\nSękocin Stary\n${KOD} ${C}`],
+  ]);
+});
+test('G7: numer mieszkania słownie wchodzi do maski adresu', () => {
+  masked([
+    ['Spółdzielnia Mieszkaniowa Lipa\nul. Polna 3 mieszkania 14', `Spółdzielnia Mieszkaniowa Lipa\n${A}`],
+    ['Spółdzielnia Mieszkaniowa Lipa, ul. Polna 3 mieszkania 14', `Spółdzielnia Mieszkaniowa Lipa, ${A}`],
+    ['Zamieszkały: ul. Polna 3 mieszkania 14', `Zamieszkały: ${A}`],
+    ['Zamieszkały: ul. Polna 3 mieszkaniu 14', `Zamieszkały: ${A}`],
+    ['Zamieszkały: ul. Polna 3 lokalu 14', `Zamieszkały: ${A}`],
+    ['Jan Kowalski zam. ul. Polna 3 mieszkanie 14, Turek', `${N} zam. ${A}, ${C}`],
+    ['zam. Jana Pawła II 14 mieszkania 3, Kraków', `zam. ${A}, ${C}`],
+    ['Adres: Tomasza Mazura 12 mieszkanie 4', `Adres: ${A}`],
+  ]);
+  // Lokal słownie przed liczebnikiem w prozie to podmiot zdania, a słowo bez kotwicy adresu nie robi adresu.
+  masked([
+    ['Przy ul. Długiej 5 mieszkania 12 lat stały puste.', `Przy ${A} mieszkania 12 lat stały puste.`],
+    ['Kupił od Jana Nowaka 2 mieszkania 3 lata temu.', `Kupił od ${N} 2 mieszkania 3 lata temu.`],
+  ]);
+});
+test('G7 weryfikacja: pułapki wokół siedziby, miejscowości przed kodem i lokalu słownie', () => {
+  // Siedziby z miastem w nazwie i miejscowością przed kodem zostają jawne.
+  keep([
+    'Urząd Skarbowy w Turku, ul. Kaliska 59, 62-700 Turek',
+    'Sąd Rejonowy dla Łodzi-Śródmieścia, ul. Kopcińskiego 56, 90-928 Łódź',
+    'Urząd Gminy Raszyn, ul. Szkolna 2a, 05-090 Raszyn',
+    'Prokuratura Rejonowa w Kole, ul. Sienkiewicza 1',
+    'Wojewódzki Inspektorat Ochrony Środowiska w Lublinie, ul. Obywatelska 13',
+    'Urząd Miasta Zielona Góra, ul. Podgórna 22, 65-424 Zielona Góra',
+    'Urząd Gminy Nadarzyn, ul. Mszczonowska 24, Nadarzyn, 05-830 Nadarzyn',
+    'Urząd Skarbowy, ul. Polna 3, Zielona Góra, 65-001 Zielona Góra',
+    // „mieszkania/lokalu N” bez ulicy przed nim to proza, nie adres
+    'Spółdzielnia sprzedała 14 mieszkania 2 lata temu.',
+    'Sprzedano 3 mieszkania 14 osobom.',
+    'Lokalu 5 nie ma w ewidencji.',
+    'Pismo z dnia 3 lutego dotyczy mieszkania 14.',
+  ]);
+  masked([
+    // słowo lokalu bez numeru, z metrażem albo z liczbą pokoi zostaje poza maską
+    ['ul. Polna 3 mieszkanie 3-pokojowe na sprzedaż', `${A} mieszkanie 3-pokojowe na sprzedaż`],
+    ['ul. Polna 3 mieszkania 45 m2', `${A} mieszkania 45 m2`],
+    ['Biuro przy ul. Polnej 3 mieszkania nie wynajmuje.', `Biuro przy ${A} mieszkania nie wynajmuje.`],
+    ['Uchwała nr 3 w sprawie lokalu 14 przy ul. Polnej 3.', `Uchwała nr 3 w sprawie lokalu 14 przy ${A}.`],
+    // samo nazwisko w miejscu miejscowości to osoba, więc kod pocztowy nie należy do siedziby
+    ['Urząd Gminy, ul. Polna 3, Nowak Kowalski, 05-090 Raszyn', `Urząd Gminy, ul. Polna 3, ${N}, ${KOD} ${C}`],
+    ['Urząd Gminy, ul. Polna 3, Kowalska, 05-090 Raszyn', `Urząd Gminy, ul. Polna 3, ${N}, ${KOD} ${C}`],
+    // jawna siedziba w zdaniu wcześniej nie odsłania adresu osoby w następnym
+    ['Ośrodek Pomocy Społecznej w Turku, ul. Kaliska 59. Pani Nowak, Turek, ul. Polna 3.', `Ośrodek Pomocy Społecznej w Turku, ul. Kaliska 59. Pani ${N}, ${C}, ${A}.`],
+    ['Kancelaria Jan Kowalski Turek, ul. Kaliska 59', `Kancelaria ${N} ${C}, ${A}`],
+    ['Pan Jan Nowak, Urząd Miasta Łodzi, ul. Piotrkowska 104 m. 5', `Pan ${N}, Urząd Miasta ${C}, ${A}`],
   ]);
 });

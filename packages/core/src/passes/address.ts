@@ -73,16 +73,20 @@ const RE_YEAR_TAIL = /[ \t](?:19|20)\d{2}$/;
 // Numer lokalu nie zaczyna dłuższego wyrazu („mieszkanie 3-pokojowe"), nie jest metrażem („lokal
 // 120 m2", „lokal 32,4 m2") ani początkiem dłuższej liczby (cofanie skróciłoby „120" do „12").
 const ADDR_UNIT_END = String.raw`(?![-–]?[${PL_LO}${PL_UP}]|\d|[,.]\d|[ \t]*(?:m2|m²|mkw|m\.?[ \t]*kw))`;
-// Lokal: „/3", „m. 3", „lok. 3", po przecinku („Długa 5, m. 3"), słowem („lokal 3", „mieszk. 3")
+// Lokal: „/3", „m. 3", „lok. 3", po przecinku („Długa 5, m. 3"), słowem („lokal 3", „mieszk. 3",
+// „mieszkania 14")
 // i z drugim członem („84/92 lok. 105", „m. 3/4", „lok. 2 i 3"). Warianty z przecinkiem i słowem
 // tylko w obrębie wiersza: przez nową linię lokal sklejałby się z następnym wpisem.
 // „i N" nie przed wyrazem: „m. 3 i 2 dzieci" to lokal i liczebnik.
 const ADDR_UNIT_WORD_NO = String.raw`\d+[A-Za-z]?(?:[ \t]*\/[ \t]*\d{1,3}[A-Za-z]?|[ \t]+i[ \t]+\d{1,3}[A-Za-z]?(?![ \t]+[${PL_LO}]{3}))?`;
-const ADDR_UNIT_INLINE = String.raw`(?:[ \t]*\/[ \t]*\d+[A-Za-z]?|(?:[ \t]*(?:m\.?|lok\.?)[ \t]*|[ \t]*,[ \t]*(?:m\.?|lok\.?|lokal|mieszk\.?)[ \t]*|[ \t]+(?:lokal|mieszk\.?)[ \t]*)${ADDR_UNIT_WORD_NO})${ADDR_UNIT_END}`;
+// Lokal słowem w każdej odmianie, w jakiej stoi za numerem domu („lokal 4", „lokalu 4", „mieszk. 5",
+// „mieszkanie 14", „mieszkania 14", „mieszkaniu 14").
+const ADDR_UNIT_WORD = String.raw`(?:lokal(?:u|em)?|mieszk(?:ani(?:e|a|u|em)|\.)?)`;
+const ADDR_UNIT_INLINE = String.raw`(?:[ \t]*\/[ \t]*\d+[A-Za-z]?|(?:[ \t]*(?:m\.?|lok\.?)[ \t]*|[ \t]*,[ \t]*(?:m\.?|lok\.?|${ADDR_UNIT_WORD})[ \t]*|[ \t]+${ADDR_UNIT_WORD}[ \t]*)${ADDR_UNIT_WORD_NO})${ADDR_UNIT_END}`;
 const ADDR_UNIT = String.raw`(?:\s*(?:\/\s*\d+[A-Za-z]?|(?:m\.?|lok\.?)\s*${ADDR_UNIT_WORD_NO})${ADDR_UNIT_END}|${ADDR_UNIT_INLINE})?(?:${ADDR_UNIT_INLINE})?`;
 // Jawny człon lokalu („/3", „m. 3", „mieszk. 5") rozstrzyga, że liczba przed nim to numer domu,
 // a nie liczebnik.
-const RE_ADDR_HAS_UNIT = /\d[A-Za-z]?[ \t]*\/[ \t]*\d|(?<![\p{L}])(?:m\.?|lok\.?|lokal|mieszk\.?)[ \t]*\d/u;
+const RE_ADDR_HAS_UNIT = new RegExp(String.raw`\d[A-Za-z]?[ \t]*\/[ \t]*\d|(?<![\p{L}])(?:m\.?|lok\.?|${ADDR_UNIT_WORD})[ \t]*\d`, 'u');
 // Łącznik małą literą przed ostatnim członem nazwy ulicy („Żwirki i Wigury", „Bitwy pod Płowcami").
 // „z/ze" nie przed narzędnikiem: „na ul. Długiej z Kowalskim 5 razy" to osoba. Nie po liczbie ani
 // numerze z literą: w „przy ul. Polnej 5 i Leśnej 7" liczba to numer domu pierwszego adresu.
@@ -147,7 +151,7 @@ const RE_PROSE_AFTER_WEAK = new RegExp(
 );
 // Lokal słowem po spacji („ul. Długiej 5 lokal 12") w prozie bywa podmiotem z liczebnikiem („Przy
 // ul. Długiej 5 lokal 12 lat stał pusty"). Skrót „mieszk." i lokal po przecinku podmiotem nie bywają.
-const RE_SPACE_UNIT_TAIL = /(?<=\d[A-Za-z]?)[ \t]+lokal[ \t]*\d+[A-Za-z]?$/;
+const RE_SPACE_UNIT_TAIL = /(?<=\d[A-Za-z]?)[ \t]+(?:lokal(?:u|em)?|mieszkani(?:e|a|u|em))[ \t]*\d+[A-Za-z]?$/;
 
 // Drugi człon wyliczenia za maską adresu bez „ul." musi mieć kształt nazwy ulicy: przymiotnik
 // („Leśnej") albo patron w dopełniaczu („Mickiewicza"). Rzeczownik pospolity z numerem to część
@@ -222,7 +226,7 @@ const PATRON_STREET_NAME_SRC = String.raw`(?<![\p{L}\p{N}])(?:(?<!\.)|(?<=(?<!\p
 const PATRON_STREET_HEAD_SRC = PATRON_STREET_NAME_SRC + String.raw`(?: +[IVX]{1,4})?`;
 // Liczba przed jednostką powierzchni („Mieszkanie Jana Nowaka 48 m2", „… 2 ha") to metraż, a „m"
 // bez kropki to lokal tylko ze spacją przed numerem („30 m 2"). Lokal „m."/„lok." także wersalikami.
-const PATRON_STREET_NUM_SRC = String.raw` +\d{1,4}[a-zA-Z]?(?: ?[/-] ?\d{1,4}[a-zA-Z]?)?(?: *(?:[mM]\.(?= *\d)|[mM](?= +\d)(?! +\d{1,3} *(?:cm|mm)(?![\p{L}\p{N}]))|[lL][oO][kK]\.|[lL]okal(?:u)?|LOKAL(?:U)?) *\d{1,3}[a-zA-Z]?)?(?! *(?:[mM]2|[mM]²|[mM][kK][wW]|[mM]\.? ?[kK][wW]\.?|ha)(?![\p{L}\p{N}]))`;
+const PATRON_STREET_NUM_SRC = String.raw` +\d{1,4}[a-zA-Z]?(?: ?[/-] ?\d{1,4}[a-zA-Z]?)?(?: *(?:[mM]\.(?= *\d)|[mM](?= +\d)(?! +\d{1,3} *(?:cm|mm)(?![\p{L}\p{N}]))|[lL][oO][kK]\.|[lL]okal(?:u|em)?|LOKAL(?:U|EM)?|[mM]ieszk(?:ani(?:e|a|u|em)|\.)|MIESZK(?:ANI(?:E|A|U|EM)|\.)) *\d{1,3}[a-zA-Z]?)?(?! *(?:[mM]2|[mM]²|[mM][kK][wW]|[mM]\.? ?[kK][wW]\.?|ha)(?![\p{L}\p{N}]))`;
 const PATRON_STREET_SRC = PATRON_STREET_HEAD_SRC + PATRON_STREET_NUM_SRC;
 // Po etykiecie adresu, zamieszkania albo „przy" ulica z numerem w dowolnym otoczeniu: miasto, kod,
 // „nr", myślnik czy imię kolejnej osoby za numerem („zamieszkały przy Jana Pawła II nr 14").
@@ -269,7 +273,7 @@ const RE_PATRON_ROMAN_BOUNDARY = /(?:^|[\r\n\t;,(–—"„“”«»'|]|[ \t]-)
 const RE_PATRON_STREET_TITLE_HEAD = new RegExp(String.raw`^(?:${PATRON_STREET_TITLES})[ \t]`, 'u');
 // Lokal „m."/„lok." w dopasowaniu („Tomasza Mazura 12 m. 3") to kształt adresu sam w sobie, w każdym
 // trybie. „m" bez kropki tylko z odstępem przed numerem: „48 m2" to powierzchnia.
-const RE_PATRON_STREET_FLAT = /[ \t]\d{1,4}[a-zA-Z]?[ \t]*(?:m\.[ \t]*|m[ \t]+|lok\.[ \t]*|lokalu?[ \t]*)\d{1,3}[a-zA-Z]?$/i;
+const RE_PATRON_STREET_FLAT = /[ \t]\d{1,4}[a-zA-Z]?[ \t]*(?:m\.[ \t]*|m[ \t]+|lok\.[ \t]*|lokal(?:u|em)?[ \t]*|mieszk\.[ \t]*)\d{1,3}[a-zA-Z]?$/i;
 // Sam ukośnik wygląda jak udział czy ocena („Ocena Tomasza Mazura 3/5"), więc wskazuje adres dopiero
 // z miejscowością za numerem. Rok po ukośniku („12/2020") to sygnatura albo numer pisma.
 const RE_PATRON_STREET_SLASH = /[ \t](\d{1,4})[a-zA-Z]?\/(?!(?:19|20)\d\d(?!\d))(\d{1,4})[a-zA-Z]?$/;

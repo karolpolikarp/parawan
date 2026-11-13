@@ -11,7 +11,7 @@ import { BIRTH_COMBO, birthVerbAboutPerson } from '../guards/birth.js';
 import { saintWithContext } from '../guards/eponyms.js';
 import { LEGAL_ENTITY_WORDS, PARTY_ROLE_WORDS, ROLE_WORDS } from '../guards/roles.js';
 import { precededByLegalRef } from '../guards/numbers.js';
-import { institutionPostalAt } from '../guards/institution-address.js';
+import { institutionPostalAt, institutionStreetAt, STREET_SRC } from '../guards/institution-address.js';
 import { splitWords } from '../util.js';
 
 /** Rok sprzed 1900 jako osobny wyraz („w 1867 r.”). */
@@ -446,6 +446,14 @@ const RE_CITY_AFTER_ADDR = new RegExp(
     `(${CITY_RUN}|(?:${CAPS_CITY_TOK}[ \\t]+){0,2}${CAPS_CITY_TOK})`,
   'g',
 );
+// Ulica z numerem zaczynająca się dokładnie na danej pozycji (jak w strażniku siedziby).
+const RE_STREET_AT = new RegExp(STREET_SRC, 'uy');
+/** Czy na pozycji `at` stoi jawna ulica siedziby instytucji, tak jak ją ocenił strażnik przed
+ *  przebiegami adresu (passProtectInstitutionStreets)? */
+function institutionStreetHere(ctx: RedactCtx, str: string, at: number): boolean {
+  RE_STREET_AT.lastIndex = at;
+  return RE_STREET_AT.test(str) && institutionStreetAt(str, at, ctx.personProbe);
+}
 function maskCityNextToAddress(ctx: RedactCtx): void {
   ctx.text = ctx.text.replace(
     RE_CITY_BEFORE_ADDR,
@@ -455,6 +463,9 @@ function maskCityNextToAddress(ctx: RedactCtx): void {
       const lead = capRun.slice(0, capRun.lastIndexOf('\t') + 1);
       const run = capRun.slice(lead.length);
       if (cityRunLooksLikePerson(run, str.slice(Math.max(0, offset - 80), offset) + lead)) return m;
+      // Jawna ulica za miastem, którą strażnik siedziby zostawił („Urząd Miasta Łodzi, ul. Piotrkowska
+      // 104”, „Starostwo Powiatowe Turek, ul. Kaliska 59”): miasto to część nazwy i adresu instytucji.
+      if (/^(?:ul|al|os|pl)\.$/.test(anchor) && institutionStreetHere(ctx, str, offset + m.length - anchor.length)) return m;
       const rest = cityAtEdge(ctx, run, 'end');
       return rest === null ? m : `${lead}${rest}${ctx.M.MIEJSCOWOSC}${sep}${anchor}`;
     },

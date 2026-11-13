@@ -295,8 +295,10 @@ function previousBlockStrong(lines: string[], n: number): boolean {
 // Nazwa instytucji z przecinkiem tuż przed adresem, od początku nawiasu, wiersza albo zdania
 // („(Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1)”).
 // Biegnie przez execTail (flaga g), więc początek wiersza to `(?<![^\n])`, a nie `^`: lookbehind
-// widzi tekst przed oknem i trafia tylko w prawdziwy początek wiersza.
-const RE_INLINE_INSTITUTION = /(?:(?<![^\n])|[\n(]|[.;][ \t])[ \t]*([^\n(),;]{4,100}),[ \t]*$/gu;
+// widzi tekst przed oknem i trafia tylko w prawdziwy początek wiersza. Kropka skrótu ulicy nie kończy
+// zdania: w „…, ul. Hejmowskiego 2. Starostwo Powiatowe Turek, ul. Kaliska 59” nazwa zaczyna się
+// po „2.”, a nie po „ul.”.
+const RE_INLINE_INSTITUTION = /(?:(?<![^\n])|[\n(]|(?<!(?<!\p{L})(?:[Uu]l|[Aa]l|[Pp]l|[Oo]s))[.;][ \t])[ \t]*([^\n(),;]{4,100}),[ \t]*$/gu;
 // Sala z numerem w budynku przy ulicy („sala 214, budynek przy ul. Królewskiej 27”): miejsce
 // spotkania w gmachu instytucji, nie mieszkanie.
 const RE_ROOM_IN_BUILDING = /(?<!\p{L})sal[aię][ \t]+(?:nr[ \t]*)?\d+[a-z]?[ \t]*,[ \t]*(?:w[ \t]+)?(?:budyn\p{L}*|gmach\p{L}*)[ \t]+przy[ \t]+$/giu;
@@ -387,7 +389,18 @@ export const STREET_SRC = String.raw`(?<!\p{L})(?:[Uu]l\.|[Aa]l\.|[Pp]l\.|[Oo]s\
 // Pokój, piętro czy wejście za numerem („ul. Piotrkowska 104, pok. 12”) to część siedziby.
 const ROOM_TAIL = String.raw`(?:[ \t]*,[ \t]*(?:pok\.|pokój|p\.|piętro|wejście|budynek|bud\.)[^\n,]{0,30})?`;
 const RE_STREET_LINE = new RegExp(String.raw`^[ \t]*(${STREET_SRC})${ROOM_TAIL}[ \t]*,?[ \t]*\r?$`, 'u');
-const RE_STREET_BEFORE_POSTAL_INLINE = new RegExp(String.raw`(${STREET_SRC})[ \t]*,[ \t]*$`, 'gu');
+// Miejscowość (poczta) między ulicą a kodem, gdy siedziba leży we wsi z pocztą gdzie indziej
+// („ul. Braci Leśnej 3, Sękocin Stary, 05-090 Raszyn”): do trzech wyrazów z wielkiej litery, także
+// z łącznikiem albo „nad/pod”, albo znacznik miejscowości z pierwszego przebiegu.
+const LOCALITY_SRC = String.raw`(?:\[MIEJSCOWOŚĆ\]|\p{Lu}\p{Ll}+(?:(?:[ \t]+(?:(?:nad|pod)[ \t]+)?|-)\p{Lu}\p{Ll}+){0,2})`;
+const RE_STREET_BEFORE_POSTAL_INLINE = new RegExp(String.raw`(${STREET_SRC})[ \t]*,[ \t]*(?:(${LOCALITY_SRC})[ \t]*,[ \t]*)?$`, 'gu');
+const RE_LOCALITY_LINE = new RegExp(String.raw`^[ \t]*(${LOCALITY_SRC})[ \t]*,?[ \t]*\r?$`, 'u');
+/** Czy segment między ulicą a kodem to miejscowość, a nie imię i nazwisko („ul. Polna 3, Jan Nowak,”)
+ *  ani samo nazwisko, które sonda osób rozpozna („ul. Polna 3, Nowak Kowalski,”)? */
+function localitySegment(seg: string | undefined, probe?: PersonProbe): boolean {
+  if (seg === undefined) return true;
+  return !hasFirstName(seg.split(/[ \t-]+/)) && !probeFindsPerson(probe, [seg]);
+}
 
 /** Czy kod pocztowy na pozycji `offset` należy do adresu siedziby instytucji? Tylko razem z ulicą
  *  tej siedziby: w wierszu wyżej albo przed przecinkiem w tym samym wierszu. */
@@ -396,10 +409,19 @@ export function institutionPostalAt(t: string, offset: number, probe?: PersonPro
   if (blankBetween(t, win.from, offset) && blankBetween(t, win.lineStart(), win.from)) {
     const lineStart = win.lineStart();
     if (lineStart === 0) return false;
-    const prevStart = t.lastIndexOf('\n', lineStart - 2) + 1;
-    const m = RE_STREET_LINE.exec(t.slice(prevStart, lineStart - 1));
+    let prevStart = t.lastIndexOf('\n', lineStart - 2) + 1;
+    let m = RE_STREET_LINE.exec(t.slice(prevStart, lineStart - 1));
+    // Wiersz z samą miejscowością między ulicą a kodem („ul. Braci Leśnej 3⏎Sękocin Stary⏎05-090 Raszyn”).
+    if (!m && prevStart > 0) {
+      const loc = RE_LOCALITY_LINE.exec(t.slice(prevStart, lineStart - 1));
+      if (loc && localitySegment(loc[1], probe)) {
+        const streetStart = t.lastIndexOf('\n', prevStart - 2) + 1;
+        m = RE_STREET_LINE.exec(t.slice(streetStart, prevStart - 1));
+        prevStart = streetStart;
+      }
+    }
     return !!m && institutionStreetAt(t, prevStart + m.index + m[0].indexOf(m[1]), probe);
   }
   const m = execTail(RE_STREET_BEFORE_POSTAL_INLINE, t, win.from, offset);
-  return !!m && institutionStreetAt(t, m.index + m[0].indexOf(m[1]), probe);
+  return !!m && localitySegment(m[2], probe) && institutionStreetAt(t, m.index + m[0].indexOf(m[1]), probe);
 }

@@ -1141,6 +1141,13 @@ export function buildDataset() {
   str('W razie pytań pod numerem 22 123 45 67. Pan Nowak dostępny jest pod numerem 61 262 16 30.', ['22 123 45 67', 'Nowak', '61 262 16 30'], ['W razie pytań', 'dostępny jest pod numerem']);
   neg('Pani sprawa dostępna jest pod numerem 12 345 67 89. W razie pytań dotyczących sprawy prowadzonej pod numerem 22 379 56 66 proszę pisać.', ['12 345 67 89', '22 379 56 66']);
 
+  // Grupa G7 (spójność): miasto przed ulicą siedziby, miejscowość między ulicą a kodem i lokal słownie.
+  neg('Urząd Miasta Łodzi, ul. Piotrkowska 104, 90-926 Łódź. Sąd Okręgowy w Poznaniu, ul. Hejmowskiego 2. Starostwo Powiatowe Turek, ul. Kaliska 59.', ['Łodzi', 'ul. Piotrkowska 104', '90-926 Łódź', 'Poznaniu', 'ul. Hejmowskiego 2', 'Turek', 'ul. Kaliska 59']);
+  neg('Instytut Badawczy Leśnictwa, ul. Braci Leśnej 3, Sękocin Stary, 05-090 Raszyn.', ['ul. Braci Leśnej 3', 'Sękocin Stary', '05-090 Raszyn']);
+  str('Spółdzielnia Mieszkaniowa Lipa\nul. Polna 3 mieszkania 14', ['ul. Polna 3', 'mieszkania 14'], ['Spółdzielnia Mieszkaniowa Lipa']);
+  str('Zamieszkały: ul. Polna 3 mieszkania 14, Turek. Lokal w Poznaniu, ul. Długa 5.', ['ul. Polna 3', 'mieszkania 14', 'Turek', 'Poznaniu', 'ul. Długa 5'], ['Zamieszkały:', 'Lokal w']);
+  str('Urząd Gminy, ul. Polna 3, Nowak Kowalski, 05-090 Raszyn', ['Nowak Kowalski', '05-090', 'Raszyn'], ['Urząd Gminy, ul. Polna 3']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {

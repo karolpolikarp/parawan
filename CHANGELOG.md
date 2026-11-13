@@ -20,7 +20,12 @@ działają na GitHubie od chwili wypchnięcia tagów.
   siedziby, więc zostaje, także ulica z patronem, stopniem albo liczbą („ul. gen. Władysława
   Andersa 5”, „ul. 3 Maja 5”) w całości, również pod organem („Prezydent Miasta⏎Wydział
   Komunikacji”, „Wójt Gminy”), z dzielnicą po łączniku („Urząd Skarbowy Warszawa-Targówek”) i ze
-  skrótem („Oddział PKO”, „Delegatura NIK”, „Oddział Regionalny ARiMR”). Szkoła, przedszkole, żłobek, przychodnia, poradnia,
+  skrótem („Oddział PKO”, „Delegatura NIK”, „Oddział Regionalny ARiMR”). Miasto w nazwie tuż przed
+  ulicą siedziby zostaje razem z nią („Urząd Miasta Łodzi, ul. Piotrkowska 104, 90-926 Łódź”, „Sąd
+  Okręgowy w Poznaniu, ul. Hejmowskiego 2”, „Starostwo Powiatowe Turek, ul. Kaliska 59”), tak samo
+  miejscowość między ulicą a kodem („ul. Braci Leśnej 3, Sękocin Stary, 05-090 Raszyn”), także kilka
+  siedzib w jednym akapicie. Imię albo samo nazwisko w miejscu tej miejscowości („ul. Polna 3,
+  Nowak Kowalski, 05-090 Raszyn”) to adresat, więc kod pocztowy i poczta dalej znikają. Szkoła, przedszkole, żłobek, przychodnia, poradnia,
   ośrodek, instytut czy akademia liczą się jako siedziba tylko z numerem, patronem, miejscowością
   po „w” albo słowem „Miejski”, „Gminny”, „Powiatowy”, „Publiczny”, „SP ZOZ” („Szkoła Podstawowa
   nr 5 im. Marii Konopnickiej”, „Przedszkole Miejskie nr 3 w Turku”, także
@@ -33,8 +38,11 @@ działają na GitHubie od chwili wypchnięcia tagów.
   Kierowców KOS”, „Przychodnia Weterynaryjna Wilk”, „Żłobek Domowy Ewy”), po „zam.”,
   „adres zamieszkania” i „miejsce zamieszkania” nad blokiem, pod „Gmina” albo „Dzielnica”
   z nazwą miejscowości, z numerem mieszkania („m. 3”, „lok. 9”, „12/4”, „ul. Polna 3, m. 14”,
-  „lokal 4”), po pustej linii pod nagłówkiem instytucji oraz w zdaniu, w którym instytucja coś robi z osobą („Szpital przyjął
-  pacjenta Jana Kowalskiego, ul. Polna 3”). Sprawdzanie siedziby nie spowalnia długich
+  „lokal 4”, „mieszkania 14”), po pustej linii pod nagłówkiem instytucji oraz w zdaniu, w którym instytucja coś robi z osobą („Szpital przyjął
+  pacjenta Jana Kowalskiego, ul. Polna 3”). Numer mieszkania zapisany słowem w odmianie
+  („ul. Polna 3 mieszkania 14”, „lokalu 14”, „mieszkaniu 14”, „Jana Pawła II 14 mieszkania 3”)
+  znika razem z adresem w każdym piśmie, także po „Zamieszkały:”; wcześniej zostawał jawny za
+  znacznikiem `[ADRES]`. Sprawdzanie siedziby nie spowalnia długich
   dokumentów: spis kilku tysięcy placówek w jednym wierszu (280 KB) albo lista działów jeden pod
   drugim anonimizuje się w ułamku sekundy.
 - **Nowy rodzaj danych: dane o zdrowiu.** Rozpoznania, kody chorób, leki, urazy i nałogi
