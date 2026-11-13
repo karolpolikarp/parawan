@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-11-13T13:51:11.371Z",
+  "generatedAt": "2026-11-13T14:20:31.719Z",
   "seed": 20260704,
   "coreVersion": "0.29.14",
-  "casesTotal": 567,
-  "mustMaskTotal": 757,
-  "mustKeepTotal": 908,
+  "casesTotal": 569,
+  "mustMaskTotal": 761,
+  "mustKeepTotal": 912,
   "skippedLayers": [
     {
       "name": "core+spacy",
@@ -26,16 +26,16 @@
     {
       "name": "T0+T1 core",
       "desc": "redactPII(): regex, sumy kontrolne i słownik (in-process, offline)",
-      "elapsedMs": 478,
+      "elapsedMs": 436,
       "changedVsCore": null,
-      "recall": 0.9801849405548216,
-      "precision": 0.998898678414097,
-      "f1": 0.9894533331863108,
+      "recall": 0.9802890932982917,
+      "precision": 0.9989035087719298,
+      "f1": 0.9895087662335299,
       "agg": {
-        "maskTotal": 757,
-        "maskHit": 742,
-        "keepTotal": 908,
-        "keepHit": 907
+        "maskTotal": 761,
+        "maskHit": 746,
+        "keepTotal": 912,
+        "keepHit": 911
       },
       "perCategory": {
         "osoby-podstawowe": {
@@ -69,10 +69,10 @@
           "recall": 1,
           "precision": 1,
           "f1": 1,
-          "maskTotal": 393,
-          "maskHit": 393,
-          "keepTotal": 274,
-          "keepHit": 274
+          "maskTotal": 397,
+          "maskHit": 397,
+          "keepTotal": 278,
+          "keepHit": 278
         },
         "negatywy": {
           "recall": null,
@@ -3129,6 +3129,16 @@
         },
         {
           "id": "str-185",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-186",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-187",
           "leaked": [],
           "eaten": []
         }

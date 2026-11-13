@@ -9603,3 +9603,84 @@ test('G po drugiej weryfikacji: drugi przebieg daje ten sam wynik także w pseud
     }
   }
 });
+
+// ── Ewaluacja, grupa G7: strażnik siedziby instytucji w czasie liniowym ──
+test('G7: długi dokument z adresami instytucji w jednym wierszu w czasie liniowym', () => {
+  const time = (s: string): number => {
+    const t0 = performance.now();
+    redactPII(s);
+    return performance.now() - t0;
+  };
+  const inline = (n: number): string => Array.from({ length: n }, (_, i) => `Urząd Miasta, ul. Długa ${i + 1}, 00-001 Warszawa`).join('; ');
+  const paren = (n: number): string =>
+    Array.from({ length: n }, (_, i) => `(Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna ${i + 1})`).join(' ');
+  redactPII(inline(200)); // rozgrzewka JIT
+  // 280 KB w jednym wierszu: dawniej 30 s (każdy adres przeszukiwał wiersz od początku)
+  expect(time(inline(6000))).toBeLessThan(1500);
+  // proporcja zamiast samego progu, żeby nie zależeć od maszyny: czas liniowy daje ok. 4, kwadratowy 16
+  for (const [name, gen] of [
+    ['inline', inline],
+    ['nawias', paren],
+  ] as const) {
+    const t1 = Math.min(time(gen(1000)), time(gen(1000)));
+    const t4 = time(gen(4000));
+    expect(t4 / t1, name).toBeLessThan(6);
+  }
+  expect(redactPII(paren(4000)).redacted).toBe(paren(4000));
+});
+test('G7: powtarzany nagłówek działu z ulicą nie woła pełnej redakcji przy każdym numerze domu', () => {
+  const time = (s: string): number => {
+    const t0 = performance.now();
+    redactPII(s);
+    return performance.now() - t0;
+  };
+  const blocks = (head: string): string => Array.from({ length: 4000 }, (_, i) => `${head}\nul. Moniuszki ${i + 1}`).join('\n');
+  redactPII(blocks('x').slice(0, 5000)); // rozgrzewka JIT
+  // ten sam tekst bez nagłówka instytucji (mała litera) jako miara maszyny; dawniej 12 razy wolniej
+  const ratio = Math.min(...[0, 1].map(() => time(blocks('Dział Kadr i Płac')) / time(blocks('dział kadr i płac'))));
+  expect(ratio).toBeLessThan(4);
+  // a wynik bez zmian: siedziba jawna, osoba albo adres po kodzie dalej w masce
+  masked([
+    ['Dział Kadr\nul. Polna 1\nDział Płac\nul. Polna 2', 'Dział Kadr\nul. Polna 1\nDział Płac\nul. Polna 2'],
+    ['Urząd Miasta\nul. Długa 1\n00-001 Warszawa\nUrząd Pracy\nul. Lipowa 9', 'Urząd Miasta\nul. Długa 1\n00-001 Warszawa\nUrząd Pracy\nul. Lipowa 9'],
+    ['Pan Jan Kowalski\nul. Polna 3\nUrząd Pracy\nul. Lipowa 9', `Pan ${N}\n${A}\nUrząd Pracy\nul. Lipowa 9`],
+    ['Dział Kadr\nul. Polna 1\nW. Nowak\nDział Płac\nul. Polna 2', `Dział Kadr\nul. Polna 1\nW. ${N}\nDział Płac\n${A}`],
+    ['ul. Polna 1\nPrzychodnia Lekarska Ewy Nowak\nul. Lipowa 5', `${A}\nPrzychodnia Lekarska ${N}\n${A}`],
+  ]);
+});
+test('G7: okno strażnika siedziby nie zmienia wyniku przy długim wierszu ani długich spacjach', () => {
+  const pad = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit sed do. '.repeat(10);
+  masked([
+    [`${pad}(Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1)`, `${pad}(Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1)`],
+    [`${pad}Jan Kowalski, ul. Długa 5, 00-001 Warszawa`, `${pad}${N}, ${A}, ${KOD} ${C}`],
+    [`${pad}zam. ul. Długa 5, 00-001 Warszawa`, `${pad}zam. ${A}, ${KOD} ${C}`],
+    [`(${' '.repeat(200)}Urząd Miasta, ul. Długa 5`, `(${' '.repeat(200)}Urząd Miasta, ul. Długa 5`],
+    [`Urząd Miasta,${' '.repeat(200)}ul. Długa 5`, `Urząd Miasta,${' '.repeat(200)}ul. Długa 5`],
+    [`Urząd Miasta, ul.${' '.repeat(200)}Długa 5,${' '.repeat(100)}00-001 Warszawa`, `Urząd Miasta, ul.${' '.repeat(200)}Długa 5,${' '.repeat(100)}00-001 Warszawa`],
+    // pusty początek wiersza liczony od prawdziwego początku wiersza, nie od okna
+    [`Urząd Miasta\n${' '.repeat(300)}ul. Długa 5`, `Urząd Miasta\n${' '.repeat(300)}ul. Długa 5`],
+    // samotny „\r” w wierszu nie jest początkiem wiersza dla nazwy instytucji
+    ['Jan Kowalski, przedstawiciel,\rUrząd Miasta, ul. Długa 5, 00-001 Warszawa', `${N}, przedstawiciel,\rUrząd Miasta, ${A}, ${KOD} ${C}`],
+  ]);
+});
+test('G7 po weryfikacji: adresy siedzib zostają jawne przy oknie i nagłówku po adresie poprzedniego bloku', () => {
+  const pad = 'Pismo w sprawie wniosku złożonego w ubiegłym miesiącu przez stronę postępowania. '.repeat(4);
+  const keep = [
+    `${pad}spotkanie w sali 214, budynek przy ul. Królewskiej 27`,
+    'Wydział Komunikacji\nul. Długa 5\n00-001 Warszawa\nWydział Geodezji\nul. Krótka 7\n00-002 Warszawa',
+    'Urząd Gminy\nul. Lipowa 9\nReferat Podatków\nul. Lipowa 11',
+    'Ośrodek Pomocy Społecznej, ul. Słoneczna 4, 05-500 Piaseczno; Powiatowy Urząd Pracy, ul. Polna 8, 05-500 Piaseczno',
+    `${' '.repeat(250)}Urząd Miasta, ul. Długa 5, 00-001 Warszawa`,
+    `Komenda Powiatowa Policji,${'\t'.repeat(150)}ul. Kościuszki 3`,
+    `${'x'.repeat(400)}. Kuratorium Oświaty, ul. Wały Chrobrego 4, 70-502 Szczecin`,
+    'Szpital Wojewódzki\nul. Szpitalna 1\nPrzychodnia Specjalistyczna\nul. Szpitalna 3\nArchiwum Zakładowe\nul. Szpitalna 5',
+    `${pad}; Izba Skarbowa, ul. Wojska Polskiego 10, 90-001 Łódź; Zarząd Dróg, ul. Kolejowa 2, 90-002 Łódź`,
+    'Departament Rolnictwa\nul. Wspólna 30\n\nInstytut Badawczy\nul. Rakowiecka 32',
+    '(Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1) i (Spółdzielnia Mieszkaniowa „Zgoda”, ul. Wspólna 2)',
+    'Prokuratura Rejonowa\nul. Ogrodowa 51\n90-001 Łódź\nKomisariat Policji\nul. Ogrodowa 53\n90-001 Łódź',
+    `${pad.replace(/\. /g, ', ')}. Urząd Stanu Cywilnego, ul. Andersa 5, 00-159 Warszawa`,
+    'Inspektorat Pracy\nul. Kolejowa 4\n00-001 Warszawa\n\nDelegatura Inspektoratu\nul. Kolejowa 6\n00-001 Warszawa',
+    `${pad}(Szkoła Podstawowa nr 5, ul. Szkolna 12)`,
+  ];
+  masked(keep.map((s) => [s, s]));
+});

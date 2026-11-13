@@ -1049,6 +1049,17 @@ export function buildDataset() {
     ['ul. Moniuszki 3', '00-009'],
   );
   str('Zakład Usług Remontowych Jan Kowalski\nul. Polna 5\n00-001 Warszawa', ['Jan Kowalski', 'ul. Polna 5', '00-001'], ['Zakład Usług Remontowych']);
+  // Grupa G7: strażnik siedziby w oknie przed adresem i nagłówek po adresie poprzedniego bloku.
+  str(
+    'Dział Kadr\nul. Polna 1\n00-001 Warszawa\nDział Płac\nul. Polna 2\nW. Nowak\nPrzychodnia Rodzinna\nul. Lipowa 7',
+    ['Nowak', 'ul. Lipowa 7'],
+    ['ul. Polna 1', '00-001 Warszawa', 'ul. Polna 2'],
+  );
+  str(
+    `${'Lista placówek przyjmujących wnioski w tym roku; '.repeat(6)}Urząd Gminy, ul. Lipowa 9, 05-500 Piaseczno; Jan Kowalski, ul. Polna 3, 05-500 Piaseczno.`,
+    ['Jan Kowalski', 'ul. Polna 3'],
+    ['ul. Lipowa 9'],
+  );
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

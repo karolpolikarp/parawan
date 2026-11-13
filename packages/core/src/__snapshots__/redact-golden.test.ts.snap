@@ -610,6 +610,15 @@ ul. Krótka 115A lok. 9
   "str-185": "Zakład Usług Remontowych Jan Kowalski
 ul. Polna 5
 00-001 Warszawa",
+  "str-186": "Dział Kadr
+ul. Polna 1
+00-001 Warszawa
+Dział Płac
+ul. Polna 2
+W. Nowak
+Przychodnia Rodzinna
+ul. Lipowa 7",
+  "str-187": "Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Urząd Gminy, ul. Lipowa 9, 05-500 Piaseczno; Jan Kowalski, ul. Polna 3, 05-500 Piaseczno.",
   "str-19": "sms na [TELEFON] nie doszedł",
   "str-20": "Infolinia oddzwoni z [TELEFON].",
   "str-21": "Proszę o odpowiedź na [EMAIL] w tym tygodniu.",
@@ -1303,6 +1312,15 @@ Pani
   "str-185": "Zakład Usług Remontowych [OSOBA-A]
 [ADRES]
 [KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-186": "Dział Kadr
+ul. Polna 1
+00-001 Warszawa
+Dział Płac
+ul. Polna 2
+W. [OSOBA-A]
+Przychodnia Rodzinna
+[ADRES]",
+  "str-187": "Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Urząd Gminy, ul. Lipowa 9, 05-500 Piaseczno; [OSOBA-A], [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ].",
   "str-19": "sms na [TELEFON] nie doszedł",
   "str-20": "Infolinia oddzwoni z [TELEFON].",
   "str-21": "Proszę o odpowiedź na [EMAIL] w tym tygodniu.",
@@ -1996,6 +2014,15 @@ Pani
   "str-185": "Zakład Usług Remontowych [IMIĘ I NAZWISKO]
 [ADRES]
 [KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-186": "Dział Kadr
+ul. Polna 1
+00-001 Warszawa
+Dział Płac
+ul. Polna 2
+W. [IMIĘ I NAZWISKO]
+Przychodnia Rodzinna
+[ADRES]",
+  "str-187": "Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Urząd Gminy, ul. Lipowa 9, 05-500 Piaseczno; [IMIĘ I NAZWISKO], [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ].",
   "str-19": "sms na [TELEFON] nie doszedł",
   "str-20": "Infolinia oddzwoni z [TELEFON].",
   "str-21": "Proszę o odpowiedź na [EMAIL] w tym tygodniu.",
@@ -2738,6 +2765,15 @@ Pani
   "str-185": "Zakład Usług Remontowych <<osoba>>
 <<adres>>
 <<kod>> <<miejsce>>",
+  "str-186": "Dział Kadr
+ul. Polna 1
+00-001 Warszawa
+Dział Płac
+ul. Polna 2
+W. <<osoba>>
+Przychodnia Rodzinna
+<<adres>>",
+  "str-187": "Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Urząd Gminy, ul. Lipowa 9, 05-500 Piaseczno; <<osoba>>, <<adres>>, <<kod>> <<miejsce>>.",
   "str-19": "sms na [TELEFON] nie doszedł",
   "str-20": "Infolinia oddzwoni z [TELEFON].",
   "str-21": "Proszę o odpowiedź na [EMAIL] w tym tygodniu.",
@@ -3355,6 +3391,8 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "str-183": "ZDROWIE:2",
   "str-184": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
   "str-185": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-186": "ADRES:1 IMIE:1",
+  "str-187": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
   "str-19": "TELEFON:1",
   "str-20": "TELEFON:1",
   "str-21": "EMAIL:1",
@@ -3971,6 +4009,8 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "str-183": "ZDROWIE:2",
   "str-184": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
   "str-185": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-186": "ADRES:1 IMIE:1",
+  "str-187": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
   "str-19": "TELEFON:1",
   "str-20": "TELEFON:1",
   "str-21": "EMAIL:1",

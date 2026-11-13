@@ -25,7 +25,9 @@ działają na GitHubie od chwili wypchnięcia tagów.
   „adres zamieszkania” i „miejsce zamieszkania” nad blokiem, pod „Gmina” albo „Dzielnica”
   z nazwą miejscowości, z numerem mieszkania („m. 3”, „lok. 9”, „12/4”, „ul. Polna 3, m. 14”,
   „lokal 4”), po pustej linii pod nagłówkiem instytucji oraz w zdaniu, w którym instytucja coś robi z osobą („Szpital przyjął
-  pacjenta Jana Kowalskiego, ul. Polna 3”).
+  pacjenta Jana Kowalskiego, ul. Polna 3”). Sprawdzanie siedziby nie spowalnia długich
+  dokumentów: spis kilku tysięcy placówek w jednym wierszu (280 KB) albo lista działów jeden pod
+  drugim anonimizuje się w ułamku sekundy.
 - **Nowy rodzaj danych: dane o zdrowiu.** Rozpoznania, kody chorób, leki, urazy i nałogi
   zostawały jawne w kartach informacyjnych ze szpitala, pismach kadrowych, pozwach i zgłoszeniach
   szkody. Teraz dostają znacznik `[DANE O ZDROWIU]`, zawsze tylko wtedy, gdy tekst mówi o konkretnej

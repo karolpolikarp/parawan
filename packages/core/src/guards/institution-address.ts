@@ -84,6 +84,9 @@ function personLineAbove(line: string | undefined): boolean {
   return RE_SALUTATION_LINE.test(s) || RE_RESIDENCE_LABEL.test(s) || RE_PERSON_MASK.test(s) || hasFirstName(s.split(/[ \t]+/));
 }
 
+// Wiersz zaczynający się od kodu pocztowego (jawnego albo już zamaskowanego): „00-950 Warszawa”.
+const RE_POSTAL_LINE = new RegExp(String.raw`^[ \t]*(?:\d{2}-\d{3}|${MASK['KOD-POCZTOWY'].replace(/[[\]]/g, '\\$&')})(?![\d\p{L}])`, 'u');
+
 // Wiersze tekstu tuż nad pozycją (od najbliższego), do pierwszej pustej linii.
 function linesAbove(t: string, lineStart: number, max: number): string[] {
   const out: string[] = [];
@@ -106,15 +109,56 @@ function institutionHeaderAbove(t: string, lineStart: number, probe?: PersonProb
   let n = 0;
   while (n < lines.length && n < 4 && institutionNameLine(lines[n])) n++;
   if (n === 0 || personLineAbove(lines[n])) return false;
+  // Nad blokiem stoi sama ulica z numerem albo wiersz z kodem pocztowym: to koniec adresu poprzedniego
+  // bloku („Dział Kadr⏎ul. Polna 1⏎Dział Płac⏎ul. Polna 2”), nie osoba. Sonda sprawdza wtedy same
+  // nazwy, więc ten sam nagłówek trafia w pamięć sondy zamiast pełnej redakcji przy każdym numerze.
+  const above = lines[n];
+  if (above !== undefined && (RE_STREET_LINE.test(above) || RE_POSTAL_LINE.test(above))) return !probeFindsPerson(probe, lines.slice(0, n));
   return !probeFindsPerson(probe, lines.slice(0, n + 1), lines[n] === undefined ? undefined : lines[n + 1]);
 }
 
 // Nazwa instytucji z przecinkiem tuż przed adresem, od początku nawiasu, wiersza albo zdania
 // („(Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1)”).
-const RE_INLINE_INSTITUTION = /(?:^|[\n(]|[.;][ \t])[ \t]*([^\n(),;]{4,100}),[ \t]*$/u;
+// Biegnie przez execTail (flaga g), więc początek wiersza to `(?<![^\n])`, a nie `^`: lookbehind
+// widzi tekst przed oknem i trafia tylko w prawdziwy początek wiersza.
+const RE_INLINE_INSTITUTION = /(?:(?<![^\n])|[\n(]|[.;][ \t])[ \t]*([^\n(),;]{4,100}),[ \t]*$/gu;
 // Sala z numerem w budynku przy ulicy („sala 214, budynek przy ul. Królewskiej 27”): miejsce
 // spotkania w gmachu instytucji, nie mieszkanie.
-const RE_ROOM_IN_BUILDING = /(?<!\p{L})sal[aię][ \t]+(?:nr[ \t]*)?\d+[a-z]?[ \t]*,[ \t]*(?:w[ \t]+)?(?:budyn\p{L}*|gmach\p{L}*)[ \t]+przy[ \t]+$/iu;
+const RE_ROOM_IN_BUILDING = /(?<!\p{L})sal[aię][ \t]+(?:nr[ \t]*)?\d+[a-z]?[ \t]*,[ \t]*(?:w[ \t]+)?(?:budyn\p{L}*|gmach\p{L}*)[ \t]+przy[ \t]+$/giu;
+// Okno przed adresem, w którym szukają wyrażenia tego wiersza. Nazwa ma najwyżej 100 znaków, ulica
+// przed kodem około 80 (bez spacji), więc dalej nic nie sięga. Bez okna każde wywołanie przeszukiwało
+// wiersz od początku, a dokument w jednym długim wierszu dawał czas kwadratowy (280 KB: 30 s).
+const INLINE_WINDOW = 160;
+/** Dopasowanie wyrażenia (flaga g) kończącego się na `to` (`$`), szukane od `from`. Lookbehind widzi
+ *  prawdziwy tekst przed oknem, więc wynik jest taki sam jak na całym wierszu. */
+function execTail(re: RegExp, t: string, from: number, to: number): RegExpExecArray | null {
+  re.lastIndex = from;
+  return re.exec(t.slice(0, to));
+}
+// Czy w tekście [from, to) stoi coś poza białymi znakami? Kończy na pierwszym takim znaku.
+const RE_NON_SPACE = /\S/u;
+const blankBetween = (t: string, from: number, to: number): boolean => !RE_NON_SPACE.test(t.slice(from, to));
+/** Okno przed pozycją `offset`: INLINE_WINDOW znaków innych niż spacja i tabulator wstecz, najdalej
+ *  do początku wiersza. Spacje się nie liczą, bo wyrażenia przyjmują ich dowolnie dużo („Urząd
+ *  Miasta,⎵⎵⎵…ul. Długa 5”). Dokładny początek wiersza (`lineStart()`) liczony dopiero na żądanie:
+ *  szukanie go wstecz przez cały długi wiersz przy każdym adresie też dawało czas kwadratowy. */
+function windowBefore(t: string, offset: number): { from: number; lineStart: () => number } {
+  const blank = (i: number): boolean => t[i] === ' ' || t[i] === '\t';
+  let from = offset;
+  let budget = INLINE_WINDOW;
+  while (from > 0 && t[from - 1] !== '\n' && (budget > 0 || blank(from - 1))) {
+    from--;
+    if (!blank(from)) budget--;
+  }
+  let ls = from === 0 || t[from - 1] === '\n' ? from : -1;
+  return {
+    from,
+    lineStart: () => {
+      if (ls < 0) ls = t.lastIndexOf('\n', offset - 1) + 1;
+      return ls;
+    },
+  };
+}
 // Numer lokalu za numerem domu („m. 3”, „lok. 9”, „lokal 4”, „mieszkania 14”); numer z ukośnikiem
 // ocenia flatUnit.
 const FLAT_UNIT_SRC = String.raw`(?:m|lok|lokal\p{L}*|mieszk\p{L}*|apt)\.?[ \t]*(?:nr\.?[ \t]*)?\d`;
@@ -134,24 +178,25 @@ function flatUnit(street: string): boolean {
 /** Czy ulica zaczynająca się na pozycji `offset` to adres siedziby instytucji? Sonda osób (z redact.ts)
  *  sprawdza, czy w nazwie albo nad nią nie stoi osoba, którą zamaskują dopiero przebiegi osób. */
 export function institutionStreetAt(t: string, offset: number, probe?: PersonProbe): boolean {
-  const lineStart = t.lastIndexOf('\n', offset - 1) + 1;
-  const inLine = t.slice(lineStart, offset);
-  if (RE_RESIDENCE_LABEL.test(inLine.slice(-40))) return false;
+  const { from, lineStart } = windowBefore(t, offset);
+  if (RE_RESIDENCE_LABEL.test(t.slice(Math.max(from, offset - 40), offset))) return false;
   // Numer mieszkania („m. 3”, „lok. 9”, „3/5”, także po przecinku: „3, m. 14”) wskazuje lokal
   // mieszkalny, nie siedzibę. Za przecinkiem liczy się tylko lokal tuż po nim, żeby sygnatura czy
   // data dalej w wierszu nie myliła.
-  const eol = t.indexOf('\n', offset);
-  const seg = t.slice(offset, eol < 0 ? offset + 80 : Math.min(eol, offset + 80));
+  const after = t.slice(offset, offset + 80);
+  const eol = after.indexOf('\n');
+  const seg = eol < 0 ? after : after.slice(0, eol);
   const comma = seg.indexOf(',');
   if (flatUnit(comma < 0 ? seg : seg.slice(0, comma))) return false;
   if (comma >= 0 && RE_FLAT_UNIT_AFTER_COMMA.test(seg.slice(comma + 1))) return false;
-  if (!inLine.trim()) return institutionHeaderAbove(t, lineStart, probe);
-  if (RE_ROOM_IN_BUILDING.test(inLine)) return true;
-  const m = RE_INLINE_INSTITUTION.exec(inLine);
+  // Pusty początek wiersza liczony od prawdziwego początku wiersza, nie od okna.
+  if (blankBetween(t, from, offset) && blankBetween(t, lineStart(), from)) return institutionHeaderAbove(t, lineStart(), probe);
+  if (execTail(RE_ROOM_IN_BUILDING, t, from, offset)) return true;
+  const m = execTail(RE_INLINE_INSTITUTION, t, from, offset);
   if (!m || !institutionNameLine(m[1])) return false;
   // Nazwa od początku wiersza: wiersz wyżej nie może wskazywać osoby („Jan Kowalski⏎Spółdzielnia…, ul.”).
-  const fromLineStart = !inLine.slice(0, m.index + m[0].indexOf(m[1])).trim();
-  const above = fromLineStart ? linesAbove(t, lineStart, 2) : [];
+  const fromLineStart = blankBetween(t, from, m.index + m[0].indexOf(m[1])) && blankBetween(t, lineStart(), from);
+  const above = fromLineStart ? linesAbove(t, lineStart(), 2) : [];
   if (personLineAbove(above[0])) return false;
   return !probeFindsPerson(probe, above[0] === undefined ? [m[1]] : [m[1], above[0]], above[1]);
 }
@@ -165,19 +210,19 @@ export const STREET_SRC = String.raw`(?<!\p{L})(?:[Uu]l\.|[Aa]l\.|[Pp]l\.|[Oo]s\
 // Pokój, piętro czy wejście za numerem („ul. Piotrkowska 104, pok. 12”) to część siedziby.
 const ROOM_TAIL = String.raw`(?:[ \t]*,[ \t]*(?:pok\.|pokój|p\.|piętro|wejście|budynek|bud\.)[^\n,]{0,30})?`;
 const RE_STREET_LINE = new RegExp(String.raw`^[ \t]*(${STREET_SRC})${ROOM_TAIL}[ \t]*,?[ \t]*\r?$`, 'u');
-const RE_STREET_BEFORE_POSTAL_INLINE = new RegExp(String.raw`(${STREET_SRC})[ \t]*,[ \t]*$`, 'u');
+const RE_STREET_BEFORE_POSTAL_INLINE = new RegExp(String.raw`(${STREET_SRC})[ \t]*,[ \t]*$`, 'gu');
 
 /** Czy kod pocztowy na pozycji `offset` należy do adresu siedziby instytucji? Tylko razem z ulicą
  *  tej siedziby: w wierszu wyżej albo przed przecinkiem w tym samym wierszu. */
 export function institutionPostalAt(t: string, offset: number, probe?: PersonProbe): boolean {
-  const lineStart = t.lastIndexOf('\n', offset - 1) + 1;
-  const inLine = t.slice(lineStart, offset);
-  if (!inLine.trim()) {
+  const win = windowBefore(t, offset);
+  if (blankBetween(t, win.from, offset) && blankBetween(t, win.lineStart(), win.from)) {
+    const lineStart = win.lineStart();
     if (lineStart === 0) return false;
     const prevStart = t.lastIndexOf('\n', lineStart - 2) + 1;
     const m = RE_STREET_LINE.exec(t.slice(prevStart, lineStart - 1));
     return !!m && institutionStreetAt(t, prevStart + m.index + m[0].indexOf(m[1]), probe);
   }
-  const m = RE_STREET_BEFORE_POSTAL_INLINE.exec(inLine);
-  return !!m && institutionStreetAt(t, lineStart + m.index + m[0].indexOf(m[1]), probe);
+  const m = execTail(RE_STREET_BEFORE_POSTAL_INLINE, t, win.from, offset);
+  return !!m && institutionStreetAt(t, m.index + m[0].indexOf(m[1]), probe);
 }
