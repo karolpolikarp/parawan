@@ -953,6 +953,13 @@ export function buildDataset() {
   // audyt końcowy r2: adres kończy się na kropce za numerem domu, drugie imię rodzica w tej samej masce
   str('Zgłaszająca mieszka przy ul. Grochowskiej 17. Od 3 lat skarży się na hałas. Anna Lis, córka Piotra Pawła i Anny Marii.', ['ul. Grochowskiej 17', 'Anna Lis', 'Piotra Pawła', 'Anny Marii'], ['Od 3 lat skarży się']);
   neg('Odbiorca: Szkoła Podstawowa nr 12 im. Jana Pawła II', ['im. Jana Pawła II']);
+  // ewaluacja G4: PESEL po etykiecie z literówką zmieniającą długość (zgubiona albo dodana cyfra);
+  // nagłówek tabeli z PESEL nad inną kolumną liczbową zostaje
+  str('Pacjentka, PESEL: 8909150266, zgłosiła się na badanie.', ['8909150266'], ['Pacjentka', 'badanie']);
+  str('Wnioskodawca, PESEL 890915026670, prosi o zwrot.', ['890915026670'], ['Wnioskodawca', 'zwrot']);
+  neg('Kolumny: PESEL Kwota 1234567890 zł do zapłaty.', ['1234567890']);
+  str('Nr PESEL: 8909150266, adres do korespondencji bez zmian.', ['8909150266'], ['adres do korespondencji']);
+  neg('Zapytanie do bazy PESEL nr 2026111301 zrealizowano.', ['2026111301']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

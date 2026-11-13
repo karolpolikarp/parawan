@@ -12,7 +12,14 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
-Na razie brak zmian od v0.46.27.
+- **PESEL z literówką w długości jest zamaskowany.** Po etykiecie „PESEL” numer z jedną cyfrą
+  za mało albo za dużo („PESEL: 8909150266”, „PESEL Pacjenta: 890915026670”, pole `"pesel"` w JSON
+  lub XML) trafia pod znacznik `[PESEL]`. Wcześniej maska obejmowała tylko dokładnie 11 cyfr. Działa też
+  po „Nr PESEL:” i „Lp. PESEL:”. Między etykietą a numerem może stać tylko „nr” albo określenie osoby
+  („ojca”, „pacjenta”, „ubezpieczonego”).
+  Bez etykiety nic się nie zmienia. Zostają jawne: liczba w następnym zdaniu („PESEL. 2024000123 to
+  nr zgłoszenia”), nagłówek tabeli z „PESEL” nad inną kolumną, numer po innym słowie („PESEL
+  zgłoszenie 2024100123”), numer sprawy po nazwie rejestru („zapytanie do bazy PESEL nr 2026111301”), NIP po pustym polu PESEL i dłuższe identyfikatory („1234567890-12”).
 
 ## v0.46.27 — 2026-11-12
 

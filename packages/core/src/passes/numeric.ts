@@ -140,7 +140,65 @@ export function passPesel(ctx: RedactCtx): void {
   });
   // Silna etykieta: maska mimo złej sumy, bo numer bywa z literówką.
   maskAfterLabel(ctx, RE_PESEL_LABELED, 'PESEL');
+  maskPeselLengthTypo(ctx);
   maskSpacedAfterLabel(ctx, RE_PESEL_SPACED, 'PESEL', isValidPesel);
+}
+
+// Etykieta PESEL i w tym samym wierszu 10 albo 12 cyfr ciągiem: zgubiona albo dodana cyfra.
+// Separator: spacje (także twarde, częste w tekście z .docx), „:", „=", „.", „-", a także klucz JSON
+// („"pesel": "…"") i znacznik XML („<pesel>…"). Za numerem nie może stać dalsza grupa cyfr
+// („PESEL 8909150266 6" to 11 cyfr dla maskSpacedAfterLabel, „1234567890-12" czy „…/2020" to inny
+// identyfikator), inaczej maska objęłaby tylko fragment.
+const RE_PESEL_LENGTH_TYPO = new RegExp(
+  String.raw`\b(pesel${LABEL_WORDS})([ \t${HARD_SPACES}:=.-]+|["'][ \t]*:[ \t]*["']|>)(\d{12}|\d{10})(?![ \t${HARD_SPACES}|/-]{0,3}\d)`,
+  'gi',
+);
+// Słowa między etykietą a numerem, które dopuszczamy bez sumy kontrolnej: numer albo osoba, do
+// której PESEL należy („PESEL pacjenta:", „PESEL Ubezpieczonego", „PESEL nr"). Lista zamknięta,
+// bo każde inne słowo („PESEL zgłoszenie 2024100123", „PESEL kwota 1234567890 zł") zmienia sens.
+const RE_PESEL_OWNER_WORD = new RegExp(
+  '^(?:nr|numer|osoby|ojca|matki|rodzica|dziecka|syna|córki|żony|męża|małżonk[ai]|opiekun(?:a|ki)|' +
+    'pacjent(?:a|ki)|klient(?:a|ki)|ubezpieczon(?:ego|ej)|wnioskodawc(?:y|zyni)|pracownik(?:a)|pracownicy|' +
+    'dłużni(?:ka|czki)|wierzyciel(?:a|ki)|powoda|powódki|pozwan(?:ego|ej)|świadka|zmarł(?:ego|ej)|' +
+    'spadkodawc(?:y|zyni)|najemcy|kupując(?:ego|ej)|sprzedając(?:ego|ej)|właściciel(?:a|ki)|ucznia|uczennicy|' +
+    'student(?:a|ki)|podatni(?:ka|czki)|płatnika|beneficjent(?:a|ki)|członka|uczestni(?:ka|czki)|' +
+    'poszkodowan(?:ego|ej)|sprawcy|kierowcy|abonent(?:a|ki)|zgłaszając(?:ego|ej)|' +
+    'oskarżon(?:ego|ej)|podejrzan(?:ego|ej)|skazan(?:ego|ej))$',
+  'iu',
+);
+// „nr”, „numer”, „lp.” tuż przed etykietą PESEL (pomijane przy strażniku odwołań).
+const RE_PESEL_LEAD_NR = /(?<![\p{L}\d])(?:nr|numer|lp)\.?[ \t]*$/iu;
+// Słowo przed „PESEL”, po którym PESEL to nazwa rejestru, a nie etykieta danej osoby.
+const RE_PESEL_REGISTER_BEFORE =
+  /(?<![\p{L}\d])(?:w|we|do|z|ze|dla|baz\p{L}*|rejestr\p{L}*|system\p{L}*|numer\p{L}*|ewidencj\p{L}*|danych|aktualizacj\p{L}*|zgłosze\p{L}*|wniosk\p{L}*|zapyta\p{L}*|nadani\p{L}*|weryfikacj\p{L}*|wpis\p{L}*)[ \t]+$/iu;
+/**
+ * PESEL z literówką zmieniającą długość („PESEL: 8909150266", „PESEL 890915026670"). Sumy nie da się
+ * sprawdzić, więc kotwicą jest sama etykieta i warunki ostrzejsze niż przy 11 cyfrach: etykieta
+ * i numer w jednym wierszu, słowa po etykiecie tylko z listy RE_PESEL_OWNER_WORD („PESEL Kwota
+ * 1234567890" to nagłówek tabeli, „PESEL brak NIP 5260250274" to inne pole), bez końca zdania
+ * między nimi („Klient podał PESEL. 2024000123 – nr zgłoszenia"), bez łącznika sklejonego z etykietą
+ * („PESEL-1234567890" to kod rekordu), a 10 cyfr z poprawną sumą NIP zostaje dla przebiegu NIP.
+ */
+function maskPeselLengthTypo(ctx: RedactCtx): void {
+  ctx.text = ctx.text.replace(RE_PESEL_LENGTH_TYPO, (m, kw: string, sep: string, val: string, off: number, str: string) => {
+    const words = kw.split(/\s+/).slice(1);
+    if (kw.includes('\n') || !words.every((w) => RE_PESEL_OWNER_WORD.test(w))) return m;
+    // Kropka z odstępem kończy zdanie; wyjątkiem jest skrót „nr." tuż przed numerem.
+    if (/\.[\s]/u.test(sep) && words[words.length - 1]?.toLowerCase() !== 'nr') return m;
+    if (/^-+$/.test(sep)) return m;
+    if (sep === '>' && (words.length || str[off - 1] !== '<')) return m;
+    // „Nr PESEL:”, „Lp. PESEL:” to zwykła etykieta pola, więc strażnik odwołań („nr ”, „lp.”) patrzy
+    // dopiero przed nią; „art. PESEL”, „rejestru PESEL” dalej blokują.
+    const lead = RE_PESEL_LEAD_NR.exec(str.slice(Math.max(0, off - 8), off))?.[0].length ?? 0;
+    if (precededByLegalRef(str, off - lead)) return m;
+    // „PESEL nr X” po nazwie rejestru („numeru PESEL nr 2024000123”, „bazy PESEL nr …”, „w PESEL nr …”):
+    // „nr” należy wtedy do wniosku albo zgłoszenia, a liczba to numer sprawy.
+    if (words.some((w) => /^(?:nr|numer)$/i.test(w)) && RE_PESEL_REGISTER_BEFORE.test(str.slice(Math.max(0, off - 32), off))) {
+      return m;
+    }
+    if (val.length === 10 && isValidNip(val)) return m;
+    return `${kw}${sep}${ctx.hit('PESEL')}`;
+  });
 }
 
 // Słowa za etykietą, które otwierają inne pole albo mówią, że numeru nie ma („PESEL⏎Tel. 48 601 222 333",

@@ -8434,3 +8434,104 @@ test('options.masks — maska z cudzysłowem, backslashem i nową linią nie psu
   expect(() => JSON.parse(out)).not.toThrow();
   expect(JSON.parse(out)).toEqual({ opis: `${masks.IMIE}, PESEL ${masks.PESEL}`, pesel: masks.PESEL });
 });
+
+test('PESEL po etykiecie z literówką zmieniającą długość (10 albo 12 cyfr) pod maską', () => {
+  const masked: [string, string][] = [
+    ['PESEL: 8909150266', 'PESEL: [PESEL]'],
+    ['PESEL 890915026670', 'PESEL [PESEL]'],
+    ['Wnioskodawczyni (PESEL 8909150266), urodzona w 1989 r.', 'Wnioskodawczyni (PESEL [PESEL]), urodzona w 1989 r.'],
+    ['PESEL pacjenta: 890915026670, oddział', 'PESEL pacjenta: [PESEL], oddział'],
+    ['pesel nr 8909150266', 'pesel nr [PESEL]'],
+  ];
+  for (const [t, want] of masked) expect(redactPII(t).redacted).toBe(want);
+  // 11 cyfr ze złą sumą po etykiecie dalej pod maską (bez zmian)
+  expect(redactPII('PESEL: 89091502660').redacted).toBe('PESEL: [PESEL]');
+  const keep = [
+    // bez etykiety nic się nie zmienia: fałszywy PESEL jako numer polisy
+    'nr polisy ubezpieczeniowej kontraktu 08650158616',
+    'Numer zamówienia 8909150266 z dnia 3 maja',
+    // nagłówek tabeli: PESEL nad inną kolumną liczbową
+    'Imię | PESEL | Kwota\nJan | 8909150266 | 100',
+    'PESEL Kwota 1234567890',
+    'PESEL\n1234567890',
+    // etykieta innego pola między PESEL a numerem
+    'PESEL tel. 6012223334',
+    // 13 cyfr to już nie literówka PESEL
+    'PESEL: 1234567890123',
+  ];
+  for (const t of keep) expect(redactPII(t).redacted).toBe(t);
+  // NIP stojący zaraz po pustym polu PESEL dostaje znacznik NIP, nie PESEL
+  expect(redactPII('PESEL:\nNIP: 5260250274').redacted).toBe('PESEL:\nNIP: [NIP]');
+  expect(redactPII('PESEL brak NIP 5260250274').redacted).toBe('PESEL brak NIP [NIP]');
+  expect(redactPII('PESEL: NIP 1234567890').redacted).toBe('PESEL: NIP [NIP]');
+});
+
+test('PESEL z literówką długości: koniec zdania, obce słowa, twarda spacja, określenia osoby, JSON/XML i całe numery', () => {
+  const N = ' ';
+  const masked: [string, string][] = [
+    // twarda spacja z tekstu .docx
+    [`PESEL:${N}8909150266`, `PESEL:${N}[PESEL]`],
+    [`PESEL nr${N}8909150266`, `PESEL nr${N}[PESEL]`],
+    // określenie osoby wielką literą (formularze medyczne i ZUS)
+    ['PESEL Pacjenta: 8909150266', 'PESEL Pacjenta: [PESEL]'],
+    ['PESEL PACJENTA: 890915026670', 'PESEL PACJENTA: [PESEL]'],
+    ['PESEL Ubezpieczonego 8909150266', 'PESEL Ubezpieczonego [PESEL]'],
+    ['PESEL Nr 8909150266', 'PESEL Nr [PESEL]'],
+    ['PESEL nr. 8909150266', 'PESEL nr. [PESEL]'],
+    // klucz JSON i znacznik XML
+    ['"pesel": "8909150266"', '"pesel": "[PESEL]"'],
+    ['{"pesel":"890915026670"}', '{"pesel":"[PESEL]"}'],
+    ['<pesel>8909150266</pesel>', '<pesel>[PESEL]</pesel>'],
+    // 11 cyfr z odstępem albo łącznikiem przed ostatnią cyfrą: maska na całym numerze, nie na 10 cyfrach
+    ['PESEL 8909150266 6', 'PESEL [PESEL]'],
+    ['PESEL: 8909150266-6', 'PESEL: [PESEL]'],
+    ['PESEL: 8909150266  6', 'PESEL: [PESEL]'],
+    ['PESEL 8909150266\t6', 'PESEL [PESEL]'],
+  ];
+  for (const [t, want] of masked) expect(redactPII(t).redacted).toBe(want);
+  const keep = [
+    // kropka ze spacją kończy zdanie: liczba na początku następnego to inny numer
+    'Klient podał PESEL. 2024000123 – nr zgłoszenia w systemie.',
+    'Weryfikacja PESEL zakończona. 1234567890 to numer zgłoszenia',
+    'Zgłoszenie dotyczy błędnego PESEL. 2024000123',
+    // słowo spoza listy określeń osoby zmienia sens
+    'W systemie PESEL zgłoszenie 2024100123 zamknięto.',
+    'PESEL dotyczy polisy 1234567890',
+    'PESEL oraz numer sprawy 2024000123',
+    'PESEL lub numer dokumentu 1234567890',
+    'PESEL zmieniony decyzją nr 2024000123',
+    'PESEL zweryfikowano 1700000000 (znacznik czasu)',
+    'Błędny PESEL kwota 1234567890 zł',
+    'PESEL nr rej. 1234567890',
+    // łącznik sklejony z etykietą to kod rekordu
+    'Kod: PESEL-1234567890',
+    // dalsza grupa cyfr: inny identyfikator, bez maski na fragmencie
+    'PESEL: 1234567890-12',
+    'PESEL: 8909150266/2020',
+  ];
+  for (const t of keep) expect(redactPII(t).redacted).toBe(t);
+});
+
+test('PESEL z literówką długości po „Nr PESEL” i „Lp. PESEL”, bez maski na numerze sprawy po nazwie rejestru', () => {
+  const masked: [string, string][] = [
+    ['Nr PESEL: 8909150266', 'Nr PESEL: [PESEL]'],
+    ['Nr PESEL 890915026670', 'Nr PESEL [PESEL]'],
+    ['nr PESEL ojca: 8909150266', 'nr PESEL ojca: [PESEL]'],
+    ['Wnioskodawca (nr PESEL: 8909150266) wnosi o', 'Wnioskodawca (nr PESEL: [PESEL]) wnosi o'],
+    ['Pacjent Jan, nr PESEL 8909150266.', 'Pacjent Jan, nr PESEL [PESEL].'],
+    ['Lp. PESEL: 8909150266', 'Lp. PESEL: [PESEL]'],
+    ['Osoba o PESEL nr 8909150266', 'Osoba o PESEL nr [PESEL]'],
+  ];
+  for (const [t, want] of masked) expect(redactPII(t).redacted).toBe(want);
+  const keep = [
+    // „nr” należy do wniosku, zapytania albo zgłoszenia: liczba to numer sprawy
+    'Wniosek o nadanie numeru PESEL nr 2024000123 został przekazany do Wydziału Spraw Obywatelskich.',
+    'Zapytanie do bazy PESEL nr 2026111301 zrealizowano.',
+    'Zgłoszenie aktualizacji danych w PESEL nr 1000234567 z dnia 3.11.2026.',
+    'w rejestrze PESEL nr 2024000123',
+    // odwołanie do przepisu albo rejestru tuż przed etykietą dalej blokuje
+    'art. PESEL 1234567890',
+    'rejestru PESEL 1234567890',
+  ];
+  for (const t of keep) expect(redactPII(t).redacted).toBe(t);
+});
