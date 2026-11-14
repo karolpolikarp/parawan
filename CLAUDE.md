@@ -151,7 +151,6 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 - Procedura „Niebieskiej Karty” zostaje jawna („Pani Nowak jest objęta procedurą Niebieskiej
   Karty.”: osoba zakryta, fakt procedury nie). Nie podpinać pod `[DANE O ZDROWIU]`; plan nowego
   typu z kotwicą w ROADMAP poz. 28.
-- Fakt procedury „Niebieskiej Karty” zostaje jawny (osoba zakryta), ROADMAP poz. 28. Pełna lista
-  ograniczeń po ewaluacji: `docs/EWALUACJA.md`, „Znane ograniczenia”.
+- Pełna lista ograniczeń po ewaluacji: `docs/EWALUACJA.md`, „Znane ograniczenia”.
 - Gołe inicjały po „odp.” („(odp. AS)”) są maskowane tylko, gdy w piśmie jest pełne imię i nazwisko
   tej osoby; notatka z samymi inicjałami albo z „Pani Sadowska” zostawia je jawne (świadomie, precyzja).
