@@ -10756,3 +10756,135 @@ test('klasa 5: pokrewieństwo jako etykieta z dwukropkiem albo myślnikiem', () 
   ]);
   keep(['Dzieci: brak.', 'Ojciec: nieznany.', 'Syn - Kraków', 'Matka: Boża Częstochowska']);
 });
+test('klasa 9: etykieta mówcy w czacie, SMS-ach i transkrypcji to osoba', () => {
+  masked([
+    // eksport czatu ze znacznikami czasu, emotikona po imieniu, imię małą literą dalej w treści
+    [
+      '[08:12] Kasia 🌸: dzwonili ze szpitala\n[08:13] Tomek: co powiedzieli??\n[08:30] Tomek: dzięki. kasia a recepty?',
+      `[08:12] ${N} 🌸: dzwonili ze szpitala\n[08:13] ${N}: co powiedzieli??\n[08:30] ${N}: dzięki. ${N} a recepty?`,
+    ],
+    // jeden wiersz z mówcą już pod maską pary wystarcza, żeby uznać pismo za eksport czatu
+    ['12:03 Kasia Nowak: hej\n12:04 Tomasz: cześć\n12:05 Kasia Nowak: co tam', `12:03 ${N}: hej\n12:04 ${N}: cześć\n12:05 ${N}: co tam`],
+    ['2026-10-01 09:14 Zbyszek: czynsz\n2026-10-01 09:40 Ja: przeleję', `2026-10-01 09:14 ${N}: czynsz\n2026-10-01 09:40 Ja: przeleję`],
+    ['[12.11.2026, 08:12:33] Ania: jestem\n[12.11.2026, 08:13:01] Bartek: ok', `[12.11.2026, 08:12:33] ${N}: jestem\n[12.11.2026, 08:13:01] ${N}: ok`],
+    // rola mówcy zostaje, imię w nawiasie i po roli znika
+    ['Konsultant (Marek): dzień dobry\nKlient: witam\nKonsultant (Marek): słucham', `Konsultant (${N}): dzień dobry\nKlient: witam\nKonsultant (${N}): słucham`],
+    // wątek komentarzy: odpowiedź „↳”, imię z inicjałem nazwiska, rola przed imieniem
+    [
+      'Komentarze:\nRobert Wysocki: widziałem psa 😅\n  ↳ Szymon P.: offtop\n  ↳ Admin Wiesia 🌻: bez wycieczek\nSzymon P.: niech wyrobi kartę',
+      `Komentarze:\n${N}: widziałem psa 😅\n  ↳ ${N}: offtop\n  ↳ Admin ${N} 🌻: bez wycieczek\n${N}: niech wyrobi kartę`,
+    ],
+    // punktor i imię będące też zwykłym słowem, gdy wraca w roli mówcy
+    ['- Ola: będę o 5\n- Ja: ok\n- Ola: super', `- ${N}: będę o 5\n- Ja: ok\n- ${N}: super`],
+    // rozmowa bez znaczników czasu: mówcy wracają naprzemiennie
+    ['Kasia: hej, jesteś?\nTomek: tak\nKasia: to dzwonię', `${N}: hej, jesteś?\n${N}: tak\n${N}: to dzwonię`],
+    // program z godzinami, gdy pismo ma kształt rozmowy, i znacznik czatu w nawiasie
+    ['10:01 Kasia: hej\n10:02 Tomek: tak\n10:03 Kasia: dzwonię', `10:01 ${N}: hej\n10:02 ${N}: tak\n10:03 ${N}: dzwonię`],
+    ['[09:00] Hala: jestem\n[09:01] Ewa: ok\n[09:05] Hala: idę', `[09:00] ${N}: jestem\n[09:01] ${N}: ok\n[09:05] ${N}: idę`],
+    // samo nazwisko mówcy w eksporcie ze znacznikami czasu, gdy wraca
+    ['[08:00] Nowak: kup chleb\n[08:01] Ewa: ok\n[08:02] Nowak: i mleko', `[08:00] ${N}: kup chleb\n[08:01] ${N}: ok\n[08:02] ${N}: i mleko`],
+  ]);
+});
+test('klasa 9: imię mówcy w pseudonimach to ta sama osoba co zdrobnienie w treści', () => {
+  const r = redactPII('[08:12] Kasia: jestem\n[08:13] Tomek: ok\n[08:14] Tomek: kasia, dzięki', { pseudonyms: true }).redacted;
+  expect(r).toBe('[08:12] [OSOBA-A]: jestem\n[08:13] [OSOBA-B]: ok\n[08:14] [OSOBA-B]: [OSOBA-A], dzięki');
+});
+test('klasa 9: rola mówcy, etykieta pola, nagłówek i pokrewieństwo bez imienia zostają', () => {
+  keep([
+    '[10:01] Konsultant: Dzień dobry\n[10:02] Klient: dzień dobry\n[10:03] Konsultant: w czym pomóc?\n[10:04] Bot: proszę czekać',
+    'KONSULTANTKA: Dzień dobry\nKLIENT: Dzień dobry pani\nKONSULTANTKA: Rozumiem.',
+    '[12:00] System: Użytkownik dołączył\n[12:01] Grupa Wsparcia: witamy\n[12:02] Grupa Wsparcia: zasady',
+    '2026-10-01 09:14 InPost: paczka czeka\n2026-10-02 10:00 InPost: odbierz paczkę\n2026-10-02 11:00 Ja: ok',
+    '[08:00] Mama: kup chleb\n[08:01] Tata: ok\n[08:02] Mama: i mleko',
+    'Od: Urząd Miasta\nDo: Wydział\nTemat: wniosek\nUwagi: brak\nData: 12.11.2026',
+    'PL: Wniosek\nEN: Application\nPL: Data\nEN: Date',
+    'Świadek: zeznaje\nŚwiadek: dalej\nSędzia: dziękuję',
+    'Wniosek: tak\nUzasadnienie: brak\nPouczenie: od decyzji',
+    // wyraz z wielkiej litery przed czasownikiem to zdanie, nie mówca; imię-rzeczownik raz w etykiecie zostaje
+    'Marek powiedział: tak\nUwaga: ważne\nHala: sportowa nr 2',
+    '- Kuba: wyspa na Karaibach',
+    // porządek obrad z godzinami: punkt, przerwa i miejscowość to nie mówcy
+    '10:00 Otwarcie: powitanie gości\n10:15 Przerwa: kawa\n11:00 Kraków: przejazd\n12:00 Podsumowanie: wnioski',
+  ]);
+});
+test('klasa 9: lista „Pole: wartość” z emotikoną, powtórzeniem albo godziną to nie rozmowa', () => {
+  keep([
+    // emotikona i nagłówki e-maila nie robią z listy wątku mówców
+    'Od: sekretariat\nTemat: Imieniny w grudniu 🎉\nData: 1.12.2026\nBarbara: 4 grudnia\nMikołaj: 6 grudnia\nŁucja: 13 grudnia',
+    'Wyjazdy służbowe 2026 ✈️\nJordan: marzec\nVirginia: kwiecień\nCharlotte: maj\nVictoria: czerwiec',
+    'Ogłoszenia\nJan: 3,16\nMateusz: 5,1-12\nŁukasz: 2,1-14\nMarek: 1,1-8 📖',
+    'Lektury klasy 4 😊:\nMikołajek: R. Goscinny\nPinokio: C. Collodi',
+    'Dyżury 😊\nRóża: kwiaciarnia\nPoniedziałek: Ewa\nWtorek: sklep',
+    // samo powtórzenie etykiety, także imienia-wyrazu, bez kształtu rozmowy
+    'Magazyn A\nHala: zamknięta\nBrama: otwarta\nHala: remont do piątku',
+    'Kierunki 🌍:\nKuba: wiza niepotrzebna\nKuba: szczepienia zalecane',
+    'Zapisy na zajęcia\nKuba: 3 osoby\nKuba: lista rezerwowa',
+    'Ogłoszenia parafialne\nEwangelia wg św. Jana\nJan: 3,16-18\nJan: 20,1-9',
+    // postacie biblijne w scenariuszu jasełek
+    'Jasełka\nJózef: Nie ma miejsca w gospodzie.\nMaryja: Idźmy dalej.\nJózef: Nie ma miejsca w gospodzie.\nMaryja: Dobrze.',
+    // program dnia z godzinami: dzielnica, brama, święto i toponim „imię + przymiotnik”
+    'Plan wycieczki:\n08:00 Kazimierz: zbiórka przy synagodze\n15:00 Florian: brama i mury obronne',
+    'Program dnia:\n08:00 Kazimierz Dolny: zbiórka\n16:00 Kazimierz Dolny: powrót',
+    'Plan imprez:\n18:00 Sylwester: bal w auli\n20:00 Koncert: zespół',
+    '[08:00] Kazimierz Dolny: zbiórka\n[16:00] Kazimierz Dolny: powrót',
+  ]);
+});
+test('klasa 9: program dnia, grafik i rozkład z wracającą etykietą to nie rozmowa', () => {
+  keep([
+    // ta sama etykieta wraca w wierszach z godziną, ale nikt nie mówi
+    'Plan:\n08:00 Kazimierz: zbiórka przy synagodze\n10:00 Wawel: zwiedzanie komnat\n14:00 Kazimierz: obiad',
+    'Rozkład:\n07:15 Ludwik: linia 12\n07:30 Pętla: linia 4\n07:45 Ludwik: linia 12',
+    'Grafik sal:\n08:00 Florian: sala 1\n12:00 Florian: sala 2',
+    'Plan:\n08:00 Kazimierz: zbiórka\n12:00 Kazimierz: obiad\n16:00 Wawel: zwiedzanie',
+    'Rozkład:\n07:10 Wiktoria: peron 1\n09:10 Wiktoria: peron 2',
+    'Dyżury apteki:\n08:00 Róża: otwarta\n20:00 Róża: zamknięta',
+    'Sale:\n08:00 Kazimierz: sala 1\n09:00 Florian: sala 2\n10:00 Kazimierz: sala 3',
+  ]);
+});
+test('klasa 9: lista A…B…A bez wypowiedzi, cytat e-maila „>” i lekcja religii zostają jawne', () => {
+  keep([
+    // nazwy dzielnic, sal, oddziałów, kontenerów i imieniny: etykieta wraca, treść to wartość pola
+    'Kazimierz: zwiedzanie synagog\nPodgórze: obiad\nKazimierz: kolacja',
+    'Franciszek: grupa młodzieży\nKlara: grupa seniorów\nFranciszek: spotkanie liderów',
+    'Hospicjum, oddziały:\nŁukasz: oddział stacjonarny\nAnna: poradnia\nŁukasz: opieka domowa',
+    'Nazwy kontenerów:\nWiktor: produkcja\nKlient: testy\nWiktor: wycofany',
+    'Imieniny w kalendarzu:\nWiktoria: grudzień\nBarbara: grudzień\nWiktoria: także w lipcu',
+    // cytat odpowiedzi w e-mailu nie jest wątkiem komentarzy
+    'w załączeniu plan, który dostałem:\n> Kazimierz: zwiedzanie\n> Wawel: obiad\n> Kazimierz: kolacja',
+    '> Temat: dyżury\n> Florian: brama wschodnia\n> Kazimierz: parking',
+    '> Uwagi: przesyłam listę\nWiktor: nazwa projektu, Zofia: nazwa serwera',
+    // ewangeliści w planie lekcji religii i katechezy: tylko jeden z nich „mówi”
+    'Na lekcję religii przygotuj:\nJan: Na początku było Słowo\nŁukasz: Zwiastowanie\nJan: Ja jestem drogą',
+    'Plan lekcji religii:\nMateusz: Kazanie na górze\nŁukasz: Syn marnotrawny\nMateusz: Błogosławieństwa',
+    'Katecheza dla klasy 2:\nJan: Wesele w Kanie\nMarek: Burza na jeziorze\nJan: Dobry Pasterz',
+  ]);
+});
+test('klasa 9: zwykły czat o parafii, czytaniach albo kolędzie zakrywa wszystkich mówców', () => {
+  masked([
+    ['[10:00] Paweł: ślub w parafii św. Anny\n[10:01] Ewa: super\n[10:02] Paweł: dzięki', `[10:00] ${N}: ślub w parafii św. Anny\n[10:01] ${N}: super\n[10:02] ${N}: dzięki`],
+    ['[09:00] Jan: dzień dobry\n[09:01] Ewa: hej\n[09:02] Jan: czytania jutro?', `[09:00] ${N}: dzień dobry\n[09:01] ${N}: hej\n[09:02] ${N}: czytania jutro?`],
+    ['Marek: kolęda u nas w piątek?\nEwa: tak\nMarek: super', `${N}: kolęda u nas w piątek?\n${N}: tak\n${N}: super`],
+    ['Tomasz: jesteś w parafii?\nEwa: tak, idę\nTomasz: ok', `${N}: jesteś w parafii?\n${N}: tak, idę\n${N}: ok`],
+  ]);
+});
+test('klasa 9: ocena kształtu rozmowy w czasie liniowym', () => {
+  const time = (s: string): number => {
+    const t0 = performance.now();
+    redactPII(s);
+    return performance.now() - t0;
+  };
+  // każda etykieta wraca raz, tuż po sobie: dawniej każda przechodziła całą listę wypowiedzi
+  const pairs = (n: number): string => `Kasia: hej\n${Array.from({ length: n }, (_, i) => `p${i}: a\np${i}: a`).join('\n')}`;
+  const fields = (n: number): string => `Anna: start\n${Array.from({ length: n }, (_, i) => `Pole${i}: x\nPole${i}: y`).join('\n')}`;
+  pairs(500); // rozgrzewka JIT
+  redactPII(pairs(500));
+  for (const [name, gen] of [
+    ['pary', pairs],
+    ['pola', fields],
+  ] as const) {
+    const t1 = Math.min(time(gen(2500)), time(gen(2500)));
+    const t4 = time(gen(10000));
+    expect(t4 / t1, name).toBeLessThan(6);
+    expect(time(gen(20000)), name).toBeLessThan(2000);
+  }
+});

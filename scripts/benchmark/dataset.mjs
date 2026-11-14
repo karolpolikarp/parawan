@@ -1216,6 +1216,19 @@ export function buildDataset() {
   // pokrewieństwo jako etykieta z dwukropkiem albo myślnikiem
   oso('Dzieci: Oliwia (8 lat), Filip (5 lat) i Tymon (2 lata). Syn: Piotr, ur. 2015. dzieci – Hania i Kuba', ['Oliwia', 'Filip', 'Tymon', 'Piotr', 'Hania', 'Kuba'], ['Dzieci:', '(8 lat)', 'Syn:']);
 
+  // ──────────────────────────────────────────────────────────────────────────
+  // ETYKIETA MÓWCY W CZACIE I TRANSKRYPCJI (seria 2, klasa 9): imię albo imię z inicjałem przed
+  // dwukropkiem na początku wiersza eksportu czatu, SMS-ów, wątku komentarzy. Rola mówcy, etykieta
+  // pola i nagłówek zostają.
+  oso('[08:12] Kasia 🌸: dzwonili ze szpitala\n[08:13] Tomek: co powiedzieli??\n[08:30] Tomek: dzięki. kasia a recepty?', ['Kasia', 'Tomek', 'kasia'], ['[08:12]', '🌸', 'dzwonili ze szpitala']);
+  oso('Konsultant (Marek): dzień dobry\nKlient: witam\nKonsultant (Marek): słucham', ['Marek'], ['Konsultant', 'Klient']);
+  oso('Komentarze:\nRobert Wysocki: widziałem psa 😅\n  ↳ Szymon P.: offtop\n  ↳ Admin Wiesia 🌻: bez wycieczek', ['Robert Wysocki', 'Szymon P.', 'Wiesia'], ['Komentarze:', 'Admin', 'offtop']);
+  neg('[10:01] Konsultant: Dzień dobry\n[10:02] Klient: dzień dobry\n[10:03] Bot: proszę czekać\n[10:04] Mama: kup chleb\n[10:05] InPost: paczka czeka\n[10:06] InPost: odbierz', ['Konsultant', 'Klient', 'Bot', 'Mama', 'InPost']);
+  neg('Od: Urząd Miasta\nDo: Wydział\nTemat: wniosek\nUwagi: brak\nData: 12.11.2026\nPL: Wniosek\nEN: Application\n10:15 Przerwa: kawa\n11:00 Kraków: przejazd', ['Temat', 'Uwagi', 'Przerwa', 'Kraków']);
+  // lista „Pole: wartość” z emotikoną, powtórzeniem etykiety albo godziną to nie rozmowa
+  neg('Temat: Imieniny w grudniu 🎉\nBarbara: 4 grudnia\nMikołaj: 6 grudnia\nMagazyn A\nHala: zamknięta\nBrama: otwarta\nHala: remont do piątku', ['Barbara', 'Mikołaj', 'Hala']);
+  neg('Plan wycieczki:\n08:00 Kazimierz: zbiórka przy synagodze\n15:00 Florian: brama i mury obronne\n16:00 Kazimierz Dolny: obiad\n18:00 Kazimierz Dolny: powrót', ['Kazimierz', 'Florian', 'Kazimierz Dolny']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {

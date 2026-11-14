@@ -237,6 +237,33 @@ Sandro,5",
   "neg-249": "Wszystkim dzieciom Mikołaj przyniósł prezenty. Dziadek Mikołaj odwiedził przedszkole. Synowie Marka Aureliusza nie przejęli władzy. Salomon był synem Dawida i Batszeby. Ewangelia mówi o Marii, matce Jakuba.",
   "neg-25": "Kruk krukowi oka nie wykole, jak mówi przysłowie.",
   "neg-250": "Jak żyła matka Teresa z Kalkuty? Jak mawiał brat Albert, trzeba być dobrym jak chleb. Matka Jana Pawła II, Emilia, zmarła w 1929 roku.",
+  "neg-251": "[10:01] Konsultant: Dzień dobry
+[10:02] Klient: dzień dobry
+[10:03] Bot: proszę czekać
+[10:04] Mama: kup chleb
+[10:05] InPost: paczka czeka
+[10:06] InPost: odbierz",
+  "neg-252": "Od: Urząd Miasta
+Do: Wydział
+Temat: wniosek
+Uwagi: brak
+Data: 12.11.2026
+PL: Wniosek
+EN: Application
+10:15 Przerwa: kawa
+11:00 Kraków: przejazd",
+  "neg-253": "Temat: Imieniny w grudniu 🎉
+Barbara: 4 grudnia
+Mikołaj: 6 grudnia
+Magazyn A
+Hala: zamknięta
+Brama: otwarta
+Hala: remont do piątku",
+  "neg-254": "Plan wycieczki:
+08:00 Kazimierz: zbiórka przy synagodze
+15:00 Florian: brama i mury obronne
+16:00 Kazimierz Dolny: obiad
+18:00 Kazimierz Dolny: powrót",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
   "neg-27": "Kot przewrócił doniczkę z parapetu.",
   "neg-28": "W piątek trzynastego lepiej zostać w domu.",
@@ -396,6 +423,16 @@ Oliver Hastings",
   "os-o-67": "Mój brat Albert przyszedł, a moja matka Teresa została w domu.",
   "os-o-68": "Brat Piotr z Niemiec przyjechał na pogrzeb. Siostra Ewa z MOPS przyszła na wizytę. Matka Anna z Wadowic złożyła wniosek.",
   "os-o-69": "Dzieci: Oliwia (8 lat), Filip (5 lat) i Tymon (2 lata). Syn: Piotr, ur. 2015. dzieci – Hania i Kuba",
+  "os-o-70": "[08:12] Kasia 🌸: dzwonili ze szpitala
+[08:13] Tomek: co powiedzieli??
+[08:30] Tomek: dzięki. kasia a recepty?",
+  "os-o-71": "Konsultant (Marek): dzień dobry
+Klient: witam
+Konsultant (Marek): słucham",
+  "os-o-72": "Komentarze:
+Robert Wysocki: widziałem psa 😅
+  ↳ Szymon P.: offtop
+  ↳ Admin Wiesia 🌻: bez wycieczek",
   "os-p-01": "Pozwany Jan Kowalski nie stawił się na rozprawie.",
   "os-p-02": "Powódka Anna Nowak wniosła o zasądzenie kosztów.",
   "os-p-03": "Świadek Piotr Wiśniewski zeznał, że widział zdarzenie.",
@@ -1118,6 +1155,33 @@ Sandro,5",
   "neg-249": "Wszystkim dzieciom Mikołaj przyniósł prezenty. Dziadek Mikołaj odwiedził przedszkole. Synowie Marka Aureliusza nie przejęli władzy. Salomon był synem Dawida i Batszeby. Ewangelia mówi o Marii, matce Jakuba.",
   "neg-25": "Kruk krukowi oka nie wykole, jak mówi przysłowie.",
   "neg-250": "Jak żyła matka Teresa z Kalkuty? Jak mawiał brat Albert, trzeba być dobrym jak chleb. Matka Jana Pawła II, Emilia, zmarła w 1929 roku.",
+  "neg-251": "[10:01] Konsultant: Dzień dobry
+[10:02] Klient: dzień dobry
+[10:03] Bot: proszę czekać
+[10:04] Mama: kup chleb
+[10:05] InPost: paczka czeka
+[10:06] InPost: odbierz",
+  "neg-252": "Od: Urząd Miasta
+Do: Wydział
+Temat: wniosek
+Uwagi: brak
+Data: 12.11.2026
+PL: Wniosek
+EN: Application
+10:15 Przerwa: kawa
+11:00 Kraków: przejazd",
+  "neg-253": "Temat: Imieniny w grudniu 🎉
+Barbara: 4 grudnia
+Mikołaj: 6 grudnia
+Magazyn A
+Hala: zamknięta
+Brama: otwarta
+Hala: remont do piątku",
+  "neg-254": "Plan wycieczki:
+08:00 Kazimierz: zbiórka przy synagodze
+15:00 Florian: brama i mury obronne
+16:00 Kazimierz Dolny: obiad
+18:00 Kazimierz Dolny: powrót",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
   "neg-27": "Kot przewrócił doniczkę z parapetu.",
   "neg-28": "W piątek trzynastego lepiej zostać w domu.",
@@ -1276,6 +1340,16 @@ Best regards,
   "os-o-67": "Mój brat [OSOBA-A] przyszedł, a moja matka [OSOBA-B] została w domu.",
   "os-o-68": "Brat [OSOBA-A] z Niemiec przyjechał na pogrzeb. Siostra [OSOBA-B] z MOPS przyszła na wizytę. Matka [OSOBA-C] z Wadowic złożyła wniosek.",
   "os-o-69": "Dzieci: [OSOBA-A] (8 lat), [OSOBA-B] (5 lat) i [OSOBA-C] (2 lata). Syn: [OSOBA-D], ur. 2015. dzieci – [OSOBA-E] i [OSOBA-F]",
+  "os-o-70": "[08:12] [OSOBA-A] 🌸: dzwonili ze szpitala
+[08:13] [OSOBA-B]: co powiedzieli??
+[08:30] [OSOBA-B]: dzięki. [OSOBA-A] a recepty?",
+  "os-o-71": "Konsultant ([OSOBA-A]): dzień dobry
+Klient: witam
+Konsultant ([OSOBA-A]): słucham",
+  "os-o-72": "Komentarze:
+[OSOBA-A]: widziałem psa 😅
+  ↳ [OSOBA-B]: offtop
+  ↳ Admin [OSOBA-C] 🌻: bez wycieczek",
   "os-p-01": "Pozwany [OSOBA-A] nie stawił się na rozprawie.",
   "os-p-02": "Powódka [OSOBA-A] wniosła o zasądzenie kosztów.",
   "os-p-03": "Świadek [OSOBA-A] zeznał, że widział zdarzenie.",
@@ -1997,6 +2071,33 @@ Sandro,5",
   "neg-249": "Wszystkim dzieciom Mikołaj przyniósł prezenty. Dziadek Mikołaj odwiedził przedszkole. Synowie Marka Aureliusza nie przejęli władzy. Salomon był synem Dawida i Batszeby. Ewangelia mówi o Marii, matce Jakuba.",
   "neg-25": "Kruk krukowi oka nie wykole, jak mówi przysłowie.",
   "neg-250": "Jak żyła matka Teresa z Kalkuty? Jak mawiał brat Albert, trzeba być dobrym jak chleb. Matka Jana Pawła II, Emilia, zmarła w 1929 roku.",
+  "neg-251": "[10:01] Konsultant: Dzień dobry
+[10:02] Klient: dzień dobry
+[10:03] Bot: proszę czekać
+[10:04] Mama: kup chleb
+[10:05] InPost: paczka czeka
+[10:06] InPost: odbierz",
+  "neg-252": "Od: Urząd Miasta
+Do: Wydział
+Temat: wniosek
+Uwagi: brak
+Data: 12.11.2026
+PL: Wniosek
+EN: Application
+10:15 Przerwa: kawa
+11:00 Kraków: przejazd",
+  "neg-253": "Temat: Imieniny w grudniu 🎉
+Barbara: 4 grudnia
+Mikołaj: 6 grudnia
+Magazyn A
+Hala: zamknięta
+Brama: otwarta
+Hala: remont do piątku",
+  "neg-254": "Plan wycieczki:
+08:00 Kazimierz: zbiórka przy synagodze
+15:00 Florian: brama i mury obronne
+16:00 Kazimierz Dolny: obiad
+18:00 Kazimierz Dolny: powrót",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
   "neg-27": "Kot przewrócił doniczkę z parapetu.",
   "neg-28": "W piątek trzynastego lepiej zostać w domu.",
@@ -2155,6 +2256,16 @@ Best regards,
   "os-o-67": "Mój brat [IMIĘ I NAZWISKO] przyszedł, a moja matka [IMIĘ I NAZWISKO] została w domu.",
   "os-o-68": "Brat [IMIĘ I NAZWISKO] z Niemiec przyjechał na pogrzeb. Siostra [IMIĘ I NAZWISKO] z MOPS przyszła na wizytę. Matka [IMIĘ I NAZWISKO] z Wadowic złożyła wniosek.",
   "os-o-69": "Dzieci: [IMIĘ I NAZWISKO] (8 lat), [IMIĘ I NAZWISKO] (5 lat) i [IMIĘ I NAZWISKO] (2 lata). Syn: [IMIĘ I NAZWISKO], ur. 2015. dzieci – [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO]",
+  "os-o-70": "[08:12] [IMIĘ I NAZWISKO] 🌸: dzwonili ze szpitala
+[08:13] [IMIĘ I NAZWISKO]: co powiedzieli??
+[08:30] [IMIĘ I NAZWISKO]: dzięki. [IMIĘ I NAZWISKO] a recepty?",
+  "os-o-71": "Konsultant ([IMIĘ I NAZWISKO]): dzień dobry
+Klient: witam
+Konsultant ([IMIĘ I NAZWISKO]): słucham",
+  "os-o-72": "Komentarze:
+[IMIĘ I NAZWISKO]: widziałem psa 😅
+  ↳ [IMIĘ I NAZWISKO]: offtop
+  ↳ Admin [IMIĘ I NAZWISKO] 🌻: bez wycieczek",
   "os-p-01": "Pozwany [IMIĘ I NAZWISKO] nie stawił się na rozprawie.",
   "os-p-02": "Powódka [IMIĘ I NAZWISKO] wniosła o zasądzenie kosztów.",
   "os-p-03": "Świadek [IMIĘ I NAZWISKO] zeznał, że widział zdarzenie.",
@@ -2925,6 +3036,33 @@ Sandro,5",
   "neg-249": "Wszystkim dzieciom Mikołaj przyniósł prezenty. Dziadek Mikołaj odwiedził przedszkole. Synowie Marka Aureliusza nie przejęli władzy. Salomon był synem Dawida i Batszeby. Ewangelia mówi o Marii, matce Jakuba.",
   "neg-25": "Kruk krukowi oka nie wykole, jak mówi przysłowie.",
   "neg-250": "Jak żyła matka Teresa z Kalkuty? Jak mawiał brat Albert, trzeba być dobrym jak chleb. Matka Jana Pawła II, Emilia, zmarła w 1929 roku.",
+  "neg-251": "[10:01] Konsultant: Dzień dobry
+[10:02] Klient: dzień dobry
+[10:03] Bot: proszę czekać
+[10:04] Mama: kup chleb
+[10:05] InPost: paczka czeka
+[10:06] InPost: odbierz",
+  "neg-252": "Od: Urząd Miasta
+Do: Wydział
+Temat: wniosek
+Uwagi: brak
+Data: 12.11.2026
+PL: Wniosek
+EN: Application
+10:15 Przerwa: kawa
+11:00 Kraków: przejazd",
+  "neg-253": "Temat: Imieniny w grudniu 🎉
+Barbara: 4 grudnia
+Mikołaj: 6 grudnia
+Magazyn A
+Hala: zamknięta
+Brama: otwarta
+Hala: remont do piątku",
+  "neg-254": "Plan wycieczki:
+08:00 Kazimierz: zbiórka przy synagodze
+15:00 Florian: brama i mury obronne
+16:00 Kazimierz Dolny: obiad
+18:00 Kazimierz Dolny: powrót",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
   "neg-27": "Kot przewrócił doniczkę z parapetu.",
   "neg-28": "W piątek trzynastego lepiej zostać w domu.",
@@ -3083,6 +3221,16 @@ Best regards,
   "os-o-67": "Mój brat <<osoba>> przyszedł, a moja matka <<osoba>> została w domu.",
   "os-o-68": "Brat <<osoba>> z Niemiec przyjechał na pogrzeb. Siostra <<osoba>> z MOPS przyszła na wizytę. Matka <<osoba>> z Wadowic złożyła wniosek.",
   "os-o-69": "Dzieci: <<osoba>> (8 lat), <<osoba>> (5 lat) i <<osoba>> (2 lata). Syn: <<osoba>>, ur. 2015. dzieci – <<osoba>> i <<osoba>>",
+  "os-o-70": "[08:12] <<osoba>> 🌸: dzwonili ze szpitala
+[08:13] <<osoba>>: co powiedzieli??
+[08:30] <<osoba>>: dzięki. <<osoba>> a recepty?",
+  "os-o-71": "Konsultant (<<osoba>>): dzień dobry
+Klient: witam
+Konsultant (<<osoba>>): słucham",
+  "os-o-72": "Komentarze:
+<<osoba>>: widziałem psa 😅
+  ↳ <<osoba>>: offtop
+  ↳ Admin <<osoba>> 🌻: bez wycieczek",
   "os-p-01": "Pozwany <<osoba>> nie stawił się na rozprawie.",
   "os-p-02": "Powódka <<osoba>> wniosła o zasądzenie kosztów.",
   "os-p-03": "Świadek <<osoba>> zeznał, że widział zdarzenie.",
@@ -3789,6 +3937,10 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "neg-249": "",
   "neg-25": "",
   "neg-250": "",
+  "neg-251": "",
+  "neg-252": "",
+  "neg-253": "",
+  "neg-254": "",
   "neg-26": "",
   "neg-27": "",
   "neg-28": "",
@@ -3932,6 +4084,9 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "os-o-67": "IMIE:2",
   "os-o-68": "IMIE:3",
   "os-o-69": "IMIE:6",
+  "os-o-70": "IMIE:4",
+  "os-o-71": "IMIE:2",
+  "os-o-72": "IMIE:3",
   "os-p-01": "IMIE:1",
   "os-p-02": "IMIE:1",
   "os-p-03": "IMIE:1",
@@ -4519,6 +4674,10 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "neg-249": "",
   "neg-25": "",
   "neg-250": "",
+  "neg-251": "",
+  "neg-252": "",
+  "neg-253": "",
+  "neg-254": "",
   "neg-26": "",
   "neg-27": "",
   "neg-28": "",
@@ -4662,6 +4821,9 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "os-o-67": "IMIE:2",
   "os-o-68": "IMIE:3",
   "os-o-69": "IMIE:6",
+  "os-o-70": "IMIE:4",
+  "os-o-71": "IMIE:2",
+  "os-o-72": "IMIE:3",
   "os-p-01": "IMIE:1",
   "os-p-02": "IMIE:1",
   "os-p-03": "IMIE:1",

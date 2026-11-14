@@ -18,6 +18,7 @@ import { passPersonMaidenAfterMask, passPersonMixedCase, passPersonOcrMix, passP
 import { passPersonKinship } from './passes/person-kin.js';
 import { passPersonPairs, passProtectFictional } from './passes/person-pairs.js';
 import { passPersonPropagate } from './passes/person-propagate.js';
+import { passPersonSpeaker } from './passes/person-speaker.js';
 import { passPersonForeignTitle, passPersonPDotName, passPersonSignature, passPersonVocative } from './passes/person-vocative.js';
 import { passPersonForeign, passPersonHomographAnchor, passPersonInitial, passPersonRoleComplement, passPersonSoloDict, passPersonSoloMorph, passPersonStrongTrigger, passPersonTrigger } from './passes/person-triggers.js';
 import { passProtectJsonEscapes, passProtectUrls } from './passes/protect.js';
@@ -84,7 +85,7 @@ function redactWith(input: string, options: RedactOptions | undefined, withProbe
     return `[OSOBA-${label}]`;
   };
 
-  const ctx: RedactCtx = { text: input, raw: input, ksefAnchor: hasKsefAnchor(input), on, bump, hit, M, personMask, pseudonyms: !!personLabels, maskedSurnames, protectedUrls: [], jsonEscapes: false, loginSeeds: new Set(), institutionStreets: [] };
+  const ctx: RedactCtx = { text: input, raw: input, ksefAnchor: hasKsefAnchor(input), on, bump, hit, M, personMask, pseudonyms: !!personLabels, maskedSurnames, protectedUrls: [], jsonEscapes: false, loginSeeds: new Set(), speakerNames: new Set(), institutionStreets: [] };
   // Sonda osób dla strażnika siedziby instytucji: te same typy, bez pseudonimów i własnych masek,
   // bez kolejnej sondy w środku. Wynik zapamiętany, bo kod, ulica i miejscowość pytają o te same wiersze.
   if (withProbe) {
@@ -173,6 +174,9 @@ function redactWith(input: string, options: RedactOptions | undefined, withProbe
   passPersonPDotName(ctx);
   passPersonVocative(ctx);
   passPersonSignature(ctx);
+  // Etykieta mówcy w czacie i transkrypcji („[08:12] Kasia:”, „Konsultant (Marek):”): imię bez nazwiska
+  // na pozycji mówcy. Po parach („Kasia Nowak:” bierze para), przed nazwiskiem samodzielnym.
+  passPersonSpeaker(ctx);
   passPersonSoloDict(ctx);
   passPersonInitial(ctx);
   passPersonHomographAnchor(ctx);

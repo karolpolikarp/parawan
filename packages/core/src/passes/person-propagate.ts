@@ -276,7 +276,14 @@ function buildSeeds(ctx: RedactCtx): Seed[] {
       const w = norm[0];
       // Kotwica: „Pan/Pani”, etykieta, obcy tytuł, powitanie, formuła pożegnalna albo sam wołacz imienia
       // („Kasiu,” na początku wiersza), który stoi tylko przy osobie.
-      if (!RE_SOLO_ANCHOR_BEFORE.test(before) && !RE_ADDRESS_ANCHOR_BEFORE.test(before) && !RE_KIN_ANCHOR_BEFORE.test(before) && !firstNameOfBareVocative(w)) continue;
+      if (
+        !RE_SOLO_ANCHOR_BEFORE.test(before) &&
+        !RE_ADDRESS_ANCHOR_BEFORE.test(before) &&
+        !RE_KIN_ANCHOR_BEFORE.test(before) &&
+        !firstNameOfBareVocative(w) &&
+        !ctx.speakerNames.has(w.toLowerCase())
+      )
+        continue;
       // „Pani Dyrektor”, „Pan Prezes”: rola, nie osoba
       if (ROLE_WORDS.has(w.toLowerCase()) || TITLE_WORDS.has(w.toLowerCase()) || isNameOfThingHead(w)) continue;
       const nameForm = isNameWord(w) || nameIndex().has(w.toLowerCase());

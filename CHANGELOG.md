@@ -112,6 +112,32 @@ działają na GitHubie od chwili wypchnięcia tagów.
   Marek kupił rower”), oraz postacie historyczne i biblijne („Synowie Marka Aureliusza”,
   „synem Dawida i Batszeby”, „Ewangelia mówi o Marii, matce Jakuba”). Na części
   roboczej drugiej serii zakrytych danych jest 80,8% zamiast 78,9%, bez nowych nadmiarowych zakryć.
+- **Imię autora wiadomości w czacie, SMS-ach, komentarzach i transkrypcji znika, choć pismo nie
+  podaje nazwiska.** Imię, zdrobnienie albo imię z inicjałem przed dwukropkiem na początku wiersza
+  eksportu rozmowy to osoba: „[08:12] Kasia 🌸: dzwonili ze szpitala”, „12:04 Tomasz: cześć”,
+  „2026-10-01 09:14 Zbyszek: czynsz”, „[12.11.2026, 08:12:33] Ania: jestem”, „Konsultant (Marek):
+  dzień dobry”, w wątku komentarzy „↳ Szymon P.: offtop” i „↳ Admin Wiesia 🌻: bez wycieczek”,
+  w rozmowie bez godzin, w której mówcy wracają naprzemiennie („- Ola: będę o 5”, „- Ja: ok”,
+  „- Ola: super”). W eksporcie ze znacznikami czasu znika też samo nazwisko mówcy, gdy
+  wraca w kilku wierszach („[08:00] Nowak: kup chleb”). Takie imię zakrywa dalsze wzmianki w treści,
+  także małą literą („kasia a recepty?”), a z pseudonimami mówca i wzmianka mają tę samą etykietę.
+  Jawne zostają role mówcy („Konsultant:”, „KLIENT:”, „Bot:”, „System:”, „Ja:”, „InPost:”),
+  pokrewieństwo bez imienia („Mama:”, „Tata:”), etykiety pól i nagłówki („Od:”, „Temat:”, „Uwagi:”,
+  „Data:”, „PL:”/„EN:”), punkty porządku obrad z godziną („10:15 Przerwa: kawa”, „11:00 Kraków:
+  przejazd”), zdanie z wyrazem przed dwukropkiem („Marek powiedział: tak”) i imię będące zwykłym
+  słowem użyte raz („Hala: sportowa nr 2”, „- Kuba: wyspa na Karaibach”). Lista „Pole: wartość”
+  nie jest rozmową, nawet z emotikoną, powtórzoną etykietą albo godziną: lista imienin w e-mailu
+  („Temat: Imieniny w grudniu 🎉”, „Barbara: 4 grudnia”), wyjazdów („Jordan: marzec”), czytań
+  („Jan: 3,16”), magazynu („Hala: zamknięta”, „Brama: otwarta”, „Hala: remont”), scenariusz jasełek
+  („Józef: Nie ma miejsca w gospodzie.”) i program wycieczki („08:00 Kazimierz: zbiórka”, „15:00
+  Florian: brama”, „16:00 Kazimierz Dolny: powrót”, „18:00 Sylwester: bal”) zostają jawne, także gdy
+  etykieta wraca („08:00 Kazimierz: zbiórka”, „14:00 Kazimierz: obiad”, „08:00 Róża: otwarta”,
+  „20:00 Róża: zamknięta”). Rozmową jest dopiero wymiana, w której co najmniej dwie osoby mówią jak
+  w rozmowie (pytanie, powitanie, „tak”, „ok”), więc jawne zostają też dzielnice, sale i oddziały
+  („Kazimierz: zwiedzanie synagog”, „Podgórze: obiad”, „Kazimierz: kolacja”), plan przekazany
+  w cytacie e-maila („> Kazimierz: zwiedzanie”) i ewangeliści w planie lekcji religii, a zwykły czat
+  o parafii albo kolędzie („[10:00] Paweł: ślub w parafii”) zakrywa wszystkich mówców. Na
+  części roboczej drugiej serii zakrytych danych jest 82,7% zamiast 80,8%, bez nowych nadmiarowych zakryć.
 
 ## v0.47.0 — 2026-11-14
 
