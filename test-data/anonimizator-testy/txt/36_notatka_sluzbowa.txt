@@ -1,0 +1,17 @@
+NOTATKA SŁUŻBOWA
+ze spotkania roboczego w dniu 23 lipca 2026 r., sala 214, budynek przy ul. Królewskiej 27 w Warszawie
+Uczestnicy:
+1. dr hab. inż. Wojciech Lewandowski (Ministerstwo Cyfryzacji)
+2. mgr Joanna Kowal (Centralny Ośrodek Informatyki)
+3. dr Marta Wójcik (NASK – Państwowy Instytut Badawczy)
+4. Michał Nowak (Ministerstwo Cyfryzacji)
+5. mgr inż. Antoni Kamiński (Centralny Ośrodek Informatyki)
+6. Paweł Jabłoński (Narodowy Instytut Onkologii im. Marii Skłodowskiej-Curie)
+Spotkanie otworzył Wojciech Lewandowski, który przedstawił stan prac nad wdrożeniem elektronicznego obiegu dokumentów. Pani Kowal zwróciła uwagę na opóźnienie odbioru drugiego etapu. Zgodnie z ustaleniami z Panem Ministrem termin nie może zostać przesunięty.
+Marta Wójcik poinformowała, że testy obciążeniowe wykonał zespół Michała Nowaka. Wyniki przesłano Antoniemu Kamińskiemu 3 dni temu. Przedstawiciel instytutu, Paweł Jabłoński, zgłosił potrzebę udziału w pilotażu.
+Ustalenia:
+1. Harmonogram odbioru do 5 dni roboczych (odp. WL).
+2. Uzupełnienie raportu z testów (odp. MN, kontakt m.nowak@coi-test.gov.pl, tel. 58 245 58 82).
+3. Zaproszenie przedstawiciela Rzecznika Praw Obywatelskich na kolejne spotkanie (odp. JK).
+Sporządził: Antoni Kamiński
+a.kaminski@mc-test.gov.pl

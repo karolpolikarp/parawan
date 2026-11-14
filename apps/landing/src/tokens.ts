@@ -22,6 +22,9 @@ export const TYPE_MASK: Record<PiiType, { token: string; cat: Cat }> = {
   KW: { token: 'NR-KW', cat: 'ident' },
   'ZNAK-SPRAWY': { token: 'ZNAK-SPRAWY', cat: 'ident' },
   'PRAWO-JAZDY': { token: 'PRAWO-JAZDY', cat: 'ident' },
+  'NR-UPRAWNIEN': { token: 'NR-UPRAWNIEŃ', cat: 'ident' },
+  'KARTA-POBYTU': { token: 'NR-KARTY-POBYTU', cat: 'ident' },
+  'AKT-USC': { token: 'NR-AKTU-USC', cat: 'ident' },
   'NR-REJESTRACYJNY': { token: 'NR-REJESTRACYJNY', cat: 'ident' },
   VIN: { token: 'VIN', cat: 'ident' },
   IP: { token: 'IP', cat: 'ident' },
@@ -38,6 +41,7 @@ export const TYPE_MASK: Record<PiiType, { token: string; cat: Cat }> = {
   MIEJSCOWOSC: { token: 'MIEJSCOWOŚĆ', cat: 'place' },
   IMIE: { token: 'IMIĘ I NAZWISKO', cat: 'person' },
   'DATA-UR': { token: 'DATA-URODZENIA', cat: 'person' },
+  ZDROWIE: { token: 'DANE O ZDROWIU', cat: 'person' },
 };
 
 const TOKEN_CAT = new Map(Object.values(TYPE_MASK).map((m) => [m.token, m.cat]));

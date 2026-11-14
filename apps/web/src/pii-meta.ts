@@ -39,6 +39,9 @@ export const PII_TOKENS: Record<string, TokenMeta> = {
   'NR-KW': { cat: 'ident', icon: 'numer-dok', tip: 'kod wydziału, 8 cyfr i cyfra kontrolna albo po słowach „księga wieczysta” lub „KW”' },
   'ZNAK-SPRAWY': { cat: 'ident', icon: 'numer-dok', tip: 'znak sprawy/pisma (JRWA) lub sygnatura akt' },
   'PRAWO-JAZDY': { cat: 'ident', icon: 'numer-dok', tip: 'kontekst „prawo jazdy” + numer z cyfrą' },
+  'NR-UPRAWNIEŃ': { cat: 'ident', icon: 'numer-dok', tip: 'kontekst „PWZ”, „radca prawny”, „adwokat” + numer prawa wykonywania zawodu lub wpisu na listę' },
+  'NR-KARTY-POBYTU': { cat: 'ident', icon: 'numer-dok', tip: 'kontekst „karta pobytu” + 2 litery + 7 cyfr' },
+  'NR-AKTU-USC': { cat: 'ident', icon: 'numer-dok', tip: 'kontekst „akt urodzenia/małżeństwa/zgonu” + numer z ukośnikiem' },
   'NR-REJESTRACYJNY': { cat: 'ident', icon: 'numer-dok', tip: 'kontekst „rejestracyjny/tablica” + tablica' },
   VIN: { cat: 'ident', icon: 'dane-id', tip: '17 znaków bez I/O/Q; kontekst „VIN” lub układ VIN' },
   IP: { cat: 'ident', icon: 'dane-id', tip: 'adres IPv4 (oktety 0–255) lub IPv6' },
@@ -59,6 +62,7 @@ export const PII_TOKENS: Record<string, TokenMeta> = {
   // Osoby
   'IMIĘ I NAZWISKO': { cat: 'person', icon: 'dane-osobowe', tip: 'słownik imion/nazwisk lub wyzwalacz kontekstu' },
   'DATA-URODZENIA': { cat: 'person', icon: 'kalendarz', tip: 'data z kontekstem „ur./urodzony”' },
+  'DANE O ZDROWIU': { cat: 'person', icon: 'dane-osobowe', tip: 'rozpoznanie, kod ICD-10 albo lek z dawką w karcie; choroba lub uraz tylko przy kotwicy medycznej' },
   // Znacznik ręczny (corrections.ts), nie typ rdzenia: nie ma przełącznika ani wiersza „Co wykrywa”.
   DANE: { cat: 'ident', icon: 'dane-id', tip: 'fragment zasłonięty ręcznie albo z listy' },
 };
@@ -97,6 +101,7 @@ export function maskTip(name: string): string {
 export const GENITIVE_LABEL: Record<string, readonly [string, string]> = {
   'IMIĘ I NAZWISKO': ['imienia i nazwiska', 'imion i nazwisk'],
   'DATA-URODZENIA': ['daty urodzenia', 'dat urodzenia'],
+  'DANE O ZDROWIU': ['danej o zdrowiu', 'danych o zdrowiu'],
   ADRES: ['adresu', 'adresów'],
   'KOD-POCZTOWY': ['kodu pocztowego', 'kodów pocztowych'],
   'MIEJSCOWOŚĆ': ['nazwy miejscowości', 'nazw miejscowości'],
@@ -108,6 +113,9 @@ export const GENITIVE_LABEL: Record<string, readonly [string, string]> = {
   'NR-DOWODU': ['numeru dowodu osobistego', 'numerów dowodów osobistych'],
   'NR-PASZPORTU': ['numeru paszportu', 'numerów paszportów'],
   'PRAWO-JAZDY': ['numeru prawa jazdy', 'numerów praw jazdy'],
+  'NR-UPRAWNIEŃ': ['numeru uprawnień zawodowych', 'numerów uprawnień zawodowych'],
+  'NR-KARTY-POBYTU': ['numeru karty pobytu', 'numerów kart pobytu'],
+  'NR-AKTU-USC': ['numeru aktu stanu cywilnego', 'numerów aktów stanu cywilnego'],
   'NR-REJESTRACYJNY': ['numeru rejestracyjnego pojazdu', 'numerów rejestracyjnych pojazdów'],
   VIN: ['numeru VIN', 'numerów VIN'],
   KRS: ['numeru KRS', 'numerów KRS'],
@@ -150,6 +158,9 @@ export const MASK_GROUP_DEFS: MaskGroupDef[] = [
   { key: 'kw', label: 'Nr księgi wieczystej', types: ['KW'], code: '[NR-KW]', tip: 'Kod wydziału, 8 cyfr i cyfra kontrolna (AB1C/12345678/9) z poprawną sumą; po słowach „księga wieczysta” albo „KW” także mimo złej sumy' },
   { key: 'znak', label: 'Znak sprawy / pisma', types: ['ZNAK-SPRAWY'], code: '[ZNAK-SPRAWY]', tip: 'Znak sprawy/pisma wg JRWA (ABC-def.123.77.2016) lub sygnatura akt („Sygn. akt II CSK 234/19”)' },
   { key: 'prawojazdy', label: 'Nr prawa jazdy', types: ['PRAWO-JAZDY'], code: '[PRAWO-JAZDY]', tip: 'Kontekst „prawo jazdy” + numer (z cyfrą)' },
+  { key: 'uprawnienia', label: 'Nr uprawnień zawodowych', types: ['NR-UPRAWNIEN'], code: '[NR-UPRAWNIEŃ]', tip: 'Numer PWZ lekarza, pielęgniarki lub farmaceuty po etykiecie „PWZ” (przy lekarzu bez etykiety tylko z poprawną sumą kontrolną) i numer wpisu radcy prawnego, adwokata lub notariusza w tym samym wierszu (np. „radca prawny, WA-1234”)' },
+  { key: 'kartapobytu', label: 'Nr karty pobytu', types: ['KARTA-POBYTU'], code: '[NR-KARTY-POBYTU]', tip: 'Kontekst „karta pobytu” + 2 litery + 7 cyfr' },
+  { key: 'aktusc', label: 'Nr aktu stanu cywilnego', types: ['AKT-USC'], code: '[NR-AKTU-USC]', tip: 'Kontekst „akt urodzenia/małżeństwa/zgonu” albo „nr aktu” + numer z ukośnikiem (1040/2011); sygnatura „Sygn. akt” to znak sprawy' },
   { key: 'rejestracja', label: 'Nr rejestracyjny', types: ['NR-REJESTRACYJNY'], code: '[NR-REJESTRACYJNY]', tip: 'Kontekst „rejestracyjny/tablica” + tablica (WI1234K)' },
   { key: 'vin', label: 'VIN', types: ['VIN'], code: '[VIN]', tip: '17 znaków bez I/O/Q; kontekst „VIN/nadwozia” lub wyraźny układ VIN' },
   { key: 'ip', label: 'Adres IP', types: ['IP'], code: '[IP]', tip: 'IPv4 (oktety 0–255) oraz IPv6' },
@@ -165,6 +176,7 @@ export const MASK_GROUP_DEFS: MaskGroupDef[] = [
   { key: 'miejscowosc', label: 'Miejscowość', types: ['MIEJSCOWOSC'], code: '[MIEJSCOWOŚĆ]', tip: 'Miejscowość przy adresie (przed nim lub po nim), po kodzie pocztowym albo przy zamieszkaniu lub urodzeniu; nie w zwykłym tekście' },
   { key: 'imie', label: 'Imię i nazwisko', types: ['IMIE'], code: '[IMIĘ I NAZWISKO]', tip: 'Słownik imion i nazwisk z odmianą, morfologia (-ski/-cki/-icz/-czyk) i wyzwalacze kontekstu; wykrywanie heurystyczne' },
   { key: 'dataur', label: 'Data urodzenia', types: ['DATA-UR'], code: '[DATA-URODZENIA]', tip: 'Data z kontekstem „ur./urodzony”' },
+  { key: 'zdrowie', label: 'Dane o zdrowiu', types: ['ZDROWIE'], code: '[DANE O ZDROWIU]', tip: 'Dane szczególnej kategorii (art. 9 RODO), zawsze z kotwicą: wartość po „Rozpoznanie:” i „Leki:”, lek z dawką w zaleceniach karty, kod ICD-10 po „rozpoznanie” lub „ICD-10”, lek z dawką przy „zalecił” lub „przyjmuje”, a choroba, uraz, zabieg czy wizyta u specjalisty tylko obok słów „zaświadczenie lekarskie”, „leczenie”, „rozpoznano”, „doznał” i podobnych; „nadużywa alkoholu” zawsze' },
 ];
 
 /** Token wewnątrz [...] z kodu znacznika, np. „[NR-KONTA]” → „NR-KONTA”. */
@@ -203,6 +215,9 @@ export const WYKRYWA_ROWS: Array<{ code: string; how: string }> = [
   { code: '[NR-KW]', how: 'kod wydziału + 8 cyfr + <strong>cyfra kontrolna</strong> (<code>AB1C/12345678/9</code>); po słowach „księga wieczysta” albo „KW” także mimo złej sumy' },
   { code: '[ZNAK-SPRAWY]', how: 'znak sprawy/pisma wg JRWA lub sygnatura akt („Sygn. akt II CSK 234/19”)' },
   { code: '[PRAWO-JAZDY]', how: 'kontekst „prawo jazdy” + numer (z cyfrą)' },
+  { code: '[NR-UPRAWNIEŃ]', how: 'etykieta „PWZ” + numer prawa wykonywania zawodu (lekarz bez etykiety: <strong>suma kontrolna</strong>); kontekst „radca prawny/adwokat/notariusz” + numer wpisu (<code>WA-1234</code>)' },
+  { code: '[NR-KARTY-POBYTU]', how: 'kontekst „karta pobytu” + 2 litery + 7 cyfr' },
+  { code: '[NR-AKTU-USC]', how: 'kontekst „akt urodzenia/małżeństwa/zgonu” + numer z ukośnikiem (<code>1040/2011</code>)' },
   { code: '[NR-REJESTRACYJNY]', how: 'kontekst „rejestracyjny/tablica/pojazd” + tablica (np. WI1234K)' },
   { code: '[VIN]', how: '17 znaków bez I/O/Q; kontekst „VIN/nadwozia” lub wyraźny układ VIN' },
   { code: '[IP]', how: 'IPv4 (oktety 0–255) oraz IPv6' },
@@ -217,6 +232,7 @@ export const WYKRYWA_ROWS: Array<{ code: string; how: string }> = [
   { code: '[KOD-POCZTOWY]', how: 'XX-XXX' },
   { code: '[MIEJSCOWOŚĆ]', how: 'miejscowość przy adresie, po kodzie pocztowym albo przy zamieszkaniu lub urodzeniu (nie w zwykłym tekście ani w nazwie instytucji)' },
   { code: '[DATA-URODZENIA]', how: 'data z kontekstem „ur./urodzony”' },
+  { code: '[DANE O ZDROWIU]', how: 'wartość po „Rozpoznanie:” i „Leki:” w karcie, kod ICD-10 po „rozpoznanie” lub „ICD-10”, lek z dawką (<code>sertralina 50 mg</code>); choroba lub uraz tylko przy <strong>kotwicy medycznej</strong> w zdaniu albo w zdaniu obok' },
   { code: '[IMIĘ I NAZWISKO]', how: 'słownik imion i nazwisk (z odmianą), morfologia (-ski/-cki/-icz/-czyk), wyzwalacze („nazywam się”, „Pan/Pani”)' },
 ];
 
@@ -237,6 +253,9 @@ const CHIP_LABELS: Record<PiiType, string> = {
   KW: 'nr księgi wieczystej',
   'ZNAK-SPRAWY': 'znak sprawy',
   'PRAWO-JAZDY': 'nr prawa jazdy',
+  'NR-UPRAWNIEN': 'nr uprawnień zawodowych',
+  'KARTA-POBYTU': 'nr karty pobytu',
+  'AKT-USC': 'nr aktu stanu cywilnego',
   'NR-REJESTRACYJNY': 'nr rejestracyjny',
   VIN: 'VIN',
   IP: 'adres IP',
@@ -252,6 +271,7 @@ const CHIP_LABELS: Record<PiiType, string> = {
   'KOD-POCZTOWY': 'kod pocztowy',
   MIEJSCOWOSC: 'miejscowość',
   'DATA-UR': 'data urodzenia',
+  ZDROWIE: 'dane o zdrowiu',
 };
 
 export interface ChipMeta {

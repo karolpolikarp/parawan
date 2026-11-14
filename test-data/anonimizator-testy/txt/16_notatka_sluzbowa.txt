@@ -1,0 +1,17 @@
+NOTATKA SŁUŻBOWA
+ze spotkania roboczego w dniu 24 czerwca 2026 r., sala 214, budynek przy ul. Królewskiej 27 w Warszawie
+Uczestnicy:
+1. dr hab. inż. Joanna Kaczmarek (Ministerstwo Cyfryzacji)
+2. mgr Grzegorz Zawadzki (Centralny Ośrodek Informatyki)
+3. dr Zofia Kawa (NASK – Państwowy Instytut Badawczy)
+4. Jakub Sadowski (Ministerstwo Cyfryzacji)
+5. mgr inż. Magdalena Jabłońska (Centralny Ośrodek Informatyki)
+6. Agnieszka Wójcik (Narodowy Instytut Onkologii im. Marii Skłodowskiej-Curie)
+Spotkanie otworzyła Joanna Kaczmarek, która przedstawiła stan prac nad wdrożeniem elektronicznego obiegu dokumentów. Pan Zawadzki zwrócił uwagę na opóźnienie odbioru drugiego etapu. Zgodnie z ustaleniami z Panem Ministrem termin nie może zostać przesunięty.
+Zofia Kawa poinformowała, że testy obciążeniowe wykonał zespół Jakuba Sadowskiego. Wyniki przesłano Magdalenie Jabłońskiej 3 dni temu. Przedstawicielka instytutu, Agnieszka Wójcik, zgłosiła potrzebę udziału w pilotażu.
+Ustalenia:
+1. Harmonogram odbioru do 5 dni roboczych (odp. JK).
+2. Uzupełnienie raportu z testów (odp. JS, kontakt jakub90@coi-test.gov.pl, tel. 12 334 95 55).
+3. Zaproszenie przedstawiciela Rzecznika Praw Obywatelskich na kolejne spotkanie (odp. GZ).
+Sporządziła: Magdalena Jabłońska
+jablonskam75@mc-test.gov.pl

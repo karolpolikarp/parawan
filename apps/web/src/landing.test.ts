@@ -6,6 +6,7 @@ import dlaRaw from '../../../docs/wydanie/DLA-IOD-I-IT.txt?raw';
 import coreSrc from '../../../packages/core/src/types.ts?raw';
 import landingHtmlRaw from '../../landing/index.html?raw';
 import landingConfig from '../../landing/vite.config.ts?raw';
+import readmeMd from '../../../README.md?raw';
 import { ICONS as LANDING_ICONS } from '../../landing/src/icons';
 import { EXAMPLE_TEXT, MASK_TOKEN_RE, maskCategory, TYPE_MASK, typeCategory } from '../../landing/src/tokens';
 import { MARKERS, SUMA_BRAK, wstawWydanie, wydanieZEnv } from '../../landing/src/wydanie';
@@ -115,6 +116,21 @@ test('landing: notka i liczby benchmarku zgodne z docs/BENCHMARK.md', () => {
   expect(landingHtml).toContain(`Z ${mustMask} fragmentów, które miały zniknąć, zniknęło ${hit}.`);
   expect(landingHtml).toContain(`Z ${mustKeep} fragmentów, które miały zostać, zostało ${kept}.`);
   expect(landingHtml).toContain(`Każdy z ${Number(mustMask) - Number(hit)} wycieków w pomiarze`);
+});
+
+test('README i DLA-IOD-I-IT.txt: odsetki z benchmarku zgodne z docs/BENCHMARK.md', () => {
+  // README stało na recall 97,8% po kolejnym pomiarze: wszystkie miejsca z liczbami pilnujemy razem
+  const row = benchmarkMd.match(
+    /\| T0\+T1 core \| ([\d.]+)% \(\d+\/\d+\) \| ([\d.]+)% \(\d+\/\d+\) \| ([\d.]+)% \|/,
+  );
+  expect(row).toBeTruthy();
+  const [recall, precision, f1] = (row ?? []).slice(1).map((v) => v.replace('.', ','));
+  expect(readmeMd.replace(/\r?\n> /g, ' ')).toContain(
+    `**recall ${recall}%, precyzja-proxy ${precision}%, F1 ${f1}%**`,
+  );
+  const dlaFlat = dla.replace(/\s+/g, ' ');
+  expect(dlaFlat).toContain(`które miały zniknąć (${recall}%)`);
+  expect(dlaFlat).toContain(`które miały zostać (${precision}%)`);
 });
 
 test('landing: silnik i CLI prowadzą do packages/core, nie do nieopublikowanego pakietu npm', () => {

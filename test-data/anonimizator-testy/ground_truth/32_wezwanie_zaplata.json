@@ -1,0 +1,245 @@
+{
+  "id": "32_wezwanie_zaplata",
+  "template": "wezwanie_zaplata",
+  "title": "Przedsądowe wezwanie do zapłaty",
+  "seed": 1032,
+  "traps": [
+    "nazwisko Kos i słowo „kosy”",
+    "numer wpisu radcy w podpisie",
+    "fragment firmy JDG z nazwiskiem",
+    "fałszywy PESEL jako numer polisy"
+  ],
+  "entities": [
+    {
+      "text": "PO-1620",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer wpisu na listę radców",
+      "count": 1
+    },
+    {
+      "text": "Mebloteka Online sp. z o.o.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "0000516735",
+      "type": "KRS",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "9220597849",
+      "type": "NIP_COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "178707218",
+      "type": "REGON_COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Polna 81A lok. 13",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres kancelarii jednoosobowej",
+      "count": 1
+    },
+    {
+      "text": "04-463",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "12 912 89 75",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ZIELIŃS-BUD",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "fragment firmy JDG zawierający nazwisko",
+      "count": 1
+    },
+    {
+      "text": "ul. Kazimierza Wielkiego 81/13",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "05-526",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Konstancin-Jeziorna",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "ul. Granicznej 29",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres budowy u osoby fizycznej",
+      "count": 1
+    },
+    {
+      "text": "FV/2026/03/332",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "66105332638",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "11 cyfr bez poprawnej sumy kontrolnej PESEL",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy dla Łodzi-Śródmieścia w Łodzi",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mariusz Kos",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "3065614344",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kancelaria@kos-legal-test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "MK/119/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak z inicjałami",
+      "count": 1
+    },
+    {
+      "text": "Monika Zielińska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "ZIELIŃS-BUD Monika Zielińska",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "pełna firma JDG",
+      "count": 1
+    },
+    {
+      "text": "5560571290",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "731518113",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kosy",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko Kos",
+      "count": 1
+    },
+    {
+      "text": "Joanna Kamińska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL56 1020 2892 1596 9204 2394 7916",
+      "type": "IBAN_COMPANY",
+      "expect": "policy",
+      "note": "rachunek osoby prawnej",
+      "count": 1
+    },
+    {
+      "text": "Małgorzatą Wójcik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "malgorzata.wojcik@kos-legal-test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "817 076 314",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wójcik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 2
+    },
+    {
+      "text": "Anna Nowakowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Nowakowską",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 1
+    }
+  ]
+}

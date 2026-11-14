@@ -12,7 +12,203 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
-Na razie brak zmian od v0.46.27.
+## v0.47.0 — 2026-11-14
+
+**Parawan zakrywa dane o zdrowiu, numery uprawnień zawodowych, karty pobytu i aktów stanu cywilnego, a adres urzędu w nagłówku pisma zostawia jawny.**
+
+Pilność: pilna
+
+Na 50 fikcyjnych pismach z kluczem (karta ze szpitala, pismo kadrowe, pozew, wezwanie do zapłaty
+i inne, `docs/EWALUACJA.md`) Parawan zakrywał 89% danych do zakrycia i zakrywał też 30 adresów
+urzędów, które miały zostać. Teraz zakrywa 99,5% i żadnego adresu urzędu, także na drugim,
+niezależnie wygenerowanym zestawie 50 pism. Jawny zostaje tylko fakt procedury „Niebieskiej
+Karty” (ROADMAP poz. 28). Rdzeń 0.30.0 (paczki `anonimizator` i `parawan`).
+
+- **Adres urzędu, sądu czy działu pracodawcy w nagłówku pisma zostaje jawny.** Ulica, kod pocztowy i
+  miejscowość pod nazwą instytucji („Urząd Miasta Łodzi⏎Wydział Finansowy⏎ul. Piotrkowska 104⏎90-926
+  Łódź”, „Dział Kadr i Płac⏎ul. Stanisława Moniuszki 3”), ulica tuż za nazwą instytucji z
+  przecinkiem („(Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1)”) i budynek z salą spotkania
+  („sala 214, budynek przy ul. Królewskiej 27”) były zakrywane jak adres osoby. To adres siedziby,
+  więc zostaje, także ulica z patronem, stopniem albo liczbą („ul. gen. Władysława Andersa 5”, „ul.
+  3 Maja 5”) w całości, również pod organem („Prezydent Miasta⏎Wydział Komunikacji”, „Wójt Gminy”),
+  z dzielnicą po łączniku („Urząd Skarbowy Warszawa-Targówek”) i ze skrótem („Oddział PKO”,
+  „Delegatura NIK”, „Oddział Regionalny ARiMR”). Miasto w nazwie tuż przed ulicą siedziby zostaje
+  razem z nią („Urząd Miasta Łodzi, ul. Piotrkowska 104, 90-926 Łódź”, „Sąd Okręgowy w Poznaniu, ul.
+  Hejmowskiego 2”, „Starostwo Powiatowe Turek, ul. Kaliska 59”), tak samo miejscowość między ulicą a
+  kodem („ul. Braci Leśnej 3, Sękocin Stary, 05-090 Raszyn”), także kilka siedzib w jednym akapicie.
+  Imię albo samo nazwisko w miejscu tej miejscowości („ul. Polna 3, Nowak Kowalski, 05-090 Raszyn”)
+  to adresat, więc kod pocztowy i poczta dalej znikają. Szkoła, przedszkole, żłobek, przychodnia,
+  poradnia, ośrodek, instytut czy akademia liczą się jako siedziba tylko z numerem, patronem,
+  miejscowością po „w” albo słowem „Miejski”, „Gminny”, „Powiatowy”, „Publiczny”, „SP ZOZ” („Szkoła
+  Podstawowa nr 5 im. Marii Konopnickiej”, „Przedszkole Miejskie nr 3 w Turku”, także wersalikami:
+  „SZKOŁA PODSTAWOWA NR 5”), bo tak samo zaczyna się nazwa firmy jednoosobowej. Adres osoby dalej
+  znika: pod imieniem i nazwiskiem (także spoza słownika imion, „Marianna Zięba-Kot”) albo pod
+  „Pani”, „Pan”, „Sz. Pan” i „Dla:”, pod inicjałem z nazwiskiem („W. Nowak”), w nazwie firmy z
+  imieniem albo nazwiskiem właściciela w każdym zapisie i odmianie, także pisanym wersalikami albo
+  będącym zwykłym słowem („Zakład Usług Remontowych Jan Kowalski”, „Przychodnia Lekarska Ewy Nowak”,
+  „Szkoła Jazdy KOWALSKI”, „Ośrodek Szkolenia Kierowców KOS”, „Przychodnia Weterynaryjna Wilk”,
+  „Żłobek Domowy Ewy”), po „zam.”, „adres zamieszkania” i „miejsce zamieszkania” nad blokiem, pod
+  „Gmina” albo „Dzielnica” z nazwą miejscowości, z numerem mieszkania („m. 3”, „lok. 9”, „12/4”,
+  „ul. Polna 3, m. 14”, „lokal 4”, „mieszkania 14”), po pustej linii pod nagłówkiem instytucji oraz
+  w zdaniu, w którym instytucja coś robi z osobą („Szpital przyjął pacjenta Jana Kowalskiego, ul.
+  Polna 3”). Numer mieszkania zapisany słowem w odmianie („ul. Polna 3 mieszkania 14”, „lokalu 14”,
+  „mieszkaniu 14”, „Jana Pawła II 14 mieszkania 3”) znika razem z adresem w każdym piśmie, także po
+  „Zamieszkały:”; wcześniej zostawał jawny za znacznikiem `[ADRES]`. Sprawdzanie siedziby nie
+  spowalnia długich dokumentów: spis kilku tysięcy placówek w jednym wierszu (280 KB) albo lista
+  działów jeden pod drugim anonimizuje się w ułamku sekundy.
+- **Nowy rodzaj danych: dane o zdrowiu.** Rozpoznania, kody chorób ICD-10, leki z dawką, urazy,
+  zabiegi, ciąża i nałogi zostawały jawne w kartach ze szpitala, pismach kadrowych i pozwach. Teraz
+  dostają znacznik `[DANE O ZDROWIU]`: wartość po „Rozpoznanie:”, „ICD-10:” czy „Leki:”, leki w
+  „Zaleceniach” karty, lek z dawką po „przyjmuje” i choroba po „choruje na”, gdy zdanie dotyczy
+  konkretnej osoby (imię i nazwisko, „Pani”, rola, PESEL). Jawne zostają przepis, poradnik,
+  statystyka, ulotka, cennik apteki, przykład w instrukcji („np. ibuprofen 200 mg”), kod błędu kotła
+  i „depresja gospodarcza”. To dane szczególnej kategorii (art. 9 RODO), więc typ jest domyślnie
+  włączony; można go wyłączyć w panelu „Co maskować”.
+- **Trzy nowe rodzaje danych: numer uprawnień zawodowych, numer karty pobytu i numer aktu stanu
+  cywilnego.** Numer prawa wykonywania zawodu („PWZ 2663347”), numer wpisu radcy prawnego albo
+  adwokata w podpisie („radca prawny, WA-3516”, „radcę prawnego Jana Nowaka (KR-4222)”), numer karty
+  pobytu („kartą pobytu nr RP6295053”) i numer aktu („akt małżeństwa nr 1040/2011”) zostawały jawne.
+  Teraz dostają znaczniki `[NR-UPRAWNIEŃ]`, `[NR-KARTY-POBYTU]` i `[NR-AKTU-USC]`, zawsze tylko przy
+  słowie, które je zapowiada. Przy etykiecie „PWZ” numer jest zakryty także z literówką, a przy
+  samym „lek.” tylko wtedy, gdy zgadza się suma kontrolna numeru lekarza. „Sygn. akt I C 1040/2011”
+  dalej jest znakiem sprawy, a „WA-1234” bez słowa „radca” czy „adwokat” zostaje, bo może być kodem
+  produktu. Numer wpisu musi stać zaraz po zawodzie albo po imieniu i nazwisku i zaczynać się kodem
+  izby, więc faktura „FV/1234”, umowa „UM-2023”, norma czy zgłoszenie „LEG-123” w zdaniu z adwokatem
+  zostają jawne, tak samo „nr wpisu do CEIDG”. Znane są kody wszystkich 19 okręgowych izb radców
+  prawnych, także Lublina („LB-1231”) i Białegostoku („BK-1234”), oraz rad adwokackich („WAW”,
+  „KRK/Adw/2345”, „LUB/Adw/456”). Numer jest zakryty także po długiej nazwie izby („nr wpisu na
+  listę radców prawnych OIRP w Warszawie: …”, „wpisana na listę adwokatów ORA w Lublinie pod nr …”,
+  ale nie po „liście obecności” czy „liście uczestników szkolenia”) i w drugim wierszu podpisu
+  („Adwokat Jan Kowalski⏎Nr wpisu: KR-1234”); samo „NR WPISU: WA-1234” bez zawodu zostaje jawne.
+  Numer aktu wychodzi też z zapisu „Akt urodzenia: nr …”, „pod nr …” i z wyliczenia („akty urodzenia
+  12/2010 i 13/2010”), a udział „1/2” obok aktu zgonu zostaje. Słowa zapowiadające działają bez
+  względu na wielkość liter („Akt urodzenia Nr …”, „KARTA POBYTU: …”, „Nr prawa wykonywania zawodu:
+  …”). Statystyki zostają jawne: „PWZ 12345 lekarzom”, „wynagrodzenia lekarzy, 1340517”, zakres lat
+  „akty urodzenia 2019/2020” i kod po adwokacie, po którym zdanie biegnie dalej („KR-2020 to numer
+  sprawy”, „PO-350 zł”), także po myślniku, gdy przed kodem stoi sam zawód („Kancelaria radcy
+  prawnego, KR-2026 - plan pracy na rok”). Długa lista numerów jest przetwarzana tak samo szybko jak
+  krótka. Nowe typy można wyłączyć w panelu „Co maskować”. Biblioteka npm ma nowy eksport
+  `isValidNpwz`, który sprawdza sumę kontrolną numeru prawa wykonywania zawodu lekarza.
+- **Osoba z nazwiskiem, które jest też zwykłym słowem, jest zakryta po „zespół” czy „drużyna”.** W
+  zdaniu „testy obciążeniowe wykonał zespół Joanny Sikory” imię i nazwisko zostawały jawne, bo
+  „zespół” przed imieniem w dopełniaczu był brany za początek nazwy z patronem, a nazwisko „Sikora”
+  to też nazwa ptaka. Teraz po „zespół”, „drużyna”, „chór”, „orkiestra”, „komitet”, „hufiec” i
+  „koło” pisanych małą literą taka para dostaje znacznik osoby (tak samo „drużyna Piotra Wilka”,
+  „zespół Anny Lis”). „Zespół”, „Drużyna” i „Komitet” wielką literą na początku zdania, wiersza albo
+  punktu listy też („Zespół Adama Kota wykonał audyt”). Patroni i kluby zostają jawni jak dotąd:
+  „chór Stanisława Moniuszki”, „hufiec Tadeusza Kościuszki”, „drużyna Lecha Poznań”, „Koncert dał
+  Chór Jana Lisa”, „Fundacja Joanny Sikory”. Po „zespół”, „drużyna” i „komitet” małą literą zakryte
+  jest też nazwisko spoza słownika („zespół Ewy Zimy”, „zespół Wiktorii Kos”), osoba z dwoma
+  imionami („zespół Joanny Marii Sikory”) i nazwisko z łącznikiem („drużyna Anny Nowak-Lis”). Znani
+  patroni i kluby zostają jawni („zespół Marii Skłodowskiej-Curie”, „drużyna Wisły Kraków”). Przy
+  okazji „Najświętszej Marii Panny” i „kościół Marii Panny” nie są już brane za imię i nazwisko, a
+  „Wezwano Marię Pannę na rozprawę”, „W kościele Maria Panna zauważyła sprawcę” i „Maria Panna,
+  PESEL …” nadal są zakryte. Zakryta jest też osoba, której imię w dopełniaczu jest zarazem zwykłym
+  słowem („Marka”, „Ani”, „Arka”, „Witka”), a nazwisko nazwą zwierzęcia czy zawodu: w drugim członie
+  wyliczenia za zakrytą osobą („akt małżeństwa Marty Sowy i Marka Sowy”, „Marty Lis i Marka Lisa”),
+  po „od”, „dla”, „do”, „u”, „wobec”, „według”, „przeciwko” i „z udziałem” („Pismo od Marka Sowy z 3
+  marca”), po nazwie pisma („Pozew Marka Gołębia”, „wniosek Ani Sowy”) i po „zespół”, „drużyna”,
+  „komitet”. Wcześniej takie imię i nazwisko zostawały jawne. Nazwisko „Gołąb” i „Dąb” jest
+  rozpoznawane we wszystkich odmianach („Gołębia”, „Gołębiowi”, „Gołębiem”, „Dęba”). Jawne zostają
+  „od Marka do piątku”, „gniazdo sowy i lisa”, „Marka Sowy nie znam” bez słowa przed parą i „Msza w
+  kościele pw. Najświętszej Maryi Panny”.
+- **Data urodzenia dziecka po słowie „urodzenie” jest zakryta.** W piśmie kadrowym „w związku z
+  urodzeniem syna, Marka Nowaka (PESEL …), w dniu 17 czerwca 2026 r.” data zostawała jawna, bo
+  między „urodzeniem” a datą stały imię, nazwisko i numer. Teraz data dostaje znacznik daty
+  urodzenia, gdy po „urodzeniu”, „urodzenia” albo „urodzeniem” stoi syn, córka, dziecko czy wnuk, a
+  dalej tylko imię i nazwisko dziecka, nawias z numerem, przecinek, złamanie wiersza albo „które
+  przyszło na świat”, po czym „w dniu”, „dnia” lub „dn.” z datą. Każde inne słowo pomiędzy oznacza
+  datę innego zdarzenia, więc zostaje jawna: wypłata zasiłku, termin wizyty, decyzja, powrót do
+  pracy, koniec urlopu („po urodzeniu dziecka wraca do pracy dnia 1.09.2026”). Tak samo, gdy przed
+  datą stoi urząd, sąd, pracodawca albo osoba z tytułem („Po urodzeniu dziecka ZUS w dniu 10.08.2026
+  r. wypłacił zasiłek”), gdy zaraz po dacie stoi czasownik w czasie przeszłym albo termin w czasie
+  teraźniejszym lub przyszłym („upływa”, „mija”, „przysługuje”, „wejdą w życie”), gdy data stoi w
+  osobnym wtrąceniu po przecinku, a zdanie biegnie dalej („Po urodzeniu dziecka, w dniu 1 września
+  2026 r., wejdą w życie nowe przepisy”), i gdy zdanie zaczyna się od „Przed urodzeniem”. Po „z
+  tytułu urodzenia” czy „w związku z urodzeniem” oraz przy miejscu i godzinie porodu („w dniu … r.,
+  w Szpitalu Miejskim”, „o godz. 14:30”) data dalej znika. Jawne zostają też daty przy „Zgłoszeniu”
+  czy „Transkrypcji aktu urodzenia”, przepisy „w przypadku urodzenia dziecka w dniu … i później”,
+  termin „6 tygodni po urodzeniu” i rok sprzed 1900. Przy okazji etykieta z myślnikiem zamiast
+  dwukropka też zakrywa datę („Data urodzenia – 05.06.2018”, „Data urodzenia dziecka — 05.06.2018”).
+- **Nazwa firmy jednoosobowej z nazwiskiem właściciela znika razem z osobą.** W piśmie „prowadząca
+  działalność gospodarczą pod firmą LIS-BUD Jadwiga Lis” imię i nazwisko były zakryte, ale „LIS-BUD”
+  zostawało jawne i zdradzało nazwisko. Teraz nazwa firmy z wielkich liter z łącznikiem wchodzi do
+  znacznika osoby, gdy jej pierwszy człon to nazwisko zakrytej osoby, także skrócone
+  („JABŁOŃS-TRANS”, „ZIELIŃS-BUD”) albo zapisane ze spacjami wokół łącznika („NOWAK - POL”), a do
+  tego przed nazwą stoi „pod firmą”, „Firma:” czy „w firmie” albo nazwa kończy się typowym członem
+  branżowym („-BUD”, „-TRANS”, „-POL”, „-MED”). Dzięki temu znika też nazwa w nagłówku faktury
+  („Sprzedawca:”, niżej „LIS-BUD” i „Jadwiga Lis”). Nazwa w cudzysłowie też jest zakrywana, a raz
+  rozpoznana firma znika przy każdej kolejnej wzmiance w piśmie, także odmienionej („LIS-BUDU”,
+  „LIS-BUDEM”). Spółki („NOWAK-BUD Sp. z o.o.”, „spółki NOWAK-POL”), nazwy bez nazwiska („Firma:
+  PKO-BP Jan Kowalski”, „pod nazwą NFZ-POZ”) i zwykłe zapisy wersalikami, w których pierwszy człon
+  tylko przypadkiem równa się nazwisku („Jan Rak, RAK-JELITA w wywiadzie”, „Anna Maj, MAJ-CZERWIEC:
+  urlop”), zostają, tak samo nazwa firmy z sąsiedniej kolumny tabeli.
+- **Tytuł urzędu po „Panem” i „Panu” nie jest już brany za nazwisko.** Zdanie „Zgodnie z ustaleniami
+  z Panem Ministrem termin nie może zostać przesunięty.” zamieniało „Ministrem” na znacznik osoby.
+  Teraz tytuły urzędów i funkcji w każdej odmianie („z Panem Ministrem”, „Panu Dyrektorowi”, „z
+  Panem Wojewodą”, „Panu Komornikowi”, „z Panem Notariuszem”, „z Panem Wicestarostą”, „z Panią
+  Dyrektorką”, „Szanowna Pani Sędzio”) zostają jawne. Jawny zostaje też przymiotnik albo drugi człon
+  urzędu („z Panem Wojewodą Mazowieckim”, „z Panem Komendantem Głównym Policji”, „Panu Sędziemu
+  Sprawozdawcy”). Nazwisko za tytułem dalej trafia pod znacznik, a tytuł zostaje („z Panem Ministrem
+  Kowalskim” daje „z Panem Ministrem [IMIĘ I NAZWISKO]”), także w tekście wielkimi literami („Z
+  PANEM MINISTREM [IMIĘ I NAZWISKO]”). Przymiotnik od nazwy miasta zostaje jawny tylko po urzędzie
+  terytorialnym (wojewoda, starosta, komendant, kurator), więc „z Panem Dyrektorem Krakowskim” i
+  „Pismo do Pana Sędziego Krakowskiego” nadal ukrywają nazwisko. Jawny zostaje przymiotnik funkcji
+  („Panu Dyrektorowi Finansowemu”, „z Panem Kierownikiem Technicznym”, „z Panem Kierownikiem
+  Budowy”), a nazwisko za nim i za nazwą urzędu („z Panem Sekretarzem Gminy [IMIĘ I NAZWISKO]”)
+  trafia pod znacznik. Nazwisko brzmiące jak urząd za innym tytułem („z Panem Prezesem Marszałkiem”)
+  też jest ukrywane.
+- **„Niebieska Karta” zostaje jako nazwa procedury.** Zdanie „wszczęto procedurę Niebieskiej Karty”
+  dawało „procedurę [IMIĘ I NAZWISKO] Karty”. Teraz nazwa zostaje jawna w każdym przypadku
+  („Niebieska Karta”, „w Niebieskiej Karcie”, „Założono Niebieską Kartę”, „Niebieskie Karty”), także
+  wielkimi literami i z podziałem wiersza między wyrazami. Osoba o nazwisku Niebieska jest nadal
+  maskowana, gdy nie stoi przed „Kartą” („Pani Niebieska”, „Anna Niebieska”), a także przed zwykłą
+  kartą, gdy przed nazwiskiem stoi imię albo „Pani” lub przypadki się nie zgadzają („Pani
+  Niebieskiej kartę parkingową”, „Joanna Niebieska karta klienta”). Procedura nie jest też daną o
+  zdrowiu: sam jej fakt zostaje jawny, a osoba w zdaniu jest zakryta (osobny rodzaj danych jest w
+  planie, ROADMAP.md poz. 28).
+- **Inicjały osoby w liście zadań są zamaskowane.** Gdy w piśmie jest osoba, na przykład Anna
+  Sadowska na liście uczestników, jej inicjały po „odp.” w punkcie notatki („(odp. AS)”, „(odp. MK,
+  kontakt …)”, „odp. AS – termin 15.12”) i w stopce („Sporządził(a): AS”, „Odpowiedzialny – AS”,
+  „Prowadzący: AS”, „Sporządziła: mgr AS”) oraz w kolumnie „Odp.” tabeli zadań trafiają pod znacznik
+  osoby. Z pseudonimami dostają tę samą etykietę co pełne imię i nazwisko. Inicjały z kropkami
+  („Sporządziła: A.S.”, „(odp. A.S., M.K.)”) są maskowane także bez takiej osoby, a „A.S. Nowak” to
+  nadal jedna osoba. Zostają jawne odpowiedzi w ankietach i wyjaśnieniach („Odp. TAK”, „Sprawdził:
+  NOK”, „B.D.”), badania („wyk. EKG, RTG”, „badanie wyk. MR”), funkcje („Zatwierdził: DG”),
+  instytucje i firmy („oprac. PWN”, „Wykonał: ZDM”, „Wykonał: F.H.U. „Budmax””, „do akceptacji MZ”),
+  numery etapów („odp. II”) i kody („odp. AS12”). Gołe inicjały w notatce, w której nie ma pełnego
+  imienia i nazwiska tej osoby, nadal zostają jawne, bo nie da się ich odróżnić od skrótu.
+- **PESEL z literówką w długości jest zamaskowany.** Po etykiecie „PESEL” numer z jedną cyfrą za
+  mało albo za dużo („PESEL: 8909150266”, „PESEL Pacjenta: 890915026670”, pole `"pesel"` w JSON lub
+  XML) trafia pod znacznik `[PESEL]`. Wcześniej maska obejmowała tylko dokładnie 11 cyfr. Działa też
+  po „Nr PESEL:” i „Lp. PESEL:”. Między etykietą a numerem może stać tylko określenie osoby („ojca”,
+  „pacjenta”, „ubezpieczonego”). Bez etykiety nic się nie zmienia. Zostają jawne: liczba w następnym
+  zdaniu („PESEL. 2024000123 to nr zgłoszenia”), nagłówek tabeli z „PESEL” nad inną kolumną, numer
+  po innym słowie („PESEL zgłoszenie 2024100123”), numer sprawy po „PESEL nr”, gdzie PESEL to nazwa
+  rejestru („Wniosek dotyczący PESEL nr 2024000123”, „ws. PESEL nr …”, „Korekta PESEL nr …”,
+  „zapytanie do bazy PESEL nr 2026111301”), NIP po pustym polu PESEL i dłuższe identyfikatory
+  („1234567890-12”). Pełne 11 cyfr po „PESEL nr” są zakryte jak dotąd.
+- **Telefon po „pod numerem” w zdaniu o kontakcie jest zamaskowany.** Zdanie „W razie pytań proszę
+  kontaktować się z działem kadr pod numerem 22 379 56 66.” zostawiało numer jawny. Teraz numer
+  trafia pod znacznik `[TELEFON]`, gdy przed „pod numerem”, „pod numerami”, „pod nr” albo „pod
+  wskazanym numerem” stoi zwrot kontaktu („kontaktować się ze mną”, „kontakt z sekretariatem”,
+  „dzwonić do mnie w godzinach 8-16”, „telefonować”, „jestem dostępny”, „jestem osiągalna”, „W razie
+  pytań”, „Pan Nowak dostępny jest”, „Pani Anna Kos będzie osiągalna”). Osoba przy „dostępny” liczy
+  się tylko po „Pan/Pani” z imieniem lub nazwiskiem wielką literą, więc „Pani sprawa dostępna jest
+  pod numerem …” i „Akta Pana Nowaka dostępne są pod numerem …” zostają jawne, tak samo jak „W razie
+  pytań dotyczących sprawy prowadzonej pod numerem …”. Po „pod numerem” zostaje jawny też dłuższy
+  ciąg cyfr („22 123 45 67 89 10”, „2024 123 45 67”) i 9 cyfr od zera („01 123 45 67”), bo maska
+  objęłaby tylko część numeru albo numer bez kierunkowego. Między nimi mogą stać tylko krótkie
+  wyrazy w rodzaju „się”, „ze mną”, „wyłącznie”, „telefonicznie lub mailowo” albo adresat po „z” („z
+  Panią Kierownik”). Adresat liczy się tylko w prośbie o kontakt („proszę kontaktować się z działem
+  kadr”, „proszę o kontakt z sekretariatem”), więc opis zdarzenia („Kontakt z firmą wpisaną pod
+  numerem …”, „Kontaktowano się z lokatorem mieszkania pod numerem …”, „Sprawa o kontakty z
+  dzieckiem prowadzona pod numerem …”) zostawia numer jawny. Samo „pod numerem” niczego nie maskuje,
+  więc numer w rejestrze, sprawie, fakturze czy KRS („wpisana do rejestru pod numerem …”,
+  „kontaktowała się w sprawie wpisu pod numerem …”) zostaje jak był. „Dostępny pod numerem” maskuje
+  tylko przy osobie („jestem dostępny”) albo z „telefonicznie”, więc „Dokument dostępny pod numerem
+  …” i „Ogłoszenie jest dostępne pod numerem … w BIP” zostają jawne. Liczba z walutą, data i numer z
+  rokiem po ukośniku („… pod numerem 22 379 56 66/2024”) po tym zwrocie też zostają.
 
 ## v0.46.27 — 2026-11-12
 
@@ -1881,7 +2077,8 @@ Przegląd stabilizacyjny:
 - Opcjonalny lokalny NER (spaCy PL): usługa `services/ner` (Docker) + klient
   `anonimizator/ner` (fail-safe, circuit breaker).
 
-[Unreleased]: https://github.com/karolpolikarp/parawan/compare/v0.46.27...HEAD
+[Unreleased]: https://github.com/karolpolikarp/parawan/compare/v0.47.0...HEAD
+[v0.47.0]: https://github.com/karolpolikarp/parawan/compare/v0.46.27...v0.47.0
 [v0.46.27]: https://github.com/karolpolikarp/parawan/compare/v0.46.26...v0.46.27
 [v0.46.26]: https://github.com/karolpolikarp/parawan/compare/v0.46.25...v0.46.26
 [v0.46.25]: https://github.com/karolpolikarp/parawan/compare/v0.46.24...v0.46.25

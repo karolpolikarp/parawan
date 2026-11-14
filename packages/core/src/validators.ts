@@ -1,4 +1,4 @@
-// Sumy kontrolne numerów (PESEL, NIP, REGON, IBAN, dowód, księga wieczysta, karta).
+// Sumy kontrolne numerów (PESEL, NIP, REGON, IBAN, dowód, księga wieczysta, karta, PWZ lekarza).
 
 const onlyDigits = (s: string): number[] =>
   s.replace(/\D/g, '').split('').map((d) => parseInt(d, 10));
@@ -135,4 +135,20 @@ export function isValidCard(raw: string): boolean {
   if (d.length < 13 || d.length > 19) return false;
   if (!hasCardPrefix(d)) return false;
   return luhnValid(d);
+}
+
+/**
+ * Numer prawa wykonywania zawodu lekarza i lekarza dentysty (NPWZ): 7 cyfr, pierwsza jest
+ * kontrolna i równa się sumie cyfr 2–7 z wagami 1…6 modulo 11. Kontrola 0 i 10 jest niedozwolona,
+ * więc numer nie zaczyna się od zera, np. „2663347”. Numer pielęgniarki i położnej (z literą P/A
+ * na końcu) nie ma takiej sumy.
+ */
+export function isValidNpwz(raw: string): boolean {
+  const s = raw.replace(/\s/g, '');
+  if (!/^\d{7}$/.test(s)) return false;
+  const d = onlyDigits(s);
+  let sum = 0;
+  for (let i = 1; i < 7; i++) sum += d[i] * i;
+  const c = sum % 11;
+  return c !== 0 && c !== 10 && c === d[0];
 }

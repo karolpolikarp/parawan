@@ -1,0 +1,237 @@
+{
+  "id": "22_wezwanie_zaplata",
+  "template": "wezwanie_zaplata",
+  "title": "Przedsądowe wezwanie do zapłaty",
+  "seed": 1022,
+  "traps": [
+    "numer wpisu radcy w podpisie",
+    "fragment firmy JDG z nazwiskiem",
+    "fałszywy PESEL jako numer polisy"
+  ],
+  "entities": [
+    {
+      "text": "WA-3516",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer wpisu na listę radców",
+      "count": 1
+    },
+    {
+      "text": "Kamex Logistyka sp. z o.o.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "0000134201",
+      "type": "KRS",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "6592775783",
+      "type": "NIP_COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "791113881",
+      "type": "REGON_COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Księcia Józefa Poniatowskiego 18 lok. 14",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres kancelarii jednoosobowej",
+      "count": 1
+    },
+    {
+      "text": "00-188",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "71 959 65 55",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "JABŁOŃS-TRANS",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "fragment firmy JDG zawierający nazwisko",
+      "count": 1
+    },
+    {
+      "text": "ul. Jana Heweliusza 44 m. 38",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "91-428",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Łódź",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "ul. Spacerowej 4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres budowy u osoby fizycznej",
+      "count": 1
+    },
+    {
+      "text": "FV/2026/02/251",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "00074430627",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "11 cyfr bez poprawnej sumy kontrolnej PESEL",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy dla Warszawy-Mokotowa w Warszawie",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marek Wysocki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "5484372504",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kancelaria@wysocki-legal-test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "MW/847/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak z inicjałami",
+      "count": 1
+    },
+    {
+      "text": "Antoni Jabłoński",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "JABŁOŃS-TRANS Antoni Jabłoński",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "pełna firma JDG",
+      "count": 1
+    },
+    {
+      "text": "9606278703",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "312416420",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Anna Kawa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "83194010769815748981309048",
+      "type": "IBAN_COMPANY",
+      "expect": "policy",
+      "note": "rachunek osoby prawnej",
+      "count": 1
+    },
+    {
+      "text": "Wojciechem Lewandowskim",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wojciech.lewandowski@wysocki-legal-test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "670 890 240",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Lewandowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 1
+    },
+    {
+      "text": "Jadwiga Nowicka-Grabowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Nowicką-Grabowską",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 1
+    }
+  ]
+}

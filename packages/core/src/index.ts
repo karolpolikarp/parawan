@@ -15,7 +15,7 @@
  */
 
 export type { PiiType, PiiFinding, RedactionResult, RedactOptions } from './types.js';
-export { isValidPesel, isValidNip, isValidRegon9, isValidRegon14, isValidIban, isValidDowod, isValidKw, isValidCard } from './validators.js';
+export { isValidPesel, isValidNip, isValidRegon9, isValidRegon14, isValidIban, isValidDowod, isValidKw, isValidCard, isValidNpwz } from './validators.js';
 export { NON_PERSON_CONTEXT } from './guards/eponyms.js';
 export { LEGAL_ENTITY_WORDS } from './guards/roles.js';
 export { redactPII, hasPII, describeFindings } from './redact.js';

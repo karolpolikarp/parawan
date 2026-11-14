@@ -1,0 +1,167 @@
+{
+  "id": "41_wniosek_urzad",
+  "template": "wniosek_urzad",
+  "title": "Wniosek mieszkańca do urzędu",
+  "seed": 1041,
+  "traps": [
+    "nazwisko Zima i słowo „zimą”",
+    "patron ulicy w adresie osoby (maskować jako adres)",
+    "adres urzędu ma zostać"
+  ],
+  "entities": [
+    {
+      "text": "Urząd m.st. Warszawy",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Rakowiecka 25/27",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "02-517",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Lipowa 73",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "50-382",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wrocław",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "ul. Słoneczna 61B lok. 8",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "91-463",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Łódź",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "544 971 517",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "ON/2024/352611",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer deklaracji",
+      "count": 1
+    },
+    {
+      "text": "Anna Zima",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "99020776309",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "zimaa87@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KZH563657",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jakub Zima",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "01292882033",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "zimą",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko Zima",
+      "count": 1
+    },
+    {
+      "text": "10 1240 1037 8876 6952 1312 9758",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+48 544 971 517",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "ten sam numer w innym formacie",
+      "count": 1
+    },
+    {
+      "text": "Barbara Zawadzka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jakuba Zimy",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    }
+  ]
+}

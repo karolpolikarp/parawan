@@ -1,0 +1,160 @@
+{
+  "id": "16_notatka_sluzbowa",
+  "template": "notatka_sluzbowa",
+  "title": "Notatka służbowa ze spotkania",
+  "seed": 1016,
+  "traps": [
+    "inicjały osób",
+    "patron w nazwie instytucji",
+    "odmiana wielu nazwisk"
+  ],
+  "entities": [
+    {
+      "text": "Ministerstwo Cyfryzacji",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Centralny Ośrodek Informatyki",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "NASK – Państwowy Instytut Badawczy",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Narodowy Instytut Onkologii im. Marii Skłodowskiej-Curie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie instytucji",
+      "count": 1
+    },
+    {
+      "text": "ul. Królewskiej 27",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Joanna Kaczmarek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Grzegorz Zawadzki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zofia Kawa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Jakub Sadowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Magdalena Jabłońska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Agnieszka Wójcik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Zawadzki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 2
+    },
+    {
+      "text": "Jakuba Sadowskiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Magdalenie Jabłońskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "JK",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "inicjały w liście zadań",
+      "count": 1
+    },
+    {
+      "text": "JS",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "inicjały w liście zadań",
+      "count": 1
+    },
+    {
+      "text": "jakub90@coi-test.gov.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "12 334 95 55",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "GZ",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "inicjały w liście zadań",
+      "count": 1
+    },
+    {
+      "text": "Rzecznika Praw Obywatelskich",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "jablonskam75@mc-test.gov.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

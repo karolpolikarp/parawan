@@ -148,7 +148,7 @@ rozpoznaje charakterystyczny zapis (kolumna „Metoda”).
 
 | Dane | Metoda | Znacznik w tekście |
 |---|---|---|
-| 🟤 PESEL | 11 cyfr + suma kontrolna (lub przy etykiecie „PESEL” mimo złej sumy) | `[PESEL]` |
+| 🟤 PESEL | 11 cyfr + suma kontrolna (lub przy etykiecie „PESEL” mimo złej sumy, także z literówką w długości: 10 albo 12 cyfr po „PESEL:”); „PESEL nr …” z numerem sprawy zostaje | `[PESEL]` |
 | 🟤 NIP | 10 cyfr (też z myślnikami) + suma kontrolna (lub przy etykiecie „NIP”) | `[NIP]` |
 | 🟤 REGON | 9/14 cyfr + suma kontrolna (lub przy etykiecie „REGON”) | `[REGON]` |
 | 🟢 IBAN / nr konta | mod 97 lub kontekst „konto/rachunek/IBAN” (też format IBAN mimo złej sumy) | `[NR-KONTA]` |
@@ -159,6 +159,9 @@ rozpoznaje charakterystyczny zapis (kolumna „Metoda”).
 | 🟤 Numer KSeF | słowo „KSeF” gdziekolwiek w dokumencie + numer faktury `NIP-RRRRMMDD-znaki-suma` (też stary format 36-znakowy) z **sumą kontrolną NIP-u** w pierwszym członie | `[NR-KSEF]` |
 | 🟤 Nr księgi wieczystej | kod wydziału + 8 cyfr + cyfra kontrolna (`AB1C/12345678/9`, wagi 1-3-7) z poprawną sumą i znanym kodem sądu; po słowach „KW”, „Kw nr”, „księga wieczysta” także mimo złej sumy, z wyliczeniem kolejnych numerów | `[NR-KW]` |
 | 🟤 Nr prawa jazdy | kontekst „prawo jazdy” + numer (z cyfrą) | `[PRAWO-JAZDY]` |
+| 🟤 Nr uprawnień zawodowych | etykieta „PWZ”/„NPWZ”/„prawo wykonywania zawodu” + 5–8 cyfr (także z literą P/A pielęgniarki i położnej), przy lekarzu bez etykiety numer w nawiasie z poprawną **sumą kontrolną NPWZ**; numer wpisu radcy, adwokata lub notariusza z kodem izby (`WA-1234`, `LB-1231`, `KRK/Adw/2345`) zaraz po „radca prawny”, „adwokat”, „r.pr.”, „adw.”, po imieniu i nazwisku, po długiej nazwie izby („nr wpisu na listę radców prawnych OIRP w Warszawie”, „pod nr”) albo w drugim wierszu podpisu („Nr wpisu:”); samo „WA-1234” bez zawodu zostaje | `[NR-UPRAWNIEŃ]` |
+| 🟤 Nr karty pobytu | kontekst „karta pobytu” + 2 litery + 7 cyfr | `[NR-KARTY-POBYTU]` |
+| 🟤 Nr aktu stanu cywilnego | kontekst „akt urodzenia/małżeństwa/zgonu” albo „nr aktu” + numer z ukośnikiem (`1040/2011`); „Sygn. akt” to znak sprawy | `[NR-AKTU-USC]` |
 | 🟤 Nr rejestracyjny | kontekst „rejestracyjny/tablica/pojazd” + tablica (np. WI1234K); wyliczenia po przecinku i „oraz/i” z walidacją wyróżnika wojewódzkiego | `[NR-REJESTRACYJNY]` |
 | 🟤 VIN | 17 znaków bez I/O/Q; kontekst „VIN/nadwozia” lub wyraźny układ VIN | `[VIN]` |
 | 🟤 Adres IP | IPv4 (oktety 0–255) oraz IPv6 (numery wersji „1.2.3.4” i adresy specjalne: 127.0.0.1, 0.0.0.0, maski, adres sieci, publiczne DNS pomijane) | `[IP]` |
@@ -168,12 +171,13 @@ rozpoznaje charakterystyczny zapis (kolumna „Metoda”).
 | 🟤 Znak sprawy / pisma | znak wg JRWA (`ABC-def.123.77.2016`) albo sygnatura z kotwicą „Znak sprawy:”, „Znak pisma:”, „Sygn. akt”; cytowane orzecznictwo bez kotwicy zostaje | `[ZNAK-SPRAWY]` |
 | 🔗 URL | całe adresy chronione; wewnątrz maskowane wartości parametrów osobowych (`?user=`, `?email=`, `?token=`…) | wg typu |
 | 🔵 E-mail | wzorzec adresu (w URL-ach także forma `%40`) | `[EMAIL]` |
-| 🔵 Telefon | 9 cyfr, opcjonalnie +48 (też „+48.512.345.678”), nawiasy, kropki z kotwicą; wyliczenia po przecinku i „oraz/i” | `[TELEFON]` |
+| 🔵 Telefon | 9 cyfr, opcjonalnie +48 (też „+48.512.345.678”), nawiasy, kropki z kotwicą; wyliczenia po przecinku i „oraz/i”; po „pod numerem” w zdaniu o kontakcie (komórkowy i stacjonarny „22 379 56 66”) | `[TELEFON]` |
 | 📍 Kod pocztowy | XX-XXX | `[KOD-POCZTOWY]` |
-| 🟣 Data urodzenia | data z kontekstem „ur./urodzony”, cyfrowa i słowna („5 maja 1985”) | `[DATA-URODZENIA]` |
-| 📍 Adres | ul./al./os./pl. + nazwa + numer (też „3 Maja”, „gen./ks./św.”); bez „ul.” po etykiecie zamieszkania („Adres zamieszkania: Lipowa 14/3”) | `[ADRES]` |
+| 🟣 Data urodzenia | data z kontekstem „ur./urodzony” albo rzeczownikiem „urodzenie/urodzeniem” (także z osobą i PESEL-em pomiędzy, po półpauzie), cyfrowa i słowna („5 maja 1985”); termin „Po urodzeniu dziecka, …” zostaje | `[DATA-URODZENIA]` |
+| 📍 Adres | ul./al./os./pl. + nazwa + numer (też „3 Maja”, „gen./ks./św.”, numer mieszkania słowem: „mieszkania 14”); bez „ul.” po etykiecie zamieszkania („Adres zamieszkania: Lipowa 14/3”); adres siedziby urzędu, sądu czy działu pracodawcy w nagłówku pisma zostaje jawny, adres pod imieniem i nazwiskiem albo w nazwie firmy z nazwiskiem właściciela znika | `[ADRES]` |
 | 📍 Miejscowość | w adresie i przy zamieszkaniu; **nie** w prozie/instytucji | `[MIEJSCOWOŚĆ]` |
 | 🟣 Imię i nazwisko | słownik imion + nazwisk (z odmianą), **morfologia** (-ski/-cki/-icz/-czyk), kolejność odwrócona, wyzwalacze kontekstu | `[IMIĘ I NAZWISKO]` |
+| 🟣 Dane o zdrowiu | zawsze z kotwicą i tylko przy konkretnej osobie (imię i nazwisko, „Pani”, rola, PESEL); przepis, statystyka, słownik ICD, ulotka i przykład po „np.” zostają jawne: wartość po „Rozpoznanie:” (także sekcja w kilku wierszach), „ICD-10:”, „Choroby współistniejące:”, „Leki:” i wiersz z lekiem w zaleceniach karty; kod ICD-10 po „rozpoznanie”, „ICD-10”, „kod choroby” (`I10` bez kotwicy zostaje); lek z dawką (`sertralina 50 mg`, także spoza słownika z jednostką po „przyjmuje”) przy „zalecił”, „przyjmuje” itp.; choroba po „choruje na”; choroba, uraz z częścią ciała, zabieg, wizyta u specjalisty tylko przy kotwicy medycznej w zdaniu albo w zdaniu obok („zaświadczenie lekarskie”, „leczenie”, „rozpoznano”, „doznał”); „nadużywa alkoholu” zawsze | `[DANE O ZDROWIU]` |
 | 🧩 Pola formularza / XML / JSON | „Nazwisko:”, tag `<Surname>`, klucz `"lastName"` jako kotwica, maskowana sama wartość, struktura zostaje | wg typu |
 | 🔎 Błędy OCR | homoglify 0→O / 1→l walidowane słownikiem („J0AN K0WALSKI”, „uI. Lip0wa 15”) | wg typu |
 
@@ -193,7 +197,7 @@ Domyka je opcjonalny dodatek AI (osobny projekt, niżej).
 
 > [!NOTE]
 > Benchmark warstwy offline (deterministyczny zbiór, [`docs/BENCHMARK.md`](docs/BENCHMARK.md)):
-> **recall 97,8%, precyzja-proxy 99,9%, F1 98,8%** (rdzeń, bez NER). Wycieki pochodzą z celowo
+> **recall 98,2%, precyzja-proxy 99,9%, F1 99,0%** (rdzeń, bez NER). Wycieki pochodzą z celowo
 > trudnej kategorii rzadkich i obcych nazwisk bez kontekstu, którą domyka dodatek AI.
 > W pozostałych kategoriach recall wynosi 100%.
 
@@ -255,7 +259,7 @@ redactPII('Kowalski pozwał Nowaka. Kowalskiemu zależy na ugodzie.', { pseudony
 
 Eksportowane są też walidatory sum kontrolnych: `isValidPesel`, `isValidNip`, `isValidRegon9`,
 `isValidRegon14`, `isValidIban`, `isValidDowod`, `isValidCard` (Luhn),
-`isValidKw` (księga wieczysta).
+`isValidKw` (księga wieczysta), `isValidNpwz` (prawo wykonywania zawodu lekarza).
 
 > `found` zawiera wyłącznie typ i liczbę wystąpień (**nigdy oryginalne wartości**), więc można go
 > bezpiecznie logować.

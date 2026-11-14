@@ -1,0 +1,118 @@
+{
+  "id": "25_reklamacja",
+  "template": "reklamacja",
+  "title": "Reklamacja konsumencka",
+  "seed": 1025,
+  "traps": [
+    "nazwisko Kawa i słowo „kawa”",
+    "samo imię osoby (kurier, konsultantka)",
+    "numer klienta i zamówienia"
+  ],
+  "entities": [
+    {
+      "text": "ul. Księcia Józefa Poniatowskiego 46",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "50-357",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wrocław",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "Domowe AGD Direct S.A.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ZAM-2026898-76",
+      "type": "ORDER_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KL-1117525",
+      "type": "CUSTOMER_ID",
+      "expect": "policy",
+      "note": "identyfikator klienta, pseudonim",
+      "count": 1
+    },
+    {
+      "text": "5423",
+      "type": "CARD_LAST4",
+      "expect": "policy",
+      "note": "ostatnie 4 cyfry karty",
+      "count": 1
+    },
+    {
+      "text": "SN4341066949",
+      "type": "SERIAL_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Agnieszka Kawa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "agnieszka.kawa@mail-test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+48853502690",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Łukasz",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię",
+      "count": 1
+    },
+    {
+      "text": "kawa",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko Kawa",
+      "count": 1
+    },
+    {
+      "text": "Weronika",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię",
+      "count": 1
+    },
+    {
+      "text": "84102028920035549433590248",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

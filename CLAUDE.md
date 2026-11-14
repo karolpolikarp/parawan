@@ -102,12 +102,15 @@ Sam benchmark nie wystarcza — sprawdzaj zmiany wieloagentowo/adwersarialnie na
 
 Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i diakrytyką).
 
-## Stan (2026-11-12)
+## Stan (2026-11-14)
 
 - `main` = v0.46.27 (wydane 2026-11-12, tag, Release i kopia na domenie zgodne, suma
-  `2ce67831…`). Rdzeń podzielony na moduły (patrz Struktura), wynik domyślny identyczny z v0.46.26.
-  npm 0.29.14 (`anonimizator`, `parawan`) czeka na ręczną publikację (Backlog 4).
-  Handoff sprzątania: `docs/handoff-2026-11-12.md`.
+  `2ce67831…`). npm 0.29.14 nie został opublikowany (Backlog 4).
+- Gałąź `feat/ewaluacja-50-pism` (wypchnięta, bez PR): ewaluacja na 50 fikcyjnych pismach
+  (`test-data/anonimizator-testy/`, `npm run eval`, wyniki w `docs/EWALUACJA.md`) i poprawki:
+  recall 89,2% → 99,5%, nadmiarowe 30 → 0, tak samo na odłożonym zestawie. Wersje już podbite:
+  aplikacja v0.47.0, rdzeń i `parawan` 0.30.0, CHANGELOG `## v0.47.0 — 2026-11-14`. Brakuje
+  PR, merge, tagu i publikacji (Backlog 5). Handoff: `docs/handoff-2026-11-14.md`.
 - W toku: nowy landing (`/frontend`), kierunek „Sosna o poranku”. Próbki poza repo w
   `E:\parawan-landing-proby\`. Handoff: `docs/handoff-2026-11-01.md`.
 
@@ -127,8 +130,16 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 3. „tarnowski” w słowniku nazwisk i na liście przymiotników: rozróżnienie przez regułę kontekstową
    (nazwa instytucji lub geografii po przymiotniku, np. „Starosta Tarnowski”, „Ziemia Tarnowska”).
    Usunięcie ze słownika dawało wycieki („Sędzia Tarnowski”), cofnięte w 380586a.
-4. Publikacja npm 0.29.14 z komputera autora (2FA): `npm login`, potem `npm publish -w anonimizator`
-   i `npm publish -w parawan`. Powrót: po publikacji sprawdzić `npm view anonimizator version`.
+4. Publikacja npm z komputera autora (2FA): `npm login`, potem `npm publish -w anonimizator`
+   i `npm publish -w parawan`. 0.29.14 nie wyszło; po merge v0.47.0 publikować od razu 0.30.0.
+   Powrót: `npm view anonimizator version`.
+5. Wydanie v0.47.0: PR z `feat/ewaluacja-50-pism`, merge na `main`, kroki z `docs/WYDANIE.md`
+   (próba `release.yml`, tag `v0.47.0`), potem Backlog 4. Wymaga słowa użytkownika.
+6. Opcje polityki z `docs/EWALUACJA.md` (dane firm, miejscowość, numery spraw, profile „Do pracy”
+   i „Do publikacji”, osobne pseudonimy małżonków o tym samym nazwisku).
+7. Znane ograniczenia z `docs/EWALUACJA.md` poz. 2–11 (m.in. parafia bez „w”, EZD pod numerem,
+   „Niebieska wstążka”, „Mariackim”); Niebieska Karta jako typ: ROADMAP poz. 28.
+8. Trudniejsza seria testowa: tabele, OCR, tekst angielski, inne szablony niż 10 z generatora.
 
 ## Znane problemy
 
@@ -137,3 +148,9 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 - REGON z długim wtrąceniem po etykiecie dostaje znacznik `[TELEFON]` (ROADMAP poz. 7).
 - Login w ścieżce URL typu `/user/akowalski` przechodzi jawny (ROADMAP poz. 15).
 - „tarnowski” bywa nazwiskiem i przymiotnikiem (Backlog 3).
+- Procedura „Niebieskiej Karty” zostaje jawna („Pani Nowak jest objęta procedurą Niebieskiej
+  Karty.”: osoba zakryta, fakt procedury nie). Nie podpinać pod `[DANE O ZDROWIU]`; plan nowego
+  typu z kotwicą w ROADMAP poz. 28.
+- Pełna lista ograniczeń po ewaluacji: `docs/EWALUACJA.md`, „Znane ograniczenia”.
+- Gołe inicjały po „odp.” („(odp. AS)”) są maskowane tylko, gdy w piśmie jest pełne imię i nazwisko
+  tej osoby; notatka z samymi inicjałami albo z „Pani Sadowska” zostawia je jawne (świadomie, precyzja).

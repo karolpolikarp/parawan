@@ -1,0 +1,245 @@
+{
+  "id": "12_wezwanie_zaplata",
+  "template": "wezwanie_zaplata",
+  "title": "Przedsądowe wezwanie do zapłaty",
+  "seed": 1012,
+  "traps": [
+    "nazwisko Kos i słowo „kosy”",
+    "numer wpisu radcy w podpisie",
+    "fragment firmy JDG z nazwiskiem",
+    "fałszywy PESEL jako numer polisy"
+  ],
+  "entities": [
+    {
+      "text": "KR-7377",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer wpisu na listę radców",
+      "count": 1
+    },
+    {
+      "text": "Kamex Logistyka sp. z o.o.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "0000605165",
+      "type": "KRS",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "9431204189",
+      "type": "NIP_COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "038253303",
+      "type": "REGON_COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Brzozowa 24B lok. 17",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres kancelarii jednoosobowej",
+      "count": 1
+    },
+    {
+      "text": "04-342",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "61 8858886",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "WRZOSEK-BUD",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "fragment firmy JDG zawierający nazwisko",
+      "count": 1
+    },
+    {
+      "text": "ul. Słoneczna 20",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "05-509",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Piaseczno",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "ul. Polnej 46",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres budowy u osoby fizycznej",
+      "count": 1
+    },
+    {
+      "text": "FV/2026/04/84",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "30104488590",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "11 cyfr bez poprawnej sumy kontrolnej PESEL",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy dla Łodzi-Śródmieścia w Łodzi",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Agnieszka Kos",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "5392847365",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kancelaria@kos-legal-test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "AK/155/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak z inicjałami",
+      "count": 1
+    },
+    {
+      "text": "Jadwiga Wrzosek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "WRZOSEK-BUD Jadwiga Wrzosek",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "pełna firma JDG",
+      "count": 1
+    },
+    {
+      "text": "8225525274",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "229677455",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kosy",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko Kos",
+      "count": 1
+    },
+    {
+      "text": "Andrzej Wysocki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL16102028926935002118451182",
+      "type": "IBAN_COMPANY",
+      "expect": "policy",
+      "note": "rachunek osoby prawnej",
+      "count": 1
+    },
+    {
+      "text": "Katarzyną Mazur",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "katarzyna83@kos-legal-test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "688 454 720",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mazur",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 2
+    },
+    {
+      "text": "Zofia Kaczmarek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kaczmarek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 2
+    }
+  ]
+}

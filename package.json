@@ -11,7 +11,8 @@
     "dev": "npm run dev -w anonimizator-web",
     "lint": "biome lint",
     "format": "biome format --write",
-    "e2e": "node --test \"scripts/e2e/*.test.mjs\""
+    "e2e": "node --test \"scripts/e2e/*.test.mjs\"",
+    "eval": "node scripts/eval/run-eval.mjs --eval"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.6.3",

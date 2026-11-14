@@ -1,6 +1,6 @@
 # Roadmapa Parawana
 
-Stan na 2026-11-12, wersja bazowa v0.46.27 (rdzeń `anonimizator` 0.29.14, w npm także jako `parawan`).
+Stan na 2026-11-14, wersja bazowa v0.47.0 (rdzeń `anonimizator` 0.30.0, w npm także jako `parawan`).
 Każda pozycja ma docelową wersję i rozmiar (S, M, L). Pozycje „Z repozytorium” wynikają z kodu,
 CHANGELOG, dokumentów i PR-ów i podają źródło; „Propozycje” to pomysły spoza tych źródeł.
 
@@ -10,8 +10,10 @@ Zasady, które tu obowiązują: precyzja ważniejsza niż nadmaskowanie, jeden s
 
 ## Teraz
 
-Docelowo v0.46.28, rdzeń 0.29.15. v0.46.27 wyszło 2026-11-12: silnik podzielony na moduły
-z tym samym wynikiem, poprawki własnych masek i warstwy LLM w paczce npm.
+Docelowo v0.47.1, rdzeń 0.30.1. v0.47.0 (2026-11-14) to poprawki z ewaluacji na 50 fikcyjnych
+pismach (`docs/EWALUACJA.md`): dane o zdrowiu, numery uprawnień zawodowych, karty pobytu i aktów
+stanu cywilnego jako nowe typy, jawny adres siedziby instytucji. v0.46.27 wyszło 2026-11-12:
+silnik podzielony na moduły z tym samym wynikiem.
 
 ### Z repozytorium
 
@@ -130,6 +132,20 @@ v0.46.25. Dlatego następna fala (A10, A11 i L02) przesuwa się z v0.47.1 na v0.
     jednoznacznie osobowe ścieżki to kotwice strukturalne, więc pasują do zasady precyzji. Gołe
     `github.com/akowalski` świadomie zostaje bez reguły, bo ten sam kształt ma organizacja i projekt
     (komentarz przy `URL_PROFILE_PATH_RULES`). Źródło: docs/SCENARIUSZ-TESTOW-v0.45.md, sekcja 4.
+
+28. **Procedura „Niebieskiej Karty” jako osobny typ danych**
+    v0.47.x / rdzeń 0.30.x · M
+    Zdanie „Pani Nowak jest objęta procedurą Niebieskiej Karty.” zakrywa dziś osobę, ale fakt
+    procedury zostaje jawny. Na zestawie odłożonym ewaluacji to 0 z 5 takich miejsc. Podpięcie
+    pod `[DANE O ZDROWIU]` dawałoby błędną etykietę, więc potrzebny jest nowy typ (roboczo
+    `[PRZEMOC-DOMOWA]`) z kotwicą: osoba w zdaniu, czasownik albo rzeczownik procedury
+    (`procedur*`, `założon*`, `objęt*`, `wszczęt*`) i „Niebiesk* Kart*” albo „NK”. Przypadki do
+    testów: „W sprawie Jana Nowaka założono Niebieską Kartę w 2023 r.”, „Wobec Jana Nowaka
+    wszczęto procedurę „Niebieskiej Karty”.”, „procedurę NK wobec rodziny Kowalskich”. Typ
+    przechodzi przez pełną listę z CLAUDE.md (types.ts, pii-meta.ts, tokens.ts i index.html
+    landingu, README, testy, dataset.mjs). „NK” jest skrótem wieloznacznym, więc wymaga
+    osobnego audytu precyzji (np. „NK” jako inicjały osoby albo skrót nazwy firmy). Źródło:
+    docs/EWALUACJA.md i raport zestawu odłożonego (ziarna 7001–7050).
 
 ### Propozycje
 

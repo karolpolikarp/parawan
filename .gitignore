@@ -21,3 +21,7 @@ test-results/
 .cache/sonda/
 .cache/poc-docx/
 .cache/viewports/
+
+# Ewaluacja na zestawie 50 pism: wyniki runnera i oryginalne archiwum
+test-data/wyniki/
+/anonimizator-testy.zip

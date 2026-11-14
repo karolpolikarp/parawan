@@ -15,6 +15,9 @@ export type PiiType =
   | 'KSEF'
   | 'KW'
   | 'PRAWO-JAZDY'
+  | 'NR-UPRAWNIEN'
+  | 'KARTA-POBYTU'
+  | 'AKT-USC'
   | 'NR-REJESTRACYJNY'
   | 'VIN'
   | 'IP'
@@ -24,6 +27,7 @@ export type PiiType =
   | 'ZNAK-SPRAWY'
   | 'KOD-POCZTOWY'
   | 'DATA-UR'
+  | 'ZDROWIE'
   | 'ADRES'
   | 'MIEJSCOWOSC'
   | 'IMIE';
@@ -75,6 +79,9 @@ export const MASK: Record<PiiType, string> = {
   KSEF: '[NR-KSEF]',
   KW: '[NR-KW]',
   'PRAWO-JAZDY': '[PRAWO-JAZDY]',
+  'NR-UPRAWNIEN': '[NR-UPRAWNIEŃ]',
+  'KARTA-POBYTU': '[NR-KARTY-POBYTU]',
+  'AKT-USC': '[NR-AKTU-USC]',
   'NR-REJESTRACYJNY': '[NR-REJESTRACYJNY]',
   VIN: '[VIN]',
   IP: '[IP]',
@@ -84,6 +91,7 @@ export const MASK: Record<PiiType, string> = {
   'ZNAK-SPRAWY': '[ZNAK-SPRAWY]',
   'KOD-POCZTOWY': '[KOD-POCZTOWY]',
   'DATA-UR': '[DATA-URODZENIA]',
+  ZDROWIE: '[DANE O ZDROWIU]',
   ADRES: '[ADRES]',
   MIEJSCOWOSC: '[MIEJSCOWOŚĆ]',
   IMIE: '[IMIĘ I NAZWISKO]',
@@ -108,6 +116,9 @@ export const HUMAN_LABEL: Record<PiiType, string> = {
   KSEF: 'numer KSeF',
   KW: 'numer księgi wieczystej',
   'PRAWO-JAZDY': 'nr prawa jazdy',
+  'NR-UPRAWNIEN': 'numer uprawnień zawodowych',
+  'KARTA-POBYTU': 'numer karty pobytu',
+  'AKT-USC': 'numer aktu stanu cywilnego',
   'NR-REJESTRACYJNY': 'nr rejestracyjny',
   VIN: 'VIN',
   IP: 'adres IP',
@@ -117,6 +128,7 @@ export const HUMAN_LABEL: Record<PiiType, string> = {
   'ZNAK-SPRAWY': 'znak sprawy',
   'KOD-POCZTOWY': 'kod pocztowy',
   'DATA-UR': 'datę urodzenia',
+  ZDROWIE: 'dane o zdrowiu',
   ADRES: 'adres',
   MIEJSCOWOSC: 'miejscowość',
   IMIE: 'imię i nazwisko',

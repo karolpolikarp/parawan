@@ -1,6 +1,6 @@
 // Ostatnia faza: domknięcia masek osób (imię, inicjał, ogon przeniesienia), stabilna numeracja
 // etykiet, przywrócenie URL-i i ucieczek JSON, cudzysłowy wokół masek w dokumencie JSON i własne maski.
-import { HOMOGRAPH_SURNAMES, isGeoAdjective, looksLikeSurname, NON_SURNAME_ADJ, surnameBase, surnameShaped } from '../surnames.js';
+import { HOMOGRAPH_SURNAMES, isGeoAdjective, looksLikeSurname, NON_SURNAME_ADJ, normalizeSurnameKey, surnameBase, surnameShaped } from '../surnames.js';
 import { CAP_WORD, ESC_WS, LIST_BULLET, NM_BOUND, PERSON_MASK_SRC, PL_LO, PL_UP, RE_CHAR_LU } from '../charset.js';
 import { indexToLetters, JSON_ESC_FROM_PUA, JSON_ESC_PUA, JSON_ESC_PUA_EOL, JSON_ESC_TO_PUA, lettersToIndex, MAIDEN_D_SENTINEL, RE_URL_SENTINEL, type RedactCtx } from '../context.js';
 import { COLLIDING_NAME_FORMS, isFirstNameGenitive, isFirstNameLike, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
@@ -466,6 +466,112 @@ function relabelPersons(ctx: RedactCtx): void {
   for (const mm of ctx.text.matchAll(/\[OSOBA-([A-Z]+)\]/g)) if (!labels.has(mm[1])) labels.set(mm[1], indexToLetters(labels.size));
   ctx.text = ctx.text.replace(/\[OSOBA-([A-Z]+)\]/g, (_m, l: string) => `[OSOBA-${labels.get(l)}]`);
 }
+// Nazwa firmy osoby fizycznej z wersalików z łącznikiem („LIS-BUD”, „JABŁOŃS-TRANS”, po OCR także
+// „NOWAK - POL”). Do trzech członów, bez cyfr, żeby „COVID-19” czy „PN-EN” z numerem normy nie pasowały.
+// Opcjonalny cudzysłów wokół nazwy („pod firmą „KOWAL-BUD” Jan Kowalski”). Między nazwą a maską osoby
+// tylko spacje: tabulator to granica kolumn w tabeli, a nazwa z jednej kolumny nie należy do drugiej.
+const FIRM_SEP = / ?- ?/;
+const FIRM_TOKEN = `(?<![${NM_BOUND}0-9-])([${PL_UP}]{2,}(?: ?- ?[${PL_UP}]{2,}){1,2})(?![${NM_BOUND}0-9-])`;
+const RE_FIRM_TOKEN = new RegExp(`([„"«]?)${FIRM_TOKEN}([”"»]?)(?:( +)(${PERSON_MASK_SRC}))?`, 'g');
+// Kotwica firmy przed nazwą: „pod firmą”, „pod nazwą”, „Firma:”, „firma/firmy/firmie/firmą”, także
+// z przełamaniem wiersza za nią. Sama kotwica nigdy nie wystarcza: pierwszy człon nazwy musi być
+// nazwiskiem zakrytej osoby.
+const RE_FIRM_ANCHOR_BEFORE = /(?:(?<!\p{L})pod[ \t]+(?:firmą|nazwą)[ \t]*:?|(?<!\p{L})firm(?:a|ą|ie|y)[ \t]*:?)[ \t]*(?:\r?\n[ \t]*)?$/iu;
+// Typowe człony branżowe w nazwach firm jednoosobowych („LIS-BUD”, „JABŁOŃS-TRANS”, „POLAK-POL”), także
+// w odmianie („LIS-BUDU”, „LIS-BUDEM”, „LIS-BUDZIE”). Bez kotwicy firmy tylko taki ostatni człon
+// odróżnia nazwę firmy od zwykłego zapisu wersalikami, w którym pierwszy człon przypadkiem równa się
+// nazwisku („RAK-JELITA”, „MAJ-CZERWIEC”, „WILK-ŁĄKA”, „NOWAK-KIEROWNIK”).
+const FIRM_TRADE_WORDS =
+  'BUD|BUDEX|BUDMEX|TRANS|TRANSPORT|SPED|POL|POLEX|MED|MEDIC|MET|METAL|STAL|STOL|DREW|DREX|SERWIS|SERVICE|HANDEL|EXPORT|IMPORT|IMPEX|EX|AUTO|MOTO|CAR|CARS|GAZ|TERM|TERMO|ELEKTRO|ELEKTRYK|ENERGO|INSTAL|DACH|DOM|PLAST|TECH|TECHNIK|SYSTEM|KOMP|NET|SOFT|MAX|LUX|PRINT|FARM|FARMA|AGRO|EKO|GRAF|FOTO|DENT|OPTYK|MEBLE|MEBEL|OKNA|PAK|LOG|TRADE|GROUP|PROJEKT|GEO|KONSULT|CONSULTING|LEX|TAX';
+const RE_FIRM_TRADE_LAST = new RegExp(`(?:^|-)(?:${FIRM_TRADE_WORDS})(?:U|EM|OWI|IE|ZIE|A|Y|ACH|AMI|OM|ÓW)?$`, 'u');
+// Końcówka odmiany ostatniego członu: kolejne wzmianki rozpoznanej nazwy bywają odmienione.
+const RE_FIRM_INFLECTION = /(?:U|EM|OWI|IE|ZIE|A|Y|ACH|AMI|OM|ÓW)$/u;
+// Słowo „spółka” tuż przed nazwą albo forma prawna za nią („Sp. z o.o.”, „S.A.”): to spółka, nie firma
+// osoby fizycznej, więc nazwa zostaje (tak samo przy każdej wzmiance tej nazwy).
+const RE_COMPANY_BEFORE = /(?<!\p{L})spółk\p{L}*[ \t]*$/iu;
+const RE_LEGAL_FORM_AFTER = /^[ \t]*(?:sp\.|sp[ \t]+z|spółk|s\.[ \t]?[ac]\.|sa(?!\p{L})|s\.?k\.?a\.?(?!\p{L}))/iu;
+/**
+ * Klucz zamaskowanego nazwiska, które otwiera nazwę firmy, albo null. Człon bywa nazwiskiem w całości
+ * („LIS-BUD”, „WRZOSEK-BUD”) albo jego początkiem bez końcówki („JABŁOŃS-TRANS” od Jabłońskiego,
+ * „ZIELIŃS-BUD” od Zielińskiej). Początek dopiero od pięciu liter, żeby krótki skrót nie trafiał.
+ * Gdy początek pasuje do kilku nazwisk („WÓJCI-” do Wójcika i Wójcickiej), wygrywa osoba z maski tuż za
+ * nazwą, a bez niej osoba wspomniana najbliżej przed nazwą.
+ */
+function firmHeadSurname(ctx: RedactCtx, head: string, maskAfter: string | undefined, before: string): string | null {
+  const w = head.toLowerCase();
+  if (w.length < 3) return null;
+  const key = normalizeSurnameKey(w);
+  if (ctx.maskedSurnames.has(key)) return key;
+  if (ctx.maskedSurnames.has(w)) return w;
+  if (w.length < 5) return null;
+  const cands = [...ctx.maskedSurnames].filter((k) => k.startsWith(w) && k.length - w.length <= 3);
+  if (cands.length <= 1) return cands[0] ?? null;
+  const masks = cands.map((k) => ctx.personMask(k));
+  if (maskAfter) {
+    const i = masks.indexOf(maskAfter);
+    if (i >= 0) return cands[i];
+  }
+  let best = 0;
+  let bestPos = -1;
+  masks.forEach((m, i) => {
+    const pos = before.lastIndexOf(m);
+    if (pos > bestPos) [best, bestPos] = [i, pos];
+  });
+  return cands[best];
+}
+/**
+ * Nazwa firmy jednoosobowej z nazwiskiem właściciela („LIS-BUD [OSOBA]”) to dana osoby, więc wchodzi
+ * do jej maski. Zawsze wymagane nazwisko zakrytej osoby w pierwszym członie nazwy. Do tego kotwica firmy
+ * przed nazwą („pod firmą”, „Firma:”) albo branżowy ostatni człon („-BUD”, „-TRANS”); wtedy nazwa jest
+ * zakrywana także bez osoby obok (faktura: „Sprzedawca:”, w następnym wierszu „LIS-BUD”, pod nim
+ * „Jadwiga Lis”). Gdy nazwa wskazuje inną osobę niż maska za nią (tryb pseudonimów), dostaje osobną maskę właściciela. Raz rozpoznana nazwa jest
+ * maskowana przy każdej kolejnej wzmiance, także odmienionej („LIS-BUDU”). Zostają: spółki
+ * („NOWAK-BUD Sp. z o.o.”, „spółki NOWAK-POL”), nazwy bez nazwiska („PKO-BP Jan Kowalski”,
+ * „pod firmą AGD-SERWIS Jan Kowalski”) i zapisy wersalikami bez kotwicy i bez członu branżowego
+ * („RAK-JELITA”, „MAJ-CZERWIEC”), bo nic nie wskazuje, że to firma.
+ */
+function absorbOwnerFirmName(ctx: RedactCtx): void {
+  if (!ctx.maskedSurnames.size || !/[A-ZĄĆĘŁŃÓŚŹŻ] ?- ?[A-ZĄĆĘŁŃÓŚŹŻ]/.test(ctx.text)) return;
+  const known = new Map<string, string>();
+  const norm = (firm: string) => firm.split(FIRM_SEP).join('-');
+  const isCompany = (t: string, offset: number, end: number) =>
+    RE_COMPANY_BEFORE.test(t.slice(Math.max(0, offset - 30), offset)) || RE_LEGAL_FORM_AFTER.test(t.slice(end, end + 20));
+  // Postać podstawowa nazwy: bez spacji wokół łącznika i bez końcówki odmiany („LIS-BUDU” = „LIS-BUD”).
+  const base = (firm: string) => norm(firm).replace(RE_FIRM_INFLECTION, '');
+  // Nazwa raz oznaczona jako spółka zostaje przy każdej wzmiance, także odmienionej i bez formy prawnej.
+  const companies = new Set<string>();
+  for (const mm of ctx.text.matchAll(RE_FIRM_TOKEN)) {
+    const [, open, firm, close] = mm;
+    if (isCompany(ctx.text, mm.index, mm.index + open.length + firm.length + close.length)) companies.add(base(firm));
+  }
+  ctx.text = ctx.text.replace(
+    RE_FIRM_TOKEN,
+    (m, open: string, firm: string, close: string, sp: string | undefined, mask: string | undefined, offset: number, t: string) => {
+      if (companies.has(base(firm))) return m;
+      const key = firmHeadSurname(ctx, firm.split(FIRM_SEP)[0], mask, t.slice(0, offset));
+      if (!key) return m;
+      if (!RE_FIRM_TRADE_LAST.test(norm(firm)) && !RE_FIRM_ANCHOR_BEFORE.test(t.slice(Math.max(0, offset - 60), offset))) return m;
+      const owner = ctx.personMask(key);
+      known.set(base(firm), owner);
+      if (mask && !open && !close && owner === mask) return mask;
+      ctx.bump('IMIE');
+      return `${open}${owner}${close}${mask ? `${sp}${mask}` : ''}`;
+    },
+  );
+  if (!known.size) return;
+  // Pozostałe wzmianki rozpoznanej nazwy (także te przed pierwszą rozpoznaną i odmienione) dostają
+  // maskę właściciela. Nazwy spółek nie trafiają do `known`, więc tu nie trzeba ich sprawdzać ponownie.
+  ctx.text = ctx.text.replace(
+    RE_FIRM_TOKEN,
+    (m, open: string, firm: string, close: string, sp: string | undefined, mask: string | undefined) => {
+      const owner = known.get(base(firm));
+      if (!owner) return m;
+      ctx.bump('IMIE');
+      return `${open}${owner}${close}${mask ? `${sp}${mask}` : ''}`;
+    },
+  );
+}
+
 export function finalizePersons(ctx: RedactCtx): void {
   let links: Map<string, RawWordLink[]> | undefined;
   const rawLinks: RawLinksLookup = (w) => (links ??= buildRawWordLinks(ctx.raw)).get(w) ?? [];
@@ -477,6 +583,7 @@ export function finalizePersons(ctx: RedactCtx): void {
   closeOcrNamesAroundMask(ctx, rawLinks);
   closeListEntries(ctx);
   absorbInitialsAndParticles(ctx);
+  absorbOwnerFirmName(ctx);
   relabelPersons(ctx);
 }
 

@@ -6,6 +6,7 @@ import { PLATE_NOT_ACRONYM, PLATE_VOIV_LETTERS, PLATE_YEAR_ABBR, plateYearEndsLi
 import { type PiiType } from '../types.js';
 import { CURRENCY_CODES, precededByLegalRef } from '../guards/numbers.js';
 import { isValidDowod } from '../validators.js';
+import { institutionPostalAt } from '../guards/institution-address.js';
 
 /** Kod waluty albo jednostki ilości na początku kandydata tablicy to kwota lub liczba sztuk. Bez RUB:
  *  „RUB” może zaczynać tablicę podkarpacką, więc taki kandydat idzie dalej do strażników tablicy. */
@@ -250,6 +251,8 @@ export function passPostal(ctx: RedactCtx): void {
   if (!ctx.on('KOD-POCZTOWY')) return;
   ctx.text = ctx.text.replace(RE_POSTAL, (m, offset: number) => {
     if (precededByLegalRef(ctx.text, offset)) return m;
+    // Kod pod ulicą siedziby instytucji zostaje razem z jej adresem.
+    if (institutionPostalAt(ctx.text, offset, ctx.personProbe)) return m;
     return ctx.hit('KOD-POCZTOWY');
   });
 }

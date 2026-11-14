@@ -1,0 +1,145 @@
+{
+  "id": "38_karta_szpitalna",
+  "template": "karta_szpitalna",
+  "title": "Karta informacyjna ze szpitala",
+  "seed": 1038,
+  "traps": [
+    "eponimy w nazwach chorób (Leśniowskiego-Crohna)",
+    "patron w nazwie szpitala"
+  ],
+  "entities": [
+    {
+      "text": "ul. Polna 51 m. 48",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "50-387",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wrocław",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Przychodnia Rodzinna „Pod Lipami”",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "placówka, może zawierać patrona",
+      "count": 1
+    },
+    {
+      "text": "Monika Pietrzycka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "17230262209",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "02.03.2017",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "3714/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer hospitalizacji",
+      "count": 1
+    },
+    {
+      "text": "Ewa Pietrzycka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+48675010474",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "K50.0",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "choroba Leśniowskiego-Crohna jelita cienkiego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "E10.9",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "cukrzyca typu 1 bez powikłań",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "mesalazyna 1 g",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "insulina aspart",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "Ewie Pietrzyckiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Katarzyna Lis",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "6524930",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

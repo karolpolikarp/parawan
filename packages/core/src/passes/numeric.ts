@@ -140,7 +140,59 @@ export function passPesel(ctx: RedactCtx): void {
   });
   // Silna etykieta: maska mimo złej sumy, bo numer bywa z literówką.
   maskAfterLabel(ctx, RE_PESEL_LABELED, 'PESEL');
+  maskPeselLengthTypo(ctx);
   maskSpacedAfterLabel(ctx, RE_PESEL_SPACED, 'PESEL', isValidPesel);
+}
+
+// Etykieta PESEL i w tym samym wierszu 10 albo 12 cyfr ciągiem: zgubiona albo dodana cyfra.
+// Separator: spacje (także twarde, częste w tekście z .docx), „:", „=", „.", „-", a także klucz JSON
+// („"pesel": "…"") i znacznik XML („<pesel>…"). Za numerem nie może stać dalsza grupa cyfr
+// („PESEL 8909150266 6" to 11 cyfr dla maskSpacedAfterLabel, „1234567890-12" czy „…/2020" to inny
+// identyfikator), inaczej maska objęłaby tylko fragment.
+const RE_PESEL_LENGTH_TYPO = new RegExp(
+  String.raw`\b(pesel${LABEL_WORDS})([ \t${HARD_SPACES}:=.-]+|["'][ \t]*:[ \t]*["']|>)(\d{12}|\d{10})(?![ \t${HARD_SPACES}|/-]{0,3}\d)`,
+  'gi',
+);
+// Słowa między etykietą a numerem, które dopuszczamy bez sumy kontrolnej: osoba, do której PESEL
+// należy („PESEL pacjenta:", „PESEL Ubezpieczonego"). Lista zamknięta, bo każde inne słowo
+// („PESEL zgłoszenie 2024100123", „PESEL kwota 1234567890 zł") zmienia sens. Celowo bez „nr”
+// i „numer”: w „PESEL nr X” PESEL to zwykle nazwa rejestru, a X numer wniosku albo sprawy
+// („Wniosek dotyczący PESEL nr 2024000123”, „Korekta PESEL nr …”). Numer osoby stoi po „nr PESEL”.
+const RE_PESEL_OWNER_WORD = new RegExp(
+  '^(?:osoby|ojca|matki|rodzica|dziecka|syna|córki|żony|męża|małżonk[ai]|opiekun(?:a|ki)|' +
+    'pacjent(?:a|ki)|klient(?:a|ki)|ubezpieczon(?:ego|ej)|wnioskodawc(?:y|zyni)|pracownik(?:a)|pracownicy|' +
+    'dłużni(?:ka|czki)|wierzyciel(?:a|ki)|powoda|powódki|pozwan(?:ego|ej)|świadka|zmarł(?:ego|ej)|' +
+    'spadkodawc(?:y|zyni)|najemcy|kupując(?:ego|ej)|sprzedając(?:ego|ej)|właściciel(?:a|ki)|ucznia|uczennicy|' +
+    'student(?:a|ki)|podatni(?:ka|czki)|płatnika|beneficjent(?:a|ki)|członka|uczestni(?:ka|czki)|' +
+    'poszkodowan(?:ego|ej)|sprawcy|kierowcy|abonent(?:a|ki)|zgłaszając(?:ego|ej)|' +
+    'oskarżon(?:ego|ej)|podejrzan(?:ego|ej)|skazan(?:ego|ej))$',
+  'iu',
+);
+// „nr”, „numer”, „lp.” tuż przed etykietą PESEL (pomijane przy strażniku odwołań).
+const RE_PESEL_LEAD_NR = /(?<![\p{L}\d])(?:nr|numer|lp)\.?[ \t]*$/iu;
+/**
+ * PESEL z literówką zmieniającą długość („PESEL: 8909150266", „PESEL 890915026670"). Sumy nie da się
+ * sprawdzić, więc kotwicą jest sama etykieta i warunki ostrzejsze niż przy 11 cyfrach: etykieta
+ * i numer w jednym wierszu, słowa po etykiecie tylko z listy RE_PESEL_OWNER_WORD („PESEL Kwota
+ * 1234567890" to nagłówek tabeli, „PESEL brak NIP 5260250274" to inne pole, „PESEL nr 2024000123”
+ * to numer sprawy w rejestrze), bez końca zdania między nimi („Klient podał PESEL. 2024000123 – nr zgłoszenia"), bez łącznika sklejonego z etykietą
+ * („PESEL-1234567890" to kod rekordu), a 10 cyfr z poprawną sumą NIP zostaje dla przebiegu NIP.
+ */
+function maskPeselLengthTypo(ctx: RedactCtx): void {
+  ctx.text = ctx.text.replace(RE_PESEL_LENGTH_TYPO, (m, kw: string, sep: string, val: string, off: number, str: string) => {
+    const words = kw.split(/\s+/).slice(1);
+    if (kw.includes('\n') || !words.every((w) => RE_PESEL_OWNER_WORD.test(w))) return m;
+    // Kropka z odstępem kończy zdanie.
+    if (/\.[\s]/u.test(sep)) return m;
+    if (/^-+$/.test(sep)) return m;
+    if (sep === '>' && (words.length || str[off - 1] !== '<')) return m;
+    // „Nr PESEL:”, „Lp. PESEL:” to zwykła etykieta pola, więc strażnik odwołań („nr ”, „lp.”) patrzy
+    // dopiero przed nią; „art. PESEL”, „rejestru PESEL” dalej blokują.
+    const lead = RE_PESEL_LEAD_NR.exec(str.slice(Math.max(0, off - 8), off))?.[0].length ?? 0;
+    if (precededByLegalRef(str, off - lead)) return m;
+    if (val.length === 10 && isValidNip(val)) return m;
+    return `${kw}${sep}${ctx.hit('PESEL')}`;
+  });
 }
 
 // Słowa za etykietą, które otwierają inne pole albo mówią, że numeru nie ma („PESEL⏎Tel. 48 601 222 333",
@@ -252,7 +304,58 @@ const PHONE_GAP_WORD = String.raw`(?!(?:inw|ewid|fabr|ser|kat|poz|szt|egz|lp)\.)
 // strażnika w callbacku: odrzucone dopasowanie zjadłoby kotwicę leżącą dalej. „kom." (Komisja)
 // i „kontakt" są bez przerwy. \b odcina „iPhone" i „mobbing". Czasownik tylko z „pod/na"
 // („dzwonić pod 512 345⏎678"), bo „Dzwonił w sprawie faktury …" to nie numer.
+// Czasownik albo rzeczownik kontaktu z „pod numerem" dalej w zdaniu („kontaktować się ze mną pod
+// numerem 22 379 56 66", „jestem dostępny pod nr …"). Między nimi tylko wyrazy z zamkniętej listy
+// (zaimki, „się", przysłówki, spójnik między nimi) i godziny („w godzinach 8-16"), bo „kontaktował
+// się w sprawie wpisu pod numerem …" to numer rekordu. Samo „pod numerem" kotwicą nie jest:
+// „wpisana do rejestru pod numerem 123 456 789". „dostępny/osiągalny" tylko z osobą („jestem
+// dostępny") albo z „telefonicznie", bo „Dokument dostępny pod numerem …" to numer dokumentu.
+// Adresat po „z/ze" („z działem kadr", „z Panią Kierownik") tylko po prośbie o kontakt
+// (bezokolicznik, tryb rozkazujący, „o kontakt"): opis zdarzenia („Kontakt z firmą …",
+// „Kontaktowano się z lokatorem mieszkania pod numerem …", „Sprawa o kontakty z dzieckiem …")
+// mówi o numerze wpisu, sprawy albo lokalu. Adresat ma najwyżej dwa wyrazy i żaden nie jest
+// imiesłowem („z osobą ubezpieczoną pod numerem … polisy") ani słowem „nie/strony/sprawie".
+const PHONE_CONTACT_LETTER = 'A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż';
+const PHONE_CONTACT_PARTICIPLE =
+  `[${PHONE_CONTACT_LETTER}]*(?:an|on|ąc|ęt|yt|ut|art|ert|ót|it)(?:[aeyi]|ym|ą|ego|ej|ych)` +
+  `|[${PHONE_CONTACT_LETTER}]*(?:ano|ono|ęto|yto)`;
+const PHONE_CONTACT_ADDR_WORD =
+  `(?!(?:w|we|na|o|od|do|dla|ws|nie|strony|sprawie|tematu?|powodu|pod|nr|numer[${PHONE_CONTACT_LETTER}]*|${PHONE_CONTACT_PARTICIPLE})(?![${PHONE_CONTACT_LETTER}]))` +
+  `[${PHONE_CONTACT_LETTER}]{1,20}(?![${PHONE_CONTACT_LETTER}])`;
+const PHONE_CONTACT_ADDR = String.raw`ze?[ \t]+${PHONE_CONTACT_ADDR_WORD}(?:[ \t]+${PHONE_CONTACT_ADDR_WORD})?`;
+const PHONE_CONTACT_GAP =
+  '(?:się|mną|mnie|nami|nim|nią|nimi|do|bezpośrednio|telefonicznie|mailowo|e-mailowo|osobiście|również|też|także|' +
+  'wyłącznie|tylko|jedynie|najlepiej|lub|albo|bądź|' +
+  String.raw`ze?[ \t]+(?:mną|mnie|nami|nim|nią|nimi)(?![${PHONE_CONTACT_LETTER}])|` +
+  String.raw`w[ \t]+godz(?:inach|\.)[ \t]*\d{1,2}(?:[:.]\d{2})?[ \t]*[-–][ \t]*\d{1,2}(?:[:.]\d{2})?)`;
+const PHONE_CONTACT_ADJ =
+  '(?:wskazanym|podanym|poniższym|powyższym|następującym|tym|moim|naszym|bezpośrednim|służbowym|prywatnym|komórkowym|stacjonarnym)';
+// „W razie pytań pod numerem …" to zaproszenie do kontaktu, tak jak „proszę dzwonić".
+const PHONE_CONTACT_DOUBT = '(?:pytań|wątpliwości|problemów|trudności)';
+// Osoba po „Pan/Pani" przed „dostępny/osiągalna" („Pan Nowak dostępny jest pod numerem …", „Pani Anna
+// Kos będzie osiągalna …"). Regex ma flagę „i", więc wielkie litery imienia i nazwiska sprawdza
+// RE_PHONE_PERSON_HEAD w callbacku: „Pani sprawa dostępna jest pod numerem …" to numer sprawy.
+const PHONE_CONTACT_NAME = `[${PHONE_CONTACT_LETTER}]{2,20}(?:-[${PHONE_CONTACT_LETTER}]{2,20})?`;
+const PHONE_CONTACT_PERSON =
+  String.raw`pani?[ \t]+${PHONE_CONTACT_NAME}(?:[ \t]+${PHONE_CONTACT_NAME})?[ \t]+(?:(?:jest|będzie|pozostaje)[ \t]+)?` +
+  String.raw`(?:dostępn|osiągaln)[a-ząćęłńóśźż]*(?:[ \t]+(?:jest|będzie|pozostaje))?`;
+const RE_PHONE_PERSON_HEAD_START = /^pani?[ \t]/i;
+const RE_PHONE_PERSON_HEAD =
+  /^[Pp]ani?[ \t]+\p{Lu}\p{Ll}+(?:-\p{Lu}\p{Ll}+)?(?:[ \t]+\p{Lu}\p{Ll}+(?:-\p{Lu}\p{Ll}+)?)?[ \t]+(?:(?:jest|będzie|pozostaje)[ \t]+)?(?:dostępn|osiągaln)/u;
+const PHONE_CONTACT_HEAD =
+  '(?:(?:s?kontakt|(?:za|od|prze)?dzwo|telefonow|sms(?:-(?=[a-z]))?)[a-ząćęłńóśźż]*' +
+  String.raw`|(?:jestem|jesteśmy|będę|będziemy|pozostaję|pozostajemy)(?:[ \t]+(?:też|także|również|zawsze))?[ \t]+(?:dostępn|osiągaln)[a-ząćęłńóśźż]*` +
+  String.raw`|(?:dostępn|osiągaln)[a-ząćęłńóśźż]*[ \t]+telefonicznie` +
+  String.raw`|w[ \t]+razie[ \t]+${PHONE_CONTACT_DOUBT}(?:[ \t]+(?:lub|i|albo|bądź)[ \t]+${PHONE_CONTACT_DOUBT})?` +
+  String.raw`|${PHONE_CONTACT_PERSON})`;
+// Prośba o kontakt: bezokolicznik, tryb rozkazujący albo „o kontakt" („Proszę o kontakt z …").
+const PHONE_CONTACT_REQUEST =
+  String.raw`(?:s?kontaktowa[ćc]|s?kontaktuj(?:cie|my)?|o[ \t]+s?kontakt|(?:za)?dzwoni[ćc]|(?:za)?dzwoń(?:cie)?|telefonowa[ćc])(?![${PHONE_CONTACT_LETTER}])`;
+const PHONE_CONTACT_POD =
+  String.raw`(?:${PHONE_CONTACT_REQUEST}(?:,?[ \t]+(?:${PHONE_CONTACT_GAP}|${PHONE_CONTACT_ADDR})){0,4}|${PHONE_CONTACT_HEAD}(?:,?[ \t]+${PHONE_CONTACT_GAP}){0,4})` +
+  String.raw`,?[ \t]+pod[ \t]+(?:${PHONE_CONTACT_ADJ}[ \t]+)?(?:numer(?:em|u|ami)?|nr\.?)(?:[ \t]+telefonu)?(?=[\s:])`;
 const PHONE_ANCHOR =
+  `${PHONE_CONTACT_POD}|` +
   '(?:tel(?:;[A-Za-z-]{1,20}(?:=[A-Za-z0-9,-]{1,40})?){1,4}(?=:))|' +
   String.raw`(?:te[li]\.?|telefon(?:u|y|em|ie)?|nr te[li]\.?|fax|faks)(?:(?:[ \t]+${PHONE_GAP_WORD}\.?)?[ \t]+${PHONE_GAP_WORD}(?:\.|[ \t]*(?=:)))?` +
   String.raw`|telefon(?:\w|[ąćęłńóśźż]){0,6}|kom\.?|komór(?:k(?:\w|[ąćęłńóśźż]){1,5}|ce)|kontakt\w{0,4}|(?:tele)?phone|mobile|mob\.?|gsm` +
@@ -424,12 +527,25 @@ export function passPhone(ctx: RedactCtx): void {
   // („Kontakt nr 512 345 678, tel. 22 843 21 09") ma własną kotwicę.
   const anchored = (m: string, kw: string, sep: string, nums: string, offset: number, str: string): string => {
     if (rejectPhoneNrFiller(kw, sep, str, offset)) return `${kw}${sep}${nums.replace(RE_PHONE_ANCHORED, anchored)}`;
+    // „Pan/Pani" z wyrazem małą literą („Pani sprawa dostępna jest pod numerem …") to nie osoba.
+    if (RE_PHONE_PERSON_HEAD_START.test(kw) && !RE_PHONE_PERSON_HEAD.test(kw)) return m;
     const parts = nums.split(RE_PHONE_ENUM_SPLIT);
     if (!parts.every((p) => phoneDigitsValid(p.replace(/\D/g, '')))) return m;
     if (parts.some((p) => RE_PHONE_DATE_SHAPE.test(p))) return m;
     // Waluta za liczbą po „komórce" i „telefoniczne" to kwota (komórka arkusza, pozycja kosztów),
     // a po etykiecie „tel." numer. Waluta przed następną liczbą („603 456 789 zł 30,00") należy do niej.
-    if (/^komór/i.test(kw) || RE_PHONE_KW_WEAK.test(kw)) {
+    // Tak samo po kotwicy z „pod numerem" („dostępny pod numerem … zł" to nie telefon).
+    const podAnchor = /[ \t]pod[ \t]/i.test(kw);
+    // Po „pod numerem" liczba z rokiem albo krótkim członem za „/" lub „-" to numer dokumentu
+    // („… pod numerem 22 379 56 66/2024"). Maska objęłaby tylko część numeru, więc zostaje cały.
+    // Pełny drugi numer po „/" („/501 601 701") dalej jest wyliczeniem telefonów.
+    if (podAnchor && /^[/-]\d{1,4}(?![\d \t-]?\d)/.test(str.slice(offset + m.length, offset + m.length + 8))) return m;
+    // Po „pod numerem" dalsze cyfry za oknem 9 cyfr („… pod numerem 22 123 45 67 89 10") to dłuższy
+    // numer rekordu, a 9 cyfr od zera („01 123 45 67") nie ma kierunkowego 12–99 ani prefiksu komórki.
+    // Maska objęłaby tylko część numeru albo numer, który telefonem nie jest, więc zostaje cały.
+    if (podAnchor && /^[ \t-]?\d/.test(str.slice(offset + m.length, offset + m.length + 2))) return m;
+    if (podAnchor && parts.some((p) => /^0\d{8}$/.test(p.replace(/\D/g, '')))) return m;
+    if (/^komór/i.test(kw) || RE_PHONE_KW_WEAK.test(kw) || podAnchor) {
       const after = str.slice(offset + m.length, offset + m.length + 16);
       if ((RE_PHONE_AMOUNT_AFTER.test(after) || RE_PHONE_ZL_AFTER.test(after)) && !RE_CURRENCY_BEFORE_NUMBER.test(after)) return m;
     }

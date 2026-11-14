@@ -9,7 +9,7 @@ import { FOREIGN_GIVEN_NAMES, isFirstNameGenitive, isFirstNameLike, POLISH_FIRST
 import { POLISH_CITIES } from '../dict/places.js';
 import { afterNonPersonContext, isObliqueSurnameForm, precededByAdminLabel, precededByEponym, STREET_RANK } from '../guards/eponyms.js';
 import { DOT_CHAIN, dotChainKind, HOMOGRAPH_PAIR_EXCL, INITIAL_START, isHonorificP, RE_PAST_VERB_AFTER } from '../guards/person-context.js';
-import { LEGAL_ENTITY_WORDS, RE_FOLLOWED_BY_PARK, ROLE_COMPLEMENT_GEN, ROLE_WORDS, TITLE_WORDS } from '../guards/roles.js';
+import { isOfficeAdjOblique, LEGAL_ENTITY_WORDS, RE_FOLLOWED_BY_PARK, ROLE_COMPLEMENT_GEN, ROLE_HOMOGRAPH_OBLIQUE, ROLE_WORDS, TITLE_WORDS } from '../guards/roles.js';
 import { RE_FOREIGN_BRAND_WORD, RE_FOREIGN_TAIL_START, RE_NON_PL_LETTER, RE_PL_OBLIQUE_ENDING, RE_SLAVIC_TAIL_START, RE_SOLO_DICT, RE_SOLO_MORPH } from '../person-patterns.js';
 import { splitWords } from '../util.js';
 
@@ -19,7 +19,11 @@ const isNonPersonWord = (l: string): boolean => LEGAL_ENTITY_WORDS.has(l) || NON
 function splitAfterRoles(name: string): { parts: string[]; words: string[]; s: number } {
   const { parts, words } = splitWords(name);
   let s = 0;
-  while (s < words.length && (ROLE_WORDS.has(words[s].toLowerCase()) || TITLE_WORDS.has(words[s].toLowerCase()))) s++;
+  while (s < words.length && (ROLE_WORDS.has(words[s].toLowerCase()) || TITLE_WORDS.has(words[s].toLowerCase()))) {
+    // homograf nazwiska za inną rolą to nazwisko („z Panem Prezesem Marszałkiem”)
+    if (s > 0 && ROLE_HOMOGRAPH_OBLIQUE.has(words[s].toLowerCase())) break;
+    s++;
+  }
   return { parts, words, s };
 }
 
@@ -143,6 +147,8 @@ export function passPersonTrigger(ctx: RedactCtx): void {
     if (LEGAL_ENTITY_WORDS.has(words[s].toLowerCase())) return m;
     if (NON_SURNAME_ADJ.has(sl) && !(s === 0 && words.length === 1 && /(?:sk|ck|dzk)i$/.test(sl))) return m;
     if (s > 0 && isCompoundAdjective(sl)) return m;
+    // przymiotnik urzędu w odmianie za rolą („z Panem Wojewodą Mazowieckim”, „Panu Dyrektorowi Finansowemu”)
+    if (s > 0 && isOfficeAdjOblique(words[s], words[s - 1])) return m;
     // dopełniacz urzędu albo imię sakralne w kandydacie („Pani Minister Zdrowia”, „do Pana Boga”)
     if (words.slice(s).some((w) => ROLE_COMPLEMENT_GEN.has(w.toLowerCase()))) {
       // nazwisko za imieniem sakralnym to podmiot zdania („Do Pana Boga Gzik się modlił”): maska tylko na nim

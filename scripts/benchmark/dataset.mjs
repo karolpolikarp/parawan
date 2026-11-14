@@ -953,6 +953,200 @@ export function buildDataset() {
   // audyt końcowy r2: adres kończy się na kropce za numerem domu, drugie imię rodzica w tej samej masce
   str('Zgłaszająca mieszka przy ul. Grochowskiej 17. Od 3 lat skarży się na hałas. Anna Lis, córka Piotra Pawła i Anny Marii.', ['ul. Grochowskiej 17', 'Anna Lis', 'Piotra Pawła', 'Anny Marii'], ['Od 3 lat skarży się']);
   neg('Odbiorca: Szkoła Podstawowa nr 12 im. Jana Pawła II', ['im. Jana Pawła II']);
+  // ewaluacja G4: PESEL po etykiecie z literówką zmieniającą długość (zgubiona albo dodana cyfra);
+  // nagłówek tabeli z PESEL nad inną kolumną liczbową zostaje
+  str('Pacjentka, PESEL: 8909150266, zgłosiła się na badanie.', ['8909150266'], ['Pacjentka', 'badanie']);
+  str('Wnioskodawca, PESEL 890915026670, prosi o zwrot.', ['890915026670'], ['Wnioskodawca', 'zwrot']);
+  neg('Kolumny: PESEL Kwota 1234567890 zł do zapłaty.', ['1234567890']);
+  str('Nr PESEL: 8909150266, adres do korespondencji bez zmian.', ['8909150266'], ['adres do korespondencji']);
+  neg('Zapytanie do bazy PESEL nr 2026111301 zrealizowano.', ['2026111301']);
+  // ewaluacja G2: telefon po „pod numerem", gdy wcześniej w zdaniu stoi zwrot kontaktu; samo
+  // „pod numerem" przy rejestrze, sprawie albo fakturze zostaje
+  str('W razie pytań proszę kontaktować się ze mną pod numerem 22 379 56 66.', ['22 379 56 66'], ['W razie pytań', 'pod numerem']);
+  str('Jestem dostępny pod nr 12 672 59 69 w dni robocze.', ['12 672 59 69'], ['Jestem dostępny', 'dni robocze']);
+  neg('Spółka wpisana do rejestru pod numerem 22 379 56 66.', ['22 379 56 66']);
+  neg('Spółka kontaktowała się w sprawie wpisu pod numerem 12 345 67 89.', ['12 345 67 89']);
+  str('Proszę kontaktować się z działem kadr pod numerem 61 262 16 30.', ['61 262 16 30'], ['z działem kadr', 'pod numerem']);
+  neg('Ogłoszenie jest dostępne pod numerem 22 379 56 66 w BIP urzędu.', ['22 379 56 66']);
+  // adresat po „z" tylko po prośbie o kontakt i bez imiesłowu: opis zdarzenia to numer wpisu lub sprawy
+  neg('Kontakt z firmą wpisaną pod numerem 12 345 67 89 do rejestru.', ['12 345 67 89']);
+  neg('Kontaktowano się ze stroną postępowania zarejestrowanego pod nr 12 345 67 89.', ['12 345 67 89']);
+  neg('Sprawa o kontakty z dzieckiem prowadzona pod numerem 12 345 67 89.', ['12 345 67 89']);
+  neg('Kontakt ze strony urzędu pod numerem 12 345 67 89.', ['12 345 67 89']);
+  // ewaluacja G10: inicjały osoby po kotwicy odpowiedzialności („odp.”, „Sporządził:”). Gołe wersaliki
+  // tylko przy osobie o tych inicjałach w piśmie; skróty instytucji, odpowiedzi, badania i rzymskie
+  // numery etapów zostają
+  osp('Uczestnicy: Anna Sadowska, Marek Kot, Jan Tomczak.\nUstalenia:\n1. Harmonogram odbioru do 5 dni roboczych (odp. AS).\n2. Raport z testów (odp. MK, JT).', ['Anna Sadowska', 'Marek Kot', 'Jan Tomczak', '(odp. AS)', 'MK, JT'], ['Harmonogram odbioru', '(odp. ']);
+  osp('Notatkę opracowano w Wydziale Kadr.\nSporządziła: A.Ł.', ['A.Ł.'], ['Sporządziła:', 'Wydziale Kadr']);
+  neg('Ustalenia:\n1. Zgłoszenie do ZUS (odp. ZUS).\n2. Konta w systemie (odp. IT).\n3. Szkolenie (odp. BHP, etap II).', ['(odp. ZUS)', '(odp. IT)', '(odp. BHP, etap II)']);
+  neg('Audyt bezpieczeństwa (wyk. NASK), dane (opr. GUS). Etap (odp. IV).', ['(wyk. NASK)', '(opr. GUS)', '(odp. IV)']);
+  neg('Pytanie 3: Czy Zamawiający dopuszcza dostawę w dwóch partiach? Odp. TAK.\nPytanie 4: Czy wymagane jest wadium? Odp.: NIE\nAnkieta, pyt. 7 (odp. TAK).', ['Odp. TAK.', 'Odp.: NIE', '(odp. TAK)']);
+  neg('Wyk. EKG.\nBadania wyk.: CRP, OB\nW dniu przyjęcia wyk. RTG, USG.', ['Wyk. EKG.', 'wyk.: CRP, OB', 'wyk. RTG, USG.']);
+  neg('Źródło: opr. PWN. Wykonał: ZDM. Sprawdził: NOK. Zatwierdził: DG. Kontrola (odp. MF).', ['opr. PWN', 'Wykonał: ZDM', 'Sprawdził: NOK', 'Zatwierdził: DG', '(odp. MF)']);
+  neg('Sporządził: AS', ['Sporządził: AS']);
+  // tytuł urzędu w formie zależnej po „Panem/Panu” i nazwa procedury „Niebieska Karta” to nie osoby
+  neg('Zgodnie z ustaleniami z Panem Ministrem termin nie może zostać przesunięty.', ['Panem Ministrem termin']);
+  neg('W domu dochodziło do awantur, w związku z czym wszczęto procedurę Niebieskiej Karty.', ['procedurę Niebieskiej Karty']);
+  neg('Spotkanie z Panem Wojewodą i Panią Dziekan odbyło się w piątek. Dziękuję Panu Dyrektorowi.', ['Panem Wojewodą', 'Panią Dziekan', 'Panu Dyrektorowi']);
+  oso('Zgodnie z ustaleniami z Panem Ministrem Kowalskim termin zostaje.', ['Kowalskim'], ['Panem Ministrem']);
+  oso('Dziękuję Panu Dyrektorowi Nowakowi za pomoc.', ['Nowakowi'], ['Panu Dyrektorowi']);
+
+  // Firma jednoosobowa z nazwiskiem właściciela (ewaluacja 50 pism, grupa E): nazwa firmy to dana osoby.
+  osp('Jadwiga Lis\nprowadząca działalność gospodarczą pod firmą\nLIS-BUD Jadwiga Lis\nwzywa do zapłaty.', ['LIS-BUD', 'Jadwiga', 'Lis'], ['prowadząca działalność gospodarczą pod firmą', 'wzywa do zapłaty']);
+  osp('Antoni Jabłoński, prowadzący działalność pod firmą JABŁOŃS-TRANS Antoni Jabłoński, wzywa.', ['JABŁOŃS-TRANS', 'Antoni', 'Jabłoński'], ['prowadzący działalność pod firmą', 'wzywa']);
+  osp('Odbiorca: ZIELIŃS-BUD Monika Zielińska, ul. w załączeniu.', ['ZIELIŃS-BUD', 'Monika', 'Zielińska'], ['Odbiorca:']);
+  osp('Umowa z Jadwigą Lis prowadzącą działalność pod firmą LIS-BUD Jadwiga Lis. Za opóźnienie LIS-BUD zapłaci karę.', ['LIS-BUD', 'Jadwigą', 'Lis'], ['Za opóźnienie', 'zapłaci karę']);
+  osp('Firma: EKO-TRANS Jan Kowalski (osoba kontaktowa) odpowie na pismo.', ['Jan', 'Kowalski'], ['Firma: EKO-TRANS', 'osoba kontaktowa']);
+  neg('Serwis AGD-SERWIS i spółka NOWAK-BUD Sp. z o.o. oraz norma PN-EN zostają.', ['AGD-SERWIS', 'NOWAK-BUD Sp. z o.o.', 'PN-EN']);
+
+  // data po rzeczowniku „urodzenie” z dopełniaczem dziecka, z osobą i numerem pomiędzy
+  str('Urlop w związku z urodzeniem syna, Marka Nowaka (PESEL 26261702538), w dniu 17 czerwca 2026 r.', ['17 czerwca 2026', '26261702538'], ['urodzeniem syna']);
+  neg('Zasiłek z tytułu urodzenia dziecka wypłacony w dniu 5 maja 2026 r., wypłata do dnia 31.12.2026.', ['5 maja 2026', '31.12.2026']);
+  neg('Zgłoszenie urodzenia dziecka nastąpiło w dniu 10.06.2026 r., a po urodzeniu córki szczepienie wykonano dnia 3.05.2026 r.', ['10.06.2026', '3.05.2026']);
+
+  // imię i nazwisko-homograf po rzeczowniku zbiorowym małą literą (ewaluacja 50 pism, grupa G6)
+  osp('Testy obciążeniowe wykonał zespół Joanny Sikory.', ['Joanny', 'Sikory'], ['Testy obciążeniowe wykonał zespół']);
+  osp('Mecz wygrała drużyna Piotra Wilka, a raport przygotował zespół Anny Lis.', ['Piotra', 'Wilka', 'Anny', 'Lis'], ['Mecz wygrała drużyna', 'raport przygotował zespół']);
+  neg('Koncert dał Chór Jana Lisa, a Fundacja Joanny Sikory wsparła festiwal.', ['Chór Jana Lisa', 'Fundacja Joanny Sikory']);
+  neg('Msza w kościele Najświętszej Marii Panny, a chór Stanisława Moniuszki zaśpiewał.', ['Najświętszej Marii Panny', 'chór Stanisława Moniuszki']);
+  osp('Notatka. Zespół Adama Kota wykonał audyt, a wezwano Marię Pannę na rozprawę.', ['Adama', 'Kota', 'Marię', 'Pannę'], ['Notatka. Zespół', 'wezwano', 'na rozprawę']);
+  osp('Pracę wykonał zespół Ewy Zimy, a projekt prowadzi drużyna Anny Nowak-Lis.', ['Ewy', 'Zimy', 'Anny', 'Nowak-Lis'], ['Pracę wykonał zespół', 'projekt prowadzi drużyna']);
+  osp('W kościele Maria Panna zauważyła sprawcę i wezwała policję.', ['Maria', 'Panna'], ['W kościele', 'zauważyła sprawcę']);
+  neg('Mecz rozegrała drużyna Lecha Poznań, a grała orkiestra Jana Kiepury.', ['drużyna Lecha Poznań', 'orkiestra Jana Kiepury']);
+
+  // numery rejestrów zawodowych i urzędowych z kotwicą (ewaluacja 50 pism, grupa G1)
+  str('Agnieszka Kamińska\nradca prawny, GD-8638', ['GD-8638'], ['radca prawny']);
+  str('Powódka reprezentowana przez radczynię prawną Jadwigę Wysocką (GD-8776).', ['GD-8776'], ['reprezentowana przez radczynię prawną']);
+  str('Zaświadczenie wystawił lekarz Jakub Kamiński (PWZ 9488577).', ['9488577'], ['Zaświadczenie wystawił lekarz', 'PWZ']);
+  str('lek. Anna Lis\nspecjalista chorób wewnętrznych\nPWZ 3757956', ['3757956'], ['specjalista chorób wewnętrznych', 'PWZ']);
+  str('Legitymująca się kartą pobytu nr RP6295053, zamieszkała w Warszawie.', ['RP6295053'], ['kartą pobytu nr']);
+  str('Małżeństwo zawarte w Urzędzie Stanu Cywilnego w Warszawie, akt małżeństwa nr 1040/2011.', ['1040/2011'], ['akt małżeństwa nr']);
+  neg('Sygn. akt I C 1040/2011 oraz Dz.U. 2011 nr 1040 poz. 5.', ['Dz.U. 2011 nr 1040 poz. 5']);
+  neg('Kod produktu WA-1234 w magazynie. Lekarz ma numer PWZ, który podaje na recepcie.', ['Kod produktu WA-1234', 'numer PWZ, który']);
+  neg('Karta pobytu jest ważna 3 lata, a akt notarialny Rep. A nr 1234/2020 sporządzono w Krakowie.', ['Karta pobytu jest ważna 3 lata', 'Rep. A nr 1234/2020']);
+  neg('Adwokat przedstawił fakturę FV/1234, a radca prawny złożył deklarację JPK-12 i powołał się na PKD-2007.', ['fakturę FV/1234', 'deklarację JPK-12', 'PKD-2007']);
+  neg('Zgodnie z aktem zgonu ojca udział 1/2 przypada córce.', ['udział 1/2']);
+  str('AKT URODZENIA NR 123/2020, Karta Pobytu RP1234567', ['123/2020', 'RP1234567'], ['AKT URODZENIA NR', 'Karta Pobytu']);
+  neg('Izba wydała PWZ 12345 lekarzom, a wynagrodzenia lekarzy, 1340517 zł, rosną. Adwokat, KR-2020 to numer sprawy, akty urodzenia 2019/2020 omówiono.', ['PWZ 12345 lekarzom', '1340517', 'KR-2020', '2019/2020']);
+
+  // dane o zdrowiu z kotwicą (ewaluacja 50 pism, grupa G9)
+  str('Rozpoznanie:\nF32.1 epizod depresyjny umiarkowany\nJ45.0 astma oskrzelowa\nZalecenia przy wypisie:\nsertralina 50 mg\nsalbutamol doraźnie\nkontrola w poradni za 4 tygodnie', ['F32.1', 'epizod depresyjny', 'J45.0', 'astma oskrzelowa', 'sertralina', 'salbutamol'], ['Rozpoznanie:', 'Zalecenia przy wypisie:', 'kontrola w poradni za 4 tygodnie']);
+  str('Pacjent z rozpoznaniem K50.0, przyjmuje mesalazynę 1 g dziennie.', ['K50.0', 'mesalazynę 1 g'], ['Pacjent z rozpoznaniem', 'przyjmuje']);
+  str('Zgodnie z zaświadczeniem lekarskim po porodzie przez cesarskie cięcie przeciwwskazane jest dźwiganie ciężarów do końca roku.', ['cesarskie cięcie', 'dźwiganie ciężarów'], ['Zgodnie z zaświadczeniem lekarskim', 'przeciwwskazane jest', 'do końca roku']);
+  str('Od dwóch lat pozwany nadużywa alkoholu. W wyniku zdarzenia doznałem stłuczenia klatki piersiowej.', ['nadużywa alkoholu', 'stłuczenia klatki piersiowej'], ['Od dwóch lat pozwany', 'W wyniku zdarzenia doznałem']);
+  str('Potrzeba wynika z rozpoznania cukrzycy typu 1 i leczenia epizodu depresyjnego, potwierdzonego zaświadczeniem lekarza.', ['cukrzycy typu 1', 'epizodu depresyjnego'], ['Potrzeba wynika z rozpoznania', 'potwierdzonego zaświadczeniem lekarza']);
+  neg('Spotkanie w sali I10. Dane o zdrowiu pacjenta przetwarza szpital zgodnie z art. 9 RODO. Podpisał lek. med. dyżurny.', ['sali I10', 'Dane o zdrowiu pacjenta przetwarza szpital', 'lek. med. dyżurny']);
+  neg('Program profilaktyki cukrzycy realizuje gmina, a apteka sprzedaje paracetamol 500 mg za 9,99 zł.', ['profilaktyki cukrzycy', 'paracetamol 500 mg']);
+  neg('Zerwanie umowy i złamanie przepisów nie są urazem. Brak przeciwwskazań do pracy. Centrum Leczenia Stwardnienia Rozsianego przyjmuje.', ['Zerwanie umowy', 'złamanie przepisów', 'Brak przeciwwskazań do pracy', 'Centrum Leczenia Stwardnienia Rozsianego']);
+  neg('Rozpoznanie sprawy nastąpi na posiedzeniu, a osoba uzależniona od alkoholu nie może prowadzić pojazdu.', ['Rozpoznanie sprawy', 'osoba uzależniona od alkoholu']);
+
+  // Grupa G ewaluacji: adres siedziby instytucji w nagłówku pisma zostaje, adres osoby pod nim nie.
+  neg('Urząd Miasta Łodzi\nWydział Finansowy\nul. Piotrkowska 104\n90-926 Łódź', ['ul. Piotrkowska 104', '90-926 Łódź']);
+  neg('W sprawach awarii proszę o kontakt z administratorem (Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1).', ['ul. Wspólna 1']);
+  str(
+    'Dział Kadr i Płac\nul. Moniuszki 3\n00-009 Warszawa\nPani\nJoanna Zawadzka\nul. Krótka 115A lok. 9\n03-283 Warszawa',
+    ['Joanna Zawadzka', 'ul. Krótka 115A lok. 9', '03-283'],
+    ['ul. Moniuszki 3', '00-009'],
+  );
+  str('Zakład Usług Remontowych Jan Kowalski\nul. Polna 5\n00-001 Warszawa', ['Jan Kowalski', 'ul. Polna 5', '00-001'], ['Zakład Usług Remontowych']);
+  // Grupa G7: strażnik siedziby w oknie przed adresem i nagłówek po adresie poprzedniego bloku.
+  str(
+    'Dział Kadr\nul. Polna 1\n00-001 Warszawa\nDział Płac\nul. Polna 2\nW. Nowak\nPrzychodnia Rodzinna\nul. Lipowa 7',
+    ['Nowak', 'ul. Lipowa 7'],
+    ['ul. Polna 1', '00-001 Warszawa', 'ul. Polna 2'],
+  );
+  str(
+    `${'Lista placówek przyjmujących wnioski w tym roku; '.repeat(6)}Urząd Gminy, ul. Lipowa 9, 05-500 Piaseczno; Jan Kowalski, ul. Polna 3, 05-500 Piaseczno.`,
+    ['Jan Kowalski', 'ul. Polna 3'],
+    ['ul. Lipowa 9'],
+  );
+  // Grupa G7 (regresja): firma jednoosobowa ze słabym członem i osoba nad nagłówkiem działu to adres osoby.
+  str('Szkoła Jazdy KOWALSKI\nul. Lipowa 8\n20-001 Lublin', ['ul. Lipowa 8', '20-001'], ['Szkoła Jazdy']);
+  str('Przychodnia Weterynaryjna Wilk, ul. Lipowa 8, 20-001 Lublin', ['ul. Lipowa 8', '20-001'], ['Przychodnia Weterynaryjna']);
+  str('Żłobek Domowy Ewy\nul. Lipowa 8\n20-001 Lublin', ['ul. Lipowa 8', '20-001'], ['Żłobek Domowy']);
+  str('Dla:\nMarianna Zięba-Kot\nWydział Komunikacji\nul. Lipowa 8\n20-001 Lublin', ['ul. Lipowa 8', '20-001'], ['Wydział Komunikacji']);
+  neg('Przedszkole Miejskie nr 3 w Turku\nul. Lipowa 8\n62-700 Turek', ['ul. Lipowa 8', '62-700 Turek']);
+  neg('Szkoła Podstawowa nr 5 im. Marii Konopnickiej, ul. Lipowa 8, 20-001 Lublin', ['ul. Lipowa 8', '20-001 Lublin']);
+  neg('Prezydent Miasta\nWydział Komunikacji\nul. Lipowa 8\n20-001 Lublin', ['ul. Lipowa 8', '20-001 Lublin']);
+  neg('Urząd Skarbowy Warszawa-Targówek\nul. Lipowa 8\n20-001 Lublin', ['ul. Lipowa 8', '20-001 Lublin']);
+  neg('SZKOŁA PODSTAWOWA NR 5\nul. Lipowa 8\n20-001 Lublin', ['ul. Lipowa 8', '20-001 Lublin']);
+  // Grupa G9 (regresja): kotwica zdrowia w zdaniu bez konkretnej osoby, lek jako przykład, definicja.
+  neg('Kod choroby J18.9 oznacza zapalenie płuc, nieokreślone.', ['J18.9', 'zapalenie płuc']);
+  neg('Kod choroby: E11 - cukrzyca typu 2 (opis w słowniku ICD-10).', ['E11', 'cukrzyca typu 2']);
+  neg('Kod choroby E11 dotyczy cukrzycy typu 2; w 2025 r. zgłoszono 1,2 mln porad.', ['E11', 'cukrzycy typu 2']);
+  neg('Osoba, która choruje na cukrzycę, może skorzystać z ulgi.', ['cukrzycę']);
+  neg('Każdy pacjent, który choruje na cukrzycę, ma prawo do edukacji.', ['cukrzycę']);
+  neg('W razie bólu można przyjąć np. paracetamol 500 mg doraźnie.', ['paracetamol 500 mg']);
+  neg('Lekarz zalecił leki przeciwbólowe, np. ibuprofen 200 mg.', ['ibuprofen 200 mg']);
+  neg('Lekarz POZ zalecił w 2025 r. 1,2 mln recept na metforminę 500 mg.', ['metforminę 500 mg']);
+  neg('Lekarz zalecił, by w przypadku gorączki stosować paracetamol 500 mg (instrukcja w ulotce).', ['paracetamol 500 mg']);
+  neg('Choroby współistniejące: brak danych. Pacjent wypisany.', ['brak danych']);
+  neg('Choroby współistniejące: b.d.', ['b.d.']);
+  neg('Rozpoznanie: w rozumieniu art. 5 ustawy cukrzyca jest chorobą przewlekłą.', ['cukrzyca']);
+  neg('Rozpoznanie E11 nie jest wymagane do refundacji.', ['E11']);
+  neg('Pacjent, który choruje na astmę, może otrzymać refundację leków.', ['astmę']);
+  neg('Chory, który cierpi na depresję, ma prawo do zwolnienia.', ['depresję']);
+  neg('Statystyka NFZ: rozpoznanie E11 postawiono u 3 mln osób.', ['E11']);
+  neg('W Polsce wystawiono 3 mln recept na sertralinę 50 mg.', ['sertralinę 50 mg']);
+  neg('Leki takie jak metformina 500 mg obniżają poziom cukru.', ['metformina 500 mg']);
+  str('Na konferencji Jan Kowalski omówił rozpoznanie astmy oskrzelowej u dzieci.', ['Jan Kowalski'], ['astmy oskrzelowej']);
+  str('Lekarz zalecił mu sertralinę 50 mg dziennie.', ['sertralinę 50 mg'], ['Lekarz zalecił mu']);
+  str('Rozpoznanie: astma oskrzelowa, Jan Kowalski, lat 54', ['astma oskrzelowa', 'Jan Kowalski'], ['Rozpoznanie:', 'lat 54']);
+  // Grupa G1 (regresja): kody wszystkich izb, długa nazwa izby po „na listę”, wpis w drugim wierszu podpisu, myślnik.
+  str('Mariusz Kos\nradca prawny, LB-1231\nKancelaria w Białymstoku, adwokat Anna Lis (BK-1234)', ['LB-1231', 'BK-1234'], ['radca prawny', 'Kancelaria w Białymstoku']);
+  str('Radca prawny Jan Nowak, nr wpisu na listę radców prawnych OIRP w Warszawie: WA-1234', ['WA-1234'], ['nr wpisu na listę radców prawnych OIRP w Warszawie']);
+  str('Adwokat Ewa Lis, wpisana na listę adwokatów ORA w Lublinie pod nr LUB/Adw/456, oraz adwokat Anna Nowak, KRK/Adw/2345.', ['LUB/Adw/456', 'KRK/Adw/2345'], ['wpisana na listę adwokatów ORA w Lublinie pod nr']);
+  str('Adwokat Jan Kowalski\nNr wpisu: KR-1234', ['KR-1234'], ['Nr wpisu:']);
+  neg('Kancelaria radcy prawnego, KR-2026 - plan pracy na rok. Radca prawny, WA-1234 – aplikacja 2026 r. NR WPISU: WA-4321', ['KR-2026', 'WA-1234', 'WA-4321']);
+  neg('Radca prawny złożył wniosek o wpis na listę rzeczników patentowych pod nr KR-2020 sprawy. Wpis na listę obecności pod nr LB-12. Adwokat, KRK-2024 - lista spraw.', ['KR-2020', 'LB-12', 'KRK-2024']);
+  // Grupa G5 (regresja): termin w czasie teraźniejszym/przyszłym i data we wtrąceniu to nie urodzenie; myślnik po etykiecie.
+  neg('Po urodzeniu dziecka, w dniu 1 września 2026 r., wejdą w życie nowe przepisy. Po urodzeniu dziecka, dnia 15 stycznia 2027 r. upływa termin na zgłoszenie.', ['1 września 2026', '15 stycznia 2027']);
+  neg('Po urodzeniu dziecka w dniu 3 marca 2026 r. przysługuje zasiłek, a po urodzeniu córki w dniu 4.04.2026 r. kończy się okres ochronny.', ['3 marca 2026', '4.04.2026']);
+  str('W związku z urodzeniem dziecka w dniu 3 marca 2026 r. pracownica złożyła wniosek o urlop.', ['3 marca 2026'], ['pracownica złożyła wniosek']);
+  str('Data urodzenia – 05.06.2018\nData urodzenia dziecka — 07.08.2019', ['05.06.2018', '07.08.2019'], ['Data urodzenia dziecka']);
+  str('Wnoszę o zasiłek z tytułu urodzenia syna, w dniu 5.06.2026 r., w Szpitalu Wojewódzkim. W związku z urodzeniem córki w dniu 3 marca 2026 r. przysługuje mi zasiłek.', ['5.06.2026', '3 marca 2026'], ['Szpitalu Wojewódzkim', 'przysługuje mi zasiłek']);
+  // Grupa G4 (regresja): po „PESEL nr” 10 albo 12 cyfr to numer sprawy w rejestrze; „Nr PESEL:” i pełne 11 cyfr dalej pod maską.
+  neg('Wniosek dotyczący PESEL nr 2024000123 rozpatrzono. Pismo ws. PESEL nr 2024000124 przekazano. Korekta PESEL nr 1000234567 z dnia 3.11.2026.', ['2024000123', '2024000124', '1000234567']);
+  str('Nr PESEL: 8909150266, PESEL nr 44051401359', ['8909150266', '44051401359'], ['Nr PESEL:', 'PESEL nr']);
+
+  // Grupa G9 (dane o zdrowiu, częste zapisy): etykieta ICD-10, rozpoznania w wierszach karty osoby,
+  // lek spoza słownika z dawką po czasowniku, dopełnienie „choruje na”, operacja, ciąża, pobyt
+  // w szpitalu psychiatrycznym, plik z końcami wierszy Windows. Ujemne: podmiot ogólny, ulotka,
+  // „przyjmuje leki” bez dawki, nawóz w gramach, protokół serwisowy z „Rozpoznanie:”.
+  str('ICD10: F32.1\nICD-10: I10\nRozpoznanie: ICD10 K21.0', ['F32.1', 'I10', 'K21.0'], ['ICD10:', 'ICD-10:', 'Rozpoznanie:']);
+  str('Pracownik leczony z powodu S82.6.', ['S82.6'], ['Pracownik leczony z powodu']);
+  str('Pacjent: Jan Nowak\nRozpoznanie:\nNiewydolność serca\nMigotanie przedsionków\nPacjent wypisany do domu', ['Jan Nowak', 'Niewydolność serca', 'Migotanie przedsionków'], ['Rozpoznanie:', 'Pacjent wypisany do domu']);
+  str('PESEL: 44051401359\nRozpoznanie:\nPrzewlekła obturacyjna choroba płuc', ['44051401359', 'Przewlekła obturacyjna choroba płuc'], ['Rozpoznanie:']);
+  str('Pracownik choruje na nadciśnienie, przyjmuje Augmentin 875 mg. Przyjmuje Lorafen 1 mg na noc.', ['nadciśnienie', 'Augmentin 875 mg', 'Lorafen 1 mg na noc'], ['Pracownik choruje na', 'przyjmuje', 'Przyjmuje']);
+  str('Zalecono syrop Mucosolvan 5 ml 3x dziennie.\nZalecenia:\nLetrox 75 µg rano na czczo', ['Mucosolvan 5 ml 3x dziennie', 'Letrox 75 µg rano na czczo'], ['Zalecono', 'Zalecenia:']);
+  str('Pacjent: Jan Nowak\r\nZalecenia przy wypisie:\r\nmesalazyna 1 g\r\ninsulina aspart\r\nperyndopryl 5 mg\r\nkontrola w poradni za 4 tygodnie', ['Jan Nowak', 'mesalazyna 1 g', 'insulina aspart', 'peryndopryl 5 mg'], ['Zalecenia przy wypisie:', 'kontrola w poradni za 4 tygodnie']);
+  str('Syn wnioskodawcy choruje na autyzm. Ubezpieczony choruje na przewlekłą obturacyjną chorobę płuc.', ['autyzm', 'przewlekłą obturacyjną chorobę płuc'], ['Syn wnioskodawcy choruje na', 'Ubezpieczony choruje na']);
+  str('Pracownik przeszedł operację kręgosłupa w marcu. Pracownik przebywał w szpitalu psychiatrycznym. Pani Nowak jest w 5. miesiącu ciąży.', ['operację kręgosłupa', 'szpitalu psychiatrycznym', '5. miesiącu ciąży'], ['w marcu', 'Pracownik przebywał w', 'jest']);
+  neg('Pacjenci, którzy chorują na astmę, mogą otrzymać refundację. Kto choruje na grypę, powinien zostać w domu.', ['astmę', 'grypę']);
+  neg('Ulotka: Augmentin 875 mg, tabletki powlekane. Dorośli: przyjmuje się 500 mg dwa razy dziennie.', ['Augmentin 875 mg', '500 mg dwa razy dziennie']);
+  neg('Pacjent przyjmuje leki w obecności pielęgniarki. Zalecono nawóz 30 g na metr kwadratowy.', ['przyjmuje leki', 'nawóz 30 g']);
+  neg('Jeżeli pracownica jest w ciąży, pracodawca nie może jej zwolnić. Pielęgniarka pracuje w szpitalu psychiatrycznym.', ['w ciąży', 'szpitalu psychiatrycznym']);
+  neg('Protokół serwisowy\nImię i nazwisko klienta: Adam Lis\nRozpoznanie:\nUszkodzenie łożyska\nZużycie paska', ['Uszkodzenie łożyska', 'Zużycie paska']);
+  neg('Program lekowy B.29 (ICD-10: G35) finansuje NFZ. Pociąg opóźniony z powodu S12 awarii. Firma przeszła operację restrukturyzacji.', ['G35', 'S12', 'operację restrukturyzacji']);
+  neg('Wiele osób choruje na cukrzycę. Co trzeci Polak choruje na nadciśnienie. Większość pacjentów przyjmuje Xyzanol 5 mg rano.', ['cukrzycę', 'nadciśnienie', 'Xyzanol 5 mg rano']);
+
+  // Grupa G6 (homograf w dopełniaczu): forma imienia będąca słowem („Marka”, „Ani”) z nazwiskiem-homografem
+  // po zamaskowanej osobie i spójniku, po przyimku z dopełniaczem i po nazwie pisma; oboczność ą→ę.
+  osp('Odpis aktu małżeństwa Marty Sowy i Marka Sowy, zawartego w Krakowie.', ['Marty Sowy', 'Marka Sowy'], ['Odpis aktu małżeństwa', 'zawartego w Krakowie']);
+  osp('Pismo od Marka Sowy z 3 marca. Pozew Marka Gołębia wpłynął.', ['Marka Sowy', 'Marka Gołębia'], ['Pismo od', 'z 3 marca', 'Pozew', 'wpłynął']);
+  neg('Pismo od Marka do piątku. Gniazdo sowy i lisa w lesie. Msza w kościele pw. Najświętszej Maryi Panny.', ['Marka do piątku', 'sowy i lisa', 'Najświętszej Maryi Panny']);
+
+  // Grupa G2 (telefon pod numerem): stacjonarny 2-3-2-2 po „W razie pytań” i po osobie z „Pan/Pani”
+  // przed „dostępny/osiągalna”; „Pani sprawa”, „Akta Pana …” i „w razie pytań” o sprawie zostają.
+  str('W razie pytań pod numerem 22 123 45 67. Pan Nowak dostępny jest pod numerem 61 262 16 30.', ['22 123 45 67', 'Nowak', '61 262 16 30'], ['W razie pytań', 'dostępny jest pod numerem']);
+  neg('Pani sprawa dostępna jest pod numerem 12 345 67 89. W razie pytań dotyczących sprawy prowadzonej pod numerem 22 379 56 66 proszę pisać.', ['12 345 67 89', '22 379 56 66']);
+
+  // Grupa G7 (spójność): miasto przed ulicą siedziby, miejscowość między ulicą a kodem i lokal słownie.
+  neg('Urząd Miasta Łodzi, ul. Piotrkowska 104, 90-926 Łódź. Sąd Okręgowy w Poznaniu, ul. Hejmowskiego 2. Starostwo Powiatowe Turek, ul. Kaliska 59.', ['Łodzi', 'ul. Piotrkowska 104', '90-926 Łódź', 'Poznaniu', 'ul. Hejmowskiego 2', 'Turek', 'ul. Kaliska 59']);
+  neg('Instytut Badawczy Leśnictwa, ul. Braci Leśnej 3, Sękocin Stary, 05-090 Raszyn.', ['ul. Braci Leśnej 3', 'Sękocin Stary', '05-090 Raszyn']);
+  str('Spółdzielnia Mieszkaniowa Lipa\nul. Polna 3 mieszkania 14', ['ul. Polna 3', 'mieszkania 14'], ['Spółdzielnia Mieszkaniowa Lipa']);
+  str('Zamieszkały: ul. Polna 3 mieszkania 14, Turek. Lokal w Poznaniu, ul. Długa 5.', ['ul. Polna 3', 'mieszkania 14', 'Turek', 'Poznaniu', 'ul. Długa 5'], ['Zamieszkały:', 'Lokal w']);
+  str('Urząd Gminy, ul. Polna 3, Nowak Kowalski, 05-090 Raszyn', ['Nowak Kowalski', '05-090', 'Raszyn'], ['Urząd Gminy, ul. Polna 3']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

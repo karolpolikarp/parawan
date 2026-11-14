@@ -1,21 +1,24 @@
 // Orkiestrator redakcji: przygotowuje kontekst i woła przebiegi w ustalonej kolejności.
 import { normalizeSurnameKey } from './surnames.js';
 import { indexToLetters, type RedactCtx } from './context.js';
-import { passAddress, passAddressAfterResidenceLabel, passPostalNoHyphen } from './passes/address.js';
+import { passAddress, passAddressAfterResidenceLabel, passPostalNoHyphen, passProtectInstitutionStreets, passRestoreInstitutionStreets } from './passes/address.js';
 import { passBirthDate } from './passes/birth-date.js';
 import { passCity } from './passes/city.js';
 import { passDriverLicense, passIdCard, passKrs, passPassport, passPlate, passPostal } from './passes/documents.js';
 import { passEmail } from './passes/email.js';
 import { finalizePersons, passApplyOwnMasks, passJsonRequote, passRestoreJsonEscapes, passRestoreUrls } from './passes/finalize.js';
 import { passFormFields } from './passes/forms.js';
+import { passHealth } from './passes/health.js';
 import { hasKsefAnchor, passKsef, passKw, passZnakSprawy } from './passes/kw-ksef-case.js';
 import { passLogin } from './passes/login.js';
 import { passIp, passMac, passTokens, passVin } from './passes/network.js';
 import { passAccount, passCard, passIban, passNip, passPesel, passPhone, passRegon } from './passes/numeric.js';
+import { passPersonInitialsAfterAnchor } from './passes/person-initials.js';
 import { passPersonMaidenAfterMask, passPersonMixedCase, passPersonOcrMix, passPersonOcrPair, passPersonOcrTitle, passPersonParents } from './passes/person-caps-ocr.js';
 import { passPersonPairs, passProtectFictional } from './passes/person-pairs.js';
 import { passPersonForeign, passPersonHomographAnchor, passPersonInitial, passPersonRoleComplement, passPersonSoloDict, passPersonSoloMorph, passPersonStrongTrigger, passPersonTrigger } from './passes/person-triggers.js';
 import { passProtectJsonEscapes, passProtectUrls } from './passes/protect.js';
+import { passCivilRecord, passProfessionalNumber, passResidenceCard } from './passes/registers.js';
 import { passDelimitedTable, passStructured } from './passes/structured.js';
 import { HUMAN_LABEL, MASK, type PiiFinding, type PiiType, type RedactionResult, type RedactOptions } from './types.js';
 
@@ -43,6 +46,10 @@ function resolveMasks(custom: RedactOptions['masks']): { M: Record<PiiType, stri
 }
 
 export function redactPII(input: string, options?: RedactOptions): RedactionResult {
+  return redactWith(input, options, true);
+}
+
+function redactWith(input: string, options: RedactOptions | undefined, withProbe: boolean): RedactionResult {
   if (!input || typeof input !== 'string') {
     return { redacted: input ?? '', found: [] };
   }
@@ -74,7 +81,21 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
     return `[OSOBA-${label}]`;
   };
 
-  const ctx: RedactCtx = { text: input, raw: input, ksefAnchor: hasKsefAnchor(input), on, bump, hit, M, personMask, pseudonyms: !!personLabels, maskedSurnames, protectedUrls: [], jsonEscapes: false, loginSeeds: new Set() };
+  const ctx: RedactCtx = { text: input, raw: input, ksefAnchor: hasKsefAnchor(input), on, bump, hit, M, personMask, pseudonyms: !!personLabels, maskedSurnames, protectedUrls: [], jsonEscapes: false, loginSeeds: new Set(), institutionStreets: [] };
+  // Sonda osób dla strażnika siedziby instytucji: te same typy, bez pseudonimów i własnych masek,
+  // bez kolejnej sondy w środku. Wynik zapamiętany, bo kod, ulica i miejscowość pytają o te same wiersze.
+  if (withProbe) {
+    const memo = new Map<string, string>();
+    const probeOptions: RedactOptions | undefined = options?.types ? { types: options.types } : undefined;
+    ctx.personProbe = (s: string): string => {
+      let r = memo.get(s);
+      if (r === undefined) {
+        r = redactWith(s, probeOptions, false).redacted;
+        memo.set(s, r);
+      }
+      return r;
+    };
+  }
 
   // Kolejność ma znaczenie: przebiegi czytają placeholdery poprzednich, a pierwszy bump typu
   // ustala kolejność `found`.
@@ -97,6 +118,11 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   passKsef(ctx);
   passKw(ctx); // przed znakiem sprawy: numer KW stoi po „Sygn.” albo „Znak:”
   passZnakSprawy(ctx);
+  // Numery rejestrów zawodowych i urzędowych po znaku sprawy (sygnatura „akt I C 1040/2011” jest
+  // już zamaskowana), a przed numerami: 7 cyfr PWZ nie może trafić do telefonu ani REGON-u.
+  passProfessionalNumber(ctx);
+  passResidenceCard(ctx);
+  passCivilRecord(ctx);
 
   // Faza 2: identyfikatory numeryczne (suma kontrolna, etykieta, długość)
   passIban(ctx);
@@ -115,12 +141,20 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
 
   // Faza 3: data urodzenia, adres, miejscowość
   passBirthDate(ctx);
+  passProtectInstitutionStreets(ctx); // ulica siedziby w całości poza zasięgiem wzorców adresu
   passAddress(ctx);
   passAddressAfterResidenceLabel(ctx);
+  passRestoreInstitutionStreets(ctx);
+  // Kod pod ulicą, która mimo to trafiła pod maskę adresu, też znika: jawny kod przy zakrytej ulicy
+  // zmieniałby wynik drugiego przebiegu.
+  passPostal(ctx);
   // Kod bez myślnika i miejscowość kotwiczą na już zamaskowanym [ADRES] i [KOD-POCZTOWY],
   // dlatego biegną po adresie.
   passPostalNoHyphen(ctx);
   passCity(ctx);
+  // Dane o zdrowiu przed osobami: eponim w nazwie choroby („choroba Leśniowskiego-Crohna”) znika
+  // pod maską zdrowia, zanim reguły osobowe wezmą go za nazwisko. Numery i adresy są już zakryte.
+  passHealth(ctx);
 
   // Faza 4: imię i nazwisko (heurystyka)
   passProtectFictional(ctx);
@@ -139,6 +173,7 @@ export function redactPII(input: string, options?: RedactOptions): RedactionResu
   passPersonOcrMix(ctx);
   passPersonMaidenAfterMask(ctx);
   passPersonParents(ctx);
+  passPersonInitialsAfterAnchor(ctx); // po osobach, przed finalizePersons: relabelPersons numeruje też te maski
 
   // Faza 5: domknięcia osób, stabilna numeracja, przywrócenie URL-i i ucieczek
   finalizePersons(ctx);

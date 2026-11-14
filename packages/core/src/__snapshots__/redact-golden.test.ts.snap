@@ -110,13 +110,111 @@ Sąd Rejonowy	Wydział Cywilny",
   "neg-162": "Wzór numeru księgi wieczystej: XXXX/XXXXXXXX/X. Nieruchomość KR1P/00234567/1 w zestawieniu.",
   "neg-163": "Szpital Specjalistyczny im. dr. Wilka w Krakowie. Szkoła im. Ks. Jerzego Popiełuszki. Kościół pw. bł. ks. Jerzego Popiełuszki. Parafia pw. bł. Józefa Kowalskiego.",
   "neg-164": "Odbiorca: Szkoła Podstawowa nr 12 im. Jana Pawła II",
+  "neg-165": "Kolumny: PESEL Kwota 1234567890 zł do zapłaty.",
+  "neg-166": "Zapytanie do bazy PESEL nr 2026111301 zrealizowano.",
+  "neg-167": "Spółka wpisana do rejestru pod numerem 22 379 56 66.",
+  "neg-168": "Spółka kontaktowała się w sprawie wpisu pod numerem 12 345 67 89.",
+  "neg-169": "Ogłoszenie jest dostępne pod numerem 22 379 56 66 w BIP urzędu.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
+  "neg-170": "Kontakt z firmą wpisaną pod numerem 12 345 67 89 do rejestru.",
+  "neg-171": "Kontaktowano się ze stroną postępowania zarejestrowanego pod nr 12 345 67 89.",
+  "neg-172": "Sprawa o kontakty z dzieckiem prowadzona pod numerem 12 345 67 89.",
+  "neg-173": "Kontakt ze strony urzędu pod numerem 12 345 67 89.",
+  "neg-174": "Ustalenia:
+1. Zgłoszenie do ZUS (odp. ZUS).
+2. Konta w systemie (odp. IT).
+3. Szkolenie (odp. BHP, etap II).",
+  "neg-175": "Audyt bezpieczeństwa (wyk. NASK), dane (opr. GUS). Etap (odp. IV).",
+  "neg-176": "Pytanie 3: Czy Zamawiający dopuszcza dostawę w dwóch partiach? Odp. TAK.
+Pytanie 4: Czy wymagane jest wadium? Odp.: NIE
+Ankieta, pyt. 7 (odp. TAK).",
+  "neg-177": "Wyk. EKG.
+Badania wyk.: CRP, OB
+W dniu przyjęcia wyk. RTG, USG.",
+  "neg-178": "Źródło: opr. PWN. Wykonał: ZDM. Sprawdził: NOK. Zatwierdził: DG. Kontrola (odp. MF).",
+  "neg-179": "Sporządził: AS",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
+  "neg-180": "Zgodnie z ustaleniami z Panem Ministrem termin nie może zostać przesunięty.",
+  "neg-181": "W domu dochodziło do awantur, w związku z czym wszczęto procedurę Niebieskiej Karty.",
+  "neg-182": "Spotkanie z Panem Wojewodą i Panią Dziekan odbyło się w piątek. Dziękuję Panu Dyrektorowi.",
+  "neg-183": "Serwis AGD-SERWIS i spółka NOWAK-BUD Sp. z o.o. oraz norma PN-EN zostają.",
+  "neg-184": "Zasiłek z tytułu urodzenia dziecka wypłacony w dniu 5 maja 2026 r., wypłata do dnia 31.12.2026.",
+  "neg-185": "Zgłoszenie urodzenia dziecka nastąpiło w dniu 10.06.2026 r., a po urodzeniu córki szczepienie wykonano dnia 3.05.2026 r.",
+  "neg-186": "Koncert dał Chór Jana Lisa, a Fundacja Joanny Sikory wsparła festiwal.",
+  "neg-187": "Msza w kościele Najświętszej Marii Panny, a chór Stanisława Moniuszki zaśpiewał.",
+  "neg-188": "Mecz rozegrała drużyna Lecha Poznań, a grała orkiestra Jana Kiepury.",
+  "neg-189": "Sygn. akt I C 1040/2011 oraz Dz.U. 2011 nr 1040 poz. 5.",
   "neg-19": "Rzecznik Praw Obywatelskich zabrał głos w debacie.",
+  "neg-190": "Kod produktu WA-1234 w magazynie. Lekarz ma numer PWZ, który podaje na recepcie.",
+  "neg-191": "Karta pobytu jest ważna 3 lata, a akt notarialny Rep. A nr 1234/2020 sporządzono w Krakowie.",
+  "neg-192": "Adwokat przedstawił fakturę FV/1234, a radca prawny złożył deklarację JPK-12 i powołał się na PKD-2007.",
+  "neg-193": "Zgodnie z aktem zgonu ojca udział 1/2 przypada córce.",
+  "neg-194": "Izba wydała PWZ 12345 lekarzom, a wynagrodzenia lekarzy, 1340517 zł, rosną. Adwokat, KR-2020 to numer sprawy, akty urodzenia 2019/2020 omówiono.",
+  "neg-195": "Spotkanie w sali I10. Dane o zdrowiu pacjenta przetwarza szpital zgodnie z art. 9 RODO. Podpisał lek. med. dyżurny.",
+  "neg-196": "Program profilaktyki cukrzycy realizuje gmina, a apteka sprzedaje paracetamol 500 mg za 9,99 zł.",
+  "neg-197": "Zerwanie umowy i złamanie przepisów nie są urazem. Brak przeciwwskazań do pracy. Centrum Leczenia Stwardnienia Rozsianego przyjmuje.",
+  "neg-198": "Rozpoznanie sprawy nastąpi na posiedzeniu, a osoba uzależniona od alkoholu nie może prowadzić pojazdu.",
+  "neg-199": "Urząd Miasta Łodzi
+Wydział Finansowy
+ul. Piotrkowska 104
+90-926 Łódź",
   "neg-20": "Wilk biegał po lesie za sarną.",
+  "neg-200": "W sprawach awarii proszę o kontakt z administratorem (Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1).",
+  "neg-201": "Przedszkole Miejskie nr 3 w Turku
+ul. Lipowa 8
+62-700 Turek",
+  "neg-202": "Szkoła Podstawowa nr 5 im. Marii Konopnickiej, ul. Lipowa 8, 20-001 Lublin",
+  "neg-203": "Prezydent Miasta
+Wydział Komunikacji
+ul. Lipowa 8
+20-001 Lublin",
+  "neg-204": "Urząd Skarbowy Warszawa-Targówek
+ul. Lipowa 8
+20-001 Lublin",
+  "neg-205": "SZKOŁA PODSTAWOWA NR 5
+ul. Lipowa 8
+20-001 Lublin",
+  "neg-206": "Kod choroby J18.9 oznacza zapalenie płuc, nieokreślone.",
+  "neg-207": "Kod choroby: E11 - cukrzyca typu 2 (opis w słowniku ICD-10).",
+  "neg-208": "Kod choroby E11 dotyczy cukrzycy typu 2; w 2025 r. zgłoszono 1,2 mln porad.",
+  "neg-209": "Osoba, która choruje na cukrzycę, może skorzystać z ulgi.",
   "neg-21": "Lis przemknął przez drogę tuż przed autem.",
+  "neg-210": "Każdy pacjent, który choruje na cukrzycę, ma prawo do edukacji.",
+  "neg-211": "W razie bólu można przyjąć np. paracetamol 500 mg doraźnie.",
+  "neg-212": "Lekarz zalecił leki przeciwbólowe, np. ibuprofen 200 mg.",
+  "neg-213": "Lekarz POZ zalecił w 2025 r. 1,2 mln recept na metforminę 500 mg.",
+  "neg-214": "Lekarz zalecił, by w przypadku gorączki stosować paracetamol 500 mg (instrukcja w ulotce).",
+  "neg-215": "Choroby współistniejące: brak danych. Pacjent wypisany.",
+  "neg-216": "Choroby współistniejące: b.d.",
+  "neg-217": "Rozpoznanie: w rozumieniu art. 5 ustawy cukrzyca jest chorobą przewlekłą.",
+  "neg-218": "Rozpoznanie E11 nie jest wymagane do refundacji.",
+  "neg-219": "Pacjent, który choruje na astmę, może otrzymać refundację leków.",
   "neg-22": "Baran to pierwszy znak zodiaku.",
+  "neg-220": "Chory, który cierpi na depresję, ma prawo do zwolnienia.",
+  "neg-221": "Statystyka NFZ: rozpoznanie E11 postawiono u 3 mln osób.",
+  "neg-222": "W Polsce wystawiono 3 mln recept na sertralinę 50 mg.",
+  "neg-223": "Leki takie jak metformina 500 mg obniżają poziom cukru.",
+  "neg-224": "Kancelaria radcy prawnego, KR-2026 - plan pracy na rok. Radca prawny, WA-1234 – aplikacja 2026 r. NR WPISU: WA-4321",
+  "neg-225": "Radca prawny złożył wniosek o wpis na listę rzeczników patentowych pod nr KR-2020 sprawy. Wpis na listę obecności pod nr LB-12. Adwokat, KRK-2024 - lista spraw.",
+  "neg-226": "Po urodzeniu dziecka, w dniu 1 września 2026 r., wejdą w życie nowe przepisy. Po urodzeniu dziecka, dnia 15 stycznia 2027 r. upływa termin na zgłoszenie.",
+  "neg-227": "Po urodzeniu dziecka w dniu 3 marca 2026 r. przysługuje zasiłek, a po urodzeniu córki w dniu 4.04.2026 r. kończy się okres ochronny.",
+  "neg-228": "Wniosek dotyczący PESEL nr 2024000123 rozpatrzono. Pismo ws. PESEL nr 2024000124 przekazano. Korekta PESEL nr 1000234567 z dnia 3.11.2026.",
+  "neg-229": "Pacjenci, którzy chorują na astmę, mogą otrzymać refundację. Kto choruje na grypę, powinien zostać w domu.",
   "neg-23": "Mazurek wielkanocny stygł na parapecie.",
+  "neg-230": "Ulotka: Augmentin 875 mg, tabletki powlekane. Dorośli: przyjmuje się 500 mg dwa razy dziennie.",
+  "neg-231": "Pacjent przyjmuje leki w obecności pielęgniarki. Zalecono nawóz 30 g na metr kwadratowy.",
+  "neg-232": "Jeżeli pracownica jest w ciąży, pracodawca nie może jej zwolnić. Pielęgniarka pracuje w szpitalu psychiatrycznym.",
+  "neg-233": "Protokół serwisowy
+Imię i nazwisko klienta: Adam Lis
+Rozpoznanie:
+Uszkodzenie łożyska
+Zużycie paska",
+  "neg-234": "Program lekowy B.29 (ICD-10: G35) finansuje NFZ. Pociąg opóźniony z powodu S12 awarii. Firma przeszła operację restrukturyzacji.",
+  "neg-235": "Wiele osób choruje na cukrzycę. Co trzeci Polak choruje na nadciśnienie. Większość pacjentów przyjmuje Xyzanol 5 mg rano.",
+  "neg-236": "Pismo od Marka do piątku. Gniazdo sowy i lisa w lesie. Msza w kościele pw. Najświętszej Maryi Panny.",
+  "neg-237": "Pani sprawa dostępna jest pod numerem 12 345 67 89. W razie pytań dotyczących sprawy prowadzonej pod numerem 22 379 56 66 proszę pisać.",
+  "neg-238": "Urząd Miasta Łodzi, ul. Piotrkowska 104, 90-926 Łódź. Sąd Okręgowy w Poznaniu, ul. Hejmowskiego 2. Starostwo Powiatowe Turek, ul. Kaliska 59.",
+  "neg-239": "Instytut Badawczy Leśnictwa, ul. Braci Leśnej 3, Sękocin Stary, 05-090 Raszyn.",
   "neg-24": "Sowa hukała całą noc pod oknem.",
   "neg-25": "Kruk krukowi oka nie wykole, jak mówi przysłowie.",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
@@ -229,6 +327,8 @@ Sąd Rejonowy	Wydział Cywilny",
   "os-o-34": "Jan
 Wiśniewski złożył wniosek do urzędu.",
   "os-o-35": "z powództwa Pawła Kowalskiego przeciwko Agacie Nowak, z udziałem Jerzego Nowaka i Henrykiem Lisem",
+  "os-o-36": "Zgodnie z ustaleniami z Panem Ministrem Kowalskim termin zostaje.",
+  "os-o-37": "Dziękuję Panu Dyrektorowi Nowakowi za pomoc.",
   "os-p-01": "Pozwany Jan Kowalski nie stawił się na rozprawie.",
   "os-p-02": "Powódka Anna Nowak wniosła o zasądzenie kosztów.",
   "os-p-03": "Świadek Piotr Wiśniewski zeznał, że widział zdarzenie.",
@@ -319,6 +419,27 @@ Anna Kowalska z domu Sikora
 Kierownik Działu Kadr Grzegorz Mazur",
   "os-p-73": "Świadek Poleski zeznał. Mieczyk zatrudniony od 01.02.2010 r. Szanowna Pani Dyrektor Szkoły Kowalska-Nowak. Grafik: Dzień Lisiecka, Noc Brzozowska. Do kościoła wraz ze św. Kowalskim wszedł sprawca.",
   "os-p-74": "Michal Nowak napisal, ze Lukasz Wisniewski bedzie o 18. Krzysztof Wróbel, syn Józefa i Marii, stawił się.",
+  "os-p-75": "Uczestnicy: Anna Sadowska, Marek Kot, Jan Tomczak.
+Ustalenia:
+1. Harmonogram odbioru do 5 dni roboczych (odp. AS).
+2. Raport z testów (odp. MK, JT).",
+  "os-p-76": "Notatkę opracowano w Wydziale Kadr.
+Sporządziła: A.Ł.",
+  "os-p-77": "Jadwiga Lis
+prowadząca działalność gospodarczą pod firmą
+LIS-BUD Jadwiga Lis
+wzywa do zapłaty.",
+  "os-p-78": "Antoni Jabłoński, prowadzący działalność pod firmą JABŁOŃS-TRANS Antoni Jabłoński, wzywa.",
+  "os-p-79": "Odbiorca: ZIELIŃS-BUD Monika Zielińska, ul. w załączeniu.",
+  "os-p-80": "Umowa z Jadwigą Lis prowadzącą działalność pod firmą LIS-BUD Jadwiga Lis. Za opóźnienie LIS-BUD zapłaci karę.",
+  "os-p-81": "Firma: EKO-TRANS Jan Kowalski (osoba kontaktowa) odpowie na pismo.",
+  "os-p-82": "Testy obciążeniowe wykonał zespół Joanny Sikory.",
+  "os-p-83": "Mecz wygrała drużyna Piotra Wilka, a raport przygotował zespół Anny Lis.",
+  "os-p-84": "Notatka. Zespół Adama Kota wykonał audyt, a wezwano Marię Pannę na rozprawę.",
+  "os-p-85": "Pracę wykonał zespół Ewy Zimy, a projekt prowadzi drużyna Anny Nowak-Lis.",
+  "os-p-86": "W kościele Maria Panna zauważyła sprawcę i wezwała policję.",
+  "os-p-87": "Odpis aktu małżeństwa Marty Sowy i Marka Sowy, zawartego w Krakowie.",
+  "os-p-88": "Pismo od Marka Sowy z 3 marca. Pozew Marka Gołębia wpłynął.",
   "os-r-01": "Marek Bąkiewicz podpisał protokół odbioru.",
   "os-r-02": "Alicja Krzemieniecka złożyła wniosek o urlop.",
   "os-r-03": "Tadeusz Gzowski wynajął magazyn pod miastem.",
@@ -503,11 +624,114 @@ Jan;Kowalski;Kraków",
 Login: mazur
 Na zakończenie orkiestra zagrała mazur.",
   "str-164": "Zgłaszająca mieszka przy ul. Grochowskiej 17. Od 3 lat skarży się na hałas. Anna Lis, córka Piotra Pawła i Anny Marii.",
+  "str-165": "Pacjentka, PESEL: [PESEL], zgłosiła się na badanie.",
+  "str-166": "Wnioskodawca, PESEL [PESEL], prosi o zwrot.",
+  "str-167": "Nr PESEL: [PESEL], adres do korespondencji bez zmian.",
+  "str-168": "W razie pytań proszę kontaktować się ze mną pod numerem [TELEFON].",
+  "str-169": "Jestem dostępny pod nr [TELEFON] w dni robocze.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
+  "str-170": "Proszę kontaktować się z działem kadr pod numerem [TELEFON].",
+  "str-171": "Urlop w związku z urodzeniem syna, Marka Nowaka (PESEL [PESEL]), w dniu 17 czerwca 2026 r.",
+  "str-172": "Agnieszka Kamińska
+radca prawny, GD-8638",
+  "str-173": "Powódka reprezentowana przez radczynię prawną Jadwigę Wysocką (GD-8776).",
+  "str-174": "Zaświadczenie wystawił lekarz Jakub Kamiński (PWZ 9488577).",
+  "str-175": "lek. Anna Lis
+specjalista chorób wewnętrznych
+PWZ 3757956",
+  "str-176": "Legitymująca się kartą pobytu nr RP6295053, zamieszkała w Warszawie.",
+  "str-177": "Małżeństwo zawarte w Urzędzie Stanu Cywilnego w Warszawie, akt małżeństwa nr 1040/2011.",
+  "str-178": "AKT URODZENIA NR 123/2020, Karta Pobytu RP1234567",
+  "str-179": "Rozpoznanie:
+F32.1 epizod depresyjny umiarkowany
+J45.0 astma oskrzelowa
+Zalecenia przy wypisie:
+sertralina 50 mg
+salbutamol doraźnie
+kontrola w poradni za 4 tygodnie",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
+  "str-180": "Pacjent z rozpoznaniem K50.0, przyjmuje mesalazynę 1 g dziennie.",
+  "str-181": "Zgodnie z zaświadczeniem lekarskim po porodzie przez cesarskie cięcie przeciwwskazane jest dźwiganie ciężarów do końca roku.",
+  "str-182": "Od dwóch lat pozwany nadużywa alkoholu. W wyniku zdarzenia doznałem stłuczenia klatki piersiowej.",
+  "str-183": "Potrzeba wynika z rozpoznania cukrzycy typu 1 i leczenia epizodu depresyjnego, potwierdzonego zaświadczeniem lekarza.",
+  "str-184": "Dział Kadr i Płac
+ul. Moniuszki 3
+00-009 Warszawa
+Pani
+Joanna Zawadzka
+ul. Krótka 115A lok. 9
+03-283 Warszawa",
+  "str-185": "Zakład Usług Remontowych Jan Kowalski
+ul. Polna 5
+00-001 Warszawa",
+  "str-186": "Dział Kadr
+ul. Polna 1
+00-001 Warszawa
+Dział Płac
+ul. Polna 2
+W. Nowak
+Przychodnia Rodzinna
+ul. Lipowa 7",
+  "str-187": "Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Urząd Gminy, ul. Lipowa 9, 05-500 Piaseczno; Jan Kowalski, ul. Polna 3, 05-500 Piaseczno.",
+  "str-188": "Szkoła Jazdy KOWALSKI
+ul. Lipowa 8
+20-001 Lublin",
+  "str-189": "Przychodnia Weterynaryjna Wilk, ul. Lipowa 8, 20-001 Lublin",
   "str-19": "sms na [TELEFON] nie doszedł",
+  "str-190": "Żłobek Domowy Ewy
+ul. Lipowa 8
+20-001 Lublin",
+  "str-191": "Dla:
+Marianna Zięba-Kot
+Wydział Komunikacji
+ul. Lipowa 8
+20-001 Lublin",
+  "str-192": "Na konferencji Jan Kowalski omówił rozpoznanie astmy oskrzelowej u dzieci.",
+  "str-193": "Lekarz zalecił mu sertralinę 50 mg dziennie.",
+  "str-194": "Rozpoznanie: astma oskrzelowa, Jan Kowalski, lat 54",
+  "str-195": "Mariusz Kos
+radca prawny, LB-1231
+Kancelaria w Białymstoku, adwokat Anna Lis (BK-1234)",
+  "str-196": "Radca prawny Jan Nowak, nr wpisu na listę radców prawnych OIRP w Warszawie: WA-1234",
+  "str-197": "Adwokat Ewa Lis, wpisana na listę adwokatów ORA w Lublinie pod nr LUB/Adw/456, oraz adwokat Anna Nowak, KRK/Adw/2345.",
+  "str-198": "Adwokat Jan Kowalski
+Nr wpisu: KR-1234",
+  "str-199": "W związku z urodzeniem dziecka w dniu 3 marca 2026 r. pracownica złożyła wniosek o urlop.",
   "str-20": "Infolinia oddzwoni z [TELEFON].",
+  "str-200": "Data urodzenia – 05.06.2018
+Data urodzenia dziecka — 07.08.2019",
+  "str-201": "Wnoszę o zasiłek z tytułu urodzenia syna, w dniu 5.06.2026 r., w Szpitalu Wojewódzkim. W związku z urodzeniem córki w dniu 3 marca 2026 r. przysługuje mi zasiłek.",
+  "str-202": "Nr PESEL: [PESEL], PESEL nr [PESEL]",
+  "str-203": "ICD10: F32.1
+ICD-10: I10
+Rozpoznanie: ICD10 K21.0",
+  "str-204": "Pracownik leczony z powodu S82.6.",
+  "str-205": "Pacjent: Jan Nowak
+Rozpoznanie:
+Niewydolność serca
+Migotanie przedsionków
+Pacjent wypisany do domu",
+  "str-206": "PESEL: [PESEL]
+Rozpoznanie:
+Przewlekła obturacyjna choroba płuc",
+  "str-207": "Pracownik choruje na nadciśnienie, przyjmuje Augmentin 875 mg. Przyjmuje Lorafen 1 mg na noc.",
+  "str-208": "Zalecono syrop Mucosolvan 5 ml 3x dziennie.
+Zalecenia:
+Letrox 75 µg rano na czczo",
+  "str-209": "Pacjent: Jan Nowak
+Zalecenia przy wypisie:
+mesalazyna 1 g
+insulina aspart
+peryndopryl 5 mg
+kontrola w poradni za 4 tygodnie",
   "str-21": "Proszę o odpowiedź na [EMAIL] w tym tygodniu.",
+  "str-210": "Syn wnioskodawcy choruje na autyzm. Ubezpieczony choruje na przewlekłą obturacyjną chorobę płuc.",
+  "str-211": "Pracownik przeszedł operację kręgosłupa w marcu. Pracownik przebywał w szpitalu psychiatrycznym. Pani Nowak jest w 5. miesiącu ciąży.",
+  "str-212": "W razie pytań pod numerem [TELEFON]. Pan Nowak dostępny jest pod numerem [TELEFON].",
+  "str-213": "Spółdzielnia Mieszkaniowa Lipa
+ul. Polna 3 mieszkania 14",
+  "str-214": "Zamieszkały: ul. Polna 3 mieszkania 14, Turek. Lokal w Poznaniu, ul. Długa 5.",
+  "str-215": "Urząd Gminy, ul. Polna 3, Nowak Kowalski, 05-090 Raszyn",
   "str-22": "Zgłoszenia przyjmujemy pod adresem [EMAIL].",
   "str-23": "e-mail: [EMAIL] (służbowy)",
   "str-24": "Adres do doręczeń: 00-950 Warszawa, skrytka 21.",
@@ -700,13 +924,111 @@ Sąd Rejonowy	Wydział Cywilny",
   "neg-162": "Wzór numeru księgi wieczystej: XXXX/XXXXXXXX/X. Nieruchomość KR1P/00234567/1 w zestawieniu.",
   "neg-163": "Szpital Specjalistyczny im. dr. Wilka w Krakowie. Szkoła im. Ks. Jerzego Popiełuszki. Kościół pw. bł. ks. Jerzego Popiełuszki. Parafia pw. bł. Józefa Kowalskiego.",
   "neg-164": "Odbiorca: Szkoła Podstawowa nr 12 im. Jana Pawła II",
+  "neg-165": "Kolumny: PESEL Kwota 1234567890 zł do zapłaty.",
+  "neg-166": "Zapytanie do bazy PESEL nr 2026111301 zrealizowano.",
+  "neg-167": "Spółka wpisana do rejestru pod numerem 22 379 56 66.",
+  "neg-168": "Spółka kontaktowała się w sprawie wpisu pod numerem 12 345 67 89.",
+  "neg-169": "Ogłoszenie jest dostępne pod numerem 22 379 56 66 w BIP urzędu.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
+  "neg-170": "Kontakt z firmą wpisaną pod numerem 12 345 67 89 do rejestru.",
+  "neg-171": "Kontaktowano się ze stroną postępowania zarejestrowanego pod nr 12 345 67 89.",
+  "neg-172": "Sprawa o kontakty z dzieckiem prowadzona pod numerem 12 345 67 89.",
+  "neg-173": "Kontakt ze strony urzędu pod numerem 12 345 67 89.",
+  "neg-174": "Ustalenia:
+1. Zgłoszenie do ZUS (odp. ZUS).
+2. Konta w systemie (odp. IT).
+3. Szkolenie (odp. BHP, etap II).",
+  "neg-175": "Audyt bezpieczeństwa (wyk. NASK), dane (opr. GUS). Etap (odp. IV).",
+  "neg-176": "Pytanie 3: Czy Zamawiający dopuszcza dostawę w dwóch partiach? Odp. TAK.
+Pytanie 4: Czy wymagane jest wadium? Odp.: NIE
+Ankieta, pyt. 7 (odp. TAK).",
+  "neg-177": "Wyk. EKG.
+Badania wyk.: CRP, OB
+W dniu przyjęcia wyk. RTG, USG.",
+  "neg-178": "Źródło: opr. PWN. Wykonał: ZDM. Sprawdził: NOK. Zatwierdził: DG. Kontrola (odp. MF).",
+  "neg-179": "Sporządził: AS",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
+  "neg-180": "Zgodnie z ustaleniami z Panem Ministrem termin nie może zostać przesunięty.",
+  "neg-181": "W domu dochodziło do awantur, w związku z czym wszczęto procedurę Niebieskiej Karty.",
+  "neg-182": "Spotkanie z Panem Wojewodą i Panią Dziekan odbyło się w piątek. Dziękuję Panu Dyrektorowi.",
+  "neg-183": "Serwis AGD-SERWIS i spółka NOWAK-BUD Sp. z o.o. oraz norma PN-EN zostają.",
+  "neg-184": "Zasiłek z tytułu urodzenia dziecka wypłacony w dniu 5 maja 2026 r., wypłata do dnia 31.12.2026.",
+  "neg-185": "Zgłoszenie urodzenia dziecka nastąpiło w dniu 10.06.2026 r., a po urodzeniu córki szczepienie wykonano dnia 3.05.2026 r.",
+  "neg-186": "Koncert dał Chór Jana Lisa, a Fundacja Joanny Sikory wsparła festiwal.",
+  "neg-187": "Msza w kościele Najświętszej Marii Panny, a chór Stanisława Moniuszki zaśpiewał.",
+  "neg-188": "Mecz rozegrała drużyna Lecha Poznań, a grała orkiestra Jana Kiepury.",
+  "neg-189": "Sygn. akt [ZNAK-SPRAWY] oraz Dz.U. 2011 nr 1040 poz. 5.",
   "neg-19": "Rzecznik Praw Obywatelskich zabrał głos w debacie.",
+  "neg-190": "Kod produktu WA-1234 w magazynie. Lekarz ma numer PWZ, który podaje na recepcie.",
+  "neg-191": "Karta pobytu jest ważna 3 lata, a akt notarialny Rep. A nr 1234/2020 sporządzono w Krakowie.",
+  "neg-192": "Adwokat przedstawił fakturę FV/1234, a radca prawny złożył deklarację JPK-12 i powołał się na PKD-2007.",
+  "neg-193": "Zgodnie z aktem zgonu ojca udział 1/2 przypada córce.",
+  "neg-194": "Izba wydała PWZ 12345 lekarzom, a wynagrodzenia lekarzy, 1340517 zł, rosną. Adwokat, KR-2020 to numer sprawy, akty urodzenia 2019/2020 omówiono.",
+  "neg-195": "Spotkanie w sali I10. Dane o zdrowiu pacjenta przetwarza szpital zgodnie z art. 9 RODO. Podpisał lek. med. dyżurny.",
+  "neg-196": "Program profilaktyki cukrzycy realizuje gmina, a apteka sprzedaje paracetamol 500 mg za 9,99 zł.",
+  "neg-197": "Zerwanie umowy i złamanie przepisów nie są urazem. Brak przeciwwskazań do pracy. Centrum Leczenia Stwardnienia Rozsianego przyjmuje.",
+  "neg-198": "Rozpoznanie sprawy nastąpi na posiedzeniu, a osoba uzależniona od alkoholu nie może prowadzić pojazdu.",
+  "neg-199": "Urząd Miasta Łodzi
+Wydział Finansowy
+ul. Piotrkowska 104
+90-926 Łódź",
   "neg-20": "Wilk biegał po lesie za sarną.",
+  "neg-200": "W sprawach awarii proszę o kontakt z administratorem (Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1).",
+  "neg-201": "Przedszkole Miejskie nr 3 w Turku
+ul. Lipowa 8
+62-700 Turek",
+  "neg-202": "Szkoła Podstawowa nr 5 im. Marii Konopnickiej, ul. Lipowa 8, 20-001 Lublin",
+  "neg-203": "Prezydent Miasta
+Wydział Komunikacji
+ul. Lipowa 8
+20-001 Lublin",
+  "neg-204": "Urząd Skarbowy Warszawa-Targówek
+ul. Lipowa 8
+20-001 Lublin",
+  "neg-205": "SZKOŁA PODSTAWOWA NR 5
+ul. Lipowa 8
+20-001 Lublin",
+  "neg-206": "Kod choroby J18.9 oznacza zapalenie płuc, nieokreślone.",
+  "neg-207": "Kod choroby: E11 - cukrzyca typu 2 (opis w słowniku ICD-10).",
+  "neg-208": "Kod choroby E11 dotyczy cukrzycy typu 2; w 2025 r. zgłoszono 1,2 mln porad.",
+  "neg-209": "Osoba, która choruje na cukrzycę, może skorzystać z ulgi.",
   "neg-21": "Lis przemknął przez drogę tuż przed autem.",
+  "neg-210": "Każdy pacjent, który choruje na cukrzycę, ma prawo do edukacji.",
+  "neg-211": "W razie bólu można przyjąć np. paracetamol 500 mg doraźnie.",
+  "neg-212": "Lekarz zalecił leki przeciwbólowe, np. ibuprofen 200 mg.",
+  "neg-213": "Lekarz POZ zalecił w 2025 r. 1,2 mln recept na metforminę 500 mg.",
+  "neg-214": "Lekarz zalecił, by w przypadku gorączki stosować paracetamol 500 mg (instrukcja w ulotce).",
+  "neg-215": "Choroby współistniejące: brak danych. Pacjent wypisany.",
+  "neg-216": "Choroby współistniejące: b.d.",
+  "neg-217": "Rozpoznanie: w rozumieniu art. 5 ustawy cukrzyca jest chorobą przewlekłą.",
+  "neg-218": "Rozpoznanie E11 nie jest wymagane do refundacji.",
+  "neg-219": "Pacjent, który choruje na astmę, może otrzymać refundację leków.",
   "neg-22": "Baran to pierwszy znak zodiaku.",
+  "neg-220": "Chory, który cierpi na depresję, ma prawo do zwolnienia.",
+  "neg-221": "Statystyka NFZ: rozpoznanie E11 postawiono u 3 mln osób.",
+  "neg-222": "W Polsce wystawiono 3 mln recept na sertralinę 50 mg.",
+  "neg-223": "Leki takie jak metformina 500 mg obniżają poziom cukru.",
+  "neg-224": "Kancelaria radcy prawnego, KR-2026 - plan pracy na rok. Radca prawny, WA-1234 – aplikacja 2026 r. NR WPISU: WA-4321",
+  "neg-225": "Radca prawny złożył wniosek o wpis na listę rzeczników patentowych pod nr KR-2020 sprawy. Wpis na listę obecności pod nr LB-12. Adwokat, KRK-2024 - lista spraw.",
+  "neg-226": "Po urodzeniu dziecka, w dniu 1 września 2026 r., wejdą w życie nowe przepisy. Po urodzeniu dziecka, dnia 15 stycznia 2027 r. upływa termin na zgłoszenie.",
+  "neg-227": "Po urodzeniu dziecka w dniu 3 marca 2026 r. przysługuje zasiłek, a po urodzeniu córki w dniu 4.04.2026 r. kończy się okres ochronny.",
+  "neg-228": "Wniosek dotyczący PESEL nr 2024000123 rozpatrzono. Pismo ws. PESEL nr 2024000124 przekazano. Korekta PESEL nr 1000234567 z dnia 3.11.2026.",
+  "neg-229": "Pacjenci, którzy chorują na astmę, mogą otrzymać refundację. Kto choruje na grypę, powinien zostać w domu.",
   "neg-23": "Mazurek wielkanocny stygł na parapecie.",
+  "neg-230": "Ulotka: Augmentin 875 mg, tabletki powlekane. Dorośli: przyjmuje się 500 mg dwa razy dziennie.",
+  "neg-231": "Pacjent przyjmuje leki w obecności pielęgniarki. Zalecono nawóz 30 g na metr kwadratowy.",
+  "neg-232": "Jeżeli pracownica jest w ciąży, pracodawca nie może jej zwolnić. Pielęgniarka pracuje w szpitalu psychiatrycznym.",
+  "neg-233": "Protokół serwisowy
+Imię i nazwisko klienta: [OSOBA-A]
+Rozpoznanie:
+Uszkodzenie łożyska
+Zużycie paska",
+  "neg-234": "Program lekowy B.29 (ICD-10: G35) finansuje NFZ. Pociąg opóźniony z powodu S12 awarii. Firma przeszła operację restrukturyzacji.",
+  "neg-235": "Wiele osób choruje na cukrzycę. Co trzeci Polak choruje na nadciśnienie. Większość pacjentów przyjmuje Xyzanol 5 mg rano.",
+  "neg-236": "Pismo od Marka do piątku. Gniazdo sowy i lisa w lesie. Msza w kościele pw. Najświętszej Maryi Panny.",
+  "neg-237": "Pani sprawa dostępna jest pod numerem 12 345 67 89. W razie pytań dotyczących sprawy prowadzonej pod numerem 22 379 56 66 proszę pisać.",
+  "neg-238": "Urząd Miasta Łodzi, ul. Piotrkowska 104, 90-926 Łódź. Sąd Okręgowy w Poznaniu, ul. Hejmowskiego 2. Starostwo Powiatowe Turek, ul. Kaliska 59.",
+  "neg-239": "Instytut Badawczy Leśnictwa, ul. Braci Leśnej 3, Sękocin Stary, 05-090 Raszyn.",
   "neg-24": "Sowa hukała całą noc pod oknem.",
   "neg-25": "Kruk krukowi oka nie wykole, jak mówi przysłowie.",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
@@ -818,6 +1140,8 @@ Sąd Rejonowy	Wydział Cywilny",
   "os-o-33": "Na ulicy spotkałem wczoraj [OSOBA-A].",
   "os-o-34": "[OSOBA-A] złożył wniosek do urzędu.",
   "os-o-35": "z powództwa [OSOBA-A] przeciwko [OSOBA-B], z udziałem [OSOBA-B] i [OSOBA-C]",
+  "os-o-36": "Zgodnie z ustaleniami z Panem Ministrem [OSOBA-A] termin zostaje.",
+  "os-o-37": "Dziękuję Panu Dyrektorowi [OSOBA-A] za pomoc.",
   "os-p-01": "Pozwany [OSOBA-A] nie stawił się na rozprawie.",
   "os-p-02": "Powódka [OSOBA-A] wniosła o zasądzenie kosztów.",
   "os-p-03": "Świadek [OSOBA-A] zeznał, że widział zdarzenie.",
@@ -907,6 +1231,27 @@ Pozwany [OSOBA-C] Annie groził.",
 Kierownik Działu Kadr [OSOBA-D]",
   "os-p-73": "Świadek [OSOBA-A] zeznał. [OSOBA-B] zatrudniony od 01.02.2010 r. Szanowna Pani Dyrektor Szkoły [OSOBA-C]. Grafik: Dzień [OSOBA-D], Noc [OSOBA-E]. Do kościoła wraz ze św. [OSOBA-F] wszedł sprawca.",
   "os-p-74": "[OSOBA-A] napisal, ze [OSOBA-B] bedzie o 18. [OSOBA-C], syn [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO], stawił się.",
+  "os-p-75": "Uczestnicy: [OSOBA-A], [OSOBA-B], [OSOBA-C].
+Ustalenia:
+1. Harmonogram odbioru do 5 dni roboczych (odp. [OSOBA-A]).
+2. Raport z testów (odp. [OSOBA-B], [OSOBA-C]).",
+  "os-p-76": "Notatkę opracowano w Wydziale Kadr.
+Sporządziła: [OSOBA-A]",
+  "os-p-77": "[OSOBA-A]
+prowadząca działalność gospodarczą pod firmą
+[OSOBA-A]
+wzywa do zapłaty.",
+  "os-p-78": "[OSOBA-A], prowadzący działalność pod firmą [OSOBA-A], wzywa.",
+  "os-p-79": "Odbiorca: [OSOBA-A], ul. w załączeniu.",
+  "os-p-80": "Umowa z [OSOBA-A] prowadzącą działalność pod firmą [OSOBA-A]. Za opóźnienie [OSOBA-A] zapłaci karę.",
+  "os-p-81": "Firma: EKO-TRANS [OSOBA-A] (osoba kontaktowa) odpowie na pismo.",
+  "os-p-82": "Testy obciążeniowe wykonał zespół [OSOBA-A].",
+  "os-p-83": "Mecz wygrała drużyna [OSOBA-A], a raport przygotował zespół [OSOBA-B].",
+  "os-p-84": "Notatka. Zespół [OSOBA-A] wykonał audyt, a wezwano [OSOBA-B] na rozprawę.",
+  "os-p-85": "Pracę wykonał zespół [OSOBA-A], a projekt prowadzi drużyna [OSOBA-B].",
+  "os-p-86": "W kościele [OSOBA-A] zauważyła sprawcę i wezwała policję.",
+  "os-p-87": "Odpis aktu małżeństwa [OSOBA-A] i [OSOBA-A], zawartego w Krakowie.",
+  "os-p-88": "Pismo od [OSOBA-A] z 3 marca. Pozew [OSOBA-B] wpłynął.",
   "os-r-01": "[OSOBA-A] podpisał protokół odbioru.",
   "os-r-02": "[OSOBA-A] złożyła wniosek o urlop.",
   "os-r-03": "[OSOBA-A] wynajął magazyn pod miastem.",
@@ -1091,11 +1436,114 @@ Wakat;-;Warszawa
 Login: [LOGIN]
 Na zakończenie orkiestra zagrała mazur.",
   "str-164": "Zgłaszająca mieszka przy [ADRES]. Od 3 lat skarży się na hałas. [OSOBA-A], córka [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO].",
+  "str-165": "Pacjentka, PESEL: [PESEL], zgłosiła się na badanie.",
+  "str-166": "Wnioskodawca, PESEL [PESEL], prosi o zwrot.",
+  "str-167": "Nr PESEL: [PESEL], adres do korespondencji bez zmian.",
+  "str-168": "W razie pytań proszę kontaktować się ze mną pod numerem [TELEFON].",
+  "str-169": "Jestem dostępny pod nr [TELEFON] w dni robocze.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
+  "str-170": "Proszę kontaktować się z działem kadr pod numerem [TELEFON].",
+  "str-171": "Urlop w związku z urodzeniem syna, [OSOBA-A] (PESEL [PESEL]), w dniu [DATA-URODZENIA] r.",
+  "str-172": "[OSOBA-A]
+radca prawny, [NR-UPRAWNIEŃ]",
+  "str-173": "Powódka reprezentowana przez radczynię prawną [OSOBA-A] ([NR-UPRAWNIEŃ]).",
+  "str-174": "Zaświadczenie wystawił lekarz [OSOBA-A] (PWZ [NR-UPRAWNIEŃ]).",
+  "str-175": "lek. [OSOBA-A]
+specjalista chorób wewnętrznych
+PWZ [NR-UPRAWNIEŃ]",
+  "str-176": "Legitymująca się kartą pobytu nr [NR-KARTY-POBYTU], zamieszkała w [MIEJSCOWOŚĆ].",
+  "str-177": "Małżeństwo zawarte w Urzędzie Stanu Cywilnego w Warszawie, akt małżeństwa nr [NR-AKTU-USC].",
+  "str-178": "AKT URODZENIA NR [NR-AKTU-USC], Karta Pobytu [NR-KARTY-POBYTU]",
+  "str-179": "Rozpoznanie:
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+Zalecenia przy wypisie:
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+kontrola w poradni za 4 tygodnie",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
+  "str-180": "Pacjent z rozpoznaniem [DANE O ZDROWIU], przyjmuje [DANE O ZDROWIU].",
+  "str-181": "Zgodnie z zaświadczeniem lekarskim po porodzie przez [DANE O ZDROWIU] przeciwwskazane jest [DANE O ZDROWIU] do końca roku.",
+  "str-182": "Od dwóch lat pozwany [DANE O ZDROWIU]. W wyniku zdarzenia doznałem [DANE O ZDROWIU].",
+  "str-183": "Potrzeba wynika z rozpoznania [DANE O ZDROWIU] i leczenia [DANE O ZDROWIU], potwierdzonego zaświadczeniem lekarza.",
+  "str-184": "Dział Kadr i Płac
+ul. Moniuszki 3
+00-009 Warszawa
+Pani
+[OSOBA-A]
+[ADRES]
+[KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-185": "Zakład Usług Remontowych [OSOBA-A]
+[ADRES]
+[KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-186": "Dział Kadr
+ul. Polna 1
+00-001 Warszawa
+Dział Płac
+ul. Polna 2
+W. [OSOBA-A]
+Przychodnia Rodzinna
+[ADRES]",
+  "str-187": "Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Urząd Gminy, ul. Lipowa 9, 05-500 Piaseczno; [OSOBA-A], [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ].",
+  "str-188": "Szkoła Jazdy KOWALSKI
+[ADRES]
+[KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-189": "Przychodnia Weterynaryjna Wilk, [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
   "str-19": "sms na [TELEFON] nie doszedł",
+  "str-190": "Żłobek Domowy Ewy
+[ADRES]
+[KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-191": "Dla:
+Marianna Zięba-Kot
+Wydział Komunikacji
+[ADRES]
+[KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-192": "Na konferencji [OSOBA-A] omówił rozpoznanie astmy oskrzelowej u dzieci.",
+  "str-193": "Lekarz zalecił mu [DANE O ZDROWIU].",
+  "str-194": "Rozpoznanie: [DANE O ZDROWIU], [OSOBA-A], lat 54",
+  "str-195": "[OSOBA-A]
+radca prawny, [NR-UPRAWNIEŃ]
+Kancelaria w Białymstoku, adwokat [OSOBA-B] ([NR-UPRAWNIEŃ])",
+  "str-196": "Radca prawny [OSOBA-A], nr wpisu na listę radców prawnych OIRP w Warszawie: [NR-UPRAWNIEŃ]",
+  "str-197": "Adwokat [OSOBA-A], wpisana na listę adwokatów ORA w Lublinie pod nr [NR-UPRAWNIEŃ], oraz adwokat [OSOBA-B], [NR-UPRAWNIEŃ].",
+  "str-198": "Adwokat [OSOBA-A]
+Nr wpisu: [NR-UPRAWNIEŃ]",
+  "str-199": "W związku z urodzeniem dziecka w dniu [DATA-URODZENIA] r. pracownica złożyła wniosek o urlop.",
   "str-20": "Infolinia oddzwoni z [TELEFON].",
+  "str-200": "Data urodzenia – [DATA-URODZENIA]
+Data urodzenia dziecka — [DATA-URODZENIA]",
+  "str-201": "Wnoszę o zasiłek z tytułu urodzenia syna, w dniu [DATA-URODZENIA] r., w Szpitalu Wojewódzkim. W związku z urodzeniem córki w dniu [DATA-URODZENIA] r. przysługuje mi zasiłek.",
+  "str-202": "Nr PESEL: [PESEL], PESEL nr [PESEL]",
+  "str-203": "ICD10: [DANE O ZDROWIU]
+ICD-10: [DANE O ZDROWIU]
+Rozpoznanie: [DANE O ZDROWIU]",
+  "str-204": "Pracownik leczony z powodu [DANE O ZDROWIU].",
+  "str-205": "Pacjent: [OSOBA-A]
+Rozpoznanie:
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+Pacjent wypisany do domu",
+  "str-206": "PESEL: [PESEL]
+Rozpoznanie:
+[DANE O ZDROWIU]",
+  "str-207": "Pracownik choruje na [DANE O ZDROWIU], przyjmuje [DANE O ZDROWIU]. Przyjmuje [DANE O ZDROWIU].",
+  "str-208": "Zalecono [DANE O ZDROWIU].
+Zalecenia:
+[DANE O ZDROWIU]",
+  "str-209": "Pacjent: [OSOBA-A]
+Zalecenia przy wypisie:
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+kontrola w poradni za 4 tygodnie",
   "str-21": "Proszę o odpowiedź na [EMAIL] w tym tygodniu.",
+  "str-210": "Syn wnioskodawcy choruje na [DANE O ZDROWIU]. Ubezpieczony choruje na [DANE O ZDROWIU].",
+  "str-211": "Pracownik przeszedł [DANE O ZDROWIU] w marcu. Pracownik przebywał w [DANE O ZDROWIU]. Pani [OSOBA-A] jest [DANE O ZDROWIU].",
+  "str-212": "W razie pytań pod numerem [TELEFON]. Pan [OSOBA-A] dostępny jest pod numerem [TELEFON].",
+  "str-213": "Spółdzielnia Mieszkaniowa Lipa
+[ADRES]",
+  "str-214": "Zamieszkały: [ADRES], [MIEJSCOWOŚĆ]. Lokal w [MIEJSCOWOŚĆ], [ADRES].",
+  "str-215": "Urząd Gminy, ul. Polna 3, [OSOBA-A], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
   "str-22": "Zgłoszenia przyjmujemy pod adresem [EMAIL].",
   "str-23": "e-mail: [EMAIL] (służbowy)",
   "str-24": "Adres do doręczeń: [KOD-POCZTOWY] [MIEJSCOWOŚĆ], skrytka 21.",
@@ -1288,13 +1736,111 @@ Sąd Rejonowy	Wydział Cywilny",
   "neg-162": "Wzór numeru księgi wieczystej: XXXX/XXXXXXXX/X. Nieruchomość KR1P/00234567/1 w zestawieniu.",
   "neg-163": "Szpital Specjalistyczny im. dr. Wilka w Krakowie. Szkoła im. Ks. Jerzego Popiełuszki. Kościół pw. bł. ks. Jerzego Popiełuszki. Parafia pw. bł. Józefa Kowalskiego.",
   "neg-164": "Odbiorca: Szkoła Podstawowa nr 12 im. Jana Pawła II",
+  "neg-165": "Kolumny: PESEL Kwota 1234567890 zł do zapłaty.",
+  "neg-166": "Zapytanie do bazy PESEL nr 2026111301 zrealizowano.",
+  "neg-167": "Spółka wpisana do rejestru pod numerem 22 379 56 66.",
+  "neg-168": "Spółka kontaktowała się w sprawie wpisu pod numerem 12 345 67 89.",
+  "neg-169": "Ogłoszenie jest dostępne pod numerem 22 379 56 66 w BIP urzędu.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
+  "neg-170": "Kontakt z firmą wpisaną pod numerem 12 345 67 89 do rejestru.",
+  "neg-171": "Kontaktowano się ze stroną postępowania zarejestrowanego pod nr 12 345 67 89.",
+  "neg-172": "Sprawa o kontakty z dzieckiem prowadzona pod numerem 12 345 67 89.",
+  "neg-173": "Kontakt ze strony urzędu pod numerem 12 345 67 89.",
+  "neg-174": "Ustalenia:
+1. Zgłoszenie do ZUS (odp. ZUS).
+2. Konta w systemie (odp. IT).
+3. Szkolenie (odp. BHP, etap II).",
+  "neg-175": "Audyt bezpieczeństwa (wyk. NASK), dane (opr. GUS). Etap (odp. IV).",
+  "neg-176": "Pytanie 3: Czy Zamawiający dopuszcza dostawę w dwóch partiach? Odp. TAK.
+Pytanie 4: Czy wymagane jest wadium? Odp.: NIE
+Ankieta, pyt. 7 (odp. TAK).",
+  "neg-177": "Wyk. EKG.
+Badania wyk.: CRP, OB
+W dniu przyjęcia wyk. RTG, USG.",
+  "neg-178": "Źródło: opr. PWN. Wykonał: ZDM. Sprawdził: NOK. Zatwierdził: DG. Kontrola (odp. MF).",
+  "neg-179": "Sporządził: AS",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
+  "neg-180": "Zgodnie z ustaleniami z Panem Ministrem termin nie może zostać przesunięty.",
+  "neg-181": "W domu dochodziło do awantur, w związku z czym wszczęto procedurę Niebieskiej Karty.",
+  "neg-182": "Spotkanie z Panem Wojewodą i Panią Dziekan odbyło się w piątek. Dziękuję Panu Dyrektorowi.",
+  "neg-183": "Serwis AGD-SERWIS i spółka NOWAK-BUD Sp. z o.o. oraz norma PN-EN zostają.",
+  "neg-184": "Zasiłek z tytułu urodzenia dziecka wypłacony w dniu 5 maja 2026 r., wypłata do dnia 31.12.2026.",
+  "neg-185": "Zgłoszenie urodzenia dziecka nastąpiło w dniu 10.06.2026 r., a po urodzeniu córki szczepienie wykonano dnia 3.05.2026 r.",
+  "neg-186": "Koncert dał Chór Jana Lisa, a Fundacja Joanny Sikory wsparła festiwal.",
+  "neg-187": "Msza w kościele Najświętszej Marii Panny, a chór Stanisława Moniuszki zaśpiewał.",
+  "neg-188": "Mecz rozegrała drużyna Lecha Poznań, a grała orkiestra Jana Kiepury.",
+  "neg-189": "Sygn. akt [ZNAK-SPRAWY] oraz Dz.U. 2011 nr 1040 poz. 5.",
   "neg-19": "Rzecznik Praw Obywatelskich zabrał głos w debacie.",
+  "neg-190": "Kod produktu WA-1234 w magazynie. Lekarz ma numer PWZ, który podaje na recepcie.",
+  "neg-191": "Karta pobytu jest ważna 3 lata, a akt notarialny Rep. A nr 1234/2020 sporządzono w Krakowie.",
+  "neg-192": "Adwokat przedstawił fakturę FV/1234, a radca prawny złożył deklarację JPK-12 i powołał się na PKD-2007.",
+  "neg-193": "Zgodnie z aktem zgonu ojca udział 1/2 przypada córce.",
+  "neg-194": "Izba wydała PWZ 12345 lekarzom, a wynagrodzenia lekarzy, 1340517 zł, rosną. Adwokat, KR-2020 to numer sprawy, akty urodzenia 2019/2020 omówiono.",
+  "neg-195": "Spotkanie w sali I10. Dane o zdrowiu pacjenta przetwarza szpital zgodnie z art. 9 RODO. Podpisał lek. med. dyżurny.",
+  "neg-196": "Program profilaktyki cukrzycy realizuje gmina, a apteka sprzedaje paracetamol 500 mg za 9,99 zł.",
+  "neg-197": "Zerwanie umowy i złamanie przepisów nie są urazem. Brak przeciwwskazań do pracy. Centrum Leczenia Stwardnienia Rozsianego przyjmuje.",
+  "neg-198": "Rozpoznanie sprawy nastąpi na posiedzeniu, a osoba uzależniona od alkoholu nie może prowadzić pojazdu.",
+  "neg-199": "Urząd Miasta Łodzi
+Wydział Finansowy
+ul. Piotrkowska 104
+90-926 Łódź",
   "neg-20": "Wilk biegał po lesie za sarną.",
+  "neg-200": "W sprawach awarii proszę o kontakt z administratorem (Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1).",
+  "neg-201": "Przedszkole Miejskie nr 3 w Turku
+ul. Lipowa 8
+62-700 Turek",
+  "neg-202": "Szkoła Podstawowa nr 5 im. Marii Konopnickiej, ul. Lipowa 8, 20-001 Lublin",
+  "neg-203": "Prezydent Miasta
+Wydział Komunikacji
+ul. Lipowa 8
+20-001 Lublin",
+  "neg-204": "Urząd Skarbowy Warszawa-Targówek
+ul. Lipowa 8
+20-001 Lublin",
+  "neg-205": "SZKOŁA PODSTAWOWA NR 5
+ul. Lipowa 8
+20-001 Lublin",
+  "neg-206": "Kod choroby J18.9 oznacza zapalenie płuc, nieokreślone.",
+  "neg-207": "Kod choroby: E11 - cukrzyca typu 2 (opis w słowniku ICD-10).",
+  "neg-208": "Kod choroby E11 dotyczy cukrzycy typu 2; w 2025 r. zgłoszono 1,2 mln porad.",
+  "neg-209": "Osoba, która choruje na cukrzycę, może skorzystać z ulgi.",
   "neg-21": "Lis przemknął przez drogę tuż przed autem.",
+  "neg-210": "Każdy pacjent, który choruje na cukrzycę, ma prawo do edukacji.",
+  "neg-211": "W razie bólu można przyjąć np. paracetamol 500 mg doraźnie.",
+  "neg-212": "Lekarz zalecił leki przeciwbólowe, np. ibuprofen 200 mg.",
+  "neg-213": "Lekarz POZ zalecił w 2025 r. 1,2 mln recept na metforminę 500 mg.",
+  "neg-214": "Lekarz zalecił, by w przypadku gorączki stosować paracetamol 500 mg (instrukcja w ulotce).",
+  "neg-215": "Choroby współistniejące: brak danych. Pacjent wypisany.",
+  "neg-216": "Choroby współistniejące: b.d.",
+  "neg-217": "Rozpoznanie: w rozumieniu art. 5 ustawy cukrzyca jest chorobą przewlekłą.",
+  "neg-218": "Rozpoznanie E11 nie jest wymagane do refundacji.",
+  "neg-219": "Pacjent, który choruje na astmę, może otrzymać refundację leków.",
   "neg-22": "Baran to pierwszy znak zodiaku.",
+  "neg-220": "Chory, który cierpi na depresję, ma prawo do zwolnienia.",
+  "neg-221": "Statystyka NFZ: rozpoznanie E11 postawiono u 3 mln osób.",
+  "neg-222": "W Polsce wystawiono 3 mln recept na sertralinę 50 mg.",
+  "neg-223": "Leki takie jak metformina 500 mg obniżają poziom cukru.",
+  "neg-224": "Kancelaria radcy prawnego, KR-2026 - plan pracy na rok. Radca prawny, WA-1234 – aplikacja 2026 r. NR WPISU: WA-4321",
+  "neg-225": "Radca prawny złożył wniosek o wpis na listę rzeczników patentowych pod nr KR-2020 sprawy. Wpis na listę obecności pod nr LB-12. Adwokat, KRK-2024 - lista spraw.",
+  "neg-226": "Po urodzeniu dziecka, w dniu 1 września 2026 r., wejdą w życie nowe przepisy. Po urodzeniu dziecka, dnia 15 stycznia 2027 r. upływa termin na zgłoszenie.",
+  "neg-227": "Po urodzeniu dziecka w dniu 3 marca 2026 r. przysługuje zasiłek, a po urodzeniu córki w dniu 4.04.2026 r. kończy się okres ochronny.",
+  "neg-228": "Wniosek dotyczący PESEL nr 2024000123 rozpatrzono. Pismo ws. PESEL nr 2024000124 przekazano. Korekta PESEL nr 1000234567 z dnia 3.11.2026.",
+  "neg-229": "Pacjenci, którzy chorują na astmę, mogą otrzymać refundację. Kto choruje na grypę, powinien zostać w domu.",
   "neg-23": "Mazurek wielkanocny stygł na parapecie.",
+  "neg-230": "Ulotka: Augmentin 875 mg, tabletki powlekane. Dorośli: przyjmuje się 500 mg dwa razy dziennie.",
+  "neg-231": "Pacjent przyjmuje leki w obecności pielęgniarki. Zalecono nawóz 30 g na metr kwadratowy.",
+  "neg-232": "Jeżeli pracownica jest w ciąży, pracodawca nie może jej zwolnić. Pielęgniarka pracuje w szpitalu psychiatrycznym.",
+  "neg-233": "Protokół serwisowy
+Imię i nazwisko klienta: [IMIĘ I NAZWISKO]
+Rozpoznanie:
+Uszkodzenie łożyska
+Zużycie paska",
+  "neg-234": "Program lekowy B.29 (ICD-10: G35) finansuje NFZ. Pociąg opóźniony z powodu S12 awarii. Firma przeszła operację restrukturyzacji.",
+  "neg-235": "Wiele osób choruje na cukrzycę. Co trzeci Polak choruje na nadciśnienie. Większość pacjentów przyjmuje Xyzanol 5 mg rano.",
+  "neg-236": "Pismo od Marka do piątku. Gniazdo sowy i lisa w lesie. Msza w kościele pw. Najświętszej Maryi Panny.",
+  "neg-237": "Pani sprawa dostępna jest pod numerem 12 345 67 89. W razie pytań dotyczących sprawy prowadzonej pod numerem 22 379 56 66 proszę pisać.",
+  "neg-238": "Urząd Miasta Łodzi, ul. Piotrkowska 104, 90-926 Łódź. Sąd Okręgowy w Poznaniu, ul. Hejmowskiego 2. Starostwo Powiatowe Turek, ul. Kaliska 59.",
+  "neg-239": "Instytut Badawczy Leśnictwa, ul. Braci Leśnej 3, Sękocin Stary, 05-090 Raszyn.",
   "neg-24": "Sowa hukała całą noc pod oknem.",
   "neg-25": "Kruk krukowi oka nie wykole, jak mówi przysłowie.",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
@@ -1406,6 +1952,8 @@ Sąd Rejonowy	Wydział Cywilny",
   "os-o-33": "Na ulicy spotkałem wczoraj [IMIĘ I NAZWISKO].",
   "os-o-34": "[IMIĘ I NAZWISKO] złożył wniosek do urzędu.",
   "os-o-35": "z powództwa [IMIĘ I NAZWISKO] przeciwko [IMIĘ I NAZWISKO], z udziałem [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO]",
+  "os-o-36": "Zgodnie z ustaleniami z Panem Ministrem [IMIĘ I NAZWISKO] termin zostaje.",
+  "os-o-37": "Dziękuję Panu Dyrektorowi [IMIĘ I NAZWISKO] za pomoc.",
   "os-p-01": "Pozwany [IMIĘ I NAZWISKO] nie stawił się na rozprawie.",
   "os-p-02": "Powódka [IMIĘ I NAZWISKO] wniosła o zasądzenie kosztów.",
   "os-p-03": "Świadek [IMIĘ I NAZWISKO] zeznał, że widział zdarzenie.",
@@ -1495,6 +2043,27 @@ Pozwany [IMIĘ I NAZWISKO] Annie groził.",
 Kierownik Działu Kadr [IMIĘ I NAZWISKO]",
   "os-p-73": "Świadek [IMIĘ I NAZWISKO] zeznał. [IMIĘ I NAZWISKO] zatrudniony od 01.02.2010 r. Szanowna Pani Dyrektor Szkoły [IMIĘ I NAZWISKO]. Grafik: Dzień [IMIĘ I NAZWISKO], Noc [IMIĘ I NAZWISKO]. Do kościoła wraz ze św. [IMIĘ I NAZWISKO] wszedł sprawca.",
   "os-p-74": "[IMIĘ I NAZWISKO] napisal, ze [IMIĘ I NAZWISKO] bedzie o 18. [IMIĘ I NAZWISKO], syn [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO], stawił się.",
+  "os-p-75": "Uczestnicy: [IMIĘ I NAZWISKO], [IMIĘ I NAZWISKO], [IMIĘ I NAZWISKO].
+Ustalenia:
+1. Harmonogram odbioru do 5 dni roboczych (odp. [IMIĘ I NAZWISKO]).
+2. Raport z testów (odp. [IMIĘ I NAZWISKO], [IMIĘ I NAZWISKO]).",
+  "os-p-76": "Notatkę opracowano w Wydziale Kadr.
+Sporządziła: [IMIĘ I NAZWISKO]",
+  "os-p-77": "[IMIĘ I NAZWISKO]
+prowadząca działalność gospodarczą pod firmą
+[IMIĘ I NAZWISKO]
+wzywa do zapłaty.",
+  "os-p-78": "[IMIĘ I NAZWISKO], prowadzący działalność pod firmą [IMIĘ I NAZWISKO], wzywa.",
+  "os-p-79": "Odbiorca: [IMIĘ I NAZWISKO], ul. w załączeniu.",
+  "os-p-80": "Umowa z [IMIĘ I NAZWISKO] prowadzącą działalność pod firmą [IMIĘ I NAZWISKO]. Za opóźnienie [IMIĘ I NAZWISKO] zapłaci karę.",
+  "os-p-81": "Firma: EKO-TRANS [IMIĘ I NAZWISKO] (osoba kontaktowa) odpowie na pismo.",
+  "os-p-82": "Testy obciążeniowe wykonał zespół [IMIĘ I NAZWISKO].",
+  "os-p-83": "Mecz wygrała drużyna [IMIĘ I NAZWISKO], a raport przygotował zespół [IMIĘ I NAZWISKO].",
+  "os-p-84": "Notatka. Zespół [IMIĘ I NAZWISKO] wykonał audyt, a wezwano [IMIĘ I NAZWISKO] na rozprawę.",
+  "os-p-85": "Pracę wykonał zespół [IMIĘ I NAZWISKO], a projekt prowadzi drużyna [IMIĘ I NAZWISKO].",
+  "os-p-86": "W kościele [IMIĘ I NAZWISKO] zauważyła sprawcę i wezwała policję.",
+  "os-p-87": "Odpis aktu małżeństwa [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO], zawartego w Krakowie.",
+  "os-p-88": "Pismo od [IMIĘ I NAZWISKO] z 3 marca. Pozew [IMIĘ I NAZWISKO] wpłynął.",
   "os-r-01": "[IMIĘ I NAZWISKO] podpisał protokół odbioru.",
   "os-r-02": "[IMIĘ I NAZWISKO] złożyła wniosek o urlop.",
   "os-r-03": "[IMIĘ I NAZWISKO] wynajął magazyn pod miastem.",
@@ -1679,11 +2248,114 @@ Wakat;-;Warszawa
 Login: [LOGIN]
 Na zakończenie orkiestra zagrała mazur.",
   "str-164": "Zgłaszająca mieszka przy [ADRES]. Od 3 lat skarży się na hałas. [IMIĘ I NAZWISKO], córka [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO].",
+  "str-165": "Pacjentka, PESEL: [PESEL], zgłosiła się na badanie.",
+  "str-166": "Wnioskodawca, PESEL [PESEL], prosi o zwrot.",
+  "str-167": "Nr PESEL: [PESEL], adres do korespondencji bez zmian.",
+  "str-168": "W razie pytań proszę kontaktować się ze mną pod numerem [TELEFON].",
+  "str-169": "Jestem dostępny pod nr [TELEFON] w dni robocze.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
+  "str-170": "Proszę kontaktować się z działem kadr pod numerem [TELEFON].",
+  "str-171": "Urlop w związku z urodzeniem syna, [IMIĘ I NAZWISKO] (PESEL [PESEL]), w dniu [DATA-URODZENIA] r.",
+  "str-172": "[IMIĘ I NAZWISKO]
+radca prawny, [NR-UPRAWNIEŃ]",
+  "str-173": "Powódka reprezentowana przez radczynię prawną [IMIĘ I NAZWISKO] ([NR-UPRAWNIEŃ]).",
+  "str-174": "Zaświadczenie wystawił lekarz [IMIĘ I NAZWISKO] (PWZ [NR-UPRAWNIEŃ]).",
+  "str-175": "lek. [IMIĘ I NAZWISKO]
+specjalista chorób wewnętrznych
+PWZ [NR-UPRAWNIEŃ]",
+  "str-176": "Legitymująca się kartą pobytu nr [NR-KARTY-POBYTU], zamieszkała w [MIEJSCOWOŚĆ].",
+  "str-177": "Małżeństwo zawarte w Urzędzie Stanu Cywilnego w Warszawie, akt małżeństwa nr [NR-AKTU-USC].",
+  "str-178": "AKT URODZENIA NR [NR-AKTU-USC], Karta Pobytu [NR-KARTY-POBYTU]",
+  "str-179": "Rozpoznanie:
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+Zalecenia przy wypisie:
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+kontrola w poradni za 4 tygodnie",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
+  "str-180": "Pacjent z rozpoznaniem [DANE O ZDROWIU], przyjmuje [DANE O ZDROWIU].",
+  "str-181": "Zgodnie z zaświadczeniem lekarskim po porodzie przez [DANE O ZDROWIU] przeciwwskazane jest [DANE O ZDROWIU] do końca roku.",
+  "str-182": "Od dwóch lat pozwany [DANE O ZDROWIU]. W wyniku zdarzenia doznałem [DANE O ZDROWIU].",
+  "str-183": "Potrzeba wynika z rozpoznania [DANE O ZDROWIU] i leczenia [DANE O ZDROWIU], potwierdzonego zaświadczeniem lekarza.",
+  "str-184": "Dział Kadr i Płac
+ul. Moniuszki 3
+00-009 Warszawa
+Pani
+[IMIĘ I NAZWISKO]
+[ADRES]
+[KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-185": "Zakład Usług Remontowych [IMIĘ I NAZWISKO]
+[ADRES]
+[KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-186": "Dział Kadr
+ul. Polna 1
+00-001 Warszawa
+Dział Płac
+ul. Polna 2
+W. [IMIĘ I NAZWISKO]
+Przychodnia Rodzinna
+[ADRES]",
+  "str-187": "Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Urząd Gminy, ul. Lipowa 9, 05-500 Piaseczno; [IMIĘ I NAZWISKO], [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ].",
+  "str-188": "Szkoła Jazdy KOWALSKI
+[ADRES]
+[KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-189": "Przychodnia Weterynaryjna Wilk, [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
   "str-19": "sms na [TELEFON] nie doszedł",
+  "str-190": "Żłobek Domowy Ewy
+[ADRES]
+[KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-191": "Dla:
+Marianna Zięba-Kot
+Wydział Komunikacji
+[ADRES]
+[KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-192": "Na konferencji [IMIĘ I NAZWISKO] omówił rozpoznanie astmy oskrzelowej u dzieci.",
+  "str-193": "Lekarz zalecił mu [DANE O ZDROWIU].",
+  "str-194": "Rozpoznanie: [DANE O ZDROWIU], [IMIĘ I NAZWISKO], lat 54",
+  "str-195": "[IMIĘ I NAZWISKO]
+radca prawny, [NR-UPRAWNIEŃ]
+Kancelaria w Białymstoku, adwokat [IMIĘ I NAZWISKO] ([NR-UPRAWNIEŃ])",
+  "str-196": "Radca prawny [IMIĘ I NAZWISKO], nr wpisu na listę radców prawnych OIRP w Warszawie: [NR-UPRAWNIEŃ]",
+  "str-197": "Adwokat [IMIĘ I NAZWISKO], wpisana na listę adwokatów ORA w Lublinie pod nr [NR-UPRAWNIEŃ], oraz adwokat [IMIĘ I NAZWISKO], [NR-UPRAWNIEŃ].",
+  "str-198": "Adwokat [IMIĘ I NAZWISKO]
+Nr wpisu: [NR-UPRAWNIEŃ]",
+  "str-199": "W związku z urodzeniem dziecka w dniu [DATA-URODZENIA] r. pracownica złożyła wniosek o urlop.",
   "str-20": "Infolinia oddzwoni z [TELEFON].",
+  "str-200": "Data urodzenia – [DATA-URODZENIA]
+Data urodzenia dziecka — [DATA-URODZENIA]",
+  "str-201": "Wnoszę o zasiłek z tytułu urodzenia syna, w dniu [DATA-URODZENIA] r., w Szpitalu Wojewódzkim. W związku z urodzeniem córki w dniu [DATA-URODZENIA] r. przysługuje mi zasiłek.",
+  "str-202": "Nr PESEL: [PESEL], PESEL nr [PESEL]",
+  "str-203": "ICD10: [DANE O ZDROWIU]
+ICD-10: [DANE O ZDROWIU]
+Rozpoznanie: [DANE O ZDROWIU]",
+  "str-204": "Pracownik leczony z powodu [DANE O ZDROWIU].",
+  "str-205": "Pacjent: [IMIĘ I NAZWISKO]
+Rozpoznanie:
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+Pacjent wypisany do domu",
+  "str-206": "PESEL: [PESEL]
+Rozpoznanie:
+[DANE O ZDROWIU]",
+  "str-207": "Pracownik choruje na [DANE O ZDROWIU], przyjmuje [DANE O ZDROWIU]. Przyjmuje [DANE O ZDROWIU].",
+  "str-208": "Zalecono [DANE O ZDROWIU].
+Zalecenia:
+[DANE O ZDROWIU]",
+  "str-209": "Pacjent: [IMIĘ I NAZWISKO]
+Zalecenia przy wypisie:
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+kontrola w poradni za 4 tygodnie",
   "str-21": "Proszę o odpowiedź na [EMAIL] w tym tygodniu.",
+  "str-210": "Syn wnioskodawcy choruje na [DANE O ZDROWIU]. Ubezpieczony choruje na [DANE O ZDROWIU].",
+  "str-211": "Pracownik przeszedł [DANE O ZDROWIU] w marcu. Pracownik przebywał w [DANE O ZDROWIU]. Pani [IMIĘ I NAZWISKO] jest [DANE O ZDROWIU].",
+  "str-212": "W razie pytań pod numerem [TELEFON]. Pan [IMIĘ I NAZWISKO] dostępny jest pod numerem [TELEFON].",
+  "str-213": "Spółdzielnia Mieszkaniowa Lipa
+[ADRES]",
+  "str-214": "Zamieszkały: [ADRES], [MIEJSCOWOŚĆ]. Lokal w [MIEJSCOWOŚĆ], [ADRES].",
+  "str-215": "Urząd Gminy, ul. Polna 3, [IMIĘ I NAZWISKO], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
   "str-22": "Zgłoszenia przyjmujemy pod adresem [EMAIL].",
   "str-23": "e-mail: [EMAIL] (służbowy)",
   "str-24": "Adres do doręczeń: [KOD-POCZTOWY] [MIEJSCOWOŚĆ], skrytka 21.",
@@ -1925,13 +2597,111 @@ Sąd Rejonowy	Wydział Cywilny",
   "neg-162": "Wzór numeru księgi wieczystej: XXXX/XXXXXXXX/X. Nieruchomość KR1P/00234567/1 w zestawieniu.",
   "neg-163": "Szpital Specjalistyczny im. dr. Wilka w Krakowie. Szkoła im. Ks. Jerzego Popiełuszki. Kościół pw. bł. ks. Jerzego Popiełuszki. Parafia pw. bł. Józefa Kowalskiego.",
   "neg-164": "Odbiorca: Szkoła Podstawowa nr 12 im. Jana Pawła II",
+  "neg-165": "Kolumny: PESEL Kwota 1234567890 zł do zapłaty.",
+  "neg-166": "Zapytanie do bazy PESEL nr 2026111301 zrealizowano.",
+  "neg-167": "Spółka wpisana do rejestru pod numerem 22 379 56 66.",
+  "neg-168": "Spółka kontaktowała się w sprawie wpisu pod numerem 12 345 67 89.",
+  "neg-169": "Ogłoszenie jest dostępne pod numerem 22 379 56 66 w BIP urzędu.",
   "neg-17": "Skierowano pytanie do Izby Cywilnej Sądu Najwyższego.",
+  "neg-170": "Kontakt z firmą wpisaną pod numerem 12 345 67 89 do rejestru.",
+  "neg-171": "Kontaktowano się ze stroną postępowania zarejestrowanego pod nr 12 345 67 89.",
+  "neg-172": "Sprawa o kontakty z dzieckiem prowadzona pod numerem 12 345 67 89.",
+  "neg-173": "Kontakt ze strony urzędu pod numerem 12 345 67 89.",
+  "neg-174": "Ustalenia:
+1. Zgłoszenie do ZUS (odp. ZUS).
+2. Konta w systemie (odp. IT).
+3. Szkolenie (odp. BHP, etap II).",
+  "neg-175": "Audyt bezpieczeństwa (wyk. NASK), dane (opr. GUS). Etap (odp. IV).",
+  "neg-176": "Pytanie 3: Czy Zamawiający dopuszcza dostawę w dwóch partiach? Odp. TAK.
+Pytanie 4: Czy wymagane jest wadium? Odp.: NIE
+Ankieta, pyt. 7 (odp. TAK).",
+  "neg-177": "Wyk. EKG.
+Badania wyk.: CRP, OB
+W dniu przyjęcia wyk. RTG, USG.",
+  "neg-178": "Źródło: opr. PWN. Wykonał: ZDM. Sprawdził: NOK. Zatwierdził: DG. Kontrola (odp. MF).",
+  "neg-179": "Sporządził: AS",
   "neg-18": "Prokuratura Okręgowa w Warszawie umorzyła śledztwo.",
+  "neg-180": "Zgodnie z ustaleniami z Panem Ministrem termin nie może zostać przesunięty.",
+  "neg-181": "W domu dochodziło do awantur, w związku z czym wszczęto procedurę Niebieskiej Karty.",
+  "neg-182": "Spotkanie z Panem Wojewodą i Panią Dziekan odbyło się w piątek. Dziękuję Panu Dyrektorowi.",
+  "neg-183": "Serwis AGD-SERWIS i spółka NOWAK-BUD Sp. z o.o. oraz norma PN-EN zostają.",
+  "neg-184": "Zasiłek z tytułu urodzenia dziecka wypłacony w dniu 5 maja 2026 r., wypłata do dnia 31.12.2026.",
+  "neg-185": "Zgłoszenie urodzenia dziecka nastąpiło w dniu 10.06.2026 r., a po urodzeniu córki szczepienie wykonano dnia 3.05.2026 r.",
+  "neg-186": "Koncert dał Chór Jana Lisa, a Fundacja Joanny Sikory wsparła festiwal.",
+  "neg-187": "Msza w kościele Najświętszej Marii Panny, a chór Stanisława Moniuszki zaśpiewał.",
+  "neg-188": "Mecz rozegrała drużyna Lecha Poznań, a grała orkiestra Jana Kiepury.",
+  "neg-189": "Sygn. akt [ZNAK-SPRAWY] oraz Dz.U. 2011 nr 1040 poz. 5.",
   "neg-19": "Rzecznik Praw Obywatelskich zabrał głos w debacie.",
+  "neg-190": "Kod produktu WA-1234 w magazynie. Lekarz ma numer PWZ, który podaje na recepcie.",
+  "neg-191": "Karta pobytu jest ważna 3 lata, a akt notarialny Rep. A nr 1234/2020 sporządzono w Krakowie.",
+  "neg-192": "Adwokat przedstawił fakturę FV/1234, a radca prawny złożył deklarację JPK-12 i powołał się na PKD-2007.",
+  "neg-193": "Zgodnie z aktem zgonu ojca udział 1/2 przypada córce.",
+  "neg-194": "Izba wydała PWZ 12345 lekarzom, a wynagrodzenia lekarzy, 1340517 zł, rosną. Adwokat, KR-2020 to numer sprawy, akty urodzenia 2019/2020 omówiono.",
+  "neg-195": "Spotkanie w sali I10. Dane o zdrowiu pacjenta przetwarza szpital zgodnie z art. 9 RODO. Podpisał lek. med. dyżurny.",
+  "neg-196": "Program profilaktyki cukrzycy realizuje gmina, a apteka sprzedaje paracetamol 500 mg za 9,99 zł.",
+  "neg-197": "Zerwanie umowy i złamanie przepisów nie są urazem. Brak przeciwwskazań do pracy. Centrum Leczenia Stwardnienia Rozsianego przyjmuje.",
+  "neg-198": "Rozpoznanie sprawy nastąpi na posiedzeniu, a osoba uzależniona od alkoholu nie może prowadzić pojazdu.",
+  "neg-199": "Urząd Miasta Łodzi
+Wydział Finansowy
+ul. Piotrkowska 104
+90-926 Łódź",
   "neg-20": "Wilk biegał po lesie za sarną.",
+  "neg-200": "W sprawach awarii proszę o kontakt z administratorem (Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna 1).",
+  "neg-201": "Przedszkole Miejskie nr 3 w Turku
+ul. Lipowa 8
+62-700 Turek",
+  "neg-202": "Szkoła Podstawowa nr 5 im. Marii Konopnickiej, ul. Lipowa 8, 20-001 Lublin",
+  "neg-203": "Prezydent Miasta
+Wydział Komunikacji
+ul. Lipowa 8
+20-001 Lublin",
+  "neg-204": "Urząd Skarbowy Warszawa-Targówek
+ul. Lipowa 8
+20-001 Lublin",
+  "neg-205": "SZKOŁA PODSTAWOWA NR 5
+ul. Lipowa 8
+20-001 Lublin",
+  "neg-206": "Kod choroby J18.9 oznacza zapalenie płuc, nieokreślone.",
+  "neg-207": "Kod choroby: E11 - cukrzyca typu 2 (opis w słowniku ICD-10).",
+  "neg-208": "Kod choroby E11 dotyczy cukrzycy typu 2; w 2025 r. zgłoszono 1,2 mln porad.",
+  "neg-209": "Osoba, która choruje na cukrzycę, może skorzystać z ulgi.",
   "neg-21": "Lis przemknął przez drogę tuż przed autem.",
+  "neg-210": "Każdy pacjent, który choruje na cukrzycę, ma prawo do edukacji.",
+  "neg-211": "W razie bólu można przyjąć np. paracetamol 500 mg doraźnie.",
+  "neg-212": "Lekarz zalecił leki przeciwbólowe, np. ibuprofen 200 mg.",
+  "neg-213": "Lekarz POZ zalecił w 2025 r. 1,2 mln recept na metforminę 500 mg.",
+  "neg-214": "Lekarz zalecił, by w przypadku gorączki stosować paracetamol 500 mg (instrukcja w ulotce).",
+  "neg-215": "Choroby współistniejące: brak danych. Pacjent wypisany.",
+  "neg-216": "Choroby współistniejące: b.d.",
+  "neg-217": "Rozpoznanie: w rozumieniu art. 5 ustawy cukrzyca jest chorobą przewlekłą.",
+  "neg-218": "Rozpoznanie E11 nie jest wymagane do refundacji.",
+  "neg-219": "Pacjent, który choruje na astmę, może otrzymać refundację leków.",
   "neg-22": "Baran to pierwszy znak zodiaku.",
+  "neg-220": "Chory, który cierpi na depresję, ma prawo do zwolnienia.",
+  "neg-221": "Statystyka NFZ: rozpoznanie E11 postawiono u 3 mln osób.",
+  "neg-222": "W Polsce wystawiono 3 mln recept na sertralinę 50 mg.",
+  "neg-223": "Leki takie jak metformina 500 mg obniżają poziom cukru.",
+  "neg-224": "Kancelaria radcy prawnego, KR-2026 - plan pracy na rok. Radca prawny, WA-1234 – aplikacja 2026 r. NR WPISU: WA-4321",
+  "neg-225": "Radca prawny złożył wniosek o wpis na listę rzeczników patentowych pod nr KR-2020 sprawy. Wpis na listę obecności pod nr LB-12. Adwokat, KRK-2024 - lista spraw.",
+  "neg-226": "Po urodzeniu dziecka, w dniu 1 września 2026 r., wejdą w życie nowe przepisy. Po urodzeniu dziecka, dnia 15 stycznia 2027 r. upływa termin na zgłoszenie.",
+  "neg-227": "Po urodzeniu dziecka w dniu 3 marca 2026 r. przysługuje zasiłek, a po urodzeniu córki w dniu 4.04.2026 r. kończy się okres ochronny.",
+  "neg-228": "Wniosek dotyczący PESEL nr 2024000123 rozpatrzono. Pismo ws. PESEL nr 2024000124 przekazano. Korekta PESEL nr 1000234567 z dnia 3.11.2026.",
+  "neg-229": "Pacjenci, którzy chorują na astmę, mogą otrzymać refundację. Kto choruje na grypę, powinien zostać w domu.",
   "neg-23": "Mazurek wielkanocny stygł na parapecie.",
+  "neg-230": "Ulotka: Augmentin 875 mg, tabletki powlekane. Dorośli: przyjmuje się 500 mg dwa razy dziennie.",
+  "neg-231": "Pacjent przyjmuje leki w obecności pielęgniarki. Zalecono nawóz 30 g na metr kwadratowy.",
+  "neg-232": "Jeżeli pracownica jest w ciąży, pracodawca nie może jej zwolnić. Pielęgniarka pracuje w szpitalu psychiatrycznym.",
+  "neg-233": "Protokół serwisowy
+Imię i nazwisko klienta: <<osoba>>
+Rozpoznanie:
+Uszkodzenie łożyska
+Zużycie paska",
+  "neg-234": "Program lekowy B.29 (ICD-10: G35) finansuje NFZ. Pociąg opóźniony z powodu S12 awarii. Firma przeszła operację restrukturyzacji.",
+  "neg-235": "Wiele osób choruje na cukrzycę. Co trzeci Polak choruje na nadciśnienie. Większość pacjentów przyjmuje Xyzanol 5 mg rano.",
+  "neg-236": "Pismo od Marka do piątku. Gniazdo sowy i lisa w lesie. Msza w kościele pw. Najświętszej Maryi Panny.",
+  "neg-237": "Pani sprawa dostępna jest pod numerem 12 345 67 89. W razie pytań dotyczących sprawy prowadzonej pod numerem 22 379 56 66 proszę pisać.",
+  "neg-238": "Urząd Miasta Łodzi, ul. Piotrkowska 104, 90-926 Łódź. Sąd Okręgowy w Poznaniu, ul. Hejmowskiego 2. Starostwo Powiatowe Turek, ul. Kaliska 59.",
+  "neg-239": "Instytut Badawczy Leśnictwa, ul. Braci Leśnej 3, Sękocin Stary, 05-090 Raszyn.",
   "neg-24": "Sowa hukała całą noc pod oknem.",
   "neg-25": "Kruk krukowi oka nie wykole, jak mówi przysłowie.",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
@@ -2043,6 +2813,8 @@ Sąd Rejonowy	Wydział Cywilny",
   "os-o-33": "Na ulicy spotkałem wczoraj <<osoba>>.",
   "os-o-34": "<<osoba>> złożył wniosek do urzędu.",
   "os-o-35": "z powództwa <<osoba>> przeciwko <<osoba>>, z udziałem <<osoba>> i <<osoba>>",
+  "os-o-36": "Zgodnie z ustaleniami z Panem Ministrem <<osoba>> termin zostaje.",
+  "os-o-37": "Dziękuję Panu Dyrektorowi <<osoba>> za pomoc.",
   "os-p-01": "Pozwany <<osoba>> nie stawił się na rozprawie.",
   "os-p-02": "Powódka <<osoba>> wniosła o zasądzenie kosztów.",
   "os-p-03": "Świadek <<osoba>> zeznał, że widział zdarzenie.",
@@ -2132,6 +2904,27 @@ Pozwany <<osoba>> Annie groził.",
 Kierownik Działu Kadr <<osoba>>",
   "os-p-73": "Świadek <<osoba>> zeznał. <<osoba>> zatrudniony od 01.02.2010 r. Szanowna Pani Dyrektor Szkoły <<osoba>>. Grafik: Dzień <<osoba>>, Noc <<osoba>>. Do kościoła wraz ze św. <<osoba>> wszedł sprawca.",
   "os-p-74": "<<osoba>> napisal, ze <<osoba>> bedzie o 18. <<osoba>>, syn <<osoba>> i <<osoba>>, stawił się.",
+  "os-p-75": "Uczestnicy: <<osoba>>, <<osoba>>, <<osoba>>.
+Ustalenia:
+1. Harmonogram odbioru do 5 dni roboczych (odp. <<osoba>>).
+2. Raport z testów (odp. <<osoba>>, <<osoba>>).",
+  "os-p-76": "Notatkę opracowano w Wydziale Kadr.
+Sporządziła: <<osoba>>",
+  "os-p-77": "<<osoba>>
+prowadząca działalność gospodarczą pod firmą
+<<osoba>>
+wzywa do zapłaty.",
+  "os-p-78": "<<osoba>>, prowadzący działalność pod firmą <<osoba>>, wzywa.",
+  "os-p-79": "Odbiorca: <<osoba>>, ul. w załączeniu.",
+  "os-p-80": "Umowa z <<osoba>> prowadzącą działalność pod firmą <<osoba>>. Za opóźnienie <<osoba>> zapłaci karę.",
+  "os-p-81": "Firma: EKO-TRANS <<osoba>> (osoba kontaktowa) odpowie na pismo.",
+  "os-p-82": "Testy obciążeniowe wykonał zespół <<osoba>>.",
+  "os-p-83": "Mecz wygrała drużyna <<osoba>>, a raport przygotował zespół <<osoba>>.",
+  "os-p-84": "Notatka. Zespół <<osoba>> wykonał audyt, a wezwano <<osoba>> na rozprawę.",
+  "os-p-85": "Pracę wykonał zespół <<osoba>>, a projekt prowadzi drużyna <<osoba>>.",
+  "os-p-86": "W kościele <<osoba>> zauważyła sprawcę i wezwała policję.",
+  "os-p-87": "Odpis aktu małżeństwa <<osoba>> i <<osoba>>, zawartego w Krakowie.",
+  "os-p-88": "Pismo od <<osoba>> z 3 marca. Pozew <<osoba>> wpłynął.",
   "os-r-01": "<<osoba>> podpisał protokół odbioru.",
   "os-r-02": "<<osoba>> złożyła wniosek o urlop.",
   "os-r-03": "<<osoba>> wynajął magazyn pod miastem.",
@@ -2316,11 +3109,114 @@ Wakat;-;Warszawa
 Login: [LOGIN]
 Na zakończenie orkiestra zagrała mazur.",
   "str-164": "Zgłaszająca mieszka przy <<adres>>. Od 3 lat skarży się na hałas. <<osoba>>, córka <<osoba>> i <<osoba>>.",
+  "str-165": "Pacjentka, PESEL: <<pesel>>, zgłosiła się na badanie.",
+  "str-166": "Wnioskodawca, PESEL <<pesel>>, prosi o zwrot.",
+  "str-167": "Nr PESEL: <<pesel>>, adres do korespondencji bez zmian.",
+  "str-168": "W razie pytań proszę kontaktować się ze mną pod numerem [TELEFON].",
+  "str-169": "Jestem dostępny pod nr [TELEFON] w dni robocze.",
   "str-17": "Zadzwoń pod [TELEFON] wieczorem.",
+  "str-170": "Proszę kontaktować się z działem kadr pod numerem [TELEFON].",
+  "str-171": "Urlop w związku z urodzeniem syna, <<osoba>> (PESEL <<pesel>>), w dniu <<data>> r.",
+  "str-172": "<<osoba>>
+radca prawny, [NR-UPRAWNIEŃ]",
+  "str-173": "Powódka reprezentowana przez radczynię prawną <<osoba>> ([NR-UPRAWNIEŃ]).",
+  "str-174": "Zaświadczenie wystawił lekarz <<osoba>> (PWZ [NR-UPRAWNIEŃ]).",
+  "str-175": "lek. <<osoba>>
+specjalista chorób wewnętrznych
+PWZ [NR-UPRAWNIEŃ]",
+  "str-176": "Legitymująca się kartą pobytu nr [NR-KARTY-POBYTU], zamieszkała w <<miejsce>>.",
+  "str-177": "Małżeństwo zawarte w Urzędzie Stanu Cywilnego w Warszawie, akt małżeństwa nr [NR-AKTU-USC].",
+  "str-178": "AKT URODZENIA NR [NR-AKTU-USC], Karta Pobytu [NR-KARTY-POBYTU]",
+  "str-179": "Rozpoznanie:
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+Zalecenia przy wypisie:
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+kontrola w poradni za 4 tygodnie",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
+  "str-180": "Pacjent z rozpoznaniem [DANE O ZDROWIU], przyjmuje [DANE O ZDROWIU].",
+  "str-181": "Zgodnie z zaświadczeniem lekarskim po porodzie przez [DANE O ZDROWIU] przeciwwskazane jest [DANE O ZDROWIU] do końca roku.",
+  "str-182": "Od dwóch lat pozwany [DANE O ZDROWIU]. W wyniku zdarzenia doznałem [DANE O ZDROWIU].",
+  "str-183": "Potrzeba wynika z rozpoznania [DANE O ZDROWIU] i leczenia [DANE O ZDROWIU], potwierdzonego zaświadczeniem lekarza.",
+  "str-184": "Dział Kadr i Płac
+ul. Moniuszki 3
+00-009 Warszawa
+Pani
+<<osoba>>
+<<adres>>
+<<kod>> <<miejsce>>",
+  "str-185": "Zakład Usług Remontowych <<osoba>>
+<<adres>>
+<<kod>> <<miejsce>>",
+  "str-186": "Dział Kadr
+ul. Polna 1
+00-001 Warszawa
+Dział Płac
+ul. Polna 2
+W. <<osoba>>
+Przychodnia Rodzinna
+<<adres>>",
+  "str-187": "Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Lista placówek przyjmujących wnioski w tym roku; Urząd Gminy, ul. Lipowa 9, 05-500 Piaseczno; <<osoba>>, <<adres>>, <<kod>> <<miejsce>>.",
+  "str-188": "Szkoła Jazdy KOWALSKI
+<<adres>>
+<<kod>> <<miejsce>>",
+  "str-189": "Przychodnia Weterynaryjna Wilk, <<adres>>, <<kod>> <<miejsce>>",
   "str-19": "sms na [TELEFON] nie doszedł",
+  "str-190": "Żłobek Domowy Ewy
+<<adres>>
+<<kod>> <<miejsce>>",
+  "str-191": "Dla:
+Marianna Zięba-Kot
+Wydział Komunikacji
+<<adres>>
+<<kod>> <<miejsce>>",
+  "str-192": "Na konferencji <<osoba>> omówił rozpoznanie astmy oskrzelowej u dzieci.",
+  "str-193": "Lekarz zalecił mu [DANE O ZDROWIU].",
+  "str-194": "Rozpoznanie: [DANE O ZDROWIU], <<osoba>>, lat 54",
+  "str-195": "<<osoba>>
+radca prawny, [NR-UPRAWNIEŃ]
+Kancelaria w Białymstoku, adwokat <<osoba>> ([NR-UPRAWNIEŃ])",
+  "str-196": "Radca prawny <<osoba>>, nr wpisu na listę radców prawnych OIRP w Warszawie: [NR-UPRAWNIEŃ]",
+  "str-197": "Adwokat <<osoba>>, wpisana na listę adwokatów ORA w Lublinie pod nr [NR-UPRAWNIEŃ], oraz adwokat <<osoba>>, [NR-UPRAWNIEŃ].",
+  "str-198": "Adwokat <<osoba>>
+Nr wpisu: [NR-UPRAWNIEŃ]",
+  "str-199": "W związku z urodzeniem dziecka w dniu <<data>> r. pracownica złożyła wniosek o urlop.",
   "str-20": "Infolinia oddzwoni z [TELEFON].",
+  "str-200": "Data urodzenia – <<data>>
+Data urodzenia dziecka — <<data>>",
+  "str-201": "Wnoszę o zasiłek z tytułu urodzenia syna, w dniu <<data>> r., w Szpitalu Wojewódzkim. W związku z urodzeniem córki w dniu <<data>> r. przysługuje mi zasiłek.",
+  "str-202": "Nr PESEL: <<pesel>>, PESEL nr <<pesel>>",
+  "str-203": "ICD10: [DANE O ZDROWIU]
+ICD-10: [DANE O ZDROWIU]
+Rozpoznanie: [DANE O ZDROWIU]",
+  "str-204": "Pracownik leczony z powodu [DANE O ZDROWIU].",
+  "str-205": "Pacjent: <<osoba>>
+Rozpoznanie:
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+Pacjent wypisany do domu",
+  "str-206": "PESEL: <<pesel>>
+Rozpoznanie:
+[DANE O ZDROWIU]",
+  "str-207": "Pracownik choruje na [DANE O ZDROWIU], przyjmuje [DANE O ZDROWIU]. Przyjmuje [DANE O ZDROWIU].",
+  "str-208": "Zalecono [DANE O ZDROWIU].
+Zalecenia:
+[DANE O ZDROWIU]",
+  "str-209": "Pacjent: <<osoba>>
+Zalecenia przy wypisie:
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+[DANE O ZDROWIU]
+kontrola w poradni za 4 tygodnie",
   "str-21": "Proszę o odpowiedź na [EMAIL] w tym tygodniu.",
+  "str-210": "Syn wnioskodawcy choruje na [DANE O ZDROWIU]. Ubezpieczony choruje na [DANE O ZDROWIU].",
+  "str-211": "Pracownik przeszedł [DANE O ZDROWIU] w marcu. Pracownik przebywał w [DANE O ZDROWIU]. Pani <<osoba>> jest [DANE O ZDROWIU].",
+  "str-212": "W razie pytań pod numerem [TELEFON]. Pan <<osoba>> dostępny jest pod numerem [TELEFON].",
+  "str-213": "Spółdzielnia Mieszkaniowa Lipa
+<<adres>>",
+  "str-214": "Zamieszkały: <<adres>>, <<miejsce>>. Lokal w <<miejsce>>, <<adres>>.",
+  "str-215": "Urząd Gminy, ul. Polna 3, <<osoba>>, <<kod>> <<miejsce>>",
   "str-22": "Zgłoszenia przyjmujemy pod adresem [EMAIL].",
   "str-23": "e-mail: [EMAIL] (służbowy)",
   "str-24": "Adres do doręczeń: <<kod>> <<miejsce>>, skrytka 21.",
@@ -2530,13 +3426,88 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "neg-162": "",
   "neg-163": "",
   "neg-164": "",
+  "neg-165": "",
+  "neg-166": "",
+  "neg-167": "",
+  "neg-168": "",
+  "neg-169": "",
   "neg-17": "",
+  "neg-170": "",
+  "neg-171": "",
+  "neg-172": "",
+  "neg-173": "",
+  "neg-174": "",
+  "neg-175": "",
+  "neg-176": "",
+  "neg-177": "",
+  "neg-178": "",
+  "neg-179": "",
   "neg-18": "",
+  "neg-180": "",
+  "neg-181": "",
+  "neg-182": "",
+  "neg-183": "",
+  "neg-184": "",
+  "neg-185": "",
+  "neg-186": "",
+  "neg-187": "",
+  "neg-188": "",
+  "neg-189": "ZNAK-SPRAWY:1",
   "neg-19": "",
+  "neg-190": "",
+  "neg-191": "",
+  "neg-192": "",
+  "neg-193": "",
+  "neg-194": "",
+  "neg-195": "",
+  "neg-196": "",
+  "neg-197": "",
+  "neg-198": "",
+  "neg-199": "",
   "neg-20": "",
+  "neg-200": "",
+  "neg-201": "",
+  "neg-202": "",
+  "neg-203": "",
+  "neg-204": "",
+  "neg-205": "",
+  "neg-206": "",
+  "neg-207": "",
+  "neg-208": "",
+  "neg-209": "",
   "neg-21": "",
+  "neg-210": "",
+  "neg-211": "",
+  "neg-212": "",
+  "neg-213": "",
+  "neg-214": "",
+  "neg-215": "",
+  "neg-216": "",
+  "neg-217": "",
+  "neg-218": "",
+  "neg-219": "",
   "neg-22": "",
+  "neg-220": "",
+  "neg-221": "",
+  "neg-222": "",
+  "neg-223": "",
+  "neg-224": "",
+  "neg-225": "",
+  "neg-226": "",
+  "neg-227": "",
+  "neg-228": "",
+  "neg-229": "",
   "neg-23": "",
+  "neg-230": "",
+  "neg-231": "",
+  "neg-232": "",
+  "neg-233": "IMIE:1",
+  "neg-234": "",
+  "neg-235": "",
+  "neg-236": "",
+  "neg-237": "",
+  "neg-238": "",
+  "neg-239": "",
   "neg-24": "",
   "neg-25": "",
   "neg-26": "",
@@ -2648,6 +3619,8 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "os-o-33": "IMIE:1",
   "os-o-34": "IMIE:1",
   "os-o-35": "IMIE:4",
+  "os-o-36": "IMIE:1",
+  "os-o-37": "IMIE:1",
   "os-p-01": "IMIE:1",
   "os-p-02": "IMIE:1",
   "os-p-03": "IMIE:1",
@@ -2722,6 +3695,20 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "os-p-72": "IMIE:4",
   "os-p-73": "IMIE:6",
   "os-p-74": "IMIE:4",
+  "os-p-75": "IMIE:6",
+  "os-p-76": "IMIE:1",
+  "os-p-77": "IMIE:2",
+  "os-p-78": "IMIE:2",
+  "os-p-79": "IMIE:1",
+  "os-p-80": "IMIE:3",
+  "os-p-81": "IMIE:1",
+  "os-p-82": "IMIE:1",
+  "os-p-83": "IMIE:2",
+  "os-p-84": "IMIE:2",
+  "os-p-85": "IMIE:2",
+  "os-p-86": "IMIE:1",
+  "os-p-87": "IMIE:2",
+  "os-p-88": "IMIE:2",
   "os-r-01": "IMIE:1",
   "os-r-02": "IMIE:1",
   "os-r-03": "IMIE:1",
@@ -2862,11 +3849,62 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "str-162": "KW:3",
   "str-163": "LOGIN:1 TELEFON:1",
   "str-164": "ADRES:1 IMIE:2",
+  "str-165": "PESEL:1",
+  "str-166": "PESEL:1",
+  "str-167": "PESEL:1",
+  "str-168": "TELEFON:1",
+  "str-169": "TELEFON:1",
   "str-17": "TELEFON:1",
+  "str-170": "TELEFON:1",
+  "str-171": "PESEL:1 DATA-UR:1 IMIE:1",
+  "str-172": "NR-UPRAWNIEN:1 IMIE:1",
+  "str-173": "NR-UPRAWNIEN:1 IMIE:1",
+  "str-174": "NR-UPRAWNIEN:1 IMIE:1",
+  "str-175": "NR-UPRAWNIEN:1 IMIE:1",
+  "str-176": "KARTA-POBYTU:1 MIEJSCOWOSC:1",
+  "str-177": "AKT-USC:1",
+  "str-178": "KARTA-POBYTU:1 AKT-USC:1",
+  "str-179": "ZDROWIE:4",
   "str-18": "TELEFON:1",
+  "str-180": "ZDROWIE:2",
+  "str-181": "ZDROWIE:2",
+  "str-182": "ZDROWIE:2",
+  "str-183": "ZDROWIE:2",
+  "str-184": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-185": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-186": "ADRES:1 IMIE:1",
+  "str-187": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-188": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
+  "str-189": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
   "str-19": "TELEFON:1",
+  "str-190": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
+  "str-191": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
+  "str-192": "IMIE:1",
+  "str-193": "ZDROWIE:1",
+  "str-194": "ZDROWIE:1 IMIE:1",
+  "str-195": "NR-UPRAWNIEN:2 IMIE:2",
+  "str-196": "NR-UPRAWNIEN:1 IMIE:1",
+  "str-197": "NR-UPRAWNIEN:2 IMIE:2",
+  "str-198": "NR-UPRAWNIEN:1 IMIE:1",
+  "str-199": "DATA-UR:1",
   "str-20": "TELEFON:1",
+  "str-200": "DATA-UR:2",
+  "str-201": "DATA-UR:2",
+  "str-202": "PESEL:2",
+  "str-203": "ZDROWIE:3",
+  "str-204": "ZDROWIE:1",
+  "str-205": "ZDROWIE:2 IMIE:1",
+  "str-206": "PESEL:1 ZDROWIE:1",
+  "str-207": "ZDROWIE:3",
+  "str-208": "ZDROWIE:2",
+  "str-209": "ZDROWIE:3 IMIE:1",
   "str-21": "EMAIL:1",
+  "str-210": "ZDROWIE:2",
+  "str-211": "ZDROWIE:3 IMIE:1",
+  "str-212": "TELEFON:2 IMIE:1",
+  "str-213": "ADRES:1",
+  "str-214": "ADRES:2 MIEJSCOWOSC:2",
+  "str-215": "KOD-POCZTOWY:1 MIEJSCOWOSC:1 IMIE:1",
   "str-22": "EMAIL:1",
   "str-23": "EMAIL:1",
   "str-24": "KOD-POCZTOWY:1 MIEJSCOWOSC:1",
@@ -3075,13 +4113,88 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "neg-162": "",
   "neg-163": "",
   "neg-164": "",
+  "neg-165": "",
+  "neg-166": "",
+  "neg-167": "",
+  "neg-168": "",
+  "neg-169": "",
   "neg-17": "",
+  "neg-170": "",
+  "neg-171": "",
+  "neg-172": "",
+  "neg-173": "",
+  "neg-174": "",
+  "neg-175": "",
+  "neg-176": "",
+  "neg-177": "",
+  "neg-178": "",
+  "neg-179": "",
   "neg-18": "",
+  "neg-180": "",
+  "neg-181": "",
+  "neg-182": "",
+  "neg-183": "",
+  "neg-184": "",
+  "neg-185": "",
+  "neg-186": "",
+  "neg-187": "",
+  "neg-188": "",
+  "neg-189": "ZNAK-SPRAWY:1",
   "neg-19": "",
+  "neg-190": "",
+  "neg-191": "",
+  "neg-192": "",
+  "neg-193": "",
+  "neg-194": "",
+  "neg-195": "",
+  "neg-196": "",
+  "neg-197": "",
+  "neg-198": "",
+  "neg-199": "",
   "neg-20": "",
+  "neg-200": "",
+  "neg-201": "",
+  "neg-202": "",
+  "neg-203": "",
+  "neg-204": "",
+  "neg-205": "",
+  "neg-206": "",
+  "neg-207": "",
+  "neg-208": "",
+  "neg-209": "",
   "neg-21": "",
+  "neg-210": "",
+  "neg-211": "",
+  "neg-212": "",
+  "neg-213": "",
+  "neg-214": "",
+  "neg-215": "",
+  "neg-216": "",
+  "neg-217": "",
+  "neg-218": "",
+  "neg-219": "",
   "neg-22": "",
+  "neg-220": "",
+  "neg-221": "",
+  "neg-222": "",
+  "neg-223": "",
+  "neg-224": "",
+  "neg-225": "",
+  "neg-226": "",
+  "neg-227": "",
+  "neg-228": "",
+  "neg-229": "",
   "neg-23": "",
+  "neg-230": "",
+  "neg-231": "",
+  "neg-232": "",
+  "neg-233": "IMIE:1",
+  "neg-234": "",
+  "neg-235": "",
+  "neg-236": "",
+  "neg-237": "",
+  "neg-238": "",
+  "neg-239": "",
   "neg-24": "",
   "neg-25": "",
   "neg-26": "",
@@ -3193,6 +4306,8 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "os-o-33": "IMIE:1",
   "os-o-34": "IMIE:1",
   "os-o-35": "IMIE:4",
+  "os-o-36": "IMIE:1",
+  "os-o-37": "IMIE:1",
   "os-p-01": "IMIE:1",
   "os-p-02": "IMIE:1",
   "os-p-03": "IMIE:1",
@@ -3267,6 +4382,20 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "os-p-72": "IMIE:4",
   "os-p-73": "IMIE:6",
   "os-p-74": "IMIE:4",
+  "os-p-75": "IMIE:6",
+  "os-p-76": "IMIE:1",
+  "os-p-77": "IMIE:2",
+  "os-p-78": "IMIE:2",
+  "os-p-79": "IMIE:1",
+  "os-p-80": "IMIE:3",
+  "os-p-81": "IMIE:1",
+  "os-p-82": "IMIE:1",
+  "os-p-83": "IMIE:2",
+  "os-p-84": "IMIE:2",
+  "os-p-85": "IMIE:2",
+  "os-p-86": "IMIE:1",
+  "os-p-87": "IMIE:2",
+  "os-p-88": "IMIE:2",
   "os-r-01": "IMIE:1",
   "os-r-02": "IMIE:1",
   "os-r-03": "IMIE:1",
@@ -3407,11 +4536,62 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "str-162": "KW:3",
   "str-163": "LOGIN:1 TELEFON:1",
   "str-164": "ADRES:1 IMIE:2",
+  "str-165": "PESEL:1",
+  "str-166": "PESEL:1",
+  "str-167": "PESEL:1",
+  "str-168": "TELEFON:1",
+  "str-169": "TELEFON:1",
   "str-17": "TELEFON:1",
+  "str-170": "TELEFON:1",
+  "str-171": "PESEL:1 DATA-UR:1 IMIE:1",
+  "str-172": "NR-UPRAWNIEN:1 IMIE:1",
+  "str-173": "NR-UPRAWNIEN:1 IMIE:1",
+  "str-174": "NR-UPRAWNIEN:1 IMIE:1",
+  "str-175": "NR-UPRAWNIEN:1 IMIE:1",
+  "str-176": "KARTA-POBYTU:1 MIEJSCOWOSC:1",
+  "str-177": "AKT-USC:1",
+  "str-178": "KARTA-POBYTU:1 AKT-USC:1",
+  "str-179": "ZDROWIE:4",
   "str-18": "TELEFON:1",
+  "str-180": "ZDROWIE:2",
+  "str-181": "ZDROWIE:2",
+  "str-182": "ZDROWIE:2",
+  "str-183": "ZDROWIE:2",
+  "str-184": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-185": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-186": "ADRES:1 IMIE:1",
+  "str-187": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-188": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
+  "str-189": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
   "str-19": "TELEFON:1",
+  "str-190": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
+  "str-191": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
+  "str-192": "IMIE:1",
+  "str-193": "ZDROWIE:1",
+  "str-194": "ZDROWIE:1 IMIE:1",
+  "str-195": "NR-UPRAWNIEN:2 IMIE:2",
+  "str-196": "NR-UPRAWNIEN:1 IMIE:1",
+  "str-197": "NR-UPRAWNIEN:2 IMIE:2",
+  "str-198": "NR-UPRAWNIEN:1 IMIE:1",
+  "str-199": "DATA-UR:1",
   "str-20": "TELEFON:1",
+  "str-200": "DATA-UR:2",
+  "str-201": "DATA-UR:2",
+  "str-202": "PESEL:2",
+  "str-203": "ZDROWIE:3",
+  "str-204": "ZDROWIE:1",
+  "str-205": "ZDROWIE:2 IMIE:1",
+  "str-206": "PESEL:1 ZDROWIE:1",
+  "str-207": "ZDROWIE:3",
+  "str-208": "ZDROWIE:2",
+  "str-209": "ZDROWIE:3 IMIE:1",
   "str-21": "EMAIL:1",
+  "str-210": "ZDROWIE:2",
+  "str-211": "ZDROWIE:3 IMIE:1",
+  "str-212": "TELEFON:2 IMIE:1",
+  "str-213": "ADRES:1",
+  "str-214": "ADRES:2 MIEJSCOWOSC:2",
+  "str-215": "KOD-POCZTOWY:1 MIEJSCOWOSC:1 IMIE:1",
   "str-22": "EMAIL:1",
   "str-23": "EMAIL:1",
   "str-24": "KOD-POCZTOWY:1 MIEJSCOWOSC:1",
