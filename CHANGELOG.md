@@ -332,6 +332,9 @@ działają na GitHubie od chwili wypchnięcia tagów.
   klinicznym włączono metforminę u 300 pacjentów”, „W programie podawano sertralinę 140
   uczestnikom”, „Kontrola NIK: w szpitalu podawano morfinę bez zlecenia”). Wszystkie leki
   wyliczenia przy osobie znikają razem („bierze sertralinę, lamotryginę i insulinę”).
+- **Długie pismo bez kropek z wieloma nazwami chorób nie spowalnia już redakcji.** Wiersz z tysiącami
+  nazw chorób, tabela JSON z opisami zdrowia albo długi log z adresami IP i liczbami przechodzi kilka
+  do kilkunastu razy szybciej. Wynik redakcji jest taki sam jak wcześniej.
 
 ## v0.47.0 — 2026-11-14
 

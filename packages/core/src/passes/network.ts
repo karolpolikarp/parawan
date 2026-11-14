@@ -1,6 +1,7 @@
 // Identyfikatory techniczne: tokeny i sekrety, MAC, IPv6/IPv4, VIN.
 import { maskKeepPrefix, type RedactCtx } from '../context.js';
 import { precededByLegalRef } from '../guards/numbers.js';
+import { windowMemo } from '../util.js';
 
 // „eyJ" to base64 z „{\"": znikome FP, a token daje dostęp, więc maskujemy w całości.
 // Źródło współdzielone z passProtectUrls, które zdejmuje JWT z adresów przed sentinelem.
@@ -20,9 +21,8 @@ export function passTokens(ctx: RedactCtx): void {
 // z jednym wyrazem dopowiedzenia („EUI-64 interfejsu:", „DUID. . . :").
 const RE_MAC_LABEL_BEFORE = /(?<![A-Za-z])(?:mac|eui(?:-?64)?|duid)(?:[ \t]+\p{L}+)?[\s:=.-]*$/iu;
 
-// Musi biec przed IPv6, bo MAC pasuje do wzorca grup hex IPv6.
-export function passMac(ctx: RedactCtx): void {
-  if (!ctx.on('MAC')) return;
+/** MAC jako pary hex z „:” albo „-”. */
+function maskMacPairs(ctx: RedactCtx): void {
   // Cały łańcuch par z jednym separatorem, żeby nie ciąć dłuższego (numer seryjny, odcisk klucza,
   // „MAC=" z iptables) na sześciopary. Maska przy 6 parach, DHCP „01"+MAC (7), DUID-LLT (14),
   // DUID-LL (10), EUI-64 z „ff:fe" w środku (8) albo po etykiecie.
@@ -46,6 +46,13 @@ export function passMac(ctx: RedactCtx): void {
     /(?<![0-9A-Fa-f]{2}[:-])\b(?:[0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}\b(?![:-][0-9A-Fa-f]{2})/g,
     () => ctx.hit('MAC'),
   );
+}
+
+// Musi biec przed IPv6, bo MAC pasuje do wzorca grup hex IPv6.
+export function passMac(ctx: RedactCtx): void {
+  if (!ctx.on('MAC')) return;
+  // pary z separatorem wymagają „:” albo „-”; bez nich zostaje tylko notacja Cisco z kropkami
+  if (/[:-]/.test(ctx.text)) maskMacPairs(ctx);
   // Notacja Cisco „aabb.ccdd.eeff" z co najmniej jedną literą hex. {0,13} ogranicza lookahead
   // do samego adresu, inaczej ciąg „1.1.1…" daje czas kwadratowy.
   ctx.text = ctx.text.replace(
@@ -72,23 +79,28 @@ const RE_HEX_8_PAIRS = /^[0-9A-Fa-f]{2}(?::[0-9A-Fa-f]{2}){7}$/;
 // IPv6 przed IPv4. Jeden typ dla obu wersji.
 export function passIp(ctx: RedactCtx): void {
   if (!ctx.on('IP')) return;
-  ctx.text = ctx.text.replace(RE_IPV6, (m) => {
-    if (RE_HEX_8_PAIRS.test(m)) return m;
-    return ctx.hit('IP');
-  });
+  // każdy wariant IPv6 ma dwukropek, więc tekst bez niego nie wymaga skanu
+  if (ctx.text.includes(':')) {
+    ctx.text = ctx.text.replace(RE_IPV6, (m) => {
+      if (RE_HEX_8_PAIRS.test(m)) return m;
+      return ctx.hit('IP');
+    });
+  }
   // Prawa granica jak w IPv6 („10.0.0.1.nip.io", OID „1.3.6.1.4" blokują). Kropka kończy też numer
   // punktu konspektu („1.2.3.4. Zakres prac"), więc adres przed kropką wymaga kontekstu sieciowego.
   ctx.text = ctx.text.replace(
     /(?<![\d.])(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)(?!\d|\.\w)/g,
-    (m, offset: number) => {
-      if (precededByLegalRef(ctx.text, offset)) return m;
-      if (RE_IPV4_VERSION_BEFORE.test(ctx.text.slice(Math.max(0, offset - 32), offset))) return m;
-      if (isNonHostIpv4(m, ctx.text.slice(offset + m.length, offset + m.length + 4))) return m;
-      if (ctx.text[offset + m.length] === '.' && !ipv4BeforeDotIsAddress(ctx.text, offset, m)) return m;
-      return ctx.hit('IP');
-    },
+    (m, offset: number) => (ipv4Kept(ctx.text, offset, m) ? m : ctx.hit('IP')),
   );
+  ipv4Kept.clear();
 }
+/** Czy IPv4 zostaje jawny. Strażniki czytają najwyżej 60 znaków przed adresem i 4 po nim. */
+const ipv4Kept = windowMemo(60, 4, (text, offset, m) => {
+  if (precededByLegalRef(text, offset)) return true;
+  if (RE_IPV4_VERSION_BEFORE.test(text.slice(Math.max(0, offset - 32), offset))) return true;
+  if (isNonHostIpv4(m, text.slice(offset + m.length, offset + m.length + 4))) return true;
+  return text[offset + m.length] === '.' && !ipv4BeforeDotIsAddress(text, offset, m);
+});
 
 const PUBLIC_DNS_IPV4 = new Set(['8.8.8.8', '8.8.4.4', '1.1.1.1', '1.0.0.1', '9.9.9.9', '149.112.112.112']);
 /**

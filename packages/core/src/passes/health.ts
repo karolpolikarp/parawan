@@ -19,6 +19,47 @@ import type { RedactCtx } from '../context.js';
 import { NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { escapeRe } from '../util.js';
 
+/*
+ * Pamięć podręczna wyników czystych funkcji tekstu. Kotwice przy każdym trafieniu sprawdzają te same
+ * zdanie i okno kilkoma wyrażeniami (długi wiersz z tysiącami trafień liczył je od nowa przy każdym).
+ * Kluczem jest dokładnie ten napis, który dostaje wyrażenie albo funkcja, więc wynik nie może się
+ * różnić od policzonego wprost. Wyrażenia z flagą g albo y zależą od lastIndex i idą bez pamięci.
+ * Pamięć czyści passHealth na początku i na końcu (nie trzyma tekstu pisma po redakcji).
+ */
+const MEMO_MAX = 4096;
+const memoTests = new Map<RegExp, Map<string, boolean>>();
+const memoFns = new Map<(s: string) => unknown, Map<string, unknown>>();
+function mtest(re: RegExp, s: string): boolean {
+  if (re.global || re.sticky) return re.test(s);
+  let m = memoTests.get(re);
+  if (!m) memoTests.set(re, (m = new Map()));
+  let r = m.get(s);
+  if (r === undefined) {
+    if (m.size >= MEMO_MAX) m.clear();
+    r = re.test(s);
+    m.set(s, r);
+  }
+  return r;
+}
+/** Wynik czystej funkcji jednego napisu, liczony raz na napis. Wynik jest tylko do odczytu. */
+function memo<T>(fn: (s: string) => T): (s: string) => T {
+  const m = new Map<string, T>();
+  memoFns.set(fn, m as Map<string, unknown>);
+  return (s: string): T => {
+    if (m.has(s)) return m.get(s) as T;
+    if (m.size >= MEMO_MAX) m.clear();
+    const r = fn(s);
+    m.set(s, r);
+    return r;
+  };
+}
+function clearMemo(): void {
+  for (const m of memoTests.values()) m.clear();
+  for (const m of memoFns.values()) m.clear();
+  startsText = null;
+  startsValue = [];
+}
+
 const LO = 'a-ząćęłńóśźż';
 const UP = 'A-ZĄĆĘŁŃÓŚŹŻ';
 const LETTER = `${LO}${UP}`;
@@ -193,24 +234,24 @@ const isGivenName = (w: string): boolean => {
 /** Patron instytucji przed imieniem („Szpital im. Józefa Babińskiego”, „im. dr. Jana Biziela”, „imienia ks. Jana Twardowskiego”). */
 const RE_PATRON_BEFORE = /(?:im\.|imienia)[ \t]*(?:(?:dr|prof|ks|św|gen|bp|abp|płk|hm)\.?[ \t]*){0,2}$/i;
 /** Pozycja pierwszej pary „imię nazwisko” w tekście albo -1. */
-function namePairAt(s: string): number {
+const namePairAt = memo(function namePairAt(s: string): number {
   RE_CAP_PAIR.lastIndex = 0;
   for (let m = RE_CAP_PAIR.exec(s); m; m = RE_CAP_PAIR.exec(s)) {
     // patron po „im.” („Szpital im. Józefa Babińskiego”) to nazwa instytucji, a nie osoba
-    const patron = RE_PATRON_BEFORE.test(s.slice(Math.max(0, m.index - 24), m.index));
+    const patron = mtest(RE_PATRON_BEFORE, s.slice(Math.max(0, m.index - 24), m.index));
     if (!patron && (isGivenName(m[1]) || isGivenName(m[2]))) return m.index;
     // para zachodzi na siebie („Pacjentka Maria Kowalska”): następny wyraz zaczyna kolejną parę
     RE_CAP_PAIR.lastIndex = m.index + m[1].length;
   }
   return -1;
-}
-const hasPerson = (w: string): boolean => RE_PERSON.test(w) || RE_PERSON_CS.test(w);
+});
+const hasPerson = (w: string): boolean => mtest(RE_PERSON, w) || mtest(RE_PERSON_CS, w);
 /**
  * Osoba przy trafieniu: rola, zaimek, „Pan”, „Pani” w szerszym oknie, a imię z nazwiskiem tylko
  * w tym samym zdaniu (nazwisko prezesa w zdaniu obok nie robi z raportu karty pacjenta).
  */
 const personNear = (text: string, sentence: string, from: number, to: number): boolean =>
-  hasPerson(personWindow(text, from, to)) || (namePairAt(sentence) >= 0 && !RE_NAME_NOT_PATIENT.test(sentence));
+  hasPerson(personWindow(text, from, to)) || (namePairAt(sentence) >= 0 && !mtest(RE_NAME_NOT_PATIENT, sentence));
 /**
  * Zdanie o grupie ludzi albo o kodzie ze słownika: imię i nazwisko w nim to prelegent czy autor,
  * a nie pacjent („Jan Kowalski omówił rozpoznanie astmy u dzieci”, „Kod J45 oznacza astmę; Jan
@@ -229,7 +270,7 @@ const RE_GENERIC_RULE = new RegExp(
   `^[ \\t"„(]*[${UP}][${LO}]+(?:[ \\t]+[${LO}]+)?[ \\t]*,[ \\t]*któr${L}[^.!?\\n]{1,100}?,[ \\t]*(?:nie[ \\t]+)?(?:powin${L}|może|mogą|ma[ \\t]+prawo|mają[ \\t]+prawo|musi|muszą|przysługuj${L}|należy)${NOT_LETTER_AFTER}`,
 );
 const isGenericRule = (sentence: string): boolean =>
-  RE_GENERIC_RULE.test(sentence) && !hasPerson(sentence) && namePairAt(sentence) < 0;
+  mtest(RE_GENERIC_RULE, sentence) && !hasPerson(sentence) && namePairAt(sentence) < 0;
 
 /** Czasownik o przyjmowaniu leku przez osobę („przyjmuje”, „zalecił”); „zaleca się” i „stosuje się do” nie. */
 const RE_DRUG_VERB = new RegExp(
@@ -460,12 +501,12 @@ const RE_CONDITIONAL = new RegExp(`${NOT_LETTER_BEFORE}(?:jeżeli|jeśli|gdy|gdy
 const sentenceHead = (text: string, starts: number[], from: number): string =>
   text.slice(Math.max(starts[sentenceIndex(starts, from)], from - SPAN), from);
 const populationSubject = (text: string, starts: number[], from: number): boolean =>
-  RE_POPULATION_SUBJECT.test(sentenceHead(text, starts, from));
+  mtest(RE_POPULATION_SUBJECT, sentenceHead(text, starts, from));
 /** Kotwica medyczna albo konkretna osoba w zdaniu, ale nie w regule ogólnej ani zdaniu warunkowym. */
 const personAnchor: Anchor = (text, starts, from, to, mask) => {
   if (medicalAnchored(text, starts, from, to, mask)) return true;
   const sentence = sentenceAt(text, starts, from, to);
-  if (RE_CONDITIONAL.test(sentenceHead(text, starts, from)) || isGenericRule(sentence)) return false;
+  if (mtest(RE_CONDITIONAL, sentenceHead(text, starts, from)) || isGenericRule(sentence)) return false;
   return personNear(text, sentence, from, to);
 };
 /** Personel szpitala („pielęgniarka w szpitalu psychiatrycznym”, „pracuje w…”) to miejsce pracy, a nie pobyt. */
@@ -474,7 +515,7 @@ const RE_HOSPITAL_STAFF = new RegExp(
   'i',
 );
 const stayAnchor: Anchor = (text, starts, from, to, mask) =>
-  !RE_HOSPITAL_STAFF.test(sentenceHead(text, starts, from)) && personAnchor(text, starts, from, to, mask);
+  !mtest(RE_HOSPITAL_STAFF, sentenceHead(text, starts, from)) && personAnchor(text, starts, from, to, mask);
 
 // Frazy, które same wskazują osobę, idą pierwsze: ich maska jest kotwicą dla fraz dalej.
 const PHRASES: Phrase[] = [
@@ -556,7 +597,7 @@ const PHRASES: Phrase[] = [
 ];
 /** Te same frazy bez flagi „g” do sprawdzania, czy w tekście jest nazwa choroby. */
 const PHRASE_TESTS = PHRASES.map((p) => new RegExp(p.re.source, 'i'));
-const hasDisease = (s: string): boolean => PHRASE_TESTS.some((re) => re.test(s));
+const hasDisease = memo((s: string): boolean => PHRASE_TESTS.some((re) => re.test(s)));
 const PHRASE_AT_START = PHRASES.map((p) => new RegExp(`^(?:${p.re.source})`, 'i'));
 
 /** Słownictwo medyczne w otoczeniu nagłówka sekcji: karta ze szpitala, a nie raport techniczny. */
@@ -564,7 +605,7 @@ const RE_MED_VOCAB = new RegExp(
   `${NOT_LETTER_BEFORE}(?:${STRONG}|pacjen(?:t|tk)${L}|leczeni${L}|hospitaliz${L}|porod${L}|poród|lekar${L}|lekark${L}|szpital${L}|przychodni${L}|poradni${L}|klinik${L}|ICD(?:-?10)?|pielęgniar${L}|ordynator${L}|oddział${L}[ \\t]+(?:chorób|kardiolog|neurolog|chirurg|psychiatr|onkolog|wewnętrzn|intensywn|ratunkow|pediatr|ginekolog|ortoped)${L})${NOT_LETTER_AFTER}`,
   'i',
 );
-const hasMedVocab = (s: string): boolean => RE_MED_VOCAB.test(s) || hasDisease(s) || RE_DRUG_NAME.test(s);
+const hasMedVocab = (s: string): boolean => mtest(RE_MED_VOCAB, s) || hasDisease(s) || mtest(RE_DRUG_NAME, s);
 
 /* ── Zdarzenia zdrowotne przy osobie ── */
 
@@ -651,10 +692,10 @@ const RE_NORMATIVE = new RegExp(
 const RE_NORMATIVE_WEAK = new RegExp(`${NOT_LETTER_BEFORE}(?:może|mogą|można|wymagan${L}|wymaga|każd${L}(?![ \\t]+(?:dnia|dzień|roku|tygodnia|miesiąca|razem|razie|wieczór|rano|nocy|porze|porę|godzinie|chwili|chwilę))|wszys(?:cy|tkie|tkich))(?![${LETTER}])`, 'i');
 const RE_COORD = new RegExp(`(?:[,;:–]|${NOT_LETTER_BEFORE}(?:i|oraz|a|ale|lecz|więc|dlatego|ponieważ|bo|gdyż|zatem|przez[ \\t]+co)(?![${LETTER}]))`, 'i');
 function weakNormative(sentence: string, from: number, to: number): boolean {
-  if (RE_NORMATIVE_WEAK.test(sentence.slice(0, from))) return true;
+  if (mtest(RE_NORMATIVE_WEAK, sentence.slice(0, from))) return true;
   const after = sentence.slice(to);
   const w = RE_NORMATIVE_WEAK.exec(after);
-  return !!w && !RE_COORD.test(after.slice(0, w.index));
+  return !!w && !mtest(RE_COORD, after.slice(0, w.index));
 }
 /** Warunek i reguła („jeżeli”, „w przypadku”, „kto”): bez osoby wskazanej z nazwy mowa o każdym. */
 const RE_IF = new RegExp(`${NOT_LETTER_BEFORE}(?:jeżeli|jeśli|gdyby|o[ \\t]+ile|kto|w[ \\t]+razie|w[ \\t]+przypadku)${NOT_LETTER_AFTER}`, 'i');
@@ -682,7 +723,7 @@ const RE_MY_BEFORE = new RegExp(`${NOT_LETTER_BEFORE}(?:mój|moja|moje|mojego|mo
 const RE_LIST_POS = /^[ \t]*(?:[-•*][ \t]*)?poz\.[ \t]*\d{1,3}(?!\d)[ \t]*[:)]/i;
 const RE_QUANTITY = new RegExp(`${NOT_LETTER_BEFORE}(?:szt\\.|sztuk${L}|zł|PLN|kwot${L}|cen${L}|netto|brutto|opakowa${L}|kpl\\.|komplet${L})(?![${LETTER}])`, 'i');
 const namedIn = (sentence: string): boolean =>
-  RE_NAMED.test(sentence) || (RE_LIST_POS.test(sentence) && !RE_QUANTITY.test(sentence));
+  mtest(RE_NAMED, sentence) || (mtest(RE_LIST_POS, sentence) && !mtest(RE_QUANTITY, sentence));
 /**
  * Czasownik osoby tuż przed frazą („przebywa na zwolnieniu lekarskim”, „ma orzeczenie”, „dostarczył L4”,
  * „jestem na dializach”): podmiot w liczbie pojedynczej, więc fraza mówi o konkretnej osobie.
@@ -691,7 +732,7 @@ const namedIn = (sentence: string): boolean =>
 const RE_SELF_FRAME = new RegExp(
   `${NOT_LETTER_BEFORE}(?:(?:przebyw(?:a|am|ał|ała|ałem|ałam)|jest|jestem|był|była|byłem|byłam)[ \\t]{1,4}(?:na|po|w)|przebyw(?:a|am|ał|ała|ałem|ałam)|(?:ma|mam|miał|miała)(?:[ \\t]{1,4}(?:zaplanowan|wyznaczon|stwierdzon|rozpoznan|przyznan|orzeczon|wystawion|zalecon)[${LO}]{1,3})?|posiada|dostarczył(?:a|em|am)?|przedstawił(?:a|em|am)?|otrzymał(?:a|em|am)?|legitymuj(?:e|ę)[ \\t]+się)[ \\t]{1,4}$`,
 );
-const selfFrame = (whole: string, offset: number): boolean => RE_SELF_FRAME.test(whole.slice(Math.max(0, offset - 40), offset));
+const selfFrame = (whole: string, offset: number): boolean => mtest(RE_SELF_FRAME, whole.slice(Math.max(0, offset - 40), offset));
 /**
  * Osoba wskazana słabiej: rola, krewny. Wystarcza tylko w zdaniu, które nie jest normatywne.
  * „Strona” to też strona internetowa i strona dokumentu („na stronie internetowej”, „na stronie 4”,
@@ -728,12 +769,7 @@ const RE_EV_PRONOUN = new RegExp(
 const RE_CLAUSE_BREAK = new RegExp(`[;(]|[,:](?!\\d)|${NOT_LETTER_BEFORE}(?:że|iż|któr${L}|gdy|kiedy|ponieważ|bo)(?![${LETTER}])`, 'gi');
 /** Człon zdania z frazą: od ostatniej granicy przed frazą do pierwszej granicy po niej. */
 function clauseAt(sentence: string, from: number, to: number): { head: string; clause: string; tail: string } {
-  let a = 0;
-  RE_CLAUSE_BREAK.lastIndex = 0;
-  for (let m = RE_CLAUSE_BREAK.exec(sentence); m && m.index < from; m = RE_CLAUSE_BREAK.exec(sentence)) a = m.index + m[0].length;
-  RE_CLAUSE_BREAK.lastIndex = to;
-  const end = RE_CLAUSE_BREAK.exec(sentence);
-  const b = end ? end.index : sentence.length;
+  const [a, b] = boundsAt(sentence, from, to, RE_CLAUSE_BREAK);
   const rest = sentence.slice(to, b);
   const coord = RE_COORD.exec(rest);
   return { head: sentence.slice(a, from), clause: `${sentence.slice(a, from)} ${rest}`, tail: coord ? rest.slice(0, coord.index) : rest };
@@ -754,13 +790,24 @@ const RE_PLURAL_VERB = new RegExp(`${NOT_LETTER_BEFORE}(?:[${LO}]{2,}(?:ują|aj�
 const RE_SUB_BREAK = new RegExp(`;|:(?!\\d)|${NOT_LETTER_BEFORE}(?:że|iż|czy|ile|dlaczego|któr${L}|gdy|kiedy|ponieważ|bo|aby|żeby|jeżeli|jeśli)(?![${LETTER}])`, 'gi');
 /** Granice [a, b) członu z frazą: od ostatniej granicy przed frazą do pierwszej granicy po niej. */
 function boundsAt(sentence: string, from: number, to: number, re: RegExp): [number, number] {
+  const br = re === RE_CLAUSE_BREAK ? clauseBreaks(sentence) : re === RE_SUB_BREAK ? subBreaks(sentence) : breaksOf(re, sentence);
   let a = 0;
-  re.lastIndex = 0;
-  for (let m = re.exec(sentence); m && m.index < from; m = re.exec(sentence)) a = m.index + m[0].length;
-  re.lastIndex = to;
-  const end = re.exec(sentence);
-  return [a, end ? end.index : sentence.length];
+  let k = 0;
+  for (; k < br.length && br[k] < from; k += 2) a = br[k + 1];
+  // szukanie od „to” daje pierwszą granicę z listy od tego miejsca: granica to jeden znak albo całe słowo
+  // z literą przed nim zabronioną, więc żadna nie zaczyna się wewnątrz innej
+  while (k < br.length && br[k] < to) k += 2;
+  return [a, k < br.length ? br[k] : sentence.length];
 }
+/** Wszystkie granice członu w zdaniu jako pary [początek, koniec] (płaska tablica, tylko do odczytu). */
+function breaksOf(re: RegExp, sentence: string): number[] {
+  const out: number[] = [];
+  re.lastIndex = 0;
+  for (let m = re.exec(sentence); m; m = re.exec(sentence)) out.push(m.index, m.index + m[0].length);
+  return out;
+}
+const clauseBreaks = memo((s: string) => breaksOf(RE_CLAUSE_BREAK, s));
+const subBreaks = memo((s: string) => breaksOf(RE_SUB_BREAK, s));
 /**
  * Funkcja w wtrąceniu po nazwisku („Pan Nowak, wójt gminy,”, „Pani Kowalska, logopeda,”, „Pan Nowak,
  * konserwator,”): osoba występuje w roli urzędnika, świadczeniodawcy albo pracownika, a nie pacjenta.
@@ -774,32 +821,32 @@ const RE_TITLED = new RegExp(`(?<![${LETTER}])(?:[Pp]an|[Pp]ani|[Pp]anu|[Pp]ani�
  * Osoby z nazwy w zdaniu jako przedziały [a, b): „Pan Nowak”, „pani Ewy Kos”, imię z nazwiskiem.
  * Pomija lekarza z tytułem, osobę z funkcją w wtrąceniu i imię prelegenta w zdaniu o grupie.
  */
-function patientNamed(sentence: string): [number, number][] {
+const patientNamed = memo(function patientNamed(sentence: string): [number, number][] {
   const out: [number, number][] = [];
   const keep = (a: number, b: number): void => {
-    if (RE_CLINICIAN_BEFORE.test(sentence.slice(Math.max(0, a - 16), a))) return;
-    if (RE_FUNCTION_APPOS.test(sentence.slice(b, b + 60))) return;
+    if (mtest(RE_CLINICIAN_BEFORE, sentence.slice(Math.max(0, a - 16), a))) return;
+    if (mtest(RE_FUNCTION_APPOS, sentence.slice(b, b + 60))) return;
     out.push([a, b]);
   };
   RE_TITLED.lastIndex = 0;
   for (let m = RE_TITLED.exec(sentence); m; m = RE_TITLED.exec(sentence)) keep(m.index, m.index + m[0].length);
-  if (!RE_NAME_NOT_PATIENT.test(sentence)) {
+  if (!mtest(RE_NAME_NOT_PATIENT, sentence)) {
     RE_CAP_PAIR.lastIndex = 0;
     for (let m = RE_CAP_PAIR.exec(sentence); m; m = RE_CAP_PAIR.exec(sentence)) {
-      const patron = RE_PATRON_BEFORE.test(sentence.slice(Math.max(0, m.index - 24), m.index));
+      const patron = mtest(RE_PATRON_BEFORE, sentence.slice(Math.max(0, m.index - 24), m.index));
       if (!patron && (isGivenName(m[1]) || isGivenName(m[2]))) keep(m.index, m.index + m[0].length);
       RE_CAP_PAIR.lastIndex = m.index + m[1].length;
     }
   }
   return out;
-}
+});
 const spanIn = (spans: [number, number][], a: number, b: number): boolean => spans.some(([x, y]) => x >= a && y <= b);
 /**
  * Pierwsza osoba w zdaniu podrzędnym z frazą: czasownik przeszły albo „u mnie” w nim, albo „mój”,
  * „mojego” tuż przed frazą.
  */
 function firstPersonIn(sentence: string, a: number, b: number, f: number): boolean {
-  return RE_FIRST_PERSON.test(sentence.slice(a, f)) || RE_FIRST_PERSON.test(sentence.slice(f, b)) || RE_MY_BEFORE.test(sentence.slice(Math.max(a, f - 12), f));
+  return mtest(RE_FIRST_PERSON, sentence.slice(a, f)) || mtest(RE_FIRST_PERSON, sentence.slice(f, b)) || mtest(RE_MY_BEFORE, sentence.slice(Math.max(a, f - 12), f));
 }
 
 /**
@@ -814,13 +861,13 @@ const RE_PROVIDER_REL = new RegExp(`${NOT_LETTER_BEFORE}${PROVIDER}((?:[ \\t]{1,
 const RE_DATIVE_PERSON = new RegExp(`${NOT_LETTER_BEFORE}(?:mu|jej|mi|mnie|im|jemu|niej|niemu)(?![${LETTER}])`, 'i');
 const RE_TITLED_ANY = new RegExp(`(?:Pan|Pani)[ \\t]+[${UP}]`);
 const RE_PROVIDER_COORD = new RegExp(`${NOT_LETTER_BEFORE}${PROVIDER}((?:[ \\t]{1,4}[^ \\t,.;:!?]{1,30}){0,6})[ \\t]{1,4}(?:i|oraz|lub|albo)[ \\t]{1,4}$`, 'i');
-function providerRel(before: string): boolean {
+const providerRel = memo(function providerRel(before: string): boolean {
   const tail = before.slice(-160);
   const m = RE_PROVIDER_REL.exec(tail) ?? RE_PROVIDER_COORD.exec(tail);
   if (!m) return false;
   const gap = m[1];
-  return !(RE_DATIVE_PERSON.test(gap) || hasPerson(gap) || RE_EV_PERSON.test(gap) || RE_TITLED_ANY.test(gap));
-}
+  return !(mtest(RE_DATIVE_PERSON, gap) || hasPerson(gap) || mtest(RE_EV_PERSON, gap) || mtest(RE_TITLED_ANY, gap));
+});
 /**
  * Grupa w liczbie mnogiej tuż po frazie („pobyt w hospicjum dla samotnych mieszkańców”, „leczenie
  * onkologiczne dzieci”, „zasiłku chorobowego dla pracowników tymczasowych”, „u dorosłych”): mowa
@@ -850,9 +897,9 @@ const RE_OFFICE_TOKEN = new RegExp(`^${OFFICE}$`);
 function personStart(tok: string[], i: number): boolean {
   const w = tok[i];
   if (/^\[(?:PESEL|DATA-URODZENIA)\]$/.test(w)) return true;
-  if (/^(?:Pan|Pani)$/.test(w)) return i + 1 < tok.length && RE_UP_TOKEN.test(tok[i + 1]) && !RE_OFFICE_TOKEN.test(tok[i + 1]);
-  if (RE_UP_TOKEN.test(w) && isGivenName(w)) return true;
-  return RE_SUBJ_ROLE.test(w);
+  if (/^(?:Pan|Pani)$/.test(w)) return i + 1 < tok.length && mtest(RE_UP_TOKEN, tok[i + 1]) && !mtest(RE_OFFICE_TOKEN, tok[i + 1]);
+  if (mtest(RE_UP_TOKEN, w) && isGivenName(w)) return true;
+  return mtest(RE_SUBJ_ROLE, w);
 }
 type SubjectKind = 'person' | 'none' | 'verb' | 'name' | 'other';
 /**
@@ -864,7 +911,7 @@ type SubjectKind = 'person' | 'none' | 'verb' | 'name' | 'other';
  * Przysłówki, spójniki, daty i przyimek z dopełnieniem („Od roku”, „W dniu 3 marca 2025 r.”,
  * „Na tym oddziale”) nie są podmiotem.
  */
-function subjectKind(region: string): SubjectKind {
+const subjectKind = memo(function subjectKind(region: string): SubjectKind {
   const tok = region.match(/\[[^\]\n]{1,30}\]|[^\s,;:„”"()–]+/g) ?? [];
   let i = 0;
   while (i < tok.length) {
@@ -876,19 +923,19 @@ function subjectKind(region: string): SubjectKind {
     }
     if (SUBJ_PREP.has(lw)) {
       i++;
-      while (i < tok.length && (RE_ADJ_TOKEN.test(tok[i]) || /^(?:tym|tej|tę|ten|tamtym|[\d./-]+)$/i.test(tok[i]))) i++;
+      while (i < tok.length && (mtest(RE_ADJ_TOKEN, tok[i]) || /^(?:tym|tej|tę|ten|tamtym|[\d./-]+)$/i.test(tok[i]))) i++;
       if (i < tok.length && !personStart(tok, i)) i++;
       continue;
     }
     if (personStart(tok, i)) return 'person';
-    if (!RE_UP_TOKEN.test(w) && !(i > 0 && /^(?:a|zaś|natomiast)$/i.test(tok[i - 1]))) return 'verb';
+    if (!mtest(RE_UP_TOKEN, w) && !(i > 0 && /^(?:a|zaś|natomiast)$/i.test(tok[i - 1]))) return 'verb';
     let k = i;
-    while (k < tok.length && k - i < 2 && RE_NAME_TOKEN.test(tok[k]) && !/^pan/i.test(tok[k])) k++;
-    if (k > i && (k === tok.length || !RE_UP_TOKEN.test(tok[k]))) return 'name';
+    while (k < tok.length && k - i < 2 && mtest(RE_NAME_TOKEN, tok[k]) && !/^pan/i.test(tok[k])) k++;
+    if (k > i && (k === tok.length || !mtest(RE_UP_TOKEN, tok[k]))) return 'name';
     return 'other';
   }
   return 'none';
-}
+});
 /**
  * Podmiot czasownika zdarzenia: najpierw człon z frazą (po przecinku zaczyna się nowe orzeczenie,
  * „a szpital stosuje”), a gdy człon nie ma podmiotu, początek zdania podrzędnego („Pan Nowak,
@@ -932,18 +979,18 @@ const ev = (src: string, opts: Omit<HealthEvent, 're'> = {}): HealthEvent => ({
 const RE_DEGREE_LIST_BEFORE = new RegExp(`${DEGREE}[ \\t]*(?:lub|albo|i|oraz|,|/)[ \\t]*$`);
 const RE_DEGREE_LIST_AFTER = new RegExp(`^[ \\t]*(?:lub|albo|i|oraz|,|/)[ \\t]*${DEGREE}`);
 const degreeList = (whole: string, offset: number, m: string): boolean =>
-  RE_DEGREE_LIST_BEFORE.test(whole.slice(Math.max(0, offset - 30), offset)) || RE_DEGREE_LIST_AFTER.test(whole.slice(offset + m.length, offset + m.length + 30));
+  mtest(RE_DEGREE_LIST_BEFORE, whole.slice(Math.max(0, offset - 30), offset)) || mtest(RE_DEGREE_LIST_AFTER, whole.slice(offset + m.length, offset + m.length + 30));
 /** Tytuł dokumentu („karta informacyjna leczenia szpitalnego”) i kształcenie terapeutów („szkoła psychoterapii”). */
 const RE_TITLE_BEFORE = new RegExp(`(?:informacyjn${L}|szkoł${L}|kurs${L}|szkoleni${L}|studi${L}|certyfikat${L}|dyplom${L}|ofert${L}|program${L}|zakres${L}|koszt${L}|finansowani${L}|refundacj${L})(?:[ \\t]+(?:z|ze|w[ \\t]+zakresie))?[ \\t]+$`, 'i');
-const titleBefore = (whole: string, offset: number): boolean => RE_TITLE_BEFORE.test(whole.slice(Math.max(0, offset - 40), offset));
+const titleBefore = (whole: string, offset: number): boolean => mtest(RE_TITLE_BEFORE, whole.slice(Math.max(0, offset - 40), offset));
 /** Terapię prowadzi terapeuta, logopeda, poradnia („prowadzi terapię logopedyczną”): to usługa, a nie leczenie osoby. */
 const RE_PROVIDER_BEFORE = new RegExp(`(?:prowadz${L}|prowadził${L}|oferuj${L}|realizuj${L}|organizuj${L}|zapewnia${L}|świadcz${L}|udziela${L})[ \\t]+(?:[${LO}]+[ \\t]+){0,2}$`, 'i');
-const providerBefore = (whole: string, offset: number): boolean => RE_PROVIDER_BEFORE.test(whole.slice(Math.max(0, offset - 40), offset));
+const providerBefore = (whole: string, offset: number): boolean => mtest(RE_PROVIDER_BEFORE, whole.slice(Math.max(0, offset - 40), offset));
 const staffBefore = (whole: string, offset: number, _m: string, starts: number[]): boolean =>
-  RE_HOSPITAL_STAFF.test(sentenceHead(whole, starts, offset));
+  mtest(RE_HOSPITAL_STAFF, sentenceHead(whole, starts, offset));
 /** Placówka tuż przed frazą („poradni leczenia uzależnień”, „ośrodka terapii”): nazwa placówki, a nie leczenie osoby. */
 const RE_PLACE_BEFORE = new RegExp(`${NOT_LETTER_BEFORE}(?:poradni${L}|przychodni${L}|ośrod(?:ek|ka|ku|kiem|ków|kach)|oddzia(?:ł|łu|le|łem|łów)|centr(?:um|ów|ach)|gabinet${L}|zakład${L}|klinik${L}|placów(?:ka|ki|ce|kę|ek)|specjalist${L}|terapeut${L})[ \\t]+$`, 'i');
-const placeBefore = (whole: string, offset: number): boolean => RE_PLACE_BEFORE.test(whole.slice(Math.max(0, offset - 30), offset));
+const placeBefore = (whole: string, offset: number): boolean => mtest(RE_PLACE_BEFORE, whole.slice(Math.max(0, offset - 30), offset));
 
 /**
  * Temat pisma albo procedury tuż przed frazą: zasady, wnioski, informacje, druk, system, rozliczenie,
@@ -962,8 +1009,8 @@ const RE_TOPIC_BEFORE = new RegExp(
 /** Osoba zaraz po frazie w dopełniaczu („zasiłku chorobowego Pana Nowaka”, „zwolnienia lekarskiego pracownika”). */
 const RE_OWNER_AFTER = new RegExp(`^[ \\t]*(?:(?:Pana|Pani|pana|pani)[ \\t]+[${UP}]|[${UP}][${LO}]+[ \\t]+[${UP}][${LO}]+|${PERSON_WORD}(?![${LETTER}]))`);
 function topicBefore(whole: string, offset: number, m: string): boolean {
-  if (!RE_TOPIC_BEFORE.test(whole.slice(Math.max(0, offset - 70), offset))) return false;
-  return !RE_OWNER_AFTER.test(whole.slice(offset + m.length, offset + m.length + 40));
+  if (!mtest(RE_TOPIC_BEFORE, whole.slice(Math.max(0, offset - 70), offset))) return false;
+  return !mtest(RE_OWNER_AFTER, whole.slice(offset + m.length, offset + m.length + 40));
 }
 
 /**
@@ -983,7 +1030,7 @@ function thingSubject(whole: string, offset: number, m: string, starts: number[]
   const sentence = sentenceAt(whole, starts, offset, offset + m.length);
   const s0 = Math.max(starts[sentenceIndex(starts, offset)], offset - SPAN);
   const { head } = clauseAt(sentence, offset - s0, offset - s0 + m.length);
-  return RE_THING_SUBJECT.test(head) || RE_STAY_PURPOSE.test(whole.slice(offset + m.length, offset + m.length + 60));
+  return mtest(RE_THING_SUBJECT, head) || mtest(RE_STAY_PURPOSE, whole.slice(offset + m.length, offset + m.length + 60));
 }
 /** Pytanie formularza („Czy dziecko posiada orzeczenie? TAK / NIE”): treść druku, a nie fakt o osobie. */
 const RE_QUESTION = /^[ \t"„(]*(?:\d{1,2}[.)][ \t]*)?czy(?![a-ząćęłńóśźż])[^?\n]*\?/i;
@@ -1059,9 +1106,9 @@ const RE_EN_GENERAL =
   /(?<![A-Za-z])(?:may|must|shall|should|can|entitled|eligible|policy|policies|regulations?|Act|Code|section|rules?|procedure|any|all|every|each|whoever|anyone|employees|patients|people|workers|persons|individuals|pupils|students|staff|those|who)(?![A-Za-z])/;
 function enAnchor(text: string, starts: number[], from: number, to: number): boolean {
   const sentence = sentenceAt(text, starts, from, to);
-  if (RE_EN_NAMED.test(sentence) || namePairAt(sentence) >= 0) return true;
-  if (RE_EN_GENERAL.test(sentence)) return false;
-  return RE_EN_PERSON.test(sentence);
+  if (mtest(RE_EN_NAMED, sentence) || namePairAt(sentence) >= 0) return true;
+  if (mtest(RE_EN_GENERAL, sentence)) return false;
+  return mtest(RE_EN_PERSON, sentence);
 }
 
 /** Rodzaj niepełnosprawności po rzeczowniku („niepełnosprawność ruchowa”, „intelektualną”). */
@@ -1087,15 +1134,15 @@ const RE_PART_CAUSE = /(?:z[ \t]+powodu|(?<![a-ząćęłńóśźż])na|w[ \t]+ki
 const RE_MED_WORD = new RegExp(`${NOT_LETTER_BEFORE}${MED_WORD}`, 'i');
 /** Czy dopowiedzenie imiesłowu jest medyczne: przysłówek leczenia, placówka, specjalista albo wyraz medyczny. */
 function partMedical(m: string): boolean {
-  if (RE_PART_PLACE.test(m)) return true;
+  if (mtest(RE_PART_PLACE, m)) return true;
   const cause = RE_PART_CAUSE.exec(m);
-  return !!cause && (hasMedVocab(cause[1]) || RE_MED_WORD.test(cause[1]));
+  return !!cause && (hasMedVocab(cause[1]) || mtest(RE_MED_WORD, cause[1]));
 }
 const RE_AGENT = /^[ \t]+przez[ \t]+([^ \t,.;:!?]+(?:[ \t]+[^ \t,.;:!?]+)?)/i;
 const RE_MED_AGENT = new RegExp(`^(?:lekar|lekark|specjalist|psychiatr|onkolog|kardiolog|neurolog|chirurg|ortoped|ginekolog|okulist|laryngolog|urolog|dermatolog|psycholog|terapeut|psychoterapeut|fizjoterapeut|ratowni|zesp|personel|dr|prof|lek|doktor|profesor|ordynator|rezydent|anestezjolog|internist|pediatr|${SPEC_RE})`, 'i');
 function agentNotMedical(after: string): boolean {
   const a = RE_AGENT.exec(after);
-  return !!a && !RE_MED_AGENT.test(a[1]) && !hasMedVocab(a[1]);
+  return !!a && !mtest(RE_MED_AGENT, a[1]) && !hasMedVocab(a[1]);
 }
 const RE_COPULA_TAIL = new RegExp(String.raw`${COPULA}[ \t]{1,8}${ADV_GAP}$`);
 const RE_STAY_TAIL = new RegExp(String.raw`${STAY_VERB}[ \t]{1,8}${STAY_ADV}$`);
@@ -1114,13 +1161,13 @@ const RE_CURE_PLACE = new RegExp(
   'i',
 );
 function impersonalCure(whole: string, offset: number, m: string, starts: number[]): boolean {
-  if (RE_CURE_OBJECT.test(whole.slice(offset + m.length, offset + m.length + 80))) return true;
+  if (mtest(RE_CURE_OBJECT, whole.slice(offset + m.length, offset + m.length + 80))) return true;
   const kind = eventSubject(whole, starts, offset, offset + m.length);
   if (kind !== 'none' && kind !== 'verb') return false;
   const sentence = sentenceAt(whole, starts, offset, offset + m.length);
   const s0 = Math.max(starts[sentenceIndex(starts, offset)], offset - SPAN);
   const [ca] = boundsAt(sentence, offset - s0, offset - s0 + m.length, RE_CLAUSE_BREAK);
-  return RE_CURE_PLACE.test(sentence.slice(ca, offset - s0));
+  return mtest(RE_CURE_PLACE, sentence.slice(ca, offset - s0));
 }
 
 /**
@@ -1142,7 +1189,7 @@ const RE_MED_AFTER = /z[ \t]+powodu|po[ \t]+(?:zawale|udarze|wypadku|operacji|za
 const RE_INSPECTION_AFTER = /^[ \t]+(?:przeciwpożar|sanitarn|techniczn|budowlan|skarbow|podatkow|finansow|NIK|PIP|sanepid|planow|doraźn|problemow|zewnętrzn|wewnętrzn|instalacj|urządze|dokumentacj|BHP|ppoż)/i;
 function nonMedicalStay(after: string): boolean {
   const seg = /^[^.;!?\n]{0,90}/.exec(after)?.[0] ?? '';
-  if (RE_STAY_PURPOSE.test(seg) || RE_WORK_TIME.test(seg)) return true;
+  if (mtest(RE_STAY_PURPOSE, seg) || mtest(RE_WORK_TIME, seg)) return true;
   const first = seg.split(/[,;(]/)[0];
   // Cel tuż po miejscu rozstrzyga pierwszy: „na stanowisko sekretarki medycznej” to praca, choć dalej stoi wyraz medyczny.
   const m = RE_PURPOSE_PREP.exec(first);
@@ -1150,13 +1197,13 @@ function nonMedicalStay(after: string): boolean {
     const prep = m[1].toLowerCase();
     const word = m[2];
     if (prep.startsWith('w')) return true;
-    const inspection = /^kontrol/i.test(word) && RE_INSPECTION_AFTER.test(first.slice(m.index + m[0].length));
-    const medWord = !inspection && (RE_MED_PURPOSE.test(word) || hasMedVocab(word) || RE_MED_WORD.test(word));
+    const inspection = /^kontrol/i.test(word) && mtest(RE_INSPECTION_AFTER, first.slice(m.index + m[0].length));
+    const medWord = !inspection && (mtest(RE_MED_PURPOSE, word) || hasMedVocab(word) || mtest(RE_MED_WORD, word));
     if (prep === 'z' || prep === 'ze') {
-      if (/(?:ą|em|ami|mi)$/.test(word) && !RE_MED_INSTR.test(word) && !medWord && !hasMedVocab(first.slice(m.index))) return true;
+      if (/(?:ą|em|ami|mi)$/.test(word) && !mtest(RE_MED_INSTR, word) && !medWord && !hasMedVocab(first.slice(m.index))) return true;
     } else if (!medWord) return true;
   }
-  if (RE_MED_AFTER.test(first) || hasMedVocab(first) || RE_MED_WORD.test(first)) return false;
+  if (mtest(RE_MED_AFTER, first) || hasMedVocab(first) || mtest(RE_MED_WORD, first)) return false;
   const g = RE_GERUND.exec(seg);
   return !!g && !hasMedVocab(seg.slice(g.index, g.index + 50));
 }
@@ -1169,7 +1216,7 @@ function stayNotTreatment(whole: string, offset: number, m: string, starts: numb
   const verbForm = !/^(?:pobyt|pobyci|Pobyt|Pobyci)/.test(m);
   if (verbForm && eventSubject(whole, starts, offset, offset + m.length, RE_STAY_TAIL) === 'other') return true;
   const seg = /^[^.;!?\n]{0,90}/.exec(after)?.[0] ?? '';
-  return RE_FUNCTION_IN_HEAD.test(sentenceHead(whole, starts, offset)) && !(RE_MED_AFTER.test(seg) || hasMedVocab(seg));
+  return mtest(RE_FUNCTION_IN_HEAD, sentenceHead(whole, starts, offset)) && !(mtest(RE_MED_AFTER, seg) || hasMedVocab(seg));
 }
 
 const EVENTS: HealthEvent[] = [
@@ -1178,7 +1225,7 @@ const EVENTS: HealthEvent[] = [
   ev(
     String.raw`(?:${cap('zwolnieni')}(?:e${WS}lekarskie|a${WS}lekarskiego|(?:u|em)${WS}lekarskim|e${WS}chorobowe|a${WS}chorobowego|(?:u|em)${WS}chorobowym)|e-ZLA|(?<=(?:na|dostarczy[${LO}]{0,4}|przedstawi[${LO}]{0,4}|przyni[${LO}]{0,6}|wystawi[${LO}]{0,5}|otrzyma[${LO}]{0,4}|dosta[${LO}]{0,4}|ma|mam|miał[${LO}]{0,3}|poszedł[${LO}]{0,3}|poszła[${LO}]{0,2})[ \t]{1,8})L-?4)(?:[ \t]*\((?:e-ZLA|ZLA|L-?4)\))?${PERIOD}`,
     // „L4” w zdaniu, w którym oznacza linię, halę albo strefę („Linia L4 stoi, operator ma L4 w grafiku”)
-    { reject: (w, o, m, st) => /^L-?4/.test(m) && RE_L4_PLACE.test(sentenceAt(w, st, o, o + m.length)) },
+    { reject: (w, o, m, st) => /^L-?4/.test(m) && mtest(RE_L4_PLACE, sentenceAt(w, st, o, o + m.length)) },
   ),
   // „przebywa na zwolnieniu”: czasownik pobytu w liczbie pojedynczej wskazuje osobę sam; imiesłów
   // („przebywający na zwolnieniu”) opisuje każdego, kogo to dotyczy
@@ -1312,29 +1359,29 @@ function eventAnchor(text: string, starts: number[], from: number, to: number, m
   const s0 = Math.max(starts[sentenceIndex(starts, from)], from - SPAN);
   const f = from - s0;
   const t = to - s0;
-  if (isGenericRule(sentence) || populationSubject(text, starts, from) || RE_QUESTION.test(sentence)) return false;
-  if (RE_GENERIC_RULE.test(sentence) && !RE_PERSON_CS.test(sentence) && namePairAt(sentence) < 0 && !RE_POSSESSIVE.test(sentence)) return false;
+  if (isGenericRule(sentence) || populationSubject(text, starts, from) || mtest(RE_QUESTION, sentence)) return false;
+  if (mtest(RE_GENERIC_RULE, sentence) && !mtest(RE_PERSON_CS, sentence) && namePairAt(sentence) < 0 && !mtest(RE_POSSESSIVE, sentence)) return false;
   const after = sentence.slice(t);
   const named = patientNamed(sentence);
   const owner = named.some(([a]) => a >= t && a <= t + 3);
   const [ca, cb] = boundsAt(sentence, f, t, RE_CLAUSE_BREAK);
   const [sa, sb] = boundsAt(sentence, f, t, RE_SUB_BREAK);
-  if (!RE_OWNER_AFTER.test(after.slice(0, 40)) && providerRel(sentence.slice(sa, f))) return false;
-  const tight = owner || spanIn(named, ca, cb) || RE_NAMED.test(sentence.slice(ca, cb));
+  if (!mtest(RE_OWNER_AFTER, after.slice(0, 40)) && providerRel(sentence.slice(sa, f))) return false;
+  const tight = owner || spanIn(named, ca, cb) || mtest(RE_NAMED, sentence.slice(ca, cb));
   if (tight) return true;
-  if (!self && RE_GROUP_AFTER.test(after)) return false;
+  if (!self && mtest(RE_GROUP_AFTER, after)) return false;
   const sub = spanIn(named, sa, sb) || firstPersonIn(sentence, sa, sb, f) || namedIn(sentence);
-  const rule = (a: number, b: number): boolean => RE_NORMATIVE.test(sentence.slice(a, b).replace(RE_LEGAL_BASIS, ' '));
+  const rule = (a: number, b: number): boolean => mtest(RE_NORMATIVE, sentence.slice(a, b).replace(RE_LEGAL_BASIS, ' '));
   if (sub && !rule(ca, cb)) return true;
   // Osoba dziedziczona z innego zdania (podmiot przed „który”, przed „że”) tylko poza przepisem:
   // „pracownik, który przedstawi zwolnienie lekarskie, zachowuje prawo do wynagrodzenia” to reguła.
   const sentenceRule = rule(0, sentence.length);
   if (!sentenceRule && (antecedentPerson(sentence, named, sa) || (sa > 0 && mainSubjectPerson(text, starts, from, to, sentence, sa)))) return true;
-  if (sentenceRule || RE_STATS.test(sentence) || RE_IF.test(sentenceHead(text, starts, from))) return false;
+  if (sentenceRule || mtest(RE_STATS, sentence) || mtest(RE_IF, sentenceHead(text, starts, from))) return false;
   const { head, clause, tail } = clauseAt(sentence, f, t);
-  if (RE_PLURAL_VERB.test(head) || RE_PLURAL_VERB.test(tail)) return false;
+  if (mtest(RE_PLURAL_VERB, head) || mtest(RE_PLURAL_VERB, tail)) return false;
   // Słowo reguły w członie z frazą („może zostać skierowana na leczenie”) wygrywa nawet z czasownikiem osoby.
-  if (RE_NORMATIVE_WEAK.test(head) || RE_NORMATIVE_WEAK.test(tail)) return false;
+  if (mtest(RE_NORMATIVE_WEAK, head) || mtest(RE_NORMATIVE_WEAK, tail)) return false;
   if (self) return true;
   if (weakNormative(sentence, f, t)) return false;
   // Zakryta już dana o zdrowiu w tym samym zdaniu („przebywa na zwolnieniu po zabiegu…”) mówi o tej samej osobie.
@@ -1342,7 +1389,7 @@ function eventAnchor(text: string, starts: number[], from: number, to: number, m
   if (fieldValue(text, from) && (isPersonForm(text) || hasPerson(personWindow(text, from, to)))) return true;
   // Rola, krewny i zaimek w tym samym zdaniu podrzędnym, bez samej frazy („Radna zwróciła uwagę, że…”).
   const subText = `${sentence.slice(sa, f)} ${sentence.slice(t, sb)}`;
-  if (RE_EV_PERSON.test(subText) || RE_PERSON_THIRD.test(subText) || RE_EV_PRONOUN.test(clause)) return true;
+  if (mtest(RE_EV_PERSON, subText) || mtest(RE_PERSON_THIRD, subText) || mtest(RE_EV_PRONOUN, clause)) return true;
   return continuesPerson(text, starts, from, to, sentence.slice(sa, f));
 }
 /** Wartość pola formularza: „Etykieta:” na początku wiersza przed frazą („03. Orzeczenie: …”, „Rozpoznanie: …”). */
@@ -1350,7 +1397,7 @@ const RE_FIELD_BEFORE = new RegExp(`(?:^|\\n)[ \\t]*(?:\\d{1,2}[.)][ \\t]*)?[${L
 const RE_TOPIC_LABEL = new RegExp(`(?:^|\\n)[ \\t]*(?:\\d{1,2}[.)][ \\t]*)?(?:temat|tytuł|przedmiot|nazwa|cel|zakres|opis|program|szkoleni|kurs|zadani|projekt|kategori|dziedzin|obszar|specjalizacj|rodzaj|usług|oferta|ofert)[${LETTER} \\t./-]{0,40}:[ \\t]*$`, 'i');
 const fieldValue = (text: string, from: number): boolean => {
   const before = text.slice(Math.max(0, from - 60), from);
-  return RE_FIELD_BEFORE.test(before) && !RE_TOPIC_LABEL.test(before);
+  return mtest(RE_FIELD_BEFORE, before) && !mtest(RE_TOPIC_LABEL, before);
 };
 /**
  * Podstawa prawna rozstrzygnięcia w konkretnej sprawie („na podstawie art. 26 ustawy o wychowaniu
@@ -1366,13 +1413,13 @@ const RE_LEGAL_BASIS = new RegExp(
  * zdania głównego, gdy ten jest człowiekiem w roli innej niż urzędowa („Konkubent przyznał, że…”).
  */
 function mainSubjectPerson(text: string, starts: number[], from: number, to: number, sentence: string, sa: number): boolean {
-  if (!RE_REPORT_BREAK.test(sentence.slice(Math.max(0, sa - 12), sa))) return false;
-  if (!RE_EVENT_VERB_TAIL.test(text.slice(Math.max(0, from - 60), from))) return false;
+  if (!mtest(RE_REPORT_BREAK, sentence.slice(Math.max(0, sa - 12), sa))) return false;
+  if (!mtest(RE_EVENT_VERB_TAIL, text.slice(Math.max(0, from - 60), from))) return false;
   const kind = eventSubject(text, starts, from, to);
   if (kind !== 'verb') return false;
   const [, mainEnd] = boundsAt(sentence, 0, 0, RE_SUB_BREAK);
   const main = sentence.slice(0, Math.min(mainEnd, sa));
-  return subjectKind(main) === 'person' && !RE_FUNCTION_IN_HEAD.test(main) && !RE_CLINICIAN_START.test(main);
+  return subjectKind(main) === 'person' && !mtest(RE_FUNCTION_IN_HEAD, main) && !mtest(RE_CLINICIAN_START, main);
 }
 const RE_EVENT_VERB_TAIL = new RegExp(
   String.raw`${NOT_LETTER_BEFORE}(?:${STAY_VERB}|przeszedł|przeszła|przeszedłem|przeszłam|przechodzi|przebył[${LO}]{0,3}|ma|mam|miał[${LO}]{0,3}|jest|jestem|był[${LO}]{0,3}|będzie|otrzymał[${LO}]{0,3}|dostał[${LO}]{0,3}|korzysta|korzystał[${LO}]{0,3}|uczęszcza[${LO}]{0,3}|podj(?:ął|ęła)|przerwał[${LO}]{0,3}|kontynuuje|zakończył[${LO}]{0,3}|rozpocz(?:ął|ęła))[ \t]{1,8}${STAY_ADV}(?:(?:na|po|w|we|do|z)[ \t]{1,8})?$`,
@@ -1389,9 +1436,9 @@ const RE_REL_PRONOUN = new RegExp(`(?<![${LETTER}])któr${L}[ \\t]*$`, 'i');
 const RE_ANTECEDENT_ROLE = new RegExp(`(?:${PERSON_THIRD.join('|')}|córk[${LO}]*|syn[${LO}]*|stron[${LO}]*|uczestni[${LO}]*)[ \\t]*,?[ \\t]*$`, 'i');
 function antecedentPerson(sentence: string, named: [number, number][], sa: number): boolean {
   const before = sentence.slice(0, sa);
-  if (!RE_REL_PRONOUN.test(before)) return false;
+  if (!mtest(RE_REL_PRONOUN, before)) return false;
   const rel = before.search(RE_REL_PRONOUN);
-  return named.some(([, b]) => b <= rel && b >= rel - 4) || RE_ANTECEDENT_ROLE.test(before.slice(Math.max(0, rel - 40), rel));
+  return named.some(([, b]) => b <= rel && b >= rel - 4) || mtest(RE_ANTECEDENT_ROLE, before.slice(Math.max(0, rel - 40), rel));
 }
 /**
  * Dalsza wzmianka: zdanie bez własnego podmiotu ciągnie wątek osoby z poprzedniego zdania („Matka
@@ -1408,7 +1455,7 @@ function continuesPerson(text: string, starts: number[], from: number, to: numbe
   if (i === 0) return false;
   const para = text.lastIndexOf('\n', starts[i] - 2) + 1;
   const prev = text.slice(Math.max(Math.min(para, starts[i - 1]), starts[i] - SPAN), starts[i]);
-  return patientNamed(prev).length > 0 || RE_PERSON_THIRD.test(prev) || RE_EV_PERSON.test(prev);
+  return patientNamed(prev).length > 0 || mtest(RE_PERSON_THIRD, prev) || mtest(RE_EV_PERSON, prev);
 }
 /** Leczenie przewlekłe z listy fraz: kotwica medyczna jak przy chorobie albo osoba jak przy zdarzeniu. */
 function eventOrMedical(text: string, starts: number[], from: number, to: number, mask: string): boolean {
@@ -1432,7 +1479,7 @@ let cardValue = false;
 function isPatientCard(text: string): boolean {
   if (text !== cardText) {
     cardText = text;
-    cardValue = RE_CARD_PATIENT.test(text);
+    cardValue = mtest(RE_CARD_PATIENT, text);
   }
   return cardValue;
 }
@@ -1443,7 +1490,7 @@ let formValue = false;
 function isPersonForm(text: string): boolean {
   if (text !== formText) {
     formText = text;
-    formValue = RE_CARD_PERSON.test(text);
+    formValue = mtest(RE_CARD_PERSON, text);
   }
   return formValue;
 }
@@ -1464,7 +1511,7 @@ function maskEventsOnce(ctx: RedactCtx, mask: string): void {
       if (e.en) return enAnchor(whole, starts, offset, to) ? ctx.hit('ZDROWIE') : m;
       if (topicBefore(whole, offset, m) || (e.subject && thingSubject(whole, offset, m, starts))) return m;
       if (e.afterMask && !sentenceAt(whole, starts, offset, to).includes(mask)) return m;
-      const self = e.self || selfFrame(whole, offset) || (RE_PREP_START.test(m) && RE_COPULA_BEFORE.test(whole.slice(Math.max(0, offset - 16), offset)));
+      const self = e.self || selfFrame(whole, offset) || (mtest(RE_PREP_START, m) && mtest(RE_COPULA_BEFORE, whole.slice(Math.max(0, offset - 16), offset)));
       return eventAnchor(whole, starts, offset, to, mask, self) ? ctx.hit('ZDROWIE') : m;
     });
   }
@@ -1476,7 +1523,16 @@ function maskEventsOnce(ctx: RedactCtx, mask: string): void {
 /* ── Okno kontekstu ── */
 
 /** Początki zdań w tekście: po nowym wierszu albo po [.!?] i odstępie przed wielką literą. */
+let startsText: string | null = null;
+let startsValue: number[] = [];
 function sentenceStarts(text: string): number[] {
+  // ten sam tekst między przebiegami (nic nie zamaskowano) nie wymaga ponownego liczenia; tablica tylko do odczytu
+  if (text === startsText) return startsValue;
+  startsText = text;
+  startsValue = sentenceStartsOf(text);
+  return startsValue;
+}
+function sentenceStartsOf(text: string): number[] {
   const starts = [0];
   const re = new RegExp(`\\n|[.!?][ \\t]+(?=[${UP}\\[])`, 'g');
   for (let m = re.exec(text); m; m = re.exec(text)) starts.push(m.index + m[0].length);
@@ -1529,8 +1585,8 @@ function medicalAnchored(text: string, starts: number[], from: number, to: numbe
   const sentence = sentenceAt(text, starts, from, to);
   if (mask !== undefined && w.includes(mask)) return true;
   if (isGenericRule(sentence) || populationSubject(text, starts, from)) return false;
-  if (RE_STRONG.test(w)) return true;
-  return RE_WEAK.test(w) && personNear(text, sentence, from, to);
+  if (mtest(RE_STRONG, w)) return true;
+  return mtest(RE_WEAK, w) && personNear(text, sentence, from, to);
 }
 
 /* ── Sekcje karty informacyjnej ── */
@@ -1564,15 +1620,15 @@ const RE_LO_START = new RegExp(`^[${LO}]`);
 
 function isListItem(line: string, drugs: boolean): boolean {
   const body = line.replace(RE_LIST_MARK, '').trim();
-  if (!body || body.length > 120 || RE_OTHER_LABEL.test(line) || RE_SENTENCE_BREAK.test(body)) return false;
+  if (!body || body.length > 120 || mtest(RE_OTHER_LABEL, line) || mtest(RE_SENTENCE_BREAK, body)) return false;
   if (hasIcd(body)) return true;
   // Nazwa choroby z wielkiej litery („Nadciśnienie tętnicze”, „Zapalenie płuc”) w sekcji rozpoznań.
   if (!drugs && hasDisease(body)) return true;
-  if (drugs && (RE_DOSE_LINE.test(line) || RE_DRUG_LINE.test(line))) return true;
+  if (drugs && (mtest(RE_DOSE_LINE, line) || mtest(RE_DRUG_LINE, line))) return true;
   // Mała litera albo znacznik wyliczenia: pozycja listy. Wiersz z wielkiej litery bez kodu
   // może być już podpisem („lek. Adam Polak” to też mała litera, ale z tytułem i osobą).
-  if (RE_TITLE.test(body)) return false;
-  return RE_LIST_MARK.test(line) || RE_LO_START.test(body);
+  if (mtest(RE_TITLE, body)) return false;
+  return mtest(RE_LIST_MARK, line) || mtest(RE_LO_START, body);
 }
 
 /**
@@ -1602,14 +1658,14 @@ function valueEnd(rest: string): number {
 /** Czy wartość sekcji (w wierszu nagłówka albo pozycja listy) to dana o zdrowiu. */
 function valueIsHealth(mode: Mode, value: string, strict: boolean, medCtx: boolean): boolean {
   const body = value.replace(RE_LIST_MARK, '').trim();
-  if (!body || RE_NEGATIVE.test(body) || RE_SECTION_GENERAL.test(body)) return false;
+  if (!body || mtest(RE_NEGATIVE, body) || mtest(RE_SECTION_GENERAL, body)) return false;
   if (mode === 'drug') {
-    if (RE_MONEY.test(body)) return false; // „Leki: 450,00 zł” w wykazie kosztów
-    return RE_HAS_DOSE.test(body) || RE_DRUG_LINE.test(value) || medCtx;
+    if (mtest(RE_MONEY, body)) return false; // „Leki: 450,00 zł” w wykazie kosztów
+    return mtest(RE_HAS_DOSE, body) || mtest(RE_DRUG_LINE, value) || medCtx;
   }
   if (mode === 'advice') {
     // W zaleceniach tylko wiersz z lekiem: ze słownika albo z jednostką lekową w karcie.
-    return RE_DRUG_LINE.test(value) || (medCtx && RE_DOSE_LINE.test(value));
+    return mtest(RE_DRUG_LINE, value) || (medCtx && mtest(RE_DOSE_LINE, value));
   }
   if (hasDisease(body)) return true;
   if (strict) return medCtx && hasIcd(body);
@@ -1626,8 +1682,8 @@ const RE_CARD_PATIENT = /(?:^|\n)[ \t]*pacjent(?:ka)?[ \t]*:/i;
 const RE_CARD_PERSON = /(?:^|\n)[ \t]*(?:PESEL|imię[ \t]+i[ \t]+nazwisko|nazwisko[ \t]+i[ \t]+imię)(?:[ \t]+(?:pacjent|chor)\S*)?[ \t]*:/i;
 function cardSignal(ctx: RedactCtx, near: string): 0 | 1 | 2 {
   const t = ctx.text;
-  if (RE_CARD_PATIENT.test(t)) return 2;
-  if (!(RE_CARD_PERSON.test(t) || t.includes(ctx.M.PESEL) || near.includes(ctx.M.IMIE))) return 0;
+  if (mtest(RE_CARD_PATIENT, t)) return 2;
+  if (!(mtest(RE_CARD_PERSON, t) || t.includes(ctx.M.PESEL) || near.includes(ctx.M.IMIE))) return 0;
   return hasMedVocab(near) ? 2 : 1;
 }
 /** Rdzenie słów nazw chorób w wierszu rozpoznania (bez słownika całych nazw). */
@@ -1646,7 +1702,7 @@ const RE_DIAG_LINE_NOT = new RegExp(
   'i',
 );
 const isCardDiagLine = (body: string): boolean =>
-  RE_DIAG_LINE.test(body) && !RE_DIAG_LINE_NOT.test(body) && !RE_NEGATIVE.test(body) && namePairAt(body) < 0;
+  mtest(RE_DIAG_LINE, body) && !mtest(RE_DIAG_LINE_NOT, body) && !mtest(RE_NEGATIVE, body) && namePairAt(body) < 0;
 
 /** Rozpoznania i leki w sekcjach karty. Zalecenia nie są maskowane w całości, tylko wiersze z lekiem. */
 function maskSections(ctx: RedactCtx): void {
@@ -1663,7 +1719,7 @@ function maskSections(ctx: RedactCtx): void {
     const line = lines[i];
     // Nagłówek bez dwukropka w osobnym wierszu („Rozpoznanie”, a pod nim akapit opinii): dalej tylko
     // wiersze z nazwą choroby, tak jak przy nagłówku „Diagnoza:”.
-    if (RE_SECTION_BARE.test(line) && (i === 0 || !lines[i - 1].trim()) && lines[i + 1]?.trim()) {
+    if (mtest(RE_SECTION_BARE, line) && (i === 0 || !lines[i - 1].trim()) && lines[i + 1]?.trim()) {
       mode = 'diag';
       strict = true;
       medCtx = hasMedVocab(headerContext(lines, i));
@@ -1674,10 +1730,10 @@ function maskSections(ctx: RedactCtx): void {
     const head = RE_SECTION.exec(line);
     if (head) {
       const name = head[2].replace(/\s+/g, ' ');
-      mode = RE_DIAG.test(name) ? 'diag' : RE_DRUG_HEAD.test(name) ? 'drug' : 'advice';
-      strict = RE_STRICT_HEAD.test(name);
+      mode = mtest(RE_DIAG, name) ? 'diag' : mtest(RE_DRUG_HEAD, name) ? 'drug' : 'advice';
+      strict = mtest(RE_STRICT_HEAD, name);
       // Nagłówek wieloznaczny („Rozpoznanie:”, „Leki:”) potrzebuje słownictwa medycznego obok.
-      medCtx = RE_MEDICAL_HEAD.test(name) || hasMedVocab(headerContext(lines, i));
+      medCtx = mtest(RE_MEDICAL_HEAD, name) || hasMedVocab(headerContext(lines, i));
       card = mode === 'diag' && !strict ? cardSignal(ctx, headerContext(lines, i)) : 0;
       const value = head[3];
       const lead = /^[ \t]*/.exec(value)?.[0] ?? '';
@@ -1707,8 +1763,8 @@ function maskSections(ctx: RedactCtx): void {
     if (mode === 'advice') {
       // W zaleceniach tylko wiersz „lek dawka”; reszta („kontrola w poradni za 4 tygodnie”) zostaje.
       const m = RE_LIST_MARK.exec(line)?.[0] ?? '';
-      if (!RE_OTHER_LABEL.test(line) && valueIsHealth('advice', line, false, medCtx)) out.push(`${m}${ctx.hit('ZDROWIE')}`);
-      else if (line.length <= 120 && !RE_OTHER_LABEL.test(line) && !RE_SENTENCE_BREAK.test(line)) out.push(line);
+      if (!mtest(RE_OTHER_LABEL, line) && valueIsHealth('advice', line, false, medCtx)) out.push(`${m}${ctx.hit('ZDROWIE')}`);
+      else if (line.length <= 120 && !mtest(RE_OTHER_LABEL, line) && !mtest(RE_SENTENCE_BREAK, line)) out.push(line);
       else {
         mode = null;
         out.push(line);
@@ -1717,8 +1773,8 @@ function maskSections(ctx: RedactCtx): void {
     }
     const body = line.replace(RE_LIST_MARK, '').trim();
     const item = strict ? hasIcd(body) || hasDisease(body) : isListItem(line, mode === 'drug');
-    const health = item && !RE_OTHER_LABEL.test(line) && valueIsHealth(mode, line, strict, medCtx);
-    const cardDiag = mode === 'diag' && card > 0 && isCardDiagLine(body) && (card === 2 || RE_DIAG_WORD.test(body));
+    const health = item && !mtest(RE_OTHER_LABEL, line) && valueIsHealth(mode, line, strict, medCtx);
+    const cardDiag = mode === 'diag' && card > 0 && isCardDiagLine(body) && (card === 2 || mtest(RE_DIAG_WORD, body));
     if (health || cardDiag) {
       const m = RE_LIST_MARK.exec(line)?.[0] ?? (/^[ \t]*/.exec(line)?.[0] ?? '');
       const trail = /[ \t]*$/.exec(line)?.[0] ?? '';
@@ -1778,17 +1834,17 @@ const RE_SICK_LEAVE = new RegExp(`${NOT_LETTER_BEFORE}niezdolnoś${L}[ \\t]+do[ 
 function icdAnchorOk(whole: string, starts: number[], offset: number, end: number, pre: string, mask: string): boolean {
   const a = pre.trim();
   const w = windowAt(whole, starts, offset, end);
-  if (RE_ICD_GENERAL.test(sentenceAt(whole, starts, offset, end))) return false;
+  if (mtest(RE_ICD_GENERAL, sentenceAt(whole, starts, offset, end))) return false;
   // samo „kod”/„z kodem” (bez „choroby”); „kodem choroby” nie może cofnąć się do „kod” + „em…”
-  if (/^kod(?:em|u)?(?![a-z]|[ \t]+[a-zA-Z])/i.test(a)) return RE_STRONG.test(w);
+  if (/^kod(?:em|u)?(?![a-z]|[ \t]+[a-zA-Z])/i.test(a)) return mtest(RE_STRONG, w);
   if (/^(?:diagnoz|rozp\.)/i.test(a) && !hasMedVocab(w)) return false;
-  const lineStart = RE_LINE_LABEL_BEFORE.test(whole.slice(Math.max(0, offset - 12), offset));
+  const lineStart = mtest(RE_LINE_LABEL_BEFORE, whole.slice(Math.max(0, offset - 12), offset));
   // Etykieta „ICD-10:”, „ICD10” na początku wiersza albo zaraz po „Rozpoznanie:” to pole karty;
   // w zdaniu („program B.29 (ICD-10: G35)”) dalej potrzebuje osoby albo kotwicy silnej.
-  if (/^ICD/.test(a) && (lineStart || RE_DIAG_LABEL_BEFORE.test(whole.slice(Math.max(0, offset - 30), offset)))) return true;
+  if (/^ICD/.test(a) && (lineStart || mtest(RE_DIAG_LABEL_BEFORE, whole.slice(Math.max(0, offset - 30), offset)))) return true;
   if (a.endsWith(':') && lineStart && !/^ICD/.test(a)) return true;
-  if (RE_STRONG.test(w) || w.includes(mask) || personNear(whole, sentenceAt(whole, starts, offset, end), offset, end)) return true;
-  return /^kod/i.test(a) && RE_SICK_LEAVE.test(w);
+  if (mtest(RE_STRONG, w) || w.includes(mask) || personNear(whole, sentenceAt(whole, starts, offset, end), offset, end)) return true;
+  return /^kod/i.test(a) && mtest(RE_SICK_LEAVE, w);
 }
 
 function maskIcdAnchored(ctx: RedactCtx): void {
@@ -1804,9 +1860,9 @@ function maskIcdAnchored(ctx: RedactCtx): void {
   ctx.text = ctx.text.replace(RE_ICD_CAUSE, (m: string, pre: string, codes: string, offset: number, whole: string) => {
     const end = offset + m.length;
     const sentence = sentenceAt(whole, starts2, offset, end);
-    if (RE_ICD_GENERAL.test(sentence) || isGenericRule(sentence)) return m;
+    if (mtest(RE_ICD_GENERAL, sentence) || isGenericRule(sentence)) return m;
     const w = windowAt(whole, starts2, offset, end);
-    if (!(RE_STRONG.test(w) || RE_WEAK.test(sentence.replace(m, ' ')) || personNear(whole, sentence, offset, end))) return m;
+    if (!(mtest(RE_STRONG, w) || mtest(RE_WEAK, sentence.replace(m, ' ')) || personNear(whole, sentence, offset, end))) return m;
     return `${pre}${codes.replace(new RegExp(ICD, 'g'), () => ctx.hit('ZDROWIE'))}`;
   });
 }
@@ -1824,7 +1880,7 @@ function maskIcdInParens(ctx: RedactCtx): void {
   ctx.text = ctx.text.replace(RE_ICD_PAREN_DOT, (m: string, pre: string, codes: string, offset: number, whole: string) => {
     const end = offset + m.length;
     const sentence = sentenceAt(whole, starts3, offset, end);
-    if (RE_ICD_GENERAL.test(sentence) || isGenericRule(sentence)) return m;
+    if (mtest(RE_ICD_GENERAL, sentence) || isGenericRule(sentence)) return m;
     if (!diseaseAnchor(whole, starts3, offset, end, ctx.M.ZDROWIE)) return m;
     return `${pre}${codes.replace(new RegExp(ICD, 'g'), () => ctx.hit('ZDROWIE'))})`;
   });
@@ -1857,7 +1913,7 @@ const RE_CONTRAINDICATION = new RegExp(
 // Skrót wersalikami („COVID-19”, „HIV”) to nie nazwa własna instytucji.
 const RE_UP_START = new RegExp(`^[${UP}][${LO}]`);
 function inProperName(whole: string, offset: number, m: string): boolean {
-  if (!RE_UP_START.test(m)) return false;
+  if (!mtest(RE_UP_START, m)) return false;
   const before = whole.slice(0, offset);
   if (!before.trim()) return false;
   return !/(?:[.!?:(\n]|\n[ \t]*(?:[-•*]|\d{1,2}[.)]))[ \t]*$/.test(before.slice(-8));
@@ -1879,7 +1935,7 @@ const RE_GENERIC_COORD = new RegExp(
 );
 const genericBefore = (whole: string, offset: number): boolean => {
   const before = whole.slice(Math.max(0, offset - 120), offset);
-  return RE_GENERIC_BEFORE.test(before.slice(-80)) || RE_GENERIC_COORD.test(before);
+  return mtest(RE_GENERIC_BEFORE, before.slice(-80)) || mtest(RE_GENERIC_COORD, before);
 };
 
 /**
@@ -1922,7 +1978,7 @@ function maskPhraseList(ctx: RedactCtx, mask: string, late: boolean): void {
       if (inProperName(whole, offset, m)) return m;
       if (!p.self && genericBefore(whole, offset)) return m;
       // grupa tuż po nazwie („leczenie cukrzycy u dzieci”, „astma wśród uczniów”): mowa o grupie, nie o osobie
-      if (!p.self && RE_GROUP_AFTER.test(whole.slice(offset + m.length, offset + m.length + 80))) return m;
+      if (!p.self && mtest(RE_GROUP_AFTER, whole.slice(offset + m.length, offset + m.length + 80))) return m;
       // nazwa choroby w zdaniu ogólnym (warunek, reguła, grupa, dane zbiorcze): ten sam strażnik co po kotwicy rozpoznania
       if ((p.late || lateOnly) && generalDx(whole, starts, offset, offset, offset + m.length)) return m;
       if (!p.self && !anchor(whole, starts, offset, offset + m.length, mask)) return m;
@@ -1941,7 +1997,7 @@ function maskPhrasesOnce(ctx: RedactCtx, mask: string): boolean {
       const to = from + obj.length;
       const sentence = sentenceAt(whole, st, from, to);
       if (isGenericRule(sentence) || populationSubject(whole, st, from)) return m;
-      const person = RE_FIRST_PERSON_VERB.test(pre) || RE_PATIENT_WORD.test(sentence) || personNear(whole, sentence, from, to);
+      const person = mtest(RE_FIRST_PERSON_VERB, pre) || mtest(RE_PATIENT_WORD, sentence) || personNear(whole, sentence, from, to);
       return person ? `${pre}${ctx.hit('ZDROWIE')}` : m;
     });
   }
@@ -2056,11 +2112,11 @@ function generalDrug(text: string, starts: number[], from: number, to: number): 
   const head = text.slice(Math.max(s0, from - SPAN), from);
   const tail = text.slice(to, to + 80);
   return (
-    RE_PLURAL_INTAKE.test(head) ||
-    RE_POP_AFTER.test(tail) ||
-    RE_PLURAL_DATIVE.test(sentence) ||
-    RE_DRUG_DOC.test(sentence) ||
-    RE_REPORT_SOURCE.test(sentence)
+    mtest(RE_PLURAL_INTAKE, head) ||
+    mtest(RE_POP_AFTER, tail) ||
+    mtest(RE_PLURAL_DATIVE, sentence) ||
+    mtest(RE_DRUG_DOC, sentence) ||
+    mtest(RE_REPORT_SOURCE, sentence)
   );
 }
 
@@ -2072,22 +2128,22 @@ function maskDrugs(ctx: RedactCtx): void {
   ctx.text = ctx.text.replace(RE_DRUG, (m: string, offset: number, whole: string) => {
     const to = offset + m.length;
     const sentence = sentenceAt(whole, starts, offset, to);
-    if (RE_PRICE.test(sentence)) return m;
-    if (RE_DRUG_EXAMPLE_BEFORE.test(whole.slice(Math.max(0, offset - 80), offset))) return m;
-    if (RE_DRUG_GENERAL.test(sentence) && !hasPerson(sentence) && namePairAt(sentence) < 0) return m;
+    if (mtest(RE_PRICE, sentence)) return m;
+    if (mtest(RE_DRUG_EXAMPLE_BEFORE, whole.slice(Math.max(0, offset - 80), offset))) return m;
+    if (mtest(RE_DRUG_GENERAL, sentence) && !hasPerson(sentence) && namePairAt(sentence) < 0) return m;
     if (populationSubject(whole, starts, offset)) return m;
     // Droga podania przy dawce („Enoksaparyna 40 mg s.c.”) wzmacnia kotwicę, ale jej nie zastępuje:
     // wystarcza wtedy sama osoba albo samo słowo medyczne pacjenta, a dawkowanie z ChPL, ulotki,
     // standardu czy wykazu i dawkowanie dla grupy („u dorosłych”) zostają jawne.
-    if (RE_ROUTE.test(m)) {
+    if (mtest(RE_ROUTE, m)) {
       if (generalDrug(whole, starts, offset, to)) return m;
       const w = windowAt(whole, starts, offset, to);
-      if (RE_WEAK.test(w) || personNear(whole, sentence, offset, to)) return ctx.hit('ZDROWIE');
+      if (mtest(RE_WEAK, w) || personNear(whole, sentence, offset, to)) return ctx.hit('ZDROWIE');
     }
     const win = windowAt(whole, starts, offset, to);
-    if (medicalAnchored(whole, starts, offset, to) || RE_DRUG_VERB.test(win)) return ctx.hit('ZDROWIE');
-    if (RE_RX_OWN.test(sentence)) return ctx.hit('ZDROWIE');
-    return RE_RX_DOC.test(sentence) && (hasPerson(sentence) || namePairAt(sentence) >= 0 || personNear(whole, sentence, offset, to))
+    if (medicalAnchored(whole, starts, offset, to) || mtest(RE_DRUG_VERB, win)) return ctx.hit('ZDROWIE');
+    if (mtest(RE_RX_OWN, sentence)) return ctx.hit('ZDROWIE');
+    return mtest(RE_RX_DOC, sentence) && (hasPerson(sentence) || namePairAt(sentence) >= 0 || personNear(whole, sentence, offset, to))
       ? ctx.hit('ZDROWIE')
       : m;
   });
@@ -2122,15 +2178,15 @@ function maskDoseSentences(ctx: RedactCtx): void {
       const from = offset + pre.length;
       const to = offset + m.length;
       const sentence = sentenceAt(whole, starts, from, to);
-      if (RE_PRICE.test(sentence) || isGenericRule(sentence) || populationSubject(whole, starts, from)) return m;
-      if (RE_DRUG_EXAMPLE_BEFORE.test(whole.slice(Math.max(0, offset - 80), offset))) return m;
-      if (RE_DRUG_GENERAL.test(sentence) && !hasPerson(sentence) && namePairAt(sentence) < 0) return m;
+      if (mtest(RE_PRICE, sentence) || isGenericRule(sentence) || populationSubject(whole, starts, from)) return m;
+      if (mtest(RE_DRUG_EXAMPLE_BEFORE, whole.slice(Math.max(0, offset - 80), offset))) return m;
+      if (mtest(RE_DRUG_GENERAL, sentence) && !hasPerson(sentence) && namePairAt(sentence) < 0) return m;
       // „g” i „ml” stoją też w dawkach nawozu, smaru, mleka czy diety: potrzebna postać leku („syrop”),
       // lek ze słownika albo nazwa handlowa (wielka litera) przy słownictwie medycznym w oknie.
-      if (!RE_UNIT_DRUG_ONLY.test(unit)) {
+      if (!mtest(RE_UNIT_DRUG_ONLY, unit)) {
         const name = drug.slice(0, drug.length - tail.length);
-        const medical = RE_HAS_UPPER.test(name) && (medicalAnchored(whole, starts, from, to) || hasMedVocab(windowAt(whole, starts, from, to)));
-        if (!(RE_DRUG_FORM_WORD.test(name) || RE_DRUG_NAME.test(name) || medical)) return m;
+        const medical = mtest(RE_HAS_UPPER, name) && (medicalAnchored(whole, starts, from, to) || hasMedVocab(windowAt(whole, starts, from, to)));
+        if (!(mtest(RE_DRUG_FORM_WORD, name) || mtest(RE_DRUG_NAME, name) || medical)) return m;
       }
       return `${pre}${ctx.hit('ZDROWIE')}`;
     },
@@ -2150,8 +2206,8 @@ function maskVerbDrugs(ctx: RedactCtx, mask: string): void {
     const from = offset + pre.length;
     const to = from + drug.length;
     const sentence = sentenceAt(whole, starts, from, to);
-    if (RE_PRICE.test(sentence) || RE_DRUG_EXAMPLE_BEFORE.test(whole.slice(Math.max(0, offset - 80), offset))) return m;
-    if (RE_DRUG_GENERAL.test(sentence) && !hasPerson(sentence) && namePairAt(sentence) < 0) return m;
+    if (mtest(RE_PRICE, sentence) || mtest(RE_DRUG_EXAMPLE_BEFORE, whole.slice(Math.max(0, offset - 80), offset))) return m;
+    if (mtest(RE_DRUG_GENERAL, sentence) && !hasPerson(sentence) && namePairAt(sentence) < 0) return m;
     // Podmiot przed czasownikiem musi być człowiekiem albo domyślny („Hurtownia przyjmuje Ibuprom”,
     // „a szpital stosuje sertralinę” to instytucja; „Pani Kos przyjmuje”, „Od roku przyjmuje” to osoba).
     const kind = eventSubject(whole, starts, offset, from);
@@ -2284,39 +2340,39 @@ const RE_INSTITUTION_LOC = new RegExp(
 );
 /** Forma bezosobowa bez odbiorcy w celowniku i bez osoby w zdaniu, w zdaniu o miejscu albo ramach działania. */
 function impersonalAtInstitution(text: string, starts: number[], rx: string, from: number, to: number): boolean {
-  if (!RE_RX_IMPERSONAL.test(rx) || RE_RX_DATIVE.test(rx)) return false;
+  if (!mtest(RE_RX_IMPERSONAL, rx) || mtest(RE_RX_DATIVE, rx)) return false;
   const sentence = sentenceAt(text, starts, from, to);
   if (hasPerson(sentence) || namePairAt(sentence) >= 0) return false;
-  return RE_INSTITUTION_LOC.test(sentence);
+  return mtest(RE_INSTITUTION_LOC, sentence);
 }
 
 /** Wspólne odrzucenia leku bez dawki: cennik, przykład, instrukcja i tekst ogólny bez osoby. */
 function bareDrugRejected(whole: string, starts: number[], offset: number, from: number, to: number): boolean {
   const sentence = sentenceAt(whole, starts, from, to);
-  if (RE_PRICE.test(sentence) || RE_DRUG_EXAMPLE_BEFORE.test(whole.slice(Math.max(0, offset - 80), offset))) return true;
-  if (RE_DRUG_GENERAL.test(sentence) && !hasPerson(sentence) && namePairAt(sentence) < 0) return true;
+  if (mtest(RE_PRICE, sentence) || mtest(RE_DRUG_EXAMPLE_BEFORE, whole.slice(Math.max(0, offset - 80), offset))) return true;
+  if (mtest(RE_DRUG_GENERAL, sentence) && !hasPerson(sentence) && namePairAt(sentence) < 0) return true;
   return generalDrug(whole, starts, from, to);
 }
 
 function maskBareDrugs(ctx: RedactCtx, mask: string): void {
-  if (!RE_BARE_VERB_QUICK.test(ctx.text)) return;
+  if (!mtest(RE_BARE_VERB_QUICK, ctx.text)) return;
   const starts = sentenceStarts(ctx.text);
   ctx.text = ctx.text.replace(
     RE_BARE_DRUG,
     (m: string, pre: string, self: string | undefined, rx: string | undefined, skip: string, drug: string, offset: number, whole: string) => {
       const from = offset + pre.length;
       const to = from + drug.length;
-      const shaped = RE_BARE_SHAPE.test(drug);
+      const shaped = mtest(RE_BARE_SHAPE, drug);
       // Nazwa handlowa po postaci leku („tabletki Relanium”): kształt „postać + wielka litera” nie jest
       // walidacją („kapsułki Nespresso”, „tabletki Mentos”, „lek Ministerstwa”). Liczy się nazwa ze
       // słownika albo o kształcie substancji, a bez niej kotwica medyczna w oknie, nie sama osoba.
       // Po „zażywa” (czasownik właściwie tylko lekowy) nazwa z wielkiej litery wystarcza przy osobie.
-      const zazywa = self !== undefined && RE_ZAZYWA.test(self);
+      const zazywa = self !== undefined && mtest(RE_ZAZYWA, self);
       let needMedical = false;
       if (!shaped) {
-        const trade = RE_FORM_TRADE_CS.test(drug);
-        if (!trade && !(zazywa && RE_UP_START.test(drug))) return m;
-        if (trade && !zazywa && !RE_BARE_SHAPE.test(drug.replace(RE_FORM_TRADE, ''))) needMedical = true;
+        const trade = mtest(RE_FORM_TRADE_CS, drug);
+        if (!trade && !(zazywa && mtest(RE_UP_START, drug))) return m;
+        if (trade && !zazywa && !mtest(RE_BARE_SHAPE, drug.replace(RE_FORM_TRADE, ''))) needMedical = true;
       }
       if (bareDrugRejected(whole, starts, offset, from, to)) return m;
       // Droga podania tuż przed lekiem („zalecono mu doustnie amoksycylinę”) należy do zlecenia i znika z lekiem.
@@ -2337,7 +2393,7 @@ function maskBareDrugs(ctx: RedactCtx, mask: string): void {
       // Zlecenie w zapisie karty: forma bezosobowa, odbiorca w celowniku, droga podania albo dawkowanie
       // przy leku o kształcie substancji („Włączono enoksaparynę s.c.”, „Odstawiono klonazepam”,
       // „Lekarz ordynował furosemid dożylnie”). To ta sama reguła co przy leku z dawką.
-      if (rx && shaped && (RE_RX_IMPERSONAL.test(rx) || RE_RX_DATIVE.test(rx) || RE_ROUTE.test(pre) || RE_DOSING_IN.test(drug.slice(1)))) {
+      if (rx && shaped && (mtest(RE_RX_IMPERSONAL, rx) || mtest(RE_RX_DATIVE, rx) || mtest(RE_ROUTE, pre) || mtest(RE_DOSING_IN, drug.slice(1)))) {
         const kind = eventSubject(whole, starts, offset, from);
         if (kind !== 'other' && !impersonalAtInstitution(whole, starts, rx, from, to)) return hit();
       }
@@ -2359,7 +2415,7 @@ const RE_POST_SUBJECT = new RegExp(
   'i',
 );
 function maskDrugFirst(ctx: RedactCtx, mask: string): void {
-  if (!RE_BARE_VERB_QUICK.test(ctx.text)) return;
+  if (!mtest(RE_BARE_VERB_QUICK, ctx.text)) return;
   const text = ctx.text;
   const starts = sentenceStarts(text);
   const cuts: [number, number][] = [];
@@ -2377,7 +2433,7 @@ function maskDrugFirst(ctx: RedactCtx, mask: string): void {
     if (kind === 'other' || kind === 'name') continue;
     const end = v.index + v[0].length;
     // Podmiot po czasowniku („Statyny przyjmuje co trzeci Polak”, „Leki wydaje apteka”): grupa albo instytucja.
-    if (RE_POST_SUBJECT.test(text.slice(end, end + 60))) continue;
+    if (mtest(RE_POST_SUBJECT, text.slice(end, end + 60))) continue;
     if (eventAnchor(text, starts, from, end, mask, true) || medicalAnchored(text, starts, from, end, mask)) cuts.push([from, to]);
   }
   if (cuts.length === 0) return;
@@ -2402,13 +2458,13 @@ const RE_DRUG_CLASS_QUICK =
   /lek|środk|preparat|tablet|kapsuł|krop|syrop|zastrzyk|neuroleptyk|antydepresant|cytostatyk|antybiotyk|antypsychotyk|anksjolityk|antykoagulant|kortykosteroid|steryd|statyn|opioid|benzodiazepin|metadon|buprenorfin/i;
 
 function maskDrugClasses(ctx: RedactCtx, mask: string): void {
-  if (!RE_DRUG_CLASS_QUICK.test(ctx.text)) return;
+  if (!mtest(RE_DRUG_CLASS_QUICK, ctx.text)) return;
   const starts = sentenceStarts(ctx.text);
   ctx.text = ctx.text.replace(RE_DRUG_CLASS, (m: string, offset: number, whole: string) => {
     const to = offset + m.length;
     const sentence = sentenceAt(whole, starts, offset, to);
     const head = whole.slice(Math.max(0, offset - 70), offset);
-    if (RE_PRICE.test(sentence) || RE_DRUG_EXAMPLE_BEFORE.test(head) || RE_DRUG_TRADE_BEFORE.test(head) || RE_DX_TOPIC.test(head)) return m;
+    if (mtest(RE_PRICE, sentence) || mtest(RE_DRUG_EXAMPLE_BEFORE, head) || mtest(RE_DRUG_TRADE_BEFORE, head) || mtest(RE_DX_TOPIC, head)) return m;
     // Sama osoba w zdaniu nie wystarcza („kradzież leków psychotropowych przez Jana Kowalskiego”): potrzebna kotwica
     // medyczna. Zdanie o grupie („pacjenci często otrzymują…”, „wynika z raportu”) zostaje mimo kotwicy.
     if (generalDx(whole, starts, offset, offset, to) || generalDrug(whole, starts, offset, to)) return m;
@@ -2472,11 +2528,11 @@ function diseaseAnchor(text: string, starts: number[], from: number, to: number,
   if (isGenericRule(sentence) || populationSubject(text, starts, from)) return false;
   // choroba jako temat („artykuł o nadciśnieniu”, „referat o chorobie Alzheimera”, „szczepienia na COVID-19”)
   const head = text.slice(Math.max(0, from - 70), from);
-  if ((topicBefore(text, from, text.slice(from, to)) || RE_DX_TOPIC.test(head)) && !RE_OWNER_AFTER.test(text.slice(to, to + 40))) return false;
+  if ((topicBefore(text, from, text.slice(from, to)) || mtest(RE_DX_TOPIC, head)) && !mtest(RE_OWNER_AFTER, text.slice(to, to + 40))) return false;
   // „Mam umiarkowany niedosłuch”, „ma przewlekłą chorobę nerek”: czasownik osoby przed określeniem stopnia
   const lead = RE_SEV_TAIL.exec(text.slice(Math.max(0, from - 40), from))?.[0].length ?? 0;
   const self =
-    (selfFrame(text, from - lead) || RE_DEVICE_VERB.test(text.slice(Math.max(0, from - lead - 30), from - lead))) &&
+    (selfFrame(text, from - lead) || mtest(RE_DEVICE_VERB, text.slice(Math.max(0, from - lead - 30), from - lead))) &&
     eventSubject(text, starts, from, to) !== 'other';
   if (eventAnchor(text, starts, from, to, mask, self)) return true;
   return medicalPersonContext(text, starts, from, to);
@@ -2498,7 +2554,7 @@ const RE_DEVICE_VERB = new RegExp(`${NOT_LETTER_BEFORE}(?:nosz(?:ę|e)|nosi|nosi
 function namedAnchor(text: string, starts: number[], from: number, to: number, mask: string): boolean {
   const last = /([\p{Lu}][\p{Ll}'’é]+)$/u.exec(text.slice(from, to))?.[1];
   if (last && /^zesp/i.test(text.slice(from, to)) && isGivenName(last)) return false;
-  if (RE_ZESP_EPONYM.test(text.slice(from, to)) && !eponymLead(text, from, to)) return false;
+  if (mtest(RE_ZESP_EPONYM, text.slice(from, to)) && !eponymLead(text, from, to)) return false;
   return diseaseAnchor(text, starts, from, to, mask);
 }
 /**
@@ -2508,21 +2564,21 @@ function namedAnchor(text: string, starts: number[], from: number, to: number, m
  */
 function morphAnchor(text: string, starts: number[], from: number, to: number, mask: string): boolean {
   const next = /^[ \t]{1,4}([a-ząćęłńóśźż]+)/.exec(text.slice(to, to + 40))?.[1];
-  if (next && (RE_ADJ_OBL_W.test(next) || RE_ADJ_NOM_W.test(next) || /[a-ząćęłńóśźż]{3,}(?:ną|wą|ową|cą|ką|tą)$/.test(next)) && !RE_VERB_W.test(next) && !RE_MED_W.test(next)) return false;
+  if (next && (mtest(RE_ADJ_OBL_W, next) || mtest(RE_ADJ_NOM_W, next) || /[a-ząćęłńóśźż]{3,}(?:ną|wą|ową|cą|ką|tą)$/.test(next)) && !mtest(RE_VERB_W, next) && !mtest(RE_MED_W, next)) return false;
   return diseaseAnchor(text, starts, from, to, mask);
 }
 /** Osoba i słownictwo medyczne w oknie, w zdaniu, które nie jest przepisem, statystyką, warunkiem ani pytaniem. */
 function medicalPersonContext(text: string, starts: number[], from: number, to: number): boolean {
   const sentence = sentenceAt(text, starts, from, to);
-  if (RE_NORMATIVE.test(sentence) || RE_STATS.test(sentence) || RE_QUESTION.test(sentence)) return false;
-  if (RE_IF.test(sentenceHead(text, starts, from)) || RE_GENERIC_BEFORE.test(text.slice(Math.max(0, from - 80), from))) return false;
+  if (mtest(RE_NORMATIVE, sentence) || mtest(RE_STATS, sentence) || mtest(RE_QUESTION, sentence)) return false;
+  if (mtest(RE_IF, sentenceHead(text, starts, from)) || mtest(RE_GENERIC_BEFORE, text.slice(Math.max(0, from - 80), from))) return false;
   if (providerRel(sentenceHead(text, starts, from)) || eventSubject(text, starts, from, to) === 'other') return false;
   const w = personWindow(text, from, to);
   if (!hasMedVocab(w)) return false;
   // osoba z nazwy (poza urzędnikiem i lekarzem) tylko w tym samym zdaniu; rola, krewny i zaimek w oknie;
   // samo „pacjent” tylko poza regulaminem
-  const patient = RE_PATIENT_WORD.test(w) && !RE_NORMATIVE.test(w);
-  return patientNamed(sentence).length > 0 || RE_PERSON_THIRD.test(w) || RE_EV_PERSON.test(w) || patient;
+  const patient = mtest(RE_PATIENT_WORD, w) && !mtest(RE_NORMATIVE, w);
+  return patientNamed(sentence).length > 0 || mtest(RE_PERSON_THIRD, w) || mtest(RE_EV_PERSON, w) || patient;
 }
 
 /** Określenie stopnia, przebiegu i rodzaju przy nazwie choroby („ostrej”, „nawracającej”, „prawostronnym”). */
@@ -2581,7 +2637,7 @@ function dxTokens(s: string, max: number): DxTok[] {
     const t = m[0];
     const kind = t === '[DANE O ZDROWIU]' ? 'mask' : t.startsWith('(') && t.length > 1 ? 'icd' : ICD_ONLY.test(t) ? 'icd' : /^\d/.test(t) ? 'num' : /^[^\p{L}]/u.test(t) ? 'punct' : 'word';
     const nl = gapText.includes('\n');
-    const gap = out.length === 0 ? /^[ \t]{0,4}$/.test(gapText) : RE_DX_GAP.test(gapText) && (!nl || /^[a-ząćęłńóśźż(]/.test(t));
+    const gap = out.length === 0 ? /^[ \t]{0,4}$/.test(gapText) : mtest(RE_DX_GAP, gapText) && (!nl || /^[a-ząćęłńóśźż(]/.test(t));
     out.push({ t, a: m.index, b: m.index + t.length, kind, gap });
     prev = m.index + t.length;
   }
@@ -2592,18 +2648,18 @@ function dxHeadKind(tok: DxTok, rest: string, free: boolean): DxHead | null {
   if (tok.kind === 'icd' || tok.kind === 'mask') return 'self';
   if (tok.kind !== 'word') return null;
   const w = tok.t;
-  if (RE_ACR_W.test(w) || RE_MORPH_W.test(w) || PHRASE_AT_START.some((re) => re.test(rest))) return 'self';
+  if (mtest(RE_ACR_W, w) || mtest(RE_MORPH_W, w) || PHRASE_AT_START.some((re) => re.test(rest))) return 'self';
   // sam „niedorozwój” jest rozpoznaniem tylko po silnej kotwicy przy osobie („rozpoznano u syna niedorozwój”)
   if (free && /^niedorozw(?:ój|oju|ojem)$/i.test(w)) return 'self';
-  if (RE_HEAD_MOD_W.test(w)) return 'mod';
-  if (RE_HEAD_BODY_W.test(w)) return 'body';
-  if (RE_HEAD_ALLERGY_W.test(w)) return 'allergy';
-  if (RE_HEAD_SYMPTOM_W.test(w)) return 'symptom';
-  if (free && /^[a-ząćęłńóśźż]{3,}$/.test(w) && !RE_DX_STOP_W.test(w) && !RE_VERB_W.test(w)) return 'free';
+  if (mtest(RE_HEAD_MOD_W, w)) return 'mod';
+  if (mtest(RE_HEAD_BODY_W, w)) return 'body';
+  if (mtest(RE_HEAD_ALLERGY_W, w)) return 'allergy';
+  if (mtest(RE_HEAD_SYMPTOM_W, w)) return 'symptom';
+  if (free && /^[a-ząćęłńóśźż]{3,}$/.test(w) && !mtest(RE_DX_STOP_W, w) && !mtest(RE_VERB_W, w)) return 'free';
   return null;
 }
 const isMedTok = (k: DxTok): boolean =>
-  k.kind === 'icd' || (k.kind === 'word' && (RE_MED_W.test(k.t) || RE_MORPH_W.test(k.t) || RE_ACR_W.test(k.t)));
+  k.kind === 'icd' || (k.kind === 'word' && (mtest(RE_MED_W, k.t) || mtest(RE_MORPH_W, k.t) || mtest(RE_ACR_W, k.t)));
 
 /**
  * Długość frazy rozpoznania od początku s albo 0. Fraza to nazwa choroby (po budowie słowa, skrót,
@@ -2616,13 +2672,13 @@ const isMedTok = (k: DxTok): boolean =>
  */
 function dxSpan(s: string, opts: { free?: boolean; cont?: boolean } = {}): number {
   const toks = dxTokens(s, 18);
-  if (toks.some((k, j) => k.kind === 'word' && j > 0 && RE_TECH_W.test(k.t) && RE_MED_W.test(toks[j - 1].t))) return 0;
+  if (toks.some((k, j) => k.kind === 'word' && j > 0 && mtest(RE_TECH_W, k.t) && mtest(RE_MED_W, toks[j - 1].t))) return 0;
   let i = 0;
   let head: DxHead = 'self';
   let end = 0;
   if (!opts.cont) {
     let lead = 0;
-    while (i < toks.length && lead < 2 && toks[i].gap && toks[i].kind === 'word' && RE_SEV_W.test(toks[i].t) && !dxHeadKind(toks[i], s.slice(toks[i].a), false)) {
+    while (i < toks.length && lead < 2 && toks[i].gap && toks[i].kind === 'word' && mtest(RE_SEV_W, toks[i].t) && !dxHeadKind(toks[i], s.slice(toks[i].a), false)) {
       i++;
       lead++;
     }
@@ -2673,7 +2729,7 @@ function dxSpan(s: string, opts: { free?: boolean; cont?: boolean } = {}): numbe
     }
     if (/^(?:z|ze|o)$/.test(w) || (w === 'na' && head === 'allergy') || (w === 'w' && /^(?:obrębie|przebiegu|stadium)$/i.test(next?.t ?? ''))) {
       if (!next?.gap || (next.kind !== 'word' && next.kind !== 'mask')) break;
-      if (opts.cont && next.kind === 'word' && !(isMedTok(next) || dxHeadKind(next, s.slice(next.a), false) || RE_HEAD_SYMPTOM_W.test(next.t))) break;
+      if (opts.cont && next.kind === 'word' && !(isMedTok(next) || dxHeadKind(next, s.slice(next.a), false) || mtest(RE_HEAD_SYMPTOM_W, next.t))) break;
       freeNext = opts.cont ? 0 : 2;
       continue;
     }
@@ -2681,10 +2737,10 @@ function dxSpan(s: string, opts: { free?: boolean; cont?: boolean } = {}): numbe
       if (next?.kind !== 'num' && !(next?.kind === 'word' && /^[IVX]+$|^(?:pierwszego|drugiego|trzeciego|lekkiego|umiarkowanego|znacznego)$/.test(next.t))) break;
       continue;
     }
-    if (RE_DX_STOP_W.test(w)) break;
+    if (mtest(RE_DX_STOP_W, w)) break;
     if (/^[\p{Lu}]/u.test(k.t)) {
-      const eponym = RE_EPONYM_W.test(k.t) && /^zesp/.test(prevW) && !isGivenName(k.t) && !(next?.kind === 'word' && /^[\p{Lu}]/u.test(next.t));
-      if (RE_ACR_W.test(k.t) || eponym) {
+      const eponym = mtest(RE_EPONYM_W, k.t) && /^zesp/.test(prevW) && !isGivenName(k.t) && !(next?.kind === 'word' && /^[\p{Lu}]/u.test(next.t));
+      if (mtest(RE_ACR_W, k.t) || eponym) {
         end = k.b;
         needMed = false;
         continue;
@@ -2698,34 +2754,34 @@ function dxSpan(s: string, opts: { free?: boolean; cont?: boolean } = {}): numbe
       afterHead = true;
       continue;
     }
-    if (afterHead && RE_GEN_W.test(w) && !RE_VERB_W.test(w) && !RE_PERSON_GEN_W.test(w)) {
+    if (afterHead && mtest(RE_GEN_W, w) && !mtest(RE_VERB_W, w) && !mtest(RE_PERSON_GEN_W, w)) {
       end = k.b;
       afterHead = false;
       continue;
     }
     afterHead = false;
-    if (isMedTok(k) || (head === 'allergy' && RE_ALLERGEN_W.test(k.t))) {
+    if (isMedTok(k) || (head === 'allergy' && mtest(RE_ALLERGEN_W, k.t))) {
       end = k.b;
       needMed = false;
       freeNext = 0;
       continue;
     }
     if (opts.cont) break;
-    if (RE_PERSON_GEN_W.test(w)) break;
-    if ((RE_ADJ_OBL_W.test(w) || RE_ADJ_NOM_W.test(w)) && !RE_VERB_W.test(w)) {
+    if (mtest(RE_PERSON_GEN_W, w)) break;
+    if ((mtest(RE_ADJ_OBL_W, w) || mtest(RE_ADJ_NOM_W, w)) && !mtest(RE_VERB_W, w)) {
       end = k.b;
       continue;
     }
     // wyraz po „z”, „o” („z opóźnieniem rozwoju mowy”, „o charakterze mieszanym”)
-    if (freeNext > 0 && !RE_VERB_W.test(w)) {
+    if (freeNext > 0 && !mtest(RE_VERB_W, w)) {
       end = k.b;
       freeNext--;
       continue;
     }
     // jeden rzeczownik w dopełniaczu tuż po nazwie („ból karku”, „zaburzeń integracji sensorycznej”)
-    if (i === startI && RE_GEN_W.test(w) && !RE_VERB_W.test(w) && head !== 'free') {
+    if (i === startI && mtest(RE_GEN_W, w) && !mtest(RE_VERB_W, w) && head !== 'free') {
       const nx = toks[i + 1];
-      const medNext = nx?.gap && nx.kind === 'word' && (isMedTok(nx) || RE_ADJ_OBL_W.test(nx.t));
+      const medNext = nx?.gap && nx.kind === 'word' && (isMedTok(nx) || mtest(RE_ADJ_OBL_W, nx.t));
       if (head === 'symptom' || medNext) {
         end = k.b;
         continue;
@@ -2786,7 +2842,7 @@ const RE_DX_CONCRETE = new RegExp(
   'i',
 );
 /** Osoba z nazwy albo z danych: „Pan Nowak”, imię i nazwisko, zakryty PESEL. */
-const namedInSentence = (sentence: string): boolean => RE_PERSON_CS.test(sentence) || namePairAt(sentence) >= 0 || RE_NAMED.test(sentence);
+const namedInSentence = (sentence: string): boolean => mtest(RE_PERSON_CS, sentence) || namePairAt(sentence) >= 0 || mtest(RE_NAMED, sentence);
 /** Orzeczenie w czasie przeszłym w zdaniu głównym („rozpoczęliśmy terapię”, „skierowano go”): zdarzenie, a nie reguła. */
 const RE_DX_PAST = new RegExp(`[${LO}]{2,}(?:ł|ła|ło|li|ły|łem|łam|łeś|łaś|liśmy|łyśmy)(?![${LETTER}])|[${LO}]{3,}(?:ano|ono|ęto|yto|ito)(?![${LETTER}])`, 'i');
 /** Grupa ludzi w liczbie mnogiej tuż przed kotwicą („Osobom z rozpoznaną…”, „dzieci z rozpoznanym…”). */
@@ -2834,12 +2890,12 @@ const RE_DX_RULE_PRED = new RegExp(
  * samym członie. Osoba z nazwy, krewny i pierwsza osoba robią z tego fakt o konkretnej osobie.
  */
 function roleRule(text: string, s0: number, sEnd: number, a: number, b: number, sentence: string): boolean {
-  if (!RE_DX_ROLE_BEFORE.test(text.slice(Math.max(s0, a - 80), a))) return false;
-  if (namedInSentence(sentence) || RE_DX_CONCRETE.test(sentence)) return false;
-  if (RE_DX_RULE_PRED.test(text.slice(s0, a))) return true;
+  if (!mtest(RE_DX_ROLE_BEFORE, text.slice(Math.max(s0, a - 80), a))) return false;
+  if (namedInSentence(sentence) || mtest(RE_DX_CONCRETE, sentence)) return false;
+  if (mtest(RE_DX_RULE_PRED, text.slice(s0, a))) return true;
   const tail = text.slice(b, sEnd);
   const w = RE_DX_RULE_PRED.exec(tail);
-  return !!w && !RE_COORD.test(tail.slice(0, w.index));
+  return !!w && !mtest(RE_COORD, tail.slice(0, w.index));
 }
 /**
  * Rozpoznanie w zdaniu ogólnym, a nie fakt o konkretnej osobie: warunek i zdanie względne reguły
@@ -2855,11 +2911,25 @@ function generalDx(text: string, starts: number[], at: number, a: number, b: num
   const s0 = Math.max(starts[si], at - SPAN);
   const sEnd = Math.min(si + 1 < starts.length ? starts[si + 1] : text.length, b + SPAN);
   const sentence = text.slice(s0, sEnd);
-  if (RE_STATS.test(sentence) || RE_DX_COUNT_BEFORE.test(text.slice(Math.max(0, a - 40), a))) return true;
-  if (populationSubject(text, starts, at) || RE_DX_GROUP_BEFORE.test(text.slice(Math.max(s0, at - 60), at))) return true;
+  if (mtest(RE_STATS, sentence) || mtest(RE_DX_COUNT_BEFORE, text.slice(Math.max(0, a - 40), a))) return true;
+  if (populationSubject(text, starts, at) || mtest(RE_DX_GROUP_BEFORE, text.slice(Math.max(s0, at - 60), at))) return true;
   if (roleRule(text, s0, sEnd, a, b, sentence)) return true;
   // człon z kotwicą: od ostatniej granicy przed kotwicą; spójnik po przecinku („Uczeń, u którego”) należy do członu
-  const head = text.slice(s0, at);
+  const { clause, cond, caseOf, rel } = dxClause(text.slice(s0, at));
+  if (!cond && !caseOf && !rel) return false;
+  if (namedInSentence(sentence)) return false;
+  if (cond) return true;
+  if (mtest(RE_DX_CONCRETE, sentence)) return false;
+  if (caseOf) return true;
+  if (mtest(RE_DX_AGENT, text.slice(at, at + 20))) return false;
+  // zdanie główne: przed członem z kotwicą i po przecinku za frazą
+  const rest = text.slice(b, sEnd);
+  const comma = rest.search(/[,;–—]/);
+  const main = `${text.slice(s0, at - clause.length)} ${comma >= 0 ? rest.slice(comma + 1) : ''}`;
+  return !mtest(RE_DX_PAST, main);
+}
+/** Człon z kotwicą rozpoznania na końcu head i rodzaj spójników w nim (warunek, przypadek, zdanie względne). */
+const dxClause = memo((head: string): { clause: string; cond: boolean; caseOf: boolean; rel: boolean } => {
   const cut = RE_DX_CLAUSE_END.exec(head);
   const clause = cut ? head.slice(cut.index + 1) : head;
   let cond = false;
@@ -2871,18 +2941,8 @@ function generalDx(text: string, starts: number[], at: number, a: number, b: num
     else if (m[2]) caseOf = true;
     else rel = true;
   }
-  if (!cond && !caseOf && !rel) return false;
-  if (namedInSentence(sentence)) return false;
-  if (cond) return true;
-  if (RE_DX_CONCRETE.test(sentence)) return false;
-  if (caseOf) return true;
-  if (RE_DX_AGENT.test(text.slice(at, at + 20))) return false;
-  // zdanie główne: przed członem z kotwicą i po przecinku za frazą
-  const rest = text.slice(b, sEnd);
-  const comma = rest.search(/[,;–—]/);
-  const main = `${text.slice(s0, at - clause.length)} ${comma >= 0 ? rest.slice(comma + 1) : ''}`;
-  return !RE_DX_PAST.test(main);
-}
+  return { clause, cond, caseOf, rel };
+});
 
 /**
  * Skrót choroby w nazwie własnej: po rzeczowniku instytucji, firmy, klubu albo programu („Instytutu
@@ -2901,7 +2961,7 @@ function acronymInName(text: string, a: number, b: number): boolean {
   for (let m = RE_ACR_ANY.exec(span); m; m = RE_ACR_ANY.exec(span)) {
     const x = a + m.index;
     const y = x + m[0].length;
-    if (RE_ACR_INST_BEFORE.test(text.slice(Math.max(0, x - 40), x)) || RE_ACR_NAME_AFTER.test(text.slice(y, y + 6))) return true;
+    if (mtest(RE_ACR_INST_BEFORE, text.slice(Math.max(0, x - 40), x)) || mtest(RE_ACR_NAME_AFTER, text.slice(y, y + 6))) return true;
   }
   return false;
 }
@@ -2951,11 +3011,11 @@ function eponymLead(text: string, from: number, to: number): boolean {
   const m = RE_EPONYM_LEAD.exec(text.slice(lo, from));
   if (!m) return false;
   if (m[1] === undefined) return true;
-  if (RE_EPONYM_ORG_AFTER.test(text.slice(to, to + 60))) return false;
+  if (mtest(RE_EPONYM_ORG_AFTER, text.slice(to, to + 60))) return false;
   if (/^mam$/i.test(m[1])) return true;
   const head = text.slice(Math.max(0, from - 160), lo + m.index);
   const subj = head.slice(Math.max(head.search(/[.!?\n][^.!?\n]*$/) + 1, 0));
-  return RE_EPONYM_SUBJ.test(subj) || hasPerson(subj) || namePairAt(subj) >= 0;
+  return mtest(RE_EPONYM_SUBJ, subj) || hasPerson(subj) || namePairAt(subj) >= 0;
 }
 
 /** Rozpoznanie po kotwicy: zakrywa nazwę choroby do końca frazy, kotwica zostaje jawna. */
@@ -2974,17 +3034,17 @@ function maskDiagnoses(ctx: RedactCtx, mask: string): void {
       const lead = /^[ \t]*/.exec(s)?.[0].length ?? 0;
       if (s.startsWith(mask, lead)) continue;
       // osoba po „u” przy kotwicy („rozpoznano u niej …”, „U wnioskodawczyni rozpoznano …”)
-      const who = !!m[1] || RE_DX_PERSON_BEFORE.test(text.slice(Math.max(0, m.index - 60), m.index));
+      const who = !!m[1] || mtest(RE_DX_PERSON_BEFORE, text.slice(Math.max(0, m.index - 60), m.index));
       const len = dxSpan(s.slice(lead), { free: strong && who });
       if (!len) continue;
       const a = from + lead;
       const b = a + len;
       if (inProperName(text, a, text.slice(a, b)) || uncheckedOption(text, a)) continue;
       const sentence = sentenceAt(text, starts, a, b);
-      if (isGenericRule(sentence) || RE_ICD_GENERAL.test(sentence) || generalDx(text, starts, m.index, a, b)) continue;
-      if (RE_GROUP_AFTER.test(text.slice(b, b + 80)) || genericBefore(text, a) || acronymInName(text, a, b)) continue;
+      if (isGenericRule(sentence) || mtest(RE_ICD_GENERAL, sentence) || generalDx(text, starts, m.index, a, b)) continue;
+      if (mtest(RE_GROUP_AFTER, text.slice(b, b + 80)) || genericBefore(text, a) || acronymInName(text, a, b)) continue;
       // zespół z nazwiskiem bez kotwicy rozpoznania tuż przed nim („w związku z zespołem Nowaka”) to zespół ludzi
-      if (RE_ZESP_EPONYM.test(text.slice(a, b)) && !eponymLead(text, a, b)) continue;
+      if (mtest(RE_ZESP_EPONYM, text.slice(a, b)) && !eponymLead(text, a, b)) continue;
       if (!strong && !diseaseAnchor(text, starts, a, b, mask)) continue;
       spans.push([a, b]);
       re.lastIndex = b;
@@ -3034,6 +3094,14 @@ function extendMasks(ctx: RedactCtx, mask: string): void {
 
 export function passHealth(ctx: RedactCtx): void {
   if (!ctx.on('ZDROWIE')) return;
+  clearMemo();
+  try {
+    passHealthWith(ctx);
+  } finally {
+    clearMemo();
+  }
+}
+function passHealthWith(ctx: RedactCtx): void {
   const mask = ctx.M.ZDROWIE;
   maskSections(ctx);
   maskDrugs(ctx);

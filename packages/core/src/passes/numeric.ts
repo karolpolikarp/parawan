@@ -4,7 +4,7 @@ import { maskAfterLabel, type RedactCtx } from '../context.js';
 import { type PiiType } from '../types.js';
 import { CURRENCY_CODES, precededByLegalRef, precededByNonPhoneLabel } from '../guards/numbers.js';
 import { isValidCard, isValidIban, isValidNip, isValidPesel, isValidRegon14, isValidRegon9 } from '../validators.js';
-import { countOf } from '../util.js';
+import { countOf, windowMemo } from '../util.js';
 
 /** Długości IBAN wg rejestru ISO 13616 (kraj → liczba znaków bez spacji). */
 const IBAN_LENGTHS: Record<string, number> = {
@@ -572,12 +572,17 @@ export function passPhone(ctx: RedactCtx): void {
     return (unbalanced ? '' : o) + ctx.M.TELEFON;
   });
   // Tryb bez kontekstu; strażniki kwot, identyfikatorów i etykiet nie-telefonu wyżej.
-  ctx.text = ctx.text.replace(RE_PHONE_BARE, (m, offset: number) => {
-    if (precededByLegalRef(ctx.text, offset) || precededByNonPhoneLabel(ctx.text, offset)) return m;
-    const d = m.replace(/\D/g, '');
-    // 800/801 to wyłącznie infolinie firm: nie ma strefy geograficznej ani zakresu komórkowego 80.
-    if (d.startsWith('0') || /^80[01]/.test(d)) return m;
-    if (gluedToIdentifier(ctx.text, offset, m.length) || looksLikeAmount(ctx.text, offset, m)) return m;
-    return ctx.hit('TELEFON');
-  });
+  ctx.text = ctx.text.replace(RE_PHONE_BARE, (m, offset: number) => (bareKept(ctx.text, offset, m) ? m : ctx.hit('TELEFON')));
+  bareKept.clear();
 }
+/**
+ * Czy liczba w trybie bez kontekstu zostaje jawna. Strażniki czytają najwyżej 48 znaków przed liczbą
+ * (etykieta nie-telefonu) i 16 po niej (waluta).
+ */
+const bareKept = windowMemo(48, 16, (text, offset, m) => {
+  if (precededByLegalRef(text, offset) || precededByNonPhoneLabel(text, offset)) return true;
+  const d = m.replace(/\D/g, '');
+  // 800/801 to wyłącznie infolinie firm: nie ma strefy geograficznej ani zakresu komórkowego 80.
+  if (d.startsWith('0') || /^80[01]/.test(d)) return true;
+  return gluedToIdentifier(text, offset, m.length) || looksLikeAmount(text, offset, m);
+});
