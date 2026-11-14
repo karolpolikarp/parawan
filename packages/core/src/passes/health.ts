@@ -27,10 +27,12 @@ import { escapeRe } from '../util.js';
  * Pamięć czyści passHealth na początku i na końcu (nie trzyma tekstu pisma po redakcji).
  */
 const MEMO_MAX = 4096;
+/** Dłuższy napis liczony wprost: pamięć dla niego kosztowałaby więcej (skrót klucza, pamięć) niż sam test. */
+const MEMO_KEY_MAX = 2048;
 const memoTests = new Map<RegExp, Map<string, boolean>>();
 const memoFns = new Map<(s: string) => unknown, Map<string, unknown>>();
 function mtest(re: RegExp, s: string): boolean {
-  if (re.global || re.sticky) return re.test(s);
+  if (re.global || re.sticky || s.length > MEMO_KEY_MAX) return re.test(s);
   let m = memoTests.get(re);
   if (!m) memoTests.set(re, (m = new Map()));
   let r = m.get(s);
@@ -46,6 +48,7 @@ function memo<T>(fn: (s: string) => T): (s: string) => T {
   const m = new Map<string, T>();
   memoFns.set(fn, m as Map<string, unknown>);
   return (s: string): T => {
+    if (s.length > MEMO_KEY_MAX) return fn(s);
     if (m.has(s)) return m.get(s) as T;
     if (m.size >= MEMO_MAX) m.clear();
     const r = fn(s);

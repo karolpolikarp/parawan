@@ -24,6 +24,8 @@ export function windowMemo(
   const run = (text: string, offset: number, m: string): boolean => {
     const a = Math.max(0, offset - before);
     const s = text.slice(a, offset + m.length + after);
+    // długi klucz (trafienie z tysiącami spacji) kosztuje więcej niż sama decyzja
+    if (s.length > 2048) return fn(s, offset - a, m);
     const key = `${offset - a},${m.length},${s}`;
     let r = memo.get(key);
     if (r === undefined) {
