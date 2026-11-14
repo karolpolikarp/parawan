@@ -126,7 +126,11 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 1. Wybór y/u (kolory kategorii jak w aplikacji czy nowa paleta), potem `DESIGN.md` i przeniesienie
    próbki do `apps/landing` na gałęzi `feat/landing-sosna`. Powrót: odpowiedź użytkownika.
 2. Przy wyborze „u”: nowa paleta kategorii w `apps/web/src/style.css` (kolory w handoffie).
-3. (zrobione 2026-11-14: „tarnowski” po urzędzie i geografii to przymiotnik, `passProtectFictional`).
+3. „tarnowski”: urząd i geografia po rzeczowniku zrobione 2026-11-14 (gałąź `fix/tarnowski-przymiotnik`,
+   `passProtectFictional`). Zostało, tak samo jak przed zmianą: przymiotnik przed nazwą instytucji
+   daje osobę („Hospicjum Tarnowskie”, „Tarnowskie Wodociągi”, „Tarnowska Agencja Rozwoju”),
+   a nazwisko po „w gminie”/„powiatu” małą literą zostaje jawne („W gminie Tarnowska złożyła
+   wniosek”, „SZPITALA TARNOWSKI JAN”).
 4. Publikacja npm z komputera autora (2FA): `npm login`, potem `npm publish -w anonimizator`
    i `npm publish -w parawan`. 0.29.14 nie wyszło; po merge v0.47.0 publikować od razu 0.30.0.
    Powrót: `npm view anonimizator version`.
