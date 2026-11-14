@@ -104,11 +104,12 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 
 ## Stan (2026-11-14)
 
-- `main` = v0.47.0 bez tagu (PR #28 scalony 2026-11-14; CI i deploy landingu zielone, landing
-  na domenie pokazuje nowe typy). Do pobrania dalej Parawan.html v0.46.27, bo Release powstaje
-  dopiero z tagu (Backlog 5). Ewaluacja na 50 fikcyjnych pismach: `npm run eval`,
-  `docs/EWALUACJA.md` (recall 89,2% → 99,5%, nadmiarowe 30 → 0). Rdzeń i `parawan` 0.30.0 czekają
-  na npm (Backlog 4). Handoff: `docs/handoff-2026-11-14.md`.
+- `main` = v0.47.0 (wydane 2026-11-14: tag, Release i kopia na domenie zgodne, suma
+  `da65c1ec…`). Ewaluacja na 50 fikcyjnych pismach: `npm run eval`, `docs/EWALUACJA.md`
+  (recall 89,2% → 99,5%, nadmiarowe 30 → 0). Rdzeń i `parawan` 0.30.0 czekają na npm
+  (Backlog 4). Handoff: `docs/handoff-2026-11-14.md`.
+- Testy wydajności rdzenia z progiem czasu sprawdzaj też na Node 20 (CI): V8 z Node 24 ukrywa
+  kwadratowy lookbehind z nieograniczonym odstępem (`(?<=jest[ 	]+)`).
 - W toku: nowy landing (`/frontend`), kierunek „Sosna o poranku”. Próbki poza repo w
   `E:\parawan-landing-proby\`. Handoff: `docs/handoff-2026-11-01.md`.
 
@@ -131,9 +132,7 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 4. Publikacja npm z komputera autora (2FA): `npm login`, potem `npm publish -w anonimizator`
    i `npm publish -w parawan`. 0.29.14 nie wyszło; po merge v0.47.0 publikować od razu 0.30.0.
    Powrót: `npm view anonimizator version`.
-5. Tag v0.47.0: próba `gh workflow run release.yml --ref main -f dry_run=true`, potem
-   `git tag -a v0.47.0 -m "Parawan 0.47.0"` i `git push origin v0.47.0`, część „Właściciel”
-   z `docs/WYDANIE.md`, potem Backlog 4. Wymaga słowa użytkownika.
+5. Część „Właściciel” z `docs/WYDANIE.md` dla v0.47.0 (czytnik ekranu, Word, wydruk PDF).
 6. Opcje polityki z `docs/EWALUACJA.md` (dane firm, miejscowość, numery spraw, profile „Do pracy”
    i „Do publikacji”, osobne pseudonimy małżonków o tym samym nazwisku).
 7. Znane ograniczenia z `docs/EWALUACJA.md` poz. 2–11 (m.in. parafia bez „w”, EZD pod numerem,
