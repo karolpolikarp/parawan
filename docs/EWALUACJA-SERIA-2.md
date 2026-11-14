@@ -123,6 +123,24 @@ ale część reguł dopasowała się do form z części roboczej, więc wynik ro
 Następne kroki trzeba sprawdzać zdaniami spoza obu części. Na części odłożonej największą
 grupą wycieków są teraz dane o zdrowiu (156 z 357), potem data urodzenia (20) i dane szczególne (15).
 
+## Po naprawie danych o zdrowiu (klasy 3, 4, 10)
+
+Commity `6c5091c`, `3148d3a`, `ca7f01b`: zdarzenie zdrowotne przy osobie (zwolnienie, orzeczenie,
+leczenie, zabieg, ciąża), rozpoznanie po kotwicy i kod ICD, uraz, lek przy czasowniku przyjmowania.
+
+| zestaw | recall przed | recall po | wycieki | HEALTH | nadmiarowe |
+|---|---:|---:|---:|---:|---:|
+| pierwszy zestaw | 99,5% | 99,5% | 5 → 5 | 0 → 0 | 0 → 0 |
+| seria 2, robocza | 83,5% | **90,7%** | 222 → 125 | 125 → 28 | 37 → 37 |
+| seria 2, odłożona | 73,9% | **77,3%** | 357 → 311 | 156 → 110 | 57 → 57 |
+
+Wycieki zdrowia spadły o 78% na części roboczej i tylko o 29% na odłożonej. Różnica jest większa niż
+przy osobach. Pozostałe wycieki części odłożonej to w większości prawdziwe dane o zdrowiu, nie spór
+o klucz: opis medyczny po angielsku w piśmie dwujęzycznym (diabetes, stent, nazwy leków), sam kod
+ICD bez kotwicy (I10, J18.9), objawy (gorączka, wysypka), sprzęt i stan funkcjonalny (pompa
+insulinowa, wózek, balkonik), skróty potoczne. Te grupy trzeba naprawiać ogólnie i sprawdzać na
+nowych pismach, bo część odłożona była już mierzona dwa razy i przestaje być w pełni niezależna.
+
 ## Kolejność napraw
 
 1. Klasy 1 + 2 + 5 + 9 + 12 razem: „osoby w piśmie” (nasiona z pewnych kotwic, rozwinięcie na
