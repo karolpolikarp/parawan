@@ -60,12 +60,12 @@ test('dane o zdrowiu: frazy opisowe w pismach kadrowych, pozwach i zgłoszeniach
   const cases: [string, string][] = [
     [
       'Zgodnie z zaświadczeniem lekarskim, po porodzie przez cesarskie cięcie przeciwwskazane jest dźwiganie ciężarów do końca roku.',
-      `Zgodnie z zaświadczeniem lekarskim, po porodzie przez ${Z} przeciwwskazane jest ${Z} do końca roku.`,
+      `Zgodnie z zaświadczeniem lekarskim, ${Z} przez ${Z} przeciwwskazane jest ${Z} do końca roku.`,
     ],
     ['Od około dwóch lat pozwany nadużywa alkoholu, a w domu dochodziło do awantur.', `Od około dwóch lat pozwany ${Z}, a w domu dochodziło do awantur.`],
     [
       'W wyniku zdarzenia doznałem stłuczenia klatki piersiowej i przebywałem na zwolnieniu lekarskim przez 25 dni.',
-      `W wyniku zdarzenia doznałem ${Z} i przebywałem na zwolnieniu lekarskim przez 25 dni.`,
+      `W wyniku zdarzenia doznałem ${Z} i przebywałem na ${Z}.`,
     ],
     ['W wyniku zdarzenia doznałam złamania kości promieniowej.', `W wyniku zdarzenia doznałam ${Z}.`],
     // kotwica w zdaniu obok: „zaświadczeniem lekarza” stoi w następnym zdaniu
@@ -193,12 +193,12 @@ test('dane o zdrowiu: tekst ogólny bez konkretnej osoby zostaje (poradnik, prze
 
 test('dane o zdrowiu: leki bez jednostki, częste rozpoznania, urazy czasownikiem, kody przy L4', () => {
   const cases: [string, string][] = [
-    ['Pracownik dostarczył L4 z kodem F32 (depresja), zwolnienie do 30 czerwca.', `Pracownik dostarczył L4 z kodem ${Z} (${Z}), zwolnienie do 30 czerwca.`],
+    ['Pracownik dostarczył L4 z kodem F32 (depresja), zwolnienie do 30 czerwca.', `Pracownik dostarczył ${Z} z kodem ${Z} (${Z}), zwolnienie do 30 czerwca.`],
     ['Pacjent przyjmuje Euthyrox N 50 rano i Concor 5 raz dziennie.', `Pacjent przyjmuje ${Z} i ${Z}.`],
     ['Lekarz zalecił Depakine Chrono 500 mg dwa razy dziennie.', `Lekarz zalecił ${Z}.`],
     ['Pacjentka leczona onkologicznie z powodu raka piersi, w trakcie chemioterapii.', `Pacjentka leczona onkologicznie z powodu ${Z}, w trakcie ${Z}.`],
     ['Rozpoznano u pracownika zapalenie płuc, hospitalizacja trwała tydzień.', `Rozpoznano u pracownika ${Z}, hospitalizacja trwała tydzień.`],
-    ['Pracownik przebywał na zwolnieniu lekarskim z powodu COVID-19.', `Pracownik przebywał na zwolnieniu lekarskim z powodu ${Z}.`],
+    ['Pracownik przebywał na zwolnieniu lekarskim z powodu COVID-19.', `Pracownik przebywał na ${Z} z powodu ${Z}.`],
     ['Pani Anna Nowak jest w ciąży, co potwierdza zaświadczenie lekarskie.', `Pani [IMIĘ I NAZWISKO] jest ${Z}, co potwierdza zaświadczenie lekarskie.`],
     ['Zgodnie z orzeczeniem lekarskim pracownik ma jaskrę i zaćmę.', `Zgodnie z orzeczeniem lekarskim pracownik ma ${Z} i ${Z}.`],
     ['Pozwany jest nosicielem HCV, zakażony wirusem HIV.', `Pozwany jest ${Z}, ${Z}.`],
@@ -239,7 +239,8 @@ test('dane o zdrowiu: uwagi weryfikacji, korespondencja, komunikaty i protokoły
     'Pracownik doznał złamania nogi stołu podczas montażu.',
     // depresja rynku i tytuł ustawy
     'Raport: w II kwartale rozpoznano przychód 2,4 mln zł; zarząd (Pan Jan Nowak) ocenia wpływ depresji na rynku nieruchomości.',
-    'Wnioskodawczyni, Pani Anna Lis, wnosi o zobowiązanie uczestnika do leczenia odwykowego na podstawie ustawy o wychowaniu w trzeźwości i przeciwdziałaniu alkoholizmowi.',
+    // tytuł ustawy sam w sobie zostaje jawny (z zakrytym leczeniem uczestnika: przypadek w `cases` niżej)
+    'Sejm uchwalił ustawę o wychowaniu w trzeźwości i przeciwdziałaniu alkoholizmowi.',
     // „leczony”, „leczona” w przepisie, programie lekowym i regulaminie
     'Osoba uzależniona od alkoholu może być leczona bez jej zgody tylko w przypadkach określonych w ustawie.',
     'W ramach programu lekowego leczony jest nowotwór złośliwy nerki u dorosłych.',
@@ -264,7 +265,7 @@ test('dane o zdrowiu: uwagi weryfikacji, korespondencja, komunikaty i protokoły
     ['Na recepcie wypisano sertralinę 50 mg.', `Na recepcie wypisano ${Z}.`],
     // kod ICD-10 z opisem: opis pod tą samą maską, kod wyliczenia po opisie też
     ['Wypis ze szpitala z rozpoznaniem J45.0 Astma oskrzelowa.', `Wypis ze szpitala z rozpoznaniem ${Z}.`],
-    ['Pracownik dostarczył zwolnienie lekarskie z kodem choroby F32 Epizod depresyjny.', `Pracownik dostarczył zwolnienie lekarskie z kodem choroby ${Z}.`],
+    ['Pracownik dostarczył zwolnienie lekarskie z kodem choroby F32 Epizod depresyjny.', `Pracownik dostarczył ${Z} z kodem choroby ${Z}.`],
     ['Pacjentka z rozpoznaniem J45.0 Astma oskrzelowa, I10', `Pacjentka z rozpoznaniem ${Z}, ${Z}`],
     ['Pacjentka z rozpoznaniem J45.0 Astma oskrzelowa wymaga kontroli.', `Pacjentka z rozpoznaniem ${Z} wymaga kontroli.`],
     // osoba dalej kotwiczy: list do adresata z urzędem, ale pisany w pierwszej osobie o sobie
@@ -273,6 +274,12 @@ test('dane o zdrowiu: uwagi weryfikacji, korespondencja, komunikaty i protokoły
     // imię i nazwisko tuż przed imiesłowem „leczony” to osoba (przypadek męski)
     ['Pacjent Jan Nowak leczony z powodu cukrzycy typu 2.', `Pacjent [IMIĘ I NAZWISKO] leczony z powodu ${Z}.`],
     ['Jan Nowak leczony z powodu astmy oskrzelowej.', `[IMIĘ I NAZWISKO] leczony z powodu ${Z}.`],
+    // wniosek o zobowiązanie konkretnego uczestnika: leczenie odwykowe zakryte, tytuł ustawy (podstawa
+    // prawna, „przeciwdziałaniu alkoholizmowi”) zostaje jawny
+    [
+      'Wnioskodawczyni, Pani Anna Lis, wnosi o zobowiązanie uczestnika do leczenia odwykowego na podstawie ustawy o wychowaniu w trzeźwości i przeciwdziałaniu alkoholizmowi.',
+      `Wnioskodawczyni, Pani [IMIĘ I NAZWISKO], wnosi o zobowiązanie uczestnika do ${Z} na podstawie ustawy o wychowaniu w trzeźwości i przeciwdziałaniu alkoholizmowi.`,
+    ],
   ];
   for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
   expect(redactPII('Pacjentka Maria Kowalska, lat 40. Rozpoznanie: J45.0 Astma oskrzelowa').redacted).toBe(

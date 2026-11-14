@@ -176,7 +176,7 @@ export const MASK_GROUP_DEFS: MaskGroupDef[] = [
   { key: 'miejscowosc', label: 'Miejscowość', types: ['MIEJSCOWOSC'], code: '[MIEJSCOWOŚĆ]', tip: 'Miejscowość przy adresie (przed nim lub po nim), po kodzie pocztowym albo przy zamieszkaniu lub urodzeniu; nie w zwykłym tekście' },
   { key: 'imie', label: 'Imię i nazwisko', types: ['IMIE'], code: '[IMIĘ I NAZWISKO]', tip: 'Słownik imion i nazwisk z odmianą, morfologia (-ski/-cki/-icz/-czyk) i wyzwalacze kontekstu; wykrywanie heurystyczne' },
   { key: 'dataur', label: 'Data urodzenia', types: ['DATA-UR'], code: '[DATA-URODZENIA]', tip: 'Data z kontekstem „ur./urodzony”' },
-  { key: 'zdrowie', label: 'Dane o zdrowiu', types: ['ZDROWIE'], code: '[DANE O ZDROWIU]', tip: 'Dane szczególnej kategorii (art. 9 RODO), zawsze z kotwicą: wartość po „Rozpoznanie:” i „Leki:”, lek z dawką w zaleceniach karty, kod ICD-10 po „rozpoznanie” lub „ICD-10”, lek z dawką przy „zalecił” lub „przyjmuje”, a choroba, uraz, zabieg czy wizyta u specjalisty tylko obok słów „zaświadczenie lekarskie”, „leczenie”, „rozpoznano”, „doznał” i podobnych; „nadużywa alkoholu” zawsze' },
+  { key: 'zdrowie', label: 'Dane o zdrowiu', types: ['ZDROWIE'], code: '[DANE O ZDROWIU]', tip: 'Dane szczególnej kategorii (art. 9 RODO), zawsze z kotwicą: wartość po „Rozpoznanie:” i „Leki:”, lek z dawką w zaleceniach karty, kod ICD-10 po „rozpoznanie” lub „ICD-10”, lek z dawką przy „zalecił” lub „przyjmuje”, a choroba, uraz, zabieg czy wizyta u specjalisty tylko obok słów „zaświadczenie lekarskie”, „leczenie”, „rozpoznano”, „doznał” i podobnych; zdarzenie przy konkretnej osobie z opisem: zwolnienie lekarskie z okresem, L4, zasiłek chorobowy, orzeczenie o niepełnosprawności, leczenie z rodzajem („jest leczona psychiatrycznie”), pobyt w szpitalu, zabieg („po przeszczepie nerki”), renta z tytułu niezdolności, ciąża z tygodniem, uzależnienie, także po angielsku (przepis, pouczenie i temat pisma zostają); „nadużywa alkoholu” zawsze' },
 ];
 
 /** Token wewnątrz [...] z kodu znacznika, np. „[NR-KONTA]” → „NR-KONTA”. */
@@ -232,7 +232,7 @@ export const WYKRYWA_ROWS: Array<{ code: string; how: string }> = [
   { code: '[KOD-POCZTOWY]', how: 'XX-XXX' },
   { code: '[MIEJSCOWOŚĆ]', how: 'miejscowość przy adresie, po kodzie pocztowym albo przy zamieszkaniu lub urodzeniu (nie w zwykłym tekście ani w nazwie instytucji)' },
   { code: '[DATA-URODZENIA]', how: 'data z kontekstem „ur./urodzony”' },
-  { code: '[DANE O ZDROWIU]', how: 'wartość po „Rozpoznanie:” i „Leki:” w karcie, kod ICD-10 po „rozpoznanie” lub „ICD-10”, lek z dawką (<code>sertralina 50 mg</code>); choroba lub uraz tylko przy <strong>kotwicy medycznej</strong> w zdaniu albo w zdaniu obok' },
+  { code: '[DANE O ZDROWIU]', how: 'wartość po „Rozpoznanie:” i „Leki:” w karcie, kod ICD-10 po „rozpoznanie” lub „ICD-10”, lek z dawką (<code>sertralina 50 mg</code>); choroba lub uraz tylko przy <strong>kotwicy medycznej</strong> w zdaniu albo w zdaniu obok; zwolnienie lekarskie, orzeczenie, leczenie, zabieg i ciąża tylko przy <strong>konkretnej osobie</strong> (<code>ma zwolnienie lekarskie do 27.11</code>)' },
   { code: '[IMIĘ I NAZWISKO]', how: 'słownik imion i nazwisk (z odmianą), morfologia (-ski/-cki/-icz/-czyk), wyzwalacze („nazywam się”, „Pan/Pani”)' },
 ];
 

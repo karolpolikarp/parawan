@@ -821,7 +821,7 @@ export function buildDataset() {
   // czasownika przeszłego, rzadkie nazwisko pod „osoba", osoba za patronem po „św.", pacjent po
   // głowie eponimu, osoba po mieście-przymiotniku — oraz zdania ogólne i nazwy, które mają zostać.
   str('Data\tZmiana\tNazwisko\tOddział\n2024-05-12\tNoc\tLisiecki\tSOR\nTak\tKaczyński\tUrząd Miasta', ['Lisiecki', 'Kaczyński'], ['Noc', 'SOR', 'Tak', 'Urząd Miasta']);
-  osp('Badanie wykonał lek. Kluczyk. Mieczyk przebywa na zwolnieniu lekarskim.', ['Kluczyk', 'Mieczyk'], ['Badanie wykonał lek.', 'przebywa na zwolnieniu']);
+  osp('Badanie wykonał lek. Kluczyk. Mieczyk przebywa na zwolnieniu lekarskim.', ['Kluczyk', 'Mieczyk'], ['Badanie wykonał lek.', 'przebywa na']);
   str('{"klient": {"osoba": "Bednarz", "telefon": "601 234 567"}}, <person>Gzik</person>, {"name": "j. kowalski"}', ['Bednarz', 'Gzik', 'kowalski'], ['"osoba"', '<person>']);
   osp('W kościele św. Anny Jan Bednarz zagra koncert kolęd. W kościele przesłuchano św. Annę Gzowską.', ['Jan', 'Bednarz', 'Annę', 'Gzowską'], ['W kościele św. Anny', 'przesłuchano św.']);
   osp('Pacjent Tadeusz Nowacki trafił na SOR. Objawy Nowackiego nasiliły się w nocy. Mistrz linii Kowalskiego wydał polecenie.', ['Tadeusz', 'Nowacki', 'Nowackiego', 'Kowalskiego'], ['Objawy', 'Mistrz linii']);
@@ -1239,6 +1239,31 @@ export function buildDataset() {
   osp('Małżonek: Tran Thi Hoa. Pełnomocnikiem ustanawiam Do Minh Tuan.', ['Tran Thi Hoa', 'Do Minh Tuan'], ['Małżonek:', 'Pełnomocnikiem']);
   neg('Na tarasie lokalu nie wolno palić. Omar Jumbo kosztuje 120 zł. Pielgrzymka do Fatimy wyrusza w maju.', ['tarasie', 'Omar', 'Fatimy']);
   neg('Delegacja odwiedziła Ho Chi Minh i Zatokę Ha Long. Do Hanoi lecieliśmy przez Dubaj. Chór zaśpiewał Salve Regina.', ['Ho Chi Minh', 'Ha Long', 'Do Hanoi', 'Salve Regina']);
+
+  // ─────────────────────────────────────────────
+  // ZDARZENIE ZDROWOTNE PRZY OSOBIE (seria 2, klasa 3): zwolnienie lekarskie z okresem, orzeczenie
+  // o stopniu niepełnosprawności, leczenie z rodzajem, pobyt i zabieg, ciąża z tygodniem. Ujemne:
+  // przepis i pouczenie, nazwa zespołu orzekającego, terapeuta prowadzący terapię, zwolnienie z pracy.
+  str('Pani Ewa Lis ma zwolnienie lekarskie do 27.11. Syn wnioskodawczyni ma orzeczenie o umiarkowanym stopniu niepełnosprawności.', ['zwolnienie lekarskie do 27.11', 'orzeczenie o umiarkowanym stopniu niepełnosprawności'], ['Pani', 'Syn wnioskodawczyni ma']);
+  str('Ojciec dziecka jest uzależniony od amfetaminy i przerwał terapię uzależnień. Matka od lat leczy się w poradni zdrowia psychicznego.', ['uzależniony od amfetaminy', 'terapię uzależnień', 'leczy się w poradni zdrowia psychicznego'], ['Ojciec dziecka jest', 'i przerwał', 'Matka od lat']);
+  str('Do końca miesiąca przebywam w sanatorium po operacji kręgosłupa. U pani Ewy Kos trwa 30. tydzień ciąży.', ['sanatorium po operacji kręgosłupa', '30. tydzień ciąży'], ['Do końca miesiąca przebywam', 'trwa']);
+  neg('Zwolnienia lekarskie należy dostarczyć w ciągu 7 dni. Zgodnie z art. 92 Kodeksu pracy za czas zwolnienia lekarskiego pracownik zachowuje prawo do wynagrodzenia.', ['Zwolnienia lekarskie należy dostarczyć', 'za czas zwolnienia lekarskiego']);
+  neg('Powiatowy Zespół do Spraw Orzekania o Niepełnosprawności wydaje orzeczenia. Pani Ewa Lis, logopeda, prowadzi terapię logopedyczną. Pan Jan Nowak został zwolniony z pracy.', ['Orzekania o Niepełnosprawności', 'prowadzi terapię logopedyczną', 'zwolniony z pracy']);
+  // Imiesłów bierny po łączniku, zabieg po budowie słowa i z narządem, pobyt w placówce, angielski.
+  // Ujemne: narzędnik na -łem („z udziałem”, „artykułem”), pozycja przepisu i tabeli, strona
+  // internetowa, podmiot rzeczowy („Pismo trafiło do szpitala”), temat pisma („zasady wypłaty”).
+  str('Matka małoletniego jest od lat leczona psychiatrycznie. Wnioskodawczyni jest po przeszczepie nerki. Pozwany kilkukrotnie trafiał do izby wytrzeźwień.', ['leczona psychiatrycznie', 'przeszczepie nerki', 'izby wytrzeźwień'], ['Matka małoletniego jest od lat', 'Wnioskodawczyni jest', 'Pozwany kilkukrotnie trafiał']);
+  str('Pani Ewelina Gryc była hospitalizowana w klinice kardiologii. Mr Adam Nowak underwent knee surgery in May.', ['hospitalizowana w klinice kardiologii', 'knee surgery'], ['Pani', 'underwent', 'in May']);
+  neg('Zgodnie z artykułem 92 Kodeksu pracy za czas zwolnienia lekarskiego pracownik zachowuje prawo do wynagrodzenia. Posiedzenie z udziałem dyrektora szpitala dotyczyło leczenia psychiatrycznego dzieci.', ['za czas zwolnienia lekarskiego', 'leczenia psychiatrycznego dzieci']);
+  neg('Na podstawie ustawy (Dz. U. z 2024 r., poz. 146) zwolnienie lekarskie jest wystawiane w systemie e-ZLA. Druk zwolnienia lekarskiego jest dostępny na stronie internetowej ZUS.', ['zwolnienie lekarskie jest wystawiane', 'Druk zwolnienia lekarskiego']);
+  neg('Pismo pana Jana Kowalskiego trafiło do szpitala w Radomiu. Na naradzie omówiono zasady wypłaty zasiłku chorobowego.', ['trafiło do szpitala', 'zasady wypłaty zasiłku chorobowego']);
+  // Rola osoby przy zdarzeniu: urzędnik z funkcją we wtrąceniu, fundator, autor pisma, cel pobytu, rzecz
+  // i instytucja jako podmiot, angielski idiom. Dodatnie: zawód we wtrąceniu przy czasowniku pobytu,
+  // podmiot zdania głównego przed „że”.
+  neg('Pani Anna Nowak, kierownik działu kadr, przypomina, że zwolnienie lekarskie należy dostarczyć w ciągu 7 dni. Pan Jan Lis, wójt gminy, ufundował pobyt w hospicjum dla samotnych mieszkańców.', ['zwolnienie lekarskie należy', 'pobyt w hospicjum dla samotnych']);
+  neg('Mam przyjemność poinformować, że Fundacja sfinansuje pobyt na turnusie rehabilitacyjnym dla 20 dzieci. Budynek był diagnozowany pod kątem zawilgocenia. Hurtownia przyjmuje Ibuprom do magazynu.', ['pobyt na turnusie rehabilitacyjnym', 'był diagnozowany', 'przyjmuje Ibuprom']);
+  neg('Klient zgłosił się do szpitala z reklamacją dotyczącą faktury. He had a stroke of genius during the negotiations.', ['do szpitala z reklamacją', 'a stroke of genius']);
+  str('Konkubent przyznał, że dwa razy trafił do izby wytrzeźwień. Pani Ewa Lis, magazynierka, przebywa na zwolnieniu lekarskim do 16 maja.', ['izby wytrzeźwień', 'zwolnieniu lekarskim do 16 maja'], ['Konkubent przyznał', 'magazynierka, przebywa na']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

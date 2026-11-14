@@ -150,6 +150,60 @@ działają na GitHubie od chwili wypchnięcia tagów.
   „Król Zygmunt August”, „Ho Chi Minh”, „Zatoka Ha Long”, „Do Hanoi lecieliśmy”, „obraz Van Gogha”.
   Na części roboczej drugiej serii zakrytych danych jest 83,5% zamiast 82,7%, bez nowych
   nadmiarowych zakryć.
+- **Zdarzenie zdrowotne konkretnej osoby znika razem z tym, czego dotyczy.** Zwolnienie lekarskie
+  z okresem („ma zwolnienie lekarskie do 27.11”, „przebywa na zwolnieniu lekarskim od 3 do 17 marca”,
+  „jestem na L4”, „(e-ZLA)”), zasiłek chorobowy („6 dni zasiłku chorobowego”), urlop dla poratowania
+  zdrowia, orzeczenie o niepełnosprawności, o stopniu niepełnosprawności z symbolem („umiarkowany
+  stopień niepełnosprawności, symbol 05-R (choroby narządu ruchu)”), o niezdolności do samodzielnej
+  egzystencji i o potrzebie kształcenia specjalnego, opinia o wczesnym wspomaganiu rozwoju, leczenie
+  i terapia z rodzajem („leczy się w poradni zdrowia psychicznego”, „przebywał na leczeniu
+  odwykowym”, „terapię integracji sensorycznej”, „korzysta z pomocy psychologa szkolnego”), pobyt
+  w szpitalu, sanatorium i izbie wytrzeźwień, zabieg z opisem („po operacji biodra”, „po zabiegu
+  usunięcia pęcherzyka żółciowego”, „po endoprotezie biodra”, „od czasu udaru”), ciąża z tygodniem
+  („w 34. tygodniu ciąży”, „24. tydzień ciąży, ciążę prowadzi lekarz”), uzależnienie od substancji
+  („jest uzależniony od amfetaminy”) i dializy. Rozpoznawane są też formy, którymi pisma opisują
+  leczenie najczęściej: imiesłów („jest od lat leczona psychiatrycznie”, „był operowany na
+  przepuklinę”, „była hospitalizowana w klinice kardiologii”, „jest dializowany”), zabieg nazwany
+  jednym słowem albo z narządem („przeszła mastektomię”, „przeszedł zabieg koronarografii”, „po
+  przeszczepie nerki”, „po amputacji nogi”, „po wszczepieniu rozrusznika serca”, „po poronieniu”),
+  pobyt na oddziale z jego specjalnością, w zakładzie leczniczym, na detoksie i turnusie
+  rehabilitacyjnym („kilkukrotnie trafiał do izby wytrzeźwień”), renta z tytułu niezdolności do
+  pracy, urlop zdrowotny, „niepełnosprawny w stopniu znacznym”, „pod stałą opieką neurologa”,
+  „przyjmuje sertralinę” oraz te same zdarzenia po angielsku w pismach dwujęzycznych („is on sick
+  leave until 30 November”, „underwent knee surgery”, „is 24 weeks pregnant”). „Nie może pracować”
+  i „wymaga opieki” po spójniku nie robią już z opisu faktu przepisu („przebywa na zwolnieniu
+  lekarskim i nie może pracować”). Zakrywana jest sama fraza: osoba, nazwa szpitala pisana wielką
+  literą i reszta zdania zostają. Na części roboczej drugiej serii zakrytych danych jest 87,3%
+  zamiast 83,5% (dane o zdrowiu: 74 wycieki zamiast 125), bez nowych nadmiarowych zakryć.
+- **Przepis, pouczenie i nazwa urzędu o zdrowiu zostają jawne.** „Zwolnienia lekarskie należy
+  dostarczyć w ciągu 7 dni”, „art. 92 Kodeksu pracy”, „Jeżeli pracownik przebywa na zwolnieniu…”,
+  „osobom ze znacznym lub umiarkowanym stopniem niepełnosprawności”, „Powiatowy Zespół do Spraw
+  Orzekania o Niepełnosprawności”, „Poradnia Leczenia Uzależnień prowadzi terapię”, terapeuta, który
+  „prowadzi terapię logopedyczną”, kadrowa, która „przyjmuje zwolnienia lekarskie”, pusta opcja
+  formularza „[ ] dziecko z orzeczeniem o niepełnosprawności”, a także „zwolniony z pracy”,
+  „zwolnienie warunkowe”, „po operacji bankowej” i „firma uzależniona od dostawcy”. Jawne zostają
+  też zdania, w których zdrowie jest tematem pisma, a nie zdarzeniem z życia osoby („zasady wypłaty
+  zasiłku chorobowego”, „Druk zwolnienia lekarskiego jest dostępny na stronie internetowej ZUS”,
+  „Mam pytanie o urlop dla poratowania zdrowia”, „kolejki do psychoterapii w powiecie”, „certyfikat
+  z psychoterapii”, „Czy dziecko posiada orzeczenie? TAK / NIE”), pismo, przesyłka i delegacja, które
+  „trafiły do szpitala”, pobyt „jako kapelan” albo „z wizytą”, „po zabiegu usunięcia drzew”, zdania
+  z „z udziałem”, „z działem płac”, „artykułem 92”, „rozdziałem 4”, pozycja przepisu, tabeli
+  i pakietu przetargu („Dz. U. z 2024 r., poz. 146”, „Pakiet 2, poz. 3: endoprotezy…”), podmiot
+  zbiorowy („Pracownicy obsługują e-ZLA”) i statystyka („Według danych GUS co trzeci pracownik…”).
+  Osoba w zdaniu musi być tą, której zdarzenie dotyczy: urzędnik z funkcją we wtrąceniu („Pani Anna
+  Nowak, kierownik działu kadr, przypomina, że zwolnienie lekarskie należy…”, „inspektor ZUS wydała
+  decyzję w sprawie renty”), lekarz, logopeda i fundator („Dr Anna Kowalska zajmuje się leczeniem
+  onkologicznym dzieci”, „wójt gminy ufundował pobyt w hospicjum dla samotnych mieszkańców”,
+  „udostępnia salę na mityngi AA”) i autor pisma w innej roli („Mam przyjemność poinformować…”,
+  „przesyłam mój raport o absencji chorobowej”, „od lat wydaję orzeczenia”, „Mam doświadczenie
+  w psychoterapii”) nie są pacjentem. Jawne zostają też pobyt w szpitalu w innym celu („zgłosił się
+  do szpitala z reklamacją”, „na rozmowę kwalifikacyjną”, „na staż”, „konserwator przebywał
+  w szpitalu od 8:00 do 16:00, naprawiając windy”, „Teczka Pana Nowaka leży w szpitalu”), imiesłów
+  przy rzeczy albo bez dopowiedzenia medycznego („Budynek był diagnozowany”, „Dron był operowany
+  przez strażaka”, „Teren był napromieniowany”, „został rehabilitowany po wyroku z czasów PRL”),
+  „zwolnienie dyscyplinarne”, bezosobowe „Na tym oddziale leczy się seniorów”, lek przy instytucji
+  („Hurtownia przyjmuje Ibuprom”) i angielskie „a stroke of genius”, „His access was disabled”,
+  „the hospital cafeteria”, „the disability pension reform”.
 
 ## v0.47.0 — 2026-11-14
 

@@ -10961,3 +10961,348 @@ test('klasa 12: reguła sylab wietnamskich w czasie liniowym', () => {
   const t4 = time(caps(4000));
   expect(t4 / t1).toBeLessThan(6);
 });
+
+test('zdrowie klasa 3: zdarzenie zdrowotne przy osobie (zwolnienie, orzeczenie, leczenie, pobyt, zabieg, ciąża, nałóg)', () => {
+  const Z = '[DANE O ZDROWIU]';
+  const cases: [string, string][] = [
+    // zwolnienie lekarskie z okresem, L4, e-ZLA, zasiłek chorobowy, urlop dla poratowania zdrowia
+    ['Jan Kowalski przebywa na zwolnieniu lekarskim od 3 do 17 marca 2026 r. i przeszedł zabieg artroskopii kolana.', `${N} przebywa na ${Z} i przeszedł ${Z}.`],
+    ['Kierowniczka referatu, Pani Ewa Lis, ma zwolnienie lekarskie do 27.11, proszę o zastępstwo.', `Kierowniczka referatu, Pani ${N}, ma ${Z}, proszę o zastępstwo.`],
+    ['Nieobecni: Jan Nowak (zwolnienie lekarskie), Anna Lis (urlop).', `Nieobecni: ${N} (${Z}), ${N} (urlop).`],
+    ['Nauczycielka przebywa na urlopie dla poratowania zdrowia do 31.08.2026 r.', `Nauczycielka przebywa na ${Z}.`],
+    ['Uwagi:\n- poz. 4: w maju 6 dni zasiłku chorobowego.', `Uwagi:\n- poz. 4: w maju ${Z}.`],
+    ['Od poniedziałku jestem na L4, wracam 20 maja.', `Od poniedziałku jestem na ${Z}, wracam 20 maja.`],
+    // orzeczenie, stopień niepełnosprawności z symbolem, niezdolność do samodzielnej egzystencji, opinia WWR
+    ['Syn wnioskodawczyni ma orzeczenie o potrzebie kształcenia specjalnego.', `Syn wnioskodawczyni ma ${Z}.`],
+    ['Wnioskodawca legitymuje się orzeczeniem o znacznym stopniu niepełnosprawności, symbol 10-N.', `Wnioskodawca legitymuje się ${Z}.`],
+    ['Ubezpieczony jest częściowo niezdolny do pracy.', `Ubezpieczony jest ${Z}.`],
+    ['Skarżąca jest całkowicie niezdolna do\nsamodzielnej egzystencji.', `Skarżąca jest ${Z}.`],
+    ['Córka ma opinię o potrzebie wczesnego wspomagania rozwoju.', `Córka ma ${Z}.`],
+    ['[X] dziecko z orzeczeniem o niepełnosprawności', `[X] dziecko z ${Z}`],
+    // leczenie i terapia z rodzajem, „leczy się”, opieka specjalisty
+    ['Matka od lat leczy się psychiatrycznie, w 2024 r. była w szpitalu psychiatrycznym.', `Matka od lat ${Z}, w 2024 r. była w ${Z}.`],
+    ['Brat skarżącego był skierowany na leczenie psychiatryczne.', `Brat skarżącego był skierowany na ${Z}.`],
+    ['Ojciec dziecka jest uzależniony od alkoholu i przerwał terapię uzależnień.', `Ojciec dziecka jest ${Z} i przerwał ${Z}.`],
+    ['Oskarżony od lat jest uzależniony od metamfetaminy.', `Oskarżony od lat jest ${Z}.`],
+    ['Chłopiec korzysta z pomocy psychologa szkolnego i uczęszcza na terapię integracji sensorycznej.', `Chłopiec ${Z} i uczęszcza na ${Z}.`],
+    // pobyt w szpitalu i sanatorium, zabieg z dopowiedzeniem medycznym, stan po zawale i udarze, endoproteza
+    ['Do końca miesiąca przebywam w sanatorium po operacji kręgosłupa.', `Do końca miesiąca przebywam ${Z}.`],
+    ['Pan Nowak jest po operacji, wraca w poniedziałek.', `Pan ${N} jest ${Z}, wraca w poniedziałek.`],
+    ['Pracownik od zawału serca pracuje na pół etatu.', `Pracownik ${Z} pracuje na pół etatu.`],
+    ['Babcia porusza się o kulach po endoprotezie biodra.', `Babcia porusza się o kulach po ${Z}.`],
+    // ciąża z tygodniem, ciąża zagrożona, dalsza wzmianka w tym samym zdaniu
+    ['Pani Maria Nowak jest w 20. tygodniu ciąży, ciąża zagrożona.', `Pani ${N} jest ${Z}, ${Z}.`],
+    ['U pani Ewy Kos trwa 30. tydzień ciąży, ciążę prowadzi lekarz rodzinny.', `U pani ${N} trwa ${Z}, ${Z} prowadzi lekarz rodzinny.`],
+    // leczenie przewlekłe przy osobie
+    ['Do południa jestem na dializach, proszę dzwonić po 15.', `Do południa jestem na ${Z}, proszę dzwonić po 15.`],
+  ];
+  for (const [t, want] of cases) {
+    const once = redactPII(t).redacted;
+    expect(once, t).toBe(want);
+    expect(redactPII(once).redacted, `idempotencja: ${t}`).toBe(once);
+  }
+  keep(
+    [
+      // przepis, pouczenie, regulamin, warunek: bez osoby wskazanej z nazwy
+      'Zwolnienia lekarskie należy dostarczyć w ciągu 7 dni.',
+      'Zgodnie z art. 92 Kodeksu pracy za czas zwolnienia lekarskiego pracownik zachowuje prawo do wynagrodzenia.',
+      'Pracownikowi przebywającemu na zwolnieniu lekarskim przysługuje zasiłek chorobowy.',
+      'Jeżeli pracownik przebywa na zwolnieniu lekarskim, nie może wykonywać pracy.',
+      'Wynagrodzenie chorobowe za okres zwolnienia lekarskiego wypłaca pracodawca.',
+      'Zwolnienie lekarskie wystawia lekarz w formie elektronicznej (e-ZLA).',
+      'Do wniosku należy dołączyć orzeczenie o stopniu niepełnosprawności.',
+      'Świadczenie przysługuje osobom ze znacznym lub umiarkowanym stopniem niepełnosprawności.',
+      'Uczniowie posiadający orzeczenie o potrzebie kształcenia specjalnego mają zapewnione zajęcia.',
+      'Pracownik może skorzystać z urlopu dla poratowania zdrowia po 7 latach pracy.',
+      'Kobiety w ciąży do 12. tygodnia ciąży mogą skorzystać z badań prenatalnych.',
+      'Wniosek o skierowanie na leczenie odwykowe składa się do gminnej komisji.',
+      // nazwa instytucji i usługa placówki
+      'Powiatowy Zespół do Spraw Orzekania o Niepełnosprawności w Krakowie wydaje orzeczenia o niepełnosprawności.',
+      'Poradnia Leczenia Uzależnień w Oświęcimiu prowadzi terapię uzależnienia od alkoholu dla mieszkańców gminy.',
+      'Gmina finansuje leczenie odwykowe w ramach programu profilaktyki.',
+      'Szpital ogłasza przetarg na dostawę endoprotez stawu biodrowego.',
+      // funkcjonariusz i pracownik w funkcji, terapeuta prowadzący terapię
+      'Pani Anna Nowak, kierownik działu kadr, przyjmuje zwolnienia lekarskie w pokoju 12.',
+      'Pan Adam Lis odpowiada za rozliczanie zasiłków chorobowych.',
+      'Pani Ewa Lis, logopeda, prowadzi terapię logopedyczną w poradni.',
+      'Pani Anna Kowalska pracuje w szpitalu psychiatrycznym jako pielęgniarka.',
+      'Pani Ewa Lis ukończyła szkołę psychoterapii w Krakowie.',
+      // słowa bez znaczenia medycznego
+      'Pan Jan Nowak został zwolniony z pracy, zwolnienie z opłat dotyczy go od maja.',
+      'Skazany przebywa na zwolnieniu warunkowym od 2025 r.',
+      'Po operacji bankowej klient otrzymuje potwierdzenie.',
+      'Pan Nowak jest po operacji przejęcia spółki.',
+      'Most po zabiegu konserwacji przęseł jest przejezdny.',
+      'Firma jest uzależniona od dostawcy z Chin.',
+      'Wnioskodawca jest uzależniony od pomocy społecznej.',
+      'Linia L4 została wyłączona, operator ma L4 w grafiku jako nazwę hali.',
+      'Karta informacyjna leczenia szpitalnego zawiera rozpoznanie.',
+      // pusta opcja formularza
+      '[ ] dziecko z orzeczeniem o niepełnosprawności',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+});
+
+test('zdrowie klasa 3: frazy zdarzeń w czasie liniowym (długie odstępy, powtórzenia)', () => {
+  const time = (s: string): number => {
+    const t0 = performance.now();
+    redactPII(s, { types: ['ZDROWIE'] });
+    return performance.now() - t0;
+  };
+  const block = (n: number): string =>
+    Array.from({ length: n }, () => `przebywa${' '.repeat(40)}na${' '.repeat(40)}zwolnieniu po operacji kolana orzeczenie o 12. tygodniu ciąży`).join(' ');
+  redactPII(block(50));
+  const t1 = Math.min(time(block(250)), time(block(250)));
+  const t4 = time(block(1000));
+  expect(t4 / t1).toBeLessThan(6);
+});
+
+test('zdrowie klasa 3: imiesłów, zabieg po budowie słowa, pobyt, angielski; temat pisma i podmiot rzeczowy zostają', () => {
+  const Z = '[DANE O ZDROWIU]';
+  const cases: [string, string][] = [
+    // imiesłów bierny po łączniku
+    ['Matka małoletniego jest od lat leczona psychiatrycznie.', `Matka małoletniego jest od lat ${Z}.`],
+    ['Pan Kamil Ryba był operowany na przepuklinę pachwinową w czerwcu.', `Pan ${N} był ${Z} w czerwcu.`],
+    ['Pani Ewelina Gryc była hospitalizowana w klinice kardiologii.', `Pani ${N} była ${Z}.`],
+    ['Mąż powódki od roku jest dializowany.', `Mąż powódki od roku jest ${Z}.`],
+    ['Brat skarżącej jest leczony z powodu cukrzycy.', `Brat skarżącej jest ${Z} z powodu ${Z}.`],
+    // zabieg po budowie słowa i z narządem
+    ['Matka małoletniego przeszła mastektomię w ubiegłym roku.', `Matka małoletniego przeszła ${Z} w ubiegłym roku.`],
+    ['Pan Damian Kos przeszedł zabieg koronarografii.', `Pan ${N} przeszedł ${Z}.`],
+    ['Wnioskodawczyni jest po przeszczepie nerki.', `Wnioskodawczyni jest ${Z}.`],
+    ['Dziadek dzieci porusza się na wózku po amputacji nogi.', `Dziadek dzieci porusza się na wózku ${Z}.`],
+    ['Babcia małoletniej jest po wszczepieniu rozrusznika serca.', `Babcia małoletniej jest ${Z}.`],
+    ['Pani Elżbieta Kurek miała w lutym zabieg usunięcia macicy.', `Pani ${N} miała w lutym ${Z}.`],
+    ['Pani Sylwia Tomczak przebywała na oddziale ginekologicznym po poronieniu.', `Pani ${N} przebywała ${Z}.`],
+    // pobyt, placówka, renta, szyk odwrócony, urlop zdrowotny
+    ['Pozwany kilkukrotnie trafiał do izby wytrzeźwień.', `Pozwany kilkukrotnie trafiał ${Z}.`],
+    ['Ojciec dziecka przebywa w zakładzie leczniczym dla osób uzależnionych.', `Ojciec dziecka przebywa ${Z}.`],
+    ['Wnioskodawczyni dwukrotnie przebywała na detoksie.', `Wnioskodawczyni dwukrotnie przebywała ${Z}.`],
+    ['Syn wnioskodawczyni przebywał na turnusie rehabilitacyjnym w Busku-Zdroju.', `Syn wnioskodawczyni przebywał ${Z} w Busku-Zdroju.`],
+    ['Wnioskodawca od 2019 r. pobiera rentę z tytułu niezdolności do pracy.', `Wnioskodawca od 2019 r. pobiera ${Z}.`],
+    ['Pan Michał Bielecki jest niepełnosprawny w stopniu znacznym.', `Pan ${N} jest ${Z}.`],
+    ['Pan Ryszard Kłos od maja korzysta z urlopu zdrowotnego.', `Pan ${N} od maja korzysta z ${Z}.`],
+    ['Syn stron jest pod stałą opieką neurologa dziecięcego.', `Syn stron jest ${Z}.`],
+    ['Pani Iwona Kos przyjmuje sertralinę.', `Pani ${N} przyjmuje ${Z}.`],
+    // słowa reguły po spójniku nie blokują opisu faktu
+    ['Mąż wnioskodawczyni przebywa na zwolnieniu lekarskim i nie może pracować.', `Mąż wnioskodawczyni przebywa na ${Z} i nie może pracować.`],
+    ['Matka dzieci jest po udarze niedokrwiennym i wymaga opieki.', `Matka dzieci jest ${Z} i wymaga opieki.`],
+    ['Ojciec jest po operacji biodra i każdego dnia chodzi o kulach.', `Ojciec jest ${Z} i każdego dnia chodzi o kulach.`],
+    ['Uczeń ma orzeczenie o potrzebie kształcenia specjalnego, więc może korzystać z dowozu.', `Uczeń ma ${Z}, więc może korzystać z dowozu.`],
+    // pisma dwujęzyczne
+    ['Ms Anna Kowalska is on sick leave until 30 November.', `Ms ${N} is ${Z}.`],
+    ['Mr John Smith underwent knee surgery in May.', `Mr ${N} underwent ${Z} in May.`],
+    ['The applicant is 24 weeks pregnant.', `The applicant is ${Z}.`],
+    ['Mr Piotr Nowak was admitted to a psychiatric hospital in March.', `Mr ${N} was ${Z} in March.`],
+    ['Ms Ewa Lis holds a certificate of moderate disability.', `Ms ${N} holds a ${Z}.`],
+  ];
+  for (const [t, want] of cases) {
+    const once = redactPII(t).redacted;
+    expect(once, t).toBe(want);
+    expect(redactPII(once).redacted, `idempotencja: ${t}`).toBe(once);
+  }
+  keep(
+    [
+      // narzędnik rzeczownika na -łem nie jest pierwszą osobą
+      'Zgodnie z artykułem 92 Kodeksu pracy za czas zwolnienia lekarskiego pracownik zachowuje prawo do wynagrodzenia.',
+      'Rozliczenie zasiłku chorobowego odbywa się w porozumieniu z działem płac.',
+      'Zgodnie z rozdziałem 4 regulaminu pracy urlop dla poratowania zdrowia udzielany jest na wniosek.',
+      'Posiedzenie z udziałem dyrektora szpitala dotyczyło leczenia psychiatrycznego dzieci.',
+      'Kościołem parafialnym zarządza proboszcz, a leczenie odwykowe organizuje caritas.',
+      // „poz. N” w przepisie, tabeli i pakiecie przetargu
+      'Na podstawie ustawy (Dz. U. z 2024 r., poz. 146) zwolnienie lekarskie jest wystawiane w systemie e-ZLA.',
+      'Tabela 3, poz. 12: zasiłek chorobowy w kwocie 1200 zł.',
+      'Wykaz poz. 7 obejmuje urlop dla poratowania zdrowia dla nauczycieli.',
+      'Pakiet 2, poz. 3: endoprotezy stawu biodrowego cementowane, 40 sztuk.',
+      // strona internetowa i strona dokumentu, zaimek w innym członie
+      'Druk zwolnienia lekarskiego jest dostępny na stronie internetowej ZUS.',
+      'Na stronie 4 opisano leczenie odwykowe.',
+      'Strona internetowa szpitala zawiera informacje o leczeniu onkologicznym.',
+      'Dyrektor oddziału ZUS, a jego zastępca rozpatruje wnioski o świadczenie rehabilitacyjne.',
+      'On zwrócił uwagę, że psychoterapia dla dzieci jest trudno dostępna w powiecie.',
+      // podmiot rzeczowy i pobyt w funkcji
+      'Przesyłka trafiła do szpitala w Kielcach 3 marca, odebrał ją pan Nowak.',
+      'Pismo pana Jana Kowalskiego trafiło do szpitala w Radomiu.',
+      'Siostra przełożona zakonu przebywa w szpitalu jako kapelan.',
+      'Delegacja radnych przebywała w szpitalu powiatowym z wizytą.',
+      // rzeczownik czynności bez narządu
+      'Pan Jan Nowak zgłosił, że po zabiegu usunięcia drzew teren zostanie uporządkowany.',
+      'Lekarze przeprowadzili w 2025 r. 120 zabiegów wszczepienia rozrusznika serca.',
+      // podmiot zbiorowy, pouczenie, temat pisma, pytanie formularza
+      'Pracownicy obsługują e-ZLA.',
+      'Pracownicy przebywający na zwolnieniu lekarskim otrzymują wynagrodzenie chorobowe.',
+      'Ubezpieczony wykorzystuje zwolnienie lekarskie zgodnie z celem.',
+      'Mam pytanie o zasady przyznawania świadczenia rehabilitacyjnego.',
+      'Otrzymałem pytanie o urlop dla poratowania zdrowia nauczycieli.',
+      'Anna Kowalska zapytała o kolejki do psychoterapii w powiecie.',
+      'Pan Adam Nowak otrzymał certyfikat z psychoterapii poznawczo-behawioralnej.',
+      'Czy dziecko posiada orzeczenie o niepełnosprawności? TAK / NIE',
+      'Na stronie BIP opublikowano wykaz poradni leczenia uzależnień.',
+      'Według danych GUS co trzeci pracownik był w ubiegłym roku na zwolnieniu lekarskim.',
+      'Art. 26. Osoba uzależniona od alkoholu może zostać skierowana na leczenie odwykowe.',
+      // angielski: przepis i grupa
+      'Patients who underwent knee surgery may apply for rehabilitation.',
+      'Employees on sick leave must submit a medical certificate.',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+});
+
+test('zdrowie klasa 3: imiesłowy, zabiegi i temat pisma w czasie liniowym', () => {
+  const time = (s: string): number => {
+    const t0 = performance.now();
+    redactPII(s, { types: ['ZDROWIE'] });
+    return performance.now() - t0;
+  };
+  const block = (n: number): string =>
+    Array.from(
+      { length: n },
+      () => `jest${' '.repeat(8)}od lat${' '.repeat(8)}leczona po przeszczepie nerki, trafiał${' '.repeat(8)}do szpitala jako zasady wypłaty zasiłku chorobowego ${'a'.repeat(60)}łem z udziałem`,
+    ).join(' ');
+  redactPII(block(50));
+  const t1 = Math.min(time(block(250)), time(block(250)));
+  const t4 = time(block(1000));
+  expect(t4 / t1).toBeLessThan(6);
+});
+
+test('zdrowie klasa 3: rola osoby przy zdarzeniu (urzędnik, świadczeniodawca, autor pisma, rzecz, instytucja)', () => {
+  const Z = '[DANE O ZDROWIU]';
+  const cases: [string, string][] = [
+    // osoba z funkcją dalej jest pacjentem, gdy zdarzenie dotyczy jej samej (czasownik pobytu, posiadania)
+    ['Pan Nowak, magazynier, przebywa na zwolnieniu lekarskim od 2 do 16 maja.', `Pan ${N}, magazynier, przebywa na ${Z}.`],
+    ['Pan Nowak, inspektor ZUS, przebywa na zwolnieniu lekarskim do końca miesiąca.', `Pan ${N}, inspektor ZUS, przebywa na ${Z} do końca miesiąca.`],
+    ['Pani Nowak, nauczycielka, przebywa na urlopie dla poratowania zdrowia.', `Pani ${N}, nauczycielka, przebywa na ${Z}.`],
+    // imiesłów dwuznaczny z dopowiedzeniem medycznym albo z człowiekiem jako podmiotem
+    ['Pani Nowak była operowana na przepuklinę kręgosłupa.', `Pani ${N} była ${Z}.`],
+    ['Pan Nowak był diagnozowany w klinice neurologii.', `Pan ${N} był ${Z}.`],
+    ['Pozwany jest leczony psychiatrycznie od 2020 r.', `Pozwany jest ${Z} od 2020 r.`],
+    ['Jest leczona psychiatrycznie.', `Jest ${Z}.`],
+    ['Pan Nowak był operowany w szpitalu wojewódzkim.', `Pan ${N} był ${Z}.`],
+    // lek po czasowniku: człowiek albo podmiot domyślny
+    ['Pani Nowak przyjmuje sertralinę.', `Pani ${N} przyjmuje ${Z}.`],
+    ['Od roku przyjmuje escitalopram.', `Od roku przyjmuje ${Z}.`],
+    // pobyt z celem medycznym, czasownik z wielkiej litery, podmiot ze zdania głównego, zdanie względne
+    ['Trafiłam do szpitala na obserwację.', `Trafiłam ${Z} na obserwację.`],
+    ['Pani Kowalska trafiła do szpitala z silnym bólem brzucha.', `Pani ${N} trafiła ${Z} z silnym bólem brzucha.`],
+    ['Konkubent przyznał, że „pije za dużo” i dwa razy trafił do izby wytrzeźwień.', `Konkubent przyznał, że „pije za dużo” i dwa razy trafił ${Z}.`],
+    [
+      'W mieszkaniu przebywa także córka stron, Oliwia Kaczor, która korzysta z pomocy psychologa szkolnego.',
+      `W mieszkaniu przebywa także córka stron, ${N}, która ${Z}.`,
+    ],
+    // zdarzenie po łączniku i przyimku, wartość pola w druku z danymi osoby, dalsza wzmianka
+    ['pracuje zdalnie bo jestem po operacji kolana i nie moge dojezdzac', `pracuje zdalnie bo jestem ${Z} i nie moge dojezdzac`],
+    [
+      'Imię i nazwisko: Jan Kowalski\n03. Orzeczenie: umiarkowany stopień niepełnosprawności, symbol 05-R (choroby narządu ruchu)',
+      `Imię i nazwisko: ${N}\n03. Orzeczenie: ${Z}`,
+    ],
+    [
+      'Komisja skierowała Mirosława Kaczora na badanie. Po otrzymaniu opinii wniosek o zobowiązanie do leczenia odwykowego trafi do sądu.',
+      `Komisja skierowała ${N} na badanie. Po otrzymaniu opinii wniosek o zobowiązanie do ${Z} trafi do sądu.`,
+    ],
+    [
+      'Matka małoletniego, Anna Nowak, mieszka w Lublinie. Od roku jest na rencie z tytułu niezdolności do pracy.',
+      `Matka małoletniego, ${N}, mieszka w [MIEJSCOWOŚĆ]. Od roku jest na ${Z}.`,
+    ],
+    // podstawa prawna w konkretnej sprawie nie zasłania osoby; tytuł ustawy zostaje jawny
+    [
+      'Wnioskodawczyni, Pani Anna Lis, wnosi o zobowiązanie uczestnika do leczenia odwykowego na podstawie ustawy o wychowaniu w trzeźwości i przeciwdziałaniu alkoholizmowi.',
+      `Wnioskodawczyni, Pani ${N}, wnosi o zobowiązanie uczestnika do ${Z} na podstawie ustawy o wychowaniu w trzeźwości i przeciwdziałaniu alkoholizmowi.`,
+    ],
+    // angielski z człowiekiem
+    ['My son is disabled and needs care.', `My son is ${Z} and needs care.`],
+    ['He holds a disability certificate.', `He holds a ${Z}.`],
+    ['She was taken to the hospital after the accident.', `She was ${Z} after the accident.`],
+  ];
+  for (const [t, want] of cases) {
+    const once = redactPII(t).redacted;
+    expect(once, t).toBe(want);
+    expect(redactPII(once).redacted, `idempotencja: ${t}`).toBe(once);
+  }
+  keep(
+    [
+      // urzędnik z nazwiska i zdanie normatywne w zdaniu podrzędnym, temat decyzji i pytania
+      'Pani Anna Nowak, kierownik działu kadr, przypomina, że zwolnienie lekarskie należy dostarczyć w ciągu 7 dni.',
+      'Pan Jan Kowalski, inspektor ZUS, wyjaśnił, że zasiłek chorobowy przysługuje od 31. dnia niezdolności do pracy.',
+      'Pani Ewa Zielińska, inspektor ZUS, wydała decyzję w sprawie renty z tytułu niezdolności do pracy.',
+      'Pan Kowalski pyta, czy renta z tytułu niezdolności do pracy podlega opodatkowaniu.',
+      'Pan Nowak wyjaśnił, że od stycznia zmieni się wysokość zasiłku chorobowego.',
+      // świadczeniodawca, fundator, specjalista, grupa po frazie
+      'Pan Nowak, wójt gminy, ufundował pobyt w hospicjum dla samotnych mieszkańców.',
+      'Pan Nowak, proboszcz, udostępnia salę parafialną na mityngi AA.',
+      'Dr Anna Kowalska od 20 lat zajmuje się leczeniem onkologicznym dzieci.',
+      'Pani Kowalska, logopeda, zajmuje się terapią logopedyczną w przedszkolu nr 3.',
+      'Pani Nowak jest specjalistką od psychoterapii poznawczo-behawioralnej.',
+      'Pan Nowak, nauczyciel WF, prowadzi zajęcia z gimnastyki korekcyjnej i terapii ręki.',
+      'Radna zwróciła uwagę na brak leczenia psychiatrycznego dla dzieci w powiecie.',
+      // autor pisma w pierwszej osobie w innej roli niż pacjent
+      'Mam przyjemność poinformować, że Fundacja sfinansuje pobyt na turnusie rehabilitacyjnym dla 20 dzieci z gminy.',
+      'W załączniku przesyłam mój raport o absencji chorobowej w spółce za 2025 r.',
+      'Mam wątpliwość co do zasiłku chorobowego dla pracowników tymczasowych.',
+      'Jestem lekarzem orzecznikiem i od lat wydaję orzeczenia o niezdolności do pracy.',
+      'Mam 15 lat doświadczenia w terapii uzależnień od alkoholu.',
+      'Podczas narady omawiałam z zespołem absencję chorobową w wydziale.',
+      // narzędnik rzeczownika na -łem po przymiotniku i przyimku
+      'Wskaźnik absencji chorobowej w zakładzie spadł w porównaniu z ubiegłym kwartałem.',
+      'Absencja chorobowa w porównaniu z poprzednim kwartałem wzrosła o 3 punkty.',
+      // pobyt bez leczenia: cel, godziny pracy, czynność, zawód, rzecz
+      'Klient zgłosił się do szpitala z reklamacją dotyczącą faktury.',
+      'Pan Nowak zgłosił się do szpitala w sprawie praktyk studenckich.',
+      'Pani Nowak zgłosiła się do szpitala na rozmowę kwalifikacyjną.',
+      'Pan Nowak trafił do szpitala na staż podyplomowy.',
+      'Pani Kowalska, studentka, została przyjęta na oddział pediatrii na praktyki.',
+      'Pan Nowak, konserwator, przebywał w szpitalu od 8:00 do 16:00, naprawiając windy.',
+      'Teczka Pana Nowaka leży w szpitalu od tygodnia.',
+      'Pan Nowak, elektryk, został skierowany do szpitala wojewódzkiego do naprawy agregatu.',
+      'Pani Nowak została przyjęta do szpitala na stanowisko sekretarki medycznej.',
+      'Pan Nowak skierowany do szpitala na kontrolę przeciwpożarową sporządził protokół.',
+      // imiesłów bez człowieka i bez dopowiedzenia medycznego, rehabilitacja prawna
+      'Budynek był diagnozowany pod kątem zawilgocenia ścian.',
+      'Teren był napromieniowany po awarii w elektrowni.',
+      'Pomnikowy dąb jest leczony przez arborystów od trzech lat.',
+      'Sąd uznał, że Pan Nowak został rehabilitowany w 1991 r. po wyroku z czasów PRL.',
+      'Silnik samochodu Pana Nowaka był diagnozowany w stacji kontroli pojazdów.',
+      'Dron był operowany przez strażaka z JRG nr 2.',
+      'Teren po żwirowni jest rehabilitowany przyrodniczo.',
+      'Rachunek był operowany przez pełnomocnika.',
+      'Pan Nowak był leczony przez kolegów z pracy jak bohater.',
+      // zwolnienie niezdrowotne, „leczy się” bezosobowe, lek przy instytucji
+      'Pan Nowak był na zwolnieniu dyscyplinarnym, o którym mowa w piśmie.',
+      'Pan Nowak jest na zwolnieniu grupowym objętym porozumieniem.',
+      'Na tym oddziale leczy się głównie seniorów po udarach.',
+      'Pan Nowak, ordynator, mówi, że w poradni leczy się dorosłych i dzieci.',
+      'Hurtownia przyjmuje Ibuprom i Apap do magazynu w poniedziałki.',
+      'Placówka przyjmuje Xanax tylko na podstawie zamówienia.',
+      // reguła z podmiotem ogólnym i zdaniem względnym, temat pola formularza
+      'Pracownik, który przebywa na zwolnieniu lekarskim, nie może wykonywać pracy zarobkowej.',
+      'W okresie pandemii COVID-19 pracownik, który przedstawi zwolnienie lekarskie, zachowuje prawo do wynagrodzenia.',
+      'Imię i nazwisko: Jan Kowalski\nTemat szkolenia: orzeczenie o niepełnosprawności w praktyce urzędu',
+      // angielski: idiom, rzecz, część szpitala, sprawa urzędowa
+      'He had a stroke of genius during the negotiations.',
+      'His access was disabled after he left the company.',
+      'He is committed to the hospital expansion project.',
+      'He was taken to the hospital cafeteria for a meeting with the board.',
+      'She drafted the disability pension reform for the ministry.',
+      'She works on the disability pension reform at the ministry.',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+});
+
+test('zdrowie klasa 3: rola osoby, podmiot i cel pobytu w czasie liniowym', () => {
+  const time = (s: string): number => {
+    const t0 = performance.now();
+    redactPII(s, { types: ['ZDROWIE'] });
+    return performance.now() - t0;
+  };
+  const block = (n: number): string =>
+    Array.from(
+      { length: n },
+      () =>
+        'Pan Jan Nowak, kierownik działu, przypomina, że zwolnienie lekarskie należy dostarczyć. Pan Nowak, konserwator, przebywał w szpitalu od 8:00 do 16:00, naprawiając windy, a córka, która korzysta z pomocy psychologa, prowadzi zajęcia z gimnastyki i terapii ręki; Hurtownia przyjmuje Ibuprom, most był diagnozowany.',
+    ).join(' ');
+  redactPII(block(50));
+  const t1 = Math.min(time(block(250)), time(block(250)));
+  const t4 = time(block(1000));
+  expect(t4 / t1).toBeLessThan(6);
+});
