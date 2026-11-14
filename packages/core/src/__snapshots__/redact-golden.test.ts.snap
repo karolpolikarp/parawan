@@ -217,6 +217,21 @@ Zużycie paska",
   "neg-239": "Instytut Badawczy Leśnictwa, ul. Braci Leśnej 3, Sękocin Stary, 05-090 Raszyn.",
   "neg-24": "Sowa hukała całą noc pod oknem.",
   "neg-240": "Jan przyszedł do urzędu. Wniosek złożył Jan.",
+  "neg-241": "Panie Prezesie, Panie Sędzio, Panie Boże! Szanowni Państwo, Dziękuję, Anna przyjdzie jutro.",
+  "neg-242": "Z poważaniem
+Zarząd Spółki
+
+Pozdrawiam
+Dział Kadr
+
+Kind regards,
+Customer Service",
+  "neg-243": "Płyn Mr Proper, catering z Mr Cook, firma Mr Garden sp. z o.o., konkurs Mr Olympia. Czytam Mrs Dalloway i Frau Holle. Herr Ober, Mr Prime Minister.",
+  "neg-244": "Wakacje spędziliśmy w Juracie, Helu, Jastarni i Władysławowie. Mieszkała w Krakowie, Kazimierzu i Podgórzu.",
+  "neg-245": "Wykład o apostołach: Piotrze, Pawle, Janie, Jakubie. Referat o królach: Mieszku, Henryku, Zygmuncie, Stefanie.",
+  "neg-246": "Ulubione gry: Tetris, Mario, Sonic. Filmy: Coco, Kubo, Moana. Autorzy: Coelho, Paulo, Cortázar.
+produkt,ilosc
+Sandro,5",
   "neg-25": "Kruk krukowi oka nie wykole, jak mówi przysłowie.",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
   "neg-27": "Kot przewrócił doniczkę z parapetu.",
@@ -357,6 +372,18 @@ Wywiad: matka – Rak jajnika. Zima była ciężka.",
   "os-o-54": "Pan Jan Wolny złożył wniosek. Wolny dostęp do informacji jest prawem. Wolny przyszedł wczoraj.",
   "os-o-55": "Pan Adam Kalisz złożył wniosek. Pociąg do Kalisza odjechał. Rozmowa z Kaliszem trwała godzinę.",
   "os-o-56": "Pan Tomasz Zieliński złożył wniosek. Dział TZ przekazał akta. Pismo przygotował TZ w dniu 5 maja.",
+  "os-o-57": "Panie Marku,
+przesyłam protokół. Witam Zbyszku, Cześć Ewo! Tak, Kasiu, wiem.",
+  "os-o-58": "Jutro przyjdzie hydraulik p. Marek, numer do niego podam.",
+  "os-o-59": "Dear Mr Brandt, Ms Sabine Krüger will call. Frau Schneider hat geschrieben. Dr Helen Carter, University of Leeds.",
+  "os-o-60": "Z poważaniem
+Kowalski
+
+Pozdrawiam, Kuba
+
+Best regards,
+Oliver Hastings",
+  "os-o-61": "Herr Dr. Müller hat angerufen. Sehr geehrte Frau Prof. Dr. Weber, Dear Dr. Smith, W Gdyni, Marku, było zimno.",
   "os-p-01": "Pozwany Jan Kowalski nie stawił się na rozprawie.",
   "os-p-02": "Powódka Anna Nowak wniosła o zasądzenie kosztów.",
   "os-p-03": "Świadek Piotr Wiśniewski zeznał, że widział zdarzenie.",
@@ -1059,6 +1086,21 @@ Zużycie paska",
   "neg-239": "Instytut Badawczy Leśnictwa, ul. Braci Leśnej 3, Sękocin Stary, 05-090 Raszyn.",
   "neg-24": "Sowa hukała całą noc pod oknem.",
   "neg-240": "Jan przyszedł do urzędu. Wniosek złożył Jan.",
+  "neg-241": "Panie Prezesie, Panie Sędzio, Panie Boże! Szanowni Państwo, Dziękuję, Anna przyjdzie jutro.",
+  "neg-242": "Z poważaniem
+Zarząd Spółki
+
+Pozdrawiam
+Dział Kadr
+
+Kind regards,
+Customer Service",
+  "neg-243": "Płyn Mr Proper, catering z Mr Cook, firma Mr Garden sp. z o.o., konkurs Mr Olympia. Czytam Mrs Dalloway i Frau Holle. Herr Ober, Mr Prime Minister.",
+  "neg-244": "Wakacje spędziliśmy w Juracie, Helu, Jastarni i Władysławowie. Mieszkała w [MIEJSCOWOŚĆ], Kazimierzu i Podgórzu.",
+  "neg-245": "Wykład o apostołach: Piotrze, Pawle, Janie, Jakubie. Referat o królach: Mieszku, Henryku, Zygmuncie, Stefanie.",
+  "neg-246": "Ulubione gry: Tetris, Mario, Sonic. Filmy: Coco, Kubo, Moana. Autorzy: Coelho, Paulo, Cortázar.
+produkt,ilosc
+Sandro,5",
   "neg-25": "Kruk krukowi oka nie wykole, jak mówi przysłowie.",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
   "neg-27": "Kot przewrócił doniczkę z parapetu.",
@@ -1177,7 +1219,7 @@ Zużycie paska",
 [OSOBA-A] odrabia lekcje, a [OSOBA-A] recytowała wiersz o tym, jak wrona zgubiła ser.",
   "os-o-40": "Szanowny Panie [OSOBA-A],
 odpowiadam na pismo w sprawie lokalu.
-[OSOBA-A]",
+[OSOBA-B]",
   "os-o-41": "Obecni: [OSOBA-A], [OSOBA-A].
 1. [OSOBA-A] złoży wniosek.
 2. [OSOBA-A] potwierdzi przelew.",
@@ -1198,6 +1240,18 @@ Wywiad: matka – Rak jajnika. Zima była ciężka.",
   "os-o-54": "Pan [OSOBA-A] złożył wniosek. Wolny dostęp do informacji jest prawem. [OSOBA-A] przyszedł wczoraj.",
   "os-o-55": "Pan [OSOBA-A] złożył wniosek. Pociąg do Kalisza odjechał. Rozmowa z [OSOBA-A] trwała godzinę.",
   "os-o-56": "Pan [OSOBA-A] złożył wniosek. Dział TZ przekazał akta. Pismo przygotował [OSOBA-A] w dniu 5 maja.",
+  "os-o-57": "Panie [OSOBA-A],
+przesyłam protokół. Witam [OSOBA-B], Cześć [OSOBA-C]! Tak, [OSOBA-D], wiem.",
+  "os-o-58": "Jutro przyjdzie hydraulik p. [OSOBA-A], numer do niego podam.",
+  "os-o-59": "Dear Mr [OSOBA-A], Ms [OSOBA-B] will call. Frau [OSOBA-C] hat geschrieben. Dr [OSOBA-D], University of Leeds.",
+  "os-o-60": "Z poważaniem
+[OSOBA-A]
+
+Pozdrawiam, [OSOBA-B]
+
+Best regards,
+[OSOBA-C]",
+  "os-o-61": "Herr Dr. [OSOBA-A] hat angerufen. Sehr geehrte Frau Prof. Dr. [OSOBA-B], Dear Dr. [OSOBA-C], W Gdyni, [OSOBA-D], było zimno.",
   "os-p-01": "Pozwany [OSOBA-A] nie stawił się na rozprawie.",
   "os-p-02": "Powódka [OSOBA-A] wniosła o zasądzenie kosztów.",
   "os-p-03": "Świadek [OSOBA-A] zeznał, że widział zdarzenie.",
@@ -1899,6 +1953,21 @@ Zużycie paska",
   "neg-239": "Instytut Badawczy Leśnictwa, ul. Braci Leśnej 3, Sękocin Stary, 05-090 Raszyn.",
   "neg-24": "Sowa hukała całą noc pod oknem.",
   "neg-240": "Jan przyszedł do urzędu. Wniosek złożył Jan.",
+  "neg-241": "Panie Prezesie, Panie Sędzio, Panie Boże! Szanowni Państwo, Dziękuję, Anna przyjdzie jutro.",
+  "neg-242": "Z poważaniem
+Zarząd Spółki
+
+Pozdrawiam
+Dział Kadr
+
+Kind regards,
+Customer Service",
+  "neg-243": "Płyn Mr Proper, catering z Mr Cook, firma Mr Garden sp. z o.o., konkurs Mr Olympia. Czytam Mrs Dalloway i Frau Holle. Herr Ober, Mr Prime Minister.",
+  "neg-244": "Wakacje spędziliśmy w Juracie, Helu, Jastarni i Władysławowie. Mieszkała w [MIEJSCOWOŚĆ], Kazimierzu i Podgórzu.",
+  "neg-245": "Wykład o apostołach: Piotrze, Pawle, Janie, Jakubie. Referat o królach: Mieszku, Henryku, Zygmuncie, Stefanie.",
+  "neg-246": "Ulubione gry: Tetris, Mario, Sonic. Filmy: Coco, Kubo, Moana. Autorzy: Coelho, Paulo, Cortázar.
+produkt,ilosc
+Sandro,5",
   "neg-25": "Kruk krukowi oka nie wykole, jak mówi przysłowie.",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
   "neg-27": "Kot przewrócił doniczkę z parapetu.",
@@ -2038,6 +2107,18 @@ Wywiad: matka – Rak jajnika. Zima była ciężka.",
   "os-o-54": "Pan [IMIĘ I NAZWISKO] złożył wniosek. Wolny dostęp do informacji jest prawem. [IMIĘ I NAZWISKO] przyszedł wczoraj.",
   "os-o-55": "Pan [IMIĘ I NAZWISKO] złożył wniosek. Pociąg do Kalisza odjechał. Rozmowa z [IMIĘ I NAZWISKO] trwała godzinę.",
   "os-o-56": "Pan [IMIĘ I NAZWISKO] złożył wniosek. Dział TZ przekazał akta. Pismo przygotował [IMIĘ I NAZWISKO] w dniu 5 maja.",
+  "os-o-57": "Panie [IMIĘ I NAZWISKO],
+przesyłam protokół. Witam [IMIĘ I NAZWISKO], Cześć [IMIĘ I NAZWISKO]! Tak, [IMIĘ I NAZWISKO], wiem.",
+  "os-o-58": "Jutro przyjdzie hydraulik p. [IMIĘ I NAZWISKO], numer do niego podam.",
+  "os-o-59": "Dear Mr [IMIĘ I NAZWISKO], Ms [IMIĘ I NAZWISKO] will call. Frau [IMIĘ I NAZWISKO] hat geschrieben. Dr [IMIĘ I NAZWISKO], University of Leeds.",
+  "os-o-60": "Z poważaniem
+[IMIĘ I NAZWISKO]
+
+Pozdrawiam, [IMIĘ I NAZWISKO]
+
+Best regards,
+[IMIĘ I NAZWISKO]",
+  "os-o-61": "Herr Dr. [IMIĘ I NAZWISKO] hat angerufen. Sehr geehrte Frau Prof. Dr. [IMIĘ I NAZWISKO], Dear Dr. [IMIĘ I NAZWISKO], W Gdyni, [IMIĘ I NAZWISKO], było zimno.",
   "os-p-01": "Pozwany [IMIĘ I NAZWISKO] nie stawił się na rozprawie.",
   "os-p-02": "Powódka [IMIĘ I NAZWISKO] wniosła o zasądzenie kosztów.",
   "os-p-03": "Świadek [IMIĘ I NAZWISKO] zeznał, że widział zdarzenie.",
@@ -2788,6 +2869,21 @@ Zużycie paska",
   "neg-239": "Instytut Badawczy Leśnictwa, ul. Braci Leśnej 3, Sękocin Stary, 05-090 Raszyn.",
   "neg-24": "Sowa hukała całą noc pod oknem.",
   "neg-240": "Jan przyszedł do urzędu. Wniosek złożył Jan.",
+  "neg-241": "Panie Prezesie, Panie Sędzio, Panie Boże! Szanowni Państwo, Dziękuję, Anna przyjdzie jutro.",
+  "neg-242": "Z poważaniem
+Zarząd Spółki
+
+Pozdrawiam
+Dział Kadr
+
+Kind regards,
+Customer Service",
+  "neg-243": "Płyn Mr Proper, catering z Mr Cook, firma Mr Garden sp. z o.o., konkurs Mr Olympia. Czytam Mrs Dalloway i Frau Holle. Herr Ober, Mr Prime Minister.",
+  "neg-244": "Wakacje spędziliśmy w Juracie, Helu, Jastarni i Władysławowie. Mieszkała w <<miejsce>>, Kazimierzu i Podgórzu.",
+  "neg-245": "Wykład o apostołach: Piotrze, Pawle, Janie, Jakubie. Referat o królach: Mieszku, Henryku, Zygmuncie, Stefanie.",
+  "neg-246": "Ulubione gry: Tetris, Mario, Sonic. Filmy: Coco, Kubo, Moana. Autorzy: Coelho, Paulo, Cortázar.
+produkt,ilosc
+Sandro,5",
   "neg-25": "Kruk krukowi oka nie wykole, jak mówi przysłowie.",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
   "neg-27": "Kot przewrócił doniczkę z parapetu.",
@@ -2927,6 +3023,18 @@ Wywiad: matka – Rak jajnika. Zima była ciężka.",
   "os-o-54": "Pan <<osoba>> złożył wniosek. Wolny dostęp do informacji jest prawem. <<osoba>> przyszedł wczoraj.",
   "os-o-55": "Pan <<osoba>> złożył wniosek. Pociąg do Kalisza odjechał. Rozmowa z <<osoba>> trwała godzinę.",
   "os-o-56": "Pan <<osoba>> złożył wniosek. Dział TZ przekazał akta. Pismo przygotował <<osoba>> w dniu 5 maja.",
+  "os-o-57": "Panie <<osoba>>,
+przesyłam protokół. Witam <<osoba>>, Cześć <<osoba>>! Tak, <<osoba>>, wiem.",
+  "os-o-58": "Jutro przyjdzie hydraulik p. <<osoba>>, numer do niego podam.",
+  "os-o-59": "Dear Mr <<osoba>>, Ms <<osoba>> will call. Frau <<osoba>> hat geschrieben. Dr <<osoba>>, University of Leeds.",
+  "os-o-60": "Z poważaniem
+<<osoba>>
+
+Pozdrawiam, <<osoba>>
+
+Best regards,
+<<osoba>>",
+  "os-o-61": "Herr Dr. <<osoba>> hat angerufen. Sehr geehrte Frau Prof. Dr. <<osoba>>, Dear Dr. <<osoba>>, W Gdyni, <<osoba>>, było zimno.",
   "os-p-01": "Pozwany <<osoba>> nie stawił się na rozprawie.",
   "os-p-02": "Powódka <<osoba>> wniosła o zasądzenie kosztów.",
   "os-p-03": "Świadek <<osoba>> zeznał, że widział zdarzenie.",
@@ -3622,6 +3730,12 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "neg-239": "",
   "neg-24": "",
   "neg-240": "",
+  "neg-241": "",
+  "neg-242": "",
+  "neg-243": "",
+  "neg-244": "MIEJSCOWOSC:1",
+  "neg-245": "",
+  "neg-246": "",
   "neg-25": "",
   "neg-26": "",
   "neg-27": "",
@@ -3753,6 +3867,11 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "os-o-54": "IMIE:2",
   "os-o-55": "IMIE:2",
   "os-o-56": "IMIE:2",
+  "os-o-57": "IMIE:4",
+  "os-o-58": "IMIE:1",
+  "os-o-59": "IMIE:4",
+  "os-o-60": "IMIE:3",
+  "os-o-61": "IMIE:4",
   "os-p-01": "IMIE:1",
   "os-p-02": "IMIE:1",
   "os-p-03": "IMIE:1",
@@ -4329,6 +4448,12 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "neg-239": "",
   "neg-24": "",
   "neg-240": "",
+  "neg-241": "",
+  "neg-242": "",
+  "neg-243": "",
+  "neg-244": "MIEJSCOWOSC:1",
+  "neg-245": "",
+  "neg-246": "",
   "neg-25": "",
   "neg-26": "",
   "neg-27": "",
@@ -4460,6 +4585,11 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "os-o-54": "IMIE:2",
   "os-o-55": "IMIE:2",
   "os-o-56": "IMIE:2",
+  "os-o-57": "IMIE:4",
+  "os-o-58": "IMIE:1",
+  "os-o-59": "IMIE:4",
+  "os-o-60": "IMIE:3",
+  "os-o-61": "IMIE:4",
   "os-p-01": "IMIE:1",
   "os-p-02": "IMIE:1",
   "os-p-03": "IMIE:1",

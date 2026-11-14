@@ -5,13 +5,14 @@
 import { foldAscii, HOMOGRAPH_SURNAMES, homographBase, normalizeSurnameKey, surnameBase, surnameShaped } from '../surnames.js';
 import { PERSON_MASK_SRC } from '../charset.js';
 import type { RedactCtx } from '../context.js';
-import { COLLIDING_NAME_FORMS, FIRST_NAME_DIMINUTIVES, FOREIGN_GIVEN_NAMES, isFirstNameLike, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
+import { COLLIDING_NAME_FORMS, FIRST_NAME_DIMINUTIVES, FOREIGN_GIVEN_NAMES, firstNameOfBareVocative, isFirstNameLike, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
 import { afterNonPersonContext, precededByAdminLabel, precededByEponym, RE_INSTITUTION_WORD } from '../guards/eponyms.js';
 import { ORG_HEAD_WORDS, RE_SAINT_WORD_BEFORE } from '../guards/person-context.js';
 import { LEGAL_ENTITY_WORDS, ROLE_WORDS, TITLE_WORDS } from '../guards/roles.js';
 import { ALWAYS_KEEP_INITIALS, INITIAL_EXAMS } from './person-initials.js';
 import { propagateLoginValues } from './login.js';
+import { fullPartyRoles, RE_ADDRESS_ANCHOR_BEFORE, soloPartyRoles } from './person-vocative.js';
 import { escapeRe } from '../util.js';
 
 /** Osoba z pisma: maska nasiona (ta sama etykieta pseudonimu) i to, co o niej wiadomo. */
@@ -267,7 +268,9 @@ function buildSeeds(ctx: RedactCtx): Seed[] {
       } else continue;
     } else {
       const w = norm[0];
-      if (!RE_SOLO_ANCHOR_BEFORE.test(before)) continue;
+      // Kotwica: „Pan/Pani”, etykieta, obcy tytuł, powitanie, formuła pożegnalna albo sam wołacz imienia
+      // („Kasiu,” na początku wiersza), który stoi tylko przy osobie.
+      if (!RE_SOLO_ANCHOR_BEFORE.test(before) && !RE_ADDRESS_ANCHOR_BEFORE.test(before) && !firstNameOfBareVocative(w)) continue;
       // „Pani Dyrektor”, „Pan Prezes”: rola, nie osoba
       if (ROLE_WORDS.has(w.toLowerCase()) || TITLE_WORDS.has(w.toLowerCase()) || isNameOfThingHead(w)) continue;
       const nameForm = isNameWord(w) || nameIndex().has(w.toLowerCase());
@@ -928,11 +931,37 @@ function propagateSeedLogins(ctx: RedactCtx, seeds: Seed[]): void {
   if (hits.size) propagateLoginValues(ctx, hits);
 }
 
+/**
+ * Samo imię pod maską („Pani [OSOBA-B]” z „Pani Ewo”, „Panie Henryku”, podpis „Kuba”) dostaje pseudonim
+ * jedynej pełnej osoby z pisma o tym imieniu tylko wtedy, gdy ta osoba ma w korespondencji tę samą rolę:
+ * zwrot łączy się z adresatem („Do: Ewa Nowak” albo blok adresata nad zwrotem), podpis z nadawcą („Od:
+ * Jakub Nowak”). Adresat zwrotu i podpisujący to z definicji dwie osoby („Pani Ewo, … Pozdrawiam / Ewa
+ * Nowak”), a osoba z treści pisma („opinia o uczennicy Ewie Nowak”) zwykle ktoś trzeci, więc etykiety
+ * zostają osobne. Przy dwóch osobach o tym imieniu („Ewa Nowak” i „Ewa Lis”) też.
+ */
+function mergeFirstNameSeeds(ctx: RedactCtx, seeds: Seed[]): void {
+  for (const solo of seeds) {
+    if (solo.surname || !solo.firstLemmas.length || !/^\[OSOBA-[A-Z]+\]$/.test(solo.mask)) continue;
+    const targets = new Set(seeds.filter((s) => s.surname && s.mask !== solo.mask && s.firstLemmas.some((l) => solo.firstLemmas.includes(l))).map((s) => s.mask));
+    if (targets.size !== 1) continue;
+    // inna pełna osoba pod tą samą etykietą co samo imię: etykieta nie jest wyłącznie tego imienia
+    if (seeds.some((s) => s.surname && s.mask === solo.mask)) continue;
+    const [to] = targets;
+    const from = solo.mask;
+    const soloRoles = soloPartyRoles(ctx.text, from);
+    const fullRoles = fullPartyRoles(ctx.text, to, ctx.text.indexOf(from));
+    if (!(soloRoles.to && fullRoles.to) && !(soloRoles.from && fullRoles.from)) continue;
+    ctx.text = ctx.text.split(from).join(to);
+    for (const s of seeds) if (s.mask === from) s.mask = to;
+  }
+}
+
 /** Rozlewa osoby potwierdzone w piśmie na pozostałe wzmianki. Po przebiegach osobowych, przed finalizePersons. */
 export function passPersonPropagate(ctx: RedactCtx): void {
   if (!ctx.on('IMIE') || !(ctx.text.includes('[OSOBA-') || ctx.text.includes(ctx.M.IMIE))) return;
   const seeds = buildSeeds(ctx);
   if (!seeds.length) return;
+  if (ctx.pseudonyms) mergeFirstNameSeeds(ctx, seeds);
   propagateSeedLogins(ctx, seeds);
   propagateNames(ctx, seeds);
   propagateInitials(ctx, seeds);

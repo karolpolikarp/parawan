@@ -17,6 +17,7 @@ import { passPersonInitialsAfterAnchor } from './passes/person-initials.js';
 import { passPersonMaidenAfterMask, passPersonMixedCase, passPersonOcrMix, passPersonOcrPair, passPersonOcrTitle, passPersonParents } from './passes/person-caps-ocr.js';
 import { passPersonPairs, passProtectFictional } from './passes/person-pairs.js';
 import { passPersonPropagate } from './passes/person-propagate.js';
+import { passPersonForeignTitle, passPersonPDotName, passPersonSignature, passPersonVocative } from './passes/person-vocative.js';
 import { passPersonForeign, passPersonHomographAnchor, passPersonInitial, passPersonRoleComplement, passPersonSoloDict, passPersonSoloMorph, passPersonStrongTrigger, passPersonTrigger } from './passes/person-triggers.js';
 import { passProtectJsonEscapes, passProtectUrls } from './passes/protect.js';
 import { passCivilRecord, passProfessionalNumber, passResidenceCard } from './passes/registers.js';
@@ -164,6 +165,13 @@ function redactWith(input: string, options: RedactOptions | undefined, withProbe
   passPersonPairs(ctx);
   passPersonTrigger(ctx);
   passPersonStrongTrigger(ctx);
+  // Zwrot do osoby i podpis po parach i wyzwalaczach: „Mr/Herr” + nazwisko, „p. Marek”, wołacz
+  // („Panie Marku”, „Cześć Ewo,”, „Kasiu,”), imię pod „Pozdrawiam”. Przed nazwiskiem samodzielnym,
+  // żeby „Mr Nowak” i podpis „Anna Nowak” trafiły do jednej maski.
+  passPersonForeignTitle(ctx);
+  passPersonPDotName(ctx);
+  passPersonVocative(ctx);
+  passPersonSignature(ctx);
   passPersonSoloDict(ctx);
   passPersonInitial(ctx);
   passPersonHomographAnchor(ctx);

@@ -1176,6 +1176,25 @@ export function buildDataset() {
   oso('Pan Adam Kalisz złożył wniosek. Pociąg do Kalisza odjechał. Rozmowa z Kaliszem trwała godzinę.', ['Adam', 'Kalisz złożył', 'Kaliszem'], ['do Kalisza']);
   oso('Pan Tomasz Zieliński złożył wniosek. Dział TZ przekazał akta. Pismo przygotował TZ w dniu 5 maja.', ['Tomasz', 'Zieliński', 'przygotował TZ'], ['Dział TZ']);
 
+  // ──────────────────────────────────────────────────────────────────────────
+  // ZWROT DO OSOBY I PODPIS (seria 2, klasa 2): wołacz po „Panie”, powitaniu, przecinku i na początku
+  // wiersza, „p. Marek”, Mr/Ms/Frau/Dr, podpis pod formułą pożegnalną. Role, Bóg i formuły zostają.
+  // ──────────────────────────────────────────────────────────────────────────
+  oso('Panie Marku,\nprzesyłam protokół. Witam Zbyszku, Cześć Ewo! Tak, Kasiu, wiem.', ['Marku', 'Zbyszku', 'Ewo', 'Kasiu'], ['przesyłam protokół', 'Witam', 'Cześć', 'Tak,']);
+  oso('Jutro przyjdzie hydraulik p. Marek, numer do niego podam.', ['Marek'], ['hydraulik p.', 'numer do niego']);
+  oso('Dear Mr Brandt, Ms Sabine Krüger will call. Frau Schneider hat geschrieben. Dr Helen Carter, University of Leeds.', ['Brandt', 'Sabine Krüger', 'Schneider', 'Helen Carter'], ['Dear Mr', 'will call', 'University of Leeds']);
+  oso('Z poważaniem\nKowalski\n\nPozdrawiam, Kuba\n\nBest regards,\nOliver Hastings', ['Kowalski', 'Kuba', 'Oliver Hastings'], ['Z poważaniem', 'Pozdrawiam,', 'Best regards']);
+  neg('Panie Prezesie, Panie Sędzio, Panie Boże! Szanowni Państwo, Dziękuję, Anna przyjdzie jutro.', ['Panie Prezesie', 'Panie Sędzio', 'Panie Boże', 'Szanowni Państwo']);
+  neg('Z poważaniem\nZarząd Spółki\n\nPozdrawiam\nDział Kadr\n\nKind regards,\nCustomer Service', ['Zarząd Spółki', 'Dział Kadr', 'Customer Service']);
+  // obcy tytuł przed marką, utworem i rolą; miejscownik miejsc w wyliczeniu równy wołaczowi imienia
+  neg('Płyn Mr Proper, catering z Mr Cook, firma Mr Garden sp. z o.o., konkurs Mr Olympia. Czytam Mrs Dalloway i Frau Holle. Herr Ober, Mr Prime Minister.', ['Mr Proper', 'Mr Cook', 'Mr Garden', 'Mr Olympia', 'Mrs Dalloway', 'Frau Holle', 'Herr Ober', 'Prime Minister']);
+  neg('Wakacje spędziliśmy w Juracie, Helu, Jastarni i Władysławowie. Mieszkała w Krakowie, Kazimierzu i Podgórzu.', ['Helu', 'Kazimierzu']);
+  // wyliczenie w miejscowniku (męski wołacz równy miejscownikowi), nazwy na -o i pole tabeli: nie zwrot
+  neg('Wykład o apostołach: Piotrze, Pawle, Janie, Jakubie. Referat o królach: Mieszku, Henryku, Zygmuncie, Stefanie.', ['Pawle', 'Janie', 'Henryku', 'Stefanie']);
+  neg('Ulubione gry: Tetris, Mario, Sonic. Filmy: Coco, Kubo, Moana. Autorzy: Coelho, Paulo, Cortázar.\nprodukt,ilosc\nSandro,5', ['Mario', 'Kubo', 'Paulo', 'Sandro']);
+  // stopień z kropką po Herr/Frau i po powitaniu; wołacz po jednej nazwie miejsca
+  oso('Herr Dr. Müller hat angerufen. Sehr geehrte Frau Prof. Dr. Weber, Dear Dr. Smith, W Gdyni, Marku, było zimno.', ['Müller', 'Weber', 'Smith', 'Marku'], ['Herr Dr.', 'Frau Prof. Dr.', 'Dear Dr.', 'W Gdyni']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {

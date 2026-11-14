@@ -13,6 +13,7 @@ import {
   isValidNpwz,
 } from './index';
 import { HISTORIC_SURNAMES_GEN, historicSurnameGenitive } from './passes/person-caps-ocr';
+import { RE_ADDRESS_ANCHOR_BEFORE } from './passes/person-vocative';
 import { MASK, type PiiType } from './types';
 
 // Wszystkie typy oprócz danych o zdrowiu: dla testów reguł osób i formularzy na tekstach z nazwą
@@ -6723,7 +6724,6 @@ test('b7 K31: imiona w odmianie (ruchome e, -iem, przymiotnikowa, zdrobnienia, o
     'Walka z korupcją trwa.',
     'Arka Noego',
     'Antonim słowa wysoki',
-    'Drogi Pawle, dziękuję',
     'parafia św. Antoniego Padewskiego',
   ]);
   // „św." jako świadek przed imieniem w bierniku dalej maskuje osobę
@@ -7511,7 +7511,8 @@ test('fix1: imię z końca wiersza nie skleja się z prefiksem mówcy w następn
   masked([
     ['Malgorzata Wozniak: czesc, tu Gosia\nPawel Krol: siema', `${N}: czesc, tu Gosia\n${N}: siema`],
     ['Ewa Nowak: hej, tu Gosia\nAnna Lis: siema', `${N}: hej, tu Gosia\n${N}: siema`],
-    ['Pozdrawiam\nAnna\nJan Kowalski: ok', `Pozdrawiam\nAnna\n${N}: ok`],
+    // podpis „Anna” pod „Pozdrawiam” to osoba (zwrot i podpis), ale osobna od mówcy w następnym wierszu
+    ['Pozdrawiam\nAnna\nJan Kowalski: ok', `Pozdrawiam\n${N}\n${N}: ok`],
     ['Jan\nWiśniewski', N],
   ]);
 });
@@ -7724,7 +7725,8 @@ test('fix2: imię i samo nazwisko złamane przez wiersz przed dwukropkiem to jed
     ['Z poważaniem Marek\nZieliński: kierownik referatu', `Z poważaniem ${N}: kierownik referatu`],
     ['Barbara\nKowalska: hej', `${N}: hej`],
     // pełna para mówcy w następnym wierszu: imię z końca poprzedniego to inna osoba
-    ['Pozdrawiam\nAnna\nJan Kowalski: ok', `Pozdrawiam\nAnna\n${N}: ok`],
+    // podpis „Anna” pod „Pozdrawiam” to osoba (zwrot i podpis), ale osobna od mówcy w następnym wierszu
+    ['Pozdrawiam\nAnna\nJan Kowalski: ok', `Pozdrawiam\n${N}\n${N}: ok`],
     ['tu Gosia\nJan Kowalski: ok', `tu Gosia\n${N}: ok`],
   ]);
 });
@@ -10380,4 +10382,211 @@ test('rozlanie osoby: po zawężeniu ta sama osoba dalej zakryta', () => {
     ['Pan Tomasz Zieliński złożył wniosek.\nOpracował TZ', `Pan ${N} złożył wniosek.\nOpracował ${N}`],
     ['Pan Tomasz Zieliński złożył wniosek. Dokument widział TZ.', `Pan ${N} złożył wniosek. Dokument widział ${N}.`],
   ]);
+});
+
+// ── Seria 2, klasa 2: zwrot do osoby, wołacz, obce tytuły, podpis ──
+test('zwrot: wołacz imienia po „Panie”, po powitaniu, między przecinkami i na początku wiersza', () => {
+  masked([
+    ['Panie Marku,\ndziękuję za pismo.', `Panie ${N},\ndziękuję za pismo.`],
+    ['Szanowny Panie Stanisławie, w odpowiedzi', `Szanowny Panie ${N}, w odpowiedzi`],
+    ['KONSULTANTKA: Dziękuję, panie Ryszardzie. A data urodzenia?', `KONSULTANTKA: Dziękuję, panie ${N}. A data urodzenia?`],
+    ['Dzień dobry Panie Pawle, przesyłam pismo.', `Dzień dobry Panie ${N}, przesyłam pismo.`],
+    ['Cześć Ewo, jak się masz?', `Cześć ${N}, jak się masz?`],
+    ['Hej Kasiu! Co słychać?', `Hej ${N}! Co słychać?`],
+    ['Witam Zbyszku, w załączniku faktura.', `Witam ${N}, w załączniku faktura.`],
+    ['Hej Kasia! Jutro o 16.', `Hej ${N}! Jutro o 16.`],
+    ['Drogi Pawle, dziękuję', `Drogi ${N}, dziękuję`],
+    ['Tak, Marku, wiem o tym.', `Tak, ${N}, wiem o tym.`],
+    ['Kasiu,\nprzypominam o zebraniu.', `${N},\nprzypominam o zebraniu.`],
+    ['> Agnieszko!\n> Oddzwoń.', `> ${N}!\n> Oddzwoń.`],
+    // oboczności tematu z generatora: ruchome „e”, -eł, t/d/r, -ś, zdrobnienia na -la
+    ['Panie Jacku, Panie Aleksandrze, Panie Kacprze, Panie Robercie, Panie Witoldzie, Panie Stasiu.', `Panie ${N}, Panie ${N}, Panie ${N}, Panie ${N}, Panie ${N}, Panie ${N}.`],
+    ['Cześć Olu! Hej Antku! Witaj Heńku!', `Cześć ${N}! Hej ${N}! Witaj ${N}!`],
+    // imię z wołacza rozlane na dalsze wzmianki tej osoby
+    ['Pani Agnieszko,\nkonto odblokowane. Agnieszka dostała nowe hasło.', `Pani ${N},\nkonto odblokowane. ${N} dostała nowe hasło.`],
+  ]);
+  keep([
+    'Panie Prezesie, Panie Sędzio, Panie Mecenasie, Panie Ministrze, Panie Przewodniczący.',
+    'Szanowni Państwo, uprzejmie informuję.',
+    'Panie Boże, pomóż. Panie Jezu, ufam Tobie.',
+    'Witam Państwa, witam serdecznie.',
+    'Dzięki Bogu! Halo, czy ktoś słyszy?',
+    'Cześć Polsko! Hej Sokoły!',
+    // mianownik po przecinku to wyliczenie albo podmiot, nie zwrot
+    'Dziękuję, Anna przyjdzie jutro.',
+    'Hej, Tomek wczoraj dzwonił.',
+    'Byłem wczoraj w Marku i Janowie.',
+    // wołacz równy słowu albo powitaniu
+    'Halo, słychać mnie?',
+    // wyliczenie miejsc po przyimku: miejscownik („Helu”, „Kazimierzu”) równy wołaczowi imienia
+    'Wakacje spędziliśmy w Juracie, Helu, Jastarni i Władysławowie.',
+    'Mieszkała kolejno w Krakowie, Kazimierzu, Podgórzu i Nowej Hucie.',
+    'Byliśmy na Helu, w Juracie i na Kaszubach.',
+  ]);
+  // z kotwicą zwrotu forma równa miejscownikowi dalej jest imieniem
+  masked([
+    ['Panie Kazimierzu, dziękuję za pismo.', `Panie ${N}, dziękuję za pismo.`],
+    ['Cześć Helu, co słychać?', `Cześć ${N}, co słychać?`],
+  ]);
+  // wyliczenie w miejscowniku po przyimku albo dwukropku: męski wołacz równy miejscownikowi to element listy
+  keep([
+    'Wykład o apostołach: Piotrze, Pawle, Janie, Jakubie, Andrzeju.',
+    'Referat o królach: Mieszku, Henryku, Zygmuncie, Stefanie, Władysławie.',
+    'Na lekcji religii mówiliśmy o świętych: Wojciechu, Stanisławie, Florianie…',
+    'Lekcja o świętym Wojciechu, Stanisławie, Kazimierzu.',
+    'Kazanie o Piotrze, Pawle, Andrzeju i Janie.',
+    'Kolęda: Wśród nocnej ciszy, Józefie, Maryjo.',
+    'Rozmowa o Tomaszu, Pawle, Pawle i Ewie.',
+  ]);
+  // wyliczenie nazw z wielkiej litery i pole tabeli: forma na -o to mianownik obcego imienia albo marka
+  keep([
+    'Ulubione gry: Tetris, Mario, Sonic',
+    'Konsola z grami: Zelda, Mario, Kirby',
+    'Pizzerie w okolicy: Da Grasso, Nino, Mario, Sandro',
+    'Marki odzieży: Reserved, Pawo, Sandro, Mohito',
+    'Filmy animowane: Coco, Kubo, Moana',
+    'Autorzy: Coelho, Paulo, Cortázar, Julio',
+    'Anno, Domini, Deo, Gratias',
+    'produkt,ilosc\nMario,3\nSandro,5',
+    'Leonie, komm her!',
+  ]);
+  masked([
+    // po jednej nazwie miejsca: wołacz, który nie jest miejscownikiem albo nie kontynuuje listy
+    ['Spotkamy się w Warszawie, Ewo, w przyszłym tygodniu.', `Spotkamy się w Warszawie, ${N}, w przyszłym tygodniu.`],
+    ['W Gdyni, Marku, było zimno.', `W Gdyni, ${N}, było zimno.`],
+    ['Byłem na Helu, Marku, przez tydzień.', `Byłem na Helu, ${N}, przez tydzień.`],
+    ['Przyjdę o piątej, Pawle, jak obiecałem.', `Przyjdę o piątej, ${N}, jak obiecałem.`],
+    ['Marku, Pawle, chodźcie tu!', `${N}, ${N}, chodźcie tu!`],
+    // z kotwicą zwrotu obca forma dalej jest imieniem
+    ['Cześć Mario, dzięki za pismo.', `Cześć ${N}, dzięki za pismo.`],
+    ['Pani Anno, w załączniku pismo.', `Pani ${N}, w załączniku pismo.`],
+  ]);
+});
+
+test('zwrot: „p. Marek”, obce tytuły Mr/Mrs/Ms/Herr/Frau i „Dr” z imieniem', () => {
+  masked([
+    ['Jutro przyjdzie hydraulik p. Marek, numer do niego', `Jutro przyjdzie hydraulik p. ${N}, numer do niego`],
+    ['Rozmawiałam z p. Ewą o terminie.', `Rozmawiałam z p. ${N} o terminie.`],
+    ['Dear Mr Brandt, thank you for the order.', `Dear Mr ${N}, thank you for the order.`],
+    ['Mrs Smith agreed. Ms Sabine Krüger will call.', `Mrs ${N} agreed. Ms ${N} will call.`],
+    ['Sehr geehrter Herr Müller, Frau Schneider hat geschrieben.', `Sehr geehrter Herr ${N}, Frau ${N} hat geschrieben.`],
+    ['Frau Professor Schmidt kommt morgen.', `Frau Professor ${N} kommt morgen.`],
+    ['Dr Helen Carter, University of Leeds', `Dr ${N}, University of Leeds`],
+    // stopień z kropką między tytułem a nazwiskiem, sam stopień po powitaniu
+    ['Herr Dr. Müller hat angerufen.', `Herr Dr. ${N} hat angerufen.`],
+    ['Frau Dr. Becker hat angerufen.', `Frau Dr. ${N} hat angerufen.`],
+    ['Sehr geehrte Frau Dr. Becker,', `Sehr geehrte Frau Dr. ${N},`],
+    ['Frau Prof. Dr. Weber kommt.', `Frau Prof. Dr. ${N} kommt.`],
+    ['Dear Dr. Smith,', `Dear Dr. ${N},`],
+  ]);
+  keep([
+    'Herr Doktor, bitte. Mr President spoke.',
+    'Zob. s. 12 p. 3 oraz pkt II p. 4.',
+    'Kosmetyki Dr Oetker stoją na półce.',
+    // stopień z kropką bez powitania i bez nazwiska ze słownika: marka, postać
+    'Kosmetyki Dr. Oetker i Herr Dr. Oetker stoją na półce. Herr Dr., bitte.',
+    'Oglądam Dr. House i Dr. Watson.',
+    'Ms Polska',
+    // marka, firma, lokal, konkurs: tytuł stoi przed nazwą rzeczy
+    'Kupiłem płyn Mr Proper i Mr Muscle.',
+    'Catering z Mr Cook, kolacja w Mr Sushi.',
+    'Umowę zawarła firma Mr Garden sp. z o.o.',
+    'W sklepie Mr Tom Wafle kupiłem ciastka.',
+    'Konkurs Mr Olympia i Mr Universe.',
+    // utwory i postaci
+    'Czytam Mrs Dalloway i Frau Holle.',
+    "Oglądam Mr Bean, Mr Beanie, Mrs Brown's Boys i Mr. Smith Goes to Washington.",
+    'Film „Mr Smith” leci w kinie.',
+    // role i rzeczowniki po tytule, spoza słownika osób
+    'Frau Ministerin, Herr Bundeskanzler, Herr Kommissar, Herr Lehrer, Frau Lehrerin, Herr Ober.',
+    'Ms Chair, Mr Prime Minister, Mr Speaker.',
+  ]);
+  masked([
+    // pismo z marką i osobą: znika tylko osoba
+    ['Płyn Mr Proper wylał się na podłogę, sprzątał Jan Kowalski.', `Płyn Mr Proper wylał się na podłogę, sprzątał ${N}.`],
+    // druga kotwica: powitanie przed tytułem albo imię przed nazwiskiem
+    ['Dear Mr Dalloway,\nthank you.', `Dear Mr ${N},\nthank you.`],
+    ['Sehr geehrte Frau Holm,\nvielen Dank.', `Sehr geehrte Frau ${N},\nvielen Dank.`],
+    ['My colleague Ms Leonie Vogt will call.', `My colleague Ms ${N} will call.`],
+    ['I recommend Mr Michał Zieliński.', `I recommend Mr ${N}.`],
+  ]);
+});
+
+test('podpis: imię i nazwisko pod formułą pożegnalną z zamkniętej listy', () => {
+  masked([
+    ['Pozdrawiam, Kuba', `Pozdrawiam, ${N}`],
+    ['Pozdrawiam serdecznie\nAnna', `Pozdrawiam serdecznie\n${N}`],
+    ['Dziękuję,\nEwa', `Dziękuję,\n${N}`],
+    ['Z wyrazami szacunku\nKowalski', `Z wyrazami szacunku\n${N}`],
+    ['Best regards,\nTomasz', `Best regards,\n${N}`],
+    ['Kind regards / Mit freundlichen Grüßen\nMatthias Brandt\nSales Manager', `Kind regards / Mit freundlichen Grüßen\n${N}\nSales Manager`],
+    ['Thanks,\nLisa', `Thanks,\n${N}`],
+    ['Pozdrawiam, Anna K.', `Pozdrawiam, ${N}`],
+    ['> Z poważaniem\n> Halina', `> Z poważaniem\n> ${N}`],
+    // imię i nazwisko złamane przez wiersz to jedna maska
+    ['Z poważaniem\nJan\nKowalski', `Z poważaniem\n${N}`],
+  ]);
+  keep([
+    'Z poważaniem\nZarząd Spółki',
+    'Pozdrawiam\nZespół Parawan',
+    'Pozdrawiam\nDział Kadr',
+    'Dziękuję!\nWarszawa, 12 maja 2026 r.',
+    'Best regards,\nThe Team',
+    'Kind regards,\nCustomer Service',
+    'Z poważaniem\nWójt Gminy',
+    'Z poważaniem\nKraków',
+    'Z poważaniem\nPrezes Zarządu',
+    'Pozdrawiam\nSerdecznie',
+    'Dziękujemy,\nUrząd Miasta',
+    // formuła w środku zdania albo imię z dalszym ciągiem zdania to nie podpis
+    'Dziękuję, Ewa przyjdzie o 10.',
+  ]);
+});
+
+test('zwrot i podpis: samo imię ma pseudonim jedynej pełnej osoby o tym imieniu', () => {
+  masked(
+    [
+      // blok adresata nad zwrotem to adresat zwrotu
+      ['Henryk Baran\nul. Polna 3\n\nSzanowny Panie Henryku,\nodpowiadam.', 'Henryk Baran\nul. Polna 3\n\nSzanowny Panie [OSOBA-A],\nodpowiadam.'.replace('Henryk Baran', '[OSOBA-A]').replace('ul. Polna 3', '[ADRES]')],
+      // podpis samym imieniem łączy się z nadawcą z pola „Od:”
+      ['Od: Jakub Nowak\nDo: Anna Lis\nPani Anno,\nprzesyłam.\nPozdrawiam, Kuba', 'Od: [OSOBA-A]\nDo: [OSOBA-B]\nPani [OSOBA-B],\nprzesyłam.\nPozdrawiam, [OSOBA-A]'],
+      // adresat zwrotu i podpisujący to dwie osoby, także o tym samym imieniu
+      ['Szanowny Panie Henryku,\nodpowiadam.\nHenryk Baran', 'Szanowny Panie [OSOBA-A],\nodpowiadam.\n[OSOBA-B]'],
+      ['Pani Ewo,\nodpowiadam.\nEwa Nowak', 'Pani [OSOBA-A],\nodpowiadam.\n[OSOBA-B]'],
+      ['Pani Ewo,\nprzesyłam projekt.\nPozdrawiam\nEwa Nowak', 'Pani [OSOBA-A],\nprzesyłam projekt.\nPozdrawiam\n[OSOBA-B]'],
+      ['Pani Ewo,\nprzesyłam projekt.\nPozdrawiam\nEwa Kowalska\nDział Kadr', 'Pani [OSOBA-A],\nprzesyłam projekt.\nPozdrawiam\n[OSOBA-B]\nDział Kadr'],
+      ['Pani Ewo,\nprzesyłam projekt.\n\nEwa Nowak', 'Pani [OSOBA-A],\nprzesyłam projekt.\n\n[OSOBA-B]'],
+      ['Panie Marku,\nprzesyłam projekt.\nZ poważaniem\nMarek Wiśniewski', 'Panie [OSOBA-A],\nprzesyłam projekt.\nZ poważaniem\n[OSOBA-B]'],
+      // dwie osoby o tym imieniu: etykiety osobne
+      ['Pani Ewo,\nEwa Nowak i Ewa Lis', 'Pani [OSOBA-A],\n[OSOBA-B] i [OSOBA-C]'],
+      // pełna osoba w polu „Do:” to adresatka zwrotu
+      ['Do: Ewa Nowak\nPani Ewo, w załączniku pismo.', 'Do: [OSOBA-A]\nPani [OSOBA-A], w załączniku pismo.'],
+      // osoba z treści pisma to ktoś inny niż adresat zwrotu: etykiety osobne
+      [
+        'Pani Ewo,\nw załączniku opinia o uczennicy Ewie Nowak z klasy 3b.\nPozdrawiam\nAnna Lis',
+        'Pani [OSOBA-A],\nw załączniku opinia o uczennicy [OSOBA-B] z klasy 3b.\nPozdrawiam\n[OSOBA-C]',
+      ],
+      [
+        'Panie Marku,\nprzesyłam skargę Marka Wiśniewskiego.\nPozdrawiam\nAnna Lis',
+        'Panie [OSOBA-A],\nprzesyłam skargę [OSOBA-B].\nPozdrawiam\n[OSOBA-C]',
+      ],
+    ],
+    { pseudonyms: true },
+  );
+});
+
+test('podpis: formuła pożegnalna z długim odstępem w czasie liniowym', () => {
+  // ten sam początek formuły co w RE_SIGNATURE; dawniej dwa sąsiednie [ 	]* z opcjonalnym przecinkiem
+  // dawały czas kwadratowy (40 tys. spacji: ok. 0,5 s samego wyrażenia)
+  const time = (n: number): number => {
+    const t0 = performance.now();
+    RE_ADDRESS_ANCHOR_BEFORE.test(`Pozdrawiam${' '.repeat(n)}x`);
+    RE_ADDRESS_ANCHOR_BEFORE.test(`Pozdrawiam${' '.repeat(n)},${' '.repeat(n)}x`);
+    return performance.now() - t0;
+  };
+  time(1000); // rozgrzewka JIT
+  expect(time(40_000)).toBeLessThan(100);
+  expect(redactPII(`Pozdrawiam${' '.repeat(3)},${' '.repeat(3)}
+Anna`).redacted).toBe(`Pozdrawiam${' '.repeat(3)},${' '.repeat(3)}
+${N}`);
 });

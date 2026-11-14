@@ -52,6 +52,34 @@ działają na GitHubie od chwili wypchnięcia tagów.
   („Wolny przyszedł”). Miasto o brzmieniu nazwiska zostaje w każdej formie po przyimku („pociąg do
   Kalisza”, „wyjazd do Opola”), a „rozmowa z Kaliszem” znika. Zostają też symbole działów
   w kształcie inicjałów („Dział TZ”, „wydział TZ”, „materiał PS”) i „Ewangelia według Jana”.
+- **Imię w zwrocie do osoby i w podpisie znika także wtedy, gdy pismo nie podaje nazwiska.** Wołacz
+  imienia po „Panie” („Panie Marku”, „Szanowny Panie Stanisławie”, „dziękuję, panie Ryszardzie”), po
+  powitaniu albo podziękowaniu („Cześć Ewo,”, „Hej Kasiu!”, „Witam Zbyszku,”, „Drogi Pawle,”), między
+  przecinkami („Tak, Marku, wiem”) i na początku wiersza („Kasiu,”, „> Agnieszko!”). Formy wołacza
+  powstają z imion i zdrobnień w słowniku, z obocznościami („Jacek” → „Jacku”, „Paweł” → „Pawle”,
+  „Kacper” → „Kacprze”, „Ola” → „Olu”, „Heniek” → „Heńku”). Znika też imię po skrócie „p.” („hydraulik
+  p. Marek”), nazwisko po obcym tytule („Dear Mr Brandt”, „Ms Sabine Krüger”, „Herr Müller”, „Frau
+  Professor Schmidt”), „Dr Helen Carter” oraz imię i nazwisko w wierszu pod formułą pożegnalną
+  („Pozdrawiam, Kuba”, „Z wyrazami szacunku / Kowalski”, „Best regards, / Tomasz”, „Kind regards /
+  Mit freundlichen Grüßen / Matthias Brandt”). Takie imię zakrywa też dalsze wzmianki tej osoby.
+  Z pseudonimami zwrot dostaje etykietę adresata o tym imieniu („Do: Ewa Nowak / Pani Ewo,”), a podpis
+  samym imieniem etykietę nadawcy („Od: Jakub Nowak … Pozdrawiam, Kuba”). Adresatka „Pani Ewo” i
+  podpisana pod pismem „Ewa Nowak” to dwie osoby, więc mają osobne etykiety, tak samo uczennica „Ewa
+  Nowak” z treści pisma. Po obcym tytule znika tylko nazwisko albo imię ze słownika albo wyraz po
+  powitaniu („Dear Mr Dalloway,”), także za stopniem z kropką („Herr Dr. Müller”, „Frau Prof. Dr.
+  Weber”, „Sehr geehrte Frau Dr. Becker,”, „Dear Dr. Smith,”), więc zostają marki, utwory i role („płyn Mr Proper”,
+  „catering z Mr Cook”, „firma Mr Garden sp. z o.o.”, „Mr Olympia”, „Mrs Dalloway”, „Frau Holle”,
+  „Mr. Smith Goes to Washington”, „Herr Ober”, „Mr Prime Minister”, „Dr. Oetker”). Zostaje też
+  wyliczenie miejsc („w Juracie, Helu, Jastarni”, „w Krakowie, Kazimierzu, Podgórzu”), wyliczenie
+  imion w miejscowniku, równym u mężczyzn wołaczowi („Wykład o apostołach: Piotrze, Pawle, Janie”,
+  „Kazanie o Piotrze, Pawle i Janie”, „o świętym Wojciechu, Stanisławie”), nazwy na -o w wyliczeniu
+  i tabeli („Ulubione gry: Tetris, Mario, Sonic”, „Filmy: Coco, Kubo, Moana”, „Autorzy: Coelho,
+  Paulo”, wiersz CSV „Mario,3”), role i zwroty bez imienia
+  („Panie Prezesie”, „Panie Sędzio”, „Panie Boże”, „Szanowni Państwo”, „Herr Doktor”), mianownik po
+  przecinku („Dziękuję, Anna przyjdzie jutro”), „Halo,” oraz podpis instytucji („Z poważaniem /
+  Zarząd Spółki”, „Pozdrawiam / Dział Kadr”, „Kind regards, / Customer Service”). Na części roboczej drugiej serii zakrytych danych jest 78,9%
+  zamiast 78,8%, bez nowych nadmiarowych zakryć; większość zwrotów z tej serii zakrywało już
+  rozlanie osoby z pisma.
 
 ## v0.47.0 — 2026-11-14
 
