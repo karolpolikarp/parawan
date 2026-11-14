@@ -1195,6 +1195,27 @@ export function buildDataset() {
   // stopień z kropką po Herr/Frau i po powitaniu; wołacz po jednej nazwie miejsca
   oso('Herr Dr. Müller hat angerufen. Sehr geehrte Frau Prof. Dr. Weber, Dear Dr. Smith, W Gdyni, Marku, było zimno.', ['Müller', 'Weber', 'Smith', 'Marku'], ['Herr Dr.', 'Frau Prof. Dr.', 'Dear Dr.', 'W Gdyni']);
 
+  // ──────────────────────────────────────────────────────────────────────────
+  // POKREWIEŃSTWO JAKO KOTWICA OSOBY (seria 2, klasa 5): imię i zdrobnienie w każdym przypadku za
+  // rzeczownikiem pokrewieństwa lub opieki, bez maski przed nim. Tytuł zakonny, patron i postać
+  // sakralna zostają.
+  oso('Wczoraj jej syn Kuba przyszedł sam, a córce Oli daliśmy prezent. Mój brat Paweł i moja siostra Ewelina pomagają.', ['Kuba', 'Oli', 'Paweł', 'Ewelina'], ['jej syn', 'córce', 'Mój brat', 'moja siostra']);
+  oso('KLIENT: Żona, Barbara, ale ona nie wie. probowal tez maz, Grzesiek, na lapku.', ['Barbara', 'Grzesiek'], ['Żona,', 'maz,']);
+  oso('Obecne były dzieci Zuzanna (7 lat) i Antoni (4 lata). Zuzia chodzi do szkoły, Antek ma alergię.', ['Zuzanna', 'Antoni', 'Zuzia', 'Antek'], ['dzieci', '(7 lat)']);
+  oso('Zmarły, syn Władysława i Genowefy, zamieszkały w Lublinie. I moved with my husband Paweł and our daughter Zofia.', ['Władysława', 'Genowefy', 'Paweł', 'Zofia'], ['Zmarły, syn', 'my husband']);
+  neg('Syn Marnotrawny wrócił. Kościół pw. Matki Bożej. Pielgrzymka do Ojca Pio. Schronisko Brata Alberta, Towarzystwo im. św. Brata Alberta. Grupa „Babcia Halina”. Jezus, syn Józefa i Maryi, nauczał.', ['Marnotrawny', 'Matki Bożej', 'Ojca Pio', 'Brata Alberta', 'Babcia Halina', 'Józefa', 'Maryi']);
+  // tytuł zakonny w każdej pozycji zdania, postać z bajki po celowniku, postać historyczna i biblijna
+  neg('Kościół pw. Matki Teresy z Kalkuty. Film pt. Ojciec Mateusz. Temat lekcji: Brat Albert i ubodzy. Matka Joanna od Aniołów to film.', ['Teresy', 'Mateusz', 'Albert', 'Joanna']);
+  neg('Wszystkim dzieciom Mikołaj przyniósł prezenty. Dziadek Mikołaj odwiedził przedszkole. Synowie Marka Aureliusza nie przejęli władzy. Salomon był synem Dawida i Batszeby. Ewangelia mówi o Marii, matce Jakuba.', ['Mikołaj przyniósł', 'Dziadek Mikołaj', 'Marka Aureliusza', 'Dawida', 'Batszeby', 'Jakuba']);
+  oso('Matka Anna złożyła wniosek. Synowi Mikołajowi przyznano zasiłek. Syn Jakub czytał Ewangelię.', ['Anna', 'Mikołajowi', 'Jakub'], ['Matka', 'Synowi', 'Ewangelię']);
+  // tytuł zakonny małą literą (ortografia), imię papieskie po dwóch imionach; krewny z zaimkiem dzierżawczym
+  neg('Jak żyła matka Teresa z Kalkuty? Jak mawiał brat Albert, trzeba być dobrym jak chleb. Matka Jana Pawła II, Emilia, zmarła w 1929 roku.', ['Teresa', 'Albert', 'Jana Pawła']);
+  oso('Mój brat Albert przyszedł, a moja matka Teresa została w domu.', ['Albert', 'Teresa'], ['Mój brat', 'moja matka']);
+  // przydomek z „z” tylko przy świętym: kraj, instytucja i małe miasto to pochodzenie krewnego
+  oso('Brat Piotr z Niemiec przyjechał na pogrzeb. Siostra Ewa z MOPS przyszła na wizytę. Matka Anna z Wadowic złożyła wniosek.', ['Piotr', 'Ewa', 'Anna'], ['z Niemiec', 'z MOPS', 'Wadowic']);
+  // pokrewieństwo jako etykieta z dwukropkiem albo myślnikiem
+  oso('Dzieci: Oliwia (8 lat), Filip (5 lat) i Tymon (2 lata). Syn: Piotr, ur. 2015. dzieci – Hania i Kuba', ['Oliwia', 'Filip', 'Tymon', 'Piotr', 'Hania', 'Kuba'], ['Dzieci:', '(8 lat)', 'Syn:']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {

@@ -8,6 +8,7 @@ import type { RedactCtx } from '../context.js';
 import { COLLIDING_NAME_FORMS, FIRST_NAME_DIMINUTIVES, FOREIGN_GIVEN_NAMES, firstNameOfBareVocative, isFirstNameLike, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
 import { afterNonPersonContext, precededByAdminLabel, precededByEponym, RE_INSTITUTION_WORD } from '../guards/eponyms.js';
+import { RE_KIN_ANCHOR_BEFORE } from '../guards/kinship.js';
 import { ORG_HEAD_WORDS, RE_SAINT_WORD_BEFORE } from '../guards/person-context.js';
 import { LEGAL_ENTITY_WORDS, ROLE_WORDS, TITLE_WORDS } from '../guards/roles.js';
 import { ALWAYS_KEEP_INITIALS, INITIAL_EXAMS } from './person-initials.js';
@@ -215,6 +216,11 @@ function familyForms(w: string): { lemmas: string[]; forms: string[] } {
   return { lemmas, forms };
 }
 
+/** Pełne imiona (mianownik, małe litery) dla formy imienia albo zdrobnienia w dowolnym przypadku („kuby” → „jakub”). */
+export function firstNameLemmas(w: string): string[] {
+  return familyForms(w.toLowerCase()).lemmas;
+}
+
 // ——— Nasiona ———
 
 const RE_SPAN_WORD = /^\p{L}+(?:-\p{L}+)*$/u;
@@ -270,7 +276,7 @@ function buildSeeds(ctx: RedactCtx): Seed[] {
       const w = norm[0];
       // Kotwica: „Pan/Pani”, etykieta, obcy tytuł, powitanie, formuła pożegnalna albo sam wołacz imienia
       // („Kasiu,” na początku wiersza), który stoi tylko przy osobie.
-      if (!RE_SOLO_ANCHOR_BEFORE.test(before) && !RE_ADDRESS_ANCHOR_BEFORE.test(before) && !firstNameOfBareVocative(w)) continue;
+      if (!RE_SOLO_ANCHOR_BEFORE.test(before) && !RE_ADDRESS_ANCHOR_BEFORE.test(before) && !RE_KIN_ANCHOR_BEFORE.test(before) && !firstNameOfBareVocative(w)) continue;
       // „Pani Dyrektor”, „Pan Prezes”: rola, nie osoba
       if (ROLE_WORDS.has(w.toLowerCase()) || TITLE_WORDS.has(w.toLowerCase()) || isNameOfThingHead(w)) continue;
       const nameForm = isNameWord(w) || nameIndex().has(w.toLowerCase());

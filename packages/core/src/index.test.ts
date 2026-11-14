@@ -1388,6 +1388,7 @@ const withOwnMasks = (s: string): string =>
 test.each([
   ['IMIE: imię w wierszu nad maską', 'Sporządził Jan\nKowalski, dnia 3 marca.'],
   ['IMIE: imiona rodziców za maską', 'Jan Kowalski, syn Józefa i Marii, stawił się.'],
+  ['IMIE: imiona rodziców za maską adresu (pokrewieństwo)', 'Mieszka przy ul. Polnej 5, syn Józefa i Marii był obecny.'],
   ['IMIE: imię doklejone podkreśleniem', 'Załącznik: Umowa_Kredytowa_Adam_Nowak.pdf w aktach.'],
   ['IMIE: pole formularza', 'Imię i nazwisko:\nJAN KOWALSKI'],
   ['ADRES: zamaskowana ulica za miastem', 'Ludzie mieszkający w Krakowie przy ul. Długiej 5 skarżą się na hałas.'],
@@ -1410,13 +1411,13 @@ test.each([
   ['pusta maska osoby: nazwa firmy z imieniem', { IMIE: '' }, 'Sklep Jagoda oferuje owoce. Firma Wiktoria Sp. z o.o. zatrudnia.'],
   ['pusta maska osoby: nazwa hotelu', { IMIE: '' }, 'Hotel Maria w centrum'],
   ['pusta maska osoby: punkty wyliczenia', { IMIE: '' }, 'wg pkt A. i B. uzasadnienia'],
-  ['pusta maska osoby: N.N. i imiona rodziców', { IMIE: '' }, 'Ofiara N.N., syn Józefa i Marii'],
+  ['pusta maska osoby: N.N. i imiona rodziców', { IMIE: '' }, 'Ofiara N.N., s. Józefa i Marii'],
   ['puste maski adresu, kodu i miasta: nazwa sklepu nad adresem', { ADRES: '', 'KOD-POCZTOWY': '', MIEJSCOWOSC: '' }, 'Sklep Jagoda\nul. Polna 5\n30-001 Kraków'],
   ['wspólna maska [UKRYTE]: nazwa sklepu nad adresem', SAME_MASK('[UKRYTE]'), 'Sklep Jagoda\nul. Polna 5\n30-001 Kraków'],
   ['wspólna maska [UKRYTE]: nazwa kwiaciarni przed adresem', SAME_MASK('[UKRYTE]'), 'Kwiaciarnia Róża ul. Polna 5, Kraków'],
-  ['wspólna maska [UKRYTE]: „syn” za maską adresu', SAME_MASK('[UKRYTE]'), 'Mieszka przy ul. Polnej 5, syn Józefa i Marii był obecny.'],
+  ['wspólna maska [UKRYTE]: „s.” za maską adresu', SAME_MASK('[UKRYTE]'), 'Mieszka przy ul. Polnej 5, s. Józefa i Marii był obecny.'],
   ['wspólna maska ***: nazwa sklepu nad adresem', SAME_MASK('***'), 'Sklep Jagoda\nul. Polna 5\n30-001 Kraków'],
-  ['wspólna maska ***: „syn” za maską adresu', SAME_MASK('***'), 'Mieszka przy ul. Polnej 5, syn Józefa i Marii był obecny.'],
+  ['wspólna maska ***: „s.” za maską adresu', SAME_MASK('***'), 'Mieszka przy ul. Polnej 5, s. Józefa i Marii był obecny.'],
 ] as const)('options.masks — %s: bez domknięć osoby', (_name, masks, input) => {
   const r = redactPII(input, { masks }).redacted;
   // wyrazy spoza danych osobowych zostają (wynik sprzed udostępnienia własnych masek kotwicom)
@@ -1429,8 +1430,8 @@ test('options.masks — wspólna maska: adres, kod i miasto dalej zamaskowane, n
   const masks = SAME_MASK('[UKRYTE]');
   expect(redactPII('Sklep Jagoda\nul. Polna 5\n30-001 Kraków', { masks }).redacted).toBe('Sklep Jagoda\n[UKRYTE]\n[UKRYTE] [UKRYTE]');
   expect(redactPII('Kwiaciarnia Róża ul. Polna 5, Kraków', { masks }).redacted).toBe('Kwiaciarnia Róża [UKRYTE], [UKRYTE]');
-  expect(redactPII('Mieszka przy ul. Polnej 5, syn Józefa i Marii był obecny.', { masks }).redacted).toBe(
-    'Mieszka przy [UKRYTE], syn Józefa i Marii był obecny.',
+  expect(redactPII('Mieszka przy ul. Polnej 5, s. Józefa i Marii był obecny.', { masks }).redacted).toBe(
+    'Mieszka przy [UKRYTE], s. Józefa i Marii był obecny.',
   );
 });
 
@@ -3337,7 +3338,7 @@ test('b2-fix K01: telefon po imieniu, nazwisku lub „SMS/Tel" łączonym „/" 
   masked([
     ['Koordynator: Anna Nowak/601 234 567', 'Koordynator: [IMIĘ I NAZWISKO]/[TELEFON]'],
     ['Jan Kowalski-601234567', '[IMIĘ I NAZWISKO]-[TELEFON]'],
-    ['córka Anna/603 456 789', 'córka Anna/[TELEFON]'],
+    ['córka Anna/603 456 789', 'córka [IMIĘ I NAZWISKO]/[TELEFON]'],
     ['SMS/601 234 567', 'SMS/[TELEFON]'],
     ['Kontakt/601 234 567', 'Kontakt/[TELEFON]'],
     ['(koordynator), Tel/607 890 123', '(koordynator), Tel/[TELEFON]'],
@@ -6761,8 +6762,10 @@ test('b7 K67: imiona rodziców za zamaskowaną osobą', () => {
     // skrót „s." bez dwóch imion i przymiotnik po „syn" nie są imionami rodziców
     ['Jan Kowalski, s. 15 protokołu.', `${N}, s. 15 protokołu.`],
     ['Jan Kowalski, syn marnotrawny, wrócił.', `${N}, syn marnotrawny, wrócił.`],
+    // od klasy 5 (pokrewieństwo jako kotwica) imię za „syn” jest osobą także bez maski przed nim
+    ['Mój syn Józef ma pięć lat.', `Mój syn ${N} ma pięć lat.`],
   ]);
-  keep(['Jezus, syn Józefa i Maryi, nauczał.', 'Mój syn Józef ma pięć lat.', 'Parafia Świętego Józefa']);
+  keep(['Jezus, syn Józefa i Maryi, nauczał.', 'Parafia Świętego Józefa']);
 });
 test('b7 K53: data urodzenia po formie osobowej „urodził(a) się"', () => {
   masked([
@@ -7476,7 +7479,7 @@ test('fix1: „urodzonym" po przyimku i rzeczowniku w liczbie pojedynczej to oso
   masked([
     ['Opinia o pracowniku zatrudnionym urodzonym 05.06.1975 r. w Radomiu.', 'Opinia o pracowniku zatrudnionym urodzonym [DATA-URODZENIA] r. w [MIEJSCOWOŚĆ].'],
     ['Informacja o pacjencie hospitalizowanym urodzonym 05.06.1948 r.', 'Informacja o pacjencie hospitalizowanym urodzonym [DATA-URODZENIA] r.'],
-    ['Opieka nad synem Kubą przysposobionym urodzonym 12.02.2015 r.', 'Opieka nad synem Kubą przysposobionym urodzonym [DATA-URODZENIA] r.'],
+    ['Opieka nad synem Kubą przysposobionym urodzonym 12.02.2015 r.', 'Opieka nad synem [IMIĘ I NAZWISKO] przysposobionym urodzonym [DATA-URODZENIA] r.'],
   ]);
   keep(['Emerytura przysługuje ubezpieczonym urodzonym 1 stycznia 1949 r.']);
 });
@@ -10589,4 +10592,167 @@ test('podpis: formuła pożegnalna z długim odstępem w czasie liniowym', () =>
   expect(redactPII(`Pozdrawiam${' '.repeat(3)},${' '.repeat(3)}
 Anna`).redacted).toBe(`Pozdrawiam${' '.repeat(3)},${' '.repeat(3)}
 ${N}`);
+});
+
+test('klasa 5: imię za rzeczownikiem pokrewieństwa lub opieki to osoba', () => {
+  masked([
+    ['Wczoraj jej syn Kuba przyszedł sam.', `Wczoraj jej syn ${N} przyszedł sam.`],
+    ['Daliśmy prezent córce Oli.', `Daliśmy prezent córce ${N}.`],
+    ['Widziałem syna Jakuba w szkole.', `Widziałem syna ${N} w szkole.`],
+    ['Mój brat Paweł pracuje w sklepie.', `Mój brat ${N} pracuje w sklepie.`],
+    ['moja siostra Ewelina jest wolontariuszką', `moja siostra ${N} jest wolontariuszką`],
+    ['mój syn Antoś ma autyzm', `mój syn ${N} ma autyzm`],
+    ['opiekun Adam przyjdzie jutro', `opiekun ${N} przyjdzie jutro`],
+    // wtrącenie po przecinku i zapis bez ogonków
+    ['KLIENT: Żona, Barbara, ale ona nie wie.', `KLIENT: Żona, ${N}, ale ona nie wie.`],
+    ['probowal tez maz, Grzesiek, na swoim lapku', `probowal tez maz, ${N}, na swoim lapku`],
+    ['tak to auto mojego chlopaka, Kuby, juz przestawil', `tak to auto mojego chlopaka, ${N}, juz przestawil`],
+    // wyliczenie za tym samym rzeczownikiem i imiona rodziców bez maski przed „syn”
+    ['Obecne były dzieci Zuzanna (7 lat) i Antoni (4 lata).', `Obecne były dzieci ${N} (7 lat) i ${N} (4 lata).`],
+    ['Rodzina: mama Kasia, tata Marek i brat Tomek.', `Rodzina: mama ${N}, tata ${N} i brat ${N}.`],
+    ['Zmarły, syn Władysława i Genowefy, zamieszkały w Lublinie.', `Zmarły, syn ${N} i ${N}, zamieszkały w ${C}.`],
+    ['spadek po [IMIĘ I NAZWISKO], synu Jana i Marii, urodzonym', `spadek po ${N}, synu ${N} i ${N}, urodzonym`],
+    // etykieta w czacie i tekst angielski
+    ['[08:16] Ciocia Grażka: Boże', `[08:16] Ciocia ${N}: Boże`],
+    ['with my husband Paweł and our daughter Zofia, aged 7', `with my husband ${N} and our daughter ${N}, aged 7`],
+  ]);
+});
+test('klasa 5: imię zakryte za pokrewieństwem rozlewa się na zdrobnienia w piśmie', () => {
+  masked([
+    ['Obecne były dzieci Zuzanna (7 lat) i Antoni (4 lata). Zuzia chodzi do szkoły. Antek ma alergię.', `Obecne były dzieci ${N} (7 lat) i ${N} (4 lata). ${N} chodzi do szkoły. ${N} ma alergię.`],
+  ]);
+});
+test('klasa 5: tytuł zakonny, patron, postać sakralna i nazwa nie są osobą z pokrewieństwa', () => {
+  keep([
+    'Przypowieść o Synu Marnotrawnym. Syn Marnotrawny wrócił.',
+    'Kościół pw. Matki Bożej Częstochowskiej. Matka Boża.',
+    'Syn Boży i Matka Boska.',
+    'Pielgrzymka do Ojca Pio.',
+    'Schronisko Brata Alberta w Krakowie, Towarzystwo Pomocy im. św. Brata Alberta.',
+    'Pomnik Brata Alberta.',
+    'Dom Pomocy Społecznej im. Matki Teresy z Kalkuty.',
+    'Grupa wsparcia „Babcia Halina” spotyka się w czwartki.',
+    'w serialu Ojciec Mateusz grał',
+    'serial „Ojciec Mateusz”',
+    'Jezus, syn Józefa i Maryi, nauczał.',
+    'Wnuczka Wiktoria Sp. z o.o.',
+    'dziadek Mróz',
+    'partner Orange',
+  ]);
+});
+test('klasa 5: wzorzec pokrewieństwa w czasie liniowym przy długim odstępie', () => {
+  const time = (n: number): number => {
+    const t0 = performance.now();
+    redactPII(`syn${' '.repeat(n)},${' '.repeat(n)}x syn${' '.repeat(n)}abc${' '.repeat(n)}`);
+    return performance.now() - t0;
+  };
+  time(1000);
+  expect(time(40_000)).toBeLessThan(300);
+});
+test('klasa 5: tytuł zakonny i patron z wielkiej litery w każdej pozycji w zdaniu', () => {
+  keep([
+    // po skrócie nazwy („pw.”, „pt.”, „tzw.”, „zob.”)
+    'Kościół pw. Matki Teresy z Kalkuty stoi przy rynku.',
+    'Obejrzeliśmy film pt. Ojciec Mateusz w szkole.',
+    'Tzw. Matka Teresa naszego osiedla pomaga sąsiadom.',
+    'Zob. Brat Albert, rozdział 3.',
+    // na początku zdania, po numerze listy, dwukropku i myślniku
+    '2. Matka Teresa z Kalkuty — biografia.',
+    'Temat lekcji: Brat Albert i ubodzy.',
+    'Patron szkoły – Matka Teresa z Kalkuty.',
+    'Matka Teresa z Kalkuty pracowała wśród ubogich.',
+    'Brat Albert Chmielowski założył zgromadzenie.',
+    'Matka Joanna od Aniołów to film.',
+    'Brata Alberta obchodzimy 17 czerwca.',
+  ]);
+  masked([
+    // zwykły krewny na początku zdania, po numerze i dwukropku zostaje zakryty
+    ['Matka Anna złożyła wniosek o zasiłek.', `Matka ${N} złożyła wniosek o zasiłek.`],
+    ['2. Syn Piotr, ur. 2010.', `2. Syn ${N}, ur. 2010.`],
+    ['Temat: córka Ola nie chodzi do szkoły.', `Temat: córka ${N} nie chodzi do szkoły.`],
+    // skrót nazwy nie zmienia krewnego pisanego małą literą
+    ['np. syn Kuba nie chodzi do szkoły.', `np. syn ${N} nie chodzi do szkoły.`],
+  ]);
+});
+test('klasa 5: imię w mianowniku za rzeczownikiem w innym przypadku to podmiot, nie krewny', () => {
+  keep([
+    'Wszystkim dzieciom Mikołaj przyniósł prezenty.',
+    'W grudniu do dzieci Mikołaj przychodzi z workiem.',
+    'Dziadek Mikołaj odwiedził przedszkole.',
+    'Wczoraj synowi Marek kupił rower, a córce Ola dała lalkę.',
+    'Pomoc dla córki Zuzanna potrzebuje od zaraz.',
+  ]);
+  masked([
+    ['Jej syn Mikołaj ma 5 lat.', `Jej syn ${N} ma 5 lat.`],
+    ['Synowi Mikołajowi przyznano zasiłek.', `Synowi ${N} przyznano zasiłek.`],
+    ['Mój dziadek Mikołaj zmarł w 2010 r.', `Mój dziadek ${N} zmarł w 2010 r.`],
+    ['Opieka nad dziećmi Zuzanną i Antonim.', `Opieka nad dziećmi ${N} i ${N}.`],
+    ['W domu przebywają dzieci Zuzanna i Antoni.', `W domu przebywają dzieci ${N} i ${N}.`],
+    ['Synowie Marek i Paweł mieszkają z matką.', `Synowie ${N} i ${N} mieszkają z matką.`],
+  ]);
+});
+test('klasa 5: postać historyczna i biblijna bez maski na fragmencie nazwy', () => {
+  keep([
+    'Synowie Marka Aureliusza nie przejęli władzy.',
+    'Salomon był synem Dawida i Batszeby.',
+    'Ewangelia mówi o Marii, matce Jakuba.',
+  ]);
+  // liczebnik władcy: imię bez maski, reszta jak przed klasą 5 (bez nowej maski na „Jana”)
+  expect(redactPII('Była to żona Jana III Sobieskiego.').redacted).not.toContain(`żona ${N}`);
+  masked([
+    // słowo biblijne za krewnym nie wystarcza
+    ['Syn Jakub czytał Ewangelię w kościele.', `Syn ${N} czytał Ewangelię w kościele.`],
+    ['Córka Anna Maria uczy się w liceum.', `Córka ${N} uczy się w liceum.`],
+  ]);
+});
+test('klasa 5: tytuł zakonny małą literą (polska ortografia) nie jest krewnym', () => {
+  keep([
+    'jak żyła matka Teresa z Kalkuty',
+    'Według matki Teresy z Kalkuty pomoc jest ważna.',
+    'Dzieło, które rozpoczął brat Albert, kontynuują albertyni.',
+    'Jak mawiał brat Albert, trzeba być dobrym jak chleb.',
+    'Ofiara, którą złożył ojciec Maksymilian, jest znana.',
+    'Film o tym, jak żyła matka Joanna od Aniołów.',
+    'Matka: Teresa z Kalkuty',
+  ]);
+  masked([
+    // zaimek dzierżawczy przed rzeczownikiem i nazwisko za imieniem to krewny
+    ['mój brat Albert przyszedł', `mój brat ${N} przyszedł`],
+    ['moja matka Teresa zmarła', `moja matka ${N} zmarła`],
+    ['Według jej matki Teresy dziecko jest zdrowe.', `Według jej matki ${N} dziecko jest zdrowe.`],
+    ['matka Teresa Nowak złożyła wniosek.', `matka ${N} złożyła wniosek.`],
+  ]);
+});
+test('klasa 5: przydomek z „z” tylko przy świętym albo miejscowości spoza Polski', () => {
+  masked([
+    // kraj, instytucja, małe i duże miasto po „z” to pochodzenie albo miejsce pracy krewnego
+    ['Brat Piotr z Niemiec przyjechał na pogrzeb.', `Brat ${N} z Niemiec przyjechał na pogrzeb.`],
+    ['Siostra Ewa z MOPS przyszła na wizytę.', `Siostra ${N} z MOPS przyszła na wizytę.`],
+    ['Matka Anna z Wadowic złożyła wniosek.', `Matka ${N} z Wadowic złożyła wniosek.`],
+    ['Ojciec Tomasz z Gdańska złożył wniosek.', `Ojciec ${N} z Gdańska złożył wniosek.`],
+    ['Siostra Ewa z Zakopanego przyjechała.', `Siostra ${N} z Zakopanego przyjechała.`],
+  ]);
+  keep(['Matka Teresa z Kalkuty pracowała wśród ubogich.', 'Matka Joanna od Aniołów to film.', 'Brat Albert z Krakowa']);
+});
+test('klasa 5: imię papieskie i królewskie z liczebnikiem po kilku imionach bez maski', () => {
+  keep([
+    'Matka Jana Pawła II, Emilia, zmarła w 1929 roku.',
+    'jak ojciec Jana Pawła II wychowywał syna',
+    'Syn Karola Gustawa X objął tron.',
+  ]);
+  masked([['Jej syn Jan Paweł ma 5 lat.', `Jej syn ${N} ma 5 lat.`]]);
+});
+test('klasa 5: pokrewieństwo jako etykieta z dwukropkiem albo myślnikiem', () => {
+  masked([
+    ['Dzieci: Oliwia (8 lat), Filip (5 lat) i Tymon (2 lata).', `Dzieci: ${N} (8 lat), ${N} (5 lat) i ${N} (2 lata).`],
+    ['Dzieci: Oliwia i Filip.', `Dzieci: ${N} i ${N}.`],
+    ['Syn: Piotr, ur. 2015.', `Syn: ${N}, ur. 2015.`],
+    ['dzieci – Oliwia i Filip', `dzieci – ${N} i ${N}`],
+    ['Córka - Anna (12 lat).', `Córka - ${N} (12 lat).`],
+    ['Dzieci: Filip chodzi do szkoły.', `Dzieci: ${N} chodzi do szkoły.`],
+    ['Ojciec: Jan, matka: Maria.', `Ojciec: ${N}, matka: ${N}.`],
+    // imię z etykiety rozlewa się na dalsze wzmianki
+    ['Dzieci: Oliwia (8 lat) i Filip (5 lat). Oliwia chodzi do przedszkola.', `Dzieci: ${N} (8 lat) i ${N} (5 lat). ${N} chodzi do przedszkola.`],
+  ]);
+  keep(['Dzieci: brak.', 'Ojciec: nieznany.', 'Syn - Kraków', 'Matka: Boża Częstochowska']);
 });

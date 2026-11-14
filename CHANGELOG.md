@@ -80,6 +80,38 @@ działają na GitHubie od chwili wypchnięcia tagów.
   Zarząd Spółki”, „Pozdrawiam / Dział Kadr”, „Kind regards, / Customer Service”). Na części roboczej drugiej serii zakrytych danych jest 78,9%
   zamiast 78,8%, bez nowych nadmiarowych zakryć; większość zwrotów z tej serii zakrywało już
   rozlanie osoby z pisma.
+- **Imię członka rodziny albo podopiecznego znika, choć pismo nie podaje nazwiska.** Imię
+  i zdrobnienie w każdym przypadku tuż za słowem pokrewieństwa lub opieki (syn, córka, mąż, żona,
+  matka, ojciec, brat, siostra, babcia, dziadek, wnuk, ciocia, wujek, konkubent, partner, opiekun,
+  podopieczny, dzieci): „jej syn Kuba”, „córce Oli”, „widziałem syna Jakuba”, „moja siostra Ewelina”,
+  „mój syn Antoś”, wtrącenie po przecinku („Żona, Barbara, ale…”, „maz, Grzesiek, na lapku”, „auto
+  mojego chlopaka, Kuby”), wyliczenie („dzieci Zuzanna (7 lat) i Antoni (4 lata)”, „mama Kasia, tata
+  Marek i brat Tomek”), imiona rodziców bez osoby przed nimi („syn Władysława i Genowefy”, „synu Jana
+  i Marii”), etykieta z dwukropkiem albo myślnikiem, jak w formularzach i notatkach („Dzieci: Oliwia
+  (8 lat), Filip (5 lat) i Tymon (2 lata)”, „Syn: Piotr, ur. 2015”, „dzieci – Oliwia i Filip”),
+  etykieta w czacie („Ciocia Grażka:”) i tekst angielski („my husband Paweł”, „our
+  daughter Zofia”). Takie imię zakrywa też dalsze wzmianki („Zuzanna” → „Zuzia”, „Zuzi”; „Antoni” →
+  „Antek”, „Antka”). Dawniej działało to tylko za zakrytą osobą („[…], syn Józefa i Marii”), więc
+  zmienia się wcześniejsze ustalenie, że „Mój syn Józef ma pięć lat” zostaje jawne. Jawne zostają
+  tytuły zakonne, patroni i postacie sakralne, czyli słowo pokrewieństwa z wielkiej litery w środku
+  zdania, po „im.” albo „św.” („Schronisko Brata Alberta”, „im. św. Brata Alberta”, „Dom Pomocy
+  im. Matki Teresy”, „Pielgrzymka do Ojca Pio”, „Matka Boża”, „Syn Marnotrawny”, „Jezus, syn Józefa
+  i Maryi”), nazwa w cudzysłowie („grupa »Babcia Halina«”, „serial »Ojciec Mateusz«”) i nazwa firmy
+  („Wnuczka Wiktoria Sp. z o.o.”). Tytuł zakonny przed znanym świętym albo imieniem z przydomkiem
+  zostaje jawny w każdym miejscu zdania, także na jego początku, po numerze listy, dwukropku, myślniku
+  i skrócie „pw.”, „pt.”, „tzw.”, „zob.” („Kościół pw. Matki Teresy z Kalkuty”, „film pt. Ojciec
+  Mateusz”, „Temat lekcji: Brat Albert i ubodzy”, „Matka Joanna od Aniołów to film”). Tak samo
+  tytuł pisany małą literą, jak każe ortografia („jak żyła matka Teresa z Kalkuty”, „Jak mawiał brat
+  Albert”, „ofiara, którą złożył ojciec Maksymilian”), chyba że przed nim stoi „mój”, „jej”, „naszego”
+  („mój brat Albert”, „moja matka Teresa” to krewni i znikają). Przydomek z „z” chroni tytuł tylko
+  przy świętym albo przy mieście spoza Polski, więc krewny z kraju, instytucji czy małego miasta
+  znika („Brat Piotr z Niemiec”, „Siostra Ewa z MOPS”, „Matka Anna z Wadowic”). Jawne zostaje też
+  imię papieża i króla z liczebnikiem po kilku imionach („Matka Jana Pawła II, Emilia”). Jawny zostaje
+  też Mikołaj z przedszkola („Wszystkim dzieciom Mikołaj przyniósł prezenty”, „Dziadek Mikołaj
+  odwiedził przedszkole”) i każde imię, które jest podmiotem zdania, a nie krewnym („Wczoraj synowi
+  Marek kupił rower”), oraz postacie historyczne i biblijne („Synowie Marka Aureliusza”,
+  „synem Dawida i Batszeby”, „Ewangelia mówi o Marii, matce Jakuba”). Na części
+  roboczej drugiej serii zakrytych danych jest 80,8% zamiast 78,9%, bez nowych nadmiarowych zakryć.
 
 ## v0.47.0 — 2026-11-14
 

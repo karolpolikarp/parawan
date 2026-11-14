@@ -15,6 +15,7 @@ import { passIp, passMac, passTokens, passVin } from './passes/network.js';
 import { passAccount, passCard, passIban, passNip, passPesel, passPhone, passRegon } from './passes/numeric.js';
 import { passPersonInitialsAfterAnchor } from './passes/person-initials.js';
 import { passPersonMaidenAfterMask, passPersonMixedCase, passPersonOcrMix, passPersonOcrPair, passPersonOcrTitle, passPersonParents } from './passes/person-caps-ocr.js';
+import { passPersonKinship } from './passes/person-kin.js';
 import { passPersonPairs, passProtectFictional } from './passes/person-pairs.js';
 import { passPersonPropagate } from './passes/person-propagate.js';
 import { passPersonForeignTitle, passPersonPDotName, passPersonSignature, passPersonVocative } from './passes/person-vocative.js';
@@ -182,6 +183,7 @@ function redactWith(input: string, options: RedactOptions | undefined, withProbe
   passPersonOcrMix(ctx);
   passPersonMaidenAfterMask(ctx);
   passPersonParents(ctx);
+  passPersonKinship(ctx); // po rodzicach za maską: tamten przebieg zna skróty „s.” i „c.”
   passPersonInitialsAfterAnchor(ctx); // po osobach, przed finalizePersons: relabelPersons numeruje też te maski
   // Osoba potwierdzona pewną kotwicą (para, „Pan/Pani”, pole) zakryta też w innych wzmiankach: samo
   // nazwisko, samo imię i zdrobnienie, inicjały, login. Po wszystkich przebiegach osobowych, bo nasiona
