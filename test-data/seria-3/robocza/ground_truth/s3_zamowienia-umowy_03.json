@@ -1,0 +1,393 @@
+{
+  "id": "s3_zamowienia-umowy_03",
+  "template": "zamowienia-umowy",
+  "title": "Centralny rejestr umów – wyciąg kwartalny w tabeli",
+  "seed": null,
+  "traps": [
+    "tabela z kolumnami rozdzielonymi „|”, dane osób fizycznych obok spółki i stowarzyszenia",
+    "nazwiska Mróz, Ptak, Kot, Bór obok słów „mrozem”, „ptak”",
+    "dwa PESEL po jednej etykiecie, NRB bez spacji",
+    "fałszywy PESEL jako numer referencyjny, KRS stowarzyszenia do zachowania",
+    "dana o zdrowiu (ciąża) w kolumnie uwag"
+  ],
+  "entities": [
+    {
+      "text": "Urząd Miejski w Krzeszowicach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zarządzenia nr 0050.41.2024",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Burmistrza Gminy Krzeszowice",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "OR.2151.18.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer umowy",
+      "count": 1
+    },
+    {
+      "text": "OR.2151.19.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer umowy",
+      "count": 1
+    },
+    {
+      "text": "OR.2151.22.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer umowy",
+      "count": 1
+    },
+    {
+      "text": "CZYSTA GMINA",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "nazwa firmy JDG bez nazwiska",
+      "count": 1
+    },
+    {
+      "text": "Elżbieta Mróz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko będące rzeczownikiem",
+      "count": 1
+    },
+    {
+      "text": "ul. Daleka 7",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "32-067",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tenczynek",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "1753116067",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ochrona przed mrozem",
+      "type": "WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo równe nazwisku",
+      "count": 1
+    },
+    {
+      "text": "Jerzy Malinowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "os. Krzemionki 3/12",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "32-064",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rudawa",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "57110202530",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL w kolumnie tabeli",
+      "count": 1
+    },
+    {
+      "text": "88124010377373133352374641",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "NRB bez spacji i bez PL",
+      "count": 1
+    },
+    {
+      "text": "Wojciech Ptak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "imię i nazwisko w nazwie kancelarii",
+      "count": 1
+    },
+    {
+      "text": "2109547580",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KR-4417",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer wpisu radcy prawnego",
+      "count": 1
+    },
+    {
+      "text": "Stowarzyszenie Przyjaciół Ziemi Krzeszowickiej",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "0000314578",
+      "type": "KRS",
+      "expect": "keep",
+      "note": "KRS stowarzyszenia",
+      "count": 1
+    },
+    {
+      "text": "Agnieszka Duda-Rak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe ze słów pospolitych",
+      "count": 1
+    },
+    {
+      "text": "93042771463",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "w ciąży zagrożonej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "dana o zdrowiu w kolumnie Uwagi",
+      "count": 1
+    },
+    {
+      "text": "INSTAL-SERWIS Sp. z o.o.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "5982975609",
+      "type": "NIP_COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "08148289702",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "11 cyfr bez poprawnej sumy PESEL (numer referencyjny)",
+      "count": 1
+    },
+    {
+      "text": "AGRO-BOR",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "fragment firmy JDG z nazwiskiem bez diakrytyki",
+      "count": 1
+    },
+    {
+      "text": "Stanisław Bór",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "6376423872",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "048617022",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "38 1020 2892 7741 9120 5662 2362",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wiktoria Nawara",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "ul. Kolejowa 112",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "32-065",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Nawojowa Góra",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "04293080141",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "30.09.2004",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "731 004 286",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Michał Kot",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ewa Kot",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "68031438731",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "dwa PESEL po jednej etykiecie",
+      "count": 1
+    },
+    {
+      "text": "71060587729",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "drugi PESEL bez etykiety",
+      "count": 1
+    },
+    {
+      "text": "ptak chroniony",
+      "type": "WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo równe nazwisku",
+      "count": 1
+    },
+    {
+      "text": "jerzyk",
+      "type": "WORD",
+      "expect": "keep",
+      "note": "nazwa ptaka zbliżona do imienia Jerzy",
+      "count": 1
+    },
+    {
+      "text": "Agnieszki Duda-Rak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bartosza Kota",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "502 117 930",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ilona Gacek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik urzędu",
+      "count": 1
+    },
+    {
+      "text": "12 258 10 44",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon pracownika urzędu",
+      "count": 1
+    },
+    {
+      "text": "Paweł Lach",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "sekretarz gminy w funkcji",
+      "count": 1
+    }
+  ]
+}

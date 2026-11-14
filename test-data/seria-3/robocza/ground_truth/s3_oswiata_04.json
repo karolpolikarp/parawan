@@ -1,0 +1,253 @@
+{
+  "id": "s3_oswiata_04",
+  "template": "oswiata",
+  "title": "Umowa gminy z rodzicem o zwrot kosztów dowozu dziecka z niepełnosprawnością",
+  "seed": null,
+  "traps": [
+    "komparycja w narzędniku („Panią Ewą Mróz”)",
+    "nazwisko Mróz obok słowa „mrozu”",
+    "eponim w rozpoznaniu (zespół Aspergera) i patron w nazwie szkoły",
+    "tablica rejestracyjna i model samochodu",
+    "telefon urzędnika gminy obok telefonu rodzica"
+  ],
+  "entities": [
+    {
+      "text": "Gminą Pszczyna",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Rynek 2",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "43-200",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "OŚ.4462.17.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer umowy",
+      "count": 1
+    },
+    {
+      "text": "Jacka Ochmańskiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "zastępca burmistrza w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Ilony Grabowskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "skarbnik w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Ewą Mróz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "narzędnik w komparycji",
+      "count": 1
+    },
+    {
+      "text": "Ćwiklicach",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "ul. Szkolnej 27",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "43-229",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ćwiklice",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "GEA716969",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "83061287089",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szymona Mroza",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "14 stycznia 2015",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "15211418559",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zespołu Szkół Specjalnych nr 9 im. Janusza Korczaka w Tychach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "214/2025/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer orzeczenia poradni",
+      "count": 1
+    },
+    {
+      "text": "Poradni Psychologiczno-Pedagogicznej w Pszczynie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "autyzm, w tym zespół Aspergera",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "eponim w rozpoznaniu",
+      "count": 1
+    },
+    {
+      "text": "niepełnosprawność intelektualną w stopniu lekkim",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Skoda Octavia",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "SPS 4K771",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Hurtowni Leków Arnika sp. z o.o.",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "pracodawca rodzica",
+      "count": 1
+    },
+    {
+      "text": "512/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer zarządzenia",
+      "count": 1
+    },
+    {
+      "text": "mrozu",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko Mróz",
+      "count": 1
+    },
+    {
+      "text": "PL13 1050 0099 8202 6094 9923 8780",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Beata Ślosarczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownica urzędu",
+      "count": 1
+    },
+    {
+      "text": "32 449 39 12",
+      "type": "PHONE",
+      "expect": "policy",
+      "note": "służbowy telefon urzędnika",
+      "count": 1
+    },
+    {
+      "text": "512 663 089",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ewa.mroz@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ewa Mróz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jacek Ochmański",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Ilona Grabowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis w funkcji",
+      "count": 1
+    }
+  ]
+}

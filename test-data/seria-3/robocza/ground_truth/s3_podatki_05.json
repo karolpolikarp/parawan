@@ -1,0 +1,302 @@
+{
+  "id": "s3_podatki_05",
+  "template": "podatki",
+  "title": "Decyzja o odpowiedzialności spadkobierców za zaległość podatkową",
+  "seed": null,
+  "traps": [
+    "zmarły spadkodawca i zmarły syn: dane nadal do zakrycia",
+    "adres zagraniczny z niemieckim kodem i numerem telefonu",
+    "małoletnia spadkobierczyni reprezentowana przez matkę",
+    "sygnatura postanowienia spadkowego (policy) obok cytowanych przepisów",
+    "odmiana nazwiska Pyka (Pyki, Pyce, Pykę)"
+  ],
+  "entities": [
+    {
+      "text": "Wydział Podatków i Opłat",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Zwycięstwa 21",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "44-100",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Gliwice",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby, także w adresie urzędu",
+      "count": 5
+    },
+    {
+      "text": "PO.3110.27.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Alojzego Pyki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "zmarły spadkodawca",
+      "count": 1
+    },
+    {
+      "text": "41060328257",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL zmarłego",
+      "count": 1
+    },
+    {
+      "text": "ul. Kozielskiej 88 m. 4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "ostatni adres zmarłego",
+      "count": 1
+    },
+    {
+      "text": "Gabriela Skowronek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "68120188943",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Wolności 302 m. 15",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "41-800",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zabrze",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Henryk Pyka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "71052705656",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kleppingstraße 21",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres zagraniczny",
+      "count": 1
+    },
+    {
+      "text": "44135",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "niemiecki kod pocztowy",
+      "count": 1
+    },
+    {
+      "text": "Dortmund",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby za granicą",
+      "count": 1
+    },
+    {
+      "text": "Natalia Pyka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletnia",
+      "count": 1
+    },
+    {
+      "text": "10281635442",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL małoletniej",
+      "count": 1
+    },
+    {
+      "text": "Sylwię Pykę",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "przedstawiciel ustawowy",
+      "count": 1
+    },
+    {
+      "text": "ul. Toszecka 9",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "44-117",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krystiana Pyki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "zmarły ojciec małoletniej",
+      "count": 1
+    },
+    {
+      "text": "Alojzy Pyka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy w Gliwicach",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "GL1G/48097436/6",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sądu Rejonowego w Gliwicach",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "VI Ns 218/26",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy spadkowej tej rodziny, nie cytowane orzecznictwo",
+      "count": 1
+    },
+    {
+      "text": "2466011/00/AZ/2025/001857",
+      "type": "CIVIL_RECORD",
+      "expect": "mask",
+      "note": "numer aktu zgonu",
+      "count": 1
+    },
+    {
+      "text": "+48 501 772 603",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Henrykowi Pyce",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Łukasza Grzegorzka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pełnomocnik do doręczeń",
+      "count": 1
+    },
+    {
+      "text": "KAT/R/1874",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer wpisu radcy prawnego",
+      "count": 1
+    },
+    {
+      "text": "ul. Dworcowa 31/5",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres kancelarii jednoosobowej",
+      "count": 1
+    },
+    {
+      "text": "44-102",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "h.pyka@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+49 231 5560 2214",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "zagraniczny numer telefonu",
+      "count": 1
+    },
+    {
+      "text": "PL53 1240 1037 5039 1130 6191 9257",
+      "type": "IBAN_INSTITUTION",
+      "expect": "keep",
+      "note": "rachunek miasta do wpłat",
+      "count": 1
+    },
+    {
+      "text": "Samorządowego Kolegium Odwoławczego w Katowicach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zbigniew Stolorz",
+      "type": "OFFICIAL",
+      "expect": "policy",
+      "note": "naczelnik podpisujący z upoważnienia organu",
+      "count": 1
+    }
+  ]
+}

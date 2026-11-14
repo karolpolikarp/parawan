@@ -1,0 +1,331 @@
+{
+  "id": "s3_kadry_01",
+  "template": "kadry",
+  "title": "Notatka do komisji rekrutacyjnej z projektem listy kandydatów",
+  "seed": null,
+  "traps": [
+    "lista do BIP z imionami, nazwiskami i miejscowościami zamieszkania (CITY policy)",
+    "nazwiska będące zwykłymi słowami w dopełniaczu (Sowy, Brzozy) i dwuczłonowe z łącznikiem",
+    "inicjał + nazwisko w tabeli kontaktów",
+    "niepełnosprawność przypisana kandydatce tylko numerem pozycji na liście",
+    "ogólny adres e-mail sekretariatu do zachowania obok imiennego adresu pracownicy",
+    "patron w nazwie ulicy siedziby urzędu"
+  ],
+  "entities": [
+    {
+      "text": "Urząd Gminy Stara Kamionka",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kardynała Stefana Wyszyńskiego 4",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w nazwie ulicy siedziby urzędu",
+      "count": 1
+    },
+    {
+      "text": "34-120",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Or.2110.7.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy naboru",
+      "count": 1
+    },
+    {
+      "text": "Dominika Wróbel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "kandydatka, lista do BIP",
+      "count": 1
+    },
+    {
+      "text": "Szymon Pietrzak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Weronika Jaskółka-Mazur",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe, pierwszy człon to zwykłe słowo",
+      "count": 1
+    },
+    {
+      "text": "Bartłomiej Zięba",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Halina Gąsienica-Ryś",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kamionka Górna",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce zamieszkania kandydata z listy",
+      "count": 1
+    },
+    {
+      "text": "Sucha Beskidzka",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce zamieszkania kandydata",
+      "count": 2
+    },
+    {
+      "text": "Lachowice",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce zamieszkania kandydata",
+      "count": 1
+    },
+    {
+      "text": "Zembrzyce",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce zamieszkania kandydata",
+      "count": 1
+    },
+    {
+      "text": "Maków Podhalański",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce zamieszkania kandydata",
+      "count": 2
+    },
+    {
+      "text": "Kamila Sowy",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko Sowa w dopełniaczu, zwykłe słowo",
+      "count": 1
+    },
+    {
+      "text": "Ilony Brzozy",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko Brzoza w dopełniaczu, zwykłe słowo",
+      "count": 1
+    },
+    {
+      "text": "ul. Polna 17",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "34-220",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "os. Słoneczne 3/12",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "34-200",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "orzeczenie o umiarkowanym stopniu niepełnosprawności",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kandydatka wskazana numerem pozycji",
+      "count": 1
+    },
+    {
+      "text": "05-R",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "symbol przyczyny niepełnosprawności",
+      "count": 1
+    },
+    {
+      "text": "Mariana Pietrzaka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "radny, więź rodzinna z kandydatem",
+      "count": 1
+    },
+    {
+      "text": "Teresa Pietrzak-Kubiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "członkini komisji, więź rodzinna",
+      "count": 1
+    },
+    {
+      "text": "Martę Kozieł",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownica na urlopie wychowawczym",
+      "count": 1
+    },
+    {
+      "text": "D. Wróbel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał + nazwisko w tabeli",
+      "count": 1
+    },
+    {
+      "text": "S. Pietrzak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał + nazwisko w tabeli",
+      "count": 1
+    },
+    {
+      "text": "W. Jaskółka-Mazur",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał + nazwisko w tabeli",
+      "count": 1
+    },
+    {
+      "text": "B. Zięba",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał + nazwisko w tabeli",
+      "count": 1
+    },
+    {
+      "text": "H. Gąsienica-Ryś",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał + nazwisko w tabeli",
+      "count": 1
+    },
+    {
+      "text": "604 218 377",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "512 904 116",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "723 055 841",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "668 371 290",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "33 874 12 09",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon stacjonarny kandydatki",
+      "count": 1
+    },
+    {
+      "text": "dominika.wrobel@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "s.pietrzak94@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "weronika.jm@test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "bzieba@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "halina.gr@test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "sekretariat@starakamionka.example.pl",
+      "type": "INSTITUTION_EMAIL",
+      "expect": "keep",
+      "note": "ogólny adres sekretariatu urzędu",
+      "count": 1
+    },
+    {
+      "text": "Agnieszka Siwiec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownica urzędu, autorka notatki",
+      "count": 1
+    },
+    {
+      "text": "inspektor ds. kadr",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wew. 21",
+      "type": "PHONE_EXT",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "a.siwiec@starakamionka.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "imienny adres służbowy",
+      "count": 1
+    }
+  ]
+}

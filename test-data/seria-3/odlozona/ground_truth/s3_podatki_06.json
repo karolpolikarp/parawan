@@ -1,0 +1,218 @@
+{
+  "id": "s3_podatki_06",
+  "template": "podatki",
+  "title": "Decyzja o zwrocie podatku akcyzowego od oleju napędowego dla rolnika",
+  "seed": null,
+  "traps": [
+    "nazwisko Baran i słowo „baran” (zwierzę) w tym samym piśmie",
+    "numery faktur i dane wystawcy (keep i policy) obok NIP rolnika (mask)",
+    "rachunek rolnika (mask) i rachunek gminy zapisany ciągiem (keep)",
+    "adres wiejski bez ulicy i adres urzędu bez ulicy",
+    "e-mail strony w stopce obok nazwiska urzędnika"
+  ],
+  "entities": [
+    {
+      "text": "Haczów 400",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "adres urzędu bez ulicy",
+      "count": 1
+    },
+    {
+      "text": "36-213",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "RG.3109.2.84.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tadeusz Baran",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Malinówka 88",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres wiejski bez ulicy",
+      "count": 1
+    },
+    {
+      "text": "36-217",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "84/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer decyzji",
+      "count": 1
+    },
+    {
+      "text": "Tadeusza Barana",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "66020880817",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "6814913376",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "NIP rolnika",
+      "count": 1
+    },
+    {
+      "text": "FV/0214/01/2026",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "FV/0388/01/2026",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "FV/1102/02/2026",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Agrotank sp. z o.o.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "wystawca faktur",
+      "count": 1
+    },
+    {
+      "text": "7484513584",
+      "type": "NIP_COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Lucyny Baran",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "współposiadaczka gospodarstwa",
+      "count": 1
+    },
+    {
+      "text": "69092356648",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Agencji Restrukturyzacji i Modernizacji Rolnictwa",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "baran",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwierzę obok nazwiska Baran",
+      "count": 1
+    },
+    {
+      "text": "Grzegorz Baran",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "698 304 221",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tadeuszowi Baranowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL82 1050 0099 3241 0429 4129 0299",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "rachunek rolnika do wypłaty zwrotu",
+      "count": 1
+    },
+    {
+      "text": "Banku Spółdzielczym w Brzozowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "20102028923317711232401126",
+      "type": "IBAN_INSTITUTION",
+      "expect": "keep",
+      "note": "rachunek gminy, zapis ciągiem 26 cyfr",
+      "count": 1
+    },
+    {
+      "text": "Samorządowego Kolegium Odwoławczego w Krośnie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Stanisław Kędzior",
+      "type": "OFFICIAL",
+      "expect": "policy",
+      "note": "wójt podpisujący jako organ",
+      "count": 1
+    },
+    {
+      "text": "Marta Wojtowicz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "urzędnik opracowujący",
+      "count": 1
+    },
+    {
+      "text": "tadeusz.b88@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "e-mail strony z nazwiskiem i miejscowością",
+      "count": 1
+    }
+  ]
+}

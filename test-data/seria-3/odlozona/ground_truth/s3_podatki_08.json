@@ -1,0 +1,184 @@
+{
+  "id": "s3_podatki_08",
+  "template": "podatki",
+  "title": "Protokół oględzin nieruchomości w postępowaniu podatkowym",
+  "seed": null,
+  "traps": [
+    "nazwisko Stopka i słowo „stopkę” w tym samym protokole",
+    "dowód osobisty okazany przy czynności",
+    "firma JDG z nazwiskiem i NIP przedsiębiorcy",
+    "tablica rejestracyjna pojazdu osoby trzeciej",
+    "dane o zdrowiu w oświadczeniu strony",
+    "pracownicy urzędu i świadek w liście podpisów"
+  ],
+  "entities": [
+    {
+      "text": "URZĄD GMINY CZARNY DUNAJEC",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kmietowicza 4",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "34-470",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "FN.3120.5.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Józefa Chowańca",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "52011758193",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Agnieszka Stopka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik urzędu w protokole",
+      "count": 2
+    },
+    {
+      "text": "Tomasz Bachleda-Curuś",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik urzędu, nazwisko dwuczłonowe",
+      "count": 2
+    },
+    {
+      "text": "Józef Chowaniec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "Ciche 118",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres wiejski bez ulicy",
+      "count": 1
+    },
+    {
+      "text": "BNF246555",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "dowód okazany przy oględzinach",
+      "count": 1
+    },
+    {
+      "text": "Szymon Chowaniec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "609 515 287",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Maria Kuchta",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "świadek, sąsiadka",
+      "count": 3
+    },
+    {
+      "text": "Ciche 241",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres świadka",
+      "count": 1
+    },
+    {
+      "text": "3307/4",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "numer działki ewidencyjnej osoby",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy w Nowym Targu",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "NS1T/69633570/7",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Auto Serwis Chowaniec",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "firma JDG z nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "3452408830",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "NIP przedsiębiorcy JDG",
+      "count": 1
+    },
+    {
+      "text": "KNT 4815E",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "pojazd klienta, osoba trzecia",
+      "count": 1
+    },
+    {
+      "text": "udaru mózgu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "dane o zdrowiu w oświadczeniu strony",
+      "count": 1
+    },
+    {
+      "text": "stopkę",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo obok nazwiska Stopka",
+      "count": 1
+    },
+    {
+      "text": "Szymona Chowańca",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,212 @@
+{
+  "id": "s3_kadry_07",
+  "template": "kadry",
+  "title": "Arkusz oceny okresowej urzędnika wydziału architektury",
+  "seed": null,
+  "traps": [
+    "nazwisko dwuczłonowe z członem Wilk obok zwykłego słowa „wilka”",
+    "nazwiska Kot i Piątek jako zwykłe słowa",
+    "osoby trzecie ze spraw prowadzonych przez ocenianą (sąsiad, małżonkowie w liczbie mnogiej)",
+    "sygnatura wyroku WSA do zachowania obok znaków spraw (policy)",
+    "patron w nazwie szkoły",
+    "dane o zdrowiu w uzasadnieniu oceny i dwuliterowe inicjały"
+  ],
+  "entities": [
+    {
+      "text": "Urząd Miejski w Koszalinie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Rynek Staromiejski 6–7",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "75-007",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Koszalin",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "KD.1131.88.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kamila Wilk-Sadurska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe, pierwszy człon Wilk",
+      "count": 1
+    },
+    {
+      "text": "starszy inspektor w Referacie Pozwoleń na Budowę",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Leszek Ostrowiec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kierownik Referatu Pozwoleń na Budowę",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wilk-Sadurskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w celowniku",
+      "count": 1
+    },
+    {
+      "text": "Szkoły Podstawowej nr 7 im. Mikołaja Kopernika",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "WAB.6740.112.2025",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Henryk Rogala",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sąsiad, strona postępowania",
+      "count": 1
+    },
+    {
+      "text": "ul. Zwycięstwa 141",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Morskiej 22",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres nieruchomości strony",
+      "count": 1
+    },
+    {
+      "text": "Grażyny i Ludwika Paszkowskich",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małżonkowie, wspólne nazwisko w liczbie mnogiej",
+      "count": 1
+    },
+    {
+      "text": "WSA w Szczecinie",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "II SA/Sz 1187/25",
+      "type": "CASE_LAW",
+      "expect": "keep",
+      "note": "sygnatura wyroku sądu administracyjnego",
+      "count": 1
+    },
+    {
+      "text": "Wojewodę Zachodniopomorskiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "nieobecna 46 dni po zabiegu kardiochirurgicznym",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "pod kontrolą poradni kardiologicznej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marzena Kot",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko Kot",
+      "count": 1
+    },
+    {
+      "text": "wilka",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo obok nazwiska Wilk-Sadurska",
+      "count": 1
+    },
+    {
+      "text": "Julii Piątek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko Piątek jak dzień tygodnia",
+      "count": 1
+    },
+    {
+      "text": "EK",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "inicjały pracowników",
+      "count": 1
+    },
+    {
+      "text": "ZK",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "inicjały pracowników",
+      "count": 1
+    },
+    {
+      "text": "K. Wilk-Sadurska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał + nazwisko w podpisie",
+      "count": 1
+    },
+    {
+      "text": "L. Ostrowiec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał + nazwisko w podpisie",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,331 @@
+{
+  "id": "s3_kadry_09",
+  "template": "kadry",
+  "title": "Zgłoszenie pracowników do PPK",
+  "seed": null,
+  "traps": [
+    "tabela z PESEL, datą urodzenia, e-mailem i telefonem w jednej komórce",
+    "cudzoziemiec z PESEL i paszportem, obywatelstwo (policy)",
+    "numer rejestru z 11 cyfr bez sumy kontrolnej PESEL (keep)",
+    "nazwiska będące zwykłymi słowami (Kruk, Szczygieł, Krawiec, Lis-Borowiec)",
+    "rachunek instytucji finansowej bez spacji (policy) i numer umowy PPK",
+    "patron w nazwie szkoły i w ulicy siedziby"
+  ],
+  "entities": [
+    {
+      "text": "Centrum Usług Wspólnych Oświaty w Gorzowie Wielkopolskim",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Sikorskiego 3–5",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "nazwisko patrona w ulicy siedziby",
+      "count": 1
+    },
+    {
+      "text": "66-400",
+      "type": "POSTAL",
+      "expect": "policy",
+      "note": "ten sam kod dla siedziby i pracownika",
+      "count": 2
+    },
+    {
+      "text": "Gorzów Wielkopolski",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "CUW.KP.1173.6.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PFR TFI S.A.",
+      "type": "COMPANY",
+      "expect": "keep",
+      "note": "instytucja finansowa",
+      "count": 1
+    },
+    {
+      "text": "PPK/2019/01447",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer umowy o prowadzenie PPK",
+      "count": 1
+    },
+    {
+      "text": "Marię Tokarz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownica instytucji finansowej",
+      "count": 1
+    },
+    {
+      "text": "Patryk Szymczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "98011751934",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "17.01.1998",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "p.szymczak@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "698 012 437",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Agata Lis-Borowiec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe z członem Lis",
+      "count": 1
+    },
+    {
+      "text": "77090259740",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "02.09.1977",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "agata.lb@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "607 551 290",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wiktoria Kruk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko Kruk",
+      "count": 1
+    },
+    {
+      "text": "03321129669",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "11.12.2003",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wkruk03@test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "534 870 163",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ołeksandr Hnatiuk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "cudzoziemiec, imię ukraińskie",
+      "count": 2
+    },
+    {
+      "text": "69032855578",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "28.03.1969",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ukraińskie",
+      "type": "NATIONALITY",
+      "expect": "policy",
+      "note": "obywatelstwo w tabeli obok osoby",
+      "count": 1
+    },
+    {
+      "text": "WM0587213",
+      "type": "PASSPORT",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "885 304 719",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Joanna Szczygieł",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko Szczygieł",
+      "count": 2
+    },
+    {
+      "text": "93080869980",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "08.08.1993",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "joanna.szczygiel@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "515 263 900",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kosynierów Gdyńskich 12/7",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szkole Podstawowej nr 20 im. Kornela Makuszyńskiego",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "drugi pracodawca, patron w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "Barbara Mazurek-Pilch",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "70342315821",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "11 cyfr bez poprawnej sumy kontrolnej PESEL (numer rachunku rejestru)",
+      "count": 1
+    },
+    {
+      "text": "33124010372482197230052879",
+      "type": "IBAN_COMPANY",
+      "expect": "policy",
+      "note": "rachunek techniczny instytucji finansowej, 26 cyfr bez spacji",
+      "count": 1
+    },
+    {
+      "text": "Wioletta Grabarczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "starsza specjalistka ds. płac",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "95 735 18 40",
+      "type": "INSTITUTION_PHONE",
+      "expect": "keep",
+      "note": "centrala CUW",
+      "count": 1
+    },
+    {
+      "text": "wew. 112",
+      "type": "PHONE_EXT",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "w.grabarczyk@cuw-gorzow.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ryszard Krawiec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko Krawiec jak zawód",
+      "count": 1
+    }
+  ]
+}

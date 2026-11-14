@@ -1,0 +1,18 @@
+Urząd Miasta Rzeszowa – Wydział Promocji i Kultury
+Rejestr umów cywilnoprawnych z osobami fizycznymi, III kwartał 2026 r. (eksport z systemu kadrowo-płacowego, separator: tabulator)
+
+Nr	Data	Zleceniobiorca / Wykonawca	PESEL / dokument	Adres	Rodzaj	Przedmiot	Brutto	ZUS	Rachunek
+WPK.0602.41.2026	01.07.2026	Klaudia Wolska	98012561161	ul. Hetmańska 12/40, 35-045 Rzeszów	zlecenie	obsługa punktu informacji turystycznej	4 850,00	E, R, W, Z	91 1140 2004 4147 4953 7054 6196
+WPK.0602.42.2026	03.07.2026	Tadeusz Bielecki	66071345758	Budziwój 311, 35-329 Budziwój	dzieło	koncert jazzowy na Rynku	2 500,00	brak	18109010141815922031832415
+WPK.0602.43.2026	10.07.2026	Oleksandr Bondarenko	paszport PL8131119	ul. Krakowska 8/3, 35-111 Rzeszów	zlecenie	obsługa sceny festiwalu	3 120,00	E, R, W, Z	PL83 2490 0005 6077 2870 6371 4174
+WPK.0602.44.2026	14.07.2026	Konrad Pelc	07310233012	ul. Siemieńskiego 2/7, 35-234 Rzeszów	zlecenie	wolontariat płatny – Europejski Stadion Kultury	1 400,00	uczeń do 26 lat	wypłata do rąk ojca, Romana Pelca
+WPK.0602.45.2026	22.08.2026	Justyna Mazur-Lis	85043001504	ul. Lwowska 90/14, 35-301 Rzeszów	dzieło	projekt identyfikacji wizualnej festiwalu	7 380,00	brak	55 1050 0099 5037 4866 6766 9654
+WPK.0602.46.2026	05.09.2026	Henryk Wójcicki	49121919411	ul. Okrzei 3, 35-002 Rzeszów	dzieło	wykład o historii Rzeszowa	800,00	brak	przekaz pocztowy
+
+Adnotacje do rejestru:
+– WPK.0602.43.2026: zleceniobiorca jest obywatelem Ukrainy, legalność pobytu potwierdzono wpisem do rejestru PESEL dla obywateli Ukrainy w trakcie (wniosek złożony 8.07.2026); do czasu nadania numeru PESEL rozliczenie po numerze paszportu.
+– WPK.0602.44.2026: zleceniobiorca jest niepełnoletni; zgoda przedstawiciela ustawowego (ojciec, Roman Pelc, tel. 663 509 118) w aktach umowy.
+– WPK.0602.46.2026: Pan Henryk Wójcicki, osoba z niepełnosprawnością ruchową (orzeczenie o znacznym stopniu niepełnosprawności), poprosił o salę na parterze; zapewniono salę w Wojewódzkim Domu Kultury w Rzeszowie przy ul. Okrzei 7.
+– Festiwal „Lis i Żuraw – bajki na Rynku” rozliczany jest w odrębnym rejestrze; wykonawczyni projektu graficznego (Justyna Mazur-Lis) nie jest autorką scenariusza.
+
+Rejestr prowadzi: Ewelina Rusnak, Wydział Promocji i Kultury, e.rusnak@example.pl, tel. 17 875 46 20

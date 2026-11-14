@@ -1,0 +1,240 @@
+{
+  "id": "s3_praca-z-ai_10",
+  "template": "praca-z-ai",
+  "title": "Polecenie do AI: ocena naruszenia ochrony danych po e-mailu wysłanym do złego adresata",
+  "seed": null,
+  "traps": [
+    "dwie różne osoby o prawie tym samym imieniu i nazwisku (Wiesława Rutkowska i Wiesław Rutkowski) i dwa podobne e-maile",
+    "inicjały w podpisie odpowiedzi („W. R.”)",
+    "adres IP stacji roboczej pracownika i identyfikator stacji",
+    "dane o zdrowiu syna z samym imieniem",
+    "rodzaj świadczenia ujawniający niepełnosprawność",
+    "RODO, UODO i Outlook do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "7/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer zgłoszenia naruszenia",
+      "count": 1
+    },
+    {
+      "text": "Kamila Jankowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "zgłaszająca pracownica",
+      "count": 1
+    },
+    {
+      "text": "Referat Świadczeń Rodzinnych",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wew. 245",
+      "type": "PHONE_EXT",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "UM-RSR-05",
+      "type": "DEVICE_ID",
+      "expect": "policy",
+      "note": "identyfikator stacji roboczej",
+      "count": 1
+    },
+    {
+      "text": "192.0.2.6",
+      "type": "IP",
+      "expect": "mask",
+      "note": "adres IP stacji roboczej pracownicy",
+      "count": 1
+    },
+    {
+      "text": "świadczenia pielęgnacyjnego",
+      "type": "BENEFIT",
+      "expect": "policy",
+      "note": "rodzaj świadczenia ujawnia niepełnosprawność członka rodziny",
+      "count": 1
+    },
+    {
+      "text": "Wiesławy Rutkowskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "osoba, której dane dotyczą",
+      "count": 1
+    },
+    {
+      "text": "66022783262",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Stryjewskiego 3 m. 9",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "84-300",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Lębork",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "w.rutkowski@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "adres błędnego adresata",
+      "count": 1
+    },
+    {
+      "text": "w.rutkowska@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "adres właściwej adresatki",
+      "count": 1
+    },
+    {
+      "text": "Outlooku",
+      "type": "SOFTWARE",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Wiesław Rutkowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "błędny adresat, prawie to samo imię i nazwisko",
+      "count": 1
+    },
+    {
+      "text": "Rutkowskiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko błędnego adresata",
+      "count": 1
+    },
+    {
+      "text": "Nowej Wsi Lęborskiej",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość osoby",
+      "count": 1
+    },
+    {
+      "text": "Damiana",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "syn tylko z imienia",
+      "count": 1
+    },
+    {
+      "text": "95050314870",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "stwardnienie rozsiane",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "porusza się na wózku",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wymaga cewnikowania i całodobowej opieki",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "znaczny stopień niepełnosprawności ze wskazaniem konieczności stałej opieki",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL97 1020 2892 2617 8575 8173 3760",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "600 271 845",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "W. R.",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "inicjały w podpisie",
+      "count": 1
+    },
+    {
+      "text": "Wanda Okońska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "kierowniczka referatu",
+      "count": 1
+    },
+    {
+      "text": "Rutkowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 1
+    },
+    {
+      "text": "2/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer wcześniejszego zgłoszenia",
+      "count": 1
+    },
+    {
+      "text": "UODO",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "RODO",
+      "type": "LEGAL_ACT",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    }
+  ]
+}

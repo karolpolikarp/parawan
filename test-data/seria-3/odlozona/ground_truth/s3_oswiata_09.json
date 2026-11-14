@@ -1,0 +1,261 @@
+{
+  "id": "s3_oswiata_09",
+  "template": "oswiata",
+  "title": "Upomnienie dyrektora szkoły w sprawie niespełniania obowiązku szkolnego",
+  "seed": null,
+  "traps": [
+    "adres zagraniczny z kodem Eircode",
+    "telefon zagraniczny",
+    "nadzór kuratora sądowego i sygnatura sprawy rodziny (polityka)",
+    "policjant z imienia i nazwiska w narzędniku",
+    "patron w nazwie szkoły",
+    "samo imię dziecka"
+  ],
+  "entities": [
+    {
+      "text": "Szkoła Podstawowa nr 3 im. Tadeusza Kościuszki w Biłgoraju",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "ul. Nadstawna 21",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "84 686 30 12",
+      "type": "INSTITUTION_PHONE",
+      "expect": "keep",
+      "note": "telefon szkoły",
+      "count": 1
+    },
+    {
+      "text": "SP3.4321.7.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "Rafał Szkutnik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Agnieszka Szkutnik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Ogrodowa 14/3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "23-400",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Biłgoraj",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "Dawida Szkutnika",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "4 maja 2015",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "15250424331",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dawid",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię",
+      "count": 1
+    },
+    {
+      "text": "Beata Margol",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "wychowawczyni",
+      "count": 1
+    },
+    {
+      "text": "Marzena Kołodziej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pedagog szkolny",
+      "count": 1
+    },
+    {
+      "text": "604 882 117",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "693 450 218",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Konradem Bielą",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "policjant, narzędnik",
+      "count": 1
+    },
+    {
+      "text": "Teresa Mazurek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sąsiadka",
+      "count": 1
+    },
+    {
+      "text": "ul. Ogrodowa 14/5",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Irlandii",
+      "type": "TRAVEL_CITY",
+      "expect": "keep",
+      "note": "państwo",
+      "count": 2
+    },
+    {
+      "text": "Stefania Szkutnik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "14 Oak Park Drive",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres zagraniczny",
+      "count": 1
+    },
+    {
+      "text": "Naas",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Co. Kildare",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "hrabstwo z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "W91 X2P4",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "kod Eircode",
+      "count": 1
+    },
+    {
+      "text": "+353 87 214 6630",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon zagraniczny",
+      "count": 1
+    },
+    {
+      "text": "nadzorem kuratora sądowego",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "nadzór kuratora nad rodziną",
+      "count": 1
+    },
+    {
+      "text": "Sądu Rejonowego w Biłgoraju",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy w Biłgoraju",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "III Nsm 214/24",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy rodzinnej tej rodziny",
+      "count": 1
+    },
+    {
+      "text": "Jolanta Fus",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "kuratorka sądowa",
+      "count": 1
+    },
+    {
+      "text": "rafal.szkutnik@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wiesław Bździuch",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dyrektor w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Wydział Edukacji Urzędu Miasta w Biłgoraju",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

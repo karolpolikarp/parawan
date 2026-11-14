@@ -1,0 +1,43 @@
+Urząd Gminy Stara Kamionka
+Referat Organizacyjny
+ul. Kardynała Stefana Wyszyńskiego 4
+34-120 Stara Kamionka
+
+Or.2110.7.2026
+Stara Kamionka, 9 października 2026 r.
+
+NOTATKA SŁUŻBOWA
+dla Przewodniczącego Komisji Rekrutacyjnej
+
+Dotyczy: naboru na wolne stanowisko urzędnicze podinspektora ds. wymiaru podatków i opłat lokalnych w Referacie Finansowym (ogłoszenie z 15 września 2026 r.)
+
+Do 30 września 2026 r. wpłynęło siedem ofert. Po wstępnej selekcji przygotowałam projekt listy kandydatów spełniających wymagania formalne. Zgodnie z art. 13 ust. 3 ustawy z dnia 21 listopada 2008 r. o pracownikach samorządowych lista zawiera imiona, nazwiska i miejsce zamieszkania kandydatów i zostanie opublikowana w Biuletynie Informacji Publicznej oraz na tablicy ogłoszeń Urzędu:
+
+1. Dominika Wróbel, Kamionka Górna
+2. Szymon Pietrzak, Sucha Beskidzka
+3. Weronika Jaskółka-Mazur, Lachowice
+4. Bartłomiej Zięba, Zembrzyce
+5. Halina Gąsienica-Ryś, Maków Podhalański
+
+Wymagań nie spełniają oferty Pana Kamila Sowy (wpłynęła 1 października 2026 r., czyli po terminie) oraz Pani Ilony Brzozy (brak kopii dyplomu ukończenia studiów wyższych). Proponuję zawiadomić ich pisemnie i odesłać dokumenty na adresy podane w ofertach: ul. Polna 17, 34-220 Maków Podhalański oraz os. Słoneczne 3/12, 34-200 Sucha Beskidzka.
+
+Uwagi dla komisji (informacje nieprzeznaczone do publikacji):
+- Do oferty kandydatki z poz. 5 dołączono orzeczenie o umiarkowanym stopniu niepełnosprawności (symbol przyczyny 05-R). Wskaźnik zatrudnienia osób niepełnosprawnych w Urzędzie wyniósł w sierpniu 2026 r. 4,2%, więc jeżeli kandydatka znajdzie się w gronie pięciu najlepszych kandydatów, przysługuje jej pierwszeństwo na zasadach art. 13a ust. 2 ustawy.
+- Kandydat z poz. 2 jest synem radnego Mariana Pietrzaka. Członkini komisji Teresa Pietrzak-Kubiak jest jego ciotką i powinna złożyć oświadczenie o wyłączeniu z prac komisji.
+- Kandydatka z poz. 1 pracuje obecnie w Urzędzie na umowie na zastępstwo za Panią Martę Kozieł, która przebywa na urlopie wychowawczym do 31 stycznia 2027 r.
+
+Test kompetencji z ustawy o podatkach i opłatach lokalnych oraz Ordynacji podatkowej odbędzie się 16 października 2026 r. o godz. 9:00 w sali narad (I piętro, pok. 12). Zaproszenia wyślę e-mailem i SMS-em na dane z formularzy:
+
+Kandydat | telefon | e-mail
+D. Wróbel | 604 218 377 | dominika.wrobel@example.pl
+S. Pietrzak | 512 904 116 | s.pietrzak94@example.pl
+W. Jaskółka-Mazur | 723 055 841 | weronika.jm@test.pl
+B. Zięba | 668 371 290 | bzieba@example.com
+H. Gąsienica-Ryś | 33 874 12 09 | halina.gr@test.pl
+
+Ostateczną listę opublikujemy po zatwierdzeniu przez Wójta Gminy. Pytania kandydatów kieruję na ogólny adres sekretariat@starakamionka.example.pl.
+
+Sporządziła:
+Agnieszka Siwiec
+inspektor ds. kadr, wew. 21
+a.siwiec@starakamionka.example.pl

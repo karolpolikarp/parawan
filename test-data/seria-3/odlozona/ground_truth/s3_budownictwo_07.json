@@ -1,0 +1,246 @@
+{
+  "id": "s3_budownictwo_07",
+  "template": "budownictwo",
+  "title": "Decyzja nakazująca rozbiórkę samowoli budowlanej",
+  "seed": null,
+  "traps": [
+    "nazwisko inspektora Kurek obok słowa „kurek” w opisie instalacji",
+    "choroba nowotworowa inwestora i specjalność lekarza jako argument za terminem",
+    "numer PWZ lekarza i numery uprawnień rzeczoznawcy",
+    "odmiana Kuc → Kuca, Sokołowski w trzech przypadkach",
+    "patronka w adresie inspektoratu do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "Kazimierzowi Sokołowskiemu",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Danucie Sokołowskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Polna 21",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "18-416",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Bożena Szymańska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "784 115 902",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kazimierza Sokołowskiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kazimierz Sokołowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Jarosława Kuca",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dopełniacz nazwiska Kuc",
+      "count": 1
+    },
+    {
+      "text": "PDL/0412/OWOK/04",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer uprawnień rzeczoznawcy",
+      "count": 1
+    },
+    {
+      "text": "PDL/BO/0633/04",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer członkowski izby inżynierów",
+      "count": 1
+    },
+    {
+      "text": "Adama Borowika",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarz wystawiający zaświadczenie",
+      "count": 1
+    },
+    {
+      "text": "7330485",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer prawa wykonywania zawodu lekarza",
+      "count": 1
+    },
+    {
+      "text": "lekarza onkologa",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "specjalność lekarza ujawnia chorobę",
+      "count": 1
+    },
+    {
+      "text": "chemioterapię",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "raka jelita grubego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Danuta Sokołowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "86 218 47 33",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Polna 23",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kupiski Nowe",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i nazwa obrębu",
+      "count": 3
+    },
+    {
+      "text": "156/4",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka zobowiązanych",
+      "count": 1
+    },
+    {
+      "text": "156/5",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka sąsiadki",
+      "count": 1
+    },
+    {
+      "text": "Paweł Kurek",
+      "type": "OFFICIAL",
+      "expect": "policy",
+      "note": "inspektor w funkcji kontrolnej",
+      "count": 1
+    },
+    {
+      "text": "Monika Jaworowska",
+      "type": "OFFICIAL",
+      "expect": "policy",
+      "note": "inspektor podpisujący decyzję",
+      "count": 1
+    },
+    {
+      "text": "PINB.5160.37.2026.PK",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy z inicjałami",
+      "count": 1
+    },
+    {
+      "text": "92/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer decyzji",
+      "count": 1
+    },
+    {
+      "text": "POWIATOWY INSPEKTOR NADZORU BUDOWLANEGO W ŁOMŻY",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Marii Skłodowskiej-Curie 1",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patronka w adresie instytucji",
+      "count": 1
+    },
+    {
+      "text": "18-400",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Podlaskiej Okręgowej Izby Inżynierów Budownictwa",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Podlaskiego Wojewódzkiego Inspektora Nadzoru Budowlanego w Białymstoku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wójt Gminy Łomża",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kurek",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko inspektora Kurek",
+      "count": 1
+    }
+  ]
+}

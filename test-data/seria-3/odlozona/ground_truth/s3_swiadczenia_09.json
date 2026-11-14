@@ -1,0 +1,282 @@
+{
+  "id": "s3_swiadczenia_09",
+  "template": "swiadczenia",
+  "title": "Decyzja o uznaniu dłużnika alimentacyjnego za uchylającego się od zobowiązań",
+  "seed": null,
+  "traps": [
+    "nazwisko Krawiec obok słowa „krawcem” (zawód)",
+    "prawo jazdy i tablica rejestracyjna dłużnika",
+    "odwrotna kolejność w tytule przelewu („Krawiec Sebastian”)",
+    "partnerka dłużnika z telefonem podanym telefonicznie",
+    "zagraniczna agencja pracy jako pracodawca",
+    "rachunek urzędu do spłat (nie osoby)"
+  ],
+  "entities": [
+    {
+      "text": "Miejski Ośrodek Pomocy Rodzinie w Słupsku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Słoneczna 15D",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "76-200",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "DA.5243.36.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Sebastiana Krawca",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dłużnik alimentacyjny",
+      "count": 2
+    },
+    {
+      "text": "31 stycznia 1989",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "89013193659",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Marynarki Polskiej 22/9",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "76-270",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ustka",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Amelii Krawiec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dziecko",
+      "count": 1
+    },
+    {
+      "text": "16 sierpnia 2011",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "11281622061",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dziecka",
+      "count": 1
+    },
+    {
+      "text": "Dominikę Szulc",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "91041212680",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "18 500,00 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "należność dłużnika",
+      "count": 1
+    },
+    {
+      "text": "FlexWork Staffing B.V.",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "zagraniczna agencja pracy",
+      "count": 1
+    },
+    {
+      "text": "Holandii",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "kraj pracy dłużnika",
+      "count": 1
+    },
+    {
+      "text": "krawcem",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zawód, nie nazwisko",
+      "count": 1
+    },
+    {
+      "text": "Powiatowym Urzędzie Pracy w Słupsku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Komornika Sądowego przy Sądzie Rejonowym w Słupsku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KM 1172/23",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura egzekucji",
+      "count": 1
+    },
+    {
+      "text": "Centralnej Ewidencji Pojazdów i Kierowców",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "77870/08/2398",
+      "type": "DRIVING_LICENSE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Volkswagen Passat B7",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "GSL 47K21",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ustki",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "miejsce użytkowania pojazdu",
+      "count": 1
+    },
+    {
+      "text": "Wioletta Brzezińska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "partnerka dłużnika",
+      "count": 1
+    },
+    {
+      "text": "698 330 145",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Starosty Słupskiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "podejrzeniu popełnienia przestępstwa z art. 209 § 1 Kodeksu karnego",
+      "type": "SENSITIVE",
+      "expect": "policy",
+      "note": "dane o czynie zabronionym (art. 10 RODO)",
+      "count": 1
+    },
+    {
+      "text": "Prokuratury Rejonowej w Słupsku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "73 1050 0099 1149 0342 8547 1439",
+      "type": "IBAN_COMPANY",
+      "expect": "policy",
+      "note": "rachunek urzędu",
+      "count": 1
+    },
+    {
+      "text": "Krawiec Sebastian",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "odwrotna kolejność w tytule przelewu",
+      "count": 1
+    },
+    {
+      "text": "Samorządowego Kolegium Odwoławczego w Słupsku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Joanna Dąbrowska-Fiedorowicz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis",
+      "count": 1
+    },
+    {
+      "text": "Sebastian Krawiec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dominika Szulc",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

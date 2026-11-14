@@ -1,0 +1,232 @@
+{
+  "id": "s3_komunikacja-srodowisko_03",
+  "template": "komunikacja-srodowisko",
+  "title": "Zezwolenie na zajęcie pasa drogowego pod rusztowanie",
+  "seed": null,
+  "traps": [
+    "firma JDG z nazwiskiem wersalikami",
+    "rachunek urzędu do zachowania obok rachunku przedsiębiorcy",
+    "patron w nazwie ulicy przy adresie nieruchomości osoby",
+    "nazwisko z łącznikiem",
+    "uprawnienia budowlane z numerem"
+  ],
+  "entities": [
+    {
+      "text": "Miejski Zarząd Dróg w Toruniu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Grudziądzka 159",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "87-100",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Samorządowego Kolegium Odwoławczego w Toruniu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "60 1240 1037 0884 1573 5546 0660",
+      "type": "IBAN_COMPANY",
+      "expect": "keep",
+      "note": "rachunek urzędu",
+      "count": 1
+    },
+    {
+      "text": "MZD-ZP.7230.1.611.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "MZD-IR.7131.214.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak pisma zatwierdzającego projekt",
+      "count": 1
+    },
+    {
+      "text": "Kazimierz Dziedzic",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kazimierzowi Dziedzicowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Usługi Remontowo-Budowlane DZIEDZIC",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "pełna firma JDG",
+      "count": 2
+    },
+    {
+      "text": "ul. Polna 6",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres zamieszkania i siedziby JDG",
+      "count": 1
+    },
+    {
+      "text": "Gostkowo",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "87-152",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Łubianka",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "9183684524",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "168864144",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Mikołaja Kopernika 22",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres nieruchomości osoby fizycznej, patron w nazwie ulicy",
+      "count": 1
+    },
+    {
+      "text": "Arkadiusz Lipka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KUP/0187/POOK/12",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer uprawnień budowlanych",
+      "count": 1
+    },
+    {
+      "text": "512 448 090",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bożeny Lipińskiej-Kur",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe",
+      "count": 1
+    },
+    {
+      "text": "Bydgoszczy",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "ul. Gdańskiej 140 m. 7",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "23124010374952649483394979",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "NRB bez spacji",
+      "count": 1
+    },
+    {
+      "text": "Celina Wróblewska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "56 622 18 07",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon stacjonarny osoby",
+      "count": 1
+    },
+    {
+      "text": "biuro@dziedzic-remonty.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "e-mail JDG z nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "Monika Zaleśna",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędnik w funkcji",
+      "count": 1
+    },
+    {
+      "text": "611/ZP/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer decyzji",
+      "count": 1
+    },
+    {
+      "text": "288/ZP/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer wcześniejszej decyzji",
+      "count": 1
+    },
+    {
+      "text": "MZD-ZP 611/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "tytuł przelewu z numerem decyzji",
+      "count": 1
+    }
+  ]
+}

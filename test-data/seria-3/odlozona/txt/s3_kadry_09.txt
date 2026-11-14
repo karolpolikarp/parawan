@@ -1,0 +1,34 @@
+Centrum Usług Wspólnych Oświaty w Gorzowie Wielkopolskim
+ul. Sikorskiego 3–5, 66-400 Gorzów Wielkopolski
+Dział Kadr i Płac
+
+CUW.KP.1173.6.2026
+Gorzów Wielkopolski, 10 listopada 2026 r.
+
+PFR TFI S.A. (portal mojePPK)
+dot. umowy o prowadzenie PPK nr PPK/2019/01447
+
+ZGŁOSZENIE OSÓB ZATRUDNIONYCH DO UMOWY O PROWADZENIE PPK
+(art. 16 i 17 ustawy z dnia 4 października 2018 r. o pracowniczych planach kapitałowych)
+
+W związku z upływem 90 dni zatrudnienia zgłaszamy niżej wymienionych pracowników szkół obsługiwanych przez Centrum. Dane przekazujemy także w pliku XML przez portal; poniżej wersja do weryfikacji przez Panią Marię Tokarz, koordynatorkę PPK po stronie instytucji.
+
+Lp. | Imię i nazwisko | PESEL | Data urodzenia | Obywatelstwo | E-mail / telefon | Wpłata dodatkowa
+1 | Patryk Szymczak | 98011751934 | 17.01.1998 | polskie | p.szymczak@example.pl / 698 012 437 | 0%
+2 | Agata Lis-Borowiec | 77090259740 | 02.09.1977 | polskie | agata.lb@example.com / 607 551 290 | 2%
+3 | Wiktoria Kruk | 03321129669 | 11.12.2003 | polskie | wkruk03@test.pl / 534 870 163 | 0%
+4 | Ołeksandr Hnatiuk | 69032855578 | 28.03.1969 | ukraińskie | paszport WM0587213 / 885 304 719 | 0%
+5 | Joanna Szczygieł | 93080869980 | 08.08.1993 | polskie | joanna.szczygiel@example.pl / 515 263 900 | 1,5%
+
+Uwagi:
+- Pan Ołeksandr Hnatiuk ukończył 55 lat; zgodnie z art. 16 ust. 2 ustawy umowę zawiera się tylko na jego wniosek. Wniosek złożył 3 listopada 2026 r., dlatego jest na liście. Adres do korespondencji: ul. Kosynierów Gdyńskich 12/7, 66-400 Gorzów Wielkopolski.
+- Pani Joanna Szczygieł jest zatrudniona równolegle w Szkole Podstawowej nr 20 im. Kornela Makuszyńskiego; tam również została zgłoszona do PPK.
+- Pani Barbara Mazurek-Pilch złożyła 28 października 2026 r. deklarację o rezygnacji z dokonywania wpłat do PPK, dlatego jej nie zgłaszamy. Deklaracja traci ważność 1 kwietnia 2027 r. (automatyczny zapis).
+- W poprzednim pliku pod poz. 3 omyłkowo podano numer rachunku rejestru 70342315821 zamiast PESEL. Prosimy o korektę.
+
+Wpłaty za październik przekażemy do 15 listopada 2026 r. na rachunek techniczny instytucji 33124010372482197230052879.
+
+Kontakt w sprawie zgłoszenia: Wioletta Grabarczyk, starsza specjalistka ds. płac, tel. 95 735 18 40 wew. 112, w.grabarczyk@cuw-gorzow.example.pl
+
+Dyrektor Centrum
+Ryszard Krawiec

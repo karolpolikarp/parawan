@@ -1,0 +1,289 @@
+{
+  "id": "s3_swiadczenia_02",
+  "template": "swiadczenia",
+  "title": "Decyzja o przyznaniu świadczenia pielęgnacyjnego na dziecko",
+  "seed": null,
+  "traps": [
+    "opis orzeczenia o niepełnosprawności i rozpoznania dziecka",
+    "PESEL trojga członków rodziny, w tym dwóch dzieci",
+    "samo imię dziecka w bierniku („na Szymona”)",
+    "sygnatura cytowanego wyroku TK do zachowania",
+    "adres osiedlowy bez „ul.” („os. Kopernika 14/22”)",
+    "nazwisko kierowniczki będące zwykłym słowem (Mrowiec)"
+  ],
+  "entities": [
+    {
+      "text": "Ośrodek Pomocy Społecznej w Kętach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Rynek 1",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "32-650",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kęty",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 4
+    },
+    {
+      "text": "ŚR.5230.88.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tomasza Wilka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "83082788215",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "BZD901719",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "os. Kopernika 14/22",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres osiedlowy, patron",
+      "count": 1
+    },
+    {
+      "text": "32-651",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tomaszowi Wilkowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szymonem Wilkiem",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dziecko",
+      "count": 1
+    },
+    {
+      "text": "8 kwietnia 2014",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "14240868511",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dziecka",
+      "count": 1
+    },
+    {
+      "text": "Powiatowego Zespołu do Spraw Orzekania o Niepełnosprawności w Oświęcimiu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "OŚ.N.4110.231.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "znacznie ograniczoną możliwością samodzielnej egzystencji",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "wskazanie z orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "mózgowe porażenie dziecięce",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "padaczką lekooporną",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "niepełnosprawnością intelektualną w stopniu umiarkowanym",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "zaliczające syna do osób niepełnosprawnych",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "status niepełnosprawności dziecka z orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "karmienia przez gastrostomię",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "codziennej rehabilitacji ruchowej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "potrzeba leczenia dziecka",
+      "count": 1
+    },
+    {
+      "text": "Tomasz Wilk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "operatora maszyn",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Fabryka Elementów Złącznych „Bolmet” S.A.",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Justyna Wilk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "86011560922",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kacper Wilk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dziecko",
+      "count": 1
+    },
+    {
+      "text": "11323071839",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dziecka",
+      "count": 1
+    },
+    {
+      "text": "Szymona",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię dziecka",
+      "count": 1
+    },
+    {
+      "text": "Trybunału Konstytucyjnego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "K 38/13",
+      "type": "CITED_RULING",
+      "expect": "keep",
+      "note": "sygnatura cytowanego wyroku",
+      "count": 1
+    },
+    {
+      "text": "94 1240 1037 6365 7604 2607 0168",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zakładu Ubezpieczeń Społecznych",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Samorządowego Kolegium Odwoławczego w Bielsku-Białej",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "t.wilk83@poczta.example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Agata Mrowiec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis; mrowiec to też słowo",
+      "count": 1
+    },
+    {
+      "text": "3 287,00 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "kwota świadczenia",
+      "count": 1
+    }
+  ]
+}

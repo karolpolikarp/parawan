@@ -1,0 +1,226 @@
+{
+  "id": "s3_kadry_04",
+  "template": "kadry",
+  "title": "Umowa o pracę na czas określony ze służbą przygotowawczą",
+  "seed": null,
+  "traps": [
+    "komparycja w narzędniku i burmistrz z nazwiskiem Gałka w bierniku",
+    "patron w ulicy z adresu pracownika (mask) obok placu Niepodległości siedziby (keep)",
+    "NIP i REGON urzędu (policy) obok PESEL i dowodu pracownika",
+    "rachunek do wynagrodzeń w formacie PL ze spacjami",
+    "centrala urzędu z numerem wewnętrznym (keep/policy) obok telefonów prywatnych",
+    "kod pocztowy wspólny dla urzędu i pracownika"
+  ],
+  "entities": [
+    {
+      "text": "Urzędem Miejskim w Kórniku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "pl. Niepodległości 1",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "62-035",
+      "type": "POSTAL",
+      "expect": "policy",
+      "note": "ten sam kod dla urzędu i pracownika",
+      "count": 2
+    },
+    {
+      "text": "Kórnik",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "6798339326",
+      "type": "NIP_COMPANY",
+      "expect": "policy",
+      "note": "NIP urzędu",
+      "count": 1
+    },
+    {
+      "text": "672556487",
+      "type": "REGON_COMPANY",
+      "expect": "policy",
+      "note": "REGON urzędu",
+      "count": 1
+    },
+    {
+      "text": "Przemysława Gałkę",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "burmistrz w funkcji pracodawcy, nazwisko Gałka w bierniku",
+      "count": 1
+    },
+    {
+      "text": "Haliny Dębskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "skarbnik w kontrasygnacie",
+      "count": 1
+    },
+    {
+      "text": "Igorem Kaczmarczykiem",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "komparycja w narzędniku",
+      "count": 1
+    },
+    {
+      "text": "Bninie",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "część miasta w adresie pracownika",
+      "count": 1
+    },
+    {
+      "text": "ul. Marszałka Józefa Piłsudskiego 8 m. 2",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "patron w ulicy adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "00271999131",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "FMR108553",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "podinspektora w Wydziale Ochrony Środowiska i Rolnictwa",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "5 480,00 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "wynagrodzenie pracownika",
+      "count": 1
+    },
+    {
+      "text": "XI kategoria zaszeregowania",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Urzędu Miejskiego w Kórniku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL46 2490 0005 5600 3343 2015 1257",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Alior Bank S.A.",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Igor Kaczmarczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "789 512 063",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jolanta Kaczmarczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "matka pracownika",
+      "count": 1
+    },
+    {
+      "text": "61 817 40 92",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "brak przeciwwskazań do pracy na stanowisku",
+      "type": "HEALTH",
+      "expect": "policy",
+      "note": "wynik badań wstępnych",
+      "count": 1
+    },
+    {
+      "text": "Magdalenę Strzyż",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarz medycyny pracy",
+      "count": 1
+    },
+    {
+      "text": "8939785",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer prawa wykonywania zawodu lekarza",
+      "count": 1
+    },
+    {
+      "text": "Centrum Medycyny Pracy MEDIQ w Poznaniu",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sylwia Ratajczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "61 817 04 11",
+      "type": "INSTITUTION_PHONE",
+      "expect": "keep",
+      "note": "centrala urzędu",
+      "count": 1
+    },
+    {
+      "text": "wew. 34",
+      "type": "PHONE_EXT",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

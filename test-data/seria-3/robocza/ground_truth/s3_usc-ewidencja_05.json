@@ -1,0 +1,232 @@
+{
+  "id": "s3_usc-ewidencja_05",
+  "template": "usc-ewidencja",
+  "title": "Wezwanie do uzupełnienia zgłoszenia pobytu czasowego cudzoziemki",
+  "seed": null,
+  "traps": [
+    "cudzoziemka z kartą pobytu, paszportem i nadanym numerem PESEL",
+    "nieodmienne nazwisko gruzińskie u trzech członków rodziny, w tym ojca za granicą",
+    "nazwa sądu z nazwą dzielnicy (do zachowania) i adres hostelu jako poprzedni pobyt (polityka)",
+    "patron w adresie urzędu (ul. Libelta)",
+    "NIP pracodawcy obok danych osobowych (polityka)"
+  ],
+  "entities": [
+    {
+      "text": "Poznań",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i urzędu",
+      "count": 3
+    },
+    {
+      "text": "ul. Libelta 16/20",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "siedziba urzędu, patron ulicy",
+      "count": 1
+    },
+    {
+      "text": "61-706",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "WSO-EL.5342.1203.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "Nino Beridze",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "cudzoziemka",
+      "count": 2
+    },
+    {
+      "text": "ul. Głogowska 233 m. 14",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "60-104",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mariam Beridze",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletnia",
+      "count": 2
+    },
+    {
+      "text": "08.07.1990",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tbilisi",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce urodzenia",
+      "count": 2
+    },
+    {
+      "text": "90070885829",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "XP4661940",
+      "type": "PASSPORT",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "RG4817305",
+      "type": "RESIDENCE_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wojewodę Wielkopolskiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "25.01.2019",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "19212505540",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "JA3077424",
+      "type": "PASSPORT",
+      "expect": "mask",
+      "note": "paszport dziecka",
+      "count": 1
+    },
+    {
+      "text": "Giorgi Beridze",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "ojciec dziecka",
+      "count": 1
+    },
+    {
+      "text": "+48 571 664 209",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "nino.beridze@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tomasz Jankowiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "właściciel lokalu",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy dla Poznania-Starego Miasta w Poznaniu",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "MKR695180",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tamar Kapanadze",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "znajoma, autorka tłumaczenia",
+      "count": 1
+    },
+    {
+      "text": "ul. Dworcowej 2",
+      "type": "ADDRESS",
+      "expect": "policy",
+      "note": "adres hostelu, poprzedni pobyt",
+      "count": 1
+    },
+    {
+      "text": "Fabryka Mebli Klose sp. z o.o.",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "7792418833",
+      "type": "NIP_COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PO1P/04930271/0",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "księga lokalu osoby fizycznej",
+      "count": 1
+    },
+    {
+      "text": "Agata Wiśniewska",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędnik prowadzący sprawę",
+      "count": 1
+    },
+    {
+      "text": "61 878 54 12",
+      "type": "PHONE",
+      "expect": "policy",
+      "note": "telefon służbowy urzędu",
+      "count": 1
+    },
+    {
+      "text": "Michał Dudziak",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędnik podpisujący w funkcji",
+      "count": 1
+    }
+  ]
+}

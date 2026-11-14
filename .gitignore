@@ -25,3 +25,4 @@ test-results/
 # Ewaluacja na zestawie 50 pism: wyniki runnera i oryginalne archiwum
 test-data/wyniki/
 /anonimizator-testy.zip
+__pycache__/

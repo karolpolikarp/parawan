@@ -1,0 +1,400 @@
+{
+  "id": "s3_budownictwo_01",
+  "template": "budownictwo",
+  "title": "Decyzja o pozwoleniu na budowę domu jednorodzinnego",
+  "seed": null,
+  "traps": [
+    "odmiana Kozieł i samo nazwisko „Kozła”",
+    "nazwisko dwuczłonowe Kalinowska-Brzoza obok słowa „brzozy”",
+    "dane o zdrowiu inwestorki w uzasadnieniu decyzji",
+    "numery uprawnień budowlanych i izb w trzech formatach",
+    "adres starostwa, uchwała i sygnatura NSA do zachowania, numery działek (policy)"
+  ],
+  "entities": [
+    {
+      "text": "Marcina Wrzesińskiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ewelinę Wrzesińską",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ewelina Wrzesińska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "86041754838",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "88090271867",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Okrężna 18 m. 4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "02-916",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Olgę Kalinowską-Brzozę",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe w bierniku",
+      "count": 1
+    },
+    {
+      "text": "Olga Kalinowska-Brzoza",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe",
+      "count": 2
+    },
+    {
+      "text": "MAZ/0213/PWOA/14",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer uprawnień budowlanych architekta",
+      "count": 1
+    },
+    {
+      "text": "MA-2207",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer członkowski izby architektów",
+      "count": 1
+    },
+    {
+      "text": "Rafał Dziedzic",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "LOD/0871/POOK/11",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer uprawnień budowlanych",
+      "count": 1
+    },
+    {
+      "text": "MAZ/BO/4417/12",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer członkowski izby inżynierów",
+      "count": 1
+    },
+    {
+      "text": "Henryk Pałka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "MAZ/0094/POOK/05",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer uprawnień sprawdzającego",
+      "count": 1
+    },
+    {
+      "text": "WA5M/89410529/0",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "księga wieczysta wskazuje właściciela",
+      "count": 1
+    },
+    {
+      "text": "porusza się na wózku inwalidzkim",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "urazie rdzenia kręgowego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "orzeczenie o znacznym stopniu niepełnosprawności",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zbigniew Kozieł",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Kozła",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w dopełniaczu z wypadnięciem e",
+      "count": 1
+    },
+    {
+      "text": "ul. Leśna 3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "05-504",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Joanna Malinowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Krzysztof Malinowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "ul. Słoneczna 27",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Puławska 241 lok. 3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres pracowni projektanta prowadzącej działalność osobiście",
+      "count": 1
+    },
+    {
+      "text": "02-715",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "601 448 213",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "o.kalinowska@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Warszawa",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "Złotokłos",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i nazwa obrębu",
+      "count": 4
+    },
+    {
+      "text": "412/7",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "numer działki inwestora, przez EGiB wskazuje właściciela",
+      "count": 1
+    },
+    {
+      "text": "412/6",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka sąsiada",
+      "count": 2
+    },
+    {
+      "text": "412/8",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka sąsiadów",
+      "count": 1
+    },
+    {
+      "text": "AB.6740.2.1187.2026.MJ",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy z inicjałami pracownika",
+      "count": 1
+    },
+    {
+      "text": "1342/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer decyzji",
+      "count": 1
+    },
+    {
+      "text": "Joanna Sitarz",
+      "type": "OFFICIAL",
+      "expect": "policy",
+      "note": "urzędnik podpisujący decyzję w funkcji",
+      "count": 1
+    },
+    {
+      "text": "STAROSTA PIASECZYŃSKI",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Starosty Piaseczyńskiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Chyliczkowska 14",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "05-500",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy w Piasecznie",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wojewody Mazowieckiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Powiatowego Inspektora Nadzoru Budowlanego w Piasecznie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Powiatowy Inspektor Nadzoru Budowlanego w Piasecznie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mazowieckiej Okręgowej Izby Architektów RP",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mazowieckiej Okręgowej Izby Inżynierów Budownictwa",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rady Miejskiej w Piasecznie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "XXXIV/612/2017",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer uchwały planistycznej",
+      "count": 1
+    },
+    {
+      "text": "Gmina Piaseczno",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "413",
+      "type": "PARCEL",
+      "expect": "keep",
+      "note": "działka drogowa gminy",
+      "count": 1
+    },
+    {
+      "text": "II OSK 2408/18",
+      "type": "CASE_LAW",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "brzozy",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko Brzoza",
+      "count": 1
+    }
+  ]
+}

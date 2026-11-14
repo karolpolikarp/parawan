@@ -1,0 +1,260 @@
+{
+  "id": "s3_praca-z-ai_09",
+  "template": "praca-z-ai",
+  "title": "Polecenie do AI: wyliczenie dochodu na osobę we wniosku o dodatek mieszkaniowy",
+  "seed": null,
+  "traps": [
+    "inicjał imienia z nazwiskiem w zestawieniu dochodów (M. Kruk, D. Fijałkowska)",
+    "dziecko z innym nazwiskiem niż matka, ojciec dziecka w dopełniaczu",
+    "uzależnienie i niepełnosprawność w uwagach pracownika",
+    "ulica z patronem w adresie osoby",
+    "sygnatura sprawy komorniczej i nazwa spółdzielni jako zarządcy"
+  ],
+  "entities": [
+    {
+      "text": "DM/412/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer wniosku",
+      "count": 1
+    },
+    {
+      "text": "Urzędu Miasta Krosna",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mariusz Kruk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "wnioskodawca",
+      "count": 1
+    },
+    {
+      "text": "ul. Piotra Czajkowskiego 12 m. 7",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "ulica z patronem w adresie osoby",
+      "count": 1
+    },
+    {
+      "text": "38-400",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krosno",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "666 015 873",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krośnieńskiej Spółdzielni Mieszkaniowej",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "zarządca lokalu",
+      "count": 1
+    },
+    {
+      "text": "Dorota Fijałkowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "partnerka",
+      "count": 1
+    },
+    {
+      "text": "Kacper Kruk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "syn",
+      "count": 1
+    },
+    {
+      "text": "03301186075",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "UR w Rzeszowie",
+      "type": "INSTITUTION",
+      "expect": "policy",
+      "note": "uczelnia jako quasi-identyfikator",
+      "count": 1
+    },
+    {
+      "text": "Zuzanna Bąk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dziecko partnerki",
+      "count": 1
+    },
+    {
+      "text": "23.06.2015",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "15262312260",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "M. Kruk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał imienia z nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "Zakład Produkcji Opakowań Szklanych w Krośnie",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "pracodawca",
+      "count": 1
+    },
+    {
+      "text": "4 120,00",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "wynagrodzenie",
+      "count": 2
+    },
+    {
+      "text": "4 388,15 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "wynagrodzenie",
+      "count": 1
+    },
+    {
+      "text": "D. Fijałkowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał imienia z nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "PUP w Krośnie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "1 304,16 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "zasiłek",
+      "count": 1
+    },
+    {
+      "text": "K. Kruk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał imienia z nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "renta socjalna",
+      "type": "BENEFIT",
+      "expect": "policy",
+      "note": "rodzaj świadczenia ujawnia niepełnosprawność",
+      "count": 1
+    },
+    {
+      "text": "1 506,00 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "renta",
+      "count": 1
+    },
+    {
+      "text": "orzeczenie o umiarkowanym stopniu niepełnosprawności",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "cukrzyca typu 1",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Z. Bąk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał imienia z nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "Tomasza Bąka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "ojciec dziecka w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "Komornik Sądowy przy Sądzie Rejonowym w Krośnie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Km 2204/25",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy egzekucyjnej",
+      "count": 1
+    },
+    {
+      "text": "w trakcie terapii uzależnienia od alkoholu po leczeniu odwykowym",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "uzależnienie i leczenie",
+      "count": 1
+    },
+    {
+      "text": "66 1020 2892 7011 8860 8191 8430",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "NRB bez prefiksu PL",
+      "count": 1
+    },
+    {
+      "text": "Weronika Szela",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownica urzędu",
+      "count": 1
+    },
+    {
+      "text": "wew. 118",
+      "type": "PHONE_EXT",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,317 @@
+{
+  "id": "s3_swiadczenia_10",
+  "template": "swiadczenia",
+  "title": "Odwołanie pełnomocnika od decyzji o nienależnie pobranym świadczeniu pielęgnacyjnym",
+  "seed": null,
+  "traps": [
+    "firma kancelarii jednoosobowej z nazwiskiem radcy, jej NIP, adres i e-mail",
+    "numer wpisu radcy prawnego",
+    "eponim w nazwie choroby („zespołu Retta”)",
+    "sygnatura cytowanego wyroku WSA do zachowania",
+    "numer aktu zgonu i adres do doręczeń elektronicznych",
+    "świadek-sąsiad z adresem różniącym się numerem lokalu"
+  ],
+  "entities": [
+    {
+      "text": "Kancelaria Radcy Prawnego Ziółkowska",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "firma JDG z nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "Beata Ziółkowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "radca prawny",
+      "count": 2
+    },
+    {
+      "text": "OIRP w Opolu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "OP-1873",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer wpisu na listę radców",
+      "count": 1
+    },
+    {
+      "text": "ul. Ozimska 48/3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres kancelarii jednoosobowej",
+      "count": 1
+    },
+    {
+      "text": "45-058",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Opole",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 5
+    },
+    {
+      "text": "5107932648",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "NIP radcy (JDG)",
+      "count": 1
+    },
+    {
+      "text": "77 441 26 90",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon kancelarii jednoosobowej",
+      "count": 1
+    },
+    {
+      "text": "kancelaria@ziolkowska-radca.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "e-mail kancelarii z nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "Samorządowe Kolegium Odwoławcze w Opolu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Miejski Ośrodek Pomocy Rodzinie w Opolu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Armii Krajowej 36",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "45-071",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "MOPR.ŚR.5233.140.2026.JS",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak z inicjałami",
+      "count": 1
+    },
+    {
+      "text": "Jolanta Sikorska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "70090308827",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Grota-Roweckiego 5/41",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "patron w adresie osoby",
+      "count": 1
+    },
+    {
+      "text": "45-279",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Beatę Ziółkowską",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jolanty Sikorskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "24 316,00 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "kwota do zwrotu",
+      "count": 1
+    },
+    {
+      "text": "Wiktorią Sikorską",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "córka",
+      "count": 1
+    },
+    {
+      "text": "14 lutego 2006",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "06221413560",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "orzeczeniem o znacznym stopniu niepełnosprawności",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "zespołu Retta z padaczką i całkowitą utratą mowy",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "eponim, nie osoba",
+      "count": 1
+    },
+    {
+      "text": "wymaga pomocy przy jedzeniu, przemieszczaniu się i higienie",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "3 kwietnia 2025",
+      "type": "DATE_DEATH",
+      "expect": "policy",
+      "note": "data zgonu męża",
+      "count": 1
+    },
+    {
+      "text": "Andrzej Sikorski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "zmarły mąż",
+      "count": 1
+    },
+    {
+      "text": "Zakładu Ubezpieczeń Społecznych Oddział w Opolu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sylwię Banaś",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik ośrodka",
+      "count": 1
+    },
+    {
+      "text": "Ryszard Pietrzyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "świadek",
+      "count": 1
+    },
+    {
+      "text": "ul. Grota-Roweckiego 5/40",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres świadka",
+      "count": 1
+    },
+    {
+      "text": "Wojewódzkiego Sądu Administracyjnego w Opolu",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "II SA/Op 412/22",
+      "type": "CITED_RULING",
+      "expect": "keep",
+      "note": "sygnatura cytowanego wyroku",
+      "count": 1
+    },
+    {
+      "text": "2 904,17 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "dochód",
+      "count": 1
+    },
+    {
+      "text": "lewetyracetam",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "walproinian",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "leków przeciwpadaczkowych",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "ujawnia chorobę córki",
+      "count": 1
+    },
+    {
+      "text": "AE:PL-51837-46201-UVWXY-19",
+      "type": "EDELIVERY_ADDRESS",
+      "expect": "policy",
+      "note": "adres do doręczeń elektronicznych pełnomocnika",
+      "count": 1
+    },
+    {
+      "text": "1842/2025",
+      "type": "CIVIL_RECORD",
+      "expect": "mask",
+      "note": "numer aktu zgonu",
+      "count": 1
+    },
+    {
+      "text": "Ryszarda Pietrzyka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

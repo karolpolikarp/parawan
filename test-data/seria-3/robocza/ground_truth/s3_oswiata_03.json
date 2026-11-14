@@ -1,0 +1,261 @@
+{
+  "id": "s3_oswiata_03",
+  "template": "oswiata",
+  "title": "Decyzja dyrektora szkoły o odroczeniu obowiązku szkolnego",
+  "seed": null,
+  "traps": [
+    "adres wiejski bez ulicy („Prokowo 41A”)",
+    "zdrobnienie imienia (Franek)",
+    "patron w nazwie szkoły",
+    "cytowany wyrok WSA",
+    "opis rozwoju dziecka z opinii poradni",
+    "telefon szkoły (zostaje) przy nazwisku pracownicy"
+  ],
+  "entities": [
+    {
+      "text": "Szkoła Podstawowa nr 2 im. Floriana Ceynowy w Kartuzach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "Szkoły Podstawowej nr 2 im. Floriana Ceynowy w Kartuzach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Klasztorna 11",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "83-300",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "58 681 24 07",
+      "type": "INSTITUTION_PHONE",
+      "expect": "keep",
+      "note": "telefon sekretariatu szkoły",
+      "count": 2
+    },
+    {
+      "text": "wew. 21",
+      "type": "PHONE_EXT",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "SP2.4320.3.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "Marty Kąkol",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Pawła Kąkola",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marta Kąkol",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Paweł Kąkol",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Prokowo 41A",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres wiejski bez ulicy",
+      "count": 1
+    },
+    {
+      "text": "83-304",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Przodkowo",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Franciszka Kąkola",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "3 sierpnia 2019",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "19280364870",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "418/2025/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer opinii poradni",
+      "count": 1
+    },
+    {
+      "text": "Poradni Psychologiczno-Pedagogicznej w Kartuzach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "urodziło się przedwcześnie, w 31. tygodniu ciąży",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "dyslalię wieloraką",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "obniżone napięcie mięśniowe w obrębie obręczy barkowej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "niedojrzałość emocjonalno-społeczną",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "pod opieką neurologa dziecięcego i logopedy",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Iwona Mach",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "wychowawczyni",
+      "count": 1
+    },
+    {
+      "text": "Franek",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie",
+      "count": 1
+    },
+    {
+      "text": "Przedszkolu Gminnym „Słoneczko” w Przodkowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "III SA/Gd 811/22",
+      "type": "CASE_NUMBER",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "Wojewódzki Sąd Administracyjny w Gdańsku",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Pomorskiego Kuratora Oświaty",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Danuta Formela",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dyrektor w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Aneta Wenta",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownica szkoły",
+      "count": 1
+    },
+    {
+      "text": "Urząd Gminy w Przodkowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "rozwój psychoruchowy przebiega nieharmonijnie",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "opis rozwoju dziecka z opinii poradni",
+      "count": 1
+    },
+    {
+      "text": "kontynuowanie terapii logopedycznej i integracji sensorycznej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "zalecona terapia dziecka",
+      "count": 1
+    }
+  ]
+}

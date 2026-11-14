@@ -1,0 +1,226 @@
+{
+  "id": "s3_kadry_06",
+  "template": "kadry",
+  "title": "Oświadczenie majątkowe wójta z częścią jawną i niejawną",
+  "seed": null,
+  "traps": [
+    "część A publikowana w BIP, część B niejawna: oba rodzaje danych w jednym tekście",
+    "adres na wsi bez ulicy (nazwa wsi powtórzona jako poczta)",
+    "firma JDG żony z imieniem i nazwiskiem",
+    "numery działek i ksiąg wieczystych z miejscem położenia",
+    "dwa imiona w części A, jedno w podpisie",
+    "kwoty dochodów i wartości majątku (policy)"
+  ],
+  "entities": [
+    {
+      "text": "Stanisław Jan Bielecki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dwa imiona",
+      "count": 1
+    },
+    {
+      "text": "12 maja 1968",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Strzyżowie",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce urodzenia",
+      "count": 1
+    },
+    {
+      "text": "Wójt Gminy Brzeziny Dolne",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "funkcja jednoznacznie wskazuje osobę",
+      "count": 1
+    },
+    {
+      "text": "Urzędzie Gminy Brzeziny Dolne",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "61 300,00 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "690 000 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ewą Bielecką",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "żona, narzędnik",
+      "count": 1
+    },
+    {
+      "text": "96 120,00 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "22 470,00 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sad-Pol Przetwórstwo Owoców sp. z o.o.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kwiaciarnia „Pod Jarzębiną” Ewa Bielecka",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "firma JDG z imieniem i nazwiskiem żony",
+      "count": 1
+    },
+    {
+      "text": "182 406,51 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "wynagrodzenie wójta",
+      "count": 1
+    },
+    {
+      "text": "Samodzielnego Publicznego Zakładu Opieki Zdrowotnej w Czudcu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Skoda Superb",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zetor Proxima",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Banku Spółdzielczym Rzemiosła w Krakowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "118 900,00 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Łętownia 214, 38-114 Łętownia",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres wiejski bez ulicy w całości (wieś, numer, kod, poczta); część B",
+      "count": 1
+    },
+    {
+      "text": "1187/3",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "numer działki z miejscem położenia, część niejawna (jak w seriach 2 i 3: działka osoby to policy)",
+      "count": 1
+    },
+    {
+      "text": "RZ1Z/69516889/2",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Gbiska",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "obręb ewidencyjny nieruchomości",
+      "count": 1
+    },
+    {
+      "text": "455, 456/2 i 461",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "numery działek gospodarstwa (jak w seriach 2 i 3: działka osoby to policy)",
+      "count": 1
+    },
+    {
+      "text": "RZ1Z/11881315/6",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "RSR 4K71",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "RSR 06KP",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "692 840 117",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Stanisław Bielecki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis bez drugiego imienia",
+      "count": 1
+    },
+    {
+      "text": "Rady Gminy Brzeziny Dolne",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Roman Pyrcz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "przewodniczący rady przyjmujący oświadczenie",
+      "count": 1
+    }
+  ]
+}

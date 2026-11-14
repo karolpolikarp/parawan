@@ -1,0 +1,316 @@
+{
+  "id": "s3_budownictwo_09",
+  "template": "budownictwo",
+  "title": "Decyzja o przeniesieniu pozwolenia na budowę na nowych inwestorów",
+  "seed": null,
+  "traps": [
+    "cudzoziemiec z paszportem, kartą pobytu, PESEL-em i zagranicznym telefonem",
+    "„Oleksandra” jako dopełniacz imienia męskiego, nieodmienne nazwisko Bondarenko",
+    "trzy numery uprawnień w różnych formatach (budowlane, izba, tłumacz)",
+    "znaki i numery dwóch decyzji, repertorium notarialne (policy)",
+    "miasto Rzeszów w adresie urzędu i osoby, patron w adresie wydziału"
+  ],
+  "entities": [
+    {
+      "text": "Oleksandra Bondarenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dopełniacz imienia męskiego równy imieniu żeńskiemu, nazwisko nieodmienne",
+      "count": 1
+    },
+    {
+      "text": "21 stycznia 1987",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "87012150910",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "RN2100908",
+      "type": "PASSPORT",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "RP7310486",
+      "type": "RESIDENCE_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Iryny Bondarenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "89061203328",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Podkarpacka 147/9",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "35-082",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Adriana Kołodzieja",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Krakowska 52",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "39-120",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Monikę Drążek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "notariusz",
+      "count": 1
+    },
+    {
+      "text": "RZ1Z/62893888/2",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "księga wieczysta wskazuje właściciela",
+      "count": 1
+    },
+    {
+      "text": "Adrian Kołodziej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Stanisława Rusina",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PDK/0188/OWOK/09",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer uprawnień kierownika budowy",
+      "count": 1
+    },
+    {
+      "text": "PDK/BO/0912/09",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer członkowski izby",
+      "count": 1
+    },
+    {
+      "text": "Oleksandr Bondarenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Natalii Hreczko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "tłumacz przysięgły",
+      "count": 1
+    },
+    {
+      "text": "TP/2711/16",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer na liście tłumaczy przysięgłych",
+      "count": 1
+    },
+    {
+      "text": "+380 67 412 33 09",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "numer zagraniczny",
+      "count": 1
+    },
+    {
+      "text": "iryna.bondarenko@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Iryna Bondarenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "obywatela Ukrainy",
+      "type": "NATIONALITY",
+      "expect": "policy",
+      "note": "obywatelstwo",
+      "count": 1
+    },
+    {
+      "text": "Rzeszów",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i siedziby urzędu",
+      "count": 3
+    },
+    {
+      "text": "Sędziszów Małopolski",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "2247/18",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka inwestorów",
+      "count": 2
+    },
+    {
+      "text": "Słocina",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "nazwa obrębu",
+      "count": 1
+    },
+    {
+      "text": "Rep. A nr 5532/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer repertorium notarialnego",
+      "count": 1
+    },
+    {
+      "text": "902/2025",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer przenoszonej decyzji",
+      "count": 1
+    },
+    {
+      "text": "ARCH.6740.7.144.2025",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak przenoszonej decyzji",
+      "count": 1
+    },
+    {
+      "text": "ARCH.6740.7.311.2026.KD",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy z inicjałami",
+      "count": 1
+    },
+    {
+      "text": "1876/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer decyzji",
+      "count": 1
+    },
+    {
+      "text": "Katarzyna Dulęba",
+      "type": "OFFICIAL",
+      "expect": "policy",
+      "note": "kierownik referatu podpisujący decyzję",
+      "count": 1
+    },
+    {
+      "text": "PREZYDENT MIASTA RZESZOWA",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Prezydenta Miasta Rzeszowa",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "ul. Joachima Lelewela 8",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w adresie instytucji",
+      "count": 1
+    },
+    {
+      "text": "35-959",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kancelarii Notarialnej w Rzeszowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Podkarpackiej Okręgowej Izby Inżynierów Budownictwa",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wojewody Podkarpackiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Powiatowy Inspektor Nadzoru Budowlanego dla Miasta Rzeszowa",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

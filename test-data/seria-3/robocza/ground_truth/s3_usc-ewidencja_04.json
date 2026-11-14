@@ -1,0 +1,274 @@
+{
+  "id": "s3_usc-ewidencja_04",
+  "template": "usc-ewidencja",
+  "title": "Notatka z przyjęcia wniosku o dowód osobisty w miejscu pobytu",
+  "seed": null,
+  "traps": [
+    "trzy numery dowodów: unieważniony, nowy i dowód córki",
+    "samo nazwisko po „Pan” i samo imię wnuczki",
+    "dwie placówki medyczne z patronami (polityka) obok danych o zdrowiu",
+    "numer CAN i numer zgłoszenia utraty (polityka)",
+    "lekarz z numerem PWZ"
+  ],
+  "entities": [
+    {
+      "text": "ul. Toruńska 21",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "87-162",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Lubicz",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "siedziba urzędu",
+      "count": 2
+    },
+    {
+      "text": "SO.5350.36.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "Stanisława Zająca",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "02.05.1939",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Grudziądzu",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce urodzenia",
+      "count": 1
+    },
+    {
+      "text": "39050234071",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Akacjowa 9",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "87-123",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dobrzejewice",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Elżbieta Majewska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "córka",
+      "count": 1
+    },
+    {
+      "text": "66032702503",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "698 120 557",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ela.majewska@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Piotra Banasia",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarz",
+      "count": 1
+    },
+    {
+      "text": "2916836",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer PWZ",
+      "count": 1
+    },
+    {
+      "text": "Ośrodka Zdrowia im. dr. Władysława Kozłowskiego w Lubiczu Dolnym",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "placówka z patronem",
+      "count": 1
+    },
+    {
+      "text": "Zając",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 1
+    },
+    {
+      "text": "osobą leżącą",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "udarze niedokrwiennym mózgu z niedowładem prawostronnym",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "NCS956568",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "unieważniony dowód",
+      "count": 1
+    },
+    {
+      "text": "ZU/2026/004177",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer zgłoszenia utraty",
+      "count": 1
+    },
+    {
+      "text": "Szpitalu Specjalistycznym im. Ludwika Rydygiera w Toruniu",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "szpital z patronem",
+      "count": 1
+    },
+    {
+      "text": "Rejestrze Dowodów Osobistych",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "nazwa rejestru",
+      "count": 1
+    },
+    {
+      "text": "mObywatel",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "nazwa aplikacji",
+      "count": 1
+    },
+    {
+      "text": "LKG050451",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "dowód córki",
+      "count": 1
+    },
+    {
+      "text": "niedowład prawej ręki",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Natalia",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wnuczka, samo imię",
+      "count": 2
+    },
+    {
+      "text": "Elżbiecie Majewskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "JWS572399",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "nowy dowód",
+      "count": 1
+    },
+    {
+      "text": "482917",
+      "type": "SERIAL_NUMBER",
+      "expect": "policy",
+      "note": "numer CAN dokumentu",
+      "count": 1
+    },
+    {
+      "text": "Stanisław",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię",
+      "count": 1
+    },
+    {
+      "text": "leki przeciwkrzepliwe",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "opieką pielęgniarki środowiskowej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "opieka pielęgniarska nad wnioskodawcą",
+      "count": 1
+    },
+    {
+      "text": "Krzysztof Wilk",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędnik w funkcji",
+      "count": 1
+    },
+    {
+      "text": "podinspektor ds. dowodów osobistych",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

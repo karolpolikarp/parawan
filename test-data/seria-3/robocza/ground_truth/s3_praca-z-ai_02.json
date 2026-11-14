@@ -1,0 +1,309 @@
+{
+  "id": "s3_praca-z-ai_02",
+  "template": "praca-z-ai",
+  "title": "Polecenie do AI: streszczenie wywiadu środowiskowego do skierowania do DPS",
+  "seed": null,
+  "traps": [
+    "imię ojca po skrócie „c.”",
+    "eponim w rozpoznaniu (choroba Alzheimera) i patron w nazwie DPS",
+    "fałszywy PESEL jako numer świadczenia",
+    "wyznanie i alkohol opisowo w tekście",
+    "telefon służbowy z numerem wewnętrznym"
+  ],
+  "entities": [
+    {
+      "text": "Leokadia Sowa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "osoba, której dotyczy wywiad",
+      "count": 1
+    },
+    {
+      "text": "Stanisława",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię ojca po „c.”",
+      "count": 1
+    },
+    {
+      "text": "12.06.1940",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Koninie",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "miejsce urodzenia",
+      "count": 1
+    },
+    {
+      "text": "40061275865",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Adama Asnyka 7 m. 41",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "ulica z patronem w adresie osoby",
+      "count": 1
+    },
+    {
+      "text": "62-800",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kalisz",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "2 870,40 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "wysokość emerytury",
+      "count": 1
+    },
+    {
+      "text": "78793396242",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "numer świadczenia, 11 cyfr bez poprawnej sumy PESEL",
+      "count": 1
+    },
+    {
+      "text": "Bożena Szymczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "córka",
+      "count": 1
+    },
+    {
+      "text": "512 664 090",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kolejowa 3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ostrów Wielkopolski",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "otępienie w przebiegu choroby Alzheimera",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "eponim w rozpoznaniu",
+      "count": 1
+    },
+    {
+      "text": "cukrzyca typu 2",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "na insulinie",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "leczenie",
+      "count": 1
+    },
+    {
+      "text": "kontrole w poradni diabetologicznej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "leczenie opisowo",
+      "count": 1
+    },
+    {
+      "text": "stan po złamaniu szyjki kości udowej lewej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "porusza się przy balkoniku",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "opis sprawności",
+      "count": 1
+    },
+    {
+      "text": "orzeczenie o znacznym stopniu niepełnosprawności",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tomasz Ignaczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarz",
+      "count": 1
+    },
+    {
+      "text": "3711975",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer prawa wykonywania zawodu lekarza",
+      "count": 1
+    },
+    {
+      "text": "Przychodnia pod Lipami",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "placówka medyczna",
+      "count": 1
+    },
+    {
+      "text": "Ryszard Sowa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "syn",
+      "count": 1
+    },
+    {
+      "text": "Niemczech",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "miejsce pobytu syna za granicą",
+      "count": 1
+    },
+    {
+      "text": "nadużywa alkoholu",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "alkohol opisowo",
+      "count": 1
+    },
+    {
+      "text": "Grażyna Olejnik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "opiekunka",
+      "count": 1
+    },
+    {
+      "text": "nie pamięta o przyjmowaniu leków",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "opis stanu",
+      "count": 1
+    },
+    {
+      "text": "ciężkiej hipoglikemii",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wezwania pogotowia",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "interwencja medyczna opisowo",
+      "count": 1
+    },
+    {
+      "text": "Leokadii",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "osobą głęboko wierzącą",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "przekonania religijne",
+      "count": 1
+    },
+    {
+      "text": "praktykującą katoliczką",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "wyznanie",
+      "count": 1
+    },
+    {
+      "text": "Dom Pomocy Społecznej im. św. Brata Alberta w Kaliszu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie instytucji",
+      "count": 1
+    },
+    {
+      "text": "Zgromadzenie Sióstr Nazaretanek",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Miejski Ośrodek Pomocy Społecznej w Kaliszu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ZUS",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Agnieszka Pietrzak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik socjalny",
+      "count": 1
+    },
+    {
+      "text": "starszy pracownik socjalny",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "62 765 44 12",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon służbowy pracownika",
+      "count": 1
+    },
+    {
+      "text": "wew. 31",
+      "type": "PHONE_EXT",
+      "expect": "policy",
+      "note": "numer wewnętrzny",
+      "count": 1
+    }
+  ]
+}

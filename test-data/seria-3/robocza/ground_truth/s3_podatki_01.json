@@ -1,0 +1,260 @@
+{
+  "id": "s3_podatki_01",
+  "template": "podatki",
+  "title": "Decyzja w sprawie wymiaru łącznego zobowiązania pieniężnego dla współwłaścicieli",
+  "seed": null,
+  "traps": [
+    "rachunek gminy do wpłat (keep) obok rachunku współwłaściciela do zwrotu nadpłaty (mask)",
+    "odmiana nazwiska Kania (Kani, Kanię, Kaniowie) u trzech współwłaścicieli",
+    "adres wiejski bez ulicy (Kozłówka 47)",
+    "numery działek ewidencyjnych i numer księgi wieczystej obok numeru karty podatnika",
+    "zastępca wójta podpisujący w funkcji organu i inspektor prowadzący sprawę"
+  ],
+  "entities": [
+    {
+      "text": "Urząd Gminy Firlej",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Szkolna 2",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "21-136",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "81 856 40 12",
+      "type": "PHONE_INSTITUTION",
+      "expect": "keep",
+      "note": "centrala urzędu",
+      "count": 1
+    },
+    {
+      "text": "podatki@firlej.example.pl",
+      "type": "INSTITUTION_EMAIL",
+      "expect": "keep",
+      "note": "skrzynka funkcyjna urzędu",
+      "count": 1
+    },
+    {
+      "text": "Fn.3120.1.0417.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy z numerem karty podatnika",
+      "count": 1
+    },
+    {
+      "text": "Zdzisław Kania",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "Teresa Kania",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "Mirosław Kania",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "Kozłówka 47",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres wiejski bez ulicy",
+      "count": 1
+    },
+    {
+      "text": "21-132",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kamionka",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "ul. Tomasza Zana 41 m. 8",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "20-601",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Lublin",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Zdzisławowi Kani",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Teresie Kani",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mirosławowi Kani",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "58032254838",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "61100571865",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "86071450034",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "412/3",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "numer działki ewidencyjnej osoby",
+      "count": 2
+    },
+    {
+      "text": "1187/2",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "numer działki ewidencyjnej osoby",
+      "count": 2
+    },
+    {
+      "text": "LU1A/89781981/5",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "księga wieczysta wskazuje właścicieli",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy w Lubartowie",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "78 1160 2202 6163 7497 8486 2063",
+      "type": "IBAN_INSTITUTION",
+      "expect": "keep",
+      "note": "rachunek gminy do wpłat",
+      "count": 1
+    },
+    {
+      "text": "K/0417",
+      "type": "CUSTOMER_ID",
+      "expect": "policy",
+      "note": "numer karty podatnika",
+      "count": 1
+    },
+    {
+      "text": "Kaniowie",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w liczbie mnogiej",
+      "count": 1
+    },
+    {
+      "text": "607 392 115",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mirosława Kanię",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL02 1240 1037 4507 9523 1154 4257",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "rachunek współwłaściciela do zwrotu nadpłaty",
+      "count": 1
+    },
+    {
+      "text": "m.kania@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Samorządowego Kolegium Odwoławczego w Lublinie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Henryk Malec",
+      "type": "OFFICIAL",
+      "expect": "policy",
+      "note": "zastępca wójta podpisujący w funkcji organu",
+      "count": 1
+    },
+    {
+      "text": "Joanna Pietrzyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "urzędnik prowadzący sprawę",
+      "count": 1
+    }
+  ]
+}

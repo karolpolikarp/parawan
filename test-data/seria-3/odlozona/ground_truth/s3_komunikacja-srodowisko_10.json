@@ -1,0 +1,218 @@
+{
+  "id": "s3_komunikacja-srodowisko_10",
+  "template": "komunikacja-srodowisko",
+  "title": "Protokół kontroli palenisk przez straż miejską",
+  "seed": null,
+  "traps": [
+    "nazwisko Węgiel obok słowa „węgiel kamienny”",
+    "właścicielka nieruchomości z danymi o zdrowiu",
+    "patron w adresie siedziby straży",
+    "sąsiad zgłaszający z adresem i telefonem",
+    "numery lotu drona i próbki jako policy"
+  ],
+  "entities": [
+    {
+      "text": "STRAŻ MIEJSKA W RYBNIKU",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Bolesława Chrobrego 2",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w adresie instytucji",
+      "count": 1
+    },
+    {
+      "text": "44-200",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sejmiku Województwa Śląskiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sądu Rejonowego w Rybniku",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wydziału Ekologii Urzędu Miasta Rybnika",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "węgiel kamienny",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko Węgiel",
+      "count": 2
+    },
+    {
+      "text": "214/OP/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer protokołu",
+      "count": 1
+    },
+    {
+      "text": "OŚ.0052.41.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer upoważnienia",
+      "count": 1
+    },
+    {
+      "text": "D-2026-388",
+      "type": "DOC_NUMBER",
+      "expect": "policy",
+      "note": "numer lotu drona",
+      "count": 1
+    },
+    {
+      "text": "R/214/1",
+      "type": "DOC_NUMBER",
+      "expect": "policy",
+      "note": "numer próbki",
+      "count": 1
+    },
+    {
+      "text": "Damian Szołtysek",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "strażnik miejski w funkcji",
+      "count": 2
+    },
+    {
+      "text": "Ewa Kasperek",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "strażnik miejski w funkcji",
+      "count": 2
+    },
+    {
+      "text": "legitymacja nr 087",
+      "type": "PROF_ID",
+      "expect": "policy",
+      "note": "numer legitymacji strażnika",
+      "count": 1
+    },
+    {
+      "text": "legitymacja nr 112",
+      "type": "PROF_ID",
+      "expect": "policy",
+      "note": "numer legitymacji strażnika",
+      "count": 1
+    },
+    {
+      "text": "ul. Gliwicka 211",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "44-207",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rybnik",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i siedziba straży",
+      "count": 2
+    },
+    {
+      "text": "Bogusław Węgiel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "7 sierpnia 1971 r.",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "71080768379",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "MDP465416",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jerzego Kocura",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sąsiad zgłaszający",
+      "count": 1
+    },
+    {
+      "text": "ul. Gliwicka 209",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "32 422 15 08",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Leokadii Węgiel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "44111914625",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "osobą leżącą po udarze niedokrwiennym mózgu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "791 300 446",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

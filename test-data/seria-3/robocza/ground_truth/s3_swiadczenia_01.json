@@ -1,0 +1,310 @@
+{
+  "id": "s3_swiadczenia_01",
+  "template": "swiadczenia",
+  "title": "Decyzja o przyznaniu dodatku mieszkaniowego z wywiadem środowiskowym",
+  "seed": null,
+  "traps": [
+    "dochody każdego członka gospodarstwa domowego w liście",
+    "nazwiska będące zwykłymi słowami (Pająk, Gołąb) i znane nazwisko Duda",
+    "samo imię wnuczki w narzędniku („Oliwią”)",
+    "patron w nazwie szkoły i w adresie urzędu (zachować) obok patrona w adresie osoby (maskować)",
+    "rachunek spółdzielni jako zarządcy (nie osoby)",
+    "inicjał z nazwiskiem w stopce „Sprawę prowadzi”"
+  ],
+  "entities": [
+    {
+      "text": "Miejski Ośrodek Pomocy Społecznej w Tarnobrzegu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Ignacego Paderewskiego 12",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w adresie urzędu",
+      "count": 1
+    },
+    {
+      "text": "39-400",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "15 822 41 30",
+      "type": "INSTITUTION_CONTACT",
+      "expect": "keep",
+      "note": "telefon urzędu",
+      "count": 1
+    },
+    {
+      "text": "sekretariat@mops-tarnobrzeg.example.pl",
+      "type": "INSTITUTION_CONTACT",
+      "expect": "keep",
+      "note": "e-mail urzędu",
+      "count": 1
+    },
+    {
+      "text": "Tarnobrzeg",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 3
+    },
+    {
+      "text": "DM.5320.214.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "DM/214/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer decyzji",
+      "count": 1
+    },
+    {
+      "text": "Halinę Sobczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "61051235300",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Henryka Sienkiewicza 41 m. 7",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "patron ulicy w adresie osoby",
+      "count": 1
+    },
+    {
+      "text": "39-432",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Halinie Sobczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Spółdzielni Mieszkaniowej „Siarkopol”",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "zarządca budynku",
+      "count": 2
+    },
+    {
+      "text": "Spółdzielnia Mieszkaniowa „Siarkopol”",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Halina Sobczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "12.05.1961",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "2 418,36 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "dochód osoby",
+      "count": 1
+    },
+    {
+      "text": "Dariusz Sobczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "03.11.1988",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "88110331737",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Przedsiębiorstwie Usług Komunalnych „Komtar” Sp. z o.o.",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "3 105,20 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "dochód osoby",
+      "count": 1
+    },
+    {
+      "text": "Oliwia Sobczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletnia",
+      "count": 1
+    },
+    {
+      "text": "19.02.2015",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "15221978324",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dziecka",
+      "count": 1
+    },
+    {
+      "text": "rodzina zastępcza spokrewniona",
+      "type": "FAMILY_STATUS",
+      "expect": "policy",
+      "note": "sytuacja rodzinna",
+      "count": 1
+    },
+    {
+      "text": "Pawła Rybaka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "ojciec dziecka, płaci alimenty",
+      "count": 1
+    },
+    {
+      "text": "600,00 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "alimenty",
+      "count": 1
+    },
+    {
+      "text": "Iwona Pająk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik socjalny",
+      "count": 1
+    },
+    {
+      "text": "porusza się na wózku inwalidzkim",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "amputacji prawej kończyny dolnej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Oliwią",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię dziecka",
+      "count": 1
+    },
+    {
+      "text": "Szkoły Podstawowej nr 4 im. Kornela Makuszyńskiego w Tarnobrzegu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "Elżbieta Duda",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sąsiadka, świadek",
+      "count": 1
+    },
+    {
+      "text": "80 1050 0099 3592 9003 5470 7796",
+      "type": "IBAN_COMPANY",
+      "expect": "policy",
+      "note": "rachunek spółdzielni (zarządcy)",
+      "count": 1
+    },
+    {
+      "text": "Samorządowego Kolegium Odwoławczego w Tarnobrzegu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Prezydenta Miasta Tarnobrzega",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "604 218 337",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marzena Gołąb",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dyrektor, podpis; gołąb to też ptak",
+      "count": 1
+    },
+    {
+      "text": "Miejskiego Ośrodka Pomocy Społecznej",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "I. Pająk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał + nazwisko",
+      "count": 1
+    }
+  ]
+}

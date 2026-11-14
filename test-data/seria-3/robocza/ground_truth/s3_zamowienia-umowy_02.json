@@ -1,0 +1,253 @@
+{
+  "id": "s3_zamowienia-umowy_02",
+  "template": "zamowienia-umowy",
+  "title": "Umowa zlecenia z osobą fizyczną (inwentaryzacja drzew)",
+  "seed": null,
+  "traps": [
+    "nazwisko Dąb obok pomnika przyrody „Dąb Bolko” i słowa „dąb szypułkowy”",
+    "koordynator Sikora obok „sikory bogatki”",
+    "ulica Jana Pawła II i patron uczelni do zachowania",
+    "symbol niepełnosprawności 05-R i numer legitymacji studenckiej",
+    "zastępca burmistrza i skarbnik w funkcji (policy) obok zwykłego pracownika (mask)"
+  ],
+  "entities": [
+    {
+      "text": "OŚ.6131.4.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer umowy",
+      "count": 1
+    },
+    {
+      "text": "Rynek 1",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "38-500",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "3871652842",
+      "type": "NIP_COMPANY",
+      "expect": "policy",
+      "note": "NIP gminy",
+      "count": 1
+    },
+    {
+      "text": "Agatę Rusin",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "zastępca burmistrza w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Agata Rusin",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "zastępca burmistrza w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Wiesława Trzop",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "skarbnik w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Natalią Dąb",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko będące rzeczownikiem, narzędnik",
+      "count": 1
+    },
+    {
+      "text": "Natalia Dąb",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "19.07.2002",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "02271956406",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Robotnicza 17/4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "38-540",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zagórz",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "DCZ990042",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Lipińskiego",
+      "type": "STREET",
+      "expect": "keep",
+      "note": "ulica publiczna w przedmiocie zlecenia",
+      "count": 1
+    },
+    {
+      "text": "Jana Pawła II",
+      "type": "STREET",
+      "expect": "keep",
+      "note": "patron ulicy w przedmiocie zlecenia",
+      "count": 1
+    },
+    {
+      "text": "Dąb Bolko",
+      "type": "NATURE_MONUMENT",
+      "expect": "keep",
+      "note": "nazwa pomnika przyrody",
+      "count": 1
+    },
+    {
+      "text": "dąb szypułkowy",
+      "type": "WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo równe nazwisku",
+      "count": 1
+    },
+    {
+      "text": "sikory bogatki",
+      "type": "WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo zbliżone do nazwiska koordynatora",
+      "count": 1
+    },
+    {
+      "text": "Krzysztof Sikora",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik urzędu",
+      "count": 1
+    },
+    {
+      "text": "13 465 28 41",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon pracownika",
+      "count": 1
+    },
+    {
+      "text": "k.sikora@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "86 1940 1076 1014 9727 7953 0475",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Uniwersytecie Rolniczym im. Hugona Kołłątaja w Krakowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie uczelni",
+      "count": 1
+    },
+    {
+      "text": "118342",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer legitymacji studenckiej",
+      "count": 1
+    },
+    {
+      "text": "lekkim stopniu niepełnosprawności",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "05-R",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "symbol przyczyny niepełnosprawności",
+      "count": 1
+    },
+    {
+      "text": "Urząd Skarbowy w Sanoku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kamil Dąb",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "członek rodziny",
+      "count": 1
+    },
+    {
+      "text": "05210809632",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Burmistrz Miasta Sanoka",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marcinem Pyrczem",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inspektor ochrony danych",
+      "count": 1
+    },
+    {
+      "text": "iod@example.pl",
+      "type": "EMAIL_INSTITUTION",
+      "expect": "policy",
+      "note": "skrzynka funkcyjna IOD",
+      "count": 1
+    }
+  ]
+}

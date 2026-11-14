@@ -1,0 +1,260 @@
+{
+  "id": "s3_zamowienia-umowy_05",
+  "template": "zamowienia-umowy",
+  "title": "Umowa dzierżawy gruntu gminnego z rolnikiem",
+  "seed": null,
+  "traps": [
+    "nazwisko Baran w kilku przypadkach obok słowa „baranów”",
+    "numer producenta ARiMR o długości REGON",
+    "księga wieczysta gminy (policy) i działki gminne do zachowania",
+    "adresy wiejskie bez ulicy (Wólka Pukarzowska 37 i 41)",
+    "udar mózgu jako uzasadnienie pomocy syna"
+  ],
+  "entities": [
+    {
+      "text": "GKN.6845.7.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer umowy",
+      "count": 1
+    },
+    {
+      "text": "uchwała nr XXIV/181/2025",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rady Gminy Łaszczów",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Szkolna 4",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "22-650",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ryszarda Kwiatka",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "wójt w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Anny Hawryluk",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "skarbnik w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Ryszard Kwiatek",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "wójt w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Anna Hawryluk",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "skarbnik w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Stanisławem Baranem",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "narzędnik w komparycji",
+      "count": 1
+    },
+    {
+      "text": "61052213493",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "HKX650830",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wólka Pukarzowska 37",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres wiejski bez ulicy",
+      "count": 1
+    },
+    {
+      "text": "22-652",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Pukarzów",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "poczta z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "064218733",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer producenta ARiMR (9 cyfr jak REGON)",
+      "count": 1
+    },
+    {
+      "text": "Teresy Baran",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "żona",
+      "count": 1
+    },
+    {
+      "text": "64100913349",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL w nawiasie",
+      "count": 1
+    },
+    {
+      "text": "działek ewidencyjnych nr 312/2 i 315",
+      "type": "PARCEL",
+      "expect": "keep",
+      "note": "działki gminne",
+      "count": 1
+    },
+    {
+      "text": "obrębie Domaniż",
+      "type": "PLACE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy w Tomaszowie Lubelskim",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ZA1T/15386833/7",
+      "type": "LAND_REGISTER",
+      "expect": "policy",
+      "note": "księga wieczysta gminy, nie osoby",
+      "count": 1
+    },
+    {
+      "text": "Józefa Skiby",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sąsiad",
+      "count": 1
+    },
+    {
+      "text": "Wólka Pukarzowska 41",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres sąsiada",
+      "count": 1
+    },
+    {
+      "text": "baranów",
+      "type": "WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo równe nazwisku",
+      "count": 1
+    },
+    {
+      "text": "Prezesa Głównego Urzędu Statystycznego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL98 2490 0005 7216 3533 4749 5334",
+      "type": "IBAN_COMPANY",
+      "expect": "policy",
+      "note": "rachunek gminy",
+      "count": 1
+    },
+    {
+      "text": "79 2490 0005 0929 7635 9133 3792",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "udarze mózgu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Arkadiusz Baran",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "syn",
+      "count": 1
+    },
+    {
+      "text": "90081724953",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Henryka Pałkę",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sołtys",
+      "count": 1
+    },
+    {
+      "text": "84 661 72 09",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krystiana Mazurka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik urzędu",
+      "count": 1
+    },
+    {
+      "text": "Stanisław Baran",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,275 @@
+{
+  "id": "s3_skargi-wnioski_07",
+  "template": "skargi-wnioski",
+  "title": "Rejestr skarg i wniosków za kwartał",
+  "seed": null,
+  "traps": [
+    "tabela rozdzielona tabulatorami z danymi w komórkach",
+    "nazwisko Ryba strażnika i słowo „ryba” w opisie innej skargi",
+    "cudzoziemiec z paszportem i nadanym numerem PESEL",
+    "inicjały pracowników w kolumnie prowadzącego (pracownicy w funkcji)",
+    "adres osoby przy ulicy z patronem (Kopernika) obok adresu urzędu z patronem",
+    "skarga anonimowa i rada osiedla bez danych osobowych"
+  ],
+  "entities": [
+    {
+      "text": "Urząd Miejski w Ustce",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Marszałka Józefa Piłsudskiego 6",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w adresie urzędu",
+      "count": 1
+    },
+    {
+      "text": "76-270",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Henryk Olech",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Darłowska 14/2",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Pawła Rybę",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "strażnik miejski, którego dotyczy skarga",
+      "count": 1
+    },
+    {
+      "text": "posiada kartę parkingową",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "pośrednio niepełnosprawność skarżącego",
+      "count": 1
+    },
+    {
+      "text": "Referatu Gospodarki Komunalnej",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Teresa Lipińska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zbigniew Lipiński",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Wczasowa 3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dawida Kamrowskiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sąsiad wskazany w skardze",
+      "count": 1
+    },
+    {
+      "text": "ryba",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko Ryba",
+      "count": 1
+    },
+    {
+      "text": "PPIS w Słupsku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krystyna Bałdyga-Wenta",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "os. Rzeczpospolitej 6/18",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "601 450 337",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Referatu Spraw Obywatelskich",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Łukasza Wenty",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "syn skarżącej",
+      "count": 1
+    },
+    {
+      "text": "przebywającego w szpitalu psychiatrycznym",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rada Osiedla Wschód",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Iwan Kovalenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "cudzoziemiec",
+      "count": 1
+    },
+    {
+      "text": "ul. Kopernika 21/5",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres osoby przy ulicy z patronem",
+      "count": 1
+    },
+    {
+      "text": "GF0724745",
+      "type": "PASSPORT",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "91042394019",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marianna Grot",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "m.grot@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sylwię Dąbek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownica MOPS, której dotyczy skarga",
+      "count": 1
+    },
+    {
+      "text": "37 1140 2004 5518 5280 4096 8787",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "NRB bez prefiksu PL",
+      "count": 1
+    },
+    {
+      "text": "Radzie Miejskiej w Ustce",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "Zenon Mazurkiewicz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Polna 9",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Burmistrza Miasta Ustka",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "MK",
+      "type": "PERSON_INITIALS",
+      "expect": "policy",
+      "note": "inicjały pracownika prowadzącego w funkcji",
+      "count": 5
+    },
+    {
+      "text": "JR",
+      "type": "PERSON_INITIALS",
+      "expect": "policy",
+      "note": "inicjały pracownika prowadzącego w funkcji",
+      "count": 5
+    },
+    {
+      "text": "Magdalena Kurek",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "pracownik sporządzający rejestr w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Jakub Rogowski",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędnik sprawdzający w funkcji",
+      "count": 1
+    }
+  ]
+}

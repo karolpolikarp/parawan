@@ -1,0 +1,205 @@
+{
+  "id": "s3_skargi-wnioski_05",
+  "template": "skargi-wnioski",
+  "title": "Interpelacja radnej w sprawie lokalu komunalnego mieszkanki",
+  "seed": null,
+  "traps": [
+    "nazwisko Zając pracownika i czasownik „zająć”",
+    "dziecko w wieku szkolnym z rozpoznaniem choroby",
+    "pobyt członka rodziny w zakładzie karnym jako dane szczególne",
+    "radna i urzędy w funkcji (policy) obok mieszkańców (mask)",
+    "patron w adresie siedziby instytucji do zachowania",
+    "kwoty emerytury i zaległości czynszowej jako dane finansowe"
+  ],
+  "entities": [
+    {
+      "text": "Radna Rady Miasta Białystok",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "funkcja radnej",
+      "count": 2
+    },
+    {
+      "text": "Beata Sienkiewicz-Hryniewicka",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "radna w funkcji publicznej",
+      "count": 2
+    },
+    {
+      "text": "Prezydent Miasta Białegostoku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Przewodniczącego Rady Miasta Białystok",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Wiejskiej 47 m. 3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres mieszkanki w dopełniaczu",
+      "count": 2
+    },
+    {
+      "text": "Jadwigi Ostaszewskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ostaszewska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 2
+    },
+    {
+      "text": "Zarząd Mienia Komunalnego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "przewlekłą obturacyjną chorobę płuc",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "poradni pulmonologicznej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Oliwer Ostaszewski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletni wnuk",
+      "count": 1
+    },
+    {
+      "text": "astmę oskrzelową",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "rozpoznanie u dziecka",
+      "count": 1
+    },
+    {
+      "text": "Romana Zająca",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik administratora wskazany z nazwiska w sprawie mieszkanki",
+      "count": 1
+    },
+    {
+      "text": "zająć",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "czasownik, a nie nazwisko Zając",
+      "count": 1
+    },
+    {
+      "text": "4 318,20 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "zaległość czynszowa osoby",
+      "count": 1
+    },
+    {
+      "text": "złamaniu szyjki kości udowej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mariusz Ostaszewski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "przebywa obecnie w zakładzie karnym",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "dane o pozbawieniu wolności",
+      "count": 1
+    },
+    {
+      "text": "Ewa Jurczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "2 140 zł netto",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "dochód osoby",
+      "count": 1
+    },
+    {
+      "text": "ZMK-LM.7140.212.2023",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer wniosku mieszkanki",
+      "count": 1
+    },
+    {
+      "text": "Miejski Ośrodek Pomocy Rodzinnej w Białymstoku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "85 744 21 09",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon stacjonarny mieszkanki",
+      "count": 1
+    },
+    {
+      "text": "Natalię Jurczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "789012334",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon bez spacji",
+      "count": 1
+    },
+    {
+      "text": "PL37 1940 1076 4279 0139 5597 9998",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Jana Klemensa Branickiego 3/5",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w adresie siedziby instytucji",
+      "count": 1
+    }
+  ]
+}

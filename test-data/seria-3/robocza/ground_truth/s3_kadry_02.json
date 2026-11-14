@@ -1,0 +1,296 @@
+{
+  "id": "s3_kadry_02",
+  "template": "kadry",
+  "title": "Protokół z przeprowadzonego naboru na stanowisko urzędnicze",
+  "seed": null,
+  "traps": [
+    "miejscowość Książki obok zwykłego słowa „książki” (książka podawcza)",
+    "kod pocztowy kandydatki taki sam jak kod siedziby starostwa (policy)",
+    "patron w nazwie uczelni (keep) i patron w ulicy z adresu kandydatki (mask)",
+    "numer wpisu radcy prawnego w składzie komisji",
+    "inicjały protokolantki z kropkami",
+    "obecny pracodawca kandydatki jako quasi-identyfikator"
+  ],
+  "entities": [
+    {
+      "text": "Starostwo Powiatowe w Wąbrzeźnie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Wolności 44",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wąbrzeźno",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miasto siedziby starostwa i adres kandydatki",
+      "count": 2
+    },
+    {
+      "text": "OK.2110.3.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Grzegorz Lewandowicz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "przewodniczący komisji, też w podpisie",
+      "count": 2
+    },
+    {
+      "text": "Sekretarz Powiatu",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Iwona Kaczmarek-Bąk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Naczelnik Wydziału Komunikacji i Transportu",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Paweł Szulc",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "TO-1287",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer wpisu na listę radców prawnych",
+      "count": 1
+    },
+    {
+      "text": "Monika Duda",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Justyny Kubackiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "książki",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie miejscowość Książki",
+      "count": 1
+    },
+    {
+      "text": "Natalia Grzelak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Chełmińska 12/4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "87-200",
+      "type": "POSTAL",
+      "expect": "policy",
+      "note": "ten sam kod co siedziba starostwa i adres kandydatki",
+      "count": 2
+    },
+    {
+      "text": "Krystian Malinowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "ul. Szkolna 5",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "87-222",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Książki",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość będąca zwykłym słowem",
+      "count": 1
+    },
+    {
+      "text": "Oliwia Bartkowiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Podgórna 9",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "87-140",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Chełmża",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Damian Szczepański",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Lipowa 3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "87-207",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dębowa Łąka",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ewelina Rataj",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Józefa Wybickiego 21 m. 7",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "patron w nazwie ulicy w adresie osoby",
+      "count": 1
+    },
+    {
+      "text": "87-100",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Toruń",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Natalię Grzelak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Uniwersytecie Mikołaja Kopernika w Toruniu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie uczelni",
+      "count": 1
+    },
+    {
+      "text": "Starostwie Powiatowym w Golubiu-Dobrzyniu",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "obecny pracodawca kandydatki",
+      "count": 1
+    },
+    {
+      "text": "Malinowskiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 1
+    },
+    {
+      "text": "661 402 958",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "natalia.grzelak@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "M.D.",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "inicjały protokolantki",
+      "count": 1
+    },
+    {
+      "text": "Andrzej Wiśniewicz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "starosta w podpisie",
+      "count": 1
+    }
+  ]
+}

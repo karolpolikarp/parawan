@@ -1,0 +1,225 @@
+{
+  "id": "s3_podatki_07",
+  "template": "podatki",
+  "title": "Zawiadomienie o zajęciu rachunku bankowego w egzekucji podatku lokalnego",
+  "seed": null,
+  "traps": [
+    "imiona rodziców i data urodzenia w danych zobowiązanego",
+    "firma JDG z nazwiskiem zapisanym wersalikami",
+    "dwa rachunki zobowiązanego w różnych formatach (mask) obok rachunku organu (keep)",
+    "numery tytułów wykonawczych i legitymacji poborcy (policy)",
+    "adres banku-adresata (keep) obok adresu nieruchomości osoby (mask)"
+  ],
+  "entities": [
+    {
+      "text": "Biuro Egzekucji Administracyjnej",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Wyzwolenia 30",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "10-106",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Olsztyn",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby, także w adresach urzędu i banku",
+      "count": 4
+    },
+    {
+      "text": "BEA-III.3160.712.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Warmińsko-Mazurski Bank Spółdzielczy",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Dąbrowszczaków 8",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "10-541",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "TW/2026/1187",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer tytułu wykonawczego",
+      "count": 2
+    },
+    {
+      "text": "TW/2026/1188",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer tytułu wykonawczego",
+      "count": 2
+    },
+    {
+      "text": "Grzegorz Ślusarczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "21.05.1979",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bogdan",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię ojca",
+      "count": 1
+    },
+    {
+      "text": "Halina",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię matki",
+      "count": 1
+    },
+    {
+      "text": "79052121638",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "1485418324",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "614201980",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kołobrzeska 14 m. 33",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "10-434",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "REMBUD-ŚLUSARCZYK",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "firma JDG z nazwiskiem wersalikami",
+      "count": 1
+    },
+    {
+      "text": "30 1050 0099 3682 2828 0160 8670",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "rachunek osobisty zobowiązanego",
+      "count": 1
+    },
+    {
+      "text": "50124010373128371440893230",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "rachunek firmowy JDG, zapis ciągiem",
+      "count": 1
+    },
+    {
+      "text": "ul. Lubelskiej 42",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "nieruchomość osoby fizycznej zajęta na działalność",
+      "count": 1
+    },
+    {
+      "text": "PL19 1050 0099 8411 5555 2826 8851",
+      "type": "IBAN_INSTITUTION",
+      "expect": "keep",
+      "note": "rachunek organu egzekucyjnego",
+      "count": 1
+    },
+    {
+      "text": "Grzegorzowi Ślusarczykowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "600 913 482",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "rembud.slusarczyk@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ewa Dudzińska",
+      "type": "OFFICIAL",
+      "expect": "policy",
+      "note": "kierownik podpisujący z upoważnienia organu",
+      "count": 1
+    },
+    {
+      "text": "Krzysztof Wysocki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "poborca skarbowy prowadzący sprawę",
+      "count": 1
+    },
+    {
+      "text": "07/2026",
+      "type": "SERIAL_NUMBER",
+      "expect": "policy",
+      "note": "numer legitymacji służbowej poborcy",
+      "count": 1
+    }
+  ]
+}

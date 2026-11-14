@@ -1,0 +1,351 @@
+{
+  "id": "s3_oswiata_06",
+  "template": "oswiata",
+  "title": "Zestawienie uczniów objętych programem „Wyprawka szkolna”",
+  "seed": null,
+  "traps": [
+    "tabela z rodzajem niepełnosprawności przy nazwisku",
+    "ogólny katalog niepełnosprawności w opisie programu (zostaje)",
+    "rodzina zastępcza spokrewniona (dane szczególne)",
+    "numery faktur i firma dostawcy",
+    "patron w nazwie szkoły i w adresie urzędu"
+  ],
+  "entities": [
+    {
+      "text": "Szkoła Podstawowa nr 18 im. Mikołaja Kopernika w Olsztynie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "ul. Kołobrzeska 9",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "10-444",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "SP18.4462.5.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak pisma",
+      "count": 1
+    },
+    {
+      "text": "Urząd Miasta Olsztyna",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "pl. Jana Pawła II 1",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w adresie urzędu",
+      "count": 1
+    },
+    {
+      "text": "10-101",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "uczniów słabowidzących, niesłyszących, słabosłyszących",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "opis programu, nie dotyczy osoby",
+      "count": 1
+    },
+    {
+      "text": "Julia Kordek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "słabowidząca",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "zaćma wrodzona obu oczu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "77/2024/2025",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "Marlena Kordek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kajetan Nitka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "słabosłyszący",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "obustronne aparaty słuchowe",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "103/2025/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "Grzegorz Nitka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wiktoria Bałdyga",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "niepełnosprawność intelektualna w stopniu lekkim",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "12/2026/2027",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "Danuta Bałdyga",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "rodzina zastępcza spokrewniona",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "piecza zastępcza",
+      "count": 1
+    },
+    {
+      "text": "Oskar Pelc",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "autyzm; zaburzenia lękowe",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "58/2023/2024",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "Ireneusz Pelc",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zuzanna Rydz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "niesłysząca, padaczka",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "9/2022/2023",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "Celina Rydz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Edukator Warmia sp. z o.o.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "6785967925",
+      "type": "NIP_COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "FV/2026/09/0147",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "FV/2026/09/0152",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Oskara Pelca",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ireneusza Pelca",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "77 1050 0099 1862 1739 2545 2996",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "przebywa w rodzinie zastępczej na podstawie postanowienia sądu rodzinnego",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "piecza zastępcza",
+      "count": 1
+    },
+    {
+      "text": "Zuzia",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie, samo imię",
+      "count": 1
+    },
+    {
+      "text": "zajęć rewalidacyjnych z surdopedagogiem",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "505 219 736",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Lidia Szczęsna",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "koordynatorka",
+      "count": 1
+    },
+    {
+      "text": "89 527 14 80",
+      "type": "INSTITUTION_PHONE",
+      "expect": "keep",
+      "note": "telefon szkoły",
+      "count": 1
+    },
+    {
+      "text": "wew. 14",
+      "type": "PHONE_EXT",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "l.szczesna@sp18.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "służbowy e-mail imienny",
+      "count": 1
+    },
+    {
+      "text": "Henryka Dziedzic",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dyrektor w funkcji",
+      "count": 1
+    },
+    {
+      "text": "postanowienia o ustanowieniu rodziny zastępczej",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "piecza zastępcza uczennicy z poz. 3",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,204 @@
+{
+  "id": "s3_zamowienia-umowy_06",
+  "template": "zamowienia-umowy",
+  "title": "Umowa o dzieło z przeniesieniem praw autorskich (monografia)",
+  "seed": null,
+  "traps": [
+    "emeryt z miejscem urodzenia w miejscowniku i instytucją ZUS",
+    "osoby z wizerunku: adres i choroba mieszkanki kamienicy",
+    "nazwa zabytku (Kamienica Pod Aniołami) i adres urzędu do zachowania",
+    "XIX-wieczny autor cytowanych prac (policy)",
+    "nazwisko Głąb w narzędniku i mianowniku"
+  ],
+  "entities": [
+    {
+      "text": "WK.526.11.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer umowy",
+      "count": 1
+    },
+    {
+      "text": "Główny Rynek 20",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "62-800",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Magdalenę Owczarek",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "naczelnik wydziału w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Magdalena Owczarek",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "naczelnik wydziału w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Prezydenta Miasta Kalisza",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wiesławem Głąbem",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "narzędnik w komparycji",
+      "count": 1
+    },
+    {
+      "text": "04.03.1953",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ostrowie Wielkopolskim",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce urodzenia",
+      "count": 1
+    },
+    {
+      "text": "53030435278",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Podgórze 8 m. 2",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "62-860",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Opatówek",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Kamienicy Pod Aniołami",
+      "type": "BUILDING",
+      "expect": "keep",
+      "note": "nazwa zabytku",
+      "count": 1
+    },
+    {
+      "text": "Jarosława Pietrasa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik urzędu",
+      "count": 1
+    },
+    {
+      "text": "62 765 44 18",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "j.pietras@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL31 1140 2004 1338 1580 8439 3693",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zakład Ubezpieczeń Społecznych",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krystyny Lisieckiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Złotej 5 m. 7",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres osoby z wizerunku",
+      "count": 1
+    },
+    {
+      "text": "Bogdana Szulca",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Lisiecka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 1
+    },
+    {
+      "text": "stwardnienie rozsiane",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "porusza się na wózku",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Adama Chodyńskiego",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "nieżyjący XIX-wieczny autor cytowanych prac",
+      "count": 1
+    },
+    {
+      "text": "Wiesław Głąb",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

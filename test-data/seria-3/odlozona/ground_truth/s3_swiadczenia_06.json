@@ -1,0 +1,261 @@
+{
+  "id": "s3_swiadczenia_06",
+  "template": "swiadczenia",
+  "title": "Decyzja odmowna w sprawie zasiłku pielęgnacyjnego dla osoby po 75. roku życia",
+  "seed": null,
+  "traps": [
+    "eponim w nazwie choroby („chorobę Alzheimera”) to nie osoba",
+    "córka jako pełnomocnik z nazwiskiem dwuczłonowym i wnuczka z jego pierwszym członem",
+    "samo imię osoby starszej („Pani Stanisława”)",
+    "numer PWZ lekarza rodzinnego",
+    "inicjały pracownika w stopce i w znaku sprawy",
+    "kod pocztowy urzędu inny niż kody osób w tym samym mieście"
+  ],
+  "entities": [
+    {
+      "text": "Miejski Ośrodek Pomocy Rodzinie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Królowej Jadwigi 43",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w adresie urzędu",
+      "count": 1
+    },
+    {
+      "text": "88-100",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Inowrocław",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 4
+    },
+    {
+      "text": "DŚ.5220.402.2026.KN",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak z inicjałami pracownika",
+      "count": 1
+    },
+    {
+      "text": "Stanisławy Kasprzyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "48033031941",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Poznańskiej 118 m. 4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "88-104",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Renatę Wolską-Kasprzyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pełnomocnik",
+      "count": 1
+    },
+    {
+      "text": "72101923025",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Stanisławie Kasprzyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Przemysława Kulika",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarz rodzinny",
+      "count": 1
+    },
+    {
+      "text": "4291521",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer PWZ lekarza",
+      "count": 1
+    },
+    {
+      "text": "NZOZ „Rodzinna Praktyka” w Inowrocławiu",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Stanisława",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię",
+      "count": 1
+    },
+    {
+      "text": "chorobę Alzheimera w stadium umiarkowanym",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "eponim, nie osoba",
+      "count": 1
+    },
+    {
+      "text": "udar niedokrwienny mózgu z niedowładem lewostronnym",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wymaga pomocy przy wszystkich czynnościach dnia codziennego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "donepezilu 10 mg",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "Zakładu Ubezpieczeń Społecznych Oddział w Bydgoszczy",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "348,22 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "kwota dodatku pielęgnacyjnego",
+      "count": 1
+    },
+    {
+      "text": "całkowitej niezdolności do samodzielnej egzystencji",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Henryka Kasprzyka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "zmarły mąż",
+      "count": 1
+    },
+    {
+      "text": "Miejskim Ośrodku Pomocy Rodzinie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Dworcowa 27/6",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres do doręczeń pełnomocnika",
+      "count": 1
+    },
+    {
+      "text": "88-101",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "691 404 228",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "renata.wk@poczta.test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Klaudię Wolską",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "wnuczka",
+      "count": 1
+    },
+    {
+      "text": "732 015 660",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Samorządowego Kolegium Odwoławczego w Bydgoszczy",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krystian Nowicki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis",
+      "count": 1
+    },
+    {
+      "text": "Renata Wolska-Kasprzyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "K.N.",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "inicjały w stopce",
+      "count": 1
+    }
+  ]
+}

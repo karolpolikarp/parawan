@@ -1,0 +1,247 @@
+{
+  "id": "s3_usc-ewidencja_10",
+  "template": "usc-ewidencja",
+  "title": "Decyzja o udostępnieniu danych z rejestru mieszkańców",
+  "seed": null,
+  "traps": [
+    "firma JDG z imieniem i nazwiskiem, NIP, REGON i rachunek osoby fizycznej",
+    "kod pocztowy osoby różny o jedną cyfrę od kodu urzędu w tej samej miejscowości",
+    "nazwisko Żurek u żony bez odmiany, u męża w odmianie (Żurka), samo imię żony",
+    "numer faktury do zachowania i sygnatura nakazu zapłaty (polityka)",
+    "adres IP nadawcy z ePUAP i adres do doręczeń elektronicznych",
+    "miejscowość Kazimierz Dolny zawierająca imię"
+  ],
+  "entities": [
+    {
+      "text": "ul. Lubelska 5",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "24-100",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "24-102",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "kod osoby różny o jedną cyfrę od kodu urzędu",
+      "count": 1
+    },
+    {
+      "text": "Puławy",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i urzędu",
+      "count": 4
+    },
+    {
+      "text": "SO.5345.88.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "Usługi Remontowo-Budowlane Sebastian Bielecki",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "firma JDG z imieniem i nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "3484066290",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "NIP przedsiębiorcy osoby fizycznej",
+      "count": 1
+    },
+    {
+      "text": "738495645",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kolejowa 18",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres JDG osoby fizycznej",
+      "count": 1
+    },
+    {
+      "text": "24-120",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kazimierz Dolny",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z imieniem w nazwie",
+      "count": 1
+    },
+    {
+      "text": "198.51.100.73",
+      "type": "IP",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Patryka Żurka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dłużnik",
+      "count": 2
+    },
+    {
+      "text": "86102186798",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "21.10.1986",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Włostowicka 50 m. 12",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Głęboka 31/8",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "20-612",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Lublin",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Moniki Żurek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "żona dłużnika",
+      "count": 1
+    },
+    {
+      "text": "Sądu Rejonowego w Puławach",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "I Nc 1534/26",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura nakazu zapłaty",
+      "count": 1
+    },
+    {
+      "text": "23 480 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "kwota długu osoby",
+      "count": 1
+    },
+    {
+      "text": "FV/2026/03/118",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer faktury",
+      "count": 1
+    },
+    {
+      "text": "Monika",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię żony",
+      "count": 1
+    },
+    {
+      "text": "PL07 1140 2004 2172 3122 2019 0354",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "rachunek JDG osoby fizycznej",
+      "count": 1
+    },
+    {
+      "text": "881 507 236",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Lublinie",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Wojewody Lubelskiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "AE:PL-48211-07733-GHTRE-27",
+      "type": "SERIAL_NUMBER",
+      "expect": "mask",
+      "note": "adres do doręczeń elektronicznych osoby",
+      "count": 1
+    },
+    {
+      "text": "Joanna Sobczak",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędnik podpisujący w funkcji",
+      "count": 1
+    },
+    {
+      "text": "j.sobczak@example.pl",
+      "type": "EMAIL",
+      "expect": "policy",
+      "note": "służbowy e-mail urzędnika podpisującego w funkcji (jak jej nazwisko)",
+      "count": 1
+    },
+    {
+      "text": "Patryk Żurek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

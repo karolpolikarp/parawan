@@ -1,0 +1,239 @@
+{
+  "id": "s3_podatki_03",
+  "template": "podatki",
+  "title": "Decyzja o umorzeniu zaległości w podatku od nieruchomości",
+  "seed": null,
+  "traps": [
+    "dane o zdrowiu w uzasadnieniu sytuacji życiowej (rozpoznanie, kod ICD, terapia, orzeczenie)",
+    "zmarły małżonek z numerem aktu zgonu",
+    "patron w nazwie instytucji (keep) obok patrona w adresie osoby (mask)",
+    "rachunek osobisty podatniczki (mask) obok indywidualnego rachunku gminy przypisanego podatnikowi (policy)",
+    "inicjały urzędnika w znaku sprawy"
+  ],
+  "entities": [
+    {
+      "text": "Pleszew",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby, także w dacie i nazwie organu",
+      "count": 3
+    },
+    {
+      "text": "FN.3113.18.2026.MS",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy z inicjałami urzędnika",
+      "count": 1
+    },
+    {
+      "text": "Krystyna Janiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "ul. Juliusza Słowackiego 7 m. 2",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "patron w adresie osoby",
+      "count": 2
+    },
+    {
+      "text": "63-300",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krystyny Janiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "59041173507",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "2214/6",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "numer działki ewidencyjnej osoby",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy w Pleszewie",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KZ1P/56894142/0",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ryszard Janiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "zmarły małżonek",
+      "count": 1
+    },
+    {
+      "text": "30176/00/AZ/2025/000412",
+      "type": "CIVIL_RECORD",
+      "expect": "mask",
+      "note": "numer aktu zgonu",
+      "count": 1
+    },
+    {
+      "text": "2 140,36 zł netto",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "dochód osoby",
+      "count": 1
+    },
+    {
+      "text": "Dariusz Janiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "17.06.1989",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "orzeczeniem o znacznym stopniu niepełnosprawności",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "mózgowego porażenia dziecięcego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Piotra Banasia",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "1476967",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer prawa wykonywania zawodu lekarza",
+      "count": 1
+    },
+    {
+      "text": "Wielkopolskiego Centrum Onkologii im. Marii Skłodowskiej-Curie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie instytucji",
+      "count": 1
+    },
+    {
+      "text": "raka piersi",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "C50.4",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "chemioterapię",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Miejsko-Gminnego Ośrodka Pomocy Społecznej w Pleszewie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Agatę Sobczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik socjalny",
+      "count": 1
+    },
+    {
+      "text": "83 1160 2202 3194 6133 2522 9130",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "rachunek osobisty wnioskodawczyni",
+      "count": 1
+    },
+    {
+      "text": "12 1050 0099 6554 0593 2226 9017",
+      "type": "IBAN",
+      "expect": "policy",
+      "note": "indywidualny rachunek gminy przypisany podatnikowi",
+      "count": 1
+    },
+    {
+      "text": "Samorządowego Kolegium Odwoławczego w Kaliszu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Arkadiusz Ptak",
+      "type": "OFFICIAL",
+      "expect": "policy",
+      "note": "burmistrz podpisujący jako organ",
+      "count": 1
+    },
+    {
+      "text": "Monika Szulc",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "urzędnik prowadzący sprawę",
+      "count": 1
+    },
+    {
+      "text": "62 742 83 15",
+      "type": "PHONE_INSTITUTION",
+      "expect": "policy",
+      "note": "służbowy numer pracownika",
+      "count": 1
+    },
+    {
+      "text": "691 204 887",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

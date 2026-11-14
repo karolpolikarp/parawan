@@ -1,0 +1,295 @@
+{
+  "id": "s3_usc-ewidencja_03",
+  "template": "usc-ewidencja",
+  "title": "Decyzja o zmianie nazwiska",
+  "seed": null,
+  "traps": [
+    "nazwisko Kiełbasa i zwykłe słowo „kiełbasa” małą literą",
+    "stare i nowe nazwisko w cudzysłowie bez imienia",
+    "zmiana obejmuje małoletniego: PESEL, akt urodzenia, dane o zdrowiu dziecka",
+    "szkoła z patronem i miejscowością, cytowany wyrok WSA",
+    "kod ICD-10 przy rozpoznaniu"
+  ],
+  "entities": [
+    {
+      "text": "Kielce",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i urzędu",
+      "count": 3
+    },
+    {
+      "text": "Kielcach",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce urodzenia, siedziba USC",
+      "count": 4
+    },
+    {
+      "text": "ul. Strycharska 6",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "25-659",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "USC-II.5360.47.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "Zuzanny Kiełbasy",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "11 lutego 1998",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "98021148005",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Józefa",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię ojca",
+      "count": 1
+    },
+    {
+      "text": "Danuty",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię matki",
+      "count": 1
+    },
+    {
+      "text": "734/1998",
+      "type": "CIVIL_RECORD",
+      "expect": "mask",
+      "note": "numer aktu urodzenia",
+      "count": 1
+    },
+    {
+      "text": "Kiełbasa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dotychczasowe nazwisko",
+      "count": 2
+    },
+    {
+      "text": "Kielska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nowe nazwisko",
+      "count": 2
+    },
+    {
+      "text": "Oliwera Kiełbasy",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletni",
+      "count": 1
+    },
+    {
+      "text": "4 września 2016",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Busku-Zdroju",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce urodzenia, siedziba USC",
+      "count": 2
+    },
+    {
+      "text": "16290494814",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "2601021/00/AU/2016/000219",
+      "type": "CIVIL_RECORD",
+      "expect": "mask",
+      "note": "numer aktu urodzenia",
+      "count": 1
+    },
+    {
+      "text": "Kielski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nowe nazwisko syna",
+      "count": 1
+    },
+    {
+      "text": "ul. Warszawskiej 207/19",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "25-414",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kiełbasa",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo równe nazwisku",
+      "count": 1
+    },
+    {
+      "text": "Anny Pietrzyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "psycholog",
+      "count": 1
+    },
+    {
+      "text": "zaburzeń lękowych uogólnionych",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "F41.1",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "objawy fobii szkolnej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "dziecko",
+      "count": 1
+    },
+    {
+      "text": "Szkoły Podstawowej nr 12 im. Stefana Żeromskiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "szkoła z patronem",
+      "count": 1
+    },
+    {
+      "text": "Oliwer",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię dziecka",
+      "count": 1
+    },
+    {
+      "text": "Bartosz Kozera",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "ojciec dziecka",
+      "count": 1
+    },
+    {
+      "text": "94121917198",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Lipowa 3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "32-020",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wieliczka",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Urzędu Stanu Cywilnego w Wieliczce",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kozery",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 1
+    },
+    {
+      "text": "II SA/Ke 412/21",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "Wojewody Świętokrzyskiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jolanta Rogala",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędnik podpisujący w funkcji",
+      "count": 1
+    },
+    {
+      "text": "692 331 058",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "zuzanna.k@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

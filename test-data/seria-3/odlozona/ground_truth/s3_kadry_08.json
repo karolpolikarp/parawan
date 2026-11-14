@@ -1,0 +1,282 @@
+{
+  "id": "s3_kadry_08",
+  "template": "kadry",
+  "title": "Wniosek pracodawcy do ZUS o kontrolę zwolnień lekarskich",
+  "seed": null,
+  "traps": [
+    "kody literowe e-ZLA (B, A) jako dane o zdrowiu i ich objaśnienie",
+    "serie i numery e-ZLA (policy) obok PWZ lekarzy",
+    "„Węgiel” jako zwykłe słowo na początku zdania obok nazwiska Węgiel w dopełniaczu (Węgla)",
+    "nazwisko Sroka, samo imię „Konrad”",
+    "dane osób trzecich z kontroli (mąż, siostra z adresem, sąsiad, tablica)",
+    "patron w ulicach adresów osób i siedziby urzędu"
+  ],
+  "entities": [
+    {
+      "text": "Powiatowy Urząd Pracy w Zgorzelcu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Bohaterów II Armii Wojska Polskiego 8a",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "59-900",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zgorzelec",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "KP.1141.19.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zakład Ubezpieczeń Społecznych",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sylwia Konieczna",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "85063006303",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "doradca zawodowy",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Daszyńskiego 9/4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "nazwisko patrona w ulicy adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "59-920",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bogatynia",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ZY 4081553",
+      "type": "ZLA_NUMBER",
+      "expect": "policy",
+      "note": "seria i numer e-ZLA wskazują pracownicę w systemie ZUS",
+      "count": 1
+    },
+    {
+      "text": "ZY 4097012",
+      "type": "ZLA_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ZY 4120844",
+      "type": "ZLA_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marek Hanusz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarz wystawiający",
+      "count": 1
+    },
+    {
+      "text": "3258905",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kod literowy B",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod B oznacza ciążę",
+      "count": 2
+    },
+    {
+      "text": "Dorota Fijałkowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "8386854",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kod literowy A",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod A oznacza kolejną niezdolność bez przerwy",
+      "count": 1
+    },
+    {
+      "text": "Kod B oznacza niezdolność przypadającą w okresie ciąży",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "leczy się z powodu depresji",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Joanna Mikulska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Elżbieta Sroka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko Sroka, zwykłe słowo",
+      "count": 1
+    },
+    {
+      "text": "Rafała Koniecznego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Karoliny Hajduk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Chopina 3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "patron w ulicy adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "81-806",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sopot",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Stefana Węgla",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko Węgiel w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "WZG 52KT",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Węgiel",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo na początku zdania, a nie nazwisko",
+      "count": 1
+    },
+    {
+      "text": "Konrad",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię syna sąsiada",
+      "count": 1
+    },
+    {
+      "text": "sylwia.konieczna@test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "723 664 015",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Powiatowego Urzędu Pracy w Zgorzelcu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jarosław Pindel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

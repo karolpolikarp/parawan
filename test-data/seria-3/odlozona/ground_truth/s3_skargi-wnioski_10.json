@@ -1,0 +1,247 @@
+{
+  "id": "s3_skargi-wnioski_10",
+  "template": "skargi-wnioski",
+  "title": "Protokół z posiedzenia komisji skarg, wniosków i petycji rady powiatu",
+  "seed": null,
+  "traps": [
+    "radni i urzędnicy w funkcji (policy) obok skarżącego i jego rodziny (mask)",
+    "małoletnia w pieczy zastępczej z PESEL i datą urodzenia",
+    "rodzina zastępcza: samo imię żony i nazwisko w liczbie mnogiej",
+    "sygnatura sprawy rodzinnej sądu (policy) obok nazwy sądu (keep)",
+    "dane o zdrowiu kilku osób (uzależnienie matki dziecka, choroby serca skarżącego)",
+    "nazwa powiatu i miasta w nazwach instytucji oraz miasto w adresie osoby"
+  ],
+  "entities": [
+    {
+      "text": "Komisji Skarg, Wniosków i Petycji Rady Powiatu Ostrowskiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Starostwa Powiatowego w Ostrowie Wielkopolskim",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mirosław Kubiak",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "radny w funkcji przewodniczącego komisji",
+      "count": 2
+    },
+    {
+      "text": "Elżbieta Kaczmarek",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "radna w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Józef Pietrzak",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "radny w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Antoni Przybyła",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "skarżący",
+      "count": 1
+    },
+    {
+      "text": "Renata Fabiszak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dyrektor, której dotyczy skarga",
+      "count": 2
+    },
+    {
+      "text": "Agata Nawrocka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "reprezentantka podmiotu wnoszącego petycję",
+      "count": 2
+    },
+    {
+      "text": "Dyrektor Powiatowego Centrum Pomocy Rodzinnej",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "stanowisko jednoznacznie wskazujące osobę, której dotyczy skarga",
+      "count": 1
+    },
+    {
+      "text": "Antoniego Przybyły",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dyrektora Powiatowego Centrum Pomocy Rodzinnej",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "stanowisko jednoznacznie wskazujące osobę, której dotyczy skarga",
+      "count": 1
+    },
+    {
+      "text": "Zuzanny Przybyły",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletnia w pieczy zastępczej",
+      "count": 1
+    },
+    {
+      "text": "09.01.2019",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "19210909261",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sądu Rejonowego w Ostrowie Wielkopolskim",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "III Nsm 214/26",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy rodzinnej dotyczącej dziecka",
+      "count": 1
+    },
+    {
+      "text": "Agnieszki",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię w zestawieniu „Państwa Agnieszki i Romana”",
+      "count": 1
+    },
+    {
+      "text": "Romana Bartkowiaków",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "rodzina zastępcza, nazwisko w liczbie mnogiej",
+      "count": 1
+    },
+    {
+      "text": "Klaudia Przybyła",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "matka dziecka",
+      "count": 1
+    },
+    {
+      "text": "przebywa w ośrodku leczenia uzależnień",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kingę Sobczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "psycholog sporządzająca opinię o skarżącym",
+      "count": 1
+    },
+    {
+      "text": "dwa przebyte zawały serca",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "przewlekła niewydolność krążenia",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zarządowi Powiatu Ostrowskiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "512 908 377",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "agata.nawrocka@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zbigniewa Glapy",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zbigniew Glapa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Wrocławska 61/3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "63-400",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ostrów Wielkopolski",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Biuletynie Informacji Publicznej",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Joanna Szymczak",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "pracownik biura rady protokołujący w funkcji",
+      "count": 1
+    }
+  ]
+}

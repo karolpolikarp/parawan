@@ -1,0 +1,197 @@
+{
+  "id": "s3_skargi-wnioski_04",
+  "template": "skargi-wnioski",
+  "title": "Decyzja o odmowie udostępnienia informacji publicznej ze względu na prywatność",
+  "seed": null,
+  "traps": [
+    "nazwisko Wrona wnioskodawczyni i słowo „wrona” w opisie oględzin drzewa",
+    "małżonkowie wymienieni razem (samo imię męża i nazwisko w liczbie mnogiej w dopełniaczu)",
+    "sygnatury dwóch cytowanych wyroków do zachowania",
+    "numer księgi wieczystej osoby, która zgodziła się na udostępnienie danych (nadal do maskowania)",
+    "adres sąsiadów różniący się od adresu wnioskodawczyni tylko numerem i przypadkiem"
+  ],
+  "entities": [
+    {
+      "text": "OŚ.1431.12.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "Elżbiety Wrony",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "wnioskodawczyni",
+      "count": 1
+    },
+    {
+      "text": "Elżbieta Wrona",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wronie",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w celowniku",
+      "count": 1
+    },
+    {
+      "text": "ul. Rumska 21/4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "81-198",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Pierwoszyno",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "Wójt Gminy Kosakowo",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wójta Gminy Kosakowo",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ewrona@test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jarosława",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię męża w zestawieniu „Państwa Jarosława i Doroty”",
+      "count": 1
+    },
+    {
+      "text": "Doroty Klawikowskich",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko w liczbie mnogiej po imieniu żony",
+      "count": 1
+    },
+    {
+      "text": "ul. Rumskiej 23",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres sąsiadów w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "wrona",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "nazwa ptaka, a nie nazwisko Wrona",
+      "count": 1
+    },
+    {
+      "text": "I OSK 2213/17",
+      "type": "CASE_NUMBER",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "II SAB/Gd 54/23",
+      "type": "CASE_NUMBER",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "WSA w Gdańsku",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ryszard Okoniewski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "zgoda na udostępnienie w sprawie nie zwalnia z maskowania",
+      "count": 1
+    },
+    {
+      "text": "GD1Y/14987316/9",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jarosław Klawikowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "503 118 274",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Samorządowego Kolegium Odwoławczego w Gdańsku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Leszek Szymichowski",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędnik podpisujący decyzję w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Joanna Rompca",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "pracownik prowadzący sprawę w funkcji",
+      "count": 1
+    },
+    {
+      "text": "inspektor ds. ochrony środowiska",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "58 660 43 18",
+      "type": "PHONE_EXT",
+      "expect": "policy",
+      "note": "telefon urzędu",
+      "count": 1
+    }
+  ]
+}

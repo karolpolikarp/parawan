@@ -1,0 +1,268 @@
+{
+  "id": "s3_usc-ewidencja_02",
+  "template": "usc-ewidencja",
+  "title": "Protokół przyjęcia wniosku o sprostowanie aktu urodzenia",
+  "seed": null,
+  "traps": [
+    "nazwisko rodowe matki w dwóch brzmieniach (błędne i poprawne) i w liczbie mnogiej",
+    "samo nazwisko rodowe ojca po słowach „nazwisko rodowe”",
+    "rachunek urzędu do opłaty skarbowej (polityka, nie dana osoby)",
+    "cytowana sygnatura NSA do zachowania",
+    "numery aktów w starym i nowym formacie",
+    "zabieg medyczny matki jako powód nieobecności"
+  ],
+  "entities": [
+    {
+      "text": "ul. Koraszewskiego 7–9",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "siedziba USC",
+      "count": 1
+    },
+    {
+      "text": "45-011",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Opole",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby, urzędu i miejsce urodzenia",
+      "count": 3
+    },
+    {
+      "text": "USC.5361.2.114.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "Urzędzie Stanu Cywilnego w Opolu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Martę Gacek",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędnik w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Marta Gacek",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędnik w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Kamil Nowicki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "23.04.1995",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "95042342836",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "MFP559690",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Ozimska 112/4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "45-310",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "517 902 446",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kamil.nowicki95@test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "1061/1995",
+      "type": "CIVIL_RECORD",
+      "expect": "mask",
+      "note": "numer aktu urodzenia",
+      "count": 1
+    },
+    {
+      "text": "Szewczik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "błędne nazwisko rodowe matki",
+      "count": 2
+    },
+    {
+      "text": "Szewczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko rodowe matki",
+      "count": 2
+    },
+    {
+      "text": "1661011/00/AU/1995/001061",
+      "type": "CIVIL_RECORD",
+      "expect": "mask",
+      "note": "numer aktu w rejestrze",
+      "count": 1
+    },
+    {
+      "text": "Grzegorz Nowicki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "ojciec",
+      "count": 1
+    },
+    {
+      "text": "14.01.1969",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kluczborku",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce urodzenia",
+      "count": 1
+    },
+    {
+      "text": "Bożena Nowicka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "matka",
+      "count": 1
+    },
+    {
+      "text": "30.08.1971",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Strzelcach Opolskich",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce urodzenia i siedziba USC",
+      "count": 3
+    },
+    {
+      "text": "388/1993",
+      "type": "CIVIL_RECORD",
+      "expect": "mask",
+      "note": "numer aktu małżeństwa",
+      "count": 1
+    },
+    {
+      "text": "517/1971",
+      "type": "CIVIL_RECORD",
+      "expect": "mask",
+      "note": "numer aktu urodzenia matki",
+      "count": 1
+    },
+    {
+      "text": "Bożeny Nowickiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "71083024821",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ośrodku rehabilitacyjnym",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "pobyt matki na rehabilitacji",
+      "count": 1
+    },
+    {
+      "text": "endoprotezoplastyce stawu biodrowego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "zabieg osoby",
+      "count": 1
+    },
+    {
+      "text": "Szewczykowie",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko rodowe w liczbie mnogiej",
+      "count": 1
+    },
+    {
+      "text": "Wojewody Opolskiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "II OSK 1673/17",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "Urzędu Miasta Opola",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "79 1020 2892 0763 0429 9096 4119",
+      "type": "IBAN_COMPANY",
+      "expect": "policy",
+      "note": "rachunek urzędu",
+      "count": 1
+    }
+  ]
+}

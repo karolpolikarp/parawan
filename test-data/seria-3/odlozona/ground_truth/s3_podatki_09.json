@@ -1,0 +1,267 @@
+{
+  "id": "s3_podatki_09",
+  "template": "podatki",
+  "title": "Decyzja określająca podatek od środków transportowych",
+  "seed": null,
+  "traps": [
+    "firma JDG z imieniem i nazwiskiem jako adresat decyzji",
+    "trzy pojazdy: tablice i VIN (mask) obok modeli (policy)",
+    "leasingodawca jako spółka (policy)",
+    "pełnomocnik z numerem wpisu bez prefiksu literowego",
+    "kierowca z numerem prawa jazdy z protokołu kontroli"
+  ],
+  "entities": [
+    {
+      "text": "Urząd Gminy Oleśnica",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Lwowska 37",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "56-400",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "FN.3123.4.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Przewóz Towarów Renata Wawrzyniak",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "firma JDG z imieniem i nazwiskiem jako adresat",
+      "count": 1
+    },
+    {
+      "text": "ul. Lipowa 6",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "56-416",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Boguszyce",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Renacie Wawrzyniak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "2730761008",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "908750126",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "DAF XF 480",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "DOL 61K22",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "UF95H15XE749R7268",
+      "type": "VIN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Schmitz Cargobull SKO 24",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "DOL 2H771",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "7VEK0GHVFR75GADXY",
+      "type": "VIN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "MAN TGL 12.250",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "DOL 94511",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PEA25M8VS6G25X5RP",
+      "type": "VIN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Centralnej Ewidencji Pojazdów",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Prima Lease Polska sp. z o.o.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "leasingodawca",
+      "count": 1
+    },
+    {
+      "text": "Renaty Wawrzyniak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Michał Lewandowicz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pełnomocnik, doradca podatkowy",
+      "count": 1
+    },
+    {
+      "text": "11583",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer wpisu na listę doradców podatkowych",
+      "count": 1
+    },
+    {
+      "text": "ul. Kazimierza Wielkiego 12/4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres kancelarii jednoosobowej",
+      "count": 1
+    },
+    {
+      "text": "50-077",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wrocław",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu pełnomocnika",
+      "count": 1
+    },
+    {
+      "text": "m.lewandowicz@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Inspekcji Transportu Drogowego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Łukasz Mroczek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "kierowca, osoba trzecia",
+      "count": 1
+    },
+    {
+      "text": "19199/13/2403",
+      "type": "DRIVING_LICENSE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL25 1050 0099 0915 5843 5230 1504",
+      "type": "IBAN_INSTITUTION",
+      "expect": "keep",
+      "note": "rachunek gminy do wpłat",
+      "count": 1
+    },
+    {
+      "text": "08 1050 0099 9631 3478 9170 8168",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "rachunek podatniczki do zwrotu nadpłaty",
+      "count": 1
+    },
+    {
+      "text": "Samorządowego Kolegium Odwoławczego we Wrocławiu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marcin Ostrowski",
+      "type": "OFFICIAL",
+      "expect": "policy",
+      "note": "wójt podpisujący jako organ",
+      "count": 1
+    }
+  ]
+}

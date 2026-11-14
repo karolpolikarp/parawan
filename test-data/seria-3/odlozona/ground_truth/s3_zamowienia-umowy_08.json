@@ -1,0 +1,330 @@
+{
+  "id": "s3_zamowienia-umowy_08",
+  "template": "zamowienia-umowy",
+  "title": "Protokół z postępowania na dowóz uczniów niepełnosprawnych",
+  "seed": null,
+  "traps": [
+    "dzieci jako imię i inicjał z rodzajem niepełnosprawności",
+    "spółka cywilna osób fizycznych: nazwiska wspólników w firmie TRANS-KOS",
+    "miejscowości będące zarazem punktami trasy i adresami osób",
+    "sygnatura wyroku WSA i patron szkoły do zachowania",
+    "adres wiejski bez ulicy (Sułów 77)"
+  ],
+  "entities": [
+    {
+      "text": "Urząd Miejski w Miliczu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Trzebnicka 2",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "56-300",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "WE.271.9.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "Renata Sobczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik urzędu",
+      "count": 2
+    },
+    {
+      "text": "Łukasz Mielczarek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik urzędu",
+      "count": 3
+    },
+    {
+      "text": "Weronika Adamiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik urzędu",
+      "count": 2
+    },
+    {
+      "text": "Zespół Szkół Specjalnych im. Marii Grzegorzewskiej w Miliczu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "Oliwia K.",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "uczennica: imię i inicjał",
+      "count": 1
+    },
+    {
+      "text": "wózek inwalidzki",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szymon P.",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "uczeń: imię i inicjał",
+      "count": 1
+    },
+    {
+      "text": "autyzm",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ośrodek Rewalidacyjno-Wychowawczy w Miliczu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dominik R.",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "uczeń: imię i inicjał",
+      "count": 1
+    },
+    {
+      "text": "padaczka lekooporna",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Lena S.",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "uczennica: imię i inicjał",
+      "count": 1
+    },
+    {
+      "text": "ul. Polnej 6",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres ucznia w miejscowniku",
+      "count": 1
+    },
+    {
+      "text": "Wierzchowicach",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu ucznia",
+      "count": 1
+    },
+    {
+      "text": "TRANS-KOS",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "firma spółki cywilnej z nazwiskiem wspólników",
+      "count": 1
+    },
+    {
+      "text": "Ryszard Kos",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "wspólnik s.c.",
+      "count": 1
+    },
+    {
+      "text": "Edyta Kos",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "wspólniczka s.c.",
+      "count": 1
+    },
+    {
+      "text": "ul. Leśna 40",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "56-321",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wierzchowice",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i punkt trasy",
+      "count": 2
+    },
+    {
+      "text": "2672078825",
+      "type": "NIP_COMPANY",
+      "expect": "policy",
+      "note": "NIP spółki cywilnej osób fizycznych",
+      "count": 1
+    },
+    {
+      "text": "995015459",
+      "type": "REGON_COMPANY",
+      "expect": "policy",
+      "note": "REGON spółki cywilnej osób fizycznych",
+      "count": 1
+    },
+    {
+      "text": "Jadwiga Fryc",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "opiekunka",
+      "count": 1
+    },
+    {
+      "text": "umiarkowanym stopniem niepełnosprawności",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Leszek Domagała",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "imię i nazwisko w firmie JDG",
+      "count": 1
+    },
+    {
+      "text": "Sułów 77",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres wiejski bez ulicy",
+      "count": 1
+    },
+    {
+      "text": "56-301",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "5249071937",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Adrian Domagała",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "syn wykonawcy",
+      "count": 1
+    },
+    {
+      "text": "Grażyna Pyka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "imię i nazwisko w firmie JDG",
+      "count": 2
+    },
+    {
+      "text": "ul. Ogrodowa 3/1",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "56-330",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Cieszków",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "1515751638",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "221438053",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krajowego Rejestru Karnego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Edytę Kos",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "609 441 872",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "transkos.milicz@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "skrzynka s.c. osób fizycznych",
+      "count": 1
+    },
+    {
+      "text": "IV SA/Wr 412/22",
+      "type": "COURT_CASE",
+      "expect": "keep",
+      "note": "sygnatura cytowanego wyroku",
+      "count": 1
+    },
+    {
+      "text": "Jakub Turek",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "burmistrz w funkcji",
+      "count": 1
+    }
+  ]
+}

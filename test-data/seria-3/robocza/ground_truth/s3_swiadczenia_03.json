@@ -1,0 +1,345 @@
+{
+  "id": "s3_swiadczenia_03",
+  "template": "swiadczenia",
+  "title": "Decyzja o przyznaniu świadczeń z funduszu alimentacyjnego z danymi dłużnika",
+  "seed": null,
+  "traps": [
+    "dłużnik alimentacyjny z adresem zagranicznym i niemieckim telefonem",
+    "firma JDG zawierająca samo nazwisko dłużnika",
+    "komornik z imienia i nazwiska (osoba w funkcji)",
+    "sygnatura sprawy alimentacyjnej stron, a nie cytowane orzecznictwo",
+    "samo imię dziecka w mianowniku („Julia”)",
+    "nazwisko komornika i dłużnika jako nazwy ptaków (Łabędź, Zięba)"
+  ],
+  "entities": [
+    {
+      "text": "Miejski Ośrodek Pomocy Rodzinie w Gnieźnie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Józefa Pułaskiego 32",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w adresie urzędu",
+      "count": 1
+    },
+    {
+      "text": "62-200",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Gniezno",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 4
+    },
+    {
+      "text": "FA.5240.57.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Natalii Kaczmarczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "90062117187",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Orzeszkowej 9/3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "62-202",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Julii Kaczmarczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dziecko",
+      "count": 1
+    },
+    {
+      "text": "4 września 2012",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "12290467520",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dziecka",
+      "count": 1
+    },
+    {
+      "text": "Antoniego Kaczmarczyka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dziecko",
+      "count": 1
+    },
+    {
+      "text": "11 marca 2018",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "18231135738",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dziecka",
+      "count": 1
+    },
+    {
+      "text": "Sądu Rejonowego w Gnieźnie III Wydział Rodzinny i Nieletnich",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "III RC 212/23",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy stron",
+      "count": 1
+    },
+    {
+      "text": "Rafała Zięby",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dłużnik alimentacyjny",
+      "count": 1
+    },
+    {
+      "text": "2 października 1987",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "87100240277",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Komornika Sądowego przy Sądzie Rejonowym w Gnieźnie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mariusza Łabędzia",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "komornik w funkcji",
+      "count": 1
+    },
+    {
+      "text": "KM 418/24",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura egzekucji",
+      "count": 1
+    },
+    {
+      "text": "21 465,70 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "zadłużenie dłużnika",
+      "count": 1
+    },
+    {
+      "text": "1 112,40 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "dochód na osobę",
+      "count": 1
+    },
+    {
+      "text": "Przychodni Weterynaryjnej „Azor” s.c.",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szkoły Podstawowej nr 6 im. Mikołaja Kopernika w Gnieźnie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "Julia",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię dziecka",
+      "count": 1
+    },
+    {
+      "text": "Usługi Transportowe Zięba",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "firma JDG z nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "6807635775",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "NIP JDG dłużnika",
+      "count": 1
+    },
+    {
+      "text": "905709420",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "REGON JDG dłużnika",
+      "count": 1
+    },
+    {
+      "text": "Lindenstraße 14",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres zagraniczny",
+      "count": 1
+    },
+    {
+      "text": "44137",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "niemiecki kod pocztowy",
+      "count": 1
+    },
+    {
+      "text": "Dortmund",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby (zagranica)",
+      "count": 1
+    },
+    {
+      "text": "Niemczech",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "kraj pobytu dłużnika",
+      "count": 1
+    },
+    {
+      "text": "ul. Kłecka 120",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "ostatni adres dłużnika w kraju",
+      "count": 1
+    },
+    {
+      "text": "62-203",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+49 1512 3456789",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon zagraniczny",
+      "count": 1
+    },
+    {
+      "text": "Wojewody Wielkopolskiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rozporządzenia Rady (WE) nr 4/2009",
+      "type": "LEGAL_REF",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "63 1160 2202 0905 5379 0907 1184",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Samorządowego Kolegium Odwoławczego w Poznaniu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Prezydenta Miasta Gniezna",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ewa Szczepaniak-Bąk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis, nazwisko dwuczłonowe",
+      "count": 1
+    },
+    {
+      "text": "Natalia Kaczmarczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rafał Zięba",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mariusz Łabędź",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "komornik w funkcji",
+      "count": 1
+    }
+  ]
+}

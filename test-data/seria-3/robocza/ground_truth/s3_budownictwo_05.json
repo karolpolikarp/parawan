@@ -1,0 +1,428 @@
+{
+  "id": "s3_budownictwo_05",
+  "template": "budownictwo",
+  "title": "Decyzja o zwrocie wywłaszczonej nieruchomości spadkobiercom",
+  "seed": null,
+  "traps": [
+    "odmiana Zając w sześciu formach, „Bronisława” jako dopełniacz imienia męskiego",
+    "rachunek starostwa do zachowania obok PESEL-i stron",
+    "daty śmierci i sygnatury spraw spadkowych (policy)",
+    "renta z tytułu niezdolności do pracy jako dana o zdrowiu",
+    "adres kancelarii i numer wpisu adwokata"
+  ],
+  "entities": [
+    {
+      "text": "Krystynę Pawlik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ryszarda Zająca",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Michał Zając",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Szymona Ratajczaka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szymon Ratajczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Krystynie Pawlik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ryszardowi Zającowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Michałowi Zającowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bronisława Zająca",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dopełniacz męski równy żeńskiemu imieniu Bronisława",
+      "count": 2
+    },
+    {
+      "text": "Bronisław Zając",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wanda Zając",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krystyna Pawlik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ryszard Zając",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Leszek Zając",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krystyny Pawlik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "14 kwietnia 1956",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "56041428248",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "59120188958",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "91082505653",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Zdrojowa 15/2",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "57-320",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Ślężna 118 m. 21",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "53-111",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kłodzka 4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "57-350",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "SW1K/48274493/0",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "księga wieczysta wskazuje właściciela",
+      "count": 1
+    },
+    {
+      "text": "Ewa Grzelak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "6234",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer uprawnień rzeczoznawcy majątkowego",
+      "count": 1
+    },
+    {
+      "text": "WRO/Adw/1876",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer wpisu na listę adwokatów",
+      "count": 1
+    },
+    {
+      "text": "ul. Ruska 51/7",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres kancelarii adwokata",
+      "count": 1
+    },
+    {
+      "text": "50-079",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kancelaria.ratajczak@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "renty z tytułu niezdolności do pracy",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "świadczenie ujawniające stan zdrowia",
+      "count": 1
+    },
+    {
+      "text": "Polanica-Zdrój",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Wrocław",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "Kudowa-Zdrój",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "37/2",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka zwracana stronom",
+      "count": 1
+    },
+    {
+      "text": "Zagórze",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "nazwa obrębu",
+      "count": 1
+    },
+    {
+      "text": "11 stycznia 1998",
+      "type": "DATE_DEATH",
+      "expect": "policy",
+      "note": "data śmierci byłego właściciela",
+      "count": 1
+    },
+    {
+      "text": "6 września 2015",
+      "type": "DATE_DEATH",
+      "expect": "policy",
+      "note": "data śmierci",
+      "count": 1
+    },
+    {
+      "text": "zmarły w 2023 r.",
+      "type": "DATE_DEATH",
+      "expect": "policy",
+      "note": "rok śmierci",
+      "count": 1
+    },
+    {
+      "text": "I Ns 377/16",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy spadkowej",
+      "count": 1
+    },
+    {
+      "text": "I Ns 802/24",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy spadkowej",
+      "count": 1
+    },
+    {
+      "text": "GT.8222/14/79",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer decyzji wywłaszczeniowej",
+      "count": 1
+    },
+    {
+      "text": "GN.6821.9.2025.ES",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy z inicjałami pracownika",
+      "count": 1
+    },
+    {
+      "text": "14/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer decyzji",
+      "count": 1
+    },
+    {
+      "text": "Elżbieta Sowińska",
+      "type": "OFFICIAL",
+      "expect": "policy",
+      "note": "naczelnik podpisujący decyzję",
+      "count": 1
+    },
+    {
+      "text": "STAROSTA KŁODZKI",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Starosty Kłodzkiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Stefana Okrzei 1",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w adresie instytucji",
+      "count": 1
+    },
+    {
+      "text": "57-300",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy w Kłodzku",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sądu Rejonowego w Kłodzku",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Starostwa Powiatowego w Kłodzku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "36 1020 2892 5450 3911 3061 9192",
+      "type": "IBAN_INSTITUTION",
+      "expect": "keep",
+      "note": "rachunek starostwa",
+      "count": 1
+    },
+    {
+      "text": "Naczelnika Miasta Kłodzka",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Gmina Miejska Kłodzko",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Izby Adwokackiej we Wrocławiu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wojewody Dolnośląskiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

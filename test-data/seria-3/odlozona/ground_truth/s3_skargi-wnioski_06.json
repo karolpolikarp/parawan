@@ -1,0 +1,303 @@
+{
+  "id": "s3_skargi-wnioski_06",
+  "template": "skargi-wnioski",
+  "title": "Petycja mieszkańców z listą podpisów",
+  "seed": null,
+  "traps": [
+    "nazwisko Szpak reprezentanta i słowo „szpaki”",
+    "adres osoby przy ulicy z patronem (Jana Pawła II) do maskowania, obok szkoły z patronem do zachowania",
+    "lista podpisów w tabeli: imiona, nazwiska i adresy w kolumnach rozdzielonych tabulatorem",
+    "ten sam adres przy kilku sygnatariuszach (małżonkowie)",
+    "małoletni i ofiara potrącenia z obrażeniami opisanymi w uzasadnieniu",
+    "numer drogi powiatowej i sygnatura postępowania policji"
+  ],
+  "entities": [
+    {
+      "text": "Rada Miejska w Głuchołazach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Burmistrza Głuchołaz",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Rynek 15",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "48-340",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jarnołtówek",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osób i przedmiot petycji",
+      "count": 4
+    },
+    {
+      "text": "1517 O",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "numer drogi powiatowej",
+      "count": 2
+    },
+    {
+      "text": "Stanisława Szpaka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "reprezentant podmiotu wnoszącego petycję",
+      "count": 1
+    },
+    {
+      "text": "ul. Górska 12",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "48-267",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "st.szpak@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "663 902 115",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Radę Miejską w Głuchołazach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zarządem Dróg Powiatowych w Nysie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szkoły Podstawowej im. Janusza Korczaka w Głuchołazach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "szpaki",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "nazwa ptaków, a nie nazwisko Szpak",
+      "count": 1
+    },
+    {
+      "text": "złamania podudzia",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "obrażenia osoby potrąconej",
+      "count": 1
+    },
+    {
+      "text": "porusza się o kulach",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "skutek obrażeń osoby potrąconej",
+      "count": 1
+    },
+    {
+      "text": "Komenda Powiatowa Policji w Nysie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "RSD-412/26",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura postępowania policji",
+      "count": 1
+    },
+    {
+      "text": "Filip Grzegorczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletni",
+      "count": 1
+    },
+    {
+      "text": "Stanisław Szpak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sygnatariusz w tabeli podpisów",
+      "count": 1
+    },
+    {
+      "text": "Weronika Szpak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sygnatariusz w tabeli podpisów",
+      "count": 1
+    },
+    {
+      "text": "Lucyna Pawlak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sygnatariusz w tabeli podpisów",
+      "count": 2
+    },
+    {
+      "text": "Tadeusz Pawlak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sygnatariusz w tabeli podpisów",
+      "count": 1
+    },
+    {
+      "text": "Monika Grzegorczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sygnatariusz w tabeli podpisów",
+      "count": 1
+    },
+    {
+      "text": "Halina Kruk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sygnatariusz w tabeli podpisów",
+      "count": 1
+    },
+    {
+      "text": "Rafał Wilczek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sygnatariusz w tabeli podpisów",
+      "count": 1
+    },
+    {
+      "text": "Bożena Szymańska-Dyl",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sygnatariusz w tabeli podpisów",
+      "count": 1
+    },
+    {
+      "text": "Józef Ciepłucha",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sygnatariusz w tabeli podpisów",
+      "count": 1
+    },
+    {
+      "text": "Aleksandra Bąk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sygnatariusz w tabeli podpisów",
+      "count": 1
+    },
+    {
+      "text": "Eryk Nowosielski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sygnatariusz w tabeli podpisów",
+      "count": 1
+    },
+    {
+      "text": "Zofia Hajduk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sygnatariusz w tabeli podpisów",
+      "count": 1
+    },
+    {
+      "text": "ul. Jana Pawła II 5",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres sygnatariusza w tabeli",
+      "count": 2
+    },
+    {
+      "text": "ul. Słoneczna 3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres sygnatariusza w tabeli",
+      "count": 1
+    },
+    {
+      "text": "ul. Słoneczna 8a",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres sygnatariusza w tabeli",
+      "count": 1
+    },
+    {
+      "text": "ul. Leśna 19",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres sygnatariusza w tabeli",
+      "count": 1
+    },
+    {
+      "text": "ul. Leśna 21/2",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres sygnatariusza w tabeli",
+      "count": 1
+    },
+    {
+      "text": "ul. Kamienna 1",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres sygnatariusza w tabeli",
+      "count": 1
+    },
+    {
+      "text": "ul. Kamienna 6",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres sygnatariusza w tabeli",
+      "count": 1
+    },
+    {
+      "text": "ul. Górska 30",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres sygnatariusza w tabeli",
+      "count": 1
+    },
+    {
+      "text": "ul. Biskupia 44",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres sygnatariusza w tabeli",
+      "count": 1
+    }
+  ]
+}
