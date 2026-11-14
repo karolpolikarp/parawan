@@ -65,7 +65,7 @@ const RE_BIRTH_NOUN = new RegExp(
 );
 // „nastąpiło” bez „które” pasuje tylko do mianownika („Urodzenie dziecka nastąpiło w dniu …”); przy
 // dopełniaczu podmiotem jest rzeczownik przed kotwicą („Zgłoszenie urodzenia dziecka nastąpiło …”).
-const RE_BIRTH_NOUN_BARE_VERB = /(?:^|[^\p{L}])(?<!(?:które|który|która|co)[ \t]+)(?:nastąpił|miał|przysz|urodził|się)/u;
+const RE_BIRTH_NOUN_BARE_VERB = /(?:^|[^\p{L}])(?<!(?:które|który|która|co)[ \t]{1,8})(?:nastąpił|miał|przysz|urodził|się)/u;
 // Dopełniacz „urodzenia” tylko po wyrażeniu przyczyny („z tytułu urodzenia dziecka w dniu …”). Inny
 // rzeczownik przed nim („Zgłoszenie/Transkrypcja aktu/Kwestię urodzenia”, „w przypadku urodzenia”)
 // to zdarzenie, którego dotyczy data, albo hipoteza z przepisu.

@@ -53,7 +53,7 @@ const hasIcd = (body: string): boolean => ICD_AT_START.test(body) || ICD_PAREN_E
  * „Pracownik, który choruje” i „Jan Kowalski, który choruje” to dalej konkretna osoba.
  */
 const GENERIC_SUBJECT = `(?:osob${L}|każd${L}(?:[ \\t]+[${LO}]+)?|ktoś|człowiek|ten|ta|ci|te|wszys${L}|ludzie|pacjenci|chorzy)`;
-const NOT_GENERIC_SUBJECT = `(?<!(?:${GENERIC_SUBJECT}[ \\t]*,?[ \\t]*któr${L}|kto|każd${L})[ \\t]+)`;
+const NOT_GENERIC_SUBJECT = `(?<!(?:${GENERIC_SUBJECT}[ \\t]{0,8},?[ \\t]{0,8}któr${L}|kto|każd${L})[ \\t]{1,8})`;
 /**
  * Podmiot liczony w populacji przed czasownikiem („Wiele osób choruje na…”, „Co trzeci Polak…”,
  * „Większość pacjentów przyjmuje…”, „Każdy chory przyjmuje…”): statystyka albo reguła, a nie
@@ -83,7 +83,7 @@ const STRONG = [
   `orzeczeni${L}[ \\t]+lekarsk${L}`,
   `wypis${L}[ \\t]+ze[ \\t]+szpitala`,
   // „linia L4”, „hala L4” to oznaczenie miejsca albo wariantu, a nie zwolnienie lekarskie
-  `(?<!(?:lini|hal|sektor|stref|poziom|bram|budyn|sal|klas|kondygnacj|piętr|segment|blok|modu|wariant|typ|model|wersj|rząd|rzęd|pol|stanowisk|magazyn|regał|kabin|peron|tor|ciąg|nr)${L}[ \\t]+)L-?4`,
+  `(?<!(?:lini|hal|sektor|stref|poziom|bram|budyn|sal|klas|kondygnacj|piętr|segment|blok|modu|wariant|typ|model|wersj|rząd|rzęd|pol|stanowisk|magazyn|regał|kabin|peron|tor|ciąg|nr)${L}[ \\t]{1,8})L-?4`,
 ].join('|');
 
 /**
@@ -343,10 +343,10 @@ const stayAnchor: Anchor = (text, starts, from, to, mask) =>
 const PHRASES: Phrase[] = [
   // nałogi: czasownik osobowy w liczbie pojedynczej wskazuje osobę, ale nie w zdaniu względnym
   // ani po „kto” („osoby, które nadużywają alkoholu”, „kto nadużywa alkoholu, podlega…”)
-  phrase(String.raw`(?<!(?:któr${L}|kto)[ \t]+)nadużyw(?:a|ał|ała)[ \t]+(?:alkoholu|narkotyków|leków|substancji[ \t]+psychoaktywnych)`, true),
+  phrase(String.raw`(?<!(?:któr${L}|kto)[ \t]{1,8})nadużyw(?:a|ał|ała)[ \t]+(?:alkoholu|narkotyków|leków|substancji[ \t]+psychoaktywnych)`, true),
   // „jest nosicielem HCV”, „była zakażona wirusem HIV”: łącznik wskazuje osobę
   phrase(
-    String.raw`(?<=(?:jest|był|była|został|została)[ \t]+)(?:nosiciel(?:em|ką)[ \t]+(?:wirusa[ \t]+)?(?:HCV|HBV|HIV|WZW[ \t]+typu[ \t]+[BC])|zakażon[ya][ \t]+(?:wirusem[ \t]+)?(?:HIV|HCV|HBV))`,
+    String.raw`(?<=(?:jest|był|była|został|została)[ \t]{1,8})(?:nosiciel(?:em|ką)[ \t]+(?:wirusa[ \t]+)?(?:HCV|HBV|HIV|WZW[ \t]+typu[ \t]+[BC])|zakażon[ya][ \t]+(?:wirusem[ \t]+)?(?:HIV|HCV|HBV))`,
     true,
   ),
   // uraz zapisany czasownikiem w czasie przeszłym („złamał nogę w kostce”, „skręciłam kostkę”)
@@ -377,12 +377,12 @@ const PHRASES: Phrase[] = [
   phrase(`COVID(?:-19)?|SARS-CoV-2|koronawirus${L}`),
   // „jest w ciąży”, „jest w 5. miesiącu ciąży”, „była w piątym tygodniu ciąży”
   phrase(
-    String.raw`(?<=(?:jest|była|będąc${L})[ \t]+)w[ \t]+(?:(?:\d{1,2}\.?|[${LO}]{3,}(?:ym|im))[ \t]+(?:miesiącu|tygodniu)[ \t]+)?ciąży`,
+    String.raw`(?<=(?:jest|była|będąc${L})[ \t]{1,8})w[ \t]+(?:(?:\d{1,2}\.?|[${LO}]{3,}(?:ym|im))[ \t]+(?:miesiącu|tygodniu)[ \t]+)?ciąży`,
     false,
     personAnchor,
   ),
   // pobyt w szpitalu psychiatrycznym; sam „szpital” bez przymiotnika zostaje jawny
-  phrase(String.raw`(?<=(?:w|we|do|ze|z)[ \t]+)szpital(?:u|a|em)?[ \t]+psychiatryczn(?:ym|ego|y)`, false, stayAnchor),
+  phrase(String.raw`(?<=(?:w|we|do|ze|z)[ \t]{1,8})szpital(?:u|a|em)?[ \t]+psychiatryczn(?:ym|ego|y)`, false, stayAnchor),
   phrase(
     String.raw`udar${L}[ \t]+mózgu|zawał${L}[ \t]+(?:serca|mięśnia[ \t]+sercowego)|niedoczynnoś${L}[ \t]+tarczycy|nadczynnoś${L}[ \t]+tarczycy|(?:zakażeni|zakażon)${L}[ \t]+(?:wirusem[ \t]+)?(?:HIV|HCV|HBV)|nosiciel${L}[ \t]+(?:wirusa[ \t]+)?(?:HCV|HBV|HIV)`,
   ),
