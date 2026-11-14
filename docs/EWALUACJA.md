@@ -1,6 +1,7 @@
 # Ewaluacja na zestawie 50 fikcyjnych pism
 
-Data: 2026-11-12. Wersja: aplikacja v0.46.27, rdzeń 0.29.14, commit `c11836a`.
+Pomiar bazowy: 2026-11-12, aplikacja v0.46.27, rdzeń 0.29.14, commit `c11836a`. Wynik po
+poprawkach (v0.47.0): sekcja „Po poprawkach” na końcu.
 
 Zestaw: `test-data/anonimizator-testy/` (50 pism w 10 szablonach, txt i docx, klucz w `ground_truth/`,
 ocena `eval.py`). Wszystkie dane są zmyślone. Runner: `npm run eval` (`scripts/eval/run-eval.mjs`),
@@ -138,3 +139,124 @@ patronów, nie dla zwykłych ulic w bloku instytucji.
 | 5 | adres urzędu maskowany, nazwa spółki zostaje obok zamaskowanego KRS | **potwierdzona** | adres/kod instytucji usunięte 30/30; COMPANY zostaje 15/15, a KRS, NIP, REGON i IBAN spółek zamaskowane 20/20. |
 | 6 | brak sygnału dla danych o zdrowiu | **potwierdzona** | HEALTH 0/50. |
 | 7 | suma PESEL dobra, ale PESEL z literówką po „PESEL” przejdzie | **częściowo potwierdzona** | Fałszywy PESEL bez etykiety zostaje 5/5 (dobrze). 11 cyfr ze złą sumą po „PESEL” jest maskowane. Przechodzi literówka zmieniająca długość: `PESEL: 8909150266` (10 cyfr) i `PESEL 890915026670` (12 cyfr) zostają jawne (`passes/numeric.ts:129`, etykieta wymaga dokładnie 11 cyfr). |
+
+## Po poprawkach (v0.47.0, rdzeń 0.30.0)
+
+Data: 2026-11-14, commit `16c06f7` plus podbicie wersji. Dwa zestawy:
+- **roboczy**: `test-data/anonimizator-testy/` (ziarna 1001–1050), na nim szukano przyczyn;
+- **odłożony**: 50 pism z tego samego generatora (`generuj.py`) z ziarnami 7001–7050, których nikt
+  nie oglądał przy pisaniu poprawek. Leży poza repo; odtworzenie: `generuj.py` z innym ziarnem
+  i `eval.py` na wyniku.
+
+Wyniki z txt i docx są identyczne, z pseudonimami i bez też (poza samymi znacznikami osób).
+
+| miara | roboczy przed | roboczy po | odłożony przed | odłożony po |
+|---|---:|---:|---:|---:|
+| recall (wystąpienia) | 89,2% (869/974) | **99,5%** (969/974) | 89,3% (864/968) | **99,5%** (963/968) |
+| wycieki | 105 | **5** | 104 | **5** |
+| nadmiarowe maskowanie | 30/117 | **0/117** | 30/119 | **0/119** |
+| znaczniki osób literowe (z pseudonimami) | 356 | 362 | | |
+
+Pierwsza wersja poprawek dawała na odłożonym 98,2% i 17 wycieków (leki spoza listy, izba radców
+z Lublina, „Marka Sowy”), czyli była lekko dopasowana do zestawu roboczego. Końcowa weryfikacja
+wieloagentowa poprawiła te klasy w całości, nie pojedyncze słowa.
+
+### Recall per typ, przed i po
+
+| typ | roboczy przed | roboczy po | odłożony przed | odłożony po |
+|---|---:|---:|---:|---:|
+| PERSON | 357/358 | 358/358 | 350/352 | 352/352 |
+| ADDRESS | 100/100 | 100/100 | 100/100 | 100/100 |
+| POSTAL | 85/85 | 85/85 | 85/85 | 85/85 |
+| PESEL | 64/64 | 64/64 | 64/64 | 64/64 |
+| PHONE | 57/62 | **62/62** | 57/62 | **62/62** |
+| HEALTH | 0/50 | **50/50** | 0/50 | **50/50** |
+| EMAIL | 45/45 | 45/45 | 45/45 | 45/45 |
+| DATE_BIRTH | 32/34 | **34/34** | 32/34 | **34/34** |
+| IBAN | 27/27 | 27/27 | 28/28 | 28/28 |
+| PROF_ID | 0/20 | **20/20** | 0/20 | **20/20** |
+| ID_CARD | 18/18 | 18/18 | 20/20 | 20/20 |
+| PLATE | 17/17 | 17/17 | 18/18 | 18/18 |
+| PERSON_INITIALS | 0/15 | **15/15** | 0/15 | **15/15** |
+| NIP_PERSON | 13/13 | 13/13 | 12/12 | 12/12 |
+| JDG_NAME | 5/10 | **10/10** | 5/10 | **10/10** |
+| PERSON_FIRSTNAME | 10/10 | 10/10 | 10/10 | 10/10 |
+| PASSPORT | 7/7 | 7/7 | 5/5 | 5/5 |
+| VIN | 7/7 | 7/7 | 8/8 | 8/8 |
+| IP | 5/5 | 5/5 | 5/5 | 5/5 |
+| REGON_PERSON | 5/5 | 5/5 | 5/5 | 5/5 |
+| SENSITIVE | 5/5 | 0/5 | 5/5 | 0/5 |
+| CIVIL_RECORD | 0/5 | **5/5** | 0/5 | **5/5** |
+| LAND_REGISTER | 5/5 | 5/5 | 5/5 | 5/5 |
+| DRIVING_LICENSE | 5/5 | 5/5 | 5/5 | 5/5 |
+| RESIDENCE_CARD | 0/2 | **2/2** | – | – |
+
+SENSITIVE „spadło” z 5/5 na 0/5, ale wcześniejsze 5/5 brało się z fałszywego trafienia
+(„procedurę [IMIĘ I NAZWISKO] Karty”). Po poprawce tytułów urzędów i „Niebieskiej Karty” to słowo
+nie jest już osobą, a samego faktu procedury silnik nie zakrywa. Wszystkie 5 pozostałych wycieków
+w obu zestawach to właśnie „Niebieskiej Karty” w pozwach (07, 17, 27, 37, 47).
+
+Nadmiarowe maskowanie per typ: INSTITUTION_ADDRESS 20/20 → 0/20, INSTITUTION_POSTAL 10/10 → 0/10,
+pozostałe bez zmian (0).
+
+### Polityka po poprawkach
+
+Zmieniła się tylko miejscowość: CITY jawne 31 → 37 (roboczy) i 32 → 38 (odłożony), bo miasto
+w nazwie urzędu tuż przed jawną ulicą siedziby zostaje razem z nią. Reszta bez zmian: COMPANY
+15/15 jawne, KRS, NIP, REGON i IBAN spółek zakryte, CASE_NUMBER 20/30 jawne, EMPLOYER, JOB_TITLE
+i podobne jawne.
+
+### Commity poprawek
+
+Pierwsza runda (grupy przyczyn A–G i hipotezy): `ca8f1c3` PESEL z literówką w długości, `7cc6dac`
+telefon po „pod numerem”, `75e6351` inicjały po „odp.”, `c79287d` tytuł urzędu po „Pan” i
+„Niebieska Karta”, `9c2eb1e` firma jednoosobowa w całości, `68ce603` data urodzenia po
+„urodzeniem”, `5bcbcd4` homograf w dopełniaczu, `8ff2bcf` trzy nowe typy numerów, `522172d` dane
+o zdrowiu, `d939cc0` adres siedziby instytucji.
+
+Końcowa weryfikacja (98 zgłoszeń, 33 potwierdzone, 12 grup): `668cdca`, `1bbdb18`, `cb3e799`,
+`5358ac1`, `e016054`, `98de206`, `e7b5932`, `5407239`, `df196f6`, `7feb79a`, `5d0b2d6`, `16c06f7`.
+Dwie z nich były blokerami: strażnik siedziby zwalniał długi wiersz (280 KB: 0,2 s w v0.46.27,
+22 s po pierwszej rundzie, teraz 0,3 s) i odsłaniał adres szkoły jazdy czy żłobka domowego
+z nazwiskiem właściciela.
+
+## Znane ograniczenia
+
+1. **Niebieska Karta**: osoba jest zakryta, sam fakt procedury zostaje (SENSITIVE 0/5). Plan:
+   osobny typ, ROADMAP poz. 28.
+2. Silna etykieta działa także w instrukcji: „W polu „Numer PWZ” wpisz…, np. PWZ 5425740” i „np.
+   PESEL 1234567890” są zakryte (świadomie: lepiej zakryć przykład, niż przepuścić numer).
+3. „Numer PESEL nr 8909150266” (10 cyfr po „PESEL nr”) zostaje jawny, bo „PESEL nr” z numerem
+   sprawy też się zdarza.
+4. „Urodzenie dziecka Jana Kowalskiego w dniu 10.08.2020 r. zostało zgłoszone”: data zostaje jawna.
+   „Termin urodzenia – 05.06.2026 r.” jest za to brany za datę urodzenia.
+5. „przebywał w szpitalu” bez „psychiatrycznym” czy rozpoznania zostaje jawne.
+6. Bez pseudonimów „Rozpoznanie: RAK-JELITA Jan Kowalski” zostawia „RAK-JELITA” jawne.
+7. „Parafia pw. św. Stanisława Kalisz, ul. Polna 3” daje `[ADRES]`, bo parafii bez „w” nie ma wśród
+   mocnych członów nazwy instytucji.
+8. „(Urząd Skarbowy w Łodzi, …)”: adres siedziby zostaje, ale miasto dostaje `[MIEJSCOWOŚĆ]` (stare
+   zachowanie przebiegu miejscowości).
+9. Osoba spoza słownika imion („Marianna Zięba-Kot”, „Ołeksandr”) zostaje jawna; adres pod nią jest
+   zakryty.
+10. „pod numerem 123456789 w systemie EZD”, „z przesyłką pod numerem …” i „Dokumentacja dostępna
+    pod numerem …” po „Pani” dają `[TELEFON]` (stare zachowanie).
+11. Stare nadmaskowania poza tą rundą: „Mariackim” jako osoba, „Lecha Poznań” po „z udziałem Arka
+    Gdynia”, „Niebieska wstążka” → `[IMIĘ I NAZWISKO]`, słowo w masce adresu w „ul. Długiej 5
+    mieszkania 20 rodzin”.
+12. Gołe inicjały po „odp.” są zakryte tylko, gdy w piśmie stoi pełne imię i nazwisko tej osoby.
+13. Oba zestawy pochodzą z jednego generatora z 10 szablonami. Wynik 99,5% mówi o tych szablonach,
+    nie o dowolnych pismach: tabel, skanów po OCR, tekstu angielskiego i pism przepisanych
+    ręcznie nie mierzono.
+
+## Decyzje polityki do podjęcia (kandydaci na opcje)
+
+Klucz zestawu oznacza te pozycje jako `policy`, czyli bez jednej dobrej odpowiedzi. Dziś każda ma
+stałe zachowanie.
+
+| decyzja | dziś | rekomendacja |
+|---|---|---|
+| Dane spółek (nazwa, KRS, NIP, REGON, IBAN firmy) | nazwa jawna, numery zakryte | opcja „Zostaw jawne dane firm” (domyślnie wyłączona): przy publikacji w BIP numery spółek są jawne, w pismach wewnętrznych bywają zbędne |
+| Miejscowość | zakryta przy adresie osoby, jawna w prozie i w nazwie urzędu | bez zmian; ewentualnie przełącznik „zakrywaj każdą miejscowość” dla małych gmin, gdzie miejscowość wskazuje osobę |
+| Numery spraw (znak, sygnatura) | zakryte tylko z kotwicą („Znak sprawy:”, „Sygn. akt”) | bez zmian w trybie domyślnym; w profilu „Do publikacji” (ROADMAP poz. 11) jawne |
+| Tryb pseudonimizacja / publikacja | jeden tryb, pseudonimy osobnym przełącznikiem | dwa profile: „Do pracy” (pseudonimy i numeracja osób) i „Do publikacji w BIP” (ROADMAP poz. 11) |
+| Numeracja osób: litery czy cyfry | `[OSOBA-A]`, `[OSOBA-B]` | litery zostają, bo znacznik bez cyfr nie myli się z daną przy ponownym przebiegu; to `eval.py` powinien liczyć litery jako numerację. Do zrobienia: osobna etykieta dla małżonków o tym samym nazwisku (dziś klucz to nazwisko) |

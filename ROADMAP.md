@@ -1,6 +1,6 @@
 # Roadmapa Parawana
 
-Stan na 2026-11-12, wersja bazowa v0.46.27 (rdzeń `anonimizator` 0.29.14, w npm także jako `parawan`).
+Stan na 2026-11-14, wersja bazowa v0.47.0 (rdzeń `anonimizator` 0.30.0, w npm także jako `parawan`).
 Każda pozycja ma docelową wersję i rozmiar (S, M, L). Pozycje „Z repozytorium” wynikają z kodu,
 CHANGELOG, dokumentów i PR-ów i podają źródło; „Propozycje” to pomysły spoza tych źródeł.
 
@@ -10,8 +10,10 @@ Zasady, które tu obowiązują: precyzja ważniejsza niż nadmaskowanie, jeden s
 
 ## Teraz
 
-Docelowo v0.46.28, rdzeń 0.29.15. v0.46.27 wyszło 2026-11-12: silnik podzielony na moduły
-z tym samym wynikiem, poprawki własnych masek i warstwy LLM w paczce npm.
+Docelowo v0.47.1, rdzeń 0.30.1. v0.47.0 (2026-11-14) to poprawki z ewaluacji na 50 fikcyjnych
+pismach (`docs/EWALUACJA.md`): dane o zdrowiu, numery uprawnień zawodowych, karty pobytu i aktów
+stanu cywilnego jako nowe typy, jawny adres siedziby instytucji. v0.46.27 wyszło 2026-11-12:
+silnik podzielony na moduły z tym samym wynikiem.
 
 ### Z repozytorium
 

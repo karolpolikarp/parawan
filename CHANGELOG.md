@@ -12,6 +12,18 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+## v0.47.0 — 2026-11-14
+
+**Parawan zakrywa dane o zdrowiu, numery uprawnień zawodowych, karty pobytu i aktów stanu cywilnego, a adres urzędu w nagłówku pisma zostawia jawny.**
+
+Pilność: pilna
+
+Na 50 fikcyjnych pismach z kluczem (karta ze szpitala, pismo kadrowe, pozew, wezwanie do zapłaty
+i inne, `docs/EWALUACJA.md`) Parawan zakrywał 89% danych do zakrycia i zakrywał też 30 adresów
+urzędów, które miały zostać. Teraz zakrywa 99,5% i żadnego adresu urzędu, także na drugim,
+niezależnie wygenerowanym zestawie 50 pism. Jawny zostaje tylko fakt procedury „Niebieskiej
+Karty” (ROADMAP poz. 28). Rdzeń 0.30.0 (paczki `anonimizator` i `parawan`).
+
 - **Adres urzędu, sądu czy działu pracodawcy w nagłówku pisma zostaje jawny.** Ulica, kod pocztowy i
   miejscowość pod nazwą instytucji („Urząd Miasta Łodzi⏎Wydział Finansowy⏎ul. Piotrkowska 104⏎90-926
   Łódź”, „Dział Kadr i Płac⏎ul. Stanisława Moniuszki 3”), ulica tuż za nazwą instytucji z
@@ -2065,7 +2077,8 @@ Przegląd stabilizacyjny:
 - Opcjonalny lokalny NER (spaCy PL): usługa `services/ner` (Docker) + klient
   `anonimizator/ner` (fail-safe, circuit breaker).
 
-[Unreleased]: https://github.com/karolpolikarp/parawan/compare/v0.46.27...HEAD
+[Unreleased]: https://github.com/karolpolikarp/parawan/compare/v0.47.0...HEAD
+[v0.47.0]: https://github.com/karolpolikarp/parawan/compare/v0.46.27...v0.47.0
 [v0.46.27]: https://github.com/karolpolikarp/parawan/compare/v0.46.26...v0.46.27
 [v0.46.26]: https://github.com/karolpolikarp/parawan/compare/v0.46.25...v0.46.26
 [v0.46.25]: https://github.com/karolpolikarp/parawan/compare/v0.46.24...v0.46.25
