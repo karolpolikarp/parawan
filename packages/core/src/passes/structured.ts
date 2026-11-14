@@ -65,7 +65,8 @@ function structSurnameKey(ws: string[], key?: string): string {
   const surnameFirstKey = !!key && normStructKey(key).startsWith('nazwisko');
   if (fnL && !fnF && key && !surnameFirstKey && !isConfirmedSurname(ws[0])) return last;
   if (fnL && !fnF) return ws[0];
-  if (fnF) return last;
+  // oba wyrazy to imiona („Iryna Roman”): szyk rozstrzyga klucz pola, jak przy braku imienia
+  if (fnF && !(fnL && surnameFirstKey)) return last;
   return surnameFirstKey ? ws[0] : last;
 }
 const STRUCT_FORM_KIND: Partial<Record<StructKind, Parameters<typeof isValidFormValue>[1]>> = {

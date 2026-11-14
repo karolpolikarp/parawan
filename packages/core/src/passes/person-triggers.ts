@@ -1,7 +1,7 @@
 // Przebiegi osobowe z kotwicą: „Pan/Pani” i rola, self-ID, inicjał, tytuł przed homografem, obce imię
 // z łącznikiem oraz samodzielne nazwisko ze słownika albo z morfologii.
 import { COMMON_NOUN_LOOKALIKES, DIMINUTIVE_LOOKALIKES, homographBase, isCompoundAdjective, isConfirmedSurname, isGeoAdjective, looksLikeSurname, NON_SURNAME_ADJ, normalizeSurnameKey, surnameBase, surnameShaped } from '../surnames.js';
-import { CAP_WORD, NM_BOUND, NM_LO, NM_UP, PL_LO, PL_UP, PRECEDED_BY_CAP } from '../charset.js';
+import { CAP_WORD, NM_BOUND, NM_LO, NM_UP, PERSON_MASK_SRC, PL_LO, PL_UP, PRECEDED_BY_CAP } from '../charset.js';
 import { JSON_ESC_PUA_EOL, type RedactCtx, VI_GIVEN_SENTINEL } from '../context.js';
 import { FORM_LABEL_WORDS, isEmptyFormValue } from '../dict/forms.js';
 import { TABLE_HEADER_WORDS } from '../dict/headers.js';
@@ -316,6 +316,88 @@ export function passPersonForeign(ctx: RedactCtx): void {
     if (isNonPersonWord(last.toLowerCase())) return m;
     ctx.bump('IMIE');
     return ctx.personMask(last);
+  });
+  passVietnameseGivenAtMask(ctx);
+}
+
+// Imię i nazwisko wietnamskie bez kotwicy („Małżonek: Tran Thi Hoa”, „ustanawiam Do Minh Tuan”,
+// „Thanh Nguyen”). Rozpoznaje je układ: same sylaby wietnamskie, nazwisko rodowe na początku albo
+// na końcu i co najmniej dwie sylaby, które nie są wyrazem polskim ani angielskim (albo jedna przy
+// członie „Thi/Van” w trzech wyrazach). Sylaby wieloznaczne („Do”, „Nam”, „Long”, „Mai”, „Van”) same
+// nie wystarczą, więc „Ho Chi Minh”, „Ha Long” i „Le Van” zostają jawne. Porównanie bez diakrytyki.
+const VI_SURNAMES = new Set<string>(
+  'nguyen tran le pham hoang huynh phan vu vo dang bui do ho ngo duong ly trinh dinh truong lam mai dao cao luong'.split(' '),
+);
+const VI_DISTINCT = new Set<string>(
+  (
+    'nguyen tran pham hoang huynh phan dang bui ngo duong trinh dinh truong thi minh tuan thanh hoa huong ' +
+    'linh trang ngoc phuong hanh thao hien khanh quang hieu thuy nguyet tuyet duc cuong viet quoc xuan tien ' +
+    'trung kien khoa phuc vinh thang tung nhung giang loan nhan thuong huu'
+  ).split(' '),
+);
+const VI_AMBIGUOUS = new Set<string>(
+  'van le do ho vo vu ly lam mai dao cao luong hai lan nam long an ha my son tam hung dung binh chi yen anh thu hau dat hong kim lien nga hang quynh hue bao'.split(' '),
+);
+const VI_MIDDLE = new Set<string>(['thi', 'van']);
+const viFold = (w: string): string => w.normalize('NFD').replace(/\p{M}/gu, '').replace(/[đĐ]/g, 'd').toLowerCase();
+const RE_VI_RUN = new RegExp(`(?<![${NM_BOUND}\\d])[${NM_UP}][${NM_LO}${NM_UP}]{0,6}(?:[ \\t]+[${NM_UP}][${NM_LO}${NM_UP}]{0,6}){1,5}(?![${NM_BOUND}\\d-])`, 'g');
+/** Okno wyrazów run[i..j) to imię i nazwisko wietnamskie? Zwraca indeks nazwiska w oknie albo -1. */
+function viNameWindow(f: string[]): number {
+  if (f.some((w) => !VI_DISTINCT.has(w) && !VI_AMBIGUOUS.has(w))) return -1;
+  const distinct = f.filter((w) => VI_DISTINCT.has(w)).length;
+  const ok = f.length === 2 ? distinct === 2 : distinct >= 2 || (distinct === 1 && f.slice(1, -1).some((w) => VI_MIDDLE.has(w)));
+  if (!ok) return -1;
+  if (VI_SURNAMES.has(f[0])) return 0;
+  return VI_SURNAMES.has(f[f.length - 1]) ? f.length - 1 : -1;
+}
+/** Imię i nazwisko wietnamskie rozpoznane po układzie sylab. Przed parami i nazwiskiem ze słownika: inaczej
+ *  samo „Nguyen” trafia pod maskę, a „Thi Lan” zostaje jawne. */
+export function passPersonVietnamese(ctx: RedactCtx): void {
+  if (!ctx.on('IMIE')) return;
+  ctx.text = ctx.text.replace(RE_VI_RUN, (m) => {
+    const { parts, words } = splitWords(m);
+    const folded = words.map(viFold);
+    // najdłuższe okno od lewej (najwyżej cztery wyrazy)
+    for (let i = 0; i < words.length - 1; i++) {
+      for (let len = Math.min(4, words.length - i); len >= 2; len--) {
+        const k = viNameWindow(folded.slice(i, i + len));
+        if (k < 0) continue;
+        ctx.bump('IMIE');
+        return `${parts.slice(0, 2 * i).join('')}${ctx.personMask(words[i + k])}${parts.slice(2 * (i + len) - 1).join('')}`;
+      }
+    }
+    return m;
+  });
+}
+
+// Imię wietnamskie przy masce osoby, gdy nazwisko zakrył wcześniej inny przebieg (pole „Nazwisko:”,
+// rozlanie osoby): „Thanh [OSOBA]”, „[OSOBA] Thi Lan”. Wyrazy tylko przez spację, same sylaby
+// wietnamskie, w tym co najmniej jedna typowa dla imienia („Thanh”, „Thi”, „Minh”), nie dla nazwiska.
+const VI_WORD = `[${NM_UP}][${NM_LO}${NM_UP}]{0,6}`;
+const RE_VI_BEFORE_MASK = new RegExp(`(?<![${NM_BOUND}\\d])((?:${VI_WORD}[ \\t]+){1,3})(${PERSON_MASK_SRC})`, 'g');
+const RE_VI_AFTER_MASK = new RegExp(`(${PERSON_MASK_SRC})((?:[ \\t]+${VI_WORD}){1,3})(?![${NM_BOUND}\\d-])`, 'g');
+const viGivenRun = (ws: string[]): boolean => {
+  const f = ws.map(viFold);
+  return f.every((w) => VI_DISTINCT.has(w) || VI_AMBIGUOUS.has(w)) && f.some((w) => VI_DISTINCT.has(w) && !VI_SURNAMES.has(w));
+};
+function passVietnameseGivenAtMask(ctx: RedactCtx): void {
+  ctx.text = ctx.text.replace(RE_VI_BEFORE_MASK, (m, run: string, mask: string) => {
+    const { parts, words } = splitWords(run.trimEnd());
+    // najdłuższy przyrostek z samych sylab wietnamskich
+    for (let i = 0; i < words.length; i++) {
+      if (!viGivenRun(words.slice(i))) continue;
+      return `${parts.slice(0, 2 * i).join('')}${mask}`;
+    }
+    return m;
+  });
+  ctx.text = ctx.text.replace(RE_VI_AFTER_MASK, (m, mask: string, run: string) => {
+    const { parts, words } = splitWords(run.trim());
+    for (let n = words.length; n >= 1; n--) {
+      if (!viGivenRun(words.slice(0, n))) continue;
+      const rest = parts.slice(2 * n - 1).join('');
+      return `${mask}${rest}`;
+    }
+    return m;
   });
 }
 

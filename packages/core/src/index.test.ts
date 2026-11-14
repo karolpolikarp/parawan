@@ -9712,11 +9712,16 @@ test('G po drugiej weryfikacji: osoba, którą silnik rozpoznaje w nazwie albo n
       'Dane do faktury:\nSzkoła Językowa Kowalski\nul. Kwiatowa 18\n95-200 Pabianice\nNIP 7251234567',
       `Dane do faktury:\nSzkoła Językowa ${N}\n${A}\n${KOD} ${C}\nNIP [NIP]`,
     ],
-    // osoba nad nagłówkiem: inicjał, imię spoza słownika pod „Sz. Pan”, samo nazwisko
+    // osoba nad nagłówkiem: inicjał, imię spoza słownika pod „Sz. Pan”, samo nazwisko; imię ukraińskie
+    // ze słownika („Ołeksandr”) wchodzi do maski razem z nazwiskiem
     ['Odbiorca:\nW. Nowak\nDział Kadr\nul. Kwiatowa 18', `Odbiorca:\nW. ${N}\nDział Kadr\n${A}`],
     [
+      'Sz. Pan\nKwame Bondarenko\nOśrodek Szkolenia Kierowców\nul. Kwiatowa 18\n95-200 Pabianice',
+      `Sz. Pan\nKwame ${N}\nOśrodek Szkolenia Kierowców\n${A}\n${KOD} ${C}`,
+    ],
+    [
       'Sz. Pan\nOłeksandr Bondarenko\nOśrodek Szkolenia Kierowców\nul. Kwiatowa 18\n95-200 Pabianice',
-      `Sz. Pan\nOłeksandr ${N}\nOśrodek Szkolenia Kierowców\n${A}\n${KOD} ${C}`,
+      `Sz. Pan\n${N}\nOśrodek Szkolenia Kierowców\n${A}\n${KOD} ${C}`,
     ],
     ['Kowalska\nSzkoła Podstawowa nr 5\nul. Lipowa 9\n00-950 Warszawa', `${N}\nSzkoła Podstawowa nr 5\n${A}\n${KOD} ${C}`],
     // adres osoby nad nagłówkiem urzędu nie odbiera jawności siedzibie pod nim
@@ -9871,8 +9876,11 @@ test('G7 regresja: słaby człon (szkoła, ośrodek, przychodnia…) bez znaczni
 });
 test('G7 regresja: osoba w postaci „Imię Nazwisko” nad blokiem albo etykieta „Dla:” w bloku blokuje strażnika siedziby', () => {
   masked([
-    ['Dla:\nMarianna Zięba-Kot\nWydział Komunikacji\nul. Lipowa 8\n20-001 Lublin', 'Dla:\nMarianna Zięba-Kot\nWydział Komunikacji\n[ADRES]\n[KOD-POCZTOWY] [MIEJSCOWOŚĆ]'],
-    ['Marianna Zięba-Kot\nWydział Komunikacji\nul. Lipowa 8\n20-001 Lublin', `Marianna Zięba-Kot\nWydział Komunikacji\n${A}\n${KOD} ${C}`],
+    ['Dla:\nKwame Zięba-Kot\nWydział Komunikacji\nul. Lipowa 8\n20-001 Lublin', 'Dla:\nKwame Zięba-Kot\nWydział Komunikacji\n[ADRES]\n[KOD-POCZTOWY] [MIEJSCOWOŚĆ]'],
+    ['Kwame Zięba-Kot\nWydział Komunikacji\nul. Lipowa 8\n20-001 Lublin', `Kwame Zięba-Kot\nWydział Komunikacji\n${A}\n${KOD} ${C}`],
+    // imię ze słownika („Marianna”): osoba zakryta w całości, adres pod nią też
+    ['Dla:\nMarianna Zięba-Kot\nWydział Komunikacji\nul. Lipowa 8\n20-001 Lublin', `Dla:\n${N}\nWydział Komunikacji\n${A}\n${KOD} ${C}`],
+    ['Marianna Zięba-Kot\nWydział Komunikacji\nul. Lipowa 8\n20-001 Lublin', `${N}\nWydział Komunikacji\n${A}\n${KOD} ${C}`],
     ['Adresat:\nUrząd Skarbowy\nul. Lipowa 8', `Adresat:\nUrząd Skarbowy\n${A}`],
     ['Do:\nWydział Komunikacji, ul. Lipowa 8', `Do:\nWydział Komunikacji, ${A}`],
   ]);
@@ -10186,8 +10194,9 @@ test('rozlanie osoby: samo nazwisko w odmianie, wersalikami i z inicjałem', () 
     // wersaliki obok inicjału albo imienia
     ['Dyżur: lek. Ryszard Wilk\nZASTĘPSTWO: WILK R.', `Dyżur: lek. ${N}\nZASTĘPSTWO: ${N}`],
     ['Kierownik: Beata Konieczna\nPieczęć: BEATA KONIECZNA', `Kierownik: ${N}\nPieczęć: ${N}`],
-    // obce imię przed nazwiskiem osoby z pisma
-    ['Małoletni: Kamil Zając.\nOliwiera Zająca, urodzonego 2016 r.', `Małoletni: ${N}.\nOliwiera ${N}, urodzonego 2016 r.`],
+    // obce imię spoza słownika przed nazwiskiem osoby z pisma; imię ze słownika („Oliwiera”) w masce
+    ['Małoletni: Kamil Zając.\nKwamego Zająca, urodzonego 2016 r.', `Małoletni: ${N}.\nKwamego ${N}, urodzonego 2016 r.`],
+    ['Małoletni: Kamil Zając.\nOliwiera Zająca, urodzonego 2016 r.', `Małoletni: ${N}.\n${N}, urodzonego 2016 r.`],
   ]);
 });
 test('rozlanie osoby: samo imię w odmianie, wołacz i zdrobnienie', () => {
@@ -10887,4 +10896,68 @@ test('klasa 9: ocena kształtu rozmowy w czasie liniowym', () => {
     expect(t4 / t1, name).toBeLessThan(6);
     expect(time(gen(20000)), name).toBeLessThan(2000);
   }
+});
+
+test('klasa 12: imiona cudzoziemców z urzędów (UA, BY, RU, arabskie, indyjskie) i brakujące polskie', () => {
+  masked([
+    // pary z nazwiskiem w zapisie polskim i paszportowym, z odmianą
+    ['matka Oksana Burek okazała paszport', `matka ${N} okazała paszport`],
+    ['Wnioskodawca Ołeksandr Melnyk złożył wniosek.', `Wnioskodawca ${N} złożył wniosek.`],
+    ['Pracodawca zatrudnia OLEKSANDR MELNYK na stanowisku kucharza.', `Pracodawca zatrudnia ${N} na stanowisku kucharza.`],
+    ['Decyzję doręczono Ołeksandrowi Melnykowi.', `Decyzję doręczono ${N}.`],
+    ['Pełnomocnictwo dla Dmytra Kowalenki z 3 marca.', `Pełnomocnictwo dla ${N} z 3 marca.`],
+    ['Świadek Svitlana Bondarenko i Iryna Kovalenko potwierdziły.', `Świadek ${N} i ${N} potwierdziły.`],
+    ['Wniosek złożyła Fatima Haddad, obywatelka Syrii.', `Wniosek złożyła ${N}, obywatelka Syrii.`],
+    ['Zespół: Priya Raman (analityk).', `Zespół: ${N} (analityk).`],
+    // polskie imiona, których słownik nie miał
+    ['Oliwier Zając przyszedł z matką.', `${N} przyszedł z matką.`],
+    ['Na liście jest Eryk Wilk.', `Na liście jest ${N}.`],
+    ['Zawiadomienie otrzymała Daria Nowak.', `Zawiadomienie otrzymała ${N}.`],
+  ]);
+});
+test('klasa 12: słowa pospolite i nazwy własne zbieżne z imionami obcymi zostają jawne', () => {
+  const keep = [
+    'Na tarasie lokalu nie wolno palić, a ZIELONY TARAS ma ogródek.',
+    'Taras Widokowy przy ul. Długiej jest zamknięty.',
+    'Omar Jumbo w restauracji kosztuje 120 zł.',
+    'Inna Sprawa dotyczy podatku.',
+    'Pielgrzymka do Fatimy i Lourdes, Sanktuarium w Fatimie, Matka Boża z Fatimy.',
+    'Chór zaśpiewał Regina Coeli i Salve Regina.',
+    'Aminy Biogenne oznaczono w surowicy.',
+    'Rana Kłuta wymagała szycia.',
+    'Król Zygmunt August i Bolesław Chrobry.',
+  ];
+  masked(keep.map((s) => [s, s]));
+});
+test('klasa 12: imię i nazwisko wietnamskie po układzie sylab, także z diakrytyką', () => {
+  masked([
+    ['Małżonek: Tran Thi Hoa, PESEL 86120177363', `Małżonek: ${N}, PESEL [PESEL]`],
+    ['Pełnomocnikiem ustanawiam Do Minh Tuan, który pomagał w tłumaczeniu.', `Pełnomocnikiem ustanawiam ${N}, który pomagał w tłumaczeniu.`],
+    ['Wniosek złożyła Nguyen Thi Lan.', `Wniosek złożyła ${N}.`],
+    ['Nguyễn Văn Hùng złożył wniosek.', `${N} złożył wniosek.`],
+    ['Mysiadło, 06.11.2026   Thanh Nguyen', `Mysiadło, 06.11.2026   ${N}`],
+  ]);
+  // sylaby wieloznaczne bez dwóch typowych dla imienia: miasto, zatoka, nazwisko artysty, zwykłe zdanie
+  const keep = [
+    'Delegacja odwiedziła Ho Chi Minh i Hanoi.',
+    'Zatoka Ha Long jest na liście UNESCO.',
+    'Do Hanoi lecieliśmy przez Dubaj.',
+    'Obraz Van Gogha wisi w Amsterdamie.',
+    'Le Van Long to nazwa restauracji.',
+  ];
+  masked(keep.map((s) => [s, s]));
+  // pseudonim: osoba wietnamska z kluczem nazwiska, ta sama przy drugiej wzmiance
+  masked([['Małżonek: Tran Thi Hoa. Podpis: Tran Thi Hoa.', 'Małżonek: [OSOBA-A]. Podpis: [OSOBA-A].']], { pseudonyms: true });
+});
+test('klasa 12: reguła sylab wietnamskich w czasie liniowym', () => {
+  const time = (s: string): number => {
+    const t0 = performance.now();
+    redactPII(s);
+    return performance.now() - t0;
+  };
+  const caps = (n: number): string => Array.from({ length: n }, () => 'MINH THANH HOA LAN VAN DO').join(' ');
+  redactPII(caps(200));
+  const t1 = Math.min(time(caps(1000)), time(caps(1000)));
+  const t4 = time(caps(4000));
+  expect(t4 / t1).toBeLessThan(6);
 });

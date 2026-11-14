@@ -20,7 +20,7 @@ import { passPersonPairs, passProtectFictional } from './passes/person-pairs.js'
 import { passPersonPropagate } from './passes/person-propagate.js';
 import { passPersonSpeaker } from './passes/person-speaker.js';
 import { passPersonForeignTitle, passPersonPDotName, passPersonSignature, passPersonVocative } from './passes/person-vocative.js';
-import { passPersonForeign, passPersonHomographAnchor, passPersonInitial, passPersonRoleComplement, passPersonSoloDict, passPersonSoloMorph, passPersonStrongTrigger, passPersonTrigger } from './passes/person-triggers.js';
+import { passPersonForeign, passPersonHomographAnchor, passPersonVietnamese, passPersonInitial, passPersonRoleComplement, passPersonSoloDict, passPersonSoloMorph, passPersonStrongTrigger, passPersonTrigger } from './passes/person-triggers.js';
 import { passProtectJsonEscapes, passProtectUrls } from './passes/protect.js';
 import { passCivilRecord, passProfessionalNumber, passResidenceCard } from './passes/registers.js';
 import { passDelimitedTable, passStructured } from './passes/structured.js';
@@ -162,6 +162,8 @@ function redactWith(input: string, options: RedactOptions | undefined, withProbe
 
   // Faza 4: imię i nazwisko (heurystyka)
   passProtectFictional(ctx);
+  // Imię i nazwisko wietnamskie po układzie sylab, zanim nazwisko ze słownika („Nguyen”) weźmie samo siebie.
+  passPersonVietnamese(ctx);
   passPersonMixedCase(ctx); // przed wyzwalaczem „Pan/Pani”: inaczej wyzwalacz bierze imię, a nazwisko zostaje jawne
   passPersonRoleComplement(ctx);
   passPersonPairs(ctx);

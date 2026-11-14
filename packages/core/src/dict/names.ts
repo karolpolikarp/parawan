@@ -1,10 +1,47 @@
 // Słowniki imion (polskie, obce, formy odmienione i zapisy bez ogonków) oraz testy „czy to imię”.
 import { foldAscii, NO_E } from '../surnames.js';
 
+/**
+ * Imiona cudzoziemców częste w polskich urzędach (ZUS, CEIDG, żłobek, szkoła, karta pobytu): ukraińskie,
+ * białoruskie i rosyjskie w zapisie polskim („Ołeksandr”, „Switłana”) i paszportowym („Oleksandr”,
+ * „Svitlana”), arabskie i indyjskie. Działają jak imiona polskie: z nazwiskiem, po wyzwalaczu, po polu,
+ * w odmianie („Oksany”, „Ołeksandrowi”, „Dmytra”). Bez imion będących zwykłym słowem albo jego formą:
+ * taras, omar, inna, wira („wiry”), pasza, nur, dalia, rana, rania („ranie”), amina („aminy”), said, lilia. Bez form
+ * żeńskich równych dopełniaczowi imienia męskiego (bohdana, oleksandra, jarosława). Nazwiska i drugie
+ * imiona wietnamskie mają osobną regułę układu (passPersonForeign).
+ */
+const OFFICE_FOREIGN_FIRST_NAMES =
+  // ukraińskie, białoruskie i rosyjskie, zapis polski
+  'ołeksandr ołeksij mychajło mykoła wołodymyr dmytro andrij serhij jurij wasyl ihor bohdan iwan petro ' +
+  'pawło witalij anatolij wiaczesław jewhen wadym oleh stepan ostap nazar artem denys kyryło illia mykyta ' +
+  'wałentyn hennadij ołena oksana switłana hałyna iryna tetiana kateryna julija wiktorija anastasija ' +
+  'marija natalija ludmyła nadija łarysa ołha daryna sofija sołomija uliana chrystyna alisa polina ołesia ' +
+  'lesia alaksandr siarhiej uładzimir alaksiej zmicier wolha taciana aksana siergiej sergiej władimir ' +
+  'dmitrij aleksiej nikołaj michaił jewgienij wasilij giennadij oleg swietłana tatiana jelena irina galina ' +
+  'jekaterina ' +
+  // ukraińskie, białoruskie i rosyjskie, zapis paszportowy (łaciński)
+  'oleksandr oleksii mykhailo mykola volodymyr andrii andriy serhii serhiy yurii yuriy vasyl vitalii ' +
+  'anatolii yevhen vadym pavlo kyrylo ivan viktor yaroslav olena svitlana halyna yuliia viktoriia ' +
+  'anastasiia mariia nataliia liudmyla nadiia larysa valentyna olha sofiia solomiia khrystyna aliaksandr ' +
+  'siarhei uladzimir aliaksei yauheni dzmitry volha alena tatsiana sergei sergey vladimir dmitry dmitrii ' +
+  'aleksei alexey nikolai mikhail yevgeny evgeny vasily gennady yuri svetlana tatyana elena yelena ' +
+  'lyudmila ekaterina yekaterina anastasia yulia ' +
+  // arabskie
+  'ahmed ahmad mohammed mohammad muhammad mohamed mahmoud mahmud mustafa hassan hasan hussein husajn ' +
+  'khaled khalid chalid youssef yusuf jusuf ibrahim abdullah karim tarik tareq samir amir bilal hamza ' +
+  'rashid nabil walid yasser fatima fatma aisha aisza mariam maryam leila lejla lajla layla zainab ' +
+  'zajnab yasmin salma huda samira hiba ' +
+  // indyjskie (informatyka, outsourcing)
+  'priya rahul amit sanjay deepak anil sunil vijay ravi arjun rohan neha pooja anjali kavya divya ' +
+  'shreya aditi ananya rajesh suresh ramesh';
+
 // Imiona pełne i zdrobnienia w mianowniku. Bez zdrobnień kolidujących z rzeczownikami (kuba, maks,
 // misiek, ryś), bo imię maskujemy tylko w parze z nazwiskiem albo po wyzwalaczu.
 export const POLISH_FIRST_NAMES = new Set<string>(
   (
+    `${OFFICE_FOREIGN_FIRST_NAMES} ` +
+    'oliwier eryk nataniel fryderyk aleksy juliusz lucjan marian ireneusz longin ' +
+    'roksana marlena adrianna liwia jagna marianna leokadia kazimiera aldona honorata julianna daria ' +
     'adam adrian agata agnieszka aleksander aleksandra alicja alina amelia andrzej aniela anna ' +
     'antoni antonina arkadiusz artur bartłomiej bartosz beata bogdan bogumił bogusław bożena ' +
     'cezary daniel danuta dariusz dawid dominik dominika dorota edward elżbieta emil emilia ewa ' +
@@ -113,6 +150,13 @@ export const EXTRA_NAME_FORMS = ((): Set<string> => {
     add(`${s}ego`, `${s}emu`, `${s}ym`);
   }
   for (const n of ['antoni', 'jeremi', 'marceli']) add(`${n}ego`, `${n}emu`, `${n}m`);
+  // Męskie imiona wschodnie na „-o” odmieniają się jak „Bruno”: Dmytro → Dmytra, Dmytrem, Dmytrowi.
+  // Tylko z listy obcej: polskie „Iwo” dałoby „iwa” (drzewo).
+  for (const n of OFFICE_FOREIGN_FIRST_NAMES.split(/\s+/)) {
+    if (!/[^aeiouy]o$/.test(n)) continue;
+    const s = n.slice(0, -1);
+    add(`${s}a`, `${s}em`, `${s}owi`);
+  }
   return out;
 })();
 

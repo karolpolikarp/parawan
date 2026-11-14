@@ -264,6 +264,8 @@ Hala: remont do piątku",
 15:00 Florian: brama i mury obronne
 16:00 Kazimierz Dolny: obiad
 18:00 Kazimierz Dolny: powrót",
+  "neg-255": "Na tarasie lokalu nie wolno palić. Omar Jumbo kosztuje 120 zł. Pielgrzymka do Fatimy wyrusza w maju.",
+  "neg-256": "Delegacja odwiedziła Ho Chi Minh i Zatokę Ha Long. Do Hanoi lecieliśmy przez Dubaj. Chór zaśpiewał Salve Regina.",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
   "neg-27": "Kot przewrócił doniczkę z parapetu.",
   "neg-28": "W piątek trzynastego lepiej zostać w domu.",
@@ -544,6 +546,10 @@ wzywa do zapłaty.",
   "os-p-86": "W kościele Maria Panna zauważyła sprawcę i wezwała policję.",
   "os-p-87": "Odpis aktu małżeństwa Marty Sowy i Marka Sowy, zawartego w Krakowie.",
   "os-p-88": "Pismo od Marka Sowy z 3 marca. Pozew Marka Gołębia wpłynął.",
+  "os-p-89": "Uczeń przyjechał z Ukrainy, matka Oksana Burek okazała paszport.",
+  "os-p-90": "Decyzję doręczono Ołeksandrowi Melnykowi, a odpis Svitlanie Bondarenko.",
+  "os-p-91": "Wniosek złożyła Fatima Haddad, obywatelka Syrii, a pełnomocnikiem jest Oliwier Zając.",
+  "os-p-92": "Małżonek: Tran Thi Hoa. Pełnomocnikiem ustanawiam Do Minh Tuan.",
   "os-r-01": "Marek Bąkiewicz podpisał protokół odbioru.",
   "os-r-02": "Alicja Krzemieniecka złożyła wniosek o urlop.",
   "os-r-03": "Tadeusz Gzowski wynajął magazyn pod miastem.",
@@ -1182,6 +1188,8 @@ Hala: remont do piątku",
 15:00 Florian: brama i mury obronne
 16:00 Kazimierz Dolny: obiad
 18:00 Kazimierz Dolny: powrót",
+  "neg-255": "Na tarasie lokalu nie wolno palić. Omar Jumbo kosztuje 120 zł. Pielgrzymka do Fatimy wyrusza w maju.",
+  "neg-256": "Delegacja odwiedziła Ho Chi Minh i Zatokę Ha Long. Do Hanoi lecieliśmy przez Dubaj. Chór zaśpiewał Salve Regina.",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
   "neg-27": "Kot przewrócił doniczkę z parapetu.",
   "neg-28": "W piątek trzynastego lepiej zostać w domu.",
@@ -1460,6 +1468,10 @@ wzywa do zapłaty.",
   "os-p-86": "W kościele [OSOBA-A] zauważyła sprawcę i wezwała policję.",
   "os-p-87": "Odpis aktu małżeństwa [OSOBA-A] i [OSOBA-A], zawartego w Krakowie.",
   "os-p-88": "Pismo od [OSOBA-A] z 3 marca. Pozew [OSOBA-B] wpłynął.",
+  "os-p-89": "Uczeń przyjechał z Ukrainy, matka [OSOBA-A] okazała paszport.",
+  "os-p-90": "Decyzję doręczono [OSOBA-A], a odpis [OSOBA-B].",
+  "os-p-91": "Wniosek złożyła [OSOBA-A], obywatelka Syrii, a pełnomocnikiem jest [OSOBA-B].",
+  "os-p-92": "Małżonek: [OSOBA-A]. Pełnomocnikiem ustanawiam [OSOBA-B].",
   "os-r-01": "[OSOBA-A] podpisał protokół odbioru.",
   "os-r-02": "[OSOBA-A] złożyła wniosek o urlop.",
   "os-r-03": "[OSOBA-A] wynajął magazyn pod miastem.",
@@ -1702,7 +1714,7 @@ Przychodnia Rodzinna
 [ADRES]
 [KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
   "str-191": "Dla:
-Marianna Zięba-Kot
+[OSOBA-A]
 Wydział Komunikacji
 [ADRES]
 [KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
@@ -2098,6 +2110,8 @@ Hala: remont do piątku",
 15:00 Florian: brama i mury obronne
 16:00 Kazimierz Dolny: obiad
 18:00 Kazimierz Dolny: powrót",
+  "neg-255": "Na tarasie lokalu nie wolno palić. Omar Jumbo kosztuje 120 zł. Pielgrzymka do Fatimy wyrusza w maju.",
+  "neg-256": "Delegacja odwiedziła Ho Chi Minh i Zatokę Ha Long. Do Hanoi lecieliśmy przez Dubaj. Chór zaśpiewał Salve Regina.",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
   "neg-27": "Kot przewrócił doniczkę z parapetu.",
   "neg-28": "W piątek trzynastego lepiej zostać w domu.",
@@ -2376,6 +2390,10 @@ wzywa do zapłaty.",
   "os-p-86": "W kościele [IMIĘ I NAZWISKO] zauważyła sprawcę i wezwała policję.",
   "os-p-87": "Odpis aktu małżeństwa [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO], zawartego w Krakowie.",
   "os-p-88": "Pismo od [IMIĘ I NAZWISKO] z 3 marca. Pozew [IMIĘ I NAZWISKO] wpłynął.",
+  "os-p-89": "Uczeń przyjechał z Ukrainy, matka [IMIĘ I NAZWISKO] okazała paszport.",
+  "os-p-90": "Decyzję doręczono [IMIĘ I NAZWISKO], a odpis [IMIĘ I NAZWISKO].",
+  "os-p-91": "Wniosek złożyła [IMIĘ I NAZWISKO], obywatelka Syrii, a pełnomocnikiem jest [IMIĘ I NAZWISKO].",
+  "os-p-92": "Małżonek: [IMIĘ I NAZWISKO]. Pełnomocnikiem ustanawiam [IMIĘ I NAZWISKO].",
   "os-r-01": "[IMIĘ I NAZWISKO] podpisał protokół odbioru.",
   "os-r-02": "[IMIĘ I NAZWISKO] złożyła wniosek o urlop.",
   "os-r-03": "[IMIĘ I NAZWISKO] wynajął magazyn pod miastem.",
@@ -2618,7 +2636,7 @@ Przychodnia Rodzinna
 [ADRES]
 [KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
   "str-191": "Dla:
-Marianna Zięba-Kot
+[IMIĘ I NAZWISKO]
 Wydział Komunikacji
 [ADRES]
 [KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
@@ -3063,6 +3081,8 @@ Hala: remont do piątku",
 15:00 Florian: brama i mury obronne
 16:00 Kazimierz Dolny: obiad
 18:00 Kazimierz Dolny: powrót",
+  "neg-255": "Na tarasie lokalu nie wolno palić. Omar Jumbo kosztuje 120 zł. Pielgrzymka do Fatimy wyrusza w maju.",
+  "neg-256": "Delegacja odwiedziła Ho Chi Minh i Zatokę Ha Long. Do Hanoi lecieliśmy przez Dubaj. Chór zaśpiewał Salve Regina.",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
   "neg-27": "Kot przewrócił doniczkę z parapetu.",
   "neg-28": "W piątek trzynastego lepiej zostać w domu.",
@@ -3341,6 +3361,10 @@ wzywa do zapłaty.",
   "os-p-86": "W kościele <<osoba>> zauważyła sprawcę i wezwała policję.",
   "os-p-87": "Odpis aktu małżeństwa <<osoba>> i <<osoba>>, zawartego w Krakowie.",
   "os-p-88": "Pismo od <<osoba>> z 3 marca. Pozew <<osoba>> wpłynął.",
+  "os-p-89": "Uczeń przyjechał z Ukrainy, matka <<osoba>> okazała paszport.",
+  "os-p-90": "Decyzję doręczono <<osoba>>, a odpis <<osoba>>.",
+  "os-p-91": "Wniosek złożyła <<osoba>>, obywatelka Syrii, a pełnomocnikiem jest <<osoba>>.",
+  "os-p-92": "Małżonek: <<osoba>>. Pełnomocnikiem ustanawiam <<osoba>>.",
   "os-r-01": "<<osoba>> podpisał protokół odbioru.",
   "os-r-02": "<<osoba>> złożyła wniosek o urlop.",
   "os-r-03": "<<osoba>> wynajął magazyn pod miastem.",
@@ -3583,7 +3607,7 @@ Przychodnia Rodzinna
 <<adres>>
 <<kod>> <<miejsce>>",
   "str-191": "Dla:
-Marianna Zięba-Kot
+<<osoba>>
 Wydział Komunikacji
 <<adres>>
 <<kod>> <<miejsce>>",
@@ -3941,6 +3965,8 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "neg-252": "",
   "neg-253": "",
   "neg-254": "",
+  "neg-255": "",
+  "neg-256": "",
   "neg-26": "",
   "neg-27": "",
   "neg-28": "",
@@ -4175,6 +4201,10 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "os-p-86": "IMIE:1",
   "os-p-87": "IMIE:2",
   "os-p-88": "IMIE:2",
+  "os-p-89": "IMIE:1",
+  "os-p-90": "IMIE:2",
+  "os-p-91": "IMIE:2",
+  "os-p-92": "IMIE:2",
   "os-r-01": "IMIE:1",
   "os-r-02": "IMIE:1",
   "os-r-03": "IMIE:1",
@@ -4344,7 +4374,7 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "str-189": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
   "str-19": "TELEFON:1",
   "str-190": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
-  "str-191": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
+  "str-191": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
   "str-192": "IMIE:1",
   "str-193": "ZDROWIE:1",
   "str-194": "ZDROWIE:1 IMIE:1",
@@ -4678,6 +4708,8 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "neg-252": "",
   "neg-253": "",
   "neg-254": "",
+  "neg-255": "",
+  "neg-256": "",
   "neg-26": "",
   "neg-27": "",
   "neg-28": "",
@@ -4912,6 +4944,10 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "os-p-86": "IMIE:1",
   "os-p-87": "IMIE:2",
   "os-p-88": "IMIE:2",
+  "os-p-89": "IMIE:1",
+  "os-p-90": "IMIE:2",
+  "os-p-91": "IMIE:2",
+  "os-p-92": "IMIE:2",
   "os-r-01": "IMIE:1",
   "os-r-02": "IMIE:1",
   "os-r-03": "IMIE:1",
@@ -5081,7 +5117,7 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "str-189": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
   "str-19": "TELEFON:1",
   "str-190": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
-  "str-191": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
+  "str-191": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
   "str-192": "IMIE:1",
   "str-193": "ZDROWIE:1",
   "str-194": "ZDROWIE:1 IMIE:1",

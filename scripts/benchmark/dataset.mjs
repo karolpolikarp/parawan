@@ -1229,6 +1229,17 @@ export function buildDataset() {
   neg('Temat: Imieniny w grudniu 🎉\nBarbara: 4 grudnia\nMikołaj: 6 grudnia\nMagazyn A\nHala: zamknięta\nBrama: otwarta\nHala: remont do piątku', ['Barbara', 'Mikołaj', 'Hala']);
   neg('Plan wycieczki:\n08:00 Kazimierz: zbiórka przy synagodze\n15:00 Florian: brama i mury obronne\n16:00 Kazimierz Dolny: obiad\n18:00 Kazimierz Dolny: powrót', ['Kazimierz', 'Florian', 'Kazimierz Dolny']);
 
+  // ──────────────────────────────────────────────────────────────────────────
+  // IMIONA CUDZOZIEMCÓW Z URZĘDÓW (seria 2, klasa 12): ukraińskie, białoruskie i rosyjskie w zapisie
+  // polskim i paszportowym, arabskie, indyjskie, polskie spoza dawnego słownika (Oliwier, Eryk) oraz
+  // imię i nazwisko wietnamskie rozpoznane po układzie sylab. Słowa pospolite zbieżne z imionami zostają.
+  osp('Uczeń przyjechał z Ukrainy, matka Oksana Burek okazała paszport.', ['Oksana Burek'], ['Ukrainy', 'paszport']);
+  osp('Decyzję doręczono Ołeksandrowi Melnykowi, a odpis Svitlanie Bondarenko.', ['Ołeksandrowi Melnykowi', 'Svitlanie Bondarenko'], ['Decyzję', 'odpis']);
+  osp('Wniosek złożyła Fatima Haddad, obywatelka Syrii, a pełnomocnikiem jest Oliwier Zając.', ['Fatima Haddad', 'Oliwier Zając'], ['Syrii', 'pełnomocnikiem']);
+  osp('Małżonek: Tran Thi Hoa. Pełnomocnikiem ustanawiam Do Minh Tuan.', ['Tran Thi Hoa', 'Do Minh Tuan'], ['Małżonek:', 'Pełnomocnikiem']);
+  neg('Na tarasie lokalu nie wolno palić. Omar Jumbo kosztuje 120 zł. Pielgrzymka do Fatimy wyrusza w maju.', ['tarasie', 'Omar', 'Fatimy']);
+  neg('Delegacja odwiedziła Ho Chi Minh i Zatokę Ha Long. Do Hanoi lecieliśmy przez Dubaj. Chór zaśpiewał Salve Regina.', ['Ho Chi Minh', 'Ha Long', 'Do Hanoi', 'Salve Regina']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {

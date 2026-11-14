@@ -138,6 +138,18 @@ działają na GitHubie od chwili wypchnięcia tagów.
   w cytacie e-maila („> Kazimierz: zwiedzanie”) i ewangeliści w planie lekcji religii, a zwykły czat
   o parafii albo kolędzie („[10:00] Paweł: ślub w parafii”) zakrywa wszystkich mówców. Na
   części roboczej drugiej serii zakrytych danych jest 82,7% zamiast 80,8%, bez nowych nadmiarowych zakryć.
+- **Imiona cudzoziemców z pism urzędowych znikają tak jak polskie.** Słownik zna częste imiona
+  ukraińskie, białoruskie i rosyjskie w zapisie polskim i paszportowym („matka Oksana Burek”,
+  „doręczono Ołeksandrowi Melnykowi”, „pełnomocnictwo dla Dmytra Kowalenki”, „OLEKSANDR MELNYK”,
+  „Svitlana Bondarenko”, „Iryna Kovalenko”), arabskie („Fatima Haddad”, „Ahmed”, „Mohammed”)
+  i indyjskie („Priya Raman”), a także polskie, których brakowało („Oliwier Zając”, „Eryk Wilk”,
+  „Daria Nowak”, „Marianna Zięba-Kot” w bloku adresata). Imię i nazwisko wietnamskie Parawan
+  rozpoznaje po układzie sylab, także z diakrytyką: „Małżonek: Tran Thi Hoa”, „ustanawiam Do Minh
+  Tuan”, „Nguyễn Văn Hùng”, „Thanh Nguyen” w podpisie. Jawne zostają słowa i nazwy zbieżne
+  z imionami: „na tarasie”, „ZIELONY TARAS”, „Omar Jumbo”, „pielgrzymka do Fatimy”, „Salve Regina”,
+  „Król Zygmunt August”, „Ho Chi Minh”, „Zatoka Ha Long”, „Do Hanoi lecieliśmy”, „obraz Van Gogha”.
+  Na części roboczej drugiej serii zakrytych danych jest 83,5% zamiast 82,7%, bez nowych
+  nadmiarowych zakryć.
 
 ## v0.47.0 — 2026-11-14
 
