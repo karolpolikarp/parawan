@@ -104,13 +104,11 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 
 ## Stan (2026-11-14)
 
-- `main` = v0.46.27 (wydane 2026-11-12, tag, Release i kopia na domenie zgodne, suma
-  `2ce67831…`). npm 0.29.14 nie został opublikowany (Backlog 4).
-- Gałąź `feat/ewaluacja-50-pism` (wypchnięta, bez PR): ewaluacja na 50 fikcyjnych pismach
-  (`test-data/anonimizator-testy/`, `npm run eval`, wyniki w `docs/EWALUACJA.md`) i poprawki:
-  recall 89,2% → 99,5%, nadmiarowe 30 → 0, tak samo na odłożonym zestawie. Wersje już podbite:
-  aplikacja v0.47.0, rdzeń i `parawan` 0.30.0, CHANGELOG `## v0.47.0 — 2026-11-14`. Brakuje
-  PR, merge, tagu i publikacji (Backlog 5). Handoff: `docs/handoff-2026-11-14.md`.
+- `main` = v0.47.0 bez tagu (PR #28 scalony 2026-11-14; CI i deploy landingu zielone, landing
+  na domenie pokazuje nowe typy). Do pobrania dalej Parawan.html v0.46.27, bo Release powstaje
+  dopiero z tagu (Backlog 5). Ewaluacja na 50 fikcyjnych pismach: `npm run eval`,
+  `docs/EWALUACJA.md` (recall 89,2% → 99,5%, nadmiarowe 30 → 0). Rdzeń i `parawan` 0.30.0 czekają
+  na npm (Backlog 4). Handoff: `docs/handoff-2026-11-14.md`.
 - W toku: nowy landing (`/frontend`), kierunek „Sosna o poranku”. Próbki poza repo w
   `E:\parawan-landing-proby\`. Handoff: `docs/handoff-2026-11-01.md`.
 
@@ -133,8 +131,9 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 4. Publikacja npm z komputera autora (2FA): `npm login`, potem `npm publish -w anonimizator`
    i `npm publish -w parawan`. 0.29.14 nie wyszło; po merge v0.47.0 publikować od razu 0.30.0.
    Powrót: `npm view anonimizator version`.
-5. Wydanie v0.47.0: PR z `feat/ewaluacja-50-pism`, merge na `main`, kroki z `docs/WYDANIE.md`
-   (próba `release.yml`, tag `v0.47.0`), potem Backlog 4. Wymaga słowa użytkownika.
+5. Tag v0.47.0: próba `gh workflow run release.yml --ref main -f dry_run=true`, potem
+   `git tag -a v0.47.0 -m "Parawan 0.47.0"` i `git push origin v0.47.0`, część „Właściciel”
+   z `docs/WYDANIE.md`, potem Backlog 4. Wymaga słowa użytkownika.
 6. Opcje polityki z `docs/EWALUACJA.md` (dane firm, miejscowość, numery spraw, profile „Do pracy”
    i „Do publikacji”, osobne pseudonimy małżonków o tym samym nazwisku).
 7. Znane ograniczenia z `docs/EWALUACJA.md` poz. 2–11 (m.in. parafia bez „w”, EZD pod numerem,
