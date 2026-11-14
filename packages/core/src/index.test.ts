@@ -9338,7 +9338,6 @@ test('ewaluacja G6: imię i nazwisko-homograf w zgodnym przypadku po rzeczowniku
     'Wspiera nas Fundacja Joanny Sikory.',
     'Nagroda Jana Lisa została przyznana.',
     'Szkoła im. Józefa Wybickiego.',
-    'Zdiagnozowano zespół Downa.',
     // Matka Boża tylko z kotwicą religijną przed parą
     'Kościół Najświętszej Marii Panny.',
     'Msza w kościele Marii Panny.',
@@ -9404,9 +9403,16 @@ test('ewaluacja G6 po trzeciej weryfikacji: Maria Panna jako osoba przy miejscu 
     'Chór Jana Kiepury wystąpił.',
     'Na pielgrzymkę pojechał komitet Jana Pawła II.',
     'W turnieju wystąpiła drużyna Wisły Kraków.',
-    'Rozpoznano zespół Aspergera u dziecka.',
-    'Pacjent ma zespół Marfana.',
   ]);
+  // zespół z nazwiskiem po kotwicy rozpoznania to rozpoznanie (dana o zdrowiu), a nie osoba
+  for (const [t, want] of [
+    ['Zdiagnozowano zespół Downa.', 'Zdiagnozowano [DANE O ZDROWIU].'],
+    ['Rozpoznano zespół Aspergera u dziecka.', 'Rozpoznano [DANE O ZDROWIU] u dziecka.'],
+    ['Pacjent ma zespół Marfana.', 'Pacjent ma [DANE O ZDROWIU].'],
+  ]) {
+    expect(redactPII(t).redacted, t).toBe(want);
+    expect(redactPII(t).redacted, t).not.toContain('[IMIĘ I NAZWISKO]');
+  }
 });
 
 // ── Numery rejestrów zawodowych i urzędowych (ewaluacja 50 pism, grupa B / G1) ──
@@ -10610,7 +10616,8 @@ test('klasa 5: imię za rzeczownikiem pokrewieństwa lub opieki to osoba', () =>
     ['Widziałem syna Jakuba w szkole.', `Widziałem syna ${N} w szkole.`],
     ['Mój brat Paweł pracuje w sklepie.', `Mój brat ${N} pracuje w sklepie.`],
     ['moja siostra Ewelina jest wolontariuszką', `moja siostra ${N} jest wolontariuszką`],
-    ['mój syn Antoś ma autyzm', `mój syn ${N} ma autyzm`],
+    // od klasy 4 zdrowia autyzm przy osobie to też dana o zdrowiu
+    ['mój syn Antoś ma autyzm', `mój syn ${N} ma [DANE O ZDROWIU]`],
     ['opiekun Adam przyjdzie jutro', `opiekun ${N} przyjdzie jutro`],
     // wtrącenie po przecinku i zapis bez ogonków
     ['KLIENT: Żona, Barbara, ale ona nie wie.', `KLIENT: Żona, ${N}, ale ona nie wie.`],
@@ -11305,4 +11312,312 @@ test('zdrowie klasa 3: rola osoby, podmiot i cel pobytu w czasie liniowym', () =
   const t1 = Math.min(time(block(250)), time(block(250)));
   const t4 = time(block(1000));
   expect(t4 / t1).toBeLessThan(6);
+});
+
+// ── Zdrowie klasa 4: rozpoznanie spoza listy chorób, kod ICD w zdaniu, uraz ──
+test('zdrowie klasa 4: rozpoznanie po kotwicy, nazwa choroby po budowie słowa, kod ICD-10 i ICD-11, uraz', () => {
+  const Z = '[DANE O ZDROWIU]';
+  const cases: [string, string][] = [
+    // kotwica rozpoznania i nazwa spoza listy: do końca frazy, z dopowiedzeniem i kodem
+    ['U wnioskodawczyni rozpoznano toczeń rumieniowaty układowy, co potwierdza dokumentacja.', `U wnioskodawczyni rozpoznano ${Z}, co potwierdza dokumentacja.`],
+    ['Syn stron ma zdiagnozowaną mukowiscydozę i wymaga codziennej fizjoterapii.', `Syn stron ma zdiagnozowaną ${Z} i wymaga codziennej fizjoterapii.`],
+    ['Zdiagnozowano u niej endometriozę oraz niedoczynność tarczycy.', `Zdiagnozowano u niej ${Z} oraz ${Z}.`],
+    ['W wywiadzie: padaczka od 12. roku życia, obecnie bez napadów.', `W wywiadzie: ${Z} od 12. roku życia, obecnie bez napadów.`],
+    ['Kurator ustaliła, że uczestnik postępowania ma rozpoznane PTSD i przyjmuje leki.', `Kurator ustaliła, że uczestnik postępowania ma rozpoznane ${Z} i przyjmuje leki.`],
+    ['Małoletni ma rozpoznane zaburzenia ze spektrum autyzmu (6A02).', `Małoletni ma rozpoznane ${Z}.`],
+    ['Psychiatra rozpoznała zespół hiperkinetyczny z zaburzeniami uwagi (F90.0).', `Psychiatra rozpoznała ${Z}.`],
+    ['Biegły stwierdził u powoda zespół stresu pourazowego po wypadku.', `Biegły stwierdził u powoda ${Z} po wypadku.`],
+    // budowa słowa: -opatia, -algia, -oza, dys-, niedo-, skrót rozpoznania, alergen
+    ['Pacjentka cierpi na fibromialgię i neuropatię cukrzycową.', `Pacjentka cierpi na ${Z} i ${Z}.`],
+    ['Z opinii poradni wynika, że Julia ma dysleksję rozwojową i dyskalkulię.', `Z opinii poradni wynika, że Julia ma ${Z} i ${Z}.`],
+    ['Podopieczna ma niedowład lewostronny po udarze krwotocznym mózgu.', `Podopieczna ma ${Z}.`],
+    ['Babcia ma demencję i wymaga stałej opieki.', `Babcia ma ${Z} i wymaga stałej opieki.`],
+    ['Antek ma alergię na białko mleka krowiego, wymaga specjalnej diety.', `Antek ma ${Z}, wymaga specjalnej diety.`],
+    ['PL: Mam umiarkowany niedosłuch i noszę aparaty słuchowe.', `PL: Mam ${Z} i noszę ${Z}.`],
+    // choroba z listy przy osobie i czasowniku „ma”, stopień przed nazwą i kod po niej w tej samej masce
+    ['Pani Tereska źle sypia, ma nadciśnienie tętnicze i bierze leki.', `Pani [IMIĘ I NAZWISKO] źle sypia, ma ${Z} i bierze leki.`],
+    ['Pani Nowak przyjmuje leki na nadciśnienie tętnicze.', `Pani [IMIĘ I NAZWISKO] przyjmuje leki na ${Z}.`],
+    ['Pani Nowak opowiadała w artykule o chorobie Alzheimera swojej matki.', `Pani [IMIĘ I NAZWISKO] opowiadała w artykule o ${Z} swojej matki.`],
+    ['Wnioskodawca leczy się z powodu przewlekłej obturacyjnej choroby płuc (J44.9).', `Wnioskodawca ${Z} z powodu ${Z}.`],
+    ['Strona leczy się z powodu depresji nawracającej (F33.1), co ogranicza jej pracę.', `Strona ${Z} z powodu ${Z}, co ogranicza jej pracę.`],
+    ['Leszek nie przyszedł z powodu zwolnienia lekarskiego (grypa z powikłaniami).', `Leszek nie przyszedł z powodu ${Z}.`],
+    // uraz z wyrazem między nazwą a częścią ciała i z łamaniem wiersza
+    ['Pacjent lat 32. W RTG stwierdzono złamanie\ntrzonu kości piszczelowej lewej z przemieszczeniem.', `Pacjent lat 32. W RTG stwierdzono ${Z}.`],
+    ['Uczestniczka nr 1 uskarżała się na ból karku.', `Uczestniczka nr 1 uskarżała się na ${Z}.`],
+    // angielski
+    ['EN: I have a moderate hearing impairment and use hearing aids.', `EN: I have a ${Z} and use ${Z}.`],
+    ['Mr Zieliński underwent treatment for acute lymphoblastic leukaemia in 2021.', `[IMIĘ I NAZWISKO] underwent treatment for ${Z} in 2021.`],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
+  // nagłówek „Rozpoznanie” bez dwukropka nad akapitem opinii
+  expect(redactPII('Szybko się męczył.\n\nRozpoznanie\nDysleksja rozwojowa o charakterze mieszanym u ucznia z ADHD.\n\nZalecenia').redacted).toBe(
+    `Szybko się męczył.\n\nRozpoznanie\n${Z}\n\nZalecenia`,
+  );
+  // idempotencja: drugi przebieg nic nie dokłada
+  for (const [t] of cases) {
+    const once = redactPII(t).redacted;
+    expect(redactPII(once).redacted, t).toBe(once);
+  }
+});
+
+test('zdrowie klasa 4: bez rozpoznania osoby zostaje (zespół ludzi, stwierdzenie urzędowe, przenośnia, grupa, przepis)', () => {
+  keep(
+    [
+      'Zespół Szkół nr 2 w Krakowie ogłasza nabór.',
+      'Posiedzenie Zespołu Kontroli Zarządczej odbyło się 3 marca.',
+      'Zespół Zarządzania Kryzysowego obradował w nocy.',
+      'Zespół Pieśni i Tańca „Mazowsze” wystąpi w hali.',
+      'Projekt prowadzi zespół Nowaka z Politechniki.',
+      'Zespół Nowaka rozpoznał problem z instalacją.',
+      'W trakcie kontroli stwierdzono naruszenie przepisów o zamówieniach publicznych.',
+      'Stwierdzono uszkodzenie dachu oraz pęknięcie ściany nośnej budynku.',
+      'Zakład stwierdził zużycie łożysk i złamanie wału silnika.',
+      'Kontrola stwierdziła wady prawne umowy oraz wadę fizyczną towaru.',
+      'Świadek rozpoznała oskarżonego na okazanym zdjęciu.',
+      'Sąd rozpoznał apelację pozwanego na rozprawie.',
+      'Gmina ma rozpoznane potrzeby mieszkańców w zakresie transportu.',
+      'Rozpoznano u niego talent muzyczny i skierowano do szkoły.',
+      'Firma ma zdiagnozowane problemy z płynnością finansową.',
+      'Prokuratura prowadzi postępowanie z powodu podejrzenia popełnienia przestępstwa.',
+      'Diagnoza potrzeb rynku pracy w powiecie została opracowana przez urząd.',
+      'W wywiadzie dla radia burmistrz mówił o grypie.',
+      'W wywiadzie środowiskowym ustalono, że rodzina mieszka w trudnych warunkach.',
+      'Pracownik był nieobecny z powodu choroby.',
+      'Wniosek złożono z powodu choroby dziecka.',
+      'Mieszkaniec skarży się na brak informacji z urzędu.',
+      'Pan Kowalski skarży się na hałas z warsztatu sąsiada.',
+      'W piśmie wskazano na zaburzenia w dostawach energii z powodu awarii sieci.',
+      'Objawy kryzysu gospodarczego są widoczne w regionie.',
+      'Stan po remoncie: lokal zdatny do zamieszkania.',
+      'Choroba holenderska gospodarki to znane zjawisko.',
+      'Firma ma anemię inwestycyjną, a prezes to potwierdził.',
+      'Pan Kowalski ma alergię na biurokrację.',
+      'Skarżący wskazał na nostalgię i sympatię do dawnych czasów.',
+      'Prognoza pogody zapowiada opady. Diagnoza usterki zajęła mechanikowi dwa dni.',
+      'Wirtuoza fortepianu przywitała publiczność. Glukoza i fruktoza to cukry.',
+      'Odra wylała w okolicach Wrocławia.',
+      // grupa, temat, przepis, statystyka
+      'Wiele osób choruje na grypę w sezonie jesiennym.',
+      'Objawy grypy to gorączka i kaszel.',
+      'Zespół Aspergera to całościowe zaburzenie rozwoju.',
+      'Dzieci z autyzmem mają prawo do wczesnego wspomagania rozwoju.',
+      'Rodzice dzieci z ADHD spotkają się w szkole.',
+      'Pani Kowalska prowadzi terapię dzieci z autyzmem.',
+      'Pani Kowalska jest specjalistką od autyzmu i dysleksji.',
+      'Dyrektor szpitala, Pan Jan Nowak, omówił leczenie cukrzycy u dzieci.',
+      'Sklep medyczny oferuje aparaty słuchowe i implanty ślimakowe.',
+      'Rozporządzenie określa wykaz chorób zawodowych.',
+      'Leczenie nowotworów w Polsce finansuje NFZ.',
+      'Hearing loss affects many people and employers should provide hearing aids.',
+      // choroba jako temat wypowiedzi albo działania dla wszystkich
+      'Radna zapytała o szczepienia na COVID-19 w szkołach.',
+      'Pan Kowalski, pracownik sanepidu, omawiał zasady izolacji przy COVID-19.',
+      'Pani Nowak napisała artykuł o nadciśnieniu tętniczym.',
+      'Uczeń przygotował referat o chorobie Alzheimera.',
+      // obserwacja zachowania to nie rozpoznanie (polityka)
+      'Pracownik jest drażliwy i ma trudności z koncentracją.',
+      // kod niebędący kodem choroby
+      'Sygnatura akt II K 123/24, sala A12, kod rabatowy F32A.',
+      'Rozpoznanie\nSąd zważył, co następuje.',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+});
+
+test('zdrowie klasa 4: fraza rozpoznania w czasie liniowym', () => {
+  const time = (s: string): number => {
+    const t0 = performance.now();
+    redactPII(s, { types: ['ZDROWIE'] });
+    return performance.now() - t0;
+  };
+  const block = (n: number): string =>
+    Array.from(
+      { length: n },
+      () =>
+        'U syna rozpoznano zespół hiperkinetyczny z zaburzeniami uwagi (F90.0) i alergię na białko mleka krowiego; stwierdzono złamanie trzonu kości piszczelowej lewej, a Zespół Szkół stwierdził naruszenie zasad z powodu awarii.',
+    ).join(' ');
+  redactPII(block(50));
+  const t1 = Math.min(time(block(250)), time(block(250)));
+  const t4 = time(block(1000));
+  expect(t4 / t1).toBeLessThan(6);
+});
+
+test('zdrowie klasa 4: rozpoznanie w zdaniu ogólnym zostaje (warunek, zdanie względne reguły, kwantyfikator, grupa, dane zbiorcze)', () => {
+  keep(
+    [
+      // warunek: przypadek możliwy, a nie fakt o osobie
+      'Jeżeli u dziecka zdiagnozowano autyzm, rodzice mogą złożyć wniosek o wczesne wspomaganie.',
+      'Jeśli u pracownika stwierdzono pylicę płuc, pracodawca zawiadamia inspektora pracy.',
+      'Gdy u pacjenta rozpoznano gruźlicę, lekarz zgłasza to do państwowej inspekcji sanitarnej.',
+      'O ile u ubezpieczonego rozpoznano chorobę zawodową, przysługuje mu jednorazowe odszkodowanie.',
+      'W przypadku gdy u kandydata stwierdzono padaczkę, lekarz wydaje orzeczenie o przeciwwskazaniach.',
+      // zdanie względne reguły: podmiot ogólny i orzeczenie bez zdarzenia z przeszłości
+      'Uczeń, u którego rozpoznano dysleksję, może pisać egzamin w wydłużonym czasie.',
+      'Pracownik, u którego stwierdzono chorobę zawodową, ma prawo do jednorazowego odszkodowania.',
+      'Dziecko, u którego zdiagnozowano ADHD, otrzymuje dostosowanie warunków egzaminu.',
+      'Ktoś, u kogo rozpoznano anemię, powinien skonsultować dietę.',
+      // kwantyfikator i grupa przed kotwicą
+      'Każdy uczeń z rozpoznanym ADHD otrzymuje dostosowanie warunków egzaminu.',
+      'Każde dziecko z rozpoznanym autyzmem ma prawo do wczesnego wspomagania rozwoju.',
+      'Osobom z rozpoznaną padaczką nie wydaje się prawa jazdy bez opinii neurologa.',
+      'Pacjentom z rozpoznanym zespołem Downa przysługuje opieka koordynowana.',
+      // dane zbiorcze
+      'W tym roku zdiagnozowano 45 przypadków boreliozy w gminie.',
+      'W 2025 r. w powiecie rozpoznano 312 przypadków gruźlicy.',
+      'Według danych NFZ u co trzeciego seniora rozpoznano nadciśnienie.',
+      'Sanepid odnotował wzrost zachorowań na boreliozę w powiecie.',
+      // ten sam strażnik przy chorobie z listy fraz
+      'Jeżeli u dziecka zdiagnozowano astmę, rodzice mogą złożyć wniosek.',
+      'Uczeń, u którego rozpoznano cukrzycę, może korzystać z dodatkowych przerw.',
+      'Osobom z rozpoznaną cukrzycą typu 1 przysługuje refundacja sensorów.',
+      'W 2025 r. rozpoznano 312 przypadków cukrzycy ciążowej.',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+});
+
+test('zdrowie klasa 4: skrót choroby w nazwie własnej i zespół ludzi z nazwiskiem zostają', () => {
+  keep(
+    [
+      'Dr Anna Lis pracuje w IBS PAN od 2019 r.',
+      'Pani Nowak przyjechała z Instytutu IBS w Warszawie na konsultacje.',
+      'Pan Kowalski gra w klubie RZS Rzeszów od trzech sezonów.',
+      'Pan Nowak jest prezesem spółki OCD Consulting.',
+      'Pani Kowalska zrezygnowała z pracy z powodu SMA Solar.',
+      'Przedstawiciel Fundacji AIDS Healthcare odwiedził szpital.',
+      'Pani Anna Lis pracuje w zespole Mazura na oddziale kardiologii.',
+      'Pan Jan Kos dołączył do zespołu Nowaka w poradni rehabilitacyjnej.',
+      'Pielęgniarka z zespołu Wójcika dyżuruje w środy w szpitalu.',
+      'Pan Adam Lis jest członkiem zespołu Kubiaka w przychodni rejonowej.',
+      'Pan Adam Lis współpracuje z zespołem Kubiaka w szpitalu powiatowym.',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+});
+
+test('zdrowie klasa 4: konkretna osoba przy warunku, zdaniu względnym, skrócie i zespole z nazwiskiem zostaje zakryta', () => {
+  const Z = '[DANE O ZDROWIU]';
+  const cases: [string, string][] = [
+    // zdarzenie z przeszłości w zdaniu głównym, krewny, osoba wskazana w zdaniu
+    ['Gdy u syna zdiagnozowano autyzm, rozpoczęliśmy terapię.', `Gdy u syna zdiagnozowano ${Z}, rozpoczęliśmy terapię.`],
+    ['Pacjentka, u której rozpoznano boreliozę, została przyjęta na oddział.', `Pacjentka, u której rozpoznano ${Z}, została przyjęta na oddział.`],
+    ['W przypadku syna rozpoznano zespół Aspergera.', `W przypadku syna rozpoznano ${Z}.`],
+    ['Jeżeli chodzi o syna, w zeszłym roku zdiagnozowano u niego autyzm.', `Jeżeli chodzi o syna, w zeszłym roku zdiagnozowano u niego ${Z}.`],
+    ['Chłopca przyjęła lekarka, która rozpoznała zespół hiperkinetyczny (F90.0).', `Chłopca przyjęła lekarka, która rozpoznała ${Z}.`],
+    // skrót przy osobie, także obok poradni bez nazwy własnej
+    ['Pani Nowak ma rozpoznane ADHD od 2020 r.', `Pani Nowak ma rozpoznane ${Z} od 2020 r.`],
+    ['Syn jest pod opieką poradni z powodu RZS.', `Syn jest pod opieką poradni z powodu ${Z}.`],
+    // zespół z nazwiskiem po kotwicy rozpoznania albo przyczyny i przy osobie, która go ma
+    ['U syna rozpoznano zespół Aspergera.', `U syna rozpoznano ${Z}.`],
+    ['Ze względu na zespół Aspergera pacjent wymagał obecności matki przy badaniach.', `Ze względu na ${Z} pacjent wymagał obecności matki przy badaniach.`],
+    ['Syn ma zespół Tourette’a.', `Syn ma ${Z}.`],
+    ['Dziecko z zespołem Downa uczęszcza do przedszkola integracyjnego.', `Dziecko z ${Z} uczęszcza do przedszkola integracyjnego.`],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t, { types: ['ZDROWIE'] }).redacted, t).toBe(want);
+});
+
+test('zdrowie klasa 4: maski rozpoznań podstawiane w czasie liniowym (długi wiersz bez kropek)', () => {
+  const time = (s: string): number => {
+    const t0 = performance.now();
+    redactPII(s, { types: ['ZDROWIE'] });
+    return performance.now() - t0;
+  };
+  for (const unit of ['W wywiadzie: astma. ', 'W wywiadzie nadciśnienie, ']) {
+    const text = (n: number): string => unit.repeat(Math.ceil(n / unit.length));
+    time(text(20_000));
+    const t1 = Math.min(time(text(50_000)), time(text(50_000)));
+    const t4 = time(text(200_000));
+    expect(t4 / t1, unit).toBeLessThan(6);
+  }
+});
+
+test('zdrowie klasa 4: rdzeń polski z „-oz-” (wóz, mróz) i przenośny „niedorozwój” nie są chorobą', () => {
+  keep(
+    [
+      // „-wóz-” (pojazd, transport) i „-mróz-” przed „-oza”: słownictwo gmin, przetargów i rolnictwa
+      'Z uwagi na przewozy szkolne Pan Nowak zmienił godziny pracy.',
+      'Pani Nowak odpowiada za przewozy.',
+      'Pan Kowalski odpowiada za przewozy pasażerskie w spółce.',
+      'Na skutek opóźnień w przewozie Pan Nowak spóźnił się do pracy.',
+      'Gmina zleciła przewozy uczniów niepełnosprawnych do szkół.',
+      'Pan Nowak kupił dwa betonowozy i szambowozy dla firmy.',
+      'Pani Kowalska zwróciła uwagę na przymrozy w maju.',
+      'Z powodu przymrozów rolnik stracił plony.',
+      'Pani Kowalska czyta prozę i opowiada o grozie wojny.',
+      // „niedorozwój” infrastruktury, sieci i rynku w piśmie samorządu
+      'Wójt wskazał, że z powodu niedorozwoju sieci kanalizacyjnej Pan Nowak nie może się przyłączyć.',
+      'Pan Kowalski skarży się na niedorozwój komunikacji publicznej w gminie.',
+      'Z powodu niedorozwoju rynku pracy w powiecie Pan Nowak wyjechał.',
+      'Strategia gminy wskazuje niedorozwój infrastruktury drogowej jako główny problem.',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+  const Z = '[DANE O ZDROWIU]';
+  const cases: [string, string][] = [
+    // choroba na „-oza” po rdzeniu greckim zostaje rozpoznaniem, także w złożeniu z cukrem
+    ['U pacjenta rozpoznano boreliozę.', `U pacjenta rozpoznano ${Z}.`],
+    ['Pani Nowak choruje na sarkoidozę.', `Pani Nowak choruje na ${Z}.`],
+    ['U pacjentki stwierdzono endometriozę i skoliozę.', `U pacjentki stwierdzono ${Z}.`],
+    ['Pan Kowalski ma zdiagnozowaną toksoplazmozę.', `Pan Kowalski ma zdiagnozowaną ${Z}.`],
+    // niedorozwój z rodzajem albo narządem
+    ['U syna rozpoznano niedorozwój umysłowy w stopniu lekkim.', `U syna rozpoznano ${Z} w stopniu lekkim.`],
+    ['Pan Nowak ma niedorozwój kończyny dolnej prawej.', `Pan Nowak ma ${Z}.`],
+    ['Stwierdzono u dziecka niedorozwój nerki lewej.', `Stwierdzono u dziecka ${Z}.`],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t, { types: ['ZDROWIE'] }).redacted, t).toBe(want);
+});
+
+test('zdrowie klasa 4: zespół z nazwiskiem po „ma” to choroba tylko u osoby i bez dopowiedzenia organizacyjnego', () => {
+  keep(
+    [
+      'Szkoła ma zespół Kubiaka do obsługi zawodów.',
+      'Pan Kowalski ma zespół Kowalczyka w dziale IT.',
+      'Pani Kowalska ma zespół Nowaka do pomocy przy inwentaryzacji.',
+      'Dyrektor ma zespół Nowaka w dziale kadr.',
+      'Urząd miał zespół Mazura do spraw zamówień.',
+      'Firma posiada zespół Wójcika na budowie w Gdańsku.',
+      'Pan Nowak ma zespół Lisa z biura projektów.',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+  const Z = '[DANE O ZDROWIU]';
+  const cases: [string, string][] = [
+    ['Syn ma zespół Aspergera.', `Syn ma ${Z}.`],
+    ['Pan Nowak ma zespół Tourette’a.', `Pan Nowak ma ${Z}.`],
+    ['Pani Kowalska ma zespół Downa i uczęszcza na zajęcia.', `Pani Kowalska ma ${Z} i uczęszcza na zajęcia.`],
+    ['Córka ma zespół Retta od urodzenia.', `Córka ma ${Z} od urodzenia.`],
+    ['Wnuczka ma zespół Williamsa.', `Wnuczka ma ${Z}.`],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t, { types: ['ZDROWIE'] }).redacted, t).toBe(want);
+});
+
+test('zdrowie klasa 4: przepis o roli w liczbie pojedynczej z rozpoznaniem zostaje jawny', () => {
+  keep(
+    [
+      'Pracownik z rozpoznaną depresją może skorzystać z urlopu.',
+      'Pracodawca może skierować pracownika z rozpoznaną depresją na badanie.',
+      'Kandydat z rozpoznaną padaczką nie może uzyskać prawa jazdy.',
+      'Osoba z rozpoznanym autyzmem ma prawo do asystenta.',
+      'Dziecku z rozpoznanym ADHD przysługuje pomoc psychologiczno-pedagogiczna.',
+      'Uczeń z rozpoznaną dysleksją może pisać egzamin dłużej.',
+      'Lekarz orzecznik może uznać osobę z rozpoznaną schizofrenią za niezdolną.',
+      'Pacjent z podejrzeniem udaru jest przewożony na SOR.',
+      'Pacjent z podejrzeniem zawału serca zostaje skierowany na oddział kardiologii.',
+      'Uczeń z dysleksją powinien mieć wydłużony czas pisania.',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+  const Z = '[DANE O ZDROWIU]';
+  const cases: [string, string][] = [
+    // osoba z nazwy, krewny, pierwsza osoba, zdarzenie bez orzeczenia reguły, strona postępowania
+    ['Pan Nowak z rozpoznaną depresją może skorzystać z urlopu.', `Pan Nowak z rozpoznaną ${Z} może skorzystać z urlopu.`],
+    ['Syn z rozpoznanym autyzmem ma prawo do asystenta.', `Syn z rozpoznanym ${Z} ma prawo do asystenta.`],
+    ['Moja córka z rozpoznanym autyzmem ma prawo do asystenta.', `Moja córka z rozpoznanym ${Z} ma prawo do asystenta.`],
+    ['Pracownik z rozpoznaną depresją wrócił do pracy w marcu.', `Pracownik z rozpoznaną ${Z} wrócił do pracy w marcu.`],
+    ['Pacjent z rozpoznaną cukrzycą zgłosił się na wizytę.', `Pacjent z rozpoznaną ${Z} zgłosił się na wizytę.`],
+    ['Wnioskodawczyni z rozpoznaną depresją może mieć trudności z dojazdem.', `Wnioskodawczyni z rozpoznaną ${Z} może mieć trudności z dojazdem.`],
+    // orzeczenie reguły po spójniku to nowe orzeczenie o tej samej osobie
+    ['Pracownik z rozpoznaną depresją wrócił do pracy i może pracować zdalnie.', `Pracownik z rozpoznaną ${Z} wrócił do pracy i może pracować zdalnie.`],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t, { types: ['ZDROWIE'] }).redacted, t).toBe(want);
 });

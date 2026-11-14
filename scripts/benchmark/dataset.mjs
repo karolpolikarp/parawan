@@ -1265,6 +1265,28 @@ export function buildDataset() {
   neg('Klient zgłosił się do szpitala z reklamacją dotyczącą faktury. He had a stroke of genius during the negotiations.', ['do szpitala z reklamacją', 'a stroke of genius']);
   str('Konkubent przyznał, że dwa razy trafił do izby wytrzeźwień. Pani Ewa Lis, magazynierka, przebywa na zwolnieniu lekarskim do 16 maja.', ['izby wytrzeźwień', 'zwolnieniu lekarskim do 16 maja'], ['Konkubent przyznał', 'magazynierka, przebywa na']);
 
+  // ─────────────────────────────────────────────
+  // ROZPOZNANIE SPOZA LISTY CHORÓB (seria 2, klasa 4): kotwica rozpoznania i fraza do końca, nazwa
+  // choroby po budowie słowa (-oza, -algia, dys-, niedo-), zespół z nazwiskiem, kod ICD-10 i ICD-11
+  // w zdaniu, uraz z częścią ciała. Ujemne: zespół ludzi i nazwa szkoły, stwierdzenie urzędowe,
+  // rozpoznanie sprawy i sprawcy, przenośnia, grupa i temat.
+  str('U wnioskodawczyni rozpoznano toczeń rumieniowaty układowy. Syn stron ma zdiagnozowaną mukowiscydozę.', ['toczeń rumieniowaty układowy', 'mukowiscydozę'], ['U wnioskodawczyni rozpoznano', 'Syn stron ma zdiagnozowaną']);
+  str('Małoletni ma rozpoznane zaburzenia ze spektrum autyzmu (6A02). Psychiatra rozpoznała zespół hiperkinetyczny z zaburzeniami uwagi (F90.0).', ['zaburzenia ze spektrum autyzmu', '6A02', 'zespół hiperkinetyczny', 'F90.0'], ['Małoletni ma rozpoznane', 'Psychiatra rozpoznała']);
+  str('Pacjentka cierpi na fibromialgię. Babcia ma demencję i niedowład lewostronny. Uczennica ma orzeczenie ze względu na zespół Aspergera.', ['fibromialgię', 'demencję', 'niedowład lewostronny', 'zespół Aspergera'], ['Pacjentka cierpi na', 'Babcia ma', 'ze względu na']);
+  str('Pacjent lat 32. W RTG stwierdzono złamanie trzonu kości piszczelowej lewej. Uczestniczka uskarżała się na ból karku.', ['złamanie trzonu kości piszczelowej lewej', 'ból karku'], ['W RTG stwierdzono', 'Uczestniczka uskarżała się na']);
+  neg('Zespół Szkół nr 2 ogłasza nabór. Projekt prowadzi zespół Nowaka. W trakcie kontroli stwierdzono naruszenie przepisów i pęknięcie ściany nośnej.', ['Zespół Szkół', 'zespół Nowaka', 'stwierdzono naruszenie', 'pęknięcie ściany nośnej']);
+  neg('Świadek rozpoznała oskarżonego. Sąd rozpoznał apelację. Rozpoznano u niego talent muzyczny. Pracownik był nieobecny z powodu choroby.', ['rozpoznała oskarżonego', 'rozpoznał apelację', 'talent muzyczny', 'z powodu choroby']);
+  neg('Firma ma anemię inwestycyjną. Wiele osób choruje na grypę. Dzieci z autyzmem mają prawo do wsparcia. Pani Kowalska jest specjalistką od dysleksji.', ['anemię inwestycyjną', 'choruje na grypę', 'Dzieci z autyzmem', 'specjalistką od dysleksji']);
+  // zdanie ogólne po kotwicy rozpoznania: warunek, zdanie względne reguły, kwantyfikator, dane zbiorcze
+  neg('Jeżeli u dziecka zdiagnozowano autyzm, rodzice mogą złożyć wniosek. Uczeń, u którego rozpoznano dysleksję, może pisać egzamin dłużej. Każdy uczeń z rozpoznanym ADHD otrzymuje dostosowanie. W 2025 r. w powiecie rozpoznano 312 przypadków gruźlicy.', ['zdiagnozowano autyzm', 'rozpoznano dysleksję', 'rozpoznanym ADHD', 'przypadków gruźlicy']);
+  // skrót choroby w nazwie własnej i zespół ludzi z nazwiskiem w piśmie szpitala
+  str('Dr Anna Lis pracuje w IBS PAN. Pan Kowalski gra w klubie RZS Rzeszów. Pielęgniarka Ewa Mak pracuje w zespole Mazura na oddziale kardiologii i dyżuruje w szpitalu.', ['Anna', 'Lis', 'Kowalski', 'Ewa', 'Mak'], ['IBS PAN', 'RZS Rzeszów', 'zespole Mazura']);
+  // rdzeń polski z „-oz-” (wóz, mróz), przenośny „niedorozwój”, zespół ludzi po „ma”, przepis o roli w liczbie pojedynczej
+  str('U syna rozpoznano niedorozwój umysłowy. Pani Nowak choruje na sarkoidozę. Córka ma zespół Retta.', ['niedorozwój umysłowy', 'sarkoidozę', 'zespół Retta'], ['U syna rozpoznano', 'choruje na', 'Córka ma']);
+  neg('Z uwagi na przewozy szkolne Pan Nowak zmienił godziny pracy. Pan Kowalski kupił dwa betonowozy. Pani Lis zwróciła uwagę na przymrozy w maju.', ['przewozy szkolne', 'betonowozy', 'przymrozy']);
+  neg('Z powodu niedorozwoju sieci kanalizacyjnej Pan Nowak nie może się przyłączyć. Szkoła ma zespół Kubiaka do obsługi zawodów. Pani Kowalska ma zespół Nowaka do pomocy.', ['niedorozwoju sieci kanalizacyjnej', 'zespół Kubiaka', 'zespół Nowaka']);
+  neg('Pracownik z rozpoznaną depresją może skorzystać z urlopu. Dziecku z rozpoznanym ADHD przysługuje pomoc. Pacjent z podejrzeniem udaru jest przewożony na SOR.', ['rozpoznaną depresją', 'rozpoznanym ADHD', 'podejrzeniem udaru']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {

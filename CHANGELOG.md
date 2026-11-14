@@ -204,6 +204,69 @@ działają na GitHubie od chwili wypchnięcia tagów.
   „zwolnienie dyscyplinarne”, bezosobowe „Na tym oddziale leczy się seniorów”, lek przy instytucji
   („Hurtownia przyjmuje Ibuprom”) i angielskie „a stroke of genius”, „His access was disabled”,
   „the hospital cafeteria”, „the disability pension reform”.
+- **Rozpoznanie choroby znika także wtedy, gdy choroby nie ma na liście Parawana.** Po słowach, którymi
+  pisma podają rozpoznanie („rozpoznano”, „zdiagnozowano u niej”, „ma rozpoznane”, „z rozpoznanym”,
+  „w wywiadzie:”, „stwierdzono u powoda”, „z powodu”, „ze względu na”, „leczenie”, „skarży się na”,
+  „stan po”) znika nazwa choroby do końca frazy, razem ze stopniem, dopowiedzeniem i kodem: „U
+  wnioskodawczyni rozpoznano toczeń rumieniowaty układowy”, „ma rozpoznane zaburzenia ze spektrum
+  autyzmu (6A02)”, „rozpoznała zespół hiperkinetyczny z zaburzeniami uwagi (F90.0)”, „z powodu
+  zaawansowanej choroby otępiennej”, „z powodu depresji nawracającej (F33.1)”, „z powodu
+  zwolnienia lekarskiego (grypa z powikłaniami)”, „uskarżała się na ból karku”. Nazwę choroby
+  Parawan poznaje też po budowie słowa („retinopatia”, „fibromialgia”, „mukowiscydoza”, „dysleksja”,
+  „niedowład”, „niedosłuch”, „demencja”), po skrócie („ADHD”, „PTSD”, „POChP”), po nazwisku w nazwie
+  zespołu („zespół Aspergera”, „zespół Downa”) i po określeniu choroby albo zaburzeń („choroba
+  nerek”, „zaburzenia integracji sensorycznej”, „opóźniony rozwój mowy”, „alergia na białko mleka
+  krowiego”). Choroba z listy znika przy konkretnej osobie także bez słowa medycznego („Pani Tereska
+  ma nadciśnienie tętnicze”, „mój syn ma autyzm”, „Babcia ma demencję”), uraz z wyrazem między nazwą
+  a częścią ciała i z końcem wiersza („złamanie trzonu kości piszczelowej lewej z przemieszczeniem”,
+  „stłuczenie odcinka szyjnego kręgosłupa”), wiersz pod nagłówkiem „Rozpoznanie” bez dwukropka
+  w opinii poradni, kod ICD-10 z podkategorią w nawiasie i kod ICD-11 po kotwicy („rozpoznanie
+  6A02”), a po angielsku „underwent treatment for acute lymphoblastic leukaemia” i „a moderate
+  hearing impairment”. Zakrywana jest sama nazwa: kotwica, osoba i reszta zdania zostają. Na części
+  roboczej drugiej serii zakrytych danych jest 90,1% zamiast 87,3% (dane o zdrowiu: 36 wycieków
+  zamiast 74), bez nowych nadmiarowych zakryć.
+- **Zespół ludzi, stwierdzenie urzędowe i przenośnia zostają jawne.** „Zespół Szkół nr 2”, „Zespół
+  Zarządzania Kryzysowego”, „Zespół Pieśni i Tańca”, „zespół Nowaka rozpoznał
+  problem”, „stwierdzono naruszenie przepisów”, „pęknięcie ściany nośnej”, „złamanie wału silnika”,
+  „wady prawne umowy”, „Świadek rozpoznała oskarżonego”, „Sąd rozpoznał apelację”, „ma rozpoznane
+  potrzeby mieszkańców”, „rozpoznano u niego talent muzyczny”, „z powodu podejrzenia popełnienia
+  przestępstwa”, „W wywiadzie dla radia”, „wywiad środowiskowy”, „nieobecny z powodu choroby”,
+  „skarży się na hałas”, „anemia inwestycyjna”, „alergia na biurokrację”, „diagnoza”, „prognoza”,
+  „nostalgia”, „sympatia”, „glukoza”, rzeka Odra i kod niebędący kodem choroby („sala A12”, „kod
+  rabatowy F32A”). Zostaje też choroba jako temat albo przy grupie („Wiele osób choruje na grypę”,
+  „Objawy grypy to gorączka i kaszel”, „Dzieci z autyzmem mają prawo…”, „leczenie cukrzycy
+  u dzieci”, „poradnia przyjmuje pacjentów z cukrzycą typu 1 i astmą”), specjalista od choroby
+  („specjalistka od autyzmu i dysleksji”) i obserwacja zachowania bez rozpoznania („jest drażliwy
+  i ma trudności z koncentracją”). „O każdej porze” nie robi już z opisu faktu przepisu. Słowa
+  z polskim rdzeniem przed „-oza” nie są chorobą: „przewozy szkolne”, „odpowiada za przewozy
+  pasażerskie”, „opóźnienia w przewozie”, „betonowozy i szambowozy”, „przymrozy w maju”. „Niedorozwój”
+  jest chorobą tylko z rodzajem albo narządem („niedorozwój umysłowy”, „niedorozwój kończyny
+  dolnej”), więc „niedorozwój sieci kanalizacyjnej”, „rynku pracy” i „komunikacji publicznej” w piśmie
+  gminy zostają. Zespół z nazwiskiem po „ma” jest chorobą tylko u osoby i bez dopowiedzenia
+  o pracy: „Syn ma zespół Aspergera” znika, a „Szkoła ma zespół Kubiaka do obsługi zawodów”, „Pan
+  Kowalski ma zespół Kowalczyka w dziale IT” i „ma zespół Nowaka do pomocy przy inwentaryzacji”
+  zostają.
+- **Rozpoznanie w przepisie, regule i statystyce zostaje jawne, także po słowie „rozpoznano”.**
+  Warunek („Jeżeli u dziecka zdiagnozowano autyzm, rodzice mogą złożyć wniosek”, „Gdy u pacjenta
+  rozpoznano gruźlicę, lekarz zgłasza…”), zdanie o każdym takim przypadku („Uczeń, u którego
+  rozpoznano dysleksję, może pisać egzamin dłużej”, „Pracownik, u którego stwierdzono chorobę
+  zawodową, ma prawo do odszkodowania”, „Każdy uczeń z rozpoznanym ADHD otrzymuje dostosowanie”,
+  „Osobom z rozpoznaną padaczką nie wydaje się prawa jazdy”) i dane zbiorcze („rozpoznano 312
+  przypadków gruźlicy”, „wzrost zachorowań na boreliozę”) nie mówią o konkretnej osobie. Ta sama
+  zasada działa dla chorób z listy („Jeżeli u dziecka zdiagnozowano astmę…”), a także dla roli
+  w liczbie pojedynczej z orzeczeniem przepisu: „Pracownik z rozpoznaną depresją może skorzystać
+  z urlopu”, „Pracodawca może skierować pracownika z rozpoznaną depresją na badanie”, „Kandydat
+  z rozpoznaną padaczką nie może uzyskać prawa jazdy”, „Dziecku z rozpoznanym ADHD przysługuje
+  pomoc”, „Pacjent z podejrzeniem udaru jest przewożony na SOR”. Przy osobie z nazwy, krewnym
+  i zdarzeniu choroba dalej znika („Syn z rozpoznanym autyzmem ma prawo do asystenta”, „Pracownik
+  z rozpoznaną depresją wrócił do pracy w marcu”). Zdarzenie zostaje
+  zakryte: „Gdy u syna zdiagnozowano autyzm, rozpoczęliśmy terapię”, „Pacjentka, u której rozpoznano
+  boreliozę, została przyjęta na oddział”. Skrót choroby w nazwie instytucji, firmy albo klubu
+  („IBS PAN”, „Instytut IBS”, „klub RZS Rzeszów”, „OCD Consulting”, „Fundacja AIDS Healthcare”)
+  i zespół ludzi z nazwiskiem w piśmie szpitala („pracuje w zespole Mazura na oddziale kardiologii”,
+  „członek zespołu Kubiaka w przychodni”) też zostają; zespół z nazwiskiem jest chorobą po słowie
+  rozpoznania albo przyczyny i przy osobie, która go ma („rozpoznano zespół Downa”, „ze względu na
+  zespół Aspergera”, „dziecko z zespołem Retta”).
 
 ## v0.47.0 — 2026-11-14
 
