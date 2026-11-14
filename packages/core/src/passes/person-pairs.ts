@@ -297,7 +297,33 @@ export function passProtectFictional(ctx: RedactCtx): void {
     if (prev && (TITLE_WORDS.has(prev.toLowerCase()) || prev.toLowerCase() === 'panem' || (/^\p{Lu}/u.test(prev) && isFirstNameLike(prev)))) return m;
     return protectSpan(ctx, m);
   });
+  // „Tarnowski” jest i nazwiskiem, i przymiotnikiem od Tarnowa. Po rzeczowniku urzędu albo geografii
+  // („Starosta Tarnowski”, „Ziemi Tarnowskiej”, „Powiatu Tarnowskiego”) i w „Tarnowskich Górach” to
+  // przymiotnik, tak jak „Starosta Krakowski”. Po tytule, roli osoby czy imieniu („Sędzia Tarnowski”,
+  // „Pan Tarnowski”, „Jan Tarnowski”) zostaje nazwiskiem. „Pan Starosta Tarnowski” to forma zwracania
+  // się do starosty tarnowskiego, więc jak „Pan Starosta Krakowski” zostaje jawne.
+  ctx.text = ctx.text.replace(RE_GEO_ADJ_SURNAME, (m, head: string | undefined, adj: string | undefined, _gory: string | undefined, offset: number, t: string) => {
+    if (head && adj) {
+      const prev = RE_PREV_TOKEN.exec(t.slice(Math.max(0, offset - 40), offset))?.[1];
+      // „Anna Gmina Tarnowska”: imię przed rzeczownikiem, więc to osoba z nazwiskiem dwuczłonowym
+      if (prev && /^\p{Lu}/u.test(prev) && isFirstNameLike(prev)) return m;
+      return `${m.slice(0, m.length - adj.length)}${protectSpan(ctx, adj)}`;
+    }
+    return protectSpan(ctx, m);
+  });
 }
+
+// Rzeczowniki, po których „Tarnowsk*” jest przymiotnikiem: jednostki i urzędy samorządu, geografia,
+// instytucje regionalne. Bez ról osób („Sędzia”, „Prezes”, „Dyrektor”), bo tam stoi nazwisko.
+const GEO_ADJ_HEADS =
+  'starost\\p{L}*|powiat\\p{L}*|ziemi[aęą]?|region\\p{L}*|gmin(?:a|y|ie|ę|ą|ach|om)?|diecezj[aięą]|' +
+  'archidiecezj[aięą]|dekanat\\p{L}*|wie[sś]|wsi|dąbrow(?:a|y|ie|ę|ą)|szpital\\p{L}*|kolej(?:e|i|ą|ki)?|' +
+  'okręg\\p{L}*|obwód|obwodu|ośrodk\\p{L}*|ośrodek|sanktuari\\p{L}*|pogórz\\p{L}*|kotlin\\p{L}*';
+const TARNOW_ADJ = 'Tarnowsk(?:i|a|ie|iego|iej|iemu|im|imi|ich|ą)';
+const RE_GEO_ADJ_SURNAME = new RegExp(
+  `(?<![\\p{L}\\p{N}])(?:(${GEO_ADJ_HEADS})[ \\t]+(${TARNOW_ADJ})|(${TARNOW_ADJ})[ \\t]+Gór(?:y|ach|om|ami|ze))(?![\\p{L}\\p{N}])`,
+  'giu',
+);
 // Postacie historyczne z dwoma imionami w dopełniaczu („za panowania Zygmunta Augusta"): bez kotwicy
 // osoby za parą to nie strona pisma.
 const HISTORIC_DOUBLE_NAMES_GEN = new Set<string>(

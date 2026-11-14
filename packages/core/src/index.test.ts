@@ -10166,3 +10166,29 @@ test('G7 weryfikacja: pułapki wokół siedziby, miejscowości przed kodem i lok
     ['Pan Jan Nowak, Urząd Miasta Łodzi, ul. Piotrkowska 104 m. 5', `Pan ${N}, Urząd Miasta ${C}, ${A}`],
   ]);
 });
+
+test('„Tarnowski” po urzędzie i w geografii to przymiotnik, po roli osoby i imieniu nazwisko', () => {
+  keep([
+    'Starosta Tarnowski wydał decyzję w sprawie drogi.',
+    'Pismo do Starosty Tarnowskiego z dnia 3 marca.',
+    'Pan Starosta Tarnowski otrzymał pismo.',
+    'Starosta Krakowski i Starosta Tarnowski podpisali porozumienie.',
+    'Ziemia Tarnowska słynie z sadów.',
+    'Rada Powiatu Tarnowskiego przyjęła uchwałę.',
+    'Urząd Gminy Tarnowskiej wydał zaświadczenie.',
+    'Ksiądz z Diecezji Tarnowskiej odprawił mszę.',
+    'Kolej Tarnowska kursuje codziennie.',
+    'W Tarnowskich Górach jest kopalnia.',
+  ]);
+  masked([
+    ['Sędzia Tarnowski oddalił powództwo.', `Sędzia ${N} oddalił powództwo.`],
+    ['Pan Tarnowski złożył wniosek.', `Pan ${N} złożył wniosek.`],
+    ['Prezes Tarnowski zwołał zebranie.', `Prezes ${N} zwołał zebranie.`],
+    ['Sprawę Tarnowskiego przekazano do sądu.', `Sprawę ${N} przekazano do sądu.`],
+    ['Wniosek złożyła Anna Tarnowska.', `Wniosek złożyła ${N}.`],
+    ['Rozmawiałem z Tarnowskim o umowie.', `Rozmawiałem z ${N} o umowie.`],
+    ['Wójt Gminy Tarnowskiej Jan Kowalski podpisał.', `Wójt Gminy Tarnowskiej ${N} podpisał.`],
+    ['Kierownik Ośrodka Tarnowskiego, Adam Tarnowski.', `Kierownik Ośrodka Tarnowskiego, ${N}.`],
+    ['Jan Kowalski, ul. Polna 3, 42-600 Tarnowskie Góry', `${N}, ${A}, [KOD-POCZTOWY] ${C}`],
+  ]);
+});

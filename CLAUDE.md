@@ -126,9 +126,7 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 1. Wybór y/u (kolory kategorii jak w aplikacji czy nowa paleta), potem `DESIGN.md` i przeniesienie
    próbki do `apps/landing` na gałęzi `feat/landing-sosna`. Powrót: odpowiedź użytkownika.
 2. Przy wyborze „u”: nowa paleta kategorii w `apps/web/src/style.css` (kolory w handoffie).
-3. „tarnowski” w słowniku nazwisk i na liście przymiotników: rozróżnienie przez regułę kontekstową
-   (nazwa instytucji lub geografii po przymiotniku, np. „Starosta Tarnowski”, „Ziemia Tarnowska”).
-   Usunięcie ze słownika dawało wycieki („Sędzia Tarnowski”), cofnięte w 380586a.
+3. (zrobione 2026-11-14: „tarnowski” po urzędzie i geografii to przymiotnik, `passProtectFictional`).
 4. Publikacja npm z komputera autora (2FA): `npm login`, potem `npm publish -w anonimizator`
    i `npm publish -w parawan`. 0.29.14 nie wyszło; po merge v0.47.0 publikować od razu 0.30.0.
    Powrót: `npm view anonimizator version`.
@@ -145,7 +143,6 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
   wyliczenia w celowniku, dwa imiona bez nazwiska, patron wersalikami (ROADMAP poz. 1, 2 i 13).
 - REGON z długim wtrąceniem po etykiecie dostaje znacznik `[TELEFON]` (ROADMAP poz. 7).
 - Login w ścieżce URL typu `/user/akowalski` przechodzi jawny (ROADMAP poz. 15).
-- „tarnowski” bywa nazwiskiem i przymiotnikiem (Backlog 3).
 - Procedura „Niebieskiej Karty” zostaje jawna („Pani Nowak jest objęta procedurą Niebieskiej
   Karty.”: osoba zakryta, fakt procedury nie). Nie podpinać pod `[DANE O ZDROWIU]`; plan nowego
   typu z kotwicą w ROADMAP poz. 28.

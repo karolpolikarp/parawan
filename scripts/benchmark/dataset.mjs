@@ -1144,6 +1144,11 @@ export function buildDataset() {
   // Grupa G7 (spójność): miasto przed ulicą siedziby, miejscowość między ulicą a kodem i lokal słownie.
   neg('Urząd Miasta Łodzi, ul. Piotrkowska 104, 90-926 Łódź. Sąd Okręgowy w Poznaniu, ul. Hejmowskiego 2. Starostwo Powiatowe Turek, ul. Kaliska 59.', ['Łodzi', 'ul. Piotrkowska 104', '90-926 Łódź', 'Poznaniu', 'ul. Hejmowskiego 2', 'Turek', 'ul. Kaliska 59']);
   neg('Instytut Badawczy Leśnictwa, ul. Braci Leśnej 3, Sękocin Stary, 05-090 Raszyn.', ['ul. Braci Leśnej 3', 'Sękocin Stary', '05-090 Raszyn']);
+
+  // „Tarnowski” po rzeczowniku urzędu albo geografii to przymiotnik (jak „Starosta Krakowski”),
+  // po roli osoby, tytule i imieniu nazwisko.
+  neg('Starosta Tarnowski wydał decyzję. Rada Powiatu Tarnowskiego i Diecezja Tarnowska. W Tarnowskich Górach jest kopalnia.', ['Starosta Tarnowski', 'Powiatu Tarnowskiego', 'Diecezja Tarnowska', 'Tarnowskich Górach']);
+  oso('Sędzia Tarnowski oddalił powództwo. Sprawę Tarnowskiego przekazano dalej.', ['Tarnowski', 'Tarnowskiego'], ['Sędzia', 'Sprawę']);
   str('Spółdzielnia Mieszkaniowa Lipa\nul. Polna 3 mieszkania 14', ['ul. Polna 3', 'mieszkania 14'], ['Spółdzielnia Mieszkaniowa Lipa']);
   str('Zamieszkały: ul. Polna 3 mieszkania 14, Turek. Lokal w Poznaniu, ul. Długa 5.', ['ul. Polna 3', 'mieszkania 14', 'Turek', 'Poznaniu', 'ul. Długa 5'], ['Zamieszkały:', 'Lokal w']);
   str('Urząd Gminy, ul. Polna 3, Nowak Kowalski, 05-090 Raszyn', ['Nowak Kowalski', '05-090', 'Raszyn'], ['Urząd Gminy, ul. Polna 3']);

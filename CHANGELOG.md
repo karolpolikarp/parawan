@@ -12,6 +12,14 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+- **„Starosta Tarnowski”, „Powiat Tarnowski” i „Tarnowskie Góry” zostają jawne.** „Tarnowski” to
+  i nazwisko, i przymiotnik od Tarnowa, więc nazwa urzędu i miejsca znikała jak imię i nazwisko
+  („Starosta [IMIĘ I NAZWISKO]”), choć „Starosta Krakowski” zostawał. Teraz po rzeczowniku urzędu
+  albo geografii („Starosty Tarnowskiego”, „Rada Powiatu Tarnowskiego”, „Ziemia Tarnowska”, „Diecezja
+  Tarnowska”, „Kolej Tarnowska”) i w „Tarnowskich Górach” to przymiotnik. Osoba dalej znika: „Sędzia
+  Tarnowski”, „Pan Tarnowski”, „Prezes Tarnowski”, „Sprawę Tarnowskiego”, „Anna Tarnowska”, a adres
+  „42-600 Tarnowskie Góry” zostaje zakryty jak dotąd.
+
 ## v0.47.0 — 2026-11-14
 
 **Parawan zakrywa dane o zdrowiu, numery uprawnień zawodowych, karty pobytu i aktów stanu cywilnego, a adres urzędu w nagłówku pisma zostawia jawny.**
