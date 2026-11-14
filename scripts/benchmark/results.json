@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-11-14T00:06:59.919Z",
+  "generatedAt": "2026-11-14T14:51:33.522Z",
   "seed": 20260704,
   "coreVersion": "0.30.0",
-  "casesTotal": 638,
-  "mustMaskTotal": 826,
-  "mustKeepTotal": 1037,
+  "casesTotal": 658,
+  "mustMaskTotal": 879,
+  "mustKeepTotal": 1064,
   "skippedLayers": [
     {
       "name": "core+spacy",
@@ -26,16 +26,16 @@
     {
       "name": "T0+T1 core",
       "desc": "redactPII(): regex, sumy kontrolne i słownik (in-process, offline)",
-      "elapsedMs": 432,
+      "elapsedMs": 518,
       "changedVsCore": null,
-      "recall": 0.9818401937046005,
-      "precision": 0.9990356798457087,
-      "f1": 0.990363301926102,
+      "recall": 0.9829351535836177,
+      "precision": 0.9990601503759399,
+      "f1": 0.9909320575959191,
       "agg": {
-        "maskTotal": 826,
-        "maskHit": 811,
-        "keepTotal": 1037,
-        "keepHit": 1036
+        "maskTotal": 879,
+        "maskHit": 864,
+        "keepTotal": 1064,
+        "keepHit": 1063
       },
       "perCategory": {
         "osoby-podstawowe": {
@@ -51,10 +51,10 @@
           "recall": 1,
           "precision": 1,
           "f1": 1,
-          "maskTotal": 45,
-          "maskHit": 45,
-          "keepTotal": 41,
-          "keepHit": 41
+          "maskTotal": 98,
+          "maskHit": 98,
+          "keepTotal": 66,
+          "keepHit": 66
         },
         "osoby-rzadkie": {
           "recall": 1,
@@ -76,12 +76,12 @@
         },
         "negatywy": {
           "recall": null,
-          "precision": 0.9978354978354979,
+          "precision": 0.9978448275862069,
           "f1": null,
           "maskTotal": 0,
           "maskHit": 0,
-          "keepTotal": 462,
-          "keepHit": 461
+          "keepTotal": 464,
+          "keepHit": 463
         },
         "osoby-rzadkie-ner": {
           "recall": 0.21052631578947367,
@@ -3484,6 +3484,106 @@
         },
         {
           "id": "str-215",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-38",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-39",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-40",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-41",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-42",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-240",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-43",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-44",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-45",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-46",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-47",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-48",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-49",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-50",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-51",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-52",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-53",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-54",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-55",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-56",
           "leaked": [],
           "eaten": []
         }

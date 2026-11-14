@@ -1148,6 +1148,34 @@ export function buildDataset() {
   str('Zamieszkały: ul. Polna 3 mieszkania 14, Turek. Lokal w Poznaniu, ul. Długa 5.', ['ul. Polna 3', 'mieszkania 14', 'Turek', 'Poznaniu', 'ul. Długa 5'], ['Zamieszkały:', 'Lokal w']);
   str('Urząd Gminy, ul. Polna 3, Nowak Kowalski, 05-090 Raszyn', ['Nowak Kowalski', '05-090', 'Raszyn'], ['Urząd Gminy, ul. Polna 3']);
 
+  // ──────────────────────────────────────────────────────────────────────────
+  // OSOBA POTWIERDZONA W PIŚMIE — dalsze wzmianki: samo nazwisko w odmianie, samo imię i zdrobnienie,
+  // inicjały, login (seria 2, klasa 1). Negatywy: imię bez osoby w piśmie, patron, homograf.
+  // ──────────────────────────────────────────────────────────────────────────
+  oso('Głos zabrała radna Elżbieta Sowa. Radny Kmieć poparł wniosek radnej Sowy.', ['Elżbieta', 'Sowa', 'Sowy'], ['Głos zabrała radna', 'poparł wniosek radnej']);
+  oso('- Jakub Wrona, syn\n- Aleksandra Wrona, córka\nKuba odrabia lekcje, a Ola recytowała wiersz o tym, jak wrona zgubiła ser.', ['Jakub', 'Aleksandra', 'Wrona,', 'Kuba', 'Ola'], ['jak wrona zgubiła ser']);
+  oso('Szanowny Panie Henryku,\nodpowiadam na pismo w sprawie lokalu.\nHenryk Baran', ['Henryku', 'Henryk', 'Baran'], ['odpowiadam na pismo']);
+  oso('Obecni: Patrycja Lorenc, Marcin Lorenc.\n1. P.L. złoży wniosek.\n2. M.L. potwierdzi przelew.', ['Patrycja', 'Marcin', 'Lorenc', 'P.L.', 'M.L.'], ['złoży wniosek', 'potwierdzi przelew']);
+  oso('Zgłaszający: amazur (Agnieszka Mazur)\nKomentarz 08:20, amazur: dalej nie działa.', ['amazur', 'Agnieszka', 'Mazur'], ['dalej nie działa']);
+  neg('Jan przyszedł do urzędu. Wniosek złożył Jan.', ['Jan przyszedł', 'złożył Jan']);
+  oso('Wnioskodawczyni Maria Nowak. Szkoła Podstawowa im. Marii Konopnickiej.', ['Maria', 'Nowak'], ['im. Marii Konopnickiej']);
+  oso('Radny Tomasz Wróbel zgłosił wniosek. Wróbel na dachu ćwierkał.', ['Tomasz', 'Wróbel zgłosił'], ['Wróbel na dachu']);
+  // poprawki po weryfikacji: miejsce, skrót, święty, nazwa rzeczy i słowo zostają, celownik -owi znika
+  oso('Pan Marek Włoch złożył wniosek. Wyjazd do Włoch, potem urlop na Mazurach. Decyzję doręczono Włochowi.', ['Marek', 'Włoch złożył', 'Włochowi'], ['Wyjazd do Włoch', 'urlop na Mazurach']);
+  oso('Pan Jan Rak złożył wniosek. Mecz w Rakowie. Rozmawiano z Rakiem.', ['Jan', 'Rak złożył', 'Rakiem'], ['Mecz w Rakowie']);
+  oso('Pan Michał Zieliński złożył wniosek do Ministerstwa Zdrowia (MZ). Projekt zatwierdzony przez MZ.', ['Michał', 'Zieliński'], ['Ministerstwa Zdrowia (MZ)', 'przez MZ']);
+  oso('Pan Paweł Wiśniewski należy do parafii św. Piotra i Pawła. Paweł przyszedł.', ['Paweł Wiśniewski', 'Paweł przyszedł'], ['św. Piotra i Pawła']);
+  oso('Pani Barbara Nowak pracuje w kopalni. Kopalnia Barbara zatrudnia 500 osób. Rondo Trzeciego Maja.', ['Barbara Nowak'], ['Kopalnia Barbara', 'Rondo Trzeciego Maja']);
+  oso('Pacjentka Ewa Rak, lat 45.\nWywiad: matka – Rak jajnika. Zima była ciężka.', ['Ewa', 'Rak, lat'], ['matka – Rak jajnika', 'Zima była']);
+  oso('Celina Mazurek :) dzwonię w celu umówienia wizyty, pozdrawiam celina', ['Celina Mazurek', 'pozdrawiam celina'], ['w celu umówienia']);
+  // formy, które nie mogą być osobą z pisma: przymiotnik na -skie, odmiana nazwiska kobiety na
+  // spółgłoskę, przymiotnik przed rzeczownikiem, miasto po przyimku, symbol działu
+  oso('Pan Piotr Pomorski złożył wniosek. Pojezierze Pomorskie jest piękne. Decyzję doręczono Pomorskiemu.', ['Piotr', 'Pomorski złożył', 'Pomorskiemu'], ['Pojezierze Pomorskie']);
+  oso('Pani Maria Lis złożyła wniosek. Przedszkole „Pod Lisem” zaprasza. Pani Lis przyszła.', ['Maria', 'Lis złożyła', 'Lis przyszła'], ['„Pod Lisem”']);
+  oso('Pan Jan Wolny złożył wniosek. Wolny dostęp do informacji jest prawem. Wolny przyszedł wczoraj.', ['Jan', 'Wolny złożył', 'Wolny przyszedł'], ['Wolny dostęp']);
+  oso('Pan Adam Kalisz złożył wniosek. Pociąg do Kalisza odjechał. Rozmowa z Kaliszem trwała godzinę.', ['Adam', 'Kalisz złożył', 'Kaliszem'], ['do Kalisza']);
+  oso('Pan Tomasz Zieliński złożył wniosek. Dział TZ przekazał akta. Pismo przygotował TZ w dniu 5 maja.', ['Tomasz', 'Zieliński', 'przygotował TZ'], ['Dział TZ']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {

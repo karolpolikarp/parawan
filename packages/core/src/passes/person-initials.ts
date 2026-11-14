@@ -47,7 +47,7 @@ const RE_AFTER_DOTTED_BAD = /^[ \t]*[„"«»“]/u;
 
 // Skróty w kształcie inicjałów. Zawsze jawne: odpowiedzi i statusy, dział albo rola, funkcja
 // („Zatwierdził: DG”), formy prawne firm („F.H.U.”, „P.H.U.”) oraz trzyliterowe skróty instytucji.
-const ALWAYS_KEEP = new Set<string>(
+export const ALWAYS_KEEP_INITIALS = new Set<string>(
   (
     'IT HR QA ND NA BD DG OK FH PH SC SJ ' +
     'TAK NIE NOK TBD TBC BHP BOK BOI BOP IOD DPO ABI CEO CFO CTO CIO COO PMO ' +
@@ -65,7 +65,7 @@ const KEEP_UNLESS_PERSON = new Set<string>(
 );
 // Badania po „wyk.” („wyk. EKG”, „badanie wyk. MR”): po tej kotwicy zawsze jawne, także przy
 // pacjencie o tych inicjałach. Po innych kotwicach rozstrzyga osoba w piśmie.
-const EXAMS = new Set<string>('EKG ECG RTG USG CRP OB MR RM CT KT TK MRI EEG EMG PET OCT KTG'.split(' '));
+export const INITIAL_EXAMS = new Set<string>('EKG ECG RTG USG CRP OB MR RM CT KT TK MRI EEG EMG PET OCT KTG'.split(' '));
 const RE_EXAM_ANCHOR = /^[Ww]yk(?:\.|onał)/;
 // „OK” po „odp.” bywa osobą („(odp. OK)” przy Oliwii Kubiak), po pozostałych kotwicach to status.
 const RE_ODP_ANCHOR = /^[Oo]dp/;
@@ -138,10 +138,10 @@ export function passPersonInitialsAfterAnchor(ctx: RedactCtx): void {
   const decide = (tok: string, end: number, anchor: string): string | null => {
     const letters = lettersOf(tok);
     if (RE_ROMAN.test(letters)) return null;
-    if (EXAMS.has(letters) && RE_EXAM_ANCHOR.test(anchor)) return null;
+    if (INITIAL_EXAMS.has(letters) && RE_EXAM_ANCHOR.test(anchor)) return null;
     const owners = (known ??= personInitials(ctx)).get(letters);
     if (letters === 'OK') return owners && RE_ODP_ANCHOR.test(anchor) ? mask(letters, owners) : null;
-    if (ALWAYS_KEEP.has(letters)) return null;
+    if (ALWAYS_KEEP_INITIALS.has(letters)) return null;
     if (owners) return mask(letters, owners);
     if (KEEP_UNLESS_PERSON.has(letters)) return null;
     // bez osoby w piśmie tylko zapis z kropkami, po którym nie stoi nazwa w cudzysłowie

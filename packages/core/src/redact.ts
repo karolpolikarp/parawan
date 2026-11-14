@@ -16,6 +16,7 @@ import { passAccount, passCard, passIban, passNip, passPesel, passPhone, passReg
 import { passPersonInitialsAfterAnchor } from './passes/person-initials.js';
 import { passPersonMaidenAfterMask, passPersonMixedCase, passPersonOcrMix, passPersonOcrPair, passPersonOcrTitle, passPersonParents } from './passes/person-caps-ocr.js';
 import { passPersonPairs, passProtectFictional } from './passes/person-pairs.js';
+import { passPersonPropagate } from './passes/person-propagate.js';
 import { passPersonForeign, passPersonHomographAnchor, passPersonInitial, passPersonRoleComplement, passPersonSoloDict, passPersonSoloMorph, passPersonStrongTrigger, passPersonTrigger } from './passes/person-triggers.js';
 import { passProtectJsonEscapes, passProtectUrls } from './passes/protect.js';
 import { passCivilRecord, passProfessionalNumber, passResidenceCard } from './passes/registers.js';
@@ -174,6 +175,10 @@ function redactWith(input: string, options: RedactOptions | undefined, withProbe
   passPersonMaidenAfterMask(ctx);
   passPersonParents(ctx);
   passPersonInitialsAfterAnchor(ctx); // po osobach, przed finalizePersons: relabelPersons numeruje też te maski
+  // Osoba potwierdzona pewną kotwicą (para, „Pan/Pani”, pole) zakryta też w innych wzmiankach: samo
+  // nazwisko, samo imię i zdrobnienie, inicjały, login. Po wszystkich przebiegach osobowych, bo nasiona
+  // czyta z ich masek; przed finalizePersons, który domyka imię przy masce i numeruje etykiety.
+  passPersonPropagate(ctx);
 
   // Faza 5: domknięcia osób, stabilna numeracja, przywrócenie URL-i i ucieczek
   finalizePersons(ctx);

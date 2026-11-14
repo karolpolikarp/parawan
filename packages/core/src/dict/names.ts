@@ -149,3 +149,47 @@ export function isFirstNameLike(word: string): boolean {
 // Imiona będące też rzeczownikiem albo nazwą rośliny („róża”, „kalina”, „maja”): pisane małą literą
 // bez nazwiska nie przesądzają o osobie.
 export const NOUN_LIKE_FIRST_NAMES = new Set<string>('róża kalina jagoda nadzieja wiktoria pola wiola maja'.split(' '));
+
+/**
+ * Zdrobnienia imion (mianownik, małe litery): pełne imię → zdrobnienia. Służą tylko do rozlania osoby
+ * potwierdzonej w piśmie („Jakub Wrona” → „Kuba”, „Kuby”), nigdy do wykrywania samego imienia, więc
+ * mogą zawierać formy kolidujące ze słowami („kuba”, „hala”). Zdrobnienie przypisane kilku imionom
+ * („ala”) łączy ich rodziny tylko przy tej osobie, której imię pasuje.
+ */
+export const FIRST_NAME_DIMINUTIVES: Record<string, string[]> = Object.fromEntries(
+  (
+    'adam:adaś,adamek agata:agatka agnieszka:aga,agusia,agnisia aleksander:olek,alek,oleś ' +
+    'aleksandra:ola,olka,olcia,oleńka alicja:ala,alka,alusia andrzej:andrzejek,jędrek ' +
+    'anna:ania,anka,anusia,aneczka hanna:hania,hanka,hanusia antoni:antek,antoś,tosiek antonina:tosia,tonia ' +
+    'artur:arturek barbara:basia,baśka,basieńka bartłomiej:bartek,bartuś bartosz:bartek,bartuś ' +
+    'beata:beatka bogdan:bogdanek bożena:bożenka,bożka dariusz:darek dorota:dorotka,dorka,dosia ' +
+    'elżbieta:ela,elka,elżunia ewa:ewka,ewunia,ewcia ewelina:ewelinka gabriela:gabrysia,gabi gabriel:gabryś ' +
+    'grażyna:grażka,grażynka grzegorz:grzesiek,grześ,grzesio halina:hala,halinka,halusia helena:hela,helenka,helcia ' +
+    'henryk:heniek,henio irena:irenka,irka iwona:iwonka jadwiga:jadzia,jadźka jakub:kuba,kubuś ' +
+    'jan:janek,jaś,jasiek,jasio janina:janka,janinka jarosław:jarek jerzy:jurek joanna:asia,joasia,aśka ' +
+    'józef:józek,józio julia:julka,julcia,jula justyna:justynka kamil:kamilek kamila:kamilka karol:karolek ' +
+    'karolina:karolinka katarzyna:kasia,kaśka,kasieńka kazimierz:kazik,kazio krystyna:krysia,kryśka,krystynka ' +
+    'krzysztof:krzysiek,krzyś,krzysio lucyna:lucynka,lusia łukasz:łukaszek magdalena:magda,madzia,magdusia ' +
+    'małgorzata:gosia,małgosia,gośka marek:mareczek maria:marysia,maryśka mariusz:mariuszek ' +
+    'marta:martusia,martunia,marteczka mateusz:mateuszek michał:michałek,michaś mikołaj:mikołajek ' +
+    'monika:monisia,monia,monka natalia:natalka,nati,natusia,natka paulina:paulinka paweł:pawełek,pawcio ' +
+    'piotr:piotrek,piotruś przemysław:przemek rafał:rafałek renata:renia,renatka roman:romek,romcio ' +
+    'ryszard:rysiek,rysio sławomir:sławek stanisław:staś,stasiek,staszek,stasio stanisława:stasia,staszka ' +
+    'stefan:stefek,stefcio szymon:szymek,szymuś tadeusz:tadek,tadzio teresa:tereska,tesia ' +
+    'tomasz:tomek,tomcio,tomuś urszula:ula,ulka,ulcia wiesław:wiesiek,wiesio wiesława:wiesia,wieśka ' +
+    'wiktor:wiktorek wiktoria:wika,wiktorka władysław:władek,władzio wojciech:wojtek,wojtuś ' +
+    'zbigniew:zbyszek,zbysio,zbyś zdzisław:zdzisiek,zdziś zofia:zosia,zośka,zosieńka zuzanna:zuzia,zuzka,zuzanka ' +
+    'weronika:werka,weronka,wera oliwia:oliwka,oliwcia emilia:emilka lena:lenka,lenusia nikola:nikolka ' +
+    'patrycja:patka sylwia:sylwka,sylwcia edyta:edytka filip:filipek ignacy:ignaś leon:leoś bronisław:bronek ' +
+    'czesław:czesiek,czesio mieczysław:mietek zenon:zenek eugeniusz:gienek,gienio genowefa:gienia ' +
+    'mirosław:mirek mirosława:mirka radosław:radek witold:witek kacper:kacperek oskar:oskarek ' +
+    'dominika:domi daniel:danielek daniela:danka,danusia danuta:danka,danusia jolanta:jola,jolka ' +
+    'leszek:leszeczek magda:madzia sebastian:seba,sebek kinga:kingusia klaudia:klaudka lidia:lidka ' +
+    'zdzisława:zdzisia celina:cela,celinka'
+  )
+    .split(' ')
+    .map((e) => {
+      const [full, dims] = e.split(':');
+      return [full, dims.split(',')];
+    }),
+);

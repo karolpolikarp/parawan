@@ -324,7 +324,7 @@ function maskQuotedLogins(ctx: RedactCtx, loginValues: Set<string>): void {
 // rozetnie. Kropka kończąca zdanie nie blokuje, kropka z dalszym ciągiem tak („jan.nowak.adm").
 // Zakres Latin-1/Extended zamiast \p{L}: regex powstaje dla każdej wartości, a flaga „u" jest
 // wielokrotnie droższa w kompilacji.
-function propagateLoginValues(ctx: RedactCtx, loginValues: Set<string>): void {
+export function propagateLoginValues(ctx: RedactCtx, loginValues: Set<string>): void {
   for (const v of [...loginValues].sort((a, b) => b.length - a.length)) {
     // login zapisany jak imię albo nazwisko nie rozbija pary osobowej zostawionej dla fazy 4
     const word = RE_ASCII_CAP_WORD.test(v);

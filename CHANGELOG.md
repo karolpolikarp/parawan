@@ -12,6 +12,47 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+**Osoba, której imię i nazwisko Parawan już zakrył, znika też tam, gdzie pismo podaje ją inaczej: samym nazwiskiem w odmianie, samym imieniem, zdrobnieniem, inicjałami albo loginem.**
+
+- **Raz rozpoznana osoba zakryta w całym piśmie.** Gdy pismo podaje osobę z pewną kotwicą (imię
+  i nazwisko, „Pani Nowak”, pole „Imię i nazwisko:”), dalsze wzmianki o niej też znikają: samo
+  nazwisko w odmianie i wersalikami („radna Elżbieta Sowa” → „radnej Sowy”, „wstrzymała się (1):
+  Sowa”, „A. Kmieć”, „ZASTĘPSTWO: WILK R.”), samo imię w odmianie i w wołaczu („Szanowny Panie
+  Henryku”, „zgłoszenie Pauliny”), zdrobnienie („Jakub Wrona” → „Kuba”, „Kuby”; „Aleksandra” → „Ola”,
+  „Bartosz” → „Bartek”, „Bartkiem”), inicjały jednej osoby („P.L. złoży wniosek”, „dyżur – KB”)
+  i login z imienia i nazwiska („amazur”, „@kzielinska”). W czacie, SMS-ie i zgłoszeniu helpdesku
+  także imię pisane małą literą („dzieki panie piotrze”, „pozdrawiam aga”). Z pseudonimami wzmianka
+  dostaje tę samą etykietę co osoba. Na drugiej serii 100 pism (część robocza) zakrytych danych jest
+  78,8% zamiast 72,7%, bez nowych nadmiarowych zakryć.
+- **Bez osoby w piśmie i w nazwach nic się nie zmienia.** Samo „Jan” albo „Kuba” bez imienia
+  i nazwiska w piśmie zostaje. Patron zostaje także wtedy, gdy osoba z pisma ma to samo imię („ul.
+  Jana Pawła II”, „im. Marii Konopnickiej”, „list św. Pawła”), tak samo nazwa z nazwiskiem („Hotel
+  Lis”, „Dworzec Kaliski”), region i państwo („na Mazury”, „na Kubę”), data („3 Maja”) i nazwisko
+  będące zwykłym słowem na początku zdania, małą literą albo jako wartość pola („Wróbel na dachu”,
+  „jak wrona zgubiła ser”, „Zawód: Kowal”). Gołe wersaliki tylko w miejscu osoby („przez BWK”,
+  „– KB”), więc „do akceptacji MZ” zostaje.
+- **Kraj, miejscowość, urząd i święty o brzmieniu osoby z pisma zostają jawne.** Przy Panu Marku
+  Włochu zostaje „wyjazd do Włoch”, przy Ewie Czech „towar z Czech” i „w Czechach”, przy Agnieszce
+  Mazur „wakacje na Mazurach”, przy Janie Raku „mecz w Rakowie”, a przy Marcinie Długoszu „mieszka
+  przy Długosza 7”. Zostają też skróty urzędów i skróty rozwinięte w piśmie („Ministerstwo Zdrowia
+  (MZ)”, „zatwierdzony przez MZ”, „wydał MF”, „Platforma Obywatelska (PO)”, „Kraj: PL”), święci
+  i świątynie („parafii św. Piotra i Pawła”, „Kościół Piotra i Pawła”), nazwy rzeczy i tytuły
+  („Rondo Trzeciego Maja”, „Kopalnia Barbara”, „Ave Maria”, „Polisa Warty”, „Kino Andrzej”, „Bajka
+  o Jasiu i Małgosi”), imię jako miejsce albo dzień („z Helu”, „po Kazimierzu”, „paczki na Mikołaja”)
+  oraz nazwisko lub zdrobnienie w znaczeniu zwykłego słowa („Kamień węgielny”, „Zima była ciężka”,
+  „Latem”, „matka – Rak jajnika”, „Sowy polują”, „Kuba to wyspa”, „Hala sportowa”, „w celu”,
+  „natka pietruszki”). Celownik nazwiska znika jak pozostałe formy („przyznano zasiłek Kowalowi”,
+  „Radnemu Dębowi”).
+- **Formy, które nie mogą dotyczyć osoby z pisma, zostają jawne.** Przy Panu Piotrze Pomorskim
+  zostaje „Pojezierze Pomorskie”, przy Pani Annie Tatrzańskiej „Tatrzańskie szlaki”, bo forma na
+  -skie nie odnosi się do osoby. Nazwisko kobiety na spółgłoskę się nie odmienia, więc przy Pani
+  Marii Lis zostaje „Przedszkole »Pod Lisem«”, a przy Pani Annie Bałtyk „port nad Bałtykiem”.
+  Nazwisko-przymiotnik na początku zdania przed rzeczownikiem to zwykłe słowo („Wolny dostęp do
+  informacji”, „Nowa ustawa wchodzi w życie”, „Mostek na rzece”), a przed orzeczeniem dalej osoba
+  („Wolny przyszedł”). Miasto o brzmieniu nazwiska zostaje w każdej formie po przyimku („pociąg do
+  Kalisza”, „wyjazd do Opola”), a „rozmowa z Kaliszem” znika. Zostają też symbole działów
+  w kształcie inicjałów („Dział TZ”, „wydział TZ”, „materiał PS”) i „Ewangelia według Jana”.
+
 ## v0.47.0 — 2026-11-14
 
 **Parawan zakrywa dane o zdrowiu, numery uprawnień zawodowych, karty pobytu i aktów stanu cywilnego, a adres urzędu w nagłówku pisma zostawia jawny.**

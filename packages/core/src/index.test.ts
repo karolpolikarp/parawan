@@ -10166,3 +10166,218 @@ test('G7 weryfikacja: pułapki wokół siedziby, miejscowości przed kodem i lok
     ['Pan Jan Nowak, Urząd Miasta Łodzi, ul. Piotrkowska 104 m. 5', `Pan ${N}, Urząd Miasta ${C}, ${A}`],
   ]);
 });
+
+// ── Klasa 1 serii 2: osoba potwierdzona w piśmie zakryta też w innych wzmiankach ──
+test('rozlanie osoby: samo nazwisko w odmianie, wersalikami i z inicjałem', () => {
+  masked([
+    // homograf (Sowa, Wróbel) w środku zdania i na liście po dwukropku
+    [
+      'Głos zabrała radna Elżbieta Sowa. Radny Kmieć poparł wniosek radnej Sowy. Wstrzymała się (1): Sowa.',
+      `Głos zabrała radna ${N}. Radny Kmieć poparł wniosek radnej ${N}. Wstrzymała się (1): ${N}.`,
+    ],
+    ['Przewodniczący udzielił głosu radnemu Tomaszowi Wróblowi. Na wniosek radnego Wróbla głosowano imiennie.', `Przewodniczący udzielił głosu radnemu ${N}. Na wniosek radnego ${N} głosowano imiennie.`],
+    // inicjał imienia przed nazwiskiem i nazwisko dwuczłonowe w podpisie tabeli
+    ['| 1 | Anna Kmieć | pracownik |\n| 2 | Barbara Sikora-Wójcik | asystent |\nPodpisy: A. Kmieć, B. Sikora-Wójcik', `| 1 | ${N} | pracownik |\n| 2 | ${N} | asystent |\nPodpisy: ${N}, ${N}`],
+    // wersaliki obok inicjału albo imienia
+    ['Dyżur: lek. Ryszard Wilk\nZASTĘPSTWO: WILK R.', `Dyżur: lek. ${N}\nZASTĘPSTWO: ${N}`],
+    ['Kierownik: Beata Konieczna\nPieczęć: BEATA KONIECZNA', `Kierownik: ${N}\nPieczęć: ${N}`],
+    // obce imię przed nazwiskiem osoby z pisma
+    ['Małoletni: Kamil Zając.\nOliwiera Zająca, urodzonego 2016 r.', `Małoletni: ${N}.\nOliwiera ${N}, urodzonego 2016 r.`],
+  ]);
+});
+test('rozlanie osoby: samo imię w odmianie, wołacz i zdrobnienie', () => {
+  masked([
+    ['- Jakub Wrona, syn\n- Aleksandra Wrona, córka\nKuba odrabia lekcje. Ojciec Kuby płaci alimenty. Ola recytowała wiersz.', `- ${N}, syn\n- ${N}, córka\n${N} odrabia lekcje. Ojciec ${N} płaci alimenty. ${N} recytowała wiersz.`],
+    ['Szanowny Panie Henryku,\nodpowiadam na pismo.\nHenryk Baran', `Szanowny Panie ${N},\nodpowiadam na pismo.\n${N}`],
+    ['Uczeń: Bartosz Nowicki. Bartek ma własny pokój. Rozmowa z Bartkiem trwała godzinę.', `Uczeń: ${N}. ${N} ma własny pokój. Rozmowa z ${N} trwała godzinę.`],
+    // pismo potoczne: małe litery w wołaczu i podpisie
+    ['Zgłasza: Piotr Wiśniewski 🙂\ndzieki wielkie panie piotrze, pozdrawiam', `Zgłasza: ${N} 🙂\ndzieki wielkie panie ${N}, pozdrawiam`],
+    // imię i nazwisko złamane końcem wiersza scala się w jedną maskę
+    ['Uczestnik Stanisław\nMichalik nie stawił się. Stanisław Michalik przeprosił.', `Uczestnik ${N} nie stawił się. ${N} przeprosił.`],
+  ]);
+});
+test('rozlanie osoby: inicjały jednej osoby i login z imienia i nazwiska', () => {
+  masked([
+    ['Obecni: Patrycja Lorenc, Marcin Lorenc.\n1. P.L. złoży wniosek.\n2. M.L. potwierdzi przelew.', `Obecni: ${N}, ${N}.\n1. ${N} złoży wniosek.\n2. ${N} potwierdzi przelew.`],
+    ['Komisja: Krystyna Bąk, Marek Kurek.\nDyżury: 7–11 lipca – KB, 14–18 lipca – MK.', `Komisja: ${N}, ${N}.\nDyżury: 7–11 lipca – ${N}, 14–18 lipca – ${N}.`],
+    [
+      'Zgłaszający: amazur (Agnieszka Mazur)\nKomentarz 08:20, amazur: dalej nie działa\nPrzekazuję do @kzielinska (Katarzyna Zielińska).',
+      `Zgłaszający: [LOGIN] (${N})\nKomentarz 08:20, [LOGIN]: dalej nie działa\nPrzekazuję do @[LOGIN] (${N}).`,
+    ],
+  ]);
+});
+test('rozlanie osoby: ta sama etykieta pseudonimu co nasiono', () => {
+  expect(redactPII('Radna Elżbieta Sowa i radny Jan Kmieć. Głos zabrała radna Sowa, potem Jan.', P).redacted).toBe(
+    'Radna [OSOBA-A] i radny [OSOBA-B]. Głos zabrała radna [OSOBA-A], potem [OSOBA-B].',
+  );
+  expect(redactPII('Jakub Wrona, syn. Kuba choruje.', P).redacted).toBe('[OSOBA-A], syn. [OSOBA-A] choruje.');
+});
+test('rozlanie osoby: bez nasiona, patron, homograf i nazwa rzeczy zostają', () => {
+  keep([
+    // samo imię bez osoby w piśmie
+    'Jan przyszedł do urzędu. Wniosek złożył Jan.',
+    'Kuba odrabia lekcje, a Ola recytuje wiersze.',
+  ]);
+  masked([
+    // patron ulicy i szkoły o imieniu osoby z pisma
+    ['Wnioskodawca Jan Kowalski mieszka przy ul. Jana Pawła II 5. Jan stawił się.', `Wnioskodawca ${N} mieszka przy ${A}. ${N} stawił się.`],
+    ['Wnioskodawczyni Maria Nowak. Szkoła Podstawowa im. Marii Konopnickiej.', `Wnioskodawczyni ${N}. Szkoła Podstawowa im. Marii Konopnickiej.`],
+    ['Świadek Paweł Kowalczyk. Według listu św. Pawła do Koryntian.', `Świadek ${N}. Według listu św. Pawła do Koryntian.`],
+    // homograf jako zwykłe słowo: na początku zdania, małą literą, po etykiecie pola
+    ['Radna Elżbieta Sowa zabrała głos. Sowa siedziała na drzewie, a na dachu sowa.', `Radna ${N} zabrała głos. Sowa siedziała na drzewie, a na dachu sowa.`],
+    ['Radny Tomasz Wróbel zgłosił wniosek. Wróbel na dachu. Na dachu wróble.', `Radny ${N} zgłosił wniosek. Wróbel na dachu. Na dachu wróble.`],
+    ['Obecna Anna Wrona. Ola recytowała wiersz o tym, jak wrona zgubiła ser.', `Obecna ${N}. Ola recytowała wiersz o tym, jak wrona zgubiła ser.`],
+    ['Uczestnik Jan Grzyb zgłosił zalanie. W piwnicy pojawił się grzyb. Grzyb rośnie po ulewie.', `Uczestnik ${N} zgłosił zalanie. W piwnicy pojawił się grzyb. Grzyb rośnie po ulewie.`],
+    ['Kierownik Marek Kowal przyjął wniosek.\nZawód: Kowal', `Kierownik ${N} przyjął wniosek.\nZawód: Kowal`],
+    // nazwa rzeczy z nazwiskiem, region, państwo, data
+    ['Strona Agnieszka Lis. Hotel Lis w Zakopanem.', `Strona ${N}. Hotel Lis w Zakopanem.`],
+    ['Zgłasza Agnieszka Mazur. Zespół jedzie na Mazury.', `Zgłasza ${N}. Zespół jedzie na Mazury.`],
+    ['Wnioskodawca Jakub Nowak wyjechał na Kubę.', `Wnioskodawca ${N} wyjechał na Kubę.`],
+    ['Pani Maja Kowalska przyszła. Święto 3 Maja.', `Pani ${N} przyszła. Święto 3 Maja.`],
+    // gołe wersaliki poza miejscem osoby to skrót
+    ['Uczestnicy: Marek Zieliński.\nProjekt do akceptacji MZ.', `Uczestnicy: ${N}.\nProjekt do akceptacji MZ.`],
+  ]);
+});
+
+// ── Klasa 1 serii 2, poprawki po weryfikacji: rozlanie nie zakrywa miejsc, nazw, skrótów i słów ──
+test('rozlanie osoby: kraj, kraina i miejscowość o brzmieniu nazwiska zostają', () => {
+  masked([
+    ['Pan Marek Włoch złożył wniosek. Wyjazd służbowy do Włoch trwał tydzień.', `Pan ${N} złożył wniosek. Wyjazd służbowy do Włoch trwał tydzień.`],
+    ['Pani Ewa Czech złożyła reklamację. Towar z Czech dotarł uszkodzony, w Czechach był tańszy.', `Pani ${N} złożyła reklamację. Towar z Czech dotarł uszkodzony, w Czechach był tańszy.`],
+    ['Pan Jan Węgier złożył wniosek. Delegacja z Węgier przyjedzie w maju.', `Pan ${N} złożył wniosek. Delegacja z Węgier przyjedzie w maju.`],
+    ['Agnieszka Mazur złożyła wniosek o urlop. Planuje wakacje na Mazurach.', `${N} złożyła wniosek o urlop. Planuje wakacje na Mazurach.`],
+    ['Pani Anna Kaszuba złożyła wniosek. Planuje urlop na Kaszubach.', `Pani ${N} złożyła wniosek. Planuje urlop na Kaszubach.`],
+    ['Pan Tomasz Wielkopolski złożył wniosek. Pracuje w Wielkopolsce od lat.', `Pan ${N} złożył wniosek. Pracuje w Wielkopolsce od lat.`],
+    ['Pan Piotr Bielski złożył wniosek. Od lat mieszka w Bielsku.', `Pan ${N} złożył wniosek. Od lat mieszka w Bielsku.`],
+    ['Pan Jan Kowal złożył wniosek. Od lat pracuje w Kowalach.', `Pan ${N} złożył wniosek. Od lat pracuje w Kowalach.`],
+    ['Pan Jan Polak złożył skargę. Każdy Polak ma prawo do informacji. Polaków jest 38 mln.', `Pan ${N} złożył skargę. Każdy Polak ma prawo do informacji. Polaków jest 38 mln.`],
+    ['Pan Jan Zawada złożył wniosek. Chodzi o wieś Zawada w gminie Pilzno.', `Pan ${N} złożył wniosek. Chodzi o wieś Zawada w gminie Pilzno.`],
+    // miejscownik -owie po „w” to miejscowość, nie liczba mnoga nazwiska
+    ['Pan Jan Rak złożył wniosek. Mecz w Rakowie odbędzie się w sobotę.', `Pan ${N} złożył wniosek. Mecz w Rakowie odbędzie się w sobotę.`],
+    ['Pan Adam Sokół złożył wniosek. Oddział w Sokołowie jest zamknięty.', `Pan ${N} złożył wniosek. Oddział w Sokołowie jest zamknięty.`],
+    // ulica bez „ul.” po „przy” z numerem domu
+    ['Pan Marcin Długosz złożył wniosek. Mieszka przy Długosza 7.', `Pan ${N} złożył wniosek. Mieszka przy Długosza 7.`],
+    ['Pan Jan Krakowski złożył wniosek. Biuro mieści się przy Krakowskiej 12.', `Pan ${N} złożył wniosek. Biuro mieści się przy Krakowskiej 12.`],
+  ]);
+  // ta sama osoba w odmianie dalej znika: celownik, dopełniacz, mianownik bez przyimka
+  masked([
+    ['Pan Marek Włoch złożył wniosek. Decyzję doręczono Włochowi, a Włoch ją odebrał.', `Pan ${N} złożył wniosek. Decyzję doręczono ${N}, a ${N} ją odebrał.`],
+    ['Pan Adam Mazur złożył wniosek. Rozpatrzono wniosek Mazura pozytywnie.', `Pan ${N} złożył wniosek. Rozpatrzono wniosek ${N} pozytywnie.`],
+    ['Pan Jan Bielski złożył wniosek. Bielski odebrał decyzję w Bielsku.', `Pan ${N} złożył wniosek. ${N} odebrał decyzję w Bielsku.`],
+  ]);
+});
+test('rozlanie osoby: celownik nazwiska męskiego na -owi znika', () => {
+  masked([
+    ['Pan Adam Gzylak złożył wniosek. Przyznano Gzylakowi zasiłek.', `Pan ${N} złożył wniosek. Przyznano ${N} zasiłek.`],
+    ['Pan Jan Chmiel złożył wniosek. Przyznano zasiłek Chmielowi.', `Pan ${N} złożył wniosek. Przyznano zasiłek ${N}.`],
+    ['Pan Jan Dąb złożył wniosek. Przyznano zasiłek Dębowi. Radnemu Dębowi odpowiedział wójt.', `Pan ${N} złożył wniosek. Przyznano zasiłek ${N}. Radnemu ${N} odpowiedział wójt.`],
+    ['Pan Jan Mróz złożył wniosek. Przyznano zasiłek Mrozowi.', `Pan ${N} złożył wniosek. Przyznano zasiłek ${N}.`],
+  ]);
+});
+test('rozlanie osoby: skrót urzędu i skrót rozwinięty w piśmie zostają', () => {
+  masked([
+    ['Pan Michał Zieliński złożył wniosek do Ministerstwa Zdrowia (MZ). Projekt zatwierdzony przez MZ.', `Pan ${N} złożył wniosek do Ministerstwa Zdrowia (MZ). Projekt zatwierdzony przez MZ.`],
+    ['Pan Adam Kowalski, prezes Związku Żołnierzy Armii Krajowej (AK). Zatwierdził AK w dniu 5 maja.', `Pan ${N}, prezes Związku Żołnierzy Armii Krajowej (AK). Zatwierdził AK w dniu 5 maja.`],
+    ['Pan Marek Fijałkowski złożył wniosek. Decyzję wydał MF. Zatwierdzone przez MF.', `Pan ${N} złożył wniosek. Decyzję wydał MF. Zatwierdzone przez MF.`],
+    ['Pani Paulina Olszewska jest radną. Platforma Obywatelska (PO) zgłosiła projekt przez PO.', `Pani ${N} jest radną. Platforma Obywatelska (PO) zgłosiła projekt przez PO.`],
+    ['Pani Urszula Sikora złożyła zeznanie do Urzędu Skarbowego w Radomiu (US).', `Pani ${N} złożyła zeznanie do Urzędu Skarbowego w Radomiu (US).`],
+    ['Pani Joanna Paulina Kowalczyk przesłała plik. Plik ma strukturę JPK (JPK).', `Pani ${N} przesłała plik. Plik ma strukturę JPK (JPK).`],
+    ['Pan Wojciech Kowalski złożył wniosek. Wydział Komunikacji (WK) wydał decyzję.', `Pan ${N} złożył wniosek. Wydział Komunikacji (WK) wydał decyzję.`],
+    ['Pan Piotr Lis złożył wniosek.\nKraj: PL\nMiasto: Gdańsk', `Pan ${N} złożył wniosek.\nKraj: PL\nMiasto: Gdańsk`],
+  ]);
+  // inicjały osoby: w polu podpisu i podane przy osobie
+  masked([
+    ['Pan Michał Zieliński przyszedł.\nSporządził: MZ', `Pan ${N} przyszedł.\nSporządził: ${N}`],
+    ['Pan Adam Kowalski (AK) złożył wniosek. Zatwierdził AK.', `Pan ${N} (${N}) złożył wniosek. Zatwierdził ${N}.`],
+  ]);
+});
+test('rozlanie osoby: święty, tytuł dzieła i nazwa rzeczy z imieniem zostają', () => {
+  masked([
+    ['Pan Paweł Wiśniewski jest członkiem parafii św. Piotra i Pawła w Gdańsku.', `Pan ${N} jest członkiem parafii św. Piotra i Pawła w Gdańsku.`],
+    ['Pan Wacław Nowicki jest kościelnym w parafii pw. świętych Stanisława i Wacława.', `Pan ${N} jest kościelnym w parafii pw. świętych Stanisława i Wacława.`],
+    ['Pan Piotr Zieliński należy do parafii Piotra i Pawła. Kościół Piotra i Pawła jest zabytkiem.', `Pan ${N} należy do parafii Piotra i Pawła. Kościół Piotra i Pawła jest zabytkiem.`],
+    ['Pan Jan Kowalski i Pani Małgorzata Nowak zagrali w przedstawieniu „Jaś i Małgosia”. Bajka o Jasiu i Małgosi.', `Pan ${N} i Pani ${N} zagrali w przedstawieniu „Jaś i Małgosia”. Bajka o Jasiu i Małgosi.`],
+    ['Pani Maja Kowalska złożyła wniosek. Rondo Trzeciego Maja jest zamknięte.', `Pani ${N} złożyła wniosek. Rondo Trzeciego Maja jest zamknięte.`],
+    ['Pani Maria Dąbrowska śpiewała w chórze. Na koniec wykonano Ave Maria.', `Pani ${N} śpiewała w chórze. Na koniec wykonano Ave Maria.`],
+    ['Pani Barbara Nowak pracuje w kopalni. Kopalnia Barbara zatrudnia 500 osób.', `Pani ${N} pracuje w kopalni. Kopalnia Barbara zatrudnia 500 osób.`],
+    ['Pani Agnieszka Kopernik złożyła wniosek. Centrum Nauki Kopernik organizuje warsztaty.', `Pani ${N} złożyła wniosek. Centrum Nauki Kopernik organizuje warsztaty.`],
+    ['Pani Karolina Warta złożyła wniosek. Polisa Warty wygasła. Ubezpieczyciel Warta odmówił. Spływ Wartą odwołano.', `Pani ${N} złożyła wniosek. Polisa Warty wygasła. Ubezpieczyciel Warta odmówił. Spływ Wartą odwołano.`],
+    ['Pani Anna Sowa złożyła wniosek. Spotkanie odbyło się w cukierni Sowa.', `Pani ${N} złożyła wniosek. Spotkanie odbyło się w cukierni Sowa.`],
+    ['Pan Andrzej Nowak złożył wniosek. Kino Andrzej jest zamknięte.', `Pan ${N} złożył wniosek. Kino Andrzej jest zamknięte.`],
+    // samo imię jako miejsce, dzielnica i dzień imienin
+    ['Pani Helena Kaczmarek złożyła wniosek. Jedzie z Helu do Gdyni.', `Pani ${N} złożyła wniosek. Jedzie z Helu do Gdyni.`],
+    ['Pan Kazimierz Lewandowski złożył wniosek. Wycieczka po Kazimierzu w Krakowie.', `Pan ${N} złożył wniosek. Wycieczka po Kazimierzu w Krakowie.`],
+    ['Uczeń Mikołaj Kamiński przyniósł zgodę. Szkoła przygotuje paczki na Mikołaja.', `Uczeń ${N} przyniósł zgodę. Szkoła przygotuje paczki na Mikołaja.`],
+  ]);
+});
+test('rozlanie osoby: nazwisko albo imię w znaczeniu zwykłego słowa zostaje', () => {
+  masked([
+    ['Pani Anna Kamień złożyła wniosek. Kamień węgielny wmurowano w maju.', `Pani ${N} złożyła wniosek. Kamień węgielny wmurowano w maju.`],
+    ['Pan Marek Zima złożył wniosek. Zima była łagodna, a Zimą jeździmy na narty.', `Pan ${N} złożył wniosek. Zima była łagodna, a Zimą jeździmy na narty.`],
+    ['Pan Jan Lato złożył wniosek. Lato było upalne. Latem jeździmy nad morze.', `Pan ${N} złożył wniosek. Lato było upalne. Latem jeździmy nad morze.`],
+    ['Pacjentka Ewa Rak, lat 45.\nWywiad: matka – Rak jajnika.', `Pacjentka ${N}, lat 45.\nWywiad: matka – Rak jajnika.`],
+    ['Pani Elżbieta Sowa złożyła wniosek. W lesie Sowy polują nocą.', `Pani ${N} złożyła wniosek. W lesie Sowy polują nocą.`],
+    ['Pan Tomasz Wróbel złożył wniosek. Wróblom zimno.', `Pan ${N} złożył wniosek. Wróblom zimno.`],
+    ['Pan Jakub Nowak (Kuba) złożył wniosek. Kuba to wyspa na Karaibach.', `Pan ${N} (${N}) złożył wniosek. Kuba to wyspa na Karaibach.`],
+    ['Pani Halina Kos złożyła wniosek. Hala sportowa jest zamknięta. Hala nr 3.', `Pani ${N} złożyła wniosek. Hala sportowa jest zamknięta. Hala nr 3.`],
+    // pismo potoczne: zdrobnienie w znaczeniu rzeczownika i jego formy
+    ['Celina Mazurek :) dzwonię w celu umówienia wizyty. W celi nr 4 jest zimno.', `${N} :) dzwonię w celu umówienia wizyty. W celi nr 4 jest zimno.`],
+    ['Natalia Nowak :) kupiłam natkę pietruszki, natka była świeża', `${N} :) kupiłam natkę pietruszki, natka była świeża`],
+    ['Oliwia Wrona :) Kupiłam oliwki na targu', `${N} :) Kupiłam oliwki na targu`],
+    ['Jagoda Lis 🙂 kupiłam jagody na targu', `${N} 🙂 kupiłam jagody na targu`],
+  ]);
+  // osoba dalej znika, gdy pozycja nie wskazuje na słowo
+  masked([
+    ['Pan Jakub Wrona złożył wniosek. Kuba choruje od roku.', `Pan ${N} złożył wniosek. ${N} choruje od roku.`],
+    ['Radna Elżbieta Sowa zgłosiła wniosek. Przeciw (0), wstrzymała się (1): Sowa.', `Radna ${N} zgłosiła wniosek. Przeciw (0), wstrzymała się (1): ${N}.`],
+    ['Agnieszka Kowal :) nie dziala mi poczta pozdrawiam aga', `${N} :) nie dziala mi poczta pozdrawiam ${N}`],
+  ]);
+});
+test('rozlanie osoby: formy, które nie mogą być tą osobą, zostają jawne', () => {
+  masked([
+    // przymiotnik na -skie/-ckie (nijaki, niemęskoosobowy) to region albo rzecz, nie osoba
+    ['Pan Piotr Pomorski złożył wniosek. Pojezierze Pomorskie i Wybrzeże Pomorskie.', `Pan ${N} złożył wniosek. Pojezierze Pomorskie i Wybrzeże Pomorskie.`],
+    ['Pan Jan Gdański złożył wniosek. Pomorze Gdańskie jest piękne.', `Pan ${N} złożył wniosek. Pomorze Gdańskie jest piękne.`],
+    ['Pan Jan Polański złożył wniosek. Polańskie łąki zalało.', `Pan ${N} złożył wniosek. Polańskie łąki zalało.`],
+    ['Pani Anna Tatrzańska złożyła wniosek. Tatrzańskie szlaki są zamknięte.', `Pani ${N} złożyła wniosek. Tatrzańskie szlaki są zamknięte.`],
+    // nazwisko kobiety na spółgłoskę się nie odmienia
+    ['Pani Maria Lis złożyła wniosek. Przedszkole „Pod Lisem” zaprasza.', `Pani ${N} złożyła wniosek. Przedszkole „Pod Lisem” zaprasza.`],
+    ['Pani Ewa Dąb złożyła wniosek. Pod Dębem Bartkiem odbył się piknik.', `Pani ${N} złożyła wniosek. Pod Dębem Bartkiem odbył się piknik.`],
+    ['Pani Anna Bałtyk złożyła wniosek. Port nad Bałtykiem jest duży.', `Pani ${N} złożyła wniosek. Port nad Bałtykiem jest duży.`],
+    // przymiotnik na początku zdania przed rzeczownikiem
+    ['Pan Jan Wolny złożył wniosek. Wolny dostęp do informacji jest prawem.', `Pan ${N} złożył wniosek. Wolny dostęp do informacji jest prawem.`],
+    ['Pan Jan Młody złożył wniosek. Młody człowiek nie stawił się.', `Pan ${N} złożył wniosek. Młody człowiek nie stawił się.`],
+    ['Pani Ewa Wysoka złożyła wniosek. Wysoka temperatura utrzymuje się.', `Pani ${N} złożyła wniosek. Wysoka temperatura utrzymuje się.`],
+    ['Pani Anna Nowa złożyła wniosek. Nowa ustawa wchodzi w życie.', `Pani ${N} złożyła wniosek. Nowa ustawa wchodzi w życie.`],
+    // rzeczownik na początku zdania przed przyimkiem
+    ['Pan Jan Mostek złożył wniosek. Mostek na rzece wymaga remontu.', `Pan ${N} złożył wniosek. Mostek na rzece wymaga remontu.`],
+    // miejscowość w odmianie po przyimku
+    ['Pan Adam Kalisz złożył wniosek. Pociąg do Kalisza odjechał. Wrócił z Kalisza.', `Pan ${N} złożył wniosek. Pociąg do Kalisza odjechał. Wrócił z Kalisza.`],
+    ['Pan Adam Opole złożył wniosek. Wyjazd do Opola.', `Pan ${N} złożył wniosek. Wyjazd do Opola.`],
+    ['Pan Adam Zamość złożył wniosek. Pociąg do Zamościa.', `Pan ${N} złożył wniosek. Pociąg do Zamościa.`],
+    // ewangelista bez „św.”
+    ['Pan Jan Wiśniewski złożył wniosek. Ewangelia według Jana jest czytana.', `Pan ${N} złożył wniosek. Ewangelia według Jana jest czytana.`],
+    // symbol działu w kształcie inicjałów
+    ['Pan Tomasz Zieliński złożył wniosek. Dział TZ przekazał akta.', `Pan ${N} złożył wniosek. Dział TZ przekazał akta.`],
+    ['Pan Tomasz Zieliński złożył wniosek. Do wiadomości: referat ZP, wydział TZ.', `Pan ${N} złożył wniosek. Do wiadomości: referat ZP, wydział TZ.`],
+    ['Pani Paulina Sowa złożyła wniosek. Materiał PS przekazano. Potencjał PS jest duży.', `Pani ${N} złożyła wniosek. Materiał PS przekazano. Potencjał PS jest duży.`],
+    ['Pan Jan Kowalski złożył wniosek. Kanał JK na platformie działa.', `Pan ${N} złożył wniosek. Kanał JK na platformie działa.`],
+  ]);
+});
+test('rozlanie osoby: po zawężeniu ta sama osoba dalej zakryta', () => {
+  masked([
+    ['Pan Jan Wolny złożył wniosek. Wolny przyszedł wczoraj. Wolny też przyszedł. Decyzję doręczono Wolnemu.', `Pan ${N} złożył wniosek. ${N} przyszedł wczoraj. ${N} też przyszedł. Decyzję doręczono ${N}.`],
+    ['Pani Anna Wysoka złożyła wniosek. Wysoka złożyła odwołanie. Wysoka mieszka w Lublinie.', `Pani ${N} złożyła wniosek. ${N} złożyła odwołanie. ${N} mieszka w ${C}.`],
+    ['Pan Piotr Pomorski złożył wniosek. Decyzję doręczono Pomorskiemu. Pomorski przyszedł.', `Pan ${N} złożył wniosek. Decyzję doręczono ${N}. ${N} przyszedł.`],
+    ['Pani Ewa Pomorska złożyła wniosek. Pomorskiej doręczono decyzję.', `Pani ${N} złożyła wniosek. ${N} doręczono decyzję.`],
+    // kobieta: forma równa nasionu; mężczyzna: odmiana
+    ['Pani Maria Lis złożyła wniosek. Pani Lis przyszła. Pismo do Lis wysłano.', `Pani ${N} złożyła wniosek. Pani ${N} przyszła. Pismo do ${N} wysłano.`],
+    ['Pan Marek Lis złożył wniosek. Rozmowa z Lisem trwała godzinę.', `Pan ${N} złożył wniosek. Rozmowa z ${N} trwała godzinę.`],
+    // miasto-nazwisko: osoba w narzędniku po „z” i w mianowniku
+    ['Pan Adam Kalisz złożył wniosek. Rozmowa z Kaliszem trwała godzinę. Kalisz przyszedł.', `Pan ${N} złożył wniosek. Rozmowa z ${N} trwała godzinę. ${N} przyszedł.`],
+    // inicjały po czasowniku: podpis i środek zdania
+    ['Pan Tomasz Zieliński złożył wniosek. Pismo przygotował TZ w dniu 5 maja.', `Pan ${N} złożył wniosek. Pismo przygotował ${N} w dniu 5 maja.`],
+    ['Pan Tomasz Zieliński złożył wniosek.\nOpracował TZ', `Pan ${N} złożył wniosek.\nOpracował ${N}`],
+    ['Pan Tomasz Zieliński złożył wniosek. Dokument widział TZ.', `Pan ${N} złożył wniosek. Dokument widział ${N}.`],
+  ]);
+});
