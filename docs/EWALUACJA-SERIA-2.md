@@ -99,6 +99,30 @@ Niebieska Karta, odbywanie kary), dla których brak typu (ROADMAP poz. 28). Zasa
 o zdrowiu wymaga rozpoznania, leczenia, świadczenia albo faktu przypisanego osobie; obserwacje
 i funkcjonariusze w funkcji to `policy`.
 
+## Po naprawie „osób w piśmie” (klasy 1, 2, 5, 9, 12)
+
+Commity `595fc3d`–`d199ff7`: propagacja osoby rozpoznanej w piśmie (odmiana, samo imię,
+zdrobnienie, inicjały, login), zwrot i wołacz, obce tytuły, podpis, pokrewieństwo, mówca w czacie,
+imiona cudzoziemców. Każda część przeszła przez weryfikatora precyzji i skuteczności.
+
+| zestaw | recall przed | recall po | wycieki | nadmiarowe |
+|---|---:|---:|---:|---:|
+| pierwszy zestaw | 99,5% | 99,5% | 5 → 5 | 0 → 0 |
+| seria 2, robocza | 72,7% | **83,5%** | 368 → 222 | 37 → 37 |
+| seria 2, odłożona | 69,8% | **73,9%** | 413 → 357 | 57 → 57 |
+
+Wycieki danych osobowych (PERSON, PERSON_FIRSTNAME, PERSON_INITIALS):
+
+| zestaw | przed | po | spadek |
+|---|---:|---:|---:|
+| robocza | 123 | 23 | 81% |
+| odłożona | 111 | 59 | 47% |
+
+Na części odłożonej zysk jest mniejszy niż na roboczej. Mechanizmy działają na nowych pismach,
+ale część reguł dopasowała się do form z części roboczej, więc wynik roboczy przecenia skuteczność.
+Następne kroki trzeba sprawdzać zdaniami spoza obu części. Na części odłożonej największą
+grupą wycieków są teraz dane o zdrowiu (156 z 357), potem data urodzenia (20) i dane szczególne (15).
+
 ## Kolejność napraw
 
 1. Klasy 1 + 2 + 5 + 9 + 12 razem: „osoby w piśmie” (nasiona z pewnych kotwic, rozwinięcie na
