@@ -16,9 +16,12 @@ działają na GitHubie od chwili wypchnięcia tagów.
   i nazwisko, i przymiotnik od Tarnowa, więc nazwa urzędu i miejsca znikała jak imię i nazwisko
   („Starosta [IMIĘ I NAZWISKO]”), choć „Starosta Krakowski” zostawał. Teraz po rzeczowniku urzędu
   albo geografii („Starosty Tarnowskiego”, „Rada Powiatu Tarnowskiego”, „Ziemia Tarnowska”, „Diecezja
-  Tarnowska”, „Kolej Tarnowska”) i w „Tarnowskich Górach” to przymiotnik. Osoba dalej znika: „Sędzia
-  Tarnowski”, „Pan Tarnowski”, „Prezes Tarnowski”, „Sprawę Tarnowskiego”, „Anna Tarnowska”, a adres
-  „42-600 Tarnowskie Góry” zostaje zakryty jak dotąd.
+  Tarnowska”, „Wicestarosta Tarnowski”) i w „Tarnowskich Górach” to przymiotnik, gdy rzeczownik
+  stoi wielką literą (albo oba wyrazy wersalikami) i zgadza się z przymiotnikiem w przypadku. Osoba
+  dalej znika: „Sędzia Tarnowski”, „Pan Tarnowski”, „Sprawę Tarnowskiego”, „Anna Tarnowska”,
+  „Dyrektor szpitala Tarnowski”, „Ziemia Tarnowskiego przeszła na syna” i „Szpital Tarnowski wypisał
+  go”, gdy pismo wymienia osobę o tym nazwisku. Adres „42-600 Tarnowskie Góry” zostaje zakryty jak
+  dotąd.
 
 ## v0.47.0 — 2026-11-14
 

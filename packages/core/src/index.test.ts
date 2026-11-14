@@ -10177,8 +10177,13 @@ test('„Tarnowski” po urzędzie i w geografii to przymiotnik, po roli osoby i
     'Rada Powiatu Tarnowskiego przyjęła uchwałę.',
     'Urząd Gminy Tarnowskiej wydał zaświadczenie.',
     'Ksiądz z Diecezji Tarnowskiej odprawił mszę.',
-    'Kolej Tarnowska kursuje codziennie.',
     'W Tarnowskich Górach jest kopalnia.',
+    'Spółdzielnia z Tarnowskich Gór',
+    'Wicestarosty Tarnowskiego nie było.',
+    'Wieś Tarnowska Wola leży w gminie.',
+    'Starostą Tarnowskim był wówczas Adam.',
+    'STAROSTA TARNOWSKI',
+    'Szpital Tarnowski przy ul. Lwowskiej przyjmuje pacjentów.',
   ]);
   masked([
     ['Sędzia Tarnowski oddalił powództwo.', `Sędzia ${N} oddalił powództwo.`],
@@ -10190,5 +10195,17 @@ test('„Tarnowski” po urzędzie i w geografii to przymiotnik, po roli osoby i
     ['Wójt Gminy Tarnowskiej Jan Kowalski podpisał.', `Wójt Gminy Tarnowskiej ${N} podpisał.`],
     ['Kierownik Ośrodka Tarnowskiego, Adam Tarnowski.', `Kierownik Ośrodka Tarnowskiego, ${N}.`],
     ['Jan Kowalski, ul. Polna 3, 42-600 Tarnowskie Góry', `${N}, ${A}, [KOD-POCZTOWY] ${C}`],
+    // rzeczownik małą literą przed nazwiskiem: rola albo miejsce pobytu osoby, nie nazwa urzędu
+    ['Pracownik ośrodka Tarnowski nie stawił się.', `Pracownik ośrodka ${N} nie stawił się.`],
+    ['Dyrektor szpitala Tarnowski podpisał.', `Dyrektor szpitala ${N} podpisał.`],
+    ['W szpitalu Tarnowska przeszła operację.', `W szpitalu ${N} przeszła operację.`],
+    ['W regionie Tarnowski jest znanym przedsiębiorcą.', `W regionie ${N} jest znanym przedsiębiorcą.`],
+    // przymiotnik niezgodny z rzeczownikiem w przypadku albo rodzaju to nazwisko
+    ['Ziemia Tarnowskiego przeszła na syna.', `Ziemia ${N} przeszła na syna.`],
+    ['Starosta Tarnowskiej przekazała dar.', `Starosta ${N} przekazała dar.`],
+    ['Kolej Tarnowskiego przyszła na rozmowę.', `Kolej ${N} przyszła na rozmowę.`],
+    // placówka w mianowniku, gdy pismo wymienia osobę o tym nazwisku
+    ['Jan Tarnowski zgłosił się. Szpital Tarnowski wypisał go po tygodniu.', `${N} zgłosił się. Szpital ${N} wypisał go po tygodniu.`],
+    ['Adam Tarnowski złożył wniosek. Ośrodek Tarnowski przyjął go.', `${N} złożył wniosek. Ośrodek ${N} przyjął go.`],
   ]);
 });

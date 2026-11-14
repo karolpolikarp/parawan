@@ -298,32 +298,78 @@ export function passProtectFictional(ctx: RedactCtx): void {
     return protectSpan(ctx, m);
   });
   // „Tarnowski” jest i nazwiskiem, i przymiotnikiem od Tarnowa. Po rzeczowniku urzędu albo geografii
-  // („Starosta Tarnowski”, „Ziemi Tarnowskiej”, „Powiatu Tarnowskiego”) i w „Tarnowskich Górach” to
-  // przymiotnik, tak jak „Starosta Krakowski”. Po tytule, roli osoby czy imieniu („Sędzia Tarnowski”,
-  // „Pan Tarnowski”, „Jan Tarnowski”) zostaje nazwiskiem. „Pan Starosta Tarnowski” to forma zwracania
-  // się do starosty tarnowskiego, więc jak „Pan Starosta Krakowski” zostaje jawne.
-  ctx.text = ctx.text.replace(RE_GEO_ADJ_SURNAME, (m, head: string | undefined, adj: string | undefined, _gory: string | undefined, offset: number, t: string) => {
-    if (head && adj) {
-      const prev = RE_PREV_TOKEN.exec(t.slice(Math.max(0, offset - 40), offset))?.[1];
-      // „Anna Gmina Tarnowska”: imię przed rzeczownikiem, więc to osoba z nazwiskiem dwuczłonowym
-      if (prev && /^\p{Lu}/u.test(prev) && isFirstNameLike(prev)) return m;
-      return `${m.slice(0, m.length - adj.length)}${protectSpan(ctx, adj)}`;
+  // w zgodnym przypadku i tym samym zapisie („Starosta Tarnowski”, „Ziemi Tarnowskiej”, „Powiatu
+  // Tarnowskiego”, „STAROSTA TARNOWSKI”) i w „Tarnowskich Górach” to przymiotnik, tak jak „Starosta
+  // Krakowski”. Nazwiskiem zostaje: po rzeczowniku małą literą („szpitala Tarnowski”), bez zgody
+  // przypadka („Ziemia Tarnowskiego”), z imieniem przed rzeczownikiem albo po przymiotniku („Gmina
+  // Tarnowska Anna”) i po placówce w mianowniku, gdy pismo wymienia osobę o tym nazwisku („Jan
+  // Tarnowski… Szpital Tarnowski wypisał go”). „Pan Starosta Tarnowski” to forma zwracania się do
+  // starosty, więc jak „Pan Starosta Krakowski” zostaje jawne.
+  let tarnowPerson: boolean | undefined;
+  ctx.text = ctx.text.replace(RE_GEO_ADJ_SURNAME, (m, head: string | undefined, adj: string | undefined, gAdj: string | undefined, gory: string | undefined, offset: number, t: string) => {
+    const a = adj ?? gAdj ?? '';
+    const w1 = head ?? a;
+    const w2 = head ? a : (gory ?? '');
+    if (!sameCaseStyle(w1, w2)) return m;
+    const adjEnd = a.slice('tarnowsk'.length).toLowerCase();
+    if (!head) {
+      if (!TARNOW_GORY_AGREE[adjEnd]?.test((gory ?? '').toLowerCase())) return m;
+      return protectSpan(ctx, m);
     }
-    return protectSpan(ctx, m);
+    const ends = geoHeadEndings(head.toLowerCase());
+    if (!ends?.includes(adjEnd)) return m;
+    const prev = RE_PREV_TOKEN.exec(t.slice(Math.max(0, offset - 40), offset))?.[1];
+    if (prev && /^\p{Lu}/u.test(prev) && isFirstNameLike(prev)) return m;
+    const next = RE_NEXT_CAP_WORD_1SP.exec(t.slice(offset + m.length, offset + m.length + 40))?.[1];
+    if (next && isFirstNameLike(next)) return m;
+    if ((adjEnd === 'i' || adjEnd === 'a') && RE_PLACE_OF_STAY_HEAD.test(head)) {
+      tarnowPerson ??= [...ctx.raw.matchAll(RE_TARNOW_PERSON)].some((x) => isFirstNameLike(x[1]));
+      if (tarnowPerson) return m;
+    }
+    return `${m.slice(0, m.length - a.length)}${protectSpan(ctx, a)}`;
   });
 }
 
-// Rzeczowniki, po których „Tarnowsk*” jest przymiotnikiem: jednostki i urzędy samorządu, geografia,
-// instytucje regionalne. Bez ról osób („Sędzia”, „Prezes”, „Dyrektor”), bo tam stoi nazwisko.
-const GEO_ADJ_HEADS =
-  'starost\\p{L}*|powiat\\p{L}*|ziemi[aęą]?|region\\p{L}*|gmin(?:a|y|ie|ę|ą|ach|om)?|diecezj[aięą]|' +
-  'archidiecezj[aięą]|dekanat\\p{L}*|wie[sś]|wsi|dąbrow(?:a|y|ie|ę|ą)|szpital\\p{L}*|kolej(?:e|i|ą|ki)?|' +
-  'okręg\\p{L}*|obwód|obwodu|ośrodk\\p{L}*|ośrodek|sanktuari\\p{L}*|pogórz\\p{L}*|kotlin\\p{L}*';
-const TARNOW_ADJ = 'Tarnowsk(?:i|a|ie|iego|iej|iemu|im|imi|ich|ą)';
-const RE_GEO_ADJ_SURNAME = new RegExp(
-  `(?<![\\p{L}\\p{N}])(?:(${GEO_ADJ_HEADS})[ \\t]+(${TARNOW_ADJ})|(${TARNOW_ADJ})[ \\t]+Gór(?:y|ach|om|ami|ze))(?![\\p{L}\\p{N}])`,
-  'giu',
-);
+// Ten sam zapis obu wyrazów: oba wersalikami, oba z wielkiej litery albo oba małymi literami.
+function sameCaseStyle(a: string, b: string): boolean {
+  const style = (w: string): string => (w === w.toUpperCase() ? 'U' : /^\p{Lu}/u.test(w) ? 'C' : w === w.toLowerCase() ? 'L' : '?');
+  const s1 = style(a);
+  return s1 !== '?' && s1 === style(b);
+}
+
+// Rzeczowniki, po których „Tarnowsk*” jest przymiotnikiem, z końcówkami przymiotnika zgodnymi
+// w przypadku i rodzaju. Bez ról osób („Sędzia”, „Prezes”, „Dyrektor”) i bez „kolej” (też
+// „kolejność”), bo tam stoi nazwisko.
+const MASC: Record<string, string> = { '': 'i', u: 'iego', a: 'iego', owi: 'iemu', em: 'im', ie: 'im', cie: 'im' };
+const GEO_HEADS: [RegExp, Record<string, string[]>][] = [
+  [/^(?:wice)?starost(a|y|ę|ą|o|cie)$/, { a: ['i'], y: ['iego'], ę: ['iego'], ą: ['im'], o: ['i'], cie: ['iemu', 'im'] }],
+  [/^starostw(o|a|u|em|ie)$/, { o: ['ie'], a: ['iego'], u: ['iemu'], em: ['im'], ie: ['im'] }],
+  [/^(?:powi(?:at|ecie)|region|dekanat|szpital|okręg|obw[oó]d)(u|a|owi|em|ie)?$/, {}],
+  [/^ośr(?:odek|odk(a|owi|iem|u))$/, { '': ['i'], a: ['iego'], owi: ['iemu'], iem: ['im'], u: ['im'] }],
+  [/^(?:ziemi|diecezj|archidiecezj)(a|i|ę|ą)$/, { a: ['a'], i: ['iej'], ę: ['ą'], ą: ['ą'] }],
+  [/^(?:gmin|dąbrow|kotlin)(a|y|ie|ę|ą)$/, { a: ['a'], y: ['iej'], ie: ['iej'], ę: ['ą'], ą: ['ą'] }],
+  [/^(wieś|wsi|wsią)$/, { wieś: ['a'], wsi: ['iej'], wsią: ['ą'] }],
+  [/^pogórz(e|a|u|em)$/, { e: ['ie'], a: ['iego'], u: ['im'], em: ['im'] }],
+];
+function geoHeadEndings(head: string): string[] | null {
+  for (const [re, map] of GEO_HEADS) {
+    const mm = re.exec(head);
+    if (!mm) continue;
+    if (Object.keys(map).length) return map[mm[1] ?? ''] ?? null;
+    // rzeczowniki męskie: powiat, region, dekanat, szpital, okręg, obwód
+    if (head === 'powiecie') return ['im'];
+    const end = mm[1] ?? '';
+    // „Okręgu”, „Obwodu”, „Szpitalu” to też miejscownik
+    if (end === 'u') return head.startsWith('szpital') ? ['im'] : ['iego', 'im'];
+    return MASC[end] ? [MASC[end]] : null;
+  }
+  return null;
+}
+const TARNOW_GORY_AGREE: Record<string, RegExp> = { ie: /^góry$/, ich: /^gór(?:ach)?$/, im: /^górom$/, imi: /^górami$/ };
+// Placówki i obszary, w których osoba bywa podmiotem zdania („Szpital Tarnowski wypisał go”).
+const RE_PLACE_OF_STAY_HEAD = /^(?:szpital|ośrodek|okręg|obw[oó]d|region|wieś)$/iu;
+const RE_TARNOW_PERSON = /(?<![\p{L}])(\p{Lu}\p{Ll}+)[ \t]+Tarnowsk(?:i|a|iego|iej|iemu|im|ą)(?![\p{L}])/gu;
+const RE_GEO_ADJ_SURNAME = /(?<![\p{L}\p{N}])(?:(\p{L}+)[ \t]+(Tarnowsk(?:i|a|ie|iego|iej|iemu|im|ą))|(Tarnowsk(?:ie|ich|im|imi))[ \t]+(Gór(?:y|ach|om|ami)?))(?![\p{L}\p{N}])/giu;
 // Postacie historyczne z dwoma imionami w dopełniaczu („za panowania Zygmunta Augusta"): bez kotwicy
 // osoby za parą to nie strona pisma.
 const HISTORIC_DOUBLE_NAMES_GEN = new Set<string>(
