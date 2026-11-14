@@ -56,6 +56,79 @@ function memo<T>(fn: (s: string) => T): (s: string) => T {
     return r;
   };
 }
+/**
+ * Tania bramka przed wyrażeniem z lookbehindami: to samo wyrażenie bez lookbehindów dopasowuje
+ * nadzbiór (lookbehind tylko zawęża), więc brak trafienia bramki znaczy brak trafienia wyrażenia.
+ * Wyrażenie zaczynające się od lookbehindu V8 (Node 20) sprawdza na każdej pozycji tekstu; bramka
+ * zaczyna się od litery i przeszukuje tekst szybko.
+ */
+const BACKSLASH = String.fromCharCode(92);
+const gates = new Map<RegExp, RegExp>();
+function stripLookbehinds(src: string): string {
+  let out = '';
+  let i = 0;
+  let inClass = false;
+  while (i < src.length) {
+    const c = src[i];
+    if (c === BACKSLASH) {
+      out += src.slice(i, i + 2);
+      i += 2;
+      continue;
+    }
+    if (inClass) {
+      if (c === ']') inClass = false;
+      out += c;
+      i++;
+      continue;
+    }
+    if (c === '[') {
+      inClass = true;
+      out += c;
+      i++;
+      continue;
+    }
+    if (src.startsWith('(?<=', i) || src.startsWith('(?<!', i)) {
+      // jednoznakowy lookbehind („przed nie stoi litera”) zostaje: jest tani i chroni przed
+      // przeszukiwaniem długich ciągów liter; pomijany jest tylko lookbehind o zmiennej długości
+      const one = /^\(\?<[=!](?:\[(?:\\.|[^\]\\])*\]|\\.|[^()[\]\\|*+?{])\)/.exec(src.slice(i, i + 200));
+      if (one) {
+        out += one[0];
+        i += one[0].length;
+        continue;
+      }
+      // pomiń całą grupę z zagnieżdżeniami
+      let depth = 0;
+      let cls = false;
+      for (; i < src.length; i++) {
+        const d = src[i];
+        if (d === BACKSLASH) {
+          i++;
+          continue;
+        }
+        if (cls) {
+          if (d === ']') cls = false;
+          continue;
+        }
+        if (d === '[') cls = true;
+        else if (d === '(') depth++;
+        else if (d === ')' && --depth === 0) break;
+      }
+      i++;
+      continue;
+    }
+    out += c;
+    i++;
+  }
+  return out;
+}
+function gatePasses(re: RegExp, text: string): boolean {
+  let g = gates.get(re);
+  if (!g) {
+    g = new RegExp(stripLookbehinds(re.source), re.flags.replace(/[gy]/g, ''));
+    gates.set(re, g);
+  }
+  return g.test(text);
+}
 function clearMemo(): void {
   for (const m of memoTests.values()) m.clear();
   for (const m of memoFns.values()) m.clear();
@@ -1504,6 +1577,7 @@ const RE_COPULA_BEFORE = new RegExp(`${NOT_LETTER_BEFORE}(?:jest|jestem|był|by�
 /** Jeden przebieg zdarzeń zdrowotnych (w punkcie stałym razem z frazami). */
 function maskEventsOnce(ctx: RedactCtx, mask: string): void {
   for (const e of EVENTS) {
+    if (!gatePasses(e.re, ctx.text)) continue;
     const starts = sentenceStarts(ctx.text);
     ctx.text = ctx.text.replace(e.re, (m: string, ...args: unknown[]) => {
       const offset = args[args.length - 2] as number;
@@ -1974,6 +2048,7 @@ function maskPhraseList(ctx: RedactCtx, mask: string, late: boolean): void {
     const lateOnly = p.anchor === diseaseAnchor || p.anchor === namedAnchor || p.anchor === morphAnchor || p.anchor === acronymAnchor;
     if (late ? p.self || !(lateOnly || (p.late && !p.anchor)) : lateOnly) continue;
     const anchor = late ? (p.anchor ?? diseaseAnchor) : (p.anchor ?? medicalAnchored);
+    if (!gatePasses(p.re, ctx.text)) continue;
     const starts = sentenceStarts(ctx.text);
     ctx.text = ctx.text.replace(p.re, (m: string, ...args: unknown[]) => {
       const offset = args[args.length - 2] as number;
