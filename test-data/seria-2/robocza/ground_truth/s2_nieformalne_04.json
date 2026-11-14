@@ -1,0 +1,212 @@
+{
+  "id": "s2_nieformalne_04",
+  "template": "nieformalne",
+  "title": "Zgłoszenie w helpdesku IT o dostępie VPN",
+  "seed": null,
+  "traps": [
+    "loginy z nazwisk (amazur, pwisniewski, @kzielinska)",
+    "nazwa laptopa z nazwiskiem",
+    "IP osoby i IP serwera obok siebie",
+    "numer seryjny z 11 cyframi",
+    "region Mazury obok nazwiska Mazur",
+    "dane o zdrowiu bez polskich znaków"
+  ],
+  "entities": [
+    {
+      "text": "amazur",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "login utworzony z nazwiska",
+      "count": 4
+    },
+    {
+      "text": "Agnieszka Mazur",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Agnieszko",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz",
+      "count": 1
+    },
+    {
+      "text": "aga",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie małą literą w podpisie",
+      "count": 1
+    },
+    {
+      "text": "pwisniewski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "login utworzony z nazwiska",
+      "count": 3
+    },
+    {
+      "text": "Piotr Wiśniewski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "piotrze",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz małą literą",
+      "count": 1
+    },
+    {
+      "text": "P.W.",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kzielinska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "login, także jako wzmianka @",
+      "count": 2
+    },
+    {
+      "text": "Karolina Zielińska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Grzesiek",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie",
+      "count": 1
+    },
+    {
+      "text": "a.mazur@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "507-118-942",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon z myślnikami",
+      "count": 1
+    },
+    {
+      "text": "61 852 44 10",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "stary numer stacjonarny osoby",
+      "count": 1
+    },
+    {
+      "text": "198.51.100.73",
+      "type": "IP",
+      "expect": "mask",
+      "note": "domowe IP osoby",
+      "count": 2
+    },
+    {
+      "text": "po operacji kolana",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "zerwane wiezadlo krzyzowe",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "bez polskich znaków",
+      "count": 1
+    },
+    {
+      "text": "rehabilitacja",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "LAP-AMAZUR-07",
+      "type": "HOSTNAME",
+      "expect": "policy",
+      "note": "nazwa komputera z nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "2314",
+      "type": "PHONE_EXT",
+      "expect": "policy",
+      "note": "numer wewnętrzny",
+      "count": 1
+    },
+    {
+      "text": "INC-2026-04417",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer zgłoszenia",
+      "count": 1
+    },
+    {
+      "text": "Centrum Rehabilitacji Ortopedycznej",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "placówka ujawnia leczenie",
+      "count": 1
+    },
+    {
+      "text": "192.0.2.10",
+      "type": "IP_SERVER",
+      "expect": "keep",
+      "note": "adres serwera firmy, nie osoby",
+      "count": 1
+    },
+    {
+      "text": "48203917564",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "numer seryjny, 11 cyfr bez poprawnej sumy PESEL",
+      "count": 1
+    },
+    {
+      "text": "10.0.19045",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "wersja systemu",
+      "count": 1
+    },
+    {
+      "text": "ul. Szamarzewskiego 84",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "adres placówki",
+      "count": 1
+    },
+    {
+      "text": "Mazury",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "region, podobny do nazwiska Mazur",
+      "count": 1
+    },
+    {
+      "text": "vpn-gw01",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "nazwa serwera",
+      "count": 1
+    }
+  ]
+}

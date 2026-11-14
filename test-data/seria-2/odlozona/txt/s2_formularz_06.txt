@@ -1,0 +1,43 @@
+ZUS Z-15A
+WNIOSEK O ZASIŁEK OPIEKUŃCZY Z POWODU KONIECZNOŚCI SPRAWOWANIA OPIEKI NAD CHORYM DZIECKIEM
+Zakład Ubezpieczeń Społecznych Oddział w Rzeszowie, ul. Zamkowa 8, 35-032 Rzeszów
+
+CZĘŚĆ I. DANE OSOBY UBIEGAJĄCEJ SIĘ O ZASIŁEK
+PESEL: 87031269875
+Imię: ŁUKASZ
+Nazwisko: SROKA
+Adres zamieszkania: ul. Hetmańska 102/7, 35-078 Rzeszów
+Numer telefonu: 17 862 44 19
+Adres e-mail: lukasz.s87@example.pl
+
+CZĘŚĆ II. DANE DZIECKA
+PESEL dziecka: 18292557395
+Imię i nazwisko dziecka: Kacper Sroka
+Data urodzenia: 25.09.2018
+Okres opieki: od 02.11.2026 do 13.11.2026
+Zaświadczenie lekarskie e-ZLA seria i numer: ZY 4417263
+Rozpoznanie wpisane przez lekarza: J18.9 zapalenie płuc, niewymagające hospitalizacji
+Lekarz wystawiający: lek. med. Agata Pięta, nr prawa wykonywania zawodu 5482917
+
+CZĘŚĆ III. OŚWIADCZENIA
+1. Czy w okresie opieki jest inny członek rodziny, który może zapewnić opiekę?
+[ ] tak   [X] nie
+Uzasadnienie: matka dziecka, Iryna Sroka z domu Melnyk (PESEL 89010834326), przebywa w szpitalu po zabiegu, a babcia mieszka w Iwano-Frankiwsku.
+2. Czy drugi z rodziców pracuje w systemie zmianowym?  [X] tak   [ ] nie
+3. Czy w roku kalendarzowym pobierano już zasiłek opiekuńczy na to dziecko?
+[X] tak, 4 dni (marzec 2026)   [ ] nie
+
+CZĘŚĆ IV. DANE PŁATNIKA SKŁADEK
+Nazwa: ELEKTROSROKA Łukasz Sroka
+NIP płatnika: 1831421093
+Uwaga: wnioskodawca prowadzi jednoosobową działalność i jest sam dla siebie płatnikiem.
+
+CZĘŚĆ V. SPOSÓB WYPŁATY
+Numer rachunku: 23194010763678988050773053
+
+CZĘŚĆ VI. DANE DRUGIEGO RODZICA (dla oświadczenia o pracy zmianowej)
+Imię i nazwisko: Iryna Sroka
+Pracodawca: Szpital Wojewódzki nr 2 w Rzeszowie, pielęgniarka oddziałowa
+
+Na drzewie przed blokiem przez cały tydzień siedziała sroka, a Kacperek liczył ją z okna jako najlepszą zabawę w chorobie.
+Rzeszów, 14.11.2026         Ł. Sroka

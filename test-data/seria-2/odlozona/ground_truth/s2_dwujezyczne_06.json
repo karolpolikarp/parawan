@@ -1,0 +1,240 @@
+{
+  "id": "s2_dwujezyczne_06",
+  "template": "dwujezyczne",
+  "title": "Umowa najmu w dwóch kolumnach (PL | EN) z najemcą z Irlandii",
+  "seed": null,
+  "traps": [
+    "układ dwukolumnowy: polski i angielski tekst w jednej linii, rozdzielone „|”",
+    "nazwiska z apostrofem i znakiem diakrytycznym (Sean O'Connor, Siobhán O'Connor)",
+    "zagraniczny adres z irlandzkim kodem Eircode (D11 KX27) i numer dzielnicy Dublin 11",
+    "numer księgi wieczystej i NRB w obu kolumnach",
+    "telefon +353 i polski numer bez prefiksu w jednej linii",
+    "data urodzenia 17.10.1990 i 17 October 1990 obok dat umowy do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "Grażyna Mazur",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "ul. Narutowicza 87/4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "90-139",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "KCA810773",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "62042775784",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Sean O'Connor",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko z apostrofem",
+      "count": 3
+    },
+    {
+      "text": "17.10.1990",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "17 October 1990",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia w formacie brytyjskim",
+      "count": 1
+    },
+    {
+      "text": "90101716636",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL cudzoziemca",
+      "count": 2
+    },
+    {
+      "text": "MZ5572806",
+      "type": "RESIDENCE_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "22 Glasnevin Avenue",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres zagraniczny",
+      "count": 2
+    },
+    {
+      "text": "D11 KX27",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "irlandzki kod Eircode",
+      "count": 2
+    },
+    {
+      "text": "ul. Wólczańskiej 34 m. 12",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres wynajmowanego lokalu",
+      "count": 1
+    },
+    {
+      "text": "ul. Wólczańska 34 m. 12",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "90-607",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "LD1M/62514201/1",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "32 1050 0099 5207 6036 8794 9311",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "NRB bez PL",
+      "count": 2
+    },
+    {
+      "text": "Aoife Byrne",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Siobhán O'Connor",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "+353 87 412 6603",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon irlandzki",
+      "count": 2
+    },
+    {
+      "text": "604 552 871",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "g.mazur62@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "+48 572 118 640",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "sean.oconnor@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Sąd Rejonowy dla Łodzi-Śródmieścia w Łodzi",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "1 December 2025",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "30 November 2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Łódź",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 5
+    },
+    {
+      "text": "Dublin",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z zagranicznego adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "Cork",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce urodzenia",
+      "count": 2
+    },
+    {
+      "text": "Irlandii",
+      "type": "NATIONALITY",
+      "expect": "policy",
+      "note": "obywatelstwo",
+      "count": 1
+    },
+    {
+      "text": "Irish",
+      "type": "NATIONALITY",
+      "expect": "policy",
+      "note": "obywatelstwo",
+      "count": 1
+    }
+  ]
+}

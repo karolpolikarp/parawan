@@ -1,0 +1,309 @@
+{
+  "id": "s2_tabele_03",
+  "template": "tabele",
+  "title": "Wykaz wnioskodawców stypendium szkolnego (eksport CSV, średnik)",
+  "seed": null,
+  "traps": [
+    "nazwisko i imię w osobnych kolumnach, nazwiska wersalikami",
+    "puste komórki (;;) i wiersz sumy RAZEM",
+    "nazwisko Kowal obok rzeczownika „Kowal” (rzemieślnik) na początku zdania",
+    "11-cyfrowy identyfikator paczki bez etykiety PESEL (zła suma)",
+    "adres z patronem ulicy (Kopernika) w adresie osoby, adresy wiejskie bez ulicy"
+  ],
+  "entities": [
+    {
+      "text": "Urząd Gminy w Łapanowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Referat Oświaty i Spraw Społecznych",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "66284855201",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "identyfikator paczki, zła suma kontrolna",
+      "count": 1
+    },
+    {
+      "text": "Nazwisko",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "nagłówek kolumny",
+      "count": 1
+    },
+    {
+      "text": "Imię",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "nagłówek kolumny",
+      "count": 1
+    },
+    {
+      "text": "OS.4431.1.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer wniosku",
+      "count": 2
+    },
+    {
+      "text": "OS.4431.2.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer wniosku",
+      "count": 1
+    },
+    {
+      "text": "OS.4431.3.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer wniosku",
+      "count": 2
+    },
+    {
+      "text": "OS.4431.4.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer wniosku",
+      "count": 2
+    },
+    {
+      "text": "OS.4431.5.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer wniosku",
+      "count": 2
+    },
+    {
+      "text": "STAWARZ",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko wersalikami w osobnej kolumnie",
+      "count": 1
+    },
+    {
+      "text": "Natalia",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię w osobnej kolumnie",
+      "count": 1
+    },
+    {
+      "text": "KOWAL",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko = zawód",
+      "count": 1
+    },
+    {
+      "text": "Szymon",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "CHRZĄSZCZ",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko = owad",
+      "count": 2
+    },
+    {
+      "text": "Lena",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Maja",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "BUREK",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Antoni",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "12240967827",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dziecka",
+      "count": 1
+    },
+    {
+      "text": "15282184414",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dziecka",
+      "count": 1
+    },
+    {
+      "text": "10320233365",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dziecka",
+      "count": 1
+    },
+    {
+      "text": "13261490822",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dziecka",
+      "count": 1
+    },
+    {
+      "text": "Tarnawa 77",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres wiejski bez ulicy",
+      "count": 1
+    },
+    {
+      "text": "Sobolów 145",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres wiejski bez ulicy",
+      "count": 1
+    },
+    {
+      "text": "ul. Kopernika 3/2",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "patron w nazwie ulicy, ale adres osoby",
+      "count": 2
+    },
+    {
+      "text": "Wola Wieruszycka 12",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres wiejski bez kodu",
+      "count": 1
+    },
+    {
+      "text": "32-740",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 4
+    },
+    {
+      "text": "Łapanów",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 4
+    },
+    {
+      "text": "512 340 991",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+48 693 004 217",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "661-202-385",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon z łącznikami",
+      "count": 1
+    },
+    {
+      "text": "Henryk Stawarz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "orzeczenie o umiarkowanym stopniu niepełnosprawności",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Oksana Burek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "NF1761137",
+      "type": "PASSPORT",
+      "expect": "mask",
+      "note": "paszport matki",
+      "count": 1
+    },
+    {
+      "text": "z Ukrainy",
+      "type": "NATIONALITY",
+      "expect": "policy",
+      "note": "kraj pochodzenia ucznia",
+      "count": 1
+    },
+    {
+      "text": "Kowal",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "rzemieślnik, wielka litera na początku zdania",
+      "count": 1
+    },
+    {
+      "text": "XXII/180/26",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer uchwały",
+      "count": 1
+    },
+    {
+      "text": "Paweł Szczurek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "12 271 02 34",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "p.szczurek@lapanow.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

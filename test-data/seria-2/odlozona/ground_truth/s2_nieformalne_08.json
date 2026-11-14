@@ -1,0 +1,296 @@
+{
+  "id": "s2_nieformalne_08",
+  "template": "nieformalne",
+  "title": "SMS-y przy sprzedaży samochodu i powiadomienia automatyczne",
+  "seed": null,
+  "traps": [
+    "ten sam telefon w formatach 0048 i +48 jako nadawca",
+    "tablica ze spacją i bez spacji",
+    "nazwisko wersalikami w SMS z banku",
+    "numer polisy z 11 cyframi jak PESEL",
+    "PESEL i dowód bez etykiet po samym nazwisku",
+    "kody paczkomatu i odbioru obok danych osobowych"
+  ],
+  "entities": [
+    {
+      "text": "P.J.",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "właścicielka telefonu w nagłówku",
+      "count": 1
+    },
+    {
+      "text": "Seba",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie w nazwie kontaktu",
+      "count": 6
+    },
+    {
+      "text": "Seby",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "Sebastian",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "paula",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie małą literą",
+      "count": 2
+    },
+    {
+      "text": "paulinka",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie małą literą",
+      "count": 1
+    },
+    {
+      "text": "Paulina Jaworska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dawid Krawczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "DAWID KRAWCZYK",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "wersaliki w SMS z banku",
+      "count": 1
+    },
+    {
+      "text": "Henryk Jaworski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "86NB1XN44K9TZ0MAH",
+      "type": "VIN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "SK 2291W",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "SK2291W",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "tablica bez spacji w tytule przelewu",
+      "count": 1
+    },
+    {
+      "text": "0048 733 019 552",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "prefiks 0048",
+      "count": 1
+    },
+    {
+      "text": "+48733019552",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "ten sam numer w innym formacie jako nadawca",
+      "count": 4
+    },
+    {
+      "text": "691 040 277",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "numer do BLIK",
+      "count": 1
+    },
+    {
+      "text": "93071999373",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "96030267326",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "bez etykiety",
+      "count": 1
+    },
+    {
+      "text": "RPD813728",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "GFT794471",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "bez etykiety",
+      "count": 1
+    },
+    {
+      "text": "PL41 1090 1014 0451 7520 2401 7747",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Wolności 312/14",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Michałkowicka 45",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "94556/14/3277",
+      "type": "DRIVING_LICENSE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "w gipsie",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "peknieta kosc lokciowa",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "bez polskich znaków",
+      "count": 1
+    },
+    {
+      "text": "łokieć",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "uraz wspomniany pytaniem",
+      "count": 1
+    },
+    {
+      "text": "Chorzów",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Siemianowice Śląskie",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "482913",
+      "type": "PICKUP_CODE",
+      "expect": "policy",
+      "note": "kod odbioru paczki",
+      "count": 1
+    },
+    {
+      "text": "Toyota Yaris",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "golfa",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "model sprzedawanego auta",
+      "count": 2
+    },
+    {
+      "text": "23 412,18 PLN",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "saldo rachunku",
+      "count": 1
+    },
+    {
+      "text": "91635450480",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "numer polisy, 11 cyfr bez poprawnej sumy PESEL",
+      "count": 1
+    },
+    {
+      "text": "InPost",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KAT05M",
+      "type": "LOCATION",
+      "expect": "keep",
+      "note": "kod paczkomatu",
+      "count": 1
+    },
+    {
+      "text": "ul. Mikołowska 100",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "adres paczkomatu",
+      "count": 1
+    },
+    {
+      "text": "PZU",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Katowice Pyrzowice",
+      "type": "TRAVEL_CITY",
+      "expect": "keep",
+      "note": "lotnisko",
+      "count": 1
+    },
+    {
+      "text": "Szpitalu Miejskim w Siemianowicach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,260 @@
+{
+  "id": "s2_spoleczne_10",
+  "template": "spoleczne",
+  "title": "Wywiad środowiskowy z osobą bezdomną",
+  "seed": null,
+  "traps": [
+    "patron w nazwie ulicy przy adresie ośrodka (Wita Stwosza)",
+    "patron w nazwie noclegowni do zachowania",
+    "przezwisko „Heniek” jako zdrobnienie",
+    "numer utraconego dowodu osobistego",
+    "IBAN bez spacji i bez PL"
+  ],
+  "entities": [
+    {
+      "text": "Miejski Ośrodek Pomocy Społecznej w Katowicach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Wita Stwosza 7",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w nazwie ulicy przy adresie ośrodka",
+      "count": 1
+    },
+    {
+      "text": "40-040",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Katowice",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i siedziby",
+      "count": 3
+    },
+    {
+      "text": "DPOB.4012.208.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "Henryk Bednarz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "30 maja 1968 r.",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "68053017934",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Mikołowska 52/4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "40-066",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Noclegownia Towarzystwa Pomocy im. św. Brata Alberta",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie noclegowni",
+      "count": 1
+    },
+    {
+      "text": "Łukasza Kreta",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Heniek",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie imienia Henryk",
+      "count": 1
+    },
+    {
+      "text": "ul. Mikołowskiej",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "ulica poprzedniego mieszkania osoby",
+      "count": 1
+    },
+    {
+      "text": "ZMN316260",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jolantą Bednarz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sosnowcu",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość zamieszkania osoby",
+      "count": 1
+    },
+    {
+      "text": "Karoliną Mróz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zdzisław Bednarz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Burschego 11",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "43-100",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tychy",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "32 227 61 04",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "padaczkę",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "przewlekłe wirusowe zapalenie wątroby typu C",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "odmrożeń stóp",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "amputowano mu dwa palce lewej stopy",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "uzależniony od alkoholu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "mityngi AA",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Leki przeciwpadaczkowe",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "niezdolność do pracy",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "58194010760293565228443163",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Anna Mikulska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "32 251 00 87",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon służbowy pracownika",
+      "count": 1
+    },
+    {
+      "text": "a.mikulska@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

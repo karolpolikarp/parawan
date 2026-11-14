@@ -1,0 +1,261 @@
+{
+  "id": "s2_formularz_07",
+  "template": "formularz",
+  "title": "Wniosek o świadczenie pielęgnacyjne",
+  "seed": null,
+  "traps": [
+    "nazwisko z rodzajnikiem Al- w odwrotnej kolejności wersalikami",
+    "patron w adresie osoby i w adresie MOPS",
+    "„Biedronka” jako pracodawca, a nie owad",
+    "opisowe dane o zdrowiu poza kodem ICD-10",
+    "telefon z kierunkowym w nawiasie",
+    "samo imię syna i zdrobnienie imienia żony"
+  ],
+  "entities": [
+    {
+      "text": "Miejski Ośrodek Pomocy Społecznej w Sosnowcu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Ignacego Mościckiego 26",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w adresie instytucji",
+      "count": 1
+    },
+    {
+      "text": "41-200",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sosnowiec",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby, siedziby i podpisu",
+      "count": 3
+    },
+    {
+      "text": "ŚP.4110.77.2026.MG",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak z inicjałami pracownika",
+      "count": 1
+    },
+    {
+      "text": "AL-KHATIB OMAR",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko i imię w odwrotnej kolejności, wersalikami",
+      "count": 1
+    },
+    {
+      "text": "04.05.1976",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "76050469814",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "jordańskie",
+      "type": "NATIONALITY",
+      "expect": "policy",
+      "note": "obywatelstwo",
+      "count": 1
+    },
+    {
+      "text": "RP5476564",
+      "type": "RESIDENCE_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Jana Kilińskiego 14 m. 3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "patron w adresie osoby (maskować)",
+      "count": 1
+    },
+    {
+      "text": "41-218",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "(32) 266 71 08",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "kierunkowy w nawiasie",
+      "count": 1
+    },
+    {
+      "text": "788 145 902",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Nur Al-Khatib",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "arabskie imię spoza słownika",
+      "count": 1
+    },
+    {
+      "text": "11271587820",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "o niepełnosprawności ze wskazaniami w pkt 7 i 8",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Miejski Zespół do Spraw Orzekania o Niepełnosprawności w Sosnowcu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "mózgowe porażenie dziecięce, postać obustronna kurczowa",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "G80.1",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "padaczka lekooporna",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dziecko porusza się na wózku, wymaga karmienia przez PEG i całodobowej opieki",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Katarzyna Al-Khatib",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Gajewska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko rodowe w nawiasie",
+      "count": 1
+    },
+    {
+      "text": "81022198780",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kasia",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie imienia żony",
+      "count": 1
+    },
+    {
+      "text": "Biedronce",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "sieć sklepów, zbieżna ze zwykłym słowem",
+      "count": 1
+    },
+    {
+      "text": "ul. Piłsudskiego",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "ulica sklepu bez numeru",
+      "count": 1
+    },
+    {
+      "text": "zastępczyni kierownika sklepu",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Yusuf",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię syna, arabskie",
+      "count": 1
+    },
+    {
+      "text": "Politechniki Śląskiej",
+      "type": "INSTITUTION",
+      "expect": "policy",
+      "note": "uczelnia syna, quasi-identyfikator",
+      "count": 1
+    },
+    {
+      "text": "Silesia Logistics sp. z o.o.",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "były pracodawca",
+      "count": 1
+    },
+    {
+      "text": "Joanny Furman",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "asystentka rodziny",
+      "count": 1
+    },
+    {
+      "text": "50 1160 2202 8881 0140 3498 1621",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Omar Al-Khatib",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    }
+  ]
+}

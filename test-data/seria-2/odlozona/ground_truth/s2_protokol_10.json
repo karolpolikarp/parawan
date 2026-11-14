@@ -1,0 +1,247 @@
+{
+  "id": "s2_protokol_10",
+  "template": "protokol",
+  "title": "Protokół z zebrania wiejskiego",
+  "seed": null,
+  "traps": [
+    "wybory sołtysa z wynikami głosowania przy nazwiskach",
+    "nazwisko Pasternak i „pasternak” na stoisku",
+    "nazwa sołectwa w odmianie w nazwie instytucji (KGW w Trzebusce) i jako miejscowość osoby",
+    "księga wieczysta działki rolnika i szkody łowieckie",
+    "zbiórka na leczenie dziecka z rachunkiem matki",
+    "radna i burmistrz: radna jako osoba, burmistrz tylko z funkcji"
+  ],
+  "entities": [
+    {
+      "text": "Burmistrz Sokołowa Małopolskiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "burmistrz bez nazwiska",
+      "count": 1
+    },
+    {
+      "text": "Rady Miejskiej",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Koło Łowieckie „Darz Bór”",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Koło Gospodyń Wiejskich w Trzebusce",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "nazwa wsi w nazwie instytucji",
+      "count": 1
+    },
+    {
+      "text": "pasternak",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "warzywo obok nazwiska Pasternak",
+      "count": 1
+    },
+    {
+      "text": "Trzebuska",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "nazwa sołectwa i miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "Sokołów Małopolski",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "gmina",
+      "count": 1
+    },
+    {
+      "text": "48 300 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "kwota funduszu sołeckiego",
+      "count": 1
+    },
+    {
+      "text": "Józef Pasternak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sołtys",
+      "count": 4
+    },
+    {
+      "text": "Aleksandra Wolak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "radna",
+      "count": 2
+    },
+    {
+      "text": "Ludwika Batora",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Anitę Pociask",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sabina Koziara",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Pasternakowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w celowniku",
+      "count": 1
+    },
+    {
+      "text": "Sabinie Koziarze",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wiesławę Ćwik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Grzegorza Słowika",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Eugeniusz Kotula",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Polna 6",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kotuli",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "Bronisława Kluz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "jeździ na dializy",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Czesław Fryc",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "697 304 115",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "RZ1Z/15443433/5",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "księga wieczysta działki osoby",
+      "count": 1
+    },
+    {
+      "text": "Frycowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w celowniku",
+      "count": 1
+    },
+    {
+      "text": "Leny Bator",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletnia",
+      "count": 1
+    },
+    {
+      "text": "Justyny Bator",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "rdzeniowy zanik mięśni",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "choroba dziecka",
+      "count": 1
+    },
+    {
+      "text": "PL41114020041351197181478158",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "rachunek matki, bez spacji",
+      "count": 1
+    },
+    {
+      "text": "Ludwik Bator",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Anita Pociask",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "lat 79",
+      "type": "AGE",
+      "expect": "policy",
+      "note": "wiek osoby",
+      "count": 1
+    }
+  ]
+}

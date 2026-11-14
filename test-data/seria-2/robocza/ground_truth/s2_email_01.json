@@ -1,0 +1,233 @@
+{
+  "id": "s2_email_01",
+  "template": "email",
+  "title": "Rekrutacja: zgłoszenie kandydatki przekazane kierownikowi i autoodpowiedź",
+  "seed": null,
+  "traps": [
+    "nazwisko Mróz i słowo „mróz” w tej samej wiadomości",
+    "autoodpowiedź z danymi zastępczyni (imię i nazwisko w dopełniaczu, telefon, e-mail)",
+    "funkcyjna skrzynka rekrutacja@ i dane firmy w stopce (polityka)",
+    "dane o zdrowiu w liście kandydatki (niepełnosprawność, choroba, leczenie)",
+    "wołacz zdrobnienia „Tomku” i samo imię „Pauliny” w dopełniaczu",
+    "numer ogłoszenia REK/2026/114 do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "Tomasz Grabowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "tomasz.grabowski@kalibra.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "służbowy e-mail osoby",
+      "count": 2
+    },
+    {
+      "text": "Agata Wierzbicka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "a.wierzbicka@kalibra.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "służbowy e-mail osoby",
+      "count": 2
+    },
+    {
+      "text": "Jolanty Kubiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "zastępczyni w autoodpowiedzi, dopełniacz",
+      "count": 1
+    },
+    {
+      "text": "jolanta.kubiak@kalibra.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "605 772 318",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tomku",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz zdrobnienia",
+      "count": 1
+    },
+    {
+      "text": "Pauliny",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "698 041 225",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "służbowa komórka osoby",
+      "count": 1
+    },
+    {
+      "text": "Paulina Mróz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "paulina.mroz94@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "rok urodzenia w adresie",
+      "count": 1
+    },
+    {
+      "text": "ul. Kasztanowa 12/4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "53-206",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "512 384 097",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "17.03.1994",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "94031724604",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "orzeczenie o umiarkowanym stopniu niepełnosprawności",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "cukrzycę typu 1",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "insulinoterapii",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "leczenie",
+      "count": 1
+    },
+    {
+      "text": "Wrocław",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i z adresu firmy",
+      "count": 2
+    },
+    {
+      "text": "rekrutacja@kalibra.example.pl",
+      "type": "EMAIL_FUNCTIONAL",
+      "expect": "policy",
+      "note": "skrzynka funkcyjna firmy",
+      "count": 2
+    },
+    {
+      "text": "Kalibra Systemy sp. z o.o.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "pracodawca nadawcy",
+      "count": 1
+    },
+    {
+      "text": "ul. Legnicka 48",
+      "type": "COMPANY_ADDRESS",
+      "expect": "policy",
+      "note": "adres siedziby firmy",
+      "count": 1
+    },
+    {
+      "text": "54-202",
+      "type": "COMPANY_POSTAL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+48 71 330 18 40",
+      "type": "PHONE_COMPANY",
+      "expect": "policy",
+      "note": "centrala firmy",
+      "count": 1
+    },
+    {
+      "text": "wew. 112",
+      "type": "PHONE_EXT",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Specjalistka ds. rekrutacji",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Logistyka Odra sp. z o.o.",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "obecny pracodawca kandydatki",
+      "count": 1
+    },
+    {
+      "text": "REK/2026/114",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer ogłoszenia",
+      "count": 4
+    },
+    {
+      "text": "mróz",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo równe nazwisku",
+      "count": 1
+    }
+  ]
+}

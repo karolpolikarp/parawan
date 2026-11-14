@@ -71,14 +71,14 @@ function runEval(dir) {
   const rep = JSON.parse(readFileSync(join(dir, 'raport.json'), 'utf8'));
   // eval.py uznaje za numerowane tylko znaczniki z cyfrą; etykiety [OSOBA-A] liczymy osobno.
   let lettered = 0;
-  for (const f of readdirSync(dir).filter((n) => /^\d.*\.txt$/.test(n))) {
+  for (const f of readdirSync(dir).filter((n) => n.endsWith('.txt') && !n.startsWith('raport'))) {
     lettered += (readFileSync(join(dir, f), 'utf8').match(/\[OSOBA-[A-Z]{1,3}\]/g) ?? []).length;
   }
   return { rep, lettered };
 }
 
 const engine = await loadEngine();
-const setName = opt('--set') ? `-${SET.split(/[\/]/).filter(Boolean).slice(-2).join('-')}` : '';
+const setName = opt('--set') ? `-${SET.split(/[\\/]/).filter(Boolean).slice(-2).join('-')}` : '';
 const out = resolve(opt('--out') ?? join(ROOT, 'test-data/wyniki', `${version()}${setName}`));
 const profiles = opt('--profile') ? [opt('--profile')] : Object.keys(PROFILES);
 const summary = [];

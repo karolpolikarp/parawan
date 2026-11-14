@@ -1,0 +1,51 @@
+Od: Renata Głowacka <r.glowacka@starostwo-kutno.example.pl>
+Wysłano: piątek, 13 listopada 2026 11:02
+Do: Łukasz Wrona <lwrona@starostwo-kutno.example.pl>
+Temat: PD: RE: [INC-2026-48213] Brak dostępu do EZD po zmianie hasła
+
+Panie Łukaszu,
+
+dziękuję za szybką pomoc. Dariusza od poniedziałku nie będzie, ma zwolnienie lekarskie do 27.11 (rehabilitacja po złamaniu nadgarstka). Proszę na ten czas wyłączyć mu dostęp VPN. Jego wnioski przejmuje pani Aneta Jaworska, proszę nadać jej uprawnienia do teczki rejestracji pojazdów.
+
+Renata Głowacka
+Naczelnik Wydziału Komunikacji i Transportu
+Starostwo Powiatowe w Kutnie
+
+-----Wiadomość oryginalna-----
+Od: Łukasz Wrona <lwrona@starostwo-kutno.example.pl>
+Wysłano: piątek, 13 listopada 2026 10:26
+Do: Dariusz Kołodziej <dariusz.kolodziej@starostwo-kutno.example.pl>
+DW: Renata Głowacka <r.glowacka@starostwo-kutno.example.pl>
+Temat: RE: [INC-2026-48213] Brak dostępu do EZD po zmianie hasła
+
+Panie Dariuszu,
+
+konto jest odblokowane. Blokada wynikała z pięciu nieudanych logowań z adresu 198.51.100.23, czyli z Pana prywatnego telefonu, na którym została stara konfiguracja poczty. Proszę usunąć konto w telefonie i dodać je od nowa.
+
+Nowe hasło musi mieć co najmniej 14 znaków. Słowa ze słownika nie przejdą, np. „wrona” albo „jesien2026”.
+
+Przy okazji: w opisie zgłoszenia wkleił Pan dane obywatela. Proszę tego nie robić, zgłoszenia widzi cały zespół IT. Usunąłem je z opisu w systemie, ale zostały w powiadomieniu e-mail poniżej.
+
+Pozdrawiam
+Łukasz Wrona
+II linia wsparcia IT
+tel. 24 355 47 90 wew. 301
+
+-----Wiadomość oryginalna-----
+Od: ServiceDesk Starostwa <servicedesk@starostwo-kutno.example.pl>
+Wysłano: piątek, 13 listopada 2026 09:41
+Do: Dariusz Kołodziej <dariusz.kolodziej@starostwo-kutno.example.pl>
+Temat: [INC-2026-48213] Zgłoszenie zarejestrowane: Brak dostępu do EZD po zmianie hasła
+
+To jest wiadomość wygenerowana automatycznie. Nie odpowiadaj na nią.
+
+Numer zgłoszenia: INC-2026-48213
+Priorytet: P2
+Przypisany technik: Łukasz Wrona
+Zgłaszający: Dariusz Kołodziej, Wydział Komunikacji i Transportu, pok. 108, wew. 214
+Urządzenie: laptop Dell Latitude 5440, nr inwentarzowy 87692766123, nr seryjny 7HQX2K3
+Adres IP stacji: 192.0.2.147
+Login domenowy: dkolodziej
+
+Opis:
+Po wymuszonej zmianie hasła nie mogę zalogować się do EZD ani do poczty w telefonie. Dostaję komunikat o zablokowanym koncie. Mam dziś 40 spraw do rozpatrzenia, w tym pilny wniosek pana Edwarda Kani o rejestrację pojazdu EKU 52731, który czeka od wtorku.

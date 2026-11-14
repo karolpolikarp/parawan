@@ -1,0 +1,296 @@
+{
+  "id": "s2_dwujezyczne_03",
+  "template": "dwujezyczne",
+  "title": "List motywacyjny pielęgniarki do niemieckiego domu opieki (EN) z notatką agencji (PL)",
+  "seed": null,
+  "traps": [
+    "samo nazwisko z tytułem grzecznościowym w trzech wariantach: Ms, Frau, pełne imię w adresie",
+    "nazwisko Dudek i zwykłe słowo „dudka” (ptak) w notatce",
+    "data urodzenia w formacie brytyjskim (22 November 1984) i polskim (22.11.1984)",
+    "dane o zdrowiu opisowo po angielsku (rak tarczycy, remisja)",
+    "imiona członków rodziny bez nazwisk (Paweł, Zofia)",
+    "szpital z patronem i izba pielęgniarek do zachowania, niemiecki kod pocztowy pięciocyfrowy przy adresie firmy"
+  ],
+  "entities": [
+    {
+      "text": "Agnieszka Dudek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "ul. Hetmańska 9/24",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "35-045",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+48 789 214 506",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "a.dudek84@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sabine Krüger",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ms Krüger",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko z tytułem grzecznościowym",
+      "count": 1
+    },
+    {
+      "text": "Frau Krüger",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko z niemieckim tytułem",
+      "count": 1
+    },
+    {
+      "text": "22 November 1984",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia w formacie brytyjskim",
+      "count": 1
+    },
+    {
+      "text": "22.11.1984",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "84112234047",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "5751816P",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer prawa wykonywania zawodu pielęgniarki",
+      "count": 1
+    },
+    {
+      "text": "thyroid cancer",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "in full remission",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Paweł",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "mąż, samo imię",
+      "count": 1
+    },
+    {
+      "text": "Zofia",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "córka, samo imię",
+      "count": 1
+    },
+    {
+      "text": "Bożena Kmieć",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+48 604 117 382",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Łukasz Pietrzak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+49 89 5507 3318",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon niemiecki",
+      "count": 1
+    },
+    {
+      "text": "s.krueger@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "dudka",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "ptak, zwykłe słowo",
+      "count": 1
+    },
+    {
+      "text": "Okręgowa Izba Pielęgniarek i Położnych w Rzeszowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Goethe-Institut",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "SR-PF-2026-03",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer ogłoszenia",
+      "count": 1
+    },
+    {
+      "text": "18 February 2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "June 1, 2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "10 lutego 2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rzeszów",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "Kliniczny Szpital Wojewódzki nr 1 im. Fryderyka Chopina w Rzeszowie",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "pracodawca z patronem",
+      "count": 1
+    },
+    {
+      "text": "Seniorenresidenz Isarblick GmbH",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "przyszły pracodawca",
+      "count": 1
+    },
+    {
+      "text": "Leopoldstraße 41",
+      "type": "COMPANY_ADDRESS",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "80802",
+      "type": "COMPANY_ADDRESS",
+      "expect": "policy",
+      "note": "niemiecki kod pocztowy firmy",
+      "count": 1
+    },
+    {
+      "text": "München",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Munich",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Garching",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "miejsce pracy męża",
+      "count": 1
+    },
+    {
+      "text": "Wisłokiem",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "okolica miejsca zamieszkania",
+      "count": 1
+    },
+    {
+      "text": "Euro-Care Rekrutacja Sp. z o.o.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Head of Human Resources",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ward manager",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

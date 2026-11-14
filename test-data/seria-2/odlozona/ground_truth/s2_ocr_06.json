@@ -1,0 +1,254 @@
+{
+  "id": "s2_ocr_06",
+  "template": "ocr",
+  "title": "Decyzja naczelnika urzędu skarbowego dla przedsiębiorcy (skan po OCR)",
+  "seed": null,
+  "traps": [
+    "firma JDG zawierająca nazwisko z błędem OCR (SOKÓL-DACH)",
+    "NIP osoby z myślnikami i spacją z OCR",
+    "fałszywy PESEL jako numer referencyjny",
+    "numery faktur do zachowania",
+    "nazwisko złamane łącznikiem na końcu wiersza (Soko-/łowskiej)",
+    "rachunek urzędu do zachowania obok rachunku osoby"
+  ],
+  "entities": [
+    {
+      "text": "NACZELNIK PIERWSZEGO URZĘDU SKARBOWEGO W BIAŁYMSTOKU",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Pałacowa 3",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "15-042",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Izby Administracji Skarbowej\nw Białymstoku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "nazwa złamana końcem wiersza",
+      "count": 1
+    },
+    {
+      "text": "87909165549",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "numer referencyjny, 11 cyfr bez poprawnej sumy PESEL",
+      "count": 1
+    },
+    {
+      "text": "FV/118/2025",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "FV/121/2025",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "37 1010 1010 0166 2622 2300 0000",
+      "type": "IBAN_INSTITUTION",
+      "expect": "keep",
+      "note": "rachunek urzędu skarbowego",
+      "count": 1
+    },
+    {
+      "text": "0201-SPV.4103.88.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy w nagłówku i stopce",
+      "count": 2
+    },
+    {
+      "text": "Białystok",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość siedziby urzędu i adresu pełnomocniczki",
+      "count": 3
+    },
+    {
+      "text": "Wasilków",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Hurtownię Budowlaną Podlasie Sp. z o.o.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "5157900722",
+      "type": "NIP_COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "18 420 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "kwota zobowiązania",
+      "count": 1
+    },
+    {
+      "text": "Wiktor  Sokołowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podwójna spacja z OCR",
+      "count": 1
+    },
+    {
+      "text": "SOKÓL-DACH",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "firma JDG z nazwiskiem, ł odczytane jako l",
+      "count": 1
+    },
+    {
+      "text": "SOKÓŁ-DACH",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "firma JDG z nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "Wiktor Sokołowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "w nazwie firmy JDG",
+      "count": 2
+    },
+    {
+      "text": "ul. Białostocka 2l",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "l zamiast 1",
+      "count": 1
+    },
+    {
+      "text": "16-O1O",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "O zamiast 0",
+      "count": 1
+    },
+    {
+      "text": "Wiktora Soko1owskiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "1 zamiast ł",
+      "count": 1
+    },
+    {
+      "text": "525-089-96 13",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "NIP z myślnikami i spacją z OCR",
+      "count": 1
+    },
+    {
+      "text": "2049428l0",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "l zamiast 1; po odczycie 204942810",
+      "count": 1
+    },
+    {
+      "text": "Teresą Soko-\nłowską",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko złamane łącznikiem",
+      "count": 1
+    },
+    {
+      "text": "73120132946",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Łucja Karpińska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "doradczyni podatkowa",
+      "count": 1
+    },
+    {
+      "text": "12437",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer wpisu na listę doradców podatkowych",
+      "count": 1
+    },
+    {
+      "text": "ul. Lipowa 14 lok. 2",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres pełnomocniczki",
+      "count": 1
+    },
+    {
+      "text": "15-424",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "l.karpinska@doradca-test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "85 744 l9 O3",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "l zamiast 1, O zamiast 0",
+      "count": 1
+    },
+    {
+      "text": "rwy kulszowej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "35 1160 2202 4844 7309 7100 2011",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "rachunek podatnika",
+      "count": 1
+    },
+    {
+      "text": "Jarosław Pietrzak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pieczątka /-/",
+      "count": 1
+    }
+  ]
+}

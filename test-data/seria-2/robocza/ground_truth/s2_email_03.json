@@ -1,0 +1,233 @@
+{
+  "id": "s2_email_03",
+  "template": "email",
+  "title": "Szkoła: rodzic do wychowawczyni o nieobecności i diagnozie dziecka",
+  "seed": null,
+  "traps": [
+    "dane o zdrowiu dziecka (diagnoza, lek) w wiadomości do szkoły",
+    "nazwisko dwuczłonowe matki, inne nazwisko dziecka i ojca",
+    "skrzynka funkcyjna pedagog@ z nazwiskiem w polu wyświetlanym",
+    "patron w nazwie szkoły i adres szkoły do zachowania",
+    "podpis zdrobnieniem „Asia”, wołacz „Beato”, narzędnik „Dudkiem”",
+    "telefon w formacie z łącznikami"
+  ],
+  "entities": [
+    {
+      "text": "Beata Sikora",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "wychowawczyni",
+      "count": 3
+    },
+    {
+      "text": "b.sikora@sp24.lublin.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "służbowy e-mail osoby",
+      "count": 2
+    },
+    {
+      "text": "Joanna Pietrzak-Nowicka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe",
+      "count": 2
+    },
+    {
+      "text": "asia.pietrzak@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Krzysztof Nowicki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "ojciec",
+      "count": 2
+    },
+    {
+      "text": "k.nowicki77@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Michał Dudek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pedagog szkolny",
+      "count": 3
+    },
+    {
+      "text": "Szymon",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię dziecka",
+      "count": 2
+    },
+    {
+      "text": "Szymona Nowickiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dziecko, dopełniacz",
+      "count": 1
+    },
+    {
+      "text": "Beato",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz",
+      "count": 1
+    },
+    {
+      "text": "ADHD",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "diagnoza dziecka",
+      "count": 1
+    },
+    {
+      "text": "zaburzenia lękowe",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "metylofenidat",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "syn źle śpi i jest drażliwy",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "objawy i skutki leczenia dziecka",
+      "count": 1
+    },
+    {
+      "text": "Dudkiem",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w narzędniku",
+      "count": 1
+    },
+    {
+      "text": "16290260190",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dziecka urodzonego po 2000 r.",
+      "count": 1
+    },
+    {
+      "text": "ul. Nałęczowska 45",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "20-701",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "607 218 334",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krzysztofa",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "663-401-892",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "format z łącznikami",
+      "count": 1
+    },
+    {
+      "text": "Asia",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "podpis zdrobnieniem",
+      "count": 1
+    },
+    {
+      "text": "Lublin",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i szkoły",
+      "count": 2
+    },
+    {
+      "text": "pedagog@sp24.lublin.example.pl",
+      "type": "EMAIL_FUNCTIONAL",
+      "expect": "policy",
+      "note": "skrzynka funkcyjna z nazwiskiem w polu wyświetlanym",
+      "count": 2
+    },
+    {
+      "text": "PPP2/O/318/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer opinii poradni o dziecku",
+      "count": 1
+    },
+    {
+      "text": "wychowawczyni klasy 4b",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "81 744 20 15",
+      "type": "PHONE_INSTITUTION",
+      "expect": "policy",
+      "note": "telefon szkoły",
+      "count": 1
+    },
+    {
+      "text": "Szkoła Podstawowa nr 24 im. Tadeusza Kościuszki w Lublinie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "ul. Radości 8",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "20-530",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Poradni Psychologiczno-Pedagogicznej nr 2 w Lublinie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

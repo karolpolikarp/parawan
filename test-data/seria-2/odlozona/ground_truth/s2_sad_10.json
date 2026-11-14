@@ -1,0 +1,268 @@
+{
+  "id": "s2_sad_10",
+  "template": "sad",
+  "title": "Wyrok sądu apelacyjnego z uzasadnieniem (błąd medyczny)",
+  "seed": null,
+  "traps": [
+    "trzyosobowy skład sądu i sędziowie pierwszej instancji",
+    "szpital z patronem w nazwie jako strona pozwana",
+    "sygnatura sprawy pierwszej instancji obok cytowanego orzecznictwa",
+    "opis przebiegu leczenia jako dane o zdrowiu",
+    "samo nazwisko lekarza w dopełniaczu",
+    "szkoła jako były pracodawca w innym mieście niż adres"
+  ],
+  "entities": [
+    {
+      "text": "I ACa 1290/25",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura akt sprawy",
+      "count": 1
+    },
+    {
+      "text": "Sąd Apelacyjny w Katowicach",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wojciech Hanusek",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "sędzia w składzie sądu, osoba w funkcji",
+      "count": 2
+    },
+    {
+      "text": "Urszula Golec",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "sędzia w składzie sądu, osoba w funkcji",
+      "count": 2
+    },
+    {
+      "text": "Jacek Pilch",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "sędzia delegowany w składzie sądu",
+      "count": 2
+    },
+    {
+      "text": "Klara Duda",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "protokolant, osoba w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Aleksandry Kaczor",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "powódka",
+      "count": 1
+    },
+    {
+      "text": "Szpitalowi Miejskiemu im. dr. Henryka Jordana w Gliwicach sp. z o.o.",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "strona pozwana, patron w nazwie",
+      "count": 1
+    },
+    {
+      "text": "Sądu Okręgowego w Gliwicach",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "I C 744/23",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy w pierwszej instancji, nie cytowane orzecznictwo",
+      "count": 1
+    },
+    {
+      "text": "Aleksandra Kaczor",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "powódka",
+      "count": 1
+    },
+    {
+      "text": "2 lutego 1987",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Szpitalna 7 m. 2",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "44-190",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Knurów",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "laparoskopowym usunięciu pęcherzyka żółciowego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "zabieg",
+      "count": 1
+    },
+    {
+      "text": "Norbert Zalewski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarz",
+      "count": 1
+    },
+    {
+      "text": "uszkodził przewód żółciowy wspólny",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "żółtaczką mechaniczną",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "zapaleniem otrzewnej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "rekonstrukcję dróg żółciowych",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "oddziale intensywnej terapii",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "pobyt na OIT",
+      "count": 1
+    },
+    {
+      "text": "zespół stresu pourazowego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "leczy u psychiatry",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "leczenie psychiatryczne powódki",
+      "count": 1
+    },
+    {
+      "text": "nauczycielki matematyki",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "zawód, quasi-identyfikator",
+      "count": 1
+    },
+    {
+      "text": "Szkole Podstawowej nr 14 w Zabrzu",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "były pracodawca",
+      "count": 1
+    },
+    {
+      "text": "Sebastian Kaczor",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "mąż powódki",
+      "count": 1
+    },
+    {
+      "text": "Eugeniusz Kubica",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "biegły sądowy w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Piotra Gadomskiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pełnomocnik strony",
+      "count": 1
+    },
+    {
+      "text": "Patrycja Starzyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pełnomocnik strony",
+      "count": 1
+    },
+    {
+      "text": "Sądu Najwyższego",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "IV CSK 309/18",
+      "type": "CASE_LAW",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "Zalewskiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "III CZP 60/17",
+      "type": "CASE_LAW",
+      "expect": "keep",
+      "note": "sygnatura cytowanej uchwały",
+      "count": 1
+    },
+    {
+      "text": "Sądu Apelacyjnego w Krakowie",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "I ACa 55/20",
+      "type": "CASE_LAW",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    }
+  ]
+}

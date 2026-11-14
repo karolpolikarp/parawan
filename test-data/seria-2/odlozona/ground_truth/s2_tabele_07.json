@@ -1,0 +1,386 @@
+{
+  "id": "s2_tabele_07",
+  "template": "tabele",
+  "title": "Lista uczestników wycieczki szkolnej z danymi dzieci (tabulator)",
+  "seed": null,
+  "traps": [
+    "dane dzieci: daty urodzenia i uwagi zdrowotne w komórkach",
+    "nazwisko Góra obok rzeczownika „góra”, nazwisko Drąg w odmianie (Drąga)",
+    "ten sam telefon nie powtarza się, ale pusta komórka telefonu",
+    "11-cyfrowy numer polisy bez etykiety PESEL (zła suma)",
+    "patron w nazwie szkoły, miejscowości trasy do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "Szkoła Podstawowa nr 3 im. Marii Konopnickiej w Krośnie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "ul. Kisielewskiego 18",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "38-400",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krosno",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "siedziba szkoły i początek trasy",
+      "count": 2
+    },
+    {
+      "text": "Ustrzyki Górne",
+      "type": "TRAVEL_CITY",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wetlina",
+      "type": "TRAVEL_CITY",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Agnieszka Fus-Wrońska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "600 712 390",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marek Leja",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dorota Pelc",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "BOCHNIA",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko = nazwa miasta",
+      "count": 1
+    },
+    {
+      "text": "Filip",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "CZUBA",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Hanna",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "DRĄG",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kornel",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "FRYC",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Amelia",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "GÓRA",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko = rzeczownik",
+      "count": 1
+    },
+    {
+      "text": "Stanisław",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "HAJDUK",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zuzanna",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "14.02.2016",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "kolumna „Data ur.”",
+      "count": 1
+    },
+    {
+      "text": "03.09.2015",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "27.11.2015",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "08.06.2016",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "19.01.2016",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "30.04.2016",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "605 330 128",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "507 221 984",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "732 018 447",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "518 640 223",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "696 510 002",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "alergia na orzechy",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "dane o zdrowiu dziecka",
+      "count": 1
+    },
+    {
+      "text": "adrenalina w plecaku opiekuna",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek ratunkowy dziecka (wstrząs anafilaktyczny)",
+      "count": 1
+    },
+    {
+      "text": "astma, inhalator z salbutamolem",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "dieta bezglutenowa (celiakia)",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "choroba lokomocyjna",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kornela Drąga",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "odmiana nazwiska z tabeli",
+      "count": 1
+    },
+    {
+      "text": "Krystyna Drąg",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "opiekun prawny",
+      "type": "FAMILY",
+      "expect": "policy",
+      "note": "piecza nad dzieckiem sprawowana przez babcię",
+      "count": 1
+    },
+    {
+      "text": "13 432 77 19",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Posiłki bezglutenowe",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "dieta dziecka z celiakią, przez numer pozycji",
+      "count": 1
+    },
+    {
+      "text": "Grzegorz Hajduk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zuzanny",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię dziecka w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "g.hajduk@test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "51756497872",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "numer polisy, zła suma kontrolna",
+      "count": 1
+    },
+    {
+      "text": "góra",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "rzeczownik, nie nazwisko",
+      "count": 1
+    },
+    {
+      "text": "RKR 61HT",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zenon Wajda",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "kierowca",
+      "count": 1
+    },
+    {
+      "text": "604 908 117",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "A. Fus-Wrońska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis: inicjał + nazwisko",
+      "count": 1
+    },
+    {
+      "text": "Lucyna Bober",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dyrektor szkoły",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,226 @@
+{
+  "id": "s2_ocr_09",
+  "template": "ocr",
+  "title": "Opinia poradni psychologiczno-pedagogicznej o uczennicy (skan po OCR)",
+  "seed": null,
+  "traps": [
+    "dane dziecka i rodziców, samo imię wychowawczyni",
+    "patron w nazwie szkoły do zachowania",
+    "nazwisko z ł odczytanym jako l (Malinowska → Ma1inowska)",
+    "PESEL złamany łącznikiem",
+    "kod ICD-10 z O zamiast 0",
+    "stopka z numerem opinii na każdej stronie"
+  ],
+  "entities": [
+    {
+      "text": "PORADNIA PSYCHOLOGICZNO-PEDAGOGICZNA NR 2 W OLSZTYNIE",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Gietkowska 6a",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "10-170",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szkoła Podstawowa nr 12 im. Marii Konopnickiej w Olsztynie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "skala Wechslera",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "eponim w nazwie testu",
+      "count": 1
+    },
+    {
+      "text": "Poradni Zdrowia Psychicznego dla Dzieci i Młodzieży",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "placówka leczenia ujawnia dane o zdrowiu",
+      "count": 1
+    },
+    {
+      "text": "PPP-2.4201.318.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer opinii w nagłówkach i stopkach",
+      "count": 3
+    },
+    {
+      "text": "Olsztyn",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "siedziba poradni",
+      "count": 2
+    },
+    {
+      "text": "Dywity",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "klasa VI b",
+      "type": "SCHOOL_CLASS",
+      "expect": "policy",
+      "note": "quasi-identyfikator dziecka",
+      "count": 1
+    },
+    {
+      "text": "Oliwia Ma1inowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dziecko, 1 zamiast l",
+      "count": 1
+    },
+    {
+      "text": "13.07.2014",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "1427135-\n                         4641",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL złamany łącznikiem z wcięciem kolumny",
+      "count": 1
+    },
+    {
+      "text": "ul. Spacerowa 3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "11-OOl",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "O zamiast 0, l zamiast 1",
+      "count": 1
+    },
+    {
+      "text": "Marzena Malinowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "matka",
+      "count": 1
+    },
+    {
+      "text": "5l2 908 336",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "l zamiast 1",
+      "count": 1
+    },
+    {
+      "text": "marzena.malinowska@test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Iwona Stępień",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "psycholog",
+      "count": 1
+    },
+    {
+      "text": "Ewelina Krupa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pedagog",
+      "count": 2
+    },
+    {
+      "text": "dysleksję rozwojową",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "F81.O",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10 z O zamiast 0",
+      "count": 1
+    },
+    {
+      "text": "zaburzeń lękowych z napadami paniki",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Artur Malinowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "ojciec",
+      "count": 1
+    },
+    {
+      "text": "Grażyna",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię wychowawczyni",
+      "count": 1
+    },
+    {
+      "text": "Oliwka",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię dziecka w zdrobnieniu",
+      "count": 1
+    },
+    {
+      "text": "bóle brzucha przed sprawdzianami",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "objawy somatyczne",
+      "count": 1
+    },
+    {
+      "text": "leczenia u psychiatry dzieci i młodzieży",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Iwona Stępien",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "ń odczytane jako n",
+      "count": 1
+    },
+    {
+      "text": "Hanna 0strowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "zero zamiast O",
+      "count": 1
+    }
+  ]
+}

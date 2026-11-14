@@ -1,0 +1,49 @@
+WNIOSEK O WYDANIE DOWODU OSOBISTEGO DLA OSOBY, KTÓRA NIE UKOŃCZYŁA 18 LAT
+Kierownik Urzędu Stanu Cywilnego w Szczecinie — Wydział Ewidencji Ludności i Dowodów Osobistych
+pl. Armii Krajowej 1, 70-456 Szczecin
+
+CZĘŚĆ A. POWÓD
+[ ] pierwszy dowód   [ ] upływ ważności   [ ] zmiana danych   [X] utrata dowodu (zgłoszona 28.01.2026, nr zgłoszenia UTR/0128/2026)
+
+CZĘŚĆ B. DANE DZIECKA
+Nazwisko:
+BENALI
+Imiona:
+AMIRA ZOFIA
+Nazwisko rodowe: BENALI
+Imię ojca: KARIM
+Imię matki: AGATA
+Nazwisko rodowe matki: SZULC
+Data urodzenia: 02.10.2017
+Miejsce urodzenia: SZCZECIN
+PESEL: 17300223208
+Numer utraconego dowodu: MDF160797
+Obywatelstwo: polskie, francuskie
+
+CZĘŚĆ C. DANE RODZICA SKŁADAJĄCEGO WNIOSEK
+Imię i nazwisko: Agata Benali z d. Szulc
+PESEL: 86082350082
+Seria i numer dowodu: FPF209158
+Adres: ul. Jagiellońska 67 lok. 2, 70-382 Szczecin
+Tel. 91 433 18 06 lub 607 504 911
+E-mail: agata.benali@example.com
+
+CZĘŚĆ D. DRUGI RODZIC
+Imię i nazwisko: Karim Benali
+PESEL: 84061190474
+Zgoda drugiego rodzica: [X] wyrażona osobiście przy składaniu wniosku  [ ] dołączona
+
+CZĘŚĆ E. ODCISKI PALCÓW I PODPIS
+Dziecko ma ukończone 12 lat: [ ] tak  [X] nie, odciski i podpis nie są pobierane.
+Dziecko ma alergię kontaktową na nikiel (L23.0), zdjęcie wykonano bez kolczyków.
+
+CZĘŚĆ F. ODBIÓR
+Dowód odbierze: [X] rodzic składający wniosek  [ ] drugi rodzic  [ ] pełnomocnik
+Pełnomocnik (jeśli dotyczy): babcia dziecka, Marianne Benali, zam. w Lyonie
+Powiadomienie SMS: [X] tak
+
+CZĘŚĆ G. ADNOTACJE URZĘDU
+Wniosek przyjęła: Ewa Szulcowa, starszy referent (podobieństwo nazwiska do nazwiska rodowego matki przypadkowe).
+Wniosek nr: WEL.5340.2.311.2026
+Szczecin, 03.02.2026
+Podpis rodzica: A. Benali

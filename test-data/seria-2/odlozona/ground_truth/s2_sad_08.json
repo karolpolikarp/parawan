@@ -1,0 +1,282 @@
+{
+  "id": "s2_sad_08",
+  "template": "sad",
+  "title": "Postanowienie w sprawie przyjęcia do szpitala psychiatrycznego bez zgody",
+  "seed": null,
+  "traps": [
+    "nazwisko Gawron i słowo „gawron” w opisie urojeń",
+    "nazwisko dwuczłonowe siostry (Gawron-Pietrzak) i zdrobnienie Renatka",
+    "rozpoznanie psychiatryczne, kod ICD-10 i lek",
+    "szpital z patronem w nazwie i adres przy ulicy z patronem",
+    "lekarz z numerem PWZ obok biegłej w funkcji",
+    "cytowane orzecznictwo SN i TK"
+  ],
+  "entities": [
+    {
+      "text": "III RNs 412/26",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura akt sprawy",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy w Toruniu",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Przemysław Grochowski",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "sędzia w składzie sądu, osoba w funkcji",
+      "count": 2
+    },
+    {
+      "text": "Małgorzata Leśniak",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "protokolant, osoba w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Wojewódzkim Szpitalu Psychiatrycznym im. dr. Ludwika Kuczyńskiego",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "placówka z patronem w nazwie; ujawnia rodzaj leczenia",
+      "count": 1
+    },
+    {
+      "text": "ul. Józefa Wybickiego 34",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "adres szpitala, ulica z patronem",
+      "count": 1
+    },
+    {
+      "text": "Leszka Gawrona",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "uczestnik",
+      "count": 2
+    },
+    {
+      "text": "Leszek Gawron",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "uczestnik",
+      "count": 1
+    },
+    {
+      "text": "Edmunda",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię ojca uczestnika",
+      "count": 1
+    },
+    {
+      "text": "Wandy",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię matki uczestnika",
+      "count": 1
+    },
+    {
+      "text": "19 listopada 1979",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "79111995172",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ELS918737",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Szosa Lubicka 140 m. 9",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "87-100",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "szpitala psychiatrycznego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "przyjęcie uczestnika do szpitala psychiatrycznego",
+      "count": 1
+    },
+    {
+      "text": "Toruń",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Michałowi Lipińskiemu",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pełnomocnik z urzędu",
+      "count": 1
+    },
+    {
+      "text": "Michał Lipiński",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pełnomocnik z urzędu",
+      "count": 1
+    },
+    {
+      "text": "Renatę Gawron-Pietrzak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "siostra uczestnika, nazwisko dwuczłonowe",
+      "count": 1
+    },
+    {
+      "text": "gawron",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko Gawron",
+      "count": 1
+    },
+    {
+      "text": "schizofrenię paranoidalną",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "F20.0",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "hospitalizowany sześciokrotnie",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "historia leczenia psychiatrycznego",
+      "count": 1
+    },
+    {
+      "text": "olanzapinę",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "nadużywać alkoholu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "objawy psychotyczne",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jarosław Fic",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarz",
+      "count": 1
+    },
+    {
+      "text": "9854399",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer prawa wykonywania zawodu lekarza",
+      "count": 1
+    },
+    {
+      "text": "Hanna Szymczyk",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "biegła sądowa w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Renatka",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie imienia siostry",
+      "count": 1
+    },
+    {
+      "text": "694 210 557",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "renata.gp@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "art. 23 ust. 1 ustawy o ochronie zdrowia psychicznego",
+      "type": "LEGAL_REF",
+      "expect": "keep",
+      "note": "przepis",
+      "count": 1
+    },
+    {
+      "text": "Sądu Najwyższego",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "IV CSK 435/18",
+      "type": "CASE_LAW",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "Trybunału Konstytucyjnego",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "K 52/13",
+      "type": "CASE_LAW",
+      "expect": "keep",
+      "note": "sygnatura cytowanego wyroku TK",
+      "count": 1
+    }
+  ]
+}

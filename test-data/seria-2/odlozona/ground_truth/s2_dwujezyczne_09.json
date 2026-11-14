@@ -1,0 +1,247 @@
+{
+  "id": "s2_dwujezyczne_09",
+  "template": "dwujezyczne",
+  "title": "Referencje z niemieckiej firmy logistycznej (EN) z e-mailem kandydata i notatką HR (PL)",
+  "seed": null,
+  "traps": [
+    "nazwisko Bąk w odmianie („Panu Bąkowi”) i z „Mr” obok idiomu „zbijał bąków”",
+    "dzierżawczy „Mr Bąk's” po angielsku",
+    "ogólna skrzynka rekrutacja@example.pl (nie osoba) do zachowania",
+    "dane o zdrowiu osoby trzeciej bez nazwiska („ojcem po udarze”)",
+    "niemiecki adres i kod pocztowy osoby obok adresu firmy",
+    "daty zatrudnienia po angielsku do zachowania, data urodzenia 11 June 1986 do zamaskowania"
+  ],
+  "entities": [
+    {
+      "text": "Wojciech Bąk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "wbak.logistyka@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kopernika 5/3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "87-100",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "509 773 204",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "po udarze",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "zdrowie członka rodziny",
+      "count": 1
+    },
+    {
+      "text": "Mr Bąk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko z tytułem, także dzierżawczo",
+      "count": 2
+    },
+    {
+      "text": "11 June 1986",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia w formacie brytyjskim",
+      "count": 1
+    },
+    {
+      "text": "Sonnenallee 118",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "dawny adres osoby w Niemczech",
+      "count": 1
+    },
+    {
+      "text": "12045",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "niemiecki kod pocztowy osoby",
+      "count": 1
+    },
+    {
+      "text": "+49 30 5481 7720",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "j.albrecht@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jens Albrecht",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jensem Albrechtem",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Panu Bąkowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Iwona Sobczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "bąków",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "idiom „zbijać bąki”",
+      "count": 1
+    },
+    {
+      "text": "rekrutacja@example.pl",
+      "type": "INSTITUTION_EMAIL",
+      "expect": "keep",
+      "note": "ogólna skrzynka działu, nie osoba",
+      "count": 1
+    },
+    {
+      "text": "30 January 2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "1 September 2021",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "31 January 2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "4 lutego 2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "17 marca 2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Toruń",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i miejsce urodzenia",
+      "count": 2
+    },
+    {
+      "text": "Berlin",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "siedziba pracodawcy i dawny adres osoby",
+      "count": 4
+    },
+    {
+      "text": "Spreetal Logistik GmbH",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "Köpenicker Chaussee 4",
+      "type": "COMPANY_ADDRESS",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "10317",
+      "type": "COMPANY_ADDRESS",
+      "expect": "policy",
+      "note": "niemiecki kod pocztowy firmy",
+      "count": 1
+    },
+    {
+      "text": "SL-FI-0927",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer wewnętrznego certyfikatu",
+      "count": 1
+    },
+    {
+      "text": "Night Shift Supervisor",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Head of Operations",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Lubiczu",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "214",
+      "type": "PHONE_EXT",
+      "expect": "policy",
+      "note": "numer wewnętrzny",
+      "count": 1
+    }
+  ]
+}

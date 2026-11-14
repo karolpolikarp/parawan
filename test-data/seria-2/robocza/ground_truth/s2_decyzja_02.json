@@ -1,0 +1,267 @@
+{
+  "id": "s2_decyzja_02",
+  "template": "decyzja",
+  "title": "Decyzja starosty o zatrzymaniu prawa jazdy",
+  "seed": null,
+  "traps": [
+    "Starosta Nowosądecki jako przymiotnik w nazwie organu",
+    "ulica z patronem w adresie osoby (do maskowania)",
+    "sygnatura cytowanego wyroku NSA do zachowania obok sygnatury sprawy strony",
+    "patron w nazwie szpitala",
+    "policjant ze stopniem służbowym"
+  ],
+  "entities": [
+    {
+      "text": "STAROSTA NOWOSĄDECKI",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "wersaliki",
+      "count": 1
+    },
+    {
+      "text": "ul. Jagiellońska 33",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "33-300",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KT.5430.1.412.2026.MG",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak z inicjałami urzędnika",
+      "count": 1
+    },
+    {
+      "text": "Dz.U. z 2024 r. poz. 1210",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "publikator",
+      "count": 1
+    },
+    {
+      "text": "Komendanta Powiatowego Policji w Nowym Sączu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kamilowi Szczepanikowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "celownik",
+      "count": 1
+    },
+    {
+      "text": "4 lipca 2000",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "00270451212",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL z rocznika 2000",
+      "count": 1
+    },
+    {
+      "text": "ul. Ignacego Daszyńskiego 18/4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "patron w adresie osoby",
+      "count": 1
+    },
+    {
+      "text": "33-340",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Stary Sącz",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "42413/23/1464",
+      "type": "DRIVING_LICENSE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kurs reedukacyjny w zakresie problematyki przeciwalkoholowej",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "skierowanie na kurs ujawnia wykroczenie alkoholowe",
+      "count": 1
+    },
+    {
+      "text": "sierż. szt. Tomasz Gąska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "policjant ze stopniem",
+      "count": 1
+    },
+    {
+      "text": "Skoda Fabia",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KNS 52814",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "EDY0ZB7AM2092C5AT",
+      "type": "VIN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kamil Szczepanik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "JKY201484",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "0,31 mg/l alkoholu w wydychanym powietrzu",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "dane o wykroczeniu",
+      "count": 1
+    },
+    {
+      "text": "stan po użyciu alkoholu",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sądem Rejonowym w Nowym Sączu",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "II W 1432/26",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy strony o wykroczenie",
+      "count": 1
+    },
+    {
+      "text": "Halinę Szczepanik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "matka strony",
+      "count": 1
+    },
+    {
+      "text": "na dializy",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "dane o zdrowiu matki",
+      "count": 1
+    },
+    {
+      "text": "Szpitala Specjalistycznego im. Jędrzeja Śniadeckiego w Nowym Sączu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szpitala",
+      "count": 1
+    },
+    {
+      "text": "Naczelny Sąd Administracyjny",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "I OSK 1873/21",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "Pan Szczepanik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko z Pan",
+      "count": 1
+    },
+    {
+      "text": "Samorządowego Kolegium Odwoławczego w Nowym Sączu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Starosty Nowosądeckiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "przymiotnik od miasta, nie nazwisko",
+      "count": 1
+    },
+    {
+      "text": "512 604 931",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kamil.szczepanik@test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Magdalena Gruca",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis z upoważnienia",
+      "count": 1
+    },
+    {
+      "text": "Komenda Powiatowa Policji w Nowym Sączu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

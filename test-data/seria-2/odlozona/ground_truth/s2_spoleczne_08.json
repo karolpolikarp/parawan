@@ -1,0 +1,246 @@
+{
+  "id": "s2_spoleczne_08",
+  "template": "spoleczne",
+  "title": "Sprawozdanie kuratora zawodowego z dozoru",
+  "seed": null,
+  "traps": [
+    "nazwisko Sikora i słowo „sikory” w opisie działki",
+    "fałszywy PESEL jako numer w rejestrze dozorów",
+    "adres osiedlowy bez „ul.” („os. Orła Białego”)",
+    "dana o skazaniu i zakazie prowadzenia pojazdów",
+    "pracodawca i stanowisko skazanego"
+  ],
+  "entities": [
+    {
+      "text": "Zespół Kuratorskiej Służby Sądowej nr 3 dla Dorosłych",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sądzie Rejonowym w Kaliszu",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Łazienna 6",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "62-800",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kalisz",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i siedziby",
+      "count": 3
+    },
+    {
+      "text": "Sąd Rejonowy w Kaliszu",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "VIII K 1210/24",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy",
+      "count": 1
+    },
+    {
+      "text": "64167974398",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "11 cyfr bez poprawnej sumy kontrolnej PESEL, numer w rejestrze",
+      "count": 1
+    },
+    {
+      "text": "Robert Sikora",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "8.12.1979",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "79120809679",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "os. Orła Białego 5 m. 34",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres osiedlowy",
+      "count": 1
+    },
+    {
+      "text": "62-810",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "693 450 218",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "prowadzenie samochodu w stanie nietrzeźwości",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "dane o skazaniu",
+      "count": 1
+    },
+    {
+      "text": "karę 10 miesięcy pozbawienia wolności",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "wymiar kary",
+      "count": 1
+    },
+    {
+      "text": "zakazem prowadzenia pojazdów mechanicznych",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "środek karny",
+      "count": 1
+    },
+    {
+      "text": "89978/19/3030",
+      "type": "DRIVING_LICENSE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Skoda Octavia",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PK 7316M",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "terapii uzależnienia od alkoholu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Poradni Leczenia Uzależnień i Współuzależnienia",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bogumiła Nowicka-Rydz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe",
+      "count": 1
+    },
+    {
+      "text": "zespołu zależności alkoholowej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "F10.2",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "Lidią Sikorą",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mają",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię w narzędniku",
+      "count": 1
+    },
+    {
+      "text": "Igorem",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię w narzędniku",
+      "count": 1
+    },
+    {
+      "text": "Marek Olejnik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "policjant z imienia i nazwiska",
+      "count": 1
+    },
+    {
+      "text": "magazynier",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Transbet sp. z o.o.",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "sikory",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "ptaki, a nie nazwisko Sikora",
+      "count": 1
+    },
+    {
+      "text": "Przemysław Jankowiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

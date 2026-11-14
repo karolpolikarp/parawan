@@ -1,0 +1,23 @@
+Urząd Gminy w Łapanowie
+Referat Oświaty i Spraw Społecznych
+
+Wykaz wnioskodawców: stypendium szkolne o charakterze socjalnym, rok szkolny 2026/2027
+Eksport z systemu, separator: średnik. Identyfikator paczki: 66284855201
+
+Nr wniosku;Nazwisko;Imię;PESEL ucznia;Adres zamieszkania;Telefon rodzica;Dochód na osobę;Kwota
+OS.4431.1.2026;STAWARZ;Natalia;12240967827;Tarnawa 77, 32-740 Łapanów;512 340 991;612,40;1 200,00
+OS.4431.2.2026;KOWAL;Szymon;15282184414;Sobolów 145, 32-740 Łapanów;;488,00;1 200,00
+OS.4431.3.2026;CHRZĄSZCZ;Lena;10320233365;ul. Kopernika 3/2, 32-740 Łapanów;+48 693 004 217;701,15;960,00
+OS.4431.4.2026;CHRZĄSZCZ;Maja;13261490822;ul. Kopernika 3/2, 32-740 Łapanów;+48 693 004 217;701,15;960,00
+OS.4431.5.2026;BUREK;Antoni;;Wola Wieruszycka 12;661-202-385;845,90;0,00
+;;;;;;RAZEM;4 320,00
+
+Uwagi komisji:
+- OS.4431.1.2026: rodzina wielodzietna; ojciec ucznia, Henryk Stawarz, ma orzeczenie o umiarkowanym stopniu niepełnosprawności.
+- OS.4431.3.2026 i OS.4431.4.2026: rodzeństwo, jeden komplet załączników, wniosek złożyła matka uczennic.
+- OS.4431.5.2026: uczeń bez numeru PESEL (przyjechał z Ukrainy w sierpniu), matka Oksana Burek okazała paszport NF1761137. Kwota 0,00 do czasu nadania numeru.
+- Kowal z gminnej kuźni w Sobolowie przekazał na rzecz szkoły darowiznę, której nie wlicza się do dochodu rodziny ucznia z poz. 2.
+
+Kryterium dochodowe wynosi 600,00 zł netto na osobę w rodzinie; przekroczenie dopuszcza się tylko w szczególnie uzasadnionych przypadkach. Wysokość stypendium ustalono według regulaminu przyjętego uchwałą Rady Gminy nr XXII/180/26.
+
+Sporządził: inspektor ds. oświaty Paweł Szczurek, tel. 12 271 02 34, p.szczurek@lapanow.example.pl

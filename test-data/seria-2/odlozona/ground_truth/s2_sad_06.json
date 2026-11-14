@@ -1,0 +1,338 @@
+{
+  "id": "s2_sad_06",
+  "template": "sad",
+  "title": "Protokół rozprawy głównej w sprawie wypadku drogowego",
+  "seed": null,
+  "traps": [
+    "nazwisko Ptak i słowo „ptak”",
+    "samo imię pokrzywdzonego w dopełniaczu (Bronisława, zarazem imię żeńskie)",
+    "nazwa miejscowości Police obok słowa Policja",
+    "numer prawa jazdy i tablica rejestracyjna",
+    "opis obrażeń jako dane o zdrowiu",
+    "nazwy prokuratury i policji z nazwą miasta do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "VI K 74/26",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura akt sprawy",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy Szczecin-Prawobrzeże i Zachód w Szczecinie",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bogumiła Rataj",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "sędzia w składzie sądu, osoba w funkcji",
+      "count": 2
+    },
+    {
+      "text": "Oskar Lemański",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "protokolant, osoba w funkcji",
+      "count": 2
+    },
+    {
+      "text": "Prokuratury Rejonowej Szczecin-Prawobrzeże",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Justyna Rogalska",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "prokurator w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Kingi Stelmach",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "oskarżona",
+      "count": 1
+    },
+    {
+      "text": "Kinga Stelmach",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "oskarżona",
+      "count": 2
+    },
+    {
+      "text": "art. 177 § 2 k.k.",
+      "type": "LEGAL_REF",
+      "expect": "keep",
+      "note": "przepis",
+      "count": 1
+    },
+    {
+      "text": "Igorem Banasiem",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "obrońca",
+      "count": 1
+    },
+    {
+      "text": "Igor Banaś",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "obrońca",
+      "count": 1
+    },
+    {
+      "text": "Arkadiusz Ptak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "oskarżyciel posiłkowy",
+      "count": 2
+    },
+    {
+      "text": "Eweliną Wieczorek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pełnomocnik strony",
+      "count": 1
+    },
+    {
+      "text": "Ewelina Wieczorek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pełnomocnik strony",
+      "count": 1
+    },
+    {
+      "text": "Konrad Białas",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "policjant jako świadek",
+      "count": 2
+    },
+    {
+      "text": "Komendy Miejskiej Policji w Szczecinie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Feliks Osowski",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "biegły sądowy w funkcji",
+      "count": 2
+    },
+    {
+      "text": "Mirosława",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię ojca oskarżonej",
+      "count": 1
+    },
+    {
+      "text": "Bogusławy",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię matki oskarżonej",
+      "count": 1
+    },
+    {
+      "text": "4 lipca 2002",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Gryficach",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce urodzenia",
+      "count": 1
+    },
+    {
+      "text": "02270453942",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kardynała Wyszyńskiego 18 m. 4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres osoby przy ulicy z patronem",
+      "count": 1
+    },
+    {
+      "text": "72-010",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Police",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "niekarana",
+      "type": "SENSITIVE",
+      "expect": "policy",
+      "note": "dane o niekaralności (art. 10 RODO)",
+      "count": 1
+    },
+    {
+      "text": "23415/15/1573",
+      "type": "DRIVING_LICENSE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "skodą fabią",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ZS 4417K",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ulicą Krzekowską",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "miejsce zdarzenia",
+      "count": 1
+    },
+    {
+      "text": "ptak",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko Ptak",
+      "count": 1
+    },
+    {
+      "text": "Bronisława",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię pokrzywdzonego",
+      "count": 1
+    },
+    {
+      "text": "RSD-1187/26",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer notatki policyjnej",
+      "count": 1
+    },
+    {
+      "text": "Bronisław Ptak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pokrzywdzony",
+      "count": 1
+    },
+    {
+      "text": "nieprzytomny",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "stan pokrzywdzonego po wypadku",
+      "count": 1
+    },
+    {
+      "text": "urazu czaszkowo-mózgowego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "krwiakiem podtwardówkowym",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "złamania trzonu kości udowej lewej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "zaburzenia pamięci",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "porusza się o kulach",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "skutek obrażeń pokrzywdzonego",
+      "count": 1
+    },
+    {
+      "text": "Goleniowie",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość pobytu pokrzywdzonego",
+      "count": 1
+    },
+    {
+      "text": "63 1940 1076 4226 4232 0267 8656",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "rachunek osoby fizycznej bez prefiksu PL",
+      "count": 1
+    },
+    {
+      "text": "Sądu Najwyższego",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "IV KK 238/18",
+      "type": "CASE_LAW",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "Sądu Apelacyjnego w Szczecinie",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "II AKa 211/20",
+      "type": "CASE_LAW",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    }
+  ]
+}

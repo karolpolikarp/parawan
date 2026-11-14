@@ -1,0 +1,275 @@
+{
+  "id": "s2_dwujezyczne_08",
+  "template": "dwujezyczne",
+  "title": "CV księgowej z Wietnamu mieszkającej w Warszawie (PL/EN)",
+  "seed": null,
+  "traps": [
+    "nazwisko przed imieniem (Nguyen Thi Lan) i odwrócona kolejność (Lan Nguyen), krótkie imię „Lan” z tytułami Pani/Ms",
+    "nazwa JDG zawiera imię i nazwisko właścicielki, która w referencjach występuje w narzędniku",
+    "data urodzenia w dwóch formatach w jednej linii (12.08.1993 i August 12, 1993)",
+    "dane o zdrowiu w dwóch językach (cukrzyca typu 1, pompa insulinowa)",
+    "telefon niemiecki +49 i były pracodawca w Lipsku",
+    "uczelnie, program SGH i nazwy programów księgowych do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "Nguyen Thi Lan",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko przed imieniem",
+      "count": 2
+    },
+    {
+      "text": "Lan Nguyen",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "odwrócona kolejność",
+      "count": 1
+    },
+    {
+      "text": "Pani Lan",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Pani Nguyen",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ms Lan",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ms Nguyen",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Marywilska 44 m. 106",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "03-228",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+48 579 404 216",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "lan.nguyen.acc@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "12.08.1993",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "August 12, 1993",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia w formacie angielskim",
+      "count": 1
+    },
+    {
+      "text": "93081279409",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL cudzoziemki",
+      "count": 1
+    },
+    {
+      "text": "WT6386464",
+      "type": "RESIDENCE_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "cukrzycę typu 1",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "pompy insulinowej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "type 1 diabetes",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "insulin pump",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Biuro Rachunkowe „Saldo” Joanna Wieczorek",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "firma JDG z imieniem i nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "Joanną Wieczorek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+48 601 920 384",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Stefan Hoffmann",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "+49 341 2290 1187",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon niemiecki",
+      "count": 2
+    },
+    {
+      "text": "s.hoffmann@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Vietnam Maritime University",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szkoła Główna Handlowa w Warszawie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Comarch ERP Optima",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "nazwa programu",
+      "count": 1
+    },
+    {
+      "text": "30.06.2028",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "data ważności dokumentu",
+      "count": 1
+    },
+    {
+      "text": "Warszawa",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i siedziba pracodawcy",
+      "count": 2
+    },
+    {
+      "text": "Hải Phòng",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce urodzenia",
+      "count": 1
+    },
+    {
+      "text": "Wietnam",
+      "type": "NATIONALITY",
+      "expect": "policy",
+      "note": "kraj urodzenia",
+      "count": 1
+    },
+    {
+      "text": "Leipziger Handelskontor GmbH",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Cat Bi Seafood Export JSC",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Leipzig",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miasto dawnego pracodawcy",
+      "count": 2
+    },
+    {
+      "text": "Lipsku",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miasto dawnego pracodawcy",
+      "count": 1
+    },
+    {
+      "text": "Specjalistka ds. księgowości",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Accounting Specialist",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,240 @@
+{
+  "id": "s2_dwujezyczne_07",
+  "template": "dwujezyczne",
+  "title": "Reklamacja klienta z Wielkiej Brytanii i dwujęzyczna odpowiedź stolarza (JDG)",
+  "seed": null,
+  "traps": [
+    "nazwisko Baker i zwykłe słowo „baker” (piekarz) w tym samym liście",
+    "angielskie nazwisko w polskiej odmianie („pana Bakera”) i z tytułem („Mr Baker”)",
+    "brytyjski adres w kilku liniach z kodem BS6 5AH",
+    "firma jednoosobowa z nazwiskiem właściciela, NIP z prefiksem PL jako VAT ID, REGON osoby",
+    "samo imię kierowcy (pan Marek, Marek) i sąsiad z tytułem Mr",
+    "niepełnosprawność klienta opisowo, ostatnie cyfry karty jako polityka"
+  ],
+  "entities": [
+    {
+      "text": "Thomas Baker",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "7 Elm Grove",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres zagraniczny",
+      "count": 1
+    },
+    {
+      "text": "BS6 5AH",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "brytyjski kod pocztowy",
+      "count": 1
+    },
+    {
+      "text": "+44 117 496 0581",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "tbaker.bristol@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mr Kowalczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko z tytułem",
+      "count": 1
+    },
+    {
+      "text": "Ian Hughes",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sąsiad",
+      "count": 1
+    },
+    {
+      "text": "wheelchair user",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "niepełnosprawność",
+      "count": 1
+    },
+    {
+      "text": "Mr Baker",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko z tytułem",
+      "count": 1
+    },
+    {
+      "text": "pana Bakera",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "obce nazwisko w polskiej odmianie",
+      "count": 1
+    },
+    {
+      "text": "Marek",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię kierowcy",
+      "count": 2
+    },
+    {
+      "text": "Stolarstwo Artystyczne Kowalczyk",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "firma JDG z nazwiskiem właściciela",
+      "count": 2
+    },
+    {
+      "text": "Piotr Kowalczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "PL2757430200",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "NIP JDG z prefiksem PL (VAT UE)",
+      "count": 1
+    },
+    {
+      "text": "691470650",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL81 1240 1037 3528 2139 9970 0670",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+48 18 201 44 73",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon warsztatu JDG",
+      "count": 1
+    },
+    {
+      "text": "+48 695 330 812",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "p.kowalczyk.stolarz@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "baker",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "piekarz, zwykłe słowo",
+      "count": 1
+    },
+    {
+      "text": "9 January 2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "22 December 2025",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "14 October 2025",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "13 stycznia 2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "20 February 2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bristol",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "ul. Kościeliska 18",
+      "type": "COMPANY_ADDRESS",
+      "expect": "policy",
+      "note": "adres warsztatu JDG",
+      "count": 1
+    },
+    {
+      "text": "34-500",
+      "type": "COMPANY_ADDRESS",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zakopane",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "siedziba JDG",
+      "count": 3
+    },
+    {
+      "text": "SAK/112/2025",
+      "type": "ORDER_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "4417",
+      "type": "CARD_LAST4",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tatra Cargo",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 2
+    }
+  ]
+}

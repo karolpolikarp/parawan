@@ -1,0 +1,267 @@
+{
+  "id": "s2_decyzja_01",
+  "template": "decyzja",
+  "title": "Decyzja MOPR o przyznaniu zasiłku okresowego",
+  "seed": null,
+  "traps": [
+    "nazwisko Wróbel i ulica Wróblewskiego w adresie filii",
+    "patron w nazwie szkoły",
+    "fałszywy PESEL jako numer ewidencyjny wniosku",
+    "dane o zdrowiu z kodem ICD-10",
+    "telefon pracownika socjalnego w pouczeniu"
+  ],
+  "entities": [
+    {
+      "text": "Miejski Ośrodek Pomocy Rodzinie w Lublinie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Walerego Wróblewskiego 6",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w adresie instytucji, nazwisko podobne do strony",
+      "count": 1
+    },
+    {
+      "text": "20-466",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Lublin",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i nazwa organu",
+      "count": 6
+    },
+    {
+      "text": "MOPR-DŚ.4011.2381.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "Dz.U. z 2025 r. poz. 1691",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "publikator",
+      "count": 1
+    },
+    {
+      "text": "Dz.U. z 2025 r. poz. 1214",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "publikator",
+      "count": 1
+    },
+    {
+      "text": "66276407739",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "11 cyfr bez sumy kontrolnej, numer wniosku",
+      "count": 1
+    },
+    {
+      "text": "Ewę Wróbel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "biernik z grzecznościowym Pani",
+      "count": 1
+    },
+    {
+      "text": "ul. Nałęczowska 41/12",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "20-701",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "84031202282",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ewie Wróbel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "celownik",
+      "count": 1
+    },
+    {
+      "text": "32 1090 1014 9290 4721 6152 6754",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "NRB bez prefiksu PL",
+      "count": 1
+    },
+    {
+      "text": "Ewa Wróbel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "12 marca 1984",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Danuta Szewczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownica socjalna",
+      "count": 1
+    },
+    {
+      "text": "Oliwią Wróbel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletnia, narzędnik",
+      "count": 1
+    },
+    {
+      "text": "13290282241",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dziecka",
+      "count": 1
+    },
+    {
+      "text": "Szkoły Podstawowej nr 51 im. Ignacego Jana Paderewskiego w Lublinie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "Szymonem Wróblem",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletni, narzędnik",
+      "count": 1
+    },
+    {
+      "text": "17212708819",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dziecka",
+      "count": 1
+    },
+    {
+      "text": "27 stycznia 2017",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia dziecka",
+      "count": 1
+    },
+    {
+      "text": "Rafał Wróbel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "były mąż",
+      "count": 1
+    },
+    {
+      "text": "Sądzie Rejonowym w Lublinie",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "leczy się w poradni zdrowia psychicznego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "depresji nawracającej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ogranicza jej zdolność do podjęcia pracy w pełnym wymiarze",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "ocena lekarza o skutkach choroby",
+      "count": 1
+    },
+    {
+      "text": "F33.1",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "1 284,60 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "dochód rodziny",
+      "count": 1
+    },
+    {
+      "text": "Samorządowego Kolegium Odwoławczego w Lublinie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "81 466 23 17",
+      "type": "PHONE",
+      "expect": "policy",
+      "note": "telefon służbowy pracownika socjalnego",
+      "count": 1
+    },
+    {
+      "text": "Pani Szewczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 1
+    },
+    {
+      "text": "607 284 913",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ewa.wrobel84@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Małgorzata Pietras",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis z upoważnienia",
+      "count": 1
+    }
+  ]
+}

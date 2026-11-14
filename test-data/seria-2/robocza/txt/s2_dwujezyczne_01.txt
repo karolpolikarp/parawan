@@ -1,0 +1,36 @@
+UMOWA O DZIEŁO NR 7/2026
+CONTRACT FOR SPECIFIC WORK NO. 7/2026
+
+Zawarta w Krakowie dnia 5 marca 2026 r.
+Made in Kraków on March 5, 2026
+
+Strony / Parties
+
+PL: Umowa zostaje zawarta pomiędzy Northbridge Analytics Ltd z siedzibą w Leeds, 14 Calder Row, Leeds LS1 4QP, Wielka Brytania, numer spółki 09876543, reprezentowaną przez Olivera Hastingsa, dyrektora zarządzającego, zwaną dalej „Zamawiającym”, a Martą Wróbel, urodzoną 14 lipca 1991 r. w Nowym Sączu, PESEL 91071415802, NIP 8950563526, zamieszkałą przy ul. Zakopiańskiej 61/12, 30-418 Kraków, zwaną dalej „Wykonawcą”.
+
+EN: This Contract is made between Northbridge Analytics Ltd, registered office at 14 Calder Row, Leeds LS1 4QP, United Kingdom, company number 09876543, represented by Oliver Hastings, Managing Director (the "Client"), and Marta Wróbel, born July 14, 1991 in Nowy Sącz, PESEL 91071415802, tax ID (NIP) 8950563526, residing at ul. Zakopiańska 61/12, 30-418 Kraków, Poland (the "Contractor").
+
+§ 1. Przedmiot umowy / Subject matter
+PL: Wykonawca zobowiązuje się przetłumaczyć na język polski dokumentację techniczną systemu „Harbour” (ok. 180 stron) i przekazać ją Zamawiającemu do dnia 30 kwietnia 2026 r.
+EN: The Contractor undertakes to translate the technical documentation of the "Harbour" system (approx. 180 pages) into Polish and deliver it to the Client by April 30, 2026.
+
+§ 2. Wynagrodzenie / Fee
+PL: Za wykonanie dzieła Zamawiający zapłaci 4200 GBP na rachunek Wykonawcy nr 39 1050 0099 7635 6752 0648 6602 w terminie 14 dni od odbioru.
+EN: The Client shall pay GBP 4,200 to the Contractor's account IBAN PL39105000997635675206486602, BIC ALBPPLPW, within 14 days of acceptance.
+
+§ 3. Kontakt / Contact
+PL: Osobą do kontaktu po stronie Zamawiającego jest Priya Raman, kierowniczka projektu, tel. +44 113 496 0732, e-mail priya.raman@example.com. Wykonawca jest dostępny pod numerem +48 601 448 219 i adresem m.wrobel@example.pl.
+EN: The Client's contact person is Priya Raman, Project Manager, phone +44 113 496 0732, e-mail priya.raman@example.com. The Contractor can be reached at +48 601 448 219 and m.wrobel@example.pl.
+
+§ 4. Poufność / Confidentiality
+PL: Wykonawca nie ujawni osobom trzecim danych klientów Zamawiającego, w tym danych z bazy „Harbour CRM”. Obowiązek trwa 3 lata od zakończenia umowy.
+EN: The Contractor shall not disclose to third parties any data of the Client's customers, including data held in the "Harbour CRM" database. This obligation survives for 3 years after termination.
+
+§ 5. Prawo właściwe / Governing law
+PL: Umowa podlega prawu polskiemu. Spory rozstrzyga Sąd Okręgowy w Krakowie.
+EN: This Contract is governed by Polish law. Any disputes shall be settled by Sąd Okręgowy w Krakowie (Regional Court).
+
+Podpisy / Signatures
+Za Zamawiającego / For the Client: Oliver Hastings
+Wykonawca / Contractor: Marta Wróbel
+Świadek / Witness: Tomasz Gajewski, ul. Lea 114/3, 30-133 Kraków

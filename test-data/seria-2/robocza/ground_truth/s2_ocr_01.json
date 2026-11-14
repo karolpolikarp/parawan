@@ -1,0 +1,233 @@
+{
+  "id": "s2_ocr_01",
+  "template": "ocr",
+  "title": "Decyzja ZUS o ponownym ustaleniu emerytury (skan po OCR)",
+  "seed": null,
+  "traps": [
+    "imię i nazwisko z podwójną spacją w adresie",
+    "nazwisko podzielone łącznikiem na końcu wiersza (Wróblew-/skiego)",
+    "PESEL z wtrąconą spacją",
+    "dowód osobisty z literą l zamiast cyfry 1",
+    "IBAN złamany między wierszami",
+    "ó→o w nazwisku (Wroblewska), patron ulicy w adresie ZUS do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "ZAKŁAD UBEZPIECZEŃ SPOŁECZNYCH",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "nagłówek wersalikami",
+      "count": 1
+    },
+    {
+      "text": "Zakład Ubezpieczeń Społecznych Oddział w Lub1inie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "błąd OCR 1 zamiast l w nazwie instytucji",
+      "count": 1
+    },
+    {
+      "text": "ul. Marii Curie-Skłodowskiej 2",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron ulicy w adresie instytucji",
+      "count": 1
+    },
+    {
+      "text": "20-029",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sądu Okręgowego w Lublinie",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Lublin",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i siedziby ZUS",
+      "count": 3
+    },
+    {
+      "text": "Świdnik",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu pełnomocnika",
+      "count": 1
+    },
+    {
+      "text": "Krasnystaw",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce urodzenia",
+      "count": 1
+    },
+    {
+      "text": "ER/0412/2026/WB",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak z inicjałami urzędniczki",
+      "count": 2
+    },
+    {
+      "text": "0l/ER/2O13/558214",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer świadczenia z błędami OCR",
+      "count": 1
+    },
+    {
+      "text": "3 412,57 zł brutto",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "wysokość świadczenia",
+      "count": 1
+    },
+    {
+      "text": "Halina  Wróblewska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podwójna spacja z OCR",
+      "count": 1
+    },
+    {
+      "text": "Halina Wroblewska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "ó odczytane jako o",
+      "count": 1
+    },
+    {
+      "text": "Halina Wróblewska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Grzegorza Wróblew-\nskiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko złamane łącznikiem na końcu wiersza",
+      "count": 1
+    },
+    {
+      "text": "Grzegorz Wróblewski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "ul. Nadbystrzycka 4l m. 7",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "l zamiast 1 w numerze domu",
+      "count": 1
+    },
+    {
+      "text": "2O-618",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "litera O zamiast zera",
+      "count": 1
+    },
+    {
+      "text": "530418 33342",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL z wtrąconą spacją",
+      "count": 1
+    },
+    {
+      "text": "18.04.1953",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "CCG l87981",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "spacja i l zamiast 1; po odczycie CCG187981",
+      "count": 1
+    },
+    {
+      "text": "82 1940 1076 2003 1716\n7123 4312",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "rachunek złamany między wierszami",
+      "count": 1
+    },
+    {
+      "text": "całkowicie niezdolna do\nsamodzie1nej egzystencji",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "orzeczenie o niezdolności, błąd OCR 1 zamiast l",
+      "count": 1
+    },
+    {
+      "text": "chorobę Parkinsona",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "eponim jako rozpoznanie osoby",
+      "count": 1
+    },
+    {
+      "text": "stan po udarze\nniedokrwiennym mózgu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "niedowładem prawostronnym",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Lipowa 9",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "21-040",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "6O2 l18 437",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "O zamiast 0 i l zamiast 1",
+      "count": 1
+    },
+    {
+      "text": "g.wroblewski@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wiesława Bak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pieczątka /-/, ą odczytane jako a",
+      "count": 1
+    }
+  ]
+}

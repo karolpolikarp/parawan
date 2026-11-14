@@ -1,0 +1,212 @@
+{
+  "id": "s2_nieformalne_07",
+  "template": "nieformalne",
+  "title": "Plotki koleżanek z pracy w komunikatorze",
+  "seed": null,
+  "traps": [
+    "nazwisko członka zarządu i piłkarza w jednym zdaniu, różna wielkość liter",
+    "ksywka Kaczor obok pełnego nazwiska Kaczorowski",
+    "dane o zdrowiu i wyznanie w plotce",
+    "„sie zabije” jako przesada",
+    "imię z wydłużoną końcówką („magdaaa”)",
+    "infolinia instytucji do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "Iza",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "pseudonim z emotikoną",
+      "count": 13
+    },
+    {
+      "text": "Magda K.",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "imię z inicjałem nazwiska",
+      "count": 10
+    },
+    {
+      "text": "magdaaa",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię z wydłużoną końcówką",
+      "count": 1
+    },
+    {
+      "text": "magda",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię małą literą",
+      "count": 1
+    },
+    {
+      "text": "darek",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie małą literą",
+      "count": 1
+    },
+    {
+      "text": "darkowi",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "celownik małą literą",
+      "count": 1
+    },
+    {
+      "text": "raka prostaty",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "dane o zdrowiu przełożonego",
+      "count": 1
+    },
+    {
+      "text": "in vitro",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "leczenie niepłodności",
+      "count": 2
+    },
+    {
+      "text": "lewandowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko małą literą",
+      "count": 1
+    },
+    {
+      "text": "Paulina Sowa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarka, nazwisko jak ptak",
+      "count": 1
+    },
+    {
+      "text": "607312298",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "prywatny telefon bez formatowania",
+      "count": 1
+    },
+    {
+      "text": "Pawłem",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "narzędnik",
+      "count": 1
+    },
+    {
+      "text": "Kaczor",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "ksywka z nazwiska",
+      "count": 2
+    },
+    {
+      "text": "Paweł Kaczorowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ewka Malinowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "zdrobnienie z nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "zapisala sie do Świadków Jehowy",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "przekonania religijne",
+      "count": 1
+    },
+    {
+      "text": "Lewandowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "członek zarządu",
+      "count": 1
+    },
+    {
+      "text": "kowalczyk.magda88@test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+48502334871",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jola",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie",
+      "count": 1
+    },
+    {
+      "text": "lewandowski",
+      "type": "PUBLIC_FIGURE",
+      "expect": "policy",
+      "note": "piłkarz w porównaniu, osoba publiczna małą literą",
+      "count": 1
+    },
+    {
+      "text": "Alnea",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "pracodawca",
+      "count": 1
+    },
+    {
+      "text": "Medicover",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Legnickiej",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "ulica placówki",
+      "count": 1
+    },
+    {
+      "text": "Ruskiej",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "ulica kancelarii notarialnej",
+      "count": 1
+    },
+    {
+      "text": "sie zabije",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "przesada, nie dane o zdrowiu",
+      "count": 1
+    },
+    {
+      "text": "Państwowej Inspekcji Pracy",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "459 599 000",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "infolinia instytucji",
+      "count": 1
+    }
+  ]
+}

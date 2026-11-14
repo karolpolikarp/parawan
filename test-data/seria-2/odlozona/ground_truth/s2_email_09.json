@@ -1,0 +1,233 @@
+{
+  "id": "s2_email_09",
+  "template": "email",
+  "title": "Sprzedaż mieszkania: agentka przekazuje dane sprzedającego, kupująca odpisuje, autoodpowiedź kancelarii notarialnej",
+  "seed": null,
+  "traps": [
+    "nazwisko Kurek i słowo „kurek” (kurek główny wody)",
+    "firma JDG z samym nazwiskiem sprzedającego, NIP i REGON osoby fizycznej",
+    "numer księgi wieczystej i adres lokalu na sprzedaż",
+    "notariuszka w funkcji i kancelaria notarialna (polityka)",
+    "pole wyświetlane „S. Kurek”, podpis „Sylwia”, wołacz „Dario”",
+    "numer faktury za prowizję do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "S. Kurek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał i nazwisko w polu wyświetlanym",
+      "count": 2
+    },
+    {
+      "text": "sylwiakurek@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "ul. Ligocka 7/23",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "lokal sprzedającego, także w temacie",
+      "count": 3
+    },
+    {
+      "text": "Daria Szymczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "agentka nieruchomości",
+      "count": 3
+    },
+    {
+      "text": "daria.szymczak@slaskiklucz.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "służbowy e-mail osoby",
+      "count": 2
+    },
+    {
+      "text": "Adrian Kurek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "a.kurek84@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dario",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz",
+      "count": 1
+    },
+    {
+      "text": "Leszka",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię w bierniku",
+      "count": 1
+    },
+    {
+      "text": "74249000055718737854399779",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "NRB bez spacji i bez PL",
+      "count": 1
+    },
+    {
+      "text": "Sylwia",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "podpis samym imieniem",
+      "count": 1
+    },
+    {
+      "text": "Sylwio",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz",
+      "count": 1
+    },
+    {
+      "text": "Adrianie",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz",
+      "count": 1
+    },
+    {
+      "text": "Pawłowskiemu",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w celowniku",
+      "count": 1
+    },
+    {
+      "text": "601 822 459",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "komórka agentki",
+      "count": 1
+    },
+    {
+      "text": "Leszek Pawłowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sprzedający",
+      "count": 2
+    },
+    {
+      "text": "leszek.pawlowski72@test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "72041444035",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "NSK812952",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "40-570",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KA1K/54126750/6",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Instalacje Sanitarne Pawłowski",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "firma JDG z nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "5891635457",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "NIP przedsiębiorcy JDG",
+      "count": 1
+    },
+    {
+      "text": "048098444",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "REGON przedsiębiorcy JDG",
+      "count": 1
+    },
+    {
+      "text": "512 607 883",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Katowice",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu lokalu",
+      "count": 1
+    },
+    {
+      "text": "Barbary Lis-Majewskiej",
+      "type": "PERSON_OFFICIAL",
+      "expect": "policy",
+      "note": "notariuszka w funkcji",
+      "count": 1
+    },
+    {
+      "text": "biuro@notariusz-katowice.example.pl",
+      "type": "EMAIL_FUNCTIONAL",
+      "expect": "policy",
+      "note": "skrzynka kancelarii",
+      "count": 2
+    },
+    {
+      "text": "Biuro Nieruchomości Śląski Klucz",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "FV/SK/2026/388",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer faktury",
+      "count": 1
+    },
+    {
+      "text": "kurek",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo równe nazwisku",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,254 @@
+{
+  "id": "s2_nieformalne_05",
+  "template": "nieformalne",
+  "title": "Wpis i komentarze w grupie mieszkańców osiedla",
+  "seed": null,
+  "traps": [
+    "imię psa Bruno i zwierzę „zając” obok nazwiska Zając",
+    "adresy bez „ul.” i w miejscowniku",
+    "dane o zdrowiu osoby opisanej przez piętro i blok",
+    "pseudonim administratorki z emotikoną",
+    "imię z inicjałem nazwiska „Szymon P.”",
+    "profil organizacji wyglądający jak autor komentarza"
+  ],
+  "entities": [
+    {
+      "text": "beata kozłowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "autorka posta, imię i nazwisko małymi literami",
+      "count": 4
+    },
+    {
+      "text": "Beatko",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz zdrobnienia",
+      "count": 1
+    },
+    {
+      "text": "Antoś",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "dziecko, zdrobnienie",
+      "count": 1
+    },
+    {
+      "text": "ma autyzm",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "dane o zdrowiu dziecka",
+      "count": 1
+    },
+    {
+      "text": "Chwarznieńskiej 134/6",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres bez „ul.”",
+      "count": 1
+    },
+    {
+      "text": "600123457",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon bez formatowania",
+      "count": 1
+    },
+    {
+      "text": "Leszek Zając",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Leszku",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz",
+      "count": 1
+    },
+    {
+      "text": "Iwona Szulc-Nowak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe",
+      "count": 1
+    },
+    {
+      "text": "Ewelina",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "siostra, samo imię",
+      "count": 1
+    },
+    {
+      "text": "Szymon P.",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "imię z inicjałem nazwiska",
+      "count": 2
+    },
+    {
+      "text": "GA 7731K",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Halina Grzenkowicz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Nałkowskiej 2",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres osoby wskazanej opisowo",
+      "count": 1
+    },
+    {
+      "text": "po chemii",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "osoba identyfikowalna przez adres i piętro",
+      "count": 1
+    },
+    {
+      "text": "Wiesia",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "pseudonim administratorki z emotikoną",
+      "count": 1
+    },
+    {
+      "text": "Robert Wysocki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Robercie",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz",
+      "count": 1
+    },
+    {
+      "text": "698 555 112",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Danuta",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię",
+      "count": 1
+    },
+    {
+      "text": "ul. Rdestowej 40",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres osoby w miejscowniku",
+      "count": 1
+    },
+    {
+      "text": "Bruno",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "imię psa",
+      "count": 1
+    },
+    {
+      "text": "BRUNO",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "imię psa wersalikami",
+      "count": 1
+    },
+    {
+      "text": "zając",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwierzę, to samo słowo co nazwisko Zając",
+      "count": 1
+    },
+    {
+      "text": "Biedronki",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "sklep",
+      "count": 1
+    },
+    {
+      "text": "Schronisku Ciapkowo",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Straży Miejskiej",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Straż Miejska w Gdyni",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "986",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer alarmowy straży miejskiej",
+      "count": 1
+    },
+    {
+      "text": "Rada Dzielnicy Chwarzno-Wiczlino",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wiczlino Ogród",
+      "type": "LOCATION",
+      "expect": "keep",
+      "note": "nazwa przystanku",
+      "count": 1
+    },
+    {
+      "text": "Grupa Wsparcia Psiaki",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "profil organizacji, nie osoba",
+      "count": 1
+    },
+    {
+      "text": "passat",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Chwarzna i Wiczlina",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "osiedla w nazwie grupy",
+      "count": 1
+    }
+  ]
+}

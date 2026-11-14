@@ -1,0 +1,261 @@
+{
+  "id": "s2_sad_05",
+  "template": "sad",
+  "title": "Postanowienie o stwierdzeniu nabycia spadku z uzasadnieniem",
+  "seed": null,
+  "traps": [
+    "nazwisko Maj w odmianie (Maja, Maju) obok nazwy miesiąca „maja”",
+    "imię ojca „Władysława” (dopełniacz męski, zarazem żeńskie imię)",
+    "cztery PESEL w jednym zdaniu",
+    "numer aktu zgonu i księgi wieczystej",
+    "adres osoby przy ulicy z patronem (Kościuszki)",
+    "spadkobierca za granicą z e-mailem"
+  ],
+  "entities": [
+    {
+      "text": "I Ns 611/26",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura akt sprawy",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy w Kłodzku",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tomasz Hajduk",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "sędzia w składzie sądu, osoba w funkcji",
+      "count": 2
+    },
+    {
+      "text": "Aneta Fiałkowska",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "protokolant, osoba w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Bożeny Maj",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bożena Maj",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Rafała Maja",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rafał Maj",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "Iwony Szostak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Iwona Szostak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Stefanie Maju",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "spadkodawca, miejscownik",
+      "count": 2
+    },
+    {
+      "text": "Władysława",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię ojca spadkodawcy",
+      "count": 1
+    },
+    {
+      "text": "Genowefy",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię matki spadkodawcy",
+      "count": 1
+    },
+    {
+      "text": "49010864978",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL spadkodawcy",
+      "count": 1
+    },
+    {
+      "text": "52100262426",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "76032787419",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "81120518727",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "maja",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "nazwa miesiąca, a nie nazwisko Maj",
+      "count": 2
+    },
+    {
+      "text": "Polanicy-Zdroju",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "ul. Zdrojowej 27",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "2213/2026",
+      "type": "CIVIL_RECORD",
+      "expect": "mask",
+      "note": "numer aktu zgonu",
+      "count": 1
+    },
+    {
+      "text": "Urzędu Stanu Cywilnego w Kłodzku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "stwardnienie zanikowe boczne",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zakładzie Opiekuńczo-Leczniczym w Szczytnej",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Danutą Wilczek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "zmarła pierwsza żona",
+      "count": 1
+    },
+    {
+      "text": "Dortmundzie",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość zamieszkania osoby za granicą",
+      "count": 1
+    },
+    {
+      "text": "ul. Kościuszki 3 m. 8",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres osoby przy ulicy z patronem",
+      "count": 1
+    },
+    {
+      "text": "57-300",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kłodzko",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "rafal.maj@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ryszard Rzepka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "świadek",
+      "count": 1
+    },
+    {
+      "text": "SW1K/15147063/8",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "księga wieczysta nieruchomości spadkowej",
+      "count": 1
+    },
+    {
+      "text": "art. 931 § 1 k.c.",
+      "type": "LEGAL_REF",
+      "expect": "keep",
+      "note": "przepis",
+      "count": 1
+    },
+    {
+      "text": "Sądu Najwyższego",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "III CZP 22/16",
+      "type": "CASE_LAW",
+      "expect": "keep",
+      "note": "sygnatura cytowanej uchwały",
+      "count": 1
+    }
+  ]
+}

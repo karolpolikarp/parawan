@@ -1,0 +1,190 @@
+{
+  "id": "s2_tabele_02",
+  "template": "tabele",
+  "title": "Lista obecności ze szkolenia (tabela Markdown)",
+  "seed": null,
+  "traps": [
+    "podpis jako inicjały (R.P.) i inicjał z nazwiskiem w kolumnie podpisu",
+    "nazwisko Maj obok miesiąca „maj”",
+    "puste komórki i pusty wiersz tabeli",
+    "nazwisko dwuczłonowe z łącznikiem",
+    "dane o zdrowiu w uwagach pod tabelą"
+  ],
+  "entities": [
+    {
+      "text": "Gminny Ośrodek Pomocy Społecznej w Zwierzyńcu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Partyzantów 12, 22-470 Zwierzyniec",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "GOPS",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "skrót nazwy ośrodka",
+      "count": 1
+    },
+    {
+      "text": "Krzysztof Wrona",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "prowadzący szkolenie",
+      "count": 1
+    },
+    {
+      "text": "Centrum Szkoleń Ratowniczych „Puls”",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "firma szkoleniowa",
+      "count": 1
+    },
+    {
+      "text": "Imię i nazwisko",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "nagłówek kolumny",
+      "count": 1
+    },
+    {
+      "text": "Alicja Kmieć",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "A. Kmieć",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis: inicjał + nazwisko",
+      "count": 1
+    },
+    {
+      "text": "Bożena Sikora-Wójcik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "B. Sikora-Wójcik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis: inicjał + nazwisko dwuczłonowe",
+      "count": 1
+    },
+    {
+      "text": "Tadeusz Gil",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Renata Pawlak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "R.P.",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "podpis samymi inicjałami",
+      "count": 1
+    },
+    {
+      "text": "Wiktoria Maj",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko = nazwa miesiąca",
+      "count": 1
+    },
+    {
+      "text": "W. Maj",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis: inicjał + nazwisko",
+      "count": 1
+    },
+    {
+      "text": "84 687 21 03",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "607 118 442",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "84 687 21 05",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "zwolnienie lekarskie",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Irenę Gil",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "24. tydzień ciąży",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "ciąża osoby z poz. 5",
+      "count": 1
+    },
+    {
+      "text": "r.pawlak@gops-zwierzyniec.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "maj",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "nazwa miesiąca, nie nazwisko",
+      "count": 1
+    },
+    {
+      "text": "Zespół Szkół w Zwierzyńcu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Elżbieta Dudek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "kierownik ośrodka",
+      "count": 1
+    }
+  ]
+}

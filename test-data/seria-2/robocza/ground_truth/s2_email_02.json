@@ -1,0 +1,254 @@
+{
+  "id": "s2_email_02",
+  "template": "email",
+  "title": "Wspólnota mieszkaniowa: zalanie lokalu, wątek z cytowaniem i autoodpowiedź",
+  "seed": null,
+  "traps": [
+    "nazwa wspólnoty „WM Startowa 9” zawiera ulicę z adresu osoby (polityka)",
+    "dwa rachunki: osoby (maskować) i wspólnoty (polityka)",
+    "cytowanie dwupoziomowe „> ” i „>> ” z powtórzonym adresem i telefonem",
+    "nazwisko Baran i słowo „baran”, wołacze „Henryku”, „Ewelino”",
+    "dane o zdrowiu żony i członka zarządu w autoodpowiedzi",
+    "numer faktury i numer szkody"
+  ],
+  "entities": [
+    {
+      "text": "Ryszard Olszewski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "członek zarządu wspólnoty, osoba prywatna",
+      "count": 2
+    },
+    {
+      "text": "r.olszewski@test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Henryk Baran",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 5
+    },
+    {
+      "text": "h.baran1952@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "rok urodzenia w adresie",
+      "count": 3
+    },
+    {
+      "text": "po operacji biodra",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "dane o zdrowiu w autoodpowiedzi",
+      "count": 1
+    },
+    {
+      "text": "Teresy Michalak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dopełniacz",
+      "count": 1
+    },
+    {
+      "text": "507 113 864",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ewelina Kaczmarek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "e.kaczmarek@domuspomorze.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "służbowy e-mail osoby",
+      "count": 2
+    },
+    {
+      "text": "Ewelino",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz",
+      "count": 1
+    },
+    {
+      "text": "Zbigniew",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię hydraulika",
+      "count": 1
+    },
+    {
+      "text": "Grażyna Witkowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sąsiadka",
+      "count": 1
+    },
+    {
+      "text": "51 1140 2004 5825 2742 2642 3202",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "rachunek osoby, NRB ze spacjami bez PL",
+      "count": 1
+    },
+    {
+      "text": "Olszewskiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "choruje na astmę",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "dane o zdrowiu żony",
+      "count": 1
+    },
+    {
+      "text": "Halina",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię żony",
+      "count": 1
+    },
+    {
+      "text": "ul. Startowa 9/11",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "80-461",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "58 552 41 07",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon stacjonarny osoby",
+      "count": 2
+    },
+    {
+      "text": "Henryku",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz",
+      "count": 1
+    },
+    {
+      "text": "721 600 914",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "służbowa komórka osoby",
+      "count": 1
+    },
+    {
+      "text": "Gdańsk",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i zarządcy",
+      "count": 2
+    },
+    {
+      "text": "WM Startowa 9",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "nazwa wspólnoty zawiera ulicę i numer budynku osoby",
+      "count": 2
+    },
+    {
+      "text": "lokalu nr 11",
+      "type": "ADDRESS_PART",
+      "expect": "policy",
+      "note": "numer lokalu osoby w temacie wątku",
+      "count": 2
+    },
+    {
+      "text": "lokalu nr 14",
+      "type": "ADDRESS_PART",
+      "expect": "policy",
+      "note": "numer lokalu sąsiadki",
+      "count": 2
+    },
+    {
+      "text": "76 2490 0005 7611 3728 3289 4471",
+      "type": "IBAN_COMPANY",
+      "expect": "policy",
+      "note": "rachunek wspólnoty",
+      "count": 1
+    },
+    {
+      "text": "PZ/2026/77314",
+      "type": "POLICY_NUMBER",
+      "expect": "policy",
+      "note": "numer szkody",
+      "count": 1
+    },
+    {
+      "text": "Domus Pomorze sp. z o.o.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "zarządca nieruchomości",
+      "count": 1
+    },
+    {
+      "text": "ul. Grunwaldzka 211",
+      "type": "COMPANY_ADDRESS",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "80-266",
+      "type": "COMPANY_POSTAL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "58 340 77 20",
+      "type": "PHONE_COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "administratorka nieruchomości",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "FV 1187/11/2026",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer faktury",
+      "count": 1
+    },
+    {
+      "text": "baran",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo równe nazwisku",
+      "count": 1
+    }
+  ]
+}

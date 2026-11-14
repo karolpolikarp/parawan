@@ -1,0 +1,30 @@
+Transkrypcja nagrania rozmowy, infolinia Banku Pekao S.A., 03.11.2026, godz. 10:42, czas 7 min 18 s
+(transkrypcja automatyczna, poprawiona ręcznie)
+
+KONSULTANTKA: Dzień dobry, Bank Pekao, nazywam się Monika, w czym mogę pomóc?
+KLIENT: Dzień dobry pani, ja dzwonię, bo mi zablokowało kartę, znaczy aplikacja pisze, że karta zastrzeżona, a ja nic nie zastrzegałem.
+KONSULTANTKA: Rozumiem. Żeby zweryfikować tożsamość, poproszę o imię, nazwisko i numer PESEL.
+KLIENT: Ryszard Szymański. PESEL... chwileczkę, mam w portfelu... 56 04 12 986 34.
+KONSULTANTKA: Dziękuję, panie Ryszardzie. A data urodzenia?
+KLIENT: Dwunasty kwietnia pięćdziesiąt sześć. Znaczy tysiąc dziewięćset pięćdziesiątego szóstego.
+KONSULTANTKA: Zgadza się. Widzę, że kartę kończącą się na 7710 zastrzegł system bezpieczeństwa wczoraj o 23:15, po próbie płatności w sklepie internetowym w Holandii.
+KLIENT: W Holandii? Ja w życiu nie byłem w Holandii. Ja od zawału to nawet do Radomia nie jeżdżę, mam rozrusznik i lekarz zabronił mi się denerwować, a tu takie rzeczy.
+KONSULTANTKA: Bardzo mi przykro. Czy ktoś poza panem ma dostęp do karty albo do telefonu?
+KLIENT: Żona, Barbara, ale ona nie... Basia, chodź tu na chwilę! ... Nie, mówi, że nie ruszała.
+KONSULTANTKA: W takim razie wydam nową kartę. Wyślemy ją na adres korespondencyjny. Mam zapisane: ulica Grochowska 221 mieszkania 17, 04-077 Warszawa. Aktualny?
+KLIENT: Nie, nie, przeprowadziliśmy się do córki, na Wawer. Teraz jest ulica Patriotów 98a, kod zero cztery... 04-946.
+KONSULTANTKA: Zapisuję: ulica Patriotów 98a, 04-946 Warszawa. A kontakt mailowy?
+KLIENT: Wnuczek mi założył. ryszard kropka szym małpa example kropka pl. Nazwisko skrócone, bez reszty.
+KONSULTANTKA: Czyli ryszard.szym@example.pl.
+KLIENT: Tak jest.
+KONSULTANTKA: Jeszcze numer telefonu do kontaktu, bo w systemie mam tylko stacjonarny.
+KLIENT: Komórka sześćset jeden, dwieście dwadzieścia, trzysta trzydzieści dziewięć. Znaczy 601 220 339.
+KONSULTANTKA: Dziękuję. Reklamację tej transakcji zgłaszam pod numerem RK/2026/558213. Czy zwrot ma trafić na rachunek, z którego zapłacono kartą?
+KLIENT: Nie, na drugi, ten emerytalny, mam tu zapisane: PL86 1020 2892 2742 2642 3202 6786.
+KONSULTANTKA: Przyjęłam. Czy mogę jeszcze w czymś pomóc, panie Ryszardzie?
+KLIENT: A, jeszcze jedno, moja córka, Joanna Szymańska-Kur, chce mieć pełnomocnictwo do konta, bo ja już nie wszystko ogarniam po tym zawale.
+KONSULTANTKA: Pełnomocnictwo córka może ustanowić w oddziale, razem z panem, z dowodami osobistymi. Najbliższy oddział jest przy ul. Marsa 56.
+KLIENT: Dziękuję pani, pani Moniko.
+KONSULTANTKA: Dziękuję za rozmowę, do usłyszenia.
+[koniec nagrania]
+Kategoria: zastrzeżenie karty / reklamacja transakcji. Konsultantka ident. K-2231.

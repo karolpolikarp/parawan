@@ -1,0 +1,20 @@
+Czat na żywo, Hurtownia Budmax24, sesja CH-77812
+Klient zalogowany jako: kamil.wojcik.remonty@example.com | IP sesji: 203.0.113.58 | przeglądarka Chrome 130
+
+[14:02] Bot Maks: Cześć! Jestem Maks 🤖, wirtualny asystent. W czym mogę pomóc?
+[14:02] Klient: chce fakture na firme a przyszla na osobe prywatna
+[14:03] Bot Maks: Łączę z konsultantem…
+[14:05] Bartek (wsparcie): Hej, tu Bartek z zespołu wsparcia. Podaj proszę numer zamówienia i dane firmy do faktury 🙂
+[14:07] Klient: zam 2026/10/88412. firma USŁUGI REMONTOWE KAMIL WÓJCIK, nip 5422262943, ul. Pomorska 152 lok 3, 90-224 Łódź. to jest tez moj adres zamieszkania bo firma w domu
+[14:09] Bartek (wsparcie): Dzięki! Widzę, faktura FV/BM/2026/10/5521 poszła na Kamila Wójcika jako konsumenta. Wystawię korektę i nową na firmę. Wyślę na kamil.wojcik.remonty@example.com, zgadza się?
+[14:10] Klient: tak. i jeszcze zwrot za uszkodzone plytki (2 paczki pekniete), na konto 08 1050 0099 1600 9434 0446 8029
+[14:12] Bartek (wsparcie): Przyjąłem, reklamacja RKL-30917. Kurier Rafał zaznaczył w protokole uszkodzenie, więc pójdzie szybko 👍
+[14:13] Klient: ok. pytanie jeszcze, zamawiam teraz klej z wysylka do Niemiec, na budowe w Dreźnie, bo tam robie od grudnia. co potrzebujecie do odprawy?
+[14:15] Bartek (wsparcie): Przy wysyłce poza Polskę na JDG prosimy o numer paszportu albo dowodu i numer EORI firmy.
+[14:16] Klient: paszport BM2564446. EORI nie mam pojecia co to jest 😅
+[14:18] Bartek (wsparcie): EORI nadaje Krajowa Administracja Skarbowa, dla JDG to zwykle PL + NIP, czyli u Ciebie PL5422262943. Sprawdź w Izbie Administracji Skarbowej w Łodzi.
+[14:20] Klient: dobra. a jak cos to dzwoncie na 789-004-311 albo do zony, Marzena, 664 902 113, ona prowadzi papiery
+[14:22] Bartek (wsparcie): Zapisane. Czy mogę jeszcze w czymś pomóc?
+[14:23] Klient: nie, dzieki bartek, dobra robota 💪
+[14:23] Bartek (wsparcie): Miłego dnia, Kamil! Za chwilę pojawi się ankieta oceny rozmowy.
+--- koniec czatu --- Konsultant: B. Sikora (ID 4471)

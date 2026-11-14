@@ -1,0 +1,247 @@
+{
+  "id": "s2_ocr_02",
+  "template": "ocr",
+  "title": "Postanowienie o stwierdzeniu nabycia spadku z pismem przewodnim (skan po OCR)",
+  "seed": null,
+  "traps": [
+    "m odczytane jako rn w nazwisku (Ziernby)",
+    "PESEL zmarłego złamany łącznikiem na końcu wiersza",
+    "księga wieczysta z wtrąconą spacją po ukośniku",
+    "cytowana uchwała SN z „sygn. akt” do zachowania",
+    "imiona rodziców jako dane osobowe",
+    "nagłówek strony z sygnaturą i stopka „Strona 1 z 2”"
+  ],
+  "entities": [
+    {
+      "text": "SĄD REJONOWY W NOWYM SĄCZU",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy w Nowym Saczu",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "ą odczytane jako a w nazwie sądu",
+      "count": 1
+    },
+    {
+      "text": "Sądu Rejonowego w Nowym Sączu",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "opis pieczęci",
+      "count": 1
+    },
+    {
+      "text": "Sądu Najwyższego",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Pijarska 3",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "33-300",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "III CZP 12/19",
+      "type": "COURT_CITATION",
+      "expect": "keep",
+      "note": "cytowana uchwała SN po „sygn. akt”",
+      "count": 1
+    },
+    {
+      "text": "Kodeksu cywilnego",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "I Ns 1342/25",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy, także w nagłówkach stron",
+      "count": 3
+    },
+    {
+      "text": "Nowy Sącz",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i sądu",
+      "count": 3
+    },
+    {
+      "text": "Limanowej",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce zgonu i zamieszkania spadkodawcy",
+      "count": 2
+    },
+    {
+      "text": "Łososinie Dolnej",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "położenie nieruchomości",
+      "count": 1
+    },
+    {
+      "text": "Agnieszka Lis-Pawlak",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "sędzia w funkcji",
+      "count": 2
+    },
+    {
+      "text": "Wiktoria Rzepka",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "protokolantka w funkcji",
+      "count": 2
+    },
+    {
+      "text": "Danuta Ziemba",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "os. Słoneczne 4/l2",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "l zamiast 1",
+      "count": 1
+    },
+    {
+      "text": "33-3OO",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "litery O zamiast zer",
+      "count": 1
+    },
+    {
+      "text": "Danuty Ziernby",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "m odczytane jako rn",
+      "count": 1
+    },
+    {
+      "text": "Krystyny Micha1ik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "1 zamiast l",
+      "count": 1
+    },
+    {
+      "text": "Stanisława Michalika",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Józefie Michaliku",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "spadkodawca",
+      "count": 2
+    },
+    {
+      "text": "Jana i Marii",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imiona rodziców",
+      "count": 1
+    },
+    {
+      "text": "3803028-\n   4237",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL złamany łącznikiem na końcu wiersza",
+      "count": 1
+    },
+    {
+      "text": "2 marca 1938",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Zygmunta Augusta 1l",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "patron ulicy w adresie osoby, l zamiast 1",
+      "count": 1
+    },
+    {
+      "text": "412/2025",
+      "type": "CIVIL_RECORD",
+      "expect": "mask",
+      "note": "numer aktu zgonu",
+      "count": 1
+    },
+    {
+      "text": "Krystyna Michalik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Antoniego i Heleny",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imiona rodziców",
+      "count": 1
+    },
+    {
+      "text": "Stanisław Michalik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Józefa i Krystyny",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imiona rodziców",
+      "count": 2
+    },
+    {
+      "text": "NS1S/ 27379665/4",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "spacja po ukośniku z OCR",
+      "count": 1
+    },
+    {
+      "text": "Stanisław\nMichalik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "imię i nazwisko rozdzielone końcem wiersza",
+      "count": 1
+    },
+    {
+      "text": "pobyt w szpitalu\npsychiatrycznym",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

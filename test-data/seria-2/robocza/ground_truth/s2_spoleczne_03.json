@@ -1,0 +1,239 @@
+{
+  "id": "s2_spoleczne_03",
+  "template": "spoleczne",
+  "title": "Sprawozdanie kuratora rodzinnego",
+  "seed": null,
+  "traps": [
+    "cytowana uchwała Sądu Najwyższego z sygnaturą do zachowania",
+    "sygnatura sprawy z kotwicą „Sygn. akt”",
+    "pobyt ojca w zakładzie karnym jako dana o wyroku",
+    "zdrobnienia Bartek i Wika",
+    "sędzia w funkcji"
+  ],
+  "entities": [
+    {
+      "text": "Sąd Rejonowy w Opolu",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "III Nsm 412/25",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy",
+      "count": 1
+    },
+    {
+      "text": "Bartosz Gil",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "19.08.2012",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "12281912318",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sylwia Gil",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Ozimska 120/7",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "45-310",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Opole",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "724 090 561",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tomasz Gil",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "odbywa karę pozbawienia wolności",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "dane o wyroku skazującym",
+      "count": 1
+    },
+    {
+      "text": "Zakładzie Karnym w Strzelcach Opolskich",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bartek",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie",
+      "count": 2
+    },
+    {
+      "text": "Wiktoria Gil",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "2.03.2020",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "20230232422",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mirosław Zając",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bartkiem",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie w narzędniku",
+      "count": 1
+    },
+    {
+      "text": "Publicznej Szkoły Podstawowej nr 21 w Opolu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Iwona Matczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "potwierdził obecność THC",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "wynik testu na narkotyki",
+      "count": 1
+    },
+    {
+      "text": "pali marihuanę",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "używanie substancji",
+      "count": 1
+    },
+    {
+      "text": "Krystyna Gil",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wikę",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie imienia Wiktoria",
+      "count": 1
+    },
+    {
+      "text": "Sądu Najwyższego",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "III CZP 46/75",
+      "type": "CITED_CASE",
+      "expect": "keep",
+      "note": "sygnatura cytowanej uchwały",
+      "count": 1
+    },
+    {
+      "text": "Opiniodawczego Zespołu Sądowych Specjalistów w Opolu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bartosza",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "używania substancji",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Agnieszka Cholewa",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "sędzia w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Grażyna Sobczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

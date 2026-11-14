@@ -1,0 +1,26 @@
+Piekarnia Złoty Kłos sp. z o.o.
+ul. Młyńska 8, 62-200 Gniezno
+NIP 3571873786
+
+LISTA PŁAC NR 10/2026
+za okres: październik 2026, data wypłaty: 10.11.2026
+Dział: produkcja i sprzedaż
+
+Lp.	Nazwisko i imię	PESEL	Stanowisko	Brutto	Składki ZUS	Zaliczka PIT	Netto	Nr rachunku
+1	NOWICKA Ewa	84031124603	kierownik zmiany	6 800,00	932,28	412,00	5 455,72	PL94 1050 0099 6206 9866 4337 2893
+2	PIEKARZ Grzegorz	79070260197	piekarz	5 200,00	712,92	280,00	4 207,08	97 1020 2892 3674 1295 2762 9132
+3	SOWIŃSKI Dawid	03212551779	pomocnik piekarza	4 666,00	639,71	221,00	3 805,29	
+4	ZAJĄC-MROCZEK Halina	68103050920	sprzedawczyni	4 900,00	671,79	248,00	3 980,21	51114020045825274226423202
+5	BIAŁEK Oskar	91051744816	kierowca	5 100,00	699,21	266,00	4 134,79	PL96 1160 2202 7865 6925 9595 8377
+	RAZEM			26 666,00	3 655,91	1 427,00	21 583,09	
+
+Uwagi do listy:
+- poz. 2: w październiku 4 dni zasiłku chorobowego, rozliczone osobną listą.
+- poz. 3: brak rachunku, wynagrodzenie płatne gotówką w kasie. Pan Dawid Sowiński odbierze je osobiście za okazaniem dowodu osobistego MJG099779.
+- poz. 4: potrącenie komornicze w sprawie KM 1432/25 prowadzonej przez Komornika Sądowego przy Sądzie Rejonowym w Gnieźnie, przekazane na rachunek komornika.
+- poz. 5: w wynagrodzeniu ekwiwalent za pranie odzieży roboczej (40,00 zł).
+Od stycznia każdy nowy piekarz dostaje komplet odzieży z logo firmy.
+
+Sporządziła: Marta Głowacka, specjalistka ds. kadr i płac, tel. 61 424 18 07, m.glowacka@zlotyklos.example.pl
+Sprawdziła: główna księgowa J. Ratajczak
+Zatwierdził: Prezes Zarządu Leszek Mroczek

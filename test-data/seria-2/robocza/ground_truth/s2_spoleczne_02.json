@@ -1,0 +1,281 @@
+{
+  "id": "s2_spoleczne_02",
+  "template": "spoleczne",
+  "title": "Opinia poradni psychologiczno-pedagogicznej",
+  "seed": null,
+  "traps": [
+    "patron w nazwie szkoły (Tadeusza Kościuszki) do zachowania",
+    "nazwisko Kaczor i słowo „kaczor” w opisie rysunku",
+    "zdrobnienia Szymek i Hania",
+    "lekarz psychiatra wymieniony z tytułem",
+    "podstawa prawna z nazwą ministra"
+  ],
+  "entities": [
+    {
+      "text": "Poradnia Psychologiczno-Pedagogiczna nr 3 w Krakowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "os. Szkolne 21",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "31-978",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "12 644 18 90",
+      "type": "INSTITUTION_PHONE",
+      "expect": "keep",
+      "note": "telefon poradni",
+      "count": 1
+    },
+    {
+      "text": "PPP3.4232.611.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer opinii",
+      "count": 1
+    },
+    {
+      "text": "Kraków",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i siedziby",
+      "count": 3
+    },
+    {
+      "text": "specyficznych trudności w uczeniu się",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "przedmiot opinii ujawnia rozpoznanie",
+      "count": 1
+    },
+    {
+      "text": "Szymon Kaczor",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "11 stycznia 2016 r.",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "16211170418",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szkoła Podstawowa nr 85 im. Tadeusza Kościuszki w Krakowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "ul. Bulwarowa 9/41",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "31-751",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marta Kaczor",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "607 230 118",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ministra Edukacji Narodowej",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Hanną",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię siostry",
+      "count": 1
+    },
+    {
+      "text": "Łukasz Kaczor",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Norwegii",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "kraj pracy ojca",
+      "count": 1
+    },
+    {
+      "text": "urodził się w 34. tygodniu ciąży",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "wcześniactwo",
+      "count": 1
+    },
+    {
+      "text": "terapii logopedycznej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "lekarza psychiatry",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "opieka psychiatryczna",
+      "count": 1
+    },
+    {
+      "text": "Anny Rogalskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarz psychiatra",
+      "count": 1
+    },
+    {
+      "text": "zespół hiperkinetyczny z zaburzeniami uwagi",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "F90.0",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "metylofenidat",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "Słuch fonemowy obniżony",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szymek",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie",
+      "count": 1
+    },
+    {
+      "text": "Hanią",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie",
+      "count": 1
+    },
+    {
+      "text": "kaczor",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko Kaczor",
+      "count": 1
+    },
+    {
+      "text": "Dysleksja rozwojowa o charakterze mieszanym",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "dysleksja i dysortografia",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "rozpoznanie w nawiasie",
+      "count": 1
+    },
+    {
+      "text": "ADHD",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jolanta Piwowarczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "leczenia psychiatrycznego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Karolina Bąk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wiesław Ożóg",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Elżbieta Synowiec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

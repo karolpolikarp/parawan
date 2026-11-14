@@ -1,0 +1,240 @@
+{
+  "id": "s2_formularz_06",
+  "template": "formularz",
+  "title": "ZUS Z-15A zasiłek opiekuńczy na chore dziecko",
+  "seed": null,
+  "traps": [
+    "nazwisko Sroka i ptak „sroka” w tym samym piśmie",
+    "nazwisko panieńskie po „z domu”",
+    "PWZ lekarza bez skrótu PWZ",
+    "kod ICD-10 i opis rozpoznania",
+    "firma JDG powtarzająca nazwisko",
+    "samo imię i samo nazwisko w osobnych polach"
+  ],
+  "entities": [
+    {
+      "text": "Zakład Ubezpieczeń Społecznych Oddział w Rzeszowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Zamkowa 8",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "35-032",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rzeszów",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i siedziby",
+      "count": 3
+    },
+    {
+      "text": "87031269875",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ŁUKASZ",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię w osobnym polu",
+      "count": 1
+    },
+    {
+      "text": "SROKA",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w osobnym polu (zwykłe słowo)",
+      "count": 1
+    },
+    {
+      "text": "ul. Hetmańska 102/7",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "35-078",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "17 862 44 19",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "numer stacjonarny",
+      "count": 1
+    },
+    {
+      "text": "lukasz.s87@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "18292557395",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dziecka",
+      "count": 1
+    },
+    {
+      "text": "Kacper Sroka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "25.09.2018",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ZY 4417263",
+      "type": "DOC_NUMBER",
+      "expect": "policy",
+      "note": "seria i numer zwolnienia e-ZLA",
+      "count": 1
+    },
+    {
+      "text": "J18.9",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "zapalenie płuc, niewymagające hospitalizacji",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Agata Pięta",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarka",
+      "count": 1
+    },
+    {
+      "text": "5482917",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "PWZ bez kotwicy „PWZ”",
+      "count": 1
+    },
+    {
+      "text": "Iryna Sroka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "matka, ukraińskie imię",
+      "count": 2
+    },
+    {
+      "text": "Melnyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko panieńskie po „z domu”",
+      "count": 1
+    },
+    {
+      "text": "89010834326",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "przebywa w szpitalu po zabiegu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "dana o zdrowiu matki",
+      "count": 1
+    },
+    {
+      "text": "Iwano-Frankiwsku",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość zamieszkania babci za granicą",
+      "count": 1
+    },
+    {
+      "text": "ELEKTROSROKA Łukasz Sroka",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "firma JDG z nazwiskiem sklejonym w nazwie",
+      "count": 1
+    },
+    {
+      "text": "1831421093",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "NIP JDG",
+      "count": 1
+    },
+    {
+      "text": "23194010763678988050773053",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "NRB bez spacji i bez PL",
+      "count": 1
+    },
+    {
+      "text": "Szpital Wojewódzki nr 2 w Rzeszowie",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "pracodawca matki",
+      "count": 1
+    },
+    {
+      "text": "pielęgniarka oddziałowa",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "sroka",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "ptak, małą literą",
+      "count": 1
+    },
+    {
+      "text": "Kacperek",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie imienia dziecka",
+      "count": 1
+    },
+    {
+      "text": "Ł. Sroka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis z inicjałem na literze Ł",
+      "count": 1
+    }
+  ]
+}

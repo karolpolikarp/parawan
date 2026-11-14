@@ -1,0 +1,253 @@
+{
+  "id": "s2_decyzja_10",
+  "template": "decyzja",
+  "title": "Decyzja inspektora sanitarnego o obowiązku szczepienia",
+  "seed": null,
+  "traps": [
+    "nazwisko Hałas i słowo „hałas”",
+    "dane o zdrowiu małoletniej (alergia, AZS, brak szczepień)",
+    "patron (święta) w nazwie szpitala",
+    "placówka medyczna jako nazwa własna",
+    "kraj docelowy wyjazdu"
+  ],
+  "entities": [
+    {
+      "text": "PAŃSTWOWY POWIATOWY INSPEKTOR SANITARNY W RZESZOWIE",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Rycerska 3",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "35-241",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rzeszów",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i urzędu",
+      "count": 3
+    },
+    {
+      "text": "PSSE.NS.9022.4.61.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dz.U. z 2024 r. poz. 924",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "publikator",
+      "count": 1
+    },
+    {
+      "text": "Agatę Hałas",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mateusza Hałasa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Podwisłocze 14/22",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "35-309",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Leną Hałas",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletnia, narzędnik",
+      "count": 1
+    },
+    {
+      "text": "3 czerwca 2024",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia dziecka",
+      "count": 1
+    },
+    {
+      "text": "24260391328",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL z rocznika 2024",
+      "count": 1
+    },
+    {
+      "text": "lek. Iwona Dziedzic",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarz",
+      "count": 1
+    },
+    {
+      "text": "7773877",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer prawa wykonywania zawodu lekarza",
+      "count": 1
+    },
+    {
+      "text": "Przychodni Rodzinnej Słoneczna Dolina",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Lena Hałas",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "nie została zaszczepiona",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "alergię na białko jaja kurzego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "atopowe zapalenie skóry",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Klinicznym Szpitalu Wojewódzkim nr 2 im. św. Jadwigi Królowej w Rzeszowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szpitala",
+      "count": 1
+    },
+    {
+      "text": "Mateusz Hałas",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "664 908 213",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon ojca",
+      "count": 1
+    },
+    {
+      "text": "do Irlandii",
+      "type": "TRAVEL",
+      "expect": "policy",
+      "note": "planowany wyjazd rodziny strony, informacja o osobie",
+      "count": 1
+    },
+    {
+      "text": "hałas",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, nazwisko Hałas",
+      "count": 1
+    },
+    {
+      "text": "Antoni Hałas",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "starszy brat",
+      "count": 1
+    },
+    {
+      "text": "8 lat",
+      "type": "AGE",
+      "expect": "policy",
+      "note": "wiek brata",
+      "count": 1
+    },
+    {
+      "text": "otrzymał wszystkie szczepienia obowiązkowe",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "stan szczepień brata",
+      "count": 1
+    },
+    {
+      "text": "Podkarpackiego Państwowego Wojewódzkiego Inspektora Sanitarnego w Rzeszowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "agata.halas@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Państwowy Powiatowy Inspektor Sanitarny w Rzeszowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "dr n. med. Robert Szkutnik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis z upoważnienia",
+      "count": 1
+    },
+    {
+      "text": "Agata Hałas",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "rozdzielnik",
+      "count": 1
+    },
+    {
+      "text": "Przychodnia Rodzinna Słoneczna Dolina",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

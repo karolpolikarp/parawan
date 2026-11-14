@@ -1,0 +1,25 @@
+Ochotnicza Straż Pożarna w Barczewie
+ul. Mickiewicza 21, 11-010 Barczewo
+
+GRAFIK DYŻURÓW W REMIZIE: STYCZEŃ 2027
+Plik z systemu powiadamiania, separator średnik, puste pole = brak obsady.
+
+data;zmiana;dowódca;kierowca;ratownik 1;ratownik 2;telefon dowódcy
+2027-01-02;dzień;dh Rafał Ozga;dh Seweryn Kłos;dh Kinga Rzepka;;509 114 270
+2027-01-03;noc;dh Rafał Ozga;dh Bartosz Kołodziej;dh Kinga Rzepka;dh Emil Wąsik;509 114 270
+2027-01-09;dzień;dh Ludwik Szyszko;dh Seweryn Kłos;;dh Emil Wąsik;+48 727 300 815
+2027-01-10;noc;dh Ludwik Szyszko;dh Bartosz Kołodziej;dh Natalia Kowalczuk-Grzyb;dh Emil Wąsik;+48 727 300 815
+
+Kierowcy z uprawnieniami kat. C:
+Seweryn Kłos, prawo jazdy nr 23694/13/1065, dojazd prywatnym autem NOL 47812
+Bartosz Kołodziej, prawo jazdy nr 29917/08/1327
+
+Wyłączeni z dyżurów w styczniu:
+dh Mirosław Gąsior, złamanie kości promieniowej, niezdolny do akcji do 31.01
+dh Joanna Szyszko, urlop rodzicielski
+
+Na każdym dyżurze obowiązuje przegląd motopompy, agregatu i pilarki. Zboże z pola przy remizie zebrano, więc na łące nie został ani jeden kłos i plac manewrowy jest wolny.
+
+Obsada minimalna to dowódca, kierowca i jeden ratownik. Zmiana dzienna trwa od 7:00 do 19:00, nocna od 19:00 do 7:00. Każdy wyjazd zgłasza się dyspozytorowi Komendy Miejskiej PSP w Olsztynie, a po powrocie dowódca uzupełnia kartę wyjazdu w ciągu 24 godzin. Grafik na luty zostanie ogłoszony do 25 stycznia. Na dyżur nocny każdy zabiera latarkę czołową i komplet ubrania specjalnego.
+
+Zastępstwa zgłaszać SMS-em do naczelnika: dh Leszek Bałdyga, tel. 89 514 83 02

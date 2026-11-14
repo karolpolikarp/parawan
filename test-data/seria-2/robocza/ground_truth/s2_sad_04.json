@@ -1,0 +1,205 @@
+{
+  "id": "s2_sad_04",
+  "template": "sad",
+  "title": "Wezwanie świadka do sądu okręgowego",
+  "seed": null,
+  "traps": [
+    "telefon i e-mail sądu do zachowania obok telefonu i e-maila świadka",
+    "adres sądu (Wały Jagiellońskie) do zachowania",
+    "firma JDG z imieniem i nazwiskiem",
+    "nazwisko dwuczłonowe pełnomocnika",
+    "dane o zdrowiu w adnotacji sekretariatu",
+    "parafa urzędnika (I.K.)"
+  ],
+  "entities": [
+    {
+      "text": "Sąd Okręgowy w Bydgoszczy",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "ul. Wały Jagiellońskie 2",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "adres siedziby sądu",
+      "count": 1
+    },
+    {
+      "text": "85-128",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "52 325 31 40",
+      "type": "PHONE_INSTITUTION",
+      "expect": "keep",
+      "note": "telefon sekretariatu sądu",
+      "count": 1
+    },
+    {
+      "text": "cywilny1@so-bydgoszcz.example.pl",
+      "type": "EMAIL_INSTITUTION",
+      "expect": "keep",
+      "note": "e-mail sekretariatu sądu",
+      "count": 1
+    },
+    {
+      "text": "I C 905/26",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura akt sprawy",
+      "count": 1
+    },
+    {
+      "text": "Grzegorz Lewczuk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "świadek",
+      "count": 2
+    },
+    {
+      "text": "ul. Toruńska 58",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "86-050",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Solec Kujawski",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Agnieszki Ratajczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "powódka",
+      "count": 1
+    },
+    {
+      "text": "Marcinowi Sobczakowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pozwany",
+      "count": 1
+    },
+    {
+      "text": "BUD-REM Marcin Sobczak",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "pełna firma JDG z imieniem i nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "ul. Polnej 6",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "dom powódki",
+      "count": 1
+    },
+    {
+      "text": "Białych Błotach",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Karolina Wilk-Nowacka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pełnomocnik strony, nazwisko dwuczłonowe",
+      "count": 1
+    },
+    {
+      "text": "BY-1534",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer wpisu na listę radców",
+      "count": 1
+    },
+    {
+      "text": "56021746838",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "512 093 448",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "art. 274 § 1 k.p.c.",
+      "type": "LEGAL_REF",
+      "expect": "keep",
+      "note": "przepis",
+      "count": 1
+    },
+    {
+      "text": "Iwona Kaczmarek",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędnik sądowy w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Szpitalu Uniwersyteckim nr 2 im. dr. Jana Biziela w Bydgoszczy",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "placówka z patronem w nazwie; pobyt ujawnia leczenie",
+      "count": 1
+    },
+    {
+      "text": "wszczepienie endoprotezy stawu biodrowego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Grażyna Lewczuk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "żona świadka",
+      "count": 1
+    },
+    {
+      "text": "g.lewczuk@test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tomaszowi Grzelakowi",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "sędzia referent w funkcji",
+      "count": 1
+    },
+    {
+      "text": "I.K.",
+      "type": "PERSON_INITIALS",
+      "expect": "policy",
+      "note": "parafa urzędnika sądowego",
+      "count": 1
+    }
+  ]
+}

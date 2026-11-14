@@ -1,0 +1,267 @@
+{
+  "id": "s2_formularz_02",
+  "template": "formularz",
+  "title": "Wniosek o zasiłek rodzinny z dodatkiem rehabilitacyjnym",
+  "seed": null,
+  "traps": [
+    "człon nazwiska „Szczęsna” jest zwykłym przymiotnikiem, nazwisko rodowe inne",
+    "dane dzieci i PESEL w tabeli z kreskami",
+    "patron w nazwie szkoły do zachowania",
+    "kratki [X] obok danych",
+    "samo imię dziecka i męża w uzasadnieniu"
+  ],
+  "entities": [
+    {
+      "text": "Miejski Ośrodek Pomocy Rodzinie w Białymstoku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Malmeda 6",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "15-440",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "MOPR-ŚR.5210.1832.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "EWELINA",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię w osobnym polu",
+      "count": 1
+    },
+    {
+      "text": "SZCZĘSNA-BEDNARZ",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe w osobnym polu (człon „Szczęsna” to przymiotnik)",
+      "count": 1
+    },
+    {
+      "text": "KALINOWSKA",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko rodowe inne niż człony obecnego",
+      "count": 1
+    },
+    {
+      "text": "88103071949",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ZRP712193",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Antoniuk Fabryczny 31 lok. 54",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres w kolejnym wierszu po etykiecie",
+      "count": 1
+    },
+    {
+      "text": "15-762",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Białystok",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i siedziby",
+      "count": 3
+    },
+    {
+      "text": "600-418-273",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon z łącznikami",
+      "count": 1
+    },
+    {
+      "text": "ewelina.sb@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Paweł Bednarz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "w tabeli",
+      "count": 1
+    },
+    {
+      "text": "85011710498",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "w tabeli",
+      "count": 1
+    },
+    {
+      "text": "Oliwia Bednarz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dziecko w tabeli",
+      "count": 1
+    },
+    {
+      "text": "15230931464",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dziecka w tabeli",
+      "count": 1
+    },
+    {
+      "text": "Szkoła Podstawowa nr 12 im. Marii Konopnickiej w Białymstoku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "kl. 5b",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "klasa dziecka, quasi-identyfikator",
+      "count": 1
+    },
+    {
+      "text": "Szymon Bednarz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dziecko w tabeli",
+      "count": 1
+    },
+    {
+      "text": "20312853895",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dziecka w tabeli",
+      "count": 1
+    },
+    {
+      "text": "Przedszkole Samorządowe nr 21 „Wesołe Nutki”",
+      "type": "INSTITUTION",
+      "expect": "policy",
+      "note": "placówka dziecka, quasi-identyfikator",
+      "count": 1
+    },
+    {
+      "text": "Szymona",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię dziecka w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "autyzmu dziecięcego (F84.0) z opóźnieniem rozwoju mowy",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "terapię integracji sensorycznej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "stwierdzono niepełnosprawność",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "fakt niepełnosprawności dziecka",
+      "count": 1
+    },
+    {
+      "text": "Spółdzielni Mleczarskiej „Podlasie” w Zambrowie",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "pracodawca męża",
+      "count": 1
+    },
+    {
+      "text": "operatora linii rozlewniczej",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "sprzedawczyni",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "stanowisko wnioskodawczyni",
+      "count": 1
+    },
+    {
+      "text": "71 840,22 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "dochód rodziny",
+      "count": 1
+    },
+    {
+      "text": "Ewelina Szczęsna-Bednarz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "właścicielka rachunku i podpis",
+      "count": 2
+    },
+    {
+      "text": "PL15 1090 1014 3661 0577 2217 3384",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "z prefiksem PL i spacjami",
+      "count": 1
+    },
+    {
+      "text": "Pawła",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię męża w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "Norwegii",
+      "type": "TRAVEL_CITY",
+      "expect": "keep",
+      "note": "kraj pobytu, nie dana osobowa",
+      "count": 1
+    },
+    {
+      "text": "Beata Ołdakowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownica socjalna z imienia i nazwiska",
+      "count": 1
+    }
+  ]
+}

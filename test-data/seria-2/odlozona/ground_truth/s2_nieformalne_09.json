@@ -1,0 +1,268 @@
+{
+  "id": "s2_nieformalne_09",
+  "template": "nieformalne",
+  "title": "Transkrypcja rejestracji telefonicznej w przychodni",
+  "seed": null,
+  "traps": [
+    "transkrypcja ASR z lukami [nz] w telefonie i adresie",
+    "data urodzenia, telefon i e-mail słownie",
+    "dzielnica Jasień obok nazwiska Jasińska",
+    "dane małoletniego i alergia",
+    "zakaz zbliżania się jako dana szczególna",
+    "infolinia NFZ do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "Renata",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "rejestratorka, samo imię",
+      "count": 1
+    },
+    {
+      "text": "Renato",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz",
+      "count": 1
+    },
+    {
+      "text": "Filip Kubiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dziecko",
+      "count": 1
+    },
+    {
+      "text": "Filipek",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie",
+      "count": 1
+    },
+    {
+      "text": "19262352390",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dziecka",
+      "count": 1
+    },
+    {
+      "text": "dwudziesty trzeci czerwca dwa tysiące dziewiętnaście",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia słownie",
+      "count": 1
+    },
+    {
+      "text": "Natalia Kubiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Natalio",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz",
+      "count": 1
+    },
+    {
+      "text": "gorączkę",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wysypkę na brzuchu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "alergię na amoksycylinę",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "po augmentinie miał wstrząs",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "astmę",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wziewy",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "leki",
+      "count": 1
+    },
+    {
+      "text": "Jasińskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarka, samo nazwisko w dopełniaczu",
+      "count": 2
+    },
+    {
+      "text": "Ewa Jasińska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarka",
+      "count": 1
+    },
+    {
+      "text": "ulica Kartuska 187",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres dyktowany, ASR",
+      "count": 1
+    },
+    {
+      "text": "Kartuska 187/2",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "80-122",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "sześćset dziewięćdziesiąt osiem, trzysta trzydzieści, dwieście dwadzieścia jeden",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon słownie",
+      "count": 1
+    },
+    {
+      "text": "698 330 221",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "natka kubiak razem, małpa test kropka pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "e-mail słownie",
+      "count": 1
+    },
+    {
+      "text": "natkakubiak@test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Łukasz Kubiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "501 [nz] 338",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon z luką transkrypcji",
+      "count": 1
+    },
+    {
+      "text": "ma zakaz zbliżania się do nas",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "środek sądowy wobec osoby",
+      "count": 1
+    },
+    {
+      "text": "Grażyna Wolska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "kierowniczka",
+      "count": 1
+    },
+    {
+      "text": "Gdańsk",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "2026/11/07-0193",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer nagrania",
+      "count": 1
+    },
+    {
+      "text": "Przychodnia Rodzinna „Przymorze”",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Przychodnia Przymorze",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jasieniu",
+      "type": "LOCATION",
+      "expect": "keep",
+      "note": "dzielnica, podobna do nazwiska Jasińska",
+      "count": 1
+    },
+    {
+      "text": "Przymorzu",
+      "type": "LOCATION",
+      "expect": "keep",
+      "note": "dzielnica",
+      "count": 1
+    },
+    {
+      "text": "Obrońców Wybrzeża 4",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "adres przychodni",
+      "count": 1
+    },
+    {
+      "text": "NFZ",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "800 190 590",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "infolinia instytucji",
+      "count": 1
+    }
+  ]
+}

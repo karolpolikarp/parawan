@@ -1,0 +1,281 @@
+{
+  "id": "s2_spoleczne_09",
+  "template": "spoleczne",
+  "title": "Plan pracy z rodziną (tabela)",
+  "seed": null,
+  "traps": [
+    "tabela z separatorem „|”",
+    "nazwiska ukraińskie nieodmienne i zdrobnienia Sasza, Saszy, Dasza",
+    "inicjał z nazwiskiem i same inicjały w tabeli",
+    "nazwisko Szewc i słowo „szewc”",
+    "patronka w nazwie szkoły do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "Centrum Usług Społecznych w Pabianicach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Zamkowa 16",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "95-200",
+      "type": "POSTAL",
+      "expect": "policy",
+      "note": "kod pocztowy wspólny dla ośrodka i osoby",
+      "count": 2
+    },
+    {
+      "text": "Pabianice",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i siedziby",
+      "count": 2
+    },
+    {
+      "text": "Olena Kovalenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "17.03.1990",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "90031754520",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "RF3489217",
+      "type": "RESIDENCE_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Oleksandr Kovalenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "9.06.2015",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "15260910033",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szkoły Podstawowej nr 3 im. Królowej Jadwigi w Pabianicach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patronka w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "Daria Kovalenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "21.11.2018",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "18312129845",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Warszawska 48 m. 7",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+48 731 004 562",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL21 1140 2004 2943 9550 4819 2631",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Oleny",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "Andrij Kovalenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "nadciśnienie tętnicze",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Saszą",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie w narzędniku",
+      "count": 1
+    },
+    {
+      "text": "zespołu stresu pourazowego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Charkowa",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "miasto pochodzenia rodziny",
+      "count": 1
+    },
+    {
+      "text": "Dasza",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie",
+      "count": 1
+    },
+    {
+      "text": "astygmatyzm",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Halyna Bondar",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "szewc",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zawód, a nie nazwisko Szewc",
+      "count": 1
+    },
+    {
+      "text": "O. Kovalenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał imienia + nazwisko",
+      "count": 1
+    },
+    {
+      "text": "Saszy",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie w dopełniaczu",
+      "count": 2
+    },
+    {
+      "text": "Poradni Zdrowia Psychicznego dla Dzieci i Młodzieży",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "M. Szewc",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał imienia + nazwisko",
+      "count": 2
+    },
+    {
+      "text": "O.K.",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "inicjały w tabeli",
+      "count": 2
+    },
+    {
+      "text": "Daszy",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "Iryny Melnyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Magdalena Szewc",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "42 215 43 19",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon służbowy asystentki",
+      "count": 1
+    },
+    {
+      "text": "mszewc@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

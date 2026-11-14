@@ -1,0 +1,268 @@
+{
+  "id": "s2_sad_02",
+  "template": "sad",
+  "title": "Wyrok karny z uzasadnieniem (kradzież z włamaniem)",
+  "seed": null,
+  "traps": [
+    "imiona rodziców i nazwisko rodowe matki oskarżonego",
+    "pseudonim oskarżonego",
+    "nazwisko Baran i słowo „baran”",
+    "sygnatura wcześniejszego skazania (dotyczy osoby) obok cytowanych orzeczeń",
+    "dane o uzależnieniu",
+    "prokurator i sędzia jako decyzja polityki"
+  ],
+  "entities": [
+    {
+      "text": "II K 318/26",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura akt sprawy",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy w Elblągu",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Agata Wierzbicka",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "sędzia w składzie sądu, osoba w funkcji",
+      "count": 2
+    },
+    {
+      "text": "Kamil Olszewski",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "protokolant, osoba w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Prokuratury Rejonowej w Elblągu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rafała Chmiela",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "prokurator w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Mateusza Barana",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Mateusz Baran",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zbigniewa",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię ojca oskarżonego",
+      "count": 1
+    },
+    {
+      "text": "Moniki",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię matki oskarżonego",
+      "count": 1
+    },
+    {
+      "text": "Lewandowskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko rodowe matki",
+      "count": 1
+    },
+    {
+      "text": "3 maja 1998",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Braniewie",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce urodzenia",
+      "count": 1
+    },
+    {
+      "text": "98050365518",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tolkmicku",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "ul. Portowej 5 m. 2",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Pasłęku",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość zamieszkania pokrzywdzonej i miejsce czynu",
+      "count": 2
+    },
+    {
+      "text": "ul. Ogrodowej 9",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "dom pokrzywdzonej",
+      "count": 1
+    },
+    {
+      "text": "Haliny Jasińskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Halina Jasińska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "art. 279 § 1 k.k.",
+      "type": "LEGAL_REF",
+      "expect": "keep",
+      "note": "przepis",
+      "count": 2
+    },
+    {
+      "text": "Witolda Sikory",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "obrońca z urzędu",
+      "count": 2
+    },
+    {
+      "text": "Edyty Ćwik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "córka pokrzywdzonej",
+      "count": 1
+    },
+    {
+      "text": "Krystian Majewski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "świadek",
+      "count": 2
+    },
+    {
+      "text": "Krystiana Majewskiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "świadek",
+      "count": 1
+    },
+    {
+      "text": "Baryła",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pseudonim oskarżonego",
+      "count": 1
+    },
+    {
+      "text": "uzależniony od amfetaminy",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "uzależnienie",
+      "count": 1
+    },
+    {
+      "text": "leczeniu odwykowym",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Był uprzednio karany",
+      "type": "SENSITIVE",
+      "expect": "policy",
+      "note": "dane o wyrokach skazujących (art. 10 RODO)",
+      "count": 1
+    },
+    {
+      "text": "Sądu Rejonowego w Ostródzie",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "II K 512/21",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura wcześniejszego skazania tej osoby, nie cytowane orzecznictwo",
+      "count": 1
+    },
+    {
+      "text": "baran",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko Baran",
+      "count": 1
+    },
+    {
+      "text": "Sądu Apelacyjnego w Katowicach",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "II AKa 401/17",
+      "type": "CASE_LAW",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "Sądu Najwyższego",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "III KK 45/19",
+      "type": "CASE_LAW",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    }
+  ]
+}

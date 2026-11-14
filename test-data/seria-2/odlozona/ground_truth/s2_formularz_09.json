@@ -1,0 +1,303 @@
+{
+  "id": "s2_formularz_09",
+  "template": "formularz",
+  "title": "Wniosek o przyjęcie bliźniąt do żłobka",
+  "seed": null,
+  "traps": [
+    "dane dwojga dzieci w układzie kolumnowym ze spacjami",
+    "bliźnięta z tą samą datą urodzenia",
+    "telefon gabinetu lekarskiego do zachowania",
+    "ukraińskie imiona (IVAN, Andrii, Olha, Halyna)",
+    "patron w adresie żłobka",
+    "zwykłe słowa Biedronka i jeż"
+  ],
+  "entities": [
+    {
+      "text": "Żłobek Samorządowy nr 7 w Krakowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Józefa Wybickiego 3",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w adresie żłobka",
+      "count": 1
+    },
+    {
+      "text": "31-261",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kraków",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce urodzenia dzieci, siedziba i miejsce podpisu",
+      "count": 5
+    },
+    {
+      "text": "MARTA",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię w układzie kolumnowym",
+      "count": 1
+    },
+    {
+      "text": "IVAN",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię ukraińskie w kolumnie",
+      "count": 1
+    },
+    {
+      "text": "WÓJCIK-BONDARENKO",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe w kolumnach, dwa razy w wierszu",
+      "count": 2
+    },
+    {
+      "text": "24241655564",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dziecka w kolumnie",
+      "count": 1
+    },
+    {
+      "text": "24241632077",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL bliźniaka, ta sama data",
+      "count": 1
+    },
+    {
+      "text": "16.04.2024",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia bliźniąt",
+      "count": 2
+    },
+    {
+      "text": "os. Złotego Wieku 52/8",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "31-616",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Natalia Wójcik-Bondarenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "95120880506",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "512 640 087",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "n.wojcik.b@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Andrii Bondarenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "ukraińskie imię",
+      "count": 2
+    },
+    {
+      "text": "92033098154",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "LGC798528",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "795 211 364",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szpitalu Uniwersyteckim w Krakowie",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "pracodawca matki",
+      "count": 1
+    },
+    {
+      "text": "fizjoterapeutka",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Comarch S.A.",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "programista",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ivan",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię dziecka",
+      "count": 1
+    },
+    {
+      "text": "cukrzycę typu 1",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "E10.9",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "ma pompę insulinową i sensor CGM",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kontrola glikemii przed posiłkiem",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "opisowa dana o zdrowiu dziecka",
+      "count": 1
+    },
+    {
+      "text": "Hipoglikemię rozpoznaje płacz i bladość",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "opisowa dana o zdrowiu dziecka",
+      "count": 1
+    },
+    {
+      "text": "Marta",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię dziecka",
+      "count": 1
+    },
+    {
+      "text": "przebyła RSV w szpitalu w styczniu 2025",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Olha Kravets",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarka, ukraińskie imię",
+      "count": 1
+    },
+    {
+      "text": "12 643 90 15",
+      "type": "INSTITUTION_PHONE",
+      "expect": "keep",
+      "note": "telefon gabinetu",
+      "count": 1
+    },
+    {
+      "text": "8061542",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "PWZ lekarza",
+      "count": 1
+    },
+    {
+      "text": "Halyna Bondarenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "SD7346539",
+      "type": "PASSPORT",
+      "expect": "mask",
+      "note": "paszport ukraiński",
+      "count": 1
+    },
+    {
+      "text": "Stanisław Wójcik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "600 712 488",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Biedronka",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "nazwa grupy",
+      "count": 1
+    },
+    {
+      "text": "jeż",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,296 @@
+{
+  "id": "s2_formularz_01",
+  "template": "formularz",
+  "title": "ZUS ZUA z ZCNA dla pracownika z Ukrainy",
+  "seed": null,
+  "traps": [
+    "imię i firma JDG w kolejnym wierszu po etykiecie",
+    "otczestwo w polu „Imię drugie”",
+    "dziecko zgłaszane w ZCNA z PESEL i datą urodzenia",
+    "fałszywy PESEL jako numer referencyjny",
+    "słowo „kruk” obok nazwiska Sowińska-Kruk",
+    "dane o niepełnosprawności w polu formularza"
+  ],
+  "entities": [
+    {
+      "text": "Zakład Ubezpieczeń Społecznych Oddział we Wrocławiu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Pretficza 11",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "50-950",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "26442489954",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "11 cyfr bez poprawnej sumy PESEL, numer referencyjny",
+      "count": 1
+    },
+    {
+      "text": "6204929290",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "NIP płatnika JDG",
+      "count": 1
+    },
+    {
+      "text": "280831729",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "REGON płatnika JDG",
+      "count": 1
+    },
+    {
+      "text": "71021409220",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "NXG795942",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ZIELONY TARAS Halina Sowińska-Kruk",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "pełna firma JDG w kolejnym wierszu",
+      "count": 1
+    },
+    {
+      "text": "SOWIŃSKA-KRUK",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe wersalikami",
+      "count": 1
+    },
+    {
+      "text": "HALINA",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię w kolejnym wierszu",
+      "count": 1
+    },
+    {
+      "text": "14.02.1971",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "94072295598",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "WR1789448",
+      "type": "PASSPORT",
+      "expect": "mask",
+      "note": "paszport w osobnym wierszu po rodzaju dokumentu",
+      "count": 1
+    },
+    {
+      "text": "HRYTSENKO",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko ukraińskie wersalikami w kolejnym wierszu",
+      "count": 1
+    },
+    {
+      "text": "MYKHAILO",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię ukraińskie spoza słownika",
+      "count": 1
+    },
+    {
+      "text": "YURIIOVYCH",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "otczestwo w polu drugiego imienia",
+      "count": 1
+    },
+    {
+      "text": "22.07.1994",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ukraińskie",
+      "type": "NATIONALITY",
+      "expect": "policy",
+      "note": "obywatelstwo",
+      "count": 1
+    },
+    {
+      "text": "umiarkowany stopień niepełnosprawności, symbol 05-R (choroby narządu ruchu)",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Powiatowy Zespół do Spraw Orzekania o Niepełnosprawności we Wrocławiu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kucharz zmianowy",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "53-611",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wrocław",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i siedziby ZUS",
+      "count": 2
+    },
+    {
+      "text": "Fabryczna",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "dzielnica z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "ul. Strzegomska 48 m. 12",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+48 731 204 586",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "m.hrytsenko@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "55-080",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kąty Wrocławskie",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu korespondencyjnego osoby",
+      "count": 1
+    },
+    {
+      "text": "ul. Wiejska 7",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ireny Dąbek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "osoba trzecia w dopisku do adresu",
+      "count": 1
+    },
+    {
+      "text": "Danylo Hrytsenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dziecko, ukraińskie imię",
+      "count": 1
+    },
+    {
+      "text": "19250394838",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dziecka",
+      "count": 1
+    },
+    {
+      "text": "03.05.2019",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia dziecka",
+      "count": 1
+    },
+    {
+      "text": "42 1940 1076 9927 6054 2861 8859",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "NRB bez prefiksu PL",
+      "count": 1
+    },
+    {
+      "text": "Edyta",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię kadrowej",
+      "count": 1
+    },
+    {
+      "text": "wrona",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kruk",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, część nazwiska płatniczki",
+      "count": 1
+    },
+    {
+      "text": "H. Sowińska-Kruk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał i nazwisko dwuczłonowe w podpisie",
+      "count": 1
+    }
+  ]
+}

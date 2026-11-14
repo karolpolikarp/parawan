@@ -1,0 +1,247 @@
+{
+  "id": "s2_email_07",
+  "template": "email",
+  "title": "Serwis samochodowy: auto zastępcze po kolizji, autoodpowiedź i odpowiedź zastępcy",
+  "seed": null,
+  "traps": [
+    "paszport z prefiksem RZ obok tablicy z wyróżnikiem RZ",
+    "NIP i rachunek firmy w stopce (polityka) obok danych klienta",
+    "numer faktury do zachowania, numer szkody (polityka), modele aut (polityka)",
+    "dane o zdrowiu syna klienta",
+    "autoodpowiedź z danymi zastępcy w narzędniku",
+    "nagłówek „Od:” bez adresu e-mail, wołacze „Grzegorzu”, „Patrycjo”"
+  ],
+  "entities": [
+    {
+      "text": "Kamil Jasiński",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "doradca serwisowy",
+      "count": 2
+    },
+    {
+      "text": "k.jasinski@autokarpaty.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "służbowy e-mail osoby",
+      "count": 2
+    },
+    {
+      "text": "Grzegorz Wilk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 5
+    },
+    {
+      "text": "grzegorz.wilk.rz@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "RZ 58312",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "tablica w temacie i treści",
+      "count": 4
+    },
+    {
+      "text": "Grzegorzu",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz",
+      "count": 1
+    },
+    {
+      "text": "Patrycji",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "785 230 641",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "służbowa komórka osoby",
+      "count": 2
+    },
+    {
+      "text": "Patrycja Zawadzka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "p.zawadzka@autokarpaty.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Kamilem Jasińskim",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "narzędnik w autoodpowiedzi",
+      "count": 1
+    },
+    {
+      "text": "Patrycjo",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz",
+      "count": 1
+    },
+    {
+      "text": "CTU4CLD003UWT220L",
+      "type": "VIN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Filipa",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię syna",
+      "count": 1
+    },
+    {
+      "text": "rehabilitację po urazie kręgosłupa",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "dane o zdrowiu syna",
+      "count": 1
+    },
+    {
+      "text": "ul. Podwisłocze 18/52",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "35-309",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "39897/20/3138",
+      "type": "DRIVING_LICENSE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "RZ9629132",
+      "type": "PASSPORT",
+      "expect": "mask",
+      "note": "prefiks RZ jak wyróżnik tablicy",
+      "count": 1
+    },
+    {
+      "text": "+48 609 117 482",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rzeszów",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i serwisu",
+      "count": 2
+    },
+    {
+      "text": "3/2026/RZ/118204",
+      "type": "POLICY_NUMBER",
+      "expect": "policy",
+      "note": "numer szkody",
+      "count": 1
+    },
+    {
+      "text": "PL41109010140451752024017747",
+      "type": "IBAN_COMPANY",
+      "expect": "policy",
+      "note": "rachunek spółki",
+      "count": 1
+    },
+    {
+      "text": "AutoKarpaty sp. z o.o.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "al. Armii Krajowej 70",
+      "type": "COMPANY_ADDRESS",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "35-307",
+      "type": "COMPANY_POSTAL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "3226294319",
+      "type": "NIP_COMPANY",
+      "expect": "policy",
+      "note": "NIP spółki",
+      "count": 1
+    },
+    {
+      "text": "17 862 45 00",
+      "type": "PHONE_COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Doradca serwisowy",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Toyota Corolla",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Skoda Octavia",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dębicy",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "miejsce pracy klienta",
+      "count": 1
+    },
+    {
+      "text": "FV/2026/11/0457",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer faktury",
+      "count": 1
+    }
+  ]
+}

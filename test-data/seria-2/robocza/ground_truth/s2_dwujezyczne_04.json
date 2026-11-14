@@ -1,0 +1,296 @@
+{
+  "id": "s2_dwujezyczne_04",
+  "template": "dwujezyczne",
+  "title": "Korespondencja e-mail z niemieckim dostawcą (EN) z notatką wewnętrzną (PL)",
+  "seed": null,
+  "traps": [
+    "nazwisko osoby w nazwie firmy (Brandt Fördertechnik GmbH, polityka) obok „Mr Brandt” i „pan Brandt”",
+    "nagłówki e-mail z imieniem i adresem w nawiasach ostrych oraz adres IP nadawcy",
+    "zdrobnienia i wołacz w notatce polskiej („Aniu”, „Kuba”), samo imię kierowcy („pan Serhiy”)",
+    "prywatny telefon +49 i telefon współpracownicy w jednym akapicie",
+    "numer faktury i numer zamówienia do zachowania, IBAN firmy niemieckiej jako polityka",
+    "daty w formacie 14/04/2026 i April 16, 2026 do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "Jakub Wiśniewski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "j.wisniewski@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Matthias Brandt",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "m.brandt@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mr Brandt",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko z tytułem",
+      "count": 1
+    },
+    {
+      "text": "pan Brandt",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko z tytułem",
+      "count": 1
+    },
+    {
+      "text": "Mr Wiśniewski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko z tytułem",
+      "count": 1
+    },
+    {
+      "text": "Anna Kaczmarek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "a.kaczmarek@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Aniu",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz zdrobnienia",
+      "count": 1
+    },
+    {
+      "text": "Kuba",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie w podpisie",
+      "count": 1
+    },
+    {
+      "text": "198.51.100.47",
+      "type": "IP",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Serhiy Bondarenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "kierowca, cudzoziemiec",
+      "count": 1
+    },
+    {
+      "text": "pan Serhiy",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię",
+      "count": 1
+    },
+    {
+      "text": "+48 733 905 218",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PO 4R718",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PZ 61093",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "naczepa",
+      "count": 1
+    },
+    {
+      "text": "+48 668 402 117",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "służbowa komórka osoby",
+      "count": 1
+    },
+    {
+      "text": "knee replacement surgery",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Leonie Vogt",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+49 521 9634 2205",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "l.vogt@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+49 171 4428 609",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "prywatny telefon niemiecki",
+      "count": 1
+    },
+    {
+      "text": "BFT/2026/0417",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer faktury",
+      "count": 2
+    },
+    {
+      "text": "14/04/2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "April 16, 2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "April 13, 2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PO-2026-0381",
+      "type": "ORDER_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "Brandt Fördertechnik GmbH",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "nazwa firmy zawiera nazwisko",
+      "count": 2
+    },
+    {
+      "text": "DE17 3704 0044 4693 1794 66",
+      "type": "IBAN_COMPANY",
+      "expect": "policy",
+      "note": "IBAN niemieckiej spółki",
+      "count": 1
+    },
+    {
+      "text": "Industriestraße 7",
+      "type": "COMPANY_ADDRESS",
+      "expect": "policy",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "33689",
+      "type": "COMPANY_ADDRESS",
+      "expect": "policy",
+      "note": "niemiecki kod pocztowy firmy",
+      "count": 2
+    },
+    {
+      "text": "Bielefeld",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "siedziba firmy",
+      "count": 2
+    },
+    {
+      "text": "Wielkopolskie Zakłady Opakowań S.A.",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Gdyńska 112",
+      "type": "COMPANY_ADDRESS",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "61-016",
+      "type": "COMPANY_ADDRESS",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Poznań",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "siedziba pracodawcy",
+      "count": 1
+    },
+    {
+      "text": "Purchasing Specialist",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Specjalista ds. zakupów",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sales Manager Eastern Europe",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

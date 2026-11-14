@@ -1,0 +1,247 @@
+{
+  "id": "s2_formularz_03",
+  "template": "formularz",
+  "title": "CEIDG-1 przedsiębiorcy z Wietnamu",
+  "seed": null,
+  "traps": [
+    "imiona wietnamskie spoza słownika (THANH, VAN, HUNG, MAI)",
+    "nazwisko pełnomocnika „Do” wygląda jak przyimek",
+    "firma JDG z imieniem i nazwiskiem w kolejnym wierszu",
+    "kod PKD i fałszywy PESEL jako numer wniosku",
+    "słowo „pho” w tekście i w nazwie firmy",
+    "wspólność majątkowa: dane małżonki w formularzu przedsiębiorcy"
+  ],
+  "entities": [
+    {
+      "text": "Urząd Gminy Lesznowola",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Gminna 60",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "05-506",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "69488286630",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "numer wniosku z 11 cyfr bez sumy PESEL",
+      "count": 1
+    },
+    {
+      "text": "82080547718",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "1982-08-05",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "format ISO",
+      "count": 1
+    },
+    {
+      "text": "NGUYEN",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko wietnamskie wersalikami (też jako rodowe)",
+      "count": 2
+    },
+    {
+      "text": "THANH",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię wietnamskie",
+      "count": 1
+    },
+    {
+      "text": "VAN",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "drugie imię wietnamskie",
+      "count": 1
+    },
+    {
+      "text": "HUNG",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię ojca",
+      "count": 1
+    },
+    {
+      "text": "MAI",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię matki (zbieżne z angielskim słowem)",
+      "count": 1
+    },
+    {
+      "text": "wietnamskie",
+      "type": "NATIONALITY",
+      "expect": "policy",
+      "note": "obywatelstwo",
+      "count": 1
+    },
+    {
+      "text": "RP9049697",
+      "type": "RESIDENCE_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tran Thi Hoa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małżonka, trzyczłonowe imię i nazwisko wietnamskie",
+      "count": 1
+    },
+    {
+      "text": "86120177363",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "503 117 942",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "thanh.bistro@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Szkolna 23/4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "05-500",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mysiadło",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i miejsce podpisu",
+      "count": 2
+    },
+    {
+      "text": "Nguyen Van Thanh Bistro Pho Hanoi",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "pełna firma JDG w kolejnym wierszu",
+      "count": 1
+    },
+    {
+      "text": "2850609467",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "NIP JDG",
+      "count": 1
+    },
+    {
+      "text": "917732006",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "REGON JDG",
+      "count": 1
+    },
+    {
+      "text": "Centrum Handlowe GD Center, hala C, boks 112, ul. Nadrzeczna 6",
+      "type": "BUSINESS_ADDRESS",
+      "expect": "policy",
+      "note": "miejsce wykonywania działalności JDG, jawne w CEIDG",
+      "count": 1
+    },
+    {
+      "text": "05-552",
+      "type": "POSTAL",
+      "expect": "policy",
+      "note": "kod miejsca działalności",
+      "count": 1
+    },
+    {
+      "text": "Wólka Kosowska",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość działalności",
+      "count": 1
+    },
+    {
+      "text": "56.11.Z",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "kod PKD",
+      "count": 1
+    },
+    {
+      "text": "PL11109010146641848579209682",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "rachunek JDG = osoby fizycznej, PL bez spacji",
+      "count": 1
+    },
+    {
+      "text": "Do Minh Tuan",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pełnomocnik; „Do” wygląda jak przyimek",
+      "count": 1
+    },
+    {
+      "text": "692 004 815",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "pho",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "nazwa zupy, małą literą",
+      "count": 1
+    },
+    {
+      "text": "Krystyna Wilk",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędniczka w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Thanh Nguyen",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis w kolejności imię-nazwisko",
+      "count": 1
+    }
+  ]
+}

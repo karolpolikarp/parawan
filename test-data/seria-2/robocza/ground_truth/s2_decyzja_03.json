@@ -1,0 +1,288 @@
+{
+  "id": "s2_decyzja_03",
+  "template": "decyzja",
+  "title": "Postanowienie o zawieszeniu postępowania rozgraniczeniowego",
+  "seed": null,
+  "traps": [
+    "nazwisko dwuczłonowe Gąsienica-Sieczka w kilku przypadkach i słowo „gąsienice”",
+    "adres wiejski bez ulicy i adres zagraniczny",
+    "wójt podpisany z imienia i nazwiska (osoba w funkcji)",
+    "sygnatura sprawy spadkowej strony obok cytowanego wyroku WSA",
+    "nazwa miejscowości Kościelisko w nazwie organu i w adresie osoby"
+  ],
+  "entities": [
+    {
+      "text": "WÓJT GMINY KOŚCIELISKO",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Nędzy-Kubińca 101",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron (nazwisko) w adresie urzędu",
+      "count": 1
+    },
+    {
+      "text": "34-511",
+      "type": "POSTAL",
+      "expect": "policy",
+      "note": "ten sam kod dla urzędu i adresu wnioskodawczyni",
+      "count": 2
+    },
+    {
+      "text": "Kościelisko",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i siedziba organu",
+      "count": 4
+    },
+    {
+      "text": "RG.6830.7.2025.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dz.U. z 2025 r. poz. 1691",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "publikator",
+      "count": 1
+    },
+    {
+      "text": "Dz.U. z 2024 r. poz. 1151",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "publikator",
+      "count": 1
+    },
+    {
+      "text": "działka ewidencyjna nr 4127/2",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "działka wnioskodawczyni",
+      "count": 1
+    },
+    {
+      "text": "obręb Dzianisz",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "obręb ewidencyjny, zarazem miejscowość strony",
+      "count": 1
+    },
+    {
+      "text": "NS1Z/15134891/6",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "działka nr 4128",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "działka zmarłego",
+      "count": 1
+    },
+    {
+      "text": "Marii Karpiel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Dzianisz 214",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres wiejski bez ulicy",
+      "count": 1
+    },
+    {
+      "text": "57113070983",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wojciechowi Chowańcowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "geodeta, celownik",
+      "count": 1
+    },
+    {
+      "text": "21847",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer uprawnień geodezyjnych",
+      "count": 1
+    },
+    {
+      "text": "gąsienice",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, nazwisko Gąsienica",
+      "count": 1
+    },
+    {
+      "text": "Stanisław Gąsienica-Sieczka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "zmarły",
+      "count": 1
+    },
+    {
+      "text": "Panią Karpiel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 1
+    },
+    {
+      "text": "Stanisławie Gąsienicy-Sieczce",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "miejscownik nazwiska dwuczłonowego",
+      "count": 1
+    },
+    {
+      "text": "Sądem Rejonowym w Zakopanem",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "I Ns 845/26",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy spadkowej strony",
+      "count": 1
+    },
+    {
+      "text": "Andrzej Gąsienica-Sieczka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "spadkobierca",
+      "count": 2
+    },
+    {
+      "text": "14 Elm Road, Reading RG1 5AB",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres zagraniczny",
+      "count": 2
+    },
+    {
+      "text": "+44 7700 900417",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "numer zagraniczny",
+      "count": 1
+    },
+    {
+      "text": "Zofia Gąsienica-Sieczka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "wdowa",
+      "count": 2
+    },
+    {
+      "text": "zaawansowanej choroby otępiennej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "nie jest zdolna do samodzielnego podejmowania decyzji",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "stan psychiczny wdowy",
+      "count": 1
+    },
+    {
+      "text": "przebywa w domu pomocy społecznej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "pobyt w DPS ujawnia stan zdrowia",
+      "count": 1
+    },
+    {
+      "text": "Wojewódzki Sąd Administracyjny w Krakowie",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "II SA/Kr 1544/20",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "Zofii Gąsienicy-Sieczki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dopełniacz",
+      "count": 1
+    },
+    {
+      "text": "Samorządowego Kolegium Odwoławczego w Nowym Sączu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "adw. Ilona Pitoń",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pełnomocnik",
+      "count": 1
+    },
+    {
+      "text": "ilona.piton@kancelaria-test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Roman Fronc",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "wójt podpisany w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Maria Karpiel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "rozdzielnik",
+      "count": 1
+    },
+    {
+      "text": "adw. Ilonę Pitoń",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "biernik",
+      "count": 1
+    },
+    {
+      "text": "Wojciech Chowaniec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "rozdzielnik",
+      "count": 1
+    }
+  ]
+}

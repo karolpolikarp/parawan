@@ -1,0 +1,268 @@
+{
+  "id": "s2_protokol_04",
+  "template": "protokol",
+  "title": "Protokół z klasyfikacyjnego posiedzenia rady pedagogicznej",
+  "seed": null,
+  "traps": [
+    "dane małoletnich uczniów: PESEL, data urodzenia, choroba, orzeczenie",
+    "eponim w nazwie choroby (zespół Aspergera) i patronka w nazwie szkoły",
+    "zwolnienie z religii jako dana szczególna (światopogląd)",
+    "nazwisko Kurek i „kurek” w łazience",
+    "inicjały w grafiku dyżurów",
+    "dyrektor szkoły w funkcji jako polityka"
+  ],
+  "entities": [
+    {
+      "text": "Rady Pedagogicznej Szkoły Podstawowej nr 3 im. Marii Konopnickiej w Siedlcach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patronka w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "Poradni Psychologiczno-Pedagogicznej nr 1 w Siedlcach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sądem Rejonowym w Siedlcach",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mińsku Mazowieckim",
+      "type": "LOCATION",
+      "expect": "keep",
+      "note": "poprzednia szkoła, bez osoby",
+      "count": 1
+    },
+    {
+      "text": "Prezydenta Miasta Siedlce",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "uchwałę nr 14/2025/2026",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "uchwałę nr 15/2025/2026",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kurek",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo obok nazwiska Kurek",
+      "count": 1
+    },
+    {
+      "text": "Renata Olszewska",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "dyrektor szkoły w funkcji",
+      "count": 2
+    },
+    {
+      "text": "Monika Żak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "urlop dla poratowania zdrowia",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jacek Pawlik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kamil Bartosik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Marzena Kołodziej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Paweł Dziedzic",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kacper Nowicki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletni",
+      "count": 1
+    },
+    {
+      "text": "Iwona Majchrzak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Zuzanna Pietras",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletnia",
+      "count": 1
+    },
+    {
+      "text": "Kacpra Nowickiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletni",
+      "count": 1
+    },
+    {
+      "text": "leczeniem białaczki",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ilona Kurek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mai Wawrzyniak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletnia",
+      "count": 1
+    },
+    {
+      "text": "5 września 2012",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "12290550923",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL małoletniej",
+      "count": 1
+    },
+    {
+      "text": "zespół Aspergera",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "eponim w nazwie choroby",
+      "count": 1
+    },
+    {
+      "text": "Igor Sołtysiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletni",
+      "count": 1
+    },
+    {
+      "text": "13211744810",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL małoletniego",
+      "count": 1
+    },
+    {
+      "text": "Robert Sołtysiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "693 004 512",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "rezygnacji z lekcji religii",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "światopogląd",
+      "count": 1
+    },
+    {
+      "text": "Oliwierowi Bąkowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletni",
+      "count": 1
+    },
+    {
+      "text": "objęty postępowaniem",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "postępowanie w sprawie nieletniego",
+      "count": 1
+    },
+    {
+      "text": "Oliwiera Bąka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KB",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "MK",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PD",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}
