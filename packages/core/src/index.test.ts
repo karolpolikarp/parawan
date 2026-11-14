@@ -11621,3 +11621,203 @@ test('zdrowie klasa 4: przepis o roli w liczbie pojedynczej z rozpoznaniem zosta
   ];
   for (const [t, want] of cases) expect(redactPII(t, { types: ['ZDROWIE'] }).redacted, t).toBe(want);
 });
+
+test('zdrowie klasa 10: lek bez dawki, grupa leków i droga podania przy osobie', () => {
+  const Z = '[DANE O ZDROWIU]';
+  const cases: [string, string][] = [
+    // substancja spoza słownika o kształcie nazwy leku po czasowniku przyjmowania albo zlecenia
+    ['Chłopiec przyjmuje metylofenidat.', `Chłopiec przyjmuje ${Z}.`],
+    ['Zdiagnozowano u niego ADHD, a lekarz włączył metylofenidat.', `Zdiagnozowano u niego ${Z}, a lekarz włączył ${Z}.`],
+    ['Podopieczny stosuje rysperydon.', `Podopieczny stosuje ${Z}.`],
+    ['Wnioskodawczyni od roku bierze kwetiapinę i klonazepam.', `Wnioskodawczyni od roku bierze ${Z} i ${Z}.`],
+    ['Lekarz zalecił mu amoksycylinę przez 7 dni.', `Lekarz zalecił mu ${Z} przez 7 dni.`],
+    // insulina, metadon, „jest na”
+    ['Cukrzyca się rozjechała. Chcą, żeby brała insulinę.', `${Z} się rozjechała. Chcą, żeby brała ${Z}.`],
+    ['Ojciec jest na insulinie od 2019 r.', `Ojciec jest na ${Z} od 2019 r.`],
+    ['Matka przyjmuje metadon w programie substytucyjnym.', `Matka przyjmuje ${Z} w programie substytucyjnym.`],
+    // grupa leków przy czasowniku i przy kotwicy medycznej, nazwa handlowa po postaci leku i po „zażywa”
+    ['Małoletni otrzymuje leki przeciwpadaczkowe.', `Małoletni otrzymuje ${Z}.`],
+    ['Od 2024 r. syn przyjmuje leki przeciwpsychotyczne (olanzapina).', `Od 2024 r. syn przyjmuje ${Z} (${Z}).`],
+    ['- poz. 3: zasiłek na zakup leków przeciwpadaczkowych po wypisie ze szpitala.', `- poz. 3: zasiłek na zakup ${Z}.`],
+    ['Syn zażywa tabletki Relanium.', `Syn zażywa ${Z}.`],
+    ['Syn zażywa Relanium bez wiedzy lekarza.', `Syn zażywa ${Z} bez wiedzy lekarza.`],
+    // droga podania przy dawce i kolejny lek w wyliczeniu po zakrytym
+    // droga podania wzmacnia kotwicę (sama osoba wystarcza), ale bez osoby i słowa medycznego nie wystarcza
+    ['Pan Nowak: Enoksaparyna 40 mg s.c. raz dziennie przez 35 dni.', `Pan Nowak: ${Z} przez 35 dni.`],
+    // kropka skrótu na końcu zdania zostaje, następne zdanie nie dołącza do maski
+    ['Pacjentowi ordynowano haloperydol 5 mg i.m. Stan dobry.', `Pacjentowi ordynowano ${Z}. Stan dobry.`],
+    ['Pani Nowak przyjmuje metotreksat 15 mg 2 razy w tygodniu.', `Pani Nowak przyjmuje ${Z}.`],
+    ['Pacjent hospitalizowany. Glikemie wyrównane na insulinie aspart i glarginie.', `Pacjent hospitalizowany. Glikemie wyrównane na ${Z} i ${Z}.`],
+    ['Kasia: metformina 850 2x dziennie i insulina glargine wieczorem, kod recepty przyjdzie smsem', `Kasia: ${Z} i ${Z} wieczorem, kod recepty przyjdzie smsem`],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t, { types: ['ZDROWIE'] }).redacted, t).toBe(want);
+  keep(
+    [
+      // czasownik bez leku
+      'Urząd przyjmuje interesantów od 8 do 16.',
+      'Do wniosku stosuje się przepisy ustawy.',
+      'Pan Kowalski bierze udział w szkoleniu.',
+      'Zalecono uzupełnienie wniosku w terminie 7 dni.',
+      'Podano do publicznej wiadomości wykaz nieruchomości.',
+      'Wójt przyjmuje Pana Kowalskiego w poniedziałek.',
+      'Sołtys otrzymuje Order Uśmiechu.',
+      'Dyrektor jest na urlopie do piątku.',
+      'Kierownik jest na Mazurach.',
+      'Pani Kowalska zażywa kąpieli słonecznych.',
+      'Kandydat przyjmuje stanowisko p.o. dyrektora.',
+      'Pracownik bierze platynę z magazynu.',
+      'Zespół przyjął metodę Kaina.',
+      'Aspartam jest słodzikiem.',
+      // instytucja, obrót lekami, przepis, statystyka, reguła i cennik
+      'Apteka przyjmuje recepty na leki przeciwdepresyjne.',
+      'Firma stosuje rysperydon w badaniach klinicznych.',
+      'Szpital stosuje enoksaparynę u pacjentów po zabiegach.',
+      'Gmina przyjmuje leki przeciwbólowe od darczyńców na zbiórkę.',
+      'Refundacja leków przeciwpadaczkowych dla dzieci obejmuje 2026 r.',
+      'Sprawa dotyczy kradzieży leków psychotropowych z apteki szpitalnej przez Jana Kowalskiego.',
+      'Pan Nowak, farmaceuta, przyjmuje dostawy leków nasennych.',
+      'Ustawa reguluje obrót lekami psychotropowymi.',
+      'Zalecono stosowanie leków przeciwzakrzepowych zgodnie z wytycznymi.',
+      'Leki przeciwbólowe można kupić bez recepty.',
+      'Wiele osób przyjmuje leki przeciwdepresyjne.',
+      'Pacjent może przyjmować leki przeciwzakrzepowe tylko pod kontrolą.',
+      'Kto przyjmuje insulinę, powinien mieć glukometr.',
+      'W ofercie apteki: insulina, metformina i leki nasenne w cenie 20 zł.',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+});
+
+test('zdrowie klasa 10: recepta jako kategoria leku, nazwa firmy, nowe zdanie po przecinku i praktyka instytucji zostają', () => {
+  const Z = '[DANE O ZDROWIU]';
+  keep(
+    [
+      // „bez recepty”, „na receptę”: kategoria leku w komunikacie GIF, ulotce, ogłoszeniu apteki
+      'Paracetamol 500 mg jest dostępny bez recepty w każdej aptece.',
+      'Ibuprofen 400 mg można kupić bez recepty.',
+      'Apap 500 mg, 24 tabletki, lek bez recepty.',
+      'Komunikat GIF: wycofanie z obrotu serii leku Polocard 75 mg wydawanego bez recepty.',
+      'Lek Xanax 0,5 mg wydaje się wyłącznie na receptę.',
+      'Metformina 500 mg jest lekiem na receptę refundowanym przez NFZ.',
+      'Lek wydawany z recepty: Concor 5 mg.',
+      // nowe zdanie składowe po przecinku: lek jest podmiotem, nie dopełnieniem
+      'Uczeń otrzymał pochwałę, penicylina była tematem referatu.',
+      'Uczeń otrzymał nagrodę, sertralina jest omawiana na lekcji.',
+      // praktyka instytucji, badanie, sprawozdanie: grupa po liczebniku, celownik liczby mnogiej, miejscownik instytucji
+      'W badaniu klinicznym włączono metforminę u 300 pacjentów.',
+      'W 2025 r. odstawiono warfarynę u 12 chorych z powodu krwawień.',
+      'Na oddziale włączono enoksaparynę u wszystkich hospitalizowanych.',
+      'W programie podawano sertralinę 140 uczestnikom.',
+      'Kontrola NIK: w szpitalu podawano morfinę bez zlecenia.',
+      'W szpitalu podawano morfinę dożylnie.',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+  // nazwa ubezpieczyciela o rdzeniu nazwy leku („Concor” → „Concordia”) i lek-podmiot po zakrytej chorobie zostają
+  const cases: [string, string][] = [
+    ['Pani Nowak otrzymała pismo, Concordia odmówiła.', 'Pani Nowak otrzymała pismo, Concordia odmówiła.'],
+    ['Pan Nowak choruje na astmę, Concordia przyjęła wniosek o rentę.', `Pan Nowak choruje na ${Z}, Concordia przyjęła wniosek o rentę.`],
+    ['Pani Nowak ma depresję i Concordia o tym wie.', `Pani Nowak ma ${Z} i Concordia o tym wie.`],
+    ['Pani Nowak choruje na cukrzycę, Concordia Ubezpieczenia potwierdziła polisę.', `Pani Nowak choruje na ${Z}, Concordia Ubezpieczenia potwierdziła polisę.`],
+    ['Pani Nowak przyjmuje interesantów i petentów, statyny są w szafce służbowej apteczki.', 'Pani Nowak przyjmuje interesantów i petentów, statyny są w szafce służbowej apteczki.'],
+    ['Pan Nowak choruje na astmę, sertralina jest omawiana na lekcji.', `Pan Nowak choruje na ${Z}, sertralina jest omawiana na lekcji.`],
+    // to nadal lek osoby: odmiana leku, recepta pacjenta, wyliczenie leków, zlecenie przy osobie
+    ['Pani Nowak przyjmuje Concor i Euthyrox.', `Pani Nowak przyjmuje ${Z} i ${Z}.`],
+    ['Pani Nowak jest na Concorze od roku.', `Pani Nowak jest na ${Z} od roku.`],
+    ['Pan Nowak bierze sertralinę, lamotryginę i insulinę.', `Pan Nowak bierze ${Z}, ${Z} i ${Z}.`],
+    ['Pani Nowak odebrała e-receptę na Concor 5 mg.', `Pani Nowak odebrała e-receptę na ${Z}.`],
+    ['E-recepta dla Pani Nowak: Xanax 0,5 mg.', `E-recepta dla Pani Nowak: ${Z}.`],
+    ['Pani Nowak: Concor 5 mg, recepta do odbioru.', `Pani Nowak: ${Z}, recepta do odbioru.`],
+    ['Pacjentce włączono sertralinę.', `Pacjentce włączono ${Z}.`],
+    ['Pacjent hospitalizowany na oddziale chirurgii. Na oddziale włączono enoksaparynę s.c.', `Pacjent hospitalizowany na oddziale chirurgii. Na oddziale włączono ${Z}.`],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t, { types: ['ZDROWIE'] }).redacted, t).toBe(want);
+});
+
+test('zdrowie klasa 10: przysłówek, szyk, przeczenie, zlecenie bezosobowe, postać leku i tekst angielski', () => {
+  const Z = '[DANE O ZDROWIU]';
+  const cases: [string, string][] = [
+    // przysłówek po budowie i droga podania przed lekiem (znika razem z lekiem)
+    ['Brała wcześniej fluoksetynę.', `Brała wcześniej ${Z}.`],
+    ['Pan Wiśniewski przyjmował wcześniej leki przeciwpsychotyczne.', `Pan Wiśniewski przyjmował wcześniej ${Z}.`],
+    ['Zalecono mu doustnie amoksycylinę.', `Zalecono mu ${Z}.`],
+    ['Podano domięśniowo ketoprofen.', `Podano ${Z}.`],
+    ['Pacjentka otrzymała dożylnie cefuroksym.', `Pacjentka otrzymała ${Z}.`],
+    ['Pani Agata stosuje dopochwowo progesteron.', `Pani Agata stosuje ${Z}.`],
+    ['Wcześniej przyjmowała wenlafaksynę, obecnie duloksetynę.', `Wcześniej przyjmowała ${Z}, obecnie ${Z}.`],
+    // zlecenie bezosobowe, z drogą podania albo z odbiorcą w celowniku
+    ['Włączono enoksaparynę s.c. raz dziennie.', `Włączono ${Z}.`],
+    ['Lekarz ordynował furosemid dożylnie.', `Lekarz ordynował ${Z}.`],
+    ['Odstawiono klonazepam z powodu senności.', `Odstawiono ${Z} z powodu senności.`],
+    ['Wypisano receptę na rywaroksaban.', `Wypisano receptę na ${Z}.`],
+    ['Pacjentce zalecono przyjmowanie sertraliny.', `Pacjentce zalecono przyjmowanie ${Z}.`],
+    ['Zalecono kontynuację leczenia pantoprazolem.', `Zalecono kontynuację leczenia ${Z}.`],
+    ['Opiekunka codziennie podaje mu insulinę.', `Opiekunka codziennie podaje mu ${Z}.`],
+    // szyk z dopełnieniem przed czasownikiem, przeczenie i czasownik fazowy
+    ['Kwetiapinę przyjmuje od roku.', `${Z} przyjmuje od roku.`],
+    ['Leki przeciwdepresyjne bierze od dwóch lat.', `${Z} bierze od dwóch lat.`],
+    ['Pacjent nie przyjmuje regularnie przepisanej olanzapiny.', `Pacjent nie przyjmuje regularnie przepisanej ${Z}.`],
+    ['Przestała brać leki przeciwpsychotyczne w maju.', `Przestała brać ${Z} w maju.`],
+    ['Matka nie podaje dziecku leków przeciwpadaczkowych.', `Matka nie podaje dziecku ${Z}.`],
+    // lek po zakrytym leczeniu i w wyliczeniu po pozycji spoza słownika
+    ['Pani Halina jest leczona lamotryginą.', `Pani Halina jest ${Z}.`],
+    ['Pacjentka przyjmuje kwas foliowy i lewotyroksynę.', `Pacjentka przyjmuje kwas foliowy i ${Z}.`],
+    // końcówki i grupy spoza dawnej listy, sól, postać leku z substancją, lek na narząd
+    ['Pan Leszek przyjmuje tamsulosynę.', `Pan Leszek przyjmuje ${Z}.`],
+    ['Pacjentka otrzymuje heparynę podskórnie.', `Pacjentka otrzymuje ${Z}.`],
+    ['Syn stosował wcześniej walproinian sodu.', `Syn stosował wcześniej ${Z}.`],
+    ['Pan Nowak przyjmuje tenofowir.', `Pan Nowak przyjmuje ${Z}.`],
+    ['Brat wnioskodawcy jest na lekach przeciwretrowirusowych.', `Brat wnioskodawcy jest na ${Z}.`],
+    ['Dziecko jest na sterydach wziewnych.', `Dziecko jest na ${Z}.`],
+    ['Pani Jolanta bierze tabletki antykoncepcyjne.', `Pani Jolanta bierze ${Z}.`],
+    ['Mąż przyjmuje leki na serce.', `Mąż przyjmuje ${Z}.`],
+    ['Pacjentka stosuje inhalator z salbutamolem.', `Pacjentka stosuje ${Z}.`],
+    ['Wnioskodawczyni przyjmuje tabletki Tegretol.', `Wnioskodawczyni przyjmuje ${Z}.`],
+    // pismo dwujęzyczne
+    ['The patient is taking sertraline daily.', `The patient is taking ${Z} daily.`],
+    ['He is on antidepressants.', `He is on ${Z}.`],
+    ['Mother reports that the child takes methylphenidate.', `Mother reports that the child takes ${Z}.`],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t, { types: ['ZDROWIE'] }).redacted, t).toBe(want);
+  keep(
+    [
+      // postać leku z wielką literą bez nazwy leku i bez kotwicy medycznej
+      'Klient dostaje kapsułki Nespresso w prezencie od firmy.',
+      'Dziecko bierze tabletki Haribo do szkoły.',
+      'Dziecko dostaje syrop Malinowy od babci.',
+      'Wnuczka bierze krople Żołądkowe dla dziadka ze sklepu.',
+      'Pracownik otrzymuje preparaty Spółki do testów jakości.',
+      'Pan Nowak przyjmuje lek Ministerstwa jako dowód w sprawie.',
+      'Córka bierze lek Gratis z promocji.',
+      'Pan Jan Kowalski bierze krople Deszczu na dłonie.',
+      // droga podania bez osoby: ChPL, standard, ulotka, wykaz, dawkowanie dla grupy
+      'Dawkowanie według ChPL: Clexane 40 mg s.c. raz na dobę u dorosłych.',
+      'Standard profilaktyki: Clexane 40 mg s.c. raz na dobę u pacjentów unieruchomionych.',
+      'Ulotka: Clexane 40 mg s.c. raz na dobę przez 7 dni po zabiegu.',
+      'Załącznik nr 3 – wykaz leków: insulina glargine, heparyna, Clexane 40 mg s.c. raz na dobę.',
+      // grupa leków w zdaniu o grupie, statystyce albo raporcie
+      'Po wypisie ze szpitala pacjenci często otrzymują leki przeciwzakrzepowe, wynika z raportu.',
+      'Po wypisie ze szpitala chorzy zwykle przyjmują leki przeciwzakrzepowe.',
+      'W szpitalu zalecono stosowanie heparyny u wszystkich pacjentów po zabiegu.',
+      'Na oddziale pacjentom podawano heparynę.',
+      'Statyny przyjmuje co trzeci Polak po pięćdziesiątce.',
+      'Kwetiapinę przyjmuje się wieczorem.',
+      'Szpital antybiotyki stosuje oszczędnie.',
+      // czasownik bez leku przy przysłówku, wyliczeniu, czasowniku fazowym i celowniku
+      'Pan Nowak przyjmuje obecnie interesantów i petentów.',
+      'Pan Jan przestał brać udział w zebraniach.',
+      'Pracownik odmawia przyjmowania poleceń.',
+      'Opiekunka podaje mu obiad i kolację.',
+      'Zalecono kontynuację postępowania wyjaśniającego.',
+      'Zalecono mu doustnie wodę.',
+      'Wypisano receptę na nazwisko córki.',
+      'Gmina stosuje środki przeciwpożarowe i antykorozyjne.',
+      'Apteka sprzedaje tabletki antykoncepcyjne na receptę.',
+      'Mirosław Nawirski przyjmuje interesantów.',
+      // angielskie zdanie ogólne i czasownik bez leku
+      'Patients are often prescribed antidepressants after discharge.',
+      'She is taking part in the meeting.',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+});

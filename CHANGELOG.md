@@ -267,6 +267,71 @@ działają na GitHubie od chwili wypchnięcia tagów.
   „członek zespołu Kubiaka w przychodni”) też zostają; zespół z nazwiskiem jest chorobą po słowie
   rozpoznania albo przyczyny i przy osobie, która go ma („rozpoznano zespół Downa”, „ze względu na
   zespół Aspergera”, „dziecko z zespołem Retta”).
+- **Lek, który osoba przyjmuje, znika także bez dawki i spoza słownika Parawana.** Po czasowniku
+  przyjmowania albo zlecenia („przyjmuje”, „zażywa”, „stosuje”, „bierze”, „otrzymuje”, „jest na”,
+  „włączył”, „ordynowano”, „zalecił mu”, „przepisano”) znika nazwa substancji, którą Parawan poznaje
+  po końcówce międzynarodowej nazwy leku (-pryl, -sartan, -olol, -statyna, -prazol, -azepam,
+  -mycyna, -paryna, -fenidat i podobne): „Chłopiec przyjmuje metylofenidat”, „lekarz włączył
+  metylofenidat”, „Podopieczny stosuje rysperydon”, „Wnioskodawczyni bierze kwetiapinę
+  i klonazepam”. Znika też insulina i metadon („chcą, żeby brała insulinę”, „Ojciec jest na
+  insulinie”, „Matka przyjmuje metadon”), grupa leków przy osobie („Małoletni otrzymuje leki
+  przeciwpadaczkowe”, „przyjmuje leki przeciwpsychotyczne (olanzapina)”, „zasiłek na zakup leków
+  przeciwpadaczkowych po wypisie ze szpitala”) i nazwa handlowa po postaci leku albo po „zażywa”
+  („zażywa tabletki Relanium”). Droga podania przy dawce wystarcza obok samej osoby albo samego
+  słowa medycznego i znika razem z dawką („Pan Nowak: Enoksaparyna 40 mg s.c. raz dziennie”,
+  „Pacjentowi ordynowano haloperydol 5 mg i.m.”), podobnie jak dawkowanie „2 razy w tygodniu”.
+  Kolejny lek w wyliczeniu po zakrytym leku znika razem z nim („na insulinie aspart i glarginie”,
+  „metformina 850 2x dziennie i insulina glargine wieczorem, kod recepty przyjdzie smsem”). Na
+  części roboczej drugiej serii zakrytych danych jest 90,7% zamiast 90,1% (dane o zdrowiu: 28
+  wycieków zamiast 36), bez nowych nadmiarowych zakryć.
+- **Lek znika też w szyku, przeczeniu i zapisie zlecenia z karty.** Przysłówek i droga podania przed
+  lekiem nie przerywają rozpoznania, a droga podania znika razem z lekiem („Brała wcześniej
+  fluoksetynę”, „Zalecono mu doustnie amoksycylinę”, „Pani X stosuje dopochwowo progesteron”).
+  Znika lek w zleceniu bezosobowym albo z drogą podania („Włączono enoksaparynę s.c. raz dziennie”,
+  „Odstawiono klonazepam z powodu senności”, „Lekarz ordynował furosemid dożylnie”), lek przed
+  czasownikiem („Kwetiapinę przyjmuje od roku”), po przeczeniu i czasowniku fazowym („nie przyjmuje
+  regularnie przepisanej olanzapiny”, „Przestała brać leki przeciwpsychotyczne”, „Matka nie podaje
+  dziecku leków przeciwpadaczkowych”), po recepcie i zaleceniu przyjmowania („Wypisano receptę na
+  rywaroksaban”, „zalecono przyjmowanie sertraliny”, „kontynuację leczenia pantoprazolem”), lek po
+  zakrytym leczeniu w całości („jest leczona lamotryginą”) i w wyliczeniu („przyjmuje kwas foliowy
+  i lewotyroksynę”, „wenlafaksynę, obecnie duloksetynę”). Parawan poznaje więcej substancji po
+  budowie nazwy (cefalosporyny „cef-”, „-wir”, „-mab”, „-nib”, „-zonid”, „-nizon”, sól „walproinian
+  sodu”, tamsulosyna, heparyna), grupę leków po przedrostku („leki przeciwretrowirusowe”, „tabletki
+  antykoncepcyjne”, „na sterydach wziewnych”, „leki na serce”), postać leku z substancją („inhalator
+  z salbutamolem”) i lek w zdaniu angielskim pisma dwujęzycznego („The patient is taking sertraline”,
+  „He is on antidepressants”).
+- **Postać leku bez nazwy leku i tekst o leku bez pacjenta zostają jawne.** Wyraz z wielkiej litery po
+  słowach „tabletki”, „kapsułki”, „syrop”, „lek” nie wystarcza: „Klient dostaje kapsułki Nespresso”,
+  „Dziecko bierze tabletki Haribo”, „Pan Nowak przyjmuje lek Ministerstwa jako dowód”. Potrzebna jest
+  nazwa leku albo kotwica medyczna. Dawkowanie z ChPL, ulotki, standardu, wykazu i załącznika
+  przetargowego zostaje („Dawkowanie według ChPL: Clexane 40 mg s.c. raz na dobę u dorosłych”), tak
+  samo zdanie o grupie i z raportu („Po wypisie ze szpitala pacjenci często otrzymują leki
+  przeciwzakrzepowe, wynika z raportu”, „Na oddziale pacjentom podawano heparynę”, „Statyny przyjmuje
+  co trzeci Polak”) i czasownik bez leku („przestał brać udział”, „podaje mu obiad”, „Zalecono mu
+  doustnie wodę”, „Wypisano receptę na nazwisko córki”).
+- **Czasownik bez leku, instytucja i obrót lekami zostają jawne.** „Urząd przyjmuje interesantów”,
+  „stosuje się przepisy”, „bierze udział w szkoleniu”, „Zalecono uzupełnienie wniosku”, „Podano do
+  publicznej wiadomości”, „Wójt przyjmuje Pana Kowalskiego”, „Sołtys otrzymuje Order Uśmiechu”,
+  „Dyrektor jest na urlopie”, „zażywa kąpieli słonecznych”, „p.o. dyrektora”, „bierze platynę
+  z magazynu”, „aspartam”. Zostaje lek przy instytucji i w obrocie („Szpital stosuje enoksaparynę
+  u pacjentów”, „Apteka przyjmuje recepty na leki przeciwdepresyjne”, „kradzież leków
+  psychotropowych z apteki przez Jana Kowalskiego”, „obrót lekami psychotropowymi”, „Refundacja leków
+  przeciwpadaczkowych dla dzieci”) i w zdaniu ogólnym („Wiele osób przyjmuje leki przeciwdepresyjne”,
+  „Kto przyjmuje insulinę, powinien mieć glukometr”, „Pacjent może przyjmować leki przeciwzakrzepowe
+  tylko pod kontrolą”).
+- **Komunikat o leku, nazwa ubezpieczyciela i sprawozdanie z badania zostają jawne.** Lek z dawką
+  „bez recepty” albo „na receptę” to kategoria leku z komunikatu GIF, ulotki czy ogłoszenia apteki
+  („Paracetamol 500 mg jest dostępny bez recepty”, „Lek Xanax 0,5 mg wydaje się wyłącznie na
+  receptę”). Recepta wskazuje lek osoby dopiero przy tej osobie albo jako jej recepta („kod recepty
+  przyjdzie smsem”, „odebrała e-receptę na Concor 5 mg”). Nazwa leku ze słownika znika tylko
+  w swojej odmianie, więc „Concordia” w piśmie o rencie czy odszkodowaniu zostaje („Concordia
+  odmówiła”, „Concordia Ubezpieczenia potwierdziła polisę”), a „na Concorze” dalej znika. Lek, po
+  którym stoi orzeczenie, zaczyna nowe zdanie i nie jest pozycją wyliczenia („Uczeń otrzymał
+  pochwałę, penicylina była tematem referatu”, „przyjmuje interesantów i petentów, statyny są
+  w szafce”). Zostaje też zlecenie bezosobowe w sprawozdaniu, kontroli i badaniu („W badaniu
+  klinicznym włączono metforminę u 300 pacjentów”, „W programie podawano sertralinę 140
+  uczestnikom”, „Kontrola NIK: w szpitalu podawano morfinę bez zlecenia”). Wszystkie leki
+  wyliczenia przy osobie znikają razem („bierze sertralinę, lamotryginę i insulinę”).
 
 ## v0.47.0 — 2026-11-14
 

@@ -233,7 +233,24 @@ const isGenericRule = (sentence: string): boolean =>
 
 /** Czasownik o przyjmowaniu leku przez osobę („przyjmuje”, „zalecił”); „zaleca się” i „stosuje się do” nie. */
 const RE_DRUG_VERB = new RegExp(
-  `${NOT_LETTER_BEFORE}(?:zalecił(?:a)?|zalecono|zaleca(?:m)?(?![ \\t]+się)|przyjmuj(?:e|ę)|przyjmował(?:a|em|am)?|stosuj(?:e|ę)(?![ \\t]+się)|stosował(?:a|em|am)?(?![ \\t]+się)|zażyw(?:a|am)|zażywał(?:a|em|am)?|przepisał(?:a)?|przepisano|wypisał(?:a)?|wypisano|recept(?:ę|a|y|ą)[ \\t]+na|na[ \\t]+recepcie)${NOT_LETTER_AFTER}`,
+  `${NOT_LETTER_BEFORE}(?:zalecił(?:a)?|zalecono|zaleca(?:m)?(?![ \\t]+się)|przyjmuj(?:e|ę)|przyjmował(?:a|em|am)?|stosuj(?:e|ę)(?![ \\t]+się)|stosował(?:a|em|am)?(?![ \\t]+się)|zażyw(?:a|am)|zażywał(?:a|em|am)?|bierze|biorę|brał(?:a|em|am)?|włączył(?:a)?|włączono|ordynował(?:a)?|ordynowano|przepisał(?:a)?|przepisano|wypisał(?:a)?|wypisano|(?<!bez[ \\t]{1,8})recept(?:ę|a|y|ą)[ \\t]+na|na[ \\t]+recepcie)${NOT_LETTER_AFTER}`,
+  'i',
+);
+/**
+ * Recepta jako dokument osoby („kod recepty przyjdzie smsem”, „e-recepta: Xanax 0,5 mg”). Sama nie jest
+ * kotwicą: lek „bez recepty”, „na receptę” albo „wydawany z przepisu lekarza” to opis kategorii leku
+ * w komunikacie GIF, ulotce czy ogłoszeniu apteki. Liczy się tylko przy osobie w zdaniu.
+ */
+const RE_RX_DOC = new RegExp(
+  `(?<![${LETTER}])(?<!(?:bez|na|z)[ \\t]{1,8})(?:e-?)?recept(?:a|y|ę|ą|ie)${NOT_LETTER_AFTER}`,
+  'i',
+);
+/**
+ * Recepta konkretnego pacjenta bez osoby w zdaniu: kod albo numer recepty („kod recepty przyjdzie
+ * smsem”) i czynność pacjenta na recepcie („wykupiła receptę”, „odebrałem e-receptę”, „dostał receptę”).
+ */
+const RE_RX_OWN = new RegExp(
+  `${NOT_LETTER_BEFORE}(?:(?:kod(?:em|u)?|numer(?:em|u)?|nr|PIN)[ \\t]+(?:e-?)?recept(?:y|ą)|(?:wykupił|kupił|odebrał|zrealizował|dostał|otrzymał)(?:a|em|am)?[ \\t]+(?:e-?)?recept(?:ę|y))${NOT_LETTER_AFTER}`,
   'i',
 );
 
@@ -278,10 +295,18 @@ const DRUG_STEMS = (
   'euthyrox letrox concor bisocard polpril tritace prestarium amlozek atoris siofor glucophage ventolin berodual ' +
   'symbicort seretide asertin zoloft xanax pramolan hydroxyzinum depakine lamitrin keppra ketonal nurofen ' +
   'ibuprom apap pyralgina clexane xarelto eliquis pradaxa encorton medrol controloc nolpaza polocard acard ' +
-  'lantus humalog novorapid tresiba toujeo mixtard'
+  'lantus humalog novorapid tresiba toujeo mixtard relanium tegretol medikinet concert ritalin strattera rispolept ketrel ' +
+  'ketipinor zyprexa abilify convulex neurotop trittico mirzaten velaxin efectin elicea cipralex seroquel lorafen ' +
+  // substancje bez typowej końcówki INN
+  'heparyn tamsulosyn budezonid ceftriakson progesteron'
 ).split(/\s+/);
+/**
+ * Końcówka fleksyjna po rdzeniu leku („sertraliną”, „salbutamolu”, „Euthyroxem”, „Concorze”), a nie
+ * dowolne litery: „Concordia” (ubezpieczyciel) czy „Acardia” to nie odmiana leku, tylko inne słowo.
+ */
+const DRUG_INFL = `(?:a|ą|ę|e|i|y|u|em|ie|iem|ze|zie|cie|ów|om|owi|ami|ach)?`;
 /** Nazwa leku z końcówką („sertraliną”, „salbutamolu”, „Euthyroxu”), wielka litera na początku dozwolona. */
-const DRUG_NAME = `(?<![${LETTER}])(?:${DRUG_STEMS.map((s) => `[${s[0]}${s[0].toUpperCase()}]${escapeRe(s.slice(1))}`).join('|')})[${LO}]{0,4}${NOT_LETTER_AFTER}`;
+const DRUG_NAME = `(?<![${LETTER}])(?:${DRUG_STEMS.map((s) => `[${s[0]}${s[0].toUpperCase()}]${escapeRe(s.slice(1))}`).join('|')})${DRUG_INFL}${NOT_LETTER_AFTER}`;
 const RE_DRUG_NAME = new RegExp(DRUG_NAME, 'i');
 /** Człon nazwy handlowej po nazwie („Euthyrox N”, „Depakine Chrono”, „Concor Cor”). */
 const DRUG_MOD = String.raw`(?:[ \t]+(?:N|SR|XR|CR|XL|ODT|Chrono|Forte|Retard|Mite|Max|Plus|Duo|Combi|Comp|HCT|Neo|Rapid|Long|Mini|Cor|Junior)(?![${LETTER}]))?`;
@@ -294,8 +319,21 @@ const doseOf = (unit: string): string =>
   String.raw`${NUM}(?:[ \t]*\/[ \t]*${NUM})?[ \t]?${unit}(?:[ \t]*\/[ \t]*(?:ml|dobę|d|24[ \t]?h))?(?![${LETTER}])`;
 const DOSE = doseOf(UNIT);
 const DOSE_DRUG = doseOf(UNIT_DRUG);
-/** Pozycja dawkowania: „2 x dziennie”, „1-0-1”, „raz dziennie”, „rano”, „na noc”, „na czczo”, „co 8 godzin”, „doraźnie”. */
-const DOSING_ITEM = String.raw`(?:\d[ \t]?x[ \t]?(?:dziennie|\d+|na[ \t]+dobę)|\d(?:-\d){2}|(?:raz|dwa[ \t]+razy|trzy[ \t]+razy)[ \t]+(?:dziennie|na[ \t]+dobę)|rano|wieczorem|na[ \t]+noc|na[ \t]+czczo|co[ \t]+\d{1,2}[ \t]?(?:godzin[ay]?|h)|dziennie|doraźnie)(?![${LETTER}])`;
+/**
+ * Droga podania w zleceniu („s.c.”, „i.m.”, „p.o.”, „doustnie”, „podskórnie”). Skróty tylko z kropką
+ * między literami: gołe „po”, „im”, „iv” to przyimek, zaimek albo numer.
+ */
+// Kropka po skrócie należy do skrótu tylko przed dalszym ciągiem zalecenia („s.c. raz dziennie”);
+// na końcu zdania („i.m. Stan dobry.”) zostaje, żeby kolejne zdanie nie dołączyło do maski.
+// Dalszy ciąg nazwany wprost, bo wzorce leków mają flagę „i” i klasa małych liter łapie też wielkie.
+const ROUTE_DOT = String.raw`(?:\.(?=[ \t]{0,8}(?:\d|[,;(]|(?:raz|dwa|trzy|co|rano|wieczorem|na|dziennie|doraźnie|przez|w)(?![${LETTER}]))))?`;
+const ROUTE = String.raw`(?:(?:s\.c|i\.v|i\.m|p\.o|s\.l)${ROUTE_DOT}|doustnie|podskórnie|dożylnie|domięśniowo|wziewnie|podjęzykowo|doodbytniczo|przezskórnie|dopochwowo|donosowo)(?![${LETTER}])`;
+const RE_ROUTE = new RegExp(`(?<![${LETTER}])${ROUTE}`);
+/**
+ * Pozycja dawkowania: „2 x dziennie”, „1-0-1”, „raz dziennie”, „2 razy w tygodniu”, „rano”, „na noc”,
+ * „na czczo”, „co 8 godzin”, „doraźnie” i droga podania („s.c.”, „doustnie”).
+ */
+const DOSING_ITEM = String.raw`(?:\d[ \t]?x[ \t]?(?:dziennie|\d+|na[ \t]+dobę|w[ \t]+tygodniu)|\d(?:-\d){2}|(?:raz|dwa[ \t]+razy|trzy[ \t]+razy|\d[ \t]?razy)[ \t]+(?:dziennie|na[ \t]+dobę|w[ \t]+tygodniu)|rano|wieczorem|na[ \t]+noc|na[ \t]+czczo|co[ \t]+\d{1,2}[ \t]?(?:godzin[ay]?|h)|dziennie|doraźnie|${ROUTE})(?![${LETTER}])`;
 // Jeden odstęp z opcjonalnym przecinkiem: dwa sąsiednie [ \t]* dawały wykładnicze cofanie na długich ciągach spacji.
 const DOSING = String.raw`(?:[ \t]*(?:,[ \t]*)?${DOSING_ITEM})*`;
 const DOSING_REQ = String.raw`(?:[ \t]*(?:,[ \t]*)?${DOSING_ITEM})+`;
@@ -1965,6 +2003,66 @@ const RE_DRUG_GENERAL = new RegExp(
   `${NOT_LETTER_BEFORE}(?:zgodnie[ \\t]+z[ \\t]+ulotk${L}|recept[ \\t]+na|mln|stosować)${NOT_LETTER_AFTER}`,
   'i',
 );
+/**
+ * Dokument o leku, a nie o pacjencie: charakterystyka produktu (ChPL), ulotka, standard, wytyczne,
+ * rekomendacja, wykaz, załącznik, przetarg, receptariusz, program lekowy, raport, protokół kontroli.
+ */
+const RE_DRUG_DOC = new RegExp(
+  `${NOT_LETTER_BEFORE}(?:ChPL|charakterystyk${L}[ \\t]+produktu|ulotk${L}|standard(?:u|y|ów|em|zie)?|wytyczn${L}|rekomendacj${L}|wykaz${L}|załącznik${L}|przetarg${L}|S?IWZ|SWZ|receptariusz${L}|program${L}[ \\t]+lekow${L}|obwieszczeni${L}|raport${L}|sprawozdani${L}|monografi${L}|farmakope${L})${NOT_LETTER_AFTER}`,
+  'i',
+);
+/**
+ * Grupa po leku („u dorosłych”, „u wszystkich pacjentów”, „u chorych unieruchomionych”, „dla dzieci
+ * powyżej 12 lat”): dawkowanie dla populacji, a nie zlecenie dla osoby.
+ */
+const POP_NOUN = `(?:dorosłych|dzieci|młodzieży|pacjentów|chorych|osób|kobiet|mężczyzn|seniorów|niemowląt|noworodków|ciężarnych|kobiet[ \\t]+w[ \\t]+ciąży)`;
+/** Liczebnik albo zaimek grupy („300”, „kilkunastu”, „wszystkich”, „części”) przed rzeczownikiem w liczbie mnogiej. */
+const POP_NUM = `(?:\\d[\\d \\t]{0,6}|kilku|kilkunastu|kilkudziesięciu|kilkuset|wielu|licznych|wszystkich|każdego|tych|takich|niektórych|części|większości|połowy)`;
+const RE_POP_AFTER = new RegExp(
+  // „u 300 pacjentów”, „u 12 chorych”, „u wszystkich hospitalizowanych”: po liczebniku każdy rzeczownik
+  // w dopełniaczu liczby mnogiej (-ów) albo rzeczownik przymiotnikowy (-ych, -ich), bez listy; bez liczebnika
+  // rzeczownik z listy albo imiesłów w liczbie mnogiej („u leczonych”, „u hospitalizowanych”).
+  `${NOT_LETTER_BEFORE}(?:u|dla|w[ \\t]+grupie)[ \\t]+(?:${POP_NUM}[ \\t]+(?:[${LO}]{3,}(?:ych|ich)[ \\t]+)?(?:${POP_NOUN}|[${LO}]{3,}(?:ów|ych|ich))` +
+    `|(?:[${LO}]{3,}(?:ych|ich)[ \\t]+)?${POP_NOUN}|[${LO}]{2,}(?:owanych|onych|anych|ętych|ytych))${NOT_LETTER_AFTER}`,
+  'i',
+);
+/** Orzeczenie w liczbie mnogiej o przyjmowaniu leku („pacjenci otrzymują”, „chorzy przyjmują”): grupa, nie osoba. */
+const RE_PLURAL_INTAKE = new RegExp(
+  `${NOT_LETTER_BEFORE}(?:przyjmują|otrzymują|stosują|biorą|zażywają|dostają|(?:są|pozostają|byli|były)[ \\t]+na|przyjmowali|przyjmowały|otrzymywali|otrzymywały|stosowali|stosowały|brali|brały|zażywali|zażywały)${NOT_LETTER_AFTER}`,
+  'i',
+);
+/** Odbiorcy leku w liczbie mnogiej („Pacjentom podawano heparynę”, „wszystkim chorym włączono…”). */
+const RE_PLURAL_DATIVE = new RegExp(
+  `${NOT_LETTER_BEFORE}(?:pacjentom|chorym|dzieciom|osobom|kobietom|seniorom|mieszkańcom|uczniom|pensjonariuszom|podopiecznym|(?<!przede[ \\t]{1,4})wszystkim)${NOT_LETTER_AFTER}` +
+    // celownik liczby mnogiej po budowie, po liczebniku („140 uczestnikom”, „12 chorym”, „kilku badanym”)
+    `|(?<![${LETTER}])(?:\\d[\\d \\t]{0,6}|kilku|kilkunastu|kilkudziesięciu|wielu)[ \\t]+[${LO}]{3,}(?:om|ym|im)${NOT_LETTER_AFTER}`,
+  'i',
+);
+/** Źródło danych zbiorczych w zdaniu („wynika z raportu”, „według danych NFZ”, „na podstawie badań”). */
+const RE_REPORT_SOURCE = new RegExp(
+  `${NOT_LETTER_BEFORE}(?:wynika(?:ją)?[ \\t]+z|według|wg|na[ \\t]+podstawie)[ \\t]+(?:[${LO}]{2,}[ \\t]+){0,2}(?:raport|dan(?:ych|e)|badań|badania|statystyk|analiz|sprawozda|ankiet|przegląd|NFZ|GUS|WHO|ChPL|ulotk|wytyczn)${L}`,
+  'i',
+);
+/**
+ * Lek w tekście ogólnym, a nie lek osoby: przepis, populacja przed lekiem albo po nim, orzeczenie
+ * w liczbie mnogiej, źródło danych zbiorczych i dokument o leku (ChPL, ulotka, standard, wykaz).
+ * Osoba w zdaniu („Pani Nowak: Clexane 40 mg s.c. według ChPL”) przeważa nad dokumentem.
+ */
+function generalDrug(text: string, starts: number[], from: number, to: number): boolean {
+  const sentence = sentenceAt(text, starts, from, to);
+  if (isGenericRule(sentence) || populationSubject(text, starts, from)) return true;
+  if (hasPerson(sentence) || namePairAt(sentence) >= 0) return false;
+  const s0 = starts[sentenceIndex(starts, from)];
+  const head = text.slice(Math.max(s0, from - SPAN), from);
+  const tail = text.slice(to, to + 80);
+  return (
+    RE_PLURAL_INTAKE.test(head) ||
+    RE_POP_AFTER.test(tail) ||
+    RE_PLURAL_DATIVE.test(sentence) ||
+    RE_DRUG_DOC.test(sentence) ||
+    RE_REPORT_SOURCE.test(sentence)
+  );
+}
 
 function maskDrugs(ctx: RedactCtx): void {
   // Lek z dawką poza sekcją karty tylko przy kotwicy: cennik apteki („paracetamol 500 mg, 9,99 zł”),
@@ -1978,7 +2076,20 @@ function maskDrugs(ctx: RedactCtx): void {
     if (RE_DRUG_EXAMPLE_BEFORE.test(whole.slice(Math.max(0, offset - 80), offset))) return m;
     if (RE_DRUG_GENERAL.test(sentence) && !hasPerson(sentence) && namePairAt(sentence) < 0) return m;
     if (populationSubject(whole, starts, offset)) return m;
-    return medicalAnchored(whole, starts, offset, to) || RE_DRUG_VERB.test(windowAt(whole, starts, offset, to)) ? ctx.hit('ZDROWIE') : m;
+    // Droga podania przy dawce („Enoksaparyna 40 mg s.c.”) wzmacnia kotwicę, ale jej nie zastępuje:
+    // wystarcza wtedy sama osoba albo samo słowo medyczne pacjenta, a dawkowanie z ChPL, ulotki,
+    // standardu czy wykazu i dawkowanie dla grupy („u dorosłych”) zostają jawne.
+    if (RE_ROUTE.test(m)) {
+      if (generalDrug(whole, starts, offset, to)) return m;
+      const w = windowAt(whole, starts, offset, to);
+      if (RE_WEAK.test(w) || personNear(whole, sentence, offset, to)) return ctx.hit('ZDROWIE');
+    }
+    const win = windowAt(whole, starts, offset, to);
+    if (medicalAnchored(whole, starts, offset, to) || RE_DRUG_VERB.test(win)) return ctx.hit('ZDROWIE');
+    if (RE_RX_OWN.test(sentence)) return ctx.hit('ZDROWIE');
+    return RE_RX_DOC.test(sentence) && (hasPerson(sentence) || namePairAt(sentence) >= 0 || personNear(whole, sentence, offset, to))
+      ? ctx.hit('ZDROWIE')
+      : m;
   });
 }
 
@@ -2046,6 +2157,303 @@ function maskVerbDrugs(ctx: RedactCtx, mask: string): void {
     const kind = eventSubject(whole, starts, offset, from);
     if (kind === 'other' || kind === 'name') return m;
     return eventAnchor(whole, starts, from, to, mask, true) ? `${pre}${ctx.hit('ZDROWIE')}` : m;
+  });
+}
+
+/* ── Lek bez dawki: kształt nazwy, insulina, klasa leków ── */
+
+/**
+ * Końcówki międzynarodowych nazw substancji (rdzenie INN w polskiej pisowni): „-pryl”, „-sartan”,
+ * „-olol”, „-statyna”, „-prazol”, „-azepam”, „-mycyna”, „-paryna”, „-fenidat”, „-mab”, „-nib”,
+ * „-wir”, „-zonid”, „-nizon”, „-sulosyna” i przedrostek cefalosporyn „cef-”. Przed końcówką co
+ * najmniej trzy litery, więc zwykłe słowa („platyna”, „Kain”) nie pasują. Sam kształt nie wystarcza:
+ * nazwa jest lekiem dopiero przy czasowniku przyjmowania albo zlecenia, obok zakrytego leku albo
+ * w sekcji karty.
+ */
+const INN_SUFFIX = [
+  'pryl', 'sartan', 'olol', 'dypin', 'statyn', 'prazol', 'azepam', 'azolam', 'cyklin', 'mycyn', 'floksacyn', 'cylin',
+  'gliptyn', 'gliflozyn', 'glutyd', 'tydyn', 'setron', 'tryptan', 'fenidat', 'orfin', 'paryn', 'ksaban', 'konazol',
+  'tiazyd', 'semid', 'profen', 'koksyb', 'kortyzon', 'metazon', 'tropium', 'lukast', 'tyryzyn', 'loratadyn', 'tiapin',
+  'zapin', 'peryd', 'piprazol', 'oksetyn', 'faksyn', 'pramin', 'tryptylin', 'trygin', 'racetam', 'gabalin', 'dronian',
+  'tyroksyn', 'formin', 'mab', 'nib', 'platyn', 'wudyn', 'kain', 'fetamin',
+  'sulosyn', 'zosyn', 'zonid', 'sonid', 'nizon', 'nizolon', 'proinian', 'trozol', 'ksyfen', 'dazol', 'penem',
+  'noprost', 'toprost', 'woprost', 'osteron', 'estradiol',
+].join('|');
+// „-wir” (acyklowir, tenofowir, remdesiwir) bez „wirus”: „koronawirus” to nie lek.
+const INN_WORD = `(?<![${LETTER}])(?:[${LETTER}][${LO}]{2,24}(?:${INN_SUFFIX}|wir(?!us))|[Cc]ef[${LO}]{4,14})${DRUG_INFL}(?![${LETTER}\\d])`;
+/** Rodzaj insuliny bez słowa „insulina” („i glarginie”); „aspartam” to słodzik. */
+const INSULIN_ALONE = `(?<![${LETTER}])(?:glargin|detemir|degludek|degludec|lispro|glulizyn|aspart(?!am))[${LO}]{0,4}(?![${LETTER}\\d])`;
+const INSULIN_WORD = `(?<![${LETTER}])[Ii]nsulin[${LO}]{0,3}(?:[ \\t]+${INSULIN_KIND})?(?![${LETTER}\\d])`;
+/** Grupa leków przy osobie („leki przeciwdepresyjne”, „leków przeciwpadaczkowych”, „środki nasenne”). */
+const DRUG_CLASS_ADJ = `(?:przeciwdepresyjn|przeciwpadaczkow|przeciwdrgawkow|przeciwpsychotyczn|psychotropow|neuroleptyczn|przeciwlękow|anksjolityczn|nasenn|uspokajając|normotymiczn|przeciwzakrzepow|przeciwkrzepliw|przeciwcukrzycow|hipoglikemizując|hipotensyjn|przeciwnadciśnieniow|immunosupresyjn|cytostatyczn|przeciwnowotworow|antyretrowirusow|przeciwretrowirusow|przeciwgruźlicz|przeciwparkinsonowsk|przeciwotępienn|przeciwbólow|opioidow|sterydow|steroidow)[${LO}]{0,3}`;
+/**
+ * Po słowie „lek” albo postaci leku każdy przymiotnik z przedrostkiem „przeciw-” lub „anty-” nazywa
+ * grupę leków („leki przeciwhistaminowe”, „tabletki antykoncepcyjne”, „krople przeciwalergiczne”);
+ * „środki” i „preparaty” bywają przeciwpożarowe czy antykorozyjne, więc tam tylko lista powyżej.
+ */
+const LEK_CLASS_ADJ = `(?:${DRUG_CLASS_ADJ}|(?:przeciw|anty)(?!wskaza|działa|pożar|korozy|korupc|terror|smog|dyskrymin|mobbing|przemoc|włam|kradzie|poślizg)[${LO}]{4,24}|hormonaln[${LO}]{1,3}|biologiczn[${LO}]{1,3})`;
+const LEK_FAMILY = `(?:lek(?:i|ów|ami|om|u|iem|ach)?|tabletk(?:a|i|ę|ą|ek|ami|om|ach)|kapsułk(?:a|i|ę|ą|ek|ami|om|ach)|krop(?:le|li|lami)|syrop(?:y|u|em|ów|ami)?|zastrzyk(?:i|ów|ami|u)?)`;
+/**
+ * Lek „na” narząd albo objaw („leki na serce”, „leków na tarczycę”, „tabletki na sen”). Lek „na” chorobę
+ * („leki na nadciśnienie tętnicze”) zostawia „leki na” jawne, bo samą chorobę zakrywają frazy chorób.
+ */
+const LEK_FOR = `(?:serce|ciśnienie|tarczycę|nerwy|sen|spanie|uspokojenie|wątrobę|nerki|cholesterol|krzepliwość|krążenie|żołądek|stawy|pamięć|lęki)`;
+/** Rzeczownik grupy leków („antybiotyk”, „sterydach wziewnych”, „antykoagulanty”). */
+const DRUG_CLASS_NOUN = `(?:neuroleptyk|cytostatyk|antybiotyk|antypsychotyk|anksjolityk)(?:i|ów|ami|om|u|iem|ach)?|antydepresant(?:y|ów|ami|om|ach)?|antykoagulant(?:y|ów|ami|om|ach)?|(?:gliko)?kortykosteroid(?:y|ów|ami|ach)?|steryd(?:y|ów|ami|om|ach)|statyn(?:y|ę|ami|ach)|opioid(?:y|ów|ami|ach)|benzodiazepin(?:y|a|ę|ami|om)?|metadon(?:u|em|ie)?|buprenorfin(?:a|y|ę|ą|ie)?`;
+const DRUG_CLASS =
+  `(?<![${LETTER}])(?:${LEK_FAMILY}[ \\t]+(?:${LEK_CLASS_ADJ}|na[ \\t]+${LEK_FOR})|(?:środk(?:i|ów|ami|om|ach)|preparat(?:y|ów|ami|om|ach))[ \\t]+${DRUG_CLASS_ADJ}` +
+  `|${DRUG_CLASS_NOUN})(?:(?:[ \\t]*,[ \\t]*|[ \\t]+(?:i|oraz|lub|albo)[ \\t]+)${DRUG_CLASS_ADJ}){0,2}(?:[ \\t]+(?:wziewn|doustn|dożyln|podskórn|domięśniow|miejscow)[${LO}]{1,3})?(?![${LETTER}\\d])`;
+/** Postać leku przed nazwą handlową („przyjmuje lek Concerta”, „zażywa tabletki Relanium”). */
+const DRUG_FORM_NOUN = `(?:lek(?:i|u)?|preparat(?:y|u)?|tabletk[${LO}]{0,3}|kapsułk[${LO}]{0,3}|krople|syrop|zastrzyk(?:i|ów)?)`;
+/** Postać leku z substancją („inhalator z salbutamolem”, „maść z hydrokortyzonem”, „krople do oczu z latanoprostem”). */
+const DRUG_DEVICE = `(?:inhalator${L}|inhalacj${L}|maś(?:ć|ci)|krem${L}|żel${L}|plast(?:ry|rów|er|rami|rach)|krop(?:le|li|lami)|czop(?:ki|ków|kami)|wlew${L}|zastrzyk${L}|aerozol${L})(?:[ \\t]+do[ \\t]+(?:oczu|nosa|uszu|ucha|oka))?[ \\t]+z(?:e)?[ \\t]+(?:${DRUG_NAME}|${INN_WORD})`;
+/** Sól po nazwie substancji („walproinian sodu”, „lewotyroksyna sodowa”) należy do nazwy leku. */
+const DRUG_SALT = `(?:[ \\t]+(?:sodu|potasu|wapnia|magnezu|sodow[${LO}]{1,2}|potasow[${LO}]{1,2}))?`;
+const BARE_DRUG = `(?:(?:${DRUG_NAME}|${INN_WORD})${DRUG_SALT}|${INSULIN_WORD}|${INSULIN_ALONE}|${DRUG_CLASS}|${DRUG_DEVICE}|${DRUG_FORM_NOUN}[ \\t]+[${UP}][${LO}]{2,20}(?![${LETTER}\\d])|[${UP}][${LO}]{2,20}(?![${LETTER}\\d]))`;
+/** Czasownik fazowy przed bezokolicznikiem („przestała brać”, „zaczął przyjmować”, „odmawia stosowania”). */
+const PHASE_DRUG_VERB = String.raw`(?:przestał(?:a|em|am)?|przestaje|zaczął|zaczęła|zaczyna|odmawia|odmówił(?:a)?|zaprzestał(?:a)?)[ \t]+(?:brać|przyjmować|zażywać|stosować|przyjmowania|zażywania|stosowania|brania)`;
+/** Lek, który przyjmuje sama osoba: podmiot czasownika to pacjent („jest na insulinie” też). */
+const SELF_DRUG_VERB = String.raw`${NOT_GENERIC_SUBJECT}(?:przyjmuj(?:e|ę)|przyjmował(?:a|em|am)?|przyjął|przyjęła|zażyw(?:a|am)|zażywał(?:a|em|am)?|zażył(?:a|em|am)?|stosuj(?:e|ę)|stosował(?:a|em|am)?|bierze|biorę|brał(?:a|em|am)?|otrzymuj(?:e|ę)|otrzymywał(?:a|em|am)?|otrzymał(?:a|em|am)?|dostaj(?:e|ę)|dostawał(?:a|em|am)?|dostał(?:a|em|am)?|(?:jest|jestem|był|była|byłem|byłam|pozostaje)[ \t]+na|${PHASE_DRUG_VERB})`;
+/** Odbiorca leku w celowniku („zalecił mu”, „podaje dziecku”, „ordynowano pacjentce”). */
+const DRUG_DATIVE = `(?:mu|jej|mi|mnie|dziecku|synowi|córce|pacjent(?:owi|ce)|choremu|chorej|matce|ojcu|mężowi|żonie|wnukowi|wnuczce|podopieczn(?:emu|ej)|małoletni(?:emu|ej))`;
+/**
+ * Lek, który zlecił lekarz albo podał opiekun: podmiot to nie pacjent, więc pacjent musi stać
+ * w zdaniu, w celowniku albo w zapisie zlecenia (forma bezosobowa, droga podania, dawkowanie).
+ * „Podaje” i „podał” tylko z celownikiem („podaje mu insulinę”), bo „podał adres” to co innego.
+ */
+const RX_DRUG_VERB = String.raw`(?:(?:włączył(?:a)?|włączono|ordynował(?:a)?|ordynowano|zalecił(?:a)?|zalecono|przepisał(?:a)?|przepisano|odstawił(?:a)?|odstawiono|podano|podawano)(?:[ \t]+${DRUG_DATIVE})?|(?:podaj(?:e|ę)|podawał(?:a)?|podał(?:a)?)[ \t]+${DRUG_DATIVE}|(?:wypisał(?:a)?|wypisano|przepisał(?:a)?|przepisano|wystawił(?:a)?|wystawiono)(?:[ \t]+${DRUG_DATIVE})?[ \t]+(?:e-?)?recept(?:ę|y)[ \t]+na)`;
+/** Rzeczownik czynności między zleceniem a lekiem („zalecono przyjmowanie sertraliny”, „kontynuację leczenia pantoprazolem”). */
+const RX_NOMINAL = String.raw`(?:[ \t]+(?:przyjmowanie|stosowanie|zażywanie|podawanie|włączenie|odstawienie|leczenie|kontynuacj[ęa](?:[ \t]+(?:leczenia|przyjmowania|stosowania))?|(?:zmniejszenie|zwiększenie|zmian[ęa])[ \t]+dawki))?`;
+/**
+ * Okolicznik między czasownikiem a lekiem: przysłówek po budowie (-nie, -wo, -ej, -ie: „regularnie”,
+ * „wcześniej”, „obecnie”, „domięśniowo”), droga podania („s.c.”), określenie czasu i imiesłów
+ * zlecenia („przepisanej”, „zaleconą”, „dotychczasowe”), najwyżej dwa. Sam lek dalej musi mieć kształt leku.
+ */
+const DRUG_ADV = String.raw`(?:[ \t]+(?:${ROUTE}|(?:też|także|również|nadal|wciąż|stale|już|jeszcze|dalej|ponownie|od[ \t]+(?:roku|lat|miesięcy|dawna)|na[ \t]+stałe|(?!nie(?![${LETTER}]))[${LO}]{2,16}(?:nie|wo|ej|ie)|(?:przepisan|zalecon|zlecon|dotychczasow|ordynowan)[${LO}]{1,3}|sw(?:ój|oje|oich|oją|oim|ego|ej))(?![${LETTER}]))){0,2}`;
+/**
+ * Wcześniejsze pozycje wyliczenia przed lekiem („przyjmuje kwas foliowy i lewotyroksynę”, „bierze
+ * sertralinę, lamotryginę i insulinę”), najwyżej dwie. Przecinek kończy też zdanie składowe („Uczeń
+ * otrzymał pochwałę, penicylina była tematem referatu”), więc po przecinku można pominąć tylko pozycję
+ * o kształcie leku albo pierwszą pozycję wyliczenia „A, B i lek”. Dowolny wyraz tylko przed spójnikiem.
+ */
+const LIST_WORD = String.raw`[${LETTER}]{2,20}(?:[ \t]+[${LO}]{2,20})?`;
+const LIST_SHAPE = `(?:${DRUG_NAME}|${INN_WORD}|${INSULIN_WORD}|${INSULIN_ALONE}|${DRUG_CLASS})`;
+const LIST_CONJ = String.raw`[ \t]+(?:i|oraz|lub|albo)[ \t]+`;
+const DRUG_LIST_SKIP = String.raw`(?:${LIST_WORD}[ \t]*,[ \t]*${LIST_WORD}${LIST_CONJ}|(?:${LIST_SHAPE}(?:[ \t]*,[ \t]*|${LIST_CONJ})|${LIST_WORD}${LIST_CONJ}){0,2})`;
+/**
+ * Orzeczenie tuż po leku: lek jest podmiotem nowego zdania („statyny są w szafce”, „sertralina jest
+ * omawiana”, „penicylina była tematem”, „X odmówiła”), a nie dopełnieniem czasownika przyjmowania.
+ * Łącznik, czasownik modalny, „się”, czas przeszły po budowie (-ł, -ła, -ło, -ły) i teraźniejszy na -uje.
+ */
+const PRED_AFTER = String.raw`[ \t]+(?:(?:nie|też|także|również|już|zaś|natomiast|wtedy|potem|teraz)[ \t]+)?(?:jest|są|był|była|było|byli|były|będzie|będą|bywa|bywają|zostaje|zostają|zostanie|zostaną|ma|mają|wie|wiedzą|może|mogą|musi|muszą|powin(?:ien|na|no|ny)|się|stanowi|stanowią|[${LO}]{3,}(?:ł|ła|ło|ły|uje|ują))(?![${LETTER}])`;
+const RE_BARE_DRUG = new RegExp(
+  String.raw`(${NOT_LETTER_BEFORE}(?:(${SELF_DRUG_VERB})|(${RX_DRUG_VERB}))(?![ \t]+się)${RX_NOMINAL}${DRUG_ADV}[ \t]+(${DRUG_LIST_SKIP}))(${BARE_DRUG}(?:${DRUG_FORM}[ \t]+${DOSE}${DOSING}|${DOSING_REQ})?)(?![${LETTER}\d])(?!${PRED_AFTER})`,
+  'gi',
+);
+
+const RE_LIST_SHAPE = new RegExp(LIST_SHAPE, 'gi');
+const RE_BARE_SHAPE = new RegExp(`^(?:${DRUG_NAME}|${INSULIN_WORD}|${INSULIN_ALONE}|${INN_WORD}|${DRUG_CLASS}|${DRUG_DEVICE})`, 'i');
+const RE_FORM_TRADE = new RegExp(`^${DRUG_FORM_NOUN}[ \\t]+(?=[${UP}])`, 'i');
+const RE_FORM_TRADE_CS = new RegExp(`^${DRUG_FORM_NOUN}[ \\t]+[${UP}]`);
+const RE_ZAZYWA = /^zażyw/i;
+/** Zlecenie w zapisie karty: forma bezosobowa („włączono”, „odstawiono”), z której nie wynika lekarz jako podmiot zdania. */
+const RE_ROUTE_BEFORE = new RegExp(String.raw`[ \t](?:${ROUTE})[ \t]+$`);
+const RE_RX_IMPERSONAL = /^(?:włączono|ordynowano|zalecono|przepisano|odstawiono|podano|podawano|wypisano|wystawiono)/i;
+const RE_RX_DATIVE = new RegExp(String.raw`[ \t]${DRUG_DATIVE}(?![${LETTER}])`, 'i');
+const RE_DOSING_IN = new RegExp(String.raw`(?<![${LETTER}])(?:\d|${DOSING_ITEM})`, 'i');
+
+/**
+ * Lek bez dawki przy czasowniku przyjmowania albo zlecenia: substancja o kształcie nazwy leku
+ * („Chłopiec przyjmuje metylofenidat”, „lekarz włączył klozapinę”), insulina („brała insulinę”),
+ * grupa leków („przyjmuje leki przeciwdepresyjne”) i nazwa handlowa po postaci leku („zażywa
+ * tabletki Relanium”). Czasownik bez leku („przyjmuje interesantów”, „bierze udział”, „zalecono
+ * uzupełnienie wniosku”, „stosuje się przepisy”) zostaje, tak samo cennik, przykład i reguła ogólna.
+ */
+/** Szybkie sito: bez czasownika przyjmowania albo zlecenia przebieg nie ma czego szukać (długie pisma, JSON). */
+const RE_BARE_VERB_QUICK = /przyjm|przyj[ąę]|zażyw|zażył|stosu|stosow|bier|bior|brał|brać|otrzym|dosta|jest|był|pozostaje|włącz|ordyn|zalec|przepis|odstaw|podan|podaw|podaj|poda[łl]|wypis|wystaw|przesta|zaczą|zaczę|zaczyna|odm[aó]w|zaprzesta/i;
+
+/**
+ * Miejsce albo ramy działania w miejscowniku („w szpitalu”, „na oddziale”, „w programie”, „w badaniu
+ * klinicznym”, „w placówce”, „w DPS”): forma bezosobowa w takim zdaniu opisuje praktykę instytucji
+ * (kontrola NIK, sprawozdanie, badanie), a nie zlecenie dla pacjenta.
+ */
+const RE_INSTITUTION_LOC = new RegExp(
+  `${NOT_LETTER_BEFORE}(?:w|we|na)[ \\t]+(?:(?:tym|tej|naszym|naszej|całym|całej|każdym|każdej|[${LO}]{3,}(?:ym|ej))[ \\t]+)?` +
+    `(?:szpital(?:u|ach)|oddzia(?:le|łach)|klini(?:ce|kach)|przychodni(?:ach)?|poradni(?:ach)?|placów(?:ce|kach)|ośrod(?:ku|kach)|zakład(?:zie|ach)|jednost(?:ce|kach)|hospicj(?:um|ach)|DPS|ZOL|SOR|izbie[ \\t]+przyjęć|programie|programach|badaniu|badaniach|projekcie|grupie|populacji|kohorcie)${NOT_LETTER_AFTER}`,
+  'i',
+);
+/** Forma bezosobowa bez odbiorcy w celowniku i bez osoby w zdaniu, w zdaniu o miejscu albo ramach działania. */
+function impersonalAtInstitution(text: string, starts: number[], rx: string, from: number, to: number): boolean {
+  if (!RE_RX_IMPERSONAL.test(rx) || RE_RX_DATIVE.test(rx)) return false;
+  const sentence = sentenceAt(text, starts, from, to);
+  if (hasPerson(sentence) || namePairAt(sentence) >= 0) return false;
+  return RE_INSTITUTION_LOC.test(sentence);
+}
+
+/** Wspólne odrzucenia leku bez dawki: cennik, przykład, instrukcja i tekst ogólny bez osoby. */
+function bareDrugRejected(whole: string, starts: number[], offset: number, from: number, to: number): boolean {
+  const sentence = sentenceAt(whole, starts, from, to);
+  if (RE_PRICE.test(sentence) || RE_DRUG_EXAMPLE_BEFORE.test(whole.slice(Math.max(0, offset - 80), offset))) return true;
+  if (RE_DRUG_GENERAL.test(sentence) && !hasPerson(sentence) && namePairAt(sentence) < 0) return true;
+  return generalDrug(whole, starts, from, to);
+}
+
+function maskBareDrugs(ctx: RedactCtx, mask: string): void {
+  if (!RE_BARE_VERB_QUICK.test(ctx.text)) return;
+  const starts = sentenceStarts(ctx.text);
+  ctx.text = ctx.text.replace(
+    RE_BARE_DRUG,
+    (m: string, pre: string, self: string | undefined, rx: string | undefined, skip: string, drug: string, offset: number, whole: string) => {
+      const from = offset + pre.length;
+      const to = from + drug.length;
+      const shaped = RE_BARE_SHAPE.test(drug);
+      // Nazwa handlowa po postaci leku („tabletki Relanium”): kształt „postać + wielka litera” nie jest
+      // walidacją („kapsułki Nespresso”, „tabletki Mentos”, „lek Ministerstwa”). Liczy się nazwa ze
+      // słownika albo o kształcie substancji, a bez niej kotwica medyczna w oknie, nie sama osoba.
+      // Po „zażywa” (czasownik właściwie tylko lekowy) nazwa z wielkiej litery wystarcza przy osobie.
+      const zazywa = self !== undefined && RE_ZAZYWA.test(self);
+      let needMedical = false;
+      if (!shaped) {
+        const trade = RE_FORM_TRADE_CS.test(drug);
+        if (!trade && !(zazywa && RE_UP_START.test(drug))) return m;
+        if (trade && !zazywa && !RE_BARE_SHAPE.test(drug.replace(RE_FORM_TRADE, ''))) needMedical = true;
+      }
+      if (bareDrugRejected(whole, starts, offset, from, to)) return m;
+      // Droga podania tuż przed lekiem („zalecono mu doustnie amoksycylinę”) należy do zlecenia i znika z lekiem.
+      const route = RE_ROUTE_BEFORE.exec(pre);
+      const lead = route ? pre.slice(0, route.index + 1) : pre;
+      // Wcześniejsze pozycje wyliczenia o kształcie leku („bierze sertralinę, lamotryginę i insulinę”) znikają razem z ostatnią.
+      const hit = (): string => {
+        const listed = skip && lead === pre ? `${lead.slice(0, lead.length - skip.length)}${skip.replace(RE_LIST_SHAPE, () => ctx.hit('ZDROWIE'))}` : lead;
+        return `${listed}${ctx.hit('ZDROWIE')}`;
+      };
+      if (needMedical) return medicalAnchored(whole, starts, from, to, mask) ? hit() : m;
+      if (self) {
+        const kind = eventSubject(whole, starts, offset, from);
+        if (kind === 'other' || kind === 'name') return m;
+        // „chcą, żeby brała insulinę”: liczba mnoga w zdaniu nadrzędnym to lekarze, lek bierze osoba z zakrytą chorobą obok
+        return eventAnchor(whole, starts, from, to, mask, true) || medicalAnchored(whole, starts, from, to, mask) ? hit() : m;
+      }
+      // Zlecenie w zapisie karty: forma bezosobowa, odbiorca w celowniku, droga podania albo dawkowanie
+      // przy leku o kształcie substancji („Włączono enoksaparynę s.c.”, „Odstawiono klonazepam”,
+      // „Lekarz ordynował furosemid dożylnie”). To ta sama reguła co przy leku z dawką.
+      if (rx && shaped && (RE_RX_IMPERSONAL.test(rx) || RE_RX_DATIVE.test(rx) || RE_ROUTE.test(pre) || RE_DOSING_IN.test(drug.slice(1)))) {
+        const kind = eventSubject(whole, starts, offset, from);
+        if (kind !== 'other' && !impersonalAtInstitution(whole, starts, rx, from, to)) return hit();
+      }
+      return eventAnchor(whole, starts, from, to, mask) || medicalAnchored(whole, starts, from, to, mask) ? hit() : m;
+    },
+  );
+}
+
+/**
+ * Szyk z dopełnieniem przed czasownikiem („Kwetiapinę przyjmuje od roku”, „Leki przeciwdepresyjne
+ * bierze od dwóch lat”): lek o kształcie substancji albo grupa leków i czasownik przyjmowania osoby.
+ * „Kwetiapinę przyjmuje się wieczorem” i podmiot w liczbie mnogiej zostają. Szukamy od czasownika
+ * wstecz (najwyżej 100 znaków), żeby nie sprawdzać kształtu leku przy każdym wyrazie pisma.
+ */
+const RE_SELF_VERB_AT = new RegExp(String.raw`(?<![${LETTER}])(?:${SELF_DRUG_VERB})(?![ \t]+się)(?![${LETTER}])`, 'gi');
+const RE_DRUG_BEFORE_VERB = new RegExp(String.raw`(${DRUG_NAME}|${INSULIN_WORD}|${INN_WORD}|${DRUG_CLASS})(?:${DRUG_ADV})[ \t]+$`, 'i');
+const RE_POST_SUBJECT = new RegExp(
+  `^[ \\t]+(?:(?:każd|większoś|wiel(?:e|u)|wszys|niektór|część|połow|kilk|coraz|około|ponad|prawie|blisko)${L}|co[ \\t]+[${LO}]+[iy]|\\d|pacjenci|chorzy|ludzie|osoby|dzieci|kobiety|mężczyźni|seniorzy|Polacy|szpital${L}|aptek${L}|przychodni${L}|poradni${L}|oddział${L}|NFZ|firm${L}|placówk${L}|ośrod${L})(?![${LETTER}])`,
+  'i',
+);
+function maskDrugFirst(ctx: RedactCtx, mask: string): void {
+  if (!RE_BARE_VERB_QUICK.test(ctx.text)) return;
+  const text = ctx.text;
+  const starts = sentenceStarts(text);
+  const cuts: [number, number][] = [];
+  RE_SELF_VERB_AT.lastIndex = 0;
+  for (let v = RE_SELF_VERB_AT.exec(text); v; v = RE_SELF_VERB_AT.exec(text)) {
+    const lo = Math.max(0, v.index - 100);
+    const d = RE_DRUG_BEFORE_VERB.exec(text.slice(lo, v.index));
+    if (!d) continue;
+    const from = lo + d.index;
+    const to = from + d[1].length;
+    if (cuts.length > 0 && from < cuts[cuts.length - 1][1]) continue;
+    if (bareDrugRejected(text, starts, from, from, to)) continue;
+    // Podmiot przed lekiem: instytucja („Szpital kwetiapinę stosuje…”) odpada, osoba albo podmiot domyślny zostaje.
+    const kind = eventSubject(text, starts, from, from);
+    if (kind === 'other' || kind === 'name') continue;
+    const end = v.index + v[0].length;
+    // Podmiot po czasowniku („Statyny przyjmuje co trzeci Polak”, „Leki wydaje apteka”): grupa albo instytucja.
+    if (RE_POST_SUBJECT.test(text.slice(end, end + 60))) continue;
+    if (eventAnchor(text, starts, from, end, mask, true) || medicalAnchored(text, starts, from, end, mask)) cuts.push([from, to]);
+  }
+  if (cuts.length === 0) return;
+  let out = '';
+  let pos = 0;
+  for (const [a, b] of cuts) {
+    out += `${text.slice(pos, a)}${ctx.hit('ZDROWIE')}`;
+    pos = b;
+  }
+  ctx.text = out + text.slice(pos);
+}
+
+/** Grupa leków bez czasownika przy kotwicy medycznej („zasiłek na zakup leków przeciwpadaczkowych po wypisie ze szpitala”). */
+const RE_DRUG_CLASS = new RegExp(DRUG_CLASS, 'gi');
+/** Obrót lekami, a nie leczenie: kradzież, sprzedaż, dostawa, hurtownia, przemyt, posiadanie, refundacja. */
+const RE_DRUG_TRADE_BEFORE = new RegExp(
+  `${NOT_LETTER_BEFORE}(?:kradzież${L}|ukradł${L}|sprzedaż${L}|sprzedawa${L}|dostaw${L}|hurtowni${L}|przemyt${L}|obrot${L}|obrót|posiadani${L}|magazyn${L}|wydawani${L}|przetarg${L}|refundacj${L}|produkcj${L}|reklam${L})(?:[ \\t]+[${LO}]+){0,3}[ \\t]+$`,
+  'i',
+);
+
+const RE_DRUG_CLASS_QUICK =
+  /lek|środk|preparat|tablet|kapsuł|krop|syrop|zastrzyk|neuroleptyk|antydepresant|cytostatyk|antybiotyk|antypsychotyk|anksjolityk|antykoagulant|kortykosteroid|steryd|statyn|opioid|benzodiazepin|metadon|buprenorfin/i;
+
+function maskDrugClasses(ctx: RedactCtx, mask: string): void {
+  if (!RE_DRUG_CLASS_QUICK.test(ctx.text)) return;
+  const starts = sentenceStarts(ctx.text);
+  ctx.text = ctx.text.replace(RE_DRUG_CLASS, (m: string, offset: number, whole: string) => {
+    const to = offset + m.length;
+    const sentence = sentenceAt(whole, starts, offset, to);
+    const head = whole.slice(Math.max(0, offset - 70), offset);
+    if (RE_PRICE.test(sentence) || RE_DRUG_EXAMPLE_BEFORE.test(head) || RE_DRUG_TRADE_BEFORE.test(head) || RE_DX_TOPIC.test(head)) return m;
+    // Sama osoba w zdaniu nie wystarcza („kradzież leków psychotropowych przez Jana Kowalskiego”): potrzebna kotwica
+    // medyczna. Zdanie o grupie („pacjenci często otrzymują…”, „wynika z raportu”) zostaje mimo kotwicy.
+    if (generalDx(whole, starts, offset, offset, to) || generalDrug(whole, starts, offset, to)) return m;
+    return medicalAnchored(whole, starts, offset, to, mask) ? ctx.hit('ZDROWIE') : m;
+  });
+}
+
+/**
+ * Kolejny lek w wyliczeniu po zakrytym leku („na [lek] i glarginie”, „[lek], metadon”): wyliczenie
+ * dziedziczy kotwicę poprzedniej pozycji. Lek tuż po zakrytym leczeniu („jest [leczona] lamotryginą”)
+ * należy do tej samej frazy i znika razem z nią, tak samo lek po przysłówku w wyliczeniu („[lek], obecnie
+ * duloksetynę”). Tylko wyraz o kształcie leku, nie dowolny rzeczownik.
+ */
+function maskDrugAfterMask(ctx: RedactCtx, mask: string): void {
+  const shape = `(?:${DRUG_NAME}|${INSULIN_WORD}|${INSULIN_ALONE}|${INN_WORD}|${DRUG_CLASS})`;
+  // Lek z orzeczeniem tuż po nim to podmiot nowego zdania („[astma], sertralina jest omawiana”), nie wyliczenie.
+  const reJoin = new RegExp(String.raw`${escapeRe(mask)}[ \t]+${shape}(?!${PRED_AFTER})`, 'g');
+  ctx.text = ctx.text.replace(reJoin, mask);
+  const re = new RegExp(
+    String.raw`(${escapeRe(mask)}(?:[ \t]*,[ \t]*|[ \t]*\([ \t]*|[ \t]+(?:i|oraz|lub|albo|a[ \t]+także)[ \t]+)(?:na[ \t]+)?(?:(?:teraz|potem|też|także|również|[${LO}]{2,16}(?:nie|wo|ej))[ \t]+)?)(${shape})(?!${PRED_AFTER})`,
+    'g',
+  );
+  for (let round = 0; round < 3; round++) {
+    const before = ctx.text;
+    ctx.text = ctx.text.replace(re, (_m: string, pre: string) => `${pre}${ctx.hit('ZDROWIE')}`);
+    if (ctx.text === before) break;
+  }
+}
+
+/**
+ * Lek w zdaniu angielskim pisma dwujęzycznego („The patient is taking sertraline”, „He is on
+ * antidepressants”): czasownik przyjmowania, lek o kształcie substancji albo grupa leków i osoba
+ * w zdaniu (enAnchor). Zdanie ogólne („Patients are often prescribed…”) zostaje.
+ */
+const EN_DRUG_CLASS = `(?:anti(?:depressants?|psychotics?|epileptics?|convulsants?|coagulants?|biotics?|retrovirals?|histamines?)|benzodiazepines?|opioids?|steroids?|corticosteroids?|neuroleptics?|sedatives?|sleeping[ \\t]+pills|painkillers?|methadone|methylphenidate|insulin(?:[ \\t]+injections)?|chemotherapy)`;
+const RE_EN_DRUG = new RegExp(
+  String.raw`((?<![A-Za-z])(?:(?:is|was|has[ \t]+been|have[ \t]+been|had[ \t]+been)[ \t]+(?:taking|on|prescribed|receiving|given|started[ \t]+on|treated[ \t]+with)|takes|took|receives|received|uses|prescribed)[ \t]+(?:(?:daily|regularly|currently|also|still|now)[ \t]+)?)(${EN_DRUG_CLASS}|${DRUG_NAME}|${INN_WORD})(?![A-Za-z])`,
+  'gi',
+);
+function maskEnglishDrugs(ctx: RedactCtx): void {
+  if (!/(?:taking|prescribed|receiv|takes|took|given|uses|is on|was on)/i.test(ctx.text)) return;
+  const starts = sentenceStarts(ctx.text);
+  ctx.text = ctx.text.replace(RE_EN_DRUG, (m: string, pre: string, drug: string, offset: number, whole: string) => {
+    const from = offset + pre.length;
+    return enAnchor(whole, starts, from, from + drug.length) ? `${pre}${ctx.hit('ZDROWIE')}` : m;
   });
 }
 
@@ -2631,10 +3039,18 @@ export function passHealth(ctx: RedactCtx): void {
   maskDrugs(ctx);
   maskDoseSentences(ctx);
   maskVerbDrugs(ctx, mask);
+  maskEnglishDrugs(ctx);
+  maskBareDrugs(ctx, mask);
+  maskDrugFirst(ctx, mask);
   maskIcdAnchored(ctx);
   maskPhrases(ctx, mask);
+  maskDrugClasses(ctx, mask);
+  // drugi raz: choroba zakryta przez frazy jest kotwicą leku w tym samym zdaniu („cukrzyca się rozjechała i chcą, żeby brała insulinę”)
+  maskBareDrugs(ctx, mask);
+  maskDrugFirst(ctx, mask);
   mergeIcdInParens(ctx, mask);
   extendMasks(ctx, mask);
+  maskDrugAfterMask(ctx, mask);
   maskIcdInParens(ctx);
   mergeAfterMask(ctx, mask);
 }

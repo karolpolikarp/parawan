@@ -1287,6 +1287,27 @@ export function buildDataset() {
   neg('Z powodu niedorozwoju sieci kanalizacyjnej Pan Nowak nie może się przyłączyć. Szkoła ma zespół Kubiaka do obsługi zawodów. Pani Kowalska ma zespół Nowaka do pomocy.', ['niedorozwoju sieci kanalizacyjnej', 'zespół Kubiaka', 'zespół Nowaka']);
   neg('Pracownik z rozpoznaną depresją może skorzystać z urlopu. Dziecku z rozpoznanym ADHD przysługuje pomoc. Pacjent z podejrzeniem udaru jest przewożony na SOR.', ['rozpoznaną depresją', 'rozpoznanym ADHD', 'podejrzeniem udaru']);
 
+  // ─────────────────────────────────────────────
+  // LEK BEZ DAWKI, GRUPA LEKÓW, DROGA PODANIA (seria 2, klasa 10): substancja o kształcie nazwy leku
+  // (końcówka INN) po czasowniku przyjmowania albo zlecenia, insulina i metadon, grupa leków przy
+  // osobie, droga podania przy dawce, kolejny lek w wyliczeniu. Ujemne: czasownik bez leku,
+  // instytucja, obrót lekami, przepis i zdanie ogólne.
+  str('Chłopiec przyjmuje metylofenidat. Psychiatra włączyła mu kwetiapinę. Matka przyjmuje metadon.', ['metylofenidat', 'kwetiapinę', 'metadon'], ['Chłopiec przyjmuje', 'Psychiatra włączyła mu', 'Matka przyjmuje']);
+  str('Małoletni otrzymuje leki przeciwpadaczkowe. Ojciec jest na insulinie od 2019 r. Syn zażywa tabletki Relanium.', ['leki przeciwpadaczkowe', 'insulinie', 'Relanium'], ['Małoletni otrzymuje', 'Ojciec jest na', 'Syn zażywa']);
+  str('Zalecenia:\n1. Enoksaparyna 40 mg s.c. raz dziennie przez 35 dni.\nPacjent hospitalizowany. Glikemie wyrównane na insulinie aspart i glarginie.', ['Enoksaparyna 40 mg s.c.', 'insulinie aspart', 'glarginie'], ['przez 35 dni', 'Glikemie wyrównane na']);
+  neg('Urząd przyjmuje interesantów od 8 do 16. Do wniosku stosuje się przepisy ustawy. Pan Kowalski bierze udział w szkoleniu. Zalecono uzupełnienie wniosku w terminie 7 dni.', ['przyjmuje interesantów', 'stosuje się przepisy', 'bierze udział', 'uzupełnienie wniosku']);
+  neg('Szpital stosuje enoksaparynę u pacjentów po zabiegach. Sprawa dotyczy kradzieży leków psychotropowych z apteki. Refundacja leków przeciwpadaczkowych obejmuje dzieci. Wiele osób przyjmuje leki przeciwdepresyjne.', ['enoksaparynę', 'leków psychotropowych', 'leków przeciwpadaczkowych', 'leki przeciwdepresyjne']);
+  neg('Kierownik jest na Mazurach. Pani Kowalska zażywa kąpieli słonecznych. Kandydat przyjmuje stanowisko p.o. dyrektora. Aspartam jest słodzikiem.', ['jest na Mazurach', 'zażywa kąpieli', 'p.o. dyrektora', 'Aspartam']);
+  // Przysłówek, szyk, przeczenie i zlecenie bezosobowe przy leku; ujemne: postać leku bez nazwy leku
+  // („kapsułki Nespresso”), dawkowanie z ChPL i standardu, zdanie o grupie pacjentów.
+  str('Brała wcześniej fluoksetynę. Kwetiapinę przyjmuje od roku. Odstawiono klonazepam z powodu senności. Matka nie podaje dziecku leków przeciwpadaczkowych.', ['fluoksetynę', 'Kwetiapinę', 'klonazepam', 'leków przeciwpadaczkowych'], ['Brała wcześniej', 'przyjmuje od roku', 'z powodu senności', 'Matka nie podaje dziecku']);
+  neg('Klient dostaje kapsułki Nespresso w prezencie. Dawkowanie według ChPL: Clexane 40 mg s.c. raz na dobę u dorosłych. Po wypisie ze szpitala pacjenci często otrzymują leki przeciwzakrzepowe, wynika z raportu.', ['kapsułki Nespresso', 'Clexane 40 mg', 'leki przeciwzakrzepowe']);
+  // Recepta jako kategoria leku, ubezpieczyciel o rdzeniu nazwy leku, lek-podmiot nowego zdania po
+  // przecinku i praktyka instytucji (badanie, oddział, kontrola) zostają jawne.
+  neg('Paracetamol 500 mg jest dostępny bez recepty w każdej aptece. Lek Xanax 0,5 mg wydaje się wyłącznie na receptę. Komunikat GIF: wycofanie z obrotu serii leku Polocard 75 mg wydawanego bez recepty.', ['Paracetamol 500 mg', 'Xanax 0,5 mg', 'Polocard 75 mg']);
+  neg('Pani Nowak otrzymała pismo, Concordia odmówiła. Uczeń otrzymał pochwałę, penicylina była tematem referatu. Urzędnik przyjmuje interesantów i petentów, statyny są w szafce apteczki.', ['Concordia', 'penicylina', 'statyny']);
+  neg('W badaniu klinicznym włączono metforminę u 300 pacjentów. Na oddziale włączono enoksaparynę u wszystkich hospitalizowanych. W programie podawano sertralinę 140 uczestnikom. Kontrola NIK: w szpitalu podawano morfinę bez zlecenia.', ['metforminę', 'enoksaparynę', 'sertralinę', 'morfinę']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {
