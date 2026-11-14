@@ -121,13 +121,16 @@ function stripLookbehinds(src: string): string {
   }
   return out;
 }
+const NO_GATE = /(?:)/;
 function gatePasses(re: RegExp, text: string): boolean {
   let g = gates.get(re);
   if (!g) {
-    g = new RegExp(stripLookbehinds(re.source), re.flags.replace(/[gy]/g, ''));
+    const src = stripLookbehinds(re.source);
+    // bez lookbehindu zmiennej długości bramka byłaby tym samym wzorcem: sam koszt, bez zysku
+    g = src === re.source ? NO_GATE : new RegExp(src, re.flags.replace(/[gy]/g, ''));
     gates.set(re, g);
   }
-  return g.test(text);
+  return g === NO_GATE || g.test(text);
 }
 function clearMemo(): void {
   for (const m of memoTests.values()) m.clear();
