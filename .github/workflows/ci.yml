@@ -104,3 +104,44 @@ jobs:
           name: e2e-zrzuty
           path: test-results/e2e/
           if-no-files-found: ignore
+
+  # Czas startu gotowego pliku na modelu słabego komputera (scripts/perf, opis w README.md):
+  # Chromium z dławieniem CPU ×4, skalibrowanym na kotwicy, czyli wydaniu z
+  # scripts/perf/kalibracja.json, pobranym z GitHub Releases. Progi bezwzględne (LCP ≤ 2,5 s,
+  # „gotowe” ≤ 5 s) i względny wobec kotwicy (więcej niż 1,2× i +300 ms naraz). Wynik w podsumowaniu
+  # przebiegu. Na razie nieblokujący: zmienności pomiaru (CV) na runnerach GitHuba jeszcze nie
+  # zmierzono. Po ok. 10 przebiegach PR z CV ≤ 5% continue-on-error znika, przy większym CV
+  # MAX_RATIO = 1 + 4×CV (założenia: margines 4 odchyleń standardowych, scripts/perf/README.md).
+  start:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w anonimizator
+      - run: npm run build -w anonimizator-web
+      - name: Wersja Playwright (klucz cache przeglądarki)
+        id: pw
+        run: echo "version=$(node -p "require('playwright/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+      - run: npx playwright install --with-deps chromium
+      # Kotwica: przypięte wydanie (nie „latest”), suma SHA-256 sprawdzana z kalibracja.json.
+      - name: Kotwica (wydanie z kalibracja.json)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="$(node -p "require('./scripts/perf/kalibracja.json').kotwica")"
+          gh release download "$tag" -p Parawan.html -D "$RUNNER_TEMP/kotwica"
+      - name: Czas startu wobec kotwicy
+        env:
+          PARAWAN_KOTWICA: ${{ runner.temp }}/kotwica/Parawan.html
+        run: npm run perf
