@@ -145,6 +145,8 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
   wyliczenia w celowniku, dwa imiona bez nazwiska, patron wersalikami (ROADMAP poz. 1, 2 i 13).
 - REGON z długim wtrąceniem po etykiecie dostaje znacznik `[TELEFON]` (ROADMAP poz. 7).
 - Login w ścieżce URL typu `/user/akowalski` przechodzi jawny (ROADMAP poz. 15).
+- Próg względny czasu startu nieblokujący do pomiaru CV na CI (job `start` z
+  `continue-on-error`, `scripts/perf/README.md`).
 - „tarnowski” bywa nazwiskiem i przymiotnikiem (Backlog 3).
 - Procedura „Niebieskiej Karty” zostaje jawna („Pani Nowak jest objęta procedurą Niebieskiej
   Karty.”: osoba zakryta, fakt procedury nie). Nie podpinać pod `[DANE O ZDROWIU]`; plan nowego

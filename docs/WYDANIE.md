@@ -64,6 +64,51 @@ w `release.yml` z szablonów w `docs/wydanie/` (`scripts/release/render-docs.mjs
 8. Commit z jawną listą plików (`git add <ścieżki>`, nigdy `git add -A`), adnotowany tag
    `git tag -a vX.Y.Z -m "Parawan X.Y.Z"`, `git push origin main vX.Y.Z`.
 
+### Rozmiar i czas startu
+
+Rozmiaru pliku nie pilnuje żadna wymyślona liczba (do 2026-11-15 był to `MAX_WEB_BYTES` =
+2 600 000 B). Są trzy bramki, każda z powodem:
+
+- **Sufit pocztowy** (`smoke.test.mjs`, w `npm run e2e`): plik ≤ 7 120 614 B, czyli tyle, by
+  załącznik w base64 z wierszami MIME (RFC 2045) i 256 000 B na treść maila (założenie) zmieścił
+  się w domyślnym limicie wiadomości Exchange on-premises 10 MB
+  (https://learn.microsoft.com/en-us/exchange/mail-flow/message-size-limits). Chroni tylko to,
+  że plik w ogóle dojdzie mailem.
+- **Skład pliku** (`sklad.test.mjs`, w `npm run e2e`): bez duplikatów modułów, z `node_modules`
+  tylko `pdfjs-dist` i `fflate`, pdf.js nie większy niż jego `*.min.mjs` tej samej wersji, a każdy
+  duży URI `data:` to jeden z fontów z `apps/web/src/fonts`. Łapie przypadkową drugą kopię kodu albo
+  zasobu. Bajty po minifikacji liczy wtyczka `apps/web/build/sklad.ts` z mapy źródeł
+  (`apps/web/dist/sklad.json`, nie trafia do wydania).
+- **Czas startu** (`npm run perf`, job `start` w `ci.yml`): przy CPU ×4 (model Lighthouse
+  urządzenia średniej klasy) LCP ≤ 2 500 ms (próg „dobry” z https://web.dev/articles/lcp)
+  i „gotowe” ≤ 5 000 ms (RAIL, https://web.dev/articles/rail), plus próg względny wobec kotwicy,
+  czyli wydania z `scripts/perf/kalibracja.json`. Chroni wygodę urzędnika na słabym komputerze. Opis modelu: `scripts/perf/README.md`.
+  Job jest nieblokujący (`continue-on-error: true`), dopóki nie ma pomiaru zmienności (CV) na
+  runnerach GitHuba: po ok. 10 przebiegach PR z CV ≤ 5% usuń `continue-on-error` z joba `start`;
+  przy większym CV ustaw `MAX_RATIO = 1 + 4×CV` w `scripts/perf/start.mjs` albo usuń próg
+  względny. 10 przebiegów, 5% i 4×CV to założenia (margines co najmniej 4 odchyleń
+  standardowych); uzasadnienie w `scripts/perf/README.md`, „Zmienność (CV)”.
+
+Po wydaniu (krok kalibracji): zmierz nowe wydanie na komputerze odniesienia i przestaw kotwicę.
+
+```bash
+gh release download vX.Y.Z -p Parawan.html -D /tmp/kotwica
+node scripts/perf/start.mjs /tmp/kotwica/Parawan.html --rate 1 --runs 11 --json
+node scripts/perf/start.mjs /tmp/kotwica/Parawan.html --rate 4 --runs 11 --json
+sha256sum /tmp/kotwica/Parawan.html
+```
+
+Mediany wpisz do `scripts/perf/kalibracja.json`: `kotwica` (tag), `sha256`, `data`, `metoda`
+(z wyniku), `gotowe_x1_ms` (z ×1), `ui_x4_ms`, `lcp_x4_ms`, `gotowe_x4_ms` (z ×4). Wydanie, które
+już rozgrzewa silnik przy starcie i ma znaczniki `performance.mark` (każde po v0.47.0), dostaje
+`"porownanie": ["ui", "lcp", "gotowe"]`. Pominięcie kroku nie psuje bramki: próg względny mierzy
+wtedy zmiany od starszego wydania, co jest ostrzejsze.
+
+Gdy bramka czasu nie przechodzi, zajrzyj do profilu CPU, a nie do bajtów: według pomiaru
+z 2026-11-15 najwięcej czasu idzie na rozgrzewkę rdzenia, `regex-literals.ts` (85 ms przy ×1)
+i wymuszony układ przez `offsetHeight` w `main.ts` (ok. 103 ms przy ×1); pdf.js to 66% bajtów,
+ale ok. 15% czasu startu.
+
 ## 2. Właściciel (tego automat nie sprawdzi)
 
 - Czytnik ekranu: NVDA albo Narrator przechodzi przez nowe kontrolki i odczytuje ich nazwy.
@@ -105,3 +150,4 @@ w `release.yml` z szablonów w `docs/wydanie/` (`scripts/release/render-docs.mjs
    a próba, że sprawdzenie działa: `gh workflow run deploy-landing.yml -f proba_zlej_sumy=true`
    (job ma się wywrócić; potem zwykłe uruchomienie).
 4. Pamięć projektu: stan wydania.
+5. Kalibracja czasu startu na nowym wydaniu: część 1, „Rozmiar i czas startu”.
