@@ -12702,3 +12702,202 @@ test('kontakt i rachunek urzędu w długim tekście bez złamań wiersza: czas r
     expect(big, u).toBeLessThan(Math.max(small, 15) * 16);
   }
 });
+test('numer uprawnień i wpisu zawodowego spoza PWZ maskowany przy zawodzie i kotwicy rejestru', () => {
+  masked([
+    ['kierownik budowy: mgr inż. Jan Nowak, uprawnienia budowlane nr SLK/1234/POOK/08', `kierownik budowy: mgr inż. ${N}, uprawnienia budowlane nr ${U}`],
+    ['uprawnienia budowlane do projektowania bez ograniczeń w specjalności konstrukcyjno-budowlanej nr MAP/0123/PWOK/05', `uprawnienia budowlane do projektowania bez ograniczeń w specjalności konstrukcyjno-budowlanej nr ${U}`],
+    ['inż. Adam Kos, nr ewid. upr. ŚLK/0456/OWOK/10', `inż. ${N}, nr ewid. upr. ${U}`],
+    ['projektant: Ewa Lis, członek MOIIB pod nr MAP/BO/1234/05', `projektant: ${N}, członek MOIIB pod nr ${U}`],
+    ['arch. Piotr Wrona, IARP nr 1234', `arch. ${N}, IARP nr ${U}`],
+    ['członkini Dolnośląskiej Okręgowej Izby Architektów RP nr DO-0451', `członkini Dolnośląskiej Okręgowej Izby Architektów RP nr ${U}`],
+    ['geodeta uprawniony Marek Sowa, nr upr. 23456', `geodeta uprawniony ${N}, nr upr. ${U}`],
+    ['geodetka Anna Kruk (świadectwo uprawnień zawodowych nr 1234)', `geodetka ${N} (świadectwo uprawnień zawodowych nr ${U})`],
+    ['operat sporządził rzeczoznawca majątkowy Jan Zięba, uprawnienia nr 4567.', `operat sporządził rzeczoznawca majątkowy ${N}, uprawnienia nr ${U}.`],
+    ['tłumacz przysięgły języka niemieckiego Jan Wolf, wpisany na listę tłumaczy przysięgłych pod numerem TP/123/17', `tłumacz przysięgły języka niemieckiego ${N}, wpisany na listę tłumaczy przysięgłych pod numerem ${U}`],
+    ['biegła rewident Iwona Cis, wpisana do rejestru biegłych rewidentów pod nr 12345', `biegła rewident ${N}, wpisana do rejestru biegłych rewidentów pod nr ${U}`],
+    ['doradca podatkowy Jan Lis, nr wpisu 09876', `doradca podatkowy ${N}, nr wpisu ${U}`],
+    ['adwokat Ewa Bór (Okręgowa Rada Adwokacka w Lublinie, nr wpisu LUB/Adw/0457)', `adwokat ${N} (Okręgowa Rada Adwokacka w Lublinie, nr wpisu ${U})`],
+    ['r. pr. Jan Kot (wpis GD-1287)', `r. pr. ${N} (wpis ${U})`],
+    ['Wykonawca | Kancelaria Radcy Prawnego Jan Ptak | wpis WA-4417 | obsługa prawna', `Wykonawca | Kancelaria Radcy Prawnego ${N} | wpis ${U} | obsługa prawna`],
+    ['elektryk Jan Lis, świadectwo kwalifikacyjne nr 123/E/2020', `elektryk ${N}, świadectwo kwalifikacyjne nr ${U}`],
+    ['zarządca nieruchomości, licencja zawodowa nr 12345', `zarządca nieruchomości, licencja zawodowa nr ${U}`],
+    ['studentka (legitymacja studencka nr 118342)', `studentka (legitymacja studencka nr ${U})`],
+  ]);
+  keep([
+    'zgodnie z art. 12 ust. 1 ustawy o samorządzie zawodowym architektów i inżynierów budownictwa',
+    'Decyzja o nadaniu uprawnień nr 12/2024 z dnia 1 marca.',
+    'Uchwała nr XII/123/2024 w sprawie uprawnień do ulgi.',
+    'Okręgowa Izba Radców Prawnych w Warszawie, ul. Długa nr 125',
+    'Komunikat Okręgowej Izby Lekarskiej nr 12/2024 w sprawie szczepień.',
+    'Izba Skarbowa nr 12/2024 przekazała akta.',
+    'Izba Rolnicza nr 1234 i Izba Przemysłowo-Handlowa nr KR-2020 wydały opinie.',
+    'Strona utraciła uprawnienia nr kat. B na okres 6 miesięcy.',
+    'Nadanie uprawnień w systemie EZD nr 15/2024 dla pracownika.',
+    'z upr. Wójta nr 12/2024',
+    'Zaświadczenie o wpisie do CEIDG, wpis nr 1234/2020.',
+    'świadectwo pracy nr 12/2024 wydane przez pracodawcę',
+    'Kandydat przedstawił świadectwo nr 12345 ukończenia szkoły.',
+    'Świadectwo charakterystyki energetycznej nr 12345/2024 sporządził inżynier.',
+    'Działka nr 123/4 w obrębie 0012, uprawnienia do działki nr 55/6.',
+    'Projektant, uprawnienia budowlane nadane w 2015 r., uprawnienia nr 2015 r.',
+    'kierownik budowy, dziennik budowy nr 123/2024',
+    'Inspektor nadzoru inwestorskiego, Umowa nr ZP/12/2024 z dnia 3 maja.',
+    'radca prawny, pełnomocnictwo nr 12/2024',
+    'Członek Zarządu Izby Architektów nr kadencji 5 wybrany w 2020.',
+  ]);
+});
+test('kotwica rejestru zawodowego w długim tekście bez złamań wiersza: czas rośnie liniowo', () => {
+  const units = [
+    'uprawnienia budowlane do projektowania bez ograniczeń w specjalności konstrukcyjnej oraz ',
+    'członek Okręgowej Izby Inżynierów Budownictwa, wpisany na listę członków izby i ',
+    'radca prawny, wpis na listę, świadectwo kwalifikacyjne, nr ewid. upr. ',
+  ];
+  for (const u of units) {
+    redactPII(u.repeat(200));
+    const time = (n: number): number => {
+      const t0 = performance.now();
+      redactPII(u.repeat(n));
+      return performance.now() - t0;
+    };
+    const small = time(1000);
+    const big = time(8000);
+    expect(big, u).toBeLessThan(Math.max(small, 15) * 16);
+  }
+});
+test('skrót izby bez członkostwa i osoby to dokument izby, a nie numer członka', () => {
+  keep([
+    'Wpis na listę adwokatów – posiedzenie ORA nr 12/2024 z dnia 3 marca 2024 r.',
+    'Doradca podatkowy – szkolenie KIDP nr 2024/05, sala 3.',
+    'Inżynierowie budownictwa: konferencja PIIB nr 5/2024',
+    'Architekt powiatowy przekazał stanowisko IARP nr 12/2024.',
+    'Szkolenie dla architektów – MOIA nr 2/2024',
+    'Doradcy podatkowi – egzamin KIDP nr 15/2024.',
+    'Adwokat z urzędu: zlecenie ORA nr 1234/2024.',
+    'Radca prawny Urzędu, okólnik OIRP nr 3/2024.',
+    'Adwokat, sprawozdanie ORA nr 2/2024.',
+    'Geodeta powiatowy, zebranie MOIIB nr 3/2025.',
+  ]);
+  masked([
+    ['architekt Iga Wolak (IARP 2231)', `architekt ${N} (IARP ${U})`],
+    ['Doradca podatkowy Wiktor Cios (KIDP, nr 08812) reprezentuje stronę.', `Doradca podatkowy ${N} (KIDP, nr ${U}) reprezentuje stronę.`],
+    ['członek ŚlOIIB nr SLK/IS/2233/11', `członek ŚlOIIB nr ${U}`],
+  ]);
+});
+test('wpis do rejestru podmiotów i wpis w dzienniku budowy to nie numer osoby', () => {
+  keep([
+    'Psycholog szkolny, wpis do rejestru placówek oświatowych nr 1234/2024.',
+    'Instruktor nauki jazdy – ośrodek szkolenia kierowców, wpis do rejestru OSK nr 1234.',
+    'Lekarz weterynarii, wpis nr 1234 do rejestru zakładów leczniczych dla zwierząt.',
+    'Inspektor nadzoru – wpis nr 1234; kierownik budowy – wpis nr 1235.',
+    'Kierownik robót elektrycznych potwierdził wpis nr 3456.',
+    'Kierownik robót: wpis nr 1234, strona 12.',
+    'Inspektor nadzoru inwestorskiego potwierdził wpis nr 2345 w dzienniku budowy.',
+  ]);
+  masked([
+    ['Biegła rewident Ilona Wąs, wpisana do rejestru biegłych rewidentów pod nr 13789', `Biegła rewident ${N}, wpisana do rejestru biegłych rewidentów pod nr ${U}`],
+    ['Badanie przeprowadził biegły rewident Paweł Grot, nr w rejestrze 12456.', `Badanie przeprowadził biegły rewident ${N}, nr w rejestrze ${U}.`],
+    ['Tłumacz przysięgły Hanna Wróbel, numer na liście tłumaczy: TP/0045/06', `Tłumacz przysięgły ${N}, numer na liście tłumaczy: ${U}`],
+  ]);
+});
+test('komórka i dziedzina w nazwie urzędu to nie zawód przy uprawnieniach do systemu', () => {
+  keep([
+    'Naczelnik Wydziału Architektury i Budownictwa, uprawnienia do podpisu nr 4/2025 z dnia 2.01.2025.',
+    'Wydział Architektury – nadanie uprawnień w systemie nr 12/2025.',
+    'Kierownik Referatu Inżynierii Miejskiej, upr. nr 7/2025.',
+    'Wydział Geodezji i Kartografii, uprawnienia dostępu nr 3/2025, do systemu ZSIN.',
+    'Doradca ds. architektury Gminy, uprawnienia nr 33/2025 do EZD.',
+    'Powiatowy Ośrodek Dokumentacji Geodezyjnej i Kartograficznej, uprawnienia nr 3/2025.',
+    'Poradnia Psychologiczno-Pedagogiczna, upr. nr 5/2025.',
+    'Komisja kwalifikacyjna do spraw uprawnień budowlanych, uprawnienia nr 45/2024 wydane 40 osobom.',
+  ]);
+});
+test('numer uprawnień po myślniku, w nawiasie, wersalikami, w komórce tabeli i w kolumnie z nagłówkiem', () => {
+  masked([
+    ['Pomiar wykonał geodeta Jan Kulik, uprawnienia zawodowe nr 9876 (zakres 1).', `Pomiar wykonał geodeta ${N}, uprawnienia zawodowe nr ${U} (zakres 1).`],
+    ['licencja zawodowa pośrednika w obrocie nieruchomościami nr 12034 – Iwona Kras', `licencja zawodowa pośrednika w obrocie nieruchomościami nr ${U} – ${N}`],
+    ['PROJEKTANT: MGR INŻ. EDYTA SOKÓŁ, UPRAWNIENIA BUDOWLANE NR PDK/0444/PWOS/12', `PROJEKTANT: MGR INŻ. EDYTA SOKÓŁ, UPRAWNIENIA BUDOWLANE NR ${U}`],
+    ['Sprawdzający: dr inż. Piotr Malec\tupr. nr ZAP/0099/PWBKb/12\tZPOIIB/BO/0345/13', `Sprawdzający: dr inż. ${N}\tupr. nr ${U}\t${U}`],
+    ['Projektant\tmgr inż. Celina Bór\tLOD/0871/POOK/11\tLOD/BO/2210/12', `Projektant\tmgr inż. ${N}\t${U}\t${U}`],
+    ['Uprawnienia: SLK/0456/POOK/10 (inż. Adam Kos)', `Uprawnienia: ${U} (inż. ${N})`],
+    ['Kierownik budowy: Sebastian Hak, nr uprawnień: KL/0034/OWOK/02, nr członkowski: KL/BO/0091/03', `Kierownik budowy: ${N}, nr uprawnień: ${U}, nr członkowski: ${U}`],
+    ['Lp.;Imię i nazwisko;Funkcja;Nr uprawnień\n1;Bogdan Kasprzak;kierownik budowy;123/89/Ka', `Lp.;Imię i nazwisko;Funkcja;Nr uprawnień\n1;${N};kierownik budowy;${U}`],
+  ]);
+  keep([
+    'Lp.;Nazwa;Nr wpisu\n1;Apteka Pod Lipą;1234/2024',
+  ]);
+  masked([['uprawnienia budowlane nr 12/2024; Decyzja AB/1234/2024', `uprawnienia budowlane nr ${U}; Decyzja AB/1234/2024`]]);
+});
+test('kotwica rejestru zawodowego na długim wierszu bez złamań: okno przed kotwicą nie sięga początku wiersza', () => {
+  const units = ['geodeta uprawniony, uprawnienia nr 12345, ', 'członek izby architektów nr 12345, uprawnienia budowlane nr MAZ/1/AB/2 ; '];
+  for (const u of units) {
+    redactPII(u.repeat(200));
+    const time = (n: number): number => {
+      const t0 = performance.now();
+      redactPII(u.repeat(n));
+      return performance.now() - t0;
+    };
+    const small = time(1000);
+    const big = time(8000);
+    expect(big, u).toBeLessThan(Math.max(small, 15) * 16);
+  }
+});
+test('nagłówek kolumny bez osoby w wierszu: działki, środki trwałe, jednostki i rok zostają jawne', () => {
+  keep([
+    'Lp.\tNr ewidencyjny\tObręb\tPowierzchnia [ha]\n1\t123/4\t0005 Zalesie\t0,1234',
+    'Lp.|Nr ewid.|Obręb|Pow.\n1|2187/3|Zalesie|0,12',
+    'Wykaz działek\nLp.;Nr ewid. działki;Obręb;Pow. [ha];Właściciel\n1;123/4;Zalesie;0,12;Gmina Zalesie',
+    'Lp.;Nazwa środka trwałego;Nr ewidencyjny;Wartość\n1;Komputer Dell;KOM/0123/2019;3 200,00\n2;Drukarka;DR-0045;800,00',
+    'Lp.\tPojazd\tNr ewidencyjny\n1\tJelcz 004\tPSP-0123',
+    'Lp.;Nazwa jednostki;Nr członkowski;Składka\n1;Ochotnicza Straż Pożarna w Zalesiu;0123;200,00',
+    'Nr członka | Nazwa spółdzielni | Udział\n1234 | SM „Przyszłość” | 500',
+    'Lp.|Jednostka|Nr członkowski|Data przyjęcia\n1|Koło Gospodyń Wiejskich w Zalesiu|0451|12.03.2024',
+    'Lp.|Nazwa|Uprawnienia|Kwota\n1|Starostwo Powiatowe|2024/05|1 200,00',
+    'Uprawnienia\tLiczba wniosków\tTermin\n2024/05\t12\t30 dni',
+    'Lp.\tNr uprawnień\tLiczba decyzji\n1\t2024\t12',
+  ]);
+  masked([
+    ['Lp.\tImię i nazwisko\tNr ewid. upr.\n1\tKarol Mróz\tKAT/0991/OWOK/15', `Lp.\tImię i nazwisko\tNr ewid. upr.\n1\t${N}\t${U}`],
+    ['Lp.;Imię i nazwisko;Nr członka izby\n1;Anna Nowak;MAZ/BO/0123/10', `Lp.;Imię i nazwisko;Nr członka izby\n1;${N};${U}`],
+    ['Lp.|Projektant|Uprawnienia\n1|mgr inż. Piotr Lis|SLK/0012/PWOK/09', `Lp.|Projektant|Uprawnienia\n1|mgr inż. ${N}|${U}`],
+  ]);
+});
+test('kształt numeru uprawnień budowlanych bez kotwicy tylko przy osobie w wierszu', () => {
+  keep([
+    'Sprawa OR/0456/POW/24 prowadzona przez Wydział Organizacyjny Starostwa.',
+    'Umowa nr RPO/0123/POIS/2021 o dofinansowanie projektu',
+    'Projekt OWES/0012/POWER/19 realizowany przez stowarzyszenie.',
+    'Porozumienie OR/0012/POW/24 zawarte z gminą.',
+    'Kierownik budowy, umowa nr RPO/0123/POIS/2021 z dnia 1 marca.',
+  ]);
+  masked([
+    ['1. Anna Nowak\tMAZ/0012/PWOA/12', `1. ${N}\t${U}`],
+    ['Projekt sporządził: mgr inż. arch. Adam Kos, MAZ/0012/PWOA/12', `Projekt sporządził: mgr inż. arch. ${N}, ${U}`],
+  ]);
+});
+test('skrót izby po nazwie komórki, dokument dla członków i stanowisko urzędu to nie numer osoby', () => {
+  keep([
+    'Architekt Miejski, Biuro Architektury i Planowania Przestrzennego (MOIA nr 12/2024 – stanowisko).',
+    'Radca prawny Urzędu Gminy, Kancelaria Radcy Prawnego (OIRP nr 12/2024 – okólnik).',
+    'Inspektor nadzoru inwestorskiego Miejskiego Zarządu Dróg, Zarząd Dróg Powiatowych (PIIB 2025).',
+    'Starostwo Powiatowe w Zalesiu (IARP 2024).',
+    'Ankieta dla członków PIIB nr 2/2026',
+    'Raport o przynależności do OIRP nr 5/2026',
+    'Sprawozdanie z wpisów na listę KIDP nr 12/2026',
+    'Informator dla wpisanych do ORA nr 1/2026',
+    'Komunikat dla członków MOIIB nr 3/2026',
+    'Radca prawny – opinia dla członków OIRP nr 14/2026.',
+    'Geodeta Powiatowy\tWydział Geodezji\tuprawnienia nr 3/2025 do PZGiK',
+    'Geodeta Powiatowy, uprawnienia nr 4/2025 do reprezentacji Starosty.',
+    'Inspektor Wydziału Architektury, uprawnienia nr 7/2025 do zasobu.',
+    'Psycholog szkolny, Poradnia Psychologiczno-Pedagogiczna nr 3, wpis nr 1234 do ewidencji placówek.',
+    'Lekarz weterynarii, wpis nr 1234 do wykazu podmiotów.',
+    'Psycholog, wpis nr 1234 w ewidencji szkół.',
+  ]);
+  masked([
+    ['Geodeta Powiatowy mgr inż. Jan Kowalski, uprawnienia nr 12345', `Geodeta Powiatowy mgr inż. ${N}, uprawnienia nr ${U}`],
+    ['architekt Iga Wolak, członek IARP nr 2025', `architekt ${N}, członek IARP nr ${U}`],
+    ['Jan Kowalski, nr członkowski MAZ/BO/1234/05', `${N}, nr członkowski ${U}`],
+    ['geodeta uprawniony Jan Lis, uprawnienia nr 12345 do wykonywania samodzielnych funkcji', `geodeta uprawniony ${N}, uprawnienia nr ${U} do wykonywania samodzielnych funkcji`],
+    ['psycholog Anna Lis, wpis nr 1234 na listę psychologów', `psycholog ${N}, wpis nr ${U} na listę psychologów`],
+  ]);
+});

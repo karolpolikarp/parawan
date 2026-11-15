@@ -301,7 +301,12 @@ Hala: remont do piątku",
   "neg-286": "Sprawę skierowano do Samorządowego Kolegium Odwoławczego w Siedlcach, ul. Piłsudskiego 38, 08-110 Siedlce.",
   "neg-287": "Kopia: Straż Miejska w Bydgoszczy, ul. Bernardyńska 14, 85-029 Bydgoszcz; Powiatowe Centrum Pomocy Rodzinie w Sokółce, ul. Kryńska 14",
   "neg-288": "Umowa z Przedsiębiorstwem Gospodarki Komunalnej sp. z o.o. w Żywcu, ul. Kopernika 59, 34-300 Żywiec, NIP 5530002393.",
+  "neg-289": "Lp.	Nr ewidencyjny	Obręb	Powierzchnia [ha]
+1	123/4	0005 Zalesie	0,1234
+Lp.;Nazwa jednostki;Nr członkowski;Składka
+1;Ochotnicza Straż Pożarna w Zalesiu;0123;200,00",
   "neg-29": "Kwiecień plecień, bo przeplata trochę zimy, trochę lata.",
+  "neg-290": "Architekt Miejski, Biuro Architektury i Planowania Przestrzennego (MOIA nr 12/2024 – stanowisko). Geodeta Powiatowy, uprawnienia nr 3/2025 do PZGiK.",
   "neg-30": "Król wydał ucztę na zamku.",
   "neg-31": "Numer 44051401350 nie przeszedł walidacji w systemie.",
   "neg-32": "Ciąg 1234563210 to przykładowy identyfikator testowy.",
@@ -955,6 +960,17 @@ Urząd Gminy Bielsk
 ul. Szkolna 1
 09-230 Bielsk
 tel. 24 261 33 27, pok. 12, Marek Lis",
+  "str-261": "Kierownik budowy: mgr inż. Adam Kos, uprawnienia budowlane nr SLK/0456/POOK/10, członek ŚOIIB pod nr SLK/BO/7781/11. Podstawa: art. 12 ust. 1 Prawa budowlanego.",
+  "str-262": "Mapę sporządził geodeta uprawniony Marek Sowa (nr upr. 18234), a operat rzeczoznawca majątkowy Ewa Zięba, uprawnienia nr 5512. Uchwała nr XIV/112/2026 Rady Gminy pozostaje w mocy.",
+  "str-263": "Przekład wykonała tłumaczka przysięgła Iwona Cis, wpisana na listę tłumaczy przysięgłych pod nr TP/0912/15. Komunikat Okręgowej Izby Lekarskiej nr 14/2026 dołączono do akt.",
+  "str-264": "Lp.	Imię i nazwisko	Funkcja	Nr uprawnień
+1	Karol Mróz	projektant	KAT/0991/OWOK/15
+2	Izabela Sęk	sprawdzający	123/89/Ka
+Okólnik OIRP nr 3/2026 dołączono do akt.",
+  "str-265": "Geodeta uprawniony Zenon Marek, nr uprawnień 15523 – pomiar sytuacyjny. Naczelnik Wydziału Geodezji i Kartografii, uprawnienia do podpisu nr 4/2026 w systemie EZD.",
+  "str-266": "Lp.;Imię i nazwisko;Nr członka izby
+1;Anna Nowak;MAZ/BO/0123/10
+Sprawa OR/0456/POW/24 prowadzona przez Wydział Organizacyjny. Ankieta dla członków PIIB nr 2/2026.",
   "str-27": "Biuro mieści się przy al. Jerozolimskich 44.",
   "str-28": "Nowy lokal: os. Piastów 3/12, obok szkoły.",
   "str-29": "Spotkanie odbędzie się na pl. Zbawiciela 5.",
@@ -1333,7 +1349,12 @@ Hala: remont do piątku",
   "neg-286": "Sprawę skierowano do Samorządowego Kolegium Odwoławczego w Siedlcach, ul. Piłsudskiego 38, 08-110 Siedlce.",
   "neg-287": "Kopia: Straż Miejska w Bydgoszczy, ul. Bernardyńska 14, 85-029 Bydgoszcz; Powiatowe Centrum Pomocy Rodzinie w Sokółce, ul. Kryńska 14",
   "neg-288": "Umowa z Przedsiębiorstwem Gospodarki Komunalnej sp. z o.o. w Żywcu, ul. Kopernika 59, 34-300 Żywiec, NIP 5530002393.",
+  "neg-289": "Lp.	Nr ewidencyjny	Obręb	Powierzchnia [ha]
+1	123/4	0005 Zalesie	0,1234
+Lp.;Nazwa jednostki;Nr członkowski;Składka
+1;Ochotnicza Straż Pożarna w Zalesiu;0123;200,00",
   "neg-29": "Kwiecień plecień, bo przeplata trochę zimy, trochę lata.",
+  "neg-290": "Architekt Miejski, Biuro Architektury i Planowania Przestrzennego (MOIA nr 12/2024 – stanowisko). Geodeta Powiatowy, uprawnienia nr 3/2025 do PZGiK.",
   "neg-30": "Król wydał ucztę na zamku.",
   "neg-31": "Numer 44051401350 nie przeszedł walidacji w systemie.",
   "neg-32": "Ciąg 1234563210 to przykładowy identyfikator testowy.",
@@ -1985,6 +2006,17 @@ Urząd Gminy Bielsk
 ul. Szkolna 1
 09-230 Bielsk
 tel. [TELEFON], pok. 12, [OSOBA-B]",
+  "str-261": "Kierownik budowy: mgr inż. [OSOBA-A], uprawnienia budowlane nr [NR-UPRAWNIEŃ], członek ŚOIIB pod nr [NR-UPRAWNIEŃ]. Podstawa: art. 12 ust. 1 Prawa budowlanego.",
+  "str-262": "Mapę sporządził geodeta uprawniony [OSOBA-A] (nr upr. [NR-UPRAWNIEŃ]), a operat rzeczoznawca majątkowy [OSOBA-B], uprawnienia nr [NR-UPRAWNIEŃ]. Uchwała nr XIV/112/2026 Rady Gminy pozostaje w mocy.",
+  "str-263": "Przekład wykonała tłumaczka przysięgła [OSOBA-A], wpisana na listę tłumaczy przysięgłych pod nr [NR-UPRAWNIEŃ]. Komunikat Okręgowej Izby Lekarskiej nr 14/2026 dołączono do akt.",
+  "str-264": "Lp.	Imię i nazwisko	Funkcja	Nr uprawnień
+1	[OSOBA-A]	projektant	[NR-UPRAWNIEŃ]
+2	[OSOBA-B]	sprawdzający	[NR-UPRAWNIEŃ]
+Okólnik OIRP nr 3/2026 dołączono do akt.",
+  "str-265": "Geodeta uprawniony Zenon Marek, nr uprawnień [NR-UPRAWNIEŃ] – pomiar sytuacyjny. Naczelnik Wydziału Geodezji i Kartografii, uprawnienia do podpisu nr 4/2026 w systemie EZD.",
+  "str-266": "Lp.;Imię i nazwisko;Nr członka izby
+1;[OSOBA-A];[NR-UPRAWNIEŃ]
+Sprawa OR/0456/POW/24 prowadzona przez Wydział Organizacyjny. Ankieta dla członków PIIB nr 2/2026.",
   "str-27": "Biuro mieści się przy [ADRES].",
   "str-28": "Nowy lokal: [ADRES], obok szkoły.",
   "str-29": "Spotkanie odbędzie się na [ADRES].",
@@ -2363,7 +2395,12 @@ Hala: remont do piątku",
   "neg-286": "Sprawę skierowano do Samorządowego Kolegium Odwoławczego w Siedlcach, ul. Piłsudskiego 38, 08-110 Siedlce.",
   "neg-287": "Kopia: Straż Miejska w Bydgoszczy, ul. Bernardyńska 14, 85-029 Bydgoszcz; Powiatowe Centrum Pomocy Rodzinie w Sokółce, ul. Kryńska 14",
   "neg-288": "Umowa z Przedsiębiorstwem Gospodarki Komunalnej sp. z o.o. w Żywcu, ul. Kopernika 59, 34-300 Żywiec, NIP 5530002393.",
+  "neg-289": "Lp.	Nr ewidencyjny	Obręb	Powierzchnia [ha]
+1	123/4	0005 Zalesie	0,1234
+Lp.;Nazwa jednostki;Nr członkowski;Składka
+1;Ochotnicza Straż Pożarna w Zalesiu;0123;200,00",
   "neg-29": "Kwiecień plecień, bo przeplata trochę zimy, trochę lata.",
+  "neg-290": "Architekt Miejski, Biuro Architektury i Planowania Przestrzennego (MOIA nr 12/2024 – stanowisko). Geodeta Powiatowy, uprawnienia nr 3/2025 do PZGiK.",
   "neg-30": "Król wydał ucztę na zamku.",
   "neg-31": "Numer 44051401350 nie przeszedł walidacji w systemie.",
   "neg-32": "Ciąg 1234563210 to przykładowy identyfikator testowy.",
@@ -3015,6 +3052,17 @@ Urząd Gminy Bielsk
 ul. Szkolna 1
 09-230 Bielsk
 tel. [TELEFON], pok. 12, [IMIĘ I NAZWISKO]",
+  "str-261": "Kierownik budowy: mgr inż. [IMIĘ I NAZWISKO], uprawnienia budowlane nr [NR-UPRAWNIEŃ], członek ŚOIIB pod nr [NR-UPRAWNIEŃ]. Podstawa: art. 12 ust. 1 Prawa budowlanego.",
+  "str-262": "Mapę sporządził geodeta uprawniony [IMIĘ I NAZWISKO] (nr upr. [NR-UPRAWNIEŃ]), a operat rzeczoznawca majątkowy [IMIĘ I NAZWISKO], uprawnienia nr [NR-UPRAWNIEŃ]. Uchwała nr XIV/112/2026 Rady Gminy pozostaje w mocy.",
+  "str-263": "Przekład wykonała tłumaczka przysięgła [IMIĘ I NAZWISKO], wpisana na listę tłumaczy przysięgłych pod nr [NR-UPRAWNIEŃ]. Komunikat Okręgowej Izby Lekarskiej nr 14/2026 dołączono do akt.",
+  "str-264": "Lp.	Imię i nazwisko	Funkcja	Nr uprawnień
+1	[IMIĘ I NAZWISKO]	projektant	[NR-UPRAWNIEŃ]
+2	[IMIĘ I NAZWISKO]	sprawdzający	[NR-UPRAWNIEŃ]
+Okólnik OIRP nr 3/2026 dołączono do akt.",
+  "str-265": "Geodeta uprawniony Zenon Marek, nr uprawnień [NR-UPRAWNIEŃ] – pomiar sytuacyjny. Naczelnik Wydziału Geodezji i Kartografii, uprawnienia do podpisu nr 4/2026 w systemie EZD.",
+  "str-266": "Lp.;Imię i nazwisko;Nr członka izby
+1;[IMIĘ I NAZWISKO];[NR-UPRAWNIEŃ]
+Sprawa OR/0456/POW/24 prowadzona przez Wydział Organizacyjny. Ankieta dla członków PIIB nr 2/2026.",
   "str-27": "Biuro mieści się przy [ADRES].",
   "str-28": "Nowy lokal: [ADRES], obok szkoły.",
   "str-29": "Spotkanie odbędzie się na [ADRES].",
@@ -3442,7 +3490,12 @@ Hala: remont do piątku",
   "neg-286": "Sprawę skierowano do Samorządowego Kolegium Odwoławczego w Siedlcach, ul. Piłsudskiego 38, 08-110 Siedlce.",
   "neg-287": "Kopia: Straż Miejska w Bydgoszczy, ul. Bernardyńska 14, 85-029 Bydgoszcz; Powiatowe Centrum Pomocy Rodzinie w Sokółce, ul. Kryńska 14",
   "neg-288": "Umowa z Przedsiębiorstwem Gospodarki Komunalnej sp. z o.o. w Żywcu, ul. Kopernika 59, 34-300 Żywiec, NIP 5530002393.",
+  "neg-289": "Lp.	Nr ewidencyjny	Obręb	Powierzchnia [ha]
+1	123/4	0005 Zalesie	0,1234
+Lp.;Nazwa jednostki;Nr członkowski;Składka
+1;Ochotnicza Straż Pożarna w Zalesiu;0123;200,00",
   "neg-29": "Kwiecień plecień, bo przeplata trochę zimy, trochę lata.",
+  "neg-290": "Architekt Miejski, Biuro Architektury i Planowania Przestrzennego (MOIA nr 12/2024 – stanowisko). Geodeta Powiatowy, uprawnienia nr 3/2025 do PZGiK.",
   "neg-30": "Król wydał ucztę na zamku.",
   "neg-31": "Numer 44051401350 nie przeszedł walidacji w systemie.",
   "neg-32": "Ciąg 1234563210 to przykładowy identyfikator testowy.",
@@ -4094,6 +4147,17 @@ Urząd Gminy Bielsk
 ul. Szkolna 1
 09-230 Bielsk
 tel. [TELEFON], pok. 12, <<osoba>>",
+  "str-261": "Kierownik budowy: mgr inż. <<osoba>>, uprawnienia budowlane nr [NR-UPRAWNIEŃ], członek ŚOIIB pod nr [NR-UPRAWNIEŃ]. Podstawa: art. 12 ust. 1 Prawa budowlanego.",
+  "str-262": "Mapę sporządził geodeta uprawniony <<osoba>> (nr upr. [NR-UPRAWNIEŃ]), a operat rzeczoznawca majątkowy <<osoba>>, uprawnienia nr [NR-UPRAWNIEŃ]. Uchwała nr XIV/112/2026 Rady Gminy pozostaje w mocy.",
+  "str-263": "Przekład wykonała tłumaczka przysięgła <<osoba>>, wpisana na listę tłumaczy przysięgłych pod nr [NR-UPRAWNIEŃ]. Komunikat Okręgowej Izby Lekarskiej nr 14/2026 dołączono do akt.",
+  "str-264": "Lp.	Imię i nazwisko	Funkcja	Nr uprawnień
+1	<<osoba>>	projektant	[NR-UPRAWNIEŃ]
+2	<<osoba>>	sprawdzający	[NR-UPRAWNIEŃ]
+Okólnik OIRP nr 3/2026 dołączono do akt.",
+  "str-265": "Geodeta uprawniony Zenon Marek, nr uprawnień [NR-UPRAWNIEŃ] – pomiar sytuacyjny. Naczelnik Wydziału Geodezji i Kartografii, uprawnienia do podpisu nr 4/2026 w systemie EZD.",
+  "str-266": "Lp.;Imię i nazwisko;Nr członka izby
+1;<<osoba>>;[NR-UPRAWNIEŃ]
+Sprawa OR/0456/POW/24 prowadzona przez Wydział Organizacyjny. Ankieta dla członków PIIB nr 2/2026.",
   "str-27": "Biuro mieści się przy <<adres>>.",
   "str-28": "Nowy lokal: <<adres>>, obok szkoły.",
   "str-29": "Spotkanie odbędzie się na <<adres>>.",
@@ -4434,7 +4498,9 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "neg-286": "",
   "neg-287": "",
   "neg-288": "",
+  "neg-289": "",
   "neg-29": "",
+  "neg-290": "",
   "neg-30": "",
   "neg-31": "",
   "neg-32": "",
@@ -4915,6 +4981,12 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "str-259": "NR-KONTA:1",
   "str-26": "ADRES:1 MIEJSCOWOSC:1",
   "str-260": "TELEFON:1 IMIE:2",
+  "str-261": "NR-UPRAWNIEN:2 IMIE:1",
+  "str-262": "NR-UPRAWNIEN:2 IMIE:2",
+  "str-263": "NR-UPRAWNIEN:1 IMIE:1",
+  "str-264": "IMIE:2 NR-UPRAWNIEN:2",
+  "str-265": "NR-UPRAWNIEN:1",
+  "str-266": "IMIE:1 NR-UPRAWNIEN:1",
   "str-27": "ADRES:1",
   "str-28": "ADRES:1",
   "str-29": "ADRES:1",
@@ -5254,7 +5326,9 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "neg-286": "",
   "neg-287": "",
   "neg-288": "",
+  "neg-289": "",
   "neg-29": "",
+  "neg-290": "",
   "neg-30": "",
   "neg-31": "",
   "neg-32": "",
@@ -5735,6 +5809,12 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "str-259": "NR-KONTA:1",
   "str-26": "ADRES:1 MIEJSCOWOSC:1",
   "str-260": "TELEFON:1 IMIE:2",
+  "str-261": "NR-UPRAWNIEN:2 IMIE:1",
+  "str-262": "NR-UPRAWNIEN:2 IMIE:2",
+  "str-263": "NR-UPRAWNIEN:1 IMIE:1",
+  "str-264": "IMIE:2 NR-UPRAWNIEN:2",
+  "str-265": "NR-UPRAWNIEN:1",
+  "str-266": "IMIE:1 NR-UPRAWNIEN:1",
   "str-27": "ADRES:1",
   "str-28": "ADRES:1",
   "str-29": "ADRES:1",

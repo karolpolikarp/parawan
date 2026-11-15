@@ -479,6 +479,41 @@ działają na GitHubie od chwili wypchnięcia tagów.
   adresem z ulicą („Zbigniew Pawlak⏎Kierownik Referatu⏎Urząd Miasta Kalisza, ul. Główny Rynek 20,
   tel. 62 765 43 21” daje „tel. [TELEFON]”). Nagłówek urzędu bez podpisu nad nim i numer z numerem
   wewnętrznym zostają jawne.
+- **Numer uprawnień budowlanych, numer członka izby i wpis tłumacza, geodety czy rzeczoznawcy
+  znikają przy osobie tak jak PWZ.** Wcześniej w decyzji o pozwoleniu na budowę, operacie
+  i protokole zostawały jawne numery projektantów i biegłych. Teraz „mgr inż. Adam Kos,
+  uprawnienia nr SLK/0456/POOK/10, członek Śląskiej Okręgowej Izby Inżynierów Budownictwa nr
+  SLK/BO/7781/11” daje „mgr inż. [IMIĘ I NAZWISKO], uprawnienia nr [NR-UPRAWNIEŃ], członek …
+  nr [NR-UPRAWNIEŃ]”. Tak samo znikają „nr ewid. upr. SLK/1234/POOK/08”, „IARP nr 1234”,
+  „członek MOIIB pod nr MAP/BO/1234/05”, numer uprawnień geodety i rzeczoznawcy majątkowego
+  („uprawnienia nr 23011”, „świadectwo nadania uprawnień zawodowych nr 15873”, „nr upr. 23456”),
+  wpis tłumacza przysięgłego („nr wpisu na listę TP/0912/15”), biegłego rewidenta i doradcy
+  podatkowego, wpis radcy i adwokata za wtrąceniem („(Okręgowa Rada Adwokacka w Lublinie, nr
+  wpisu LUB/Adw/0457)”, „r. pr. Jan Kot (wpis GD-1287)”), świadectwo kwalifikacyjne, licencja
+  zawodowa i legitymacja studencka. Znika też numer w tabeli zespołu projektowego wklejonej
+  z Worda albo Excela (kolumna „Nr uprawnień” czy „Nr członka izby”, komórki rozdzielone TAB-em,
+  średnikiem albo kreską), numer zapisany wersalikami („UPRAWNIENIA BUDOWLANE NR PDK/0444/PWOS/12”),
+  numer przed podpisem po myślniku albo w nawiasie („nr 9876 (zakres 1)”, „… – mgr inż. Adrian
+  Łoś”), „nr członkowski”, „nr w rejestrze”, „numer na liście tłumaczy” i „(IARP 2231)” zaraz po
+  osobie. Numer musi stać przy zawodzie w tym samym wierszu, więc jawne zostają przepisy („art. 12
+  ust. 1”), decyzja i uchwała („Decyzja o nadaniu uprawnień nr 12/2024”, „Uchwała nr XII/123/2024
+  w sprawie uprawnień”), adres i komunikat izby („Okręgowa Izba Radców Prawnych, ul. Długa nr
+  125”, „Komunikat Okręgowej Izby Lekarskiej nr 12/2024”), dokument i wydarzenie izby bez osoby
+  („posiedzenie ORA nr 12/2024”, „szkolenie KIDP nr 2024/05”, „okólnik OIRP nr 3/2024”), wpis do
+  rejestru aptek, placówek czy OSK, wpis w dzienniku budowy („kierownik budowy – wpis nr 1235”),
+  uprawnienia pracowników urzędu do systemu i do podpisu („Naczelnik Wydziału Architektury
+  i Budownictwa, uprawnienia do podpisu nr 4/2025”, „Wydział Geodezji i Kartografii, uprawnienia
+  dostępu nr 3/2025”), umowa, świadectwo pracy i świadectwo charakterystyki energetycznej.
+  Kolumna „Nr uprawnień”, „Nr członka” albo „Uprawnienia” liczy się tylko w wierszu z osobą
+  albo zawodem, więc wykaz działek („Lp.⇥Nr ewidencyjny⇥Obręb⇥Powierzchnia”, „123/4”), środków
+  trwałych, pojazdów i jednostek OSP czy spółdzielni zostaje jawny. Jawne zostają też znak sprawy
+  i numer umowy w kształcie numeru uprawnień („Sprawa OR/0456/POW/24”, „Umowa nr
+  RPO/0123/POIS/2021”), dokument izby dla członków i nazwa komórki przed skrótem izby („Ankieta
+  dla członków PIIB nr 2/2026”, „Biuro Architektury i Planowania Przestrzennego (MOIA nr 12/2024
+  – stanowisko)”), stanowisko urzędu („Geodeta Powiatowy, uprawnienia nr 3/2025 do PZGiK”) i wpis
+  do ewidencji placówek. Na
+  trzeciej serii 50 pism (część robocza) wycieków jest 142 zamiast 158, bez nowych nadmiarowych
+  zakryć.
 - **Pierwsze wklejone pismo i każda następna zmiana mają wynik od razu.** Parawan przygotowuje
   silnik zaraz po otwarciu pliku, a nie przy pierwszym piśmie. Wcześniej pierwsze przeliczenie
   trwało kilka razy dłużej niż kolejne, a pauza przed następnym rosła od niego do pół sekundy

@@ -1367,6 +1367,20 @@ export function buildDataset() {
   str('Wydział Komunikacji, e-mail: komunikacja@zielinski.pl; Starostwo Powiatowe w Łęcznej, ul. Szkolna 2, 21-010 Łęczna, e-mail: kancelaria@powiatleczynski.pl', ['komunikacja@zielinski.pl'], ['kancelaria@powiatleczynski.pl']);
   str('Podatek proszę wpłacić na rachunek Gminy Firlej nr 78 1160 2202 6163 7497 8486 2063 (subkonto podatnika). Opłatę skarbową wnosi się na rachunek urzędu nr 12 1020 1026 0000 0402 0000 0000.', ['78 1160 2202 6163 7497 8486 2063'], ['12 1020 1026 0000 0402 0000 0000']);
   str('Z poważaniem\nAnna Kwiatkowska\nInspektor\nUrząd Gminy Bielsk\nul. Szkolna 1\n09-230 Bielsk\ntel. 24 261 33 27, pok. 12, Marek Lis', ['Anna Kwiatkowska', '24 261 33 27', 'Marek Lis'], ['ul. Szkolna 1']);
+  // Numery uprawnień i wpisów zawodowych spoza PWZ: kotwica rejestru przy zawodzie, a numery
+  // przepisów, decyzji, uchwał i adres izby zostają jawne.
+  str('Kierownik budowy: mgr inż. Adam Kos, uprawnienia budowlane nr SLK/0456/POOK/10, członek ŚOIIB pod nr SLK/BO/7781/11. Podstawa: art. 12 ust. 1 Prawa budowlanego.', ['SLK/0456/POOK/10', 'SLK/BO/7781/11'], ['art. 12 ust. 1']);
+  str('Mapę sporządził geodeta uprawniony Marek Sowa (nr upr. 18234), a operat rzeczoznawca majątkowy Ewa Zięba, uprawnienia nr 5512. Uchwała nr XIV/112/2026 Rady Gminy pozostaje w mocy.', ['18234', '5512'], ['XIV/112/2026']);
+  str('Przekład wykonała tłumaczka przysięgła Iwona Cis, wpisana na listę tłumaczy przysięgłych pod nr TP/0912/15. Komunikat Okręgowej Izby Lekarskiej nr 14/2026 dołączono do akt.', ['TP/0912/15'], ['14/2026']);
+  // Tabela zespołu projektowego z Worda (TAB) i podpisy po myślniku, a obok dokumenty izby
+  // i uprawnienia pracowników urzędu do systemu, które zostają jawne.
+  str('Lp.\tImię i nazwisko\tFunkcja\tNr uprawnień\n1\tKarol Mróz\tprojektant\tKAT/0991/OWOK/15\n2\tIzabela Sęk\tsprawdzający\t123/89/Ka\nOkólnik OIRP nr 3/2026 dołączono do akt.', ['KAT/0991/OWOK/15', '123/89/Ka'], ['3/2026']);
+  str('Geodeta uprawniony Zenon Marek, nr uprawnień 15523 – pomiar sytuacyjny. Naczelnik Wydziału Geodezji i Kartografii, uprawnienia do podpisu nr 4/2026 w systemie EZD.', ['15523'], ['4/2026']);
+  // Kolumna numeru uprawnień tylko przy osobie w wierszu; wykaz działek, znak sprawy w kształcie
+  // numeru uprawnień, dokument izby dla członków i stanowisko urzędu zostają jawne.
+  str('Lp.;Imię i nazwisko;Nr członka izby\n1;Anna Nowak;MAZ/BO/0123/10\nSprawa OR/0456/POW/24 prowadzona przez Wydział Organizacyjny. Ankieta dla członków PIIB nr 2/2026.', ['MAZ/BO/0123/10'], ['OR/0456/POW/24', '2/2026']);
+  neg('Lp.\tNr ewidencyjny\tObręb\tPowierzchnia [ha]\n1\t123/4\t0005 Zalesie\t0,1234\nLp.;Nazwa jednostki;Nr członkowski;Składka\n1;Ochotnicza Straż Pożarna w Zalesiu;0123;200,00', ['123/4', '0123']);
+  neg('Architekt Miejski, Biuro Architektury i Planowania Przestrzennego (MOIA nr 12/2024 – stanowisko). Geodeta Powiatowy, uprawnienia nr 3/2025 do PZGiK.', ['12/2024', '3/2025']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
