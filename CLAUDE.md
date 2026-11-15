@@ -109,6 +109,7 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
   w `docs/EWALUACJA-SERIA-2.md`, `-SERIA-3.md`). Seria 3 robocza: recall 87,3% → 94,7%, nadmiarowe
   64 → 2 na 358; odłożona 87,7% → 90,9%, 69 → 36. Ewaluacja serii: `node scripts/eval/run-eval.mjs
   --eval --set test-data/seria-3/robocza --profile domyslny`. Części odłożonej nie używać do strojenia.
+- Handoff: `docs/handoff-2026-11-15.md` (start: Backlog 9, czas startu).
 - Bramki pliku: sufit rozmiaru z limitu poczty Exchange (7 120 614 B), strażnik składu
   (`scripts/e2e/sklad.test.mjs`), job CI `start` (czas startu, nieblokujący; dziś 1,8× wolniej niż
   v0.47.0, Backlog 9). Opis: `docs/WYDANIE.md`, „Rozmiar i czas startu”.
