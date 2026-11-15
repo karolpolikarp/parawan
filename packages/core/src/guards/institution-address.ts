@@ -342,8 +342,22 @@ function partyUnitLevel(s: string, party: boolean): -1 | 0 | 2 {
  *  w narzędniku („Gminą Pszczyna”, „Powiatem Kłodzkim”) i Skarb Państwa („Skarbem Państwa – Starostą
  *  Kłodzkim”) to strona umowy, stopień 2; mianownik („Gmina Pszczyna”) tylko z `party` (strona
  *  z reprezentantem w tym samym wierszu). `strictMarker`: słaby człon wymaga znacznika innego niż
- *  sama miejscowość po „w” (numery podmiotu: NIP gabinetu czy szkoły jazdy to NIP osoby). */
+ *  sama miejscowość po „w” (numery podmiotu: NIP gabinetu czy szkoły jazdy to NIP osoby).
+ *  Wynik zależy tylko od argumentów i stałych słowników, więc liczony raz na napis: ta sama nazwa
+ *  przy każdym adresie pisma wraca w kilku przebiegach (kod, miejscowość, ochrona ulic). */
 export function institutionNameLevel(line: string, party = false, strictMarker = false): NameLevel {
+  if (line.length > 200) return institutionNameLevelNow(line, party, strictMarker);
+  const key = `${party ? 1 : 0}${strictMarker ? 1 : 0}${line}`;
+  let r = nameLevelMemo.get(key);
+  if (r === undefined) {
+    if (nameLevelMemo.size >= 4096) nameLevelMemo.clear();
+    r = institutionNameLevelNow(line, party, strictMarker);
+    nameLevelMemo.set(key, r);
+  }
+  return r;
+}
+const nameLevelMemo = new Map<string, NameLevel>();
+function institutionNameLevelNow(line: string, party: boolean, strictMarker: boolean): NameLevel {
   const s = line.trim().replace(RE_CITY_MASK, 'Miejscowość');
   if (s.length < 4 || s.length > 100 || !/^\p{Lu}/u.test(s)) return 0;
   if (/[:@[\]]/u.test(s) || RE_RESIDENCE_LABEL.test(s)) return 0;
