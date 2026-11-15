@@ -197,7 +197,7 @@ Domyka je opcjonalny dodatek AI (osobny projekt, niżej).
 
 > [!NOTE]
 > Benchmark warstwy offline (deterministyczny zbiór, [`docs/BENCHMARK.md`](docs/BENCHMARK.md)):
-> **recall 98,7%, precyzja-proxy 99,9%, F1 99,3%** (rdzeń, bez NER). Wycieki pochodzą z celowo
+> **recall 98,8%, precyzja-proxy 99,9%, F1 99,3%** (rdzeń, bez NER). Wycieki pochodzą z celowo
 > trudnej kategorii rzadkich i obcych nazwisk bez kontekstu, którą domyka dodatek AI.
 > W pozostałych kategoriach recall wynosi 100%.
 

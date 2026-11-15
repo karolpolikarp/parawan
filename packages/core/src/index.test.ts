@@ -3907,7 +3907,7 @@ test('K20 pułapki: osoby obok eponimu, nagłówek w osobnym wierszu i mianownik
     ['Skala Wiśniewski', N],
     ['Objaw Kowalska', N],
     ['Prątki wykryto u Pawlika.', `Prątki wykryto u ${N}.`],
-    ['Dystrofia mięśniowa u Mariusza Kocha.', `Dystrofia mięśniowa u ${N}.`],
+    ['Dystrofia mięśniowa u Mariusza Kocha.', `[DANE O ZDROWIU] u ${N}.`],
     ['Pacjent Jan Kowalski, odruch Babińskiego dodatni.', `Pacjent ${N}, odruch Babińskiego dodatni.`],
     ['Na moście Jan Kowalski zatrzymał auto.', `Na moście ${N} zatrzymał auto.`],
     ['Na moście Kowalski potrącił pieszego.', `Na moście ${N} potrącił pieszego.`],
@@ -11707,7 +11707,7 @@ test('zdrowie klasa 4: rozpoznanie po kotwicy, nazwa choroby po budowie słowa, 
   const cases: [string, string][] = [
     // kotwica rozpoznania i nazwa spoza listy: do końca frazy, z dopowiedzeniem i kodem
     ['U wnioskodawczyni rozpoznano toczeń rumieniowaty układowy, co potwierdza dokumentacja.', `U wnioskodawczyni rozpoznano ${Z}, co potwierdza dokumentacja.`],
-    ['Syn stron ma zdiagnozowaną mukowiscydozę i wymaga codziennej fizjoterapii.', `Syn stron ma zdiagnozowaną ${Z} i wymaga codziennej fizjoterapii.`],
+    ['Syn stron ma zdiagnozowaną mukowiscydozę i wymaga codziennej fizjoterapii.', `Syn stron ma zdiagnozowaną ${Z} i wymaga codziennej ${Z}.`],
     ['Zdiagnozowano u niej endometriozę oraz niedoczynność tarczycy.', `Zdiagnozowano u niej ${Z} oraz ${Z}.`],
     ['W wywiadzie: padaczka od 12. roku życia, obecnie bez napadów.', `W wywiadzie: ${Z} od 12. roku życia, obecnie bez napadów.`],
     ['Kurator ustaliła, że uczestnik postępowania ma rozpoznane PTSD i przyjmuje leki.', `Kurator ustaliła, że uczestnik postępowania ma rozpoznane ${Z} i przyjmuje leki.`],
@@ -13462,8 +13462,8 @@ test('Seria 3: leczenie w złożeniu, opieka i grupa chorych po słowie tematu n
     ['Pani Maria Kowal zakończyła kurs immunoterapii alergii na jad osy.', `Pani ${N} zakończyła kurs ${H} osy.`],
     ['Pan Jan Kowalski zakończył kurs insulinoterapii cukrzycy typu 1.', `Pan ${N} zakończył kurs ${H}.`],
     ['Pani Maria Kowal jest w trakcie programu psychoterapii depresji.', `Pani ${N} jest w trakcie programu psychoterapii ${H}.`],
-    ['Pan Jan Kowalski odbył kurs fizjoterapii po udarze.', `Pan ${N} odbył kurs fizjoterapii ${H}.`],
-    ['Lp. | Osoba | Uwagi\n1 | Jan Kowalski | kurs kinezyterapii po złamaniu szyjki kości udowej\n2 | Anna Nowak | program immunoterapii czerniaka\n', `Lp. | Osoba | Uwagi\n1 | ${N} | kurs kinezyterapii po ${H}\n2 | ${N} | program ${H}\n`],
+    ['Pan Jan Kowalski odbył kurs fizjoterapii po udarze.', `Pan ${N} odbył kurs ${H}.`],
+    ['Lp. | Osoba | Uwagi\n1 | Jan Kowalski | kurs kinezyterapii po złamaniu szyjki kości udowej\n2 | Anna Nowak | program immunoterapii czerniaka\n', `Lp. | Osoba | Uwagi\n1 | ${N} | kurs ${H} po ${H}\n2 | ${N} | program ${H}\n`],
     // grupa odbiorców z chorobą przy osobie
     ['Pan Jan Kowalski uczestniczy w warsztatach dla osób po udarze mózgu.', `Pan ${N} uczestniczy w warsztatach dla osób ${H}.`],
     ['Pan Jan Kowalski został skierowany na turnus i kurs dla osób po amputacji kończyny.', `Pan ${N} został skierowany na turnus i kurs dla osób ${H}.`],
@@ -13509,7 +13509,7 @@ test('Seria 3: przyczyna lub stan w środku odcinka po słowie tematu („po”,
 test('Seria 3: stan funkcjonalny osoby z choroby lub niepełnosprawności znika, a wózek widłowy, położenie, stanowisko i przepis zostają', () => {
   const H = '[DANE O ZDROWIU]';
   masked([
-    ['Pani Ewelina Wrzesińska porusza się na wózku inwalidzkim po urazie rdzenia kręgowego.', `Pani ${N} ${H} po urazie rdzenia kręgowego.`],
+    ['Pani Ewelina Wrzesińska porusza się na wózku inwalidzkim po urazie rdzenia kręgowego.', `Pani ${N} ${H} po ${H}.`],
     ['Wnioskodawcy wskazali, że Pani Irena Kmieć porusza się na wózku inwalidzkim i podjazd jest jedyną drogą.', `Wnioskodawcy wskazali, że Pani ${N} ${H} i podjazd jest jedyną drogą.`],
     ['– stan po upadku w domu (2025), porusza się przy balkoniku,', `– stan po upadku w domu (2025), ${H},`],
     ['Ojciec wnioskodawczyni chodzi o kulach łokciowych i wymaga pomocy przy kąpieli.', `Ojciec wnioskodawczyni ${H} i ${H}.`],
@@ -13914,5 +13914,154 @@ test('Seria 3: imię przed „o” z tematem to autor lub rozmówca, a lokal „
     ['Kacprowi rozpoznano białaczkę, trwa zbiórka „Pomóż Kacprowi”.', `Kacprowi rozpoznano ${H}, trwa zbiórka „Pomóż Kacprowi”.`],
     ['Podczas wizyty u Zosi stwierdzono cukrzycę.', `Podczas wizyty u Zosi stwierdzono ${H}.`],
     ['U Zosi stwierdzono cukrzycę.', `U Zosi stwierdzono ${H}.`],
+  ]);
+});
+test('Seria 3: ślad leczenia bez nazwy choroby, fraza rozbita wtrąceniem i schorzenie po budowie słowa znikają, a likwidacja, rehabilitacja zawodowa i studia z fizjoterapii zostają', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    // ślad leczenia przy osobie: trwające leczenie, cykle, rehabilitacja, kontrole, opieka, rytm zabiegów
+    ['Wnioskodawczyni jest w trakcie leczenia i nie może podjąć pracy.', `Wnioskodawczyni jest w trakcie ${H} i nie może podjąć pracy.`],
+    ['Mąż wnioskodawczyni jest po trzech cyklach chemioterapii.', `Mąż wnioskodawczyni jest po ${H}.`],
+    ['Syn korzysta z rehabilitacji domowej dwa razy w tygodniu.', `Syn korzysta z ${H} dwa razy w tygodniu.`],
+    ['Córka od września jest rehabilitowana pięć razy w tygodniu.', `Córka od września jest ${H}.`],
+    ['Wnioskodawczyni była hospitalizowana od 3 do 12 marca 2026 r.', `Wnioskodawczyni była ${H}.`],
+    ['Mówiła, że jest po chemii i nie da rady przychodzić.', `Mówiła, że jest ${H} i nie da rady przychodzić.`],
+    ['Zgłaszająca poinformowała, że jest dwa tygodnie po operacji wszczepienia bypassów.', `Zgłaszająca poinformowała, że jest dwa tygodnie ${H}.`],
+    ['Pan Kowalski pozostaje pod opieką pielęgniarki środowiskowej.', `Pan ${N} pozostaje ${H}.`],
+    ['Podopieczna jeździ na kontrole w poradni diabetologicznej.', `Podopieczna jeździ na kontrole w ${H}.`],
+    ['Wyjaśniłam, że choruję na cukrzycę i samochód jest mi potrzebny do dojazdów na rehabilitację.', `Wyjaśniłam, że choruję na ${H} i samochód jest mi potrzebny do dojazdów na ${H}.`],
+    ['Pani Halina korzysta z hipoterapii.', `Pani ${N} korzysta z ${H}.`],
+    ['Matka nie może przyjść, ponieważ od sierpnia przebywa w sanatorium po endoprotezoplastyce stawu biodrowego.', `Matka nie może przyjść, ponieważ od sierpnia przebywa ${H}.`],
+    // wtrącenie między kotwicą a frazą: wtrącenie zostaje jawne
+    ['Pani Anna Lis była leczona — według zaświadczenia z 3 marca — onkologicznie.', `Pani ${N} była ${H} — według zaświadczenia z 3 marca — ${H}.`],
+    ['U syna rozpoznano, według opinii poradni z 3 marca, autyzm dziecięcy.', `U syna rozpoznano, według opinii poradni z 3 marca, ${H}.`],
+    // schorzenie po budowie słowa i konstrukcji: -plegia, -emia, -ektomia, porażenie, niewydolność, wyliczenie po przecinku
+    ['U pana Jana stwierdzono tetraplegię po urazie rdzenia kręgowego.', `U pana ${N} stwierdzono ${H} po ${H}.`],
+    ['U dziecka rozpoznano hiperglikemię i nawracające hipoglikemie.', `U dziecka rozpoznano ${H} i ${H}.`],
+    ['Wnioskodawca jest po laryngektomii.', `Wnioskodawca jest ${H}.`],
+    ['Lena ma mózgowe porażenie dziecięce.', `Lena ma ${H}.`],
+    ['Pani Maria ma porażenie nerwu twarzowego.', `Pani ${N} ma ${H}.`],
+    ['Pan Nowak ma przewlekłą niewydolność krążenia.', `Pan ${N} ma ${H}.`],
+    ['Syn jest po urazie głowy.', `Syn jest po ${H}.`],
+    ['U chłopca stwierdzono niepełnosprawność wieloraką, obniżone napięcie mięśniowe w obrębie obręczy barkowej.', `U chłopca ${H} wieloraką, ${H}.`],
+    ['Rozpoznano cukrzycę, nadciśnienie, ale nie zalecono leczenia.', `Rozpoznano ${H}, ${H}, ale nie zalecono leczenia.`],
+  ]);
+  keep([
+    'Spółka jest w trakcie likwidacji.',
+    'Budynek jest w trakcie remontu.',
+    'Most jest po trzech cyklach badań.',
+    'Gmina prowadzi rehabilitację domową w ramach programu.',
+    'Turnus rehabilitacyjny dofinansowuje PCPR na wniosek.',
+    'Przepisy o leczeniu uzdrowiskowym zmieniono w 2024 r.',
+    'Zespół Szkół nr 2 w Puławach organizuje rekrutację.',
+    'Terapia zajęciowa w Warsztacie Terapii Zajęciowej odbywa się codziennie.',
+    'W raporcie wskazano niewydolność systemu ochrony zdrowia.',
+    'Uczeń czyta prozę polską na lekcji.',
+    'Anatomia jest przedmiotem na pierwszym roku.',
+    'W szkole odbyła się lekcja o autotomii jaszczurek i dychotomii.',
+    'Oddział Chirurgii Ogólnej mieści się na II piętrze.',
+    'Artykuł 18 ustawy o rehabilitacji zawodowej osób niepełnosprawnych.',
+    'Akademia Medyczna im. Piotra Nowaka ogłasza nabór.',
+    'Rozpoznano, że wniosek jest zasadny.',
+  ]);
+  masked([
+    // osoba obok: dalej jawne, gdy to nie leczenie
+    ['Pani Anna Lis jest w trakcie rehabilitacji zawodowej w PCPR.', `Pani ${N} jest w trakcie rehabilitacji zawodowej w PCPR.`],
+    ['Jan Nowak ukończył studia z fizjoterapii w 2010 r.', `${N} ukończył studia z fizjoterapii w 2010 r.`],
+    ['Anna Kowalska zapytała o kolejki do fizjoterapii w powiecie.', `${N} zapytała o kolejki do fizjoterapii w powiecie.`],
+    ['Pan Nowak zwrócił uwagę na zaburzenia krążenia informacji w urzędzie.', `Pan ${N} zwrócił uwagę na zaburzenia krążenia informacji w urzędzie.`],
+    ['Rodzina wykazuje niewydolność wychowawczą, a Pan Jan Nowak jest bezrobotny.', `Rodzina wykazuje niewydolność wychowawczą, a Pan ${N} jest bezrobotny.`],
+    ['Pani Ewa Nowak, absolwentka akademii medycznej, otrzymała premię.', `Pani ${N}, absolwentka akademii medycznej, otrzymała premię.`],
+    ['Pan Jan Nowak uczy anatomii i prowadzi zajęcia z mikroskopii.', `Pan ${N} uczy anatomii i prowadzi zajęcia z mikroskopii.`],
+    ['Pani Anna Lis prowadzi socjoterapię dla młodzieży.', `Pani ${N} prowadzi socjoterapię dla młodzieży.`],
+    ['Pan Kowalski jest dwa tygodnie po urlopie.', `Pan ${N} jest dwa tygodnie po urlopie.`],
+    ['Pan Jan Nowak przeprowadził kontrolę w przychodni rodzinnej.', `Pan ${N} przeprowadził kontrolę w przychodni rodzinnej.`],
+    ['Stwierdzono, że Pan Jan Nowak, uczeń, nie stawił się.', `Stwierdzono, że Pan ${N}, uczeń, nie stawił się.`],
+  ]);
+});
+test('Seria 3: diagnostyka i rehabilitacja w toku tylko z dopowiedzeniem medycznym i przy osobie, a terapia jako zawód, kurs i placówka oraz ziemia zostają jawne', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    // ślad leczenia przy osobie z dopowiedzeniem medycznym
+    ['Syn jest w trakcie rehabilitacji neurologicznej.', `Syn jest w trakcie ${H}.`],
+    ['Ojciec jest w trakcie diagnostyki kardiologicznej.', `Ojciec jest w trakcie ${H}.`],
+    ['Syn jest w trakcie rehabilitacji w szpitalu w Busku.', `Syn jest w trakcie ${H} w Busku.`],
+    ['Wnioskodawczyni jest w trakcie hospitalizacji.', `Wnioskodawczyni jest w trakcie ${H}.`],
+    ['Pan Jan Nowak kontynuuje leczenie w poradni.', `Pan ${N} kontynuuje ${H} w poradni.`],
+    ['Pan Kowalski chodzi na rehabilitację dwa razy w tygodniu.', `Pan ${N} chodzi na ${H} dwa razy w tygodniu.`],
+    ['Lekarz zalecił synowi hipoterapię.', `Lekarz zalecił synowi ${H}.`],
+    ['Pan Jan Kowalski odbył kurs fizjoterapii po udarze.', `Pan ${N} odbył kurs ${H}.`],
+    // -emia stanu krwi, także „ischemia”
+    ['U ojca stwierdzono ischemię kończyny dolnej.', `U ojca stwierdzono ${H}.`],
+    ['U wnioskodawcy stwierdzono uremię i anemię.', `U wnioskodawcy stwierdzono ${H}.`],
+    // diagnostyka potrzeb, rzecz, instytucja, rehabilitacja niemedyczna
+    ['Pedagog jest w trakcie diagnostyki potrzeb ucznia.', 'Pedagog jest w trakcie diagnostyki potrzeb ucznia.'],
+    ['Technik jest w trakcie diagnostyki komputera.', 'Technik jest w trakcie diagnostyki komputera.'],
+    ['Weterynarz jest w trakcie diagnostyki psa.', 'Weterynarz jest w trakcie diagnostyki psa.'],
+    ['Poradnia jest w trakcie diagnostyki przesiewowej w przedszkolach.', 'Poradnia jest w trakcie diagnostyki przesiewowej w przedszkolach.'],
+    ['Szkoła jest w trakcie diagnostyki wstępnej uczniów.', 'Szkoła jest w trakcie diagnostyki wstępnej uczniów.'],
+    ['Budynek jest w trakcie rehabilitacji.', 'Budynek jest w trakcie rehabilitacji.'],
+    ['Pan Henryk jest w trakcie rehabilitacji kredytowej.', `Pan ${N} jest w trakcie rehabilitacji kredytowej.`],
+    ['Szpital kontynuuje leczenie pacjentów w nowym budynku.', 'Szpital kontynuuje leczenie pacjentów w nowym budynku.'],
+    ['Oddział przechodzi leczenie?', 'Oddział przechodzi leczenie?'],
+    ['Zespół kontynuuje leczenie zaległości w księgowości.', 'Zespół kontynuuje leczenie zaległości w księgowości.'],
+    ['Pan Kowalski chodzi na rehabilitację zawodową w ramach programu PFRON.', `Pan ${N} chodzi na rehabilitację zawodową w ramach programu PFRON.`],
+    ['Pani Nowak uczęszcza na rehabilitację społeczną w WTZ.', `Pani ${N} uczęszcza na rehabilitację społeczną w WTZ.`],
+    // terapia jako zawód, kwalifikacja i placówka w pismach kadrowych
+    ['Pan Jan Kowalski jest koordynatorem dogoterapii w fundacji.', `Pan ${N} jest koordynatorem dogoterapii w fundacji.`],
+    ['Pani Anna Nowak jest certyfikowanym trenerem arteterapii.', `Pani ${N} jest certyfikowanym trenerem arteterapii.`],
+    ['Pan Adam Lis jest nauczycielem fizjoterapii w szkole policealnej.', `Pan ${N} jest nauczycielem fizjoterapii w szkole policealnej.`],
+    ['Pani Ewa Kos jest absolwentką fizjoterapii.', `Pani ${N} jest absolwentką fizjoterapii.`],
+    ['Pan Szymon jest w trakcie kursu hipoterapii.', `Pan ${N} jest w trakcie kursu hipoterapii.`],
+    ['Pani Anna Kowalska została zatrudniona w dziale fizjoterapii.', `Pani ${N} została zatrudniona w dziale fizjoterapii.`],
+    ['Pani Ewa Lis pracuje w gabinecie fizjoterapii.', `Pani ${N} pracuje w gabinecie fizjoterapii.`],
+    ['Pan Jan Nowak jest zatrudniony w zakładzie hydroterapii na pół etatu.', `Pan ${N} jest zatrudniony w zakładzie hydroterapii na pół etatu.`],
+    ['Pani Maria Lis jest kierownikiem działu rehabilitacji i fizjoterapii w szpitalu.', `Pani ${N} jest kierownikiem działu rehabilitacji i fizjoterapii w szpitalu.`],
+    ['Pan Adam Kowalski pracuje w ośrodku hipoterapii jako instruktor.', `Pan ${N} pracuje w ośrodku hipoterapii jako instruktor.`],
+    ['Pani Ewa Kos ukończyła kurs arteterapii.', `Pani ${N} ukończyła kurs arteterapii.`],
+    ['Pani Joanna Kos jest autorką programu dogoterapii dla przedszkoli.', `Pani ${N} jest autorką programu dogoterapii dla przedszkoli.`],
+    // ziemia, podziemia, brzemię i drzemka mają końcówkę -emia
+    ['Pan Jan Kowalski ma ziemię w Zalesiu.', `Pan ${N} ma ziemię w Zalesiu.`],
+    ['Rolnik Jan Nowak posiada ziemię o powierzchni 5 ha.', `Rolnik ${N} posiada ziemię o powierzchni 5 ha.`],
+    ['Pani Anna Nowak dzierżawi ziemię od gminy.', `Pani ${N} dzierżawi ziemię od gminy.`],
+    ['Pan Jan Nowak upadł na ziemię.', `Pan ${N} upadł na ziemię.`],
+    ['Pan Jan Kowalski pracuje w podziemiach kopalni.', `Pan ${N} pracuje w podziemiach kopalni.`],
+    ['Dzieci Pani Nowak drzemią po obiedzie.', `Dzieci Pani ${N} drzemią po obiedzie.`],
+    ['Pan Jan Nowak ma brzemię długów.', `Pan ${N} ma brzemię długów.`],
+    ['Pani Maria Kowal studiuje biochemię.', `Pani ${N} studiuje biochemię.`],
+  ]);
+});
+
+test('Seria 3: terapia jako zajęcia, usługa, metoda terapeuty i temat zostaje jawna, a ta sama terapia u uczestnika, klienta i pacjenta znika', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    // uczestnik, klient i pacjent terapii: dana o zdrowiu
+    ['Dziecko Pani Nowak korzysta z zajęć z dogoterapii w ramach WWR.', `Dziecko Pani ${N} korzysta z zajęć z ${H} w ramach WWR.`],
+    ['Córka uczęszcza na zajęcia hipoterapii dwa razy w tygodniu.', `Córka uczęszcza na zajęcia ${H} dwa razy w tygodniu.`],
+    ['Syn Pani Nowak korzysta z usług fizjoterapii w ośrodku.', `Syn Pani ${N} korzysta z usług ${H} w ośrodku.`],
+    ['Lekarz stosuje fototerapię u noworodka Pani Nowak.', `Lekarz stosuje ${H} u noworodka Pani ${N}.`],
+    ['Pani Nowak stosuje aromaterapię na bezsenność.', `Pani ${N} stosuje ${H} na bezsenność.`],
+    ['Rozmawiałam z lekarzem o fizjoterapii syna.', `Rozmawiałam z lekarzem o ${H} syna.`],
+    ['Pan Jan Nowak jest beneficjentem zajęć z hipoterapii.', `Pan ${N} jest beneficjentem zajęć z ${H}.`],
+    ['Pani Anna Lis jest uczestniczką warsztatów z arteterapii.', `Pani ${N} jest uczestniczką warsztatów z ${H}.`],
+    ['Opiekun prawny stara się o hipoterapię dla syna.', `Opiekun prawny stara się o ${H} dla syna.`],
+    // wykonawca i organizator zajęć, rzeczownik czynności w dopełniaczu, usługa w zamówieniu, metoda terapeuty,
+    // temat szkolenia, uprawnień i pracy („z zakresu”, „o” z miejscownikiem), lokal i sprzęt
+    ['Pani Wiśniewska jest koordynatorką zajęć z ludoterapii w przedszkolu.', `Pani ${N} jest koordynatorką zajęć z ludoterapii w przedszkolu.`],
+    ['Pani Kowalska jest organizatorką zajęć z dogoterapii w szkole.', `Pani ${N} jest organizatorką zajęć z dogoterapii w szkole.`],
+    ['Pani Anna Kowalska jest instruktorką zajęć z hipoterapii.', `Pani ${N} jest instruktorką zajęć z hipoterapii.`],
+    ['Pani Nowak ukończyła dwa cykle szkoleń z dogoterapii.', `Pani ${N} ukończyła dwa cykle szkoleń z dogoterapii.`],
+    ['Oferta Pana Kowalskiego na usługi fizjoterapii została wybrana jako najkorzystniejsza.', `Oferta Pana ${N} na usługi fizjoterapii została wybrana jako najkorzystniejsza.`],
+    ['Pan Jan Lis jest wykonawcą usług hydroterapii dla domu pomocy społecznej.', `Pan ${N} jest wykonawcą usług hydroterapii dla domu pomocy społecznej.`],
+    ['Pani Nowak jest terapeutką i stosuje muzykoterapię w pracy z dziećmi.', `Pani ${N} jest terapeutką i stosuje muzykoterapię w pracy z dziećmi.`],
+    ['Pani Anna Kos odbyła szkolenie z zakresu fizjoterapii.', `Pani ${N} odbyła szkolenie z zakresu fizjoterapii.`],
+    ['Pan Jan Nowak ma uprawnienia z zakresu kinezyterapii.', `Pan ${N} ma uprawnienia z zakresu kinezyterapii.`],
+    ['Pani Ewa Lis ma kwalifikacje z zakresu ergoterapii.', `Pani ${N} ma kwalifikacje z zakresu ergoterapii.`],
+    ['Pan Marek Wilk ukończył kurs z zakresu hipoterapii.', `Pan ${N} ukończył kurs z zakresu hipoterapii.`],
+    ['Pani Joanna Kos napisała pracę magisterską o muzykoterapii.', `Pani ${N} napisała pracę magisterską o muzykoterapii.`],
+    ['Pan Piotr Lis uczestniczy w konferencji o fizjoterapii.', `Pan ${N} uczestniczy w konferencji o fizjoterapii.`],
+    ['Pani Ewa Nowak jest właścicielką salonu aromaterapii.', `Pani ${N} jest właścicielką salonu aromaterapii.`],
+    ['Pan Jan Kowalski sprzedaje sprzęt do magnetoterapii.', `Pan ${N} sprzedaje sprzęt do magnetoterapii.`],
+    ['Pan Adam Nowak zajmuje się produkcją urządzeń do laseroterapii.', `Pan ${N} zajmuje się produkcją urządzeń do laseroterapii.`],
   ]);
 });

@@ -764,6 +764,44 @@ działają na GitHubie od chwili wypchnięcia tagów.
   z imieniem („Pensjonat u Basi przyjmuje kuracjuszy po zawale serca”, „Gospoda U Kasi”) i imię
   w tytule akcji („Akcja „Pomóż Zuzi” zbiera środki dla dzieci z chorobą nowotworową”). Na trzeciej serii 50 pism (część robocza) wycieków jest 80 zamiast 83 (danych
   o zdrowiu 29 zamiast 32), bez nowych nadmiarowych zakryć.
+- **Ślad leczenia osoby znika także bez nazwy choroby, a schorzenie spoza słownika Parawan
+  rozpoznaje po budowie słowa.** Wcześniej w wywiadzie i we wniosku zostawało jawne to, że ktoś
+  się leczy, choć nazwa choroby była zakryta albo jej nie było. Teraz: „jest w trakcie [DANE
+  O ZDROWIU]” (leczenia), „jest po [DANE O ZDROWIU]” (trzech cyklach chemioterapii; „po chemii”,
+  „po przeszczepie”), „korzysta z [DANE O ZDROWIU]” (rehabilitacji domowej), „od września jest [DANE
+  O ZDROWIU]” (rehabilitowana pięć razy w tygodniu), „była [DANE O ZDROWIU]” (hospitalizowana od
+  3 do 12 marca 2026 r.), „pozostaje [DANE O ZDROWIU]” (pod opieką pielęgniarki środowiskowej),
+  „kontrole w [DANE O ZDROWIU]” (poradni diabetologicznej), „do dojazdów na [DANE O ZDROWIU]”,
+  „jest dwa tygodnie [DANE O ZDROWIU]” (po operacji wszczepienia bypassów). Wtrącenie między
+  słowem a chorobą zostaje jawne, a choroba znika: „U syna rozpoznano, według opinii poradni
+  z 3 marca, [DANE O ZDROWIU]”, „była [DANE O ZDROWIU] — według zaświadczenia z 3 marca — [DANE
+  O ZDROWIU]” (leczona onkologicznie). Schorzenie spoza słownika po końcówce i konstrukcji:
+  tetraplegia, hiperglikemia, laryngektomia, endoprotezoplastyka, hipoterapia, „mózgowe porażenie
+  dziecięce”, „porażenie nerwu twarzowego”, „przewlekła niewydolność krążenia”, „uraz rdzenia
+  kręgowego”, „objawy fobii szkolnej”, a po przecinku dalsza nazwa z wyliczenia („[DANE
+  O ZDROWIU], obniżone napięcie mięśniowe”). Zostają jawne: „Spółka jest w trakcie likwidacji”,
+  „Gmina prowadzi rehabilitację domową”, „rehabilitacja zawodowa”, „studia z fizjoterapii”,
+  „kolejki do fizjoterapii”, „socjoterapia”, „niewydolność systemu”, „niewydolność wychowawcza”,
+  „zaburzenia krążenia informacji”, „Zespół Szkół”, „Warsztat Terapii Zajęciowej”, anatomia jako
+  przedmiot, proza, „akademia”, „premia”, „mikroskopia”. Diagnostyka i rehabilitacja w toku znikają
+  tylko z dopowiedzeniem medycznym i przy osobie: „Ojciec jest w trakcie [DANE O ZDROWIU]”
+  (diagnostyki kardiologicznej), a „Pedagog jest w trakcie diagnostyki potrzeb ucznia”, „Poradnia
+  jest w trakcie diagnostyki przesiewowej”, „Budynek jest w trakcie rehabilitacji”, „Szpital
+  kontynuuje leczenie pacjentów” i „chodzi na rehabilitację zawodową w ramach programu PFRON”
+  zostają. Terapia jako zawód, kwalifikacja, usługa, metoda pracy, temat i placówka zostaje jawna:
+  „instruktor hipoterapii”, „koordynatorka zajęć z ludoterapii”, „absolwentka fizjoterapii”,
+  „ukończyła dwa cykle szkoleń z dogoterapii”, „ma uprawnienia z zakresu kinezyterapii”, „oferta
+  Pana Kowalskiego na usługi fizjoterapii”, „wykonawca usług hydroterapii”, „jest terapeutką
+  i stosuje muzykoterapię w pracy z dziećmi”, „pracę magisterską o muzykoterapii”, „konferencja
+  o fizjoterapii”, „właścicielka salonu aromaterapii”, „sprzedaje sprzęt do magnetoterapii”,
+  „zatrudniona w dziale fizjoterapii”, „ośrodek hipoterapii”. Ta sama terapia u uczestnika,
+  klienta i pacjenta dalej znika: „korzysta z zajęć z [DANE O ZDROWIU]” (dogoterapii), „korzysta
+  z usług [DANE O ZDROWIU]” (fizjoterapii), „jest uczestniczką warsztatów z [DANE O ZDROWIU]”,
+  „stosuje [DANE O ZDROWIU] u noworodka”, „rozmawiałam z lekarzem o [DANE O ZDROWIU] syna”,
+  „kurs [DANE O ZDROWIU]” (fizjoterapii po udarze). Ziemia rolnika nie jest daną o zdrowiu: „posiada ziemię
+  o powierzchni 5 ha”, „dzierżawi ziemię od gminy”, „pracuje w podziemiach kopalni”, „drzemią po
+  obiedzie” zostają, a „ischemia” znika. Na trzeciej serii 50 pism (część robocza) wycieków jest
+  66 zamiast 80 (danych o zdrowiu 15 zamiast 29), bez nowych nadmiarowych zakryć.
 - **Pierwsze wklejone pismo i każda następna zmiana mają wynik od razu.** Parawan przygotowuje
   silnik zaraz po otwarciu pliku, a nie przy pierwszym piśmie. Wcześniej pierwsze przeliczenie
   trwało kilka razy dłużej niż kolejne, a pauza przed następnym rosła od niego do pół sekundy
