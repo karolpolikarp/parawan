@@ -2,6 +2,7 @@ import { defineConfig, normalizePath, type Plugin } from 'vite';
 import { viteSingleFile } from 'vite-plugin-singlefile';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { sklad } from './build/sklad';
 import { cspSkrot } from './src/csp-skrot';
 
 // Content-Security-Policy gotowego pliku. Obietnicę „tekst nie opuszcza przeglądarki” pilnuje
@@ -94,8 +95,11 @@ export default defineConfig({
   // JEDEN samowystarczalny index.html (JS+CSS inline). Kluczowe dla użycia z dysku:
   // Chromium blokuje <script type="module"> i <link crossorigin> na file:// (CORS,
   // origin null), więc rozbite assety NIE działają po podwójnym kliknięciu.
-  // cspSkrot na końcu: liczy skrót skryptu już wklejonego przez viteSingleFile.
-  plugins: [viteSingleFile(), compactHtml, cspMeta, cspSkrot()],
+  // cspSkrot na końcu: liczy skrót skryptu już wklejonego przez viteSingleFile. sklad stoi za
+  // viteSingleFile w tablicy, ale ma enforce 'pre', więc Vite i tak uruchamia go wcześniej: czyta
+  // mapę źródeł, zanim viteSingleFile wklei skrypt, i zapisuje dist/sklad.json dla
+  // scripts/e2e/sklad.test.mjs (build/sklad.ts).
+  plugins: [viteSingleFile(), sklad(fileURLToPath(new URL('../..', import.meta.url))), compactHtml, cspMeta, cspSkrot()],
   base: './',
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? 'dev'),
@@ -108,6 +112,10 @@ export default defineConfig({
     // (Chromium blokuje pobocze przy origin null). Limit obejmuje też fonty marki
     // (Archivo ~35 kB/podzbiór, IBM Plex Mono ~15 kB/waga) — stąd zapas 256 kB.
     assetsInlineLimit: 262144,
+    // Mapa źródeł tylko dla wtyczki sklad: „hidden” nie dopisuje do kodu komentarza
+    // sourceMappingURL, a sklad usuwa plik .map z paczki. index.html jest więc bajt w bajt taki sam
+    // jak bez mapy, a mapa nie trafia do dist ani do wydania.
+    sourcemap: 'hidden',
   },
   resolve: {
     // Importujemy rdzeń bezpośrednio ze źródeł TS — dev/build nie wymaga
