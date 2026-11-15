@@ -20,6 +20,21 @@ import { MASK, type PiiType } from './types';
 // choroby, którą przy ustawieniach domyślnych zakrywa maska [DANE O ZDROWIU].
 const BEZ_ZDROWIA = { types: (Object.keys(MASK) as PiiType[]).filter((t) => t !== 'ZDROWIE') };
 
+// Czasy dwóch przebiegów (krótkiego i długiego wejścia) do testów czasu liniowego. Każdy rozmiar
+// liczy się jako minimum z kilku powtórzeń, na przemian krótki i długi: minimum odcina pauzy GC
+// i obciążenie od plików testów biegnących równolegle, a naprzemienność rozkłada dryf maszyny
+// na oba rozmiary. Jeden pomiar długiego wejścia dawał w CI stosunek 6,6–6,8 przy kodzie
+// liniowym (lokalnie ok. 4), a kod kwadratowy i tak daje kilkanaście.
+function bestTimes<T>(time: (input: T) => number, small: T, big: T, reps = 3): [number, number] {
+  let a = Infinity;
+  let b = Infinity;
+  for (let i = 0; i < reps; i++) {
+    a = Math.min(a, time(small));
+    b = Math.min(b, time(big));
+  }
+  return [a, b];
+}
+
 // Buduje poprawny IBAN z kodu kraju + BBAN (liczymy cyfry kontrolne mod 97),
 // żeby test nie zależał od zapamiętanego wektora.
 function makeIban(country: string, bban: string): string {
@@ -1735,8 +1750,7 @@ test('sygnatury w długim wierszu bez znaków nowej linii: czas liniowy', () => 
       i % 2 ? 'Sygn. akt I C 1/20; ' : 'wyrok NSA z 2020 r., sygn. akt II OSK 1/20, oraz ',
     ).join('');
   redactPII(line(200), { types: ['ZNAK-SPRAWY'] });
-  const t1 = Math.min(time(line(1000)), time(line(1000)));
-  const t4 = time(line(4000));
+  const [t1, t4] = bestTimes(time, line(1000), line(4000));
   expect(t4 / t1).toBeLessThan(6);
 });
 
@@ -10177,8 +10191,7 @@ test('G7: długi dokument z adresami instytucji w jednym wierszu w czasie liniow
     ['inline', inline],
     ['nawias', paren],
   ] as const) {
-    const t1 = Math.min(time(gen(1000)), time(gen(1000)));
-    const t4 = time(gen(4000));
+    const [t1, t4] = bestTimes(time, gen(1000), gen(4000));
     expect(t4 / t1, name).toBeLessThan(6);
   }
   expect(redactPII(paren(4000)).redacted).toBe(paren(4000));
@@ -11285,8 +11298,7 @@ test('klasa 9: ocena kształtu rozmowy w czasie liniowym', () => {
     ['pary', pairs],
     ['pola', fields],
   ] as const) {
-    const t1 = Math.min(time(gen(2500)), time(gen(2500)));
-    const t4 = time(gen(10000));
+    const [t1, t4] = bestTimes(time, gen(2500), gen(10000));
     expect(t4 / t1, name).toBeLessThan(6);
     expect(time(gen(20000)), name).toBeLessThan(2000);
   }
@@ -11351,8 +11363,7 @@ test('klasa 12: reguła sylab wietnamskich w czasie liniowym', () => {
   };
   const caps = (n: number): string => Array.from({ length: n }, () => 'MINH THANH HOA LAN VAN DO').join(' ');
   redactPII(caps(200));
-  const t1 = Math.min(time(caps(1000)), time(caps(1000)));
-  const t4 = time(caps(4000));
+  const [t1, t4] = bestTimes(time, caps(1000), caps(4000));
   expect(t4 / t1).toBeLessThan(6);
 });
 
@@ -11447,8 +11458,7 @@ test('zdrowie klasa 3: frazy zdarzeń w czasie liniowym (długie odstępy, powt�
   const block = (n: number): string =>
     Array.from({ length: n }, () => `przebywa${' '.repeat(40)}na${' '.repeat(40)}zwolnieniu po operacji kolana orzeczenie o 12. tygodniu ciąży`).join(' ');
   redactPII(block(50));
-  const t1 = Math.min(time(block(250)), time(block(250)));
-  const t4 = time(block(1000));
+  const [t1, t4] = bestTimes(time, block(250), block(1000));
   expect(t4 / t1).toBeLessThan(6);
 });
 
@@ -11555,8 +11565,7 @@ test('zdrowie klasa 3: imiesłowy, zabiegi i temat pisma w czasie liniowym', () 
       () => `jest${' '.repeat(8)}od lat${' '.repeat(8)}leczona po przeszczepie nerki, trafiał${' '.repeat(8)}do szpitala jako zasady wypłaty zasiłku chorobowego ${'a'.repeat(60)}łem z udziałem`,
     ).join(' ');
   redactPII(block(50));
-  const t1 = Math.min(time(block(250)), time(block(250)));
-  const t4 = time(block(1000));
+  const [t1, t4] = bestTimes(time, block(250), block(1000));
   expect(t4 / t1).toBeLessThan(6);
 });
 
@@ -11696,8 +11705,7 @@ test('zdrowie klasa 3: rola osoby, podmiot i cel pobytu w czasie liniowym', () =
         'Pan Jan Nowak, kierownik działu, przypomina, że zwolnienie lekarskie należy dostarczyć. Pan Nowak, konserwator, przebywał w szpitalu od 8:00 do 16:00, naprawiając windy, a córka, która korzysta z pomocy psychologa, prowadzi zajęcia z gimnastyki i terapii ręki; Hurtownia przyjmuje Ibuprom, most był diagnozowany.',
     ).join(' ');
   redactPII(block(50));
-  const t1 = Math.min(time(block(250)), time(block(250)));
-  const t4 = time(block(1000));
+  const [t1, t4] = bestTimes(time, block(250), block(1000));
   expect(t4 / t1).toBeLessThan(6);
 });
 
@@ -11824,8 +11832,7 @@ test('zdrowie klasa 4: fraza rozpoznania w czasie liniowym', () => {
         'U syna rozpoznano zespół hiperkinetyczny z zaburzeniami uwagi (F90.0) i alergię na białko mleka krowiego; stwierdzono złamanie trzonu kości piszczelowej lewej, a Zespół Szkół stwierdził naruszenie zasad z powodu awarii.',
     ).join(' ');
   redactPII(block(50));
-  const t1 = Math.min(time(block(250)), time(block(250)));
-  const t4 = time(block(1000));
+  const [t1, t4] = bestTimes(time, block(250), block(1000));
   expect(t4 / t1).toBeLessThan(6);
 });
 
@@ -11912,8 +11919,7 @@ test('zdrowie klasa 4: maski rozpoznań podstawiane w czasie liniowym (długi wi
   for (const unit of ['W wywiadzie: astma. ', 'W wywiadzie nadciśnienie, ']) {
     const text = (n: number): string => unit.repeat(Math.ceil(n / unit.length));
     time(text(20_000));
-    const t1 = Math.min(time(text(50_000)), time(text(50_000)));
-    const t4 = time(text(200_000));
+    const [t1, t4] = bestTimes(time, text(50_000), text(200_000));
     expect(t4 / t1, unit).toBeLessThan(6);
   }
 });
