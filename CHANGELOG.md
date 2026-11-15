@@ -514,6 +514,34 @@ działają na GitHubie od chwili wypchnięcia tagów.
   do ewidencji placówek. Na
   trzeciej serii 50 pism (część robocza) wycieków jest 142 zamiast 158, bez nowych nadmiarowych
   zakryć.
+- **Tabela wklejona z Worda jako tekst znika w każdym wierszu, także bez linii „---” pod
+  nagłówkiem.** Wcześniej tabelę z kreskami „|” Parawan rozpoznawał tylko w zapisie Markdown
+  (kreski na obu końcach i wiersz „---”), więc w protokole komisji rekrutacyjnej czy liście
+  kandydatów zostawały jawne daty urodzenia i część osób. Teraz „Lp. | Nazwisko i imię | Data
+  urodzenia | Pkt” z wierszem „3 | Czerniak Zofia | 22.11.2022 | 165” daje „3 | [IMIĘ I NAZWISKO] |
+  [DATA-URODZENIA] | 165”. Tak samo działają kolumny wyrównane spacjami (kopia z PDF-a), kolumna
+  nazwana rolą („Kandydat”, „Uczeń”, „Wnioskodawca”, „Pracownik”), nagłówek „Imię i nazwisko
+  ucznia” i telefon stacjonarny w kolumnie „telefon” („H. Gąsienica-Ryś | 33 874 12 09” →
+  „[IMIĘ I NAZWISKO] | [TELEFON]”). W tabeli, w której Parawan rozpoznał osobę, znika też osoba
+  z jednym inicjałem („H. Gąsienica-Ryś”) i osoba spoza słownika imion („Liu Wei”), ta druga tylko
+  w wierszu z PESEL-em o poprawnej sumie albo z datą urodzenia. Jawne zostają kolumny bez danych
+  osoby (punkty, kryteria, data decyzji, kwota, stanowisko) i podmioty w kolumnie osób, także na
+  liście „Imię i nazwisko albo nazwa” beneficjentów czy kontrahentów: „MOPS Lipno”, „Eko Trans”,
+  „Czyste Powietrze”, „Armii Krajowej”, „Hotel Zamek”, „F.H. Marex”, „Nadleśnictwo Lipno”,
+  „Samorządowe Kolegium Odwoławcze”. Stanowisko w kolumnie osób („Starszy Referent”, „Kierowca
+  Autobusu”, „Tłumacz Przysięgły”, „Sołtys Zalesia”) zostaje jawne także w tabeli CSV, gdzie
+  wcześniej „Sołtys Zalesia;dieta” pod „Nazwisko i imię” dawało „[IMIĘ I NAZWISKO];dieta”, a numer
+  telefonu w wierszu stanowiska zostaje razem z nim. Pod nagłówkiem roli („Wnioskodawca”,
+  „Najemca”, „Beneficjent”, „Podatnik”, „Uczestnik”) w urzędzie stoją też firmy i organizacje,
+  więc osobę potwierdza tam dopiero komórka złożona z samych imion, nazwisk ze słownika
+  i inicjałów: „Kwiaciarnia Róża;lokal 4;54 288 33 12”, „Pensjonat Agata”, „Chór Cecylia”, „Bar
+  Mleczny Basia” zostają jawne, a z nimi telefon podmiotu, a w „F.H.U. Marex Jan Nowak” znika
+  tylko „Jan Nowak”. Nazwisko utworzone od funkcji w szyku „Nazwisko Imię” znika w całości:
+  „Wójtowicz Natan;02070803628” i „Sołtysik Teofil” dają „[IMIĘ I NAZWISKO]”, nie „[IMIĘ
+  I NAZWISKO] Natan”, a w wierszu z datą urodzenia także „Marszałek Wit” i „Kanclerz Iwo”. Tabela
+  bez kolumny osoby („Lp. | Nazwa podmiotu | Kwota”) się nie zmienia. Na
+  trzeciej serii 50 pism (część robocza) wycieków jest 126 zamiast 142, bez nowych nadmiarowych
+  zakryć.
 - **Pierwsze wklejone pismo i każda następna zmiana mają wynik od razu.** Parawan przygotowuje
   silnik zaraz po otwarciu pliku, a nie przy pierwszym piśmie. Wcześniej pierwsze przeliczenie
   trwało kilka razy dłużej niż kolejne, a pauza przed następnym rosła od niego do pół sekundy

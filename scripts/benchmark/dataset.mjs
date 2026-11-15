@@ -1381,6 +1381,24 @@ export function buildDataset() {
   str('Lp.;Imię i nazwisko;Nr członka izby\n1;Anna Nowak;MAZ/BO/0123/10\nSprawa OR/0456/POW/24 prowadzona przez Wydział Organizacyjny. Ankieta dla członków PIIB nr 2/2026.', ['MAZ/BO/0123/10'], ['OR/0456/POW/24', '2/2026']);
   neg('Lp.\tNr ewidencyjny\tObręb\tPowierzchnia [ha]\n1\t123/4\t0005 Zalesie\t0,1234\nLp.;Nazwa jednostki;Nr członkowski;Składka\n1;Ochotnicza Straż Pożarna w Zalesiu;0123;200,00', ['123/4', '0123']);
   neg('Architekt Miejski, Biuro Architektury i Planowania Przestrzennego (MOIA nr 12/2024 – stanowisko). Geodeta Powiatowy, uprawnienia nr 3/2025 do PZGiK.', ['12/2024', '3/2025']);
+  // Tabela wklejona z Worda jako tekst: „|” bez wiersza „---”, szyk „Nazwisko Imię”, osoba spoza
+  // słowników, kolumna nazwana rolą i kolumny wyrównane spacjami. Data decyzji, kwota, stanowisko
+  // i podmiot w kolumnie osób zostają jawne.
+  str('Lp. | Nazwisko i imię | Data urodzenia | Kryteria | Pkt\n1 | Czerniak Zofia | 22.11.2022 | wielodzietność | 165\n2 | Zych Natan | 05.04.2023 | brak | 15', ['Czerniak Zofia', '22.11.2022', 'Zych Natan', '05.04.2023'], ['wielodzietność', '165']);
+  str('Kandydat | telefon | e-mail\nD. Wróbel | 604 218 377 | d.wrobel@example.pl\nH. Gąsienica-Ryś | 33 874 12 09 | halina@example.pl', ['D. Wróbel', '604 218 377', 'H. Gąsienica-Ryś', '33 874 12 09', 'halina@example.pl'], ['Kandydat']);
+  str('Nazwisko i imię     Data urodzenia     PESEL\nKOWALCZYK Anna      12.03.1980         80031212345', ['KOWALCZYK Anna', '12.03.1980', '80031212345'], ['Data urodzenia']);
+  str('Wnioskodawca | Data wpływu | Sprawa\nAnna Nowak | 03.11.2026 | zasiłek\nNadleśnictwo Lipno | 04.11.2026 | dzierżawa\nSamorządowe Kolegium Odwoławcze | 05.11.2026 | odwołanie', ['Anna Nowak'], ['Nadleśnictwo Lipno', 'Samorządowe Kolegium Odwoławcze', '04.11.2026']);
+  str('Nazwisko i imię | Stanowisko | Data decyzji | Kwota\nJan Kowalski | Inspektor | 12.03.2026 | 500,00 zł\nPozostali Uczestnicy | Kierownik | 13.03.2026 | 300,00 zł', ['Jan Kowalski'], ['Inspektor', '12.03.2026', '500,00 zł', 'Pozostali Uczestnicy']);
+  // Lista beneficjentów i kontrahentów („Imię i nazwisko albo nazwa”): obok osoby skrót jednostki,
+  // firma, program, ulica, stanowisko i skrót formy działalności zostają jawne. Osoba spoza
+  // słowników znika przy PESEL-u z poprawną sumą.
+  str('Lp. | Imię i nazwisko albo nazwa | Kwota\n1 | Jan Kowalski | 100,00\n2 | MOPS Lipno | 200,00\n3 | Eko Trans | 300,00\n4 | Czyste Powietrze | 400,00\n5 | Armii Krajowej | 500,00\n6 | Starszy Referent | 600,00\n7 | Sołtys Zalesia | 700,00', ['Jan Kowalski'], ['MOPS Lipno', 'Eko Trans', 'Czyste Powietrze', 'Armii Krajowej', 'Starszy Referent', 'Sołtys Zalesia']);
+  str('Wnioskodawca | Data wpływu\nAnna Nowak | 03.11.2026\nF.H. Marex | 04.11.2026\nP.W. Budrex | 05.11.2026', ['Anna Nowak'], ['F.H. Marex', 'P.W. Budrex', '04.11.2026']);
+  str('Nazwisko i imię | PESEL\nKowalski Jan | 80031212345\nLiu Wei | 02070803628', ['Kowalski Jan', 'Liu Wei', '02070803628'], ['PESEL']);
+  // Pod nagłówkiem roli („Najemca”, „Beneficjent”) stoją też firmy i organizacje: zostają jawne
+  // z telefonem. Nazwisko utworzone od funkcji („Wójtowicz”, „Sołtysik”) znika w całości.
+  str('Lp.;Najemca;Telefon\n1;Kowalska Anna;600 100 200\n2;Kwiaciarnia Róża;54 288 33 12\n3;Chór Cecylia;54 288 60 11', ['Kowalska Anna', '600 100 200'], ['Kwiaciarnia Róża', '54 288 33 12', 'Chór Cecylia', '54 288 60 11']);
+  str('Nazwisko i imię;PESEL\nKowalski Jan;80031212345\nWójtowicz Natan;02070803628\nSołtysik Teofil;85010112345', ['Kowalski Jan', 'Wójtowicz Natan', 'Sołtysik Teofil'], ['PESEL']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

@@ -564,7 +564,7 @@ function nameInSentence(seg: string): string | null {
 const RE_INLINE_TAIL = /([,|])[ \t]*$/u;
 // Stanowisko urzędnika przed nazwą urzędu, w którym pracuje („inspektor ds. oświaty”, „starszy
 // referent”, „kierownik referatu”, „pracownik socjalny”).
-const RE_OFFICIAL_ROLE =
+export const RE_OFFICIAL_ROLE =
   /^(?:(?:starsz|młodsz|główn)\p{L}*[ \t]+)?(?:podinspektor|inspektor|referent|specjalist|kierowni[kc]|naczelni[kc]|sekretarz|skarbnik|dyrektor|zastępc|pracowni[kc]|urzędni[kc]|radc|asystent|koordynator|komendant|kontroler|ewidencjoner|archiwist|informatyk|księgow)\p{L}*(?![\p{L}])/iu;
 // Nagłówek kolumny adresu osoby w tabeli („Adres zamieszkania”, „Zam.”, „Adres do doręczeń”).
 const RE_RESIDENCE_HEADER = /(?<!\p{L})(?:zam\.|zamieszk|zameldow|mieszka|doręcze|korespondenc)/iu;

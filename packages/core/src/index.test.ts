@@ -8943,8 +8943,6 @@ test('PESEL po etykiecie z literówką zmieniającą długość (10 albo 12 cyfr
     // bez etykiety nic się nie zmienia: fałszywy PESEL jako numer polisy
     'nr polisy ubezpieczeniowej kontraktu 08650158616',
     'Numer zamówienia 8909150266 z dnia 3 maja',
-    // nagłówek tabeli: PESEL nad inną kolumną liczbową
-    'Imię | PESEL | Kwota\nJan | 8909150266 | 100',
     'PESEL Kwota 1234567890',
     'PESEL\n1234567890',
     // etykieta innego pola między PESEL a numerem
@@ -8953,6 +8951,9 @@ test('PESEL po etykiecie z literówką zmieniającą długość (10 albo 12 cyfr
     'PESEL: 1234567890123',
   ];
   for (const t of keep) expect(redactPII(t).redacted).toBe(t);
+  // nagłówek tabeli: PESEL nad inną kolumną liczbową. 10 cyfr w kolumnie PESEL bez etykiety przy
+  // numerze zostaje; imię w tabeli z kolumną PESEL to osoba, także bez wiersza „---”.
+  expect(redactPII('Imię | PESEL | Kwota\nJan | 8909150266 | 100').redacted).toBe('Imię | PESEL | Kwota\n[IMIĘ I NAZWISKO] | 8909150266 | 100');
   // NIP stojący zaraz po pustym polu PESEL dostaje znacznik NIP, nie PESEL
   expect(redactPII('PESEL:\nNIP: 5260250274').redacted).toBe('PESEL:\nNIP: [NIP]');
   expect(redactPII('PESEL brak NIP 5260250274').redacted).toBe('PESEL brak NIP [NIP]');
@@ -12900,4 +12901,153 @@ test('skrót izby po nazwie komórki, dokument dla członków i stanowisko urzę
     ['geodeta uprawniony Jan Lis, uprawnienia nr 12345 do wykonywania samodzielnych funkcji', `geodeta uprawniony ${N}, uprawnienia nr ${U} do wykonywania samodzielnych funkcji`],
     ['psycholog Anna Lis, wpis nr 1234 na listę psychologów', `psycholog ${N}, wpis nr ${U} na listę psychologów`],
   ]);
+});
+test('tabela z „|” bez wiersza „---”, kolumnami ze spacji i nagłówkiem osoby: każda komórka osoby i jej danych', () => {
+  masked([
+    // wklejka z Worda: „|” bez skrajnych kresek i bez wiersza „---”, szyk „Nazwisko Imię”
+    [
+      'Lp. | Nazwisko i imię | Data urodzenia | Pkt\n1 | Czerniak Zofia | 22.11.2022 | 165\n2 | Zych Natan | 05.04.2023 | 15',
+      `Lp. | Nazwisko i imię | Data urodzenia | Pkt\n1 | ${N} | ${DU} | 165\n2 | ${N} | ${DU} | 15`,
+    ],
+    // wersaliki, nazwisko złożone, imię spoza słownika w osobnych kolumnach
+    [
+      'Lp. | Nazwisko | Imię | PESEL\n1 | KOWALCZYK | Anna | 85010112345\n2 | Gąsienica-Ryś | Halina | 90020254321',
+      `Lp. | Nazwisko | Imię | PESEL\n1 | ${N} | ${N} | ${PS}\n2 | ${N} | ${N} | ${PS}`,
+    ],
+    // skrajne kreski bez wiersza „---”
+    ['| Nazwisko i imię | PESEL |\n| Kowalski Jan | 80031212345 |', `| Nazwisko i imię | PESEL |\n| ${N} | ${PS} |`],
+    // kolumna nazwana rolą, inicjał z nazwiskiem złożonym, telefon stacjonarny w kolumnie telefonu
+    [
+      'Kandydat | telefon | e-mail\nD. Wróbel | 604 218 377 | d.wrobel@example.pl\nH. Gąsienica-Ryś | 33 874 12 09 | halina@example.pl',
+      `Kandydat | telefon | e-mail\n${N} | ${T} | [EMAIL]\n${N} | ${T} | [EMAIL]`,
+    ],
+    ['Uczeń | Klasa | Ocena\nZofia Czerniak | 3b | 5', `Uczeń | Klasa | Ocena\n${N} | 3b | 5`],
+    // nagłówek osoby z dopełnieniem roli
+    [
+      'Imię i nazwisko ucznia | Data urodzenia | Szkoła\nLena Adamczyk | 14.02.2015 | Szkoła Podstawowa nr 3',
+      `Imię i nazwisko ucznia | Data urodzenia | Szkoła\n${N} | ${DU} | Szkoła Podstawowa nr 3`,
+    ],
+    // kolumny wyrównane spacjami (kopia z PDF-a)
+    [
+      'Nazwisko i imię     Data urodzenia     PESEL\nKowalski Jan        12.03.1980         80031212345',
+      `Nazwisko i imię     Data urodzenia     PESEL\n${N}        ${DU}         ${PS}`,
+    ],
+  ]);
+  // Instytucja, stanowisko, kwota i data decyzji w tabeli osób zostają jawne.
+  masked([
+    [
+      'Wnioskodawca | Data wpływu | Sprawa\nAnna Nowak | 03.11.2026 | zasiłek\nNadleśnictwo Lipno | 04.11.2026 | dzierżawa\nWody Polskie | 05.11.2026 | opinia\nSamorządowe Kolegium Odwoławcze | 06.11.2026 | odwołanie',
+      `Wnioskodawca | Data wpływu | Sprawa\n${N} | 03.11.2026 | zasiłek\nNadleśnictwo Lipno | 04.11.2026 | dzierżawa\nWody Polskie | 05.11.2026 | opinia\nSamorządowe Kolegium Odwoławcze | 06.11.2026 | odwołanie`,
+    ],
+    [
+      'Nazwisko i imię | Data decyzji | Kwota\nKowalski Jan | 12.03.2026 | 500,00 zł\nZielona Góra | 13.03.2026 | 300,00 zł\nUsługi Remontowe | 14.03.2026 | 100,00 zł',
+      `Nazwisko i imię | Data decyzji | Kwota\n${N} | 12.03.2026 | 500,00 zł\nZielona Góra | 13.03.2026 | 300,00 zł\nUsługi Remontowe | 14.03.2026 | 100,00 zł`,
+    ],
+    [
+      'Pracownik | Stanowisko | Wydział\nJan Kowalski | Inspektor | Wydział Finansowy\nKierownik Referatu | Kierownik | Referat Podatków',
+      `Pracownik | Stanowisko | Wydział\n${N} | Inspektor | Wydział Finansowy\nKierownik Referatu | Kierownik | Referat Podatków`,
+    ],
+  ]);
+  keep([
+    // tabela bez nagłówka osób nie zmienia działania
+    'Lp. | Nazwa podmiotu | Kwota | Data decyzji\n1 | Urząd Gminy Lipno | 1 200,00 | 12.03.2026',
+    'Termin  Godzina  Sala\n12.03.2026  10:00  12',
+    // tabela osób bez potwierdzonej osoby: kształt nazwy nie wystarcza
+    'Nazwisko i imię | Uwagi\nGrupa Robocza | spotkanie\nPozostali Uczestnicy | brak',
+    // zdanie z podwójną spacją pod nagłówkiem to nie wiersz
+    'Imię  Nazwisko\nAla ma kota.  Kot ma Alę.',
+  ]);
+});
+test('tabela osób z podmiotami: skróty jednostek, firmy, programy, ulice, dni i stanowiska zostają jawne', () => {
+  // W tabeli z osobą ze słownika sam kształt „Wyraz Wyraz” nie wystarcza: lista beneficjentów,
+  // kontrahentów czy zaległości („Imię i nazwisko albo nazwa”) ma obok osób podmioty.
+  masked([
+    [
+      'Nazwisko i imię | Instytucja\nNowak Anna | ZUS\nMOPS Lipno | GOPS\nPUP Lipno | GOPS\nOSP Wola | GOPS\nEko Trans | ZUS\nHuawei Technologies | ZUS\nCzyste Powietrze | WFOŚiGW\nAdobe Reader | ZUS\nArmii Krajowej | ZDP\nDzień Otwarty | ZUS\nWielki Piątek | ZUS\nStara Huta | UG\nWpisać Drukowanymi | ZUS',
+      `Nazwisko i imię | Instytucja\n${N} | ZUS\nMOPS Lipno | GOPS\nPUP Lipno | GOPS\nOSP Wola | GOPS\nEko Trans | ZUS\nHuawei Technologies | ZUS\nCzyste Powietrze | WFOŚiGW\nAdobe Reader | ZUS\nArmii Krajowej | ZDP\nDzień Otwarty | ZUS\nWielki Piątek | ZUS\nStara Huta | UG\nWpisać Drukowanymi | ZUS`,
+    ],
+    [
+      'Lp. | Imię i nazwisko albo nazwa | Kwota\n1 | Jan Kowalski | 100,00\n2 | Hotel Zamek | 200,00\n3 | Kino Helios | 200,00\n4 | Inter Cars | 200,00\n5 | Osiedle Kopernika | 200,00\n6 | Proboszcz Parafii | 200,00',
+      `Lp. | Imię i nazwisko albo nazwa | Kwota\n1 | ${N} | 100,00\n2 | Hotel Zamek | 200,00\n3 | Kino Helios | 200,00\n4 | Inter Cars | 200,00\n5 | Osiedle Kopernika | 200,00\n6 | Proboszcz Parafii | 200,00`,
+    ],
+    // stanowisko i zawód w kolumnie osoby, także w CSV, i z nazwiskiem-homonimem („Sołtys”)
+    [
+      'Nazwisko i imię;Uwagi\nJan Kowalski;brak\nStarszy Referent;etat\nPodinspektor Wydziału;etat\nKierowca Autobusu;umowa\nKonserwator Budynku;umowa\nLekarz Weterynarii;umowa\nTłumacz Przysięgły;zlecenie\nKoordynator Projektu;umowa\nSołtys Zalesia;dieta\nWielki Piątek;wolne',
+      `Nazwisko i imię;Uwagi\n${N};brak\nStarszy Referent;etat\nPodinspektor Wydziału;etat\nKierowca Autobusu;umowa\nKonserwator Budynku;umowa\nLekarz Weterynarii;umowa\nTłumacz Przysięgły;zlecenie\nKoordynator Projektu;umowa\nSołtys Zalesia;dieta\nWielki Piątek;wolne`,
+    ],
+    // dwa inicjały przed nazwą to skrót formy działalności
+    [
+      'Wnioskodawca | Data wpływu\nAnna Nowak | 03.11.2026\nF.H. Marex | 04.11.2026\nP.W. Budrex | 05.11.2026\nZ.P. Elmet | 06.11.2026',
+      `Wnioskodawca | Data wpływu\n${N} | 03.11.2026\nF.H. Marex | 04.11.2026\nP.W. Budrex | 05.11.2026\nZ.P. Elmet | 06.11.2026`,
+    ],
+  ]);
+  // Osoba spoza słowników znika, gdy wiersz ma daną człowieka (PESEL z sumą, data urodzenia);
+  // nazwisko-homonim („Piątek”) samo w kolumnie nazwiska obok imienia dalej jest nazwiskiem.
+  masked([
+    ['Nazwisko i imię | PESEL\nKowalski Jan | 80031212345\nLiu Wei | 02070803628', `Nazwisko i imię | PESEL\n${N} | ${PS}\n${N} | ${PS}`],
+    ['Nazwisko i imię | Data urodzenia\nKowalski Jan | 12.03.1980\nLiu Wei | 05.04.2013', `Nazwisko i imię | Data urodzenia\n${N} | ${DU}\n${N} | ${DU}`],
+    ['Nazwisko | Imię | PESEL\nPiątek | Jan | 44051401359', `Nazwisko | Imię | PESEL\n${N} | ${N} | ${PS}`],
+  ]);
+});
+test('wiersz tabeli z kolumnami ze spacji i długim ciągiem spacji: czas liniowy', () => {
+  const row = (n: number): string => `Nazwisko i imię  PESEL\nKowalski Jan  80031212345\nAnna${' '.repeat(n)}x`;
+  redactPII(row(500));
+  const time = (n: number): number => {
+    const t0 = performance.now();
+    redactPII(row(n));
+    return performance.now() - t0;
+  };
+  const small = time(2000);
+  const big = time(16000);
+  expect(big).toBeLessThan(Math.max(small, 15) * 16);
+});
+test('kolumna nazwana rolą („Wnioskodawca”, „Najemca”, „Beneficjent”): firma i organizacja zostają jawne z telefonem i NIP-em', () => {
+  // Pod nagłówkiem roli w urzędzie stoją też podmioty. Osobę potwierdza komórka, w której każdy
+  // wyraz jest imieniem, nazwiskiem ze słownika albo inicjałem; rzeczownik pospolity na początku
+  // („Pensjonat”, „Kwiaciarnia”, „Chór”) ją wyklucza, także w CSV, TSV i Markdownie z „---”.
+  keep([
+    'Beneficjent;Kwota\nPensjonat Agata;12000 zł\nSalon Fryzjerski Iwona;8000 zł',
+    '| Wnioskodawca | Lokal | Kwota |\n|---|---|---|\n| Pensjonat Agata | lokal 3 | 1200 zł |',
+    'Wnioskodawca\tTelefon\nHotel Krystyna\t54 288 33 16\nSklep Ewa\t54 288 33 18',
+    'Podatnik;Przedmiot opodatkowania\nFerma Drobiu Halina;budynki',
+    'Uczestnik;Liczba osób;Telefon\nChór Cecylia;20;54 288 60 11',
+    'Najemca | Lokal\nBar Mleczny Basia | lokal 3',
+    'Najemca;Lokal;Telefon\nKwiaciarnia Róża;lokal 4;54 288 33 12\nApteka Zdrowie;lokal 6;54 288 33 14',
+    'Uczestnik;Telefon\nZespół Ludowy Jarzębina;54 288 11 11',
+    // stanowisko w tabeli osób: telefon funkcji, nie osoby
+    'Imię i nazwisko | Telefon\nKomornik Sądowy | 54 288 00 00\nSołtys Zalesia | 54 288 00 01',
+  ]);
+  masked([
+    ['Beneficjent;NIP;Kwota\nPensjonat Agata;5252248481;12000 zł', 'Beneficjent;NIP;Kwota\nPensjonat Agata;[NIP];12000 zł'],
+    // osoba w nazwie firmy znika, nazwa firmy zostaje
+    ['Wnioskodawca | NIP\nF.H.U. Marex Jan Nowak | 5252248481', `Wnioskodawca | NIP\nF.H.U. Marex ${N} | [NIP]`],
+    // osoba pod nagłówkiem roli dalej znika razem z telefonem, obok podmiotu w tej samej tabeli
+    [
+      'Lp.;Najemca;Telefon\n1;Kowalska Anna;600 100 200\n2;Nowak-Kowalska Anna;600 100 201\n3;J. Kowalski;600 100 202\n4;Kwiaciarnia Róża;54 288 33 12',
+      `Lp.;Najemca;Telefon\n1;${N};${T}\n2;${N};${T}\n3;${N};${T}\n4;Kwiaciarnia Róża;54 288 33 12`,
+    ],
+    ['Imię i nazwisko | Telefon\nJan Kowalski | 600 100 200\nSołtys Zalesia | 54 288 00 01', `Imię i nazwisko | Telefon\n${N} | ${T}\nSołtys Zalesia | 54 288 00 01`],
+  ]);
+});
+test('tabela osób: nazwisko utworzone od funkcji („Wójtowicz”, „Sołtysik”) i nazwisko-funkcja przy dacie urodzenia znikają w całości', () => {
+  masked([
+    // CSV, szyk „Nazwisko Imię”, imię spoza słownika
+    [
+      'Nazwisko i imię;PESEL\nKowalski Jan;80031212345\nWójtowicz Natan;02070803628\nSołtysik Teofil;85010112345',
+      `Nazwisko i imię;PESEL\n${N};${PS}\n${N};${PS}\n${N};${PS}`,
+    ],
+    // bez danej człowieka w wierszu: nazwisko od funkcji dalej jest nazwiskiem
+    [
+      'Nazwisko i imię;Telefon\nKowalski Jan;600 100 200\nWójtowicz Natan;600 100 201\nSołtysiak Teofil;600 100 202\nKomornicki Iwo;600 100 203\nSędzikowski Natan;600 100 204',
+      `Nazwisko i imię;Telefon\n${N};${T}\n${N};${T}\n${N};${T}\n${N};${T}\n${N};${T}`,
+    ],
+    // tabela z „|”: nazwisko równe funkcji („Marszałek”, „Kanclerz”) przy dacie urodzenia
+    [
+      'Imię i nazwisko | Data urodzenia\nJan Kowalski | 12.03.1980\nMarszałek Wit | 01.02.1975\nKanclerz Iwo | 03.04.1966\nLekarski Natan | 05.06.1990',
+      `Imię i nazwisko | Data urodzenia\n${N} | ${DU}\n${N} | ${DU}\n${N} | ${DU}\n${N} | ${DU}`,
+    ],
+    ['Nazwisko i imię\tPESEL\nKowalski Jan\t80031212345\nWójtowicz Natan\t02070803628', `Nazwisko i imię\tPESEL\n${N}\t${PS}\n${N}\t${PS}`],
+  ]);
+  // Sama funkcja bez danej człowieka zostaje jawna („Komornik”, „Sołtys Zalesia”).
+  expect(redactPII('Nazwisko i imię;Uwagi\nJan Kowalski;brak\nSołtys Zalesia;dieta\nKomornik Sądowy;pismo').redacted).toBe(`Nazwisko i imię;Uwagi\n${N};brak\nSołtys Zalesia;dieta\nKomornik Sądowy;pismo`);
 });

@@ -971,7 +971,45 @@ Okólnik OIRP nr 3/2026 dołączono do akt.",
   "str-266": "Lp.;Imię i nazwisko;Nr członka izby
 1;Anna Nowak;MAZ/BO/0123/10
 Sprawa OR/0456/POW/24 prowadzona przez Wydział Organizacyjny. Ankieta dla członków PIIB nr 2/2026.",
+  "str-267": "Lp. | Nazwisko i imię | Data urodzenia | Kryteria | Pkt
+1 | Czerniak Zofia | 22.11.2022 | wielodzietność | 165
+2 | Zych Natan | 05.04.2023 | brak | 15",
+  "str-268": "Kandydat | telefon | e-mail
+D. Wróbel | [TELEFON] | [EMAIL]
+H. Gąsienica-Ryś | [TELEFON] | [EMAIL]",
+  "str-269": "Nazwisko i imię     Data urodzenia     PESEL
+KOWALCZYK Anna      12.03.1980         [PESEL]",
   "str-27": "Biuro mieści się przy al. Jerozolimskich 44.",
+  "str-270": "Wnioskodawca | Data wpływu | Sprawa
+Anna Nowak | 03.11.2026 | zasiłek
+Nadleśnictwo Lipno | 04.11.2026 | dzierżawa
+Samorządowe Kolegium Odwoławcze | 05.11.2026 | odwołanie",
+  "str-271": "Nazwisko i imię | Stanowisko | Data decyzji | Kwota
+Jan Kowalski | Inspektor | 12.03.2026 | 500,00 zł
+Pozostali Uczestnicy | Kierownik | 13.03.2026 | 300,00 zł",
+  "str-272": "Lp. | Imię i nazwisko albo nazwa | Kwota
+1 | Jan Kowalski | 100,00
+2 | MOPS Lipno | 200,00
+3 | Eko Trans | 300,00
+4 | Czyste Powietrze | 400,00
+5 | Armii Krajowej | 500,00
+6 | Starszy Referent | 600,00
+7 | Sołtys Zalesia | 700,00",
+  "str-273": "Wnioskodawca | Data wpływu
+Anna Nowak | 03.11.2026
+F.H. Marex | 04.11.2026
+P.W. Budrex | 05.11.2026",
+  "str-274": "Nazwisko i imię | PESEL
+Kowalski Jan | [PESEL]
+Liu Wei | [PESEL]",
+  "str-275": "Lp.;Najemca;Telefon
+1;Kowalska Anna;[TELEFON]
+2;Kwiaciarnia Róża;54 288 33 12
+3;Chór Cecylia;54 288 60 11",
+  "str-276": "Nazwisko i imię;PESEL
+Kowalski Jan;[PESEL]
+Wójtowicz Natan;[PESEL]
+Sołtysik Teofil;[PESEL]",
   "str-28": "Nowy lokal: os. Piastów 3/12, obok szkoły.",
   "str-29": "Spotkanie odbędzie się na pl. Zbawiciela 5.",
   "str-30": "Mieszkam na ulicy Krakowskie Przedmieście 26/28.",
@@ -2017,7 +2055,45 @@ Okólnik OIRP nr 3/2026 dołączono do akt.",
   "str-266": "Lp.;Imię i nazwisko;Nr członka izby
 1;[OSOBA-A];[NR-UPRAWNIEŃ]
 Sprawa OR/0456/POW/24 prowadzona przez Wydział Organizacyjny. Ankieta dla członków PIIB nr 2/2026.",
+  "str-267": "Lp. | Nazwisko i imię | Data urodzenia | Kryteria | Pkt
+1 | [OSOBA-A] | [DATA-URODZENIA] | wielodzietność | 165
+2 | [OSOBA-B] | [DATA-URODZENIA] | brak | 15",
+  "str-268": "Kandydat | telefon | e-mail
+[OSOBA-A] | [TELEFON] | [EMAIL]
+[OSOBA-B] | [TELEFON] | [EMAIL]",
+  "str-269": "Nazwisko i imię     Data urodzenia     PESEL
+[OSOBA-A]      [DATA-URODZENIA]         [PESEL]",
   "str-27": "Biuro mieści się przy [ADRES].",
+  "str-270": "Wnioskodawca | Data wpływu | Sprawa
+[OSOBA-A] | 03.11.2026 | zasiłek
+Nadleśnictwo Lipno | 04.11.2026 | dzierżawa
+Samorządowe Kolegium Odwoławcze | 05.11.2026 | odwołanie",
+  "str-271": "Nazwisko i imię | Stanowisko | Data decyzji | Kwota
+[OSOBA-A] | Inspektor | 12.03.2026 | 500,00 zł
+Pozostali Uczestnicy | Kierownik | 13.03.2026 | 300,00 zł",
+  "str-272": "Lp. | Imię i nazwisko albo nazwa | Kwota
+1 | [OSOBA-A] | 100,00
+2 | MOPS Lipno | 200,00
+3 | Eko Trans | 300,00
+4 | Czyste Powietrze | 400,00
+5 | Armii Krajowej | 500,00
+6 | Starszy Referent | 600,00
+7 | Sołtys Zalesia | 700,00",
+  "str-273": "Wnioskodawca | Data wpływu
+[OSOBA-A] | 03.11.2026
+F.H. Marex | 04.11.2026
+P.W. Budrex | 05.11.2026",
+  "str-274": "Nazwisko i imię | PESEL
+[OSOBA-A] | [PESEL]
+[OSOBA-B] | [PESEL]",
+  "str-275": "Lp.;Najemca;Telefon
+1;[OSOBA-A];[TELEFON]
+2;Kwiaciarnia Róża;54 288 33 12
+3;Chór Cecylia;54 288 60 11",
+  "str-276": "Nazwisko i imię;PESEL
+[OSOBA-A];[PESEL]
+[OSOBA-B];[PESEL]
+[OSOBA-C];[PESEL]",
   "str-28": "Nowy lokal: [ADRES], obok szkoły.",
   "str-29": "Spotkanie odbędzie się na [ADRES].",
   "str-30": "Mieszkam na [ADRES].",
@@ -3063,7 +3139,45 @@ Okólnik OIRP nr 3/2026 dołączono do akt.",
   "str-266": "Lp.;Imię i nazwisko;Nr członka izby
 1;[IMIĘ I NAZWISKO];[NR-UPRAWNIEŃ]
 Sprawa OR/0456/POW/24 prowadzona przez Wydział Organizacyjny. Ankieta dla członków PIIB nr 2/2026.",
+  "str-267": "Lp. | Nazwisko i imię | Data urodzenia | Kryteria | Pkt
+1 | [IMIĘ I NAZWISKO] | [DATA-URODZENIA] | wielodzietność | 165
+2 | [IMIĘ I NAZWISKO] | [DATA-URODZENIA] | brak | 15",
+  "str-268": "Kandydat | telefon | e-mail
+[IMIĘ I NAZWISKO] | [TELEFON] | [EMAIL]
+[IMIĘ I NAZWISKO] | [TELEFON] | [EMAIL]",
+  "str-269": "Nazwisko i imię     Data urodzenia     PESEL
+[IMIĘ I NAZWISKO]      [DATA-URODZENIA]         [PESEL]",
   "str-27": "Biuro mieści się przy [ADRES].",
+  "str-270": "Wnioskodawca | Data wpływu | Sprawa
+[IMIĘ I NAZWISKO] | 03.11.2026 | zasiłek
+Nadleśnictwo Lipno | 04.11.2026 | dzierżawa
+Samorządowe Kolegium Odwoławcze | 05.11.2026 | odwołanie",
+  "str-271": "Nazwisko i imię | Stanowisko | Data decyzji | Kwota
+[IMIĘ I NAZWISKO] | Inspektor | 12.03.2026 | 500,00 zł
+Pozostali Uczestnicy | Kierownik | 13.03.2026 | 300,00 zł",
+  "str-272": "Lp. | Imię i nazwisko albo nazwa | Kwota
+1 | [IMIĘ I NAZWISKO] | 100,00
+2 | MOPS Lipno | 200,00
+3 | Eko Trans | 300,00
+4 | Czyste Powietrze | 400,00
+5 | Armii Krajowej | 500,00
+6 | Starszy Referent | 600,00
+7 | Sołtys Zalesia | 700,00",
+  "str-273": "Wnioskodawca | Data wpływu
+[IMIĘ I NAZWISKO] | 03.11.2026
+F.H. Marex | 04.11.2026
+P.W. Budrex | 05.11.2026",
+  "str-274": "Nazwisko i imię | PESEL
+[IMIĘ I NAZWISKO] | [PESEL]
+[IMIĘ I NAZWISKO] | [PESEL]",
+  "str-275": "Lp.;Najemca;Telefon
+1;[IMIĘ I NAZWISKO];[TELEFON]
+2;Kwiaciarnia Róża;54 288 33 12
+3;Chór Cecylia;54 288 60 11",
+  "str-276": "Nazwisko i imię;PESEL
+[IMIĘ I NAZWISKO];[PESEL]
+[IMIĘ I NAZWISKO];[PESEL]
+[IMIĘ I NAZWISKO];[PESEL]",
   "str-28": "Nowy lokal: [ADRES], obok szkoły.",
   "str-29": "Spotkanie odbędzie się na [ADRES].",
   "str-30": "Mieszkam na [ADRES].",
@@ -4158,7 +4272,45 @@ Okólnik OIRP nr 3/2026 dołączono do akt.",
   "str-266": "Lp.;Imię i nazwisko;Nr członka izby
 1;<<osoba>>;[NR-UPRAWNIEŃ]
 Sprawa OR/0456/POW/24 prowadzona przez Wydział Organizacyjny. Ankieta dla członków PIIB nr 2/2026.",
+  "str-267": "Lp. | Nazwisko i imię | Data urodzenia | Kryteria | Pkt
+1 | <<osoba>> | <<data>> | wielodzietność | 165
+2 | <<osoba>> | <<data>> | brak | 15",
+  "str-268": "Kandydat | telefon | e-mail
+<<osoba>> | [TELEFON] | [EMAIL]
+<<osoba>> | [TELEFON] | [EMAIL]",
+  "str-269": "Nazwisko i imię     Data urodzenia     PESEL
+<<osoba>>      <<data>>         <<pesel>>",
   "str-27": "Biuro mieści się przy <<adres>>.",
+  "str-270": "Wnioskodawca | Data wpływu | Sprawa
+<<osoba>> | 03.11.2026 | zasiłek
+Nadleśnictwo Lipno | 04.11.2026 | dzierżawa
+Samorządowe Kolegium Odwoławcze | 05.11.2026 | odwołanie",
+  "str-271": "Nazwisko i imię | Stanowisko | Data decyzji | Kwota
+<<osoba>> | Inspektor | 12.03.2026 | 500,00 zł
+Pozostali Uczestnicy | Kierownik | 13.03.2026 | 300,00 zł",
+  "str-272": "Lp. | Imię i nazwisko albo nazwa | Kwota
+1 | <<osoba>> | 100,00
+2 | MOPS Lipno | 200,00
+3 | Eko Trans | 300,00
+4 | Czyste Powietrze | 400,00
+5 | Armii Krajowej | 500,00
+6 | Starszy Referent | 600,00
+7 | Sołtys Zalesia | 700,00",
+  "str-273": "Wnioskodawca | Data wpływu
+<<osoba>> | 03.11.2026
+F.H. Marex | 04.11.2026
+P.W. Budrex | 05.11.2026",
+  "str-274": "Nazwisko i imię | PESEL
+<<osoba>> | <<pesel>>
+<<osoba>> | <<pesel>>",
+  "str-275": "Lp.;Najemca;Telefon
+1;<<osoba>>;[TELEFON]
+2;Kwiaciarnia Róża;54 288 33 12
+3;Chór Cecylia;54 288 60 11",
+  "str-276": "Nazwisko i imię;PESEL
+<<osoba>>;<<pesel>>
+<<osoba>>;<<pesel>>
+<<osoba>>;<<pesel>>",
   "str-28": "Nowy lokal: <<adres>>, obok szkoły.",
   "str-29": "Spotkanie odbędzie się na <<adres>>.",
   "str-30": "Mieszkam na <<adres>>.",
@@ -4969,7 +5121,7 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "str-248": "NIP:1 IMIE:1",
   "str-249": "NIP:1 KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
   "str-25": "KOD-POCZTOWY:1",
-  "str-250": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-250": "IMIE:1 KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
   "str-251": "NIP:2 KOD-POCZTOWY:1 ADRES:2 MIEJSCOWOSC:1",
   "str-252": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:2",
   "str-253": "EMAIL:1 TELEFON:1 IMIE:1",
@@ -4987,7 +5139,17 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "str-264": "IMIE:2 NR-UPRAWNIEN:2",
   "str-265": "NR-UPRAWNIEN:1",
   "str-266": "IMIE:1 NR-UPRAWNIEN:1",
+  "str-267": "IMIE:2 DATA-UR:2",
+  "str-268": "EMAIL:2 IMIE:2 TELEFON:2",
+  "str-269": "IMIE:1 DATA-UR:1 PESEL:1",
   "str-27": "ADRES:1",
+  "str-270": "IMIE:1",
+  "str-271": "IMIE:1",
+  "str-272": "IMIE:1",
+  "str-273": "IMIE:1",
+  "str-274": "IMIE:2 PESEL:2",
+  "str-275": "IMIE:1 TELEFON:1",
+  "str-276": "IMIE:3 PESEL:3",
   "str-28": "ADRES:1",
   "str-29": "ADRES:1",
   "str-30": "ADRES:1",
@@ -5797,7 +5959,7 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "str-248": "NIP:1 IMIE:1",
   "str-249": "NIP:1 KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
   "str-25": "KOD-POCZTOWY:1",
-  "str-250": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-250": "IMIE:1 KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
   "str-251": "NIP:2 KOD-POCZTOWY:1 ADRES:2 MIEJSCOWOSC:1",
   "str-252": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:2",
   "str-253": "EMAIL:1 TELEFON:1 IMIE:1",
@@ -5815,7 +5977,17 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "str-264": "IMIE:2 NR-UPRAWNIEN:2",
   "str-265": "NR-UPRAWNIEN:1",
   "str-266": "IMIE:1 NR-UPRAWNIEN:1",
+  "str-267": "IMIE:2 DATA-UR:2",
+  "str-268": "EMAIL:2 IMIE:2 TELEFON:2",
+  "str-269": "IMIE:1 DATA-UR:1 PESEL:1",
   "str-27": "ADRES:1",
+  "str-270": "IMIE:1",
+  "str-271": "IMIE:1",
+  "str-272": "IMIE:1",
+  "str-273": "IMIE:1",
+  "str-274": "IMIE:2 PESEL:2",
+  "str-275": "IMIE:1 TELEFON:1",
+  "str-276": "IMIE:3 PESEL:3",
   "str-28": "ADRES:1",
   "str-29": "ADRES:1",
   "str-30": "ADRES:1",

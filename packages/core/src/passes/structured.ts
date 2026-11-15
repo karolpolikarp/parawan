@@ -7,12 +7,15 @@ import { FORM_LABEL_WORDS, isEmptyFormValue, isValidFormValue, RE_DATE_VALUE, RE
 import { TABLE_GENERIC_HEADERS, TSV_NOT_SURNAME } from '../dict/headers.js';
 import { isPropagatableLogin, isSystemAccount, loginUserPart, RE_BUILTIN_ACCOUNT, RE_WELL_KNOWN_ACCOUNT } from '../dict/logins.js';
 import { isFirstNameLike } from '../dict/names.js';
+import { POLISH_CITIES } from '../dict/places.js';
+import { RE_OFFICIAL_ROLE } from '../guards/institution-address.js';
+import { RE_FUNCTION_WORD_START } from './health.js';
 import { ORG_HEAD_WORDS } from '../guards/person-context.js';
 import { LEGAL_ENTITY_WORDS, ROLE_WORDS } from '../guards/roles.js';
 import { PLATE_VOIV_LETTERS, plateYearEndsList, RE_PLATE_ACRONYM_HEAD } from '../guards/plates.js';
 import { isPersonRoleValue, lowercaseNameLooksLikePerson, PERSON_CATEGORY_VALUES, RE_LOWER_NOT_SURNAME, RE_VALUE_TITLE_OR_INITIAL, SURNAME_PARTICLES } from '../guards/person-values.js';
 import { normStructKey, STRUCT_KEYS, STRUCT_KIND_TYPE, type StructKind, structKindOf } from '../struct-keys.js';
-import { isValidIban } from '../validators.js';
+import { isValidDowod, isValidIban, isValidPesel } from '../validators.js';
 
 // Rola, która jest też częstym nazwiskiem („Marszałek", „Wójt", „Koło"): pod kluczem osoby wartość
 // z wielkiej litery to nazwisko, nie rola.
@@ -234,24 +237,47 @@ const tablePersonCell = (k: StructKind | undefined): boolean => k !== undefined 
 const RE_TABLE_HEADER_CELL = /^\p{L}[\p{L}\p{N}_.\-/() ]{0,39}$/u;
 const RE_MD_RULE = /^[ \t]*\|?(?:[ \t]*:?-{3,}:?[ \t]*\|)+(?:[ \t]*:?-{3,}:?[ \t]*)?\|?[ \t]*$/;
 interface TableCell { start: number; end: number }
-/** Podział wiersza na komórki (zakresy w wierszu); cudzysłów CSV trzyma separator w środku.
- *  `null`, gdy wiersz ma niedomknięty cudzysłów. */
-function splitTableRow(line: string, delim: string, md: boolean): TableCell[] | null {
+/**
+ * Podział wiersza na komórki (zakresy w wierszu); cudzysłów CSV trzyma separator w środku.
+ * Wiersz z „|" (Markdown albo tabela z Worda wklejona jako tekst) może mieć skrajne „|" albo nie,
+ * a cudzysłów nic w nim nie znaczy. Separator „  " to kolumny wyrównane spacjami (kopia z PDF-a):
+ * granicą są co najmniej dwie spacje. `null`, gdy wiersz ma niedomknięty cudzysłów albo nie ma
+ * separatora kolumn.
+ */
+function splitTableRow(line: string, delim: string): TableCell[] | null {
   let from = 0;
   let to = line.length;
-  if (md) {
+  const pipe = delim === '|';
+  if (pipe) {
+    if (!line.includes('|')) return null;
     const lead = /^[ \t]*\|/.exec(line);
     const trail = /\|[ \t]*$/.exec(line);
-    if (!lead || !trail || trail.index < lead[0].length) return null;
-    from = lead[0].length;
-    to = trail.index;
+    if (lead) from = lead[0].length;
+    if (trail && trail.index >= from) to = trail.index;
   }
   const cells: TableCell[] = [];
+  if (delim === '  ') {
+    const lead = /^[ \t]*/.exec(line) as RegExpExecArray;
+    let start = lead[0].length;
+    const re = / {2,}|\t/g;
+    re.lastIndex = start;
+    for (let m = re.exec(line); m; m = re.exec(line)) {
+      if (m.index + m[0].length >= line.length) break;
+      cells.push({ start, end: m.index });
+      start = m.index + m[0].length;
+    }
+    // Koniec wiersza bez spacji i tabulatorów z prawej, pętlą wstecz: wyrażenie z „$” po długim
+    // ciągu spacji próbowałoby od każdej z nich (czas kwadratowy).
+    let end = line.length;
+    while (end > start && (line[end - 1] === ' ' || line[end - 1] === '\t')) end--;
+    cells.push({ start, end });
+    return cells.length > 1 ? cells : null;
+  }
   let start = from;
   let quoted = false;
   for (let i = from; i < to; i++) {
     const ch = line[i];
-    if (ch === '"' && !md) {
+    if (ch === '"' && !pipe) {
       if (quoted && line[i + 1] === '"') i++;
       else if (quoted || line.slice(start, i).trim() === '') quoted = !quoted;
     } else if (ch === delim && !quoted) {
@@ -333,32 +359,184 @@ function tableProseCell(v: string): boolean {
     )
   );
 }
+// Kolumna osoby nazwana rolą zamiast „Imię i nazwisko" (lista kandydatów, uczniów, wnioskodawców).
+// Tylko w nagłówku tabeli: w JSON-ie i XML-u te słowa bywają kluczem obiektu, nie wartością osoby.
+const TABLE_PERSON_HEADERS = new Set<string>(
+  (
+    'kandydat kandydatka kandydaci wnioskodawca wnioskodawczyni wnioskodawcy uczeń uczen uczennica uczniowie ' +
+    'pracownik pracownica pracownicy dziecko dzieci pacjent pacjentka podatnik podatniczka świadczeniobiorca ' +
+    'uczestnik uczestniczka uczestnicy student studentka słuchacz słuchaczka najemca najemczyni petent petentka ' +
+    'beneficjent beneficjentka zawodnik zawodniczka wychowanek wychowanka mieszkaniec mieszkanka ' +
+    'zobowiązany zobowiązana dłużnik dłużniczka spadkobierca spadkobiercy wnioskujący zgłaszający'
+  ).split(' '),
+);
+// „Imię i nazwisko ucznia", „Nazwisko i imiona kandydata": nagłówek osoby z dopełnieniem roli.
+const RE_TABLE_FULLNAME_HEAD = /^(?:imi[eę]i?nazwisko|nazwiskoi?imi(?:[eę]|ona))\p{Ll}{3,20}$/u;
+/** Rodzaj kolumny pod nagłówkiem tabeli: klucz strukturalny albo nagłówek osoby znany tylko tabeli. */
+function tableKindOf(name: string, value: string): StructKind | undefined {
+  const k = structKindOf(name, value);
+  if (k) return k;
+  const n = normStructKey(name);
+  if (RE_TABLE_FULLNAME_HEAD.test(n)) return 'fullname';
+  return TABLE_PERSON_HEADERS.has(n) ? 'person' : undefined;
+}
+const RE_TABLE_NAME_WORD = /^\p{Lu}[\p{L}'’‑-]*\p{L}$/u;
+// Dwie wielkie litery obok siebie („MOPS”, „PUP”, „ZGK”, „KOWALCZYK”): skrót jednostki albo firmy
+// albo wyraz wersalikami, którego sam kształt nie odróżnia od nazwy podmiotu.
+const RE_TABLE_CAPS_RUN = /\p{Lu}{2}/u;
+// Jeden inicjał imienia przed nazwiskiem („H. Gąsienica-Ryś”). Dwa inicjały („F.H. Marex”,
+// „P.W. Budrex”, „Z.P. Elmet”) to częściej skrót formy działalności niż osoba; „J.M. Nowak”
+// potwierdza nazwisko ze słownika.
+const RE_TABLE_INITIAL_SURNAME = /^\p{Lu}\.[ ]\p{Lu}[\p{L}'’‑-]*\p{L}$/u;
+// Końcówka przymiotnika albo rzeczownika zbiorowego w nazwie podmiotu i miejscowości („Wody Polskie”,
+// „Usługi Remontowe”, „Nadleśnictwo Lipno”, „Grupa Robocza”, „Pozostali Uczestnicy”).
+const RE_TABLE_ENTITY_WORD_END = /(?:owe|owy|owa|owi|cze|czy|cza|ne|ny|ni|ie|kie|ctwo|stwo|cja|cje|cji|um|ość|ości|cy|ali|eli|ona|ony|ory|óra|ska|ski|sko)$/u;
+/**
+ * Czy wiersz ma daną, którą ma tylko człowiek: PESEL z poprawną sumą, datę w kolumnie daty
+ * urodzenia albo numer dowodu z poprawną sumą. Firma, program, ulica, wydarzenie czy stanowisko
+ * w kolumnie osób („Imię i nazwisko albo nazwa”) takiej danej obok siebie nie ma.
+ */
+function tableRowPersonDatum(values: string[], kinds: (StructKind | undefined)[]): boolean {
+  return values.some((v, i) => {
+    const t = v.trim();
+    if (!t || t.length > 24) return false;
+    if (kinds[i] === 'pesel') return /^\d{11}$/.test(t) && isValidPesel(t);
+    if (kinds[i] === 'birth') return RE_DATE_VALUE.test(t);
+    return kinds[i] === 'idcard' && isValidDowod(t);
+  });
+}
+/**
+ * Komórka o kształcie imienia i nazwiska spoza słowników. Wystarcza tylko w tabeli, w której inny
+ * wiersz potwierdził osobę słownikiem. Inicjał z nazwiskiem przechodzi w każdej kolumnie osoby
+ * (lista kandydatów z telefonem i e-mailem). Dwa albo trzy pełne wyrazy („Zych Natan”) tylko pod
+ * nagłówkiem imienia i nazwiska i tylko w wierszu z daną człowieka (`personDatum`): sam kształt
+ * „Wyraz Wyraz” mają też firmy („Eko Trans”), programy („Czyste Powietrze”), ulice („Armii
+ * Krajowej”), wydarzenia („Dzień Otwarty”) i stanowiska („Starszy Referent”).
+ */
+function tableNameShapedCell(v: string, kind: StructKind | undefined, personDatum: boolean): boolean {
+  const t = v.trim();
+  if (tableOfficeCell(t) || tableOrgCell(t) || RE_TABLE_SACRAL_CELL.test(t) || RE_TABLE_REGNAL_CELL.test(t)) return false;
+  if (tablePositionCell(t, personDatum)) return false;
+  const ws = t.split(/ +/);
+  const plain = (w: string): boolean => {
+    const l = w.toLowerCase();
+    return (
+      !RE_TABLE_CAPS_RUN.test(w) &&
+      !RE_OFFICIAL_ROLE.test(w) &&
+      !isPersonRoleValue(l) &&
+      !ROLE_WORDS.has(l) &&
+      !STRUCT_KEYS.has(normStructKey(w)) &&
+      !FORM_LABEL_WORDS.has(l)
+    );
+  };
+  if (RE_TABLE_INITIAL_SURNAME.test(t)) {
+    const sur = ws[ws.length - 1];
+    return plain(sur) && !POLISH_CITIES.has(sur.toLowerCase());
+  }
+  if (!personDatum || (kind !== 'fullname' && kind !== 'surname' && kind !== 'first')) return false;
+  if (ws.length < 2 || ws.length > 3 || POLISH_CITIES.has(t.toLowerCase())) return false;
+  return ws.every((w) => {
+    if (!RE_TABLE_NAME_WORD.test(w) || w.length < 3 || !plain(w)) return false;
+    if (isFirstNameLike(w) || isConfirmedSurname(w) || functionDerivedSurname(w)) return true;
+    return !RE_TABLE_ENTITY_WORD_END.test(w.toLowerCase()) && !POLISH_CITIES.has(w.toLowerCase());
+  });
+}
+// Stanowisko albo zawód spoza wzorców urzędu i ochrony zdrowia.
+const RE_TABLE_TRADE_START = /^(?:tłumacz|kanclerz|wikariusz|sołtys)\p{Ll}*(?!\p{L})/iu;
+// Przymiotnik przed nazwiskiem ze słownika w nazwie dnia czy wydarzenia („Wielki Piątek”).
+// Tylko końcówki męskie i nijakie: imię kobiety spoza słownika („Selina Nowak”) kończy się na -a.
+const RE_TABLE_ADJ_WORD = /(?:ki|ny|wy|ły|ty|kie|ne|we)$/u;
+/**
+ * Komórka osoby, która nazywa stanowisko, zawód albo dzień, a nie człowieka: co najmniej dwa wyrazy,
+ * żaden nie jest imieniem, a pierwszy to funkcja („Sołtys Zalesia”, „Starszy Referent”, „Kierowca
+ * Autobusu”, „Tłumacz Przysięgły”) albo przymiotnik obok nazwiska ze słownika („Wielki Piątek”).
+ * Sam wyraz („Sołtys” w kolumnie nazwiska obok imienia) zostaje nazwiskiem. Wiersz z daną
+ * człowieka (`personDatum`: PESEL z sumą, data urodzenia, dowód) nie ma stanowiska w kolumnie osób,
+ * a nazwisko utworzone od funkcji („Wójtowicz”, „Sołtysik”, „Komornicki”) funkcją nie jest.
+ */
+function tablePositionCell(v: string, personDatum = false): boolean {
+  if (personDatum) return false;
+  const ws = v.trim().split(/ +/);
+  if (ws.length < 2 || ws.some((w) => isFirstNameLike(w))) return false;
+  const t = ws.join(' ');
+  // Funkcja przed nazwiskiem ze słownika („Kurator Nowak”) to dalej osoba.
+  if (tableFunctionWord(t)) return !functionDerivedSurname(ws[0]) && !ws.slice(1).some((w) => isConfirmedSurname(w));
+  return ws.length === 2 && !isConfirmedSurname(ws[0]) && RE_TABLE_ADJ_WORD.test(ws[0].toLowerCase()) && isConfirmedSurname(ws[1]);
+}
+const tableFunctionWord = (t: string): boolean => RE_OFFICIAL_ROLE.test(t) || RE_FUNCTION_WORD_START.test(t) || RE_TABLE_TRADE_START.test(t);
+// Przyrostek nazwiska utworzonego od rdzenia wyrazu („Wójt-owicz”, „Sołtys-ik”, „Komorni-cki”,
+// „Lekar-ski”, „Sędzi-kowski”). Odmiana samej funkcji („Wójtowi”, „Sołtysem”, „Komornika”) go nie ma.
+const RE_DERIVED_SURNAME_END = /(?:owicz|ewicz|icz|iak|ik|yk|czyk|czak|ak|uk|ski|cki|dzki|ska|cka|dzka)$/u;
+/**
+ * Nazwisko utworzone od wyrazu funkcji: wyraz z wielkiej litery, którego przyrostek nazwiska stoi
+ * w całości za najkrótszym rdzeniem funkcji. „Komornik” ma „-ik” w rdzeniu „komorni-”, więc zostaje
+ * funkcją, „Komornicki” ma „-cki” za rdzeniem, więc jest nazwiskiem.
+ */
+function functionDerivedSurname(w: string): boolean {
+  if (!/^\p{Lu}\p{Ll}{3,}$/u.test(w)) return false;
+  const end = RE_DERIVED_SURNAME_END.exec(w);
+  if (!end) return false;
+  for (let i = 2; i <= end.index; i++) if (tableFunctionWord(w.slice(0, i))) return true;
+  return false;
+}
+// Inicjał imienia („J.”) w komórce osoby.
+const RE_TABLE_INITIAL = /^\p{Lu}\.$/u;
+/**
+ * Komórka kolumny nazwanej rolą („Wnioskodawca”, „Najemca”, „Beneficjent”, „Podatnik”). Pod takim
+ * nagłówkiem w urzędzie stoją też firmy i organizacje („Pensjonat Agata”, „Kwiaciarnia Róża”, „Chór
+ * Cecylia”, „F.H.U. Marex Jan Nowak”), więc osobę potwierdza dopiero komórka z co najmniej dwóch
+ * wyrazów, w której każdy jest imieniem, nazwiskiem ze słownika albo inicjałem.
+ */
+function tableRolePersonCell(v: string): boolean {
+  const ws = v.trim().split(/ +/);
+  if (ws.length < 2 || ws.length > 4) return false;
+  return ws.every((w) => RE_TABLE_INITIAL.test(w) || isFirstNameLike(w) || w.split('-').every((p) => isConfirmedSurname(p) || isFirstNameLike(p)));
+}
+/** Kolumna, która jest kolumną osób tylko z powodu nagłówka roli (TABLE_PERSON_HEADERS). */
+const tableRoleColumn = (name: string, value: string): boolean => !structKindOf(name, value) && TABLE_PERSON_HEADERS.has(normStructKey(name));
+interface TableRow { r: number; cells: TableCell[]; texts: string[]; values: string[]; kinds: (StructKind | undefined)[]; personOk: boolean; datum: boolean }
+/**
+ * Separator kolumn nagłówka. „|" ma pierwszeństwo, bo nazwa kolumny nie zawiera „|", a tabela
+ * z Worda czy z czatu wklejona jako tekst ma go bez wiersza „---" i bez skrajnych kresek. Kolumny
+ * wyrównane spacjami („Nazwisko i imię   PESEL") dopiero, gdy wiersz nie ma innego separatora.
+ */
+function tableDelim(header: string): string {
+  if (header.includes('|')) return '|';
+  if (header.includes('\t')) return '\t';
+  if (header.includes(';')) return ';';
+  if (header.includes(',')) return ',';
+  return /\S {2,}\S/.test(header) ? '  ' : '';
+}
 export function passDelimitedTable(ctx: RedactCtx): void {
   const t = ctx.text;
-  if (!/[;,\t|]/.test(t)) return;
+  if (!/[;,\t|]|\S {2,}\S/.test(t)) return;
   const parts = t.split(/(\r?\n)/);
   const lines = parts.filter((_, i) => i % 2 === 0);
   let changed = false;
   const structMask = structMasker(ctx);
   for (let h = 0; h + 1 < lines.length; h++) {
     const header = lines[h];
-    const md = /^[ \t]*\|.*\|[ \t]*$/.test(header) && RE_MD_RULE.test(lines[h + 1]);
-    const delim = md ? '|' : header.includes('\t') ? '\t' : header.includes(';') ? ';' : header.includes(',') ? ',' : '';
+    const delim = tableDelim(header);
     if (!delim) continue;
-    const hc = splitTableRow(header, delim, md);
+    const hc = splitTableRow(header, delim);
     if (!hc || hc.length < 2) continue;
     const names = hc.map((c) => header.slice(c.start, c.end).trim().replace(/^"(.*)"$/, '$1').trim());
     if (!names.every((n) => RE_TABLE_HEADER_CELL.test(n) && n.split(' ').length <= 4)) continue;
-    const headKinds = names.map((n) => STRUCT_KEYS.get(normStructKey(n)));
-    if (!headKinds.some((k) => TABLE_GATE_KINDS.has(k as StructKind))) continue;
+    const headKinds = names.map((n) => tableKindOf(n, ''));
+    const roleGateOnly = !headKinds.some((k) => TABLE_GATE_KINDS.has(k as StructKind));
+    if (roleGateOnly && !headKinds.some((k, i) => k === 'person' && TABLE_PERSON_HEADERS.has(normStructKey(names[i])))) continue;
     // Sama kolumna imienia bez innej danej osoby („Imię;Data imienin") to kalendarz albo statystyka
     // imion, w której przedmiotem jest nazwa.
     if (headKinds.every((k) => !k || k === 'first' || k === 'city')) continue;
-    let r = h + (md ? 2 : 1);
+    // Wiersz „---" pod nagłówkiem (Markdown) jest opcjonalny.
+    let r = h + (delim === '|' && RE_MD_RULE.test(lines[h + 1]) ? 2 : 1);
+    // Najpierw cała tabela: wiersz z osobą spoza słowników potwierdza kolumna, w której inny wiersz
+    // ma imię albo nazwisko ze słownika.
+    const rows: TableRow[] = [];
     for (; r < lines.length; r++) {
       const line = lines[r];
       if (!line.trim()) break;
-      const cells = splitTableRow(line, delim, md);
+      const cells = splitTableRow(line, delim);
       if (!cells || cells.length !== hc.length) break;
       const texts = cells.map((c) => line.slice(c.start, c.end));
       // przecinek bez spacji po separatorze („Dzień dobry, przesyłam listę.") to proza, nie wiersz
@@ -371,20 +549,37 @@ export function passDelimitedTable(ctx: RedactCtx): void {
       // bada pętla zewnętrzna.
       if (rowLooksLikeHeader(values)) break;
       if (RE_TABLE_SUMMARY_ROW.test(values.find((v) => v.trim()) ?? '')) continue;
-      const kinds = values.map((v, i) => structKindOf(names[i], v));
+      const kinds = values.map((v, i) => tableKindOf(names[i], v));
       if (values.some((v, i) => tablePersonCell(kinds[i]) && tableProseCell(v))) continue;
-      // Komórki osoby maskujemy tylko w wierszu, w którym choć jedna jest potwierdzona słownikiem
-      // albo morfologią: „Oddział⇥Kardiologia" pod „Nazwisko⇥Imię" to opis.
+      // Komórki osoby maskujemy w wierszu, w którym choć jedna jest potwierdzona słownikiem albo
+      // morfologią: „Oddział⇥Kardiologia" pod „Nazwisko⇥Imię" to opis.
+      const rowDatum = tableRowPersonDatum(values, kinds);
       const personOk = values.some((v, i) => {
-        if (!tablePersonCell(kinds[i]) || tableOfficeCell(v)) return false;
+        if (!tablePersonCell(kinds[i]) || tableOfficeCell(v) || tablePositionCell(v, rowDatum)) return false;
+        if (tableRoleColumn(names[i], v)) return tableRolePersonCell(v);
         const ws = v.trim().split(/ +/);
         // dzień albo miesiąc małą literą („Dzień Matki;maj") to kalendarz, nie nazwisko „Maj"
         return ws.some((w) => isFirstNameLike(w) || (isConfirmedSurname(w) && !(/^\p{Ll}/u.test(w) && TSV_NOT_SURNAME.has(w))));
       });
+      rows.push({ r, cells, texts, values, kinds, personOk, datum: rowDatum });
+    }
+    // Osoba spoza słowników („Zych Natan”) wystarcza w tabeli, w której inny wiersz ma osobę ze
+    // słownika, jeśli każda jej komórka ma kształt imienia i nazwiska.
+    const tableConfirmed = rows.some((row) => row.personOk);
+    for (const { r: ri, cells, texts, values, kinds, personOk: dictOk, datum: rowDatum } of rows) {
+      const line = lines[ri];
+      const personCells = values.flatMap((v, i) => (tablePersonCell(kinds[i]) && v.trim() && !isEmptyFormValue(v.trim()) ? [i] : []));
+      const datum = tableConfirmed && !dictOk && rowDatum;
+      const personOk = dictOk || (tableConfirmed && personCells.length > 0 && personCells.every((i) => tableNameShapedCell(values[i], kinds[i], datum)));
+      // Tabela, którą otworzył tylko nagłówek roli („Najemca;Lokal;Telefon”): wiersz bez osoby to
+      // podmiot, a jego telefon, NIP i adres należą do niego.
+      if (roleGateOnly && !personOk) continue;
       // Wiersz instytucji („Urząd Miasta,Łódź") zostaje, ale tylko z wyrazem instytucji w komórce
       // osoby: obce imię spoza słownika („Liu Wei;Lipowa 5") nie potwierdza osoby, a jego adres dalej
       // jest daną osoby.
       if (!personOk && values.some((v, i) => tablePersonCell(kinds[i]) && tableOrgCell(v))) continue;
+      // Tak samo wiersz stanowiska („Sołtys Zalesia | 54 288 00 01”): telefon funkcji, nie osoby.
+      if (!personOk && values.some((v, i) => tablePersonCell(kinds[i]) && tablePositionCell(v, rowDatum))) continue;
       if (values.some((v, i) => tablePersonCell(kinds[i]) && RE_TABLE_SACRAL_CELL.test(v))) continue;
       // Wiersz bez osoby („Wakat;-;Warszawa") nie ma czyjego adresu. Obce imię spoza słownika dalej
       // wygląda na osobę: każda niepusta komórka osoby z wielkiej litery i bez roli.
@@ -404,7 +599,10 @@ export function passDelimitedTable(ctx: RedactCtx): void {
         const value = values[i];
         const kind = kinds[i];
         if (!kind) return;
-        if (tablePersonCell(kind) && (!personOk || tableOfficeCell(value) || value.trim().split(/ +/).some((w) => isPersonRoleValue(w.toLowerCase()) || STRUCT_KEYS.has(normStructKey(w))))) return;
+        // Wyraz roli z wielkiej litery w wierszu z daną człowieka („Marszałek Wit” z datą urodzenia)
+        // jest nazwiskiem.
+        const roleWord = (w: string): boolean => isPersonRoleValue(w.toLowerCase()) && !(rowDatum && /^\p{Lu}\p{Ll}/u.test(w));
+        if (tablePersonCell(kind) && (!personOk || tableOfficeCell(value) || tablePositionCell(value, rowDatum) || value.trim().split(/ +/).some((w) => roleWord(w) || STRUCT_KEYS.has(normStructKey(w))))) return;
         if (kind === 'addr' && RE_ADDR_WITH_POSTAL.test(value)) return;
         if ((kind === 'addr' || kind === 'city') && !personPlausible && kinds.some(tablePersonCell)) return;
         let mask = structMask(kind, value, names[i]);
@@ -415,7 +613,7 @@ export function passDelimitedTable(ctx: RedactCtx): void {
         last = at + value.length;
       });
       if (last) {
-        lines[r] = out + line.slice(last);
+        lines[ri] = out + line.slice(last);
         changed = true;
       }
     }

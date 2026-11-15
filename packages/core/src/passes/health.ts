@@ -1311,6 +1311,9 @@ function nonMedicalStay(after: string): boolean {
   return !!g && !hasMedVocab(seg.slice(g.index, g.index + 50));
 }
 const STAY_TRADE = `(?:lekar|lekark|logoped|psycholog|terapeut|psychoterapeut|pielęgniar|położn|ordynator|ratowni|fizjoterapeut|opiekun(?:ka)?[ \\t]+medyczn|rezydent|kapelan|wolontariusz|student|praktykant|stażyst|konserwator|elektryk|technik|serwisant|monter|hydraulik|informatyk|kierowc|kurier|dostawc|ochroniarz|sprzątacz|salow|sanitariusz|farmaceut|diagnost|laborant|dietety|sprzedaw|handlowc|przedstawiciel|malarz|stolarz|murarz|dekarz|ślusarz|spawacz|portier|recepcjonist|sekretark|księgow|kucharz|kucharka|praczk|magazynier|zaopatrzeniow|audytor|kontroler|inspektor[ \\t]+sanepid)${L}`;
+/** Wyraz funkcji albo zawodu na początku nazwy („Sołtys Zalesia”, „Kierowca Autobusu”, „Lekarz
+ *  Weterynarii”). Wspólny ze strażnikiem kolumny osób w tabeli (passes/structured.ts). */
+export const RE_FUNCTION_WORD_START = new RegExp(`^(?:${FUNCTION_WORD}|${STAY_TRADE})(?![${LETTER}])`, 'i');
 const RE_FUNCTION_IN_HEAD = new RegExp(`,[ \\t]*(?:[${LO}]+[ \\t]+)?${STAY_TRADE}(?![${LETTER}])[^,\\n]{0,40},`, 'i');
 function stayNotTreatment(whole: string, offset: number, m: string, starts: number[]): boolean {
   if (staffBefore(whole, offset, m, starts)) return true;
