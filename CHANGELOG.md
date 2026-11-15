@@ -12,6 +12,21 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+## v0.48.0 — 2026-11-15
+
+**Parawan zostawia jawne dane urzędu, a zakrywa więcej danych osoby: tę samą osobę w całym piśmie, dane o zdrowiu ze świadczeń i oświaty, numery uprawnień, tabele i inicjały w dekretacji.**
+
+Pilność: pilna
+
+Na trzeciej serii 100 fikcyjnych pism urzędowych (podatki, USC, budownictwo, skargi, kadry, oświata,
+świadczenia, komunikacja, zamówienia, polecenia dla AI; `docs/EWALUACJA-SERIA-3.md`) Parawan zakrywa
+94,7% danych do zakrycia zamiast 87,3%, a niepotrzebnie zakrytych danych urzędu (organ, adres,
+telefon, e-mail, rachunek, sygnatura cytowanego wyroku) jest 2 zamiast 64 na 358. Na części serii,
+do której reguł nie dopasowywano, 90,9% zamiast 87,7%. Na drugiej serii (tabele, OCR, czaty,
+sprawy społeczne, `docs/EWALUACJA-SERIA-2.md`) 78,1% zamiast 69,8% w części kontrolnej. Pierwszy
+zestaw 50 pism bez zmian: 99,5%, żadnego nadmiarowego zakrycia. Rdzeń 0.31.0 (paczki `anonimizator`
+i `parawan`). Na słabym komputerze aplikacja jest gotowa do pracy po ok. 2,6 s (v0.47.0: 1,4 s).
+
 **Osoba, której imię i nazwisko Parawan już zakrył, znika też tam, gdzie pismo podaje ją inaczej: samym nazwiskiem w odmianie, samym imieniem, zdrobnieniem, inicjałami albo loginem.**
 
 - **Raz rozpoznana osoba zakryta w całym piśmie.** Gdy pismo podaje osobę z pewną kotwicą (imię
@@ -2875,7 +2890,8 @@ Przegląd stabilizacyjny:
 - Opcjonalny lokalny NER (spaCy PL): usługa `services/ner` (Docker) + klient
   `anonimizator/ner` (fail-safe, circuit breaker).
 
-[Unreleased]: https://github.com/karolpolikarp/parawan/compare/v0.47.0...HEAD
+[Unreleased]: https://github.com/karolpolikarp/parawan/compare/v0.48.0...HEAD
+[v0.48.0]: https://github.com/karolpolikarp/parawan/compare/v0.47.0...v0.48.0
 [v0.47.0]: https://github.com/karolpolikarp/parawan/compare/v0.46.27...v0.47.0
 [v0.46.27]: https://github.com/karolpolikarp/parawan/compare/v0.46.26...v0.46.27
 [v0.46.26]: https://github.com/karolpolikarp/parawan/compare/v0.46.25...v0.46.26

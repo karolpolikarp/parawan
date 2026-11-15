@@ -104,8 +104,8 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 
 ## Stan (2026-11-15)
 
-- `main` = v0.47.0 + PR #29 (scalony 2026-11-15, niewydany: pobierany plik to dalej v0.47.0).
-  PR #29: serie 2 i 3 pism (`test-data/seria-2`, `seria-3`, części robocza i odłożona; opisy
+- `main` = v0.48.0 (wydane 2026-11-15, rdzeń i `parawan` 0.31.0 czekają na npm, Backlog 4).
+  Zawiera PR #29: serie 2 i 3 pism (`test-data/seria-2`, `seria-3`, części robocza i odłożona; opisy
   w `docs/EWALUACJA-SERIA-2.md`, `-SERIA-3.md`). Seria 3 robocza: recall 87,3% → 94,7%, nadmiarowe
   64 → 2 na 358; odłożona 87,7% → 90,9%, 69 → 36. Ewaluacja serii: `node scripts/eval/run-eval.mjs
   --eval --set test-data/seria-3/robocza --profile domyslny`. Części odłożonej nie używać do strojenia.
@@ -139,7 +139,7 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
    (nazwa instytucji lub geografii po przymiotniku, np. „Starosta Tarnowski”, „Ziemia Tarnowska”).
    Usunięcie ze słownika dawało wycieki („Sędzia Tarnowski”), cofnięte w 380586a.
 4. Publikacja npm z komputera autora (2FA): `npm login`, potem `npm publish -w anonimizator`
-   i `npm publish -w parawan`. 0.29.14 nie wyszło; po merge v0.47.0 publikować od razu 0.30.0.
+   i `npm publish -w parawan`. 0.29.14 i 0.30.0 nie wyszły; publikować od razu 0.31.0 (v0.48.0).
    Powrót: `npm view anonimizator version`.
 5. Część „Właściciel” z `docs/WYDANIE.md` dla v0.47.0 (czytnik ekranu, Word, wydruk PDF).
 6. Opcje polityki z `docs/EWALUACJA.md` (dane firm, miejscowość, numery spraw, profile „Do pracy”
