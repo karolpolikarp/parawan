@@ -569,6 +569,54 @@ działają na GitHubie od chwili wypchnięcia tagów.
   „[IMIĘ I NAZWISKO], tel. wew. 21”. Na
   trzeciej serii 50 pism (część robocza) wycieków jest 116 zamiast 126, bez nowych nadmiarowych
   zakryć.
+- **Numer prawa jazdy, dowodu, paszportu, KRS i aktu stanu cywilnego znika także wtedy, gdy między
+  nazwą dokumentu a numerem stoi wtrącenie.** Wcześniej „prawo jazdy kat. AM, B nr 44411/23/1586”,
+  „Prawo jazdy okazał, nr 18957/11/1031”, „dowodem osobistym wydanym przez Prezydenta Miasta
+  Krakowa nr ABC123456”, „paszport (ważny do 2030 r.) nr AB1234567”, „KRS (Sąd Rejonowy dla
+  Krakowa-Śródmieścia, XI Wydział Gospodarczy) pod numerem 0000123456” i „odpisu aktu urodzenia
+  dziecka, nr aktu 0612/2021” zostawiały numer jawny. Teraz to „prawo jazdy kat. AM, B nr
+  [PRAWO-JAZDY]”, „… nr [NR-DOWODU]”, „… nr [NR-PASZPORTU]”, „pod numerem [KRS]” i „nr aktu
+  [NR-AKTU-USC]”. Wtrąceniem może być kategoria, organ wydający, data ważności w nawiasie albo
+  czasownik, w jednym zdaniu i bez cyfr poza nawiasem, a numer musi stać po „nr” albo „numer”
+  i mieć kształt danego dokumentu. Numer aktu w rejestrze stanu cywilnego
+  („1661011/00/AU/1995/001061”) znika po samym kształcie, także po „akt otrzymał numer”. Jawne
+  zostają numery innych dokumentów i spraw we wtrąceniu („Prawo jazdy kategorii B wydaje starosta
+  …, wniosek nr 123/2024”, „zatrzymał dokument prawa jazdy za pokwitowaniem nr 0318842”, „notatkę nr
+  123/2026”), przepis o dokumencie („ustawą o dowodach osobistych”) i nazwa punktu („Punkt
+  Paszportowy nr 2”). Jawne zostają też dane urzędu po nazwie dokumentu: gdy tuż przed „nr” stoi
+  zwykły rzeczownik, numer należy do niego („Wnioski o wydanie prawa jazdy przyjmuje Wydział
+  Komunikacji, pokój nr 1011.”, „sala nr 2014”, „stanowisko nr 1204”, „JRWA symbol nr 5430”,
+  „skrytka nr ESP12345”, „Dowód osobisty odbierzesz w Urzędzie Miasta, okienko nr …”). Tak samo
+  wielką literą i po organie wydającym („Prawo jazdy wydane przez Starostę Kartuskiego, Wydział
+  Komunikacji, Pokój nr 2107.”, „…, Stanowisko nr 1204”, „Kancelaria Ogólna nr 1014”, „KRS prowadzony
+  przez Sąd Rejonowy …, XI Wydział Gospodarczy, Sala nr …”) i przy lokalu opisanym imiesłowem
+  („Odbiór prawa jazdy: stanowisko czasowo zamknięte, nr 1204 czynne od 8:00.”).
+- **Imię, nazwisko i adres w formularzu spłaszczonym do jednego wiersza i w prozie znikają.**
+  Wcześniej z deklaracji wklejonej jako tekst „D.2 Imię ojca: Leon   Imię matki: Gertruda” dawało
+  „D.2 Imię ojca: [IMIĘ I NAZWISKO] matki: Gertruda”, a „Miejscowość: Kiełpino   Ulica: Kartuska
+  Nr domu: 41A” zostawało jawne. Teraz każde pole wiersza dostaje swoją maskę, także po średniku
+  i z numeracją części deklaracji („D.2”, „1.4.”): „Imię ojca: [IMIĘ I NAZWISKO]   Imię matki:
+  [IMIĘ I NAZWISKO]”, „Ulica: [ADRES]   Nr domu: [ADRES]”, „Imię: [IMIĘ I NAZWISKO] Nazwisko:
+  [IMIĘ I NAZWISKO] PESEL: [PESEL]”, „Imiona rodziców: [IMIĘ I NAZWISKO], [IMIĘ I NAZWISKO]”. W
+  prozie znika wartość po nazwie pola osoby: „nazwisko rodowe w akcie: [IMIĘ I NAZWISKO].”,
+  „nazwisko rodowe matki „[IMIĘ I NAZWISKO]””, zmiana nazwiska „z „[IMIĘ I NAZWISKO]” na „[IMIĘ
+  I NAZWISKO]””, „o nadanie dziecku imienia [IMIĘ I NAZWISKO].” i „zapamiętałam jedynie imię:
+  [IMIĘ I NAZWISKO].”. Jawne zostają puste pola („Imię: ………”), pouczenia („Imię i nazwisko: należy
+  wpisać drukowanymi literami.”, „należy podać imię i nazwisko oraz adres”), urząd albo rola pod
+  etykietą osoby w jednym wierszu („Nazwisko: Urząd Skarbowy   Adres: …”), Skarb Państwa pod
+  etykietą nazwiska („Działka nr 123/4, obręb Bodzentyn, nazwisko właściciela: Skarb Państwa.”,
+  „Nazwisko: Skarb Państwa”), patron („nadać szkole imię Jana Pawła II”, „Nagroda imienia Zofii”,
+  „Dom Kultury imienia Juliana.”, „Muzeum imienia Stanisława.”), także w cudzysłowie, po dwukropku
+  i przy zmianie patrona w uchwale („Nadaje się rondu imię „Józefa”.”, „Szkoła nosi imię: Józef.”,
+  „Zmiana imienia patrona z „Stanisław” na „Jan”.”), zmiana nazwy ulicy („z „Polna” na „Lipowa””)
+  i firma pod etykietą osoby albo podmiotu („Inwestor, nazwisko lub nazwa: Budimex.”). Imię bez dwukropka znika tylko w zdaniu o nadaniu albo zmianie imienia osoby, w formie
+  słownikowej („o zmianę imienia [IMIĘ I NAZWISKO].”, „Wpisano imię [IMIĘ I NAZWISKO].”). Numer pola
+  deklaracji przed kolejną etykietą należy do etykiety: „1.1. Imię: Bożydar 1.2. Nazwisko: Pękala” daje
+  „1.1. Imię: [IMIĘ I NAZWISKO] 1.2. Nazwisko: [IMIĘ I NAZWISKO]”, a „D.2 Imię: Jan  D.3 Nazwisko:
+  Kowalski  D.4 Imię ojca: Piotr” daje „D.2 Imię: [IMIĘ I NAZWISKO]  D.3 Nazwisko: [IMIĘ I NAZWISKO]
+  D.4 Imię ojca: [IMIĘ I NAZWISKO]”. Na
+  trzeciej serii 50 pism (część robocza) wycieków jest 104 zamiast 116, bez nowych nadmiarowych
+  zakryć.
 - **Pierwsze wklejone pismo i każda następna zmiana mają wynik od razu.** Parawan przygotowuje
   silnik zaraz po otwarciu pliku, a nie przy pierwszym piśmie. Wcześniej pierwsze przeliczenie
   trwało kilka razy dłużej niż kolejne, a pauza przed następnym rosła od niego do pół sekundy

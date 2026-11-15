@@ -3,7 +3,7 @@
 import { COMMON_NOUN_LOOKALIKES, DIMINUTIVE_LOOKALIKES, homographBase, isCompoundAdjective, isConfirmedSurname, isGeoAdjective, looksLikeSurname, NON_SURNAME_ADJ, normalizeSurnameKey, surnameBase, surnameShaped } from '../surnames.js';
 import { CAP_WORD, NM_BOUND, NM_LO, NM_UP, PERSON_MASK_SRC, PL_LO, PL_UP, PRECEDED_BY_CAP } from '../charset.js';
 import { JSON_ESC_PUA_EOL, type RedactCtx, VI_GIVEN_SENTINEL } from '../context.js';
-import { FORM_LABEL_WORDS, isEmptyFormValue } from '../dict/forms.js';
+import { FORM_LABEL_WORDS, isEmptyFormValue, RE_STATE_TREASURY_VALUE } from '../dict/forms.js';
 import { TABLE_HEADER_WORDS } from '../dict/headers.js';
 import { FOREIGN_GIVEN_NAMES, isFirstNameGenitive, isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
@@ -97,6 +97,8 @@ export function passPersonTrigger(ctx: RedactCtx): void {
       if (tab > 0) return onMatch(m.slice(0, m.length - name.length + tab), kw, sep, name.slice(0, tab), offset, str) + name.slice(tab);
       // wypełniacz wykazu albo szablonu („Nazwisko: Wakat”)
       if (isEmptyFormValue(name.trim())) return m;
+      // Skarb Państwa pod etykietą nazwiska („Nazwisko: Skarb Państwa”) to osoba prawna
+      if (RE_STATE_TREASURY_VALUE.test(name.trim())) return m;
     }
     const { parts, words, s } = splitAfterRoles(name);
     if (s >= words.length) return m;

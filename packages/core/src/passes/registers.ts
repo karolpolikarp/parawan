@@ -587,5 +587,24 @@ export function passCivilRecord(ctx: RedactCtx): void {
   ctx.text = ctx.text.replace(RE_CIVIL_RECORD, (m, kw: string, sep: string, val: string) =>
     notCivilNumber(val) || OTHER_DOCUMENT.test(kw) ? m : `${kw}${sep}${ctx.hit('AKT-USC')}`,
   );
+  // Rodzaj aktu i „nr aktu” rozdzielone wtrąceniem z przecinkiem („odpisu aktu urodzenia dziecka,
+  // nr aktu 0612/2021”). Rodzaj aktu szukamy tylko w krótkim oknie przed „nr aktu”, w tym samym wierszu.
+  ctx.text = ctx.text.replace(RE_CIVIL_NR_AKTU, (m, kw: string, sep: string, val: string, offset: number, str: string) => {
+    if (notCivilNumber(val)) return m;
+    const before = str.slice(Math.max(0, offset - 80), offset);
+    const line = before.slice(before.lastIndexOf('\n') + 1);
+    if (!RE_CIVIL_KIND_BEFORE.test(line) || OTHER_DOCUMENT.test(line.slice(line.search(RE_CIVIL_KIND_BEFORE)))) return m;
+    return `${kw}${sep}${ctx.hit('AKT-USC')}`;
+  });
+  // Numer aktu w rejestrze stanu cywilnego ma własny kształt (gmina TERYT, „00”, AU/AM/AZ, rok,
+  // numer w roku: „1661011/00/AU/1995/001061”), więc nie potrzebuje kotwicy tuż przed sobą
+  // („akt otrzymał numer …”).
+  ctx.text = ctx.text.replace(RE_CIVIL_REGISTRY_NUMBER, () => ctx.hit('AKT-USC'));
   maskEnumeration(ctx, 'AKT-USC', CIVIL_VALUE, (v) => !notCivilNumber(v));
 }
+const RE_CIVIL_NR_AKTU = new RegExp(String.raw`((?<![${WORD}])${NR}\s+${ci('aktu')})([\s:=-]*)(${CIVIL_VALUE})(?![${WORD}/])`, 'g');
+const RE_CIVIL_KIND_BEFORE = new RegExp(
+  String.raw`(?<![${WORD}])(?:${ci('akt')}\p{L}*\s+(?:${ciAlt(['urodzenia', 'małżeństwa', 'zgonu'])})|${CIVIL_STATE}|USC)(?![${WORD}])`,
+  'u',
+);
+const RE_CIVIL_REGISTRY_NUMBER = /(?<![\w/])\d{7}\/\d{2}\/A[UMZ]\/(?:19|20)\d{2}\/\d{6}(?![\w/])/g;

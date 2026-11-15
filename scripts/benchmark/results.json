@@ -2,9 +2,9 @@
   "generatedAt": "2026-11-15T05:15:57.777Z",
   "seed": 20260704,
   "coreVersion": "0.30.0",
-  "casesTotal": 799,
-  "mustMaskTotal": 1091,
-  "mustKeepTotal": 1406,
+  "casesTotal": 812,
+  "mustMaskTotal": 1107,
+  "mustKeepTotal": 1429,
   "skippedLayers": [
     {
       "name": "core+spacy",
@@ -28,24 +28,24 @@
       "desc": "redactPII(): regex, sumy kontrolne i słownik (in-process, offline)",
       "elapsedMs": 985,
       "changedVsCore": null,
-      "recall": 0.9862511457378552,
-      "precision": 0.9992887624466572,
-      "f1": 0.9927271497525537,
+      "recall": 0.986449864498645,
+      "precision": 0.9993002099370188,
+      "f1": 0.9928334581238636,
       "agg": {
-        "maskTotal": 1091,
-        "maskHit": 1076,
-        "keepTotal": 1406,
-        "keepHit": 1405
+        "maskTotal": 1107,
+        "maskHit": 1092,
+        "keepTotal": 1429,
+        "keepHit": 1428
       },
       "perCategory": {
         "osoby-podstawowe": {
           "recall": 1,
           "precision": 1,
           "f1": 1,
-          "maskTotal": 262,
-          "maskHit": 262,
-          "keepTotal": 165,
-          "keepHit": 165
+          "maskTotal": 266,
+          "maskHit": 266,
+          "keepTotal": 166,
+          "keepHit": 166
         },
         "osoby-odmiana": {
           "recall": 1,
@@ -69,19 +69,19 @@
           "recall": 1,
           "precision": 1,
           "f1": 1,
-          "maskTotal": 599,
-          "maskHit": 599,
-          "keepTotal": 432,
-          "keepHit": 432
+          "maskTotal": 611,
+          "maskHit": 611,
+          "keepTotal": 439,
+          "keepHit": 439
         },
         "negatywy": {
           "recall": null,
-          "precision": 0.9984251968503937,
+          "precision": 0.9984615384615385,
           "f1": null,
           "maskTotal": 0,
           "maskHit": 0,
-          "keepTotal": 635,
-          "keepHit": 634
+          "keepTotal": 650,
+          "keepHit": 649
         },
         "osoby-rzadkie-ner": {
           "recall": 0.21052631578947367,
@@ -4289,6 +4289,71 @@
         },
         {
           "id": "neg-296",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-277",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-278",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-279",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-297",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-298",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-280",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-p-97",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-299",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-300",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-301",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-281",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-302",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-303",
           "leaked": [],
           "eaten": []
         }

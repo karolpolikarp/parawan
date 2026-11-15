@@ -1,7 +1,7 @@
 // Pola formularza („Etykieta: wartość", wartość w następnej linii, wiersze z TAB-em).
 import { foldAscii, isConfirmedSurname, normalizeSurnameKey } from '../surnames.js';
 import { type RedactCtx } from '../context.js';
-import { FORM_FIELDS, type FormField, formLabelOf, isFormLabelLine, isValidFormValue, RE_DATE_VALUE, RE_PROPER_WORDS, stripFormPrefix, TAB_ROLE_LABELS } from '../dict/forms.js';
+import { FORM_FIELDS, FORM_LABEL_WORDS, type FormField, formLabelOf, isFormLabelLine, isValidFormValue, RE_DATE_VALUE, RE_PROPER_WORDS, RE_STATE_TREASURY_VALUE, stripFormPrefix, TAB_ROLE_LABELS } from '../dict/forms.js';
 import { NEXT_LINE_HEADER_WORDS, TAB_HEADER_WORDS } from '../dict/headers.js';
 import { isFirstNameLike, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { lowercaseNameLooksLikePerson, RE_VALUE_TITLE_OR_INITIAL } from '../guards/person-values.js';
@@ -87,7 +87,8 @@ function gatedPersonValue(
   }
   const tail = /[.,;]+$/.exec(core)?.[0] ?? '';
   core = core.slice(0, core.length - tail.length);
-  if (!core || RE_FORM_PERSON_PLACEHOLDER.test(core)) return null;
+  // Skarb Państwa, najczęstszy właściciel w decyzjach o nieruchomościach, to osoba prawna, nie człowiek.
+  if (!core || RE_FORM_PERSON_PLACEHOLDER.test(core) || RE_STATE_TREASURY_VALUE.test(core)) return null;
   let ws = core.split(/[ \t]+/);
   if (FORM_NOT_PERSON_HEAD_FOLDED.has(foldAscii(ws[0].toLowerCase()))) {
     const fi = ws.findIndex(isFirstNameLike);
@@ -170,8 +171,14 @@ function gatedPersonValue(
 const RE_NEXT_FIELD_LABEL = /[ \t]+\p{Lu}[\p{L}.]*(?:[ \t]+\p{L}+\.?){0,2}[ \t]*:/u;
 // Numer pozycji przed etykietą („04. Ulica: Warszawska  05. Nr domu: 31") należy do etykiety tylko
 // w formularzu numerowanym. Bez tego „Ulica: Krótka 7. Piętro: 2" traciłoby numer domu.
-const RE_FLAT_FIELD_NO_END = /(?:^|[ \t]+)\d{1,2}[.)]$/;
-const RE_FLAT_FORM_NUMBERED = /^[ \t]*\d{1,2}[.)][ \t]/;
+const RE_FLAT_FIELD_NO_END = /(?:^|[ \t]+)(?:\d{1,2}[.)]|\d{1,2}(?:\.\d{1,2}){1,3}\.?)$/;
+// Numer pola deklaracji przed kolejną etykietą („Imię: Jan  D.3 Nazwisko:”, „Imię: Jan 1.2. Nazwisko:”)
+// należy do etykiety w każdym wierszu. Liczba bez kropki na końcu („0.5”, „12.50”) zostaje wartością,
+// chyba że cały wiersz jest numerowany.
+const RE_FLAT_FIELD_PART_END = /(?:^|[ \t]+)(?:[A-Z](?:\.\d{1,2}){1,3}\.?|\d{1,2}(?:\.\d{1,2}){1,3}\.)$/;
+const RE_FLAT_FORM_NUMBERED = /^[ \t]*(?:\d{1,2}[.)]|(?:[A-Z]|\d{1,2})(?:\.\d{1,2}){1,3}\.?)[ \t]/;
+const flatFieldNoEnd = (value: string, numbered: boolean): RegExpExecArray | null =>
+  RE_FLAT_FIELD_PART_END.exec(value) ?? (numbered ? RE_FLAT_FIELD_NO_END.exec(value) : null);
 // Wyraz otwierający etykietę wielowyrazową („Nr domu:", „Data urodzenia:", „Wymiar Etatu:"): przed nim
 // stoi jeszcze wartość poprzedniego pola.
 const RE_FLAT_LABEL_OPENER =
@@ -199,10 +206,62 @@ const FLAT_ONLY_FIELDS: FormField[] = [
   { re: /^(?:m|lok|lokal|mieszk|mieszkanie)\.?$/i, type: 'ADRES', kind: 'addr' },
   { re: /^(?:miasto|poczta)$/i, type: 'MIEJSCOWOSC', kind: 'place' },
 ];
+// Pouczenie zamiast wartości pola osoby: same małe litery, co najmniej dwa wyrazy, które nie wyglądają
+// na imię i nazwisko („należy wpisać drukowanymi literami", „podać w części B").
+function isInstructionValue(val: string): boolean {
+  const t = val.trim().replace(/[.,;:]+$/, '');
+  if (/\p{Lu}/u.test(t)) return false;
+  const ws = t.split(/[ \t]+/);
+  return ws.length >= 2 && !lowercaseNameLooksLikePerson(ws);
+}
+// Instytucja, komórka albo rola pod etykietą osoby w spłaszczonym wierszu („Nazwisko: Urząd Skarbowy
+// Adres: …", „Imię i nazwisko: Wójt Gminy PESEL: …") zostaje jawna, chyba że za rolą stoi imię.
+function looksLikeInstitutionValue(val: string): boolean {
+  if (RE_STATE_TREASURY_VALUE.test(val.trim())) return true;
+  const ws = val.trim().split(/[ \t]+/);
+  if (FORM_NOT_PERSON_HEAD_FOLDED.has(foldAscii(ws[0].toLowerCase())) && !ws.slice(1).some(isFirstNameLike)) return true;
+  return ws.some((w) => isInstitutionWord(w) || RE_FORM_LEGAL_FORM.test(` ${w}`));
+}
 /**
- * Wartość pola adresowego z kolejnymi polami w tym samym wierszu: każda wartość znanego pola dostaje
- * swoją maskę, a etykiety i pola spoza listy („PESEL:") zostają dla dalszych przebiegów. Null, gdy
- * w wartości nie ma kolejnej etykiety.
+ * Bramka wartości pola osoby wspólna dla pola na początku wiersza, kolejnego pola spłaszczonego wiersza
+ * i nazwy pola w prozie („…, nazwisko właściciela: Skarb Państwa.” zostaje jawne tak samo jak
+ * „Nazwisko właściciela: Skarb Państwa.”).
+ */
+function personFieldValueOk(v: string, surnameOnly: boolean): boolean {
+  return !isInstructionValue(v) && !looksLikeInstitutionValue(v) && isValidFormValue(v, 'name') && gatedPersonValue(v, false, surnameOnly) !== null;
+}
+/**
+ * Maska wartości jednego pola spłaszczonego wiersza albo null, gdy wartość zostaje jawna. Pola osoby
+ * przechodzą te same bramki co w osobnym wierszu: lista imion, bramka etykiet z dopełnieniem
+ * i pouczenie zamiast wartości.
+ */
+function flatSegmentMask(
+  ctx: RedactCtx,
+  f: FormField,
+  vt: string,
+  label: string,
+  flatOnly: boolean,
+  maskOf: (f: FormField, v: string, label: string) => string,
+): { text: string; n: number } | null {
+  if (f.kind === 'date' || !ctx.on(f.type) || !vt) return null;
+  if (f.nameList) {
+    const list = RE_NAME_LIST_PAIR.exec(vt);
+    if (list && isFirstNameLike(list[1]) && isFirstNameLike(list[3])) return { text: `${ctx.M[f.type]}${list[2]}${ctx.M[f.type]}`, n: 2 };
+    if (!isFirstNameLike(vt)) return null;
+  }
+  if (f.kind === 'name' && (isInstructionValue(vt) || looksLikeInstitutionValue(vt))) return null;
+  if (!isValidFormValue(vt, f.kind)) return null;
+  if (flatOnly && f.kind === 'addr' && !/^\d{1,3}[A-Za-z]?$/.test(vt)) return null;
+  if (f.gated) {
+    const g = gatedPersonValue(vt, false, !!f.surnameOnly);
+    return g ? { text: `${g.lead}${maskOf(f, g.core, label)}${g.tail}`, n: 1 } : null;
+  }
+  return { text: maskOf(f, vt, label), n: 1 };
+}
+/**
+ * Wartość pola z kolejnymi polami w tym samym wierszu: każda wartość znanego pola dostaje swoją maskę,
+ * a etykiety i pola spoza listy („PESEL:") zostają dla dalszych przebiegów. Null, gdy w wartości nie
+ * ma kolejnej etykiety.
  */
 function maskFlatFormFields(
   ctx: RedactCtx,
@@ -210,6 +269,7 @@ function maskFlatFormFields(
   val: string,
   numbered: boolean,
   maskOf: (f: FormField, v: string, label: string) => string,
+  firstLabel: string,
 ): string | null {
   const segs: { label: string; value: string }[] = [];
   let label = '';
@@ -219,7 +279,7 @@ function maskFlatFormFields(
     if (!nx || nx.index === 0) break;
     let value = rest.slice(0, nx.index);
     let num = '';
-    const no = numbered ? RE_FLAT_FIELD_NO_END.exec(value) : null;
+    const no = flatFieldNoEnd(value, numbered);
     if (no) {
       num = no[0];
       value = value.slice(0, no.index);
@@ -230,13 +290,13 @@ function maskFlatFormFields(
   }
   if (!segs.length) return null;
   // numer kolejnej pozycji na końcu wiersza („Nr domu:  19.") to etykieta pustego pola, nie wartość
-  const lastNo = numbered ? RE_FLAT_FIELD_NO_END.exec(rest) : null;
+  const lastNo = flatFieldNoEnd(rest, numbered);
   segs.push({ label, value: lastNo ? rest.slice(0, lastNo.index) : rest });
   if (lastNo) segs.push({ label: lastNo[0], value: '' });
   let out = '';
   for (let k = 0; k < segs.length; k++) {
     const { label: lb, value } = segs[k];
-    const lbl = k === 0 ? '' : formLabelOf(stripFormPrefix(lb.replace(/:[ \t]*$/, '')));
+    const lbl = k === 0 ? firstLabel : formLabelOf(stripFormPrefix(lb.replace(/:[ \t]*$/, '')));
     let f = k === 0 ? field : FORM_FIELDS.find((ff) => ff.re.test(lbl));
     let flatOnly = false;
     if (!f && k > 0) {
@@ -246,19 +306,11 @@ function maskFlatFormFields(
     // Przecinek albo średnik przed etykietą następnego pola („Ulica: Lipowa, Nr domu: 3") rozdziela
     // pola, nie należy do wartości.
     const vt = value.trim().replace(/[ \t]*[,;]$/, '');
-    if (
-      f &&
-      !f.gated &&
-      f.kind !== 'date' &&
-      ctx.on(f.type) &&
-      vt &&
-      isValidFormValue(vt, f.kind) &&
-      (!flatOnly || f.kind !== 'addr' || /^\d{1,3}[A-Za-z]?$/.test(vt))
-    ) {
+    const masked = f ? flatSegmentMask(ctx, f, vt, lbl, flatOnly, maskOf) : null;
+    if (f && masked) {
       const lead = /^[ \t]*/.exec(value)?.[0] ?? '';
-      // kolejne pole osobowe w trybie pseudonimów dostaje etykietę osoby (spójną z prozą)
-      out += `${lb}${lead}${k === 0 ? ctx.M[f.type] : maskOf(f, vt, lbl)}${value.slice(lead.length + vt.length)}`;
-      ctx.bump(f.type);
+      out += `${lb}${lead}${masked.text}${value.slice(lead.length + vt.length)}`;
+      for (let b = 0; b < masked.n; b++) ctx.bump(f.type);
     } else out += lb + value;
   }
   return out;
@@ -512,21 +564,23 @@ function maskSameLineValue(
     ctx.bump(field.type);
     return;
   }
+  const val = colonVal.trim();
+  // Formularz spłaszczony do wiersza („Ulica: Krótka Nr domu: 7 Miejscowość: Mysiadło", „Imię: Jan
+  // Nazwisko: Kowalski PESEL: …", „Imię ojca: Leon   Imię matki: Gertruda"): wartość każdego pola
+  // kończy się przed etykietą następnego pola.
+  const flat = maskFlatFormFields(ctx, field, val, RE_FLAT_FORM_NUMBERED.test(lines[i]), masks.maskCell, label);
+  if (flat !== null) {
+    const at = lines[i].lastIndexOf(val);
+    lines[i] = `${lines[i].slice(0, at)}${flat}${lines[i].slice(at + val.length)}`;
+    return;
+  }
   // pod tą etykietą tylko imiona, dopisek („zgodnie z aktem urodzenia") zostaje
-  if (field.nameList && !isFirstNameLike(colonVal.trim())) return;
+  if (field.nameList && !isFirstNameLike(val)) return;
   // Data w tej samej linii ma swój detektor (passBirthDate).
   if (field.kind === 'date') return;
-  const val = colonVal.trim();
-  // Formularz spłaszczony do wiersza („Ulica: Krótka Nr domu: 7 Miejscowość: Mysiadło"): wartość
-  // pola adresowego kończy się przed etykietą następnego pola.
-  if (field.kind === 'addr') {
-    const flat = maskFlatFormFields(ctx, field, val, RE_FLAT_FORM_NUMBERED.test(lines[i]), masks.maskCell);
-    if (flat !== null) {
-      const at = lines[i].lastIndexOf(val);
-      lines[i] = `${lines[i].slice(0, at)}${flat}${lines[i].slice(at + val.length)}`;
-      return;
-    }
-  }
+  // Pouczenie małą literą pod etykietą osoby („Imię i nazwisko: należy wpisać drukowanymi literami")
+  // to treść formularza, nie wartość. Skarb Państwa pod etykietą nazwiska właściciela to osoba prawna.
+  if (field.kind === 'name' && (isInstructionValue(val) || RE_STATE_TREASURY_VALUE.test(val))) return;
   if (!isValidFormValue(val, field.kind)) return;
   if (field.gated) {
     const g = gatedPersonValue(val, false, !!field.surnameOnly);
@@ -617,4 +671,142 @@ export function passFormFields(ctx: RedactCtx): void {
   const masks = formMaskers(ctx);
   for (let i = 0; i < rows.lines.length; i++) maskFormLine(ctx, rows, masks, i);
   ctx.text = joinFormRows(rows);
+}
+
+// Pole osoby w prozie albo w środku wiersza: „nazwisko rodowe w akcie: Szewczik.”, „nazwisko rodowe matki
+// „Szewczik””, „zmiana nazwiska … z „Kiełbasa” na „Kielska””, „o nadanie dziecku imienia Zofia.”.
+// Kotwicą jest nazwa pola osoby, a wartość stoi tuż za nią (do trzech wyrazów dopełnienia małą literą)
+// i kończy się interpunkcją albo cudzysłowem, więc nazwa pola w zdaniu („należy podać imię i nazwisko
+// oraz adres”) i etykieta bez wartości („Imię: ………”) zostają bez zmian.
+const INLINE_FIRST_LABEL = '[Ii]mi(?:ę|enia|eniem|ona|on)';
+const INLINE_SURNAME_LABEL = '[Nn]azwisk(?:o|a|iem|u)';
+const INLINE_GAP = String.raw`(?:[ \t]+(?:i[ \t]+[Nn]azwisko|i[ \t]+imi[eę]|[a-ząćęłńóśźż]{1,15})){0,3}`;
+const INLINE_WORD = String.raw`\p{Lu}[\p{L}'’-]*`;
+const INLINE_VALUE = String.raw`${INLINE_WORD}(?:[ \t]+${INLINE_WORD})?`;
+// „etykieta …: Wartość” w środku wiersza (pola na początku wiersza obsłużył już passFormFields).
+const RE_INLINE_COLON = new RegExp(
+  String.raw`(?<!\p{L})(${INLINE_FIRST_LABEL}|${INLINE_SURNAME_LABEL})(${INLINE_GAP}[ \t]*:[ \t]*)(${INLINE_WORD}[ \t]*,[ \t]*${INLINE_WORD}|${INLINE_VALUE})(?=[ \t]*(?:[.,;)\n]|$))`,
+  'gu',
+);
+// „etykieta … „Wartość””.
+const RE_INLINE_QUOTED = new RegExp(
+  String.raw`(?<!\p{L})(${INLINE_FIRST_LABEL}|${INLINE_SURNAME_LABEL})(${INLINE_GAP}[ \t]+)([„"“])(${INLINE_VALUE})(?=[”"])`,
+  'gu',
+);
+// Zmiana „z „X” na „Y””, gdy wcześniej w tym samym wierszu stoi nazwa pola osoby.
+const RE_INLINE_CHANGE = new RegExp(
+  String.raw`(?<!\p{L})([Zz][ \t]+[„"“])(${INLINE_VALUE})([”"][ \t]+na[ \t]+[„"“])(${INLINE_VALUE})(?=[”"])`,
+  'gu',
+);
+const RE_INLINE_LABEL_ANY = new RegExp(String.raw`(?<!\p{L})(?:${INLINE_FIRST_LABEL}|${INLINE_SURNAME_LABEL})(?!\p{L})`, 'gu');
+// „nadanie imienia Zofia.”: imię bez dwukropka i cudzysłowu tylko ze słownika i przed interpunkcją.
+const RE_INLINE_FIRST_BARE = new RegExp(
+  String.raw`(?<!\p{L})(${INLINE_FIRST_LABEL})([ \t]+)(\p{Lu}\p{Ll}+(?:[ \t]+\p{Lu}\p{Ll}+)?)(?=[ \t]*(?:[.,;)\n]|$))`,
+  'gu',
+);
+// Imię bez dwukropka i cudzysłowu znika tylko w zdaniu o nadaniu albo zmianie imienia osoby: nazwa pola
+// stoi tuż po rzeczowniku czynności albo wpisie („o zmianę imienia Zofia.”, „Wpisano imię Zofia.”)
+// albo po osobie („o nadanie dziecku imienia Zofia.”, „córce imienia Aurelia”), a imię jest w formie
+// słownikowej (mianownik). Patron instytucji stoi w dopełniaczu, zwykle zaraz po nazwie własnej
+// („Dom Kultury imienia Juliana.”, „Muzeum imienia Stanisława.”), więc bez tej kotwicy zostaje jawny.
+const INLINE_BARE_PERSON = String.raw`(?:dzieck(?:u|a)|dzieciom|córce|córki|syn(?:owi|a)|małoletni\p{L}*|wnuk(?:owi|a)|wnucz(?:ce|ki)|noworod\p{L}*|niemowl\p{L}*)`;
+const RE_INLINE_BARE_TRIGGER = new RegExp(
+  String.raw`(?<!\p{L})(?:(?:nadani|zmian|zmieni|sprostow|wpis|uzupełni)\p{L}*(?:[ \t]+${INLINE_BARE_PERSON})?|${INLINE_BARE_PERSON})[ \t]+$`,
+  'iu',
+);
+// Imię patrona szkoły, ulicy albo jednostki („nadać szkole imię Jana Pawła II”) zostaje jawne.
+const RE_INLINE_PATRON_BEFORE =
+  /(?<!\p{L})(?:szkoł|szkol|ulic|plac|rond|skwer|park|most|hal|sal|stadion|bibliotek|przedszkol|żłob|placówk|ośrod|jednostk|drużyn|zespoł|zespół|hufc|budyn|statk|patron|liceum|gimnazj|technikum|instytut|uczelni|kości|parafi|nagrod|stypendi|fundusz|fundacj|konkurs|medal|odznak|turniej|memoriał)/iu;
+const isFirstLabel = (l: string): boolean => /^[Ii]mi/.test(l);
+function inlineValueOk(label: string, value: string): boolean {
+  const ws = value.split(/[ \t,]+/).filter(Boolean);
+  if (isFirstLabel(label)) return ws.every((w) => isFirstNameLike(w) && personFieldValueOk(w, false));
+  if (ws.length > 2) return false;
+  if (!ws.every((w) => !isInstitutionWord(w) && !FORM_LABEL_WORDS.has(w.toLowerCase()) && !FORM_NOT_PERSON_HEAD_FOLDED.has(foldAscii(w.toLowerCase()))))
+    return false;
+  // lista („Kowalska, Kielce”) ma bramkę na pierwszym wyrazie, w wywołującym
+  return value.includes(',') || personFieldValueOk(value, true);
+}
+function inlineMask(ctx: RedactCtx, value: string): string {
+  ctx.bump('IMIE');
+  const ws = value.split(/[ \t]+/);
+  return ctx.personMask(ws[ws.length - 1]);
+}
+/** Ostatnia nazwa pola osoby w tym samym wierszu, najwyżej `span` znaków przed `offset`, i tekst od niej do `offset`. */
+function labelBefore(str: string, offset: number, span: number): { label: string; span: string } | null {
+  const before = str.slice(Math.max(0, offset - span), offset);
+  const line = before.slice(before.lastIndexOf('\n') + 1);
+  let last: RegExpMatchArray | null = null;
+  for (const m of line.matchAll(RE_INLINE_LABEL_ANY)) last = m;
+  return last ? { label: last[0], span: line.slice(last.index ?? 0) } : null;
+}
+/*
+ * Patron szkoły, ulicy, ronda albo nagrody: nazwa pola stoi w uchwale o nadaniu albo zmianie nazwy
+ * („Rondo imienia „Jana””, „Nadaje się rondu imię „Józefa””, „zmienia się nazwisko patrona ulicy
+ * z „Nowotki” na „Wyszyńskiego””, „Szkoła nosi imię: Józef.”). Rzeczownika patrona szukamy w tym samym
+ * członie zdania przed nazwą pola (do przecinka, kropki albo dwukropka), w dopełnieniu nazwy pola i tuż
+ * po wartości („Nadanie imienia „Józef” rondu w Krakowie”). Okna są krótkie i ograniczone. Formy
+ * krótkich wyrazów są zamknięte, żeby „Halina” czy „parking” nie były patronem.
+ */
+const RE_INLINE_PATRON = new RegExp(
+  String.raw`(?<!\p{L})(?:patron\p{L}*|szkoł\p{L}*|szkol\p{L}*|ulic\p{L}*|plac(?:u|em|e|ów|om)?|placówk\p{L}*|rond\p{L}*|skwer\p{L}*|park(?:u|iem|i|ów|owi)?|most(?:u|em|y|owi)?|hal(?:a|i|ę|ą)|sal(?:a|i|ę|ą)|alej\p{L}*|alei|osiedl\p{L}*|bulwar\p{L}*|stadion\p{L}*|bibliotek\p{L}*|przedszkol\p{L}*|żłob\p{L}*|ośrod\p{L}*|jednostk\p{L}*|drużyn\p{L}*|zesp[oó][lł]\p{L}*|hufc\p{L}*|budyn\p{L}*|statk\p{L}*|liceum|gimnazj\p{L}*|technikum|instytut\p{L}*|uczelni\p{L}*|kości(?:ół|oł)\p{L}*|kaplic\p{L}*|parafi\p{L}*|nagrod\p{L}*|stypendi\p{L}*|fundusz\p{L}*|fundacj\p{L}*|konkurs\p{L}*|medal\p{L}*|odznak\p{L}*|turniej\p{L}*|memoriał\p{L}*|pomnik\p{L}*|tablic\p{L}*|muze\p{L}*|teatr\p{L}*|szpital\p{L}*|hospicj\p{L}*|nosi|nosz\p{L}*)(?!\p{L})`,
+  'iu',
+);
+const RE_INLINE_CLAUSE_SEP = /[.,;:\n–—]/g;
+/** Człon zdania przed `offset`: najwyżej 50 znaków, od ostatniego przecinka, kropki albo dwukropka. */
+function clauseBefore(str: string, offset: number): string {
+  const s = str.slice(Math.max(0, offset - 50), offset);
+  let cut = 0;
+  for (const m of s.matchAll(RE_INLINE_CLAUSE_SEP)) cut = (m.index ?? 0) + 1;
+  return s.slice(cut);
+}
+/** Człon zdania po `end`: najwyżej 40 znaków, do najbliższej interpunkcji. */
+function clauseAfter(str: string, end: number): string {
+  const s = str.slice(end, end + 40);
+  const cut = s.search(/[.,;:\n]/);
+  return cut < 0 ? s : s.slice(0, cut);
+}
+const isPatronContext = (...parts: string[]): boolean => parts.some((p) => RE_INLINE_PATRON.test(p));
+// Etykieta mieszana: osoba albo podmiot („nazwisko lub nazwa”, „imię i nazwisko albo firma”). Pod nią
+// stoi często firma („Budimex”, „Orlen”), więc w prozie wartość zostaje jawna, jak w polu formularza.
+const RE_INLINE_MIXED_LABEL =
+  /(?<!\p{L})(?:lub|albo|bądź|ewentualnie|nazw[aąeyię]|firm\p{L}*|podmiot\p{L}*|instytucj\p{L}*|organ\p{L}*|jednostk\p{L}*)(?!\p{L})/iu;
+export function passInlineFieldValues(ctx: RedactCtx): void {
+  if (!ctx.on('IMIE') || !/[Ii]mi|[Nn]azwisk/.test(ctx.text)) return;
+  ctx.text = ctx.text.replace(RE_INLINE_CHANGE, (m, z: string, v1: string, na: string, v2: string, offset: number, str: string) => {
+    const lb = labelBefore(str, offset, 200);
+    if (!lb || RE_INLINE_MIXED_LABEL.test(lb.span) || !inlineValueOk(lb.label, v1) || !inlineValueOk(lb.label, v2)) return m;
+    if (isPatronContext(lb.span, clauseBefore(str, offset), clauseAfter(str, offset + m.length + 1))) return m;
+    return `${z}${inlineMask(ctx, v1)}${na}${inlineMask(ctx, v2)}`;
+  });
+  ctx.text = ctx.text.replace(RE_INLINE_QUOTED, (m, lb: string, gap: string, q: string, v: string, offset: number, str: string) => {
+    if (RE_INLINE_MIXED_LABEL.test(gap) || !inlineValueOk(lb, v)) return m;
+    if (isPatronContext(gap, clauseBefore(str, offset), clauseAfter(str, offset + m.length + 1))) return m;
+    return `${lb}${gap}${q}${inlineMask(ctx, v)}`;
+  });
+  ctx.text = ctx.text.replace(RE_INLINE_COLON, (m, lb: string, gap: string, v: string, offset: number, str: string) => {
+    // Na początku wiersza to pole formularza, które passFormFields już ocenił. Okno wstecz jest
+    // ograniczone: przedrostek dłuższy niż numer pola („12.”, „D.2”, „1.4.”) to już środek wiersza,
+    // a skan do początku wiersza przy każdym trafieniu byłby kwadratowy na długim wierszu bez złamań.
+    const back = str.slice(Math.max(0, offset - 16), offset);
+    const nl = back.lastIndexOf('\n');
+    if ((nl >= 0 || offset <= 16) && stripFormPrefix(back.slice(nl + 1)) === '') return m;
+    if (RE_INLINE_MIXED_LABEL.test(gap) || !inlineValueOk(lb, v)) return m;
+    if (isPatronContext(gap, clauseBefore(str, offset), clauseAfter(str, offset + m.length))) return m;
+    const list = /^(\p{Lu}[\p{L}'’-]*)([ \t]*,[ \t]*)(\p{Lu}[\p{L}'’-]*)$/u.exec(v);
+    if (list) {
+      // pod nazwiskiem lista to nazwisko i wartość kolejnego pola („nazwisko: Kowalska, Kielce”)
+      if (!isFirstLabel(lb)) return inlineValueOk(lb, list[1]) ? `${lb}${gap}${inlineMask(ctx, list[1])}${list[2]}${list[3]}` : m;
+      return `${lb}${gap}${inlineMask(ctx, list[1])}${list[2]}${inlineMask(ctx, list[3])}`;
+    }
+    return `${lb}${gap}${inlineMask(ctx, v)}`;
+  });
+  ctx.text = ctx.text.replace(RE_INLINE_FIRST_BARE, (m, lb: string, sp: string, v: string, offset: number, str: string) => {
+    if (!inlineValueOk(lb, v) || !v.split(/[ \t]+/).every((w) => POLISH_FIRST_NAMES.has(w.toLowerCase()))) return m;
+    const before = str.slice(Math.max(0, offset - 60), offset);
+    const sentence = before.slice(Math.max(before.lastIndexOf('.'), before.lastIndexOf('\n')) + 1);
+    if (!RE_INLINE_BARE_TRIGGER.test(sentence) || RE_INLINE_PATRON_BEFORE.test(sentence)) return m;
+    if (isPatronContext(clauseAfter(str, offset + m.length))) return m;
+    return `${lb}${sp}${inlineMask(ctx, v)}`;
+  });
 }

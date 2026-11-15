@@ -1416,6 +1416,24 @@ export function buildDataset() {
   osp('Wnioskodawca: Grzegorz Kowal\nZnak sprawy: GK.6220.1.2026\nDekretacja: Burmistrz → GK → MN\nKierownik Referatu GK – Marek Nowak', ['Grzegorz Kowal', '→ MN', 'Marek Nowak'], ['→ GK', 'Referatu GK']);
   neg('Sprawę prowadzi: Z.G.K. w Pucku. Referent: W.Z.D. (Wojewódzki Zarząd Dróg)', ['Z.G.K. w Pucku', 'W.Z.D. (Wojewódzki']);
 
+  // W11: kotwica dokumentu i numer rozdzielone wtrąceniem (kategoria, organ, data ważności, czasownik).
+  str('Zatrzymuje się prawo jazdy kat. AM, B nr 55120/19/0742, wydane przez Starostę Kartuskiego.', ['55120/19/0742'], ['kat. AM, B', 'Starostę Kartuskiego']);
+  str('Strona okazała dowód osobisty wydany przez Burmistrza Kartuz nr DKR482913 oraz paszport (ważny do 2031 r.) nr EC4719283.', ['DKR482913', 'EC4719283'], ['Burmistrza Kartuz', 'ważny do 2031 r.']);
+  str('Akt otrzymał w rejestrze stanu cywilnego numer 2205011/00/AU/2003/000417, a odpis aktu urodzenia, nr aktu 417/2003, dołączono.', ['2205011/00/AU/2003/000417', '417/2003'], ['rejestrze stanu cywilnego']);
+  neg('Prawo jazdy kategorii B wydaje starosta w terminie 14 dni, a zatrzymany dokument prawa jazdy za pokwitowaniem nr 0318842 przekazano do organu.', ['w terminie 14 dni', '0318842']);
+  neg('Zgodnie z ustawą o dowodach osobistych dowód wydaje organ gminy, Punkt Paszportowy nr 2 w Gdyni przyjmuje wnioski.', ['ustawą o dowodach osobistych', 'Punkt Paszportowy nr 2']);
+  // W12: pola osoby w spłaszczonym wierszu formularza i w prozie.
+  str('D.2 Imię ojca: Bogdan   Imię matki: Leokadia\nMiejscowość: Łapalice   Ulica: Polna   Nr domu: 7B   Nr lokalu: –', ['Bogdan', 'Leokadia', 'Polna', '7B']);
+  osp('Wnioskodawczyni, nazwisko rodowe w akcie: Szczypiorska, wnosi o zmianę nazwiska syna z „Pyrka” na „Pyrkowski” i o nadanie córce imienia Aurelia.', ['Szczypiorska', 'Pyrka', 'Pyrkowski', 'Aurelia'], ['Wnioskodawczyni']);
+  neg('Imię i nazwisko osoby upoważnionej: ………… We wniosku należy podać imię i nazwisko, nazwisko rodowe oraz imiona rodziców. Rada Gminy nadaje szkole imię Jana Pawła II.', ['imię i nazwisko, nazwisko rodowe', 'imię Jana Pawła II']);
+  // W11/W12 po weryfikacji: numer urzędu po kotwicy dokumentu, Skarb Państwa, patron i numery pól deklaracji.
+  neg('Wnioski o wydanie prawa jazdy przyjmuje Wydział Komunikacji, pokój nr 2107, a dowód osobisty odbierzesz w Urzędzie Miasta, okienko nr ABA654321.', ['pokój nr 2107', 'okienko nr ABA654321']);
+  neg('Działka nr 412/7, obręb Masłów, nazwisko właściciela: Skarb Państwa. Ośrodek Kultury imienia Kazimierza prowadzi zajęcia.', ['Skarb Państwa', 'imienia Kazimierza']);
+  str('A.1 Imię: Ludomir  A.2 Nazwisko: Pękala  A.3 Imię ojca: Zdzisław', ['Ludomir', 'Pękala', 'Zdzisław'], ['A.2 Nazwisko', 'A.3 Imię ojca']);
+  // W11/W12 po drugiej weryfikacji: lokal urzędu wielką literą, imiesłów przy lokalu, „nazwisko lub nazwa”, patron w uchwale.
+  neg('Prawo jazdy wydane przez Starostę Kartuskiego, Wydział Komunikacji, Pokój nr 2107. Odbiór: okienko czasowo zamknięte, nr 1204 czynne od 8:00.', ['Pokój nr 2107', 'nr 1204 czynne']);
+  neg('Inwestor, nazwisko lub nazwa: Budimex. Rada Miejska nadaje rondu imię „Józefa”, a szkoła nosi imię: Stanisław.', ['Budimex', '„Józefa”', 'imię: Stanisław']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {

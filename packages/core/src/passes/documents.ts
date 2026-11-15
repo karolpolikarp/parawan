@@ -27,6 +27,109 @@ function maskSeriesNumber(ctx: RedactCtx, re: RegExp, type: PiiType): void {
   });
 }
 
+/**
+ * Kotwica dokumentu i numer rozdzielone wtrąceniem: kategorią („prawo jazdy kat. AM, B nr …”),
+ * organem wydającym („dowodem osobistym wydanym przez Prezydenta Miasta Krakowa nr …”), datą
+ * ważności w nawiasie („paszport (ważny do 2030 r.) nr …”) albo czasownikiem („Prawo jazdy okazał,
+ * nr …”). Wtrącenie jest krótkie (do `max` znaków), w jednym zdaniu (bez średnika, końca wiersza
+ * i kropki przed nowym zdaniem), bez cyfr poza nawiasem, a numer musi stać po „nr”/„numer”
+ * i mieć kształt danego dokumentu. Inny dokument, przepis albo sprawa w wtrąceniu przerywa
+ * kotwicę („Prawo jazdy kat. B wydaje starosta, decyzja nr …”).
+ */
+const DOC_GAP_CHAR = String.raw`(?:[^\n.;\d()]|\.(?![ \t]*\p{Lu}\p{Ll})|\([^()\n]{0,60}\))`;
+/** Słowo kotwicy bez względu na wielkość liter. Bez flagi „i”: z nią „\p{Lu}” w strażniku końca zdania łapie też małe litery. */
+const ci = (word: string): string => [...word].map((c) => (c.toUpperCase() !== c ? `[${c}${c.toUpperCase()}]` : c)).join('');
+const DOC_GAP_LINK = String.raw`(?<!\p{L})(?:(?:${ci('pod')}|${ci('o')})[ \t]+)?(?:${ci('nr')}\.?|${ci('numer')}(?:${ci('ze')}|${ci('em')}|${ci('u')})?)(?!\p{L})[ \t:]*`;
+// Inny dokument, przepis albo sprawa we wtrąceniu: „nr” należy wtedy do nich, nie do kotwicy.
+const DOC_GAP_OTHER_COMMON = String.raw`decyzj|wyrok|postanowieni|uchwał|faktur|umow|pism(?:o|a|em)(?!\p{L})|wniose?k(?:u|iem)?(?!\p{L})|sygn|spraw(?:a|y|ie|ę)?(?!\p{L})|zaświadcz|zezwoleni|art(?:\.|ykuł)|ust(?:\.|aw)|rozporządz|dz\.|akt(?:u|em)?(?!\p{L})|pesel|nip|regon|tel(?:\.|efon)|kont(?:o|a|em|cie)(?!\p{L})|rachun|kart\p{L}*[ \t]+pobytu|paszport|dow[oó]d|dowod|legitymacj|praw[oaeu]\p{L}*[ \t]+jazdy|pokwitowa|potwierdzeni|protok[oó]ł|mandat|notatk|kwit|zawiadomieni|wezwani|formularz|druk|blankiet|zgłoszeni|zleceni|poli[cs]|rejestracj|ewidencj|egzamin|skierowani|orzeczeni|świadectw|certyfikat|licencj`;
+const RE_DOC_GAP_OTHER = new RegExp(String.raw`(?<!\p{L})(?:${DOC_GAP_OTHER_COMMON}|rej(?:\.|estr)|krs)`, 'iu');
+/** Przy KRS sąd rejestrowy i nazwa rejestru we wtrąceniu należą do kotwicy. */
+const RE_DOC_GAP_OTHER_KRS = new RegExp(String.raw`(?<!\p{L})(?:${DOC_GAP_OTHER_COMMON})`, 'iu');
+const RE_DOC_GAP_LINK_TAIL = /(?:(?:pod|o)[ \t]+)?(?:nr\.?|numer(?:ze|em|u)?)[ \t:]*$/iu;
+// Przepis o dokumencie („ustawy o dowodach osobistych”, „przepisy o prawie jazdy”).
+const RE_DOC_LAW_BEFORE = /(?<!\p{L})(?:ustaw\p{L}*|przepis\p{L}*|rozporządzeni\p{L}*)[ \t]+o[ \t]*$/iu;
+const docGapRe = (anchor: string, value: string, max = 80): RegExp =>
+  new RegExp(String.raw`(?<!\p{L})(${anchor})(${DOC_GAP_CHAR}{1,${max}}?${DOC_GAP_LINK})(${value})`, 'gu');
+const RE_ID_CARD_GAP = docGapRe(
+  String.raw`${ci('dow')}[oóOÓ]${ci('d')}(?:${ci('u')}|${ci('em')}|${ci('zie')})?[ \t]+(?:${ci('osobist')}\p{L}*|${ci('tożsamości')})|${ci('dokument')}\p{L}*[ \t]+${ci('tożsamości')}`,
+  String.raw`[A-Z]{3}[ \t-]?\d{6}(?!\d)`,
+);
+const RE_PASSPORT_GAP = docGapRe(String.raw`${ci('paszport')}\p{L}*|${ci('dokument')}\p{L}*[ \t]+${ci('podróży')}`, String.raw`[A-Z]{2}[ \t-]?\d{7}(?!\d)`);
+// Wtrącenie z sądem rejestrowym bywa długie („Krajowego Rejestru Sądowego prowadzonego przez Sąd
+// Rejonowy dla …, XI Wydział Gospodarczy, pod numerem …”), ale dziesięć cyfr po „nr” jest jednoznaczne.
+const RE_KRS_GAP = docGapRe(String.raw`KRS|${ci('krajow')}\p{L}*[ \t]+${ci('rejestr')}\p{L}*[ \t]+${ci('sądow')}\p{L}*`, String.raw`\d{10}(?!\d)`, 120);
+const RE_DRIVER_LICENSE_GAP = docGapRe(
+  String.raw`${ci('praw')}(?:${ci('o')}|${ci('a')}|${ci('em')}|${ci('ie')})[ \t]+${ci('jazdy')}`,
+  String.raw`(?=[A-Za-z0-9/-]*\d)[A-Za-z0-9]{4,15}(?:[/-][A-Za-z0-9]{1,6}){0,3}(?![\p{L}\d/-])`,
+);
+/*
+ * „nr” należy do kotwicy dokumentu tylko wtedy, gdy wtrącenie kończy się tym, co opisuje sam dokument:
+ * kategorią („kat. AM, B”), organem wydającym wielką literą po „wydan*|prowadzon* przez”, czasownikiem
+ * albo imiesłowem z przecinkiem („okazał,”) albo zamkniętym nawiasem. Zwykły rzeczownik tuż przed „nr”
+ * („pokój”, „sala”, „stanowisko”, „skrytka”, „symbol”, „budynek”) to numer czegoś innego, zwykle
+ * w danych urzędu („Wydział Komunikacji, pokój nr 1011”), więc kotwica się kończy. Lokal albo komórka
+ * urzędu w dowolnym miejscu wtrącenia, także wielką literą („…, Pokój nr 1011”, „Kancelaria Ogólna nr
+ * 1014”), przerywa kotwicę zawsze, bo numer pokoju ma kształt numeru prawa jazdy.
+ */
+// „seria i numer” należy do numeru dokumentu
+const RE_DOC_GAP_SERIES_TAIL = /(?<!\p{L})seri[aiięą](?:[ \t]+i)?[ \t]*$/iu;
+const RE_DOC_GAP_END_CATEGORY = /(?<!\p{L})(?:[Kk]at\.?|[Kk]ategori\p{L}*)[ \t]*[A-DT][M1E]?E?(?:[ \t]*(?:,|i|oraz|\+)[ \t]*[A-DT][M1E]?E?)*[ \t,:]*$/u;
+const RE_DOC_GAP_END_PAREN = /\)[ \t,:–-]*$/u;
+// Czas przeszły („okazał”, „przedstawiła”, „okazali”), imiesłów przysłówkowy („okazując”) albo
+// przymiotnikowy („wydane”, „zatrzymany”, „okazanym”), zawsze z przecinkiem przed „nr”.
+const RE_DOC_GAP_END_VERB = /(?<!\p{L})(\p{Ll}{2,}(?:[aeiyę]ł|[aeiy]ł[aoy]|[aeiy]li|ąc|wszy|[aeo]n(?:y|a|e|ym|ej)|[ęy]t(?:y|a|e|ym|ej)))[ \t]*,[ \t]*$/u;
+// Rzeczowniki o końcówce czasownika albo imiesłowu („wydział, nr”, „strona, nr”).
+const RE_DOC_GAP_VERB_NOUN = /(?:dział|kanał|materiał|kapitał|sygnał|upał|zapał|stron[ay]|ochron[ay]|zmian[ay]|ścian[ay]|plany|cen[ay]|scen[ay]|ocen[ay])$/u;
+// Imiesłów przymiotnikowy („zamknięte”, „przeniesione”) w odróżnieniu od czasu przeszłego („okazał”).
+const RE_DOC_GAP_ADJ_PARTICIPLE = /(?:[aeo]n(?:y|a|e|ym|ej)|[ęy]t(?:y|a|e|ym|ej))$/u;
+// Granica członu wtrącenia: przecinek, średnik, dwukropek albo myślnik.
+const RE_DOC_GAP_CLAUSE_SEP = /[,;:–—]|[ \t]-[ \t]/gu;
+const RE_DOC_GAP_AUTHORITY = /(?<!\p{L})(?:wydan|wystawion|prowadzon)\p{L}*[ \t]+przez[ \t]+(.*)$/u;
+const RE_AUTHORITY_TOKEN = /^(?:\p{Lu}[\p{L}-]*\.?|[IVXLC]+|w|we|dla|i|z|ze|na|[–-])$/u;
+// Po przecinku organ ciągnie się tylko komórką organu („…, XI Wydział Gospodarczy”, „…, Wydział
+// Komunikacji”) albo siedzibą („…, w Gdańsku”). Każda inna fraza po przecinku zaczyna nową rzecz.
+const RE_AUTHORITY_NEXT_SEGMENT = /^(?:[IVXLC]+[ \t]+)?(?:Wydzia\p{L}*|Oddzia\p{L}*|Departament\p{L}*|Delegatur\p{L}*|Zamiejscow\p{L}*|w|we|z[ \t]+siedzibą)(?!\p{L})/u;
+/*
+ * Lokal albo komórka urzędu we wtrąceniu („Wydział Komunikacji, Pokój nr 1011”, „stanowisko czasowo
+ * zamknięte, nr 1204”, „Kancelaria Ogólna nr 1014”, „okienko nr 12A4”) bez względu na wielkość liter:
+ * „nr” należy wtedy do lokalu, nie do dokumentu. Punkt Paszportowy jest organem paszportu.
+ */
+const RE_DOC_GAP_PLACE = new RegExp(
+  String.raw`(?<!\p{L})(?:pok[oó]j\p{L}*|sal(?:a|i|ę|ą|e|ach)|stanowisk\p{L}*|okien\p{L}*|okn(?:o|a|ie|em)|kas(?:a|y|ie|ę|ą)|budyn\p{L}*|gmach\p{L}*|pawilon\p{L}*|referat\p{L}*|sekcj\p{L}*|zesp[oó][lł]\p{L}*|skrytk\p{L}*|skrzyn\p{L}*|załącznik\p{L}*|rozdział\p{L}*|kancelari\p{L}*|biur(?:o|a|ze|em|ach)|punkt(?:u|em|cie|y|ów)?(?![ \t]+paszport)|lokal(?:u|em)?|piętr\p{L}*|parter\p{L}*|gabinet\p{L}*|sekretariat\p{L}*|dziennik\p{L}*|hol(?:u|em)?|korytarz\p{L}*|kabin\p{L}*|boks\p{L}*|sektor\p{L}*|klatk\p{L}*|wejści\p{L}*|bram(?:a|ie|y|ą)|kanał\p{L}*|lini(?:a|i|ę|ą))(?!\p{L})`,
+  'iu',
+);
+function docGapEndsOk(gapWithLink: string): boolean {
+  const g = gapWithLink.replace(RE_DOC_GAP_LINK_TAIL, '').replace(RE_DOC_GAP_SERIES_TAIL, '');
+  if (!/\p{L}/u.test(g)) return true;
+  if (RE_DOC_GAP_END_PAREN.test(g) || RE_DOC_GAP_END_CATEGORY.test(g)) return true;
+  const verb = RE_DOC_GAP_END_VERB.exec(g);
+  if (verb && !RE_DOC_GAP_VERB_NOUN.test(verb[1])) {
+    // Imiesłów przymiotnikowy opisuje dokument tylko w pierwszym członie wtrącenia („Prawo jazdy
+    // zatrzymane, nr …”). Po przecinku albo myślniku opisuje to, co stoi przed nim w tym członie
+    // („…, okienko zamknięte, nr 1012”, „– stanowisko tymczasowo przeniesione, nr 1205”).
+    if (!RE_DOC_GAP_ADJ_PARTICIPLE.test(verb[1])) return true;
+    const before = g.slice(0, verb.index);
+    let cut = -1;
+    for (const s of before.matchAll(RE_DOC_GAP_CLAUSE_SEP)) cut = (s.index ?? 0) + s[0].length;
+    return cut < 0 || before.slice(cut).trim() === '';
+  }
+  const auth = RE_DOC_GAP_AUTHORITY.exec(g);
+  if (!auth) return false;
+  const segs = auth[1].split(',').map((s) => s.trim()).filter(Boolean);
+  if (!segs.length || segs.slice(1).some((s) => !RE_AUTHORITY_NEXT_SEGMENT.test(s))) return false;
+  const toks = auth[1].split(/[ \t,]+/).filter(Boolean);
+  return toks.length > 0 && /^\p{Lu}/u.test(toks[toks.length - 1]) && toks.every((t) => RE_AUTHORITY_TOKEN.test(t));
+}
+function maskDocAfterGap(ctx: RedactCtx, re: RegExp, type: PiiType, other = RE_DOC_GAP_OTHER): void {
+  ctx.text = ctx.text.replace(re, (m, kw: string, gap: string, _v: string, offset: number, str: string) => {
+    if (RE_DOC_GAP_PLACE.test(gap)) return m;
+    if (!docGapEndsOk(gap)) return m;
+    if (other.test(gap.replace(RE_DOC_GAP_LINK_TAIL, ''))) return m;
+    if (RE_DOC_LAW_BEFORE.test(str.slice(Math.max(0, offset - 30), offset))) return m;
+    return `${kw}${gap}${ctx.hit(type)}`;
+  });
+}
+
 // Dowód osobisty: 3 litery + 6 cyfr.
 export function passIdCard(ctx: RedactCtx): void {
   if (!ctx.on('DOWOD')) return;
@@ -51,6 +154,7 @@ export function passIdCard(ctx: RedactCtx): void {
     if (!isValidDowod(m)) return m;
     return ctx.hit('DOWOD');
   });
+  maskDocAfterGap(ctx, RE_ID_CARD_GAP, 'DOWOD');
 }
 
 // Paszport: 2 litery + 7 cyfr, tylko z kontekstem.
@@ -66,6 +170,7 @@ export function passPassport(ctx: RedactCtx): void {
     /\b((?:paszport\w*|dokument\w*\s+podróży|nr\s+paszportu|numer\s+paszportu)(?:\s+(?:nr\.?|numer(?:ze|em|u)?|seri[aiięą]|o|i))*)([\s:.=-]*)([A-Za-z]{2}[\s-]?\d{7})(?!\d)/gi,
     'PASZPORT',
   );
+  maskDocAfterGap(ctx, RE_PASSPORT_GAP, 'PASZPORT');
 }
 
 // KRS: 10 cyfr, tylko z etykietą, bo numer nie ma publicznej sumy kontrolnej. Etykieta wraca
@@ -73,6 +178,7 @@ export function passPassport(ctx: RedactCtx): void {
 export function passKrs(ctx: RedactCtx): void {
   if (!ctx.on('KRS')) return;
   maskAfterLabel(ctx, /\b(KRS)((?:\s+(?:pod\s+)?(?:nr\.?|numer(?:em)?))?[\s:.=-]*)(\d{10})(?!\d)/gi, 'KRS');
+  maskDocAfterGap(ctx, RE_KRS_GAP, 'KRS', RE_DOC_GAP_OTHER_KRS);
 }
 
 // Prawo jazdy: tylko z kontekstem, numer w całości razem z separatorami „/" i „-".
@@ -82,6 +188,7 @@ export function passDriverLicense(ctx: RedactCtx): void {
     /\b((?:(?:nr|numer)\s+)?praw(?:o|a|em|ie)\s+jazdy(?:\s+(?:nr\.?|numer(?:u|ze|em)?|seri[ai]|kat\.?|kategori[ai]|o|[ABCDEMT]{1,2}\d?))*[\s:=.-]*)((?=[A-Za-z0-9/-]*\d)[A-Za-z0-9]{4,15}(?:[/-][A-Za-z0-9]{1,6}){0,3})/gi,
     maskKeepPrefix(ctx, 'PRAWO-JAZDY'),
   );
+  maskDocAfterGap(ctx, RE_DRIVER_LICENSE_GAP, 'PRAWO-JAZDY');
 }
 
 // Tablica rejestracyjna: po kotwicy „nr rej."/„tablica", po kotwicy pojazdowej i w wyliczeniu.

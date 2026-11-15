@@ -6331,7 +6331,7 @@ test('Resztki, poprawki po weryfikacji · nazwisko na „-owa" pod etykietą, na
     ['Imię i nazwisko pacjenta: Oksana Petrowa', `Imię i nazwisko pacjenta: ${N}`],
     ['Imię i nazwisko świadka: Dilnoza Karimowa', `Imię i nazwisko świadka: ${N}`],
     ['Joanna Kos z domu Wrona Zam. Sosnowiec', `${N} z domu ${N} Zam. ${M}`],
-    ['Anna Kowalska z domu Sikora Imię ojca: Jan', `${N} z domu ${N} Imię ojca: Jan`],
+    ['Anna Kowalska z domu Sikora Imię ojca: Jan', `${N} z domu ${N} Imię ojca: ${N}`],
     ['Stawiła się Anna Kowalska z domu Gzik Legitymująca się dowodem', `Stawiła się ${N} z domu ${N} Legitymująca się dowodem`],
     ['Ulica: Krótka 7. Piętro: 2', `Ulica: ${A} Piętro: 2`],
     ['Ulica: Długa 5 Kraków Tel: 600123456', `Ulica: ${A} Tel: ${T}`],
@@ -13207,4 +13207,209 @@ test('tabela osób: nazwisko utworzone od funkcji („Wójtowicz”, „Sołtysi
   ]);
   // Sama funkcja bez danej człowieka zostaje jawna („Komornik”, „Sołtys Zalesia”).
   expect(redactPII('Nazwisko i imię;Uwagi\nJan Kowalski;brak\nSołtys Zalesia;dieta\nKomornik Sądowy;pismo').redacted).toBe(`Nazwisko i imię;Uwagi\n${N};brak\nSołtys Zalesia;dieta\nKomornik Sądowy;pismo`);
+});
+
+// ── W11: kotwica dokumentu i numer rozdzielone wtrąceniem ──
+test('W11: numer dokumentu po wtrąceniu z kategorią, organem, datą ważności albo czasownikiem', () => {
+  masked([
+    ['prawo jazdy kat. AM, B nr 44411/23/1586, wydane przez Starostę', 'prawo jazdy kat. AM, B nr [PRAWO-JAZDY], wydane przez Starostę'],
+    ['Prawo jazdy okazał, nr 18957/11/1031, chociaż niepotrzebne.', 'Prawo jazdy okazał, nr [PRAWO-JAZDY], chociaż niepotrzebne.'],
+    ['Prawo jazdy kategorii B, C nr 01234/12/1234 wydane przez Prezydenta Miasta Gdańska.', 'Prawo jazdy kategorii B, C nr [PRAWO-JAZDY] wydane przez Prezydenta Miasta Gdańska.'],
+    ['legitymuje się dowodem osobistym wydanym przez Prezydenta Miasta Krakowa nr ABC123456.', `legitymuje się dowodem osobistym wydanym przez Prezydenta Miasta Krakowa nr ${DW}.`],
+    ['Okazał dowód osobisty (ważny do 01.02.2030 r.) seria i numer ABC 123456.', `Okazał dowód osobisty (ważny do 01.02.2030 r.) seria i numer ${DW}.`],
+    ['Okazał paszport (ważny do 12.05.2030 r.) nr AB1234567.', `Okazał paszport (ważny do 12.05.2030 r.) nr ${PZ}.`],
+    ['Legitymował się paszportem wydanym przez RP o numerze AB1234567.', `Legitymował się paszportem wydanym przez RP o numerze ${PZ}.`],
+    ['wpisana do KRS (Sąd Rejonowy dla Krakowa-Śródmieścia, XI Wydział Gospodarczy) pod numerem 0000123456.', 'wpisana do KRS (Sąd Rejonowy dla Krakowa-Śródmieścia, XI Wydział Gospodarczy) pod numerem [KRS].'],
+    [
+      'wpisana do Krajowego Rejestru Sądowego prowadzonego przez Sąd Rejonowy Gdańsk-Północ w Gdańsku, VIII Wydział Gospodarczy, pod numerem 0000123456.',
+      'wpisana do Krajowego Rejestru Sądowego prowadzonego przez Sąd Rejonowy Gdańsk-Północ w Gdańsku, VIII Wydział Gospodarczy, pod numerem [KRS].',
+    ],
+    ['kopia odpisu skróconego aktu urodzenia dziecka, nr aktu 0612/2021 (USC Puławy),', 'kopia odpisu skróconego aktu urodzenia dziecka, nr aktu [NR-AKTU-USC] (USC Puławy),'],
+    ['przy migracji do rejestru stanu cywilnego akt otrzymał numer 1661011/00/AU/1995/001061.', 'przy migracji do rejestru stanu cywilnego akt otrzymał numer [NR-AKTU-USC].'],
+  ]);
+  keep([
+    'Zgodnie z ustawą o dowodach osobistych z dnia 6 sierpnia 2010 r. dowód wydaje organ gminy.',
+    'Prawo jazdy kategorii B wydaje starosta zgodnie z art. 11 ust. 1 ustawy, nr Dz.U. 2023/622.',
+    'Kierujący okazał prawo jazdy, a funkcjonariusz sporządził notatkę nr 123/2026.',
+    'zatrzymał dokument prawa jazdy za pokwitowaniem nr 0318842 i przekazał go do organu.',
+    'Prawo jazdy kat. B uprawnia do kierowania pojazdem, zgodnie z załącznikiem nr 3.',
+    'Paszporty wydaje Wojewoda Pomorski, Punkt Paszportowy nr 2 w Gdyni.',
+    'Paszport tymczasowy ważny jest 12 miesięcy, opłata 30 zł, wniosek nr 123/2024.',
+    'Prawo jazdy zatrzymano. Decyzja nr 12/2026 jest ostateczna.',
+    'Dowód osobisty odebrał osobiście, nr kolejny w rejestrze odbiorów 1234.',
+    'Odpis aktu urodzenia wydano w dniu 12.02.2026, pismo nr 1234/2026.',
+  ]);
+});
+
+// ── W12: wartość pola osoby w prozie i w spłaszczonym wierszu formularza ──
+test('W12: pola osoby w jednym wierszu, w prozie, w cudzysłowie i przy zmianie nazwiska', () => {
+  masked([
+    ['D.2 Imię ojca: Leon   Imię matki: Gertruda', `D.2 Imię ojca: ${N}   Imię matki: ${N}`],
+    ['   Miejscowość: Kiełpino   Ulica: Kartuska   Nr domu: 41A   Nr lokalu: –', `   Miejscowość: ${C}   Ulica: ${A}   Nr domu: ${A}   Nr lokalu: –`],
+    ['Imię: Jan Nazwisko: Kowalski PESEL: 85010112345', `Imię: ${N} Nazwisko: ${N} PESEL: [PESEL]`],
+    ['Imię: Anna; Nazwisko: Nowak; Imiona rodziców: Jan, Maria; Nazwisko rodowe: Zielińska', `Imię: ${N}; Nazwisko: ${N}; Imiona rodziców: ${N}, ${N}; Nazwisko rodowe: ${N}`],
+    ['1.4. Nazwisko: Kowalska', `1.4. Nazwisko: ${N}`],
+    ['matka: Bożena Nowicka, nazwisko rodowe w akcie: Szewczik.', `matka: ${N}, nazwisko rodowe w akcie: ${N}.`],
+    ['Wnioskodawca: Jan Kowalski, imiona rodziców: Stanisław, Helena, nazwisko rodowe matki: Wójcik.', `Wnioskodawca: ${N}, imiona rodziców: ${N}, ${N}, nazwisko rodowe matki: ${N}.`],
+    ['W akcie wpisano nazwisko rodowe matki „Szewczik”, a powinno być inaczej.', `W akcie wpisano nazwisko rodowe matki „${N}”, a powinno być inaczej.`],
+    ['nazwisko syna, ur. 4.09.2016 r., z „Kiełbasa” na „Kielski”.', `nazwisko syna, ur. [DATA-URODZENIA] r., z „${N}” na „${N}”.`],
+    ['Wnioskodawczyni wnosi o nadanie dziecku imienia Zofia.', `Wnioskodawczyni wnosi o nadanie dziecku imienia ${N}.`],
+    ['z identyfikatora zapamiętałam jedynie imię: Kamil.', `z identyfikatora zapamiętałam jedynie imię: ${N}.`],
+  ]);
+  keep([
+    'Imię i nazwisko osoby upoważnionej: ………………',
+    'Imię: ……………… Nazwisko: ………………',
+    'Imię i nazwisko: należy wpisać drukowanymi literami.',
+    'We wniosku należy podać imię i nazwisko, adres zamieszkania oraz numer PESEL.',
+    'Należy podać imiona rodziców, nazwisko rodowe matki oraz miejsce urodzenia.',
+    'W rubryce nazwisko: należy wpisać nazwisko rodowe.',
+    'Pole „Imię i nazwisko” należy wypełnić drukowanymi literami.',
+    'Rada Gminy postanawia nadać szkole imię Jana Pawła II.',
+    'Rada Gminy nadała Szkole Podstawowej w Kiełpinie imię Floriana.',
+    'Nagroda imienia Zofii.',
+    'Zmiana nazwy ulicy z „Polna” na „Lipowa”.',
+    'W imieniu Gminy Kartuzy podpisał Burmistrz.',
+    'Podpisał w zastępstwie, imię i nazwisko: Kierownik Referatu.',
+    'Nazwisko: Urząd Skarbowy   Adres: jak wyżej',
+    'Organ: Burmistrz Kartuz   Komórka: Wydział Podatków',
+  ]);
+});
+
+// ── W11/W12, poprawki po weryfikacji: dane urzędu po kotwicy dokumentu, Skarb Państwa, patron, numery pól deklaracji ──
+test('W11: rzeczownik przed „nr” we wtrąceniu kończy kotwicę dokumentu, numer urzędu zostaje jawny', () => {
+  keep([
+    'Wnioski o wydanie prawa jazdy przyjmuje Wydział Komunikacji Starostwa Powiatowego, pokój nr 1011.',
+    'Prawo jazdy odbierzesz w Wydziale Komunikacji, sala nr 2014.',
+    'Egzamin państwowy na prawo jazdy przeprowadza WORD w Kielcach, stanowisko nr 1204.',
+    'Prawo jazdy kategorii C, zgodnie z JRWA symbol nr 5430, kategoria archiwalna B10.',
+    'O wydanie prawa jazdy wnioskuje się elektronicznie przez ePUAP, skrytka nr ESP12345.',
+    'Prawo jazdy wydaje Wydział Komunikacji, okienko nr 12A4.',
+    'Dowód osobisty odbierzesz w Urzędzie Miasta, okienko nr ABA123456.',
+    'Paszport odbierzesz w Punkcie Paszportowym, stanowisko nr EA1234567.',
+    'Spółka wpisana do KRS, budynek nr 0000123456.',
+    'Dowód osobisty wydany przez Prezydenta Miasta, pokój nr ABC123456.',
+  ]);
+  masked([
+    ['Kierujący okazał prawo jazdy kat. B, C nr 04512/11/0612.', 'Kierujący okazał prawo jazdy kat. B, C nr [PRAWO-JAZDY].'],
+    ['legitymował się prawem jazdy wydanym przez Starostę Kieleckiego nr 04512/11/0612.', 'legitymował się prawem jazdy wydanym przez Starostę Kieleckiego nr [PRAWO-JAZDY].'],
+    ['Prawo jazdy przedstawiła, nr 04512/11/0612.', 'Prawo jazdy przedstawiła, nr [PRAWO-JAZDY].'],
+    ['prawo jazdy (ważne do 2030 r.) nr 04512/11/0612.', 'prawo jazdy (ważne do 2030 r.) nr [PRAWO-JAZDY].'],
+  ]);
+});
+
+test('W12: Skarb Państwa pod etykietą nazwiska zostaje jawny w środku wiersza i na jego początku', () => {
+  keep([
+    'Działka nr 123/4, obręb Bodzentyn, nazwisko właściciela: Skarb Państwa.',
+    'Nazwisko właściciela: Skarb Państwa.',
+    'Nazwisko: Skarb Państwa.',
+    'Imię i nazwisko: Skarb Państwa   Adres: jak wyżej',
+    'Działka nr 5, nazwisko właściciela: Gmina Bodzentyn.',
+  ]);
+  masked([['Działka nr 5, obręb Bodzentyn, nazwisko właściciela: Kowalski.', `Działka nr 5, obręb Bodzentyn, nazwisko właściciela: ${N}.`]]);
+});
+
+test('W12: imię patrona po nazwie instytucji zostaje jawne, imię dziecka przy nadaniu albo zmianie znika', () => {
+  keep([
+    'Wojewódzki Szpital Zespolony imienia Stefana.',
+    'Dom Kultury imienia Juliana.',
+    'Centrum Kształcenia Zawodowego imienia Józefa.',
+    'Klub Sportowy imienia Kazimierza.',
+    'Muzeum imienia Stanisława.',
+    'Teatr imienia Stefana.',
+    'Hospicjum imienia Jana.',
+    'Schronisko Młodzieżowe imienia Zofii.',
+    'Szkole nadano imię Floriana.',
+    'Uchwała w sprawie nadania imienia Juliana Tuwima.',
+  ]);
+  masked([
+    ['Rodzice wnieśli o zmianę imienia Zofia.', `Rodzice wnieśli o zmianę imienia ${N}.`],
+    ['Wpisano imię Zofia.', `Wpisano imię ${N}.`],
+    ['Wnosi o nadanie córce imienia Aurelia.', `Wnosi o nadanie córce imienia ${N}.`],
+  ]);
+});
+
+test('W12: numer pola deklaracji przed kolejną etykietą należy do etykiety, nie do wartości', () => {
+  masked([
+    ['Imię: Jan 1.2. Nazwisko: Kowalski', `Imię: ${N} 1.2. Nazwisko: ${N}`],
+    ['B.3 Imię ojca: Zdzisław  B.4 Imię matki: Halina', `B.3 Imię ojca: ${N}  B.4 Imię matki: ${N}`],
+    ['1.1. Imię: Bożydar 1.2. Nazwisko: Pękala', `1.1. Imię: ${N} 1.2. Nazwisko: ${N}`],
+    ['1.1. Imię: Bożydar', `1.1. Imię: ${N}`],
+    ['D.2 Imię: Jan  D.3 Nazwisko: Kowalski  D.4 Imię ojca: Piotr', `D.2 Imię: ${N}  D.3 Nazwisko: ${N}  D.4 Imię ojca: ${N}`],
+    ['Imię: Jan 1.2. Nazwisko: Kowalski  1.3. PESEL: 44051401359', `Imię: ${N} 1.2. Nazwisko: ${N}  1.3. PESEL: [PESEL]`],
+    ['1. Imię: Jan 2. Nazwisko: Kowalski', `1. Imię: ${N} 2. Nazwisko: ${N}`],
+  ]);
+  // liczba bez kropki na końcu w wierszu bez numeracji to wartość, nie numer pola
+  keep(['Wymiar etatu: 0.5 Stanowisko: referent']);
+});
+
+// ── W11/W12, druga weryfikacja: lokal urzędu wielką literą, etykieta „nazwisko lub nazwa”, patron w uchwale ──
+test('W11: lokal albo komórka urzędu we wtrąceniu przerywa kotwicę dokumentu bez względu na wielkość liter', () => {
+  keep([
+    'Prawo jazdy wydane przez Starostę Krakowskiego, Wydział Komunikacji, Pokój nr 1011.',
+    'Prawo jazdy wydane przez Starostę Krakowskiego, Wydział Komunikacji, Referat nr 1011.',
+    'Prawo jazdy wydane przez Starostę Krakowskiego, Wydział Komunikacji, Okienko nr 12A4.',
+    'Prawo jazdy wydane przez Starostę Krakowskiego, Wydział Komunikacji, Załącznik nr 1011.',
+    'Prawo jazdy wydane przez Prezydenta Miasta Krakowa, Budynek nr 1011.',
+    'Prawo jazdy wydane przez Starostę Kartuskiego, Stanowisko nr 1204.',
+    'Prawo jazdy kat. B wydane przez Starostę Powiatu Gdańskiego, Pokój nr 2014.',
+    'Prawo jazdy: obsługa prowadzona przez Referat Komunikacji, Pokój nr 2014.',
+    'Prawo jazdy wydane przez Wydział Komunikacji, Kancelaria Ogólna nr 1014.',
+    'Prawo jazdy wydane przez Starostę Krakowskiego, Biuro Obsługi Klienta nr 1014.',
+    'Prawo jazdy wydane przez Starostę Krakowskiego Pokój nr 1011.',
+    'Dowód osobisty wydany przez Wójta Gminy, Pokój nr ABC123456.',
+    'Dokument tożsamości wystawiony przez Urząd Miasta, Skrytka nr ESP123456.',
+    'KRS prowadzony przez Sąd Rejonowy dla Krakowa-Śródmieścia w Krakowie, XI Wydział Gospodarczy, Sala nr 1234567890.',
+    // imiesłów po rzeczowniku miejsca w kolejnym członie wtrącenia opisuje miejsce, nie dokument
+    'Odbiór prawa jazdy: stanowisko czasowo zamknięte, nr 1204 czynne od 8:00.',
+    'Prawo jazdy – stanowisko tymczasowo przeniesione, nr 1205 w holu.',
+    'Prawo jazdy – odbiór: Wydział Komunikacji, stanowisko obsługi wyłączone, nr 1012 działa.',
+    'Prawa jazdy odbierzesz w starostwie, okienko zamknięte, nr 1012 otwarte do 15:00.',
+    'Prawo jazdy – okno podawcze zamknięte, nr 1204 czynne.',
+  ]);
+  masked([
+    ['Prawo jazdy wydane przez Starostę Krakowskiego, Wydział Komunikacji, nr 04512/11/0612.', 'Prawo jazdy wydane przez Starostę Krakowskiego, Wydział Komunikacji, nr [PRAWO-JAZDY].'],
+    ['Prawo jazdy zatrzymane, nr 04512/11/0612.', 'Prawo jazdy zatrzymane, nr [PRAWO-JAZDY].'],
+    ['Paszport wydany przez Wojewodę Mazowieckiego, w Warszawie, nr AB1234567.', `Paszport wydany przez Wojewodę Mazowieckiego, w Warszawie, nr ${PZ}.`],
+  ]);
+});
+
+test('W12: etykieta „nazwisko lub nazwa” w prozie zostawia firmę jawną, nazwisko pod czystą etykietą znika', () => {
+  keep([
+    'Wnioskodawca, nazwisko lub nazwa: Budimex.',
+    'Inwestor, nazwisko lub nazwa: Tauron.',
+    'Wierzyciel, nazwisko lub nazwa: Allegro.',
+    'Dłużnik – nazwisko lub nazwa: Energa.',
+    'Odbiorca: nazwisko lub nazwa: Comarch.',
+    'Właściciel, nazwisko lub nazwa firmy: Orlen.',
+    'Strona, nazwisko albo nazwa: Mostostal.',
+  ]);
+  masked([['Wnioskodawca, nazwisko: Kowalski.', `Wnioskodawca, nazwisko: ${N}.`]]);
+});
+
+test('W12: patron ronda, ulicy i szkoły w uchwale zostaje jawny w cudzysłowie, po dwukropku i przy zmianie', () => {
+  keep([
+    'Rondo imienia „Jana”.',
+    'Nadaje się rondu imię „Józefa”.',
+    'Nadanie imienia „Józef” rondu w Krakowie.',
+    'Zmiana imienia patrona z „Stanisław” na „Jan”.',
+    'Rada Miejska zmieniła imię patrona szkoły z „Janusz” na „Maria”.',
+    'Proponowane nazwisko patrona: Kościuszko.',
+    'Szkoła nosi imię: Józef.',
+    'Szkoła Podstawowa nr 3 imienia Jana Pawła II, imię patrona: Jan Paweł.',
+  ]);
+  masked([
+    ['Wnosi o zmianę imienia dziecka z „Jan” na „Janusz”.', `Wnosi o zmianę imienia dziecka z „${N}” na „${N}”.`],
+    ['matka: Halina Nowak, nazwisko rodowe w akcie: Szewczik.', `matka: ${N}, nazwisko rodowe w akcie: ${N}.`],
+  ]);
+});
+
+test('W12: pole osoby w środku bardzo długiego wiersza bez złamań ma koszt liniowy', () => {
+  const unit = 'x, imię: Jan, ';
+  const t1 = performance.now();
+  redactPII(unit.repeat(4000));
+  const a = performance.now() - t1;
+  const t2 = performance.now();
+  redactPII(unit.repeat(16000));
+  const b = performance.now() - t2;
+  expect(b).toBeLessThan(Math.max(a * 8, 400));
 });

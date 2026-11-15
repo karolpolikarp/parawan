@@ -7,7 +7,7 @@ import { passCity } from './passes/city.js';
 import { passDriverLicense, passIdCard, passKrs, passPassport, passPlate, passPostal } from './passes/documents.js';
 import { passEmail } from './passes/email.js';
 import { finalizePersons, passApplyOwnMasks, passJsonRequote, passRestoreJsonEscapes, passRestoreUrls } from './passes/finalize.js';
-import { passFormFields } from './passes/forms.js';
+import { passFormFields, passInlineFieldValues } from './passes/forms.js';
 import { passHealth } from './passes/health.js';
 import { hasKsefAnchor, passKsef, passKw, passZnakSprawy } from './passes/kw-ksef-case.js';
 import { passLogin } from './passes/login.js';
@@ -115,6 +115,7 @@ function redactWith(input: string, options: RedactOptions | undefined, withProbe
   passIp(ctx);
   passVin(ctx);
   passFormFields(ctx);
+  passInlineFieldValues(ctx); // pole osoby w prozie i w środku wiersza („nazwisko rodowe matki: …”)
   passStructured(ctx);
   passDelimitedTable(ctx);
   passLogin(ctx);
