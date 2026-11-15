@@ -204,21 +204,27 @@ function nameIndex(): Map<string, Set<number>> {
   return idx;
 }
 /** Wszystkie formy imion z rodzin, do których należy forma `w` (małe litery). */
+// Wynik dla formy z indeksu liczony raz (indeks jest stały); tylko do odczytu.
+const familyMemo = new Map<string, { lemmas: string[]; forms: string[] }>();
 function familyForms(w: string): { lemmas: string[]; forms: string[] } {
   const ids = nameIndex().get(w);
   if (!ids) return { lemmas: [], forms: [] };
+  const known = familyMemo.get(w);
+  if (known) return known;
   const lemmas: string[] = [];
   const forms: string[] = [];
   for (const i of ids) {
     lemmas.push(families[i][0]);
     for (const member of families[i]) forms.push(...declineFirstName(member));
   }
-  return { lemmas, forms };
+  const r = { lemmas, forms };
+  familyMemo.set(w, r);
+  return r;
 }
 
 /** Pełne imiona (mianownik, małe litery) dla formy imienia albo zdrobnienia w dowolnym przypadku („kuby” → „jakub”). */
 export function firstNameLemmas(w: string): string[] {
-  return familyForms(w.toLowerCase()).lemmas;
+  return [...familyForms(w.toLowerCase()).lemmas];
 }
 
 // ——— Nasiona ———
@@ -721,7 +727,12 @@ function propagateNames(ctx: RedactCtx, seeds: Seed[]): void {
     }
     return c;
   };
-  const isSeedSurname = (w: string): boolean => bySurname.has(canonOf(w) ?? '');
+  // Rdzeń nazwiska (canonPart) zaczyna się pierwszą literą wyrazu po zmianie na małe, w zwykłej
+  // gałęzi po zamianie ć/ń/ś/ź/ó/ą (SOFT); reszta reguł zmienia tylko końcówkę. Wyraz o innej pierwszej
+  // literze niż rdzenie nasion nie ma więc rdzenia z nasion i nie trzeba go liczyć.
+  const surnameHeads = new Set([...bySurname.keys()].map((k) => k[0]));
+  const headMayMatch = (ml: string): boolean => surnameHeads.has(ml[0]) || surnameHeads.has(SOFT[ml[0]] ?? '');
+  const isSeedSurname = (w: string): boolean => headMayMatch(w.toLowerCase()) && bySurname.has(canonOf(w) ?? '');
   // za wyrazem może stać imię albo nazwisko tej samej osoby („Wróbel Tomasz”, „BEATA KONIECZNA”)
   const nextOk = (w: string): boolean => isFirstNameLike(w) || byFirst.has(w.toLowerCase()) || isSeedSurname(w);
   // Wersaliki: sąsiad z tej samej osoby. Dla nazwiska imię, inicjał albo maska; dla imienia tylko
@@ -738,13 +749,13 @@ function propagateNames(ctx: RedactCtx, seeds: Seed[]): void {
     return ok(a) || ok(b);
   };
   const mark = (mask: string): string => `${NEW_MASK_MARK}${mask}`;
-  ctx.text = ctx.text.replace(RE_WORD, (whole: string, m: string, ini: string | undefined, offset: number, t: string) => {
-    const lowerWord = m === m.toLowerCase();
-    const caps = m.length > 1 && m === m.toUpperCase();
-    if (!lowerWord && !caps && !/^\p{Lu}\p{Ll}+(?:-\p{Lu}\p{Ll}+)*$/u.test(m)) return whole;
+  ctx.text = ctx.text.replace(wordRe(byFirst, surnameHeads), (whole: string, m: string, ini: string | undefined, offset: number, t: string) => {
     const ml = m.toLowerCase();
+    const lowerWord = m === ml;
+    const caps = !lowerWord && m.length > 1 && m === m.toUpperCase();
+    if (!lowerWord && !caps && !/^\p{Lu}\p{Ll}+(?:-\p{Lu}\p{Ll}+)*$/u.test(m)) return whole;
     // nazwisko
-    const canon = lowerWord ? null : canonOf(m);
+    const canon = lowerWord || !headMayMatch(ml) ? null : canonOf(m);
     const sCands = canon ? bySurname.get(canon) : undefined;
     if (canon && sCands && !(isFirstNameLike(m) && !sCands.some((s) => s.surnameForm && isFirstNameLike(s.surnameForm))) && !masculinePlural(ml, sCands)) {
       const seedForm = sCands.some((s) => s.surnameForm?.toLowerCase() === ml);
@@ -802,6 +813,29 @@ function propagateNames(ctx: RedactCtx, seeds: Seed[]): void {
     return mark(nearestMask(t, offset, fCands));
   });
   mergeNewMasks(ctx);
+}
+/**
+ * RE_WORD tylko dla wyrazów, które mogą być nazwiskiem albo imieniem nasion. Wyraz zmienia się
+ * w przebiegu tylko z rdzeniem nazwiska z nasion (pierwsza litera rdzenia to pierwsza mała litera
+ * wyrazu albo jej odpowiednik z SOFT) albo z formą imienia z nasion, więc jego pierwsza litera po
+ * zmianie na małe należy do zbioru głów. Wymóg z przodu: litera ASCII z tego zbioru (obie wielkości)
+ * albo dowolny znak spoza ASCII; pozostałe wyrazy i tak zostałyby bez zmian. Pominięcie wyrazu niczego
+ * nie przesuwa: początek trafienia RE_WORD nie leży w poprzednim trafieniu, poza literą „ X.” za
+ * wyrazem, a sama wielka litera (jak „J”) i tak zostaje bez zmian.
+ */
+const wordRes = new Map<string, RegExp>();
+function wordRe(byFirst: Map<string, Seed[]>, surnameHeads: Set<string>): RegExp {
+  const heads = new Set(surnameHeads);
+  for (const [c, soft] of Object.entries(SOFT)) if (surnameHeads.has(soft)) heads.add(c);
+  for (const f of byFirst.keys()) heads.add(f[0]);
+  const ascii = [...heads].filter((c) => c >= 'a' && c <= 'z').sort().map((c) => c + c.toUpperCase()).join('');
+  let re = wordRes.get(ascii);
+  if (!re) {
+    re = new RegExp(String.raw`(?=[${ascii}\u0080-\u{10FFFF}])` + RE_WORD.source, 'gu');
+    if (wordRes.size > 64) wordRes.clear();
+    wordRes.set(ascii, re);
+  }
+  return re;
 }
 // Wyraz małą literą w prozie, nie człon adresu, loginu ani ścieżki.
 const RE_LOWER_WORD = new RegExp(LOWER_AHEAD + /(?<![\p{L}\d.@_/\\-])\p{Ll}+(?![\p{L}\d@_/\\-]|\.\p{L})/u.source, 'gu');
