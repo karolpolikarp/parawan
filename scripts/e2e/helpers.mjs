@@ -109,8 +109,12 @@ export const FICTIONAL_PII = [
   ['numer księgi wieczystej z decyzji w testach korekty', 'OS1W/00045123'],
 ];
 
-/** Górna granica rozmiaru pliku aplikacji w bajtach (dziś ok. 2,32 MB po silniku z v0.46.24; zapas na kolejne pakiety). */
-export const MAX_WEB_BYTES = 2_400_000;
+/**
+ * Górna granica rozmiaru pliku aplikacji w bajtach. Dziś ok. 2,53 MB: seria 2 pism dodała do rdzenia
+ * ok. 150 KB detekcji (dane o zdrowiu ok. 81 KB, osoby w piśmie ok. 60 KB). Granicę 2,4 MB podniesiono
+ * za zgodą autora 2026-11-15; ok. 1,75 MB pliku to czytnik PDF w wersji dla starszych przeglądarek.
+ */
+export const MAX_WEB_BYTES = 2_600_000;
 
 /**
  * Ścieżka do innej binarki Chromium (np. snapshot 109 z pobierz-przegladarki.mjs). Testy
