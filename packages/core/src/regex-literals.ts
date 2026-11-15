@@ -637,69 +637,92 @@ type AnyReplacer = (...args: unknown[]) => string;
 /** Powiadomienie o podmianie: stary tekst, nowy i zmiany (rosnąco, w położeniach starego tekstu). */
 export type EditListener = (oldText: string, newText: string, edits: readonly Edit[]) => void;
 
-export function replaceNear(text: string, re: RegExp, fn: Replacer, index?: LiteralIndex, onEdits?: EditListener): string {
-  const f = finderOf(re);
-  if (!f || !re.global || re.unicode || f.shortest < NEAR_MIN_LITERAL) return replaceTracked(text, re, fn, index, onEdits);
-  const idx = index?.covers(re) ? index : undefined;
-  if (idx) idx.sync(text);
+/**
+ * Kolejne trafienia wyrażenia z flagą g w jednym tekście: next(p) daje to samo co exec z lastIndex = p
+ * (pierwsze trafienie od p), szukając go tylko przy napisach gwarancji (dowód przy replaceNear).
+ * Wyrażenie bez napisów albo z krótkimi napisami idzie zwykłym exec.
+ */
+export class NearMatcher {
+  private readonly f: Finder | null;
+  private readonly idx: LiteralIndex | undefined;
   // Praca w trybie przy napisach najwyżej ułamek zwykłego przeszukiwania: próba od pozycji (flaga y)
   // kosztuje tyle co przejście wzorca po kilkudziesięciu znakach, krok wstecz po alfabecie mniej.
-  let budget = (text.length >> 6) + 64;
-  let steps = (text.length >> 2) + 256;
-  let windowed = true;
-  let out = '';
-  let last = 0;
-  let p = 0;
-  const len = text.length;
-  const edits: Edit[] = [];
-  while (p <= len) {
-    let m: RegExpExecArray | null = null;
-    if (windowed) {
-      let done = false;
+  private budget: number;
+  private steps: number;
+  private windowed: boolean;
+  private readonly global: RegExp;
+
+  constructor(
+    private readonly text: string,
+    private readonly re: RegExp,
+    index?: LiteralIndex,
+  ) {
+    const f = finderOf(re);
+    this.f = f && re.global && !re.unicode && f.shortest >= NEAR_MIN_LITERAL ? f : null;
+    this.windowed = this.f !== null;
+    this.global = this.f ? this.f.global : new RegExp(re.source, re.flags.includes('g') ? re.flags : `${re.flags}g`);
+    this.idx = this.f && index?.covers(re) ? index : undefined;
+    this.idx?.sync(text);
+    this.budget = (text.length >> 6) + 64;
+    this.steps = (text.length >> 2) + 256;
+  }
+
+  next(from: number): RegExpExecArray | null {
+    const { text, re } = this;
+    if (from > text.length) return null;
+    let p = from;
+    const f = this.f;
+    if (f && this.windowed) {
       for (;;) {
         let q: number;
-        if (idx) q = idx.next(re, p);
+        if (this.idx) q = this.idx.next(re, p);
         else {
           f.lit.lastIndex = p;
           q = f.lit.exec(text)?.index ?? -1;
         }
-        if (q < 0) {
-          done = true;
-          break;
-        }
+        if (q < 0) return null;
         let lo = Math.max(p, q - f.n);
         if (f.cls) {
           let k = q;
-          while (k > lo && steps > 0 && f.cls.test(text[k - 1])) {
+          while (k > lo && this.steps > 0 && f.cls.test(text[k - 1])) {
             k--;
-            steps--;
+            this.steps--;
           }
-          if (k > lo && steps <= 0) {
-            windowed = false;
+          if (k > lo && this.steps <= 0) {
+            this.windowed = false;
             break;
           }
           lo = k;
         }
-        if (q - lo + 1 > budget) {
-          windowed = false;
+        if (q - lo + 1 > this.budget) {
+          this.windowed = false;
           break;
         }
-        budget -= q - lo + 1;
+        this.budget -= q - lo + 1;
         for (let s = lo; s <= q; s++) {
           f.sticky.lastIndex = s;
-          m = f.sticky.exec(text);
-          if (m) break;
+          const m = f.sticky.exec(text);
+          if (m) return m;
         }
-        if (m) break;
         p = q + 1;
+        if (p > text.length) return null;
       }
-      if (done) break;
     }
-    if (!m) {
-      f.global.lastIndex = p;
-      m = f.global.exec(text);
-      if (!m) break;
-    }
+    this.global.lastIndex = p;
+    return this.global.exec(text);
+  }
+}
+
+export function replaceNear(text: string, re: RegExp, fn: Replacer, index?: LiteralIndex, onEdits?: EditListener): string {
+  const f = finderOf(re);
+  if (!f || !re.global || re.unicode || f.shortest < NEAR_MIN_LITERAL) return replaceTracked(text, re, fn, index, onEdits);
+  const matcher = new NearMatcher(text, re, index);
+  const idx = index?.covers(re) ? index : undefined;
+  let out = '';
+  let last = 0;
+  let p = 0;
+  const edits: Edit[] = [];
+  for (let m = matcher.next(p); m; m = matcher.next(p)) {
     const at = m.index;
     const args: unknown[] = [...m, at, text];
     if (m.groups !== undefined) args.push(m.groups);

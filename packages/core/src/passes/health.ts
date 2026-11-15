@@ -17,7 +17,7 @@
 // Ogólne zdania o zdrowiu bez nazwy choroby („Dane o zdrowiu pacjenta przetwarza…”) zostają.
 import type { RedactCtx } from '../context.js';
 import { NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
-import { type Edit, LiteralIndex, literalsPresent, nearSearchable, type Replacer, replaceNear, replaceTracked } from '../regex-literals.js';
+import { type Edit, LiteralIndex, literalsPresent, NearMatcher, nearSearchable, type Replacer, replaceNear, replaceTracked } from '../regex-literals.js';
 import { sentenceStartsOf, updateSentenceStarts } from '../sentence-starts.js';
 import { escapeRe } from '../util.js';
 
@@ -2235,7 +2235,7 @@ function maskDrugs(ctx: RedactCtx): void {
   // faktura i lista refundacyjna zostają, tak samo lek podany jako przykład albo w instrukcji
   // i statystyce bez osoby („stosować paracetamol 500 mg”, „1,2 mln recept na metforminę 500 mg”).
   const starts = sentenceStarts(ctx.text);
-  ctx.text = ctx.text.replace(RE_DRUG, (m: string, offset: number, whole: string) => {
+  ctx.text = replaceNear(ctx.text, RE_DRUG, (m: string, offset: number, whole: string) => {
     const to = offset + m.length;
     const sentence = sentenceAt(whole, starts, offset, to);
     if (mtest(RE_PRICE, sentence)) return m;
@@ -2256,7 +2256,7 @@ function maskDrugs(ctx: RedactCtx): void {
     return mtest(RE_RX_DOC, sentence) && (hasPerson(sentence) || namePairAt(sentence) >= 0 || personNear(whole, sentence, offset, to))
       ? ctx.hit('ZDROWIE')
       : m;
-  });
+  }, undefined, followEdits);
 }
 
 /**
@@ -2282,7 +2282,8 @@ const RE_UNIT_DRUG_ONLY = new RegExp(`^${UNIT_DRUG}$`, 'i');
 
 function maskDoseSentences(ctx: RedactCtx): void {
   const starts = sentenceStarts(ctx.text);
-  ctx.text = ctx.text.replace(
+  ctx.text = replaceNear(
+    ctx.text,
     RE_DOSE_SENTENCE,
     (m: string, pre: string, drug: string, _dose: string, unit: string, tail: string, offset: number, whole: string) => {
       const from = offset + pre.length;
@@ -2300,6 +2301,8 @@ function maskDoseSentences(ctx: RedactCtx): void {
       }
       return `${pre}${ctx.hit('ZDROWIE')}`;
     },
+    undefined,
+    followEdits,
   );
 }
 
@@ -2312,7 +2315,7 @@ const RE_VERB_DRUG = new RegExp(String.raw`(${NOT_LETTER_BEFORE}(?:${DOSE_VERB})
 
 function maskVerbDrugs(ctx: RedactCtx, mask: string): void {
   const starts = sentenceStarts(ctx.text);
-  ctx.text = ctx.text.replace(RE_VERB_DRUG, (m: string, pre: string, drug: string, offset: number, whole: string) => {
+  ctx.text = replaceNear(ctx.text, RE_VERB_DRUG, (m: string, pre: string, drug: string, offset: number, whole: string) => {
     const from = offset + pre.length;
     const to = from + drug.length;
     const sentence = sentenceAt(whole, starts, from, to);
@@ -2323,7 +2326,7 @@ function maskVerbDrugs(ctx: RedactCtx, mask: string): void {
     const kind = eventSubject(whole, starts, offset, from);
     if (kind === 'other' || kind === 'name') return m;
     return eventAnchor(whole, starts, from, to, mask, true) ? `${pre}${ctx.hit('ZDROWIE')}` : m;
-  });
+  }, undefined, followEdits);
 }
 
 /* ── Lek bez dawki: kształt nazwy, insulina, klasa leków ── */
@@ -2467,7 +2470,8 @@ function bareDrugRejected(whole: string, starts: number[], offset: number, from:
 function maskBareDrugs(ctx: RedactCtx, mask: string): void {
   if (!mtest(RE_BARE_VERB_QUICK, ctx.text)) return;
   const starts = sentenceStarts(ctx.text);
-  ctx.text = ctx.text.replace(
+  ctx.text = replaceNear(
+    ctx.text,
     RE_BARE_DRUG,
     (m: string, pre: string, self: string | undefined, rx: string | undefined, skip: string, drug: string, offset: number, whole: string) => {
       const from = offset + pre.length;
@@ -2509,6 +2513,8 @@ function maskBareDrugs(ctx: RedactCtx, mask: string): void {
       }
       return eventAnchor(whole, starts, from, to, mask) || medicalAnchored(whole, starts, from, to, mask) ? hit() : m;
     },
+    undefined,
+    followEdits,
   );
 }
 
@@ -2529,8 +2535,11 @@ function maskDrugFirst(ctx: RedactCtx, mask: string): void {
   const text = ctx.text;
   const starts = sentenceStarts(text);
   const cuts: [number, number][] = [];
-  RE_SELF_VERB_AT.lastIndex = 0;
-  for (let v = RE_SELF_VERB_AT.exec(text); v; v = RE_SELF_VERB_AT.exec(text)) {
+  // to samo co pętla exec po RE_SELF_VERB_AT, z szukaniem przy napisach gwarancji (NearMatcher)
+  const near = new NearMatcher(text, RE_SELF_VERB_AT);
+  let next = 0;
+  for (let v = near.next(0); v; v = near.next(next)) {
+    next = v.index + v[0].length;
     const lo = Math.max(0, v.index - 100);
     const d = RE_DRUG_BEFORE_VERB.exec(text.slice(lo, v.index));
     if (!d) continue;
@@ -2570,7 +2579,7 @@ const RE_DRUG_CLASS_QUICK =
 function maskDrugClasses(ctx: RedactCtx, mask: string): void {
   if (!mtest(RE_DRUG_CLASS_QUICK, ctx.text)) return;
   const starts = sentenceStarts(ctx.text);
-  ctx.text = ctx.text.replace(RE_DRUG_CLASS, (m: string, offset: number, whole: string) => {
+  ctx.text = replaceNear(ctx.text, RE_DRUG_CLASS, (m: string, offset: number, whole: string) => {
     const to = offset + m.length;
     const sentence = sentenceAt(whole, starts, offset, to);
     const head = whole.slice(Math.max(0, offset - 70), offset);
@@ -2579,7 +2588,7 @@ function maskDrugClasses(ctx: RedactCtx, mask: string): void {
     // medyczna. Zdanie o grupie („pacjenci często otrzymują…”, „wynika z raportu”) zostaje mimo kotwicy.
     if (generalDx(whole, starts, offset, offset, to) || generalDrug(whole, starts, offset, to)) return m;
     return medicalAnchored(whole, starts, offset, to, mask) ? ctx.hit('ZDROWIE') : m;
-  });
+  }, undefined, followEdits);
 }
 
 /**
@@ -3148,8 +3157,11 @@ function maskDiagnoses(ctx: RedactCtx, mask: string): void {
     const text = ctx.text;
     const starts = sentenceStarts(text);
     const spans: [number, number][] = [];
-    re.lastIndex = 0;
-    for (let m = re.exec(text); m; m = re.exec(text)) {
+    // to samo co pętla exec z lastIndex, z szukaniem przy napisach gwarancji (NearMatcher)
+    const near = new NearMatcher(text, re);
+    let next = 0;
+    for (let m = near.next(0); m; m = near.next(next)) {
+      next = m.index + m[0].length;
       const from = m.index + m[0].length;
       const s = text.slice(from, from + 220);
       const lead = /^[ \t]*/.exec(s)?.[0].length ?? 0;
@@ -3168,7 +3180,7 @@ function maskDiagnoses(ctx: RedactCtx, mask: string): void {
       if (mtest(RE_ZESP_EPONYM, text.slice(a, b)) && !eponymLead(text, a, b)) continue;
       if (!strong && !diseaseAnchor(text, starts, a, b, mask)) continue;
       spans.push([a, b]);
-      re.lastIndex = b;
+      next = b;
     }
     if (!spans.length) continue;
     // wynik składany jednym przejściem: podstawianie od końca kopiowałoby cały tekst przy każdej masce
