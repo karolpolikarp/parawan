@@ -92,3 +92,26 @@ Spór o klucz: 11 elementów (wiek jako data urodzenia, zwykłe zdania jako dane
 
 Każdy krok: pomiar na serii 3 roboczej, sprawdzian na serii 2 (obie części) i serii 3 odłożonej
 raz na koniec; pierwszy zestaw, benchmark i nadmaskowanie bez pogorszenia.
+
+## Po naprawie precyzji w danych urzędu (N1–N7)
+
+Commity `5f2dc18` (sygnatura cytowanego orzeczenia), `8baf991` (organ i patron placówki),
+`63e7057` (instytucja w środku wiersza i w przypadku zależnym), `05c8e55` (telefon, e-mail
+i rachunek urzędu). Każdy krok sprawdzali dwaj weryfikatorzy: jeden szukał odkrytych danych osób
+na nowych zdaniach, drugi sprawdzał, czy dane urzędu zostają jawne poza pismami roboczymi.
+
+| zestaw | recall | wycieki | nadmiarowe przed | nadmiarowe po |
+|---|---:|---:|---:|---:|
+| seria 3, robocza | 87,3% | 158 | 64 / 358 | **2 / 358** |
+| seria 3, odłożona | 87,7% | 145 | 69 / 340 | **36 / 340** |
+| seria 2, robocza | 90,7% | 125 | 37 / 359 | **17 / 359** |
+| seria 2, odłożona | 77,3% | 311 | 57 / 320 | **41 / 320** |
+| pierwszy zestaw | 99,5% | 5 | 0 / 117 | 0 / 117 |
+
+Recall nie zmienił się w żadnym zestawie: poprawki odsłaniają tylko dane urzędu. Zakryte zostają
+telefon i e-mail osoby w tym samym wierszu, telefon z podpisu urzędnika, skrzynka z imieniem albo
+nazwiskiem w części lokalnej lub domenie, rachunek strony („na mój rachunek”), NIP i adres JDG.
+
+Część odłożona serii 3 zyskała o połowę mniej niż robocza (−48% wobec −97%). To ten sam wzorzec
+co przy osobach i zdrowiu w serii 2: część reguł trafia w sformułowania z pism roboczych. Pozostałe
+nadmiarowe w części odłożonej przejrzeć przy następnej serii, bez strojenia do niej.
