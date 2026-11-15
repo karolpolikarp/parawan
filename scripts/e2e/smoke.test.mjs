@@ -22,11 +22,13 @@ import {
   EXAMPLE_PESEL,
   FIXTURES,
   LANDING_HTML,
-  MAX_WEB_BYTES,
+  MAIL_MARGIN_B,
+  MAX_MAIL_ATTACHMENT_BYTES,
   PISMO_PESEL,
   WEB_HTML,
   fileSize,
   launch,
+  mimeAttachmentBytes,
   makeDocx,
   openApp,
   resultText,
@@ -46,9 +48,23 @@ after(async () => {
 
 const bytes = (n) => n.toLocaleString('pl-PL');
 
-test(`plik aplikacji nie przekracza ${bytes(MAX_WEB_BYTES)} B`, () => {
+// Sufit z poczty (helpers.mjs): plik w załączniku po kodowaniu base64 i z treścią maila mieści się
+// w domyślnym limicie wiadomości Exchange on-premises. Wygodę startu pilnuje scripts/perf.
+test('plik aplikacji przejdzie jako załącznik przez domyślny limit poczty Exchange (10 MB)', () => {
   const size = fileSize(WEB_HTML);
-  assert.ok(size <= MAX_WEB_BYTES, `apps/web/dist/index.html ma ${bytes(size)} B, limit ${bytes(MAX_WEB_BYTES)} B`);
+  assert.ok(
+    size <= MAX_MAIL_ATTACHMENT_BYTES,
+    `apps/web/dist/index.html ma ${bytes(size)} B, w załączniku ${bytes(mimeAttachmentBytes(size))} B ` +
+      `+ ${bytes(MAIL_MARGIN_B)} B na treść maila; sufit pliku ${bytes(MAX_MAIL_ATTACHMENT_BYTES)} B`,
+  );
+});
+
+test('sufit pocztowy: 7 120 614 B, a plik o bajt większy już się nie mieści', () => {
+  assert.equal(MAX_MAIL_ATTACHMENT_BYTES, 7_120_614);
+  assert.equal(mimeAttachmentBytes(MAX_MAIL_ATTACHMENT_BYTES) + MAIL_MARGIN_B, 10_000_000);
+  assert.ok(mimeAttachmentBytes(MAX_MAIL_ATTACHMENT_BYTES + 1) + MAIL_MARGIN_B > 10_000_000);
+  // 57 bajtów pliku to dokładnie jeden pełny wiersz: 76 znaków base64 i CRLF.
+  assert.equal(mimeAttachmentBytes(57), 78);
 });
 
 // Każda dyrektywa osobno: dopisany host w img-src albo font-src przeszedłby test samych napisów
