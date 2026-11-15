@@ -1052,6 +1052,17 @@ Sołtysik Teofil;[PESEL]",
   "str-280": "D.2 Imię ojca: Bogdan   Imię matki: Leokadia
 Miejscowość: Łapalice   Ulica: Polna   Nr domu: 7B   Nr lokalu: –",
   "str-281": "A.1 Imię: Ludomir  A.2 Nazwisko: Pękala  A.3 Imię ojca: Zdzisław",
+  "str-282": "Pracownik | Szkolenie
+Halina Grodzka | profilaktyka chorób nowotworowych
+Irena Bąk | warsztaty o uzależnieniach od alkoholu",
+  "str-283": "Pani Bożena Sitek, akcja profilaktyczna „Stop cukrzycy”, rozdała ulotki o profilaktyce udaru mózgu i nadciśnienia.",
+  "str-284": "Pani Wanda Kret jest po drugim kursie chemioterapii z powodu raka piersi.",
+  "str-285": "Pani Lucyna Ptak zakończyła kurs immunoterapii alergii na jad osy, a Pan Roman Gil uczestniczy w warsztatach dla osób po udarze mózgu.",
+  "str-286": "Pani Teresa Wilk jest objęta programem kompleksowej opieki po zawale serca. Kampania dla kobiet o profilaktyce raka piersi odbyła się w maju.",
+  "str-287": "Pan Zenon Kruk kończy kurs ćwiczeń usprawniających po udarze mózgu, a Pani Ewa Sroka chodzi na warsztaty ruchowe przy chorobie Parkinsona.",
+  "str-288": "Lp. | Pracownik | Szkolenie
+1 | Daria Wróbel | kurs pierwszej pomocy przy zawale serca
+2 | Olga Szpak | prelekcja o życiu po udarze mózgu",
   "str-29": "Spotkanie odbędzie się na pl. Zbawiciela 5.",
   "str-30": "Mieszkam na ulicy Krakowskie Przedmieście 26/28.",
   "str-31": "ul. Marszałkowska 140 m. 7 to adres korespondencyjny.",
@@ -2177,6 +2188,17 @@ P.W. Budrex | 05.11.2026",
   "str-280": "D.2 Imię ojca: [IMIĘ I NAZWISKO]   Imię matki: [IMIĘ I NAZWISKO]
 Miejscowość: [MIEJSCOWOŚĆ]   Ulica: [ADRES]   Nr domu: [ADRES]   Nr lokalu: –",
   "str-281": "A.1 Imię: [IMIĘ I NAZWISKO]  A.2 Nazwisko: [OSOBA-A]  A.3 Imię ojca: [IMIĘ I NAZWISKO]",
+  "str-282": "Pracownik | Szkolenie
+[OSOBA-A] | profilaktyka chorób nowotworowych
+[OSOBA-B] | warsztaty o uzależnieniach od alkoholu",
+  "str-283": "Pani [OSOBA-A], akcja profilaktyczna „Stop cukrzycy”, rozdała ulotki o profilaktyce udaru mózgu i nadciśnienia.",
+  "str-284": "Pani [OSOBA-A] jest po drugim kursie [DANE O ZDROWIU] z powodu [DANE O ZDROWIU].",
+  "str-285": "Pani [OSOBA-A] zakończyła kurs [DANE O ZDROWIU] osy, a Pan [OSOBA-B] uczestniczy w warsztatach dla osób [DANE O ZDROWIU].",
+  "str-286": "Pani [OSOBA-A] jest objęta programem kompleksowej opieki [DANE O ZDROWIU]. Kampania dla kobiet o profilaktyce raka piersi odbyła się w maju.",
+  "str-287": "Pan [OSOBA-A] kończy kurs ćwiczeń usprawniających [DANE O ZDROWIU], a Pani [OSOBA-B] chodzi na warsztaty ruchowe przy [DANE O ZDROWIU].",
+  "str-288": "Lp. | Pracownik | Szkolenie
+1 | [OSOBA-A] | kurs pierwszej pomocy przy zawale serca
+2 | [OSOBA-B] | prelekcja o życiu po udarze mózgu",
   "str-29": "Spotkanie odbędzie się na [ADRES].",
   "str-30": "Mieszkam na [ADRES].",
   "str-31": "[ADRES] to adres korespondencyjny.",
@@ -3302,6 +3324,17 @@ P.W. Budrex | 05.11.2026",
   "str-280": "D.2 Imię ojca: [IMIĘ I NAZWISKO]   Imię matki: [IMIĘ I NAZWISKO]
 Miejscowość: [MIEJSCOWOŚĆ]   Ulica: [ADRES]   Nr domu: [ADRES]   Nr lokalu: –",
   "str-281": "A.1 Imię: [IMIĘ I NAZWISKO]  A.2 Nazwisko: [IMIĘ I NAZWISKO]  A.3 Imię ojca: [IMIĘ I NAZWISKO]",
+  "str-282": "Pracownik | Szkolenie
+[IMIĘ I NAZWISKO] | profilaktyka chorób nowotworowych
+[IMIĘ I NAZWISKO] | warsztaty o uzależnieniach od alkoholu",
+  "str-283": "Pani [IMIĘ I NAZWISKO], akcja profilaktyczna „Stop cukrzycy”, rozdała ulotki o profilaktyce udaru mózgu i nadciśnienia.",
+  "str-284": "Pani [IMIĘ I NAZWISKO] jest po drugim kursie [DANE O ZDROWIU] z powodu [DANE O ZDROWIU].",
+  "str-285": "Pani [IMIĘ I NAZWISKO] zakończyła kurs [DANE O ZDROWIU] osy, a Pan [IMIĘ I NAZWISKO] uczestniczy w warsztatach dla osób [DANE O ZDROWIU].",
+  "str-286": "Pani [IMIĘ I NAZWISKO] jest objęta programem kompleksowej opieki [DANE O ZDROWIU]. Kampania dla kobiet o profilaktyce raka piersi odbyła się w maju.",
+  "str-287": "Pan [IMIĘ I NAZWISKO] kończy kurs ćwiczeń usprawniających [DANE O ZDROWIU], a Pani [IMIĘ I NAZWISKO] chodzi na warsztaty ruchowe przy [DANE O ZDROWIU].",
+  "str-288": "Lp. | Pracownik | Szkolenie
+1 | [IMIĘ I NAZWISKO] | kurs pierwszej pomocy przy zawale serca
+2 | [IMIĘ I NAZWISKO] | prelekcja o życiu po udarze mózgu",
   "str-29": "Spotkanie odbędzie się na [ADRES].",
   "str-30": "Mieszkam na [ADRES].",
   "str-31": "[ADRES] to adres korespondencyjny.",
@@ -4476,6 +4509,17 @@ P.W. Budrex | 05.11.2026",
   "str-280": "D.2 Imię ojca: <<osoba>>   Imię matki: <<osoba>>
 Miejscowość: <<miejsce>>   Ulica: <<adres>>   Nr domu: <<adres>>   Nr lokalu: –",
   "str-281": "A.1 Imię: <<osoba>>  A.2 Nazwisko: <<osoba>>  A.3 Imię ojca: <<osoba>>",
+  "str-282": "Pracownik | Szkolenie
+<<osoba>> | profilaktyka chorób nowotworowych
+<<osoba>> | warsztaty o uzależnieniach od alkoholu",
+  "str-283": "Pani <<osoba>>, akcja profilaktyczna „Stop cukrzycy”, rozdała ulotki o profilaktyce udaru mózgu i nadciśnienia.",
+  "str-284": "Pani <<osoba>> jest po drugim kursie [DANE O ZDROWIU] z powodu [DANE O ZDROWIU].",
+  "str-285": "Pani <<osoba>> zakończyła kurs [DANE O ZDROWIU] osy, a Pan <<osoba>> uczestniczy w warsztatach dla osób [DANE O ZDROWIU].",
+  "str-286": "Pani <<osoba>> jest objęta programem kompleksowej opieki [DANE O ZDROWIU]. Kampania dla kobiet o profilaktyce raka piersi odbyła się w maju.",
+  "str-287": "Pan <<osoba>> kończy kurs ćwiczeń usprawniających [DANE O ZDROWIU], a Pani <<osoba>> chodzi na warsztaty ruchowe przy [DANE O ZDROWIU].",
+  "str-288": "Lp. | Pracownik | Szkolenie
+1 | <<osoba>> | kurs pierwszej pomocy przy zawale serca
+2 | <<osoba>> | prelekcja o życiu po udarze mózgu",
   "str-29": "Spotkanie odbędzie się na <<adres>>.",
   "str-30": "Mieszkam na <<adres>>.",
   "str-31": "<<adres>> to adres korespondencyjny.",
@@ -5338,6 +5382,13 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "str-28": "ADRES:1",
   "str-280": "IMIE:2 MIEJSCOWOSC:1 ADRES:2",
   "str-281": "IMIE:3",
+  "str-282": "IMIE:2",
+  "str-283": "IMIE:1",
+  "str-284": "ZDROWIE:2 IMIE:1",
+  "str-285": "ZDROWIE:3 IMIE:2",
+  "str-286": "ZDROWIE:1 IMIE:1",
+  "str-287": "ZDROWIE:2 IMIE:2",
+  "str-288": "IMIE:2",
   "str-29": "ADRES:1",
   "str-30": "ADRES:1",
   "str-31": "ADRES:1",
@@ -6199,6 +6250,13 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "str-28": "ADRES:1",
   "str-280": "IMIE:2 MIEJSCOWOSC:1 ADRES:2",
   "str-281": "IMIE:3",
+  "str-282": "IMIE:2",
+  "str-283": "IMIE:1",
+  "str-284": "ZDROWIE:2 IMIE:1",
+  "str-285": "ZDROWIE:3 IMIE:2",
+  "str-286": "ZDROWIE:1 IMIE:1",
+  "str-287": "ZDROWIE:2 IMIE:2",
+  "str-288": "IMIE:2",
   "str-29": "ADRES:1",
   "str-30": "ADRES:1",
   "str-31": "ADRES:1",

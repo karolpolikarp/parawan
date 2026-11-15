@@ -2097,9 +2097,57 @@ const RE_GENERIC_COORD = new RegExp(
   `${RE_GENERIC_BEFORE.source.slice(0, -'[ \\t]+$'.length)}(?:[ \\t]+[^\\s,.;:()]+){1,5}[ \\t]+(?:i|oraz|lub|albo)[ \\t]+$`,
   'i',
 );
+/**
+ * Temat oferty dla wszystkich: szkolenie, kurs, warsztaty, program, kampania, prelekcja, konferencja,
+ * ulotka, akcja, badania przesiewowe („szkolenie BHP i pierwszej pomocy”, „profilaktyka chorób
+ * nowotworowych” w kolumnie szkoleń, „akcja profilaktyczna „Stop cukrzycy””). Między tematem a frazą
+ * do trzech wyrazów małą literą bez czasownika, zaimka i roli osoby, więc „W ramach programu
+ * zdiagnozowano u niej…” i „Pani Nowak” po temacie zostają z maską. Leczenie odpada: „kurs
+ * chemioterapii”, „program lekowy”, „warsztaty terapii zajęciowej”, „profilaktyka przeciwzakrzepowa”,
+ * „akcja serca”, a przyczyna („szkolenia z powodu choroby”) przerywa temat. Dwukropek tylko zaraz po
+ * słowie tematu („Konferencja: choroba Alzheimera”), ale nie po „Profilaktyka:” w karcie pacjenta;
+ * badania przesiewowe tylko „w kierunku” choroby. Bez flagi „i”, żeby imię i nazwisko z wielkiej
+ * litery przerywało temat.
+ */
+const OFFER_WORD =
+  `${cap('profilakty')}(?:k${L}|ce)|${cap('szkole')}(?:ni${L}|ń)|${cap('kurs')}(?:u|ie|em|y|ów|ach|ami)?(?![${LETTER}])|${cap('warsztat')}${L}|${cap('program')}${L}|${cap('kampani')}${L}` +
+  `|${cap('prelekcj')}${L}|${cap('konferencj')}${L}|${cap('ulot')}(?:k${L}|ek|ce)|${cap('akcj')}${L}|${cap('webinar')}${L}|${cap('pogadan')}(?:k${L}|ek|ce)|przesiewow${L}(?=[ \\t]+w[ \\t]+kierunku)`;
+const OFFER_TOKEN = `[ \\t]+(?!${PERSON_WORD}(?![${LETTER}])|(?:[${LO}]*(?:ło|ła|li|ły|no|to|ał|ił|ył|ują|uje|aje|ją)|jest|ma|leczy|cierpi|niej|niego|nim|nią|się|powodu|względu|przyczyn${L}|wskutek|skutk${L}|związku|przebiegu)(?![${LETTER}]))(?:[${LO}]{3,}|z|ze|w|we|o|na|do|dla|i)`;
+const RE_OFFER_BEFORE = new RegExp(
+  `${NOT_LETTER_BEFORE}(${OFFER_WORD})(?:(?<!rofilakty(?:k[${LO}]{0,3}|ce))[ \\t]*[:–—-]|(?:${OFFER_TOKEN}){0,3})(?:[ \\t]*[„"«(](?:[${LETTER}]+(?:[ \\t]+[${LO}]+){0,2}[ \\t]+)?|[ \\t]+)$`,
+);
+/**
+ * Leczenie zaraz po słowie tematu („kurs chemioterapii”, „program lekowy”): to już nie oferta, tylko
+ * leczenie osoby. Między tematem a pierwszym wyrazem frazy rozstrzyga budowa słowa i kształt frazy:
+ * rdzeń leczenia w złożeniu („kurs immunoterapii”, „program psychoterapii”, „dializoterapii”,
+ * „po mastektomii”, „po przeszczepie”), opieka i wsparcie („program kompleksowej opieki po zawale”),
+ * grupa odbiorców z chorobą („dla osób po udarze”, „nad osobami po amputacji”, „dla chorych na SM”)
+ * oraz „z” z narzędnikiem choroby („warsztaty z cukrzycą”; „szkolenie z cukrzycy” to temat).
+ * Przyczyna albo stan na dowolnej pozycji odcinka przerywa temat jak „z powodu”: „po”, „przy”,
+ * „w trakcie”, „w toku”, „w przebiegu” i rdzeń leczenia lub zabiegu („kurs ćwiczeń usprawniających po
+ * udarze”, „program zajęć ruchowych przy chorobie Parkinsona”, „kurs zabiegów w leczeniu…”). Temat
+ * zostaje, gdy odcinek ma „o” albo odbiorców bez choroby („dla wolontariuszy”, „dla opiekunów”).
+ */
+const OFFER_SICK = `(?:os[oó]b|kobiet|dzieci|pacjent|chor|mężczyzn|senior|rodzin|matek|młodzież|niepełnospraw)`;
+const RE_OFFER_NOT = new RegExp(
+  `^[ \\t]+(?:chemio|radio|lecz|antybiot|ster[oy]|lek|rehabilit|przeciw|farmakolog|wtórn|indywidualn|edukacyjno|serc|ratunk|reanim)|(?:^|[ \\t])(?:[${LO}]*(?:terapi|terapeut|dializ|ektomi|przeszczep)|opiek|wsparci|(?:dla|nad|wśród)[ \\t]+${OFFER_SICK}[${LO}]*[ \\t]+(?:po|ze?|na|w[ \\t]+trakcie|chor|cierpi|niepełnospraw|leczon|uzależnion))|(?:^|[ \\t])ze?[ \\t]+[${LO}]+(?:ą|em|ami)$` +
+    `|^(?![\\s\\S]*(?:^|[ \\t])(?:o|dla[ \\t]+(?!${OFFER_SICK}))[ \\t])[\\s\\S]*(?:^|[ \\t])(?:(?:po|przy|w[ \\t]+(?:trakcie|toku|przebiegu))(?![${LO}])|[${LO}]*(?:lecz|operac|resekcj|amputac))`,
+  'i',
+);
+/** Szybkie sito: bez rdzenia słowa tematu w oknie nie ma po co uruchamiać kotwicy na końcu okna. */
+const RE_OFFER_HINT = /rofilakty|zkole|urs|arsztat|rogram|ampani|relekcj|onferencj|lot|kcj|ebinar|ogadan|rzesiew/;
+function offerBefore(whole: string, offset: number): boolean {
+  const before = whole.slice(Math.max(0, offset - 120), offset);
+  if (!RE_OFFER_HINT.test(before)) return false;
+  const m = RE_OFFER_BEFORE.exec(before);
+  if (!m) return false;
+  const at = offset - before.length + m.index + m[1].length;
+  // od słowa tematu do końca pierwszego wyrazu frazy
+  return !RE_OFFER_NOT.test(whole.slice(at, offset) + /^[^\s,.;:()]*/.exec(whole.slice(offset, offset + 30))![0]);
+}
 const genericBefore = (whole: string, offset: number): boolean => {
   const before = whole.slice(Math.max(0, offset - 120), offset);
-  return mtest(RE_GENERIC_BEFORE, before.slice(-80)) || mtest(RE_GENERIC_COORD, before);
+  return mtest(RE_GENERIC_BEFORE, before.slice(-80)) || mtest(RE_GENERIC_COORD, before) || offerBefore(whole, offset);
 };
 
 /**

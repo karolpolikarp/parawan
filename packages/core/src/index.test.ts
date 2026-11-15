@@ -13433,3 +13433,75 @@ test('Seria 3: inicjały „O.K.” w kolumnie „Odpowiedzialni” przy osobie 
   // bez osoby o inicjałach O.K. w piśmie „OK” w kolumnie to status wiersza
   keep(['Z wnioskiem wystąpiła [IMIĘ I NAZWISKO].\nNr | Zadanie | Odpowiedzialni | Termin\n1 | kontrola dokumentów | OK | 12.01.2027\n']);
 });
+
+test('Seria 3: temat szkolenia, programu, kampanii i ulotki przy osobie zostaje jawny, a leczenie po „kursie” i „programie lekowym” znika', () => {
+  const H = '[DANE O ZDROWIU]';
+  keep([
+    'Pracownik | Szkolenie\n[IMIĘ I NAZWISKO] | profilaktyka chorób nowotworowych\n[IMIĘ I NAZWISKO] | Program profilaktyki raka szyjki macicy\n',
+    'Lp. | Pracownik | Szkolenie\n1 | [IMIĘ I NAZWISKO] | Warsztaty o uzależnieniach od alkoholu\n2 | [IMIĘ I NAZWISKO] | Prelekcja o cukrzycy typu 2\n3 | [IMIĘ I NAZWISKO] | Konferencja: choroba Alzheimera w opiece społecznej\n',
+    'Pan [IMIĘ I NAZWISKO] rozdał mieszkańcom ulotki o profilaktyce udaru mózgu i nadciśnienia.',
+    '[IMIĘ I NAZWISKO], akcja profilaktyczna „Stop cukrzycy”, udział jako wolontariusz.',
+    'Pani [IMIĘ I NAZWISKO] zgłosiła się do programu badań przesiewowych w kierunku raka piersi.',
+    'Zaproszenie na bezpłatne badania przesiewowe w kierunku raka jelita grubego otrzymała Pani [IMIĘ I NAZWISKO].',
+  ]);
+  expect(redactPII('Pracownik | Szkolenie\nJan Kowalski | profilaktyka chorób nowotworowych\n').redacted).toBe(`Pracownik | Szkolenie\n${N} | profilaktyka chorób nowotworowych\n`);
+  masked([
+    ['Pani Maria Kowal jest po drugim kursie chemioterapii z powodu raka piersi.', `Pani ${N} jest po drugim kursie ${H} z powodu ${H}.`],
+    ['Pacjentka Anna Nowak otrzymuje profilaktykę przeciwzakrzepową z powodu zakrzepicy.', `Pacjentka ${N} otrzymuje profilaktykę przeciwzakrzepową z powodu ${H}.`],
+    ['W ramach programu badań przesiewowych zdiagnozowano u niej raka piersi.', `W ramach programu badań przesiewowych zdiagnozowano u niej ${H}.`],
+    ['W ramach programu profilaktyki u Pani Nowak wykryto raka szyjki macicy.', `W ramach programu profilaktyki u Pani ${N} wykryto ${H}.`],
+    ['Jan Kowalski | szkolenie BHP | choruje na cukrzycę', `${N} | szkolenie BHP | choruje na ${H}`],
+    ['Podczas szkolenia Pan Jan Kowalski doznał zawału serca.', `Podczas szkolenia Pan ${N} doznał ${H}.`],
+  ]);
+});
+
+test('Seria 3: leczenie w złożeniu, opieka i grupa chorych po słowie tematu nie robią z faktu o osobie tematu szkolenia', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    // rdzeń leczenia w złożeniu, nie tylko na początku wyrazu
+    ['Pani Maria Kowal zakończyła kurs immunoterapii alergii na jad osy.', `Pani ${N} zakończyła kurs ${H} osy.`],
+    ['Pan Jan Kowalski zakończył kurs insulinoterapii cukrzycy typu 1.', `Pan ${N} zakończył kurs ${H}.`],
+    ['Pani Maria Kowal jest w trakcie programu psychoterapii depresji.', `Pani ${N} jest w trakcie programu psychoterapii ${H}.`],
+    ['Pan Jan Kowalski odbył kurs fizjoterapii po udarze.', `Pan ${N} odbył kurs fizjoterapii ${H}.`],
+    ['Lp. | Osoba | Uwagi\n1 | Jan Kowalski | kurs kinezyterapii po złamaniu szyjki kości udowej\n2 | Anna Nowak | program immunoterapii czerniaka\n', `Lp. | Osoba | Uwagi\n1 | ${N} | kurs kinezyterapii po ${H}\n2 | ${N} | program ${H}\n`],
+    // grupa odbiorców z chorobą przy osobie
+    ['Pan Jan Kowalski uczestniczy w warsztatach dla osób po udarze mózgu.', `Pan ${N} uczestniczy w warsztatach dla osób ${H}.`],
+    ['Pan Jan Kowalski został skierowany na turnus i kurs dla osób po amputacji kończyny.', `Pan ${N} został skierowany na turnus i kurs dla osób ${H}.`],
+    ['Lp. | Osoba | Zajęcia\n1 | Anna Nowak | szkolenie BHP\n2 | Jan Kowalski | warsztaty dla osób po udarze\n', `Lp. | Osoba | Zajęcia\n1 | ${N} | szkolenie BHP\n2 | ${N} | warsztaty dla osób ${H}\n`],
+    ['Pani Anna Nowak uczestniczy w programie dla kobiet po mastektomii.', `Pani ${N} uczestniczy w programie dla kobiet ${H}.`],
+    ['Syn Pani Nowak uczęszcza na warsztaty dla dzieci po przeszczepie nerki.', `Syn Pani ${N} uczęszcza na warsztaty dla dzieci ${H}.`],
+    // opieka i wsparcie, „z” z narzędnikiem choroby
+    ['Pani Anna Nowak jest objęta programem kompleksowej opieki po zawale serca.', `Pani ${N} jest objęta programem kompleksowej opieki ${H}.`],
+    ['Pan Jan Kowalski jest objęty programem koordynowanej opieki w cukrzycy.', `Pan ${N} jest objęty programem koordynowanej opieki w ${H}.`],
+    ['Pan Jan Kowalski korzysta z programu wsparcia osób po udarze mózgu.', `Pan ${N} korzysta z programu wsparcia osób ${H}.`],
+    ['Pan Jan Kowalski chodzi na warsztaty z cukrzycą typu 2.', `Pan ${N} chodzi na warsztaty z ${H}.`],
+  ]);
+  // grupa odbiorców bez choroby i temat w dopełniaczu zostają tematem
+  keep([
+    'Kampania dla kobiet o profilaktyce raka piersi odbyła się w maju, koordynowała ją Pani [IMIĘ I NAZWISKO].',
+    'Warsztaty „Jak rozmawiać z osobą po udarze” dla wolontariuszy.',
+  ]);
+});
+
+test('Seria 3: przyczyna lub stan w środku odcinka po słowie tematu („po”, „przy”, „w leczeniu”, „w trakcie”) przerywa temat, a „o …” i odbiorcy bez choroby go zostawiają', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    ['Pan Jan Kowalski odbywa kurs zabiegów w leczeniu choroby zwyrodnieniowej kręgosłupa.', `Pan ${N} odbywa kurs zabiegów w leczeniu ${H}.`],
+    ['Pani Anna Nowak uczestniczy w programie zajęć ruchowych przy chorobie Parkinsona.', `Pani ${N} uczestniczy w programie zajęć ruchowych przy ${H}.`],
+    ['Pani Anna Nowak chodzi na warsztaty ruchowe przy chorobie Parkinsona.', `Pani ${N} chodzi na warsztaty ruchowe przy ${H}.`],
+    ['Pan Jan Kowalski jest w programie żywienia dojelitowego po resekcji jelita.', `Pan ${N} jest w programie żywienia dojelitowego ${H}.`],
+    ['Pan Jan Kowalski kończy kurs ćwiczeń usprawniających po udarze mózgu.', `Pan ${N} kończy kurs ćwiczeń usprawniających ${H}.`],
+    ['Pan Jan Kowalski odbywa kurs nauki chodzenia po amputacji uda.', `Pan ${N} odbywa kurs nauki chodzenia ${H}.`],
+    ['Program zdrowotny w leczeniu cukrzycy obejmuje Pana Jana Kowalskiego.', `Program zdrowotny w leczeniu ${H} obejmuje Pana ${N}.`],
+    ['Pani Halina Sowa realizuje kurs zastrzyków w leczeniu osteoporozy.', `Pani ${N} realizuje kurs zastrzyków w leczeniu ${H}.`],
+    ['Pan Marek Lis jest objęty programem żywienia klinicznego w trakcie radioterapii krtani.', `Pan ${N} jest objęty programem żywienia klinicznego w trakcie ${H}.`],
+    ['Lp. | Osoba | Uwagi\n1 | Marek Lis | kurs ćwiczeń po operacji kolana\n2 | Halina Sowa | program zajęć przy chorobie Alzheimera\n', `Lp. | Osoba | Uwagi\n1 | ${N} | kurs ćwiczeń ${H}\n2 | ${N} | program zajęć przy ${H}\n`],
+  ]);
+  keep([
+    'Lp. | Pracownik | Szkolenie\n1 | [IMIĘ I NAZWISKO] | kurs pierwszej pomocy przy zawale serca\n',
+    'Lp. | Pracownik | Szkolenie\n1 | [IMIĘ I NAZWISKO] | prelekcja o życiu po udarze mózgu\n',
+    'Pani [IMIĘ I NAZWISKO] prowadziła warsztaty o diecie przy cukrzycy.',
+    'Pan [IMIĘ I NAZWISKO] ukończył kurs dla opiekunów przy chorobie Parkinsona.',
+    'Warsztaty „Jak rozmawiać z osobą po udarze” dla wolontariuszy.',
+  ]);
+});

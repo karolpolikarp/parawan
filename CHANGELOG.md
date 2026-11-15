@@ -617,6 +617,28 @@ działają na GitHubie od chwili wypchnięcia tagów.
   D.4 Imię ojca: [IMIĘ I NAZWISKO]”. Na
   trzeciej serii 50 pism (część robocza) wycieków jest 104 zamiast 116, bez nowych nadmiarowych
   zakryć.
+- **Temat szkolenia, programu, kampanii i ulotki zostaje jawny także przy osobie.** W wykazie
+  szkoleń pracowników „Jan Kowalski | profilaktyka chorób nowotworowych” dawało „[IMIĘ I NAZWISKO]
+  | profilaktyka chorób [DANE O ZDROWIU]”, a „akcja profilaktyczna „Stop cukrzycy”” i „ulotki
+  o profilaktyce udaru mózgu i nadciśnienia” traciły nazwę choroby. Teraz po słowie tematu
+  (profilaktyka, szkolenie, kurs, warsztaty, program, kampania, prelekcja, konferencja, ulotka,
+  akcja, pogadanka, webinar, badania przesiewowe) nazwa choroby zostaje: „[IMIĘ I NAZWISKO] |
+  profilaktyka chorób nowotworowych”, „Warsztaty o uzależnieniach od alkoholu”, „Konferencja:
+  choroba Alzheimera w opiece społecznej”, „zgłosiła się do programu badań przesiewowych w kierunku
+  raka piersi”. Fakt o osobie dalej znika: „po drugim kursie [DANE O ZDROWIU] z powodu [DANE
+  O ZDROWIU]”, „profilaktykę przeciwzakrzepową z powodu [DANE O ZDROWIU]”, „W ramach programu badań
+  przesiewowych zdiagnozowano u niej [DANE O ZDROWIU]”, „Podczas szkolenia Pan [IMIĘ I NAZWISKO]
+  doznał [DANE O ZDROWIU]”, a program lekowy, warsztaty terapii zajęciowej i akcja serca nie są
+  tematem. Tematem nie jest też leczenie w złożeniu, opieka i grupa chorych: „zakończyła kurs
+  [DANE O ZDROWIU] osy” (immunoterapii alergii na jad), „jest objęta programem kompleksowej opieki
+  [DANE O ZDROWIU]”, „uczestniczy w warsztatach dla osób [DANE O ZDROWIU]”, „chodzi na warsztaty
+  z [DANE O ZDROWIU]”, a „Kampania dla kobiet o profilaktyce raka piersi” zostaje jawna. Przyczyna
+  albo stan w środku opisu zajęć też przerywa temat: „kończy kurs ćwiczeń usprawniających [DANE
+  O ZDROWIU]” (po udarze mózgu), „chodzi na warsztaty ruchowe przy [DANE O ZDROWIU]”, „kurs zabiegów
+  w leczeniu [DANE O ZDROWIU]”, „programem żywienia klinicznego w trakcie [DANE O ZDROWIU]”.
+  Z „o” albo odbiorcami bez choroby temat zostaje: „prelekcja o życiu po udarze mózgu”, „kurs dla
+  opiekunów przy chorobie Parkinsona”, a „kurs pierwszej pomocy przy zawale serca” w wykazie szkoleń
+  jak dotąd.
 - **Pierwsze wklejone pismo i każda następna zmiana mają wynik od razu.** Parawan przygotowuje
   silnik zaraz po otwarciu pliku, a nie przy pierwszym piśmie. Wcześniej pierwsze przeliczenie
   trwało kilka razy dłużej niż kolejne, a pauza przed następnym rosła od niego do pół sekundy

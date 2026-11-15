@@ -1433,6 +1433,16 @@ export function buildDataset() {
   // W11/W12 po drugiej weryfikacji: lokal urzędu wielką literą, imiesłów przy lokalu, „nazwisko lub nazwa”, patron w uchwale.
   neg('Prawo jazdy wydane przez Starostę Kartuskiego, Wydział Komunikacji, Pokój nr 2107. Odbiór: okienko czasowo zamknięte, nr 1204 czynne od 8:00.', ['Pokój nr 2107', 'nr 1204 czynne']);
   neg('Inwestor, nazwisko lub nazwa: Budimex. Rada Miejska nadaje rondu imię „Józefa”, a szkoła nosi imię: Stanisław.', ['Budimex', '„Józefa”', 'imię: Stanisław']);
+  // Temat szkolenia, programu i kampanii przy osobie to nie dana o zdrowiu; leczenie po „kursie” i „programie lekowym” tak.
+  str('Pracownik | Szkolenie\nHalina Grodzka | profilaktyka chorób nowotworowych\nIrena Bąk | warsztaty o uzależnieniach od alkoholu', ['Halina Grodzka', 'Irena Bąk'], ['profilaktyka chorób nowotworowych', 'warsztaty o uzależnieniach od alkoholu']);
+  str('Pani Bożena Sitek, akcja profilaktyczna „Stop cukrzycy”, rozdała ulotki o profilaktyce udaru mózgu i nadciśnienia.', ['Bożena Sitek'], ['„Stop cukrzycy”', 'profilaktyce udaru mózgu i nadciśnienia']);
+  str('Pani Wanda Kret jest po drugim kursie chemioterapii z powodu raka piersi.', ['Wanda Kret', 'chemioterapii', 'raka piersi'], ['po drugim kursie']);
+  // Leczenie w złożeniu, opieka i grupa chorych po słowie tematu: to fakt o osobie, nie temat.
+  str('Pani Lucyna Ptak zakończyła kurs immunoterapii alergii na jad osy, a Pan Roman Gil uczestniczy w warsztatach dla osób po udarze mózgu.', ['Lucyna Ptak', 'immunoterapii alergii', 'Roman Gil', 'po udarze mózgu'], ['zakończyła kurs', 'warsztatach dla osób']);
+  str('Pani Teresa Wilk jest objęta programem kompleksowej opieki po zawale serca. Kampania dla kobiet o profilaktyce raka piersi odbyła się w maju.', ['Teresa Wilk', 'po zawale serca'], ['programem kompleksowej opieki', 'profilaktyce raka piersi']);
+  // Przyczyna lub stan w środku odcinka po słowie tematu przerywa temat; „o …” i odbiorcy bez choroby go zostawiają.
+  str('Pan Zenon Kruk kończy kurs ćwiczeń usprawniających po udarze mózgu, a Pani Ewa Sroka chodzi na warsztaty ruchowe przy chorobie Parkinsona.', ['Zenon Kruk', 'po udarze mózgu', 'Ewa Sroka', 'chorobie Parkinsona'], ['kurs ćwiczeń usprawniających', 'warsztaty ruchowe przy']);
+  str('Lp. | Pracownik | Szkolenie\n1 | Daria Wróbel | kurs pierwszej pomocy przy zawale serca\n2 | Olga Szpak | prelekcja o życiu po udarze mózgu', ['Daria Wróbel', 'Olga Szpak'], ['pierwszej pomocy przy zawale serca', 'prelekcja o życiu po udarze mózgu']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
