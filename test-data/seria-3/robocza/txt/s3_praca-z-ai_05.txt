@@ -1,0 +1,15 @@
+Poniżej wklejam wycinek z rejestru korespondencji Referatu Podatków i Opłat Lokalnych (eksport z EZD do Excela).
+1. Pogrupuj pozycje według rodzaju sprawy.
+2. Dla wniosków o ulgę (umorzenie, odroczenie, raty) przygotuj projekt wezwania do przedłożenia dokumentów o sytuacji materialnej (art. 67a i art. 122 Ordynacji podatkowej).
+3. Wskaż, w których sprawach termin mija w tym miesiącu.
+
+Lp. | Data wpływu | Nadawca | Adres / kontakt | Sprawa | Uwagi | Prow.
+41 | 02.11.2026 | Renata Mazur | ul. Szpitalna 8 m. 12, 44-190 Knurów | wniosek o rozłożenie na raty zaległości w podatku od nieruchomości | mąż Leszek w trakcie leczenia onkologicznego, ona na zwolnieniu lekarskim od września; dołączyła zaświadczenie z Centrum Onkologii w Gliwicach | ES
+42 | 02.11.2026 | Hydro-Bud Sp. z o.o. | ul. Dworcowa 31, Zabrze, NIP 6738610475 | korekta deklaracji DN-1 za 2025 r. | brak pełnomocnictwa dla księgowej | TB
+43 | 03.11.2026 | Zbigniew Pyka | Szczygłowice, ul. Ułańska 4, tel. 691 304 558 | zwrot nadpłaty podatku rolnego | rach. do zwrotu PL91 1240 1037 1536 7774 2491 8465, NIP 6083546465 (prowadzi gospodarstwo) | ES
+44 | 03.11.2026 | spadkobiercy po Gerardzie Kuli: Gabriela Kula, Piotr Kula | ul. Niepodległości 50, 44-194 Knurów | informacja IN-1 po nabyciu spadku, KW GL1G/43742383/1 | postanowienie SR w Gliwicach o stwierdzeniu nabycia spadku, sygn. I Ns 1188/25 | TB
+45 | 04.11.2026 | Urząd Skarbowy w Gliwicach | ul. Góry Chełmskiej 15, Gliwice | zawiadomienie o zajęciu wierzytelności zobowiązanej Renaty Mazur | ID dok. EZD 49154379631 | ES
+46 | 05.11.2026 | Samorządowe Kolegium Odwoławcze w Katowicach | — | decyzja SKO.FP/415/2/26 utrzymująca w mocy decyzję w sprawie podatku od środków transportowych (odwołanie Marka Ociepki) | do wiadomości | TB
+47 | 05.11.2026 | Teresa Bugla | e-mail: tbugla65@example.com, PESEL 81070866822 | wniosek o umorzenie zaległej opłaty za gospodarowanie odpadami | samotnie wychowuje syna z niepełnosprawnością (MPD), jedyny dochód to świadczenie | ES
+
+Skróty w kolumnie Prow.: ES – Ewa Szołtysek, TB – Tomasz Bajer (podinspektorzy referatu). Pozycje 41 i 47 mają termin 30 dni od wpływu.

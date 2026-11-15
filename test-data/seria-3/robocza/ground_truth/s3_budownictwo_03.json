@@ -1,0 +1,407 @@
+{
+  "id": "s3_budownictwo_03",
+  "template": "budownictwo",
+  "title": "Decyzja zatwierdzająca podział nieruchomości spadkowej",
+  "seed": null,
+  "traps": [
+    "odmiana Gąsior: Gąsiora, Gąsior (kobieta), trzy osoby o tym samym nazwisku",
+    "ubezwłasnowolnienie i niepełnosprawność współwłaścicielki",
+    "patron w adresie osoby (mask) i w adresie starostwa (keep)",
+    "sygnatury spraw spadkowej i opiekuńczej stron (policy) obok uchwały do zachowania",
+    "firma geodety z fragmentem nazwiska, data śmierci spadkodawcy (policy)"
+  ],
+  "entities": [
+    {
+      "text": "Andrzeja Gąsiora",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Andrzej Gąsior",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "Beaty Nowickiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Beata Nowicka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Lucyny Gąsior",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Lucyna Gąsior",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "Martę Ociepkę",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Marta Ociepka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Józefa Gąsiora",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "zmarły spadkodawca",
+      "count": 1
+    },
+    {
+      "text": "61110873517",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "65032294562",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "70063048341",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Wielicka 211 m. 17",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "30-552",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Juliusza Słowackiego 6",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "patron w adresie osoby",
+      "count": 1
+    },
+    {
+      "text": "32-020",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kolejowa 48",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kolejowa 50",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "32-003",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "KR1I/56064049/6",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "księga wieczysta wskazuje właściciela",
+      "count": 1
+    },
+    {
+      "text": "częściowo ubezwłasnowolnioną",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "ubezwłasnowolnienie",
+      "count": 1
+    },
+    {
+      "text": "niepełnosprawności intelektualnej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "668 210 947",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "503 771 260",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "a.gasior@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wiesław Krupa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "15873",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer uprawnień geodety",
+      "count": 1
+    },
+    {
+      "text": "GEOKRUP Usługi Geodezyjne",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "firma JDG z fragmentem nazwiska",
+      "count": 1
+    },
+    {
+      "text": "Kraków",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Wieliczka",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Podłęże",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i nazwa obrębu",
+      "count": 3
+    },
+    {
+      "text": "2 marca 2024",
+      "type": "DATE_DEATH",
+      "expect": "policy",
+      "note": "data śmierci spadkodawcy",
+      "count": 1
+    },
+    {
+      "text": "I Ns 1542/24",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy spadkowej stron",
+      "count": 1
+    },
+    {
+      "text": "III Nsm 311/25",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy opiekuńczej strony",
+      "count": 1
+    },
+    {
+      "text": "1067/3",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka stron przed podziałem",
+      "count": 1
+    },
+    {
+      "text": "1067/5",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "1067/6",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "1067/7",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "1067/8",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "droga wewnętrzna współwłaścicieli",
+      "count": 2
+    },
+    {
+      "text": "P.1219.2026.3481",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "identyfikator operatu w zasobie",
+      "count": 1
+    },
+    {
+      "text": "GPI.6831.24.2026.AW",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy z inicjałami pracownika",
+      "count": 1
+    },
+    {
+      "text": "117/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer decyzji",
+      "count": 1
+    },
+    {
+      "text": "Tomasz Wierzbicki",
+      "type": "OFFICIAL",
+      "expect": "policy",
+      "note": "zastępca burmistrza podpisujący decyzję",
+      "count": 1
+    },
+    {
+      "text": "BURMISTRZ MIASTA I GMINY NIEPOŁOMICE",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Burmistrza Miasta i Gminy Niepołomice",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Plac Zwycięstwa 13",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "32-005",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy w Wieliczce",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sądu Rejonowego w Wieliczce",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy dla Krakowa-Podgórza w Krakowie",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Samorządowego Kolegium Odwoławczego w Krakowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Starostwo Powiatowe w Wieliczce",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Józefa Piłsudskiego 25",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w adresie instytucji",
+      "count": 1
+    },
+    {
+      "text": "Rady Miejskiej w Niepołomicach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "XLII/512/2021",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer uchwały planistycznej",
+      "count": 1
+    },
+    {
+      "text": "1102",
+      "type": "PARCEL",
+      "expect": "keep",
+      "note": "działka drogi publicznej",
+      "count": 1
+    }
+  ]
+}

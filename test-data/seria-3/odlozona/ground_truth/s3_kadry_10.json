@@ -1,0 +1,303 @@
+{
+  "id": "s3_kadry_10",
+  "template": "kadry",
+  "title": "Notatka do listy płac o zmianie rachunków do wynagrodzeń",
+  "seed": null,
+  "traps": [
+    "rachunki w czterech formatach (ze spacjami, PL, bez spacji, PL bez spacji)",
+    "rachunek komornika (policy) obok rachunków pracowników",
+    "„Pośpiech” (też polskie nazwisko) jako zwykłe słowo na początku zdania",
+    "pełnomocnik-córka z adresem i dane o zdrowiu pracownicy",
+    "nazwiska w narzędniku i celowniku (Kurzawą, Monice Woźniak)",
+    "nazwa ZOL jako placówka ujawniająca stan zdrowia (policy)"
+  ],
+  "entities": [
+    {
+      "text": "Dom Pomocy Społecznej w Kędzierzynie-Koźlu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Głowackiego 17",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "nazwisko patrona w ulicy siedziby",
+      "count": 1
+    },
+    {
+      "text": "47-220",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kędzierzyn-Koźle",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "FK.0322.14.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zofia Marcinkowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "opiekunka",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "74 1240 1037 0696 8885 2315 1261",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "NRB ze spacjami, bez PL",
+      "count": 1
+    },
+    {
+      "text": "Bogdan Kurzawa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "konserwator",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL82 1140 2004 1226 1914 4053 0425",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "PL ze spacjami",
+      "count": 1
+    },
+    {
+      "text": "Aleksandrą Kurzawą",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "żona, narzędnik",
+      "count": 1
+    },
+    {
+      "text": "Iwona Siwek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko Siwek",
+      "count": 2
+    },
+    {
+      "text": "pielęgniarka",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "29249000051199258503634842",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "26 cyfr bez spacji",
+      "count": 1
+    },
+    {
+      "text": "Henryka Jasińska-Woźniak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "starsza pokojowa",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL61105000997514829390911762",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "PL bez spacji, rachunek córki-pełnomocnika",
+      "count": 1
+    },
+    {
+      "text": "Łukasz Dziedzic",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko Dziedzic",
+      "count": 1
+    },
+    {
+      "text": "terapeuta zajęciowy",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "25 1240 1037 1863 8200 8766 7761",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "58100488202",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zakładzie Opiekuńczo-Leczniczym w Głogówku",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "miejsce pobytu ujawnia stan zdrowia",
+      "count": 1
+    },
+    {
+      "text": "po udarze niedokrwiennym mózgu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Monice Woźniak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "córka, celownik",
+      "count": 1
+    },
+    {
+      "text": "ul. Piastowska 41/2",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "47-200",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "604 932 571",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Łukasza Dziedzica",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "egzekucja alimentów na rzecz małoletniej córki",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "zadłużenie alimentacyjne",
+      "count": 1
+    },
+    {
+      "text": "Sądzie Rejonowym w Kędzierzynie-Koźlu",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KMP 77/25",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy egzekucyjnej",
+      "count": 1
+    },
+    {
+      "text": "18 2490 0005 4506 1388 6048 1882",
+      "type": "IBAN_COMPANY",
+      "expect": "policy",
+      "note": "rachunek kancelarii komorniczej",
+      "count": 1
+    },
+    {
+      "text": "mBanku S.A.",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "67102028921647442804868974",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "stary rachunek pracownicy",
+      "count": 1
+    },
+    {
+      "text": "Pośpiech",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo na początku zdania, choć bywa nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "Danuta Leja",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Główna Księgowa",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Teresa Cichoń",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Gabriela Morawiec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "specjalista ds. płac",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

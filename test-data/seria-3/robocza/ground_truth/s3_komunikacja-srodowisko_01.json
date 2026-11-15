@@ -1,0 +1,254 @@
+{
+  "id": "s3_komunikacja-srodowisko_01",
+  "template": "komunikacja-srodowisko",
+  "title": "Wezwanie do uzupełnienia wniosku o rejestrację pojazdu sprowadzonego",
+  "seed": null,
+  "traps": [
+    "patron w adresie starostwa (do zachowania)",
+    "dwóch współwłaścicieli i osoba podpisująca bez pełnomocnictwa o tym samym nazwisku",
+    "zagraniczna tablica i adres zbywcy z Niemiec",
+    "tablica tymczasowa",
+    "tłumaczka przysięgła z numerem wpisu",
+    "urzędnicy w funkcji"
+  ],
+  "entities": [
+    {
+      "text": "Starostwo Powiatowe w Nowym Targu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Bolesława Wstydliwego 14",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w adresie urzędu",
+      "count": 1
+    },
+    {
+      "text": "34-400",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Starosta Nowotarski",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Naczelnika Urzędu Skarbowego w Nowym Targu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KT.5410.2.1874.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "Stanisław Gąsienica",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Stanisława Gąsienicę",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kasprusie 21",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "34-500",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zakopane",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Weronika Chowaniec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Weroniki Chowaniec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Za Torem 9",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "34-404",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ludźmierz",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "PW4LLVDH5N2A5P9W5",
+      "type": "VIN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Volkswagen Passat Variant",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "58030952554",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "87112337321",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "APM494691",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KNT 3C47A",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "tablica tymczasowa",
+      "count": 1
+    },
+    {
+      "text": "RV-KL 482",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "niemiecki numer rejestracyjny",
+      "count": 1
+    },
+    {
+      "text": "Klaus Riedmüller",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "osoba zagraniczna",
+      "count": 1
+    },
+    {
+      "text": "Ravensburgu",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Gartenstraße 18",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres zagraniczny",
+      "count": 1
+    },
+    {
+      "text": "Danuty Pawlikowskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "TP/1127/09",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer wpisu tłumacza przysięgłego",
+      "count": 1
+    },
+    {
+      "text": "Józef Chowaniec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "601 284 973",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "s.gasienica@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Halina Zięba",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędnik w funkcji",
+      "count": 1
+    },
+    {
+      "text": "18 266 10 22",
+      "type": "PHONE",
+      "expect": "policy",
+      "note": "telefon służbowy urzędu",
+      "count": 1
+    },
+    {
+      "text": "Ryszard Bachleda",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędnik w funkcji",
+      "count": 1
+    }
+  ]
+}

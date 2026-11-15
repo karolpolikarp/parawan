@@ -13,11 +13,27 @@ import {
   isValidNpwz,
 } from './index';
 import { HISTORIC_SURNAMES_GEN, historicSurnameGenitive } from './passes/person-caps-ocr';
+import { RE_ADDRESS_ANCHOR_BEFORE } from './passes/person-vocative';
 import { MASK, type PiiType } from './types';
 
 // Wszystkie typy oprócz danych o zdrowiu: dla testów reguł osób i formularzy na tekstach z nazwą
 // choroby, którą przy ustawieniach domyślnych zakrywa maska [DANE O ZDROWIU].
 const BEZ_ZDROWIA = { types: (Object.keys(MASK) as PiiType[]).filter((t) => t !== 'ZDROWIE') };
+
+// Czasy dwóch przebiegów (krótkiego i długiego wejścia) do testów czasu liniowego. Każdy rozmiar
+// liczy się jako minimum z kilku powtórzeń, na przemian krótki i długi: minimum odcina pauzy GC
+// i obciążenie od plików testów biegnących równolegle, a naprzemienność rozkłada dryf maszyny
+// na oba rozmiary. Jeden pomiar długiego wejścia dawał w CI stosunek 6,6–6,8 przy kodzie
+// liniowym (lokalnie ok. 4), a kod kwadratowy i tak daje kilkanaście.
+function bestTimes<T>(time: (input: T) => number, small: T, big: T, reps = 3): [number, number] {
+  let a = Infinity;
+  let b = Infinity;
+  for (let i = 0; i < reps; i++) {
+    a = Math.min(a, time(small));
+    b = Math.min(b, time(big));
+  }
+  return [a, b];
+}
 
 // Buduje poprawny IBAN z kodu kraju + BBAN (liczymy cyfry kontrolne mod 97),
 // żeby test nie zależał od zapamiętanego wektora.
@@ -1387,6 +1403,7 @@ const withOwnMasks = (s: string): string =>
 test.each([
   ['IMIE: imię w wierszu nad maską', 'Sporządził Jan\nKowalski, dnia 3 marca.'],
   ['IMIE: imiona rodziców za maską', 'Jan Kowalski, syn Józefa i Marii, stawił się.'],
+  ['IMIE: imiona rodziców za maską adresu (pokrewieństwo)', 'Mieszka przy ul. Polnej 5, syn Józefa i Marii był obecny.'],
   ['IMIE: imię doklejone podkreśleniem', 'Załącznik: Umowa_Kredytowa_Adam_Nowak.pdf w aktach.'],
   ['IMIE: pole formularza', 'Imię i nazwisko:\nJAN KOWALSKI'],
   ['ADRES: zamaskowana ulica za miastem', 'Ludzie mieszkający w Krakowie przy ul. Długiej 5 skarżą się na hałas.'],
@@ -1409,13 +1426,13 @@ test.each([
   ['pusta maska osoby: nazwa firmy z imieniem', { IMIE: '' }, 'Sklep Jagoda oferuje owoce. Firma Wiktoria Sp. z o.o. zatrudnia.'],
   ['pusta maska osoby: nazwa hotelu', { IMIE: '' }, 'Hotel Maria w centrum'],
   ['pusta maska osoby: punkty wyliczenia', { IMIE: '' }, 'wg pkt A. i B. uzasadnienia'],
-  ['pusta maska osoby: N.N. i imiona rodziców', { IMIE: '' }, 'Ofiara N.N., syn Józefa i Marii'],
+  ['pusta maska osoby: N.N. i imiona rodziców', { IMIE: '' }, 'Ofiara N.N., s. Józefa i Marii'],
   ['puste maski adresu, kodu i miasta: nazwa sklepu nad adresem', { ADRES: '', 'KOD-POCZTOWY': '', MIEJSCOWOSC: '' }, 'Sklep Jagoda\nul. Polna 5\n30-001 Kraków'],
   ['wspólna maska [UKRYTE]: nazwa sklepu nad adresem', SAME_MASK('[UKRYTE]'), 'Sklep Jagoda\nul. Polna 5\n30-001 Kraków'],
   ['wspólna maska [UKRYTE]: nazwa kwiaciarni przed adresem', SAME_MASK('[UKRYTE]'), 'Kwiaciarnia Róża ul. Polna 5, Kraków'],
-  ['wspólna maska [UKRYTE]: „syn” za maską adresu', SAME_MASK('[UKRYTE]'), 'Mieszka przy ul. Polnej 5, syn Józefa i Marii był obecny.'],
+  ['wspólna maska [UKRYTE]: „s.” za maską adresu', SAME_MASK('[UKRYTE]'), 'Mieszka przy ul. Polnej 5, s. Józefa i Marii był obecny.'],
   ['wspólna maska ***: nazwa sklepu nad adresem', SAME_MASK('***'), 'Sklep Jagoda\nul. Polna 5\n30-001 Kraków'],
-  ['wspólna maska ***: „syn” za maską adresu', SAME_MASK('***'), 'Mieszka przy ul. Polnej 5, syn Józefa i Marii był obecny.'],
+  ['wspólna maska ***: „s.” za maską adresu', SAME_MASK('***'), 'Mieszka przy ul. Polnej 5, s. Józefa i Marii był obecny.'],
 ] as const)('options.masks — %s: bez domknięć osoby', (_name, masks, input) => {
   const r = redactPII(input, { masks }).redacted;
   // wyrazy spoza danych osobowych zostają (wynik sprzed udostępnienia własnych masek kotwicom)
@@ -1428,8 +1445,8 @@ test('options.masks — wspólna maska: adres, kod i miasto dalej zamaskowane, n
   const masks = SAME_MASK('[UKRYTE]');
   expect(redactPII('Sklep Jagoda\nul. Polna 5\n30-001 Kraków', { masks }).redacted).toBe('Sklep Jagoda\n[UKRYTE]\n[UKRYTE] [UKRYTE]');
   expect(redactPII('Kwiaciarnia Róża ul. Polna 5, Kraków', { masks }).redacted).toBe('Kwiaciarnia Róża [UKRYTE], [UKRYTE]');
-  expect(redactPII('Mieszka przy ul. Polnej 5, syn Józefa i Marii był obecny.', { masks }).redacted).toBe(
-    'Mieszka przy [UKRYTE], syn Józefa i Marii był obecny.',
+  expect(redactPII('Mieszka przy ul. Polnej 5, s. Józefa i Marii był obecny.', { masks }).redacted).toBe(
+    'Mieszka przy [UKRYTE], s. Józefa i Marii był obecny.',
   );
 });
 
@@ -1507,6 +1524,234 @@ test('sygnatura sądowa z dwuczłonowym wydziałem („II SA/Wa 1234/23") maskow
 test('sygnatura sądowa BEZ kotwicy (cytowane orzecznictwo) NIE jest maskowana', () => {
   const t = 'Orzeczenie w sprawie III CZP 45/22 oraz wyrok I OSK 1122/21.';
   expect(redactPII(t).redacted).toBe(t);
+});
+test('sygnatura cytowanego orzeczenia po „sygn. akt” zostaje jawna, osoba w zdaniu obok zakryta', () => {
+  const jawne = [
+    'Ocena ta odpowiada stanowisku NSA wyrażonemu w wyroku z dnia 12 maja 2021 r., sygn. akt II OSK 2408/18.',
+    'Stanowisko to potwierdza wyrok WSA w Gdańsku z dnia 9 marca 2022 r., sygn. akt II SA/Gd 812/21.',
+    'W podobnej sprawie Wojewódzki Sąd Administracyjny w Rzeszowie w wyroku z dnia 9 grudnia 2021 r., sygn. akt II SA/Rz 1187/21, uznał, że komisja powinna wezwać rodzica.',
+    'Organ uwzględnił stanowisko Trybunału Konstytucyjnego wyrażone w wyroku z dnia 21 października 2014 r., sygn. akt K 38/13.',
+    'Sąd uwzględnił stanowisko wyrażone w uchwale Sądu Najwyższego z dnia 26 lutego 2020 r., sygn. akt III CZP 12/19, dotyczącej spadku.',
+    'Zob. wyrok TSUE z dnia 1 października 2019 r., sygn. C-673/17.',
+    'Potwierdza to m.in. w wyroku NSA z dnia 8 listopada 2018 r., sygn. akt I OSK 2213/17, oraz w wyroku WSA w Gdańsku z dnia 21 czerwca 2023 r., sygn. akt II SAB/Gd 54/23.',
+  ];
+  for (const t of jawne) expect(redactPII(t).redacted).toBe(t);
+  // Nawias z „por.” zawęża zdanie: zwrot „Pana” poza nawiasem nie czyni cytatu sprawą strony.
+  const kio = redactPII(
+    'Na pytanie Pana Jana Zająca odpowiedziano, że wagi kryteriów nie mogły się zmienić (por. wyrok z 12 stycznia 2024 r., sygn. akt KIO 3871/23).',
+  ).redacted;
+  expect(kio).toContain('sygn. akt KIO 3871/23');
+  expect(kio).not.toContain('Zająca');
+  const nsa = redactPII(
+    'Stanowisko to potwierdza wyrok NSA z dnia 12 marca 2020 r., sygn. akt I OSK 2087/19. Świadczenie pobrał Jan Kowalski, PESEL 44051401359.',
+  ).redacted;
+  expect(nsa).toContain('I OSK 2087/19');
+  expect(nsa).not.toContain('Kowalski');
+  expect(nsa).not.toContain('44051401359');
+});
+test('sygnatura sprawy strony po „sygn.” dalej zakryta, także przy wyroku i postanowieniu', () => {
+  const zakryte: [string, string][] = [
+    ['Sygn. akt: I C 123/24', 'I C 123/24'],
+    ['Sygn. akt II SA/Kr 123/24', 'II SA/Kr 123/24'],
+    ['Był uprzednio karany wyrokiem Sądu Rejonowego w Ostródzie z dnia 8 czerwca 2022 r., sygn. II K 512/21, za kradzież.', 'II K 512/21'],
+    ['Nabycie spadku stwierdził Sąd Rejonowy w Krakowie postanowieniem z 18 listopada 2024 r., sygn. akt I Ns 1542/24.', 'I Ns 1542/24'],
+    ['Wyrokiem Sądu Rejonowego w Gnieźnie z dnia 14 lutego 2024 r., sygn. akt III RC 212/23, zasądzono alimenty.', 'III RC 212/23'],
+    ['Wyrokiem z dnia 3 marca 2024 r., sygn. akt II SA/Kr 123/24, WSA w Krakowie uchylił zaskarżoną decyzję Wójta.', 'II SA/Kr 123/24'],
+    ['WSA w wyroku z dnia 3 marca 2024 r., sygn. akt II SA/Kr 123/24, oddalił Pana skargę.', 'II SA/Kr 123/24'],
+    ['Dotyczy: wyroku WSA w Krakowie z dnia 3 marca 2024 r., sygn. akt II SA/Kr 123/24', 'II SA/Kr 123/24'],
+    ['Informuję, że w sprawie o sygn. akt I C 123/24 wyznaczono termin rozprawy.', 'I C 123/24'],
+    ['Wyrok NSA w sprawie o sygn. II OSK 12/20 zapadł w Pani sprawie.', 'II OSK 12/20'],
+    ['Sprawa toczy się przed Sądem Rejonowym w Nowym Sączu pod sygn. akt II W 1432/26.', 'II W 1432/26'],
+  ];
+  for (const [t, sygn] of zakryte) {
+    const r = redactPII(t).redacted;
+    expect(r, t).toContain('[ZNAK-SPRAWY]');
+    expect(r, t).not.toContain(sygn);
+  }
+});
+test('wyrok w sprawie strony (rozstrzygnięcie, wykonanie, rola strony) bez zapowiedzi cytatu: sygnatura zakryta', () => {
+  // Samo repertorium sądu (OSK, SA/Kr, ACa, AUa, USK) nie dowodzi cytatu: w piśmie ZUS, SKO czy
+  // gminy to zwykle własna sprawa strony. Jawność tylko przy zapowiedzi cytatu i bez śladu strony.
+  const zakryte: [string, string][] = [
+    ['Wnioskodawczyni przedłożyła wyrok SA w Gdańsku z dnia 3 marca 2023 r., sygn. akt III AUa 456/22, przyznający jej rentę rodzinną.', 'III AUa 456/22'],
+    ['W wykonaniu wyroku SA w Lublinie z dnia 3 marca 2024 r., sygn. akt III AUa 1234/23, Zakład przyznaje ubezpieczonej Annie Nowak emeryturę.', 'III AUa 1234/23'],
+    ['Wykonując wyrok WSA w Krakowie z dnia 3 marca 2024 r., sygn. akt II SA/Kr 123/24, Kolegium ponownie rozpatrzyło odwołanie Jana Kowalskiego.', 'II SA/Kr 123/24'],
+    ['Wyrokiem WSA w Warszawie z dnia 3 marca 2024 r., sygn. akt VIII SA/Wa 321/24, uwzględniono skargę Jana Kowalskiego na decyzję Burmistrza.', 'VIII SA/Wa 321/24'],
+    ['Sąd przesyła odpis wyroku z dnia 3 marca 2024 r., sygn. akt I ACa 123/24, wydanego w sprawie z powództwa Jana Kowalskiego.', 'I ACa 123/24'],
+    ['Sąd Najwyższy wyrokiem z dnia 3 marca 2024 r., sygn. akt V KK 12/24, uniewinnił Jana Kowalskiego.', 'V KK 12/24'],
+    ['Nadpłata zostanie zwrócona zgodnie z wyrokiem WSA w Krakowie z dnia 3 marca 2024 r., sygn. akt I SA/Kr 66/24, na rachunek podatnika.', 'I SA/Kr 66/24'],
+    ['Wyrok w sprawie pana Jana Kowalskiego, sygn. akt II SA/Po 55/24, jest prawomocny.', 'II SA/Po 55/24'],
+    ['W wyroku SA w Lublinie z dnia 3 marca 2024 r., sygn. akt I ACa 12/24, pani Anna Nowak uzyskała zadośćuczynienie.', 'I ACa 12/24'],
+    ['WYROK W IMIENIU RZECZYPOSPOLITEJ POLSKIEJ sygn. akt I ACa 123/24 Sąd Apelacyjny w Krakowie z powództwa Jana Kowalskiego', 'I ACa 123/24'],
+    ['Wyrok z dnia 5 maja 2024 r. Sygn. akt I ACa 123/24. Sąd Apelacyjny w Krakowie po rozpoznaniu apelacji', 'I ACa 123/24'],
+    ['Postanowienie z dnia 5 maja 2024 r., sygn. akt III CZP 77/24 w sprawie z wniosku Jana Kowalskiego', 'III CZP 77/24'],
+    ['Wyrok wydany pod sygn. akt II AKa 12/24 wobec Jana Kowalskiego.', 'II AKa 12/24'],
+    ['Pan Jan Kowalski wniósł skargę kasacyjną. W wyroku NSA z dnia 3 marca 2024 r., sygn. akt II OSK 1/24, sąd oddalił skargę kasacyjną.', 'II OSK 1/24'],
+    ['Organ wskazuje (por. wyrok SA w Krakowie z dnia 3 marca 2024 r., sygn. akt I ACa 900/23, wydany w sprawie powoda Jana Kowalskiego).', 'I ACa 900/23'],
+    ['Wojewódzki Sąd Administracyjny w Krakowie wyrokiem z dnia 12 marca 2024 r., sygn. akt II SA/Kr 1501/23, uchylił decyzję Samorządowego Kolegium Odwoławczego.', 'II SA/Kr 1501/23'],
+    ['Rozpatrując ponownie sprawę po wyroku WSA w Lublinie z dnia 5 lutego 2024 r., sygn. akt III SA/Lu 610/23, organ ustalił, że wnioskodawca spełnia warunki.', 'III SA/Lu 610/23'],
+    ['NSA wyrokiem z 7 maja 2024 r., sygn. akt I OSK 2210/22, oddalił skargę kasacyjną wnioskodawczyni.', 'I OSK 2210/22'],
+    ['Organ wykonuje wyrok WSA w Gliwicach z dnia 3 marca 2024 r., sygn. akt II SA/Gl 77/24, którym uchylono decyzję o odmowie przyznania zasiłku.', 'II SA/Gl 77/24'],
+    ['Wyrokiem SA w Lublinie z dnia 3 marca 2024 r., sygn. akt III AUa 301/23, zmieniono decyzję ZUS i przyznano wnioskodawczyni emeryturę.', 'III AUa 301/23'],
+    ['Wyrokiem SA w Krakowie z dnia 3 marca 2024 r., sygn. akt I ACa 77/23, zasądzono od Gminy na rzecz powoda Adama Wrony kwotę 5000 zł.', 'I ACa 77/23'],
+    ['Wnioskodawczyni Maria Lis wskazała na wyrok SN z dnia 3 marca 2024 r., sygn. akt I USK 12/23, wydany w jej sprawie.', 'I USK 12/23'],
+    ['Stanowisko Pana Jana Kowalskiego potwierdza wyrok WSA w Krakowie z dnia 3 marca 2024 r., sygn. akt II SA/Kr 12/24.', 'II SA/Kr 12/24'],
+    ['Podobnie orzekł WSA w Krakowie w sprawie Jana Kowalskiego, w wyroku z dnia 3 marca 2024 r., sygn. akt II SA/Kr 13/24.', 'II SA/Kr 13/24'],
+  ];
+  for (const [t, sygn] of zakryte) {
+    const r = redactPII(t).redacted;
+    expect(r, t).toContain('[ZNAK-SPRAWY]');
+    expect(r, t).not.toContain(sygn);
+  }
+  // Osoba obok zostaje zakryta niezależnie od sygnatury.
+  const r = redactPII('Wyrokiem SA w Krakowie z dnia 3 marca 2024 r., sygn. akt I ACa 77/23, zasądzono na rzecz powoda Adama Wrony kwotę.').redacted;
+  expect(r).not.toContain('Wrony');
+});
+test('cytat z zapowiedzią („potwierdził”, „jak wskazał”, „pogląd”, „organ wskazuje, że”) zostaje jawny', () => {
+  const jawne = [
+    'Na marginesie organ wskazuje, że w wyroku z dnia 15 lutego 2023 r., sygn. akt III SA/Gd 811/22, Wojewódzki Sąd Administracyjny w Gdańsku podkreślił, że decyzja o odroczeniu wymaga oceny opinii poradni.',
+    'Bezczynność organu podlega kontroli sądowej, co potwierdził Naczelny Sąd Administracyjny m.in. w wyroku z dnia 2 grudnia 2021 r., sygn. akt II OSK 123/21.',
+    'Jak wskazał NSA w wyroku z dnia 2 grudnia 2021 r., sygn. akt II OSK 123/21, organ ma obowiązek wyjaśnić stan faktyczny.',
+    'Zgodnie z poglądem wyrażonym w wyroku NSA z dnia 2 grudnia 2021 r., sygn. akt II OSK 123/21, termin ma charakter materialny.',
+  ];
+  for (const t of jawne) expect(redactPII(t).redacted, t).toBe(t);
+});
+test('sygnatura sprawy osoby zakryta mimo zapowiedzi cytatu: repertorium sądu powszechnego, osoba w zdaniu lub obok, akta sprawy', () => {
+  // Jawne zostają tylko repertoria linii orzeczniczej (NSA, WSA, SN, TK, KIO, TSUE). Sygnatura sądu
+  // powszechnego (Nsm, Ns, K, W, GU, RNs, RC, C, U, Co, Ca, ACa, AKa) wskazuje sprawę konkretnej osoby.
+  const zakryte = [
+  'Jak wskazał Sąd Rejonowy w Nowym Sączu w postanowieniu z dnia 12 marca 2024 r., sygn. akt III Nsm 123/23, władza rodzicielska Tomasza Wrony została ograniczona.',
+  'Organ podkreśla, że w postanowieniu z dnia 3 maja 2022 r., sygn. akt I Ns 456/22, Sąd Rejonowy stwierdził nabycie spadku po Janie Kowalskim.',
+  'Organ zauważa, że w wyroku z dnia 4 lipca 2022 r., sygn. akt XIV K 100/22, Michał Duda został uznany za winnego.',
+  'Organ wskazał, że w wyroku z dnia 1 lutego 2024 r., sygn. akt II W 55/24, ukarano Dariusza Michalaka grzywną.',
+  'Podobnie w postanowieniu z dnia 2 marca 2023 r., sygn. akt V GU 12/23, ogłoszono upadłość konsumencką Teresy Kaczmarek.',
+  'Między innymi w postanowieniu z dnia 2 marca 2023 r., sygn. akt III RNs 11/23, sąd zarządził umieszczenie Kamila Wójcika w zakładzie leczniczym.',
+  'Potwierdza to wyrok Sądu Rejonowego w Gnieźnie z dnia 2 marca 2023 r., sygn. akt III RC 45/23, ustalający alimenty na córkę Piotra Nowaka.',
+  'Stanowisko organu potwierdza orzeczenie z dnia 2 marca 2023 r., sygn. akt IV Nsm 12/23, w przedmiocie umieszczenia Oliwii Nowak w pieczy zastępczej.',
+  'Tak też w wyroku z dnia 2 marca 2023 r., sygn. akt I C 777/23 eksmitowano Romana Górę.',
+  'Jak zauważył Sąd Rejonowy w wyroku z dnia 2 marca 2024 r., sygn. akt I C 4/24, Wiktoria Sobczak zajmuje lokal bez tytułu prawnego.',
+  'Jak przyjął Sąd Najwyższy w wyroku z dnia 2 marca 2023 r., sygn. akt I USKP 12/22, świadczenie Karoliny Wiśniewskiej nie przysługuje.',
+  'Jak wskazał WSA w Łodzi w wyroku z dnia 2 marca 2024 r., sygn. akt II SA/Łd 900/23, skarga Janiny Pawlak była niezasadna.',
+  'Jak wskazał NSA w wyroku z dnia 2 marca 2024 r., sygn. akt II OSK 900/23, wydanym po rozpoznaniu skargi Anny Kowalskiej, organ błędnie ustalił stan faktyczny.',
+  'Podobnie orzekł WSA w Krakowie w wyroku z dnia 2 marca 2024 r., sygn. akt II SA/Kr 901/23, wydanym na skutek skargi Wiesława Banasia.',
+  'Szanowny Panie, jak wskazał Sąd w wyroku z dnia 1.01.2024 r., sygn. akt I C 2/24, należność została spłacona.',
+  'Szanowny Panie, jak wskazał NSA w wyroku z dnia 1.01.2024 r., sygn. akt II OSK 2/24, należność została spłacona.',
+  'Jak wskazał WSA w Gliwicach w wyroku z dnia 3 marca 2024 r., sygn. akt II SA/Gl 55/23. Wyrok zapadł w sprawie ze skargi Pani Ewy Wróbel.',
+  'Pani Ewa Wróbel złożyła skargę na decyzję. Jak wskazał WSA w Gliwicach w wyroku z dnia 3 marca 2024 r., sygn. akt II SA/Gl 55/23, decyzja była wadliwa.',
+  'Szanowna Pani, informuję że sprawa toczy się. Jak wskazał Sąd w wyroku z dnia 3 marca 2024 r., sygn. akt I C 3/24, roszczenie jest zasadne.',
+  'Szanowna Pani, informuję że sprawa toczy się. Jak wskazał NSA w wyroku z dnia 3 marca 2024 r., sygn. akt II OSK 3/24, roszczenie jest zasadne.',
+  'Jak wskazał Sąd w postanowieniu z dnia 2 lutego 2023 r., sygn. akt III Nsm 400/22,\nmałoletni Igor Kaczmarczyk pozostaje pod nadzorem kuratora.',
+  'Jak wskazał NSA w wyroku z dnia 2 lutego 2023 r., sygn. akt II OSK 400/22,\nmałoletni Igor Kaczmarczyk pozostaje pod nadzorem kuratora.',
+  'Do akt sprawy przekazano m.in. wyrok Sądu Okręgowego w Krakowie z dnia 3 marca 2024 r., sygn. akt IV U 44/23, dotyczący Krystyny Zając.',
+  'W aktach znajduje się m.in. postanowienie z dnia 3 marca 2024 r., sygn. akt I Co 12/23, o przysądzeniu własności lokalu Janowi Kowalskiemu.',
+  'Według orzecznictwa sądowego, np. wyrok SR w Bochni z dnia 3 marca 2023 r., sygn. akt I C 1/23 dotyczący najmu Jana Mroza.',
+  'Do akt sprawy przekazano m.in. wyrok NSA z dnia 3 marca 2024 r., sygn. akt II OSK 44/23.',
+  'W aktach znajduje się m.in. wyrok WSA w Krakowie z dnia 3 marca 2024 r., sygn. akt II SA/Kr 44/23.',
+  'Jak wskazał NSA w wyroku z dnia 3 marca 2024 r., sygn. akt I OSK 7/24, decyzja dotycząca Pana Adama Nowaka była prawidłowa.',
+  'Organ wskazuje, że w wyroku z dnia 3 marca 2024 r., sygn. akt II SA/Po 7/24, WSA w Poznaniu przywrócił termin Marii Lis.',
+  'Jak stwierdził NSA w wyroku z dnia 3 marca 2024 r., sygn. akt II OSK 8/24, na korzyść skarżącego przemawia stan faktyczny.',
+  'Jak wskazał Sąd Najwyższy w wyroku z dnia 3 marca 2024 r., sygn. akt I PK 8/24, Sąd przywrócił powoda do pracy.',
+  'Stanowisko to potwierdza wyrok SA w Krakowie z dnia 3 marca 2024 r., sygn. akt I ACa 8/24.',
+  'Por. wyrok Sądu Apelacyjnego w Katowicach z dnia 7 grudnia 2017 r., sygn. akt II AKa 401/17.',
+  'Jak wskazał Sąd Okręgowy w wyroku z dnia 3 marca 2024 r., sygn. akt IV U 8/24, ZUS błędnie ustalił kapitał.',
+  'Jak wskazał NSA w wyroku z dnia 3 marca 2024 r., sygn. akt II OSK 9/24, Jan Kowalski nie miał interesu prawnego.',
+  'NSA w wyroku z dnia 3 marca 2024 r., sygn. akt II OSK 5/24, uznał, że skarga kasacyjna wnioskodawczyni jest niezasadna.',
+  'WSA w Krakowie w wyroku z dnia 3 marca 2024 r., sygn. akt II SA/Kr 5/24, stwierdził, że Pan nie wykazał interesu prawnego.',
+  'Jak wskazał NSA w wyroku z dnia 3 marca 2024 r., sygn. akt II OSK 6/24, decyzja wobec Pani była wadliwa.',
+  'Sąd Najwyższy w wyroku z dnia 3 marca 2024 r., sygn. akt II USKP 6/24, przyjął, że ubezpieczona Anna Nowak ma prawo do emerytury.',
+  'Organ powołuje się na wyrok WSA w Krakowie z dnia 3 marca 2024 r., sygn. akt II SA/Kr 7/24, wydany w Pani sprawie.',
+  'Pan Jan Kowalski wskazał na wyrok NSA z dnia 3 marca 2024 r., sygn. akt II OSK 8/24, wydany w jego sprawie.',
+  'Jak wskazał NSA w wyroku z dnia 3 marca 2024 r., sygn. akt II OSK 9/24, skarżąca Maria Lis nie miała racji.',
+  'NSA w wyroku z dnia 3 marca 2024 r., sygn. akt I OSK 10/24, orzekł o odmowie zameldowania Jana Kowalskiego.',
+  'W sprawie zakończonej wyrokiem NSA z dnia 3 marca 2024 r., sygn. akt I OSK 11/24, wnioskodawca uzyskał pozwolenie.',
+  'Jak wskazał NSA w wyroku z dnia 3 marca 2024 r., sygn. akt I OSK 12/24, Panu nie przysługuje zwrot.',
+  'Szanowni Państwo, jak wskazał NSA w wyroku z dnia 3 marca 2024 r., sygn. akt I OSK 13/24, opłata jest należna.',
+  'Pan Adam Nowak złożył skargę\nkasacyjną. Por. wyrok NSA z dnia 3 marca 2024 r., sygn. akt I OSK 14/24, oddalający skargę.',
+  'Wyrokiem z dnia 3 marca 2024 r. Naczelny Sąd Administracyjny, sygn. akt I OSK 15/24, uchylił zaskarżony wyrok.',
+  'Podobnie orzekł Sąd Okręgowy w Krakowie w wyroku z dnia 3 marca 2021 r., sygn. akt II Ca 1544/20.',
+  'm.in. w wyroku NSA z dnia 8 listopada 2018 r., sygn. akt I OSK 2213/17.',
+  ];
+  const sygn = (t: string): string => /sygn\.?(?:[ \t]*akt)?[ \t]+([^,;)\n]+?\d+\/\d{2})/i.exec(t)?.[1] ?? '';
+  for (const t of zakryte) {
+    const r = redactPII(t).redacted;
+    expect(sygn(t), t).not.toBe('');
+    expect(r, t).toContain('[ZNAK-SPRAWY]');
+    expect(r, t).not.toContain(sygn(t));
+  }
+  // Osoba w zdaniu z sygnaturą zostaje zakryta.
+  expect(redactPII(zakryte[0]).redacted).not.toContain('Wrony');
+});
+test('cytat orzeczenia NSA, WSA, SN, TK, KIO i TSUE jawny w różnym szyku i u różnych organów', () => {
+  // Zapowiedź cytatu przed albo po sygnaturze („…, sygn. akt …, stwierdził, że”), wersaliki, nawias,
+  // „o sygn.”, łamanie wiersza, „r.” po dacie przed nazwą sądu.
+  const jawne = [
+  'WSA w Poznaniu w wyroku z dnia 14 kwietnia 2020 r., sygn. akt II SA/Po 1001/19, stwierdził, że opłata adiacencka wymaga ustalenia wzrostu wartości.',
+  'Sąd Najwyższy w wyroku z dnia 3 marca 2021 r., sygn. akt III PSKP 12/21, wyjaśnił, że pracodawca musi wskazać przyczynę.',
+  'Sąd Najwyższy w wyroku z dnia 3 marca 2021 r., sygn. akt I PK 12/20, wyjaśnił, że pracodawca musi wskazać przyczynę.',
+  'Krajowa Izba Odwoławcza w wyroku z dnia 5 maja 2022 r., sygn. akt KIO 1122/22, uznała, że zamawiający nie mógł odrzucić oferty.',
+  'SKO w Rzeszowie odwołuje się do wyroku NSA z dnia 4 lutego 2021 r., sygn. akt II OSK 3320/18.',
+  'Powiatowy Inspektor Nadzoru Budowlanego przywołuje wyrok NSA z dnia 4 lutego 2021 r., sygn. akt II OSK 1234/19.',
+  'Prezydent Miasta Bydgoszczy powołuje się na wyrok WSA w Bydgoszczy z dnia 4 lutego 2021 r., sygn. akt II SA/Bd 455/20.',
+  'KRUS wyjaśnia, że według Sądu Najwyższego (wyrok z dnia 4 lutego 2021 r., sygn. akt II USKP 45/21) okres ten nie podlega doliczeniu.',
+  'Jak wynika z wyroku WSA w Warszawie z dnia 4 lutego 2021 r., sygn. akt VIII SA/Wa 455/20, opłata ma charakter publicznoprawny.',
+  'W tej kwestii wypowiedział się NSA w wyroku z dnia 4 lutego 2021 r., sygn. akt I FSK 455/20.',
+  'Kwestia ta była przedmiotem uchwały siedmiu sędziów NSA z dnia 2 marca 2020 r., sygn. akt I FPS 1/20.',
+  'W WYROKU Z DNIA 24 MAJA 2018 R., SYGN. AKT II OSK 1505/16, NACZELNY SĄD ADMINISTRACYJNY PODKREŚLIŁ, ŻE WARUNKI ZABUDOWY WIĄŻĄ ORGAN.',
+  'Wskazać należy na wyrok TSUE z dnia 7 września 2023 r., sygn. C-615/21.',
+  'W wyroku z dnia 24 maja 2018 r. Naczelny Sąd Administracyjny, sygn. akt II OSK 1505/16, stwierdził, że warunki zabudowy wiążą organ.',
+  'Wojewódzki Sąd Administracyjny w Białymstoku w wyroku z dnia 3 marca 2022 r., sygn. akt II SA/Bk 77/22, podkreślił, że gmina ma obowiązek wyjaśnić sprawę.',
+  'WSA w Kielcach w wyroku z dnia 3 marca 2022 r. (sygn. akt II SA/Ke 77/22) przesądził, że opłata za odpady zależy od liczby mieszkańców.',
+  'Dyrektor Izby Administracji Skarbowej w Katowicach wskazuje na wyrok NSA z dnia 3 marca 2022 r., sygn. akt II FSK 777/20, w którym przyjęto, że ulga nie przysługuje.',
+  'Trybunał Konstytucyjny w wyroku z dnia 3 marca 2022 r., sygn. akt SK 17/20, orzekł, że przepis jest niezgodny z Konstytucją.',
+  'Zgodnie z tezą wyroku NSA z dnia 3 marca 2022 r., sygn. akt I OSK 77/21, obowiązek meldunkowy ma charakter ewidencyjny.',
+  'Organ podziela pogląd Sądu Najwyższego wyrażony w uchwale z dnia 3 marca 2022 r., sygn. akt III CZP 77/21.',
+  'Marszałek Województwa zwraca uwagę na wyrok NSA z dnia 3 marca 2022 r., sygn. akt II GSK 77/21, dotyczący kar pieniężnych.',
+  'Kierownik USC przywołuje uchwałę NSA z dnia 3 marca 2022 r., sygn. akt II OPS 1/21.',
+  'Analogicznie orzekł WSA w Olsztynie w wyroku z dnia 3 marca 2022 r., sygn. akt II SA/Ol 77/22.',
+  'Spółka komunalna powołuje się na wyrok SN z dnia 3 marca 2022 r., sygn. akt II CSKP 77/22, zgodnie z którym opłata nie jest odszkodowaniem.',
+  'W wyroku z dnia 12 stycznia 2021 r. o sygn. akt II SA/Po 12/20 WSA w Poznaniu wyjaśnił, że zaświadczenie nie jest decyzją.',
+  'Na tle podobnego stanu faktycznego Naczelny Sąd Administracyjny w wyroku z dnia 3 marca 2022 r., sygn. akt I OSK 701/21, uznał, że gmina nie może odmówić.',
+  'Kierownik GOPS wskazuje, że zgodnie z orzecznictwem (wyrok WSA w Lublinie z dnia 3 marca 2022 r., sygn. akt II SA/Lu 70/22) dochód ustala się z miesiąca poprzedzającego.',
+  'Organ zwrócił uwagę, że NSA w wyroku z dnia 3 marca 2022 r., sygn. akt I OSK 702/21, uznał zaświadczenie za niewiążące.',
+  'Jak trafnie zauważył WSA w Szczecinie w wyroku z dnia 3 marca 2022 r., sygn. akt II SA/Sz 70/22, organ nie może przerzucać ciężaru dowodu.',
+  'Straż Miejska wskazuje, że w wyroku z dnia 3 marca 2022 r., sygn. akt II SA/Wr 70/22, WSA we Wrocławiu przyjął, że pojazd bez tablic można usunąć.',
+  'Pogląd ten podzielił Sąd Najwyższy w postanowieniu z dnia 3 marca 2022 r., sygn. akt I CSK 70/21.',
+  'SKO w Białymstoku przypomina, że w wyroku NSA z dnia 3 marca 2022 r., sygn. akt II OSK 70/20, wskazano na obowiązek uzgodnienia.',
+  'Stanowisko takie zajął Wojewódzki Sąd Administracyjny w Opolu w wyroku z dnia 3 marca 2022 r., sygn. akt II SA/Op 70/22.',
+  'Organ powołuje się na utrwaloną linię orzeczniczą, np. wyrok NSA z dnia 3 marca 2022 r., sygn. akt II OSK 71/20.',
+  'Wojewoda wyjaśnia, że według NSA (wyrok z dnia 3 marca 2022 r., sygn. akt II OSK 72/20) uchwała rady wymaga uzasadnienia.',
+  'Sąd Najwyższy w uchwale z dnia 3 marca 2022 r., sygn. akt III UZP 7/21, przesądził, że dodatek przysługuje.',
+  'Krajowa Izba Odwoławcza w wyroku z dnia 3 marca 2022 r. (sygn. akt KIO 707/22) stwierdziła, że wykonawca powinien wyjaśnić cenę.',
+  'Jak podkreślił WSA w Gorzowie Wielkopolskim w wyroku z dnia 3 marca 2022 r., sygn. akt II SA/Go 70/22, gmina ma obowiązek wyjaśnić sprawę.',
+  'Trybunał Konstytucyjny w wyroku z dnia 3 marca 2022 r., sygn. akt P 7/20, uznał, że przepis jest zgodny z Konstytucją.',
+  'Por. wyrok NSA z dnia 3 marca 2022 r., sygn. akt I GSK 70/21, LEX nr 1234567.',
+  'Tak NSA w wyroku z dnia 3 marca 2022 r., sygn. akt I OSK 703/21.',
+  'Wskazać należy na stanowisko Sądu Najwyższego zawarte w wyroku z dnia 3 marca 2022 r., sygn. akt II KK 70/21.',
+  'Jak wskazał NSA w wyroku z dnia 2 marca 2024 r., sygn. akt II OSK 77/23,\norgan musi wyjaśnić wątpliwości.',
+  'W orzecznictwie przyjmuje się (zob. wyrok WSA w Rzeszowie z dnia 3 marca 2022 r., sygn. akt II SA/Rz 70/22), że termin jest instrukcyjny.',
+  ];
+  for (const t of jawne) expect(redactPII(t).redacted, t).toBe(t);
+  // Dane osoby obok cytatu dalej zakryte.
+  const r = redactPII(
+    'Jak wskazał NSA w wyroku z dnia 2 marca 2024 r., sygn. akt II OSK 77/23, organ musi wyjaśnić wątpliwości. Oświadczenie podpisał Jan Kowalski, tel. 601 448 213.',
+  ).redacted;
+  expect(r).toContain('II OSK 77/23');
+  expect(r).not.toContain('Kowalski');
+  expect(r).not.toContain('601 448 213');
+});
+test('sygnatury w długim wierszu bez znaków nowej linii: czas liniowy', () => {
+  const time = (s: string): number => {
+    const t0 = performance.now();
+    redactPII(s, { types: ['ZNAK-SPRAWY'] });
+    return performance.now() - t0;
+  };
+  const line = (n: number): string =>
+    Array.from({ length: n }, (_, i) =>
+      i % 2 ? 'Sygn. akt I C 1/20; ' : 'wyrok NSA z 2020 r., sygn. akt II OSK 1/20, oraz ',
+    ).join('');
+  redactPII(line(200), { types: ['ZNAK-SPRAWY'] });
+  const [t1, t4] = bestTimes(time, line(1000), line(4000));
+  expect(t4 / t1).toBeLessThan(6);
 });
 
 test('KRS z wypełniaczem „pod numerem" maskowany', () => {
@@ -3336,7 +3581,7 @@ test('b2-fix K01: telefon po imieniu, nazwisku lub „SMS/Tel" łączonym „/" 
   masked([
     ['Koordynator: Anna Nowak/601 234 567', 'Koordynator: [IMIĘ I NAZWISKO]/[TELEFON]'],
     ['Jan Kowalski-601234567', '[IMIĘ I NAZWISKO]-[TELEFON]'],
-    ['córka Anna/603 456 789', 'córka Anna/[TELEFON]'],
+    ['córka Anna/603 456 789', 'córka [IMIĘ I NAZWISKO]/[TELEFON]'],
     ['SMS/601 234 567', 'SMS/[TELEFON]'],
     ['Kontakt/601 234 567', 'Kontakt/[TELEFON]'],
     ['(koordynator), Tel/607 890 123', '(koordynator), Tel/[TELEFON]'],
@@ -3676,7 +3921,7 @@ test('K20 pułapki: osoby obok eponimu, nagłówek w osobnym wierszu i mianownik
     ['Skala Wiśniewski', N],
     ['Objaw Kowalska', N],
     ['Prątki wykryto u Pawlika.', `Prątki wykryto u ${N}.`],
-    ['Dystrofia mięśniowa u Mariusza Kocha.', `Dystrofia mięśniowa u ${N}.`],
+    ['Dystrofia mięśniowa u Mariusza Kocha.', `[DANE O ZDROWIU] u ${N}.`],
     ['Pacjent Jan Kowalski, odruch Babińskiego dodatni.', `Pacjent ${N}, odruch Babińskiego dodatni.`],
     ['Na moście Jan Kowalski zatrzymał auto.', `Na moście ${N} zatrzymał auto.`],
     ['Na moście Kowalski potrącił pieszego.', `Na moście ${N} potrącił pieszego.`],
@@ -6100,7 +6345,7 @@ test('Resztki, poprawki po weryfikacji · nazwisko na „-owa" pod etykietą, na
     ['Imię i nazwisko pacjenta: Oksana Petrowa', `Imię i nazwisko pacjenta: ${N}`],
     ['Imię i nazwisko świadka: Dilnoza Karimowa', `Imię i nazwisko świadka: ${N}`],
     ['Joanna Kos z domu Wrona Zam. Sosnowiec', `${N} z domu ${N} Zam. ${M}`],
-    ['Anna Kowalska z domu Sikora Imię ojca: Jan', `${N} z domu ${N} Imię ojca: Jan`],
+    ['Anna Kowalska z domu Sikora Imię ojca: Jan', `${N} z domu ${N} Imię ojca: ${N}`],
     ['Stawiła się Anna Kowalska z domu Gzik Legitymująca się dowodem', `Stawiła się ${N} z domu ${N} Legitymująca się dowodem`],
     ['Ulica: Krótka 7. Piętro: 2', `Ulica: ${A} Piętro: 2`],
     ['Ulica: Długa 5 Kraków Tel: 600123456', `Ulica: ${A} Tel: ${T}`],
@@ -6723,7 +6968,6 @@ test('b7 K31: imiona w odmianie (ruchome e, -iem, przymiotnikowa, zdrobnienia, o
     'Walka z korupcją trwa.',
     'Arka Noego',
     'Antonim słowa wysoki',
-    'Drogi Pawle, dziękuję',
     'parafia św. Antoniego Padewskiego',
   ]);
   // „św." jako świadek przed imieniem w bierniku dalej maskuje osobę
@@ -6761,8 +7005,10 @@ test('b7 K67: imiona rodziców za zamaskowaną osobą', () => {
     // skrót „s." bez dwóch imion i przymiotnik po „syn" nie są imionami rodziców
     ['Jan Kowalski, s. 15 protokołu.', `${N}, s. 15 protokołu.`],
     ['Jan Kowalski, syn marnotrawny, wrócił.', `${N}, syn marnotrawny, wrócił.`],
+    // od klasy 5 (pokrewieństwo jako kotwica) imię za „syn” jest osobą także bez maski przed nim
+    ['Mój syn Józef ma pięć lat.', `Mój syn ${N} ma pięć lat.`],
   ]);
-  keep(['Jezus, syn Józefa i Maryi, nauczał.', 'Mój syn Józef ma pięć lat.', 'Parafia Świętego Józefa']);
+  keep(['Jezus, syn Józefa i Maryi, nauczał.', 'Parafia Świętego Józefa']);
 });
 test('b7 K53: data urodzenia po formie osobowej „urodził(a) się"', () => {
   masked([
@@ -7476,7 +7722,7 @@ test('fix1: „urodzonym" po przyimku i rzeczowniku w liczbie pojedynczej to oso
   masked([
     ['Opinia o pracowniku zatrudnionym urodzonym 05.06.1975 r. w Radomiu.', 'Opinia o pracowniku zatrudnionym urodzonym [DATA-URODZENIA] r. w [MIEJSCOWOŚĆ].'],
     ['Informacja o pacjencie hospitalizowanym urodzonym 05.06.1948 r.', 'Informacja o pacjencie hospitalizowanym urodzonym [DATA-URODZENIA] r.'],
-    ['Opieka nad synem Kubą przysposobionym urodzonym 12.02.2015 r.', 'Opieka nad synem Kubą przysposobionym urodzonym [DATA-URODZENIA] r.'],
+    ['Opieka nad synem Kubą przysposobionym urodzonym 12.02.2015 r.', 'Opieka nad synem [IMIĘ I NAZWISKO] przysposobionym urodzonym [DATA-URODZENIA] r.'],
   ]);
   keep(['Emerytura przysługuje ubezpieczonym urodzonym 1 stycznia 1949 r.']);
 });
@@ -7511,7 +7757,8 @@ test('fix1: imię z końca wiersza nie skleja się z prefiksem mówcy w następn
   masked([
     ['Malgorzata Wozniak: czesc, tu Gosia\nPawel Krol: siema', `${N}: czesc, tu Gosia\n${N}: siema`],
     ['Ewa Nowak: hej, tu Gosia\nAnna Lis: siema', `${N}: hej, tu Gosia\n${N}: siema`],
-    ['Pozdrawiam\nAnna\nJan Kowalski: ok', `Pozdrawiam\nAnna\n${N}: ok`],
+    // podpis „Anna” pod „Pozdrawiam” to osoba (zwrot i podpis), ale osobna od mówcy w następnym wierszu
+    ['Pozdrawiam\nAnna\nJan Kowalski: ok', `Pozdrawiam\n${N}\n${N}: ok`],
     ['Jan\nWiśniewski', N],
   ]);
 });
@@ -7724,7 +7971,8 @@ test('fix2: imię i samo nazwisko złamane przez wiersz przed dwukropkiem to jed
     ['Z poważaniem Marek\nZieliński: kierownik referatu', `Z poważaniem ${N}: kierownik referatu`],
     ['Barbara\nKowalska: hej', `${N}: hej`],
     // pełna para mówcy w następnym wierszu: imię z końca poprzedniego to inna osoba
-    ['Pozdrawiam\nAnna\nJan Kowalski: ok', `Pozdrawiam\nAnna\n${N}: ok`],
+    // podpis „Anna” pod „Pozdrawiam” to osoba (zwrot i podpis), ale osobna od mówcy w następnym wierszu
+    ['Pozdrawiam\nAnna\nJan Kowalski: ok', `Pozdrawiam\n${N}\n${N}: ok`],
     ['tu Gosia\nJan Kowalski: ok', `tu Gosia\n${N}: ok`],
   ]);
 });
@@ -8709,8 +8957,6 @@ test('PESEL po etykiecie z literówką zmieniającą długość (10 albo 12 cyfr
     // bez etykiety nic się nie zmienia: fałszywy PESEL jako numer polisy
     'nr polisy ubezpieczeniowej kontraktu 08650158616',
     'Numer zamówienia 8909150266 z dnia 3 maja',
-    // nagłówek tabeli: PESEL nad inną kolumną liczbową
-    'Imię | PESEL | Kwota\nJan | 8909150266 | 100',
     'PESEL Kwota 1234567890',
     'PESEL\n1234567890',
     // etykieta innego pola między PESEL a numerem
@@ -8719,6 +8965,9 @@ test('PESEL po etykiecie z literówką zmieniającą długość (10 albo 12 cyfr
     'PESEL: 1234567890123',
   ];
   for (const t of keep) expect(redactPII(t).redacted).toBe(t);
+  // nagłówek tabeli: PESEL nad inną kolumną liczbową. 10 cyfr w kolumnie PESEL bez etykiety przy
+  // numerze zostaje; imię w tabeli z kolumną PESEL to osoba, także bez wiersza „---”.
+  expect(redactPII('Imię | PESEL | Kwota\nJan | 8909150266 | 100').redacted).toBe('Imię | PESEL | Kwota\n[IMIĘ I NAZWISKO] | 8909150266 | 100');
   // NIP stojący zaraz po pustym polu PESEL dostaje znacznik NIP, nie PESEL
   expect(redactPII('PESEL:\nNIP: 5260250274').redacted).toBe('PESEL:\nNIP: [NIP]');
   expect(redactPII('PESEL brak NIP 5260250274').redacted).toBe('PESEL brak NIP [NIP]');
@@ -8998,6 +9247,163 @@ test('inicjały po kotwicy: regresje z weryfikacji (firmy, skróty, tytuły, tab
     expect(p).toContain('[OSOBA-A]');
     expect(p).not.toContain('[OSOBA-B]');
   }
+});
+
+test('W4: inicjały pracownika w dekretacji, kolumnie „Prow.” i legendzie skrótów z EZD', () => {
+  const P = MASK.IMIE;
+  const cases: [string, string][] = [
+    // strzałka dekretacji i pola metryki: inicjały osoby z pisma
+    [
+      'Prowadzący: Marta Kurek, inspektor\nDekretacja: Kierownik Referatu → MK, termin 05.11.2026',
+      `Prowadzący: ${P}, inspektor\nDekretacja: Kierownik Referatu → ${P}, termin 05.11.2026`,
+    ],
+    ['Obecni: Anna Sadowska, Marek Kowal.\ndekretacja: AS → MK', `Obecni: ${P}, ${P}.\ndekretacja: ${P} → ${P}`],
+    ['Obecni: Anna Sadowska, Marek Kowal.\nPrzekazano wg właściwości: AS/MK', `Obecni: ${P}, ${P}.\nPrzekazano wg właściwości: ${P}/${P}`],
+    ['Dekretacja: Burmistrz → OR -> MK\nSprawę prowadzi: Marek Kowal', `Dekretacja: Burmistrz → OR -> ${P}\nSprawę prowadzi: ${P}`],
+    ['Zespół: Jan Nowak.\nDekretowano do: JN, termin 7 dni', `Zespół: ${P}.\nDekretowano do: ${P}, termin 7 dni`],
+    // kolumna z nagłówkiem osobowym, w której wszystkie komórki to inicjały osób: znikają także bez
+    // osoby w piśmie, odpowiedzi i statusy zostają
+    [
+      'Lp. | Sprawa | Osoba prowadząca\n1 | wniosek | ES\n2 | skarga | TB\n3 | ankieta | ND',
+      `Lp. | Sprawa | Osoba prowadząca\n1 | wniosek | ${P}\n2 | skarga | ${P}\n3 | ankieta | ND`,
+    ],
+    ['Lp.\tSprawa\tPracownik prowadzący\n1\twniosek\tES\n2\tskarga\tMR', `Lp.\tSprawa\tPracownik prowadzący\n1\twniosek\t${P}\n2\tskarga\t${P}`],
+    // gołe „Prowadzący”, „Prow.”, „Referent”: inicjały osoby z pisma
+    [
+      'Uczestnicy: Ewa Szołtysek, Tomasz Bajer.\nLp. | Sprawa | Prowadzący\n1 | wniosek | ES\n2 | skarga | TB\n3 | ankieta | ND',
+      `Uczestnicy: ${P}, ${P}.\nLp. | Sprawa | Prowadzący\n1 | wniosek | ${P}\n2 | skarga | ${P}\n3 | ankieta | ND`,
+    ],
+    [
+      'Zespół: Paweł Sowa, Urszula Miler.\nLp. | Sprawa | Referent\n1 | wniosek | UM\n2 | skarga | PS',
+      `Zespół: ${P}, ${P}.\nLp. | Sprawa | Referent\n1 | wniosek | ${P}\n2 | skarga | ${P}`,
+    ],
+    // pola osobowe: zapis z kropkami wystarcza jak po „odp.”
+    ['Referent: A.S.', `Referent: ${P}`],
+    ['Sprawę prowadzi: M.K., tel. wew. 21', `Sprawę prowadzi: ${P}, tel. wew. 21`],
+    ['Pracownik | Stanowisko\nAS | inspektor\nMK | referent', `Pracownik | Stanowisko\n${P} | inspektor\n${P} | referent`],
+    // kolumna dekretacji: inicjały po strzałce przy osobie z pisma, komórka zostaje
+    [
+      'Uczestnicy: Anna Sadowska, Marek Kowal.\nLp. | Sprawa | Dekretacja\n1 | wniosek | WOŚ → MK\n2 | skarga | Kierownik → AS',
+      `Uczestnicy: ${P}, ${P}.\nLp. | Sprawa | Dekretacja\n1 | wniosek | WOŚ → ${P}\n2 | skarga | Kierownik → ${P}`,
+    ],
+    // legenda skrótów rozwija inicjały w osobę
+    [
+      'Skróty w kolumnie Prow.: ES – Ewa Szołtysek, TB – Tomasz Bajer (podinspektorzy).',
+      `Skróty w kolumnie Prow.: ${P} – ${P}, ${P} – ${P} (podinspektorzy).`,
+    ],
+    ['MK – Maria Kowalska, inspektor\nSprawę prowadzi: MK', `${P} – ${P}, inspektor\nSprawę prowadzi: ${P}`],
+    ['MK = Maria Kowalska', `${P} = ${P}`],
+    // dopisek i mówca z dwukropkiem to nie legenda
+    ['PS: Paweł Sowa prosi o kontakt.', `PS: ${P} prosi o kontakt.`],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
+  keep([
+    // komórki, symbole JRWA, kategorie archiwalne i skróty ustaw zostają
+    'Dekretacja: Sekretarz → OR → OR.I, wg właściwości: WOŚ/RGK',
+    'Dekretacja: Burmistrz → WOŚ → RGK',
+    'Dekretacja: Burmistrz → Sekretarz → Kierownik USC',
+    'przekazano do załatwienia → BRM, wg właściwości → OR',
+    'Zadekretowano na: OŚ',
+    'Kategoria A, B5, BE10. Podstawa: KPA, KC, UODO. Komórki: WOŚ, RGK, OR, USC, BRM.',
+    'Symbol | Kat. arch. | Ref.\n0012 | A | OR\n2310 | BE10 | KD',
+    'Lp. | Sprawa | Dekretacja\n1 | wniosek | WOŚ → MK\n2 | skarga | Kierownik → AS',
+    // gołe inicjały po strzałce i polu metryki bez osoby w piśmie (komórka albo osoba: nie wiadomo)
+    'dekretacja: AB → CD',
+    'Referent: AS',
+    // strzałka poza dekretacją
+    'Etap I → II → III; Warszawa → Kraków; ZUS → US',
+    'Warszawa → Kraków → MK',
+    // kolumna „Prow.” w wyciągu bankowym to prowizja
+    'Data | Opis | Prow.\n01.11 | przelew | 1,20\n02.11 | wypłata | ND',
+    'Prow.: m.in. sprawy USC',
+  ]);
+});
+
+test('W4: kolumna „Prowadzący” i pola dekretacji z organem albo komórką zostają jawne', () => {
+  keep([
+    // gołe „Prowadzący”, „Prow.”, „Referent”, „Załatwiający” bez osoby w piśmie: organ albo komórka
+    'Lp. | Sprawa | Prow.\n1 | wniosek | ES\n2 | skarga | TB\n3 | ankieta | ND',
+    'Lp.\tSprawa\tProwadzący\n1\twniosek\tES\n2\tskarga\tKW',
+    'Lp | Rodzaj postępowania | Prowadzący | Sygnatura\n1 | podatkowe | US | 1\n2 | cywilne | SR | 2\n3 | apelacja | SO | 3\n4 | lokalowe | UM | 4\n5 | wieczysta | KW | 5',
+    'Lp | Zadanie inwestycyjne | Prowadzący | Kwota\n1 | droga gminna | UG | 10 000 zł\n2 | szkoła | UM | 20 000 zł\n3 | chodnik | ZD | 30 000 zł\n4 | kanalizacja | GK | 40 000 zł',
+    'Lp.\tData wpływu\tSprawa\tProwadzący\n1\t03.11.2026\tpozwolenie na budowę\tAB\n2\t04.11.2026\tpodział działki\tGK\n3\t05.11.2026\twycinka drzew\tOŚ\n4\t06.11.2026\trejestracja pojazdu\tKM',
+    'Lp | Sprawa | Referent | Termin\n1 | zasiłek | PS | 7 dni\n2 | świadczenie | SP | 14 dni\n3 | dodatek | OPS | 30 dni',
+    'Lp | Sprawa | Prowadzący\n1 | dotacja | UE\n2 | wniosek | PL',
+    'Lp | Sprawa | Załatwiający\n1 | zajęcie pasa | GK',
+    'Lp. | Sprawa | Referent\n1 | wniosek | UM',
+    'Lp. | Komórka | Prowadzący\n1 | Wydział Geodezji | GD\n2 | Referat Rolnictwa | RR\n3 | Biuro Rady | BR',
+    // nagłówek osobowy, ale w kolumnie stoi skrót instytucji albo symbol komórki z tego pisma
+    'Lp | Sprawa | Pracownik\n1 | a | NN\n2 | b | UE\n3 | c | WZ',
+    'Wydział Geodezji i Kartografii (GD)\nLp | Sprawa | Pracownik\n1 | mapa | GD\n2 | podział | GD',
+    // po dekretacji, przydziale i właściwości stoi komórka albo organ, także z kropkami
+    'Przekazano wg właściwości: U.S.C.',
+    'Przydzielono do: G.O.K.',
+    'Dekretacja: R.O.',
+    'Przydzielono dla: W.O.Ś.',
+    'Zadekretowano do: G.K., termin 14 dni',
+    'Dekretacja: Burmistrz → R.O. → W.O.Ś.',
+    // po zapisie z kropkami stoi przepis albo skrót kodeksu
+    'Sprawę prowadzi: K.P.A. art. 35',
+    'Referent: K.C. § 2',
+  ]);
+  // symbol komórki stoi w znaku sprawy tej samej tabeli (sam znak sprawy ma własną maskę)
+  for (const s of [
+    'Znak sprawy\tReferent\tStatus\nOR.1431.1.2026\tOR\tw toku\nGK.6220.2.2026\tGK\tzakończona',
+    'Lp. | Znak | Prowadzący\n1 | GK.6220.1.2026 | GK\n2 | OR.1431.2.2026 | OR\n3 | OŚ.6220.3.2026 | OŚ',
+    'Lp. | Znak | Osoba prowadząca\n1 | GK.6220.1.2026 | GK\n2 | OR.1431.2.2026 | OR\n3 | OŚ.6220.3.2026 | OŚ',
+    'Lp. | Znak | Pracownik prowadzący\n1 | GK.6220.1.2026 | GK\n2 | OR.1431.2.2026 | MK',
+  ])
+    expect(redactPII(s).redacted, s).not.toContain(MASK.IMIE);
+});
+
+test('W4: symbol komórki z pisma wygrywa z osobą o tych samych inicjałach, skrót jednostki w polu metryki zostaje', () => {
+  const P = MASK.IMIE;
+  // po strzałce i polach dekretacji, przydziału, właściwości oraz w kolumnie tabeli symbol komórki
+  // z tego pisma zostaje jawny także przy stronie o tych inicjałach
+  const cases: [string, string][] = [
+    ['Wnioskodawca: Grzegorz Kowal\nZnak sprawy: GK.6220.1.2026\nDekretacja: Burmistrz → GK', 'Dekretacja: Burmistrz → GK'],
+    ['Strona: Oskar Śliwa. Znak: OŚ.6131.4.2026\nDekretacja: Wójt → OŚ', 'Dekretacja: Wójt → OŚ'],
+    ['Znak: RG.7021.1.2026, Robert Gil\nPrzydzielono do: RG', 'Przydzielono do: RG'],
+    ['Znak: BR.0003.1.2026, Radny Bartosz Ryba\nwg właściwości: BR', 'wg właściwości: BR'],
+    ['Znak: OR.1431.2.2026, Olga Rak\nReferent | Sprawa\nOR | dostęp do informacji', '\nOR | dostęp do informacji'],
+    ['Znak: KD.1110.1.2026, Karolina Dąb\nProwadzący | Termin\nKD | 14 dni', '\nKD | 14 dni'],
+    ['Wydział Geodezji (GD), Pan Gustaw Dyl\nRef. | Kwota\nGD | 100', '\nGD | 100'],
+    ['Pracownik | Sprawa\nGK | GK.6220.1.2026\nMK | wniosek\nUczestnicy: Grzegorz Kowal', '\nGK |'],
+    // legenda: inicjały po słowie komórki i symbol z pisma to nie skrót osoby
+    ['Znak: GK.6831.2.2026\nKierownik Referatu GK – Grzegorz Kowalski', 'Kierownik Referatu GK – '],
+    ['Kierownik Wydziału OR – Olga Rak', 'Kierownik Wydziału OR – '],
+    ['Znak: GK.6220.1.2026\nGK – Grzegorz Kowalski', 'GK – '],
+  ];
+  for (const [t, part] of cases) {
+    const r = redactPII(t).redacted;
+    expect(r, t).toContain(part);
+    expect(r, t).toContain(P);
+  }
+  // osoba bez symbolu komórki w piśmie dalej znika po strzałce, w kolumnie i w legendzie
+  for (const [t, want] of [
+    ['Znak: GK.6220.1.2026, Marek Kowal\nDekretacja: Burmistrz → GK → MK', `Znak: [ZNAK-SPRAWY], ${P}\nDekretacja: Burmistrz → GK → ${P}`],
+    ['Znak: OR.1431.2.2026, Olga Rak, Marek Kowal\nReferent | Sprawa\nMK | wniosek', `Znak: [ZNAK-SPRAWY], ${P}, ${P}\nReferent | Sprawa\n${P} | wniosek`],
+    ['Kierownik Referatu → MK – Marek Kowal', `Kierownik Referatu → ${P} – ${P}`],
+    ['Znak: GK.6220.1.2026\nMK – Maria Kowalska', `Znak: [ZNAK-SPRAWY]\n${P} – ${P}`],
+  ] as [string, string][])
+    expect(redactPII(t).redacted, t).toBe(want);
+  // pola „Sprawę prowadzi:”, „Referent:”: trzy litery z kropkami przed miejscowością, nawiasem
+  // z rozwinięciem albo na końcu pola to skrót jednostki
+  keep([
+    'Sprawę prowadzi: Z.G.K. w Pucku',
+    'Sprawę prowadzi: P.Z.D. w Kartuzach',
+    'Referent: W.Z.D. (Wojewódzki Zarząd Dróg)',
+    'Sprawę prowadzi: Z.G.K.',
+    'Sprawę prowadzi: Z.G.K.\nTermin: 30 dni',
+    'Osoba prowadząca: M.O.P.S. w Lęborku',
+  ]);
+  for (const [t, want] of [
+    ['Sprawę prowadzi: A.S., tel. wew. 21', `Sprawę prowadzi: ${P}, tel. wew. 21`],
+    ['Referent: J.K. w Pucku', `Referent: ${P} w Pucku`],
+    ['Sprawę prowadzi: J.K.', `Sprawę prowadzi: ${P}`],
+    ['Uczestnik: Anna Sadowska-Kowal\nSprawę prowadzi: A.S.K. w Pucku', `Uczestnik: ${P}\nSprawę prowadzi: ${P} w Pucku`],
+  ] as [string, string][])
+    expect(redactPII(t).redacted, t).toBe(want);
 });
 
 test('tytuł urzędu w formie zależnej po „Panem/Panu” i „Niebieska Karta” to nie osoby', () => {
@@ -9333,7 +9739,6 @@ test('ewaluacja G6: imię i nazwisko-homograf w zgodnym przypadku po rzeczowniku
     'Wspiera nas Fundacja Joanny Sikory.',
     'Nagroda Jana Lisa została przyznana.',
     'Szkoła im. Józefa Wybickiego.',
-    'Zdiagnozowano zespół Downa.',
     // Matka Boża tylko z kotwicą religijną przed parą
     'Kościół Najświętszej Marii Panny.',
     'Msza w kościele Marii Panny.',
@@ -9399,9 +9804,16 @@ test('ewaluacja G6 po trzeciej weryfikacji: Maria Panna jako osoba przy miejscu 
     'Chór Jana Kiepury wystąpił.',
     'Na pielgrzymkę pojechał komitet Jana Pawła II.',
     'W turnieju wystąpiła drużyna Wisły Kraków.',
-    'Rozpoznano zespół Aspergera u dziecka.',
-    'Pacjent ma zespół Marfana.',
   ]);
+  // zespół z nazwiskiem po kotwicy rozpoznania to rozpoznanie (dana o zdrowiu), a nie osoba
+  for (const [t, want] of [
+    ['Zdiagnozowano zespół Downa.', 'Zdiagnozowano [DANE O ZDROWIU].'],
+    ['Rozpoznano zespół Aspergera u dziecka.', 'Rozpoznano [DANE O ZDROWIU] u dziecka.'],
+    ['Pacjent ma zespół Marfana.', 'Pacjent ma [DANE O ZDROWIU].'],
+  ]) {
+    expect(redactPII(t).redacted, t).toBe(want);
+    expect(redactPII(t).redacted, t).not.toContain('[IMIĘ I NAZWISKO]');
+  }
 });
 
 // ── Numery rejestrów zawodowych i urzędowych (ewaluacja 50 pism, grupa B / G1) ──
@@ -9707,11 +10119,16 @@ test('G po drugiej weryfikacji: osoba, którą silnik rozpoznaje w nazwie albo n
       'Dane do faktury:\nSzkoła Językowa Kowalski\nul. Kwiatowa 18\n95-200 Pabianice\nNIP 7251234567',
       `Dane do faktury:\nSzkoła Językowa ${N}\n${A}\n${KOD} ${C}\nNIP [NIP]`,
     ],
-    // osoba nad nagłówkiem: inicjał, imię spoza słownika pod „Sz. Pan”, samo nazwisko
+    // osoba nad nagłówkiem: inicjał, imię spoza słownika pod „Sz. Pan”, samo nazwisko; imię ukraińskie
+    // ze słownika („Ołeksandr”) wchodzi do maski razem z nazwiskiem
     ['Odbiorca:\nW. Nowak\nDział Kadr\nul. Kwiatowa 18', `Odbiorca:\nW. ${N}\nDział Kadr\n${A}`],
     [
+      'Sz. Pan\nKwame Bondarenko\nOśrodek Szkolenia Kierowców\nul. Kwiatowa 18\n95-200 Pabianice',
+      `Sz. Pan\nKwame ${N}\nOśrodek Szkolenia Kierowców\n${A}\n${KOD} ${C}`,
+    ],
+    [
       'Sz. Pan\nOłeksandr Bondarenko\nOśrodek Szkolenia Kierowców\nul. Kwiatowa 18\n95-200 Pabianice',
-      `Sz. Pan\nOłeksandr ${N}\nOśrodek Szkolenia Kierowców\n${A}\n${KOD} ${C}`,
+      `Sz. Pan\n${N}\nOśrodek Szkolenia Kierowców\n${A}\n${KOD} ${C}`,
     ],
     ['Kowalska\nSzkoła Podstawowa nr 5\nul. Lipowa 9\n00-950 Warszawa', `${N}\nSzkoła Podstawowa nr 5\n${A}\n${KOD} ${C}`],
     // adres osoby nad nagłówkiem urzędu nie odbiera jawności siedzibie pod nim
@@ -9774,8 +10191,7 @@ test('G7: długi dokument z adresami instytucji w jednym wierszu w czasie liniow
     ['inline', inline],
     ['nawias', paren],
   ] as const) {
-    const t1 = Math.min(time(gen(1000)), time(gen(1000)));
-    const t4 = time(gen(4000));
+    const [t1, t4] = bestTimes(time, gen(1000), gen(4000));
     expect(t4 / t1, name).toBeLessThan(6);
   }
   expect(redactPII(paren(4000)).redacted).toBe(paren(4000));
@@ -9866,8 +10282,11 @@ test('G7 regresja: słaby człon (szkoła, ośrodek, przychodnia…) bez znaczni
 });
 test('G7 regresja: osoba w postaci „Imię Nazwisko” nad blokiem albo etykieta „Dla:” w bloku blokuje strażnika siedziby', () => {
   masked([
-    ['Dla:\nMarianna Zięba-Kot\nWydział Komunikacji\nul. Lipowa 8\n20-001 Lublin', 'Dla:\nMarianna Zięba-Kot\nWydział Komunikacji\n[ADRES]\n[KOD-POCZTOWY] [MIEJSCOWOŚĆ]'],
-    ['Marianna Zięba-Kot\nWydział Komunikacji\nul. Lipowa 8\n20-001 Lublin', `Marianna Zięba-Kot\nWydział Komunikacji\n${A}\n${KOD} ${C}`],
+    ['Dla:\nKwame Zięba-Kot\nWydział Komunikacji\nul. Lipowa 8\n20-001 Lublin', 'Dla:\nKwame Zięba-Kot\nWydział Komunikacji\n[ADRES]\n[KOD-POCZTOWY] [MIEJSCOWOŚĆ]'],
+    ['Kwame Zięba-Kot\nWydział Komunikacji\nul. Lipowa 8\n20-001 Lublin', `Kwame Zięba-Kot\nWydział Komunikacji\n${A}\n${KOD} ${C}`],
+    // imię ze słownika („Marianna”): osoba zakryta w całości, adres pod nią też
+    ['Dla:\nMarianna Zięba-Kot\nWydział Komunikacji\nul. Lipowa 8\n20-001 Lublin', `Dla:\n${N}\nWydział Komunikacji\n${A}\n${KOD} ${C}`],
+    ['Marianna Zięba-Kot\nWydział Komunikacji\nul. Lipowa 8\n20-001 Lublin', `${N}\nWydział Komunikacji\n${A}\n${KOD} ${C}`],
     ['Adresat:\nUrząd Skarbowy\nul. Lipowa 8', `Adresat:\nUrząd Skarbowy\n${A}`],
     ['Do:\nWydział Komunikacji, ul. Lipowa 8', `Do:\nWydział Komunikacji, ${A}`],
   ]);
@@ -10164,5 +10583,3491 @@ test('G7 weryfikacja: pułapki wokół siedziby, miejscowości przed kodem i lok
     ['Ośrodek Pomocy Społecznej w Turku, ul. Kaliska 59. Pani Nowak, Turek, ul. Polna 3.', `Ośrodek Pomocy Społecznej w Turku, ul. Kaliska 59. Pani ${N}, ${C}, ${A}.`],
     ['Kancelaria Jan Kowalski Turek, ul. Kaliska 59', `Kancelaria ${N} ${C}, ${A}`],
     ['Pan Jan Nowak, Urząd Miasta Łodzi, ul. Piotrkowska 104 m. 5', `Pan ${N}, Urząd Miasta ${C}, ${A}`],
+  ]);
+});
+
+// ── Klasa 1 serii 2: osoba potwierdzona w piśmie zakryta też w innych wzmiankach ──
+test('rozlanie osoby: samo nazwisko w odmianie, wersalikami i z inicjałem', () => {
+  masked([
+    // homograf (Sowa, Wróbel) w środku zdania i na liście po dwukropku
+    [
+      'Głos zabrała radna Elżbieta Sowa. Radny Kmieć poparł wniosek radnej Sowy. Wstrzymała się (1): Sowa.',
+      `Głos zabrała radna ${N}. Radny Kmieć poparł wniosek radnej ${N}. Wstrzymała się (1): ${N}.`,
+    ],
+    ['Przewodniczący udzielił głosu radnemu Tomaszowi Wróblowi. Na wniosek radnego Wróbla głosowano imiennie.', `Przewodniczący udzielił głosu radnemu ${N}. Na wniosek radnego ${N} głosowano imiennie.`],
+    // inicjał imienia przed nazwiskiem i nazwisko dwuczłonowe w podpisie tabeli
+    ['| 1 | Anna Kmieć | pracownik |\n| 2 | Barbara Sikora-Wójcik | asystent |\nPodpisy: A. Kmieć, B. Sikora-Wójcik', `| 1 | ${N} | pracownik |\n| 2 | ${N} | asystent |\nPodpisy: ${N}, ${N}`],
+    // wersaliki obok inicjału albo imienia
+    ['Dyżur: lek. Ryszard Wilk\nZASTĘPSTWO: WILK R.', `Dyżur: lek. ${N}\nZASTĘPSTWO: ${N}`],
+    ['Kierownik: Beata Konieczna\nPieczęć: BEATA KONIECZNA', `Kierownik: ${N}\nPieczęć: ${N}`],
+    // obce imię spoza słownika przed nazwiskiem osoby z pisma; imię ze słownika („Oliwiera”) w masce
+    ['Małoletni: Kamil Zając.\nKwamego Zająca, urodzonego 2016 r.', `Małoletni: ${N}.\nKwamego ${N}, urodzonego 2016 r.`],
+    ['Małoletni: Kamil Zając.\nOliwiera Zająca, urodzonego 2016 r.', `Małoletni: ${N}.\n${N}, urodzonego 2016 r.`],
+  ]);
+});
+test('rozlanie osoby: samo imię w odmianie, wołacz i zdrobnienie', () => {
+  masked([
+    ['- Jakub Wrona, syn\n- Aleksandra Wrona, córka\nKuba odrabia lekcje. Ojciec Kuby płaci alimenty. Ola recytowała wiersz.', `- ${N}, syn\n- ${N}, córka\n${N} odrabia lekcje. Ojciec ${N} płaci alimenty. ${N} recytowała wiersz.`],
+    ['Szanowny Panie Henryku,\nodpowiadam na pismo.\nHenryk Baran', `Szanowny Panie ${N},\nodpowiadam na pismo.\n${N}`],
+    ['Uczeń: Bartosz Nowicki. Bartek ma własny pokój. Rozmowa z Bartkiem trwała godzinę.', `Uczeń: ${N}. ${N} ma własny pokój. Rozmowa z ${N} trwała godzinę.`],
+    // pismo potoczne: małe litery w wołaczu i podpisie
+    ['Zgłasza: Piotr Wiśniewski 🙂\ndzieki wielkie panie piotrze, pozdrawiam', `Zgłasza: ${N} 🙂\ndzieki wielkie panie ${N}, pozdrawiam`],
+    // imię i nazwisko złamane końcem wiersza scala się w jedną maskę
+    ['Uczestnik Stanisław\nMichalik nie stawił się. Stanisław Michalik przeprosił.', `Uczestnik ${N} nie stawił się. ${N} przeprosił.`],
+  ]);
+});
+test('rozlanie osoby: inicjały jednej osoby i login z imienia i nazwiska', () => {
+  masked([
+    ['Obecni: Patrycja Lorenc, Marcin Lorenc.\n1. P.L. złoży wniosek.\n2. M.L. potwierdzi przelew.', `Obecni: ${N}, ${N}.\n1. ${N} złoży wniosek.\n2. ${N} potwierdzi przelew.`],
+    ['Komisja: Krystyna Bąk, Marek Kurek.\nDyżury: 7–11 lipca – KB, 14–18 lipca – MK.', `Komisja: ${N}, ${N}.\nDyżury: 7–11 lipca – ${N}, 14–18 lipca – ${N}.`],
+    [
+      'Zgłaszający: amazur (Agnieszka Mazur)\nKomentarz 08:20, amazur: dalej nie działa\nPrzekazuję do @kzielinska (Katarzyna Zielińska).',
+      `Zgłaszający: [LOGIN] (${N})\nKomentarz 08:20, [LOGIN]: dalej nie działa\nPrzekazuję do @[LOGIN] (${N}).`,
+    ],
+  ]);
+});
+test('rozlanie osoby: ta sama etykieta pseudonimu co nasiono', () => {
+  expect(redactPII('Radna Elżbieta Sowa i radny Jan Kmieć. Głos zabrała radna Sowa, potem Jan.', P).redacted).toBe(
+    'Radna [OSOBA-A] i radny [OSOBA-B]. Głos zabrała radna [OSOBA-A], potem [OSOBA-B].',
+  );
+  expect(redactPII('Jakub Wrona, syn. Kuba choruje.', P).redacted).toBe('[OSOBA-A], syn. [OSOBA-A] choruje.');
+});
+test('rozlanie osoby: bez nasiona, patron, homograf i nazwa rzeczy zostają', () => {
+  keep([
+    // samo imię bez osoby w piśmie
+    'Jan przyszedł do urzędu. Wniosek złożył Jan.',
+    'Kuba odrabia lekcje, a Ola recytuje wiersze.',
+  ]);
+  masked([
+    // patron ulicy i szkoły o imieniu osoby z pisma
+    ['Wnioskodawca Jan Kowalski mieszka przy ul. Jana Pawła II 5. Jan stawił się.', `Wnioskodawca ${N} mieszka przy ${A}. ${N} stawił się.`],
+    ['Wnioskodawczyni Maria Nowak. Szkoła Podstawowa im. Marii Konopnickiej.', `Wnioskodawczyni ${N}. Szkoła Podstawowa im. Marii Konopnickiej.`],
+    ['Świadek Paweł Kowalczyk. Według listu św. Pawła do Koryntian.', `Świadek ${N}. Według listu św. Pawła do Koryntian.`],
+    // homograf jako zwykłe słowo: na początku zdania, małą literą, po etykiecie pola
+    ['Radna Elżbieta Sowa zabrała głos. Sowa siedziała na drzewie, a na dachu sowa.', `Radna ${N} zabrała głos. Sowa siedziała na drzewie, a na dachu sowa.`],
+    ['Radny Tomasz Wróbel zgłosił wniosek. Wróbel na dachu. Na dachu wróble.', `Radny ${N} zgłosił wniosek. Wróbel na dachu. Na dachu wróble.`],
+    ['Obecna Anna Wrona. Ola recytowała wiersz o tym, jak wrona zgubiła ser.', `Obecna ${N}. Ola recytowała wiersz o tym, jak wrona zgubiła ser.`],
+    ['Uczestnik Jan Grzyb zgłosił zalanie. W piwnicy pojawił się grzyb. Grzyb rośnie po ulewie.', `Uczestnik ${N} zgłosił zalanie. W piwnicy pojawił się grzyb. Grzyb rośnie po ulewie.`],
+    ['Kierownik Marek Kowal przyjął wniosek.\nZawód: Kowal', `Kierownik ${N} przyjął wniosek.\nZawód: Kowal`],
+    // nazwa rzeczy z nazwiskiem, region, państwo, data
+    ['Strona Agnieszka Lis. Hotel Lis w Zakopanem.', `Strona ${N}. Hotel Lis w Zakopanem.`],
+    ['Zgłasza Agnieszka Mazur. Zespół jedzie na Mazury.', `Zgłasza ${N}. Zespół jedzie na Mazury.`],
+    ['Wnioskodawca Jakub Nowak wyjechał na Kubę.', `Wnioskodawca ${N} wyjechał na Kubę.`],
+    ['Pani Maja Kowalska przyszła. Święto 3 Maja.', `Pani ${N} przyszła. Święto 3 Maja.`],
+    // gołe wersaliki poza miejscem osoby to skrót
+    ['Uczestnicy: Marek Zieliński.\nProjekt do akceptacji MZ.', `Uczestnicy: ${N}.\nProjekt do akceptacji MZ.`],
+  ]);
+});
+
+// ── Klasa 1 serii 2, poprawki po weryfikacji: rozlanie nie zakrywa miejsc, nazw, skrótów i słów ──
+test('rozlanie osoby: kraj, kraina i miejscowość o brzmieniu nazwiska zostają', () => {
+  masked([
+    ['Pan Marek Włoch złożył wniosek. Wyjazd służbowy do Włoch trwał tydzień.', `Pan ${N} złożył wniosek. Wyjazd służbowy do Włoch trwał tydzień.`],
+    ['Pani Ewa Czech złożyła reklamację. Towar z Czech dotarł uszkodzony, w Czechach był tańszy.', `Pani ${N} złożyła reklamację. Towar z Czech dotarł uszkodzony, w Czechach był tańszy.`],
+    ['Pan Jan Węgier złożył wniosek. Delegacja z Węgier przyjedzie w maju.', `Pan ${N} złożył wniosek. Delegacja z Węgier przyjedzie w maju.`],
+    ['Agnieszka Mazur złożyła wniosek o urlop. Planuje wakacje na Mazurach.', `${N} złożyła wniosek o urlop. Planuje wakacje na Mazurach.`],
+    ['Pani Anna Kaszuba złożyła wniosek. Planuje urlop na Kaszubach.', `Pani ${N} złożyła wniosek. Planuje urlop na Kaszubach.`],
+    ['Pan Tomasz Wielkopolski złożył wniosek. Pracuje w Wielkopolsce od lat.', `Pan ${N} złożył wniosek. Pracuje w Wielkopolsce od lat.`],
+    ['Pan Piotr Bielski złożył wniosek. Od lat mieszka w Bielsku.', `Pan ${N} złożył wniosek. Od lat mieszka w Bielsku.`],
+    ['Pan Jan Kowal złożył wniosek. Od lat pracuje w Kowalach.', `Pan ${N} złożył wniosek. Od lat pracuje w Kowalach.`],
+    ['Pan Jan Polak złożył skargę. Każdy Polak ma prawo do informacji. Polaków jest 38 mln.', `Pan ${N} złożył skargę. Każdy Polak ma prawo do informacji. Polaków jest 38 mln.`],
+    ['Pan Jan Zawada złożył wniosek. Chodzi o wieś Zawada w gminie Pilzno.', `Pan ${N} złożył wniosek. Chodzi o wieś Zawada w gminie Pilzno.`],
+    // miejscownik -owie po „w” to miejscowość, nie liczba mnoga nazwiska
+    ['Pan Jan Rak złożył wniosek. Mecz w Rakowie odbędzie się w sobotę.', `Pan ${N} złożył wniosek. Mecz w Rakowie odbędzie się w sobotę.`],
+    ['Pan Adam Sokół złożył wniosek. Oddział w Sokołowie jest zamknięty.', `Pan ${N} złożył wniosek. Oddział w Sokołowie jest zamknięty.`],
+    // ulica bez „ul.” po „przy” z numerem domu
+    ['Pan Marcin Długosz złożył wniosek. Mieszka przy Długosza 7.', `Pan ${N} złożył wniosek. Mieszka przy Długosza 7.`],
+    ['Pan Jan Krakowski złożył wniosek. Biuro mieści się przy Krakowskiej 12.', `Pan ${N} złożył wniosek. Biuro mieści się przy Krakowskiej 12.`],
+  ]);
+  // ta sama osoba w odmianie dalej znika: celownik, dopełniacz, mianownik bez przyimka
+  masked([
+    ['Pan Marek Włoch złożył wniosek. Decyzję doręczono Włochowi, a Włoch ją odebrał.', `Pan ${N} złożył wniosek. Decyzję doręczono ${N}, a ${N} ją odebrał.`],
+    ['Pan Adam Mazur złożył wniosek. Rozpatrzono wniosek Mazura pozytywnie.', `Pan ${N} złożył wniosek. Rozpatrzono wniosek ${N} pozytywnie.`],
+    ['Pan Jan Bielski złożył wniosek. Bielski odebrał decyzję w Bielsku.', `Pan ${N} złożył wniosek. ${N} odebrał decyzję w Bielsku.`],
+  ]);
+});
+test('rozlanie osoby: celownik nazwiska męskiego na -owi znika', () => {
+  masked([
+    ['Pan Adam Gzylak złożył wniosek. Przyznano Gzylakowi zasiłek.', `Pan ${N} złożył wniosek. Przyznano ${N} zasiłek.`],
+    ['Pan Jan Chmiel złożył wniosek. Przyznano zasiłek Chmielowi.', `Pan ${N} złożył wniosek. Przyznano zasiłek ${N}.`],
+    ['Pan Jan Dąb złożył wniosek. Przyznano zasiłek Dębowi. Radnemu Dębowi odpowiedział wójt.', `Pan ${N} złożył wniosek. Przyznano zasiłek ${N}. Radnemu ${N} odpowiedział wójt.`],
+    ['Pan Jan Mróz złożył wniosek. Przyznano zasiłek Mrozowi.', `Pan ${N} złożył wniosek. Przyznano zasiłek ${N}.`],
+  ]);
+});
+test('rozlanie osoby: skrót urzędu i skrót rozwinięty w piśmie zostają', () => {
+  masked([
+    ['Pan Michał Zieliński złożył wniosek do Ministerstwa Zdrowia (MZ). Projekt zatwierdzony przez MZ.', `Pan ${N} złożył wniosek do Ministerstwa Zdrowia (MZ). Projekt zatwierdzony przez MZ.`],
+    ['Pan Adam Kowalski, prezes Związku Żołnierzy Armii Krajowej (AK). Zatwierdził AK w dniu 5 maja.', `Pan ${N}, prezes Związku Żołnierzy Armii Krajowej (AK). Zatwierdził AK w dniu 5 maja.`],
+    ['Pan Marek Fijałkowski złożył wniosek. Decyzję wydał MF. Zatwierdzone przez MF.', `Pan ${N} złożył wniosek. Decyzję wydał MF. Zatwierdzone przez MF.`],
+    ['Pani Paulina Olszewska jest radną. Platforma Obywatelska (PO) zgłosiła projekt przez PO.', `Pani ${N} jest radną. Platforma Obywatelska (PO) zgłosiła projekt przez PO.`],
+    ['Pani Urszula Sikora złożyła zeznanie do Urzędu Skarbowego w Radomiu (US).', `Pani ${N} złożyła zeznanie do Urzędu Skarbowego w Radomiu (US).`],
+    ['Pani Joanna Paulina Kowalczyk przesłała plik. Plik ma strukturę JPK (JPK).', `Pani ${N} przesłała plik. Plik ma strukturę JPK (JPK).`],
+    ['Pan Wojciech Kowalski złożył wniosek. Wydział Komunikacji (WK) wydał decyzję.', `Pan ${N} złożył wniosek. Wydział Komunikacji (WK) wydał decyzję.`],
+    ['Pan Piotr Lis złożył wniosek.\nKraj: PL\nMiasto: Gdańsk', `Pan ${N} złożył wniosek.\nKraj: PL\nMiasto: Gdańsk`],
+  ]);
+  // inicjały osoby: w polu podpisu i podane przy osobie
+  masked([
+    ['Pan Michał Zieliński przyszedł.\nSporządził: MZ', `Pan ${N} przyszedł.\nSporządził: ${N}`],
+    ['Pan Adam Kowalski (AK) złożył wniosek. Zatwierdził AK.', `Pan ${N} (${N}) złożył wniosek. Zatwierdził ${N}.`],
+  ]);
+});
+test('rozlanie osoby: święty, tytuł dzieła i nazwa rzeczy z imieniem zostają', () => {
+  masked([
+    ['Pan Paweł Wiśniewski jest członkiem parafii św. Piotra i Pawła w Gdańsku.', `Pan ${N} jest członkiem parafii św. Piotra i Pawła w Gdańsku.`],
+    ['Pan Wacław Nowicki jest kościelnym w parafii pw. świętych Stanisława i Wacława.', `Pan ${N} jest kościelnym w parafii pw. świętych Stanisława i Wacława.`],
+    ['Pan Piotr Zieliński należy do parafii Piotra i Pawła. Kościół Piotra i Pawła jest zabytkiem.', `Pan ${N} należy do parafii Piotra i Pawła. Kościół Piotra i Pawła jest zabytkiem.`],
+    ['Pan Jan Kowalski i Pani Małgorzata Nowak zagrali w przedstawieniu „Jaś i Małgosia”. Bajka o Jasiu i Małgosi.', `Pan ${N} i Pani ${N} zagrali w przedstawieniu „Jaś i Małgosia”. Bajka o Jasiu i Małgosi.`],
+    ['Pani Maja Kowalska złożyła wniosek. Rondo Trzeciego Maja jest zamknięte.', `Pani ${N} złożyła wniosek. Rondo Trzeciego Maja jest zamknięte.`],
+    ['Pani Maria Dąbrowska śpiewała w chórze. Na koniec wykonano Ave Maria.', `Pani ${N} śpiewała w chórze. Na koniec wykonano Ave Maria.`],
+    ['Pani Barbara Nowak pracuje w kopalni. Kopalnia Barbara zatrudnia 500 osób.', `Pani ${N} pracuje w kopalni. Kopalnia Barbara zatrudnia 500 osób.`],
+    ['Pani Agnieszka Kopernik złożyła wniosek. Centrum Nauki Kopernik organizuje warsztaty.', `Pani ${N} złożyła wniosek. Centrum Nauki Kopernik organizuje warsztaty.`],
+    ['Pani Karolina Warta złożyła wniosek. Polisa Warty wygasła. Ubezpieczyciel Warta odmówił. Spływ Wartą odwołano.', `Pani ${N} złożyła wniosek. Polisa Warty wygasła. Ubezpieczyciel Warta odmówił. Spływ Wartą odwołano.`],
+    ['Pani Anna Sowa złożyła wniosek. Spotkanie odbyło się w cukierni Sowa.', `Pani ${N} złożyła wniosek. Spotkanie odbyło się w cukierni Sowa.`],
+    ['Pan Andrzej Nowak złożył wniosek. Kino Andrzej jest zamknięte.', `Pan ${N} złożył wniosek. Kino Andrzej jest zamknięte.`],
+    // samo imię jako miejsce, dzielnica i dzień imienin
+    ['Pani Helena Kaczmarek złożyła wniosek. Jedzie z Helu do Gdyni.', `Pani ${N} złożyła wniosek. Jedzie z Helu do Gdyni.`],
+    ['Pan Kazimierz Lewandowski złożył wniosek. Wycieczka po Kazimierzu w Krakowie.', `Pan ${N} złożył wniosek. Wycieczka po Kazimierzu w Krakowie.`],
+    ['Uczeń Mikołaj Kamiński przyniósł zgodę. Szkoła przygotuje paczki na Mikołaja.', `Uczeń ${N} przyniósł zgodę. Szkoła przygotuje paczki na Mikołaja.`],
+  ]);
+});
+test('rozlanie osoby: nazwisko albo imię w znaczeniu zwykłego słowa zostaje', () => {
+  masked([
+    ['Pani Anna Kamień złożyła wniosek. Kamień węgielny wmurowano w maju.', `Pani ${N} złożyła wniosek. Kamień węgielny wmurowano w maju.`],
+    ['Pan Marek Zima złożył wniosek. Zima była łagodna, a Zimą jeździmy na narty.', `Pan ${N} złożył wniosek. Zima była łagodna, a Zimą jeździmy na narty.`],
+    ['Pan Jan Lato złożył wniosek. Lato było upalne. Latem jeździmy nad morze.', `Pan ${N} złożył wniosek. Lato było upalne. Latem jeździmy nad morze.`],
+    ['Pacjentka Ewa Rak, lat 45.\nWywiad: matka – Rak jajnika.', `Pacjentka ${N}, lat 45.\nWywiad: matka – Rak jajnika.`],
+    ['Pani Elżbieta Sowa złożyła wniosek. W lesie Sowy polują nocą.', `Pani ${N} złożyła wniosek. W lesie Sowy polują nocą.`],
+    ['Pan Tomasz Wróbel złożył wniosek. Wróblom zimno.', `Pan ${N} złożył wniosek. Wróblom zimno.`],
+    ['Pan Jakub Nowak (Kuba) złożył wniosek. Kuba to wyspa na Karaibach.', `Pan ${N} (${N}) złożył wniosek. Kuba to wyspa na Karaibach.`],
+    ['Pani Halina Kos złożyła wniosek. Hala sportowa jest zamknięta. Hala nr 3.', `Pani ${N} złożyła wniosek. Hala sportowa jest zamknięta. Hala nr 3.`],
+    // pismo potoczne: zdrobnienie w znaczeniu rzeczownika i jego formy
+    ['Celina Mazurek :) dzwonię w celu umówienia wizyty. W celi nr 4 jest zimno.', `${N} :) dzwonię w celu umówienia wizyty. W celi nr 4 jest zimno.`],
+    ['Natalia Nowak :) kupiłam natkę pietruszki, natka była świeża', `${N} :) kupiłam natkę pietruszki, natka była świeża`],
+    ['Oliwia Wrona :) Kupiłam oliwki na targu', `${N} :) Kupiłam oliwki na targu`],
+    ['Jagoda Lis 🙂 kupiłam jagody na targu', `${N} 🙂 kupiłam jagody na targu`],
+  ]);
+  // osoba dalej znika, gdy pozycja nie wskazuje na słowo
+  masked([
+    ['Pan Jakub Wrona złożył wniosek. Kuba choruje od roku.', `Pan ${N} złożył wniosek. ${N} choruje od roku.`],
+    ['Radna Elżbieta Sowa zgłosiła wniosek. Przeciw (0), wstrzymała się (1): Sowa.', `Radna ${N} zgłosiła wniosek. Przeciw (0), wstrzymała się (1): ${N}.`],
+    ['Agnieszka Kowal :) nie dziala mi poczta pozdrawiam aga', `${N} :) nie dziala mi poczta pozdrawiam ${N}`],
+  ]);
+});
+test('rozlanie osoby: formy, które nie mogą być tą osobą, zostają jawne', () => {
+  masked([
+    // przymiotnik na -skie/-ckie (nijaki, niemęskoosobowy) to region albo rzecz, nie osoba
+    ['Pan Piotr Pomorski złożył wniosek. Pojezierze Pomorskie i Wybrzeże Pomorskie.', `Pan ${N} złożył wniosek. Pojezierze Pomorskie i Wybrzeże Pomorskie.`],
+    ['Pan Jan Gdański złożył wniosek. Pomorze Gdańskie jest piękne.', `Pan ${N} złożył wniosek. Pomorze Gdańskie jest piękne.`],
+    ['Pan Jan Polański złożył wniosek. Polańskie łąki zalało.', `Pan ${N} złożył wniosek. Polańskie łąki zalało.`],
+    ['Pani Anna Tatrzańska złożyła wniosek. Tatrzańskie szlaki są zamknięte.', `Pani ${N} złożyła wniosek. Tatrzańskie szlaki są zamknięte.`],
+    // nazwisko kobiety na spółgłoskę się nie odmienia
+    ['Pani Maria Lis złożyła wniosek. Przedszkole „Pod Lisem” zaprasza.', `Pani ${N} złożyła wniosek. Przedszkole „Pod Lisem” zaprasza.`],
+    ['Pani Ewa Dąb złożyła wniosek. Pod Dębem Bartkiem odbył się piknik.', `Pani ${N} złożyła wniosek. Pod Dębem Bartkiem odbył się piknik.`],
+    ['Pani Anna Bałtyk złożyła wniosek. Port nad Bałtykiem jest duży.', `Pani ${N} złożyła wniosek. Port nad Bałtykiem jest duży.`],
+    // przymiotnik na początku zdania przed rzeczownikiem
+    ['Pan Jan Wolny złożył wniosek. Wolny dostęp do informacji jest prawem.', `Pan ${N} złożył wniosek. Wolny dostęp do informacji jest prawem.`],
+    ['Pan Jan Młody złożył wniosek. Młody człowiek nie stawił się.', `Pan ${N} złożył wniosek. Młody człowiek nie stawił się.`],
+    ['Pani Ewa Wysoka złożyła wniosek. Wysoka temperatura utrzymuje się.', `Pani ${N} złożyła wniosek. Wysoka temperatura utrzymuje się.`],
+    ['Pani Anna Nowa złożyła wniosek. Nowa ustawa wchodzi w życie.', `Pani ${N} złożyła wniosek. Nowa ustawa wchodzi w życie.`],
+    // rzeczownik na początku zdania przed przyimkiem
+    ['Pan Jan Mostek złożył wniosek. Mostek na rzece wymaga remontu.', `Pan ${N} złożył wniosek. Mostek na rzece wymaga remontu.`],
+    // miejscowość w odmianie po przyimku
+    ['Pan Adam Kalisz złożył wniosek. Pociąg do Kalisza odjechał. Wrócił z Kalisza.', `Pan ${N} złożył wniosek. Pociąg do Kalisza odjechał. Wrócił z Kalisza.`],
+    ['Pan Adam Opole złożył wniosek. Wyjazd do Opola.', `Pan ${N} złożył wniosek. Wyjazd do Opola.`],
+    ['Pan Adam Zamość złożył wniosek. Pociąg do Zamościa.', `Pan ${N} złożył wniosek. Pociąg do Zamościa.`],
+    // ewangelista bez „św.”
+    ['Pan Jan Wiśniewski złożył wniosek. Ewangelia według Jana jest czytana.', `Pan ${N} złożył wniosek. Ewangelia według Jana jest czytana.`],
+    // symbol działu w kształcie inicjałów
+    ['Pan Tomasz Zieliński złożył wniosek. Dział TZ przekazał akta.', `Pan ${N} złożył wniosek. Dział TZ przekazał akta.`],
+    ['Pan Tomasz Zieliński złożył wniosek. Do wiadomości: referat ZP, wydział TZ.', `Pan ${N} złożył wniosek. Do wiadomości: referat ZP, wydział TZ.`],
+    ['Pani Paulina Sowa złożyła wniosek. Materiał PS przekazano. Potencjał PS jest duży.', `Pani ${N} złożyła wniosek. Materiał PS przekazano. Potencjał PS jest duży.`],
+    ['Pan Jan Kowalski złożył wniosek. Kanał JK na platformie działa.', `Pan ${N} złożył wniosek. Kanał JK na platformie działa.`],
+  ]);
+});
+test('rozlanie osoby: po zawężeniu ta sama osoba dalej zakryta', () => {
+  masked([
+    ['Pan Jan Wolny złożył wniosek. Wolny przyszedł wczoraj. Wolny też przyszedł. Decyzję doręczono Wolnemu.', `Pan ${N} złożył wniosek. ${N} przyszedł wczoraj. ${N} też przyszedł. Decyzję doręczono ${N}.`],
+    ['Pani Anna Wysoka złożyła wniosek. Wysoka złożyła odwołanie. Wysoka mieszka w Lublinie.', `Pani ${N} złożyła wniosek. ${N} złożyła odwołanie. ${N} mieszka w ${C}.`],
+    ['Pan Piotr Pomorski złożył wniosek. Decyzję doręczono Pomorskiemu. Pomorski przyszedł.', `Pan ${N} złożył wniosek. Decyzję doręczono ${N}. ${N} przyszedł.`],
+    ['Pani Ewa Pomorska złożyła wniosek. Pomorskiej doręczono decyzję.', `Pani ${N} złożyła wniosek. ${N} doręczono decyzję.`],
+    // kobieta: forma równa nasionu; mężczyzna: odmiana
+    ['Pani Maria Lis złożyła wniosek. Pani Lis przyszła. Pismo do Lis wysłano.', `Pani ${N} złożyła wniosek. Pani ${N} przyszła. Pismo do ${N} wysłano.`],
+    ['Pan Marek Lis złożył wniosek. Rozmowa z Lisem trwała godzinę.', `Pan ${N} złożył wniosek. Rozmowa z ${N} trwała godzinę.`],
+    // miasto-nazwisko: osoba w narzędniku po „z” i w mianowniku
+    ['Pan Adam Kalisz złożył wniosek. Rozmowa z Kaliszem trwała godzinę. Kalisz przyszedł.', `Pan ${N} złożył wniosek. Rozmowa z ${N} trwała godzinę. ${N} przyszedł.`],
+    // inicjały po czasowniku: podpis i środek zdania
+    ['Pan Tomasz Zieliński złożył wniosek. Pismo przygotował TZ w dniu 5 maja.', `Pan ${N} złożył wniosek. Pismo przygotował ${N} w dniu 5 maja.`],
+    ['Pan Tomasz Zieliński złożył wniosek.\nOpracował TZ', `Pan ${N} złożył wniosek.\nOpracował ${N}`],
+    ['Pan Tomasz Zieliński złożył wniosek. Dokument widział TZ.', `Pan ${N} złożył wniosek. Dokument widział ${N}.`],
+  ]);
+});
+
+// ── Seria 2, klasa 2: zwrot do osoby, wołacz, obce tytuły, podpis ──
+test('zwrot: wołacz imienia po „Panie”, po powitaniu, między przecinkami i na początku wiersza', () => {
+  masked([
+    ['Panie Marku,\ndziękuję za pismo.', `Panie ${N},\ndziękuję za pismo.`],
+    ['Szanowny Panie Stanisławie, w odpowiedzi', `Szanowny Panie ${N}, w odpowiedzi`],
+    ['KONSULTANTKA: Dziękuję, panie Ryszardzie. A data urodzenia?', `KONSULTANTKA: Dziękuję, panie ${N}. A data urodzenia?`],
+    ['Dzień dobry Panie Pawle, przesyłam pismo.', `Dzień dobry Panie ${N}, przesyłam pismo.`],
+    ['Cześć Ewo, jak się masz?', `Cześć ${N}, jak się masz?`],
+    ['Hej Kasiu! Co słychać?', `Hej ${N}! Co słychać?`],
+    ['Witam Zbyszku, w załączniku faktura.', `Witam ${N}, w załączniku faktura.`],
+    ['Hej Kasia! Jutro o 16.', `Hej ${N}! Jutro o 16.`],
+    ['Drogi Pawle, dziękuję', `Drogi ${N}, dziękuję`],
+    ['Tak, Marku, wiem o tym.', `Tak, ${N}, wiem o tym.`],
+    ['Kasiu,\nprzypominam o zebraniu.', `${N},\nprzypominam o zebraniu.`],
+    ['> Agnieszko!\n> Oddzwoń.', `> ${N}!\n> Oddzwoń.`],
+    // oboczności tematu z generatora: ruchome „e”, -eł, t/d/r, -ś, zdrobnienia na -la
+    ['Panie Jacku, Panie Aleksandrze, Panie Kacprze, Panie Robercie, Panie Witoldzie, Panie Stasiu.', `Panie ${N}, Panie ${N}, Panie ${N}, Panie ${N}, Panie ${N}, Panie ${N}.`],
+    ['Cześć Olu! Hej Antku! Witaj Heńku!', `Cześć ${N}! Hej ${N}! Witaj ${N}!`],
+    // imię z wołacza rozlane na dalsze wzmianki tej osoby
+    ['Pani Agnieszko,\nkonto odblokowane. Agnieszka dostała nowe hasło.', `Pani ${N},\nkonto odblokowane. ${N} dostała nowe hasło.`],
+  ]);
+  keep([
+    'Panie Prezesie, Panie Sędzio, Panie Mecenasie, Panie Ministrze, Panie Przewodniczący.',
+    'Szanowni Państwo, uprzejmie informuję.',
+    'Panie Boże, pomóż. Panie Jezu, ufam Tobie.',
+    'Witam Państwa, witam serdecznie.',
+    'Dzięki Bogu! Halo, czy ktoś słyszy?',
+    'Cześć Polsko! Hej Sokoły!',
+    // mianownik po przecinku to wyliczenie albo podmiot, nie zwrot
+    'Dziękuję, Anna przyjdzie jutro.',
+    'Hej, Tomek wczoraj dzwonił.',
+    'Byłem wczoraj w Marku i Janowie.',
+    // wołacz równy słowu albo powitaniu
+    'Halo, słychać mnie?',
+    // wyliczenie miejsc po przyimku: miejscownik („Helu”, „Kazimierzu”) równy wołaczowi imienia
+    'Wakacje spędziliśmy w Juracie, Helu, Jastarni i Władysławowie.',
+    'Mieszkała kolejno w Krakowie, Kazimierzu, Podgórzu i Nowej Hucie.',
+    'Byliśmy na Helu, w Juracie i na Kaszubach.',
+  ]);
+  // z kotwicą zwrotu forma równa miejscownikowi dalej jest imieniem
+  masked([
+    ['Panie Kazimierzu, dziękuję za pismo.', `Panie ${N}, dziękuję za pismo.`],
+    ['Cześć Helu, co słychać?', `Cześć ${N}, co słychać?`],
+  ]);
+  // wyliczenie w miejscowniku po przyimku albo dwukropku: męski wołacz równy miejscownikowi to element listy
+  keep([
+    'Wykład o apostołach: Piotrze, Pawle, Janie, Jakubie, Andrzeju.',
+    'Referat o królach: Mieszku, Henryku, Zygmuncie, Stefanie, Władysławie.',
+    'Na lekcji religii mówiliśmy o świętych: Wojciechu, Stanisławie, Florianie…',
+    'Lekcja o świętym Wojciechu, Stanisławie, Kazimierzu.',
+    'Kazanie o Piotrze, Pawle, Andrzeju i Janie.',
+    'Kolęda: Wśród nocnej ciszy, Józefie, Maryjo.',
+    'Rozmowa o Tomaszu, Pawle, Pawle i Ewie.',
+  ]);
+  // wyliczenie nazw z wielkiej litery i pole tabeli: forma na -o to mianownik obcego imienia albo marka
+  keep([
+    'Ulubione gry: Tetris, Mario, Sonic',
+    'Konsola z grami: Zelda, Mario, Kirby',
+    'Pizzerie w okolicy: Da Grasso, Nino, Mario, Sandro',
+    'Marki odzieży: Reserved, Pawo, Sandro, Mohito',
+    'Filmy animowane: Coco, Kubo, Moana',
+    'Autorzy: Coelho, Paulo, Cortázar, Julio',
+    'Anno, Domini, Deo, Gratias',
+    'produkt,ilosc\nMario,3\nSandro,5',
+    'Leonie, komm her!',
+  ]);
+  masked([
+    // po jednej nazwie miejsca: wołacz, który nie jest miejscownikiem albo nie kontynuuje listy
+    ['Spotkamy się w Warszawie, Ewo, w przyszłym tygodniu.', `Spotkamy się w Warszawie, ${N}, w przyszłym tygodniu.`],
+    ['W Gdyni, Marku, było zimno.', `W Gdyni, ${N}, było zimno.`],
+    ['Byłem na Helu, Marku, przez tydzień.', `Byłem na Helu, ${N}, przez tydzień.`],
+    ['Przyjdę o piątej, Pawle, jak obiecałem.', `Przyjdę o piątej, ${N}, jak obiecałem.`],
+    ['Marku, Pawle, chodźcie tu!', `${N}, ${N}, chodźcie tu!`],
+    // z kotwicą zwrotu obca forma dalej jest imieniem
+    ['Cześć Mario, dzięki za pismo.', `Cześć ${N}, dzięki za pismo.`],
+    ['Pani Anno, w załączniku pismo.', `Pani ${N}, w załączniku pismo.`],
+  ]);
+});
+
+test('zwrot: „p. Marek”, obce tytuły Mr/Mrs/Ms/Herr/Frau i „Dr” z imieniem', () => {
+  masked([
+    ['Jutro przyjdzie hydraulik p. Marek, numer do niego', `Jutro przyjdzie hydraulik p. ${N}, numer do niego`],
+    ['Rozmawiałam z p. Ewą o terminie.', `Rozmawiałam z p. ${N} o terminie.`],
+    ['Dear Mr Brandt, thank you for the order.', `Dear Mr ${N}, thank you for the order.`],
+    ['Mrs Smith agreed. Ms Sabine Krüger will call.', `Mrs ${N} agreed. Ms ${N} will call.`],
+    ['Sehr geehrter Herr Müller, Frau Schneider hat geschrieben.', `Sehr geehrter Herr ${N}, Frau ${N} hat geschrieben.`],
+    ['Frau Professor Schmidt kommt morgen.', `Frau Professor ${N} kommt morgen.`],
+    ['Dr Helen Carter, University of Leeds', `Dr ${N}, University of Leeds`],
+    // stopień z kropką między tytułem a nazwiskiem, sam stopień po powitaniu
+    ['Herr Dr. Müller hat angerufen.', `Herr Dr. ${N} hat angerufen.`],
+    ['Frau Dr. Becker hat angerufen.', `Frau Dr. ${N} hat angerufen.`],
+    ['Sehr geehrte Frau Dr. Becker,', `Sehr geehrte Frau Dr. ${N},`],
+    ['Frau Prof. Dr. Weber kommt.', `Frau Prof. Dr. ${N} kommt.`],
+    ['Dear Dr. Smith,', `Dear Dr. ${N},`],
+  ]);
+  keep([
+    'Herr Doktor, bitte. Mr President spoke.',
+    'Zob. s. 12 p. 3 oraz pkt II p. 4.',
+    'Kosmetyki Dr Oetker stoją na półce.',
+    // stopień z kropką bez powitania i bez nazwiska ze słownika: marka, postać
+    'Kosmetyki Dr. Oetker i Herr Dr. Oetker stoją na półce. Herr Dr., bitte.',
+    'Oglądam Dr. House i Dr. Watson.',
+    'Ms Polska',
+    // marka, firma, lokal, konkurs: tytuł stoi przed nazwą rzeczy
+    'Kupiłem płyn Mr Proper i Mr Muscle.',
+    'Catering z Mr Cook, kolacja w Mr Sushi.',
+    'Umowę zawarła firma Mr Garden sp. z o.o.',
+    'W sklepie Mr Tom Wafle kupiłem ciastka.',
+    'Konkurs Mr Olympia i Mr Universe.',
+    // utwory i postaci
+    'Czytam Mrs Dalloway i Frau Holle.',
+    "Oglądam Mr Bean, Mr Beanie, Mrs Brown's Boys i Mr. Smith Goes to Washington.",
+    'Film „Mr Smith” leci w kinie.',
+    // role i rzeczowniki po tytule, spoza słownika osób
+    'Frau Ministerin, Herr Bundeskanzler, Herr Kommissar, Herr Lehrer, Frau Lehrerin, Herr Ober.',
+    'Ms Chair, Mr Prime Minister, Mr Speaker.',
+  ]);
+  masked([
+    // pismo z marką i osobą: znika tylko osoba
+    ['Płyn Mr Proper wylał się na podłogę, sprzątał Jan Kowalski.', `Płyn Mr Proper wylał się na podłogę, sprzątał ${N}.`],
+    // druga kotwica: powitanie przed tytułem albo imię przed nazwiskiem
+    ['Dear Mr Dalloway,\nthank you.', `Dear Mr ${N},\nthank you.`],
+    ['Sehr geehrte Frau Holm,\nvielen Dank.', `Sehr geehrte Frau ${N},\nvielen Dank.`],
+    ['My colleague Ms Leonie Vogt will call.', `My colleague Ms ${N} will call.`],
+    ['I recommend Mr Michał Zieliński.', `I recommend Mr ${N}.`],
+  ]);
+});
+
+test('podpis: imię i nazwisko pod formułą pożegnalną z zamkniętej listy', () => {
+  masked([
+    ['Pozdrawiam, Kuba', `Pozdrawiam, ${N}`],
+    ['Pozdrawiam serdecznie\nAnna', `Pozdrawiam serdecznie\n${N}`],
+    ['Dziękuję,\nEwa', `Dziękuję,\n${N}`],
+    ['Z wyrazami szacunku\nKowalski', `Z wyrazami szacunku\n${N}`],
+    ['Best regards,\nTomasz', `Best regards,\n${N}`],
+    ['Kind regards / Mit freundlichen Grüßen\nMatthias Brandt\nSales Manager', `Kind regards / Mit freundlichen Grüßen\n${N}\nSales Manager`],
+    ['Thanks,\nLisa', `Thanks,\n${N}`],
+    ['Pozdrawiam, Anna K.', `Pozdrawiam, ${N}`],
+    ['> Z poważaniem\n> Halina', `> Z poważaniem\n> ${N}`],
+    // imię i nazwisko złamane przez wiersz to jedna maska
+    ['Z poważaniem\nJan\nKowalski', `Z poważaniem\n${N}`],
+  ]);
+  keep([
+    'Z poważaniem\nZarząd Spółki',
+    'Pozdrawiam\nZespół Parawan',
+    'Pozdrawiam\nDział Kadr',
+    'Dziękuję!\nWarszawa, 12 maja 2026 r.',
+    'Best regards,\nThe Team',
+    'Kind regards,\nCustomer Service',
+    'Z poważaniem\nWójt Gminy',
+    'Z poważaniem\nKraków',
+    'Z poważaniem\nPrezes Zarządu',
+    'Pozdrawiam\nSerdecznie',
+    'Dziękujemy,\nUrząd Miasta',
+    // formuła w środku zdania albo imię z dalszym ciągiem zdania to nie podpis
+    'Dziękuję, Ewa przyjdzie o 10.',
+  ]);
+});
+
+test('zwrot i podpis: samo imię ma pseudonim jedynej pełnej osoby o tym imieniu', () => {
+  masked(
+    [
+      // blok adresata nad zwrotem to adresat zwrotu
+      ['Henryk Baran\nul. Polna 3\n\nSzanowny Panie Henryku,\nodpowiadam.', 'Henryk Baran\nul. Polna 3\n\nSzanowny Panie [OSOBA-A],\nodpowiadam.'.replace('Henryk Baran', '[OSOBA-A]').replace('ul. Polna 3', '[ADRES]')],
+      // podpis samym imieniem łączy się z nadawcą z pola „Od:”
+      ['Od: Jakub Nowak\nDo: Anna Lis\nPani Anno,\nprzesyłam.\nPozdrawiam, Kuba', 'Od: [OSOBA-A]\nDo: [OSOBA-B]\nPani [OSOBA-B],\nprzesyłam.\nPozdrawiam, [OSOBA-A]'],
+      // adresat zwrotu i podpisujący to dwie osoby, także o tym samym imieniu
+      ['Szanowny Panie Henryku,\nodpowiadam.\nHenryk Baran', 'Szanowny Panie [OSOBA-A],\nodpowiadam.\n[OSOBA-B]'],
+      ['Pani Ewo,\nodpowiadam.\nEwa Nowak', 'Pani [OSOBA-A],\nodpowiadam.\n[OSOBA-B]'],
+      ['Pani Ewo,\nprzesyłam projekt.\nPozdrawiam\nEwa Nowak', 'Pani [OSOBA-A],\nprzesyłam projekt.\nPozdrawiam\n[OSOBA-B]'],
+      ['Pani Ewo,\nprzesyłam projekt.\nPozdrawiam\nEwa Kowalska\nDział Kadr', 'Pani [OSOBA-A],\nprzesyłam projekt.\nPozdrawiam\n[OSOBA-B]\nDział Kadr'],
+      ['Pani Ewo,\nprzesyłam projekt.\n\nEwa Nowak', 'Pani [OSOBA-A],\nprzesyłam projekt.\n\n[OSOBA-B]'],
+      ['Panie Marku,\nprzesyłam projekt.\nZ poważaniem\nMarek Wiśniewski', 'Panie [OSOBA-A],\nprzesyłam projekt.\nZ poważaniem\n[OSOBA-B]'],
+      // dwie osoby o tym imieniu: etykiety osobne
+      ['Pani Ewo,\nEwa Nowak i Ewa Lis', 'Pani [OSOBA-A],\n[OSOBA-B] i [OSOBA-C]'],
+      // pełna osoba w polu „Do:” to adresatka zwrotu
+      ['Do: Ewa Nowak\nPani Ewo, w załączniku pismo.', 'Do: [OSOBA-A]\nPani [OSOBA-A], w załączniku pismo.'],
+      // osoba z treści pisma to ktoś inny niż adresat zwrotu: etykiety osobne
+      [
+        'Pani Ewo,\nw załączniku opinia o uczennicy Ewie Nowak z klasy 3b.\nPozdrawiam\nAnna Lis',
+        'Pani [OSOBA-A],\nw załączniku opinia o uczennicy [OSOBA-B] z klasy 3b.\nPozdrawiam\n[OSOBA-C]',
+      ],
+      [
+        'Panie Marku,\nprzesyłam skargę Marka Wiśniewskiego.\nPozdrawiam\nAnna Lis',
+        'Panie [OSOBA-A],\nprzesyłam skargę [OSOBA-B].\nPozdrawiam\n[OSOBA-C]',
+      ],
+    ],
+    { pseudonyms: true },
+  );
+});
+
+test('podpis: formuła pożegnalna z długim odstępem w czasie liniowym', () => {
+  // ten sam początek formuły co w RE_SIGNATURE; dawniej dwa sąsiednie [ 	]* z opcjonalnym przecinkiem
+  // dawały czas kwadratowy (40 tys. spacji: ok. 0,5 s samego wyrażenia)
+  const time = (n: number): number => {
+    const t0 = performance.now();
+    RE_ADDRESS_ANCHOR_BEFORE.test(`Pozdrawiam${' '.repeat(n)}x`);
+    RE_ADDRESS_ANCHOR_BEFORE.test(`Pozdrawiam${' '.repeat(n)},${' '.repeat(n)}x`);
+    return performance.now() - t0;
+  };
+  time(1000); // rozgrzewka JIT
+  expect(time(40_000)).toBeLessThan(100);
+  expect(redactPII(`Pozdrawiam${' '.repeat(3)},${' '.repeat(3)}
+Anna`).redacted).toBe(`Pozdrawiam${' '.repeat(3)},${' '.repeat(3)}
+${N}`);
+});
+
+test('klasa 5: imię za rzeczownikiem pokrewieństwa lub opieki to osoba', () => {
+  masked([
+    ['Wczoraj jej syn Kuba przyszedł sam.', `Wczoraj jej syn ${N} przyszedł sam.`],
+    ['Daliśmy prezent córce Oli.', `Daliśmy prezent córce ${N}.`],
+    ['Widziałem syna Jakuba w szkole.', `Widziałem syna ${N} w szkole.`],
+    ['Mój brat Paweł pracuje w sklepie.', `Mój brat ${N} pracuje w sklepie.`],
+    ['moja siostra Ewelina jest wolontariuszką', `moja siostra ${N} jest wolontariuszką`],
+    // od klasy 4 zdrowia autyzm przy osobie to też dana o zdrowiu
+    ['mój syn Antoś ma autyzm', `mój syn ${N} ma [DANE O ZDROWIU]`],
+    ['opiekun Adam przyjdzie jutro', `opiekun ${N} przyjdzie jutro`],
+    // wtrącenie po przecinku i zapis bez ogonków
+    ['KLIENT: Żona, Barbara, ale ona nie wie.', `KLIENT: Żona, ${N}, ale ona nie wie.`],
+    ['probowal tez maz, Grzesiek, na swoim lapku', `probowal tez maz, ${N}, na swoim lapku`],
+    ['tak to auto mojego chlopaka, Kuby, juz przestawil', `tak to auto mojego chlopaka, ${N}, juz przestawil`],
+    // wyliczenie za tym samym rzeczownikiem i imiona rodziców bez maski przed „syn”
+    ['Obecne były dzieci Zuzanna (7 lat) i Antoni (4 lata).', `Obecne były dzieci ${N} (7 lat) i ${N} (4 lata).`],
+    ['Rodzina: mama Kasia, tata Marek i brat Tomek.', `Rodzina: mama ${N}, tata ${N} i brat ${N}.`],
+    ['Zmarły, syn Władysława i Genowefy, zamieszkały w Lublinie.', `Zmarły, syn ${N} i ${N}, zamieszkały w ${C}.`],
+    ['spadek po [IMIĘ I NAZWISKO], synu Jana i Marii, urodzonym', `spadek po ${N}, synu ${N} i ${N}, urodzonym`],
+    // etykieta w czacie i tekst angielski
+    ['[08:16] Ciocia Grażka: Boże', `[08:16] Ciocia ${N}: Boże`],
+    ['with my husband Paweł and our daughter Zofia, aged 7', `with my husband ${N} and our daughter ${N}, aged 7`],
+  ]);
+});
+test('klasa 5: imię zakryte za pokrewieństwem rozlewa się na zdrobnienia w piśmie', () => {
+  masked([
+    ['Obecne były dzieci Zuzanna (7 lat) i Antoni (4 lata). Zuzia chodzi do szkoły. Antek ma alergię.', `Obecne były dzieci ${N} (7 lat) i ${N} (4 lata). ${N} chodzi do szkoły. ${N} ma alergię.`],
+  ]);
+});
+test('klasa 5: tytuł zakonny, patron, postać sakralna i nazwa nie są osobą z pokrewieństwa', () => {
+  keep([
+    'Przypowieść o Synu Marnotrawnym. Syn Marnotrawny wrócił.',
+    'Kościół pw. Matki Bożej Częstochowskiej. Matka Boża.',
+    'Syn Boży i Matka Boska.',
+    'Pielgrzymka do Ojca Pio.',
+    'Schronisko Brata Alberta w Krakowie, Towarzystwo Pomocy im. św. Brata Alberta.',
+    'Pomnik Brata Alberta.',
+    'Dom Pomocy Społecznej im. Matki Teresy z Kalkuty.',
+    'Grupa wsparcia „Babcia Halina” spotyka się w czwartki.',
+    'w serialu Ojciec Mateusz grał',
+    'serial „Ojciec Mateusz”',
+    'Jezus, syn Józefa i Maryi, nauczał.',
+    'Wnuczka Wiktoria Sp. z o.o.',
+    'dziadek Mróz',
+    'partner Orange',
+  ]);
+});
+test('klasa 5: wzorzec pokrewieństwa w czasie liniowym przy długim odstępie', () => {
+  const time = (n: number): number => {
+    const t0 = performance.now();
+    redactPII(`syn${' '.repeat(n)},${' '.repeat(n)}x syn${' '.repeat(n)}abc${' '.repeat(n)}`);
+    return performance.now() - t0;
+  };
+  time(1000);
+  expect(time(40_000)).toBeLessThan(300);
+});
+test('klasa 5: tytuł zakonny i patron z wielkiej litery w każdej pozycji w zdaniu', () => {
+  keep([
+    // po skrócie nazwy („pw.”, „pt.”, „tzw.”, „zob.”)
+    'Kościół pw. Matki Teresy z Kalkuty stoi przy rynku.',
+    'Obejrzeliśmy film pt. Ojciec Mateusz w szkole.',
+    'Tzw. Matka Teresa naszego osiedla pomaga sąsiadom.',
+    'Zob. Brat Albert, rozdział 3.',
+    // na początku zdania, po numerze listy, dwukropku i myślniku
+    '2. Matka Teresa z Kalkuty — biografia.',
+    'Temat lekcji: Brat Albert i ubodzy.',
+    'Patron szkoły – Matka Teresa z Kalkuty.',
+    'Matka Teresa z Kalkuty pracowała wśród ubogich.',
+    'Brat Albert Chmielowski założył zgromadzenie.',
+    'Matka Joanna od Aniołów to film.',
+    'Brata Alberta obchodzimy 17 czerwca.',
+  ]);
+  masked([
+    // zwykły krewny na początku zdania, po numerze i dwukropku zostaje zakryty
+    ['Matka Anna złożyła wniosek o zasiłek.', `Matka ${N} złożyła wniosek o zasiłek.`],
+    ['2. Syn Piotr, ur. 2010.', `2. Syn ${N}, ur. 2010.`],
+    ['Temat: córka Ola nie chodzi do szkoły.', `Temat: córka ${N} nie chodzi do szkoły.`],
+    // skrót nazwy nie zmienia krewnego pisanego małą literą
+    ['np. syn Kuba nie chodzi do szkoły.', `np. syn ${N} nie chodzi do szkoły.`],
+  ]);
+});
+test('klasa 5: imię w mianowniku za rzeczownikiem w innym przypadku to podmiot, nie krewny', () => {
+  keep([
+    'Wszystkim dzieciom Mikołaj przyniósł prezenty.',
+    'W grudniu do dzieci Mikołaj przychodzi z workiem.',
+    'Dziadek Mikołaj odwiedził przedszkole.',
+    'Wczoraj synowi Marek kupił rower, a córce Ola dała lalkę.',
+    'Pomoc dla córki Zuzanna potrzebuje od zaraz.',
+  ]);
+  masked([
+    ['Jej syn Mikołaj ma 5 lat.', `Jej syn ${N} ma 5 lat.`],
+    ['Synowi Mikołajowi przyznano zasiłek.', `Synowi ${N} przyznano zasiłek.`],
+    ['Mój dziadek Mikołaj zmarł w 2010 r.', `Mój dziadek ${N} zmarł w 2010 r.`],
+    ['Opieka nad dziećmi Zuzanną i Antonim.', `Opieka nad dziećmi ${N} i ${N}.`],
+    ['W domu przebywają dzieci Zuzanna i Antoni.', `W domu przebywają dzieci ${N} i ${N}.`],
+    ['Synowie Marek i Paweł mieszkają z matką.', `Synowie ${N} i ${N} mieszkają z matką.`],
+  ]);
+});
+test('klasa 5: postać historyczna i biblijna bez maski na fragmencie nazwy', () => {
+  keep([
+    'Synowie Marka Aureliusza nie przejęli władzy.',
+    'Salomon był synem Dawida i Batszeby.',
+    'Ewangelia mówi o Marii, matce Jakuba.',
+  ]);
+  // liczebnik władcy: imię bez maski, reszta jak przed klasą 5 (bez nowej maski na „Jana”)
+  expect(redactPII('Była to żona Jana III Sobieskiego.').redacted).not.toContain(`żona ${N}`);
+  masked([
+    // słowo biblijne za krewnym nie wystarcza
+    ['Syn Jakub czytał Ewangelię w kościele.', `Syn ${N} czytał Ewangelię w kościele.`],
+    ['Córka Anna Maria uczy się w liceum.', `Córka ${N} uczy się w liceum.`],
+  ]);
+});
+test('klasa 5: tytuł zakonny małą literą (polska ortografia) nie jest krewnym', () => {
+  keep([
+    'jak żyła matka Teresa z Kalkuty',
+    'Według matki Teresy z Kalkuty pomoc jest ważna.',
+    'Dzieło, które rozpoczął brat Albert, kontynuują albertyni.',
+    'Jak mawiał brat Albert, trzeba być dobrym jak chleb.',
+    'Ofiara, którą złożył ojciec Maksymilian, jest znana.',
+    'Film o tym, jak żyła matka Joanna od Aniołów.',
+    'Matka: Teresa z Kalkuty',
+  ]);
+  masked([
+    // zaimek dzierżawczy przed rzeczownikiem i nazwisko za imieniem to krewny
+    ['mój brat Albert przyszedł', `mój brat ${N} przyszedł`],
+    ['moja matka Teresa zmarła', `moja matka ${N} zmarła`],
+    ['Według jej matki Teresy dziecko jest zdrowe.', `Według jej matki ${N} dziecko jest zdrowe.`],
+    ['matka Teresa Nowak złożyła wniosek.', `matka ${N} złożyła wniosek.`],
+  ]);
+});
+test('klasa 5: przydomek z „z” tylko przy świętym albo miejscowości spoza Polski', () => {
+  masked([
+    // kraj, instytucja, małe i duże miasto po „z” to pochodzenie albo miejsce pracy krewnego
+    ['Brat Piotr z Niemiec przyjechał na pogrzeb.', `Brat ${N} z Niemiec przyjechał na pogrzeb.`],
+    ['Siostra Ewa z MOPS przyszła na wizytę.', `Siostra ${N} z MOPS przyszła na wizytę.`],
+    ['Matka Anna z Wadowic złożyła wniosek.', `Matka ${N} z Wadowic złożyła wniosek.`],
+    ['Ojciec Tomasz z Gdańska złożył wniosek.', `Ojciec ${N} z Gdańska złożył wniosek.`],
+    ['Siostra Ewa z Zakopanego przyjechała.', `Siostra ${N} z Zakopanego przyjechała.`],
+  ]);
+  keep(['Matka Teresa z Kalkuty pracowała wśród ubogich.', 'Matka Joanna od Aniołów to film.', 'Brat Albert z Krakowa']);
+});
+test('klasa 5: imię papieskie i królewskie z liczebnikiem po kilku imionach bez maski', () => {
+  keep([
+    'Matka Jana Pawła II, Emilia, zmarła w 1929 roku.',
+    'jak ojciec Jana Pawła II wychowywał syna',
+    'Syn Karola Gustawa X objął tron.',
+  ]);
+  masked([['Jej syn Jan Paweł ma 5 lat.', `Jej syn ${N} ma 5 lat.`]]);
+});
+test('klasa 5: pokrewieństwo jako etykieta z dwukropkiem albo myślnikiem', () => {
+  masked([
+    ['Dzieci: Oliwia (8 lat), Filip (5 lat) i Tymon (2 lata).', `Dzieci: ${N} (8 lat), ${N} (5 lat) i ${N} (2 lata).`],
+    ['Dzieci: Oliwia i Filip.', `Dzieci: ${N} i ${N}.`],
+    ['Syn: Piotr, ur. 2015.', `Syn: ${N}, ur. 2015.`],
+    ['dzieci – Oliwia i Filip', `dzieci – ${N} i ${N}`],
+    ['Córka - Anna (12 lat).', `Córka - ${N} (12 lat).`],
+    ['Dzieci: Filip chodzi do szkoły.', `Dzieci: ${N} chodzi do szkoły.`],
+    ['Ojciec: Jan, matka: Maria.', `Ojciec: ${N}, matka: ${N}.`],
+    // imię z etykiety rozlewa się na dalsze wzmianki
+    ['Dzieci: Oliwia (8 lat) i Filip (5 lat). Oliwia chodzi do przedszkola.', `Dzieci: ${N} (8 lat) i ${N} (5 lat). ${N} chodzi do przedszkola.`],
+  ]);
+  keep(['Dzieci: brak.', 'Ojciec: nieznany.', 'Syn - Kraków', 'Matka: Boża Częstochowska']);
+});
+test('klasa 9: etykieta mówcy w czacie, SMS-ach i transkrypcji to osoba', () => {
+  masked([
+    // eksport czatu ze znacznikami czasu, emotikona po imieniu, imię małą literą dalej w treści
+    [
+      '[08:12] Kasia 🌸: dzwonili ze szpitala\n[08:13] Tomek: co powiedzieli??\n[08:30] Tomek: dzięki. kasia a recepty?',
+      `[08:12] ${N} 🌸: dzwonili ze szpitala\n[08:13] ${N}: co powiedzieli??\n[08:30] ${N}: dzięki. ${N} a recepty?`,
+    ],
+    // jeden wiersz z mówcą już pod maską pary wystarcza, żeby uznać pismo za eksport czatu
+    ['12:03 Kasia Nowak: hej\n12:04 Tomasz: cześć\n12:05 Kasia Nowak: co tam', `12:03 ${N}: hej\n12:04 ${N}: cześć\n12:05 ${N}: co tam`],
+    ['2026-10-01 09:14 Zbyszek: czynsz\n2026-10-01 09:40 Ja: przeleję', `2026-10-01 09:14 ${N}: czynsz\n2026-10-01 09:40 Ja: przeleję`],
+    ['[12.11.2026, 08:12:33] Ania: jestem\n[12.11.2026, 08:13:01] Bartek: ok', `[12.11.2026, 08:12:33] ${N}: jestem\n[12.11.2026, 08:13:01] ${N}: ok`],
+    // rola mówcy zostaje, imię w nawiasie i po roli znika
+    ['Konsultant (Marek): dzień dobry\nKlient: witam\nKonsultant (Marek): słucham', `Konsultant (${N}): dzień dobry\nKlient: witam\nKonsultant (${N}): słucham`],
+    // wątek komentarzy: odpowiedź „↳”, imię z inicjałem nazwiska, rola przed imieniem
+    [
+      'Komentarze:\nRobert Wysocki: widziałem psa 😅\n  ↳ Szymon P.: offtop\n  ↳ Admin Wiesia 🌻: bez wycieczek\nSzymon P.: niech wyrobi kartę',
+      `Komentarze:\n${N}: widziałem psa 😅\n  ↳ ${N}: offtop\n  ↳ Admin ${N} 🌻: bez wycieczek\n${N}: niech wyrobi kartę`,
+    ],
+    // punktor i imię będące też zwykłym słowem, gdy wraca w roli mówcy
+    ['- Ola: będę o 5\n- Ja: ok\n- Ola: super', `- ${N}: będę o 5\n- Ja: ok\n- ${N}: super`],
+    // rozmowa bez znaczników czasu: mówcy wracają naprzemiennie
+    ['Kasia: hej, jesteś?\nTomek: tak\nKasia: to dzwonię', `${N}: hej, jesteś?\n${N}: tak\n${N}: to dzwonię`],
+    // program z godzinami, gdy pismo ma kształt rozmowy, i znacznik czatu w nawiasie
+    ['10:01 Kasia: hej\n10:02 Tomek: tak\n10:03 Kasia: dzwonię', `10:01 ${N}: hej\n10:02 ${N}: tak\n10:03 ${N}: dzwonię`],
+    ['[09:00] Hala: jestem\n[09:01] Ewa: ok\n[09:05] Hala: idę', `[09:00] ${N}: jestem\n[09:01] ${N}: ok\n[09:05] ${N}: idę`],
+    // samo nazwisko mówcy w eksporcie ze znacznikami czasu, gdy wraca
+    ['[08:00] Nowak: kup chleb\n[08:01] Ewa: ok\n[08:02] Nowak: i mleko', `[08:00] ${N}: kup chleb\n[08:01] ${N}: ok\n[08:02] ${N}: i mleko`],
+  ]);
+});
+test('klasa 9: imię mówcy w pseudonimach to ta sama osoba co zdrobnienie w treści', () => {
+  const r = redactPII('[08:12] Kasia: jestem\n[08:13] Tomek: ok\n[08:14] Tomek: kasia, dzięki', { pseudonyms: true }).redacted;
+  expect(r).toBe('[08:12] [OSOBA-A]: jestem\n[08:13] [OSOBA-B]: ok\n[08:14] [OSOBA-B]: [OSOBA-A], dzięki');
+});
+test('klasa 9: rola mówcy, etykieta pola, nagłówek i pokrewieństwo bez imienia zostają', () => {
+  keep([
+    '[10:01] Konsultant: Dzień dobry\n[10:02] Klient: dzień dobry\n[10:03] Konsultant: w czym pomóc?\n[10:04] Bot: proszę czekać',
+    'KONSULTANTKA: Dzień dobry\nKLIENT: Dzień dobry pani\nKONSULTANTKA: Rozumiem.',
+    '[12:00] System: Użytkownik dołączył\n[12:01] Grupa Wsparcia: witamy\n[12:02] Grupa Wsparcia: zasady',
+    '2026-10-01 09:14 InPost: paczka czeka\n2026-10-02 10:00 InPost: odbierz paczkę\n2026-10-02 11:00 Ja: ok',
+    '[08:00] Mama: kup chleb\n[08:01] Tata: ok\n[08:02] Mama: i mleko',
+    'Od: Urząd Miasta\nDo: Wydział\nTemat: wniosek\nUwagi: brak\nData: 12.11.2026',
+    'PL: Wniosek\nEN: Application\nPL: Data\nEN: Date',
+    'Świadek: zeznaje\nŚwiadek: dalej\nSędzia: dziękuję',
+    'Wniosek: tak\nUzasadnienie: brak\nPouczenie: od decyzji',
+    // wyraz z wielkiej litery przed czasownikiem to zdanie, nie mówca; imię-rzeczownik raz w etykiecie zostaje
+    'Marek powiedział: tak\nUwaga: ważne\nHala: sportowa nr 2',
+    '- Kuba: wyspa na Karaibach',
+    // porządek obrad z godzinami: punkt, przerwa i miejscowość to nie mówcy
+    '10:00 Otwarcie: powitanie gości\n10:15 Przerwa: kawa\n11:00 Kraków: przejazd\n12:00 Podsumowanie: wnioski',
+  ]);
+});
+test('klasa 9: lista „Pole: wartość” z emotikoną, powtórzeniem albo godziną to nie rozmowa', () => {
+  keep([
+    // emotikona i nagłówki e-maila nie robią z listy wątku mówców
+    'Od: sekretariat\nTemat: Imieniny w grudniu 🎉\nData: 1.12.2026\nBarbara: 4 grudnia\nMikołaj: 6 grudnia\nŁucja: 13 grudnia',
+    'Wyjazdy służbowe 2026 ✈️\nJordan: marzec\nVirginia: kwiecień\nCharlotte: maj\nVictoria: czerwiec',
+    'Ogłoszenia\nJan: 3,16\nMateusz: 5,1-12\nŁukasz: 2,1-14\nMarek: 1,1-8 📖',
+    'Lektury klasy 4 😊:\nMikołajek: R. Goscinny\nPinokio: C. Collodi',
+    'Dyżury 😊\nRóża: kwiaciarnia\nPoniedziałek: Ewa\nWtorek: sklep',
+    // samo powtórzenie etykiety, także imienia-wyrazu, bez kształtu rozmowy
+    'Magazyn A\nHala: zamknięta\nBrama: otwarta\nHala: remont do piątku',
+    'Kierunki 🌍:\nKuba: wiza niepotrzebna\nKuba: szczepienia zalecane',
+    'Zapisy na zajęcia\nKuba: 3 osoby\nKuba: lista rezerwowa',
+    'Ogłoszenia parafialne\nEwangelia wg św. Jana\nJan: 3,16-18\nJan: 20,1-9',
+    // postacie biblijne w scenariuszu jasełek
+    'Jasełka\nJózef: Nie ma miejsca w gospodzie.\nMaryja: Idźmy dalej.\nJózef: Nie ma miejsca w gospodzie.\nMaryja: Dobrze.',
+    // program dnia z godzinami: dzielnica, brama, święto i toponim „imię + przymiotnik”
+    'Plan wycieczki:\n08:00 Kazimierz: zbiórka przy synagodze\n15:00 Florian: brama i mury obronne',
+    'Program dnia:\n08:00 Kazimierz Dolny: zbiórka\n16:00 Kazimierz Dolny: powrót',
+    'Plan imprez:\n18:00 Sylwester: bal w auli\n20:00 Koncert: zespół',
+    '[08:00] Kazimierz Dolny: zbiórka\n[16:00] Kazimierz Dolny: powrót',
+  ]);
+});
+test('klasa 9: program dnia, grafik i rozkład z wracającą etykietą to nie rozmowa', () => {
+  keep([
+    // ta sama etykieta wraca w wierszach z godziną, ale nikt nie mówi
+    'Plan:\n08:00 Kazimierz: zbiórka przy synagodze\n10:00 Wawel: zwiedzanie komnat\n14:00 Kazimierz: obiad',
+    'Rozkład:\n07:15 Ludwik: linia 12\n07:30 Pętla: linia 4\n07:45 Ludwik: linia 12',
+    'Grafik sal:\n08:00 Florian: sala 1\n12:00 Florian: sala 2',
+    'Plan:\n08:00 Kazimierz: zbiórka\n12:00 Kazimierz: obiad\n16:00 Wawel: zwiedzanie',
+    'Rozkład:\n07:10 Wiktoria: peron 1\n09:10 Wiktoria: peron 2',
+    'Dyżury apteki:\n08:00 Róża: otwarta\n20:00 Róża: zamknięta',
+    'Sale:\n08:00 Kazimierz: sala 1\n09:00 Florian: sala 2\n10:00 Kazimierz: sala 3',
+  ]);
+});
+test('klasa 9: lista A…B…A bez wypowiedzi, cytat e-maila „>” i lekcja religii zostają jawne', () => {
+  keep([
+    // nazwy dzielnic, sal, oddziałów, kontenerów i imieniny: etykieta wraca, treść to wartość pola
+    'Kazimierz: zwiedzanie synagog\nPodgórze: obiad\nKazimierz: kolacja',
+    'Franciszek: grupa młodzieży\nKlara: grupa seniorów\nFranciszek: spotkanie liderów',
+    'Hospicjum, oddziały:\nŁukasz: oddział stacjonarny\nAnna: poradnia\nŁukasz: opieka domowa',
+    'Nazwy kontenerów:\nWiktor: produkcja\nKlient: testy\nWiktor: wycofany',
+    'Imieniny w kalendarzu:\nWiktoria: grudzień\nBarbara: grudzień\nWiktoria: także w lipcu',
+    // cytat odpowiedzi w e-mailu nie jest wątkiem komentarzy
+    'w załączeniu plan, który dostałem:\n> Kazimierz: zwiedzanie\n> Wawel: obiad\n> Kazimierz: kolacja',
+    '> Temat: dyżury\n> Florian: brama wschodnia\n> Kazimierz: parking',
+    '> Uwagi: przesyłam listę\nWiktor: nazwa projektu, Zofia: nazwa serwera',
+    // ewangeliści w planie lekcji religii i katechezy: tylko jeden z nich „mówi”
+    'Na lekcję religii przygotuj:\nJan: Na początku było Słowo\nŁukasz: Zwiastowanie\nJan: Ja jestem drogą',
+    'Plan lekcji religii:\nMateusz: Kazanie na górze\nŁukasz: Syn marnotrawny\nMateusz: Błogosławieństwa',
+    'Katecheza dla klasy 2:\nJan: Wesele w Kanie\nMarek: Burza na jeziorze\nJan: Dobry Pasterz',
+  ]);
+});
+test('klasa 9: zwykły czat o parafii, czytaniach albo kolędzie zakrywa wszystkich mówców', () => {
+  masked([
+    ['[10:00] Paweł: ślub w parafii św. Anny\n[10:01] Ewa: super\n[10:02] Paweł: dzięki', `[10:00] ${N}: ślub w parafii św. Anny\n[10:01] ${N}: super\n[10:02] ${N}: dzięki`],
+    ['[09:00] Jan: dzień dobry\n[09:01] Ewa: hej\n[09:02] Jan: czytania jutro?', `[09:00] ${N}: dzień dobry\n[09:01] ${N}: hej\n[09:02] ${N}: czytania jutro?`],
+    ['Marek: kolęda u nas w piątek?\nEwa: tak\nMarek: super', `${N}: kolęda u nas w piątek?\n${N}: tak\n${N}: super`],
+    ['Tomasz: jesteś w parafii?\nEwa: tak, idę\nTomasz: ok', `${N}: jesteś w parafii?\n${N}: tak, idę\n${N}: ok`],
+  ]);
+});
+test('klasa 9: ocena kształtu rozmowy w czasie liniowym', () => {
+  const time = (s: string): number => {
+    const t0 = performance.now();
+    redactPII(s);
+    return performance.now() - t0;
+  };
+  // każda etykieta wraca raz, tuż po sobie: dawniej każda przechodziła całą listę wypowiedzi
+  const pairs = (n: number): string => `Kasia: hej\n${Array.from({ length: n }, (_, i) => `p${i}: a\np${i}: a`).join('\n')}`;
+  const fields = (n: number): string => `Anna: start\n${Array.from({ length: n }, (_, i) => `Pole${i}: x\nPole${i}: y`).join('\n')}`;
+  pairs(500); // rozgrzewka JIT
+  redactPII(pairs(500));
+  for (const [name, gen] of [
+    ['pary', pairs],
+    ['pola', fields],
+  ] as const) {
+    const [t1, t4] = bestTimes(time, gen(2500), gen(10000));
+    expect(t4 / t1, name).toBeLessThan(6);
+    expect(time(gen(20000)), name).toBeLessThan(2000);
+  }
+});
+
+test('klasa 12: imiona cudzoziemców z urzędów (UA, BY, RU, arabskie, indyjskie) i brakujące polskie', () => {
+  masked([
+    // pary z nazwiskiem w zapisie polskim i paszportowym, z odmianą
+    ['matka Oksana Burek okazała paszport', `matka ${N} okazała paszport`],
+    ['Wnioskodawca Ołeksandr Melnyk złożył wniosek.', `Wnioskodawca ${N} złożył wniosek.`],
+    ['Pracodawca zatrudnia OLEKSANDR MELNYK na stanowisku kucharza.', `Pracodawca zatrudnia ${N} na stanowisku kucharza.`],
+    ['Decyzję doręczono Ołeksandrowi Melnykowi.', `Decyzję doręczono ${N}.`],
+    ['Pełnomocnictwo dla Dmytra Kowalenki z 3 marca.', `Pełnomocnictwo dla ${N} z 3 marca.`],
+    ['Świadek Svitlana Bondarenko i Iryna Kovalenko potwierdziły.', `Świadek ${N} i ${N} potwierdziły.`],
+    ['Wniosek złożyła Fatima Haddad, obywatelka Syrii.', `Wniosek złożyła ${N}, obywatelka Syrii.`],
+    ['Zespół: Priya Raman (analityk).', `Zespół: ${N} (analityk).`],
+    // polskie imiona, których słownik nie miał
+    ['Oliwier Zając przyszedł z matką.', `${N} przyszedł z matką.`],
+    ['Na liście jest Eryk Wilk.', `Na liście jest ${N}.`],
+    ['Zawiadomienie otrzymała Daria Nowak.', `Zawiadomienie otrzymała ${N}.`],
+  ]);
+});
+test('klasa 12: słowa pospolite i nazwy własne zbieżne z imionami obcymi zostają jawne', () => {
+  const keep = [
+    'Na tarasie lokalu nie wolno palić, a ZIELONY TARAS ma ogródek.',
+    'Taras Widokowy przy ul. Długiej jest zamknięty.',
+    'Omar Jumbo w restauracji kosztuje 120 zł.',
+    'Inna Sprawa dotyczy podatku.',
+    'Pielgrzymka do Fatimy i Lourdes, Sanktuarium w Fatimie, Matka Boża z Fatimy.',
+    'Chór zaśpiewał Regina Coeli i Salve Regina.',
+    'Aminy Biogenne oznaczono w surowicy.',
+    'Rana Kłuta wymagała szycia.',
+    'Król Zygmunt August i Bolesław Chrobry.',
+  ];
+  masked(keep.map((s) => [s, s]));
+});
+test('klasa 12: imię i nazwisko wietnamskie po układzie sylab, także z diakrytyką', () => {
+  masked([
+    ['Małżonek: Tran Thi Hoa, PESEL 86120177363', `Małżonek: ${N}, PESEL [PESEL]`],
+    ['Pełnomocnikiem ustanawiam Do Minh Tuan, który pomagał w tłumaczeniu.', `Pełnomocnikiem ustanawiam ${N}, który pomagał w tłumaczeniu.`],
+    ['Wniosek złożyła Nguyen Thi Lan.', `Wniosek złożyła ${N}.`],
+    ['Nguyễn Văn Hùng złożył wniosek.', `${N} złożył wniosek.`],
+    ['Mysiadło, 06.11.2026   Thanh Nguyen', `Mysiadło, 06.11.2026   ${N}`],
+  ]);
+  // sylaby wieloznaczne bez dwóch typowych dla imienia: miasto, zatoka, nazwisko artysty, zwykłe zdanie
+  const keep = [
+    'Delegacja odwiedziła Ho Chi Minh i Hanoi.',
+    'Zatoka Ha Long jest na liście UNESCO.',
+    'Do Hanoi lecieliśmy przez Dubaj.',
+    'Obraz Van Gogha wisi w Amsterdamie.',
+    'Le Van Long to nazwa restauracji.',
+  ];
+  masked(keep.map((s) => [s, s]));
+  // pseudonim: osoba wietnamska z kluczem nazwiska, ta sama przy drugiej wzmiance
+  masked([['Małżonek: Tran Thi Hoa. Podpis: Tran Thi Hoa.', 'Małżonek: [OSOBA-A]. Podpis: [OSOBA-A].']], { pseudonyms: true });
+});
+test('klasa 12: reguła sylab wietnamskich w czasie liniowym', () => {
+  const time = (s: string): number => {
+    const t0 = performance.now();
+    redactPII(s);
+    return performance.now() - t0;
+  };
+  const caps = (n: number): string => Array.from({ length: n }, () => 'MINH THANH HOA LAN VAN DO').join(' ');
+  redactPII(caps(200));
+  const [t1, t4] = bestTimes(time, caps(1000), caps(4000));
+  expect(t4 / t1).toBeLessThan(6);
+});
+
+test('zdrowie klasa 3: zdarzenie zdrowotne przy osobie (zwolnienie, orzeczenie, leczenie, pobyt, zabieg, ciąża, nałóg)', () => {
+  const Z = '[DANE O ZDROWIU]';
+  const cases: [string, string][] = [
+    // zwolnienie lekarskie z okresem, L4, e-ZLA, zasiłek chorobowy, urlop dla poratowania zdrowia
+    ['Jan Kowalski przebywa na zwolnieniu lekarskim od 3 do 17 marca 2026 r. i przeszedł zabieg artroskopii kolana.', `${N} przebywa na ${Z} i przeszedł ${Z}.`],
+    ['Kierowniczka referatu, Pani Ewa Lis, ma zwolnienie lekarskie do 27.11, proszę o zastępstwo.', `Kierowniczka referatu, Pani ${N}, ma ${Z}, proszę o zastępstwo.`],
+    ['Nieobecni: Jan Nowak (zwolnienie lekarskie), Anna Lis (urlop).', `Nieobecni: ${N} (${Z}), ${N} (urlop).`],
+    ['Nauczycielka przebywa na urlopie dla poratowania zdrowia do 31.08.2026 r.', `Nauczycielka przebywa na ${Z}.`],
+    ['Uwagi:\n- poz. 4: w maju 6 dni zasiłku chorobowego.', `Uwagi:\n- poz. 4: w maju ${Z}.`],
+    ['Od poniedziałku jestem na L4, wracam 20 maja.', `Od poniedziałku jestem na ${Z}, wracam 20 maja.`],
+    // orzeczenie, stopień niepełnosprawności z symbolem, niezdolność do samodzielnej egzystencji, opinia WWR
+    ['Syn wnioskodawczyni ma orzeczenie o potrzebie kształcenia specjalnego.', `Syn wnioskodawczyni ma ${Z}.`],
+    ['Wnioskodawca legitymuje się orzeczeniem o znacznym stopniu niepełnosprawności, symbol 10-N.', `Wnioskodawca legitymuje się ${Z}.`],
+    ['Ubezpieczony jest częściowo niezdolny do pracy.', `Ubezpieczony jest ${Z}.`],
+    ['Skarżąca jest całkowicie niezdolna do\nsamodzielnej egzystencji.', `Skarżąca jest ${Z}.`],
+    ['Córka ma opinię o potrzebie wczesnego wspomagania rozwoju.', `Córka ma ${Z}.`],
+    ['[X] dziecko z orzeczeniem o niepełnosprawności', `[X] dziecko z ${Z}`],
+    // leczenie i terapia z rodzajem, „leczy się”, opieka specjalisty
+    ['Matka od lat leczy się psychiatrycznie, w 2024 r. była w szpitalu psychiatrycznym.', `Matka od lat ${Z}, w 2024 r. była w ${Z}.`],
+    ['Brat skarżącego był skierowany na leczenie psychiatryczne.', `Brat skarżącego był skierowany na ${Z}.`],
+    ['Ojciec dziecka jest uzależniony od alkoholu i przerwał terapię uzależnień.', `Ojciec dziecka jest ${Z} i przerwał ${Z}.`],
+    ['Oskarżony od lat jest uzależniony od metamfetaminy.', `Oskarżony od lat jest ${Z}.`],
+    ['Chłopiec korzysta z pomocy psychologa szkolnego i uczęszcza na terapię integracji sensorycznej.', `Chłopiec ${Z} i uczęszcza na ${Z}.`],
+    // pobyt w szpitalu i sanatorium, zabieg z dopowiedzeniem medycznym, stan po zawale i udarze, endoproteza
+    ['Do końca miesiąca przebywam w sanatorium po operacji kręgosłupa.', `Do końca miesiąca przebywam ${Z}.`],
+    ['Pan Nowak jest po operacji, wraca w poniedziałek.', `Pan ${N} jest ${Z}, wraca w poniedziałek.`],
+    ['Pracownik od zawału serca pracuje na pół etatu.', `Pracownik ${Z} pracuje na pół etatu.`],
+    ['Babcia porusza się o kulach po endoprotezie biodra.', `Babcia ${Z} po ${Z}.`],
+    // ciąża z tygodniem, ciąża zagrożona, dalsza wzmianka w tym samym zdaniu
+    ['Pani Maria Nowak jest w 20. tygodniu ciąży, ciąża zagrożona.', `Pani ${N} jest ${Z}, ${Z}.`],
+    ['U pani Ewy Kos trwa 30. tydzień ciąży, ciążę prowadzi lekarz rodzinny.', `U pani ${N} trwa ${Z}, ${Z} prowadzi lekarz rodzinny.`],
+    // leczenie przewlekłe przy osobie
+    ['Do południa jestem na dializach, proszę dzwonić po 15.', `Do południa jestem na ${Z}, proszę dzwonić po 15.`],
+  ];
+  for (const [t, want] of cases) {
+    const once = redactPII(t).redacted;
+    expect(once, t).toBe(want);
+    expect(redactPII(once).redacted, `idempotencja: ${t}`).toBe(once);
+  }
+  keep(
+    [
+      // przepis, pouczenie, regulamin, warunek: bez osoby wskazanej z nazwy
+      'Zwolnienia lekarskie należy dostarczyć w ciągu 7 dni.',
+      'Zgodnie z art. 92 Kodeksu pracy za czas zwolnienia lekarskiego pracownik zachowuje prawo do wynagrodzenia.',
+      'Pracownikowi przebywającemu na zwolnieniu lekarskim przysługuje zasiłek chorobowy.',
+      'Jeżeli pracownik przebywa na zwolnieniu lekarskim, nie może wykonywać pracy.',
+      'Wynagrodzenie chorobowe za okres zwolnienia lekarskiego wypłaca pracodawca.',
+      'Zwolnienie lekarskie wystawia lekarz w formie elektronicznej (e-ZLA).',
+      'Do wniosku należy dołączyć orzeczenie o stopniu niepełnosprawności.',
+      'Świadczenie przysługuje osobom ze znacznym lub umiarkowanym stopniem niepełnosprawności.',
+      'Uczniowie posiadający orzeczenie o potrzebie kształcenia specjalnego mają zapewnione zajęcia.',
+      'Pracownik może skorzystać z urlopu dla poratowania zdrowia po 7 latach pracy.',
+      'Kobiety w ciąży do 12. tygodnia ciąży mogą skorzystać z badań prenatalnych.',
+      'Wniosek o skierowanie na leczenie odwykowe składa się do gminnej komisji.',
+      // nazwa instytucji i usługa placówki
+      'Powiatowy Zespół do Spraw Orzekania o Niepełnosprawności w Krakowie wydaje orzeczenia o niepełnosprawności.',
+      'Poradnia Leczenia Uzależnień w Oświęcimiu prowadzi terapię uzależnienia od alkoholu dla mieszkańców gminy.',
+      'Gmina finansuje leczenie odwykowe w ramach programu profilaktyki.',
+      'Szpital ogłasza przetarg na dostawę endoprotez stawu biodrowego.',
+      // funkcjonariusz i pracownik w funkcji, terapeuta prowadzący terapię
+      'Pani Anna Nowak, kierownik działu kadr, przyjmuje zwolnienia lekarskie w pokoju 12.',
+      'Pan Adam Lis odpowiada za rozliczanie zasiłków chorobowych.',
+      'Pani Ewa Lis, logopeda, prowadzi terapię logopedyczną w poradni.',
+      'Pani Anna Kowalska pracuje w szpitalu psychiatrycznym jako pielęgniarka.',
+      'Pani Ewa Lis ukończyła szkołę psychoterapii w Krakowie.',
+      // słowa bez znaczenia medycznego
+      'Pan Jan Nowak został zwolniony z pracy, zwolnienie z opłat dotyczy go od maja.',
+      'Skazany przebywa na zwolnieniu warunkowym od 2025 r.',
+      'Po operacji bankowej klient otrzymuje potwierdzenie.',
+      'Pan Nowak jest po operacji przejęcia spółki.',
+      'Most po zabiegu konserwacji przęseł jest przejezdny.',
+      'Firma jest uzależniona od dostawcy z Chin.',
+      'Wnioskodawca jest uzależniony od pomocy społecznej.',
+      'Linia L4 została wyłączona, operator ma L4 w grafiku jako nazwę hali.',
+      'Karta informacyjna leczenia szpitalnego zawiera rozpoznanie.',
+      // pusta opcja formularza
+      '[ ] dziecko z orzeczeniem o niepełnosprawności',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+});
+
+test('zdrowie klasa 3: frazy zdarzeń w czasie liniowym (długie odstępy, powtórzenia)', () => {
+  const time = (s: string): number => {
+    const t0 = performance.now();
+    redactPII(s, { types: ['ZDROWIE'] });
+    return performance.now() - t0;
+  };
+  const block = (n: number): string =>
+    Array.from({ length: n }, () => `przebywa${' '.repeat(40)}na${' '.repeat(40)}zwolnieniu po operacji kolana orzeczenie o 12. tygodniu ciąży`).join(' ');
+  redactPII(block(50));
+  const [t1, t4] = bestTimes(time, block(250), block(1000));
+  expect(t4 / t1).toBeLessThan(6);
+});
+
+test('zdrowie klasa 3: imiesłów, zabieg po budowie słowa, pobyt, angielski; temat pisma i podmiot rzeczowy zostają', () => {
+  const Z = '[DANE O ZDROWIU]';
+  const cases: [string, string][] = [
+    // imiesłów bierny po łączniku
+    ['Matka małoletniego jest od lat leczona psychiatrycznie.', `Matka małoletniego jest od lat ${Z}.`],
+    ['Pan Kamil Ryba był operowany na przepuklinę pachwinową w czerwcu.', `Pan ${N} był ${Z} w czerwcu.`],
+    ['Pani Ewelina Gryc była hospitalizowana w klinice kardiologii.', `Pani ${N} była ${Z}.`],
+    ['Mąż powódki od roku jest dializowany.', `Mąż powódki od roku jest ${Z}.`],
+    ['Brat skarżącej jest leczony z powodu cukrzycy.', `Brat skarżącej jest ${Z} z powodu ${Z}.`],
+    // zabieg po budowie słowa i z narządem
+    ['Matka małoletniego przeszła mastektomię w ubiegłym roku.', `Matka małoletniego przeszła ${Z} w ubiegłym roku.`],
+    ['Pan Damian Kos przeszedł zabieg koronarografii.', `Pan ${N} przeszedł ${Z}.`],
+    ['Wnioskodawczyni jest po przeszczepie nerki.', `Wnioskodawczyni jest ${Z}.`],
+    ['Dziadek dzieci porusza się na wózku po amputacji nogi.', `Dziadek dzieci ${Z}.`],
+    ['Babcia małoletniej jest po wszczepieniu rozrusznika serca.', `Babcia małoletniej jest ${Z}.`],
+    ['Pani Elżbieta Kurek miała w lutym zabieg usunięcia macicy.', `Pani ${N} miała w lutym ${Z}.`],
+    ['Pani Sylwia Tomczak przebywała na oddziale ginekologicznym po poronieniu.', `Pani ${N} przebywała ${Z}.`],
+    // pobyt, placówka, renta, szyk odwrócony, urlop zdrowotny
+    ['Pozwany kilkukrotnie trafiał do izby wytrzeźwień.', `Pozwany kilkukrotnie trafiał ${Z}.`],
+    ['Ojciec dziecka przebywa w zakładzie leczniczym dla osób uzależnionych.', `Ojciec dziecka przebywa ${Z}.`],
+    ['Wnioskodawczyni dwukrotnie przebywała na detoksie.', `Wnioskodawczyni dwukrotnie przebywała ${Z}.`],
+    ['Syn wnioskodawczyni przebywał na turnusie rehabilitacyjnym w Busku-Zdroju.', `Syn wnioskodawczyni przebywał ${Z} w Busku-Zdroju.`],
+    ['Wnioskodawca od 2019 r. pobiera rentę z tytułu niezdolności do pracy.', `Wnioskodawca od 2019 r. pobiera ${Z}.`],
+    ['Pan Michał Bielecki jest niepełnosprawny w stopniu znacznym.', `Pan ${N} jest ${Z}.`],
+    ['Pan Ryszard Kłos od maja korzysta z urlopu zdrowotnego.', `Pan ${N} od maja korzysta z ${Z}.`],
+    ['Syn stron jest pod stałą opieką neurologa dziecięcego.', `Syn stron jest ${Z}.`],
+    ['Pani Iwona Kos przyjmuje sertralinę.', `Pani ${N} przyjmuje ${Z}.`],
+    // słowa reguły po spójniku nie blokują opisu faktu
+    ['Mąż wnioskodawczyni przebywa na zwolnieniu lekarskim i nie może pracować.', `Mąż wnioskodawczyni przebywa na ${Z} i nie może pracować.`],
+    ['Matka dzieci jest po udarze niedokrwiennym i wymaga opieki.', `Matka dzieci jest ${Z} i wymaga opieki.`],
+    ['Ojciec jest po operacji biodra i każdego dnia chodzi o kulach.', `Ojciec jest ${Z} i każdego dnia ${Z}.`],
+    ['Uczeń ma orzeczenie o potrzebie kształcenia specjalnego, więc może korzystać z dowozu.', `Uczeń ma ${Z}, więc może korzystać z dowozu.`],
+    // pisma dwujęzyczne
+    ['Ms Anna Kowalska is on sick leave until 30 November.', `Ms ${N} is ${Z}.`],
+    ['Mr John Smith underwent knee surgery in May.', `Mr ${N} underwent ${Z} in May.`],
+    ['The applicant is 24 weeks pregnant.', `The applicant is ${Z}.`],
+    ['Mr Piotr Nowak was admitted to a psychiatric hospital in March.', `Mr ${N} was ${Z} in March.`],
+    ['Ms Ewa Lis holds a certificate of moderate disability.', `Ms ${N} holds a ${Z}.`],
+  ];
+  for (const [t, want] of cases) {
+    const once = redactPII(t).redacted;
+    expect(once, t).toBe(want);
+    expect(redactPII(once).redacted, `idempotencja: ${t}`).toBe(once);
+  }
+  keep(
+    [
+      // narzędnik rzeczownika na -łem nie jest pierwszą osobą
+      'Zgodnie z artykułem 92 Kodeksu pracy za czas zwolnienia lekarskiego pracownik zachowuje prawo do wynagrodzenia.',
+      'Rozliczenie zasiłku chorobowego odbywa się w porozumieniu z działem płac.',
+      'Zgodnie z rozdziałem 4 regulaminu pracy urlop dla poratowania zdrowia udzielany jest na wniosek.',
+      'Posiedzenie z udziałem dyrektora szpitala dotyczyło leczenia psychiatrycznego dzieci.',
+      'Kościołem parafialnym zarządza proboszcz, a leczenie odwykowe organizuje caritas.',
+      // „poz. N” w przepisie, tabeli i pakiecie przetargu
+      'Na podstawie ustawy (Dz. U. z 2024 r., poz. 146) zwolnienie lekarskie jest wystawiane w systemie e-ZLA.',
+      'Tabela 3, poz. 12: zasiłek chorobowy w kwocie 1200 zł.',
+      'Wykaz poz. 7 obejmuje urlop dla poratowania zdrowia dla nauczycieli.',
+      'Pakiet 2, poz. 3: endoprotezy stawu biodrowego cementowane, 40 sztuk.',
+      // strona internetowa i strona dokumentu, zaimek w innym członie
+      'Druk zwolnienia lekarskiego jest dostępny na stronie internetowej ZUS.',
+      'Na stronie 4 opisano leczenie odwykowe.',
+      'Strona internetowa szpitala zawiera informacje o leczeniu onkologicznym.',
+      'Dyrektor oddziału ZUS, a jego zastępca rozpatruje wnioski o świadczenie rehabilitacyjne.',
+      'On zwrócił uwagę, że psychoterapia dla dzieci jest trudno dostępna w powiecie.',
+      // podmiot rzeczowy i pobyt w funkcji
+      'Przesyłka trafiła do szpitala w Kielcach 3 marca, odebrał ją pan Nowak.',
+      'Pismo pana Jana Kowalskiego trafiło do szpitala w Radomiu.',
+      'Siostra przełożona zakonu przebywa w szpitalu jako kapelan.',
+      'Delegacja radnych przebywała w szpitalu powiatowym z wizytą.',
+      // rzeczownik czynności bez narządu
+      'Pan Jan Nowak zgłosił, że po zabiegu usunięcia drzew teren zostanie uporządkowany.',
+      'Lekarze przeprowadzili w 2025 r. 120 zabiegów wszczepienia rozrusznika serca.',
+      // podmiot zbiorowy, pouczenie, temat pisma, pytanie formularza
+      'Pracownicy obsługują e-ZLA.',
+      'Pracownicy przebywający na zwolnieniu lekarskim otrzymują wynagrodzenie chorobowe.',
+      'Ubezpieczony wykorzystuje zwolnienie lekarskie zgodnie z celem.',
+      'Mam pytanie o zasady przyznawania świadczenia rehabilitacyjnego.',
+      'Otrzymałem pytanie o urlop dla poratowania zdrowia nauczycieli.',
+      'Anna Kowalska zapytała o kolejki do psychoterapii w powiecie.',
+      'Pan Adam Nowak otrzymał certyfikat z psychoterapii poznawczo-behawioralnej.',
+      'Czy dziecko posiada orzeczenie o niepełnosprawności? TAK / NIE',
+      'Na stronie BIP opublikowano wykaz poradni leczenia uzależnień.',
+      'Według danych GUS co trzeci pracownik był w ubiegłym roku na zwolnieniu lekarskim.',
+      'Art. 26. Osoba uzależniona od alkoholu może zostać skierowana na leczenie odwykowe.',
+      // angielski: przepis i grupa
+      'Patients who underwent knee surgery may apply for rehabilitation.',
+      'Employees on sick leave must submit a medical certificate.',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+});
+
+test('zdrowie klasa 3: imiesłowy, zabiegi i temat pisma w czasie liniowym', () => {
+  const time = (s: string): number => {
+    const t0 = performance.now();
+    redactPII(s, { types: ['ZDROWIE'] });
+    return performance.now() - t0;
+  };
+  const block = (n: number): string =>
+    Array.from(
+      { length: n },
+      () => `jest${' '.repeat(8)}od lat${' '.repeat(8)}leczona po przeszczepie nerki, trafiał${' '.repeat(8)}do szpitala jako zasady wypłaty zasiłku chorobowego ${'a'.repeat(60)}łem z udziałem`,
+    ).join(' ');
+  redactPII(block(50));
+  const [t1, t4] = bestTimes(time, block(250), block(1000));
+  expect(t4 / t1).toBeLessThan(6);
+});
+
+test('zdrowie klasa 3: rola osoby przy zdarzeniu (urzędnik, świadczeniodawca, autor pisma, rzecz, instytucja)', () => {
+  const Z = '[DANE O ZDROWIU]';
+  const cases: [string, string][] = [
+    // osoba z funkcją dalej jest pacjentem, gdy zdarzenie dotyczy jej samej (czasownik pobytu, posiadania)
+    ['Pan Nowak, magazynier, przebywa na zwolnieniu lekarskim od 2 do 16 maja.', `Pan ${N}, magazynier, przebywa na ${Z}.`],
+    ['Pan Nowak, inspektor ZUS, przebywa na zwolnieniu lekarskim do końca miesiąca.', `Pan ${N}, inspektor ZUS, przebywa na ${Z} do końca miesiąca.`],
+    ['Pani Nowak, nauczycielka, przebywa na urlopie dla poratowania zdrowia.', `Pani ${N}, nauczycielka, przebywa na ${Z}.`],
+    // imiesłów dwuznaczny z dopowiedzeniem medycznym albo z człowiekiem jako podmiotem
+    ['Pani Nowak była operowana na przepuklinę kręgosłupa.', `Pani ${N} była ${Z}.`],
+    ['Pan Nowak był diagnozowany w klinice neurologii.', `Pan ${N} był ${Z}.`],
+    ['Pozwany jest leczony psychiatrycznie od 2020 r.', `Pozwany jest ${Z} od 2020 r.`],
+    ['Jest leczona psychiatrycznie.', `Jest ${Z}.`],
+    ['Pan Nowak był operowany w szpitalu wojewódzkim.', `Pan ${N} był ${Z}.`],
+    // lek po czasowniku: człowiek albo podmiot domyślny
+    ['Pani Nowak przyjmuje sertralinę.', `Pani ${N} przyjmuje ${Z}.`],
+    ['Od roku przyjmuje escitalopram.', `Od roku przyjmuje ${Z}.`],
+    // pobyt z celem medycznym, czasownik z wielkiej litery, podmiot ze zdania głównego, zdanie względne
+    ['Trafiłam do szpitala na obserwację.', `Trafiłam ${Z} na obserwację.`],
+    ['Pani Kowalska trafiła do szpitala z silnym bólem brzucha.', `Pani ${N} trafiła ${Z} z silnym bólem brzucha.`],
+    ['Konkubent przyznał, że „pije za dużo” i dwa razy trafił do izby wytrzeźwień.', `Konkubent przyznał, że „pije za dużo” i dwa razy trafił ${Z}.`],
+    [
+      'W mieszkaniu przebywa także córka stron, Oliwia Kaczor, która korzysta z pomocy psychologa szkolnego.',
+      `W mieszkaniu przebywa także córka stron, ${N}, która ${Z}.`,
+    ],
+    // zdarzenie po łączniku i przyimku, wartość pola w druku z danymi osoby, dalsza wzmianka
+    ['pracuje zdalnie bo jestem po operacji kolana i nie moge dojezdzac', `pracuje zdalnie bo jestem ${Z} i nie moge dojezdzac`],
+    [
+      'Imię i nazwisko: Jan Kowalski\n03. Orzeczenie: umiarkowany stopień niepełnosprawności, symbol 05-R (choroby narządu ruchu)',
+      `Imię i nazwisko: ${N}\n03. Orzeczenie: ${Z}`,
+    ],
+    [
+      'Komisja skierowała Mirosława Kaczora na badanie. Po otrzymaniu opinii wniosek o zobowiązanie do leczenia odwykowego trafi do sądu.',
+      `Komisja skierowała ${N} na badanie. Po otrzymaniu opinii wniosek o zobowiązanie do ${Z} trafi do sądu.`,
+    ],
+    [
+      'Matka małoletniego, Anna Nowak, mieszka w Lublinie. Od roku jest na rencie z tytułu niezdolności do pracy.',
+      `Matka małoletniego, ${N}, mieszka w [MIEJSCOWOŚĆ]. Od roku jest na ${Z}.`,
+    ],
+    // podstawa prawna w konkretnej sprawie nie zasłania osoby; tytuł ustawy zostaje jawny
+    [
+      'Wnioskodawczyni, Pani Anna Lis, wnosi o zobowiązanie uczestnika do leczenia odwykowego na podstawie ustawy o wychowaniu w trzeźwości i przeciwdziałaniu alkoholizmowi.',
+      `Wnioskodawczyni, Pani ${N}, wnosi o zobowiązanie uczestnika do ${Z} na podstawie ustawy o wychowaniu w trzeźwości i przeciwdziałaniu alkoholizmowi.`,
+    ],
+    // angielski z człowiekiem
+    ['My son is disabled and needs care.', `My son is ${Z} and needs care.`],
+    ['He holds a disability certificate.', `He holds a ${Z}.`],
+    ['She was taken to the hospital after the accident.', `She was ${Z} after the accident.`],
+  ];
+  for (const [t, want] of cases) {
+    const once = redactPII(t).redacted;
+    expect(once, t).toBe(want);
+    expect(redactPII(once).redacted, `idempotencja: ${t}`).toBe(once);
+  }
+  keep(
+    [
+      // urzędnik z nazwiska i zdanie normatywne w zdaniu podrzędnym, temat decyzji i pytania
+      'Pani Anna Nowak, kierownik działu kadr, przypomina, że zwolnienie lekarskie należy dostarczyć w ciągu 7 dni.',
+      'Pan Jan Kowalski, inspektor ZUS, wyjaśnił, że zasiłek chorobowy przysługuje od 31. dnia niezdolności do pracy.',
+      'Pani Ewa Zielińska, inspektor ZUS, wydała decyzję w sprawie renty z tytułu niezdolności do pracy.',
+      'Pan Kowalski pyta, czy renta z tytułu niezdolności do pracy podlega opodatkowaniu.',
+      'Pan Nowak wyjaśnił, że od stycznia zmieni się wysokość zasiłku chorobowego.',
+      // świadczeniodawca, fundator, specjalista, grupa po frazie
+      'Pan Nowak, wójt gminy, ufundował pobyt w hospicjum dla samotnych mieszkańców.',
+      'Pan Nowak, proboszcz, udostępnia salę parafialną na mityngi AA.',
+      'Dr Anna Kowalska od 20 lat zajmuje się leczeniem onkologicznym dzieci.',
+      'Pani Kowalska, logopeda, zajmuje się terapią logopedyczną w przedszkolu nr 3.',
+      'Pani Nowak jest specjalistką od psychoterapii poznawczo-behawioralnej.',
+      'Pan Nowak, nauczyciel WF, prowadzi zajęcia z gimnastyki korekcyjnej i terapii ręki.',
+      'Radna zwróciła uwagę na brak leczenia psychiatrycznego dla dzieci w powiecie.',
+      // autor pisma w pierwszej osobie w innej roli niż pacjent
+      'Mam przyjemność poinformować, że Fundacja sfinansuje pobyt na turnusie rehabilitacyjnym dla 20 dzieci z gminy.',
+      'W załączniku przesyłam mój raport o absencji chorobowej w spółce za 2025 r.',
+      'Mam wątpliwość co do zasiłku chorobowego dla pracowników tymczasowych.',
+      'Jestem lekarzem orzecznikiem i od lat wydaję orzeczenia o niezdolności do pracy.',
+      'Mam 15 lat doświadczenia w terapii uzależnień od alkoholu.',
+      'Podczas narady omawiałam z zespołem absencję chorobową w wydziale.',
+      // narzędnik rzeczownika na -łem po przymiotniku i przyimku
+      'Wskaźnik absencji chorobowej w zakładzie spadł w porównaniu z ubiegłym kwartałem.',
+      'Absencja chorobowa w porównaniu z poprzednim kwartałem wzrosła o 3 punkty.',
+      // pobyt bez leczenia: cel, godziny pracy, czynność, zawód, rzecz
+      'Klient zgłosił się do szpitala z reklamacją dotyczącą faktury.',
+      'Pan Nowak zgłosił się do szpitala w sprawie praktyk studenckich.',
+      'Pani Nowak zgłosiła się do szpitala na rozmowę kwalifikacyjną.',
+      'Pan Nowak trafił do szpitala na staż podyplomowy.',
+      'Pani Kowalska, studentka, została przyjęta na oddział pediatrii na praktyki.',
+      'Pan Nowak, konserwator, przebywał w szpitalu od 8:00 do 16:00, naprawiając windy.',
+      'Teczka Pana Nowaka leży w szpitalu od tygodnia.',
+      'Pan Nowak, elektryk, został skierowany do szpitala wojewódzkiego do naprawy agregatu.',
+      'Pani Nowak została przyjęta do szpitala na stanowisko sekretarki medycznej.',
+      'Pan Nowak skierowany do szpitala na kontrolę przeciwpożarową sporządził protokół.',
+      // imiesłów bez człowieka i bez dopowiedzenia medycznego, rehabilitacja prawna
+      'Budynek był diagnozowany pod kątem zawilgocenia ścian.',
+      'Teren był napromieniowany po awarii w elektrowni.',
+      'Pomnikowy dąb jest leczony przez arborystów od trzech lat.',
+      'Sąd uznał, że Pan Nowak został rehabilitowany w 1991 r. po wyroku z czasów PRL.',
+      'Silnik samochodu Pana Nowaka był diagnozowany w stacji kontroli pojazdów.',
+      'Dron był operowany przez strażaka z JRG nr 2.',
+      'Teren po żwirowni jest rehabilitowany przyrodniczo.',
+      'Rachunek był operowany przez pełnomocnika.',
+      'Pan Nowak był leczony przez kolegów z pracy jak bohater.',
+      // zwolnienie niezdrowotne, „leczy się” bezosobowe, lek przy instytucji
+      'Pan Nowak był na zwolnieniu dyscyplinarnym, o którym mowa w piśmie.',
+      'Pan Nowak jest na zwolnieniu grupowym objętym porozumieniem.',
+      'Na tym oddziale leczy się głównie seniorów po udarach.',
+      'Pan Nowak, ordynator, mówi, że w poradni leczy się dorosłych i dzieci.',
+      'Hurtownia przyjmuje Ibuprom i Apap do magazynu w poniedziałki.',
+      'Placówka przyjmuje Xanax tylko na podstawie zamówienia.',
+      // reguła z podmiotem ogólnym i zdaniem względnym, temat pola formularza
+      'Pracownik, który przebywa na zwolnieniu lekarskim, nie może wykonywać pracy zarobkowej.',
+      'W okresie pandemii COVID-19 pracownik, który przedstawi zwolnienie lekarskie, zachowuje prawo do wynagrodzenia.',
+      'Imię i nazwisko: Jan Kowalski\nTemat szkolenia: orzeczenie o niepełnosprawności w praktyce urzędu',
+      // angielski: idiom, rzecz, część szpitala, sprawa urzędowa
+      'He had a stroke of genius during the negotiations.',
+      'His access was disabled after he left the company.',
+      'He is committed to the hospital expansion project.',
+      'He was taken to the hospital cafeteria for a meeting with the board.',
+      'She drafted the disability pension reform for the ministry.',
+      'She works on the disability pension reform at the ministry.',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+});
+
+test('zdrowie klasa 3: rola osoby, podmiot i cel pobytu w czasie liniowym', () => {
+  const time = (s: string): number => {
+    const t0 = performance.now();
+    redactPII(s, { types: ['ZDROWIE'] });
+    return performance.now() - t0;
+  };
+  const block = (n: number): string =>
+    Array.from(
+      { length: n },
+      () =>
+        'Pan Jan Nowak, kierownik działu, przypomina, że zwolnienie lekarskie należy dostarczyć. Pan Nowak, konserwator, przebywał w szpitalu od 8:00 do 16:00, naprawiając windy, a córka, która korzysta z pomocy psychologa, prowadzi zajęcia z gimnastyki i terapii ręki; Hurtownia przyjmuje Ibuprom, most był diagnozowany.',
+    ).join(' ');
+  redactPII(block(50));
+  const [t1, t4] = bestTimes(time, block(250), block(1000));
+  expect(t4 / t1).toBeLessThan(6);
+});
+
+// ── Zdrowie klasa 4: rozpoznanie spoza listy chorób, kod ICD w zdaniu, uraz ──
+test('zdrowie klasa 4: rozpoznanie po kotwicy, nazwa choroby po budowie słowa, kod ICD-10 i ICD-11, uraz', () => {
+  const Z = '[DANE O ZDROWIU]';
+  const cases: [string, string][] = [
+    // kotwica rozpoznania i nazwa spoza listy: do końca frazy, z dopowiedzeniem i kodem
+    ['U wnioskodawczyni rozpoznano toczeń rumieniowaty układowy, co potwierdza dokumentacja.', `U wnioskodawczyni rozpoznano ${Z}, co potwierdza dokumentacja.`],
+    ['Syn stron ma zdiagnozowaną mukowiscydozę i wymaga codziennej fizjoterapii.', `Syn stron ma zdiagnozowaną ${Z} i wymaga codziennej ${Z}.`],
+    ['Zdiagnozowano u niej endometriozę oraz niedoczynność tarczycy.', `Zdiagnozowano u niej ${Z} oraz ${Z}.`],
+    ['W wywiadzie: padaczka od 12. roku życia, obecnie bez napadów.', `W wywiadzie: ${Z} od 12. roku życia, obecnie bez napadów.`],
+    ['Kurator ustaliła, że uczestnik postępowania ma rozpoznane PTSD i przyjmuje leki.', `Kurator ustaliła, że uczestnik postępowania ma rozpoznane ${Z} i przyjmuje leki.`],
+    ['Małoletni ma rozpoznane zaburzenia ze spektrum autyzmu (6A02).', `Małoletni ma rozpoznane ${Z}.`],
+    ['Psychiatra rozpoznała zespół hiperkinetyczny z zaburzeniami uwagi (F90.0).', `Psychiatra rozpoznała ${Z}.`],
+    ['Biegły stwierdził u powoda zespół stresu pourazowego po wypadku.', `Biegły stwierdził u powoda ${Z} po wypadku.`],
+    // budowa słowa: -opatia, -algia, -oza, dys-, niedo-, skrót rozpoznania, alergen
+    ['Pacjentka cierpi na fibromialgię i neuropatię cukrzycową.', `Pacjentka cierpi na ${Z} i ${Z}.`],
+    ['Z opinii poradni wynika, że Julia ma dysleksję rozwojową i dyskalkulię.', `Z opinii poradni wynika, że Julia ma ${Z} i ${Z}.`],
+    ['Podopieczna ma niedowład lewostronny po udarze krwotocznym mózgu.', `Podopieczna ma ${Z}.`],
+    ['Babcia ma demencję i wymaga stałej opieki.', `Babcia ma ${Z} i ${Z}.`],
+    ['Antek ma alergię na białko mleka krowiego, wymaga specjalnej diety.', `Antek ma ${Z}, wymaga specjalnej diety.`],
+    ['PL: Mam umiarkowany niedosłuch i noszę aparaty słuchowe.', `PL: Mam ${Z} i noszę ${Z}.`],
+    // choroba z listy przy osobie i czasowniku „ma”, stopień przed nazwą i kod po niej w tej samej masce
+    ['Pani Tereska źle sypia, ma nadciśnienie tętnicze i bierze leki.', `Pani [IMIĘ I NAZWISKO] źle sypia, ma ${Z} i bierze leki.`],
+    ['Pani Nowak przyjmuje leki na nadciśnienie tętnicze.', `Pani [IMIĘ I NAZWISKO] przyjmuje leki na ${Z}.`],
+    ['Pani Nowak opowiadała w artykule o chorobie Alzheimera swojej matki.', `Pani [IMIĘ I NAZWISKO] opowiadała w artykule o ${Z} swojej matki.`],
+    ['Wnioskodawca leczy się z powodu przewlekłej obturacyjnej choroby płuc (J44.9).', `Wnioskodawca ${Z} z powodu ${Z}.`],
+    ['Strona leczy się z powodu depresji nawracającej (F33.1), co ogranicza jej pracę.', `Strona ${Z} z powodu ${Z}, co ogranicza jej pracę.`],
+    ['Leszek nie przyszedł z powodu zwolnienia lekarskiego (grypa z powikłaniami).', `Leszek nie przyszedł z powodu ${Z}.`],
+    // uraz z wyrazem między nazwą a częścią ciała i z łamaniem wiersza
+    ['Pacjent lat 32. W RTG stwierdzono złamanie\ntrzonu kości piszczelowej lewej z przemieszczeniem.', `Pacjent lat 32. W RTG stwierdzono ${Z}.`],
+    ['Uczestniczka nr 1 uskarżała się na ból karku.', `Uczestniczka nr 1 uskarżała się na ${Z}.`],
+    // angielski
+    ['EN: I have a moderate hearing impairment and use hearing aids.', `EN: I have a ${Z} and use ${Z}.`],
+    ['Mr Zieliński underwent treatment for acute lymphoblastic leukaemia in 2021.', `[IMIĘ I NAZWISKO] underwent treatment for ${Z} in 2021.`],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
+  // nagłówek „Rozpoznanie” bez dwukropka nad akapitem opinii
+  expect(redactPII('Szybko się męczył.\n\nRozpoznanie\nDysleksja rozwojowa o charakterze mieszanym u ucznia z ADHD.\n\nZalecenia').redacted).toBe(
+    `Szybko się męczył.\n\nRozpoznanie\n${Z}\n\nZalecenia`,
+  );
+  // idempotencja: drugi przebieg nic nie dokłada
+  for (const [t] of cases) {
+    const once = redactPII(t).redacted;
+    expect(redactPII(once).redacted, t).toBe(once);
+  }
+});
+
+test('zdrowie klasa 4: bez rozpoznania osoby zostaje (zespół ludzi, stwierdzenie urzędowe, przenośnia, grupa, przepis)', () => {
+  keep(
+    [
+      'Zespół Szkół nr 2 w Krakowie ogłasza nabór.',
+      'Posiedzenie Zespołu Kontroli Zarządczej odbyło się 3 marca.',
+      'Zespół Zarządzania Kryzysowego obradował w nocy.',
+      'Zespół Pieśni i Tańca „Mazowsze” wystąpi w hali.',
+      'Projekt prowadzi zespół Nowaka z Politechniki.',
+      'Zespół Nowaka rozpoznał problem z instalacją.',
+      'W trakcie kontroli stwierdzono naruszenie przepisów o zamówieniach publicznych.',
+      'Stwierdzono uszkodzenie dachu oraz pęknięcie ściany nośnej budynku.',
+      'Zakład stwierdził zużycie łożysk i złamanie wału silnika.',
+      'Kontrola stwierdziła wady prawne umowy oraz wadę fizyczną towaru.',
+      'Świadek rozpoznała oskarżonego na okazanym zdjęciu.',
+      'Sąd rozpoznał apelację pozwanego na rozprawie.',
+      'Gmina ma rozpoznane potrzeby mieszkańców w zakresie transportu.',
+      'Rozpoznano u niego talent muzyczny i skierowano do szkoły.',
+      'Firma ma zdiagnozowane problemy z płynnością finansową.',
+      'Prokuratura prowadzi postępowanie z powodu podejrzenia popełnienia przestępstwa.',
+      'Diagnoza potrzeb rynku pracy w powiecie została opracowana przez urząd.',
+      'W wywiadzie dla radia burmistrz mówił o grypie.',
+      'W wywiadzie środowiskowym ustalono, że rodzina mieszka w trudnych warunkach.',
+      'Pracownik był nieobecny z powodu choroby.',
+      'Wniosek złożono z powodu choroby dziecka.',
+      'Mieszkaniec skarży się na brak informacji z urzędu.',
+      'Pan Kowalski skarży się na hałas z warsztatu sąsiada.',
+      'W piśmie wskazano na zaburzenia w dostawach energii z powodu awarii sieci.',
+      'Objawy kryzysu gospodarczego są widoczne w regionie.',
+      'Stan po remoncie: lokal zdatny do zamieszkania.',
+      'Choroba holenderska gospodarki to znane zjawisko.',
+      'Firma ma anemię inwestycyjną, a prezes to potwierdził.',
+      'Pan Kowalski ma alergię na biurokrację.',
+      'Skarżący wskazał na nostalgię i sympatię do dawnych czasów.',
+      'Prognoza pogody zapowiada opady. Diagnoza usterki zajęła mechanikowi dwa dni.',
+      'Wirtuoza fortepianu przywitała publiczność. Glukoza i fruktoza to cukry.',
+      'Odra wylała w okolicach Wrocławia.',
+      // grupa, temat, przepis, statystyka
+      'Wiele osób choruje na grypę w sezonie jesiennym.',
+      'Objawy grypy to gorączka i kaszel.',
+      'Zespół Aspergera to całościowe zaburzenie rozwoju.',
+      'Dzieci z autyzmem mają prawo do wczesnego wspomagania rozwoju.',
+      'Rodzice dzieci z ADHD spotkają się w szkole.',
+      'Pani Kowalska prowadzi terapię dzieci z autyzmem.',
+      'Pani Kowalska jest specjalistką od autyzmu i dysleksji.',
+      'Dyrektor szpitala, Pan Jan Nowak, omówił leczenie cukrzycy u dzieci.',
+      'Sklep medyczny oferuje aparaty słuchowe i implanty ślimakowe.',
+      'Rozporządzenie określa wykaz chorób zawodowych.',
+      'Leczenie nowotworów w Polsce finansuje NFZ.',
+      'Hearing loss affects many people and employers should provide hearing aids.',
+      // choroba jako temat wypowiedzi albo działania dla wszystkich
+      'Radna zapytała o szczepienia na COVID-19 w szkołach.',
+      'Pan Kowalski, pracownik sanepidu, omawiał zasady izolacji przy COVID-19.',
+      'Pani Nowak napisała artykuł o nadciśnieniu tętniczym.',
+      'Uczeń przygotował referat o chorobie Alzheimera.',
+      // obserwacja zachowania to nie rozpoznanie (polityka)
+      'Pracownik jest drażliwy i ma trudności z koncentracją.',
+      // kod niebędący kodem choroby
+      'Sygnatura akt II K 123/24, sala A12, kod rabatowy F32A.',
+      'Rozpoznanie\nSąd zważył, co następuje.',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+});
+
+test('zdrowie klasa 4: fraza rozpoznania w czasie liniowym', () => {
+  const time = (s: string): number => {
+    const t0 = performance.now();
+    redactPII(s, { types: ['ZDROWIE'] });
+    return performance.now() - t0;
+  };
+  const block = (n: number): string =>
+    Array.from(
+      { length: n },
+      () =>
+        'U syna rozpoznano zespół hiperkinetyczny z zaburzeniami uwagi (F90.0) i alergię na białko mleka krowiego; stwierdzono złamanie trzonu kości piszczelowej lewej, a Zespół Szkół stwierdził naruszenie zasad z powodu awarii.',
+    ).join(' ');
+  redactPII(block(50));
+  const [t1, t4] = bestTimes(time, block(250), block(1000));
+  expect(t4 / t1).toBeLessThan(6);
+});
+
+test('zdrowie klasa 4: rozpoznanie w zdaniu ogólnym zostaje (warunek, zdanie względne reguły, kwantyfikator, grupa, dane zbiorcze)', () => {
+  keep(
+    [
+      // warunek: przypadek możliwy, a nie fakt o osobie
+      'Jeżeli u dziecka zdiagnozowano autyzm, rodzice mogą złożyć wniosek o wczesne wspomaganie.',
+      'Jeśli u pracownika stwierdzono pylicę płuc, pracodawca zawiadamia inspektora pracy.',
+      'Gdy u pacjenta rozpoznano gruźlicę, lekarz zgłasza to do państwowej inspekcji sanitarnej.',
+      'O ile u ubezpieczonego rozpoznano chorobę zawodową, przysługuje mu jednorazowe odszkodowanie.',
+      'W przypadku gdy u kandydata stwierdzono padaczkę, lekarz wydaje orzeczenie o przeciwwskazaniach.',
+      // zdanie względne reguły: podmiot ogólny i orzeczenie bez zdarzenia z przeszłości
+      'Uczeń, u którego rozpoznano dysleksję, może pisać egzamin w wydłużonym czasie.',
+      'Pracownik, u którego stwierdzono chorobę zawodową, ma prawo do jednorazowego odszkodowania.',
+      'Dziecko, u którego zdiagnozowano ADHD, otrzymuje dostosowanie warunków egzaminu.',
+      'Ktoś, u kogo rozpoznano anemię, powinien skonsultować dietę.',
+      // kwantyfikator i grupa przed kotwicą
+      'Każdy uczeń z rozpoznanym ADHD otrzymuje dostosowanie warunków egzaminu.',
+      'Każde dziecko z rozpoznanym autyzmem ma prawo do wczesnego wspomagania rozwoju.',
+      'Osobom z rozpoznaną padaczką nie wydaje się prawa jazdy bez opinii neurologa.',
+      'Pacjentom z rozpoznanym zespołem Downa przysługuje opieka koordynowana.',
+      // dane zbiorcze
+      'W tym roku zdiagnozowano 45 przypadków boreliozy w gminie.',
+      'W 2025 r. w powiecie rozpoznano 312 przypadków gruźlicy.',
+      'Według danych NFZ u co trzeciego seniora rozpoznano nadciśnienie.',
+      'Sanepid odnotował wzrost zachorowań na boreliozę w powiecie.',
+      // ten sam strażnik przy chorobie z listy fraz
+      'Jeżeli u dziecka zdiagnozowano astmę, rodzice mogą złożyć wniosek.',
+      'Uczeń, u którego rozpoznano cukrzycę, może korzystać z dodatkowych przerw.',
+      'Osobom z rozpoznaną cukrzycą typu 1 przysługuje refundacja sensorów.',
+      'W 2025 r. rozpoznano 312 przypadków cukrzycy ciążowej.',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+});
+
+test('zdrowie klasa 4: skrót choroby w nazwie własnej i zespół ludzi z nazwiskiem zostają', () => {
+  keep(
+    [
+      'Dr Anna Lis pracuje w IBS PAN od 2019 r.',
+      'Pani Nowak przyjechała z Instytutu IBS w Warszawie na konsultacje.',
+      'Pan Kowalski gra w klubie RZS Rzeszów od trzech sezonów.',
+      'Pan Nowak jest prezesem spółki OCD Consulting.',
+      'Pani Kowalska zrezygnowała z pracy z powodu SMA Solar.',
+      'Przedstawiciel Fundacji AIDS Healthcare odwiedził szpital.',
+      'Pani Anna Lis pracuje w zespole Mazura na oddziale kardiologii.',
+      'Pan Jan Kos dołączył do zespołu Nowaka w poradni rehabilitacyjnej.',
+      'Pielęgniarka z zespołu Wójcika dyżuruje w środy w szpitalu.',
+      'Pan Adam Lis jest członkiem zespołu Kubiaka w przychodni rejonowej.',
+      'Pan Adam Lis współpracuje z zespołem Kubiaka w szpitalu powiatowym.',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+});
+
+test('zdrowie klasa 4: konkretna osoba przy warunku, zdaniu względnym, skrócie i zespole z nazwiskiem zostaje zakryta', () => {
+  const Z = '[DANE O ZDROWIU]';
+  const cases: [string, string][] = [
+    // zdarzenie z przeszłości w zdaniu głównym, krewny, osoba wskazana w zdaniu
+    ['Gdy u syna zdiagnozowano autyzm, rozpoczęliśmy terapię.', `Gdy u syna zdiagnozowano ${Z}, rozpoczęliśmy terapię.`],
+    ['Pacjentka, u której rozpoznano boreliozę, została przyjęta na oddział.', `Pacjentka, u której rozpoznano ${Z}, została przyjęta na oddział.`],
+    ['W przypadku syna rozpoznano zespół Aspergera.', `W przypadku syna rozpoznano ${Z}.`],
+    ['Jeżeli chodzi o syna, w zeszłym roku zdiagnozowano u niego autyzm.', `Jeżeli chodzi o syna, w zeszłym roku zdiagnozowano u niego ${Z}.`],
+    ['Chłopca przyjęła lekarka, która rozpoznała zespół hiperkinetyczny (F90.0).', `Chłopca przyjęła lekarka, która rozpoznała ${Z}.`],
+    // skrót przy osobie, także obok poradni bez nazwy własnej
+    ['Pani Nowak ma rozpoznane ADHD od 2020 r.', `Pani Nowak ma rozpoznane ${Z} od 2020 r.`],
+    ['Syn jest pod opieką poradni z powodu RZS.', `Syn jest pod opieką poradni z powodu ${Z}.`],
+    // zespół z nazwiskiem po kotwicy rozpoznania albo przyczyny i przy osobie, która go ma
+    ['U syna rozpoznano zespół Aspergera.', `U syna rozpoznano ${Z}.`],
+    ['Ze względu na zespół Aspergera pacjent wymagał obecności matki przy badaniach.', `Ze względu na ${Z} pacjent wymagał obecności matki przy badaniach.`],
+    ['Syn ma zespół Tourette’a.', `Syn ma ${Z}.`],
+    ['Dziecko z zespołem Downa uczęszcza do przedszkola integracyjnego.', `Dziecko z ${Z} uczęszcza do przedszkola integracyjnego.`],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t, { types: ['ZDROWIE'] }).redacted, t).toBe(want);
+});
+
+test('zdrowie klasa 4: maski rozpoznań podstawiane w czasie liniowym (długi wiersz bez kropek)', () => {
+  const time = (s: string): number => {
+    const t0 = performance.now();
+    redactPII(s, { types: ['ZDROWIE'] });
+    return performance.now() - t0;
+  };
+  for (const unit of ['W wywiadzie: astma. ', 'W wywiadzie nadciśnienie, ']) {
+    const text = (n: number): string => unit.repeat(Math.ceil(n / unit.length));
+    time(text(20_000));
+    const [t1, t4] = bestTimes(time, text(50_000), text(200_000));
+    expect(t4 / t1, unit).toBeLessThan(6);
+  }
+});
+
+test('zdrowie klasa 4: rdzeń polski z „-oz-” (wóz, mróz) i przenośny „niedorozwój” nie są chorobą', () => {
+  keep(
+    [
+      // „-wóz-” (pojazd, transport) i „-mróz-” przed „-oza”: słownictwo gmin, przetargów i rolnictwa
+      'Z uwagi na przewozy szkolne Pan Nowak zmienił godziny pracy.',
+      'Pani Nowak odpowiada za przewozy.',
+      'Pan Kowalski odpowiada za przewozy pasażerskie w spółce.',
+      'Na skutek opóźnień w przewozie Pan Nowak spóźnił się do pracy.',
+      'Gmina zleciła przewozy uczniów niepełnosprawnych do szkół.',
+      'Pan Nowak kupił dwa betonowozy i szambowozy dla firmy.',
+      'Pani Kowalska zwróciła uwagę na przymrozy w maju.',
+      'Z powodu przymrozów rolnik stracił plony.',
+      'Pani Kowalska czyta prozę i opowiada o grozie wojny.',
+      // „niedorozwój” infrastruktury, sieci i rynku w piśmie samorządu
+      'Wójt wskazał, że z powodu niedorozwoju sieci kanalizacyjnej Pan Nowak nie może się przyłączyć.',
+      'Pan Kowalski skarży się na niedorozwój komunikacji publicznej w gminie.',
+      'Z powodu niedorozwoju rynku pracy w powiecie Pan Nowak wyjechał.',
+      'Strategia gminy wskazuje niedorozwój infrastruktury drogowej jako główny problem.',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+  const Z = '[DANE O ZDROWIU]';
+  const cases: [string, string][] = [
+    // choroba na „-oza” po rdzeniu greckim zostaje rozpoznaniem, także w złożeniu z cukrem
+    ['U pacjenta rozpoznano boreliozę.', `U pacjenta rozpoznano ${Z}.`],
+    ['Pani Nowak choruje na sarkoidozę.', `Pani Nowak choruje na ${Z}.`],
+    ['U pacjentki stwierdzono endometriozę i skoliozę.', `U pacjentki stwierdzono ${Z}.`],
+    ['Pan Kowalski ma zdiagnozowaną toksoplazmozę.', `Pan Kowalski ma zdiagnozowaną ${Z}.`],
+    // niedorozwój z rodzajem albo narządem
+    ['U syna rozpoznano niedorozwój umysłowy w stopniu lekkim.', `U syna rozpoznano ${Z} w stopniu lekkim.`],
+    ['Pan Nowak ma niedorozwój kończyny dolnej prawej.', `Pan Nowak ma ${Z}.`],
+    ['Stwierdzono u dziecka niedorozwój nerki lewej.', `Stwierdzono u dziecka ${Z}.`],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t, { types: ['ZDROWIE'] }).redacted, t).toBe(want);
+});
+
+test('zdrowie klasa 4: zespół z nazwiskiem po „ma” to choroba tylko u osoby i bez dopowiedzenia organizacyjnego', () => {
+  keep(
+    [
+      'Szkoła ma zespół Kubiaka do obsługi zawodów.',
+      'Pan Kowalski ma zespół Kowalczyka w dziale IT.',
+      'Pani Kowalska ma zespół Nowaka do pomocy przy inwentaryzacji.',
+      'Dyrektor ma zespół Nowaka w dziale kadr.',
+      'Urząd miał zespół Mazura do spraw zamówień.',
+      'Firma posiada zespół Wójcika na budowie w Gdańsku.',
+      'Pan Nowak ma zespół Lisa z biura projektów.',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+  const Z = '[DANE O ZDROWIU]';
+  const cases: [string, string][] = [
+    ['Syn ma zespół Aspergera.', `Syn ma ${Z}.`],
+    ['Pan Nowak ma zespół Tourette’a.', `Pan Nowak ma ${Z}.`],
+    ['Pani Kowalska ma zespół Downa i uczęszcza na zajęcia.', `Pani Kowalska ma ${Z} i uczęszcza na zajęcia.`],
+    ['Córka ma zespół Retta od urodzenia.', `Córka ma ${Z} od urodzenia.`],
+    ['Wnuczka ma zespół Williamsa.', `Wnuczka ma ${Z}.`],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t, { types: ['ZDROWIE'] }).redacted, t).toBe(want);
+});
+
+test('zdrowie klasa 4: przepis o roli w liczbie pojedynczej z rozpoznaniem zostaje jawny', () => {
+  keep(
+    [
+      'Pracownik z rozpoznaną depresją może skorzystać z urlopu.',
+      'Pracodawca może skierować pracownika z rozpoznaną depresją na badanie.',
+      'Kandydat z rozpoznaną padaczką nie może uzyskać prawa jazdy.',
+      'Osoba z rozpoznanym autyzmem ma prawo do asystenta.',
+      'Dziecku z rozpoznanym ADHD przysługuje pomoc psychologiczno-pedagogiczna.',
+      'Uczeń z rozpoznaną dysleksją może pisać egzamin dłużej.',
+      'Lekarz orzecznik może uznać osobę z rozpoznaną schizofrenią za niezdolną.',
+      'Pacjent z podejrzeniem udaru jest przewożony na SOR.',
+      'Pacjent z podejrzeniem zawału serca zostaje skierowany na oddział kardiologii.',
+      'Uczeń z dysleksją powinien mieć wydłużony czas pisania.',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+  const Z = '[DANE O ZDROWIU]';
+  const cases: [string, string][] = [
+    // osoba z nazwy, krewny, pierwsza osoba, zdarzenie bez orzeczenia reguły, strona postępowania
+    ['Pan Nowak z rozpoznaną depresją może skorzystać z urlopu.', `Pan Nowak z rozpoznaną ${Z} może skorzystać z urlopu.`],
+    ['Syn z rozpoznanym autyzmem ma prawo do asystenta.', `Syn z rozpoznanym ${Z} ma prawo do asystenta.`],
+    ['Moja córka z rozpoznanym autyzmem ma prawo do asystenta.', `Moja córka z rozpoznanym ${Z} ma prawo do asystenta.`],
+    ['Pracownik z rozpoznaną depresją wrócił do pracy w marcu.', `Pracownik z rozpoznaną ${Z} wrócił do pracy w marcu.`],
+    ['Pacjent z rozpoznaną cukrzycą zgłosił się na wizytę.', `Pacjent z rozpoznaną ${Z} zgłosił się na wizytę.`],
+    ['Wnioskodawczyni z rozpoznaną depresją może mieć trudności z dojazdem.', `Wnioskodawczyni z rozpoznaną ${Z} może mieć trudności z dojazdem.`],
+    // orzeczenie reguły po spójniku to nowe orzeczenie o tej samej osobie
+    ['Pracownik z rozpoznaną depresją wrócił do pracy i może pracować zdalnie.', `Pracownik z rozpoznaną ${Z} wrócił do pracy i może pracować zdalnie.`],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t, { types: ['ZDROWIE'] }).redacted, t).toBe(want);
+});
+
+test('zdrowie klasa 10: lek bez dawki, grupa leków i droga podania przy osobie', () => {
+  const Z = '[DANE O ZDROWIU]';
+  const cases: [string, string][] = [
+    // substancja spoza słownika o kształcie nazwy leku po czasowniku przyjmowania albo zlecenia
+    ['Chłopiec przyjmuje metylofenidat.', `Chłopiec przyjmuje ${Z}.`],
+    ['Zdiagnozowano u niego ADHD, a lekarz włączył metylofenidat.', `Zdiagnozowano u niego ${Z}, a lekarz włączył ${Z}.`],
+    ['Podopieczny stosuje rysperydon.', `Podopieczny stosuje ${Z}.`],
+    ['Wnioskodawczyni od roku bierze kwetiapinę i klonazepam.', `Wnioskodawczyni od roku bierze ${Z} i ${Z}.`],
+    ['Lekarz zalecił mu amoksycylinę przez 7 dni.', `Lekarz zalecił mu ${Z} przez 7 dni.`],
+    // insulina, metadon, „jest na”
+    ['Cukrzyca się rozjechała. Chcą, żeby brała insulinę.', `${Z} się rozjechała. Chcą, żeby brała ${Z}.`],
+    ['Ojciec jest na insulinie od 2019 r.', `Ojciec jest na ${Z} od 2019 r.`],
+    ['Matka przyjmuje metadon w programie substytucyjnym.', `Matka przyjmuje ${Z} w programie substytucyjnym.`],
+    // grupa leków przy czasowniku i przy kotwicy medycznej, nazwa handlowa po postaci leku i po „zażywa”
+    ['Małoletni otrzymuje leki przeciwpadaczkowe.', `Małoletni otrzymuje ${Z}.`],
+    ['Od 2024 r. syn przyjmuje leki przeciwpsychotyczne (olanzapina).', `Od 2024 r. syn przyjmuje ${Z} (${Z}).`],
+    ['- poz. 3: zasiłek na zakup leków przeciwpadaczkowych po wypisie ze szpitala.', `- poz. 3: zasiłek na zakup ${Z}.`],
+    ['Syn zażywa tabletki Relanium.', `Syn zażywa ${Z}.`],
+    ['Syn zażywa Relanium bez wiedzy lekarza.', `Syn zażywa ${Z} bez wiedzy lekarza.`],
+    // droga podania przy dawce i kolejny lek w wyliczeniu po zakrytym
+    // droga podania wzmacnia kotwicę (sama osoba wystarcza), ale bez osoby i słowa medycznego nie wystarcza
+    ['Pan Nowak: Enoksaparyna 40 mg s.c. raz dziennie przez 35 dni.', `Pan Nowak: ${Z} przez 35 dni.`],
+    // kropka skrótu na końcu zdania zostaje, następne zdanie nie dołącza do maski
+    ['Pacjentowi ordynowano haloperydol 5 mg i.m. Stan dobry.', `Pacjentowi ordynowano ${Z}. Stan dobry.`],
+    ['Pani Nowak przyjmuje metotreksat 15 mg 2 razy w tygodniu.', `Pani Nowak przyjmuje ${Z}.`],
+    ['Pacjent hospitalizowany. Glikemie wyrównane na insulinie aspart i glarginie.', `Pacjent hospitalizowany. Glikemie wyrównane na ${Z} i ${Z}.`],
+    ['Kasia: metformina 850 2x dziennie i insulina glargine wieczorem, kod recepty przyjdzie smsem', `Kasia: ${Z} i ${Z} wieczorem, kod recepty przyjdzie smsem`],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t, { types: ['ZDROWIE'] }).redacted, t).toBe(want);
+  keep(
+    [
+      // czasownik bez leku
+      'Urząd przyjmuje interesantów od 8 do 16.',
+      'Do wniosku stosuje się przepisy ustawy.',
+      'Pan Kowalski bierze udział w szkoleniu.',
+      'Zalecono uzupełnienie wniosku w terminie 7 dni.',
+      'Podano do publicznej wiadomości wykaz nieruchomości.',
+      'Wójt przyjmuje Pana Kowalskiego w poniedziałek.',
+      'Sołtys otrzymuje Order Uśmiechu.',
+      'Dyrektor jest na urlopie do piątku.',
+      'Kierownik jest na Mazurach.',
+      'Pani Kowalska zażywa kąpieli słonecznych.',
+      'Kandydat przyjmuje stanowisko p.o. dyrektora.',
+      'Pracownik bierze platynę z magazynu.',
+      'Zespół przyjął metodę Kaina.',
+      'Aspartam jest słodzikiem.',
+      // instytucja, obrót lekami, przepis, statystyka, reguła i cennik
+      'Apteka przyjmuje recepty na leki przeciwdepresyjne.',
+      'Firma stosuje rysperydon w badaniach klinicznych.',
+      'Szpital stosuje enoksaparynę u pacjentów po zabiegach.',
+      'Gmina przyjmuje leki przeciwbólowe od darczyńców na zbiórkę.',
+      'Refundacja leków przeciwpadaczkowych dla dzieci obejmuje 2026 r.',
+      'Sprawa dotyczy kradzieży leków psychotropowych z apteki szpitalnej przez Jana Kowalskiego.',
+      'Pan Nowak, farmaceuta, przyjmuje dostawy leków nasennych.',
+      'Ustawa reguluje obrót lekami psychotropowymi.',
+      'Zalecono stosowanie leków przeciwzakrzepowych zgodnie z wytycznymi.',
+      'Leki przeciwbólowe można kupić bez recepty.',
+      'Wiele osób przyjmuje leki przeciwdepresyjne.',
+      'Pacjent może przyjmować leki przeciwzakrzepowe tylko pod kontrolą.',
+      'Kto przyjmuje insulinę, powinien mieć glukometr.',
+      'W ofercie apteki: insulina, metformina i leki nasenne w cenie 20 zł.',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+});
+
+test('zdrowie klasa 10: recepta jako kategoria leku, nazwa firmy, nowe zdanie po przecinku i praktyka instytucji zostają', () => {
+  const Z = '[DANE O ZDROWIU]';
+  keep(
+    [
+      // „bez recepty”, „na receptę”: kategoria leku w komunikacie GIF, ulotce, ogłoszeniu apteki
+      'Paracetamol 500 mg jest dostępny bez recepty w każdej aptece.',
+      'Ibuprofen 400 mg można kupić bez recepty.',
+      'Apap 500 mg, 24 tabletki, lek bez recepty.',
+      'Komunikat GIF: wycofanie z obrotu serii leku Polocard 75 mg wydawanego bez recepty.',
+      'Lek Xanax 0,5 mg wydaje się wyłącznie na receptę.',
+      'Metformina 500 mg jest lekiem na receptę refundowanym przez NFZ.',
+      'Lek wydawany z recepty: Concor 5 mg.',
+      // nowe zdanie składowe po przecinku: lek jest podmiotem, nie dopełnieniem
+      'Uczeń otrzymał pochwałę, penicylina była tematem referatu.',
+      'Uczeń otrzymał nagrodę, sertralina jest omawiana na lekcji.',
+      // praktyka instytucji, badanie, sprawozdanie: grupa po liczebniku, celownik liczby mnogiej, miejscownik instytucji
+      'W badaniu klinicznym włączono metforminę u 300 pacjentów.',
+      'W 2025 r. odstawiono warfarynę u 12 chorych z powodu krwawień.',
+      'Na oddziale włączono enoksaparynę u wszystkich hospitalizowanych.',
+      'W programie podawano sertralinę 140 uczestnikom.',
+      'Kontrola NIK: w szpitalu podawano morfinę bez zlecenia.',
+      'W szpitalu podawano morfinę dożylnie.',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+  // nazwa ubezpieczyciela o rdzeniu nazwy leku („Concor” → „Concordia”) i lek-podmiot po zakrytej chorobie zostają
+  const cases: [string, string][] = [
+    ['Pani Nowak otrzymała pismo, Concordia odmówiła.', 'Pani Nowak otrzymała pismo, Concordia odmówiła.'],
+    ['Pan Nowak choruje na astmę, Concordia przyjęła wniosek o rentę.', `Pan Nowak choruje na ${Z}, Concordia przyjęła wniosek o rentę.`],
+    ['Pani Nowak ma depresję i Concordia o tym wie.', `Pani Nowak ma ${Z} i Concordia o tym wie.`],
+    ['Pani Nowak choruje na cukrzycę, Concordia Ubezpieczenia potwierdziła polisę.', `Pani Nowak choruje na ${Z}, Concordia Ubezpieczenia potwierdziła polisę.`],
+    ['Pani Nowak przyjmuje interesantów i petentów, statyny są w szafce służbowej apteczki.', 'Pani Nowak przyjmuje interesantów i petentów, statyny są w szafce służbowej apteczki.'],
+    ['Pan Nowak choruje na astmę, sertralina jest omawiana na lekcji.', `Pan Nowak choruje na ${Z}, sertralina jest omawiana na lekcji.`],
+    // to nadal lek osoby: odmiana leku, recepta pacjenta, wyliczenie leków, zlecenie przy osobie
+    ['Pani Nowak przyjmuje Concor i Euthyrox.', `Pani Nowak przyjmuje ${Z} i ${Z}.`],
+    ['Pani Nowak jest na Concorze od roku.', `Pani Nowak jest na ${Z} od roku.`],
+    ['Pan Nowak bierze sertralinę, lamotryginę i insulinę.', `Pan Nowak bierze ${Z}, ${Z} i ${Z}.`],
+    ['Pani Nowak odebrała e-receptę na Concor 5 mg.', `Pani Nowak odebrała e-receptę na ${Z}.`],
+    ['E-recepta dla Pani Nowak: Xanax 0,5 mg.', `E-recepta dla Pani Nowak: ${Z}.`],
+    ['Pani Nowak: Concor 5 mg, recepta do odbioru.', `Pani Nowak: ${Z}, recepta do odbioru.`],
+    ['Pacjentce włączono sertralinę.', `Pacjentce włączono ${Z}.`],
+    ['Pacjent hospitalizowany na oddziale chirurgii. Na oddziale włączono enoksaparynę s.c.', `Pacjent hospitalizowany na oddziale chirurgii. Na oddziale włączono ${Z}.`],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t, { types: ['ZDROWIE'] }).redacted, t).toBe(want);
+});
+
+test('zdrowie klasa 10: przysłówek, szyk, przeczenie, zlecenie bezosobowe, postać leku i tekst angielski', () => {
+  const Z = '[DANE O ZDROWIU]';
+  const cases: [string, string][] = [
+    // przysłówek po budowie i droga podania przed lekiem (znika razem z lekiem)
+    ['Brała wcześniej fluoksetynę.', `Brała wcześniej ${Z}.`],
+    ['Pan Wiśniewski przyjmował wcześniej leki przeciwpsychotyczne.', `Pan Wiśniewski przyjmował wcześniej ${Z}.`],
+    ['Zalecono mu doustnie amoksycylinę.', `Zalecono mu ${Z}.`],
+    ['Podano domięśniowo ketoprofen.', `Podano ${Z}.`],
+    ['Pacjentka otrzymała dożylnie cefuroksym.', `Pacjentka otrzymała ${Z}.`],
+    ['Pani Agata stosuje dopochwowo progesteron.', `Pani Agata stosuje ${Z}.`],
+    ['Wcześniej przyjmowała wenlafaksynę, obecnie duloksetynę.', `Wcześniej przyjmowała ${Z}, obecnie ${Z}.`],
+    // zlecenie bezosobowe, z drogą podania albo z odbiorcą w celowniku
+    ['Włączono enoksaparynę s.c. raz dziennie.', `Włączono ${Z}.`],
+    ['Lekarz ordynował furosemid dożylnie.', `Lekarz ordynował ${Z}.`],
+    ['Odstawiono klonazepam z powodu senności.', `Odstawiono ${Z} z powodu senności.`],
+    ['Wypisano receptę na rywaroksaban.', `Wypisano receptę na ${Z}.`],
+    ['Pacjentce zalecono przyjmowanie sertraliny.', `Pacjentce zalecono przyjmowanie ${Z}.`],
+    ['Zalecono kontynuację leczenia pantoprazolem.', `Zalecono kontynuację leczenia ${Z}.`],
+    ['Opiekunka codziennie podaje mu insulinę.', `Opiekunka codziennie podaje mu ${Z}.`],
+    // szyk z dopełnieniem przed czasownikiem, przeczenie i czasownik fazowy
+    ['Kwetiapinę przyjmuje od roku.', `${Z} przyjmuje od roku.`],
+    ['Leki przeciwdepresyjne bierze od dwóch lat.', `${Z} bierze od dwóch lat.`],
+    ['Pacjent nie przyjmuje regularnie przepisanej olanzapiny.', `Pacjent nie przyjmuje regularnie przepisanej ${Z}.`],
+    ['Przestała brać leki przeciwpsychotyczne w maju.', `Przestała brać ${Z} w maju.`],
+    ['Matka nie podaje dziecku leków przeciwpadaczkowych.', `Matka nie podaje dziecku ${Z}.`],
+    // lek po zakrytym leczeniu i w wyliczeniu po pozycji spoza słownika
+    ['Pani Halina jest leczona lamotryginą.', `Pani Halina jest ${Z}.`],
+    ['Pacjentka przyjmuje kwas foliowy i lewotyroksynę.', `Pacjentka przyjmuje kwas foliowy i ${Z}.`],
+    // końcówki i grupy spoza dawnej listy, sól, postać leku z substancją, lek na narząd
+    ['Pan Leszek przyjmuje tamsulosynę.', `Pan Leszek przyjmuje ${Z}.`],
+    ['Pacjentka otrzymuje heparynę podskórnie.', `Pacjentka otrzymuje ${Z}.`],
+    ['Syn stosował wcześniej walproinian sodu.', `Syn stosował wcześniej ${Z}.`],
+    ['Pan Nowak przyjmuje tenofowir.', `Pan Nowak przyjmuje ${Z}.`],
+    ['Brat wnioskodawcy jest na lekach przeciwretrowirusowych.', `Brat wnioskodawcy jest na ${Z}.`],
+    ['Dziecko jest na sterydach wziewnych.', `Dziecko jest na ${Z}.`],
+    ['Pani Jolanta bierze tabletki antykoncepcyjne.', `Pani Jolanta bierze ${Z}.`],
+    ['Mąż przyjmuje leki na serce.', `Mąż przyjmuje ${Z}.`],
+    ['Pacjentka stosuje inhalator z salbutamolem.', `Pacjentka stosuje ${Z}.`],
+    ['Wnioskodawczyni przyjmuje tabletki Tegretol.', `Wnioskodawczyni przyjmuje ${Z}.`],
+    // pismo dwujęzyczne
+    ['The patient is taking sertraline daily.', `The patient is taking ${Z} daily.`],
+    ['He is on antidepressants.', `He is on ${Z}.`],
+    ['Mother reports that the child takes methylphenidate.', `Mother reports that the child takes ${Z}.`],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t, { types: ['ZDROWIE'] }).redacted, t).toBe(want);
+  keep(
+    [
+      // postać leku z wielką literą bez nazwy leku i bez kotwicy medycznej
+      'Klient dostaje kapsułki Nespresso w prezencie od firmy.',
+      'Dziecko bierze tabletki Haribo do szkoły.',
+      'Dziecko dostaje syrop Malinowy od babci.',
+      'Wnuczka bierze krople Żołądkowe dla dziadka ze sklepu.',
+      'Pracownik otrzymuje preparaty Spółki do testów jakości.',
+      'Pan Nowak przyjmuje lek Ministerstwa jako dowód w sprawie.',
+      'Córka bierze lek Gratis z promocji.',
+      'Pan Jan Kowalski bierze krople Deszczu na dłonie.',
+      // droga podania bez osoby: ChPL, standard, ulotka, wykaz, dawkowanie dla grupy
+      'Dawkowanie według ChPL: Clexane 40 mg s.c. raz na dobę u dorosłych.',
+      'Standard profilaktyki: Clexane 40 mg s.c. raz na dobę u pacjentów unieruchomionych.',
+      'Ulotka: Clexane 40 mg s.c. raz na dobę przez 7 dni po zabiegu.',
+      'Załącznik nr 3 – wykaz leków: insulina glargine, heparyna, Clexane 40 mg s.c. raz na dobę.',
+      // grupa leków w zdaniu o grupie, statystyce albo raporcie
+      'Po wypisie ze szpitala pacjenci często otrzymują leki przeciwzakrzepowe, wynika z raportu.',
+      'Po wypisie ze szpitala chorzy zwykle przyjmują leki przeciwzakrzepowe.',
+      'W szpitalu zalecono stosowanie heparyny u wszystkich pacjentów po zabiegu.',
+      'Na oddziale pacjentom podawano heparynę.',
+      'Statyny przyjmuje co trzeci Polak po pięćdziesiątce.',
+      'Kwetiapinę przyjmuje się wieczorem.',
+      'Szpital antybiotyki stosuje oszczędnie.',
+      // czasownik bez leku przy przysłówku, wyliczeniu, czasowniku fazowym i celowniku
+      'Pan Nowak przyjmuje obecnie interesantów i petentów.',
+      'Pan Jan przestał brać udział w zebraniach.',
+      'Pracownik odmawia przyjmowania poleceń.',
+      'Opiekunka podaje mu obiad i kolację.',
+      'Zalecono kontynuację postępowania wyjaśniającego.',
+      'Zalecono mu doustnie wodę.',
+      'Wypisano receptę na nazwisko córki.',
+      'Gmina stosuje środki przeciwpożarowe i antykorozyjne.',
+      'Apteka sprzedaje tabletki antykoncepcyjne na receptę.',
+      'Mirosław Nawirski przyjmuje interesantów.',
+      // angielskie zdanie ogólne i czasownik bez leku
+      'Patients are often prescribed antidepressants after discharge.',
+      'She is taking part in the meeting.',
+    ],
+    { types: ['ZDROWIE'] },
+  );
+});
+
+test('nagłówek z organem jednoosobowym albo komórką: adres siedziby jawny, adres osoby zakryty', () => {
+  const jawne: [string, string[]][] = [
+    ['WÓJT GMINY KOBYLNICA\nul. Główna 20, 76-251 Kobylnica\n\nKobylnica, 21 października 2026 r.', ['ul. Główna 20', '76-251 Kobylnica']],
+    ['BURMISTRZ MIASTA I GMINY NIEPOŁOMICE\nPlac Zwycięstwa 13, 32-005 Niepołomice', ['Plac Zwycięstwa 13', '32-005']],
+    ['STAROSTA KŁODZKI\nul. Stefana Okrzei 1, 57-300 Kłodzko', ['ul. Stefana Okrzei 1', '57-300']],
+    ['KIEROWNIK URZĘDU STANU CYWILNEGO W KIELCACH\nul. Strycharska 6, 25-659 Kielce', ['ul. Strycharska 6', '25-659']],
+    ['URZĄD STANU CYWILNEGO W OPOLU\nul. Koraszewskiego 7–9, 45-011 Opole', ['ul. Koraszewskiego 7–9', '45-011']],
+    ['Dyrektor\nPrzedszkola Publicznego nr 33 w Rzeszowie\nal. Tadeusza Rejtana 3\n35-326 Rzeszów', ['al. Tadeusza Rejtana 3', '35-326']],
+    ['Ośrodek Pomocy Społecznej w Zgorzelcu\nSekcja Świadczeń Rodzinnych\nul. Bohaterów Getta 8, 59-900 Zgorzelec', ['ul. Bohaterów Getta 8', '59-900']],
+    ['Zastępca Wójta Gminy Mielnik\nul. Piaskowa 1\n17-307 Mielnik', ['ul. Piaskowa 1', '17-307 Mielnik']],
+    ['Państwowy Powiatowy Inspektor Sanitarny w Kłodzku\nul. Wyspiańskiego 2\n57-300 Kłodzko', ['ul. Wyspiańskiego 2', '57-300']],
+    ['Komendant Straży Miejskiej w Lublinie\nul. Podwale 3a\n20-117 Lublin', ['ul. Podwale 3a', '20-117']],
+    ['Sekretarz Gminy\nul. Polna 3\n30-001 Kraków', ['ul. Polna 3', '30-001']],
+    ['Burmistrz Pszczyny\nul. Rynek 2\n43-200 Pszczyna', ['ul. Rynek 2', '43-200']],
+  ];
+  for (const [t, keep] of jawne) {
+    const r = redactPII(t).redacted;
+    for (const k of keep) expect(r, t).toContain(k);
+  }
+  // Stanowisko w firmie, sama funkcja, organ z nazwiskiem albo osoba nad blokiem: adres zakryty.
+  const zakryte: [string, string[]][] = [
+    ['Kierownik Budowy\nul. Polna 3\n30-001 Kraków', ['ul. Polna 3', '30-001']],
+    ['Dyrektor Handlowy\nul. Polna 3\n30-001 Kraków', ['ul. Polna 3']],
+    ['Inspektor Nadzoru\nul. Polna 3\n30-001 Kraków', ['ul. Polna 3', '30-001']],
+    ['Kurator\nul. Polna 3\n30-001 Kraków', ['ul. Polna 3', '30-001']],
+    ['Skarbnik\nul. Polna 3', ['ul. Polna 3']],
+    ['Dyrektor, ul. Polna 3, 30-001 Kraków', ['ul. Polna 3', '30-001']],
+    ['Wnioskodawca:\nPrezes\nul. Polna 3', ['ul. Polna 3']],
+    ['Dyrektor Jan Kowalski\nul. Polna 3\n30-001 Kraków', ['Kowalski', 'ul. Polna 3', '30-001']],
+    ['Burmistrz Kowalski\nul. Rynek 2\n43-200 Pszczyna', ['Kowalski', 'ul. Rynek 2', '43-200']],
+    ['Jan Kowalski\nSekretarz Gminy\nul. Polna 3\n30-001 Kraków', ['Kowalski', 'ul. Polna 3', '30-001']],
+    ['Pan\nJan Kowalski\nKierownik Budowy\nul. Polna 3\n30-001 Kraków', ['Kowalski', 'ul. Polna 3', '30-001']],
+  ];
+  for (const [t, gone] of zakryte) {
+    const r = redactPII(t).redacted;
+    for (const g of gone) expect(r, t).not.toContain(g);
+  }
+  // Nagłówek urzędu i dane strony w jednym piśmie.
+  const r = redactPII('WÓJT GMINY KOBYLNICA\nul. Główna 20, 76-251 Kobylnica\n\nWnioskodawczyni: Halina Szczepaniak, zam. ul. Polna 3, 76-200 Słupsk.').redacted;
+  expect(r).toContain('ul. Główna 20, 76-251 Kobylnica');
+  for (const g of ['Szczepaniak', 'ul. Polna 3', '76-200']) expect(r).not.toContain(g);
+});
+
+test('organ terytorialny z przymiotnikiem od powiatu albo województwa to urząd, nie osoba', () => {
+  const r1 = redactPII('Pan Roman Słupski przesłał uwagi. Organ wyjaśnił Romanowi Słupskiemu, że odległości oceni Starosta Słupski.').redacted;
+  expect(r1).toContain('Starosta Słupski');
+  expect(r1).not.toContain('Roman Słupski');
+  expect(r1).not.toContain('Romanowi');
+  const r2 = redactPII('Wniosek Jana Tarnowskiego. Decyzję wyda Starosta Tarnowski, a odwołanie rozpatrzy Wojewoda Małopolski.').redacted;
+  expect(r2).toContain('Starosta Tarnowski');
+  expect(r2).toContain('Wojewoda Małopolski');
+  expect(r2).not.toContain('Jana Tarnowskiego');
+  const r3 = redactPII('Jan Mazowiecki złożył wniosek do Wojewody Mazowieckiego za pośrednictwem Starosty Kłodzkiego.').redacted;
+  expect(r3).toContain('do Wojewody Mazowieckiego za pośrednictwem Starosty Kłodzkiego');
+  expect(r3).not.toContain('Jan Mazowiecki');
+  // Sędzia i starosta z nazwiskiem spoza przymiotników od miejsc to osoby.
+  expect(redactPII('Sędzia Tarnowski oddalił wniosek.').redacted).not.toContain('Tarnowski');
+  expect(redactPII('Sprawę prowadzi Starosta Kowalski.').redacted).not.toContain('Kowalski');
+});
+
+test('nazwa własna w nazwie instytucji (patron, kraina, miejscowość) nie jest osobą sprawy', () => {
+  const jawne = [
+    'Kandydatka ukończyła administrację na Uniwersytecie Mikołaja Kopernika w Toruniu.',
+    'Posiłki dla uczniów Szkoły Podstawowej im. Janusza Korczaka w Mielniku (Gmina Mielnik).',
+    'Dotację otrzymało Stowarzyszenie Przyjaciół Ziemi Krzeszowickiej.',
+    'Fundacją Anny Dymnej kieruje zarząd.',
+    'Pacjentka leży w Szpitalu Wojewódzkim im. Jana Pawła II w Krakowie.',
+  ];
+  for (const t of jawne) expect(redactPII(t).redacted, t).toBe(t);
+  // Miejscowość z nazwiskiem-homografem w nagłówku daty, gdy pismo nazywa ją miejscowością.
+  const r = redactPII('Mielnik, 18 sierpnia 2026 r.\n\nPani Beata Kaczmarczyk, adres: Osłowo 21, 17-307 Mielnik.').redacted;
+  expect(r.startsWith('Mielnik, 18 sierpnia 2026 r.')).toBe(true);
+  expect(r).not.toContain('Kaczmarczyk');
+  // Bez dowodu, że to miejscowość, albo przy osobie o tym nazwisku: maska.
+  expect(redactPII('Kowalski, 18.08.2026').redacted).not.toContain('Kowalski');
+  expect(redactPII('Mieszkam w Nowaku.').redacted).not.toContain('Nowaku');
+  expect(redactPII('Pan Jan Mielnik, zam. 17-307 Mielnik. Szkoła w Mielniku.').redacted).not.toContain('Mielniku');
+  expect(redactPII('W przychodni Anny Nowak przyjęto pacjenta.').redacted).not.toContain('Nowak');
+  expect(redactPII('Uczeń Szkoły Podstawowej Anny Nowak.').redacted).not.toContain('Nowak');
+});
+
+test('siedziba instytucji w zdaniu jawna, siedziba firmy osoby zakryta', () => {
+  const r1 = redactPII(
+    'Świadek Pan Marek Sienkiewicz, administrator z ramienia Spółdzielni Mieszkaniowej „Słoneczny Stok” z siedzibą przy ul. Henryka Sienkiewicza 54 w Białymstoku, zam. ul. Polna 8 m. 2.',
+  ).redacted;
+  expect(r1).toContain('z siedzibą przy ul. Henryka Sienkiewicza 54');
+  expect(r1).not.toContain('Marek');
+  expect(r1).not.toContain('ul. Polna 8');
+  expect(redactPII('Lista zostanie wywieszona w siedzibie przedszkola przy ul. Kasztanowej 14 w Lesznie.').redacted).toContain('ul. Kasztanowej 14');
+  expect(redactPII('Spotkanie odbędzie się w siedzibie Urzędu Gminy w Mielniku przy ul. Piaskowej 1.').redacted).toContain('ul. Piaskowej 1');
+  for (const t of [
+    'Jan Kowalski, prowadzący działalność pod firmą „Kowal” z siedzibą przy ul. Polnej 3.',
+    'Zakład Stolarski Jan Kowalski z siedzibą przy ul. Polnej 3 w Lublinie.',
+    'Wspólnota Mieszkaniowa Jana Kowalskiego z siedzibą przy ul. Polnej 3.',
+    'Spotkanie odbędzie się w siedzibie Pana Kowalskiego przy ul. Polnej 3.',
+  ]) {
+    const r = redactPII(t).redacted;
+    expect(r, t).not.toContain('ul. Polnej 3');
+    expect(r, t).not.toContain('Kowalsk');
+  }
+});
+
+test('siedziba w zdaniu: nazwa firmy jednoosobowej i osoba w zdaniu nie odkrywają adresu', () => {
+  // Nazwa firmy osoby zaczyna się tak samo jak placówka („Szkoła”, „Zakład”, „Centrum”, „Akademia”),
+  // a ogon to nazwisko, homograf, wersaliki albo imię w dopełniaczu. Adres zostaje zakryty jak przed
+  // regułą siedziby w zdaniu, także kod i miejscowość za nim.
+  const firms: Array<[string, string]> = [
+    ['Szkoła Jazdy Lis z siedzibą przy ul. Lipowej 8', 'ul. Lipowej 8'],
+    ['Przychodnia Weterynaryjna Wilk z siedzibą przy ul. Leśnej 4', 'ul. Leśnej 4'],
+    ['Akademia Tańca KOWALSKI z siedzibą przy ul. Ogrodowej 11', 'ul. Ogrodowej 11'],
+    ['Zakład Usługowy KOWALSKI z siedzibą przy ul. Ogrodowej 11 w Kielcach', 'ul. Ogrodowej 11'],
+    ['Zakład Pogrzebowy Kwiatek z siedzibą przy ul. Cmentarnej 4', 'ul. Cmentarnej 4'],
+    ['Zakład Usług Pogrzebowych Mazur z siedzibą w Lublinie przy ul. Spokojnej 2', 'ul. Spokojnej 2'],
+    ['Centrum Szkoleniowe Sowa z siedzibą przy ul. Mądrej 1', 'ul. Mądrej 1'],
+    ['Zakład Fryzjerski Bogusława z siedzibą przy ul. Ładnej 1', 'ul. Ładnej 1'],
+    ['Firma Zakład Remontowy Baran z siedzibą przy ul. Polnej 3, NIP 123-456-32-18', 'ul. Polnej 3'],
+    ['Wykonawca: Zakład Instalacyjny Kozioł z siedzibą przy ul. Wodnej 2, 21-100 Lubartów', 'ul. Wodnej 2'],
+    ['Pani Anna Lis, właścicielka szkoły jazdy, Szkoła Jazdy Lis z siedzibą przy ul. Lipowej 8', 'ul. Lipowej 8'],
+    ['Pan Wilk prowadzi gabinet. Przychodnia Weterynaryjna Wilk z siedzibą przy ul. Leśnej 4', 'ul. Leśnej 4'],
+    ['Zakład usługowy z siedzibą przy ul. Polnej 3 prowadzi Pan Jan Kowalski.', 'ul. Polnej 3'],
+    ['| 3 | Szkoła Jazdy Lis z siedzibą przy ul. Lipowej 8 | |', 'ul. Lipowej 8'],
+    ['Jan Kowalski, Zakład Usług Remontowych z siedzibą przy ul. Polnej 3 w Lublinie.', 'ul. Polnej 3'],
+    ['Wnioskodawca: Jan Kowalski, Zakład Usług Remontowych z siedzibą przy ul. Polnej 3.', 'ul. Polnej 3'],
+    ['Kowalski Jan, Zakład Remontowy z siedzibą przy ul. Polnej 3.', 'ul. Polnej 3'],
+    ['Przedsiębiorca Jan Kowalski; Zakład Produkcyjny z siedzibą przy ul. Polnej 3.', 'ul. Polnej 3'],
+    ['Jan Kowalski, Szkoła Podstawowa nr 3 z siedzibą przy ul. Polnej 3.', 'ul. Polnej 3'],
+    ['Spotkanie odbędzie się w siedzibie szkoły jazdy przy ul. Polnej 3.', 'ul. Polnej 3'],
+  ];
+  for (const [t, street] of firms) {
+    const r = redactPII(t).redacted;
+    expect(r, t).not.toContain(street);
+    expect(r, t).toContain('[ADRES]');
+  }
+  expect(redactPII('Zakład Usługowy KOWALSKI z siedzibą przy ul. Ogrodowej 11 w Kielcach').redacted).not.toContain('Kielcach');
+  const koziol = redactPII('Wykonawca: Zakład Instalacyjny Kozioł z siedzibą przy ul. Wodnej 2, 21-100 Lubartów').redacted;
+  expect(koziol).not.toContain('21-100');
+  expect(koziol).not.toContain('Lubartów');
+  expect(redactPII('Jan Kowalski, Zakład Usług Remontowych z siedzibą przy ul. Polnej 3 w Lublinie.').redacted).not.toContain('Lublinie');
+  // Osoba po adresie w tym samym zdaniu też zabiera siedzibę, a sam urząd w zdaniu ją daje.
+  const school = redactPII('Szkoła Podstawowa nr 3 z siedzibą przy ul. Polnej 3 prowadzi zajęcia, dyrektor Pan Jan Kowalski.').redacted;
+  expect(school).not.toContain('ul. Polnej 3');
+  expect(school).not.toContain('Kowalski');
+  const court = redactPII('Sąd Rejonowy w Lublinie z siedzibą przy ul. Krakowskie Przedmieście 43 rozpoznał sprawę.').redacted;
+  expect(court).toContain('ul. Krakowskie Przedmieście 43');
+});
+
+test('imię po nazwie placówki bez „im.” to osoba w roli, patron tylko ze słownika par', () => {
+  // Pracownik, uczeń, pacjent albo podopieczny placówki z nazwiskiem-homografem: osoba zakryta.
+  const osoby: Array<[string, string]> = [
+    ['Zgłoszenie od dyrektor Szkoły Podstawowej Anny Lis.', 'Lis'],
+    ['Skarga na nauczycielkę Szkoły Podstawowej Marię Lis.', 'Lis'],
+    ['Podpisała: dyrektor Technikum Joanny Sowy.', 'Sowy'],
+    ['Pacjentka Szpitala Ewy Kozioł.', 'Kozioł'],
+    ['Pacjent Szpitala Jana Wróbla przyjęty 3 marca.', 'Wróbla'],
+    ['Uczestnik Ośrodka Jana Wilka w Lublinie.', 'Wilka'],
+    ['Podopieczny Ośrodka Adama Kruka.', 'Kruka'],
+    ['Wychowawczyni Przedszkola Marty Sikory.', 'Sikory'],
+    ['Pracownica Biblioteki Ewy Mazur.', 'Mazur'],
+    ['Opiekun Hospicjum Piotra Gołębia.', 'Gołębia'],
+    ['W Szkole Anny Lis prowadzonej przez nią samą przekazano dokumenty.', 'Lis'],
+    ['Ośrodku Anny Lis przekazano dokumenty.', 'Lis'],
+    ['Kontrola Teatru Anny Lis wykazała braki.', 'Lis'],
+    ['W Bibliotece Anny Lis odbyło się spotkanie.', 'Lis'],
+    ['Szkoła Podstawowa Anny Lis z siedzibą przy ul. Polnej 3.', 'Lis'],
+    ['Pacjent Szpitala Jana Dąbrowskiego.', 'Dąbrowskiego'],
+    ['Uczeń Szkoły Podstawowej Jana Kowalskiego.', 'Kowalskiego'],
+  ];
+  for (const [t, gone] of osoby) {
+    const r = redactPII(t).redacted;
+    expect(r, t).not.toContain(gone);
+    expect(r, t).toContain('[IMIĘ I NAZWISKO]');
+  }
+  // Znany patron w nazwie placówki zostaje jawny, osoba obok dalej zakryta.
+  const r = redactPII('Uczniowie Szkoły Podstawowej Marii Konopnickiej w Lesznie. Wniosek złożyła Pani Anna Lis.').redacted;
+  expect(r).toContain('Szkoły Podstawowej Marii Konopnickiej');
+  expect(r).not.toContain('Anna Lis');
+  expect(redactPII('Kandydatka ukończyła studia na Uniwersytecie Adama Mickiewicza w Poznaniu.').redacted).toContain('Adama Mickiewicza');
+});
+
+test('siedziba w zdaniu: adres kończący zdanie jawny, osoba w następnym zdaniu zakryta', () => {
+  const cases: Array<[string, string, string]> = [
+    ['Zebranie odbędzie się w siedzibie Urzędu Gminy w Baranowie przy ul. Rynek 14. Pani Anna Kot przedstawi wniosek.', 'ul. Rynek 14', 'Kot'],
+    ['Sąd Rejonowy w Lublinie z siedzibą przy ul. Krakowskie Przedmieście 43. Pan Jan Lis złożył pozew.', 'ul. Krakowskie Przedmieście 43', 'Lis'],
+    ['Spotkanie w siedzibie urzędu gminy przy ul. Brzozowej 4. Pan Jan Lis przybył.', 'ul. Brzozowej 4', 'Lis'],
+    ['Spotkanie w siedzibie urzędu gminy przy ul. Brzozowej 4! Pan Jan Lis przybył.', 'ul. Brzozowej 4', 'Lis'],
+  ];
+  for (const [t, keep, gone] of cases) {
+    const r = redactPII(t).redacted;
+    expect(r, t).toContain(keep);
+    expect(r, t).not.toContain(gone);
+  }
+  // Firma osoby z tym samym układem: adres dalej zakryty.
+  for (const t of [
+    'Zakład usługowy z siedzibą przy ul. Polnej 3. Prowadzi go Pan Jan Kowalski.',
+    'Szkoła Jazdy Lis z siedzibą przy ul. Lipowej 8. Pani Anna Lis prowadzi kursy.',
+  ]) {
+    const r = redactPII(t).redacted;
+    expect(r, t).toContain('[ADRES]');
+    expect(r, t).not.toMatch(/ul\. (?:Polnej 3|Lipowej 8)/u);
+  }
+  // Kropka po numerze przed małą literą („3. piętro”) nie kończy zdania: osoba za nią dalej liczy się do zdania.
+  expect(redactPII('Zakład usługowy z siedzibą przy ul. Polnej 3. piętro, prowadzi Pan Jan Kowalski.').redacted).not.toContain('ul. Polnej 3');
+});
+test('nazwa instytucji w środku wiersza: po dwukropku, numerze punktu, przecinku, w zdaniu i w komórce tabeli', () => {
+  const keep: Array<[string, string[]]> = [
+    ['Do wiadomości: Zarząd Mienia Komunalnego, ul. Jana Klemensa Branickiego 3/5', ['ul. Jana Klemensa Branickiego 3/5']],
+    ['Miejsce składania: Urząd Miejski w Kartuzach, ul. Jana Pawła II 1, pokój 105.', ['ul. Jana Pawła II 1']],
+    ['Wnioskodawca: Gminny Ośrodek Pomocy Społecznej w Kobylnicy, ul. Główna 20, 76-251 Kobylnica', ['ul. Główna 20', '76-251 Kobylnica']],
+    ['2. Zakład Gospodarki Komunalnej sp. z o.o., ul. Leśna 4, 11-200 Bartoszyce', ['ul. Leśna 4', '11-200 Bartoszyce']],
+    ['Rozprawa: 23.11, godz. 10:00, pok. 12, Urząd Miejski w Andrychowie, ul. Rynek 15.', ['ul. Rynek 15']],
+    [
+      '4. Starostwo Powiatowe w Wieliczce, Wydział Geodezji, Kartografii i Katastru, ul. Józefa Piłsudskiego 25 (aktualizacja)',
+      ['ul. Józefa Piłsudskiego 25'],
+    ],
+    ['45 | 04.11.2026 | Urząd Skarbowy w Gliwicach | ul. Góry Chełmskiej 15, Gliwice | zawiadomienie', ['ul. Góry Chełmskiej 15, Gliwice']],
+    ['Akta przekazano do Samodzielnego Publicznego Zakładu Opieki Zdrowotnej w Kole, ul. Szpitalna 1, 62-600 Koło.', ['ul. Szpitalna 1', '62-600 Koło']],
+    ['Pismo skierowano do Urzędu Skarbowego w Kole, ul. Polna 5. Pani Anna Nowak odebrała je osobiście.', ['ul. Polna 5']],
+  ];
+  for (const [t, parts] of keep) {
+    const r = redactPII(t).redacted;
+    for (const p of parts) expect(r, t).toContain(p);
+  }
+  // Urzędnik w funkcji: miejsce pracy jawne, osoba zakryta.
+  const z = redactPII('Sprawdziła: Marta Ziobro, inspektor ds. oświaty, Urząd Gminy Mielnik, ul. Piaskowa 1, tel. 85 657 40 12').redacted;
+  expect(z).toContain('Urząd Gminy Mielnik, ul. Piaskowa 1');
+  expect(z).not.toContain('Ziobro');
+  // Osoba przed nazwą bez stanowiska, osoba w zdaniu, kolumna adresu osoby i firma osoby: adres zakryty.
+  for (const t of [
+    'Adresat: Jan Kowalski, Urząd Gminy Kobylnica, ul. Polna 3',
+    'Pani Anna Nowak, przedstawicielka, Urząd Gminy Kobylnica, ul. Polna 3',
+    'Jan Kowalski, uczeń Szkoły Podstawowej nr 3, ul. Polna 3, 62-600 Koło',
+    'Pismo skierowano do Urzędu Skarbowego w Kole, ul. Polna 3, przez Pana Jana Nowaka.',
+    'mieszka obok Szkoły Podstawowej nr 3, ul. Polna 3',
+    '| Lp | Imię i nazwisko | Szkoła | Adres |\n| 1 | Jan Kowalski | Szkoła Podstawowa nr 3 | ul. Polna 3 |',
+    '41 | 02.11.2026 | Anna Kowalska | ul. Polna 3, 44-100 Gliwice | wniosek',
+    'Wydział Komunikacji, Jan Nowak, ul. Polna 3',
+    'Zakład Stolarski Nowak, ul. Polna 3, 00-001 Warszawa',
+    'Gmina Kobylnica, ul. Polna 3, 76-251 Kobylnica',
+    'mieszkaniec Gminy Kobylnica, ul. Polna 3',
+  ]) {
+    const r = redactPII(t).redacted;
+    expect(r, t).not.toContain('ul. Polna 3');
+    expect(r, t).not.toMatch(/Kowalsk|Nowak|Jana/u);
+  }
+});
+test('jednostka samorządu i urząd jako strona umowy: nazwa, adres, NIP i REGON jawne, druga strona zakryta', () => {
+  const umowa =
+    'zawarta pomiędzy:\nGminą Pszczyna, ul. Rynek 2, 43-200 Pszczyna, reprezentowaną przez Zastępcę Burmistrza Pszczyny – Pana Jacka Ochmańskiego,\n' +
+    'a\nPanią Ewą Mróz, zamieszkałą w Pszczynie przy ul. Polnej 3, 43-200 Pszczyna, PESEL 85010112345.';
+  const r = redactPII(umowa).redacted;
+  expect(r).toContain('Gminą Pszczyna, ul. Rynek 2, 43-200 Pszczyna, reprezentowaną przez Zastępcę Burmistrza Pszczyny');
+  expect(r).not.toMatch(/Ochmańsk|Mróz|Polnej 3|85010112345/u);
+  const keep: Array<[string, string]> = [
+    [
+      'Gminą Miasta Sanoka, Rynek 1, 38-500 Sanok, NIP 3871652842, reprezentowaną przez Agatę Rusin – Zastępcę Burmistrza Miasta,',
+      'Gminą Miasta Sanoka, Rynek 1, 38-500 Sanok, NIP 3871652842, reprezentowaną',
+    ],
+    [
+      'Urzędem Miejskim w Kórniku, pl. Niepodległości 1, 62-035 Kórnik, NIP 6798339326, REGON 672556487, reprezentowanym przez Burmistrza',
+      'Urzędem Miejskim w Kórniku, pl. Niepodległości 1, 62-035 Kórnik, NIP 6798339326, REGON 672556487',
+    ],
+    ['Gminą Łaszczów, ul. Szkolna 4, 22-650 Łaszczów, reprezentowaną przez Wójta Gminy', 'Gminą Łaszczów, ul. Szkolna 4, 22-650 Łaszczów'],
+    ['Powiatem Kłodzkim, ul. Okrzei 1, 57-300 Kłodzko, reprezentowanym przez Zarząd Powiatu', 'Powiatem Kłodzkim, ul. Okrzei 1, 57-300 Kłodzko'],
+    ['Skarbem Państwa – Starostą Kłodzkim, ul. Okrzei 1, 57-300 Kłodzko,', 'Skarbem Państwa – Starostą Kłodzkim, ul. Okrzei 1, 57-300 Kłodzko'],
+    ['Miastem Stołecznym Warszawa, pl. Bankowy 3/5, 00-950 Warszawa, NIP 5252248481', 'pl. Bankowy 3/5, 00-950 Warszawa, NIP 5252248481'],
+    ['Gmina Kobylnica, ul. Główna 20, 76-251 Kobylnica, reprezentowana przez Wójta', 'Gmina Kobylnica, ul. Główna 20, 76-251 Kobylnica'],
+    ['umowa zawarta z Gminą Pszczyna, ul. Rynek 2, 43-200 Pszczyna, reprezentowaną przez Burmistrza', 'ul. Rynek 2, 43-200 Pszczyna'],
+  ];
+  for (const [t, part] of keep) expect(redactPII(t).redacted, t).toContain(part);
+  // Osoba i firma osoby jako druga strona: adres, NIP i REGON zakryte, także w tym samym wierszu co gmina.
+  const masked: Array<[string, string]> = [
+    [
+      'Gminą Pszczyna, ul. Rynek 2, 43-200 Pszczyna, NIP 6381016402, reprezentowaną przez Burmistrza, a Panią Ewą Mróz, ul. Polna 3, 43-200 Pszczyna, NIP 5260250274',
+      'a Panią [IMIĘ I NAZWISKO], [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], NIP [NIP]',
+    ],
+    [
+      'Skarbem Państwa – Starostą Kłodzkim, ul. Okrzei 1, 57-300 Kłodzko, a Janem Nowakiem, ul. Długa 5, 57-300 Kłodzko, PESEL 85010112345',
+      'a [IMIĘ I NAZWISKO], [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], PESEL [PESEL]',
+    ],
+    ['Jan Nowak, Rynek 5, 38-500 Sanok, NIP 3871652842', '[IMIĘ I NAZWISKO], [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], NIP [NIP]'],
+    ['zam. Rynek 5, 38-500 Sanok', 'zam. [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]'],
+    ['BK-CATERING Anna Nowak, ul. Polna 3, 00-001 Warszawa, NIP 5260250274', 'BK-CATERING [IMIĘ I NAZWISKO], [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], NIP [NIP]'],
+    ['Szkoła Jazdy Lis, ul. Lipowa 8, 20-001 Lublin, NIP 5260250274', 'Szkoła Jazdy Lis, [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], NIP [NIP]'],
+    ['Przychodnia Weterynaryjna Wilk, ul. Polna 3, 00-001 Warszawa, REGON 123456785', '[ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], REGON [REGON]'],
+    [
+      'Zakład Usług Remontowych Jan Kowalski, ul. Polna 3, 00-001 Warszawa, NIP 5260250274',
+      'Zakład Usług Remontowych [IMIĘ I NAZWISKO], [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], NIP [NIP]',
+    ],
+  ];
+  for (const [t, want] of masked) expect(redactPII(t).redacted, t).toContain(want);
+  // Ponowny przebieg nie zmienia wyniku (strona umowy w pseudonimach też jawna).
+  const p = redactPII(umowa, { pseudonyms: true }).redacted;
+  expect(p).toContain('Gminą Pszczyna, ul. Rynek 2, 43-200 Pszczyna');
+  expect(redactPII(r).redacted).toBe(r);
+});
+test('NIP i REGON przy instytucji: osoba na liście za nazwą zostaje zakryta, numer też', () => {
+  // Między nazwą a numerem tylko ulica, kod z pocztą i inne numery; sama miejscowość tylko przed kodem.
+  for (const t of [
+    'Urząd Skarbowy w Kole, ul. Toruńska 10, Jan Kowalski, NIP 6661234567',
+    'Urząd Skarbowy w Kole, ul. Toruńska 10, 62-600 Koło, Anna Nowak, NIP 6661234567, REGON 123456785',
+    'Starostwo Powiatowe w Kłodzku, ul. Okrzei 1, 57-300 Kłodzko, Jan Kowalski, ul. Polna 3, 57-300 Kłodzko, NIP 6661234567',
+    'Spółdzielnia Mieszkaniowa w Kole, ul. Polna 3, Jan Kowalski, ul. Leśna 2, NIP 6661234567',
+    'Gminą Kobylnica, ul. Polna 3, 76-251 Kobylnica, Kowalski, NIP 6661234567',
+    'Gminą Kobylnica, ul. Polna 3, Ewa Lis, NIP 6661234567',
+    'Gminą Kobylnica, ul. Polna 3, Janem Kowalskim, NIP 6661234567',
+    'Gminą Kobylnica, Słupsk, Kowalska, NIP 6661234567',
+    'Urząd Gminy Rybno, ul. Jeziorna 4, Nowak, NIP 6661234567',
+    'Urzędem Gminy Kobylnica, ul. Polna 3, 76-251 Kobylnica, Pani Ewa Lis, NIP 6661234567',
+  ]) {
+    const r = redactPII(t).redacted;
+    expect(r, t).not.toMatch(/6661234567|123456785|Kowalsk|Nowak|Lis(?!\p{L})|Polna 3, 57|Leśna 2/u);
+  }
+  // Instytucja z pocztą we wsi: miejscowość przed kodem dalej jawna razem z numerem.
+  const r = redactPII('Instytut Badawczy Leśnictwa, ul. Braci Leśnej 3, Sękocin Stary, 05-090 Raszyn, NIP 5250008181').redacted;
+  expect(r).toContain('Sękocin Stary, 05-090 Raszyn, NIP 5250008181');
+});
+test('NIP i adres działalności osoby z samą miejscowością po „w” zostają zakryte', () => {
+  for (const t of [
+    'Gabinet Weterynaryjny w Kole, ul. Polna 3, 62-600 Koło, NIP 6661234567',
+    'Studio Urody w Kole, ul. Polna 3, NIP 6661234567',
+    'Instytut Urody w Kole, ul. Polna 3, NIP 6661234567',
+    'Ośrodek Szkolenia Kierowców w Kole, ul. Polna 3, NIP 6661234567',
+    'Zespół Muzyczny w Kole, ul. Polna 3, NIP 6661234567',
+    'Gabinet Stomatologiczny w Kole, ul. Polna 3, 62-600 Koło, NIP 6661234567 (właścicielka Anna Nowak)',
+    'Przychodnia Rodzinna w Kole, ul. Polna 3, NIP 6661234567',
+    'Gabinet Kosmetyczny w Kole, ul. Polna 3, REGON 123456785',
+  ]) {
+    expect(redactPII(t).redacted, t).not.toMatch(/6661234567|123456785|Nowak/u);
+  }
+  // Zakład, centrum, dom i przedsiębiorstwo bez znacznika jednostki publicznej: adres też zakryty.
+  for (const t of [
+    'Zakład Fryzjerski w Kole, ul. Polna 3, 62-600 Koło, NIP 6661234567',
+    'Zakład Pogrzebowy w Kole, ul. Polna 3, 62-600 Koło, NIP 6661234567, właściciel Jan Kowalski',
+    'Zakład Usług Remontowych w Kole, ul. Polna 3, NIP 6661234567',
+    'Jan Kowalski, kierownik, Zakład Usługowy w Kole, ul. Polna 3, 62-600 Koło, NIP 6661234567',
+    'Niepubliczny Zakład Opieki Zdrowotnej w Kole, ul. Polna 3, NIP 6661234567',
+    'Dom Weselny w Kole, ul. Polna 3, 62-600 Koło',
+    'Centrum Urody w Słupsku, ul. Polna 3, 76-200 Słupsk, NIP 6661234567',
+  ]) {
+    const r = redactPII(t).redacted;
+    expect(r, t).not.toMatch(/6661234567|ul\. Polna 3|62-600|76-200|Kowalski/u);
+  }
+  // Szkoła z numerem i spółka komunalna: NIP jednostki jawny.
+  const keep: Array<[string, string]> = [
+    ['Szkoła Podstawowa nr 12 w Radomiu, ul. Gagarina 3, 26-600 Radom, NIP 7962500111', 'ul. Gagarina 3, 26-600 Radom, NIP 7962500111'],
+    ['Zakład Gospodarki Mieszkaniowej w Pile, ul. Kossaka 2, 64-920 Piła', 'ul. Kossaka 2, 64-920 Piła'],
+    [
+      'Umowa zawarta z Przedsiębiorstwem Gospodarki Komunalnej sp. z o.o. w Żywcu, ul. Kopernika 59, 34-300 Żywiec, NIP 5530002393.',
+      'ul. Kopernika 59, 34-300 Żywiec, NIP 5530002393',
+    ],
+  ];
+  for (const [t, part] of keep) expect(redactPII(t).redacted, t).toContain(part);
+});
+test('wiersz tabeli: osoba w komórce przed urzędem albo kolumna adresu zamieszkania zakrywa adres', () => {
+  for (const t of [
+    '| Imię i nazwisko | Pracodawca | Adres zamieszkania |\n| Jan Kowalski | Urząd Gminy Mielnik | ul. Polna 3, 17-307 Mielnik |',
+    '| Kowalski Jan | Starostwo Powiatowe w Kole | ul. Polna 3 | 601 234 567 |',
+    '| Jan Kowalski | Urząd Gminy Mielnik | ul. Polna 3, 17-307 Mielnik |',
+    '| Lp. | Wnioskodawca | Urząd | Adres |\n| 1 | Anna Nowak | Urząd Miasta Kalisza | ul. Polna 3 |',
+    '| Pracownik | Zakład pracy | Adres do korespondencji |\n| --- | --- | --- |\n| Anna Wilk | Starostwo Powiatowe w Pile | ul. Polna 3, 64-920 Piła |',
+  ]) {
+    const r = redactPII(t).redacted;
+    expect(r, t).not.toMatch(/ul\. Polna 3|17-307|64-920|Kowalsk|Nowak|Wilk/u);
+  }
+  // Tabela urzędów bez osoby: adres siedziby jawny.
+  const r = redactPII('| Organ | Adres siedziby |\n| --- | --- |\n| Urząd Stanu Cywilnego w Kutnie | ul. Królewska 3, 99-300 Kutno |').redacted;
+  expect(r).toContain('ul. Królewska 3');
+});
+test('instytucje spoza listy członów i w przypadku zależnym: adres siedziby jawny, adres osoby obok zakryty', () => {
+  const keep: Array<[string, string[]]> = [
+    ['Sprawę skierowano do Samorządowego Kolegium Odwoławczego w Siedlcach, ul. Piłsudskiego 38, 08-110 Siedlce.', ['ul. Piłsudskiego 38', '08-110']],
+    ['2. Kasa Rolniczego Ubezpieczenia Społecznego Oddział Regionalny w Rzeszowie, ul. Partyzantów 12, 35-959 Rzeszów', ['ul. Partyzantów 12', '35-959']],
+    ['Kopia: Straż Miejska w Bydgoszczy, ul. Bernardyńska 14, 85-029 Bydgoszcz', ['ul. Bernardyńska 14', '85-029']],
+    ['Wykonawca: Przedsiębiorstwo Gospodarki Komunalnej w Sanoku, ul. Jana Pawła II 59, 38-500 Sanok', ['ul. Jana Pawła II 59', '38-500']],
+    ['umowa z Miejskim Przedsiębiorstwem Komunikacyjnym sp. z o.o., ul. Kasprzaka 2, 26-600 Radom', ['ul. Kasprzaka 2', '26-600']],
+    ['Informacje: Powiatowe Centrum Pomocy Rodzinie w Sokółce, ul. Kryńska 14, tel. w godzinach pracy.', ['ul. Kryńska 14']],
+    ['Zgłoszenie przyjęła Gminna Biblioteka Publiczna w Jabłonnej, ul. Modlińska 102, 05-110 Jabłonna.', ['ul. Modlińska 102', '05-110']],
+    ['Dostawca: Przedsiębiorstwo Wodociągów i Kanalizacji, ul. Wodna 3, 62-600 Koło', ['ul. Wodna 3']],
+    ['Pismo do Miejskiego Ośrodka Sportu i Rekreacji w Pruszkowie, ul. Bohaterów Warszawy 4, 05-800 Pruszków.', ['ul. Bohaterów Warszawy 4']],
+    ['Pomiędzy Powiatem Bialskim, ul. Brzeska 41, 21-500 Biała Podlaska, REGON 030237366, zwanym dalej Zamawiającym', ['ul. Brzeska 41', '030237366']],
+    ['W imieniu Gminy Miasta Radomia, ul. Kilińskiego 30, 26-600 Radom, NIP 7962839123', ['ul. Kilińskiego 30', '7962839123']],
+    ['Dom Pomocy Społecznej w Kalnicy, ul. Kalnica 1, 38-604 Baligród', ['ul. Kalnica 1', '38-604']],
+  ];
+  for (const [t, parts] of keep) {
+    const r = redactPII(t).redacted;
+    for (const p of parts) expect(r, t).toContain(p);
+  }
+  for (const t of [
+    'mieszkaniec Gminy Kobylnica, ul. Polna 3',
+    'działka położona na terenie Gminy Kobylnica, ul. Polna 3',
+    'Jan Kowalski, Kasa Rolniczego Ubezpieczenia Społecznego, ul. Polna 3',
+    'Kasa Rolniczego Ubezpieczenia Społecznego, Kowalski, ul. Polna 3',
+    'Straż Miejska w Kole, ul. Toruńska 1, Jan Kowalski, ul. Polna 3, NIP 6661234567',
+  ]) {
+    const r = redactPII(t).redacted;
+    expect(r, t).not.toMatch(/ul\. Polna 3|6661234567|Kowalsk/u);
+  }
+});
+test('dziedzina usługi nie robi z firmy osoby jednostki publicznej: adres, NIP i REGON zakryte', () => {
+  const N = 'NIP 6661234567';
+  // Nazwa działalności osoby z wyrazem dziedziny („Kultury”, „Komunikacji”, „Opieki Zdrowotnej”,
+  // „Oczyszczania”, „Usług Komunalnych”) albo z dalszym dopowiedzeniem za stałą nazwą jednostki.
+  for (const t of [
+    `Zakład Usług Komunalnych „Czysto”, ul. Polna 3, 62-600 Koło, ${N}`,
+    'Zakład Usług Komunalnych „Czysto”, ul. Polna 3, 62-600 Koło',
+    `Przedsiębiorstwo Usług Komunalnych JANBUD, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Przedsiębiorstwo Usługowo-Handlowe Komunalnik, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Centrum Kultury Fizycznej „Atleta”, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Dom Kultury Fizycznej i Tańca „Salsa”, ul. Polna 3, 62-600 Koło, ${N}`,
+    'Dom Kultury Fizycznej, ul. Polna 3, 62-600 Koło',
+    `Instytut Kultury Ciała, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Studio Komunikacji Wizualnej, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Agencja Komunikacji Wizualnej, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Szkoła Jazdy Komunikacja, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Ośrodek Szkolenia Kierowców Komunikacja, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Przedsiębiorstwo Oczyszczania „Czysty Dom”, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Gabinet Opieki Zdrowotnej Dla Zwierząt, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Przychodnia Opieki Zdrowotnej „Rodzina”, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Studio Kultury Fizycznej w Kole, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Gabinet Kultury Fizycznej, ul. Polna 3, ${N}`,
+    'Centrum Komunikacji Biznesowej w Kole, ul. Polna 3, REGON 123456785',
+    `Dom Opieki Zdrowotnej „Złota Jesień”, ul. Polna 3, ${N}`,
+    `Centrum Opieki Zdrowotnej, ul. Polna 3, ${N}`,
+    `Zakład Wodociągów i Kanalizacji Usługi, ul. Polna 3, ${N}`,
+    `Przedsiębiorstwo Gospodarki Odpadami „Eko”, ul. Polna 3, ${N}`,
+  ]) {
+    const r = redactPII(t).redacted;
+    expect(r, t).not.toMatch(/ul\. Polna 3|62-600|6661234567|123456785/u);
+  }
+  // Stała nazwa jednostki komunalnej, na której nazwa się kończy: siedziba i numer jawne.
+  const keep: Array<[string, string[]]> = [
+    [`Zakład Gospodarki Komunalnej, ul. Polna 3, 62-600 Koło, ${N}`, ['ul. Polna 3', '6661234567']],
+    ['Zakład Gospodarki Komunalnej w Kole, ul. Polna 3, 62-600 Koło', ['ul. Polna 3', '62-600']],
+    ['Przedsiębiorstwo Wodociągów i Kanalizacji w Kole, ul. Polna 3, 62-600 Koło', ['ul. Polna 3', '62-600']],
+    ['Zakład Ubezpieczeń Społecznych, ul. Polna 3, 62-600 Koło', ['ul. Polna 3', '62-600']],
+    ['Zakład Ubezpieczeń Społecznych Oddział w Kole, ul. Polna 3, 62-600 Koło', ['ul. Polna 3', '62-600']],
+    [`Dom Kultury, ul. Polna 3, 62-600 Koło, ${N}`, ['ul. Polna 3', '6661234567']],
+    ['Centrum Kultury w Kole, ul. Polna 3, 62-600 Koło', ['ul. Polna 3', '62-600']],
+    ['Zakład Komunalny w Kole, ul. Polna 3, 62-600 Koło', ['ul. Polna 3', '62-600']],
+    [`Miejskie Przedsiębiorstwo Komunikacyjne sp. z o.o., ul. Polna 3, 62-600 Koło, ${N}`, ['ul. Polna 3', '6661234567']],
+  ];
+  for (const [t, parts] of keep) {
+    const r = redactPII(t).redacted;
+    for (const p of parts) expect(r, t).toContain(p);
+  }
+});
+test('jednostka samorządu w mianowniku: stroną tylko z reprezentantem zgodnym rodzajem i bez osoby przed nią', () => {
+  // Osoba przed nazwą za nawiasem, średnikiem albo kropką, „reprezentowany” przy gminie: adres i NIP osoby zakryte.
+  for (const t of [
+    'Skarżąca Anna Nowak (Gmina Kobylnica, ul. Polna 3, 76-251 Kobylnica), reprezentowana przez adw. Piotra Lisa.',
+    'Powódka Anna Nowak (Gmina Kobylnica, ul. Polna 3, 76-251 Kobylnica) reprezentowana przez r.pr. Piotra Lisa.',
+    'Wnioskodawca: Jan Kowalski (Gmina Rybno, ul. Polna 3), reprezentowany przez pełnomocnika',
+    'Uczestnik postępowania: Kowalski (Gmina Kobylnica, ul. Polna 3), reprezentowany przez adwokata.',
+    'Skarżący Jan Kowalski; Gmina Kobylnica, ul. Polna 3, 76-251 Kobylnica, reprezentowany przez radcę prawnego.',
+    'Skarżąca Anna Nowak; Gmina Kobylnica, ul. Polna 3, 76-251 Kobylnica, reprezentowana przez radcę prawnego.',
+    'Uczestnik: Jan Kowalski. Gmina Rybno, ul. Polna 3, reprezentowany przez kuratora.',
+    'Skarżąca Anna Nowak (Gmina Kobylnica, ul. Polna 3, NIP 6661234567), reprezentowana przez adw. Lisa',
+  ]) {
+    const r = redactPII(t).redacted;
+    expect(r, t).not.toMatch(/ul\. Polna 3|76-251|6661234567|Nowak|Kowalsk/u);
+  }
+  // Gmina jako strona z reprezentantem w tym samym wierszu: siedziba i NIP jawne.
+  const r = redactPII('Gmina Pszczyna, ul. Rynek 2, 43-200 Pszczyna, NIP 6381016402, reprezentowana przez Burmistrza Pszczyny').redacted;
+  expect(r).toContain('ul. Rynek 2, 43-200 Pszczyna, NIP 6381016402');
+});
+
+// ── Kontakt i rachunek instytucji (seria 3, klasy N4 i N6): dane urzędu jawne, dane osoby obok zakryte ──
+test('telefon i e-mail urzędu w nagłówku, za etykietą centrali albo przy komórce urzędu zostają jawne', () => {
+  const keep: Array<[string, string[]]> = [
+    ['WÓJT GMINY FIRLEJ\nUrząd Gminy Firlej, ul. Szkolna 2, 21-136 Firlej\ntel. 81 856 40 12, podatki@firlej.example.pl', ['81 856 40 12', 'podatki@firlej.example.pl']],
+    ['Szkoła Podstawowa nr 2 w Kartuzach\nul. Klasztorna 11, 83-300 Kartuzy\ntel. 58 681 24 07', ['58 681 24 07']],
+    ['Sąd Okręgowy w Bydgoszczy\nI Wydział Cywilny\nul. Wały Jagiellońskie 2, 85-128 Bydgoszcz\ntel. 52 325 31 40, e-mail: cywilny1@so-bydgoszcz.example.pl', ['52 325 31 40', 'cywilny1@so-bydgoszcz.example.pl']],
+    ['Urząd Gminy Firlej, ul. Szkolna 2, 21-136 Firlej, tel. 81 856 40 12', ['81 856 40 12']],
+    ['Umowę sporządziła: Sylwia Ratajczak, Referat Organizacyjny, tel. 61 817 04 11 wew. 34', ['61 817 04 11']],
+    ['Wydział Komunikacji, tel. 22 443 12 10', ['22 443 12 10']],
+    ['Sekretariat: tel. 22 123 45 67. Centrala, tel. 22 123 45 00. Tel. sekretariatu szkoły: 58 681 24 07. Infolinia: tel. 801 400 987.', ['22 123 45 67', '22 123 45 00', '58 681 24 07', '801 400 987']],
+    ['Do: Wydział Finansowy <finanse@example.pl>', ['finanse@example.pl']],
+    ['Pytania kandydatów kieruję na ogólny adres sekretariat@starakamionka.example.pl.', ['sekretariat@starakamionka.example.pl']],
+    ['Wnioski przyjmuje sekretariat@sp2.kartuzy.pl oraz iod@um.gliwice.pl.', ['sekretariat@sp2.kartuzy.pl', 'iod@um.gliwice.pl']],
+  ];
+  for (const [t, parts] of keep) {
+    const r = redactPII(t).redacted;
+    for (const p of parts) expect(r, t).toContain(p);
+  }
+  // Ten sam numer niżej przy pracowniku to dalej numer szkoły.
+  const school = redactPII('Szkoła Podstawowa nr 2 w Kartuzach\nul. Klasztorna 11, 83-300 Kartuzy\ntel. 58 681 24 07\n\nSprawę prowadziła: Aneta Wenta, sekretarz szkoły, tel. 58 681 24 07 wew. 21').redacted;
+  expect(school).toBe('Szkoła Podstawowa nr 2 w Kartuzach\nul. Klasztorna 11, 83-300 Kartuzy\ntel. 58 681 24 07\n\nSprawę prowadziła: [IMIĘ I NAZWISKO], sekretarz szkoły, tel. 58 681 24 07 wew. 21');
+});
+test('telefon i e-mail osoby obok danych urzędu zostają zakryte', () => {
+  const masked: Array<[string, string]> = [
+    // adres osoby nad kontaktem, komórka w nagłówku urzędu, imienna skrzynka w domenie urzędu
+    ['Jan Kowalski\nul. Polna 3\n00-001 Wieś\ntel. 22 123 45 67, biuro@kowalski.pl', '[IMIĘ I NAZWISKO]\n[ADRES]\n[KOD-POCZTOWY] [MIEJSCOWOŚĆ]\ntel. [TELEFON], [EMAIL]'],
+    ['Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\ntel. 601 234 567', 'Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\ntel. [TELEFON]'],
+    ['Kontakt: jan.kowalski@ug-firlej.pl, a.siwiec@starakamionka.example.pl', 'Kontakt: [EMAIL], [EMAIL]'],
+    // telefon przy nazwisku pracownika bez numeru wewnętrznego to jego bezpośredni numer
+    ['Sprawę prowadzi: Anna Nowak, tel. 22 123 45 67', 'Sprawę prowadzi: [IMIĘ I NAZWISKO], tel. [TELEFON]'],
+    ['Sprawę prowadzi: Anna Nowak, Referat Podatków, tel. 22 123 45 67', 'Sprawę prowadzi: [IMIĘ I NAZWISKO], Referat Podatków, tel. [TELEFON]'],
+    ['Wywiad przeprowadziła: Agnieszka Pietrzak, starszy pracownik socjalny, tel. 62 765 44 12 wew. 31', 'Wywiad przeprowadziła: [IMIĘ I NAZWISKO], starszy pracownik socjalny, tel. [TELEFON] wew. 31'],
+    ['Sprawdziła: Marta Ziobro, inspektor, Urząd Gminy Mielnik, ul. Piaskowa 1, tel. 85 657 40 12', 'Sprawdziła: [IMIĘ I NAZWISKO], inspektor, Urząd Gminy Mielnik, ul. Piaskowa 1, tel. [TELEFON]'],
+    ['Anna Nowak\ninspektor\nUrząd Gminy Firlej\ntel. 81 856 40 12', '[IMIĘ I NAZWISKO]\ninspektor\nUrząd Gminy Firlej\ntel. [TELEFON]'],
+    ['Sekretariat: Anna Nowak, tel. 22 123 45 67', 'Sekretariat: [IMIĘ I NAZWISKO], tel. [TELEFON]'],
+    // skrzynka ogólna firmy z nazwiskiem w domenie, skrzynka bez kontekstu urzędu
+    ['Biuro Rachunkowe Anna Nowak\nul. Polna 3, 00-001 Wieś\ntel. 22 123 45 67, biuro@nowak-biuro.pl', 'Biuro Rachunkowe [IMIĘ I NAZWISKO]\n[ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]\ntel. [TELEFON], [EMAIL]'],
+    ['Do: Michał Dudek <sekretariat@example.pl>', 'Do: [IMIĘ I NAZWISKO] <[EMAIL]>'],
+  ];
+  for (const [t, want] of masked) expect(redactPII(t).redacted, t).toBe(want);
+});
+test('rachunek urzędu przy jego nazwie jawny, rachunek strony i indywidualny rachunek podatnika zakryte', () => {
+  const NR = '78 1160 2202 6163 7497 8486 2063';
+  const keep = [
+    `Zobowiązanie płatne na rachunek Gminy Firlej nr ${NR}, z podaniem numeru karty podatnika.`,
+    `Należność wpłacić na rachunek Starostwa Powiatowego w Kłodzku nr ${NR} w terminie 14 dni.`,
+    `Opłatę wnosi się na rachunek Miejskiego Zarządu Dróg w Toruniu nr ${NR}.`,
+    'Wpłaty należy dokonać na rachunek Gminy Miasto Rzeszów nr PL31105000992541336785327805, podając numer upomnienia.',
+    'Wpłat należy dokonywać na rachunek Miasta Gliwice nr PL53 1240 1037 5039 1130 6191 9257.',
+    `Opłatę skarbową wnosi się na rachunek urzędu nr ${NR}.`,
+  ];
+  for (const t of keep) expect(redactPII(t).redacted, t).toBe(t);
+  // Zwrot do adresata gdzie indziej w zdaniu albo w piśmie nie robi z rachunku gminy rachunku osoby.
+  const keepAddress = [
+    `W odpowiedzi na Pana wniosek nr GK.123 informuję, że opłatę należy wnieść na rachunek Gminy Firlej nr ${NR}.`,
+    `Opłatę należy wnieść na rachunek Gminy Firlej nr ${NR}.\nPana wniosek zostanie rozpatrzony w terminie.`,
+    `Decyzja indywidualna: opłatę należy wnieść na rachunek Gminy Firlej nr ${NR}.`,
+  ];
+  for (const t of keepAddress) expect(redactPII(t).redacted, t).toContain(NR);
+  const masked: Array<[string, string]> = [
+    [`Czynsz płatny na rachunek Wynajmującego nr ${NR}.`, 'Czynsz płatny na rachunek Wynajmującego nr [NR-KONTA].'],
+    [`Należność przekazywana na rachunek Rodzica nr ${NR}.`, 'Należność przekazywana na rachunek Rodzica nr [NR-KONTA].'],
+    [`Świadczenie wypłaca się na rachunek bankowy wnioskodawczyni nr ${NR}.`, 'Świadczenie wypłaca się na rachunek bankowy wnioskodawczyni nr [NR-KONTA].'],
+    [`Proszę o przelew na mój rachunek ${NR}.`, 'Proszę o przelew na mój rachunek [NR-KONTA].'],
+    [`Podatek wpłacać na indywidualny rachunek Gminy Firlej nr ${NR}.`, 'Podatek wpłacać na indywidualny rachunek Gminy Firlej nr [NR-KONTA].'],
+    [`Wpłaty na rachunek Gminy Firlej nr ${NR}, przypisany podatnikowi.`, 'Wpłaty na rachunek Gminy Firlej nr [NR-KONTA], przypisany podatnikowi.'],
+    [`Zwrot na rachunek Jana Kowalskiego nr ${NR}.`, 'Zwrot na rachunek [IMIĘ I NAZWISKO] nr [NR-KONTA].'],
+    // subkonto podatnika i zaimek adresata przy rachunku gminy, osoba za numerem
+    [`Należność proszę wpłacić na rachunek Gminy Firlej nr ${NR} (subkonto podatnika).`, 'Należność proszę wpłacić na rachunek Gminy Firlej nr [NR-KONTA] (subkonto podatnika).'],
+    [`Rachunek Gminy Firlej: ${NR} – jest to Pana numer subkonta.`, 'Rachunek Gminy Firlej: [NR-KONTA] – jest to Pana numer subkonta.'],
+    [`Proszę wpłacić na rachunek Gminy Firlej nr ${NR}, właściwy wyłącznie dla Pani.`, 'Proszę wpłacić na rachunek Gminy Firlej nr [NR-KONTA], właściwy wyłącznie dla Pani.'],
+    [`Numer Pana konta podatkowego: rachunek Gminy Firlej ${NR}`, 'Numer Pana konta podatkowego: rachunek Gminy Firlej [NR-KONTA]'],
+    [`Twój rachunek: rachunek Gminy Firlej nr ${NR}.`, 'Twój rachunek: rachunek Gminy Firlej nr [NR-KONTA].'],
+    [`Wpłaty na rachunek Gminy Firlej nr ${NR}, nadany dla podatnika Jana Kowalskiego.`, 'Wpłaty na rachunek Gminy Firlej nr [NR-KONTA], nadany dla podatnika [IMIĘ I NAZWISKO].'],
+    [`Wpłaty na rachunek Gminy Firlej nr ${NR} (subkonto Jana Kowalskiego).`, 'Wpłaty na rachunek Gminy Firlej nr [NR-KONTA] (subkonto [IMIĘ I NAZWISKO]).'],
+    ['Proszę wpłacić na rachunek urzędu: PL78116022026163749784862063 (rachunek Jana Kowalskiego).', 'Proszę wpłacić na rachunek urzędu: [NR-KONTA] (rachunek [IMIĘ I NAZWISKO]).'],
+    [`Wpłaty na rachunek Gminy Firlej nr ${NR} – ANNA NOWAK.`, 'Wpłaty na rachunek Gminy Firlej nr [NR-KONTA] – [IMIĘ I NAZWISKO].'],
+  ];
+  for (const [t, want] of masked) expect(redactPII(t).redacted, t).toBe(want);
+  // Rachunek gminy i rachunek strony w jednym zdaniu.
+  expect(redactPII(`Wpłata na rachunek Gminy Firlej nr ${NR}, zwrot nadpłaty na rachunek nr PL02 1240 1037 4507 9523 1154 4257.`).redacted).toBe(
+    `Wpłata na rachunek Gminy Firlej nr ${NR}, zwrot nadpłaty na rachunek nr [NR-KONTA].`,
+  );
+});
+test('telefon urzędnika z podpisu w wierszu nad komórką albo z nazwiskiem za numerem zostaje zakryty', () => {
+  const masked: Array<[string, string]> = [
+    ['Anna Nowak\nReferat Podatków, tel. 81 856 10 23', '[IMIĘ I NAZWISKO]\nReferat Podatków, tel. [TELEFON]'],
+    ['Kontakt: Anna Nowak\nWydział Komunikacji, tel. 22 845 12 34', 'Kontakt: [IMIĘ I NAZWISKO]\nWydział Komunikacji, tel. [TELEFON]'],
+    ['Z poważaniem\nAnna Nowak\nInspektor\nWydział Komunikacji, tel. 32 238 54 11', 'Z poważaniem\n[IMIĘ I NAZWISKO]\nInspektor\nWydział Komunikacji, tel. [TELEFON]'],
+    // osoba za numerem w bloku siedziby: bezpośredni numer tej osoby, numer centrali obok jawny
+    ['Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\ntel. 81 856 10 21\ntel. 81 856 10 23 (Anna Nowak)', 'Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\ntel. 81 856 10 21\ntel. [TELEFON] ([IMIĘ I NAZWISKO])'],
+    ['Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\ntel. 81 856 10 21\nWydział Komunikacji, tel. 81 856 10 24 – Anna Nowak', 'Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\ntel. 81 856 10 21\nWydział Komunikacji, tel. [TELEFON] – [IMIĘ I NAZWISKO]'],
+    // podpis nad adresem urzędu z ulicą: w tym samym wierszu i w bloku kilku wierszy
+    ['Zbigniew Pawlak\nKierownik Referatu\nUrząd Miasta Kalisza, ul. Główny Rynek 20, tel. 62 765 43 21', '[IMIĘ I NAZWISKO]\nKierownik Referatu\nUrząd Miasta Kalisza, ul. Główny Rynek 20, tel. [TELEFON]'],
+    ['Z poważaniem\nAnna Kwiatkowska\nInspektor\nUrząd Gminy Bielsk\nul. Szkolna 1\n09-230 Bielsk\ntel. 24 261 33 27', 'Z poważaniem\n[IMIĘ I NAZWISKO]\nInspektor\nUrząd Gminy Bielsk\nul. Szkolna 1\n09-230 Bielsk\ntel. [TELEFON]'],
+    ['Anna Kwiatkowska\nInspektor\nUrząd Gminy Bielsk\nul. Szkolna 1, 09-230 Bielsk, tel. 24 261 33 27', '[IMIĘ I NAZWISKO]\nInspektor\nUrząd Gminy Bielsk\nul. Szkolna 1, 09-230 Bielsk, tel. [TELEFON]'],
+    // osoba za numerem także za pokojem, godzinami i pisana wersalikami
+    ['Wydział Komunikacji, tel. 32 445 12 92, pok. 12, Anna Nowak', 'Wydział Komunikacji, tel. [TELEFON], pok. 12, [IMIĘ I NAZWISKO]'],
+    ['Wydział Komunikacji, tel. 32 445 12 92 (pok. 112) – Anna Nowak', 'Wydział Komunikacji, tel. [TELEFON] (pok. 112) – [IMIĘ I NAZWISKO]'],
+    ['Referat Podatków, tel. 81 857 70 23, w godz. 7.30–15.30, Anna Nowak', 'Referat Podatków, tel. [TELEFON], w godz. 7.30–15.30, [IMIĘ I NAZWISKO]'],
+    ['Wydział Komunikacji, tel. 32 445 12 92 - ANNA NOWAK', 'Wydział Komunikacji, tel. [TELEFON] - [IMIĘ I NAZWISKO]'],
+  ];
+  for (const [t, want] of masked) expect(redactPII(t).redacted, t).toBe(want);
+  // Komórka urzędu w wierszu pod nagłówkiem urzędu, bez osoby nad nią, i centrala z numerem wewnętrznym zostają jawne.
+  const keep = [
+    'Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\nReferat Podatków, tel. 81 856 10 23',
+    'Anna Nowak\nReferat Podatków, tel. 81 856 10 23 wew. 21',
+    'Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\ntel. 81 856 10 21 wew. 34 (Anna Nowak)',
+  ];
+  for (const t of keep) expect(redactPII(t).redacted, t).toContain(t.includes('wew. 21') ? '81 856 10 23 wew. 21' : t.includes('wew. 34') ? '81 856 10 21 wew. 34' : '81 856 10 23');
+});
+test('numer urzędu bez osoby za nim i nagłówek urzędu w kilku wierszach zostają jawne', () => {
+  const keep: Array<[string, string]> = [
+    ['Wydział Komunikacji, tel. 32 445 12 92, pok. 12, w godz. 7.30–15.30', '32 445 12 92'],
+    ['Wydział Komunikacji, tel. 32 445 12 92 (pon.–pt. 7.30–15.30)', '32 445 12 92'],
+    ['URZĄD GMINY BIELSK\nul. Szkolna 1\n09-230 Bielsk\ntel. 24 261 33 27', '24 261 33 27'],
+    ['Kalisz, 12.03.2026\n\nURZĄD MIASTA KALISZA\nul. Główny Rynek 20\n62-800 Kalisz\ntel. 62 765 43 21', '62 765 43 21'],
+    ['Anna Kwiatkowska\nInspektor\nUrząd Gminy Bielsk\nul. Szkolna 1\n09-230 Bielsk\ntel. 24 261 33 27 wew. 21', '24 261 33 27 wew. 21'],
+  ];
+  for (const [t, part] of keep) expect(redactPII(t).redacted, t).toContain(part);
+  // Osoba stoi dopiero za kolejnym numerem: zakryty jest jej numer, a nie pierwszy.
+  expect(redactPII('Wydział Komunikacji, tel. 32 445 12 92, Wydział Podatków, tel. 32 445 12 93 – Anna Nowak').redacted).toBe(
+    'Wydział Komunikacji, tel. 32 445 12 92, Wydział Podatków, tel. [TELEFON] – [IMIĘ I NAZWISKO]',
+  );
+});
+test('skrzynka z nazwiskiem albo imieniem w domenie zostaje zakryta także w edu.pl i przy nazwie urzędu', () => {
+  const masked: Array<[string, string]> = [
+    ['Proszę pisać na: biuro@korepetycje-kowalska.edu.pl', 'Proszę pisać na: [EMAIL]'],
+    ['Wydział Komunikacji, e-mail: komunikacja@kowalski.pl', 'Wydział Komunikacji, e-mail: [EMAIL]'],
+    ['Dział Kadr, e-mail: kadry@kowalski-transport.pl', 'Dział Kadr, e-mail: [EMAIL]'],
+    ['Urząd Gminy Firlej <sekretariat@kowalski.pl>', 'Urząd Gminy Firlej <[EMAIL]>'],
+    ['Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\nbiuro@annanowak.pl', 'Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\n[EMAIL]'],
+    // nazwisko i imię z polskimi literami zapisane w domenie bez nich
+    ['Urząd Gminy Firlej, e-mail: sekretariat@wisniewski.pl', 'Urząd Gminy Firlej, e-mail: [EMAIL]'],
+    ['Wydział Komunikacji, e-mail: komunikacja@zielinski.pl', 'Wydział Komunikacji, e-mail: [EMAIL]'],
+    ['Urząd Gminy Firlej, e-mail: kadry@wojcik-transport.pl', 'Urząd Gminy Firlej, e-mail: [EMAIL]'],
+    ['Urząd Gminy Firlej, e-mail: biuro@lukaszkaminski.pl', 'Urząd Gminy Firlej, e-mail: [EMAIL]'],
+    ['WÓJT GMINY FIRLEJ\nul. Szkolna 2, 21-136 Firlej\ne-mail: biuro@krol.pl', 'WÓJT GMINY FIRLEJ\nul. Szkolna 2, 21-136 Firlej\ne-mail: [EMAIL]'],
+    ['Wnioskodawca: Jan Wiśniewski, e-mail: biuro@przedszkole-wisniewski.pl', 'Wnioskodawca: [IMIĘ I NAZWISKO], e-mail: [EMAIL]'],
+    ['Pani Małgorzata Dąbrowska, e-mail: biuro@szkola-dabrowska.pl', 'Pani [IMIĘ I NAZWISKO], e-mail: [EMAIL]'],
+    ['Wnioskodawca: Jan Kozłowski, e-mail: biuro@sp1-kozlowski.pl', 'Wnioskodawca: [IMIĘ I NAZWISKO], e-mail: [EMAIL]'],
+    // nazwisko spoza słownika po samej końcówce, także obok członu szkoły, przedszkola czy sądu
+    ['Kontakt: biuro@przedszkole-wrzesniewska.pl', 'Kontakt: [EMAIL]'],
+    ['Kontakt: biuro@szkola-jezykowa-brzozowska.pl', 'Kontakt: [EMAIL]'],
+    ['Kontakt: biuro@sad-brzeczyszczykiewicz.pl', 'Kontakt: [EMAIL]'],
+  ];
+  for (const [t, want] of masked) expect(redactPII(t).redacted, t).toBe(want);
+  // Miejscowość w nagłówku (Nowa Wieś) nie czyni nazwiska z domeny nazwą miejsca.
+  expect(redactPII('Urząd Gminy Nowa Wieś\nul. Szkolna 2, 21-136 Nowa Wieś\nbiuro@nowak.pl').redacted).toMatch(/\n\[EMAIL\]$/u);
+  const kindergarten = redactPII('Przedszkole Niepubliczne Anny Nowak\nul. Polna 3, 21-136 Firlej\nbiuro@przedszkole-nowak.pl').redacted;
+  expect(kindergarten).not.toContain('nowak');
+  expect(kindergarten).toContain('[EMAIL]');
+  // Gmina o nazwie równej nazwisku (Firlej, Mielnik): ta sama nazwa w nagłówku urzędu, więc skrzynka jawna.
+  const keep: Array<[string, string]> = [
+    ['Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\ntel. 81 856 10 21\ne-mail: sekretariat@ug-firlej.pl', 'sekretariat@ug-firlej.pl'],
+    ['Urząd Gminy Mielnik\nul. Piaskowa 1, 17-307 Mielnik\ne-mail: gmina@mielnik.pl', 'gmina@mielnik.pl'],
+    ['Szkoła Podstawowa nr 2 w Kaliszu\nsekretariat@sp2.kalisz.pl', 'sekretariat@sp2.kalisz.pl'],
+    ['Wnioski przyjmuje sekretariat@kowalski.gov.pl.', 'sekretariat@kowalski.gov.pl'],
+    // nazwa powiatu to przymiotnik na -ski; nazwa gminy bez polskich znaków albo z ruchomym „e”
+    ['STAROSTWO POWIATOWE W ŁĘCZNEJ\nul. Szkolna 2, 21-010 Łęczna\ne-mail: kancelaria@powiatleczynski.pl', 'kancelaria@powiatleczynski.pl'],
+    ['STAROSTWO POWIATOWE W ŁĘCZNEJ\nul. Szkolna 2, 21-010 Łęczna\ne-mail: sekretariat@powiat.leczynski.pl', 'sekretariat@powiat.leczynski.pl'],
+    ['URZĄD GMINY JABŁONNA\nul. Szkolna 2, 05-110 Jabłonna\ne-mail: sekretariat@jablonna.pl', 'sekretariat@jablonna.pl'],
+    ['URZĄD MIEJSKI W TURKU\nul. Kaliska 59, 62-700 Turek\ne-mail: sekretariat@turek.pl', 'sekretariat@turek.pl'],
+  ];
+  for (const [t, part] of keep) expect(redactPII(t).redacted, t).toContain(part);
+});
+test('kontakt i rachunek urzędu w długim tekście bez złamań wiersza: czas rośnie liniowo', () => {
+  const units = [
+    'Urząd Gminy Firlej ul. Szkolna 2, 21-136 Firlej, tel. 81 856 10 21; ',
+    'Opłatę wnieść na rachunek Gminy Firlej nr 12 1020 1026 0000 0402 0000 0000; ',
+    'Wydział Komunikacji, e-mail: komunikacja@gmina-firlej.pl, tel. 81 856 10 22; ',
+  ];
+  for (const u of units) {
+    redactPII(u.repeat(200));
+    const time = (n: number): number => {
+      const t0 = performance.now();
+      redactPII(u.repeat(n));
+      return performance.now() - t0;
+    };
+    const small = time(1000);
+    const big = time(8000);
+    // Ośmiokrotnie dłuższy tekst: liniowo około 8×, kwadratowo około 64×.
+    expect(big, u).toBeLessThan(Math.max(small, 15) * 16);
+  }
+});
+test('numer uprawnień i wpisu zawodowego spoza PWZ maskowany przy zawodzie i kotwicy rejestru', () => {
+  masked([
+    ['kierownik budowy: mgr inż. Jan Nowak, uprawnienia budowlane nr SLK/1234/POOK/08', `kierownik budowy: mgr inż. ${N}, uprawnienia budowlane nr ${U}`],
+    ['uprawnienia budowlane do projektowania bez ograniczeń w specjalności konstrukcyjno-budowlanej nr MAP/0123/PWOK/05', `uprawnienia budowlane do projektowania bez ograniczeń w specjalności konstrukcyjno-budowlanej nr ${U}`],
+    ['inż. Adam Kos, nr ewid. upr. ŚLK/0456/OWOK/10', `inż. ${N}, nr ewid. upr. ${U}`],
+    ['projektant: Ewa Lis, członek MOIIB pod nr MAP/BO/1234/05', `projektant: ${N}, członek MOIIB pod nr ${U}`],
+    ['arch. Piotr Wrona, IARP nr 1234', `arch. ${N}, IARP nr ${U}`],
+    ['członkini Dolnośląskiej Okręgowej Izby Architektów RP nr DO-0451', `członkini Dolnośląskiej Okręgowej Izby Architektów RP nr ${U}`],
+    ['geodeta uprawniony Marek Sowa, nr upr. 23456', `geodeta uprawniony ${N}, nr upr. ${U}`],
+    ['geodetka Anna Kruk (świadectwo uprawnień zawodowych nr 1234)', `geodetka ${N} (świadectwo uprawnień zawodowych nr ${U})`],
+    ['operat sporządził rzeczoznawca majątkowy Jan Zięba, uprawnienia nr 4567.', `operat sporządził rzeczoznawca majątkowy ${N}, uprawnienia nr ${U}.`],
+    ['tłumacz przysięgły języka niemieckiego Jan Wolf, wpisany na listę tłumaczy przysięgłych pod numerem TP/123/17', `tłumacz przysięgły języka niemieckiego ${N}, wpisany na listę tłumaczy przysięgłych pod numerem ${U}`],
+    ['biegła rewident Iwona Cis, wpisana do rejestru biegłych rewidentów pod nr 12345', `biegła rewident ${N}, wpisana do rejestru biegłych rewidentów pod nr ${U}`],
+    ['doradca podatkowy Jan Lis, nr wpisu 09876', `doradca podatkowy ${N}, nr wpisu ${U}`],
+    ['adwokat Ewa Bór (Okręgowa Rada Adwokacka w Lublinie, nr wpisu LUB/Adw/0457)', `adwokat ${N} (Okręgowa Rada Adwokacka w Lublinie, nr wpisu ${U})`],
+    ['r. pr. Jan Kot (wpis GD-1287)', `r. pr. ${N} (wpis ${U})`],
+    ['Wykonawca | Kancelaria Radcy Prawnego Jan Ptak | wpis WA-4417 | obsługa prawna', `Wykonawca | Kancelaria Radcy Prawnego ${N} | wpis ${U} | obsługa prawna`],
+    ['elektryk Jan Lis, świadectwo kwalifikacyjne nr 123/E/2020', `elektryk ${N}, świadectwo kwalifikacyjne nr ${U}`],
+    ['zarządca nieruchomości, licencja zawodowa nr 12345', `zarządca nieruchomości, licencja zawodowa nr ${U}`],
+    ['studentka (legitymacja studencka nr 118342)', `studentka (legitymacja studencka nr ${U})`],
+  ]);
+  keep([
+    'zgodnie z art. 12 ust. 1 ustawy o samorządzie zawodowym architektów i inżynierów budownictwa',
+    'Decyzja o nadaniu uprawnień nr 12/2024 z dnia 1 marca.',
+    'Uchwała nr XII/123/2024 w sprawie uprawnień do ulgi.',
+    'Okręgowa Izba Radców Prawnych w Warszawie, ul. Długa nr 125',
+    'Komunikat Okręgowej Izby Lekarskiej nr 12/2024 w sprawie szczepień.',
+    'Izba Skarbowa nr 12/2024 przekazała akta.',
+    'Izba Rolnicza nr 1234 i Izba Przemysłowo-Handlowa nr KR-2020 wydały opinie.',
+    'Strona utraciła uprawnienia nr kat. B na okres 6 miesięcy.',
+    'Nadanie uprawnień w systemie EZD nr 15/2024 dla pracownika.',
+    'z upr. Wójta nr 12/2024',
+    'Zaświadczenie o wpisie do CEIDG, wpis nr 1234/2020.',
+    'świadectwo pracy nr 12/2024 wydane przez pracodawcę',
+    'Kandydat przedstawił świadectwo nr 12345 ukończenia szkoły.',
+    'Świadectwo charakterystyki energetycznej nr 12345/2024 sporządził inżynier.',
+    'Działka nr 123/4 w obrębie 0012, uprawnienia do działki nr 55/6.',
+    'Projektant, uprawnienia budowlane nadane w 2015 r., uprawnienia nr 2015 r.',
+    'kierownik budowy, dziennik budowy nr 123/2024',
+    'Inspektor nadzoru inwestorskiego, Umowa nr ZP/12/2024 z dnia 3 maja.',
+    'radca prawny, pełnomocnictwo nr 12/2024',
+    'Członek Zarządu Izby Architektów nr kadencji 5 wybrany w 2020.',
+  ]);
+});
+test('kotwica rejestru zawodowego w długim tekście bez złamań wiersza: czas rośnie liniowo', () => {
+  const units = [
+    'uprawnienia budowlane do projektowania bez ograniczeń w specjalności konstrukcyjnej oraz ',
+    'członek Okręgowej Izby Inżynierów Budownictwa, wpisany na listę członków izby i ',
+    'radca prawny, wpis na listę, świadectwo kwalifikacyjne, nr ewid. upr. ',
+  ];
+  for (const u of units) {
+    redactPII(u.repeat(200));
+    const time = (n: number): number => {
+      const t0 = performance.now();
+      redactPII(u.repeat(n));
+      return performance.now() - t0;
+    };
+    const small = time(1000);
+    const big = time(8000);
+    expect(big, u).toBeLessThan(Math.max(small, 15) * 16);
+  }
+});
+test('skrót izby bez członkostwa i osoby to dokument izby, a nie numer członka', () => {
+  keep([
+    'Wpis na listę adwokatów – posiedzenie ORA nr 12/2024 z dnia 3 marca 2024 r.',
+    'Doradca podatkowy – szkolenie KIDP nr 2024/05, sala 3.',
+    'Inżynierowie budownictwa: konferencja PIIB nr 5/2024',
+    'Architekt powiatowy przekazał stanowisko IARP nr 12/2024.',
+    'Szkolenie dla architektów – MOIA nr 2/2024',
+    'Doradcy podatkowi – egzamin KIDP nr 15/2024.',
+    'Adwokat z urzędu: zlecenie ORA nr 1234/2024.',
+    'Radca prawny Urzędu, okólnik OIRP nr 3/2024.',
+    'Adwokat, sprawozdanie ORA nr 2/2024.',
+    'Geodeta powiatowy, zebranie MOIIB nr 3/2025.',
+  ]);
+  masked([
+    ['architekt Iga Wolak (IARP 2231)', `architekt ${N} (IARP ${U})`],
+    ['Doradca podatkowy Wiktor Cios (KIDP, nr 08812) reprezentuje stronę.', `Doradca podatkowy ${N} (KIDP, nr ${U}) reprezentuje stronę.`],
+    ['członek ŚlOIIB nr SLK/IS/2233/11', `członek ŚlOIIB nr ${U}`],
+  ]);
+});
+test('wpis do rejestru podmiotów i wpis w dzienniku budowy to nie numer osoby', () => {
+  keep([
+    'Psycholog szkolny, wpis do rejestru placówek oświatowych nr 1234/2024.',
+    'Instruktor nauki jazdy – ośrodek szkolenia kierowców, wpis do rejestru OSK nr 1234.',
+    'Lekarz weterynarii, wpis nr 1234 do rejestru zakładów leczniczych dla zwierząt.',
+    'Inspektor nadzoru – wpis nr 1234; kierownik budowy – wpis nr 1235.',
+    'Kierownik robót elektrycznych potwierdził wpis nr 3456.',
+    'Kierownik robót: wpis nr 1234, strona 12.',
+    'Inspektor nadzoru inwestorskiego potwierdził wpis nr 2345 w dzienniku budowy.',
+  ]);
+  masked([
+    ['Biegła rewident Ilona Wąs, wpisana do rejestru biegłych rewidentów pod nr 13789', `Biegła rewident ${N}, wpisana do rejestru biegłych rewidentów pod nr ${U}`],
+    ['Badanie przeprowadził biegły rewident Paweł Grot, nr w rejestrze 12456.', `Badanie przeprowadził biegły rewident ${N}, nr w rejestrze ${U}.`],
+    ['Tłumacz przysięgły Hanna Wróbel, numer na liście tłumaczy: TP/0045/06', `Tłumacz przysięgły ${N}, numer na liście tłumaczy: ${U}`],
+  ]);
+});
+test('komórka i dziedzina w nazwie urzędu to nie zawód przy uprawnieniach do systemu', () => {
+  keep([
+    'Naczelnik Wydziału Architektury i Budownictwa, uprawnienia do podpisu nr 4/2025 z dnia 2.01.2025.',
+    'Wydział Architektury – nadanie uprawnień w systemie nr 12/2025.',
+    'Kierownik Referatu Inżynierii Miejskiej, upr. nr 7/2025.',
+    'Wydział Geodezji i Kartografii, uprawnienia dostępu nr 3/2025, do systemu ZSIN.',
+    'Doradca ds. architektury Gminy, uprawnienia nr 33/2025 do EZD.',
+    'Powiatowy Ośrodek Dokumentacji Geodezyjnej i Kartograficznej, uprawnienia nr 3/2025.',
+    'Poradnia Psychologiczno-Pedagogiczna, upr. nr 5/2025.',
+    'Komisja kwalifikacyjna do spraw uprawnień budowlanych, uprawnienia nr 45/2024 wydane 40 osobom.',
+  ]);
+});
+test('numer uprawnień po myślniku, w nawiasie, wersalikami, w komórce tabeli i w kolumnie z nagłówkiem', () => {
+  masked([
+    ['Pomiar wykonał geodeta Jan Kulik, uprawnienia zawodowe nr 9876 (zakres 1).', `Pomiar wykonał geodeta ${N}, uprawnienia zawodowe nr ${U} (zakres 1).`],
+    ['licencja zawodowa pośrednika w obrocie nieruchomościami nr 12034 – Iwona Kras', `licencja zawodowa pośrednika w obrocie nieruchomościami nr ${U} – ${N}`],
+    ['PROJEKTANT: MGR INŻ. EDYTA SOKÓŁ, UPRAWNIENIA BUDOWLANE NR PDK/0444/PWOS/12', `PROJEKTANT: MGR INŻ. EDYTA SOKÓŁ, UPRAWNIENIA BUDOWLANE NR ${U}`],
+    ['Sprawdzający: dr inż. Piotr Malec\tupr. nr ZAP/0099/PWBKb/12\tZPOIIB/BO/0345/13', `Sprawdzający: dr inż. ${N}\tupr. nr ${U}\t${U}`],
+    ['Projektant\tmgr inż. Celina Bór\tLOD/0871/POOK/11\tLOD/BO/2210/12', `Projektant\tmgr inż. ${N}\t${U}\t${U}`],
+    ['Uprawnienia: SLK/0456/POOK/10 (inż. Adam Kos)', `Uprawnienia: ${U} (inż. ${N})`],
+    ['Kierownik budowy: Sebastian Hak, nr uprawnień: KL/0034/OWOK/02, nr członkowski: KL/BO/0091/03', `Kierownik budowy: ${N}, nr uprawnień: ${U}, nr członkowski: ${U}`],
+    ['Lp.;Imię i nazwisko;Funkcja;Nr uprawnień\n1;Bogdan Kasprzak;kierownik budowy;123/89/Ka', `Lp.;Imię i nazwisko;Funkcja;Nr uprawnień\n1;${N};kierownik budowy;${U}`],
+  ]);
+  keep([
+    'Lp.;Nazwa;Nr wpisu\n1;Apteka Pod Lipą;1234/2024',
+  ]);
+  masked([['uprawnienia budowlane nr 12/2024; Decyzja AB/1234/2024', `uprawnienia budowlane nr ${U}; Decyzja AB/1234/2024`]]);
+});
+test('kotwica rejestru zawodowego na długim wierszu bez złamań: okno przed kotwicą nie sięga początku wiersza', () => {
+  const units = ['geodeta uprawniony, uprawnienia nr 12345, ', 'członek izby architektów nr 12345, uprawnienia budowlane nr MAZ/1/AB/2 ; '];
+  for (const u of units) {
+    redactPII(u.repeat(200));
+    const time = (n: number): number => {
+      const t0 = performance.now();
+      redactPII(u.repeat(n));
+      return performance.now() - t0;
+    };
+    const small = time(1000);
+    const big = time(8000);
+    expect(big, u).toBeLessThan(Math.max(small, 15) * 16);
+  }
+});
+test('nagłówek kolumny bez osoby w wierszu: działki, środki trwałe, jednostki i rok zostają jawne', () => {
+  keep([
+    'Lp.\tNr ewidencyjny\tObręb\tPowierzchnia [ha]\n1\t123/4\t0005 Zalesie\t0,1234',
+    'Lp.|Nr ewid.|Obręb|Pow.\n1|2187/3|Zalesie|0,12',
+    'Wykaz działek\nLp.;Nr ewid. działki;Obręb;Pow. [ha];Właściciel\n1;123/4;Zalesie;0,12;Gmina Zalesie',
+    'Lp.;Nazwa środka trwałego;Nr ewidencyjny;Wartość\n1;Komputer Dell;KOM/0123/2019;3 200,00\n2;Drukarka;DR-0045;800,00',
+    'Lp.\tPojazd\tNr ewidencyjny\n1\tJelcz 004\tPSP-0123',
+    'Lp.;Nazwa jednostki;Nr członkowski;Składka\n1;Ochotnicza Straż Pożarna w Zalesiu;0123;200,00',
+    'Nr członka | Nazwa spółdzielni | Udział\n1234 | SM „Przyszłość” | 500',
+    'Lp.|Jednostka|Nr członkowski|Data przyjęcia\n1|Koło Gospodyń Wiejskich w Zalesiu|0451|12.03.2024',
+    'Lp.|Nazwa|Uprawnienia|Kwota\n1|Starostwo Powiatowe|2024/05|1 200,00',
+    'Uprawnienia\tLiczba wniosków\tTermin\n2024/05\t12\t30 dni',
+    'Lp.\tNr uprawnień\tLiczba decyzji\n1\t2024\t12',
+  ]);
+  masked([
+    ['Lp.\tImię i nazwisko\tNr ewid. upr.\n1\tKarol Mróz\tKAT/0991/OWOK/15', `Lp.\tImię i nazwisko\tNr ewid. upr.\n1\t${N}\t${U}`],
+    ['Lp.;Imię i nazwisko;Nr członka izby\n1;Anna Nowak;MAZ/BO/0123/10', `Lp.;Imię i nazwisko;Nr członka izby\n1;${N};${U}`],
+    ['Lp.|Projektant|Uprawnienia\n1|mgr inż. Piotr Lis|SLK/0012/PWOK/09', `Lp.|Projektant|Uprawnienia\n1|mgr inż. ${N}|${U}`],
+  ]);
+});
+test('kształt numeru uprawnień budowlanych bez kotwicy tylko przy osobie w wierszu', () => {
+  keep([
+    'Sprawa OR/0456/POW/24 prowadzona przez Wydział Organizacyjny Starostwa.',
+    'Umowa nr RPO/0123/POIS/2021 o dofinansowanie projektu',
+    'Projekt OWES/0012/POWER/19 realizowany przez stowarzyszenie.',
+    'Porozumienie OR/0012/POW/24 zawarte z gminą.',
+    'Kierownik budowy, umowa nr RPO/0123/POIS/2021 z dnia 1 marca.',
+  ]);
+  masked([
+    ['1. Anna Nowak\tMAZ/0012/PWOA/12', `1. ${N}\t${U}`],
+    ['Projekt sporządził: mgr inż. arch. Adam Kos, MAZ/0012/PWOA/12', `Projekt sporządził: mgr inż. arch. ${N}, ${U}`],
+  ]);
+});
+test('skrót izby po nazwie komórki, dokument dla członków i stanowisko urzędu to nie numer osoby', () => {
+  keep([
+    'Architekt Miejski, Biuro Architektury i Planowania Przestrzennego (MOIA nr 12/2024 – stanowisko).',
+    'Radca prawny Urzędu Gminy, Kancelaria Radcy Prawnego (OIRP nr 12/2024 – okólnik).',
+    'Inspektor nadzoru inwestorskiego Miejskiego Zarządu Dróg, Zarząd Dróg Powiatowych (PIIB 2025).',
+    'Starostwo Powiatowe w Zalesiu (IARP 2024).',
+    'Ankieta dla członków PIIB nr 2/2026',
+    'Raport o przynależności do OIRP nr 5/2026',
+    'Sprawozdanie z wpisów na listę KIDP nr 12/2026',
+    'Informator dla wpisanych do ORA nr 1/2026',
+    'Komunikat dla członków MOIIB nr 3/2026',
+    'Radca prawny – opinia dla członków OIRP nr 14/2026.',
+    'Geodeta Powiatowy\tWydział Geodezji\tuprawnienia nr 3/2025 do PZGiK',
+    'Geodeta Powiatowy, uprawnienia nr 4/2025 do reprezentacji Starosty.',
+    'Inspektor Wydziału Architektury, uprawnienia nr 7/2025 do zasobu.',
+    'Psycholog szkolny, Poradnia Psychologiczno-Pedagogiczna nr 3, wpis nr 1234 do ewidencji placówek.',
+    'Lekarz weterynarii, wpis nr 1234 do wykazu podmiotów.',
+    'Psycholog, wpis nr 1234 w ewidencji szkół.',
+  ]);
+  masked([
+    ['Geodeta Powiatowy mgr inż. Jan Kowalski, uprawnienia nr 12345', `Geodeta Powiatowy mgr inż. ${N}, uprawnienia nr ${U}`],
+    ['architekt Iga Wolak, członek IARP nr 2025', `architekt ${N}, członek IARP nr ${U}`],
+    ['Jan Kowalski, nr członkowski MAZ/BO/1234/05', `${N}, nr członkowski ${U}`],
+    ['geodeta uprawniony Jan Lis, uprawnienia nr 12345 do wykonywania samodzielnych funkcji', `geodeta uprawniony ${N}, uprawnienia nr ${U} do wykonywania samodzielnych funkcji`],
+    ['psycholog Anna Lis, wpis nr 1234 na listę psychologów', `psycholog ${N}, wpis nr ${U} na listę psychologów`],
+  ]);
+});
+test('tabela z „|” bez wiersza „---”, kolumnami ze spacji i nagłówkiem osoby: każda komórka osoby i jej danych', () => {
+  masked([
+    // wklejka z Worda: „|” bez skrajnych kresek i bez wiersza „---”, szyk „Nazwisko Imię”
+    [
+      'Lp. | Nazwisko i imię | Data urodzenia | Pkt\n1 | Czerniak Zofia | 22.11.2022 | 165\n2 | Zych Natan | 05.04.2023 | 15',
+      `Lp. | Nazwisko i imię | Data urodzenia | Pkt\n1 | ${N} | ${DU} | 165\n2 | ${N} | ${DU} | 15`,
+    ],
+    // wersaliki, nazwisko złożone, imię spoza słownika w osobnych kolumnach
+    [
+      'Lp. | Nazwisko | Imię | PESEL\n1 | KOWALCZYK | Anna | 85010112345\n2 | Gąsienica-Ryś | Halina | 90020254321',
+      `Lp. | Nazwisko | Imię | PESEL\n1 | ${N} | ${N} | ${PS}\n2 | ${N} | ${N} | ${PS}`,
+    ],
+    // skrajne kreski bez wiersza „---”
+    ['| Nazwisko i imię | PESEL |\n| Kowalski Jan | 80031212345 |', `| Nazwisko i imię | PESEL |\n| ${N} | ${PS} |`],
+    // kolumna nazwana rolą, inicjał z nazwiskiem złożonym, telefon stacjonarny w kolumnie telefonu
+    [
+      'Kandydat | telefon | e-mail\nD. Wróbel | 604 218 377 | d.wrobel@example.pl\nH. Gąsienica-Ryś | 33 874 12 09 | halina@example.pl',
+      `Kandydat | telefon | e-mail\n${N} | ${T} | [EMAIL]\n${N} | ${T} | [EMAIL]`,
+    ],
+    ['Uczeń | Klasa | Ocena\nZofia Czerniak | 3b | 5', `Uczeń | Klasa | Ocena\n${N} | 3b | 5`],
+    // nagłówek osoby z dopełnieniem roli
+    [
+      'Imię i nazwisko ucznia | Data urodzenia | Szkoła\nLena Adamczyk | 14.02.2015 | Szkoła Podstawowa nr 3',
+      `Imię i nazwisko ucznia | Data urodzenia | Szkoła\n${N} | ${DU} | Szkoła Podstawowa nr 3`,
+    ],
+    // kolumny wyrównane spacjami (kopia z PDF-a)
+    [
+      'Nazwisko i imię     Data urodzenia     PESEL\nKowalski Jan        12.03.1980         80031212345',
+      `Nazwisko i imię     Data urodzenia     PESEL\n${N}        ${DU}         ${PS}`,
+    ],
+  ]);
+  // Instytucja, stanowisko, kwota i data decyzji w tabeli osób zostają jawne.
+  masked([
+    [
+      'Wnioskodawca | Data wpływu | Sprawa\nAnna Nowak | 03.11.2026 | zasiłek\nNadleśnictwo Lipno | 04.11.2026 | dzierżawa\nWody Polskie | 05.11.2026 | opinia\nSamorządowe Kolegium Odwoławcze | 06.11.2026 | odwołanie',
+      `Wnioskodawca | Data wpływu | Sprawa\n${N} | 03.11.2026 | zasiłek\nNadleśnictwo Lipno | 04.11.2026 | dzierżawa\nWody Polskie | 05.11.2026 | opinia\nSamorządowe Kolegium Odwoławcze | 06.11.2026 | odwołanie`,
+    ],
+    [
+      'Nazwisko i imię | Data decyzji | Kwota\nKowalski Jan | 12.03.2026 | 500,00 zł\nZielona Góra | 13.03.2026 | 300,00 zł\nUsługi Remontowe | 14.03.2026 | 100,00 zł',
+      `Nazwisko i imię | Data decyzji | Kwota\n${N} | 12.03.2026 | 500,00 zł\nZielona Góra | 13.03.2026 | 300,00 zł\nUsługi Remontowe | 14.03.2026 | 100,00 zł`,
+    ],
+    [
+      'Pracownik | Stanowisko | Wydział\nJan Kowalski | Inspektor | Wydział Finansowy\nKierownik Referatu | Kierownik | Referat Podatków',
+      `Pracownik | Stanowisko | Wydział\n${N} | Inspektor | Wydział Finansowy\nKierownik Referatu | Kierownik | Referat Podatków`,
+    ],
+  ]);
+  keep([
+    // tabela bez nagłówka osób nie zmienia działania
+    'Lp. | Nazwa podmiotu | Kwota | Data decyzji\n1 | Urząd Gminy Lipno | 1 200,00 | 12.03.2026',
+    'Termin  Godzina  Sala\n12.03.2026  10:00  12',
+    // tabela osób bez potwierdzonej osoby: kształt nazwy nie wystarcza
+    'Nazwisko i imię | Uwagi\nGrupa Robocza | spotkanie\nPozostali Uczestnicy | brak',
+    // zdanie z podwójną spacją pod nagłówkiem to nie wiersz
+    'Imię  Nazwisko\nAla ma kota.  Kot ma Alę.',
+  ]);
+});
+test('tabela osób z podmiotami: skróty jednostek, firmy, programy, ulice, dni i stanowiska zostają jawne', () => {
+  // W tabeli z osobą ze słownika sam kształt „Wyraz Wyraz” nie wystarcza: lista beneficjentów,
+  // kontrahentów czy zaległości („Imię i nazwisko albo nazwa”) ma obok osób podmioty.
+  masked([
+    [
+      'Nazwisko i imię | Instytucja\nNowak Anna | ZUS\nMOPS Lipno | GOPS\nPUP Lipno | GOPS\nOSP Wola | GOPS\nEko Trans | ZUS\nHuawei Technologies | ZUS\nCzyste Powietrze | WFOŚiGW\nAdobe Reader | ZUS\nArmii Krajowej | ZDP\nDzień Otwarty | ZUS\nWielki Piątek | ZUS\nStara Huta | UG\nWpisać Drukowanymi | ZUS',
+      `Nazwisko i imię | Instytucja\n${N} | ZUS\nMOPS Lipno | GOPS\nPUP Lipno | GOPS\nOSP Wola | GOPS\nEko Trans | ZUS\nHuawei Technologies | ZUS\nCzyste Powietrze | WFOŚiGW\nAdobe Reader | ZUS\nArmii Krajowej | ZDP\nDzień Otwarty | ZUS\nWielki Piątek | ZUS\nStara Huta | UG\nWpisać Drukowanymi | ZUS`,
+    ],
+    [
+      'Lp. | Imię i nazwisko albo nazwa | Kwota\n1 | Jan Kowalski | 100,00\n2 | Hotel Zamek | 200,00\n3 | Kino Helios | 200,00\n4 | Inter Cars | 200,00\n5 | Osiedle Kopernika | 200,00\n6 | Proboszcz Parafii | 200,00',
+      `Lp. | Imię i nazwisko albo nazwa | Kwota\n1 | ${N} | 100,00\n2 | Hotel Zamek | 200,00\n3 | Kino Helios | 200,00\n4 | Inter Cars | 200,00\n5 | Osiedle Kopernika | 200,00\n6 | Proboszcz Parafii | 200,00`,
+    ],
+    // stanowisko i zawód w kolumnie osoby, także w CSV, i z nazwiskiem-homonimem („Sołtys”)
+    [
+      'Nazwisko i imię;Uwagi\nJan Kowalski;brak\nStarszy Referent;etat\nPodinspektor Wydziału;etat\nKierowca Autobusu;umowa\nKonserwator Budynku;umowa\nLekarz Weterynarii;umowa\nTłumacz Przysięgły;zlecenie\nKoordynator Projektu;umowa\nSołtys Zalesia;dieta\nWielki Piątek;wolne',
+      `Nazwisko i imię;Uwagi\n${N};brak\nStarszy Referent;etat\nPodinspektor Wydziału;etat\nKierowca Autobusu;umowa\nKonserwator Budynku;umowa\nLekarz Weterynarii;umowa\nTłumacz Przysięgły;zlecenie\nKoordynator Projektu;umowa\nSołtys Zalesia;dieta\nWielki Piątek;wolne`,
+    ],
+    // dwa inicjały przed nazwą to skrót formy działalności
+    [
+      'Wnioskodawca | Data wpływu\nAnna Nowak | 03.11.2026\nF.H. Marex | 04.11.2026\nP.W. Budrex | 05.11.2026\nZ.P. Elmet | 06.11.2026',
+      `Wnioskodawca | Data wpływu\n${N} | 03.11.2026\nF.H. Marex | 04.11.2026\nP.W. Budrex | 05.11.2026\nZ.P. Elmet | 06.11.2026`,
+    ],
+  ]);
+  // Osoba spoza słowników znika, gdy wiersz ma daną człowieka (PESEL z sumą, data urodzenia);
+  // nazwisko-homonim („Piątek”) samo w kolumnie nazwiska obok imienia dalej jest nazwiskiem.
+  masked([
+    ['Nazwisko i imię | PESEL\nKowalski Jan | 80031212345\nLiu Wei | 02070803628', `Nazwisko i imię | PESEL\n${N} | ${PS}\n${N} | ${PS}`],
+    ['Nazwisko i imię | Data urodzenia\nKowalski Jan | 12.03.1980\nLiu Wei | 05.04.2013', `Nazwisko i imię | Data urodzenia\n${N} | ${DU}\n${N} | ${DU}`],
+    ['Nazwisko | Imię | PESEL\nPiątek | Jan | 44051401359', `Nazwisko | Imię | PESEL\n${N} | ${N} | ${PS}`],
+  ]);
+});
+test('wiersz tabeli z kolumnami ze spacji i długim ciągiem spacji: czas liniowy', () => {
+  const row = (n: number): string => `Nazwisko i imię  PESEL\nKowalski Jan  80031212345\nAnna${' '.repeat(n)}x`;
+  redactPII(row(500));
+  const time = (n: number): number => {
+    const t0 = performance.now();
+    redactPII(row(n));
+    return performance.now() - t0;
+  };
+  const small = time(2000);
+  const big = time(16000);
+  expect(big).toBeLessThan(Math.max(small, 15) * 16);
+});
+test('kolumna nazwana rolą („Wnioskodawca”, „Najemca”, „Beneficjent”): firma i organizacja zostają jawne z telefonem i NIP-em', () => {
+  // Pod nagłówkiem roli w urzędzie stoją też podmioty. Osobę potwierdza komórka, w której każdy
+  // wyraz jest imieniem, nazwiskiem ze słownika albo inicjałem; rzeczownik pospolity na początku
+  // („Pensjonat”, „Kwiaciarnia”, „Chór”) ją wyklucza, także w CSV, TSV i Markdownie z „---”.
+  keep([
+    'Beneficjent;Kwota\nPensjonat Agata;12000 zł\nSalon Fryzjerski Iwona;8000 zł',
+    '| Wnioskodawca | Lokal | Kwota |\n|---|---|---|\n| Pensjonat Agata | lokal 3 | 1200 zł |',
+    'Wnioskodawca\tTelefon\nHotel Krystyna\t54 288 33 16\nSklep Ewa\t54 288 33 18',
+    'Podatnik;Przedmiot opodatkowania\nFerma Drobiu Halina;budynki',
+    'Uczestnik;Liczba osób;Telefon\nChór Cecylia;20;54 288 60 11',
+    'Najemca | Lokal\nBar Mleczny Basia | lokal 3',
+    'Najemca;Lokal;Telefon\nKwiaciarnia Róża;lokal 4;54 288 33 12\nApteka Zdrowie;lokal 6;54 288 33 14',
+    'Uczestnik;Telefon\nZespół Ludowy Jarzębina;54 288 11 11',
+    // stanowisko w tabeli osób: telefon funkcji, nie osoby
+    'Imię i nazwisko | Telefon\nKomornik Sądowy | 54 288 00 00\nSołtys Zalesia | 54 288 00 01',
+  ]);
+  masked([
+    ['Beneficjent;NIP;Kwota\nPensjonat Agata;5252248481;12000 zł', 'Beneficjent;NIP;Kwota\nPensjonat Agata;[NIP];12000 zł'],
+    // osoba w nazwie firmy znika, nazwa firmy zostaje
+    ['Wnioskodawca | NIP\nF.H.U. Marex Jan Nowak | 5252248481', `Wnioskodawca | NIP\nF.H.U. Marex ${N} | [NIP]`],
+    // osoba pod nagłówkiem roli dalej znika razem z telefonem, obok podmiotu w tej samej tabeli
+    [
+      'Lp.;Najemca;Telefon\n1;Kowalska Anna;600 100 200\n2;Nowak-Kowalska Anna;600 100 201\n3;J. Kowalski;600 100 202\n4;Kwiaciarnia Róża;54 288 33 12',
+      `Lp.;Najemca;Telefon\n1;${N};${T}\n2;${N};${T}\n3;${N};${T}\n4;Kwiaciarnia Róża;54 288 33 12`,
+    ],
+    ['Imię i nazwisko | Telefon\nJan Kowalski | 600 100 200\nSołtys Zalesia | 54 288 00 01', `Imię i nazwisko | Telefon\n${N} | ${T}\nSołtys Zalesia | 54 288 00 01`],
+  ]);
+});
+test('tabela osób: nazwisko utworzone od funkcji („Wójtowicz”, „Sołtysik”) i nazwisko-funkcja przy dacie urodzenia znikają w całości', () => {
+  masked([
+    // CSV, szyk „Nazwisko Imię”, imię spoza słownika
+    [
+      'Nazwisko i imię;PESEL\nKowalski Jan;80031212345\nWójtowicz Natan;02070803628\nSołtysik Teofil;85010112345',
+      `Nazwisko i imię;PESEL\n${N};${PS}\n${N};${PS}\n${N};${PS}`,
+    ],
+    // bez danej człowieka w wierszu: nazwisko od funkcji dalej jest nazwiskiem
+    [
+      'Nazwisko i imię;Telefon\nKowalski Jan;600 100 200\nWójtowicz Natan;600 100 201\nSołtysiak Teofil;600 100 202\nKomornicki Iwo;600 100 203\nSędzikowski Natan;600 100 204',
+      `Nazwisko i imię;Telefon\n${N};${T}\n${N};${T}\n${N};${T}\n${N};${T}\n${N};${T}`,
+    ],
+    // tabela z „|”: nazwisko równe funkcji („Marszałek”, „Kanclerz”) przy dacie urodzenia
+    [
+      'Imię i nazwisko | Data urodzenia\nJan Kowalski | 12.03.1980\nMarszałek Wit | 01.02.1975\nKanclerz Iwo | 03.04.1966\nLekarski Natan | 05.06.1990',
+      `Imię i nazwisko | Data urodzenia\n${N} | ${DU}\n${N} | ${DU}\n${N} | ${DU}\n${N} | ${DU}`,
+    ],
+    ['Nazwisko i imię\tPESEL\nKowalski Jan\t80031212345\nWójtowicz Natan\t02070803628', `Nazwisko i imię\tPESEL\n${N}\t${PS}\n${N}\t${PS}`],
+  ]);
+  // Sama funkcja bez danej człowieka zostaje jawna („Komornik”, „Sołtys Zalesia”).
+  expect(redactPII('Nazwisko i imię;Uwagi\nJan Kowalski;brak\nSołtys Zalesia;dieta\nKomornik Sądowy;pismo').redacted).toBe(`Nazwisko i imię;Uwagi\n${N};brak\nSołtys Zalesia;dieta\nKomornik Sądowy;pismo`);
+});
+
+// ── W11: kotwica dokumentu i numer rozdzielone wtrąceniem ──
+test('W11: numer dokumentu po wtrąceniu z kategorią, organem, datą ważności albo czasownikiem', () => {
+  masked([
+    ['prawo jazdy kat. AM, B nr 44411/23/1586, wydane przez Starostę', 'prawo jazdy kat. AM, B nr [PRAWO-JAZDY], wydane przez Starostę'],
+    ['Prawo jazdy okazał, nr 18957/11/1031, chociaż niepotrzebne.', 'Prawo jazdy okazał, nr [PRAWO-JAZDY], chociaż niepotrzebne.'],
+    ['Prawo jazdy kategorii B, C nr 01234/12/1234 wydane przez Prezydenta Miasta Gdańska.', 'Prawo jazdy kategorii B, C nr [PRAWO-JAZDY] wydane przez Prezydenta Miasta Gdańska.'],
+    ['legitymuje się dowodem osobistym wydanym przez Prezydenta Miasta Krakowa nr ABC123456.', `legitymuje się dowodem osobistym wydanym przez Prezydenta Miasta Krakowa nr ${DW}.`],
+    ['Okazał dowód osobisty (ważny do 01.02.2030 r.) seria i numer ABC 123456.', `Okazał dowód osobisty (ważny do 01.02.2030 r.) seria i numer ${DW}.`],
+    ['Okazał paszport (ważny do 12.05.2030 r.) nr AB1234567.', `Okazał paszport (ważny do 12.05.2030 r.) nr ${PZ}.`],
+    ['Legitymował się paszportem wydanym przez RP o numerze AB1234567.', `Legitymował się paszportem wydanym przez RP o numerze ${PZ}.`],
+    ['wpisana do KRS (Sąd Rejonowy dla Krakowa-Śródmieścia, XI Wydział Gospodarczy) pod numerem 0000123456.', 'wpisana do KRS (Sąd Rejonowy dla Krakowa-Śródmieścia, XI Wydział Gospodarczy) pod numerem [KRS].'],
+    [
+      'wpisana do Krajowego Rejestru Sądowego prowadzonego przez Sąd Rejonowy Gdańsk-Północ w Gdańsku, VIII Wydział Gospodarczy, pod numerem 0000123456.',
+      'wpisana do Krajowego Rejestru Sądowego prowadzonego przez Sąd Rejonowy Gdańsk-Północ w Gdańsku, VIII Wydział Gospodarczy, pod numerem [KRS].',
+    ],
+    ['kopia odpisu skróconego aktu urodzenia dziecka, nr aktu 0612/2021 (USC Puławy),', 'kopia odpisu skróconego aktu urodzenia dziecka, nr aktu [NR-AKTU-USC] (USC Puławy),'],
+    ['przy migracji do rejestru stanu cywilnego akt otrzymał numer 1661011/00/AU/1995/001061.', 'przy migracji do rejestru stanu cywilnego akt otrzymał numer [NR-AKTU-USC].'],
+  ]);
+  keep([
+    'Zgodnie z ustawą o dowodach osobistych z dnia 6 sierpnia 2010 r. dowód wydaje organ gminy.',
+    'Prawo jazdy kategorii B wydaje starosta zgodnie z art. 11 ust. 1 ustawy, nr Dz.U. 2023/622.',
+    'Kierujący okazał prawo jazdy, a funkcjonariusz sporządził notatkę nr 123/2026.',
+    'zatrzymał dokument prawa jazdy za pokwitowaniem nr 0318842 i przekazał go do organu.',
+    'Prawo jazdy kat. B uprawnia do kierowania pojazdem, zgodnie z załącznikiem nr 3.',
+    'Paszporty wydaje Wojewoda Pomorski, Punkt Paszportowy nr 2 w Gdyni.',
+    'Paszport tymczasowy ważny jest 12 miesięcy, opłata 30 zł, wniosek nr 123/2024.',
+    'Prawo jazdy zatrzymano. Decyzja nr 12/2026 jest ostateczna.',
+    'Dowód osobisty odebrał osobiście, nr kolejny w rejestrze odbiorów 1234.',
+    'Odpis aktu urodzenia wydano w dniu 12.02.2026, pismo nr 1234/2026.',
+  ]);
+});
+
+// ── W12: wartość pola osoby w prozie i w spłaszczonym wierszu formularza ──
+test('W12: pola osoby w jednym wierszu, w prozie, w cudzysłowie i przy zmianie nazwiska', () => {
+  masked([
+    ['D.2 Imię ojca: Leon   Imię matki: Gertruda', `D.2 Imię ojca: ${N}   Imię matki: ${N}`],
+    ['   Miejscowość: Kiełpino   Ulica: Kartuska   Nr domu: 41A   Nr lokalu: –', `   Miejscowość: ${C}   Ulica: ${A}   Nr domu: ${A}   Nr lokalu: –`],
+    ['Imię: Jan Nazwisko: Kowalski PESEL: 85010112345', `Imię: ${N} Nazwisko: ${N} PESEL: [PESEL]`],
+    ['Imię: Anna; Nazwisko: Nowak; Imiona rodziców: Jan, Maria; Nazwisko rodowe: Zielińska', `Imię: ${N}; Nazwisko: ${N}; Imiona rodziców: ${N}, ${N}; Nazwisko rodowe: ${N}`],
+    ['1.4. Nazwisko: Kowalska', `1.4. Nazwisko: ${N}`],
+    ['matka: Bożena Nowicka, nazwisko rodowe w akcie: Szewczik.', `matka: ${N}, nazwisko rodowe w akcie: ${N}.`],
+    ['Wnioskodawca: Jan Kowalski, imiona rodziców: Stanisław, Helena, nazwisko rodowe matki: Wójcik.', `Wnioskodawca: ${N}, imiona rodziców: ${N}, ${N}, nazwisko rodowe matki: ${N}.`],
+    ['W akcie wpisano nazwisko rodowe matki „Szewczik”, a powinno być inaczej.', `W akcie wpisano nazwisko rodowe matki „${N}”, a powinno być inaczej.`],
+    ['nazwisko syna, ur. 4.09.2016 r., z „Kiełbasa” na „Kielski”.', `nazwisko syna, ur. [DATA-URODZENIA] r., z „${N}” na „${N}”.`],
+    ['Wnioskodawczyni wnosi o nadanie dziecku imienia Zofia.', `Wnioskodawczyni wnosi o nadanie dziecku imienia ${N}.`],
+    ['z identyfikatora zapamiętałam jedynie imię: Kamil.', `z identyfikatora zapamiętałam jedynie imię: ${N}.`],
+  ]);
+  keep([
+    'Imię i nazwisko osoby upoważnionej: ………………',
+    'Imię: ……………… Nazwisko: ………………',
+    'Imię i nazwisko: należy wpisać drukowanymi literami.',
+    'We wniosku należy podać imię i nazwisko, adres zamieszkania oraz numer PESEL.',
+    'Należy podać imiona rodziców, nazwisko rodowe matki oraz miejsce urodzenia.',
+    'W rubryce nazwisko: należy wpisać nazwisko rodowe.',
+    'Pole „Imię i nazwisko” należy wypełnić drukowanymi literami.',
+    'Rada Gminy postanawia nadać szkole imię Jana Pawła II.',
+    'Rada Gminy nadała Szkole Podstawowej w Kiełpinie imię Floriana.',
+    'Nagroda imienia Zofii.',
+    'Zmiana nazwy ulicy z „Polna” na „Lipowa”.',
+    'W imieniu Gminy Kartuzy podpisał Burmistrz.',
+    'Podpisał w zastępstwie, imię i nazwisko: Kierownik Referatu.',
+    'Nazwisko: Urząd Skarbowy   Adres: jak wyżej',
+    'Organ: Burmistrz Kartuz   Komórka: Wydział Podatków',
+  ]);
+});
+
+// ── W11/W12, poprawki po weryfikacji: dane urzędu po kotwicy dokumentu, Skarb Państwa, patron, numery pól deklaracji ──
+test('W11: rzeczownik przed „nr” we wtrąceniu kończy kotwicę dokumentu, numer urzędu zostaje jawny', () => {
+  keep([
+    'Wnioski o wydanie prawa jazdy przyjmuje Wydział Komunikacji Starostwa Powiatowego, pokój nr 1011.',
+    'Prawo jazdy odbierzesz w Wydziale Komunikacji, sala nr 2014.',
+    'Egzamin państwowy na prawo jazdy przeprowadza WORD w Kielcach, stanowisko nr 1204.',
+    'Prawo jazdy kategorii C, zgodnie z JRWA symbol nr 5430, kategoria archiwalna B10.',
+    'O wydanie prawa jazdy wnioskuje się elektronicznie przez ePUAP, skrytka nr ESP12345.',
+    'Prawo jazdy wydaje Wydział Komunikacji, okienko nr 12A4.',
+    'Dowód osobisty odbierzesz w Urzędzie Miasta, okienko nr ABA123456.',
+    'Paszport odbierzesz w Punkcie Paszportowym, stanowisko nr EA1234567.',
+    'Spółka wpisana do KRS, budynek nr 0000123456.',
+    'Dowód osobisty wydany przez Prezydenta Miasta, pokój nr ABC123456.',
+  ]);
+  masked([
+    ['Kierujący okazał prawo jazdy kat. B, C nr 04512/11/0612.', 'Kierujący okazał prawo jazdy kat. B, C nr [PRAWO-JAZDY].'],
+    ['legitymował się prawem jazdy wydanym przez Starostę Kieleckiego nr 04512/11/0612.', 'legitymował się prawem jazdy wydanym przez Starostę Kieleckiego nr [PRAWO-JAZDY].'],
+    ['Prawo jazdy przedstawiła, nr 04512/11/0612.', 'Prawo jazdy przedstawiła, nr [PRAWO-JAZDY].'],
+    ['prawo jazdy (ważne do 2030 r.) nr 04512/11/0612.', 'prawo jazdy (ważne do 2030 r.) nr [PRAWO-JAZDY].'],
+  ]);
+});
+
+test('W12: Skarb Państwa pod etykietą nazwiska zostaje jawny w środku wiersza i na jego początku', () => {
+  keep([
+    'Działka nr 123/4, obręb Bodzentyn, nazwisko właściciela: Skarb Państwa.',
+    'Nazwisko właściciela: Skarb Państwa.',
+    'Nazwisko: Skarb Państwa.',
+    'Imię i nazwisko: Skarb Państwa   Adres: jak wyżej',
+    'Działka nr 5, nazwisko właściciela: Gmina Bodzentyn.',
+  ]);
+  masked([['Działka nr 5, obręb Bodzentyn, nazwisko właściciela: Kowalski.', `Działka nr 5, obręb Bodzentyn, nazwisko właściciela: ${N}.`]]);
+});
+
+test('W12: imię patrona po nazwie instytucji zostaje jawne, imię dziecka przy nadaniu albo zmianie znika', () => {
+  keep([
+    'Wojewódzki Szpital Zespolony imienia Stefana.',
+    'Dom Kultury imienia Juliana.',
+    'Centrum Kształcenia Zawodowego imienia Józefa.',
+    'Klub Sportowy imienia Kazimierza.',
+    'Muzeum imienia Stanisława.',
+    'Teatr imienia Stefana.',
+    'Hospicjum imienia Jana.',
+    'Schronisko Młodzieżowe imienia Zofii.',
+    'Szkole nadano imię Floriana.',
+    'Uchwała w sprawie nadania imienia Juliana Tuwima.',
+  ]);
+  masked([
+    ['Rodzice wnieśli o zmianę imienia Zofia.', `Rodzice wnieśli o zmianę imienia ${N}.`],
+    ['Wpisano imię Zofia.', `Wpisano imię ${N}.`],
+    ['Wnosi o nadanie córce imienia Aurelia.', `Wnosi o nadanie córce imienia ${N}.`],
+  ]);
+});
+
+test('W12: numer pola deklaracji przed kolejną etykietą należy do etykiety, nie do wartości', () => {
+  masked([
+    ['Imię: Jan 1.2. Nazwisko: Kowalski', `Imię: ${N} 1.2. Nazwisko: ${N}`],
+    ['B.3 Imię ojca: Zdzisław  B.4 Imię matki: Halina', `B.3 Imię ojca: ${N}  B.4 Imię matki: ${N}`],
+    ['1.1. Imię: Bożydar 1.2. Nazwisko: Pękala', `1.1. Imię: ${N} 1.2. Nazwisko: ${N}`],
+    ['1.1. Imię: Bożydar', `1.1. Imię: ${N}`],
+    ['D.2 Imię: Jan  D.3 Nazwisko: Kowalski  D.4 Imię ojca: Piotr', `D.2 Imię: ${N}  D.3 Nazwisko: ${N}  D.4 Imię ojca: ${N}`],
+    ['Imię: Jan 1.2. Nazwisko: Kowalski  1.3. PESEL: 44051401359', `Imię: ${N} 1.2. Nazwisko: ${N}  1.3. PESEL: [PESEL]`],
+    ['1. Imię: Jan 2. Nazwisko: Kowalski', `1. Imię: ${N} 2. Nazwisko: ${N}`],
+  ]);
+  // liczba bez kropki na końcu w wierszu bez numeracji to wartość, nie numer pola
+  keep(['Wymiar etatu: 0.5 Stanowisko: referent']);
+});
+
+// ── W11/W12, druga weryfikacja: lokal urzędu wielką literą, etykieta „nazwisko lub nazwa”, patron w uchwale ──
+test('W11: lokal albo komórka urzędu we wtrąceniu przerywa kotwicę dokumentu bez względu na wielkość liter', () => {
+  keep([
+    'Prawo jazdy wydane przez Starostę Krakowskiego, Wydział Komunikacji, Pokój nr 1011.',
+    'Prawo jazdy wydane przez Starostę Krakowskiego, Wydział Komunikacji, Referat nr 1011.',
+    'Prawo jazdy wydane przez Starostę Krakowskiego, Wydział Komunikacji, Okienko nr 12A4.',
+    'Prawo jazdy wydane przez Starostę Krakowskiego, Wydział Komunikacji, Załącznik nr 1011.',
+    'Prawo jazdy wydane przez Prezydenta Miasta Krakowa, Budynek nr 1011.',
+    'Prawo jazdy wydane przez Starostę Kartuskiego, Stanowisko nr 1204.',
+    'Prawo jazdy kat. B wydane przez Starostę Powiatu Gdańskiego, Pokój nr 2014.',
+    'Prawo jazdy: obsługa prowadzona przez Referat Komunikacji, Pokój nr 2014.',
+    'Prawo jazdy wydane przez Wydział Komunikacji, Kancelaria Ogólna nr 1014.',
+    'Prawo jazdy wydane przez Starostę Krakowskiego, Biuro Obsługi Klienta nr 1014.',
+    'Prawo jazdy wydane przez Starostę Krakowskiego Pokój nr 1011.',
+    'Dowód osobisty wydany przez Wójta Gminy, Pokój nr ABC123456.',
+    'Dokument tożsamości wystawiony przez Urząd Miasta, Skrytka nr ESP123456.',
+    'KRS prowadzony przez Sąd Rejonowy dla Krakowa-Śródmieścia w Krakowie, XI Wydział Gospodarczy, Sala nr 1234567890.',
+    // imiesłów po rzeczowniku miejsca w kolejnym członie wtrącenia opisuje miejsce, nie dokument
+    'Odbiór prawa jazdy: stanowisko czasowo zamknięte, nr 1204 czynne od 8:00.',
+    'Prawo jazdy – stanowisko tymczasowo przeniesione, nr 1205 w holu.',
+    'Prawo jazdy – odbiór: Wydział Komunikacji, stanowisko obsługi wyłączone, nr 1012 działa.',
+    'Prawa jazdy odbierzesz w starostwie, okienko zamknięte, nr 1012 otwarte do 15:00.',
+    'Prawo jazdy – okno podawcze zamknięte, nr 1204 czynne.',
+  ]);
+  masked([
+    ['Prawo jazdy wydane przez Starostę Krakowskiego, Wydział Komunikacji, nr 04512/11/0612.', 'Prawo jazdy wydane przez Starostę Krakowskiego, Wydział Komunikacji, nr [PRAWO-JAZDY].'],
+    ['Prawo jazdy zatrzymane, nr 04512/11/0612.', 'Prawo jazdy zatrzymane, nr [PRAWO-JAZDY].'],
+    ['Paszport wydany przez Wojewodę Mazowieckiego, w Warszawie, nr AB1234567.', `Paszport wydany przez Wojewodę Mazowieckiego, w Warszawie, nr ${PZ}.`],
+  ]);
+});
+
+test('W12: etykieta „nazwisko lub nazwa” w prozie zostawia firmę jawną, nazwisko pod czystą etykietą znika', () => {
+  keep([
+    'Wnioskodawca, nazwisko lub nazwa: Budimex.',
+    'Inwestor, nazwisko lub nazwa: Tauron.',
+    'Wierzyciel, nazwisko lub nazwa: Allegro.',
+    'Dłużnik – nazwisko lub nazwa: Energa.',
+    'Odbiorca: nazwisko lub nazwa: Comarch.',
+    'Właściciel, nazwisko lub nazwa firmy: Orlen.',
+    'Strona, nazwisko albo nazwa: Mostostal.',
+  ]);
+  masked([['Wnioskodawca, nazwisko: Kowalski.', `Wnioskodawca, nazwisko: ${N}.`]]);
+});
+
+test('W12: patron ronda, ulicy i szkoły w uchwale zostaje jawny w cudzysłowie, po dwukropku i przy zmianie', () => {
+  keep([
+    'Rondo imienia „Jana”.',
+    'Nadaje się rondu imię „Józefa”.',
+    'Nadanie imienia „Józef” rondu w Krakowie.',
+    'Zmiana imienia patrona z „Stanisław” na „Jan”.',
+    'Rada Miejska zmieniła imię patrona szkoły z „Janusz” na „Maria”.',
+    'Proponowane nazwisko patrona: Kościuszko.',
+    'Szkoła nosi imię: Józef.',
+    'Szkoła Podstawowa nr 3 imienia Jana Pawła II, imię patrona: Jan Paweł.',
+  ]);
+  masked([
+    ['Wnosi o zmianę imienia dziecka z „Jan” na „Janusz”.', `Wnosi o zmianę imienia dziecka z „${N}” na „${N}”.`],
+    ['matka: Halina Nowak, nazwisko rodowe w akcie: Szewczik.', `matka: ${N}, nazwisko rodowe w akcie: ${N}.`],
+  ]);
+});
+
+test('W12: pole osoby w środku bardzo długiego wiersza bez złamań ma koszt liniowy', () => {
+  const unit = 'x, imię: Jan, ';
+  const t1 = performance.now();
+  redactPII(unit.repeat(4000));
+  const a = performance.now() - t1;
+  const t2 = performance.now();
+  redactPII(unit.repeat(16000));
+  const b = performance.now() - t2;
+  expect(b).toBeLessThan(Math.max(a * 8, 400));
+});
+
+test('Seria 3: dana o zdrowiu w wierszu tabeli z osobą zakrytą przez przebieg tabeli znika jak przy jawnym imieniu i nazwisku', () => {
+  const H = '[DANE O ZDROWIU]';
+  const tsv = 'Pracownik\tŚwiadczenie\tKwota\nJadwiga Mroczek\tbony na święta\t300,00\nTeresa Kowalczyk\tzapomoga po chemioterapii\t2 000,00\n';
+  const out = redactPII(tsv).redacted;
+  expect(out).toBe(`Pracownik\tŚwiadczenie\tKwota\n${N}\tbony na święta\t300,00\n${N}\tzapomoga po ${H}\t2 000,00\n`);
+  // ponowna redakcja wyniku niczego nie dokłada (kotwica pochodzi z przebiegu tabeli, nie z maski)
+  expect(redactPII(out).redacted).toBe(out);
+  expect(redactPII(tsv, { pseudonyms: true }).redacted).toContain(`zapomoga po ${H}`);
+  // tabela bez kolumny osób („Oddział”) to wykaz świadczeń, a nie dana konkretnej osoby
+  keep(['Oddział\tŚwiadczenie\nOnkologia\tchemioterapia\nKardiologia\tkoronarografia\n']);
+});
+
+test('Seria 3: inicjały „O.K.” w kolumnie „Odpowiedzialni” przy osobie z pisma o tych inicjałach znikają, a sam status „OK” zostaje', () => {
+  expect(redactPII('Z wnioskiem wystąpił Oskar Kamiński.\nNr | Zadanie | Odpowiedzialni | Termin\n1 | złożenie wniosku o dodatek | O.K. | 12.01.2027\n').redacted).toBe(
+    `Z wnioskiem wystąpił ${N}.\nNr | Zadanie | Odpowiedzialni | Termin\n1 | złożenie wniosku o dodatek | ${N} | 12.01.2027\n`,
+  );
+  // bez osoby o inicjałach O.K. w piśmie „OK” w kolumnie to status wiersza
+  keep(['Z wnioskiem wystąpiła [IMIĘ I NAZWISKO].\nNr | Zadanie | Odpowiedzialni | Termin\n1 | kontrola dokumentów | OK | 12.01.2027\n']);
+});
+
+test('Seria 3: temat szkolenia, programu, kampanii i ulotki przy osobie zostaje jawny, a leczenie po „kursie” i „programie lekowym” znika', () => {
+  const H = '[DANE O ZDROWIU]';
+  keep([
+    'Pracownik | Szkolenie\n[IMIĘ I NAZWISKO] | profilaktyka chorób nowotworowych\n[IMIĘ I NAZWISKO] | Program profilaktyki raka szyjki macicy\n',
+    'Lp. | Pracownik | Szkolenie\n1 | [IMIĘ I NAZWISKO] | Warsztaty o uzależnieniach od alkoholu\n2 | [IMIĘ I NAZWISKO] | Prelekcja o cukrzycy typu 2\n3 | [IMIĘ I NAZWISKO] | Konferencja: choroba Alzheimera w opiece społecznej\n',
+    'Pan [IMIĘ I NAZWISKO] rozdał mieszkańcom ulotki o profilaktyce udaru mózgu i nadciśnienia.',
+    '[IMIĘ I NAZWISKO], akcja profilaktyczna „Stop cukrzycy”, udział jako wolontariusz.',
+    'Pani [IMIĘ I NAZWISKO] zgłosiła się do programu badań przesiewowych w kierunku raka piersi.',
+    'Zaproszenie na bezpłatne badania przesiewowe w kierunku raka jelita grubego otrzymała Pani [IMIĘ I NAZWISKO].',
+  ]);
+  expect(redactPII('Pracownik | Szkolenie\nJan Kowalski | profilaktyka chorób nowotworowych\n').redacted).toBe(`Pracownik | Szkolenie\n${N} | profilaktyka chorób nowotworowych\n`);
+  masked([
+    ['Pani Maria Kowal jest po drugim kursie chemioterapii z powodu raka piersi.', `Pani ${N} jest po drugim kursie ${H} z powodu ${H}.`],
+    ['Pacjentka Anna Nowak otrzymuje profilaktykę przeciwzakrzepową z powodu zakrzepicy.', `Pacjentka ${N} otrzymuje profilaktykę przeciwzakrzepową z powodu ${H}.`],
+    ['W ramach programu badań przesiewowych zdiagnozowano u niej raka piersi.', `W ramach programu badań przesiewowych zdiagnozowano u niej ${H}.`],
+    ['W ramach programu profilaktyki u Pani Nowak wykryto raka szyjki macicy.', `W ramach programu profilaktyki u Pani ${N} wykryto ${H}.`],
+    ['Jan Kowalski | szkolenie BHP | choruje na cukrzycę', `${N} | szkolenie BHP | choruje na ${H}`],
+    ['Podczas szkolenia Pan Jan Kowalski doznał zawału serca.', `Podczas szkolenia Pan ${N} doznał ${H}.`],
+  ]);
+});
+
+test('Seria 3: leczenie w złożeniu, opieka i grupa chorych po słowie tematu nie robią z faktu o osobie tematu szkolenia', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    // rdzeń leczenia w złożeniu, nie tylko na początku wyrazu
+    ['Pani Maria Kowal zakończyła kurs immunoterapii alergii na jad osy.', `Pani ${N} zakończyła kurs ${H} osy.`],
+    ['Pan Jan Kowalski zakończył kurs insulinoterapii cukrzycy typu 1.', `Pan ${N} zakończył kurs ${H}.`],
+    ['Pani Maria Kowal jest w trakcie programu psychoterapii depresji.', `Pani ${N} jest w trakcie programu psychoterapii ${H}.`],
+    ['Pan Jan Kowalski odbył kurs fizjoterapii po udarze.', `Pan ${N} odbył kurs ${H}.`],
+    ['Lp. | Osoba | Uwagi\n1 | Jan Kowalski | kurs kinezyterapii po złamaniu szyjki kości udowej\n2 | Anna Nowak | program immunoterapii czerniaka\n', `Lp. | Osoba | Uwagi\n1 | ${N} | kurs ${H} po ${H}\n2 | ${N} | program ${H}\n`],
+    // grupa odbiorców z chorobą przy osobie
+    ['Pan Jan Kowalski uczestniczy w warsztatach dla osób po udarze mózgu.', `Pan ${N} uczestniczy w warsztatach dla osób ${H}.`],
+    ['Pan Jan Kowalski został skierowany na turnus i kurs dla osób po amputacji kończyny.', `Pan ${N} został skierowany na turnus i kurs dla osób ${H}.`],
+    ['Lp. | Osoba | Zajęcia\n1 | Anna Nowak | szkolenie BHP\n2 | Jan Kowalski | warsztaty dla osób po udarze\n', `Lp. | Osoba | Zajęcia\n1 | ${N} | szkolenie BHP\n2 | ${N} | warsztaty dla osób ${H}\n`],
+    ['Pani Anna Nowak uczestniczy w programie dla kobiet po mastektomii.', `Pani ${N} uczestniczy w programie dla kobiet ${H}.`],
+    ['Syn Pani Nowak uczęszcza na warsztaty dla dzieci po przeszczepie nerki.', `Syn Pani ${N} uczęszcza na warsztaty dla dzieci ${H}.`],
+    // opieka i wsparcie, „z” z narzędnikiem choroby
+    ['Pani Anna Nowak jest objęta programem kompleksowej opieki po zawale serca.', `Pani ${N} jest objęta programem kompleksowej opieki ${H}.`],
+    ['Pan Jan Kowalski jest objęty programem koordynowanej opieki w cukrzycy.', `Pan ${N} jest objęty programem koordynowanej opieki w ${H}.`],
+    ['Pan Jan Kowalski korzysta z programu wsparcia osób po udarze mózgu.', `Pan ${N} korzysta z programu wsparcia osób ${H}.`],
+    ['Pan Jan Kowalski chodzi na warsztaty z cukrzycą typu 2.', `Pan ${N} chodzi na warsztaty z ${H}.`],
+  ]);
+  // grupa odbiorców bez choroby i temat w dopełniaczu zostają tematem
+  keep([
+    'Kampania dla kobiet o profilaktyce raka piersi odbyła się w maju, koordynowała ją Pani [IMIĘ I NAZWISKO].',
+    'Warsztaty „Jak rozmawiać z osobą po udarze” dla wolontariuszy.',
+  ]);
+});
+
+test('Seria 3: przyczyna lub stan w środku odcinka po słowie tematu („po”, „przy”, „w leczeniu”, „w trakcie”) przerywa temat, a „o …” i odbiorcy bez choroby go zostawiają', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    ['Pan Jan Kowalski odbywa kurs zabiegów w leczeniu choroby zwyrodnieniowej kręgosłupa.', `Pan ${N} odbywa kurs zabiegów w leczeniu ${H}.`],
+    ['Pani Anna Nowak uczestniczy w programie zajęć ruchowych przy chorobie Parkinsona.', `Pani ${N} uczestniczy w programie zajęć ruchowych przy ${H}.`],
+    ['Pani Anna Nowak chodzi na warsztaty ruchowe przy chorobie Parkinsona.', `Pani ${N} chodzi na warsztaty ruchowe przy ${H}.`],
+    ['Pan Jan Kowalski jest w programie żywienia dojelitowego po resekcji jelita.', `Pan ${N} jest w programie żywienia dojelitowego ${H}.`],
+    ['Pan Jan Kowalski kończy kurs ćwiczeń usprawniających po udarze mózgu.', `Pan ${N} kończy kurs ćwiczeń usprawniających ${H}.`],
+    ['Pan Jan Kowalski odbywa kurs nauki chodzenia po amputacji uda.', `Pan ${N} odbywa kurs nauki chodzenia ${H}.`],
+    ['Program zdrowotny w leczeniu cukrzycy obejmuje Pana Jana Kowalskiego.', `Program zdrowotny w leczeniu ${H} obejmuje Pana ${N}.`],
+    ['Pani Halina Sowa realizuje kurs zastrzyków w leczeniu osteoporozy.', `Pani ${N} realizuje kurs zastrzyków w leczeniu ${H}.`],
+    ['Pan Marek Lis jest objęty programem żywienia klinicznego w trakcie radioterapii krtani.', `Pan ${N} jest objęty programem żywienia klinicznego w trakcie ${H}.`],
+    ['Lp. | Osoba | Uwagi\n1 | Marek Lis | kurs ćwiczeń po operacji kolana\n2 | Halina Sowa | program zajęć przy chorobie Alzheimera\n', `Lp. | Osoba | Uwagi\n1 | ${N} | kurs ćwiczeń ${H}\n2 | ${N} | program zajęć przy ${H}\n`],
+  ]);
+  keep([
+    'Lp. | Pracownik | Szkolenie\n1 | [IMIĘ I NAZWISKO] | kurs pierwszej pomocy przy zawale serca\n',
+    'Lp. | Pracownik | Szkolenie\n1 | [IMIĘ I NAZWISKO] | prelekcja o życiu po udarze mózgu\n',
+    'Pani [IMIĘ I NAZWISKO] prowadziła warsztaty o diecie przy cukrzycy.',
+    'Pan [IMIĘ I NAZWISKO] ukończył kurs dla opiekunów przy chorobie Parkinsona.',
+    'Warsztaty „Jak rozmawiać z osobą po udarze” dla wolontariuszy.',
+  ]);
+});
+
+test('Seria 3: stan funkcjonalny osoby z choroby lub niepełnosprawności znika, a wózek widłowy, położenie, stanowisko i przepis zostają', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    ['Pani Ewelina Wrzesińska porusza się na wózku inwalidzkim po urazie rdzenia kręgowego.', `Pani ${N} ${H} po ${H}.`],
+    ['Wnioskodawcy wskazali, że Pani Irena Kmieć porusza się na wózku inwalidzkim i podjazd jest jedyną drogą.', `Wnioskodawcy wskazali, że Pani ${N} ${H} i podjazd jest jedyną drogą.`],
+    ['– stan po upadku w domu (2025), porusza się przy balkoniku,', `– stan po upadku w domu (2025), ${H},`],
+    ['Ojciec wnioskodawczyni chodzi o kulach łokciowych i wymaga pomocy przy kąpieli.', `Ojciec wnioskodawczyni ${H} i ${H}.`],
+    ['Z zaświadczenia wynika, że Pan Jan Zając jest osobą leżącą od dwóch lat.', `Z zaświadczenia wynika, że Pan ${N} jest ${H} od dwóch lat.`],
+    ['Matka jest całkowicie niesamodzielna i wymaga stałej opieki.', `Matka jest ${H} i ${H}.`],
+    ['Dziecko wymaga karmienia przez gastrostomię i codziennej opieki rodzica.', `Dziecko ${H} i codziennej opieki rodzica.`],
+    ['Pan Jan Kowalski ma wyłonioną kolostomię i korzysta z pieluchomajtek.', `Pan ${N} ma wyłonioną ${H} i korzysta z ${H}.`],
+    ['Pani Anna Nowak uzyskała 15 pkt w skali Barthel.', `Pani ${N} uzyskała ${H}.`],
+    ['Pani Anna Nowak jest niewidoma od urodzenia.', `Pani ${N} jest ${H} od urodzenia.`],
+    ['Córka nie mówi i nie chodzi, porusza się z pomocą drugiej osoby.', `Córka ${H}, ${H}.`],
+    ['U Pana Jana Wójcika stosowana jest tlenoterapia domowa.', `U Pana ${N} stosowana jest ${H}.`],
+    ['Pan Jan Lis nie jest w stanie samodzielnie się poruszać.', `Pan ${N} ${H}.`],
+    ['Babcia jest obłożnie chora i nie wstaje z łóżka.', `Babcia jest ${H} i ${H}.`],
+    [
+      'Orzeczenie zawiera wskazanie konieczności stałej lub długotrwałej opieki lub pomocy innej osoby w związku ze znacznie ograniczoną możliwością samodzielnej egzystencji syna.',
+      // od kroku W6 wskazanie z orzeczenia (pkt 7) i stan, z którego wynika, to jedna maska
+      `Orzeczenie zawiera wskazanie ${H} syna.`,
+    ],
+  ]);
+  keep([
+    'Pomoc w formie usług opiekuńczych przysługuje osobie samotnej, która z powodu wieku wymaga pomocy innych osób.',
+    'Operator porusza się na wózku widłowym po hali magazynowej.',
+    'Matka porusza się z wózkiem dziecięcym po osiedlu.',
+    'Działka leżąca w obrębie Zalesie jest niezabudowana.',
+    'Dokumenty leżące na biurku przekazano do archiwum.',
+    'Na stanowisku samodzielnego referenta zatrudniono pracownika.',
+    'Samodzielne stanowisko ds. kadr prowadzi ewidencję.',
+    'Lokal mieszkalny jest niesamodzielny, ma wspólną łazienkę.',
+    'Budynek wymaga stałej opieki konserwatorskiej.',
+    'Polski Związek Niewidomych zorganizował spotkanie.',
+    'Szkolenie z pierwszej pomocy dla osób niewidomych odbędzie się w maju.',
+    'Dziecko nie chodzi samodzielnie do szkoły, odprowadza je babcia.',
+    'Osoby poruszające się na wózkach inwalidzkich mogą korzystać z windy.',
+    'Każdy, kto porusza się na wózku inwalidzkim, może skorzystać z podjazdu.',
+    'Usługi opiekuńcze obejmują pomoc w czynnościach dnia codziennego.',
+    'Świadczenie pielęgnacyjne przysługuje, jeżeli dziecko wymaga stałej opieki.',
+    'Ocena w skali Barthel 0-40 pkt uprawnia do świadczenia.',
+    'Wyroby medyczne, w tym pieluchomajtki, są refundowane przez NFZ na zlecenie lekarza.',
+    'Inspektor porusza się z pomocą nawigacji po terenie gminy.',
+    'Pracownik porusza się po budowie samochodem służbowym.',
+  ]);
+});
+
+test('Seria 3: stan funkcjonalny w bardzo długim wierszu ze spacjami ma koszt liniowy', () => {
+  const unit = 'Pan jest      porusza  się      wymaga     nie   ';
+  const t1 = performance.now();
+  redactPII(unit.repeat(2000));
+  const a = performance.now() - t1;
+  const t2 = performance.now();
+  redactPII(unit.repeat(8000));
+  const b = performance.now() - t2;
+  expect(b).toBeLessThan(Math.max(a * 8, 400));
+});
+
+test('Seria 3: stan funkcjonalny ze sprzętem, samoobsługą i zmysłami w nowych sformułowaniach znika', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    ['Pani Anna Nowak porusza się po domu przy balkoniku.', `Pani ${N} ${H}.`],
+    ['Pan Jan Kowalski porusza się z trudem, przy pomocy kuli.', `Pan ${N} ${H}.`],
+    ['Wnioskodawca porusza się o dwóch kulach.', `Wnioskodawca ${H}.`],
+    ['Ojciec porusza się na wózku elektrycznym.', `Ojciec ${H}.`],
+    ['Pani Anna Nowak porusza się z pomocą kul łokciowych.', `Pani ${N} ${H}.`],
+    ['Pani Anna Nowak przemieszcza się wyłącznie z pomocą drugiej osoby.', `Pani ${N} ${H}.`],
+    ['Badana porusza się o lasce, chód niepewny.', `Badana ${H}, chód niepewny.`],
+    ['Podopieczny jest niesamodzielny w zakresie samoobsługi.', `Podopieczny jest ${H}.`],
+    ['Mieszkaniec pokoju 5 jest całkowicie niesamodzielny, karmiony przez sondę.', `Mieszkaniec pokoju 5 jest ${H}, ${H}.`],
+    ['Matka wymaga pomocy w poruszaniu się po mieszkaniu.', `Matka ${H} po mieszkaniu.`],
+    ['Matka jest niesamodzielna i wymaga stałej opieki.', `Matka jest ${H} i ${H}.`],
+    ['Pan Jan Kowalski w skali Barthela uzyskał 30 pkt.', `Pan ${N} ${H}.`],
+    ['Pani Anna Nowak ma znacznie ograniczoną zdolność do samodzielnej egzystencji.', `Pani ${N} ma ${H}.`],
+    ['Pan Jan Kowalski nie jest w stanie samodzielnie się ubrać ani umyć.', `Pan ${N} ${H}.`],
+    ['Syn nie potrafi samodzielnie chodzić.', `Syn ${H}.`],
+    ['Córka nie słyszy i nie mówi.', `Córka ${H}.`],
+    ['Dziadek jest przykuty do łóżka.', `Dziadek jest ${H}.`],
+    ['Babcia nie wstaje z łóżka od czasu złamania szyjki kości udowej.', `Babcia ${H} od czasu ${H}.`],
+    ['Mieszka z matką, która jest leżąca od czasu udaru.', `Mieszka z matką, która jest ${H}.`],
+    ['Mam córkę, która jest niewidoma.', `Mam córkę, która jest ${H}.`],
+    ['Mama ma wyłonioną urostomię.', `Mama ma wyłonioną ${H}.`],
+    ['Pacjentka wymaga tlenoterapii domowej.', `Pacjentka ${H}.`],
+    ['Pani Anna Nowak jest osobą leżącą... od trzech lat.', `Pani ${N} jest ${H}... od trzech lat.`],
+  ]);
+});
+
+test('Seria 3: stan funkcjonalny tylko przy człowieku i ze zdrowiem: rzecz, małe dziecko, sprzęt innego rodzaju, inna sprawa, zdanie ogólne i skala zostają', () => {
+  const noHealth = (texts: string[]): void => {
+    for (const t of texts) expect(redactPII(t).redacted, t).not.toContain('[DANE O ZDROWIU]');
+  };
+  noHealth([
+    // podmiot nie jest człowiekiem
+    'Zabytek wymaga stałej opieki i nadzoru.',
+    'Zabytkowy park wymaga stałej opieki.',
+    'Kościół wymaga stałej opieki i nadzoru.',
+    'Ogród wymaga stałej opieki ogrodnika.',
+    'Pies wymaga stałej opieki weterynaryjnej.',
+    'Projekt wymaga stałej opieki merytorycznej koordynatora.',
+    'Strona internetowa wymaga stałej opieki administratora.',
+    'Mieszkanie wymaga stałej pomocy przy utrzymaniu czystości.',
+    'Stanowisko wymaga stałej pomocy innych pracowników przy rozładunku.',
+    'Stowarzyszenie nie jest w stanie samodzielnie funkcjonować bez wolontariuszy.',
+    'Rodzina wymaga stałej pomocy asystenta rodziny.',
+    // opieka z wieku dziecka, z nieznajomości języka, przy remoncie, nad dziećmi
+    'Małoletni syn wymaga stałej opieki matki, dlatego Pani Anna Nowak nie podjęła pracy.',
+    'Dziecko w wieku 2 lat wymaga stałej opieki.',
+    'Córka (3 lata) wymaga całodobowej opieki, żłobek nie ma miejsc.',
+    'Pan Jan Nowak wymaga stałej pomocy w sprawach urzędowych, bo nie zna języka polskiego.',
+    'Pani Anna Nowak potrzebuje stałej opieki nad dziećmi w czasie pracy zmianowej.',
+    'Pani Anna Nowak potrzebuje stałej pomocy w opiece nad trójką dzieci.',
+    'Pan Jan Kowalski wymaga stałej pomocy w prowadzeniu gospodarstwa domowego po wyjeździe żony.',
+    'Wnioskodawca wymaga pomocy osób trzecich przy remoncie mieszkania.',
+    'Pan Jan Kowalski potrzebuje pomocy innych osób przy przeprowadzce.',
+    'Pani Anna Nowak wymaga pomocy przy kąpieli dzieci, bo mąż pracuje za granicą.',
+    'Pani Anna Nowak wymaga pomocy przy myciu okien.',
+    'Stażystka jest niesamodzielna i wymaga stałej pomocy innych osób przy obsłudze klienta.',
+    // zdanie ogólne, definicja, procedura, warunek, pytanie
+    'Osoba niesamodzielna to osoba, która z powodu stanu zdrowia wymaga stałej pomocy w czynnościach dnia codziennego.',
+    'Lekarz orzecznik ocenia, czy badany wymaga stałej lub długotrwałej opieki i pomocy innej osoby.',
+    'Pierwszeństwo ma kandydat, który wymaga stałej opieki i pomocy osób trzecich.',
+    'Wniosek może złożyć opiekun osoby, która jest leżąca i wymaga całodobowej opieki.',
+    'Gdy podopieczny wymaga karmienia przez PEG, opiekun przechodzi szkolenie.',
+    'Nauczycielka jest niedosłysząca? Nie wiem, pytam tylko o procedurę.',
+    // sprzęt innego rodzaju
+    'Pan Jan Nowak porusza się na wózku golfowym po terenie ośrodka.',
+    'Pan Jan Nowak porusza się na wózku akumulatorowym w hali.',
+    'Pan Jan Nowak jeździ na wózku ręcznym w magazynie.',
+    'Babcia chodzi z laską trekkingową po górach.',
+    'Ksiądz chodzi z laską pasterską w procesji.',
+    'Ratownik chodzi z kulami ratunkowymi po plaży.',
+    'Pan Jan Nowak chodzi z kulami do kręgielni w każdy czwartek.',
+    'Pani Anna Nowak porusza się na wózku elektrycznym marki Kaabo.',
+    'Pan Jan Nowak porusza się z pomocą drugiej osoby w trudnym terenie podczas szkolenia survivalowego.',
+    // niesamodzielność w innej dziedzinie, norma rozwojowa, cel i czas
+    'Pan Jan Nowak jest osobą niesamodzielną finansowo.',
+    'Pani Anna Nowak jest osobą niesamodzielną mieszkaniowo, mieszka u rodziców.',
+    'Pracownik jest całkowicie niesamodzielny w obsłudze programu Płatnik.',
+    'Dziecko nie chodzi samodzielnie, bo ma dopiero 10 miesięcy.',
+    'Pan Jan Nowak nie wstaje z łóżka przed dziesiątą, bo pracuje na nocną zmianę.',
+    'Pan Jan Kowalski nie mówi i nie chodzi na zebrania wspólnoty.',
+    'Pracownik nie mówi i nie chodzi na zebrania.',
+    'Pan Jan Nowak nie mówi, nie chodzi na zebrania i nie odbiera telefonów.',
+    'Świadek nie widzi i nie słyszy niczego z balkonu.',
+    'Dziecko nie potrafi samodzielnie chodzić do szkoły, bo droga jest niebezpieczna.',
+    // grupa w celowniku, skala oceny
+    'Pani Anna Nowak jest wolontariuszką i pomaga osobom niewidomym w zakupach.',
+    'Pomagamy osobom niewidomym i słabowidzącym w dotarciu do urzędu.',
+    '| Lp. | Kategoria | Punkty |\n| 1 | osoba leżąca | 0 |\n| 2 | porusza się przy balkoniku | 1 |',
+    'Komisja ocenia samodzielność: osoba leżąca – 0 pkt, osoba chodząca – 2 pkt.',
+  ]);
+});
+
+test('Seria 3: stan funkcjonalny ze sprzętem, opieką i łańcuchem „nie …” na długim powtórzeniu ma koszt liniowy', () => {
+  for (const unit of ['Pan Nowak porusza się z trudem, po domu bardzo wolno przy ', 'Matka nie mówi, nie chodzi, nie siedzi, ', 'wymaga stałej i długotrwałej opieki lub pomocy innej osoby przy myciu, ubieraniu i ']) {
+    const t1 = performance.now();
+    redactPII(unit.repeat(1000));
+    const a = performance.now() - t1;
+    const t2 = performance.now();
+    redactPII(unit.repeat(4000));
+    const b = performance.now() - t2;
+    expect(b).toBeLessThan(Math.max(a * 8, 400));
+  }
+});
+
+test('Seria 3: sprzęt i zabieg przy posiadaczu albo pacjencie znikają, a ten sam sprzęt jako towar, dostawa i przedmiot pracy zostaje', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    ['Pani Genowefa Lis nosi pieluchomajtki z powodu nietrzymania moczu.', `Pani ${N} nosi ${H} z powodu nietrzymania moczu.`],
+    ['Wnioskodawczyni stosuje tlenoterapię domową.', `Wnioskodawczyni stosuje ${H}.`],
+    ['Pan Jan Nowak ma założony cewnik.', `Pan ${N} ma założony ${H}.`],
+    ['Pani Anna Nowak korzysta z worków stomijnych.', `Pani ${N} korzysta z ${H}.`],
+    ['Pacjentka jest na tlenoterapii domowej.', `Pacjentka jest na ${H}.`],
+  ]);
+  const noHealth = (texts: string[]): void => {
+    for (const t of texts) expect(redactPII(t).redacted, t).not.toContain('[DANE O ZDROWIU]');
+  };
+  noHealth([
+    'Osoba do kontaktu: Anna Nowak. Przedmiot zamówienia: worki stomijne i cewniki urologiczne.',
+    'Pani Nowak odpowiada za zakup pieluchomajtek dla mieszkańców.',
+    'Pan Jan Kowalski z firmy MedPol dostarczył 200 cewników i pieluchomajtki do magazynu.',
+    'Pani Nowak, magazynierka, przyjęła dostawę cewników i worków stomijnych.',
+    'Pielęgniarka Anna Nowak wymienia cewniki mieszkańcom zgodnie z harmonogramem.',
+    'Opiekunka środowiskowa Anna Nowak wykonuje czynności przy osobach leżących, w tym zmianę pieluchomajtek.',
+    'Pan Kowalski przekazał tlenoterapię domową do rozliczenia z NFZ.',
+    'Pacjentka cewnika nie miała; pielęgniarka przyniosła cewnik do gabinetu zabiegowego.',
+    'Pani Nowak ma zamówić cewnik dla oddziału.',
+    'Kierownik Jan Nowak zatwierdził przetarg na pieluchomajtki i worki stomijne.',
+  ]);
+});
+
+test('Seria 3: niemożność samoobsługi z dopełnieniem spoza domu i „poruszanie się po” miejscu bez sygnału zdrowia zostają, a przestrzeń domowa i przyczyna medyczna dalej znikają', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    ['Matka nie jest w stanie samodzielnie poruszać się po mieszkaniu.', `Matka ${H} po mieszkaniu.`],
+    ['Ojciec nie może samodzielnie wstać z łóżka.', `Ojciec ${H} z łóżka.`],
+    ['Po udarze ojciec nie jest w stanie samodzielnie chodzić po schodach.', `Po udarze ojciec ${H} po schodach.`],
+    ['Pani Anna Nowak nie jest w stanie samodzielnie funkcjonować bez pomocy osób trzecich.', `Pani ${N} ${H} bez pomocy osób trzecich.`],
+    ['Pan Jan Kowalski nie porusza się samodzielnie po mieszkaniu.', `Pan ${N} ${H} po mieszkaniu.`],
+  ]);
+  const noHealth = (texts: string[]): void => {
+    for (const t of texts) expect(redactPII(t).redacted, t).not.toContain('[DANE O ZDROWIU]');
+  };
+  noHealth([
+    'Uczeń nie potrafi samodzielnie funkcjonować w grupie rówieśniczej, często wchodzi w konflikty.',
+    'Stażysta nie potrafi samodzielnie funkcjonować w zespole.',
+    'Pracownik nie może samodzielnie funkcjonować w systemie SAP bez szkolenia.',
+    'Chłopiec nie jest w stanie samodzielnie siedzieć w ławce przez całą lekcję, wierci się.',
+    'Pan Kowalski nie jest w stanie samodzielnie wstać rano bez budzika.',
+    'Pan Kowalski nie jest w stanie samodzielnie wstać o piątej na pociąg.',
+    'Pani Nowak nie może samodzielnie wstać z pracy przed 16:00.',
+    'Uczennica nie potrafi samodzielnie się ubrać po lekcji WF, bo się spieszy.',
+    'Pan Kowalski nie potrafi samodzielnie wstać bez budzika.',
+    'Pani Nowak wymaga pomocy w poruszaniu się po systemie e-PUAP.',
+    'Pani Nowak potrzebuje pomocy w poruszaniu się po nowym budynku urzędu.',
+    'Pan Kowalski nie porusza się samodzielnie po Warszawie, bo nie zna miasta.',
+    'Pan Kowalski nie chodzi samodzielnie po mieście, gubi się w komunikacji.',
+  ]);
+});
+
+test('Seria 3: niepełnosprawność krewnego i osoby bez stopnia oraz symbol przyczyny z orzeczenia znikają, a przepis, statystyka, tytuł i kod spoza orzeczenia zostają', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    ['Pani Teresa Bugla samotnie wychowuje syna z niepełnosprawnością (MPD).', `Pani ${N} samotnie wychowuje syna ${H}.`],
+    ['Syn wnioskodawczyni jest niepełnosprawny od urodzenia.', `Syn wnioskodawczyni jest ${H} od urodzenia.`],
+    ['Mąż jest niepełnosprawny ruchowo, a córka uczęszcza do przedszkola.', `Mąż jest ${H}, a córka uczęszcza do przedszkola.`],
+    ['Wnuk jest dzieckiem niepełnosprawnym.', `Wnuk jest ${H}.`],
+    ['Mąż Pani Ewy Lis, niepełnosprawny ruchowo, nie pracuje.', `Mąż Pani ${N}, ${H}, nie pracuje.`],
+    ['Pani Zofia Wrona została zakwalifikowana do umiarkowanego stopnia niepełnosprawności.', `Pani ${N} została zakwalifikowana do ${H}.`],
+    ['4. Orzeczenie o umiarkowanym stopniu niepełnosprawności, symbol przyczyny 10-N, wydano 23 września 2026 r.', `4. Orzeczenie o ${H}, wydano 23 września 2026 r.`],
+    ['Imię i nazwisko: Zofia Dudek\nSymbol przyczyny niepełnosprawności: 12-C – całościowe zaburzenia rozwojowe', `Imię i nazwisko: ${N}\nSymbol przyczyny niepełnosprawności: ${H}`],
+  ]);
+  keep([
+    'Powiatowy Zespół do Spraw Orzekania o Niepełnosprawności wydaje orzeczenia o stopniu niepełnosprawności.',
+    'Symbol przyczyny niepełnosprawności 05-R oznacza upośledzenie narządu ruchu.',
+    'W 2025 r. wydano 412 orzeczeń o umiarkowanym stopniu niepełnosprawności, w tym 37 z symbolem 02-P.',
+    'Poradnik dla rodziców: niepełnosprawność dziecka a świadczenia rodzinne.',
+    'Dziecko z niepełnosprawnością ma prawo do bezpłatnego transportu do szkoły.',
+    'Sala 05-R jest zamknięta, a element 06-E leży w magazynie.',
+    'Świadczenie pielęgnacyjne przysługuje, jeżeli orzeczenie zawiera wskazanie konieczności stałej lub długotrwałej opieki lub pomocy innej osoby.',
+  ]);
+});
+
+test('Seria 3: niepełnosprawność przed krewnym znika tylko przy osobie w zdaniu poza samym krewnym, a kryterium, przepis, program, tytuł i przydawka po łączniku zostają', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    ['Pani Anna Nowak opiekuje się niepełnosprawną matką.', `Pani ${N} opiekuje się ${H} matką.`],
+    ['Wnioskodawczyni sprawuje opiekę nad niepełnosprawnym synem.', `Wnioskodawczyni sprawuje opiekę nad ${H} synem.`],
+    ['Jej niepełnosprawny syn uczęszcza do szkoły specjalnej.', `Jej ${H} syn uczęszcza do szkoły specjalnej.`],
+    ['Opiekuję się niepełnosprawnym mężem od 2019 r.', `Opiekuję się ${H} mężem od 2019 r.`],
+    ['Matka opiekuje się niepełnosprawnym synem.', `Matka opiekuje się ${H} synem.`],
+    ['Ze względu na niepełnosprawność dziecka i wielodzietność stypendium ustalono w kwocie wyższej.', `Ze względu na ${H} dziecka i wielodzietność stypendium ustalono w kwocie wyższej.`],
+    ['Przyznano zasiłek z uwagi na niepełnosprawność syna.', `Przyznano zasiłek z uwagi na ${H} syna.`],
+    ['Mam niepełnosprawne dziecko i nie mogę pracować.', `Mam ${H} dziecko i nie mogę pracować.`],
+  ]);
+  keep([
+    'Kryterium: wychowywanie niepełnosprawnego dziecka – 10 punktów.',
+    'Przetarg: dowóz niepełnosprawnego dziecka do Specjalnego Ośrodka Szkolno-Wychowawczego w roku szkolnym 2026/2027.',
+    'Asystent rodziny pomaga rodzicom niepełnosprawnego dziecka w załatwianiu spraw urzędowych.',
+    'Matka niepełnosprawnego dziecka nie musi rezygnować z pracy – wyrok Trybunału Konstytucyjnego.',
+    'Konferencja „Niepełnosprawny syn, niepełnosprawna córka – rodzina w kryzysie” odbędzie się 12 maja.',
+    'Niepełnosprawność dziecka nie wyklucza przyjęcia do żłobka gminnego.',
+    'Kryteria rekrutacji: niepełnosprawność dziecka, niepełnosprawność rodzica, samotne wychowywanie.',
+    'Pomiędzy rodzeństwem niepełnosprawność syna wpływa na organizację życia rodzinnego – tak piszą autorzy poradnika.',
+    'Beneficjentem projektu jest niepełnosprawny mieszkaniec gminy w wieku 18–64 lata.',
+    'W klasie jest niepełnosprawne dziecko, dlatego zatrudniono nauczyciela wspomagającego.',
+    'Pierwszeństwo w przyjęciu do przedszkola ma niepełnosprawne dziecko oraz dziecko z rodziny wielodzietnej.',
+    'W polu 12 wpisz, czy dziecko jest niepełnosprawne (tak/nie).',
+    'Zasiłek pielęgnacyjny dla niepełnosprawnego dziecka wynosi 215,84 zł miesięcznie.',
+    'Urlop wychowawczy z powodu niepełnosprawności dziecka wydłuża się do 36 miesięcy.',
+    'Rozdział 3. Niepełnosprawne dziecko w systemie oświaty',
+    'Film „Mój niepełnosprawny brat” zdobył nagrodę na festiwalu w Gdyni.',
+    'Stowarzyszenie prowadzi grupę wsparcia dla osób opiekujących się niepełnosprawną matką lub ojcem.',
+    'Pomoc kierujemy do rodzin, w których wychowuje się niepełnosprawne dziecko.',
+    'Jak rozmawiać z niepełnosprawnym synem o dorosłości – spotkanie w poradni.',
+    'Pani Dyrektor, uprzejmie informuję, że niepełnosprawność dziecka nie jest przeszkodą w rekrutacji.',
+    'Świadczenie otrzymuje matka lub ojciec niepełnosprawnego dziecka.',
+    'Na stronie urzędu opublikowano poradnik o niepełnosprawnym dziecku w przedszkolu.',
+    'Dziecko jest niepełnosprawne, jeśli posiada orzeczenie.',
+  ]);
+  // osoba w sąsiednim zdaniu notatki nie robi z opisu programu faktu o niej
+  expect(
+    redactPII('Pani Maria Wiśniewska zgłosiła się w sprawie opieki wytchnieniowej. Program jest przeznaczony dla osób opiekujących się niepełnosprawnym dzieckiem lub dorosłym.').redacted,
+  ).toBe(`Pani ${N} zgłosiła się w sprawie opieki wytchnieniowej. Program jest przeznaczony dla osób opiekujących się niepełnosprawnym dzieckiem lub dorosłym.`);
+});
+
+test('Seria 3: osoba w przypadku zależnym („U Zosi”, „Krystyny Pawlik, która”, „Kacprowi przyznano”) kotwiczy dane o zdrowiu, a patron, adres, instytucja, autor polecenia, temat zajęć i przepis zostają', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    ['U Zosi stwierdzono padaczkę.', `U Zosi stwierdzono ${H}.`],
+    ['U Kacpra stwierdzono astmę oskrzelową.', `U Kacpra stwierdzono ${H}.`],
+    ['U Anny Nowak stwierdzono cukrzycę typu 2.', `U ${N} stwierdzono ${H}.`],
+    ['Dotyczy Anny Nowak, u której stwierdzono cukrzycę typu 2.', `Dotyczy ${N}, u której stwierdzono ${H}.`],
+    ['Wniesiono o raty ze względu na sytuację materialną Krystyny Pawlik, która utrzymuje się z renty z tytułu niezdolności do pracy.', `Wniesiono o raty ze względu na sytuację materialną ${N}, która utrzymuje się z ${H}.`],
+    ['Wskazał, że strona wiozła matkę, Grażynę Szczepaniak, która uskarżała się na silny ból w klatce piersiowej.', `Wskazał, że strona wiozła matkę, ${N}, która uskarżała się na ${H}.`],
+    ['Wnioskodawczyni opiekuje się Marią Nowak, która porusza się na wózku inwalidzkim.', `Wnioskodawczyni opiekuje się ${N}, która ${H}.`],
+    ['Dotyczy Haliny Nowak, która jest osobą leżącą.', `Dotyczy ${N}, która jest ${H}.`],
+    ['Zosi wystawiono zwolnienie lekarskie do 15 marca.', `Zosi wystawiono ${H}.`],
+    ['Kacprowi przyznano rentę z tytułu niezdolności do pracy.', `Kacprowi przyznano ${H}.`],
+    ['Orzeczenie o niepełnosprawności Kacpra wydano w 2025 r.', `${H} Kacpra wydano w 2025 r.`],
+    ['Zwolnienie lekarskie Jana Kowalskiego obejmuje 14 dni.', `${H} ${N} obejmuje 14 dni.`],
+    ['Mój mąż ma astmę i po każdym takim wieczorze się dusi, w lutym trafił przez to do szpitala.', `Mój mąż ma ${H} i po każdym takim wieczorze się dusi, w lutym trafił przez to ${H}.`],
+    ['Matka uskarżała się na silne bóle głowy.', `Matka uskarżała się na ${H}.`],
+    // natężenie objawu nie jest wyrazem medycznym po masce: „z silnym wsparciem” zostaje
+    ['Pani Kowalska trafiła do szpitala z silnym wsparciem rodziny.', `Pani ${N} trafiła ${H} z silnym wsparciem rodziny.`],
+    ['Córka chodzi na zajęcia terapeutyczne z powodu ADHD.', `Córka chodzi na zajęcia terapeutyczne z powodu ${H}.`],
+    // autor polecenia i osoba z funkcją nie są pacjentem
+    ['Zgodnie z decyzją Anny Nowak zasiłek chorobowy wypłaca pracodawca.', `Zgodnie z decyzją ${N} zasiłek chorobowy wypłaca pracodawca.`],
+    ['Grupę wsparcia dla osób po udarze prowadzi Anna Nowak, psycholog.', `Grupę wsparcia dla osób po udarze prowadzi ${N}, psycholog.`],
+    ['Pacjent ma wizytę u dr Anny Nowak w poradni kardiologicznej.', `Pacjent ma wizytę u dr ${N} w poradni kardiologicznej.`],
+  ]);
+  keep([
+    'W ramach programu Fundacji Anny Dymnej prowadzona jest rehabilitacja ruchowa.',
+    'Szkoła Podstawowa im. Marii Konopnickiej prowadzi zajęcia dla uczniów z cukrzycą.',
+    'Szpital Jana Pawła II przyjmuje pacjentów z udarem.',
+    'Na oddziale szpitala św. Józefa leczy się pacjentów z udarem.',
+    'Zgodnie z wytycznymi Kasi zwolnienie lekarskie należy dostarczyć w ciągu 7 dni.',
+    'Jeżeli u Zosi wystąpi gorączka, należy wezwać lekarza.',
+    'Jeżeli u Kacpra pojawią się drgawki, należy podać lek i wezwać pogotowie.',
+    'Uczeń, u którego stwierdzono dysleksję, może pisać egzamin dłużej.',
+    'Osoba, która choruje na cukrzycę, może złożyć wniosek o kartę parkingową.',
+    'U Kasi stwierdzono brak zaległości.',
+    'U Marka stwierdzono uchybienia w rozliczeniu.',
+    'Na zebraniu u Jana omówiono program profilaktyki chorób nowotworowych.',
+    'Zajęcia o cukrzycy w klasie Zosi prowadziła pielęgniarka.',
+    'Zosi przyznano stypendium za wyniki w nauce.',
+    'Kacprowi wręczono dyplom za udział w konkursie o zdrowiu.',
+    'Na prośbę Zosi wychowawczyni zmieniła miejsce w ławce.',
+    'Do Zosi dzwoniła pielęgniarka z przychodni w sprawie szczepienia.',
+    'Raport o leczeniu uzależnień przygotował zespół pod kierunkiem Piotra.',
+  ]);
+  // ponowna redakcja wyniku nie zakrywa niczego więcej (kotwicą jest imię, a nie maska osoby)
+  for (const t of ['Wnioskodawczyni opiekuje się Marią Nowak, która porusza się na wózku inwalidzkim.', 'U Anny Nowak stwierdzono cukrzycę typu 2.']) {
+    const once = redactPII(t).redacted;
+    expect(redactPII(once).redacted, t).toBe(once);
+  }
+});
+
+test('Seria 3: patron po „im.” i „ul.”, instytucja, gmina i autor dzieła w dopełniaczu nie kotwiczą danych o zdrowiu, a osoba przed czasownikiem bezosobowym tak', () => {
+  const H = '[DANE O ZDROWIU]';
+  keep([
+    // patron po skrócie: zdanie dzieli się na „im.”, więc para stoi na początku tekstu
+    'Centrum Rehabilitacji im. Ireny Sendlerowej przyjmuje osoby po udarze.',
+    'Dom Pomocy Społecznej im. Jana Kochanowskiego przyjmuje osoby po udarze.',
+    'Hospicjum im. Marii Curie-Skłodowskiej przyjmuje osoby z chorobą nowotworową.',
+    'Hospicjum przy ul. Heleny Modrzejewskiej przyjmuje osoby po udarze.',
+    'Szpital im. Ludwika Rydygiera leczy pacjentów po zawale.',
+    'Oddział Szpitala im. Mikołaja Kopernika przyjmuje pacjentów z chorobą nowotworową.',
+    'Oddział onkologii Centrum Onkologii im. Marii Skłodowskiej-Curie przyjmuje pacjentów z chorobą nowotworową.',
+    // nazwa miejscowości z imienia i zdanie o grupie
+    'Mieszkańcy gminy Kazimierza Wielka mogą skorzystać z bezpłatnych badań w kierunku cukrzycy.',
+    'Mieszkańcy powiatu Kazimierza Wielka chorujący na cukrzycę mogą zgłosić się na badania.',
+    'Liceum Stefana Żeromskiego prowadzi zajęcia dla uczniów z cukrzycą.',
+  ]);
+  masked([
+    // patron bez „im.” po rzeczowniku instytucji: nazwa zakryta jak dotąd, zdrowie grupy jawne
+    ['Pacjenci szpitala Jana Bożego z depresją mogą korzystać z terapii grupowej.', `Pacjenci szpitala ${N} z depresją mogą korzystać z terapii grupowej.`],
+    ['Uczniowie szkoły Marii Konopnickiej z orzeczeniem o niepełnosprawności mogą korzystać z dowozu.', `Uczniowie szkoły ${N} z orzeczeniem o niepełnosprawności mogą korzystać z dowozu.`],
+    ['Stowarzyszenie Anny Nowak pomaga osobom po udarze.', `Stowarzyszenie ${N} pomaga osobom po udarze.`],
+    // autor dzieła, też z tytułem przed imieniem
+    ['Książka Jolanty Wiśniewskiej o życiu z cukrzycą typu 1 trafiła do szkolnej biblioteki.', `Książka ${N} o życiu z cukrzycą typu 1 trafiła do szkolnej biblioteki.`],
+    ['Film Agnieszki Holland o depresji obejrzeli uczniowie klasy 8.', `Film ${N} o depresji obejrzeli uczniowie klasy 8.`],
+    ['Reportaż Ewy Nowak o osobach z chorobą Alzheimera zdobył nagrodę.', `Reportaż ${N} o osobach z chorobą Alzheimera zdobył nagrodę.`],
+    ['Wykład dr. Jana Kowalskiego o chorobie Alzheimera odbędzie się w czwartek.', `Wykład dr. ${N} o chorobie Alzheimera odbędzie się w czwartek.`],
+    ['Artykuł prof. Marii Zielińskiej o leczeniu astmy ukazał się w czasopiśmie.', `Artykuł prof. ${N} o leczeniu astmy ukazał się w czasopiśmie.`],
+    // osoba na początku zdania przed czasownikiem bezosobowym i w domu z wywiadu
+    ['Grażynie Nowak przyznano zasiłek pielęgnacyjny z powodu znacznego stopnia niepełnosprawności.', `${N} przyznano zasiłek pielęgnacyjny z powodu ${H}.`],
+    ['Wywiad przeprowadzono w domu Krystyny Pawlik, która jest osobą leżącą.', `Wywiad przeprowadzono w domu ${N}, która jest ${H}.`],
+  ]);
+});
+
+test('Seria 3: imię przed „o” z tematem to autor lub rozmówca, a lokal „u Basi”, tytuł akcji w cudzysłowie i temat rozprawy nie kotwiczą danych o zdrowiu', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    // „o” z miejscownikiem po imieniu: temat dzieła lub rozmowy, osoba zakryta, choroba jawna
+    ['Wywiad z Anną Nowak o depresji ukazał się w gazecie.', `Wywiad z ${N} o depresji ukazał się w gazecie.`],
+    ['Rozmowa z Janem Kowalskim o depresji ukazała się w lokalnej gazecie.', `Rozmowa z ${N} o depresji ukazała się w lokalnej gazecie.`],
+    ['Monografia Jana Kowalskiego o chorobie afektywnej dwubiegunowej trafiła do biblioteki poradni.', `Monografia ${N} o chorobie afektywnej dwubiegunowej trafiła do biblioteki poradni.`],
+    ['Opracowanie Anny Nowak o leczeniu cukrzycy przekazano radnym.', `Opracowanie ${N} o leczeniu cukrzycy przekazano radnym.`],
+    ['Wspomnienia Jana Kowalskiego o chorobie Alzheimera czytamy na lekcji polskiego.', `Wspomnienia ${N} o chorobie Alzheimera czytamy na lekcji polskiego.`],
+    ['Biografia Marii Kowalskiej o życiu ze stwardnieniem rozsianym trafiła do księgarni.', `Biografia ${N} o życiu ze stwardnieniem rozsianym trafiła do księgarni.`],
+    ['Zaproszenie na spotkanie z Anną Nowak o życiu z cukrzycą.', `Zaproszenie na spotkanie z ${N} o życiu z cukrzycą.`],
+    ['Webinar z Anną Nowak o autyzmie odbędzie się w piątek.', `Webinar z ${N} o autyzmie odbędzie się w piątek.`],
+    ['Opinia Anny Nowak o leczeniu depresji została przyjęta.', `Opinia ${N} o leczeniu depresji została przyjęta.`],
+    // temat rozprawy, pracy i badań przy osobie w celowniku
+    ['Katarzynie Lis nadano stopień doktora za rozprawę o leczeniu cukrzycy.', `${N} nadano stopień doktora za rozprawę o leczeniu cukrzycy.`],
+    ['Dr. Annie Nowak przyznano grant na badania nad cukrzycą.', `Dr. ${N} przyznano grant na badania nad cukrzycą.`],
+    ['Pani Lis napisała artykuł o leczeniu cukrzycy.', `Pani ${N} napisała artykuł o leczeniu cukrzycy.`],
+    // „o” z biernikiem to prośba, a zaimek przy temacie wskazuje osobę: dane o zdrowiu dalej zakryte
+    ['Wniosek Krystyny Pawlik o zasiłek pielęgnacyjny z powodu choroby Parkinsona wpłynął w marcu.', `Wniosek ${N} o zasiłek pielęgnacyjny z powodu ${H} wpłynął w marcu.`],
+    ['Rozmawiano z Krystyną Pawlik o jej chorobie Parkinsona.', `Rozmawiano z ${N} o jej ${H}.`],
+    ['Pani Lis jest w trakcie leczenia cukrzycy.', `Pani ${N} jest w trakcie leczenia ${H}.`],
+  ]);
+  keep([
+    'Spotkanie z Zosią o cukrzycy w szkole.',
+    'Pensjonat u Basi przyjmuje kuracjuszy po zawale serca.',
+    'Bar u Józka zatrudnia osoby po udarze.',
+    'Gospoda U Kasi przyjmuje gości po udarze.',
+    'Kawiarnia u Zosi zatrudnia osoby z niepełnosprawnością intelektualną.',
+    'Akcja „Pomóż Zuzi” zbiera środki dla dzieci z chorobą nowotworową.',
+    'Zbiórka "Dla Kacpra" zbiera na leczenie dzieci z autyzmem.',
+    'Program „Uśmiech Hani” wspiera dzieci z cukrzycą.',
+  ]);
+  masked([
+    // osoba poza tytułem i „u” po czynności lub na początku zdania dalej kotwiczą
+    ['Kacprowi rozpoznano białaczkę, trwa zbiórka „Pomóż Kacprowi”.', `Kacprowi rozpoznano ${H}, trwa zbiórka „Pomóż Kacprowi”.`],
+    ['Podczas wizyty u Zosi stwierdzono cukrzycę.', `Podczas wizyty u Zosi stwierdzono ${H}.`],
+    ['U Zosi stwierdzono cukrzycę.', `U Zosi stwierdzono ${H}.`],
+  ]);
+});
+test('Seria 3: ślad leczenia bez nazwy choroby, fraza rozbita wtrąceniem i schorzenie po budowie słowa znikają, a likwidacja, rehabilitacja zawodowa i studia z fizjoterapii zostają', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    // ślad leczenia przy osobie: trwające leczenie, cykle, rehabilitacja, kontrole, opieka, rytm zabiegów
+    ['Wnioskodawczyni jest w trakcie leczenia i nie może podjąć pracy.', `Wnioskodawczyni jest w trakcie ${H} i nie może podjąć pracy.`],
+    ['Mąż wnioskodawczyni jest po trzech cyklach chemioterapii.', `Mąż wnioskodawczyni jest po ${H}.`],
+    ['Syn korzysta z rehabilitacji domowej dwa razy w tygodniu.', `Syn korzysta z ${H} dwa razy w tygodniu.`],
+    ['Córka od września jest rehabilitowana pięć razy w tygodniu.', `Córka od września jest ${H}.`],
+    ['Wnioskodawczyni była hospitalizowana od 3 do 12 marca 2026 r.', `Wnioskodawczyni była ${H}.`],
+    ['Mówiła, że jest po chemii i nie da rady przychodzić.', `Mówiła, że jest ${H} i nie da rady przychodzić.`],
+    ['Zgłaszająca poinformowała, że jest dwa tygodnie po operacji wszczepienia bypassów.', `Zgłaszająca poinformowała, że jest dwa tygodnie ${H}.`],
+    ['Pan Kowalski pozostaje pod opieką pielęgniarki środowiskowej.', `Pan ${N} pozostaje ${H}.`],
+    ['Podopieczna jeździ na kontrole w poradni diabetologicznej.', `Podopieczna jeździ na kontrole w ${H}.`],
+    ['Wyjaśniłam, że choruję na cukrzycę i samochód jest mi potrzebny do dojazdów na rehabilitację.', `Wyjaśniłam, że choruję na ${H} i samochód jest mi potrzebny do dojazdów na ${H}.`],
+    ['Pani Halina korzysta z hipoterapii.', `Pani ${N} korzysta z ${H}.`],
+    ['Matka nie może przyjść, ponieważ od sierpnia przebywa w sanatorium po endoprotezoplastyce stawu biodrowego.', `Matka nie może przyjść, ponieważ od sierpnia przebywa ${H}.`],
+    // wtrącenie między kotwicą a frazą: wtrącenie zostaje jawne
+    ['Pani Anna Lis była leczona — według zaświadczenia z 3 marca — onkologicznie.', `Pani ${N} była ${H} — według zaświadczenia z 3 marca — ${H}.`],
+    ['U syna rozpoznano, według opinii poradni z 3 marca, autyzm dziecięcy.', `U syna rozpoznano, według opinii poradni z 3 marca, ${H}.`],
+    // schorzenie po budowie słowa i konstrukcji: -plegia, -emia, -ektomia, porażenie, niewydolność, wyliczenie po przecinku
+    ['U pana Jana stwierdzono tetraplegię po urazie rdzenia kręgowego.', `U pana ${N} stwierdzono ${H} po ${H}.`],
+    ['U dziecka rozpoznano hiperglikemię i nawracające hipoglikemie.', `U dziecka rozpoznano ${H} i ${H}.`],
+    ['Wnioskodawca jest po laryngektomii.', `Wnioskodawca jest ${H}.`],
+    ['Lena ma mózgowe porażenie dziecięce.', `Lena ma ${H}.`],
+    ['Pani Maria ma porażenie nerwu twarzowego.', `Pani ${N} ma ${H}.`],
+    ['Pan Nowak ma przewlekłą niewydolność krążenia.', `Pan ${N} ma ${H}.`],
+    ['Syn jest po urazie głowy.', `Syn jest po ${H}.`],
+    ['U chłopca stwierdzono niepełnosprawność wieloraką, obniżone napięcie mięśniowe w obrębie obręczy barkowej.', `U chłopca ${H} wieloraką, ${H}.`],
+    ['Rozpoznano cukrzycę, nadciśnienie, ale nie zalecono leczenia.', `Rozpoznano ${H}, ${H}, ale nie zalecono leczenia.`],
+  ]);
+  keep([
+    'Spółka jest w trakcie likwidacji.',
+    'Budynek jest w trakcie remontu.',
+    'Most jest po trzech cyklach badań.',
+    'Gmina prowadzi rehabilitację domową w ramach programu.',
+    'Turnus rehabilitacyjny dofinansowuje PCPR na wniosek.',
+    'Przepisy o leczeniu uzdrowiskowym zmieniono w 2024 r.',
+    'Zespół Szkół nr 2 w Puławach organizuje rekrutację.',
+    'Terapia zajęciowa w Warsztacie Terapii Zajęciowej odbywa się codziennie.',
+    'W raporcie wskazano niewydolność systemu ochrony zdrowia.',
+    'Uczeń czyta prozę polską na lekcji.',
+    'Anatomia jest przedmiotem na pierwszym roku.',
+    'W szkole odbyła się lekcja o autotomii jaszczurek i dychotomii.',
+    'Oddział Chirurgii Ogólnej mieści się na II piętrze.',
+    'Artykuł 18 ustawy o rehabilitacji zawodowej osób niepełnosprawnych.',
+    'Akademia Medyczna im. Piotra Nowaka ogłasza nabór.',
+    'Rozpoznano, że wniosek jest zasadny.',
+  ]);
+  masked([
+    // osoba obok: dalej jawne, gdy to nie leczenie
+    ['Pani Anna Lis jest w trakcie rehabilitacji zawodowej w PCPR.', `Pani ${N} jest w trakcie rehabilitacji zawodowej w PCPR.`],
+    ['Jan Nowak ukończył studia z fizjoterapii w 2010 r.', `${N} ukończył studia z fizjoterapii w 2010 r.`],
+    ['Anna Kowalska zapytała o kolejki do fizjoterapii w powiecie.', `${N} zapytała o kolejki do fizjoterapii w powiecie.`],
+    ['Pan Nowak zwrócił uwagę na zaburzenia krążenia informacji w urzędzie.', `Pan ${N} zwrócił uwagę na zaburzenia krążenia informacji w urzędzie.`],
+    ['Rodzina wykazuje niewydolność wychowawczą, a Pan Jan Nowak jest bezrobotny.', `Rodzina wykazuje niewydolność wychowawczą, a Pan ${N} jest bezrobotny.`],
+    ['Pani Ewa Nowak, absolwentka akademii medycznej, otrzymała premię.', `Pani ${N}, absolwentka akademii medycznej, otrzymała premię.`],
+    ['Pan Jan Nowak uczy anatomii i prowadzi zajęcia z mikroskopii.', `Pan ${N} uczy anatomii i prowadzi zajęcia z mikroskopii.`],
+    ['Pani Anna Lis prowadzi socjoterapię dla młodzieży.', `Pani ${N} prowadzi socjoterapię dla młodzieży.`],
+    ['Pan Kowalski jest dwa tygodnie po urlopie.', `Pan ${N} jest dwa tygodnie po urlopie.`],
+    ['Pan Jan Nowak przeprowadził kontrolę w przychodni rodzinnej.', `Pan ${N} przeprowadził kontrolę w przychodni rodzinnej.`],
+    ['Stwierdzono, że Pan Jan Nowak, uczeń, nie stawił się.', `Stwierdzono, że Pan ${N}, uczeń, nie stawił się.`],
+  ]);
+});
+test('Seria 3: diagnostyka i rehabilitacja w toku tylko z dopowiedzeniem medycznym i przy osobie, a terapia jako zawód, kurs i placówka oraz ziemia zostają jawne', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    // ślad leczenia przy osobie z dopowiedzeniem medycznym
+    ['Syn jest w trakcie rehabilitacji neurologicznej.', `Syn jest w trakcie ${H}.`],
+    ['Ojciec jest w trakcie diagnostyki kardiologicznej.', `Ojciec jest w trakcie ${H}.`],
+    ['Syn jest w trakcie rehabilitacji w szpitalu w Busku.', `Syn jest w trakcie ${H} w Busku.`],
+    ['Wnioskodawczyni jest w trakcie hospitalizacji.', `Wnioskodawczyni jest w trakcie ${H}.`],
+    ['Pan Jan Nowak kontynuuje leczenie w poradni.', `Pan ${N} kontynuuje ${H} w poradni.`],
+    ['Pan Kowalski chodzi na rehabilitację dwa razy w tygodniu.', `Pan ${N} chodzi na ${H} dwa razy w tygodniu.`],
+    ['Lekarz zalecił synowi hipoterapię.', `Lekarz zalecił synowi ${H}.`],
+    ['Pan Jan Kowalski odbył kurs fizjoterapii po udarze.', `Pan ${N} odbył kurs ${H}.`],
+    // -emia stanu krwi, także „ischemia”
+    ['U ojca stwierdzono ischemię kończyny dolnej.', `U ojca stwierdzono ${H}.`],
+    ['U wnioskodawcy stwierdzono uremię i anemię.', `U wnioskodawcy stwierdzono ${H}.`],
+    // diagnostyka potrzeb, rzecz, instytucja, rehabilitacja niemedyczna
+    ['Pedagog jest w trakcie diagnostyki potrzeb ucznia.', 'Pedagog jest w trakcie diagnostyki potrzeb ucznia.'],
+    ['Technik jest w trakcie diagnostyki komputera.', 'Technik jest w trakcie diagnostyki komputera.'],
+    ['Weterynarz jest w trakcie diagnostyki psa.', 'Weterynarz jest w trakcie diagnostyki psa.'],
+    ['Poradnia jest w trakcie diagnostyki przesiewowej w przedszkolach.', 'Poradnia jest w trakcie diagnostyki przesiewowej w przedszkolach.'],
+    ['Szkoła jest w trakcie diagnostyki wstępnej uczniów.', 'Szkoła jest w trakcie diagnostyki wstępnej uczniów.'],
+    ['Budynek jest w trakcie rehabilitacji.', 'Budynek jest w trakcie rehabilitacji.'],
+    ['Pan Henryk jest w trakcie rehabilitacji kredytowej.', `Pan ${N} jest w trakcie rehabilitacji kredytowej.`],
+    ['Szpital kontynuuje leczenie pacjentów w nowym budynku.', 'Szpital kontynuuje leczenie pacjentów w nowym budynku.'],
+    ['Oddział przechodzi leczenie?', 'Oddział przechodzi leczenie?'],
+    ['Zespół kontynuuje leczenie zaległości w księgowości.', 'Zespół kontynuuje leczenie zaległości w księgowości.'],
+    ['Pan Kowalski chodzi na rehabilitację zawodową w ramach programu PFRON.', `Pan ${N} chodzi na rehabilitację zawodową w ramach programu PFRON.`],
+    ['Pani Nowak uczęszcza na rehabilitację społeczną w WTZ.', `Pani ${N} uczęszcza na rehabilitację społeczną w WTZ.`],
+    // terapia jako zawód, kwalifikacja i placówka w pismach kadrowych
+    ['Pan Jan Kowalski jest koordynatorem dogoterapii w fundacji.', `Pan ${N} jest koordynatorem dogoterapii w fundacji.`],
+    ['Pani Anna Nowak jest certyfikowanym trenerem arteterapii.', `Pani ${N} jest certyfikowanym trenerem arteterapii.`],
+    ['Pan Adam Lis jest nauczycielem fizjoterapii w szkole policealnej.', `Pan ${N} jest nauczycielem fizjoterapii w szkole policealnej.`],
+    ['Pani Ewa Kos jest absolwentką fizjoterapii.', `Pani ${N} jest absolwentką fizjoterapii.`],
+    ['Pan Szymon jest w trakcie kursu hipoterapii.', `Pan ${N} jest w trakcie kursu hipoterapii.`],
+    ['Pani Anna Kowalska została zatrudniona w dziale fizjoterapii.', `Pani ${N} została zatrudniona w dziale fizjoterapii.`],
+    ['Pani Ewa Lis pracuje w gabinecie fizjoterapii.', `Pani ${N} pracuje w gabinecie fizjoterapii.`],
+    ['Pan Jan Nowak jest zatrudniony w zakładzie hydroterapii na pół etatu.', `Pan ${N} jest zatrudniony w zakładzie hydroterapii na pół etatu.`],
+    ['Pani Maria Lis jest kierownikiem działu rehabilitacji i fizjoterapii w szpitalu.', `Pani ${N} jest kierownikiem działu rehabilitacji i fizjoterapii w szpitalu.`],
+    ['Pan Adam Kowalski pracuje w ośrodku hipoterapii jako instruktor.', `Pan ${N} pracuje w ośrodku hipoterapii jako instruktor.`],
+    ['Pani Ewa Kos ukończyła kurs arteterapii.', `Pani ${N} ukończyła kurs arteterapii.`],
+    ['Pani Joanna Kos jest autorką programu dogoterapii dla przedszkoli.', `Pani ${N} jest autorką programu dogoterapii dla przedszkoli.`],
+    // ziemia, podziemia, brzemię i drzemka mają końcówkę -emia
+    ['Pan Jan Kowalski ma ziemię w Zalesiu.', `Pan ${N} ma ziemię w Zalesiu.`],
+    ['Rolnik Jan Nowak posiada ziemię o powierzchni 5 ha.', `Rolnik ${N} posiada ziemię o powierzchni 5 ha.`],
+    ['Pani Anna Nowak dzierżawi ziemię od gminy.', `Pani ${N} dzierżawi ziemię od gminy.`],
+    ['Pan Jan Nowak upadł na ziemię.', `Pan ${N} upadł na ziemię.`],
+    ['Pan Jan Kowalski pracuje w podziemiach kopalni.', `Pan ${N} pracuje w podziemiach kopalni.`],
+    ['Dzieci Pani Nowak drzemią po obiedzie.', `Dzieci Pani ${N} drzemią po obiedzie.`],
+    ['Pan Jan Nowak ma brzemię długów.', `Pan ${N} ma brzemię długów.`],
+    ['Pani Maria Kowal studiuje biochemię.', `Pani ${N} studiuje biochemię.`],
+  ]);
+});
+
+test('Seria 3: terapia jako zajęcia, usługa, metoda terapeuty i temat zostaje jawna, a ta sama terapia u uczestnika, klienta i pacjenta znika', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    // uczestnik, klient i pacjent terapii: dana o zdrowiu
+    ['Dziecko Pani Nowak korzysta z zajęć z dogoterapii w ramach WWR.', `Dziecko Pani ${N} korzysta z zajęć z ${H} w ramach WWR.`],
+    ['Córka uczęszcza na zajęcia hipoterapii dwa razy w tygodniu.', `Córka uczęszcza na zajęcia ${H} dwa razy w tygodniu.`],
+    ['Syn Pani Nowak korzysta z usług fizjoterapii w ośrodku.', `Syn Pani ${N} korzysta z usług ${H} w ośrodku.`],
+    ['Lekarz stosuje fototerapię u noworodka Pani Nowak.', `Lekarz stosuje ${H} u noworodka Pani ${N}.`],
+    ['Pani Nowak stosuje aromaterapię na bezsenność.', `Pani ${N} stosuje ${H} na bezsenność.`],
+    ['Rozmawiałam z lekarzem o fizjoterapii syna.', `Rozmawiałam z lekarzem o ${H} syna.`],
+    ['Pan Jan Nowak jest beneficjentem zajęć z hipoterapii.', `Pan ${N} jest beneficjentem zajęć z ${H}.`],
+    ['Pani Anna Lis jest uczestniczką warsztatów z arteterapii.', `Pani ${N} jest uczestniczką warsztatów z ${H}.`],
+    ['Opiekun prawny stara się o hipoterapię dla syna.', `Opiekun prawny stara się o ${H} dla syna.`],
+    // wykonawca i organizator zajęć, rzeczownik czynności w dopełniaczu, usługa w zamówieniu, metoda terapeuty,
+    // temat szkolenia, uprawnień i pracy („z zakresu”, „o” z miejscownikiem), lokal i sprzęt
+    ['Pani Wiśniewska jest koordynatorką zajęć z ludoterapii w przedszkolu.', `Pani ${N} jest koordynatorką zajęć z ludoterapii w przedszkolu.`],
+    ['Pani Kowalska jest organizatorką zajęć z dogoterapii w szkole.', `Pani ${N} jest organizatorką zajęć z dogoterapii w szkole.`],
+    ['Pani Anna Kowalska jest instruktorką zajęć z hipoterapii.', `Pani ${N} jest instruktorką zajęć z hipoterapii.`],
+    ['Pani Nowak ukończyła dwa cykle szkoleń z dogoterapii.', `Pani ${N} ukończyła dwa cykle szkoleń z dogoterapii.`],
+    ['Oferta Pana Kowalskiego na usługi fizjoterapii została wybrana jako najkorzystniejsza.', `Oferta Pana ${N} na usługi fizjoterapii została wybrana jako najkorzystniejsza.`],
+    ['Pan Jan Lis jest wykonawcą usług hydroterapii dla domu pomocy społecznej.', `Pan ${N} jest wykonawcą usług hydroterapii dla domu pomocy społecznej.`],
+    ['Pani Nowak jest terapeutką i stosuje muzykoterapię w pracy z dziećmi.', `Pani ${N} jest terapeutką i stosuje muzykoterapię w pracy z dziećmi.`],
+    ['Pani Anna Kos odbyła szkolenie z zakresu fizjoterapii.', `Pani ${N} odbyła szkolenie z zakresu fizjoterapii.`],
+    ['Pan Jan Nowak ma uprawnienia z zakresu kinezyterapii.', `Pan ${N} ma uprawnienia z zakresu kinezyterapii.`],
+    ['Pani Ewa Lis ma kwalifikacje z zakresu ergoterapii.', `Pani ${N} ma kwalifikacje z zakresu ergoterapii.`],
+    ['Pan Marek Wilk ukończył kurs z zakresu hipoterapii.', `Pan ${N} ukończył kurs z zakresu hipoterapii.`],
+    ['Pani Joanna Kos napisała pracę magisterską o muzykoterapii.', `Pani ${N} napisała pracę magisterską o muzykoterapii.`],
+    ['Pan Piotr Lis uczestniczy w konferencji o fizjoterapii.', `Pan ${N} uczestniczy w konferencji o fizjoterapii.`],
+    ['Pani Ewa Nowak jest właścicielką salonu aromaterapii.', `Pani ${N} jest właścicielką salonu aromaterapii.`],
+    ['Pan Jan Kowalski sprzedaje sprzęt do magnetoterapii.', `Pan ${N} sprzedaje sprzęt do magnetoterapii.`],
+    ['Pan Adam Nowak zajmuje się produkcją urządzeń do laseroterapii.', `Pan ${N} zajmuje się produkcją urządzeń do laseroterapii.`],
   ]);
 });

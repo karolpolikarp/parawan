@@ -1,0 +1,338 @@
+{
+  "id": "s3_oswiata_01",
+  "template": "oswiata",
+  "title": "Protokół komisji rekrutacyjnej przedszkola z listą punktów",
+  "seed": null,
+  "traps": [
+    "nazwisko przed imieniem w tabeli",
+    "ustawowy katalog kryteriów (zostaje) obok kryterium przypisanego dziecku (maskować)",
+    "nazwa grupy „Sówki” obok nazwiska Sowa",
+    "fałszywy PESEL jako numer wniosku w systemie naboru",
+    "zdrobnienie imienia Hania",
+    "podpisy inicjałem i nazwiskiem"
+  ],
+  "entities": [
+    {
+      "text": "Przedszkola Miejskiego nr 7 „Pod Kasztanem” w Lesznie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kasztanowej 14",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "siedziba przedszkola",
+      "count": 1
+    },
+    {
+      "text": "Ewelina Szulc",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "członkini komisji",
+      "count": 1
+    },
+    {
+      "text": "Bogumiła Nawrot",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "członkini komisji",
+      "count": 1
+    },
+    {
+      "text": "Remigiusz Ostrowicz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "przedstawiciel rodziców",
+      "count": 1
+    },
+    {
+      "text": "E. Szulc",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis",
+      "count": 1
+    },
+    {
+      "text": "B. Nawrot",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis",
+      "count": 1
+    },
+    {
+      "text": "R. Ostrowicz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis",
+      "count": 1
+    },
+    {
+      "text": "niepełnosprawność jednego z rodziców kandydata",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "kryterium ustawowe w ujęciu ogólnym",
+      "count": 1
+    },
+    {
+      "text": "objęcie kandydata pieczą zastępczą",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "kryterium ustawowe w ujęciu ogólnym",
+      "count": 1
+    },
+    {
+      "text": "Sówki",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "nazwa grupy przedszkolnej, nie nazwisko Sowa",
+      "count": 1
+    },
+    {
+      "text": "Adamczyk Lena",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko przed imieniem",
+      "count": 1
+    },
+    {
+      "text": "Banaś Igor",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Czerniak Zofia",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dudek Maja",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Grzelak Antoni",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sowa Hanna",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Pawlicki Teodor",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wiśniewski Leon",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zych Natan",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kowalczyk Jagoda",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "14.02.2023",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "w tabeli",
+      "count": 1
+    },
+    {
+      "text": "03.07.2023",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "22.11.2022",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "09.05.2023",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "30.01.2023",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "17.08.2023",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "26.03.2023",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "12.12.2023",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "05.04.2023",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "28.06.2023",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "orzeczenie o niepełnosprawności ojca",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "niepełnosprawność konkretnej osoby",
+      "count": 1
+    },
+    {
+      "text": "samotne wychowywanie przez matkę",
+      "type": "SENSITIVE",
+      "expect": "policy",
+      "note": "sytuacja rodzinna dziecka",
+      "count": 1
+    },
+    {
+      "text": "piecza zastępcza",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "dziecko w pieczy zastępczej",
+      "count": 1
+    },
+    {
+      "text": "niedosłuch obustronny",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "aparaty słuchowe",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krystian Banaś",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Powiatowego Zespołu do Spraw Orzekania o Niepełnosprawności w Lesznie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "umiarkowanym stopniu niepełnosprawności",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "05-R",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "symbol przyczyny niepełnosprawności",
+      "count": 1
+    },
+    {
+      "text": "23659258196",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "11 cyfr bez poprawnej sumy kontrolnej PESEL, numer wniosku",
+      "count": 1
+    },
+    {
+      "text": "Maliny Wróbel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Justyna Wróbel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "607 334 912",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Hania",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie, samo imię",
+      "count": 1
+    },
+    {
+      "text": "XIV/188/2025",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer uchwały rady",
+      "count": 1
+    }
+  ]
+}

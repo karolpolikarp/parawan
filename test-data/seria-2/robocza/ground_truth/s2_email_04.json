@@ -1,0 +1,226 @@
+{
+  "id": "s2_email_04",
+  "template": "email",
+  "title": "Helpdesk urzędu: automatyczne potwierdzenie zgłoszenia, odpowiedź technika, przekazanie przełożonej",
+  "seed": null,
+  "traps": [
+    "11-cyfrowy numer inwentarzowy bez sumy PESEL (do zachowania)",
+    "dane obywatela wklejone do zgłoszenia (osoba, tablica)",
+    "nazwisko Wrona i słowo „wrona” jako przykład hasła",
+    "login domenowy z imienia i nazwiska, numer pokoju, numery wewnętrzne (polityka)",
+    "dwa adresy IP: stacji roboczej i prywatnego telefonu",
+    "dane o zdrowiu pracownika w wiadomości przełożonej"
+  ],
+  "entities": [
+    {
+      "text": "Renata Głowacka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "naczelniczka wydziału",
+      "count": 3
+    },
+    {
+      "text": "r.glowacka@starostwo-kutno.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "służbowy e-mail osoby",
+      "count": 2
+    },
+    {
+      "text": "Łukasz Wrona",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 4
+    },
+    {
+      "text": "lwrona@starostwo-kutno.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Łukaszu",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz",
+      "count": 1
+    },
+    {
+      "text": "Dariusza",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "zwolnienie lekarskie",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "nieobecność z powodu choroby",
+      "count": 1
+    },
+    {
+      "text": "rehabilitacja po złamaniu nadgarstka",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Aneta Jaworska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dariusz Kołodziej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "dariusz.kolodziej@starostwo-kutno.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Dariuszu",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz",
+      "count": 1
+    },
+    {
+      "text": "198.51.100.23",
+      "type": "IP",
+      "expect": "mask",
+      "note": "IP prywatnego telefonu",
+      "count": 1
+    },
+    {
+      "text": "192.0.2.147",
+      "type": "IP",
+      "expect": "mask",
+      "note": "IP stacji roboczej przypisanej osobie",
+      "count": 1
+    },
+    {
+      "text": "Edwarda Kani",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "obywatel, dopełniacz nazwiska Kania",
+      "count": 1
+    },
+    {
+      "text": "EKU 52731",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "dkolodziej",
+      "type": "LOGIN",
+      "expect": "policy",
+      "note": "login z inicjału i nazwiska",
+      "count": 1
+    },
+    {
+      "text": "pok. 108",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "numer pokoju pracownika",
+      "count": 1
+    },
+    {
+      "text": "wew. 214",
+      "type": "PHONE_EXT",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wew. 301",
+      "type": "PHONE_EXT",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "24 355 47 90",
+      "type": "PHONE_INSTITUTION",
+      "expect": "policy",
+      "note": "centrala urzędu",
+      "count": 1
+    },
+    {
+      "text": "Naczelnik Wydziału Komunikacji i Transportu",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "urzędniczka w funkcji",
+      "count": 1
+    },
+    {
+      "text": "II linia wsparcia IT",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "servicedesk@starostwo-kutno.example.pl",
+      "type": "EMAIL_FUNCTIONAL",
+      "expect": "policy",
+      "note": "skrzynka funkcyjna",
+      "count": 1
+    },
+    {
+      "text": "7HQX2K3",
+      "type": "SERIAL_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Starostwo Powiatowe w Kutnie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wydział Komunikacji i Transportu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "INC-2026-48213",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer zgłoszenia",
+      "count": 4
+    },
+    {
+      "text": "87692766123",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "numer inwentarzowy, 11 cyfr bez poprawnej sumy PESEL",
+      "count": 1
+    },
+    {
+      "text": "wrona",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo równe nazwisku",
+      "count": 1
+    }
+  ]
+}

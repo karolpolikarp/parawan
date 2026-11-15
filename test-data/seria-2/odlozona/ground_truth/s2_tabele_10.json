@@ -1,0 +1,267 @@
+{
+  "id": "s2_tabele_10",
+  "template": "tabele",
+  "title": "Zestawienie świadczeń z ZFŚS (tabulator)",
+  "seed": null,
+  "traps": [
+    "imiona dzieci z rokiem urodzenia w jednej komórce",
+    "nazwisko Wróbel obok ptaka „Wróbla” na początku zdania",
+    "dane o zdrowiu i przynależność związkowa (dane szczególne)",
+    "dwa nazwiska Jędrzejczyk (proste i dwuczłonowe) w różnych wierszach",
+    "numery ewidencyjne i progi dochodu jako decyzje polityki, wiersz OGÓŁEM"
+  ],
+  "entities": [
+    {
+      "text": "Spółdzielnia Mleczarska „Zorza” w Kozienicach",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "pracodawca",
+      "count": 1
+    },
+    {
+      "text": "Komisja Socjalna",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marianna Jędrzejczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Adrian Wróbel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko = ptak",
+      "count": 1
+    },
+    {
+      "text": "Stefania Cichocka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krystian Pietrzyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ewa Jędrzejczyk-Mazur",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe",
+      "count": 1
+    },
+    {
+      "text": "Roman Sitek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "0412",
+      "type": "EMPLOYEE_ID",
+      "expect": "policy",
+      "note": "numer ewidencyjny pracownika",
+      "count": 1
+    },
+    {
+      "text": "0533",
+      "type": "EMPLOYEE_ID",
+      "expect": "policy",
+      "note": "numer ewidencyjny pracownika",
+      "count": 1
+    },
+    {
+      "text": "0087",
+      "type": "EMPLOYEE_ID",
+      "expect": "policy",
+      "note": "numer ewidencyjny pracownika",
+      "count": 1
+    },
+    {
+      "text": "0701",
+      "type": "EMPLOYEE_ID",
+      "expect": "policy",
+      "note": "numer ewidencyjny pracownika",
+      "count": 1
+    },
+    {
+      "text": "0298",
+      "type": "EMPLOYEE_ID",
+      "expect": "policy",
+      "note": "numer ewidencyjny pracownika",
+      "count": 1
+    },
+    {
+      "text": "0150",
+      "type": "EMPLOYEE_ID",
+      "expect": "policy",
+      "note": "numer ewidencyjny pracownika",
+      "count": 1
+    },
+    {
+      "text": "do 2 500 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "próg dochodu na osobę",
+      "count": 3
+    },
+    {
+      "text": "powyżej 4 500 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "próg dochodu na osobę",
+      "count": 1
+    },
+    {
+      "text": "2 501–4 500 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "próg dochodu na osobę",
+      "count": 1
+    },
+    {
+      "text": "Tymon",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię dziecka",
+      "count": 1
+    },
+    {
+      "text": "Julia",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię dziecka",
+      "count": 1
+    },
+    {
+      "text": "Lilianna",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię dziecka",
+      "count": 1
+    },
+    {
+      "text": "2014",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "rok urodzenia dziecka",
+      "count": 1
+    },
+    {
+      "text": "2017",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "rok urodzenia dziecka",
+      "count": 1
+    },
+    {
+      "text": "2019",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "rok urodzenia dziecka",
+      "count": 1
+    },
+    {
+      "text": "choroba nowotworowa w trakcie chemioterapii",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Paulina Cichocka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "pobytu matki w szpitalu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "hospitalizacja pracownicy z poz. 3",
+      "count": 1
+    },
+    {
+      "text": "PL38114020044186213651896886",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Wiejskiej 14",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres osoby w miejscowniku",
+      "count": 1
+    },
+    {
+      "text": "Garbatce-Letnisku",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Wróbla",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "ptak na logo, wielka litera na początku zdania",
+      "count": 1
+    },
+    {
+      "text": "Beata Ołdak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ryszard Kępa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Iwona Sałek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "członkini Komisji Zakładowej NSZZ „Solidarność”",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "przynależność do związku zawodowego",
+      "count": 1
+    },
+    {
+      "text": "Arkadiusz Molenda",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kadry@zorza.example.pl",
+      "type": "EMAIL_FUNCTIONAL",
+      "expect": "policy",
+      "note": "adres funkcyjny działu, nie osoby",
+      "count": 1
+    }
+  ]
+}

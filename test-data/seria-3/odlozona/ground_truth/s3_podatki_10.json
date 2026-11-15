@@ -1,0 +1,260 @@
+{
+  "id": "s3_podatki_10",
+  "template": "podatki",
+  "title": "Decyzja o rozłożeniu zaległości na raty i odroczeniu terminu płatności po pożarze",
+  "seed": null,
+  "traps": [
+    "same imiona dzieci bez nazwiska",
+    "dane o zdrowiu wnioskodawcy i matki w uzasadnieniu ulgi",
+    "harmonogram rat w tabeli z datami (nie są danymi osobowymi)",
+    "patron w adresie urzędu (keep) i instytucje z nazwą miasta",
+    "indywidualny rachunek gminy (policy) i numer polisy (policy)"
+  ],
+  "entities": [
+    {
+      "text": "ul. Henryka Sienkiewicza 3",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w adresie urzędu",
+      "count": 1
+    },
+    {
+      "text": "16-061",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "GFP.3113.41.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Anatol Ignatiuk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Brzozowa 5",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ignatki-Osiedle",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "16-001",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kleosin",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Anatola Ignatiuka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "81040386455",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "214/9",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "numer działki ewidencyjnej osoby",
+      "count": 1
+    },
+    {
+      "text": "BI1B/15173749/1",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Komendy Miejskiej Państwowej Straży Pożarnej w Białymstoku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Uniwersyteckim Szpitalu Klinicznym w Białymstoku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "oparzeń II stopnia dłoni i przedramion",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "zwolnieniu lekarskim",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "niezdolność do pracy osoby",
+      "count": 1
+    },
+    {
+      "text": "Nina Ignatiuk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "2 300 zł brutto",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "dochód osoby",
+      "count": 1
+    },
+    {
+      "text": "Oliwia",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "dziecko, samo imię",
+      "count": 1
+    },
+    {
+      "text": "Kacper",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "dziecko, samo imię",
+      "count": 1
+    },
+    {
+      "text": "Eugenia Ignatiuk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "przewlekłą obturacyjną chorobę płuc",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "tlenoterapii domowej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wiktora Ignatiuka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Polnej 31",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres tymczasowego pobytu u brata",
+      "count": 1
+    },
+    {
+      "text": "16-010",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wasilków",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Gminny Ośrodek Pomocy Społecznej w Juchnowcu Kościelnym",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "920014577301",
+      "type": "POLICY_NUMBER",
+      "expect": "policy",
+      "note": "numer polisy ubezpieczeniowej",
+      "count": 1
+    },
+    {
+      "text": "PL47 1020 2892 6950 1205 2822 3720",
+      "type": "IBAN",
+      "expect": "policy",
+      "note": "indywidualny rachunek gminy przypisany podatnikowi",
+      "count": 1
+    },
+    {
+      "text": "Samorządowego Kolegium Odwoławczego w Białymstoku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krzysztof Sawicki",
+      "type": "OFFICIAL",
+      "expect": "policy",
+      "note": "sekretarz gminy podpisujący z upoważnienia",
+      "count": 1
+    },
+    {
+      "text": "Magdalena Tarasewicz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "urzędnik prowadzący sprawę",
+      "count": 1
+    },
+    {
+      "text": "785 230 641",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "anatol.ignatiuk@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

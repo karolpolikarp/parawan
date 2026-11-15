@@ -1,0 +1,337 @@
+{
+  "id": "s3_zamowienia-umowy_09",
+  "template": "zamowienia-umowy",
+  "title": "Rejestr umów cywilnoprawnych z osobami fizycznymi (eksport TSV)",
+  "seed": null,
+  "traps": [
+    "tabela rozdzielona tabulatorami, PESEL bez etykiety w kolumnie",
+    "cudzoziemiec z paszportem zamiast PESEL",
+    "adres osoby (ul. Okrzei 3) i adres instytucji (ul. Okrzei 7) przy tej samej ulicy",
+    "nazwisko Mazur-Lis obok tytułu „Lis i Żuraw”",
+    "małoletni zleceniobiorca i ojciec w dwóch przypadkach"
+  ],
+  "entities": [
+    {
+      "text": "Urząd Miasta Rzeszowa",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "WPK.0602.41.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer umowy",
+      "count": 1
+    },
+    {
+      "text": "WPK.0602.43.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer umowy",
+      "count": 2
+    },
+    {
+      "text": "WPK.0602.44.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer umowy",
+      "count": 2
+    },
+    {
+      "text": "WPK.0602.46.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer umowy",
+      "count": 2
+    },
+    {
+      "text": "Klaudia Wolska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "98012561161",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL w kolumnie bez etykiety",
+      "count": 1
+    },
+    {
+      "text": "ul. Hetmańska 12/40",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "35-045",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "91 1140 2004 4147 4953 7054 6196",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tadeusz Bielecki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "66071345758",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Budziwój 311",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres bez ulicy",
+      "count": 1
+    },
+    {
+      "text": "35-329",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "18109010141815922031832415",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "NRB bez spacji w komórce tabeli",
+      "count": 1
+    },
+    {
+      "text": "Oleksandr Bondarenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "cudzoziemiec",
+      "count": 1
+    },
+    {
+      "text": "PL8131119",
+      "type": "PASSPORT",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Krakowska 8/3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "35-111",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL83 2490 0005 6077 2870 6371 4174",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Konrad Pelc",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "niepełnoletni",
+      "count": 1
+    },
+    {
+      "text": "07310233012",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Siemieńskiego 2/7",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "ulica z nazwiskiem patrona",
+      "count": 1
+    },
+    {
+      "text": "35-234",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Romana Pelca",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "ojciec",
+      "count": 1
+    },
+    {
+      "text": "Justyna Mazur-Lis",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe ze słowem Lis",
+      "count": 2
+    },
+    {
+      "text": "85043001504",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Lwowska 90/14",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "35-301",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "55 1050 0099 5037 4866 6766 9654",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Henryk Wójcicki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "49121919411",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Okrzei 3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres osoby przy tej samej ulicy co instytucja",
+      "count": 1
+    },
+    {
+      "text": "35-002",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rzeszów",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 5
+    },
+    {
+      "text": "Roman Pelc",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "663 509 118",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "niepełnosprawnością ruchową",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "znacznym stopniu niepełnosprawności",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wojewódzkim Domu Kultury w Rzeszowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Okrzei 7",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "adres instytucji obok adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Lis i Żuraw",
+      "type": "TITLE",
+      "expect": "keep",
+      "note": "tytuł wydarzenia ze słowem równym nazwisku",
+      "count": 1
+    },
+    {
+      "text": "Europejski Stadion Kultury",
+      "type": "EVENT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ewelina Rusnak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik urzędu",
+      "count": 1
+    },
+    {
+      "text": "e.rusnak@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "17 875 46 20",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

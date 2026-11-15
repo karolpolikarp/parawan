@@ -1,0 +1,36 @@
+Urząd Gminy Końskowola
+Referat Spraw Obywatelskich i Świadczeń
+ul. Pożowska 3, 24-130 Końskowola
+
+KDR.5180.31.2026
+
+KARTA WERYFIKACJI WNIOSKU O PRZYZNANIE KARTY DUŻEJ RODZINY
+(sporządzona na podstawie ustawy z dnia 5 grudnia 2014 r. o Karcie Dużej Rodziny, Dz. U. z 2023 r. poz. 1897)
+
+Wniosek złożony elektronicznie przez portal Emp@tia w dniu 15 października 2026 r. o godz. 21:47, adres IP nadawcy 192.0.2.79, potwierdzenie UPP nr EMP/2026/10/558214.
+
+Wnioskodawca: Ewelina Kowalczyk-Dudek, PESEL 81042958403, dowód osobisty YSK251646
+Adres zamieszkania: Chrząchów 52, 24-133 Końskowola
+Telefon: 503 771 920, e-mail: ewelina.kd@skrzynka.example.pl
+
+Członkowie rodziny wielodzietnej objęci wnioskiem:
+Lp. | Imię i nazwisko | PESEL | Pokrewieństwo | Uwagi
+1 | Ewelina Kowalczyk-Dudek | 81042958403 | wnioskodawczyni | karta tradycyjna i elektroniczna
+2 | Grzegorz Dudek | 79091775511 | małżonek | karta tradycyjna
+3 | Maja Dudek | 04312254504 | córka | studentka, zaświadczenie z uczelni
+4 | Filip Dudek | 09260527973 | syn | uczeń
+5 | Zofia Dudek | 17211363785 | córka | orzeczenie o niepełnosprawności, karta bezterminowo
+
+Ustalenia pracownika weryfikującego:
+1. Maja Dudek ukończyła 18 lat. Do wniosku dołączono zaświadczenie Uniwersytetu Medycznego w Lublinie, że w roku akademickim 2026/2027 kształci się na kierunku lekarskim; karta zostanie wydana do 30 września 2027 r., nie dłużej niż do ukończenia przez nią 25. roku życia.
+2. Dla Zofii przedłożono orzeczenie Miejskiego Zespołu do Spraw Orzekania o Niepełnosprawności w Lublinie nr MZON.4110.778.2024 z dnia 3 lipca 2024 r., wydane do 31 stycznia 2033 r. (symbol przyczyny niepełnosprawności 12-C – całościowe zaburzenia rozwojowe; dziecko w spektrum autyzmu). Zgodnie z art. 10 ust. 2 ustawy karta dla dziecka z orzeczeniem o umiarkowanym albo znacznym stopniu niepełnosprawności przysługuje na okres ważności orzeczenia.
+3. Pan Grzegorz Dudek ma ustalone prawo do Karty od 2019 r. jako rodzic z poprzedniego związku (córka Natalia Dudek, ur. 1999 r., obecnie poza gospodarstwem). Poprzednia karta nr 0612/2019/KDR wygasła z powodu upływu terminu ważności i zostanie wymieniona.
+4. Filip Dudek – adres zamieszkania zgodny z rejestrem PESEL; nie wymaga dodatkowych dokumentów.
+5. Najstarsza córka posługuje się w kontaktach z uczelnią adresem korespondencyjnym ul. Chodźki 7/218, 20-093 Lublin (dom studencki „Kosmos”). Na ten adres nie należy kierować korespondencji w sprawie Karty.
+
+Rozstrzygnięcie: Karty Dużej Rodziny przyznane dla pięciu członków rodziny. Zamówienie przekazano do Banku Gospodarstwa Krajowego w dniu 20 października 2026 r. Informację o przyznaniu wysłano wnioskodawczyni na adres e-mail wskazany we wniosku oraz przez Emp@tię. Elektroniczna karta rodzica zostanie udostępniona w aplikacji mObywatel po zalogowaniu Pani Eweliny Kowalczyk-Dudek.
+
+Odbiór kart tradycyjnych w Urzędzie Gminy, pok. 14, za okazaniem dowodu osobistego. Upoważnienie do odbioru kart: Bogumiła Kowalczyk (matka wnioskodawczyni), tel. 81 881 44 09.
+
+Weryfikację przeprowadziła: Paulina Sokół, inspektor ds. świadczeń, 21 października 2026 r.
+Zatwierdził: Wójt Gminy Końskowola

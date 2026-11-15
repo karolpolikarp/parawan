@@ -1,10 +1,12 @@
 // Identyfikatory numeryczne: IBAN, numer konta, PESEL, NIP, REGON, karta płatnicza i telefon.
 // Najdłuższe ciągi cyfr idą pierwsze (IBAN 26 → PESEL 11 → NIP 10 → REGON), krótsze potem.
-import { maskAfterLabel, type RedactCtx } from '../context.js';
+import { maskAfterLabel, protectSpan, type RedactCtx } from '../context.js';
 import { type PiiType } from '../types.js';
+import { institutionIdAt } from '../guards/institution-address.js';
+import { institutionAccountAt, institutionPhoneAt, landlineDigits } from '../guards/institution-contact.js';
 import { CURRENCY_CODES, precededByLegalRef, precededByNonPhoneLabel } from '../guards/numbers.js';
 import { isValidCard, isValidIban, isValidNip, isValidPesel, isValidRegon14, isValidRegon9 } from '../validators.js';
-import { countOf } from '../util.js';
+import { countOf, windowMemo } from '../util.js';
 
 /** Długości IBAN wg rejestru ISO 13616 (kraj → liczba znaków bez spacji). */
 const IBAN_LENGTHS: Record<string, number> = {
@@ -64,6 +66,7 @@ export function passIban(ctx: RedactCtx): void {
     const p = plainSpaces(m);
     const c = ibanCut(p);
     if (isValidIban(m.slice(0, c))) {
+      if (institutionAccountAt(ctx.text, offset, offset + c, ctx.personProbe)) return protectSpan(ctx, m.slice(0, c)) + m.slice(c);
       ctx.bump('IBAN');
       const after = ctx.text.slice(offset + m.length, offset + m.length + 8);
       return ctx.M.IBAN + m.slice(ibanMaskEnd(p, c, plainSpaces(after)));
@@ -106,11 +109,16 @@ const RE_ACCOUNT_IBAN_LABELED = new RegExp(
 
 export function passAccount(ctx: RedactCtx): void {
   if (!ctx.on('NR-KONTA')) return;
-  maskAfterLabel(ctx, RE_ACCOUNT_LABELED, 'NR-KONTA');
+  // Rachunek urzędu przy jego nazwie („na rachunek Gminy Firlej nr …”) zostaje jawny pod sentinelem.
+  const office = (str: string, start: number, val: string): boolean => institutionAccountAt(str, start, start + val.length, ctx.personProbe);
+  ctx.text = ctx.text.replace(RE_ACCOUNT_LABELED, (_m, kw: string, sep: string, val: string, offset: number, str: string) =>
+    office(str, offset + kw.length + sep.length, val) ? `${kw}${sep}${protectSpan(ctx, val)}` : `${kw}${sep}${ctx.hit('NR-KONTA')}`,
+  );
   // Etykieta + format IBAN: maska nawet przy złej sumie mod-97.
   ctx.text = ctx.text.replace(
     RE_ACCOUNT_IBAN_LABELED,
-    (m, kw: string, sep: string, val: string, offset: number) => {
+    (m, kw: string, sep: string, val: string, offset: number, str: string) => {
+      if (office(str, offset + kw.length + sep.length, val)) return `${kw}${sep}${protectSpan(ctx, val)}`;
       ctx.bump('NR-KONTA');
       const p = plainSpaces(val);
       const after = plainSpaces(ctx.text.slice(offset + m.length, offset + m.length + 8));
@@ -118,8 +126,9 @@ export function passAccount(ctx: RedactCtx): void {
     },
   );
   // Bez etykiety tylko z poprawną sumą. Prefiks „PL" idzie pod maskę razem z numerem.
-  ctx.text = ctx.text.replace(RE_NRB_BARE, (m) => {
+  ctx.text = ctx.text.replace(RE_NRB_BARE, (m, offset: number, str: string) => {
     if (isValidIban('PL' + m.replace(/^PL/, ''))) {
+      if (office(str, offset, m)) return protectSpan(ctx, m);
       return ctx.hit('NR-KONTA');
     }
     return m;
@@ -208,8 +217,15 @@ const RE_FOREIGN_FIELD_WORD =
  * Nie scalać z maskAfterLabel: tam etykieta wystarcza, tu decydują jeszcze wiersz etykiety, układ
  * grup i suma kontrolna.
  */
-function maskSpacedAfterLabel(ctx: RedactCtx, re: RegExp, type: PiiType, valid: (d: string) => boolean): void {
+function maskSpacedAfterLabel(
+  ctx: RedactCtx,
+  re: RegExp,
+  type: PiiType,
+  valid: (d: string) => boolean,
+  keep?: (off: number, str: string) => boolean,
+): void {
   ctx.text = ctx.text.replace(re, (m, kw: string, sep: string, val: string, off: number, str: string) => {
+    if (keep?.(off + kw.length + sep.length, str)) return m;
     // Słowa etykiety tylko z tego samego wiersza i tylko opisujące ten numer („PESEL pacjenta:").
     // Pierwsze słowo to sama etykieta.
     if (kw.includes('\n') || kw.split(/\s+/).slice(1).some((w) => RE_FOREIGN_FIELD_WORD.test(w))) return m;
@@ -236,16 +252,30 @@ const RE_NIP = new RegExp(`(?<![\\d])${NIP_VALUE}(?![\\d])`, 'g');
 const RE_NIP_LABELED = labeledRe('nip', NIP_VALUE);
 // Inne grupowanie albo cyfry w kratkach („NIP: 5 2 6 0 2 5 0 2 7 4").
 const RE_NIP_SPACED = spacedLabeledRe('nip', String.raw`(?:PL[- ]?)?\d(?:[ \t|-]{0,3}\d){9}`);
+// NIP i REGON instytucji tuż za jej nazwą i adresem („Gminą Miasta Sanoka, Rynek 1, 38-500 Sanok,
+// NIP …”, „Urzędem Miejskim w Kórniku, pl. …, NIP …, REGON …”) zostają jawne: to dane podmiotu,
+// które urzędnik przepisuje do odpowiedzi. Firma osoby i osoba przed numerem dalej pod maską.
+const institutionId =
+  (ctx: RedactCtx) =>
+  (off: number, str: string): boolean =>
+    institutionIdAt(str, off, ctx.personProbe);
+function maskLabeledUnlessInstitution(ctx: RedactCtx, re: RegExp, type: PiiType): void {
+  const keep = institutionId(ctx);
+  ctx.text = ctx.text.replace(re, (m, kw: string, sep: string, _val: string, off: number, str: string) =>
+    keep(off + kw.length + sep.length, str) ? m : `${kw}${sep}${ctx.hit(type)}`,
+  );
+}
 export function passNip(ctx: RedactCtx): void {
   if (!ctx.on('NIP')) return;
+  const keep = institutionId(ctx);
   // Prefiks „PL" idzie pod maskę razem z numerem; isValidNip i tak liczy tylko cyfry.
-  ctx.text = ctx.text.replace(RE_NIP, (m, offset: number) => {
-    if (precededByLegalRef(ctx.text, offset) || !isValidNip(m)) return m;
+  ctx.text = ctx.text.replace(RE_NIP, (m, offset: number, str: string) => {
+    if (precededByLegalRef(ctx.text, offset) || !isValidNip(m) || keep(offset, str)) return m;
     return ctx.hit('NIP');
   });
   // Silna etykieta: maska mimo złej sumy.
-  maskAfterLabel(ctx, RE_NIP_LABELED, 'NIP');
-  maskSpacedAfterLabel(ctx, RE_NIP_SPACED, 'NIP', isValidNip);
+  maskLabeledUnlessInstitution(ctx, RE_NIP_LABELED, 'NIP');
+  maskSpacedAfterLabel(ctx, RE_NIP_SPACED, 'NIP', isValidNip, keep);
 }
 
 const RE_REGON_LABELED = labeledRe('regon', String.raw`\d{14}|\d{9}`);
@@ -253,15 +283,16 @@ const RE_REGON_SPACED = spacedLabeledRe('regon', String.raw`\d(?:[ \t|-]{0,3}\d)
 export function passRegon(ctx: RedactCtx): void {
   if (!ctx.on('REGON')) return;
   // Bez etykiety tylko 14 cyfr z poprawną sumą; 9 cyfr wymaga etykiety.
-  ctx.text = ctx.text.replace(/(?<![\d])\d{14}(?![\d])/g, (m) => {
-    if (isValidRegon14(m)) {
+  const keep = institutionId(ctx);
+  ctx.text = ctx.text.replace(/(?<![\d])\d{14}(?![\d])/g, (m, offset: number, str: string) => {
+    if (isValidRegon14(m) && !keep(offset, str)) {
       return ctx.hit('REGON');
     }
     return m;
   });
   // Silna etykieta: 9 lub 14 cyfr, maska mimo złej sumy.
-  maskAfterLabel(ctx, RE_REGON_LABELED, 'REGON');
-  maskSpacedAfterLabel(ctx, RE_REGON_SPACED, 'REGON', (d) => (d.length === 14 ? isValidRegon14(d) : isValidRegon9(d)));
+  maskLabeledUnlessInstitution(ctx, RE_REGON_LABELED, 'REGON');
+  maskSpacedAfterLabel(ctx, RE_REGON_SPACED, 'REGON', (d) => (d.length === 14 ? isValidRegon14(d) : isValidRegon9(d)), keep);
 }
 
 // Karta tylko z kontekstem karty: Luhn z prefiksem sieci przechodzi też dla IMEI, EAN, numerów
@@ -520,8 +551,24 @@ const RE_PHONE_INTL = /(?<![\d])(\([ \t]?)?((?:\+|00)[\s]?48(?:[ \t]?\(0\))?(?:[
 // (bez tabulatora) albo łącznik, bo kolumna liczb i komórki TSV skleiłyby się w jeden „telefon".
 const RE_PHONE_BARE =
   /(?<![\d.])(?:\(\d{2}\)[ \t]?\d{3}[ \t-]?\d{2}[ \t-]?\d{2}|\d{3}[ \u00A0\u2009\u202F-]?\d{3}[ \u00A0\u2009\u202F-]?\d{3})(?!\.?\d)/g;
+/** Numer krajowy z cyframi telefonu (bez „48”, „0048” i zera), do porównania wystąpień. */
+const nationalDigits = (d: string): string => (d.length > 9 ? d.slice(-9) : d);
 export function passPhone(ctx: RedactCtx): void {
   if (!ctx.on('TELEFON')) return;
+  // Numer centrali albo sekretariatu instytucji zostaje jawny pod sentinelem. Raz uznany numer
+  // urzędu (np. w nagłówku) zostaje jawny także w kolejnych wystąpieniach („sekretarz szkoły,
+  // tel. 58 681 24 07 wew. 21” pod nagłówkiem szkoły z tym samym numerem).
+  const office = new Set<string>();
+  const officePhone = (str: string, start: number, end: number, num: string): boolean => {
+    const d = num.replace(/\D/g, '');
+    if (!landlineDigits(d)) return false;
+    const key = nationalDigits(d);
+    if (office.has(key) || institutionPhoneAt(str, start, end, d, ctx.personProbe)) {
+      office.add(key);
+      return true;
+    }
+    return false;
+  };
   // Tryb kotwicowy: kotwica + 9 cyfr, także wyliczenie; słowo zostaje, numer idzie pod maskę.
   // Odrzucona kotwica oddaje resztę dopasowania do ponownego skanu, bo wyliczenie za numerem rekordu
   // („Kontakt nr 512 345 678, tel. 22 843 21 09") ma własną kotwicę.
@@ -552,9 +599,12 @@ export function passPhone(ctx: RedactCtx): void {
     // Każdy człon maskujemy w miejscu, separatory i wypełniacze zostają. Kropka skrótu („, kom. 601…")
     // i wiodące odstępy wracają w `lead` przed maską. Nawias otwierający prefiks („(+48 512 345 678)")
     // zostaje, gdy numer domyka go dopiero za segmentem.
-    const out = nums.replace(RE_PHONE_SEGMENT, (seg) => {
-      ctx.bump('TELEFON');
+    const base = offset + kw.length + sep.length;
+    const out = nums.replace(RE_PHONE_SEGMENT, (seg: string, segOff: number) => {
       const lead = seg.match(/^[\s.]*/)?.[0] ?? '';
+      const start = base + segOff + lead.length;
+      if (officePhone(str, start, base + segOff + seg.length, seg.slice(lead.length))) return `${lead}${protectSpan(ctx, seg.slice(lead.length))}`;
+      ctx.bump('TELEFON');
       const open = seg[lead.length] === '(' && countOf(seg, '(') > countOf(seg, ')');
       return `${lead}${open ? '(' : ''}${ctx.M.TELEFON}`;
     });
@@ -567,17 +617,26 @@ export function passPhone(ctx: RedactCtx): void {
   ctx.text = ctx.text.replace(RE_PHONE_INTL, (m, open: string | undefined, num: string, offset: number) => {
     const o = open ?? '';
     if (!num.startsWith('+') && precededByLegalRef(ctx.text, offset + o.length)) return m;
+    if (officePhone(ctx.text, offset + o.length, offset + m.length, num)) return `${o}${protectSpan(ctx, num)}`;
     ctx.bump('TELEFON');
     const unbalanced = countOf(num, ')') > countOf(num, '(');
     return (unbalanced ? '' : o) + ctx.M.TELEFON;
   });
   // Tryb bez kontekstu; strażniki kwot, identyfikatorów i etykiet nie-telefonu wyżej.
   ctx.text = ctx.text.replace(RE_PHONE_BARE, (m, offset: number) => {
-    if (precededByLegalRef(ctx.text, offset) || precededByNonPhoneLabel(ctx.text, offset)) return m;
-    const d = m.replace(/\D/g, '');
-    // 800/801 to wyłącznie infolinie firm: nie ma strefy geograficznej ani zakresu komórkowego 80.
-    if (d.startsWith('0') || /^80[01]/.test(d)) return m;
-    if (gluedToIdentifier(ctx.text, offset, m.length) || looksLikeAmount(ctx.text, offset, m)) return m;
-    return ctx.hit('TELEFON');
+    if (bareKept(ctx.text, offset, m)) return m;
+    return officePhone(ctx.text, offset, offset + m.length, m) ? protectSpan(ctx, m) : ctx.hit('TELEFON');
   });
+  bareKept.clear();
 }
+/**
+ * Czy liczba w trybie bez kontekstu zostaje jawna. Strażniki czytają najwyżej 48 znaków przed liczbą
+ * (etykieta nie-telefonu) i 16 po niej (waluta).
+ */
+const bareKept = windowMemo(48, 16, (text, offset, m) => {
+  if (precededByLegalRef(text, offset) || precededByNonPhoneLabel(text, offset)) return true;
+  const d = m.replace(/\D/g, '');
+  // 800/801 to wyłącznie infolinie firm: nie ma strefy geograficznej ani zakresu komórkowego 80.
+  if (d.startsWith('0') || /^80[01]/.test(d)) return true;
+  return gluedToIdentifier(text, offset, m.length) || looksLikeAmount(text, offset, m);
+});

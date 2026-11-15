@@ -1,0 +1,261 @@
+{
+  "id": "s2_ocr_08",
+  "template": "ocr",
+  "title": "Zawiadomienie komornika o zajęciu rachunku bankowego (skan po OCR)",
+  "seed": null,
+  "traps": [
+    "ź→z w nazwisku (Kuzniar) i nazwisko złamane łącznikiem (Kuź-/niarowi)",
+    "IBAN dłużnika z rozbitą grupą cyfr",
+    "rachunek kancelarii komorniczej obok rachunku dłużnika",
+    "numer wpisu adwokata",
+    "słowo „postępo-/wanie” złamane jak nazwisko",
+    "PESEL z wtrąconą spacją, adres z O zamiast 0"
+  ],
+  "entities": [
+    {
+      "text": "Komornik Sądowy przy Sądzie Rejonowym Katowice-Wschód w Katowicach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kancelaria Komornicza nr XI w Katowicach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Warszawska 37",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "40-010",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "32 2O6 l4 11",
+      "type": "INSTITUTION_PHONE",
+      "expect": "keep",
+      "note": "telefon kancelarii z błędami OCR",
+      "count": 1
+    },
+    {
+      "text": "PKO Bank Polski S.A.",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Okręgowa Rada Adwokacka w Katowicach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sądu Rejonowego Katowice-Wschód\nw Katowicach",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sądu Rejonowego\nKatowice-Wschód w Katowicach",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Prawa bankowego",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "postępo-\nwanie",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo złamane łącznikiem",
+      "count": 1
+    },
+    {
+      "text": "88 1020 2892 5345 7868 8646 8414",
+      "type": "IBAN_INSTITUTION",
+      "expect": "keep",
+      "note": "rachunek kancelarii komorniczej",
+      "count": 1
+    },
+    {
+      "text": "GKm 517/26",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "I Nc 3381/25",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura nakazu zapłaty",
+      "count": 1
+    },
+    {
+      "text": "23 600,00 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "zadłużenie",
+      "count": 1
+    },
+    {
+      "text": "Mikołów",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu wierzycielki",
+      "count": 1
+    },
+    {
+      "text": "Chorzów",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu dłużnika",
+      "count": 1
+    },
+    {
+      "text": "Mirosław Gajda",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "komornik",
+      "count": 3
+    },
+    {
+      "text": "M. Gajda",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał i nazwisko w pieczęci",
+      "count": 1
+    },
+    {
+      "text": "Jolanty Brzezińskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "wierzycielka, osoba fizyczna",
+      "count": 1
+    },
+    {
+      "text": "Jolanta Brzezińska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Mikołowska 53/8",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "43-190",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Michała Srokę",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "adwokat",
+      "count": 1
+    },
+    {
+      "text": "KAT/Adw/1187",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer wpisu na listę adwokatów",
+      "count": 1
+    },
+    {
+      "text": "Sebastian Kuzniar",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "ź odczytane jako z",
+      "count": 2
+    },
+    {
+      "text": "900219 79791",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL z wtrąconą spacją",
+      "count": 1
+    },
+    {
+      "text": "ul. Wolności 12O m. 4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "O zamiast 0",
+      "count": 1
+    },
+    {
+      "text": "41-5OO",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "O zamiast 0",
+      "count": 1
+    },
+    {
+      "text": "39 1050 0099 16 21 6477 8636 4418",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "grupa cyfr rozbita spacją",
+      "count": 1
+    },
+    {
+      "text": "Sebastianowi Kuź-\nniarowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko złamane łącznikiem",
+      "count": 1
+    },
+    {
+      "text": "renty z tytułu niezdolności do pracy",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "padaczką lekooporną",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "s.kuzniar90@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "69O 4l2 803",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "O zamiast 0, l zamiast 1",
+      "count": 1
+    }
+  ]
+}

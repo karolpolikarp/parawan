@@ -1,0 +1,212 @@
+{
+  "id": "s3_komunikacja-srodowisko_07",
+  "template": "komunikacja-srodowisko",
+  "title": "Zgłoszenie dzikiego wysypiska z adnotacjami urzędu",
+  "seed": null,
+  "traps": [
+    "adres IP z formularza",
+    "samo imię dziecka zgłaszającego",
+    "dane o zdrowiu dziecka",
+    "ulica Leśna jako miejsce i jako adres właściciela",
+    "zgłaszający bez zgody na ujawnienie danych",
+    "tablica busa i właściciel z CEPiK"
+  ],
+  "entities": [
+    {
+      "text": "Urząd Miejski w Gliwicach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Zwycięstwa 21",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "44-100",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Straży Miejskiej w Gliwicach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wojewódzki Inspektorat Ochrony Środowiska w Katowicach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Komendzie Miejskiej Policji w Gliwicach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ŚR-ZG/2026/3381",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer zgłoszenia",
+      "count": 1
+    },
+    {
+      "text": "198.51.100.47",
+      "type": "IP",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ryszard Kołodziej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Bojkowska 63",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "44-141",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "609-512-884",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "r.kolodziej@test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "nieogrodzony teren między ul. Leśną a nasypem kolejowym",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "miejsce zdarzenia",
+      "count": 1
+    },
+    {
+      "text": "SGL 4N812",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Fiat Ducato",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zuzanna",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię dziecka",
+      "count": 1
+    },
+    {
+      "text": "astmę oskrzelową",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "działka nr 1043/27, obręb Ostropa",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka wskazuje właściciela",
+      "count": 1
+    },
+    {
+      "text": "Waldemar Pająk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "63041863012",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Leśna 2",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Patryka Pająka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "11.05.1996 r.",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Waldemara Pająka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Joanna Bieniek",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędnik w funkcji",
+      "count": 1
+    },
+    {
+      "text": "32 238 54 10",
+      "type": "PHONE",
+      "expect": "policy",
+      "note": "telefon służbowy urzędu",
+      "count": 1
+    },
+    {
+      "text": "musieliśmy wezwać pogotowie",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "zdarzenie zdrowotne dziecka",
+      "count": 1
+    }
+  ]
+}

@@ -175,9 +175,12 @@ test('aplikacja: przykład pisma urzędowego, co zasłania, a co zostawia', () =
   const helpers = repoFile(new URL('../../../scripts/e2e/helpers.mjs', import.meta.url));
   expect(helpers).toContain("export const EXAMPLE_PESEL = '85071412358';");
   expect(helpers).toContain("export const EXAMPLE_NAME = 'Wierzbicki';");
-  // demo w ?demo i przycisk „Przykład” biorą ten sam tekst
+  // demo w ?demo, przycisk „Przykład” i rozgrzewka silnika po starcie biorą ten sam tekst
   expect(webMain).toContain("import { EXAMPLE_TEXT } from './example';");
-  expect(webMain.match(/EXAMPLE_TEXT/g)).toHaveLength(3);
+  expect(webMain).toContain('  input.value = EXAMPLE_TEXT;');
+  expect(webMain).toContain("  replaceSource(EXAMPLE_TEXT, 'Wstawiono przykład w miejsce Twojego tekstu.');");
+  expect(webMain).toContain('  redactPII(EXAMPLE_TEXT);');
+  expect(webMain.match(/EXAMPLE_TEXT/g)).toHaveLength(4);
 });
 
 /* ── Druk i pobieranie ── */

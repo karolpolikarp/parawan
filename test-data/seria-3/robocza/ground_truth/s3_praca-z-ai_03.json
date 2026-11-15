@@ -1,0 +1,338 @@
+{
+  "id": "s3_praca-z-ai_03",
+  "template": "praca-z-ai",
+  "title": "Polecenie do AI: tabela z wewnętrznego e-maila Wydziału Komunikacji",
+  "seed": null,
+  "traps": [
+    "zdrobnienie i wołacz imion w e-mailu („Pani Basia”, „Iwonko”)",
+    "funkcyjna skrzynka wydziału obok prywatnych adresów pracowników",
+    "nazwisko panieńskie w nawiasie „z d.”",
+    "firma JDG z imieniem i nazwiskiem oraz NIP osoby",
+    "numer faktury i adres starostwa z patronem do zachowania",
+    "kod pocztowy siedziby urzędu inny niż kody osób"
+  ],
+  "entities": [
+    {
+      "text": "Krzysztof Malinowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "urzędnik, nadawca e-maila",
+      "count": 2
+    },
+    {
+      "text": "k.malinowski@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "imienny adres pracownika",
+      "count": 1
+    },
+    {
+      "text": "finanse@example.pl",
+      "type": "EMAIL_INSTITUTION",
+      "expect": "keep",
+      "note": "funkcyjna skrzynka wydziału",
+      "count": 1
+    },
+    {
+      "text": "Iwona Sadurska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "urzędniczka w DW",
+      "count": 1
+    },
+    {
+      "text": "i.sadurska@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Iwonko",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię w wołaczu",
+      "count": 1
+    },
+    {
+      "text": "Basia",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie imienia kasjerki",
+      "count": 1
+    },
+    {
+      "text": "KM.5410.1187.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KM.5410.1203.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KM.5410.1219.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Paweł Jaworski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "78012191232",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Stare Juchy",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "ul. Ełcka 9",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "698 230 514",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Skody Octavii",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "XXDB6C79AWE75N9KZ",
+      "type": "VIN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "EL 7530N",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "18957/11/1031",
+      "type": "DRIVING_LICENSE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Natalia Wysocka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ciszewska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko panieńskie po „z d.”",
+      "count": 1
+    },
+    {
+      "text": "90041702982",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ENH648321",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Gen. Józefa Bema 17/3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "ulica z patronem w adresie osoby",
+      "count": 1
+    },
+    {
+      "text": "19-400",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Olecko",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Ford Focus",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "1YULD7V3PVT9SMVZ0",
+      "type": "VIN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wysockiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w celowniku",
+      "count": 1
+    },
+    {
+      "text": "507 118 642",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Adrian Wysocki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "mąż",
+      "count": 1
+    },
+    {
+      "text": "Auto-Handel Mirosław Pawlak",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "firma JDG z imieniem i nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "8135755088",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "NIP przedsiębiorcy JDG",
+      "count": 1
+    },
+    {
+      "text": "ul. Przemysłowa 22",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres działalności JDG",
+      "count": 1
+    },
+    {
+      "text": "Ełk",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu JDG i urzędu",
+      "count": 2
+    },
+    {
+      "text": "VW Passata",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "A1DEUMV7GTLUF8RVU",
+      "type": "VIN",
+      "expect": "mask",
+      "note": "pojazd firmy JDG",
+      "count": 1
+    },
+    {
+      "text": "FV/2026/10/0457",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer faktury",
+      "count": 1
+    },
+    {
+      "text": "Kamil Rogowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik firmy",
+      "count": 1
+    },
+    {
+      "text": "auto.pawlak@test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "adres e-mail JDG z nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "wew. 214",
+      "type": "PHONE_EXT",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "podinspektor",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wydział Komunikacji i Transportu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Starostwo Powiatowe w Ełku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Marszałka Józefa Piłsudskiego 4",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w adresie urzędu",
+      "count": 1
+    },
+    {
+      "text": "19-300",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

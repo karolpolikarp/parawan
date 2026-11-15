@@ -1,0 +1,233 @@
+{
+  "id": "s3_skargi-wnioski_09",
+  "template": "skargi-wnioski",
+  "title": "Przekazanie wniosku według właściwości do nadzoru budowlanego",
+  "seed": null,
+  "traps": [
+    "małżonkowie właściciele działki: samo imię męża i nazwisko w liczbie mnogiej",
+    "nazwisko dwuczłonowe wnioskodawczyni z łącznikiem",
+    "dwie księgi wieczyste sąsiednich działek i numery działek",
+    "firma jednoosobowa z nazwiskiem właściciela i NIP osoby fizycznej",
+    "nazwisko Wierzba policjanta i słowo „wierzby”",
+    "nadużywanie alkoholu przypisane sąsiadowi jako dane o zdrowiu"
+  ],
+  "entities": [
+    {
+      "text": "BGN.152.14.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "Powiatowy Inspektor Nadzoru Budowlanego w Koszalinie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "ul. Racławicka 13",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "75-620",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ireny Szulc-Cieślak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "wnioskodawczyni, nazwisko dwuczłonowe",
+      "count": 1
+    },
+    {
+      "text": "Irena Szulc-Cieślak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Okopowa 4/9",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "78-100",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Kołobrzeg",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "działce nr 63/12",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "działka właścicieli",
+      "count": 1
+    },
+    {
+      "text": "Kamila",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię męża w zestawieniu „Państwa Kamila i Pauliny”",
+      "count": 1
+    },
+    {
+      "text": "Pauliny Rudnickich",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko w liczbie mnogiej po imieniu żony",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy w Koszalinie",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KO1K/20641370/9",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "działki nr 63/13",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "działka wnioskodawczyni",
+      "count": 1
+    },
+    {
+      "text": "KO1K/31267980/2",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rudnicki Stolarstwo Kamil Rudnicki",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "firma jednoosobowa z imieniem i nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "7996697050",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "NIP osoby fizycznej prowadzącej działalność",
+      "count": 1
+    },
+    {
+      "text": "Bogdana Leśniaka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Osieki",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "obręb działki i miejscowość z adresu sąsiada",
+      "count": 2
+    },
+    {
+      "text": "ul. Leśna 22",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Burmistrz Sianowa",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Burmistrza Sianowa",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wierzby",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "nazwa drzewa, a nie nazwisko Wierzba",
+      "count": 1
+    },
+    {
+      "text": "od lat nadużywa alkoholu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "zarzut uzależnienia przypisany konkretnej osobie",
+      "count": 1
+    },
+    {
+      "text": "OŚ.6131.41.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "698 225 031",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Komendzie Miejskiej Policji w Koszalinie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Adrian Wierzba",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "policjant z imienia i nazwiska",
+      "count": 1
+    },
+    {
+      "text": "Tadeusz Gmyrek",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędnik podpisujący w funkcji",
+      "count": 1
+    },
+    {
+      "text": "irena.sc@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

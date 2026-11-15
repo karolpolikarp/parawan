@@ -821,7 +821,7 @@ export function buildDataset() {
   // czasownika przeszłego, rzadkie nazwisko pod „osoba", osoba za patronem po „św.", pacjent po
   // głowie eponimu, osoba po mieście-przymiotniku — oraz zdania ogólne i nazwy, które mają zostać.
   str('Data\tZmiana\tNazwisko\tOddział\n2024-05-12\tNoc\tLisiecki\tSOR\nTak\tKaczyński\tUrząd Miasta', ['Lisiecki', 'Kaczyński'], ['Noc', 'SOR', 'Tak', 'Urząd Miasta']);
-  osp('Badanie wykonał lek. Kluczyk. Mieczyk przebywa na zwolnieniu lekarskim.', ['Kluczyk', 'Mieczyk'], ['Badanie wykonał lek.', 'przebywa na zwolnieniu']);
+  osp('Badanie wykonał lek. Kluczyk. Mieczyk przebywa na zwolnieniu lekarskim.', ['Kluczyk', 'Mieczyk'], ['Badanie wykonał lek.', 'przebywa na']);
   str('{"klient": {"osoba": "Bednarz", "telefon": "601 234 567"}}, <person>Gzik</person>, {"name": "j. kowalski"}', ['Bednarz', 'Gzik', 'kowalski'], ['"osoba"', '<person>']);
   osp('W kościele św. Anny Jan Bednarz zagra koncert kolęd. W kościele przesłuchano św. Annę Gzowską.', ['Jan', 'Bednarz', 'Annę', 'Gzowską'], ['W kościele św. Anny', 'przesłuchano św.']);
   osp('Pacjent Tadeusz Nowacki trafił na SOR. Objawy Nowackiego nasiliły się w nocy. Mistrz linii Kowalskiego wydał polecenie.', ['Tadeusz', 'Nowacki', 'Nowackiego', 'Kowalskiego'], ['Objawy', 'Mistrz linii']);
@@ -1147,6 +1147,347 @@ export function buildDataset() {
   str('Spółdzielnia Mieszkaniowa Lipa\nul. Polna 3 mieszkania 14', ['ul. Polna 3', 'mieszkania 14'], ['Spółdzielnia Mieszkaniowa Lipa']);
   str('Zamieszkały: ul. Polna 3 mieszkania 14, Turek. Lokal w Poznaniu, ul. Długa 5.', ['ul. Polna 3', 'mieszkania 14', 'Turek', 'Poznaniu', 'ul. Długa 5'], ['Zamieszkały:', 'Lokal w']);
   str('Urząd Gminy, ul. Polna 3, Nowak Kowalski, 05-090 Raszyn', ['Nowak Kowalski', '05-090', 'Raszyn'], ['Urząd Gminy, ul. Polna 3']);
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // OSOBA POTWIERDZONA W PIŚMIE — dalsze wzmianki: samo nazwisko w odmianie, samo imię i zdrobnienie,
+  // inicjały, login (seria 2, klasa 1). Negatywy: imię bez osoby w piśmie, patron, homograf.
+  // ──────────────────────────────────────────────────────────────────────────
+  oso('Głos zabrała radna Elżbieta Sowa. Radny Kmieć poparł wniosek radnej Sowy.', ['Elżbieta', 'Sowa', 'Sowy'], ['Głos zabrała radna', 'poparł wniosek radnej']);
+  oso('- Jakub Wrona, syn\n- Aleksandra Wrona, córka\nKuba odrabia lekcje, a Ola recytowała wiersz o tym, jak wrona zgubiła ser.', ['Jakub', 'Aleksandra', 'Wrona,', 'Kuba', 'Ola'], ['jak wrona zgubiła ser']);
+  oso('Szanowny Panie Henryku,\nodpowiadam na pismo w sprawie lokalu.\nHenryk Baran', ['Henryku', 'Henryk', 'Baran'], ['odpowiadam na pismo']);
+  oso('Obecni: Patrycja Lorenc, Marcin Lorenc.\n1. P.L. złoży wniosek.\n2. M.L. potwierdzi przelew.', ['Patrycja', 'Marcin', 'Lorenc', 'P.L.', 'M.L.'], ['złoży wniosek', 'potwierdzi przelew']);
+  oso('Zgłaszający: amazur (Agnieszka Mazur)\nKomentarz 08:20, amazur: dalej nie działa.', ['amazur', 'Agnieszka', 'Mazur'], ['dalej nie działa']);
+  neg('Jan przyszedł do urzędu. Wniosek złożył Jan.', ['Jan przyszedł', 'złożył Jan']);
+  oso('Wnioskodawczyni Maria Nowak. Szkoła Podstawowa im. Marii Konopnickiej.', ['Maria', 'Nowak'], ['im. Marii Konopnickiej']);
+  oso('Radny Tomasz Wróbel zgłosił wniosek. Wróbel na dachu ćwierkał.', ['Tomasz', 'Wróbel zgłosił'], ['Wróbel na dachu']);
+  // poprawki po weryfikacji: miejsce, skrót, święty, nazwa rzeczy i słowo zostają, celownik -owi znika
+  oso('Pan Marek Włoch złożył wniosek. Wyjazd do Włoch, potem urlop na Mazurach. Decyzję doręczono Włochowi.', ['Marek', 'Włoch złożył', 'Włochowi'], ['Wyjazd do Włoch', 'urlop na Mazurach']);
+  oso('Pan Jan Rak złożył wniosek. Mecz w Rakowie. Rozmawiano z Rakiem.', ['Jan', 'Rak złożył', 'Rakiem'], ['Mecz w Rakowie']);
+  oso('Pan Michał Zieliński złożył wniosek do Ministerstwa Zdrowia (MZ). Projekt zatwierdzony przez MZ.', ['Michał', 'Zieliński'], ['Ministerstwa Zdrowia (MZ)', 'przez MZ']);
+  oso('Pan Paweł Wiśniewski należy do parafii św. Piotra i Pawła. Paweł przyszedł.', ['Paweł Wiśniewski', 'Paweł przyszedł'], ['św. Piotra i Pawła']);
+  oso('Pani Barbara Nowak pracuje w kopalni. Kopalnia Barbara zatrudnia 500 osób. Rondo Trzeciego Maja.', ['Barbara Nowak'], ['Kopalnia Barbara', 'Rondo Trzeciego Maja']);
+  oso('Pacjentka Ewa Rak, lat 45.\nWywiad: matka – Rak jajnika. Zima była ciężka.', ['Ewa', 'Rak, lat'], ['matka – Rak jajnika', 'Zima była']);
+  oso('Celina Mazurek :) dzwonię w celu umówienia wizyty, pozdrawiam celina', ['Celina Mazurek', 'pozdrawiam celina'], ['w celu umówienia']);
+  // formy, które nie mogą być osobą z pisma: przymiotnik na -skie, odmiana nazwiska kobiety na
+  // spółgłoskę, przymiotnik przed rzeczownikiem, miasto po przyimku, symbol działu
+  oso('Pan Piotr Pomorski złożył wniosek. Pojezierze Pomorskie jest piękne. Decyzję doręczono Pomorskiemu.', ['Piotr', 'Pomorski złożył', 'Pomorskiemu'], ['Pojezierze Pomorskie']);
+  oso('Pani Maria Lis złożyła wniosek. Przedszkole „Pod Lisem” zaprasza. Pani Lis przyszła.', ['Maria', 'Lis złożyła', 'Lis przyszła'], ['„Pod Lisem”']);
+  oso('Pan Jan Wolny złożył wniosek. Wolny dostęp do informacji jest prawem. Wolny przyszedł wczoraj.', ['Jan', 'Wolny złożył', 'Wolny przyszedł'], ['Wolny dostęp']);
+  oso('Pan Adam Kalisz złożył wniosek. Pociąg do Kalisza odjechał. Rozmowa z Kaliszem trwała godzinę.', ['Adam', 'Kalisz złożył', 'Kaliszem'], ['do Kalisza']);
+  oso('Pan Tomasz Zieliński złożył wniosek. Dział TZ przekazał akta. Pismo przygotował TZ w dniu 5 maja.', ['Tomasz', 'Zieliński', 'przygotował TZ'], ['Dział TZ']);
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // ZWROT DO OSOBY I PODPIS (seria 2, klasa 2): wołacz po „Panie”, powitaniu, przecinku i na początku
+  // wiersza, „p. Marek”, Mr/Ms/Frau/Dr, podpis pod formułą pożegnalną. Role, Bóg i formuły zostają.
+  // ──────────────────────────────────────────────────────────────────────────
+  oso('Panie Marku,\nprzesyłam protokół. Witam Zbyszku, Cześć Ewo! Tak, Kasiu, wiem.', ['Marku', 'Zbyszku', 'Ewo', 'Kasiu'], ['przesyłam protokół', 'Witam', 'Cześć', 'Tak,']);
+  oso('Jutro przyjdzie hydraulik p. Marek, numer do niego podam.', ['Marek'], ['hydraulik p.', 'numer do niego']);
+  oso('Dear Mr Brandt, Ms Sabine Krüger will call. Frau Schneider hat geschrieben. Dr Helen Carter, University of Leeds.', ['Brandt', 'Sabine Krüger', 'Schneider', 'Helen Carter'], ['Dear Mr', 'will call', 'University of Leeds']);
+  oso('Z poważaniem\nKowalski\n\nPozdrawiam, Kuba\n\nBest regards,\nOliver Hastings', ['Kowalski', 'Kuba', 'Oliver Hastings'], ['Z poważaniem', 'Pozdrawiam,', 'Best regards']);
+  neg('Panie Prezesie, Panie Sędzio, Panie Boże! Szanowni Państwo, Dziękuję, Anna przyjdzie jutro.', ['Panie Prezesie', 'Panie Sędzio', 'Panie Boże', 'Szanowni Państwo']);
+  neg('Z poważaniem\nZarząd Spółki\n\nPozdrawiam\nDział Kadr\n\nKind regards,\nCustomer Service', ['Zarząd Spółki', 'Dział Kadr', 'Customer Service']);
+  // obcy tytuł przed marką, utworem i rolą; miejscownik miejsc w wyliczeniu równy wołaczowi imienia
+  neg('Płyn Mr Proper, catering z Mr Cook, firma Mr Garden sp. z o.o., konkurs Mr Olympia. Czytam Mrs Dalloway i Frau Holle. Herr Ober, Mr Prime Minister.', ['Mr Proper', 'Mr Cook', 'Mr Garden', 'Mr Olympia', 'Mrs Dalloway', 'Frau Holle', 'Herr Ober', 'Prime Minister']);
+  neg('Wakacje spędziliśmy w Juracie, Helu, Jastarni i Władysławowie. Mieszkała w Krakowie, Kazimierzu i Podgórzu.', ['Helu', 'Kazimierzu']);
+  // wyliczenie w miejscowniku (męski wołacz równy miejscownikowi), nazwy na -o i pole tabeli: nie zwrot
+  neg('Wykład o apostołach: Piotrze, Pawle, Janie, Jakubie. Referat o królach: Mieszku, Henryku, Zygmuncie, Stefanie.', ['Pawle', 'Janie', 'Henryku', 'Stefanie']);
+  neg('Ulubione gry: Tetris, Mario, Sonic. Filmy: Coco, Kubo, Moana. Autorzy: Coelho, Paulo, Cortázar.\nprodukt,ilosc\nSandro,5', ['Mario', 'Kubo', 'Paulo', 'Sandro']);
+  // stopień z kropką po Herr/Frau i po powitaniu; wołacz po jednej nazwie miejsca
+  oso('Herr Dr. Müller hat angerufen. Sehr geehrte Frau Prof. Dr. Weber, Dear Dr. Smith, W Gdyni, Marku, było zimno.', ['Müller', 'Weber', 'Smith', 'Marku'], ['Herr Dr.', 'Frau Prof. Dr.', 'Dear Dr.', 'W Gdyni']);
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // POKREWIEŃSTWO JAKO KOTWICA OSOBY (seria 2, klasa 5): imię i zdrobnienie w każdym przypadku za
+  // rzeczownikiem pokrewieństwa lub opieki, bez maski przed nim. Tytuł zakonny, patron i postać
+  // sakralna zostają.
+  oso('Wczoraj jej syn Kuba przyszedł sam, a córce Oli daliśmy prezent. Mój brat Paweł i moja siostra Ewelina pomagają.', ['Kuba', 'Oli', 'Paweł', 'Ewelina'], ['jej syn', 'córce', 'Mój brat', 'moja siostra']);
+  oso('KLIENT: Żona, Barbara, ale ona nie wie. probowal tez maz, Grzesiek, na lapku.', ['Barbara', 'Grzesiek'], ['Żona,', 'maz,']);
+  oso('Obecne były dzieci Zuzanna (7 lat) i Antoni (4 lata). Zuzia chodzi do szkoły, Antek ma alergię.', ['Zuzanna', 'Antoni', 'Zuzia', 'Antek'], ['dzieci', '(7 lat)']);
+  oso('Zmarły, syn Władysława i Genowefy, zamieszkały w Lublinie. I moved with my husband Paweł and our daughter Zofia.', ['Władysława', 'Genowefy', 'Paweł', 'Zofia'], ['Zmarły, syn', 'my husband']);
+  neg('Syn Marnotrawny wrócił. Kościół pw. Matki Bożej. Pielgrzymka do Ojca Pio. Schronisko Brata Alberta, Towarzystwo im. św. Brata Alberta. Grupa „Babcia Halina”. Jezus, syn Józefa i Maryi, nauczał.', ['Marnotrawny', 'Matki Bożej', 'Ojca Pio', 'Brata Alberta', 'Babcia Halina', 'Józefa', 'Maryi']);
+  // tytuł zakonny w każdej pozycji zdania, postać z bajki po celowniku, postać historyczna i biblijna
+  neg('Kościół pw. Matki Teresy z Kalkuty. Film pt. Ojciec Mateusz. Temat lekcji: Brat Albert i ubodzy. Matka Joanna od Aniołów to film.', ['Teresy', 'Mateusz', 'Albert', 'Joanna']);
+  neg('Wszystkim dzieciom Mikołaj przyniósł prezenty. Dziadek Mikołaj odwiedził przedszkole. Synowie Marka Aureliusza nie przejęli władzy. Salomon był synem Dawida i Batszeby. Ewangelia mówi o Marii, matce Jakuba.', ['Mikołaj przyniósł', 'Dziadek Mikołaj', 'Marka Aureliusza', 'Dawida', 'Batszeby', 'Jakuba']);
+  oso('Matka Anna złożyła wniosek. Synowi Mikołajowi przyznano zasiłek. Syn Jakub czytał Ewangelię.', ['Anna', 'Mikołajowi', 'Jakub'], ['Matka', 'Synowi', 'Ewangelię']);
+  // tytuł zakonny małą literą (ortografia), imię papieskie po dwóch imionach; krewny z zaimkiem dzierżawczym
+  neg('Jak żyła matka Teresa z Kalkuty? Jak mawiał brat Albert, trzeba być dobrym jak chleb. Matka Jana Pawła II, Emilia, zmarła w 1929 roku.', ['Teresa', 'Albert', 'Jana Pawła']);
+  oso('Mój brat Albert przyszedł, a moja matka Teresa została w domu.', ['Albert', 'Teresa'], ['Mój brat', 'moja matka']);
+  // przydomek z „z” tylko przy świętym: kraj, instytucja i małe miasto to pochodzenie krewnego
+  oso('Brat Piotr z Niemiec przyjechał na pogrzeb. Siostra Ewa z MOPS przyszła na wizytę. Matka Anna z Wadowic złożyła wniosek.', ['Piotr', 'Ewa', 'Anna'], ['z Niemiec', 'z MOPS', 'Wadowic']);
+  // pokrewieństwo jako etykieta z dwukropkiem albo myślnikiem
+  oso('Dzieci: Oliwia (8 lat), Filip (5 lat) i Tymon (2 lata). Syn: Piotr, ur. 2015. dzieci – Hania i Kuba', ['Oliwia', 'Filip', 'Tymon', 'Piotr', 'Hania', 'Kuba'], ['Dzieci:', '(8 lat)', 'Syn:']);
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // ETYKIETA MÓWCY W CZACIE I TRANSKRYPCJI (seria 2, klasa 9): imię albo imię z inicjałem przed
+  // dwukropkiem na początku wiersza eksportu czatu, SMS-ów, wątku komentarzy. Rola mówcy, etykieta
+  // pola i nagłówek zostają.
+  oso('[08:12] Kasia 🌸: dzwonili ze szpitala\n[08:13] Tomek: co powiedzieli??\n[08:30] Tomek: dzięki. kasia a recepty?', ['Kasia', 'Tomek', 'kasia'], ['[08:12]', '🌸', 'dzwonili ze szpitala']);
+  oso('Konsultant (Marek): dzień dobry\nKlient: witam\nKonsultant (Marek): słucham', ['Marek'], ['Konsultant', 'Klient']);
+  oso('Komentarze:\nRobert Wysocki: widziałem psa 😅\n  ↳ Szymon P.: offtop\n  ↳ Admin Wiesia 🌻: bez wycieczek', ['Robert Wysocki', 'Szymon P.', 'Wiesia'], ['Komentarze:', 'Admin', 'offtop']);
+  neg('[10:01] Konsultant: Dzień dobry\n[10:02] Klient: dzień dobry\n[10:03] Bot: proszę czekać\n[10:04] Mama: kup chleb\n[10:05] InPost: paczka czeka\n[10:06] InPost: odbierz', ['Konsultant', 'Klient', 'Bot', 'Mama', 'InPost']);
+  neg('Od: Urząd Miasta\nDo: Wydział\nTemat: wniosek\nUwagi: brak\nData: 12.11.2026\nPL: Wniosek\nEN: Application\n10:15 Przerwa: kawa\n11:00 Kraków: przejazd', ['Temat', 'Uwagi', 'Przerwa', 'Kraków']);
+  // lista „Pole: wartość” z emotikoną, powtórzeniem etykiety albo godziną to nie rozmowa
+  neg('Temat: Imieniny w grudniu 🎉\nBarbara: 4 grudnia\nMikołaj: 6 grudnia\nMagazyn A\nHala: zamknięta\nBrama: otwarta\nHala: remont do piątku', ['Barbara', 'Mikołaj', 'Hala']);
+  neg('Plan wycieczki:\n08:00 Kazimierz: zbiórka przy synagodze\n15:00 Florian: brama i mury obronne\n16:00 Kazimierz Dolny: obiad\n18:00 Kazimierz Dolny: powrót', ['Kazimierz', 'Florian', 'Kazimierz Dolny']);
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // IMIONA CUDZOZIEMCÓW Z URZĘDÓW (seria 2, klasa 12): ukraińskie, białoruskie i rosyjskie w zapisie
+  // polskim i paszportowym, arabskie, indyjskie, polskie spoza dawnego słownika (Oliwier, Eryk) oraz
+  // imię i nazwisko wietnamskie rozpoznane po układzie sylab. Słowa pospolite zbieżne z imionami zostają.
+  osp('Uczeń przyjechał z Ukrainy, matka Oksana Burek okazała paszport.', ['Oksana Burek'], ['Ukrainy', 'paszport']);
+  osp('Decyzję doręczono Ołeksandrowi Melnykowi, a odpis Svitlanie Bondarenko.', ['Ołeksandrowi Melnykowi', 'Svitlanie Bondarenko'], ['Decyzję', 'odpis']);
+  osp('Wniosek złożyła Fatima Haddad, obywatelka Syrii, a pełnomocnikiem jest Oliwier Zając.', ['Fatima Haddad', 'Oliwier Zając'], ['Syrii', 'pełnomocnikiem']);
+  osp('Małżonek: Tran Thi Hoa. Pełnomocnikiem ustanawiam Do Minh Tuan.', ['Tran Thi Hoa', 'Do Minh Tuan'], ['Małżonek:', 'Pełnomocnikiem']);
+  neg('Na tarasie lokalu nie wolno palić. Omar Jumbo kosztuje 120 zł. Pielgrzymka do Fatimy wyrusza w maju.', ['tarasie', 'Omar', 'Fatimy']);
+  neg('Delegacja odwiedziła Ho Chi Minh i Zatokę Ha Long. Do Hanoi lecieliśmy przez Dubaj. Chór zaśpiewał Salve Regina.', ['Ho Chi Minh', 'Ha Long', 'Do Hanoi', 'Salve Regina']);
+
+  // ─────────────────────────────────────────────
+  // ZDARZENIE ZDROWOTNE PRZY OSOBIE (seria 2, klasa 3): zwolnienie lekarskie z okresem, orzeczenie
+  // o stopniu niepełnosprawności, leczenie z rodzajem, pobyt i zabieg, ciąża z tygodniem. Ujemne:
+  // przepis i pouczenie, nazwa zespołu orzekającego, terapeuta prowadzący terapię, zwolnienie z pracy.
+  str('Pani Ewa Lis ma zwolnienie lekarskie do 27.11. Syn wnioskodawczyni ma orzeczenie o umiarkowanym stopniu niepełnosprawności.', ['zwolnienie lekarskie do 27.11', 'orzeczenie o umiarkowanym stopniu niepełnosprawności'], ['Pani', 'Syn wnioskodawczyni ma']);
+  str('Ojciec dziecka jest uzależniony od amfetaminy i przerwał terapię uzależnień. Matka od lat leczy się w poradni zdrowia psychicznego.', ['uzależniony od amfetaminy', 'terapię uzależnień', 'leczy się w poradni zdrowia psychicznego'], ['Ojciec dziecka jest', 'i przerwał', 'Matka od lat']);
+  str('Do końca miesiąca przebywam w sanatorium po operacji kręgosłupa. U pani Ewy Kos trwa 30. tydzień ciąży.', ['sanatorium po operacji kręgosłupa', '30. tydzień ciąży'], ['Do końca miesiąca przebywam', 'trwa']);
+  neg('Zwolnienia lekarskie należy dostarczyć w ciągu 7 dni. Zgodnie z art. 92 Kodeksu pracy za czas zwolnienia lekarskiego pracownik zachowuje prawo do wynagrodzenia.', ['Zwolnienia lekarskie należy dostarczyć', 'za czas zwolnienia lekarskiego']);
+  neg('Powiatowy Zespół do Spraw Orzekania o Niepełnosprawności wydaje orzeczenia. Pani Ewa Lis, logopeda, prowadzi terapię logopedyczną. Pan Jan Nowak został zwolniony z pracy.', ['Orzekania o Niepełnosprawności', 'prowadzi terapię logopedyczną', 'zwolniony z pracy']);
+  // Imiesłów bierny po łączniku, zabieg po budowie słowa i z narządem, pobyt w placówce, angielski.
+  // Ujemne: narzędnik na -łem („z udziałem”, „artykułem”), pozycja przepisu i tabeli, strona
+  // internetowa, podmiot rzeczowy („Pismo trafiło do szpitala”), temat pisma („zasady wypłaty”).
+  str('Matka małoletniego jest od lat leczona psychiatrycznie. Wnioskodawczyni jest po przeszczepie nerki. Pozwany kilkukrotnie trafiał do izby wytrzeźwień.', ['leczona psychiatrycznie', 'przeszczepie nerki', 'izby wytrzeźwień'], ['Matka małoletniego jest od lat', 'Wnioskodawczyni jest', 'Pozwany kilkukrotnie trafiał']);
+  str('Pani Ewelina Gryc była hospitalizowana w klinice kardiologii. Mr Adam Nowak underwent knee surgery in May.', ['hospitalizowana w klinice kardiologii', 'knee surgery'], ['Pani', 'underwent', 'in May']);
+  neg('Zgodnie z artykułem 92 Kodeksu pracy za czas zwolnienia lekarskiego pracownik zachowuje prawo do wynagrodzenia. Posiedzenie z udziałem dyrektora szpitala dotyczyło leczenia psychiatrycznego dzieci.', ['za czas zwolnienia lekarskiego', 'leczenia psychiatrycznego dzieci']);
+  neg('Na podstawie ustawy (Dz. U. z 2024 r., poz. 146) zwolnienie lekarskie jest wystawiane w systemie e-ZLA. Druk zwolnienia lekarskiego jest dostępny na stronie internetowej ZUS.', ['zwolnienie lekarskie jest wystawiane', 'Druk zwolnienia lekarskiego']);
+  neg('Pismo pana Jana Kowalskiego trafiło do szpitala w Radomiu. Na naradzie omówiono zasady wypłaty zasiłku chorobowego.', ['trafiło do szpitala', 'zasady wypłaty zasiłku chorobowego']);
+  // Rola osoby przy zdarzeniu: urzędnik z funkcją we wtrąceniu, fundator, autor pisma, cel pobytu, rzecz
+  // i instytucja jako podmiot, angielski idiom. Dodatnie: zawód we wtrąceniu przy czasowniku pobytu,
+  // podmiot zdania głównego przed „że”.
+  neg('Pani Anna Nowak, kierownik działu kadr, przypomina, że zwolnienie lekarskie należy dostarczyć w ciągu 7 dni. Pan Jan Lis, wójt gminy, ufundował pobyt w hospicjum dla samotnych mieszkańców.', ['zwolnienie lekarskie należy', 'pobyt w hospicjum dla samotnych']);
+  neg('Mam przyjemność poinformować, że Fundacja sfinansuje pobyt na turnusie rehabilitacyjnym dla 20 dzieci. Budynek był diagnozowany pod kątem zawilgocenia. Hurtownia przyjmuje Ibuprom do magazynu.', ['pobyt na turnusie rehabilitacyjnym', 'był diagnozowany', 'przyjmuje Ibuprom']);
+  neg('Klient zgłosił się do szpitala z reklamacją dotyczącą faktury. He had a stroke of genius during the negotiations.', ['do szpitala z reklamacją', 'a stroke of genius']);
+  str('Konkubent przyznał, że dwa razy trafił do izby wytrzeźwień. Pani Ewa Lis, magazynierka, przebywa na zwolnieniu lekarskim do 16 maja.', ['izby wytrzeźwień', 'zwolnieniu lekarskim do 16 maja'], ['Konkubent przyznał', 'magazynierka, przebywa na']);
+
+  // ─────────────────────────────────────────────
+  // ROZPOZNANIE SPOZA LISTY CHORÓB (seria 2, klasa 4): kotwica rozpoznania i fraza do końca, nazwa
+  // choroby po budowie słowa (-oza, -algia, dys-, niedo-), zespół z nazwiskiem, kod ICD-10 i ICD-11
+  // w zdaniu, uraz z częścią ciała. Ujemne: zespół ludzi i nazwa szkoły, stwierdzenie urzędowe,
+  // rozpoznanie sprawy i sprawcy, przenośnia, grupa i temat.
+  str('U wnioskodawczyni rozpoznano toczeń rumieniowaty układowy. Syn stron ma zdiagnozowaną mukowiscydozę.', ['toczeń rumieniowaty układowy', 'mukowiscydozę'], ['U wnioskodawczyni rozpoznano', 'Syn stron ma zdiagnozowaną']);
+  str('Małoletni ma rozpoznane zaburzenia ze spektrum autyzmu (6A02). Psychiatra rozpoznała zespół hiperkinetyczny z zaburzeniami uwagi (F90.0).', ['zaburzenia ze spektrum autyzmu', '6A02', 'zespół hiperkinetyczny', 'F90.0'], ['Małoletni ma rozpoznane', 'Psychiatra rozpoznała']);
+  str('Pacjentka cierpi na fibromialgię. Babcia ma demencję i niedowład lewostronny. Uczennica ma orzeczenie ze względu na zespół Aspergera.', ['fibromialgię', 'demencję', 'niedowład lewostronny', 'zespół Aspergera'], ['Pacjentka cierpi na', 'Babcia ma', 'ze względu na']);
+  str('Pacjent lat 32. W RTG stwierdzono złamanie trzonu kości piszczelowej lewej. Uczestniczka uskarżała się na ból karku.', ['złamanie trzonu kości piszczelowej lewej', 'ból karku'], ['W RTG stwierdzono', 'Uczestniczka uskarżała się na']);
+  neg('Zespół Szkół nr 2 ogłasza nabór. Projekt prowadzi zespół Nowaka. W trakcie kontroli stwierdzono naruszenie przepisów i pęknięcie ściany nośnej.', ['Zespół Szkół', 'zespół Nowaka', 'stwierdzono naruszenie', 'pęknięcie ściany nośnej']);
+  neg('Świadek rozpoznała oskarżonego. Sąd rozpoznał apelację. Rozpoznano u niego talent muzyczny. Pracownik był nieobecny z powodu choroby.', ['rozpoznała oskarżonego', 'rozpoznał apelację', 'talent muzyczny', 'z powodu choroby']);
+  neg('Firma ma anemię inwestycyjną. Wiele osób choruje na grypę. Dzieci z autyzmem mają prawo do wsparcia. Pani Kowalska jest specjalistką od dysleksji.', ['anemię inwestycyjną', 'choruje na grypę', 'Dzieci z autyzmem', 'specjalistką od dysleksji']);
+  // zdanie ogólne po kotwicy rozpoznania: warunek, zdanie względne reguły, kwantyfikator, dane zbiorcze
+  neg('Jeżeli u dziecka zdiagnozowano autyzm, rodzice mogą złożyć wniosek. Uczeń, u którego rozpoznano dysleksję, może pisać egzamin dłużej. Każdy uczeń z rozpoznanym ADHD otrzymuje dostosowanie. W 2025 r. w powiecie rozpoznano 312 przypadków gruźlicy.', ['zdiagnozowano autyzm', 'rozpoznano dysleksję', 'rozpoznanym ADHD', 'przypadków gruźlicy']);
+  // skrót choroby w nazwie własnej i zespół ludzi z nazwiskiem w piśmie szpitala
+  str('Dr Anna Lis pracuje w IBS PAN. Pan Kowalski gra w klubie RZS Rzeszów. Pielęgniarka Ewa Mak pracuje w zespole Mazura na oddziale kardiologii i dyżuruje w szpitalu.', ['Anna', 'Lis', 'Kowalski', 'Ewa', 'Mak'], ['IBS PAN', 'RZS Rzeszów', 'zespole Mazura']);
+  // rdzeń polski z „-oz-” (wóz, mróz), przenośny „niedorozwój”, zespół ludzi po „ma”, przepis o roli w liczbie pojedynczej
+  str('U syna rozpoznano niedorozwój umysłowy. Pani Nowak choruje na sarkoidozę. Córka ma zespół Retta.', ['niedorozwój umysłowy', 'sarkoidozę', 'zespół Retta'], ['U syna rozpoznano', 'choruje na', 'Córka ma']);
+  neg('Z uwagi na przewozy szkolne Pan Nowak zmienił godziny pracy. Pan Kowalski kupił dwa betonowozy. Pani Lis zwróciła uwagę na przymrozy w maju.', ['przewozy szkolne', 'betonowozy', 'przymrozy']);
+  neg('Z powodu niedorozwoju sieci kanalizacyjnej Pan Nowak nie może się przyłączyć. Szkoła ma zespół Kubiaka do obsługi zawodów. Pani Kowalska ma zespół Nowaka do pomocy.', ['niedorozwoju sieci kanalizacyjnej', 'zespół Kubiaka', 'zespół Nowaka']);
+  neg('Pracownik z rozpoznaną depresją może skorzystać z urlopu. Dziecku z rozpoznanym ADHD przysługuje pomoc. Pacjent z podejrzeniem udaru jest przewożony na SOR.', ['rozpoznaną depresją', 'rozpoznanym ADHD', 'podejrzeniem udaru']);
+
+  // ─────────────────────────────────────────────
+  // LEK BEZ DAWKI, GRUPA LEKÓW, DROGA PODANIA (seria 2, klasa 10): substancja o kształcie nazwy leku
+  // (końcówka INN) po czasowniku przyjmowania albo zlecenia, insulina i metadon, grupa leków przy
+  // osobie, droga podania przy dawce, kolejny lek w wyliczeniu. Ujemne: czasownik bez leku,
+  // instytucja, obrót lekami, przepis i zdanie ogólne.
+  str('Chłopiec przyjmuje metylofenidat. Psychiatra włączyła mu kwetiapinę. Matka przyjmuje metadon.', ['metylofenidat', 'kwetiapinę', 'metadon'], ['Chłopiec przyjmuje', 'Psychiatra włączyła mu', 'Matka przyjmuje']);
+  str('Małoletni otrzymuje leki przeciwpadaczkowe. Ojciec jest na insulinie od 2019 r. Syn zażywa tabletki Relanium.', ['leki przeciwpadaczkowe', 'insulinie', 'Relanium'], ['Małoletni otrzymuje', 'Ojciec jest na', 'Syn zażywa']);
+  str('Zalecenia:\n1. Enoksaparyna 40 mg s.c. raz dziennie przez 35 dni.\nPacjent hospitalizowany. Glikemie wyrównane na insulinie aspart i glarginie.', ['Enoksaparyna 40 mg s.c.', 'insulinie aspart', 'glarginie'], ['przez 35 dni', 'Glikemie wyrównane na']);
+  neg('Urząd przyjmuje interesantów od 8 do 16. Do wniosku stosuje się przepisy ustawy. Pan Kowalski bierze udział w szkoleniu. Zalecono uzupełnienie wniosku w terminie 7 dni.', ['przyjmuje interesantów', 'stosuje się przepisy', 'bierze udział', 'uzupełnienie wniosku']);
+  neg('Szpital stosuje enoksaparynę u pacjentów po zabiegach. Sprawa dotyczy kradzieży leków psychotropowych z apteki. Refundacja leków przeciwpadaczkowych obejmuje dzieci. Wiele osób przyjmuje leki przeciwdepresyjne.', ['enoksaparynę', 'leków psychotropowych', 'leków przeciwpadaczkowych', 'leki przeciwdepresyjne']);
+  neg('Kierownik jest na Mazurach. Pani Kowalska zażywa kąpieli słonecznych. Kandydat przyjmuje stanowisko p.o. dyrektora. Aspartam jest słodzikiem.', ['jest na Mazurach', 'zażywa kąpieli', 'p.o. dyrektora', 'Aspartam']);
+  // Przysłówek, szyk, przeczenie i zlecenie bezosobowe przy leku; ujemne: postać leku bez nazwy leku
+  // („kapsułki Nespresso”), dawkowanie z ChPL i standardu, zdanie o grupie pacjentów.
+  str('Brała wcześniej fluoksetynę. Kwetiapinę przyjmuje od roku. Odstawiono klonazepam z powodu senności. Matka nie podaje dziecku leków przeciwpadaczkowych.', ['fluoksetynę', 'Kwetiapinę', 'klonazepam', 'leków przeciwpadaczkowych'], ['Brała wcześniej', 'przyjmuje od roku', 'z powodu senności', 'Matka nie podaje dziecku']);
+  neg('Klient dostaje kapsułki Nespresso w prezencie. Dawkowanie według ChPL: Clexane 40 mg s.c. raz na dobę u dorosłych. Po wypisie ze szpitala pacjenci często otrzymują leki przeciwzakrzepowe, wynika z raportu.', ['kapsułki Nespresso', 'Clexane 40 mg', 'leki przeciwzakrzepowe']);
+  // Recepta jako kategoria leku, ubezpieczyciel o rdzeniu nazwy leku, lek-podmiot nowego zdania po
+  // przecinku i praktyka instytucji (badanie, oddział, kontrola) zostają jawne.
+  neg('Paracetamol 500 mg jest dostępny bez recepty w każdej aptece. Lek Xanax 0,5 mg wydaje się wyłącznie na receptę. Komunikat GIF: wycofanie z obrotu serii leku Polocard 75 mg wydawanego bez recepty.', ['Paracetamol 500 mg', 'Xanax 0,5 mg', 'Polocard 75 mg']);
+  neg('Pani Nowak otrzymała pismo, Concordia odmówiła. Uczeń otrzymał pochwałę, penicylina była tematem referatu. Urzędnik przyjmuje interesantów i petentów, statyny są w szafce apteczki.', ['Concordia', 'penicylina', 'statyny']);
+  neg('W badaniu klinicznym włączono metforminę u 300 pacjentów. Na oddziale włączono enoksaparynę u wszystkich hospitalizowanych. W programie podawano sertralinę 140 uczestnikom. Kontrola NIK: w szpitalu podawano morfinę bez zlecenia.', ['metforminę', 'enoksaparynę', 'sertralinę', 'morfinę']);
+
+  // SYGNATURA CYTOWANEGO ORZECZENIA (seria 3, klasa N2): linia orzecznicza po „sygn. akt” przy
+  // zapowiedzi cytatu zostaje jawna; sprawa osoby i repertorium sądu powszechnego zakryte.
+  neg('Stanowisko to potwierdza wyrok WSA w Gdańsku z dnia 9 marca 2022 r., sygn. akt II SA/Gd 812/21.', ['II SA/Gd 812/21']);
+  neg('Organ uwzględnił stanowisko wyrażone w uchwale Sądu Najwyższego z dnia 26 lutego 2020 r., sygn. akt III CZP 12/19.', ['III CZP 12/19']);
+  str('Nabycie spadku stwierdził Sąd Rejonowy w Kłodzku postanowieniem z dnia 20 maja 2016 r., sygn. akt I Ns 377/16.', ['I Ns 377/16'], ['postanowieniem']);
+  // Wyrok w sprawie strony (rozstrzygnięcie, rola strony) bez zapowiedzi cytatu: sygnatura zakryta.
+  str('NSA wyrokiem z 7 maja 2024 r., sygn. akt I OSK 2210/22, oddalił skargę kasacyjną wnioskodawczyni.', ['I OSK 2210/22'], ['NSA']);
+  // Zapowiedź cytatu po sygnaturze („…, sygn. akt …, stwierdził, że”) i repertorium sądu powszechnego.
+  neg('WSA w Poznaniu w wyroku z dnia 14 kwietnia 2020 r., sygn. akt II SA/Po 1001/19, stwierdził, że opłata adiacencka wymaga ustalenia wzrostu wartości.', ['II SA/Po 1001/19']);
+  str('Jak wskazał Sąd Rejonowy w postanowieniu z dnia 12 marca 2024 r., sygn. akt III Nsm 123/23, władza rodzicielska ojca została ograniczona.', ['III Nsm 123/23'], ['Sąd Rejonowy']);
+  // Organ jednoosobowy i komórka w nagłówku: adres siedziby jawny, adres osoby zakryty. Nazwa własna
+  // w nazwie instytucji (patron uczelni, kraina, miejscowość w nazwie szkoły) i siedziba w zdaniu.
+  str('WÓJT GMINY KOBYLNICA\nul. Główna 20, 76-251 Kobylnica\n\nWnioskodawczyni: Halina Szczepaniak, zam. ul. Polna 3, 76-200 Słupsk.', ['Halina Szczepaniak', 'ul. Polna 3', '76-200'], ['ul. Główna 20', '76-251']);
+  str('KIEROWNIK URZĘDU STANU CYWILNEGO W KIELCACH\nul. Strycharska 6, 25-659 Kielce\n\nKierownik Budowy\nul. Lipowa 3, 25-001 Kielce', ['ul. Lipowa 3', '25-001'], ['ul. Strycharska 6', '25-659']);
+  str('Pan Roman Słupski złożył uwagi, które oceni Starosta Słupski.', ['Roman Słupski'], ['Starosta Słupski']);
+  str('Świadek Marek Nowak, administrator z ramienia Spółdzielni Mieszkaniowej „Stok” z siedzibą przy ul. Lipowej 4 w Białymstoku, zam. ul. Polna 8 m. 2.', ['Marek Nowak', 'ul. Polna 8 m. 2'], ['ul. Lipowej 4']);
+  str('Posiłki dla uczniów Szkoły Podstawowej im. Janusza Korczaka w Mielniku (Gmina Mielnik) dostarcza Beata Kaczmarczyk.', ['Beata Kaczmarczyk'], ['Janusza Korczaka w Mielniku']);
+  neg('Kandydatka ukończyła administrację na Uniwersytecie Mikołaja Kopernika w Toruniu.', ['Uniwersytecie Mikołaja Kopernika']);
+  neg('Dotację otrzymało Stowarzyszenie Przyjaciół Ziemi Krzeszowickiej.', ['Ziemi Krzeszowickiej']);
+  // Siedziba firmy osoby w zdaniu zostaje zakryta: nazwa z nazwiskiem albo homografem i osoba przed nazwą.
+  str('Wykonawca: Zakład Instalacyjny Sowa z siedzibą przy ul. Wodnej 2, 21-100 Lubartów.', ['ul. Wodnej 2', '21-100'], ['Wykonawca']);
+  str('Tomasz Bielecki, Zakład Usług Remontowych z siedzibą przy ul. Cichej 7 w Lublinie.', ['Tomasz Bielecki', 'ul. Cichej 7'], ['Zakład Usług Remontowych']);
+  // Adres siedziby kończy zdanie, a następne wymienia stronę; imię po nazwie placówki bez „im.” to osoba.
+  str('Zebranie odbędzie się w siedzibie Urzędu Gminy w Baranowie przy ul. Rynek 14. Pani Anna Kot przedstawi wniosek.', ['Anna Kot'], ['ul. Rynek 14']);
+  str('Pacjent Szpitala Jana Wróbla przyjęty 3 marca. Uczniowie Szkoły Podstawowej Marii Konopnickiej odwiedzili oddział.', ['Jana Wróbla'], ['Marii Konopnickiej']);
+  // Jednostka samorządu i urząd jako strona umowy w narzędniku: nazwa, adres i NIP jawne, druga strona
+  // (osoba albo jej firma) zakryta. Nazwa instytucji w środku wiersza: po dwukropku, numerze punktu,
+  // za stanowiskiem urzędnika, w zdaniu i w komórce tabeli.
+  str('zawarta pomiędzy:\nGminą Pszczyna, ul. Rynek 2, 43-200 Pszczyna, NIP 6381016402, reprezentowaną przez Burmistrza,\na\nPanią Ewą Mróz, ul. Polna 3, 43-200 Pszczyna, NIP 5260250274', ['Ewą Mróz', 'ul. Polna 3', '5260250274'], ['ul. Rynek 2', '6381016402']);
+  str('Urzędem Miejskim w Kórniku, pl. Niepodległości 1, 62-035 Kórnik, reprezentowanym przez Burmistrza, a Panem Adamem Wilkiem, zamieszkałym przy ul. Leśnej 4, 62-035 Kórnik', ['Adamem Wilkiem', 'ul. Leśnej 4'], ['pl. Niepodległości 1', '62-035 Kórnik, reprezentowanym']);
+  str('Sprawdziła: Marta Ziobro, inspektor ds. oświaty, Urząd Gminy Mielnik, ul. Piaskowa 1.\nDo wiadomości: Zarząd Mienia Komunalnego, ul. Bema 3.', ['Marta Ziobro'], ['ul. Piaskowa 1', 'ul. Bema 3']);
+  str('Adresat: Jan Kowalski, Urząd Gminy Kobylnica, ul. Polna 3', ['Jan Kowalski', 'ul. Polna 3'], ['Urząd Gminy Kobylnica']);
+  neg('45 | 04.11.2026 | Urząd Skarbowy w Gliwicach | ul. Góry Chełmskiej 15, Gliwice | zawiadomienie', ['ul. Góry Chełmskiej 15', 'Gliwice']);
+  neg('Akta przekazano do Samodzielnego Publicznego Zakładu Opieki Zdrowotnej w Kole, ul. Szpitalna 1, 62-600 Koło.', ['ul. Szpitalna 1', '62-600 Koło']);
+  // Osoba na liście za instytucją, działalność osoby z samą miejscowością po „w” i osoba w komórce
+  // tabeli przed urzędem: NIP i adres osoby zakryte. Kolegium, kasa, straż, centrum i przedsiębiorstwo
+  // komunalne to instytucje we wszystkich przypadkach.
+  str('Urząd Skarbowy w Kole, ul. Toruńska 10, 62-600 Koło, Anna Nowak, NIP 6661234567', ['Anna Nowak', '6661234567'], ['ul. Toruńska 10']);
+  str('Zakład Fryzjerski w Kole, ul. Polna 3, 62-600 Koło, NIP 6661234567', ['ul. Polna 3', '62-600', '6661234567'], ['Zakład Fryzjerski']);
+  str('| Imię i nazwisko | Pracodawca | Adres zamieszkania |\n| Jan Kowalski | Urząd Gminy Mielnik | ul. Polna 3, 17-307 Mielnik |', ['Jan Kowalski', 'ul. Polna 3', '17-307'], ['Urząd Gminy Mielnik']);
+  neg('Sprawę skierowano do Samorządowego Kolegium Odwoławczego w Siedlcach, ul. Piłsudskiego 38, 08-110 Siedlce.', ['ul. Piłsudskiego 38', '08-110']);
+  neg('Kopia: Straż Miejska w Bydgoszczy, ul. Bernardyńska 14, 85-029 Bydgoszcz; Powiatowe Centrum Pomocy Rodzinie w Sokółce, ul. Kryńska 14', ['ul. Bernardyńska 14', 'ul. Kryńska 14']);
+  neg('Umowa z Przedsiębiorstwem Gospodarki Komunalnej sp. z o.o. w Żywcu, ul. Kopernika 59, 34-300 Żywiec, NIP 5530002393.', ['ul. Kopernika 59', '5530002393']);
+  // Dziedzina usługi w nazwie firmy osoby („Usług Komunalnych”, „Kultury Fizycznej”, „Komunikacji
+  // Wizualnej”) i osoba przed gminą za nawiasem: adres i NIP zakryte. Stała nazwa jednostki jawna.
+  str('Zakład Usług Komunalnych „Czysto”, ul. Polna 3, 62-600 Koło, NIP 6661234567; Studio Komunikacji Wizualnej, ul. Lipowa 8, NIP 5260250274', ['ul. Polna 3', '6661234567', 'ul. Lipowa 8', '5260250274'], ['Zakład Usług Komunalnych']);
+  str('Skarżąca Anna Nowak (Gmina Kobylnica, ul. Polna 3, 76-251 Kobylnica), reprezentowana przez adw. Piotra Lisa. Uczestnik: Zakład Gospodarki Komunalnej w Kole, ul. Toruńska 10.', ['Anna Nowak', 'ul. Polna 3', '76-251', 'Piotra Lisa'], ['ul. Toruńska 10']);
+
+  // Kontakt i rachunek urzędu (seria 3, N4 i N6): numer centrali, skrzynka funkcyjna i rachunek
+  // gminy jawne; telefon przy nazwisku, imienny e-mail i rachunek strony zakryte.
+  str('Urząd Gminy Firlej, ul. Szkolna 2, 21-136 Firlej\ntel. 81 856 40 12, podatki@firlej.example.pl\n\nSprawę prowadzi: Anna Nowak, tel. 81 856 40 33, a.nowak@firlej.example.pl', ['Anna Nowak', '81 856 40 33', 'a.nowak@firlej.example.pl'], ['81 856 40 12', 'podatki@firlej.example.pl']);
+  str('Należność wpłacić na rachunek Gminy Firlej nr 78 1160 2202 6163 7497 8486 2063, a nadpłata zostanie zwrócona na rachunek nr PL02 1240 1037 4507 9523 1154 4257 wskazany przez Jana Kowalskiego.', ['PL02 1240 1037 4507 9523 1154 4257', 'Jana Kowalskiego'], ['78 1160 2202 6163 7497 8486 2063']);
+  str('Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\ntel. 81 856 10 21\ntel. 81 856 10 23 (Anna Nowak)\n\nZ poważaniem\nMarek Lis\nInspektor\nWydział Komunikacji, tel. 81 856 10 25', ['81 856 10 23', 'Anna Nowak', 'Marek Lis', '81 856 10 25'], ['81 856 10 21']);
+  str('Urząd Gminy Mielnik, ul. Piaskowa 1, 17-307 Mielnik, e-mail: gmina@mielnik.pl. Zajęcia prowadzi: biuro@korepetycje-kowalska.edu.pl, zapisy: sekretariat@kowalski-transport.pl.', ['biuro@korepetycje-kowalska.edu.pl', 'sekretariat@kowalski-transport.pl'], ['gmina@mielnik.pl']);
+  str('Umowę sporządziła: Sylwia Ratajczak, Referat Organizacyjny, tel. 61 817 04 11 wew. 34. Wywiad przeprowadziła: Agnieszka Pietrzak, pracownik socjalny, tel. 62 765 44 12 wew. 31.', ['Sylwia Ratajczak', 'Agnieszka Pietrzak', '62 765 44 12'], ['61 817 04 11']);
+  // Nazwisko w domenie bez polskich znaków, subkonto podatnika i podpis nad adresem urzędu.
+  str('Wydział Komunikacji, e-mail: komunikacja@zielinski.pl; Starostwo Powiatowe w Łęcznej, ul. Szkolna 2, 21-010 Łęczna, e-mail: kancelaria@powiatleczynski.pl', ['komunikacja@zielinski.pl'], ['kancelaria@powiatleczynski.pl']);
+  str('Podatek proszę wpłacić na rachunek Gminy Firlej nr 78 1160 2202 6163 7497 8486 2063 (subkonto podatnika). Opłatę skarbową wnosi się na rachunek urzędu nr 12 1020 1026 0000 0402 0000 0000.', ['78 1160 2202 6163 7497 8486 2063'], ['12 1020 1026 0000 0402 0000 0000']);
+  str('Z poważaniem\nAnna Kwiatkowska\nInspektor\nUrząd Gminy Bielsk\nul. Szkolna 1\n09-230 Bielsk\ntel. 24 261 33 27, pok. 12, Marek Lis', ['Anna Kwiatkowska', '24 261 33 27', 'Marek Lis'], ['ul. Szkolna 1']);
+  // Numery uprawnień i wpisów zawodowych spoza PWZ: kotwica rejestru przy zawodzie, a numery
+  // przepisów, decyzji, uchwał i adres izby zostają jawne.
+  str('Kierownik budowy: mgr inż. Adam Kos, uprawnienia budowlane nr SLK/0456/POOK/10, członek ŚOIIB pod nr SLK/BO/7781/11. Podstawa: art. 12 ust. 1 Prawa budowlanego.', ['SLK/0456/POOK/10', 'SLK/BO/7781/11'], ['art. 12 ust. 1']);
+  str('Mapę sporządził geodeta uprawniony Marek Sowa (nr upr. 18234), a operat rzeczoznawca majątkowy Ewa Zięba, uprawnienia nr 5512. Uchwała nr XIV/112/2026 Rady Gminy pozostaje w mocy.', ['18234', '5512'], ['XIV/112/2026']);
+  str('Przekład wykonała tłumaczka przysięgła Iwona Cis, wpisana na listę tłumaczy przysięgłych pod nr TP/0912/15. Komunikat Okręgowej Izby Lekarskiej nr 14/2026 dołączono do akt.', ['TP/0912/15'], ['14/2026']);
+  // Tabela zespołu projektowego z Worda (TAB) i podpisy po myślniku, a obok dokumenty izby
+  // i uprawnienia pracowników urzędu do systemu, które zostają jawne.
+  str('Lp.\tImię i nazwisko\tFunkcja\tNr uprawnień\n1\tKarol Mróz\tprojektant\tKAT/0991/OWOK/15\n2\tIzabela Sęk\tsprawdzający\t123/89/Ka\nOkólnik OIRP nr 3/2026 dołączono do akt.', ['KAT/0991/OWOK/15', '123/89/Ka'], ['3/2026']);
+  str('Geodeta uprawniony Zenon Marek, nr uprawnień 15523 – pomiar sytuacyjny. Naczelnik Wydziału Geodezji i Kartografii, uprawnienia do podpisu nr 4/2026 w systemie EZD.', ['15523'], ['4/2026']);
+  // Kolumna numeru uprawnień tylko przy osobie w wierszu; wykaz działek, znak sprawy w kształcie
+  // numeru uprawnień, dokument izby dla członków i stanowisko urzędu zostają jawne.
+  str('Lp.;Imię i nazwisko;Nr członka izby\n1;Anna Nowak;MAZ/BO/0123/10\nSprawa OR/0456/POW/24 prowadzona przez Wydział Organizacyjny. Ankieta dla członków PIIB nr 2/2026.', ['MAZ/BO/0123/10'], ['OR/0456/POW/24', '2/2026']);
+  neg('Lp.\tNr ewidencyjny\tObręb\tPowierzchnia [ha]\n1\t123/4\t0005 Zalesie\t0,1234\nLp.;Nazwa jednostki;Nr członkowski;Składka\n1;Ochotnicza Straż Pożarna w Zalesiu;0123;200,00', ['123/4', '0123']);
+  neg('Architekt Miejski, Biuro Architektury i Planowania Przestrzennego (MOIA nr 12/2024 – stanowisko). Geodeta Powiatowy, uprawnienia nr 3/2025 do PZGiK.', ['12/2024', '3/2025']);
+  // Tabela wklejona z Worda jako tekst: „|” bez wiersza „---”, szyk „Nazwisko Imię”, osoba spoza
+  // słowników, kolumna nazwana rolą i kolumny wyrównane spacjami. Data decyzji, kwota, stanowisko
+  // i podmiot w kolumnie osób zostają jawne.
+  str('Lp. | Nazwisko i imię | Data urodzenia | Kryteria | Pkt\n1 | Czerniak Zofia | 22.11.2022 | wielodzietność | 165\n2 | Zych Natan | 05.04.2023 | brak | 15', ['Czerniak Zofia', '22.11.2022', 'Zych Natan', '05.04.2023'], ['wielodzietność', '165']);
+  str('Kandydat | telefon | e-mail\nD. Wróbel | 604 218 377 | d.wrobel@example.pl\nH. Gąsienica-Ryś | 33 874 12 09 | halina@example.pl', ['D. Wróbel', '604 218 377', 'H. Gąsienica-Ryś', '33 874 12 09', 'halina@example.pl'], ['Kandydat']);
+  str('Nazwisko i imię     Data urodzenia     PESEL\nKOWALCZYK Anna      12.03.1980         80031212345', ['KOWALCZYK Anna', '12.03.1980', '80031212345'], ['Data urodzenia']);
+  str('Wnioskodawca | Data wpływu | Sprawa\nAnna Nowak | 03.11.2026 | zasiłek\nNadleśnictwo Lipno | 04.11.2026 | dzierżawa\nSamorządowe Kolegium Odwoławcze | 05.11.2026 | odwołanie', ['Anna Nowak'], ['Nadleśnictwo Lipno', 'Samorządowe Kolegium Odwoławcze', '04.11.2026']);
+  str('Nazwisko i imię | Stanowisko | Data decyzji | Kwota\nJan Kowalski | Inspektor | 12.03.2026 | 500,00 zł\nPozostali Uczestnicy | Kierownik | 13.03.2026 | 300,00 zł', ['Jan Kowalski'], ['Inspektor', '12.03.2026', '500,00 zł', 'Pozostali Uczestnicy']);
+  // Lista beneficjentów i kontrahentów („Imię i nazwisko albo nazwa”): obok osoby skrót jednostki,
+  // firma, program, ulica, stanowisko i skrót formy działalności zostają jawne. Osoba spoza
+  // słowników znika przy PESEL-u z poprawną sumą.
+  str('Lp. | Imię i nazwisko albo nazwa | Kwota\n1 | Jan Kowalski | 100,00\n2 | MOPS Lipno | 200,00\n3 | Eko Trans | 300,00\n4 | Czyste Powietrze | 400,00\n5 | Armii Krajowej | 500,00\n6 | Starszy Referent | 600,00\n7 | Sołtys Zalesia | 700,00', ['Jan Kowalski'], ['MOPS Lipno', 'Eko Trans', 'Czyste Powietrze', 'Armii Krajowej', 'Starszy Referent', 'Sołtys Zalesia']);
+  str('Wnioskodawca | Data wpływu\nAnna Nowak | 03.11.2026\nF.H. Marex | 04.11.2026\nP.W. Budrex | 05.11.2026', ['Anna Nowak'], ['F.H. Marex', 'P.W. Budrex', '04.11.2026']);
+  str('Nazwisko i imię | PESEL\nKowalski Jan | 80031212345\nLiu Wei | 02070803628', ['Kowalski Jan', 'Liu Wei', '02070803628'], ['PESEL']);
+  // Pod nagłówkiem roli („Najemca”, „Beneficjent”) stoją też firmy i organizacje: zostają jawne
+  // z telefonem. Nazwisko utworzone od funkcji („Wójtowicz”, „Sołtysik”) znika w całości.
+  str('Lp.;Najemca;Telefon\n1;Kowalska Anna;600 100 200\n2;Kwiaciarnia Róża;54 288 33 12\n3;Chór Cecylia;54 288 60 11', ['Kowalska Anna', '600 100 200'], ['Kwiaciarnia Róża', '54 288 33 12', 'Chór Cecylia', '54 288 60 11']);
+  str('Nazwisko i imię;PESEL\nKowalski Jan;80031212345\nWójtowicz Natan;02070803628\nSołtysik Teofil;85010112345', ['Kowalski Jan', 'Wójtowicz Natan', 'Sołtysik Teofil'], ['PESEL']);
+  // Metryka i rejestr z EZD: inicjały pracownika po strzałce dekretacji, w kolumnie pracownika
+  // („Prow.”) i w legendzie skrótów znikają; komórki, kategorie archiwalne i skróty ustaw zostają.
+  osp('Prowadzący: Marta Kurek, inspektor\nDekretacja: Kierownik Referatu → MK, termin 05.11.2026', ['Marta Kurek', '→ MK'], ['Kierownik Referatu', '05.11.2026']);
+  osp('Lp. | Sprawa | Prow.\n1 | wniosek | ES\n2 | skarga | TB\nSkróty w kolumnie Prow.: ES – Ewa Szołtysek, TB – Tomasz Bajer.', ['| ES', '| TB', 'ES –', 'TB –', 'Ewa Szołtysek', 'Tomasz Bajer'], ['Prow.', 'wniosek']);
+  neg('Dekretacja: Sekretarz → OR → OR.I, wg właściwości: WOŚ/RGK. Kategoria archiwalna: A, B5, BE10. Podstawa: KPA, KC, UODO.', ['→ OR → OR.I', 'WOŚ/RGK', 'A, B5, BE10', 'KPA, KC, UODO']);
+  // Gołe „Prowadzący”/„Referent” w wykazie albo rejestrze to często organ lub komórka prowadząca:
+  // bez osoby w piśmie zostają. Nagłówek osobowy z samymi inicjałami osób zakrywa je i bez osoby.
+  neg('Lp | Rodzaj postępowania | Prowadzący | Sygnatura\n1 | podatkowe | US | 1\n2 | cywilne | SR | 2\n3 | lokalowe | UM | 3', ['| US |', '| SR |', '| UM |']);
+  neg('Lp.\tSprawa\tProwadzący\n1\tpozwolenie na budowę\tAB\n2\tpodział działki\tGK\n3\twycinka drzew\tOŚ', ['budowę\tAB', 'działki\tGK', 'drzew\tOŚ']);
+  neg('Lp. | Komórka | Prowadzący\n1 | Wydział Geodezji | GD\n2 | Biuro Rady | BR', ['| GD', '| BR']);
+  neg('Przekazano wg właściwości: U.S.C. Przydzielono do: G.O.K. Sprawę prowadzi: K.P.A. art. 35', ['U.S.C.', 'G.O.K.', 'K.P.A. art. 35']);
+  osp('Lp. | Sprawa | Osoba prowadząca\n1 | wniosek | ES\n2 | skarga | TB', ['| ES', '| TB'], ['Osoba prowadząca', 'wniosek']);
+  // Symbol komórki z pisma po strzałce dekretacji, w kolumnie i w legendzie wygrywa ze stroną o tych
+  // samych inicjałach; skrót jednostki w polu „Sprawę prowadzi:” zostaje.
+  osp('Wnioskodawca: Grzegorz Kowal\nZnak sprawy: GK.6220.1.2026\nDekretacja: Burmistrz → GK → MN\nKierownik Referatu GK – Marek Nowak', ['Grzegorz Kowal', '→ MN', 'Marek Nowak'], ['→ GK', 'Referatu GK']);
+  neg('Sprawę prowadzi: Z.G.K. w Pucku. Referent: W.Z.D. (Wojewódzki Zarząd Dróg)', ['Z.G.K. w Pucku', 'W.Z.D. (Wojewódzki']);
+
+  // W11: kotwica dokumentu i numer rozdzielone wtrąceniem (kategoria, organ, data ważności, czasownik).
+  str('Zatrzymuje się prawo jazdy kat. AM, B nr 55120/19/0742, wydane przez Starostę Kartuskiego.', ['55120/19/0742'], ['kat. AM, B', 'Starostę Kartuskiego']);
+  str('Strona okazała dowód osobisty wydany przez Burmistrza Kartuz nr DKR482913 oraz paszport (ważny do 2031 r.) nr EC4719283.', ['DKR482913', 'EC4719283'], ['Burmistrza Kartuz', 'ważny do 2031 r.']);
+  str('Akt otrzymał w rejestrze stanu cywilnego numer 2205011/00/AU/2003/000417, a odpis aktu urodzenia, nr aktu 417/2003, dołączono.', ['2205011/00/AU/2003/000417', '417/2003'], ['rejestrze stanu cywilnego']);
+  neg('Prawo jazdy kategorii B wydaje starosta w terminie 14 dni, a zatrzymany dokument prawa jazdy za pokwitowaniem nr 0318842 przekazano do organu.', ['w terminie 14 dni', '0318842']);
+  neg('Zgodnie z ustawą o dowodach osobistych dowód wydaje organ gminy, Punkt Paszportowy nr 2 w Gdyni przyjmuje wnioski.', ['ustawą o dowodach osobistych', 'Punkt Paszportowy nr 2']);
+  // W12: pola osoby w spłaszczonym wierszu formularza i w prozie.
+  str('D.2 Imię ojca: Bogdan   Imię matki: Leokadia\nMiejscowość: Łapalice   Ulica: Polna   Nr domu: 7B   Nr lokalu: –', ['Bogdan', 'Leokadia', 'Polna', '7B']);
+  osp('Wnioskodawczyni, nazwisko rodowe w akcie: Szczypiorska, wnosi o zmianę nazwiska syna z „Pyrka” na „Pyrkowski” i o nadanie córce imienia Aurelia.', ['Szczypiorska', 'Pyrka', 'Pyrkowski', 'Aurelia'], ['Wnioskodawczyni']);
+  neg('Imię i nazwisko osoby upoważnionej: ………… We wniosku należy podać imię i nazwisko, nazwisko rodowe oraz imiona rodziców. Rada Gminy nadaje szkole imię Jana Pawła II.', ['imię i nazwisko, nazwisko rodowe', 'imię Jana Pawła II']);
+  // W11/W12 po weryfikacji: numer urzędu po kotwicy dokumentu, Skarb Państwa, patron i numery pól deklaracji.
+  neg('Wnioski o wydanie prawa jazdy przyjmuje Wydział Komunikacji, pokój nr 2107, a dowód osobisty odbierzesz w Urzędzie Miasta, okienko nr ABA654321.', ['pokój nr 2107', 'okienko nr ABA654321']);
+  neg('Działka nr 412/7, obręb Masłów, nazwisko właściciela: Skarb Państwa. Ośrodek Kultury imienia Kazimierza prowadzi zajęcia.', ['Skarb Państwa', 'imienia Kazimierza']);
+  str('A.1 Imię: Ludomir  A.2 Nazwisko: Pękala  A.3 Imię ojca: Zdzisław', ['Ludomir', 'Pękala', 'Zdzisław'], ['A.2 Nazwisko', 'A.3 Imię ojca']);
+  // W11/W12 po drugiej weryfikacji: lokal urzędu wielką literą, imiesłów przy lokalu, „nazwisko lub nazwa”, patron w uchwale.
+  neg('Prawo jazdy wydane przez Starostę Kartuskiego, Wydział Komunikacji, Pokój nr 2107. Odbiór: okienko czasowo zamknięte, nr 1204 czynne od 8:00.', ['Pokój nr 2107', 'nr 1204 czynne']);
+  neg('Inwestor, nazwisko lub nazwa: Budimex. Rada Miejska nadaje rondu imię „Józefa”, a szkoła nosi imię: Stanisław.', ['Budimex', '„Józefa”', 'imię: Stanisław']);
+  // Temat szkolenia, programu i kampanii przy osobie to nie dana o zdrowiu; leczenie po „kursie” i „programie lekowym” tak.
+  str('Pracownik | Szkolenie\nHalina Grodzka | profilaktyka chorób nowotworowych\nIrena Bąk | warsztaty o uzależnieniach od alkoholu', ['Halina Grodzka', 'Irena Bąk'], ['profilaktyka chorób nowotworowych', 'warsztaty o uzależnieniach od alkoholu']);
+  str('Pani Bożena Sitek, akcja profilaktyczna „Stop cukrzycy”, rozdała ulotki o profilaktyce udaru mózgu i nadciśnienia.', ['Bożena Sitek'], ['„Stop cukrzycy”', 'profilaktyce udaru mózgu i nadciśnienia']);
+  str('Pani Wanda Kret jest po drugim kursie chemioterapii z powodu raka piersi.', ['Wanda Kret', 'chemioterapii', 'raka piersi'], ['po drugim kursie']);
+  // Leczenie w złożeniu, opieka i grupa chorych po słowie tematu: to fakt o osobie, nie temat.
+  str('Pani Lucyna Ptak zakończyła kurs immunoterapii alergii na jad osy, a Pan Roman Gil uczestniczy w warsztatach dla osób po udarze mózgu.', ['Lucyna Ptak', 'immunoterapii alergii', 'Roman Gil', 'po udarze mózgu'], ['zakończyła kurs', 'warsztatach dla osób']);
+  str('Pani Teresa Wilk jest objęta programem kompleksowej opieki po zawale serca. Kampania dla kobiet o profilaktyce raka piersi odbyła się w maju.', ['Teresa Wilk', 'po zawale serca'], ['programem kompleksowej opieki', 'profilaktyce raka piersi']);
+  // Przyczyna lub stan w środku odcinka po słowie tematu przerywa temat; „o …” i odbiorcy bez choroby go zostawiają.
+  str('Pan Zenon Kruk kończy kurs ćwiczeń usprawniających po udarze mózgu, a Pani Ewa Sroka chodzi na warsztaty ruchowe przy chorobie Parkinsona.', ['Zenon Kruk', 'po udarze mózgu', 'Ewa Sroka', 'chorobie Parkinsona'], ['kurs ćwiczeń usprawniających', 'warsztaty ruchowe przy']);
+  str('Lp. | Pracownik | Szkolenie\n1 | Daria Wróbel | kurs pierwszej pomocy przy zawale serca\n2 | Olga Szpak | prelekcja o życiu po udarze mózgu', ['Daria Wróbel', 'Olga Szpak'], ['pierwszej pomocy przy zawale serca', 'prelekcja o życiu po udarze mózgu']);
+  // Stan funkcjonalny osoby z choroby lub niepełnosprawności (wywiad, karta DPS, wniosek o świadczenie).
+  str('Pani Jadwiga Sosna porusza się na wózku inwalidzkim, a jej mąż chodzi o kulach łokciowych i wymaga pomocy przy kąpieli.', ['Jadwiga Sosna', 'porusza się na wózku inwalidzkim', 'chodzi o kulach łokciowych', 'wymaga pomocy przy kąpieli'], ['a jej mąż']);
+  str('Z zaświadczenia wynika, że Pan Edward Cis jest osobą leżącą, karmioną przez PEG, w skali Barthel 10 pkt.', ['Edward Cis', 'osobą leżącą', 'karmioną przez PEG', 'skali Barthel 10'], ['Z zaświadczenia wynika']);
+  str('Syn wnioskodawczyni, Pan Igor Grab, wymaga stałej opieki i pomocy w czynnościach samoobsługowych, ma wyłonioną kolostomię.', ['Igor Grab', 'wymaga stałej opieki i pomocy w czynnościach samoobsługowych', 'kolostomię'], ['Syn wnioskodawczyni']);
+  neg('Operator porusza się na wózku widłowym po hali. Działka leżąca w obrębie Zalesie przylega do drogi. Pomoc w formie usług opiekuńczych przysługuje osobie, która wymaga pomocy innych osób.', ['wózku widłowym', 'Działka leżąca w obrębie', 'wymaga pomocy innych osób']);
+  neg('Na samodzielne stanowisko referenta przyjęto pracownika. Polski Związek Niewidomych prowadzi szkolenie dla osób niewidomych, a dziecko nie chodzi samodzielnie do szkoły.', ['samodzielne stanowisko', 'Polski Związek Niewidomych', 'osób niewidomych', 'nie chodzi samodzielnie do szkoły']);
+  // Stan funkcjonalny tylko przy człowieku i ze zdrowiem: sprzęt bez innego przymiotnika, opieka z sygnałem zdrowia.
+  str('Pan Bogdan Jodła porusza się po domu przy balkoniku, a po udarze wymaga całodobowej opieki; jego żona porusza się o dwóch kulach.', ['Bogdan Jodła', 'porusza się po domu przy balkoniku', 'wymaga całodobowej opieki', 'porusza się o dwóch kulach'], ['jego żona']);
+  neg('Zabytkowy park wymaga stałej opieki. Dziecko w wieku 2 lat wymaga stałej opieki. Ratownik chodzi z kulami ratunkowymi po plaży, a pracownik nie mówi i nie chodzi na zebrania.', ['Zabytkowy park wymaga stałej opieki', 'Dziecko w wieku 2 lat wymaga stałej opieki', 'chodzi z kulami ratunkowymi', 'nie chodzi na zebrania']);
+  // Sprzęt medyczny tylko przy posiadaczu lub pacjencie; jako towar i przedmiot pracy zostaje. Samoobsługa poza domem i „po” miejscu bez zdrowia zostają.
+  str('Pani Wanda Buk nosi pieluchomajtki, a jej wnuk Pan Olaf Grab ma założony cewnik i nie jest w stanie samodzielnie wstać z łóżka.', ['Wanda Buk', 'pieluchomajtki', 'Olaf Grab', 'cewnik', 'nie jest w stanie samodzielnie wstać'], ['a jej wnuk']);
+  neg('Pani Anna Nowak odpowiada za zakup pieluchomajtek, a Pan Jan Kowalski dostarczył 200 cewników i worki stomijne do magazynu.', ['zakup pieluchomajtek', '200 cewników', 'worki stomijne']);
+  neg('Uczeń Jan Nowak nie potrafi samodzielnie funkcjonować w grupie rówieśniczej, a Pani Ewa Lis wymaga pomocy w poruszaniu się po systemie e-PUAP i nie porusza się samodzielnie po Warszawie.', ['nie potrafi samodzielnie funkcjonować w grupie', 'pomocy w poruszaniu się po systemie', 'nie porusza się samodzielnie po Warszawie']);
+  str('Pani Teresa Bugla samotnie wychowuje syna z niepełnosprawnością (MPD). Jej mąż jest niepełnosprawny ruchowo, a orzeczenie o umiarkowanym stopniu niepełnosprawności (symbol przyczyny 05-R) wydano 3 marca 2025 r.', ['Teresa Bugla', 'z niepełnosprawnością (MPD)', 'niepełnosprawny ruchowo', 'umiarkowanym stopniu niepełnosprawności', '05-R'], ['samotnie wychowuje syna', 'wydano 3 marca 2025 r.']);
+  str('Imię i nazwisko: Zofia Dudek\nStopień niepełnosprawności: znaczny\nSymbol przyczyny niepełnosprawności: 12-C – całościowe zaburzenia rozwojowe', ['Zofia Dudek', 'znaczny', '12-C', 'całościowe zaburzenia rozwojowe'], ['Stopień niepełnosprawności:', 'Symbol przyczyny niepełnosprawności:']);
+  neg('Powiatowy Zespół do Spraw Orzekania o Niepełnosprawności wydaje orzeczenia o stopniu niepełnosprawności. Symbol przyczyny niepełnosprawności 05-R oznacza upośledzenie narządu ruchu. Dzień Osób z Niepełnosprawnościami obchodzimy 3 grudnia.', ['Zespół do Spraw Orzekania o Niepełnosprawności', 'Symbol przyczyny niepełnosprawności 05-R oznacza', 'Dzień Osób z Niepełnosprawnościami']);
+  neg('Dziecko z niepełnosprawnością ma prawo do bezpłatnego transportu do szkoły. Sala 05-R jest zamknięta, a element 06-E leży w magazynie.', ['Dziecko z niepełnosprawnością', 'Sala 05-R', 'element 06-E']);
+  str('Pani Halina Mróz opiekuje się niepełnosprawnym mężem, a jej córka, niepełnosprawna intelektualnie, ma orzeczenie o niepełnosprawności z symbolem 01-U.', ['Halina Mróz', 'niepełnosprawnym', 'niepełnosprawna intelektualnie', 'orzeczenie o niepełnosprawności', '01-U'], ['opiekuje się', 'mężem', 'a jej córka']);
+  neg('Orzeczenie o niepełnosprawności (symbol 05-R) wydaje się dzieciom z chorobami narządu ruchu. Poradnik dla rodziców: niepełnosprawność dziecka a świadczenia rodzinne. W 2025 r. wydano 412 orzeczeń o umiarkowanym stopniu niepełnosprawności, w tym 37 z symbolem 02-P.', ['symbol 05-R', 'niepełnosprawność dziecka', 'umiarkowanym stopniu niepełnosprawności', 'symbolem 02-P']);
+  neg('Kryterium: wychowywanie niepełnosprawnego dziecka – 10 punktów. Asystent rodziny pomaga rodzicom niepełnosprawnego dziecka. Beneficjentem projektu jest niepełnosprawny mieszkaniec gminy.', ['niepełnosprawnego dziecka – 10 punktów', 'rodzicom niepełnosprawnego dziecka', 'niepełnosprawny mieszkaniec']);
+  str('Wnioskodawczyni sprawuje opiekę nad niepełnosprawnym synem. Ze względu na niepełnosprawność dziecka zasiłek przyznano w wyższej kwocie.', ['niepełnosprawnym', 'niepełnosprawność'], ['Wnioskodawczyni sprawuje opiekę nad', 'synem', 'dziecka zasiłek przyznano']);
+
+  // Osoba w przypadku zależnym kotwiczy zdrowie („U Zosi stwierdzono”, „Krystyny Pawlik, która”, „Kacprowi przyznano”); patron, instytucja, autor polecenia i przepis zostają.
+  str('U Zosi stwierdzono padaczkę, a u Anny Nowak cukrzycę typu 2. Kacprowi przyznano rentę z tytułu niezdolności do pracy.', ['padaczkę', 'Anny Nowak', 'cukrzycę typu 2', 'rentę z tytułu niezdolności do pracy'], ['U Zosi stwierdzono', 'Kacprowi przyznano']);
+  str('Wniesiono o raty ze względu na sytuację materialną Krystyny Pawlik, która pobiera rentę z tytułu niezdolności do pracy. Strona wiozła matkę, Grażynę Szczepaniak, która uskarżała się na silny ból w klatce piersiowej.', ['Krystyny Pawlik', 'rentę z tytułu niezdolności do pracy', 'Grażynę Szczepaniak', 'silny ból w klatce piersiowej'], ['która pobiera', 'która uskarżała się na']);
+  str('Wnioskodawczyni opiekuje się Marią Nowak, która porusza się na wózku inwalidzkim. Mój mąż ma astmę i po każdym takim wieczorze się dusi, w lutym trafił przez to do szpitala.', ['Marią Nowak', 'porusza się na wózku inwalidzkim', 'astmę', 'do szpitala'], ['Wnioskodawczyni opiekuje się', 'po każdym takim wieczorze']);
+  neg('W ramach programu Fundacji Anny Dymnej prowadzona jest rehabilitacja ruchowa. Szkoła Podstawowa im. Marii Konopnickiej prowadzi zajęcia dla uczniów z cukrzycą. Szpital Jana Pawła II przyjmuje pacjentów z udarem.', ['Fundacji Anny Dymnej', 'rehabilitacja ruchowa', 'im. Marii Konopnickiej', 'uczniów z cukrzycą', 'Szpital Jana Pawła II', 'pacjentów z udarem']);
+  neg('Zgodnie z wytycznymi Kasi zwolnienie lekarskie należy dostarczyć w ciągu 7 dni. Jeżeli u Zosi wystąpi gorączka, należy wezwać lekarza. U Kasi stwierdzono brak zaległości.', ['zwolnienie lekarskie', 'u Zosi wystąpi gorączka', 'U Kasi stwierdzono brak zaległości']);
+  neg('Zajęcia o cukrzycy w klasie Zosi prowadziła pielęgniarka. Kacprowi wręczono dyplom za udział w konkursie o zdrowiu. Na zebraniu u Jana omówiono program profilaktyki chorób nowotworowych.', ['Zajęcia o cukrzycy w klasie Zosi', 'Kacprowi wręczono dyplom', 'profilaktyki chorób nowotworowych']);
+  // Patron po „im.” i „ul.”, gmina z imienia i autor dzieła nie są osobą z faktem o zdrowiu; osoba przed czasownikiem bezosobowym jest.
+  neg('Centrum Rehabilitacji im. Ireny Sendlerowej przyjmuje osoby po udarze. Szpital im. Ludwika Rydygiera leczy pacjentów po zawale. Mieszkańcy gminy Kazimierza Wielka mogą skorzystać z badań w kierunku cukrzycy.', ['osoby po udarze', 'pacjentów po zawale', 'w kierunku cukrzycy']);
+  str('Książka Joanny Wiśniewskiej o życiu z cukrzycą typu 1 trafiła do biblioteki. Wykład dr. Jana Kowalskiego o chorobie Alzheimera odbędzie się w czwartek.', ['Joanny Wiśniewskiej', 'Jana Kowalskiego'], ['o życiu z cukrzycą typu 1', 'o chorobie Alzheimera']);
+  str('Grażynie Nowak przyznano zasiłek pielęgnacyjny z powodu znacznego stopnia niepełnosprawności.', ['Grażynie Nowak', 'znacznego stopnia niepełnosprawności'], ['przyznano zasiłek pielęgnacyjny z powodu']);
+  // Imię przed „o” z tematem to autor lub rozmówca; lokal „u Basi”, tytuł akcji w cudzysłowie i temat rozprawy nie kotwiczą zdrowia.
+  str('Wywiad z Anną Nowak o depresji ukazał się w gazecie. Monografia Jana Kowalskiego o chorobie afektywnej dwubiegunowej trafiła do biblioteki poradni.', ['Anną Nowak', 'Jana Kowalskiego'], ['o depresji ukazał się', 'o chorobie afektywnej dwubiegunowej']);
+  str('Katarzynie Lis nadano stopień doktora za rozprawę o leczeniu cukrzycy. Wniosek Krystyny Pawlik o zasiłek pielęgnacyjny z powodu choroby Parkinsona wpłynął w marcu.', ['Katarzynie Lis', 'Krystyny Pawlik', 'choroby Parkinsona'], ['o leczeniu cukrzycy', 'o zasiłek pielęgnacyjny z powodu']);
+  neg('Pensjonat u Basi przyjmuje kuracjuszy po zawale serca. Gospoda U Kasi zatrudnia osoby po udarze. Akcja „Pomóż Zuzi” zbiera środki dla dzieci z chorobą nowotworową.', ['kuracjuszy po zawale serca', 'osoby po udarze', 'dzieci z chorobą nowotworową']);
+  // ślad leczenia bez nazwy choroby, wtrącenie między kotwicą a frazą, schorzenie po budowie słowa
+  str('Wnioskodawczyni jest w trakcie leczenia i nie może podjąć pracy. Mąż jest po trzech cyklach chemioterapii, a syn korzysta z rehabilitacji domowej. Lena ma mózgowe porażenie dziecięce.', ['leczenia', 'chemioterapii', 'rehabilitacji domowej', 'mózgowe porażenie'], ['nie może podjąć pracy']);
+  str('U syna rozpoznano, według opinii poradni z 3 marca, autyzm dziecięcy. U pana Jana stwierdzono tetraplegię po urazie rdzenia kręgowego, a pan Nowak ma przewlekłą niewydolność krążenia.', ['autyzm', 'tetraplegię', 'rdzenia kręgowego', 'niewydolność krążenia'], ['według opinii poradni z 3 marca']);
+  neg('Spółka jest w trakcie likwidacji. Gmina prowadzi rehabilitację domową w ramach programu. W raporcie wskazano niewydolność systemu ochrony zdrowia. Anatomia jest przedmiotem na pierwszym roku.', ['w trakcie likwidacji', 'rehabilitację domową', 'niewydolność systemu', 'Anatomia']);
+  // diagnostyka i rehabilitacja w toku z dopowiedzeniem medycznym; terapia jako zawód i placówka, ziemia
+  str('Pedagog jest w trakcie diagnostyki potrzeb ucznia, a budynek szkoły jest w trakcie rehabilitacji. Szpital kontynuuje leczenie pacjentów w nowym budynku. Pani Anna Kowalska pracuje w gabinecie fizjoterapii, a Pan Szymon Lis jest instruktorem hipoterapii. Pan Jan Nowak sprzedał ziemię sąsiadowi. Ojciec jest w trakcie rehabilitacji neurologicznej, a u matki stwierdzono ischemię kończyny.', ['Anna Kowalska', 'Szymon Lis', 'Jan Nowak', 'rehabilitacji neurologicznej', 'ischemię'], ['diagnostyki potrzeb ucznia', 'trakcie rehabilitacji. Szpital kontynuuje leczenie pacjentów', 'gabinecie fizjoterapii', 'instruktorem hipoterapii', 'ziemię sąsiadowi']);
+  // terapia jako zajęcia, usługa, kwalifikacja i temat przy osobie; ta sama terapia u klienta znika
+  str('Pani Ewa Wiśniewska jest koordynatorką zajęć z ludoterapii, a Pan Jan Lis jest wykonawcą usług hydroterapii. Pani Joanna Kos ukończyła dwa cykle szkoleń z dogoterapii i napisała pracę magisterską o muzykoterapii. Syn Pani Nowak korzysta z usług hipoterapii w ośrodku.', ['Ewa Wiśniewska', 'Jan Lis', 'Joanna Kos', 'Nowak', 'hipoterapii'], ['zajęć z ludoterapii', 'usług hydroterapii', 'szkoleń z dogoterapii', 'o muzykoterapii']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

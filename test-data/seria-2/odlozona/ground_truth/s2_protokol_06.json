@@ -1,0 +1,296 @@
+{
+  "id": "s2_protokol_06",
+  "template": "protokol",
+  "title": "Protokół z posiedzenia komisji skarg, wniosków i petycji rady miasta",
+  "seed": null,
+  "traps": [
+    "radni na liście obecności samym nazwiskiem (Wrona, Kret, Bocian) i w przypadkach zależnych (Wrony, Kreta, Bocianowi)",
+    "nazwisko Bocian i „gniazdo bociana” małą literą",
+    "patron w nazwie szkoły (im. Mikołaja Kopernika)",
+    "dane o zdrowiu skarżących opisowo (stwardnienie rozsiane, mukowiscydoza)",
+    "adres IP petycji elektronicznej i tablica rejestracyjna",
+    "naczelnik wydziału w funkcji jako polityka"
+  ],
+  "entities": [
+    {
+      "text": "Komisji Skarg, Wniosków i Petycji",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Urzędu Miasta Kalisza",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Straży Miejskiej Kalisza",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rady Miasta Kalisza",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Prezydenta Miasta Kalisza",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szkoły Podstawowej nr 7 im. Mikołaja Kopernika w Kaliszu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "Biuro Rady Miasta",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "bociana",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "ptak obok nazwiska Bocian",
+      "count": 2
+    },
+    {
+      "text": "ul. Majkowskiej",
+      "type": "LOCATION",
+      "expect": "keep",
+      "note": "miejsce bez związku z osobą",
+      "count": 1
+    },
+    {
+      "text": "KSWiP.1510.6.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KSWiP.1510.9.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Hanna Ostrowska",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "naczelnik wydziału w funkcji",
+      "count": 2
+    },
+    {
+      "text": "Kalisz",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "Weronika Gajewska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "przewodnicząca komisji",
+      "count": 2
+    },
+    {
+      "text": "Bogdan Cichy",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wrona",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 2
+    },
+    {
+      "text": "Kret",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 3
+    },
+    {
+      "text": "Bocian",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 3
+    },
+    {
+      "text": "Danieli Pawłowskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Wrocławska 88 m. 14",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "62-800",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Arturowi Lisieckiemu",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "strażnik miejski",
+      "count": 1
+    },
+    {
+      "text": "WX 883CK",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Daniela Pawłowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "znaczny stopień niepełnosprawności",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "stwardnienia rozsianego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wrony",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "62 501 33 18",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "daniela.pawlowska@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kazimierz Jankowiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "203.0.113.118",
+      "type": "IP",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kazimierza Jankowiaka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Amelia Jankowiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletnia",
+      "count": 1
+    },
+    {
+      "text": "Bocianowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w celowniku",
+      "count": 1
+    },
+    {
+      "text": "Teodora Zająca",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Górnośląska 17",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "choruje na mukowiscydozę",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "choroba dziecka",
+      "count": 1
+    },
+    {
+      "text": "Kreta",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w bierniku",
+      "count": 1
+    },
+    {
+      "text": "Zającem",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w narzędniku",
+      "count": 1
+    },
+    {
+      "text": "Dorota Mielcarek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "protokolantka",
+      "count": 1
+    }
+  ]
+}

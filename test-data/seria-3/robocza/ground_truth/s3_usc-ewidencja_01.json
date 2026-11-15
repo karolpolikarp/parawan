@@ -1,0 +1,281 @@
+{
+  "id": "s3_usc-ewidencja_01",
+  "template": "usc-ewidencja",
+  "title": "Decyzja o wymeldowaniu z urzędu",
+  "seed": null,
+  "traps": [
+    "świadek o nazwisku Sienkiewicz i patron Sienkiewicza w adresie spółdzielni",
+    "imiona rodziców bez nazwiska („syna Zbigniewa i Krystyny”)",
+    "numer wodomierza o długości PESEL bez sumy kontrolnej",
+    "samo nazwisko świadka po słowie „Świadek” i samo imię strony",
+    "sygnatura sprawy kuratorskiej i znak sprawy (polityka)"
+  ],
+  "entities": [
+    {
+      "text": "ul. Słonimska 1",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "siedziba urzędu",
+      "count": 1
+    },
+    {
+      "text": "15-950",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Białystok",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i urzędu",
+      "count": 3
+    },
+    {
+      "text": "DSO-II.5344.87.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "412/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer decyzji",
+      "count": 1
+    },
+    {
+      "text": "Haliny Wierzbickiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "wnioskodawczyni",
+      "count": 2
+    },
+    {
+      "text": "63110227563",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Mazowiecka 41 m. 7",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "15-302",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dariusza Grabowca",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "strona wymeldowywana",
+      "count": 3
+    },
+    {
+      "text": "17.06.1982",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sokółce",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce urodzenia",
+      "count": 1
+    },
+    {
+      "text": "Zbigniewa",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię ojca",
+      "count": 1
+    },
+    {
+      "text": "Krystyny",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię matki",
+      "count": 1
+    },
+    {
+      "text": "82061788675",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Mazowieckiej 41 m. 7",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres w miejscowniku",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy w Białymstoku",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "BI1B/56589015/5",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "księga lokalu osoby fizycznej",
+      "count": 1
+    },
+    {
+      "text": "48201937551",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "numer wodomierza, 11 cyfr bez sumy PESEL",
+      "count": 1
+    },
+    {
+      "text": "III RNs 211/26",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy o kuratora",
+      "count": 1
+    },
+    {
+      "text": "Joannę Leśniak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "kurator",
+      "count": 1
+    },
+    {
+      "text": "Teresę Ostrowską",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "świadek",
+      "count": 1
+    },
+    {
+      "text": "ul. Mazowiecka 41 m. 5",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres świadka",
+      "count": 1
+    },
+    {
+      "text": "Marka Sienkiewicza",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "świadek, nazwisko jak patron ulicy",
+      "count": 1
+    },
+    {
+      "text": "Spółdzielni Mieszkaniowej „Słoneczny Stok”",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "pracodawca świadka",
+      "count": 1
+    },
+    {
+      "text": "ul. Henryka Sienkiewicza 54",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "siedziba spółdzielni, patron ulicy",
+      "count": 1
+    },
+    {
+      "text": "Ostrowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 1
+    },
+    {
+      "text": "Sienkiewicz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko świadka",
+      "count": 1
+    },
+    {
+      "text": "Robert Grabowiec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "brat strony",
+      "count": 1
+    },
+    {
+      "text": "605 218 774",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dariusz",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię strony",
+      "count": 1
+    },
+    {
+      "text": "Wojewody Podlaskiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ewa Kalinowska",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędnik podpisujący w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Kierownik Referatu Ewidencji Ludności",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Halina Wierzbicka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "h.wierzbicka@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "85 744 19 03",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Joanna Leśniak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

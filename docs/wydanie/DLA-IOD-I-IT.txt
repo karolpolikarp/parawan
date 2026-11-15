@@ -91,8 +91,8 @@ CZEGO PARAWAN NIE ZROBI
   Zasłania też dane, które w BIP zwykle zostają jawne, np. nazwiska
   urzędników pod pismem i znak sprawy. Nie zmienia oryginalnego pliku.
 
-  W pomiarze na 638 syntetycznych zdaniach zniknęło 811 z 826 fragmentów,
-  które miały zniknąć (98,2%), i zostało 1036 z 1037, które miały zostać
+  W pomiarze na 854 syntetycznych zdaniach zniknęło 1185 z 1200 fragmentów,
+  które miały zniknąć (98,8%), i zostało 1532 z 1533, które miały zostać
   (99,9%). Metodologia: docs/BENCHMARK.md w repozytorium.
 
 DO OCENY INSPEKTORA OCHRONY DANYCH
@@ -130,13 +130,14 @@ ZASADY I NARZĘDZIA, KTÓRE BLOKUJĄ ALBO OGRANICZAJĄ PARAWANA
     w intranecie.
   - Nie dodawaj pliku do listy witryn trybu Internet Explorera
     (InternetExplorerIntegrationSiteList).
-  - DownloadRestrictions = 3 wyłącza tylko zapis wyniku do pliku. Kopiowanie
-    i druk działają.
+  - DownloadRestrictions = 3 wyłącza zapis wyniku; kopia i druk działają.
   - Tryb zwiększonych zabezpieczeń Edge w wariancie ścisłym
     (EnhanceSecurityMode = 2) wyłącza kompilację JIT. Parawan działa, ale
     200 KB tekstu analizuje około sekundy zamiast 0,1 s.
   - Microsoft Purview DLP może blokować kopiowanie z Worda tekstu z numerem
     PESEL. Wtedy wystarczy wczytać plik zamiast kopiować.
+  - Defender for Office 365 z typem html w filtrze załączników zatrzyma plik
+    w poczcie (rozpoznaje go po treści), więc przekaż go dyskiem sieciowym.
 
 BUDOWA Z KODU
   Plik można zbudować samemu i porównać sumę z wydaniem. Każdy wiersz to

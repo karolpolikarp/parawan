@@ -1,0 +1,288 @@
+{
+  "id": "s2_tabele_06",
+  "template": "tabele",
+  "title": "Lista wypłat z umów zleceń fundacji (kolumny z | bez wiersza nagłówka Markdown)",
+  "seed": null,
+  "traps": [
+    "tabela z kreskami | bez wiersza separatora Markdown",
+    "cudzoziemka z paszportem i kartą pobytu zamiast PESEL",
+    "nazwisko Krawiec obok zawodu „krawiec”, nazwiska Sroka i Kruk",
+    "nazwa ulicy Wrocławska obok miasta Wrocław",
+    "pusta komórka rachunku, wiersz RAZEM, numer faktury do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "Fundacja Rozwoju Sportu Dzieci „Odra-Start”",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "organizacja zlecająca",
+      "count": 1
+    },
+    {
+      "text": "0000880533",
+      "type": "KRS",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Na Grobli 30",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "50-421",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wrocław",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i siedziby",
+      "count": 5
+    },
+    {
+      "text": "Oliwer Dąbrowski-Zych",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe",
+      "count": 1
+    },
+    {
+      "text": "Natalija Kovalenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "osoba zagraniczna",
+      "count": 1
+    },
+    {
+      "text": "Jagoda Krawiec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko = zawód",
+      "count": 1
+    },
+    {
+      "text": "Ignacy Sroka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko = ptak",
+      "count": 2
+    },
+    {
+      "text": "Patrycja Kruk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko = ptak",
+      "count": 1
+    },
+    {
+      "text": "98060405594",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "04222991746",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "57101542050",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "95120130649",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "JN3996524",
+      "type": "PASSPORT",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kłodnicka 5/14",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "54-217",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Legnicka 61/3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "54-203",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Wrocławska 22",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "nazwa ulicy od miasta",
+      "count": 1
+    },
+    {
+      "text": "55-095",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mirków",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "ul. Kasprowicza 40",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "51-137",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Brücknera 8/1",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "znak ü w nazwie ulicy",
+      "count": 1
+    },
+    {
+      "text": "51-411",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL38194010768876927661239276",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "76109010149091737195350317",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL91 1140 2004 3841 4442 6117 7106",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "RP5405811",
+      "type": "RESIDENCE_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "obywatelka Ukrainy",
+      "type": "NATIONALITY",
+      "expect": "policy",
+      "note": "obywatelstwo osoby z poz. 2",
+      "count": 1
+    },
+    {
+      "text": "ciąża zagrożona",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "oliwer.dz@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "krawiec",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zawód, nie nazwisko",
+      "count": 1
+    },
+    {
+      "text": "FV/118/11/2026",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer faktury",
+      "count": 1
+    },
+    {
+      "text": "Klaudia Bartnik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "71 342 55 90",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wew. 12",
+      "type": "PHONE_EXT",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Witold Ćwik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

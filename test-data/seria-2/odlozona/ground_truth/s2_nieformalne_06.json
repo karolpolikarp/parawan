@@ -1,0 +1,268 @@
+{
+  "id": "s2_nieformalne_06",
+  "template": "nieformalne",
+  "title": "Odręczna notatka z wywiadu środowiskowego, przepisana",
+  "seed": null,
+  "traps": [
+    "skróty (dow. os., cukrz., k. udowej, kier.)",
+    "telefon z literą O zamiast zera",
+    "gołębie obok nazwiska Gołąb",
+    "inicjały osoby przepisującej i podpisu",
+    "nałóg opisany cytatem",
+    "adres przychodni z patronem do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "M.O.",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "inicjały osoby przepisującej",
+      "count": 1
+    },
+    {
+      "text": "Stanisław Gołąb",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "49021440055",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "14.02.1949",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "YEL795958",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "skrót „dow. os.”",
+      "count": 1
+    },
+    {
+      "text": "ul. Żeromskiego 71 m. 9",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "26-600",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krystyna",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zmarła żona, samo imię",
+      "count": 1
+    },
+    {
+      "text": "leżący częściowo",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "po złamaniu szyjki k. udowej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "skrót w rozpoznaniu",
+      "count": 1
+    },
+    {
+      "text": "chodzi z balkonikiem",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "POChP",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "skrót choroby",
+      "count": 1
+    },
+    {
+      "text": "tlen w domu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "cukrz. na insulinie",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "skrót",
+      "count": 1
+    },
+    {
+      "text": "nadużywa alkoholu",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "nałóg",
+      "count": 1
+    },
+    {
+      "text": "od śmierci żony pije codziennie",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "nałóg w cytacie",
+      "count": 1
+    },
+    {
+      "text": "Krzysztof Gołąb",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krzysiek",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie w nawiasie",
+      "count": 1
+    },
+    {
+      "text": "609 7O4 118",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "literówka: litera O zamiast zera",
+      "count": 1
+    },
+    {
+      "text": "Wanda",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "sąsiadka, samo imię",
+      "count": 1
+    },
+    {
+      "text": "Amelka",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wnuczka, zdrobnienie",
+      "count": 1
+    },
+    {
+      "text": "512 664 093",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "komórka osoby",
+      "count": 1
+    },
+    {
+      "text": "48 362 15 07",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "stacjonarny z kierunkowym bez zera",
+      "count": 1
+    },
+    {
+      "text": "66 1050 0099 7725 7187 3785 4399",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Olga Rybak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarz",
+      "count": 1
+    },
+    {
+      "text": "K. Witkowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał imienia z nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "Pawłowską",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "kierowniczka, samo nazwisko w narzędniku",
+      "count": 1
+    },
+    {
+      "text": "K.W.",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "podpis",
+      "count": 1
+    },
+    {
+      "text": "Radom",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby, także w nazwie MOPS",
+      "count": 2
+    },
+    {
+      "text": "Kielcach",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce zamieszkania syna",
+      "count": 1
+    },
+    {
+      "text": "gołębie",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "ptaki, podobne do nazwiska Gołąb",
+      "count": 1
+    },
+    {
+      "text": "Przychodnia „Zdrowie”",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kelles-Krauza 8",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "adres przychodni, ulica z patronem",
+      "count": 1
+    },
+    {
+      "text": "ZUS",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PKO",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "DPS",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

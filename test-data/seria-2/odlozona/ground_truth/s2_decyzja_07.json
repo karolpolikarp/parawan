@@ -1,0 +1,253 @@
+{
+  "id": "s2_decyzja_07",
+  "template": "decyzja",
+  "title": "Decyzja o wymeldowaniu z pobytu stałego",
+  "seed": null,
+  "traps": [
+    "nazwisko Bąk i słowo „bąka”",
+    "patron w adresie urzędu",
+    "dane o pozbawieniu wolności (dane szczególne)",
+    "policjant ze stopniem",
+    "nazwisko z małej litery w zwrocie „pan Mazur”"
+  ],
+  "entities": [
+    {
+      "text": "PREZYDENT MIASTA GDYNI",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "al. Marszałka Piłsudskiego 52/54",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w adresie urzędu",
+      "count": 1
+    },
+    {
+      "text": "81-382",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Gdynia",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i urzędu",
+      "count": 5
+    },
+    {
+      "text": "SO-EL.5350.2.118.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dz.U. z 2025 r. poz. 274",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "publikator",
+      "count": 1
+    },
+    {
+      "text": "Dz.U. z 2025 r. poz. 1691",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "publikator",
+      "count": 1
+    },
+    {
+      "text": "Teresy Lewandowskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krystiana Mazura",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "14 sierpnia 1993",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "93081406010",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Świętojańskiej 77/3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "miejscownik",
+      "count": 1
+    },
+    {
+      "text": "81-391",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "Teresa Lewandowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "ul. Świętojańska 77/3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "501 772 368",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Natalii Lewandowskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "wnuczka",
+      "count": 1
+    },
+    {
+      "text": "Pan Mazur",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 1
+    },
+    {
+      "text": "Irenę Bąk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "świadek",
+      "count": 1
+    },
+    {
+      "text": "ul. Świętojańska 77/5",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres świadka",
+      "count": 1
+    },
+    {
+      "text": "Pana Mazura",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko, dopełniacz",
+      "count": 1
+    },
+    {
+      "text": "bąka",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "owad, nazwisko Bąk",
+      "count": 1
+    },
+    {
+      "text": "Komisariatu Policji I w Gdyni",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "mł. asp. Bartosz Kurek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "policjant ze stopniem",
+      "count": 1
+    },
+    {
+      "text": "Krystian Mazur",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "przebywa w Areszcie Śledczym w Gdańsku",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "pozbawienie wolności",
+      "count": 1
+    },
+    {
+      "text": "odbywa karę pozbawienia wolności",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "skazanie",
+      "count": 1
+    },
+    {
+      "text": "GCP595282",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "II OSK 245/21",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "pan Mazur",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko po „pan” z małej litery",
+      "count": 1
+    },
+    {
+      "text": "Wojewody Pomorskiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Prezydenta Miasta Gdyni",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jolanta Formela",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis z upoważnienia",
+      "count": 1
+    },
+    {
+      "text": "Areszt Śledczy w Gdańsku",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "adres doręczenia w areszcie ujawnia osadzenie",
+      "count": 1
+    }
+  ]
+}

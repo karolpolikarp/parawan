@@ -198,6 +198,55 @@ function peopleGroupHeadBefore(t: string, offset: number, parts: string[], start
   if (!WORK_GROUP_HEADS.has(head) || raw !== raw[0] + raw.slice(1).toLowerCase()) return false;
   return (from === 0 ? RE_LEAD_START_TEXT : RE_LEAD_START).test(full.slice(0, hm.index));
 }
+// Głowa nazwy placówki publicznej albo organizacji w dowolnym przypadku, od wielkiej litery, oraz
+// przymiotnik w nazwie szkoły („Podstawowej”, „Ogólnokształcącego”). Bez przychodni, gabinetu,
+// zakładu i klubu: tak zaczynają się firmy z imieniem i nazwiskiem właściciela. Sama głowa patrona
+// nie daje: „dyrektor Szkoły Podstawowej Anny Lis”, „Pacjent Szpitala Jana Wróbla”, „Pracownica
+// Biblioteki Ewy Mazur” to osoba w roli przy placówce. Patronem jest tylko postać ze słownika
+// (PUBLIC_PATRON_PAIRS_GEN), bez kotwicy „im.” imię po nazwie placówki zostaje osobą.
+const RE_PUBLIC_FACILITY_OBLIQUE =
+  /^(?:Uniwersyte|Politechni|Akademi|Szkoł|Szkol|Liceum|Gimnazj|Techni[kc]|Przedszkol|Instytu|Szpital|Muze|Teatr|Filharmoni|Bibliotec|Bibliotek|Fundacj|Stowarzysze|Parafi|Hospicj|Ośrod|Podstawow|Ogólnokształcąc|Specjaln)\p{L}*$/u;
+// Patroni szkół, uczelni, szpitali, bibliotek, teatrów i fundacji jako para „imię nazwisko”
+// w dopełniaczu (małe litery): postaci, od których placówki w całej Polsce biorą nazwę bez „im.”
+// („Uniwersytet Mikołaja Kopernika”, „Szkoła Podstawowa Marii Konopnickiej”, „Fundacja Anny
+// Dymnej”). Para, a nie samo nazwisko, bo „Pacjent Szpitala Jana Dąbrowskiego” to osoba.
+const PUBLIC_PATRON_PAIRS_GEN = new Set<string>(
+  (
+    'mikołaja kopernika|adama mickiewicza|juliusza słowackiego|henryka sienkiewicza|marii konopnickiej|' +
+    'marii skłodowskiej-curie|marii curie-skłodowskiej|jana kochanowskiego|tadeusza kościuszki|józefa piłsudskiego|' +
+    'fryderyka chopina|stanisława moniuszki|jana matejki|jana paderewskiego|ignacego paderewskiego|' +
+    'stanisława wyspiańskiego|cypriana norwida|kamila norwida|stefana żeromskiego|władysława reymonta|' +
+    'karola szymanowskiego|henryka wieniawskiego|witolda lutosławskiego|aleksandra fredry|ignacego krasickiego|' +
+    'elizy orzeszkowej|jerzego popiełuszki|karola wojtyły|janusza korczaka|witolda pileckiego|władysława andersa|' +
+    'władysława sikorskiego|romana dmowskiego|romualda traugutta|kazimierza pułaskiego|henryka dąbrowskiego|' +
+    'jarosława dąbrowskiego|jana kiepury|anny dymnej|maksymiliana kolbego|stefana wyszyńskiego|piotra skargi|' +
+    'stanisława staszica|hugona kołłątaja|jana zamoyskiego|kazimierza jagiellończyka|stefana batorego|' +
+    'bolesława chrobrego|władysława łokietka|jędrzeja śniadeckiego|jana śniadeckiego|bolesława prusa|' +
+    'juliana tuwima|jana brzechwy|kornela makuszyńskiego|jana kasprowicza|mikołaja reja|adama asnyka|' +
+    'kamila baczyńskiego|krzysztofa baczyńskiego|zbigniewa herberta|czesława miłosza|wisławy szymborskiej|' +
+    'heleny modrzejewskiej|wojciecha bogusławskiego|juliusza osterwy|ludwika solskiego|stefana jaracza|' +
+    'mieczysława karłowicza|feliksa nowowiejskiego|władysława broniewskiego|ildefonsa gałczyńskiego|' +
+    'konstantego gałczyńskiego|ignacego kraszewskiego|józefa kraszewskiego|zofii nałkowskiej|marii dąbrowskiej|' +
+    'jarosława iwaszkiewicza|kazimierza przerwy-tetmajera|józefa bema|jana kilińskiego|leopolda okulickiego|' +
+    'stefana roweckiego|emila fieldorfa|augusta fieldorfa|wincentego witosa|ignacego daszyńskiego|' +
+    'gabriela narutowicza|wojciecha korfantego|józefa hallera|ireny sendlerowej|adama chmielowskiego|' +
+    'stanisława konarskiego|józefa wybickiego|ludwika zamenhofa|ignacego łukasiewicza|karola marcinkowskiego|' +
+    'ludwika rydygiera|tytusa chałubińskiego|leona koźmińskiego|andrzeja modrzewskiego|emilii plater|' +
+    'jana długosza|ignacego mościckiego|hipolita cegielskiego|karola miarki|lecha wałęsy|eugeniusza kwiatkowskiego'
+  ).split('|'),
+);
+/** Czy imiona od `start` i nazwisko za nimi to znany patron placówki (pierwsze albo ostatnie imię
+ *  z nazwiskiem: „Krzysztofa Kamila Baczyńskiego”)? */
+function knownPatronAt(parts: string[], start: number): boolean {
+  let k = start + 1;
+  while (2 * k < parts.length && isFirstNameGenitive(parts[2 * k].toLowerCase()) && isFirstNameLike(parts[2 * k])) k++;
+  const surname = parts[2 * k]?.toLowerCase();
+  if (!surname) return false;
+  return (
+    PUBLIC_PATRON_PAIRS_GEN.has(`${parts[2 * start].toLowerCase()} ${surname}`) ||
+    PUBLIC_PATRON_PAIRS_GEN.has(`${parts[2 * (k - 1)].toLowerCase()} ${surname}`)
+  );
+}
 /**
  * Czy imię na pozycji `start` ciągu to imię patrona: świętego („Sobór św. Jerzego Zwycięzcy") albo
  * obiektu lub instytucji („Pomnik Jerzego Popiełuszki")? Drugie tylko w przypadku zależnym; osobę
@@ -214,6 +263,10 @@ function patronFirstNameAt(t: string, offset: number, parts: string[], start: nu
   // grupa ludzi tej osoby, a nie nazwa własna z patronem („wykonał zespół Joanny Sikory”)
   if (prev && PEOPLE_GROUP_HEADS.has(prev) && peopleGroupHeadBefore(t, offset, parts, start)) return false;
   if (prev && PATRON_GEN_HEADS.has(prev)) return true;
+  // nazwa placówki publicznej w innym przypadku, wielką literą („na Uniwersytecie Mikołaja Kopernika”,
+  // „w Szkole Podstawowej Marii Konopnickiej”, „Fundacją Anny Dymnej”): imię w dopełniaczu to patron
+  const prevRaw = /(\p{L}+) +$/u.exec(before)?.[1];
+  if (prevRaw && RE_PUBLIC_FACILITY_OBLIQUE.test(prevRaw) && knownPatronAt(parts, start)) return true;
   const ranks = RE_CLERIC_RANKS_TAIL.exec(before);
   if (ranks) {
     const head = /(\p{L}+)\.?[ \t]+$/u.exec(before.slice(0, ranks.index))?.[1]?.toLowerCase();
@@ -272,6 +325,10 @@ const RE_MARY_GEN = /^Mar(?:ii|yi)[ \t]+Panny$/u;
 // Każda litera z ogonkiem także w zapisie ASCII („Kubus Puchatek").
 const foldClass = (s: string): string => s.replace(RE_PL_DIACRITIC_G, (c) => `[${c}${foldAsciiChar(c)}]`);
 const RE_FICTIONAL_PAIR = new RegExp(`(?<![\\p{L}\\p{N}])(?:${FICTIONAL_PAIRS_SRC.map(foldClass).join('|')})(?![\\p{L}\\p{N}])`, 'giu');
+// Starosta i wojewoda (też wice-) w dowolnym przypadku, potem przymiotnik w rodzaju męskim (nazwa
+// urzędu nie zmienia rodzaju: „Pani Starosta Kłodzki”). Wersaliki też, bo tak bywa w nagłówku.
+const RE_TERRITORIAL_ORGAN_ADJ =
+  /(?<![\p{L}\p{N}])(?:[Ww]ice)?(?:[Ss]tarost(?:a|y|ie|ę|ą|o)|[Ww]ojewod(?:a|y|zie|ę|ą|o)|(?:WICE)?(?:STAROST|WOJEWOD)(?:A|Y|IE|ZIE|Ę|Ą))[ \t]+(\p{Lu}\p{L}*(?:sk|ck|dzk|SK|CK|DZK)(?:i|iego|iemu|im|I|IEGO|IEMU|IM))(?![\p{L}\p{N}-])/gu;
 export function passProtectFictional(ctx: RedactCtx): void {
   if (!ctx.on('IMIE')) return;
   ctx.text = ctx.text.replace(RE_FICTIONAL_PAIR, (m, offset: number, t: string) => {
@@ -287,6 +344,11 @@ export function passProtectFictional(ctx: RedactCtx): void {
     if (personSlotBefore(t, offset) || RE_PERSON_DATA_AHEAD.test(t.slice(offset + m.length, offset + m.length + 24))) return m;
     return protectSpan(ctx, m);
   });
+  // Organ terytorialny z przymiotnikiem od nazwy powiatu albo województwa („Starosta Słupski”,
+  // „do Wojewody Mazowieckiego”, „przez Starostę Kłodzkiego”, „STAROSTA TARNOWSKI”): nazwa urzędu,
+  // także gdy strona pisma nosi to samo nazwisko („Pan Roman Słupski … oceni Starosta Słupski”).
+  // Tylko przymiotniki ze stoplisty odmiejscowej; „Sędzia Tarnowski” czy „Dyrektor Krakowski” to osoby.
+  ctx.text = ctx.text.replace(RE_TERRITORIAL_ORGAN_ADJ, (m, adj: string) => (isGeoAdjective(adj) ? protectSpan(ctx, m) : m));
   // „Niebieska Karta” to nazwa procedury: chroniona przed wszystkimi przebiegami osobowymi naraz
   // (para „Założono Niebieską”, samodzielny przymiotnik „w Niebieskiej Karcie”).
   // Nie po tytule grzecznościowym ani imieniu („Pani Niebieska karta klienta”, „Joanna Niebieska karta”):
@@ -672,6 +734,11 @@ function maskNicknamePairs(ctx: RedactCtx): void {
     return ctx.personMask(w2);
   });
 }
+// Nazwa krainy albo jednostki w przypadku zależnym przed przymiotnikiem od miejscowości („Ziemi
+// Kłodzkiej”, „Powiatu Tarnowskiego”, „Regionu Sądeckiego”). Przymiotnik musi się zgadzać z rodzajem
+// głowy: żeński po ziemi i krainie, męski po powiecie i regionie.
+const REGION_HEADS_OBLIQUE = new Set<string>('ziemi ziemię ziemią krainy krainie krainę powiatu powiecie powiatem regionu regionie regionem'.split(' '));
+const RE_REGION_ADJ_OBLIQUE = /(?:sk|ck|dzk)(?:iej|ą|iego|im|iemu)$/u;
 // Para „Wyraz Nazwisko" z nazwiskiem rozpoznanym po końcówce (-ski/-cki/-icz/-czyk) spoza słownika.
 function maskSuffixSurnamePairs(ctx: RedactCtx): void {
   ctx.text = ctx.text.replace(RE_PAIR, (m, w1: string, w2: string, offset: number, t: string) => {
@@ -701,6 +768,9 @@ function maskSuffixSurnamePairs(ctx: RedactCtx): void {
     if (RE_SURNAME_OBLIQUE.test(w2s.toLowerCase())) {
       // przymiotnik odmiejscowy po rzeczowniku („Starosty Wołomińskiego") to nazwa urzędu
       if (isGeoAdjective(w2s)) return m;
+      // przymiotnik od miejscowości po nazwie krainy albo jednostki („Stowarzyszenie Przyjaciół Ziemi
+      // Krzeszowickiej”, „z terenu Powiatu Dąbrowskiego”): człon nazwy regionu, nie nazwisko w dopełniaczu
+      if (REGION_HEADS_OBLIQUE.has(w1l) && RE_REGION_ADJ_OBLIQUE.test(w2s.toLowerCase())) return m;
       // Znany eponim po głowie („Odruch Babińskiego") i dwuczłonowy eponim („Zespół Guillaina-Barrégo")
       // to nazwa, nie osoba. Tylko w dopełniaczu, bo w mianowniku „Objaw Kowalska" to osoba. Nazwisko
       // osoby rozpoznanej już w piśmie wygrywa z patronem mostu (patrz afterNonPersonContext).

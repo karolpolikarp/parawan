@@ -1,0 +1,61 @@
+ZUS ZUA
+ZGŁOSZENIE DO UBEZPIECZEŃ / ZMIANA DANYCH OSOBY UBEZPIECZONEJ
+Zakład Ubezpieczeń Społecznych Oddział we Wrocławiu
+ul. Pretficza 11, 50-950 Wrocław
+Numer referencyjny zgłoszenia: 26442489954
+
+I. DANE ORGANIZACYJNE
+01. Zgłoszenie do ubezpieczeń  [X]      Zmiana danych osoby  [ ]
+02. Data wypełnienia: 03.11.2026
+
+II. DANE IDENTYFIKACYJNE PŁATNIKA SKŁADEK
+01. NIP: 6204929290
+02. REGON: 280831729
+03. PESEL: 71021409220
+04. Rodzaj dokumentu: 1      Seria i numer dokumentu: NXG795942
+05. Nazwa skrócona:
+ZIELONY TARAS Halina Sowińska-Kruk
+06. Nazwisko: SOWIŃSKA-KRUK
+07. Imię pierwsze:
+HALINA
+08. Data urodzenia: 14.02.1971
+
+III. DANE IDENTYFIKACYJNE OSOBY UBEZPIECZONEJ
+01. PESEL: 94072295598
+02. Rodzaj dokumentu: 2 (paszport)
+03. Seria i numer dokumentu: WR1789448
+04. Nazwisko:
+HRYTSENKO
+05. Imię pierwsze: MYKHAILO       06. Imię drugie: YURIIOVYCH
+07. Data urodzenia: 22.07.1994
+08. Obywatelstwo: ukraińskie
+
+IV. DANE O TYTUŁACH UBEZPIECZEŃ
+01. Kod tytułu ubezpieczenia: 01 10 0 0
+02. Prawo do emerytury lub renty: [ ]      Stopień niepełnosprawności: [X] 2
+03. Orzeczenie: umiarkowany stopień niepełnosprawności, symbol 05-R (choroby narządu ruchu), wydane przez Powiatowy Zespół do Spraw Orzekania o Niepełnosprawności we Wrocławiu
+04. Ubezpieczenia: emerytalne [X]  rentowe [X]  chorobowe [X]  wypadkowe [X]
+05. Data powstania obowiązku ubezpieczenia: 01.11.2026
+06. Wymiar czasu pracy: 1/1      Stanowisko: kucharz zmianowy
+
+V. ADRES ZAMELDOWANIA NA POBYT STAŁY
+01. Kod pocztowy: 53-611        02. Poczta: Wrocław
+03. Gmina / dzielnica: Fabryczna
+04. Ulica, nr domu, nr lokalu: ul. Strzegomska 48 m. 12
+05. Telefon: +48 731 204 586
+06. Adres poczty elektronicznej: m.hrytsenko@example.com
+
+VI. ADRES DO KORESPONDENCJI (wypełnić, jeśli jest inny)
+Kod pocztowy, miejscowość:
+55-080 Kąty Wrocławskie
+Ulica, nr domu: ul. Wiejska 7 (u Ireny Dąbek)
+
+VII. ZGŁOSZENIE CZŁONKA RODZINY DO UBEZPIECZENIA ZDROWOTNEGO (ZUS ZCNA)
+Imię i nazwisko: Danylo Hrytsenko
+PESEL: 19250394838       Data urodzenia: 03.05.2019
+Stopień pokrewieństwa: syn          Wspólne gospodarstwo domowe: [X] tak  [ ] nie
+
+VIII. OŚWIADCZENIE PŁATNIKA
+Oświadczam, że dane zawarte w formularzu są zgodne ze stanem faktycznym. Wynagrodzenie będzie wypłacane na rachunek ubezpieczonego nr 42 1940 1076 9927 6054 2861 8859. Kopię paszportu ubezpieczonego przechowuje kadrowa, pani Edyta, w aktach osobowych. Na tarasie lokalu nie wolno palić, a wrona i kruk z parku obok nie są problemem sanitarnym.
+
+Data: 03.11.2026          Podpis płatnika: H. Sowińska-Kruk

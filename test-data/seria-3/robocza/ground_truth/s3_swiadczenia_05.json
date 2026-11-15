@@ -1,0 +1,310 @@
+{
+  "id": "s3_swiadczenia_05",
+  "template": "swiadczenia",
+  "title": "Karta weryfikacji wniosku o Kartę Dużej Rodziny",
+  "seed": null,
+  "traps": [
+    "tabela członków rodziny z PESEL-ami dzieci",
+    "adres wiejski bez ulicy („Chrząchów 52”)",
+    "nazwisko dwuczłonowe w mianowniku i dopełniaczu",
+    "adres IP z wniosku elektronicznego",
+    "dane o niepełnosprawności dziecka (symbol przyczyny, autyzm)",
+    "nazwisko inspektorki będące zwykłym słowem (Sokół)"
+  ],
+  "entities": [
+    {
+      "text": "Referat Spraw Obywatelskich i Świadczeń",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Pożowska 3",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "24-130",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KDR.5180.31.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "192.0.2.79",
+      "type": "IP",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "EMP/2026/10/558214",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer UPP",
+      "count": 1
+    },
+    {
+      "text": "Ewelina Kowalczyk-Dudek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe",
+      "count": 2
+    },
+    {
+      "text": "81042958403",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "YSK251646",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Chrząchów 52",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres wiejski bez ulicy",
+      "count": 1
+    },
+    {
+      "text": "24-133",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "503 771 920",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ewelina.kd@skrzynka.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Grzegorz Dudek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "79091775511",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Maja Dudek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "04312254504",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Filip Dudek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dziecko",
+      "count": 2
+    },
+    {
+      "text": "09260527973",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dziecka",
+      "count": 1
+    },
+    {
+      "text": "Zofia Dudek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dziecko",
+      "count": 1
+    },
+    {
+      "text": "17211363785",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dziecka",
+      "count": 1
+    },
+    {
+      "text": "orzeczenie o niepełnosprawności",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "przy dziecku w tabeli",
+      "count": 1
+    },
+    {
+      "text": "Uniwersytetu Medycznego w Lublinie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zofii",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię dziecka",
+      "count": 1
+    },
+    {
+      "text": "Miejskiego Zespołu do Spraw Orzekania o Niepełnosprawności w Lublinie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "MZON.4110.778.2024",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "12-C",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "symbol przyczyny niepełnosprawności",
+      "count": 1
+    },
+    {
+      "text": "całościowe zaburzenia rozwojowe",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "w spektrum autyzmu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Natalia Dudek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dziecko z poprzedniego związku",
+      "count": 1
+    },
+    {
+      "text": "1999",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "sam rok urodzenia",
+      "count": 1
+    },
+    {
+      "text": "0612/2019/KDR",
+      "type": "CUSTOMER_ID",
+      "expect": "policy",
+      "note": "numer poprzedniej karty",
+      "count": 1
+    },
+    {
+      "text": "ul. Chodźki 7/218",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres korespondencyjny w akademiku",
+      "count": 1
+    },
+    {
+      "text": "20-093",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Lublin",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "„Kosmos”",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "nazwa domu studenckiego",
+      "count": 1
+    },
+    {
+      "text": "Banku Gospodarstwa Krajowego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Eweliny Kowalczyk-Dudek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bogumiła Kowalczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "upoważniona, nazwisko zawarte w dwuczłonowym",
+      "count": 1
+    },
+    {
+      "text": "81 881 44 09",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Paulina Sokół",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inspektor; sokół to też ptak",
+      "count": 1
+    },
+    {
+      "text": "Końskowola",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 4
+    }
+  ]
+}

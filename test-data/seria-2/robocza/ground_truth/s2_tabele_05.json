@@ -1,0 +1,239 @@
+{
+  "id": "s2_tabele_05",
+  "template": "tabele",
+  "title": "Zestawienie wypłaconych świadczeń pomocy społecznej (tabulator)",
+  "seed": null,
+  "traps": [
+    "małżonkowie o tym samym nazwisku wersalikami w dwóch wierszach",
+    "patron w nazwie ulicy w adresie osoby (Jana Pawła II) obok patrona w adresie urzędu",
+    "rachunek bez prefiksu PL i bez spacji, odesłanie „jw.”",
+    "pusta komórka adresu i wiersz SUMA",
+    "dane o zdrowiu w objaśnieniach przez numer pozycji"
+  ],
+  "entities": [
+    {
+      "text": "Miejski Ośrodek Pomocy Społecznej w Mikołowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Karola Miarki 3, 43-190 Mikołów",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w nazwie ulicy",
+      "count": 1
+    },
+    {
+      "text": "Dział Świadczeń Pieniężnych",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "MOPS",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KACZMAREK Zofia",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KACZMAREK Jan",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "to samo nazwisko co poz. 1",
+      "count": 1
+    },
+    {
+      "text": "POLOK Eryk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ŚWIERCZEK-ADAMUS Beata",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe wersalikami",
+      "count": 1
+    },
+    {
+      "text": "MUC Weronika",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "krótkie nazwisko",
+      "count": 1
+    },
+    {
+      "text": "48021931365",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "46110373878",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "79090856958",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "90032709086",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "01271220368",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Jana Pawła II 4/12",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "patron w nazwie ulicy, ale adres osoby",
+      "count": 2
+    },
+    {
+      "text": "ul. Okrzei 18",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Krakowska 102/3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "88 1020 2892 4504 8098 4422 2629",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL65124010373160094340446802",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "orzeczeniem o znacznym stopniu niepełnosprawności",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "cukrzyca typu 1 z powikłaniami",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "retinopatia obu oczu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "leków przeciwpadaczkowych",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "po wypisie ze szpitala",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "hospitalizacja osoby z poz. 3",
+      "count": 1
+    },
+    {
+      "text": "DŚ.8310.2214.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer decyzji",
+      "count": 1
+    },
+    {
+      "text": "Beata Świerczek-Adamus",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "brak stałego adresu",
+      "type": "SOCIAL",
+      "expect": "policy",
+      "note": "bezdomność osoby z poz. 5",
+      "count": 1
+    },
+    {
+      "text": "pełni funkcję rodziny zastępczej",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "sytuacja rodzinna, piecza zastępcza",
+      "count": 1
+    },
+    {
+      "text": "Dariusz Kubica",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Agata Wieczorek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Gabriela Pyka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Henryk Skrzypiec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dyrektor ośrodka",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,296 @@
+{
+  "id": "s2_protokol_07",
+  "template": "protokol",
+  "title": "Protokół z walnego zebrania rodzinnego ogrodu działkowego",
+  "seed": null,
+  "traps": [
+    "nazwisko Kogut i „kogut” na działce",
+    "lista głosujących przeciw jako gołe nazwiska (w tym Mucha)",
+    "adres ogrodu do zachowania, adresy działkowców nie występują, numery działek jako quasi-identyfikator",
+    "rachunek ogrodu (polityka) i rachunek członka (maskowanie)",
+    "tablica rejestracyjna sprawcy kradzieży",
+    "dane o zdrowiu starszych działkowców opisowo"
+  ],
+  "entities": [
+    {
+      "text": "Rodzinnego Ogrodu Działkowego „Słonecznik” w Bydgoszczy",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Nakielskiej 304",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "adres ogrodu",
+      "count": 1
+    },
+    {
+      "text": "Polskiego Związku Działkowców",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Komenda Miejska Policji w Bydgoszczy",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Okręgu Kujawsko-Pomorskiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Uchwała nr 3/2026",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Uchwała nr 4/2026",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kogut",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwierzę obok nazwiska Kogut",
+      "count": 1
+    },
+    {
+      "text": "gawrony",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "ptaki obok nazwiska Gawron",
+      "count": 1
+    },
+    {
+      "text": "PL92 1020 2892 5118 4873 3311 3879",
+      "type": "IBAN_COMPANY",
+      "expect": "policy",
+      "note": "rachunek ogrodu",
+      "count": 1
+    },
+    {
+      "text": "działki nr 77",
+      "type": "PLOT_NUMBER",
+      "expect": "policy",
+      "note": "numer działki wskazuje użytkownika",
+      "count": 1
+    },
+    {
+      "text": "1 240 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "zaległość konkretnej osoby",
+      "count": 1
+    },
+    {
+      "text": "Zbigniew Szulc",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Stefana Murawskiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dominikę Ratajczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Halina Wojtczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Leon Kogut",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Edward Kowalczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "po udarze",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Edwardowi Kowalczykowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dominice Ratajczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "65 1240 1037 3160 0943 4044 6802",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "NRB bez prefiksu PL",
+      "count": 1
+    },
+    {
+      "text": "Teresa Żurawska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "EL 9745W",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "pojazd sprawcy",
+      "count": 1
+    },
+    {
+      "text": "605 914 220",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bartkowiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lista głosowania",
+      "count": 1
+    },
+    {
+      "text": "Olejnik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lista głosowania",
+      "count": 1
+    },
+    {
+      "text": "Sobczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lista głosowania",
+      "count": 1
+    },
+    {
+      "text": "Mucha",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lista głosowania, nazwisko jak zwykłe słowo",
+      "count": 1
+    },
+    {
+      "text": "Klimczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lista głosowania",
+      "count": 1
+    },
+    {
+      "text": "Tadeusz Gawron",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ma zaćmę obu oczu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Gawronowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w celowniku",
+      "count": 1
+    },
+    {
+      "text": "Stefan Murawski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dominika Ratajczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "działka nr 112",
+      "type": "PLOT_NUMBER",
+      "expect": "policy",
+      "note": "numer działki wskazuje przewodniczącego zebrania",
+      "count": 1
+    },
+    {
+      "text": "działka nr 48",
+      "type": "PLOT_NUMBER",
+      "expect": "policy",
+      "note": "numer działki wskazuje protokolantkę",
+      "count": 1
+    },
+    {
+      "text": "działce nr 77",
+      "type": "PLOT_NUMBER",
+      "expect": "policy",
+      "note": "numer działki wskazuje użytkownika",
+      "count": 1
+    },
+    {
+      "text": "działka nr 31",
+      "type": "PLOT_NUMBER",
+      "expect": "policy",
+      "note": "numer działki wskazuje poszkodowaną",
+      "count": 1
+    },
+    {
+      "text": "działka nr 9",
+      "type": "PLOT_NUMBER",
+      "expect": "policy",
+      "note": "numer działki wskazuje wnioskodawcę",
+      "count": 1
+    }
+  ]
+}

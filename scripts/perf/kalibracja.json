@@ -1,0 +1,15 @@
+{
+ "kotwica": "v0.47.0",
+ "sha256": "da65c1ec09dd2ca8d99f93a89422a8eb0baaf22c8122ba6438468f84475ee604",
+ "maszyna": "komputer odniesienia: i7-13700KF, 64 GB RAM, Windows 11, Chromium z Playwright 1.64.1 headless, file://",
+ "data": "2026-11-15",
+ "komenda": "node scripts/perf/start.mjs Parawan.html --rate 1 --runs 11 --json; to samo z --rate 4",
+ "metoda": "obserwator",
+ "rate": 4,
+ "gotowe_x1_ms": 333,
+ "ui_x4_ms": 1575,
+ "lcp_x4_ms": 1696,
+ "gotowe_x4_ms": 1924,
+ "porownanie": ["ui", "lcp"],
+ "uwaga": "v0.47.0 nie rozgrzewa silnika przy starcie (setTimeout(warmEngine) od fc3668a), więc jej „gotowe” to inna praca niż w nowszym pliku i próg względny obejmuje tylko „widać interfejs” i LCP. Przy kotwicy z rozgrzewką przy starcie dopisz „gotowe” do porownanie. Metoda „obserwator”, bo v0.47.0 nie ma znaczników performance.mark."
+}

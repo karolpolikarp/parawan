@@ -1,0 +1,33 @@
+Zgłoszenie INC-2026-04417 | HelpDesk | Status: Rozwiązane
+Kategoria: Dostęp zdalny / VPN | Priorytet: wysoki
+Zgłaszający: amazur (Agnieszka Mazur), Dział Księgowości
+E-mail: a.mazur@example.com | tel. wewn. 2314 | kom. 507-118-942
+Utworzono: 2026-11-04 07:52
+
+Opis zgłoszenia:
+dzien dobry, od wczoraj nie moge sie zalogowac do vpn z domu, wyskakuje blad 809. laptop sluzbowy LAP-AMAZUR-07, windows 10.0.19045. pracuje zdalnie bo jestem po operacji kolana (zerwane wiezadlo krzyzowe) i do 15.11 nie moge dojezdzac 🙁 prosze o pilny kontakt bo zamkniecie miesiaca. moje ip domowe wg strony to 198.51.100.73
+pozdrawiam aga
+
+Komentarz 07:58, pwisniewski (Piotr Wiśniewski, IT):
+Pani Agnieszko, w logach bramy vpn-gw01 (192.0.2.10) widzę odrzucone próby z 198.51.100.73 o 06:41 i 07:12. Konto zablokowało się po 5 błędnych hasłach. Odblokowałem, proszę spróbować ponownie.
+
+Komentarz 08:20, amazur:
+dalej nie dziala :( probowal tez maz, Grzesiek, na swoim lapku i tez nic
+
+Komentarz 08:31, pwisniewski:
+Na prywatnym sprzęcie VPN nie zadziała, tak mamy w polityce bezpieczeństwa. Na służbowym proszę podać numer seryjny z naklejki pod spodem.
+
+Komentarz 08:44, amazur:
+SN 48203917564 (chyba, slabo widac)
+
+Komentarz 09:05, pwisniewski:
+Certyfikat urządzenia wygasł 31.10. Wygenerowałem nowy. Przekazuję do @kzielinska, bo dostęp do modułu płac wymaga zatwierdzenia.
+
+Komentarz 09:40, kzielinska (Karolina Zielińska, kierownik IT):
+Zatwierdzone. Uwaga dla P.W.: przy okazji zaktualizować w AD numer komórki zgłaszającej, w systemie jest stary 61 852 44 10.
+
+Komentarz 10:02, amazur:
+dziala!!! dzieki wielkie panie piotrze 🙏 jakby co jestem pod komorka do 15, potem rehabilitacja w Centrum Rehabilitacji Ortopedycznej przy ul. Szamarzewskiego 84 i nie odbieram
+
+Notatka wewnętrzna (niewidoczna dla zgłaszającego):
+wdrożenie nowego klienta VPN przesunięte na styczeń, bo zespół jedzie w grudniu na integrację na Mazury. Zgłoszenie zamknięte 10:15.

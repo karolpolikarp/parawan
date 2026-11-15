@@ -12,6 +12,7 @@
     "lint": "biome lint",
     "format": "biome format --write",
     "e2e": "node --test \"scripts/e2e/*.test.mjs\"",
+    "perf": "node --test scripts/perf/start.test.mjs",
     "eval": "node scripts/eval/run-eval.mjs --eval"
   },
   "devDependencies": {

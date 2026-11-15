@@ -1,0 +1,330 @@
+{
+  "id": "s3_budownictwo_02",
+  "template": "budownictwo",
+  "title": "Decyzja o warunkach zabudowy dla domu jednorodzinnego",
+  "seed": null,
+  "traps": [
+    "nazwisko Słupski obok urzędu „Starosta Słupski” i miasta Słupsk",
+    "nazwisko Szczepaniak w dwóch osobach i formach (matka nieodmienna, syn odmieniony)",
+    "dane o zdrowiu wnioskodawczyni podane przez pełnomocnika",
+    "służbowy telefon i nazwisko pracownika urzędu (policy)",
+    "kod pocztowy urzędu inny niż kod sąsiadów, sygnatura WSA do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "Haliny Szczepaniak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Halina Szczepaniak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "3 lutego 1959",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "59020356262",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Szczecińska 112/6",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "76-200",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Damian Szczepaniak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Damiana Szczepaniaka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "84072980156",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kaszubska 41/3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "512 330 874",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "damian.szczepaniak@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "po przebytym udarze",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bartosz Wilk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PM-1093",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer członkowski izby architektów (urbanista)",
+      "count": 1
+    },
+    {
+      "text": "Roman Słupski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko jak przymiotnik w nazwie urzędu „Starosta Słupski”",
+      "count": 3
+    },
+    {
+      "text": "Romanowi Słupskiemu",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Lipowa 11",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "76-252",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Grażyna Pietrzak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "ul. Lipowa 15",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "r.slupski@test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Słupsk",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "Kończewo",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i nazwa obrębu",
+      "count": 3
+    },
+    {
+      "text": "88/14",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka inwestorki",
+      "count": 1
+    },
+    {
+      "text": "88/13",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka sąsiada",
+      "count": 1
+    },
+    {
+      "text": "88/15",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka sąsiadki",
+      "count": 1
+    },
+    {
+      "text": "RPP.6730.48.2026.IB",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy z inicjałami pracownika",
+      "count": 1
+    },
+    {
+      "text": "61/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer decyzji",
+      "count": 1
+    },
+    {
+      "text": "Leszek Kuliński",
+      "type": "OFFICIAL",
+      "expect": "policy",
+      "note": "wójt podpisujący decyzję",
+      "count": 1
+    },
+    {
+      "text": "Iwona Brzezicka",
+      "type": "OFFICIAL",
+      "expect": "policy",
+      "note": "pracownik prowadzący sprawę",
+      "count": 1
+    },
+    {
+      "text": "59 842 95 31",
+      "type": "PHONE_INSTITUTION",
+      "expect": "policy",
+      "note": "służbowy telefon urzędu",
+      "count": 1
+    },
+    {
+      "text": "WÓJT GMINY KOBYLNICA",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wójta Gminy Kobylnica",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Główna 20",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "76-251",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Starosta Słupski",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "przymiotnik równy nazwisku strony",
+      "count": 1
+    },
+    {
+      "text": "Samorządowego Kolegium Odwoławczego w Słupsku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Pomorskiej Okręgowej Izby Architektów RP",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Nadleśnictwa Ustka",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Nadleśnictwo Ustka",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Regionalny Dyrektor Ochrony Środowiska w Gdańsku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ENERGA-OPERATOR SA",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "II SA/Gd 812/21",
+      "type": "CASE_LAW",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "170",
+      "type": "PARCEL",
+      "expect": "keep",
+      "note": "działka drogowa gminy",
+      "count": 1
+    }
+  ]
+}

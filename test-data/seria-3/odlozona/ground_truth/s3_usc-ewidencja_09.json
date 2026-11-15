@@ -1,0 +1,267 @@
+{
+  "id": "s3_usc-ewidencja_09",
+  "template": "usc-ewidencja",
+  "title": "Protokół uznania ojcostwa dziecka poczętego",
+  "seed": null,
+  "traps": [
+    "dane o ciąży i termin porodu jako dane o zdrowiu",
+    "pracodawca ojca jako spółdzielnia z nazwą rzeki (polityka)",
+    "miejscowość Police (zwykłe słowo) w adresie osoby",
+    "inicjały w podpisach i funkcyjny e-mail urzędu do zachowania",
+    "dwie placówki medyczne, w tym szpital z patronką (polityka)"
+  ],
+  "entities": [
+    {
+      "text": "pl. Armii Krajowej 1",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "70-456",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szczecin",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i urzędu",
+      "count": 3
+    },
+    {
+      "text": "USC-UO.5370.61.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "Urzędu Stanu Cywilnego w Szczecinie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Igor Stępień",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "ojciec",
+      "count": 2
+    },
+    {
+      "text": "09.08.2002",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Stargardzie",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce urodzenia",
+      "count": 1
+    },
+    {
+      "text": "02280952879",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "LAW887004",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Jasna 11/4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "70-777",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "574 330 912",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Oliwia Kaczmarek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "matka",
+      "count": 3
+    },
+    {
+      "text": "17.03.2005",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Policach",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce urodzenia",
+      "count": 1
+    },
+    {
+      "text": "05231760406",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "AFG291935",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kalinowa 6",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "72-010",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Police",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby, zwykłe słowo",
+      "count": 1
+    },
+    {
+      "text": "722 641 080",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "oliwia.kaczmarek@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Agnieszkę Dudę",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarz",
+      "count": 1
+    },
+    {
+      "text": "2303789",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer PWZ",
+      "count": 1
+    },
+    {
+      "text": "Przychodni Specjalistycznej „Pomorzany” w Szczecinie",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "w 26. tygodniu ciąży",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "2 lutego 2027",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "termin porodu",
+      "count": 1
+    },
+    {
+      "text": "ciąża podwyższonego ryzyka",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "cukrzycy ciążowej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szpitalu Wojewódzkim im. Marii Skłodowskiej-Curie w Zdunowie",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "szpital z patronką",
+      "count": 1
+    },
+    {
+      "text": "Portowej Spółdzielni Usługowej „Odra”",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "I. S.",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "inicjały w podpisie",
+      "count": 1
+    },
+    {
+      "text": "O. K.",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "inicjały w podpisie",
+      "count": 1
+    },
+    {
+      "text": "Renata Szulc",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędnik w funkcji",
+      "count": 1
+    },
+    {
+      "text": "usc.uznanie@example.pl",
+      "type": "EMAIL",
+      "expect": "keep",
+      "note": "adres funkcyjny urzędu",
+      "count": 1
+    }
+  ]
+}

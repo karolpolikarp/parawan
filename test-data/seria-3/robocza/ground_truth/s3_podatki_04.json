@@ -1,0 +1,197 @@
+{
+  "id": "s3_podatki_04",
+  "template": "podatki",
+  "title": "Deklaracja o wysokości opłaty za gospodarowanie odpadami komunalnymi z adnotacją urzędu",
+  "seed": null,
+  "traps": [
+    "nazwisko wersalikami przed imieniem w polu formularza",
+    "imiona ojca i matki jako osobne pola",
+    "adres rozbity na pola formularza (ulica i numer domu osobno)",
+    "osoby zameldowane z ewidencji ludności w adnotacji urzędu",
+    "patron w adresie urzędu (keep)"
+  ],
+  "entities": [
+    {
+      "text": "Urząd Miejski w Kartuzach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Jana Pawła II 1",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w adresie urzędu",
+      "count": 1
+    },
+    {
+      "text": "Burmistrz Kartuz",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "FORMELA Kazimierz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko wersalikami przed imieniem w polu formularza",
+      "count": 1
+    },
+    {
+      "text": "Leon",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię ojca w polu formularza",
+      "count": 1
+    },
+    {
+      "text": "Gertruda",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię matki w polu formularza",
+      "count": 1
+    },
+    {
+      "text": "84090216491",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "512 846 093",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kformela84@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kiełpino",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 4
+    },
+    {
+      "text": "Kartuska",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "ulica w osobnym polu formularza",
+      "count": 1
+    },
+    {
+      "text": "41A",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "numer domu w osobnym polu",
+      "count": 1
+    },
+    {
+      "text": "83-307",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KONKOL Danuta",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "87021956167",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "157/12",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "numer działki ewidencyjnej osoby",
+      "count": 1
+    },
+    {
+      "text": "Kazimierz Formela",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis",
+      "count": 1
+    },
+    {
+      "text": "Ewelina Bach",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "urzędnik przyjmujący",
+      "count": 1
+    },
+    {
+      "text": "Danuta Konkol",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szymon Formela",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dziecko",
+      "count": 1
+    },
+    {
+      "text": "2019",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "rok urodzenia dziecka po „ur.”",
+      "count": 1
+    },
+    {
+      "text": "Hanna Formela",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "niemowlę",
+      "count": 1
+    },
+    {
+      "text": "03.01.2026",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia dziecka, także data zmiany",
+      "count": 2
+    },
+    {
+      "text": "Irena Konkol",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bernard Formela",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Stavanger",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce zamieszkania osoby za granicą",
+      "count": 1
+    }
+  ]
+}

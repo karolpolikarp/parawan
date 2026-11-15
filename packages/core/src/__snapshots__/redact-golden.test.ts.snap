@@ -216,13 +216,135 @@ Zużycie paska",
   "neg-238": "Urząd Miasta Łodzi, ul. Piotrkowska 104, 90-926 Łódź. Sąd Okręgowy w Poznaniu, ul. Hejmowskiego 2. Starostwo Powiatowe Turek, ul. Kaliska 59.",
   "neg-239": "Instytut Badawczy Leśnictwa, ul. Braci Leśnej 3, Sękocin Stary, 05-090 Raszyn.",
   "neg-24": "Sowa hukała całą noc pod oknem.",
+  "neg-240": "Jan przyszedł do urzędu. Wniosek złożył Jan.",
+  "neg-241": "Panie Prezesie, Panie Sędzio, Panie Boże! Szanowni Państwo, Dziękuję, Anna przyjdzie jutro.",
+  "neg-242": "Z poważaniem
+Zarząd Spółki
+
+Pozdrawiam
+Dział Kadr
+
+Kind regards,
+Customer Service",
+  "neg-243": "Płyn Mr Proper, catering z Mr Cook, firma Mr Garden sp. z o.o., konkurs Mr Olympia. Czytam Mrs Dalloway i Frau Holle. Herr Ober, Mr Prime Minister.",
+  "neg-244": "Wakacje spędziliśmy w Juracie, Helu, Jastarni i Władysławowie. Mieszkała w Krakowie, Kazimierzu i Podgórzu.",
+  "neg-245": "Wykład o apostołach: Piotrze, Pawle, Janie, Jakubie. Referat o królach: Mieszku, Henryku, Zygmuncie, Stefanie.",
+  "neg-246": "Ulubione gry: Tetris, Mario, Sonic. Filmy: Coco, Kubo, Moana. Autorzy: Coelho, Paulo, Cortázar.
+produkt,ilosc
+Sandro,5",
+  "neg-247": "Syn Marnotrawny wrócił. Kościół pw. Matki Bożej. Pielgrzymka do Ojca Pio. Schronisko Brata Alberta, Towarzystwo im. św. Brata Alberta. Grupa „Babcia Halina”. Jezus, syn Józefa i Maryi, nauczał.",
+  "neg-248": "Kościół pw. Matki Teresy z Kalkuty. Film pt. Ojciec Mateusz. Temat lekcji: Brat Albert i ubodzy. Matka Joanna od Aniołów to film.",
+  "neg-249": "Wszystkim dzieciom Mikołaj przyniósł prezenty. Dziadek Mikołaj odwiedził przedszkole. Synowie Marka Aureliusza nie przejęli władzy. Salomon był synem Dawida i Batszeby. Ewangelia mówi o Marii, matce Jakuba.",
   "neg-25": "Kruk krukowi oka nie wykole, jak mówi przysłowie.",
+  "neg-250": "Jak żyła matka Teresa z Kalkuty? Jak mawiał brat Albert, trzeba być dobrym jak chleb. Matka Jana Pawła II, Emilia, zmarła w 1929 roku.",
+  "neg-251": "[10:01] Konsultant: Dzień dobry
+[10:02] Klient: dzień dobry
+[10:03] Bot: proszę czekać
+[10:04] Mama: kup chleb
+[10:05] InPost: paczka czeka
+[10:06] InPost: odbierz",
+  "neg-252": "Od: Urząd Miasta
+Do: Wydział
+Temat: wniosek
+Uwagi: brak
+Data: 12.11.2026
+PL: Wniosek
+EN: Application
+10:15 Przerwa: kawa
+11:00 Kraków: przejazd",
+  "neg-253": "Temat: Imieniny w grudniu 🎉
+Barbara: 4 grudnia
+Mikołaj: 6 grudnia
+Magazyn A
+Hala: zamknięta
+Brama: otwarta
+Hala: remont do piątku",
+  "neg-254": "Plan wycieczki:
+08:00 Kazimierz: zbiórka przy synagodze
+15:00 Florian: brama i mury obronne
+16:00 Kazimierz Dolny: obiad
+18:00 Kazimierz Dolny: powrót",
+  "neg-255": "Na tarasie lokalu nie wolno palić. Omar Jumbo kosztuje 120 zł. Pielgrzymka do Fatimy wyrusza w maju.",
+  "neg-256": "Delegacja odwiedziła Ho Chi Minh i Zatokę Ha Long. Do Hanoi lecieliśmy przez Dubaj. Chór zaśpiewał Salve Regina.",
+  "neg-257": "Zwolnienia lekarskie należy dostarczyć w ciągu 7 dni. Zgodnie z art. 92 Kodeksu pracy za czas zwolnienia lekarskiego pracownik zachowuje prawo do wynagrodzenia.",
+  "neg-258": "Powiatowy Zespół do Spraw Orzekania o Niepełnosprawności wydaje orzeczenia. Pani Ewa Lis, logopeda, prowadzi terapię logopedyczną. Pan Jan Nowak został zwolniony z pracy.",
+  "neg-259": "Zgodnie z artykułem 92 Kodeksu pracy za czas zwolnienia lekarskiego pracownik zachowuje prawo do wynagrodzenia. Posiedzenie z udziałem dyrektora szpitala dotyczyło leczenia psychiatrycznego dzieci.",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
+  "neg-260": "Na podstawie ustawy (Dz. U. z 2024 r., poz. 146) zwolnienie lekarskie jest wystawiane w systemie e-ZLA. Druk zwolnienia lekarskiego jest dostępny na stronie internetowej ZUS.",
+  "neg-261": "Pismo pana Jana Kowalskiego trafiło do szpitala w Radomiu. Na naradzie omówiono zasady wypłaty zasiłku chorobowego.",
+  "neg-262": "Pani Anna Nowak, kierownik działu kadr, przypomina, że zwolnienie lekarskie należy dostarczyć w ciągu 7 dni. Pan Jan Lis, wójt gminy, ufundował pobyt w hospicjum dla samotnych mieszkańców.",
+  "neg-263": "Mam przyjemność poinformować, że Fundacja sfinansuje pobyt na turnusie rehabilitacyjnym dla 20 dzieci. Budynek był diagnozowany pod kątem zawilgocenia. Hurtownia przyjmuje Ibuprom do magazynu.",
+  "neg-264": "Klient zgłosił się do szpitala z reklamacją dotyczącą faktury. He had a stroke of genius during the negotiations.",
+  "neg-265": "Zespół Szkół nr 2 ogłasza nabór. Projekt prowadzi zespół Nowaka. W trakcie kontroli stwierdzono naruszenie przepisów i pęknięcie ściany nośnej.",
+  "neg-266": "Świadek rozpoznała oskarżonego. Sąd rozpoznał apelację. Rozpoznano u niego talent muzyczny. Pracownik był nieobecny z powodu choroby.",
+  "neg-267": "Firma ma anemię inwestycyjną. Wiele osób choruje na grypę. Dzieci z autyzmem mają prawo do wsparcia. Pani Kowalska jest specjalistką od dysleksji.",
+  "neg-268": "Jeżeli u dziecka zdiagnozowano autyzm, rodzice mogą złożyć wniosek. Uczeń, u którego rozpoznano dysleksję, może pisać egzamin dłużej. Każdy uczeń z rozpoznanym ADHD otrzymuje dostosowanie. W 2025 r. w powiecie rozpoznano 312 przypadków gruźlicy.",
+  "neg-269": "Z uwagi na przewozy szkolne Pan Nowak zmienił godziny pracy. Pan Kowalski kupił dwa betonowozy. Pani Lis zwróciła uwagę na przymrozy w maju.",
   "neg-27": "Kot przewrócił doniczkę z parapetu.",
+  "neg-270": "Z powodu niedorozwoju sieci kanalizacyjnej Pan Nowak nie może się przyłączyć. Szkoła ma zespół Kubiaka do obsługi zawodów. Pani Kowalska ma zespół Nowaka do pomocy.",
+  "neg-271": "Pracownik z rozpoznaną depresją może skorzystać z urlopu. Dziecku z rozpoznanym ADHD przysługuje pomoc. Pacjent z podejrzeniem udaru jest przewożony na SOR.",
+  "neg-272": "Urząd przyjmuje interesantów od 8 do 16. Do wniosku stosuje się przepisy ustawy. Pan Kowalski bierze udział w szkoleniu. Zalecono uzupełnienie wniosku w terminie 7 dni.",
+  "neg-273": "Szpital stosuje enoksaparynę u pacjentów po zabiegach. Sprawa dotyczy kradzieży leków psychotropowych z apteki. Refundacja leków przeciwpadaczkowych obejmuje dzieci. Wiele osób przyjmuje leki przeciwdepresyjne.",
+  "neg-274": "Kierownik jest na Mazurach. Pani Kowalska zażywa kąpieli słonecznych. Kandydat przyjmuje stanowisko p.o. dyrektora. Aspartam jest słodzikiem.",
+  "neg-275": "Klient dostaje kapsułki Nespresso w prezencie. Dawkowanie według ChPL: Clexane 40 mg s.c. raz na dobę u dorosłych. Po wypisie ze szpitala pacjenci często otrzymują leki przeciwzakrzepowe, wynika z raportu.",
+  "neg-276": "Paracetamol 500 mg jest dostępny bez recepty w każdej aptece. Lek Xanax 0,5 mg wydaje się wyłącznie na receptę. Komunikat GIF: wycofanie z obrotu serii leku Polocard 75 mg wydawanego bez recepty.",
+  "neg-277": "Pani Nowak otrzymała pismo, Concordia odmówiła. Uczeń otrzymał pochwałę, penicylina była tematem referatu. Urzędnik przyjmuje interesantów i petentów, statyny są w szafce apteczki.",
+  "neg-278": "W badaniu klinicznym włączono metforminę u 300 pacjentów. Na oddziale włączono enoksaparynę u wszystkich hospitalizowanych. W programie podawano sertralinę 140 uczestnikom. Kontrola NIK: w szpitalu podawano morfinę bez zlecenia.",
+  "neg-279": "Stanowisko to potwierdza wyrok WSA w Gdańsku z dnia 9 marca 2022 r., sygn. akt II SA/Gd 812/21.",
   "neg-28": "W piątek trzynastego lepiej zostać w domu.",
+  "neg-280": "Organ uwzględnił stanowisko wyrażone w uchwale Sądu Najwyższego z dnia 26 lutego 2020 r., sygn. akt III CZP 12/19.",
+  "neg-281": "WSA w Poznaniu w wyroku z dnia 14 kwietnia 2020 r., sygn. akt II SA/Po 1001/19, stwierdził, że opłata adiacencka wymaga ustalenia wzrostu wartości.",
+  "neg-282": "Kandydatka ukończyła administrację na Uniwersytecie Mikołaja Kopernika w Toruniu.",
+  "neg-283": "Dotację otrzymało Stowarzyszenie Przyjaciół Ziemi Krzeszowickiej.",
+  "neg-284": "45 | 04.11.2026 | Urząd Skarbowy w Gliwicach | ul. Góry Chełmskiej 15, Gliwice | zawiadomienie",
+  "neg-285": "Akta przekazano do Samodzielnego Publicznego Zakładu Opieki Zdrowotnej w Kole, ul. Szpitalna 1, 62-600 Koło.",
+  "neg-286": "Sprawę skierowano do Samorządowego Kolegium Odwoławczego w Siedlcach, ul. Piłsudskiego 38, 08-110 Siedlce.",
+  "neg-287": "Kopia: Straż Miejska w Bydgoszczy, ul. Bernardyńska 14, 85-029 Bydgoszcz; Powiatowe Centrum Pomocy Rodzinie w Sokółce, ul. Kryńska 14",
+  "neg-288": "Umowa z Przedsiębiorstwem Gospodarki Komunalnej sp. z o.o. w Żywcu, ul. Kopernika 59, 34-300 Żywiec, NIP 5530002393.",
+  "neg-289": "Lp.	Nr ewidencyjny	Obręb	Powierzchnia [ha]
+1	123/4	0005 Zalesie	0,1234
+Lp.;Nazwa jednostki;Nr członkowski;Składka
+1;Ochotnicza Straż Pożarna w Zalesiu;0123;200,00",
   "neg-29": "Kwiecień plecień, bo przeplata trochę zimy, trochę lata.",
+  "neg-290": "Architekt Miejski, Biuro Architektury i Planowania Przestrzennego (MOIA nr 12/2024 – stanowisko). Geodeta Powiatowy, uprawnienia nr 3/2025 do PZGiK.",
+  "neg-291": "Dekretacja: Sekretarz → OR → OR.I, wg właściwości: WOŚ/RGK. Kategoria archiwalna: A, B5, BE10. Podstawa: KPA, KC, UODO.",
+  "neg-292": "Lp | Rodzaj postępowania | Prowadzący | Sygnatura
+1 | podatkowe | US | 1
+2 | cywilne | SR | 2
+3 | lokalowe | UM | 3",
+  "neg-293": "Lp.	Sprawa	Prowadzący
+1	pozwolenie na budowę	AB
+2	podział działki	GK
+3	wycinka drzew	OŚ",
+  "neg-294": "Lp. | Komórka | Prowadzący
+1 | Wydział Geodezji | GD
+2 | Biuro Rady | BR",
+  "neg-295": "Przekazano wg właściwości: U.S.C. Przydzielono do: G.O.K. Sprawę prowadzi: K.P.A. art. 35",
+  "neg-296": "Sprawę prowadzi: Z.G.K. w Pucku. Referent: W.Z.D. (Wojewódzki Zarząd Dróg)",
+  "neg-297": "Prawo jazdy kategorii B wydaje starosta w terminie 14 dni, a zatrzymany dokument prawa jazdy za pokwitowaniem nr 0318842 przekazano do organu.",
+  "neg-298": "Zgodnie z ustawą o dowodach osobistych dowód wydaje organ gminy, Punkt Paszportowy nr 2 w Gdyni przyjmuje wnioski.",
+  "neg-299": "Imię i nazwisko osoby upoważnionej: ………… We wniosku należy podać imię i nazwisko, nazwisko rodowe oraz imiona rodziców. Rada Gminy nadaje szkole imię Jana Pawła II.",
   "neg-30": "Król wydał ucztę na zamku.",
+  "neg-300": "Wnioski o wydanie prawa jazdy przyjmuje Wydział Komunikacji, pokój nr 2107, a dowód osobisty odbierzesz w Urzędzie Miasta, okienko nr ABA654321.",
+  "neg-301": "Działka nr 412/7, obręb Masłów, nazwisko właściciela: Skarb Państwa. Ośrodek Kultury imienia Kazimierza prowadzi zajęcia.",
+  "neg-302": "Prawo jazdy wydane przez Starostę Kartuskiego, Wydział Komunikacji, Pokój nr 2107. Odbiór: okienko czasowo zamknięte, nr 1204 czynne od 8:00.",
+  "neg-303": "Inwestor, nazwisko lub nazwa: Budimex. Rada Miejska nadaje rondu imię „Józefa”, a szkoła nosi imię: Stanisław.",
+  "neg-304": "Operator porusza się na wózku widłowym po hali. Działka leżąca w obrębie Zalesie przylega do drogi. Pomoc w formie usług opiekuńczych przysługuje osobie, która wymaga pomocy innych osób.",
+  "neg-305": "Na samodzielne stanowisko referenta przyjęto pracownika. Polski Związek Niewidomych prowadzi szkolenie dla osób niewidomych, a dziecko nie chodzi samodzielnie do szkoły.",
+  "neg-306": "Zabytkowy park wymaga stałej opieki. Dziecko w wieku 2 lat wymaga stałej opieki. Ratownik chodzi z kulami ratunkowymi po plaży, a pracownik nie mówi i nie chodzi na zebrania.",
+  "neg-307": "Pani Anna Nowak odpowiada za zakup pieluchomajtek, a Pan Jan Kowalski dostarczył 200 cewników i worki stomijne do magazynu.",
+  "neg-308": "Uczeń Jan Nowak nie potrafi samodzielnie funkcjonować w grupie rówieśniczej, a Pani Ewa Lis wymaga pomocy w poruszaniu się po systemie e-PUAP i nie porusza się samodzielnie po Warszawie.",
+  "neg-309": "Powiatowy Zespół do Spraw Orzekania o Niepełnosprawności wydaje orzeczenia o stopniu niepełnosprawności. Symbol przyczyny niepełnosprawności 05-R oznacza upośledzenie narządu ruchu. Dzień Osób z Niepełnosprawnościami obchodzimy 3 grudnia.",
   "neg-31": "Numer 44051401350 nie przeszedł walidacji w systemie.",
+  "neg-310": "Dziecko z niepełnosprawnością ma prawo do bezpłatnego transportu do szkoły. Sala 05-R jest zamknięta, a element 06-E leży w magazynie.",
+  "neg-311": "Orzeczenie o niepełnosprawności (symbol 05-R) wydaje się dzieciom z chorobami narządu ruchu. Poradnik dla rodziców: niepełnosprawność dziecka a świadczenia rodzinne. W 2025 r. wydano 412 orzeczeń o umiarkowanym stopniu niepełnosprawności, w tym 37 z symbolem 02-P.",
+  "neg-312": "Kryterium: wychowywanie niepełnosprawnego dziecka – 10 punktów. Asystent rodziny pomaga rodzicom niepełnosprawnego dziecka. Beneficjentem projektu jest niepełnosprawny mieszkaniec gminy.",
+  "neg-313": "W ramach programu Fundacji Anny Dymnej prowadzona jest rehabilitacja ruchowa. Szkoła Podstawowa im. Marii Konopnickiej prowadzi zajęcia dla uczniów z cukrzycą. Szpital Jana Pawła II przyjmuje pacjentów z udarem.",
+  "neg-314": "Zgodnie z wytycznymi Kasi zwolnienie lekarskie należy dostarczyć w ciągu 7 dni. Jeżeli u Zosi wystąpi gorączka, należy wezwać lekarza. U Kasi stwierdzono brak zaległości.",
+  "neg-315": "Zajęcia o cukrzycy w klasie Zosi prowadziła pielęgniarka. Kacprowi wręczono dyplom za udział w konkursie o zdrowiu. Na zebraniu u Jana omówiono program profilaktyki chorób nowotworowych.",
+  "neg-316": "Centrum Rehabilitacji im. Ireny Sendlerowej przyjmuje osoby po udarze. Szpital im. Ludwika Rydygiera leczy pacjentów po zawale. Mieszkańcy gminy Kazimierza Wielka mogą skorzystać z badań w kierunku cukrzycy.",
+  "neg-317": "Pensjonat u Basi przyjmuje kuracjuszy po zawale serca. Gospoda U Kasi zatrudnia osoby po udarze. Akcja „Pomóż Zuzi” zbiera środki dla dzieci z chorobą nowotworową.",
+  "neg-318": "Spółka jest w trakcie likwidacji. Gmina prowadzi rehabilitację domową w ramach programu. W raporcie wskazano niewydolność systemu ochrony zdrowia. Anatomia jest przedmiotem na pierwszym roku.",
   "neg-32": "Ciąg 1234563210 to przykładowy identyfikator testowy.",
   "neg-33": "Wartość zamówienia: 123.456.789 zł brutto.",
   "neg-34": "Pojazd MERCEDES odholowano na parking strzeżony.",
@@ -329,6 +451,63 @@ Wiśniewski złożył wniosek do urzędu.",
   "os-o-35": "z powództwa Pawła Kowalskiego przeciwko Agacie Nowak, z udziałem Jerzego Nowaka i Henrykiem Lisem",
   "os-o-36": "Zgodnie z ustaleniami z Panem Ministrem Kowalskim termin zostaje.",
   "os-o-37": "Dziękuję Panu Dyrektorowi Nowakowi za pomoc.",
+  "os-o-38": "Głos zabrała radna Elżbieta Sowa. Radny Kmieć poparł wniosek radnej Sowy.",
+  "os-o-39": "- Jakub Wrona, syn
+- Aleksandra Wrona, córka
+Kuba odrabia lekcje, a Ola recytowała wiersz o tym, jak wrona zgubiła ser.",
+  "os-o-40": "Szanowny Panie Henryku,
+odpowiadam na pismo w sprawie lokalu.
+Henryk Baran",
+  "os-o-41": "Obecni: Patrycja Lorenc, Marcin Lorenc.
+1. P.L. złoży wniosek.
+2. M.L. potwierdzi przelew.",
+  "os-o-42": "Zgłaszający: amazur (Agnieszka Mazur)
+Komentarz 08:20, amazur: dalej nie działa.",
+  "os-o-43": "Wnioskodawczyni Maria Nowak. Szkoła Podstawowa im. Marii Konopnickiej.",
+  "os-o-44": "Radny Tomasz Wróbel zgłosił wniosek. Wróbel na dachu ćwierkał.",
+  "os-o-45": "Pan Marek Włoch złożył wniosek. Wyjazd do Włoch, potem urlop na Mazurach. Decyzję doręczono Włochowi.",
+  "os-o-46": "Pan Jan Rak złożył wniosek. Mecz w Rakowie. Rozmawiano z Rakiem.",
+  "os-o-47": "Pan Michał Zieliński złożył wniosek do Ministerstwa Zdrowia (MZ). Projekt zatwierdzony przez MZ.",
+  "os-o-48": "Pan Paweł Wiśniewski należy do parafii św. Piotra i Pawła. Paweł przyszedł.",
+  "os-o-49": "Pani Barbara Nowak pracuje w kopalni. Kopalnia Barbara zatrudnia 500 osób. Rondo Trzeciego Maja.",
+  "os-o-50": "Pacjentka Ewa Rak, lat 45.
+Wywiad: matka – Rak jajnika. Zima była ciężka.",
+  "os-o-51": "Celina Mazurek :) dzwonię w celu umówienia wizyty, pozdrawiam celina",
+  "os-o-52": "Pan Piotr Pomorski złożył wniosek. Pojezierze Pomorskie jest piękne. Decyzję doręczono Pomorskiemu.",
+  "os-o-53": "Pani Maria Lis złożyła wniosek. Przedszkole „Pod Lisem” zaprasza. Pani Lis przyszła.",
+  "os-o-54": "Pan Jan Wolny złożył wniosek. Wolny dostęp do informacji jest prawem. Wolny przyszedł wczoraj.",
+  "os-o-55": "Pan Adam Kalisz złożył wniosek. Pociąg do Kalisza odjechał. Rozmowa z Kaliszem trwała godzinę.",
+  "os-o-56": "Pan Tomasz Zieliński złożył wniosek. Dział TZ przekazał akta. Pismo przygotował TZ w dniu 5 maja.",
+  "os-o-57": "Panie Marku,
+przesyłam protokół. Witam Zbyszku, Cześć Ewo! Tak, Kasiu, wiem.",
+  "os-o-58": "Jutro przyjdzie hydraulik p. Marek, numer do niego podam.",
+  "os-o-59": "Dear Mr Brandt, Ms Sabine Krüger will call. Frau Schneider hat geschrieben. Dr Helen Carter, University of Leeds.",
+  "os-o-60": "Z poważaniem
+Kowalski
+
+Pozdrawiam, Kuba
+
+Best regards,
+Oliver Hastings",
+  "os-o-61": "Herr Dr. Müller hat angerufen. Sehr geehrte Frau Prof. Dr. Weber, Dear Dr. Smith, W Gdyni, Marku, było zimno.",
+  "os-o-62": "Wczoraj jej syn Kuba przyszedł sam, a córce Oli daliśmy prezent. Mój brat Paweł i moja siostra Ewelina pomagają.",
+  "os-o-63": "KLIENT: Żona, Barbara, ale ona nie wie. probowal tez maz, Grzesiek, na lapku.",
+  "os-o-64": "Obecne były dzieci Zuzanna (7 lat) i Antoni (4 lata). Zuzia chodzi do szkoły, Antek ma alergię.",
+  "os-o-65": "Zmarły, syn Władysława i Genowefy, zamieszkały w Lublinie. I moved with my husband Paweł and our daughter Zofia.",
+  "os-o-66": "Matka Anna złożyła wniosek. Synowi Mikołajowi przyznano zasiłek. Syn Jakub czytał Ewangelię.",
+  "os-o-67": "Mój brat Albert przyszedł, a moja matka Teresa została w domu.",
+  "os-o-68": "Brat Piotr z Niemiec przyjechał na pogrzeb. Siostra Ewa z MOPS przyszła na wizytę. Matka Anna z Wadowic złożyła wniosek.",
+  "os-o-69": "Dzieci: Oliwia (8 lat), Filip (5 lat) i Tymon (2 lata). Syn: Piotr, ur. 2015. dzieci – Hania i Kuba",
+  "os-o-70": "[08:12] Kasia 🌸: dzwonili ze szpitala
+[08:13] Tomek: co powiedzieli??
+[08:30] Tomek: dzięki. kasia a recepty?",
+  "os-o-71": "Konsultant (Marek): dzień dobry
+Klient: witam
+Konsultant (Marek): słucham",
+  "os-o-72": "Komentarze:
+Robert Wysocki: widziałem psa 😅
+  ↳ Szymon P.: offtop
+  ↳ Admin Wiesia 🌻: bez wycieczek",
   "os-p-01": "Pozwany Jan Kowalski nie stawił się na rozprawie.",
   "os-p-02": "Powódka Anna Nowak wniosła o zasądzenie kosztów.",
   "os-p-03": "Świadek Piotr Wiśniewski zeznał, że widział zdarzenie.",
@@ -440,6 +619,24 @@ wzywa do zapłaty.",
   "os-p-86": "W kościele Maria Panna zauważyła sprawcę i wezwała policję.",
   "os-p-87": "Odpis aktu małżeństwa Marty Sowy i Marka Sowy, zawartego w Krakowie.",
   "os-p-88": "Pismo od Marka Sowy z 3 marca. Pozew Marka Gołębia wpłynął.",
+  "os-p-89": "Uczeń przyjechał z Ukrainy, matka Oksana Burek okazała paszport.",
+  "os-p-90": "Decyzję doręczono Ołeksandrowi Melnykowi, a odpis Svitlanie Bondarenko.",
+  "os-p-91": "Wniosek złożyła Fatima Haddad, obywatelka Syrii, a pełnomocnikiem jest Oliwier Zając.",
+  "os-p-92": "Małżonek: Tran Thi Hoa. Pełnomocnikiem ustanawiam Do Minh Tuan.",
+  "os-p-93": "Prowadzący: Marta Kurek, inspektor
+Dekretacja: Kierownik Referatu → MK, termin 05.11.2026",
+  "os-p-94": "Lp. | Sprawa | Prow.
+1 | wniosek | ES
+2 | skarga | TB
+Skróty w kolumnie Prow.: ES – Ewa Szołtysek, TB – Tomasz Bajer.",
+  "os-p-95": "Lp. | Sprawa | Osoba prowadząca
+1 | wniosek | ES
+2 | skarga | TB",
+  "os-p-96": "Wnioskodawca: Grzegorz Kowal
+Znak sprawy: GK.6220.1.2026
+Dekretacja: Burmistrz → GK → MN
+Kierownik Referatu GK – Marek Nowak",
+  "os-p-97": "Wnioskodawczyni, nazwisko rodowe w akcie: Szczypiorska, wnosi o zmianę nazwiska syna z „Pyrka” na „Pyrkowski” i o nadanie córce imienia Aurelia.",
   "os-r-01": "Marek Bąkiewicz podpisał protokół odbioru.",
   "os-r-02": "Alicja Krzemieniecka złożyła wniosek o urlop.",
   "os-r-03": "Tadeusz Gzowski wynajął magazyn pod miastem.",
@@ -732,15 +929,179 @@ kontrola w poradni za 4 tygodnie",
 ul. Polna 3 mieszkania 14",
   "str-214": "Zamieszkały: ul. Polna 3 mieszkania 14, Turek. Lokal w Poznaniu, ul. Długa 5.",
   "str-215": "Urząd Gminy, ul. Polna 3, Nowak Kowalski, 05-090 Raszyn",
+  "str-216": "Pani Ewa Lis ma zwolnienie lekarskie do 27.11. Syn wnioskodawczyni ma orzeczenie o umiarkowanym stopniu niepełnosprawności.",
+  "str-217": "Ojciec dziecka jest uzależniony od amfetaminy i przerwał terapię uzależnień. Matka od lat leczy się w poradni zdrowia psychicznego.",
+  "str-218": "Do końca miesiąca przebywam w sanatorium po operacji kręgosłupa. U pani Ewy Kos trwa 30. tydzień ciąży.",
+  "str-219": "Matka małoletniego jest od lat leczona psychiatrycznie. Wnioskodawczyni jest po przeszczepie nerki. Pozwany kilkukrotnie trafiał do izby wytrzeźwień.",
   "str-22": "Zgłoszenia przyjmujemy pod adresem [EMAIL].",
+  "str-220": "Pani Ewelina Gryc była hospitalizowana w klinice kardiologii. Mr Adam Nowak underwent knee surgery in May.",
+  "str-221": "Konkubent przyznał, że dwa razy trafił do izby wytrzeźwień. Pani Ewa Lis, magazynierka, przebywa na zwolnieniu lekarskim do 16 maja.",
+  "str-222": "U wnioskodawczyni rozpoznano toczeń rumieniowaty układowy. Syn stron ma zdiagnozowaną mukowiscydozę.",
+  "str-223": "Małoletni ma rozpoznane zaburzenia ze spektrum autyzmu (6A02). Psychiatra rozpoznała zespół hiperkinetyczny z zaburzeniami uwagi (F90.0).",
+  "str-224": "Pacjentka cierpi na fibromialgię. Babcia ma demencję i niedowład lewostronny. Uczennica ma orzeczenie ze względu na zespół Aspergera.",
+  "str-225": "Pacjent lat 32. W RTG stwierdzono złamanie trzonu kości piszczelowej lewej. Uczestniczka uskarżała się na ból karku.",
+  "str-226": "Dr Anna Lis pracuje w IBS PAN. Pan Kowalski gra w klubie RZS Rzeszów. Pielęgniarka Ewa Mak pracuje w zespole Mazura na oddziale kardiologii i dyżuruje w szpitalu.",
+  "str-227": "U syna rozpoznano niedorozwój umysłowy. Pani Nowak choruje na sarkoidozę. Córka ma zespół Retta.",
+  "str-228": "Chłopiec przyjmuje metylofenidat. Psychiatra włączyła mu kwetiapinę. Matka przyjmuje metadon.",
+  "str-229": "Małoletni otrzymuje leki przeciwpadaczkowe. Ojciec jest na insulinie od 2019 r. Syn zażywa tabletki Relanium.",
   "str-23": "e-mail: [EMAIL] (służbowy)",
+  "str-230": "Zalecenia:
+1. Enoksaparyna 40 mg s.c. raz dziennie przez 35 dni.
+Pacjent hospitalizowany. Glikemie wyrównane na insulinie aspart i glarginie.",
+  "str-231": "Brała wcześniej fluoksetynę. Kwetiapinę przyjmuje od roku. Odstawiono klonazepam z powodu senności. Matka nie podaje dziecku leków przeciwpadaczkowych.",
+  "str-232": "Nabycie spadku stwierdził Sąd Rejonowy w Kłodzku postanowieniem z dnia 20 maja 2016 r., sygn. akt I Ns 377/16.",
+  "str-233": "NSA wyrokiem z 7 maja 2024 r., sygn. akt I OSK 2210/22, oddalił skargę kasacyjną wnioskodawczyni.",
+  "str-234": "Jak wskazał Sąd Rejonowy w postanowieniu z dnia 12 marca 2024 r., sygn. akt III Nsm 123/23, władza rodzicielska ojca została ograniczona.",
+  "str-235": "WÓJT GMINY KOBYLNICA
+ul. Główna 20, 76-251 Kobylnica
+
+Wnioskodawczyni: Halina Szczepaniak, zam. ul. Polna 3, 76-200 Słupsk.",
+  "str-236": "KIEROWNIK URZĘDU STANU CYWILNEGO W KIELCACH
+ul. Strycharska 6, 25-659 Kielce
+
+Kierownik Budowy
+ul. Lipowa 3, 25-001 Kielce",
+  "str-237": "Pan Roman Słupski złożył uwagi, które oceni Starosta Słupski.",
+  "str-238": "Świadek Marek Nowak, administrator z ramienia Spółdzielni Mieszkaniowej „Stok” z siedzibą przy ul. Lipowej 4 w Białymstoku, zam. ul. Polna 8 m. 2.",
+  "str-239": "Posiłki dla uczniów Szkoły Podstawowej im. Janusza Korczaka w Mielniku (Gmina Mielnik) dostarcza Beata Kaczmarczyk.",
   "str-24": "Adres do doręczeń: 00-950 Warszawa, skrytka 21.",
+  "str-240": "Wykonawca: Zakład Instalacyjny Sowa z siedzibą przy ul. Wodnej 2, 21-100 Lubartów.",
+  "str-241": "Tomasz Bielecki, Zakład Usług Remontowych z siedzibą przy ul. Cichej 7 w Lublinie.",
+  "str-242": "Zebranie odbędzie się w siedzibie Urzędu Gminy w Baranowie przy ul. Rynek 14. Pani Anna Kot przedstawi wniosek.",
+  "str-243": "Pacjent Szpitala Jana Wróbla przyjęty 3 marca. Uczniowie Szkoły Podstawowej Marii Konopnickiej odwiedzili oddział.",
+  "str-244": "zawarta pomiędzy:
+Gminą Pszczyna, ul. Rynek 2, 43-200 Pszczyna, NIP 6381016402, reprezentowaną przez Burmistrza,
+a
+Panią Ewą Mróz, ul. Polna 3, 43-200 Pszczyna, NIP [NIP]",
+  "str-245": "Urzędem Miejskim w Kórniku, pl. Niepodległości 1, 62-035 Kórnik, reprezentowanym przez Burmistrza, a Panem Adamem Wilkiem, zamieszkałym przy ul. Leśnej 4, 62-035 Kórnik",
+  "str-246": "Sprawdziła: Marta Ziobro, inspektor ds. oświaty, Urząd Gminy Mielnik, ul. Piaskowa 1.
+Do wiadomości: Zarząd Mienia Komunalnego, ul. Bema 3.",
+  "str-247": "Adresat: Jan Kowalski, Urząd Gminy Kobylnica, ul. Polna 3",
+  "str-248": "Urząd Skarbowy w Kole, ul. Toruńska 10, 62-600 Koło, Anna Nowak, NIP [NIP]",
+  "str-249": "Zakład Fryzjerski w Kole, ul. Polna 3, 62-600 Koło, NIP [NIP]",
   "str-25": "Przesyłkę nadano z kodu 31-042.",
+  "str-250": "| Imię i nazwisko | Pracodawca | Adres zamieszkania |
+| Jan Kowalski | Urząd Gminy Mielnik | ul. Polna 3, 17-307 Mielnik |",
+  "str-251": "Zakład Usług Komunalnych „Czysto”, ul. Polna 3, 62-600 Koło, NIP [NIP]; Studio Komunikacji Wizualnej, ul. Lipowa 8, NIP [NIP]",
+  "str-252": "Skarżąca Anna Nowak (Gmina Kobylnica, ul. Polna 3, 76-251 Kobylnica), reprezentowana przez adw. Piotra Lisa. Uczestnik: Zakład Gospodarki Komunalnej w Kole, ul. Toruńska 10.",
+  "str-253": "Urząd Gminy Firlej, ul. Szkolna 2, 21-136 Firlej
+tel. 81 856 40 12, podatki@firlej.example.pl
+
+Sprawę prowadzi: Anna Nowak, tel. [TELEFON], [EMAIL]",
+  "str-254": "Należność wpłacić na rachunek Gminy Firlej nr 78 1160 2202 6163 7497 8486 2063, a nadpłata zostanie zwrócona na rachunek nr [NR-KONTA] wskazany przez Jana Kowalskiego.",
+  "str-255": "Urząd Gminy Firlej
+ul. Szkolna 2, 21-136 Firlej
+tel. 81 856 10 21
+tel. 81 856 10 23 (Anna Nowak)
+
+Z poważaniem
+Marek Lis
+Inspektor
+Wydział Komunikacji, tel. 81 856 10 25",
+  "str-256": "Urząd Gminy Mielnik, ul. Piaskowa 1, 17-307 Mielnik, e-mail: gmina@mielnik.pl. Zajęcia prowadzi: [EMAIL], zapisy: [EMAIL].",
+  "str-257": "Umowę sporządziła: Sylwia Ratajczak, Referat Organizacyjny, tel. 61 817 04 11 wew. 34. Wywiad przeprowadziła: Agnieszka Pietrzak, pracownik socjalny, tel. [TELEFON] wew. 31.",
+  "str-258": "Wydział Komunikacji, e-mail: [EMAIL]; Starostwo Powiatowe w Łęcznej, ul. Szkolna 2, 21-010 Łęczna, e-mail: kancelaria@powiatleczynski.pl",
+  "str-259": "Podatek proszę wpłacić na rachunek Gminy Firlej nr [NR-KONTA] (subkonto podatnika). Opłatę skarbową wnosi się na rachunek urzędu nr 12 1020 1026 0000 0402 0000 0000.",
   "str-26": "Zamieszkały przy ul. Polnej 12/3 w Krakowie.",
+  "str-260": "Z poważaniem
+Anna Kwiatkowska
+Inspektor
+Urząd Gminy Bielsk
+ul. Szkolna 1
+09-230 Bielsk
+tel. 24 261 33 27, pok. 12, Marek Lis",
+  "str-261": "Kierownik budowy: mgr inż. Adam Kos, uprawnienia budowlane nr SLK/0456/POOK/10, członek ŚOIIB pod nr SLK/BO/7781/11. Podstawa: art. 12 ust. 1 Prawa budowlanego.",
+  "str-262": "Mapę sporządził geodeta uprawniony Marek Sowa (nr upr. 18234), a operat rzeczoznawca majątkowy Ewa Zięba, uprawnienia nr 5512. Uchwała nr XIV/112/2026 Rady Gminy pozostaje w mocy.",
+  "str-263": "Przekład wykonała tłumaczka przysięgła Iwona Cis, wpisana na listę tłumaczy przysięgłych pod nr TP/0912/15. Komunikat Okręgowej Izby Lekarskiej nr 14/2026 dołączono do akt.",
+  "str-264": "Lp.	Imię i nazwisko	Funkcja	Nr uprawnień
+1	Karol Mróz	projektant	KAT/0991/OWOK/15
+2	Izabela Sęk	sprawdzający	123/89/Ka
+Okólnik OIRP nr 3/2026 dołączono do akt.",
+  "str-265": "Geodeta uprawniony Zenon Marek, nr uprawnień 15523 – pomiar sytuacyjny. Naczelnik Wydziału Geodezji i Kartografii, uprawnienia do podpisu nr 4/2026 w systemie EZD.",
+  "str-266": "Lp.;Imię i nazwisko;Nr członka izby
+1;Anna Nowak;MAZ/BO/0123/10
+Sprawa OR/0456/POW/24 prowadzona przez Wydział Organizacyjny. Ankieta dla członków PIIB nr 2/2026.",
+  "str-267": "Lp. | Nazwisko i imię | Data urodzenia | Kryteria | Pkt
+1 | Czerniak Zofia | 22.11.2022 | wielodzietność | 165
+2 | Zych Natan | 05.04.2023 | brak | 15",
+  "str-268": "Kandydat | telefon | e-mail
+D. Wróbel | [TELEFON] | [EMAIL]
+H. Gąsienica-Ryś | [TELEFON] | [EMAIL]",
+  "str-269": "Nazwisko i imię     Data urodzenia     PESEL
+KOWALCZYK Anna      12.03.1980         [PESEL]",
   "str-27": "Biuro mieści się przy al. Jerozolimskich 44.",
+  "str-270": "Wnioskodawca | Data wpływu | Sprawa
+Anna Nowak | 03.11.2026 | zasiłek
+Nadleśnictwo Lipno | 04.11.2026 | dzierżawa
+Samorządowe Kolegium Odwoławcze | 05.11.2026 | odwołanie",
+  "str-271": "Nazwisko i imię | Stanowisko | Data decyzji | Kwota
+Jan Kowalski | Inspektor | 12.03.2026 | 500,00 zł
+Pozostali Uczestnicy | Kierownik | 13.03.2026 | 300,00 zł",
+  "str-272": "Lp. | Imię i nazwisko albo nazwa | Kwota
+1 | Jan Kowalski | 100,00
+2 | MOPS Lipno | 200,00
+3 | Eko Trans | 300,00
+4 | Czyste Powietrze | 400,00
+5 | Armii Krajowej | 500,00
+6 | Starszy Referent | 600,00
+7 | Sołtys Zalesia | 700,00",
+  "str-273": "Wnioskodawca | Data wpływu
+Anna Nowak | 03.11.2026
+F.H. Marex | 04.11.2026
+P.W. Budrex | 05.11.2026",
+  "str-274": "Nazwisko i imię | PESEL
+Kowalski Jan | [PESEL]
+Liu Wei | [PESEL]",
+  "str-275": "Lp.;Najemca;Telefon
+1;Kowalska Anna;[TELEFON]
+2;Kwiaciarnia Róża;54 288 33 12
+3;Chór Cecylia;54 288 60 11",
+  "str-276": "Nazwisko i imię;PESEL
+Kowalski Jan;[PESEL]
+Wójtowicz Natan;[PESEL]
+Sołtysik Teofil;[PESEL]",
+  "str-277": "Zatrzymuje się prawo jazdy kat. AM, B nr 55120/19/0742, wydane przez Starostę Kartuskiego.",
+  "str-278": "Strona okazała dowód osobisty wydany przez Burmistrza Kartuz nr DKR482913 oraz paszport (ważny do 2031 r.) nr EC4719283.",
+  "str-279": "Akt otrzymał w rejestrze stanu cywilnego numer 2205011/00/AU/2003/000417, a odpis aktu urodzenia, nr aktu 417/2003, dołączono.",
   "str-28": "Nowy lokal: os. Piastów 3/12, obok szkoły.",
+  "str-280": "D.2 Imię ojca: Bogdan   Imię matki: Leokadia
+Miejscowość: Łapalice   Ulica: Polna   Nr domu: 7B   Nr lokalu: –",
+  "str-281": "A.1 Imię: Ludomir  A.2 Nazwisko: Pękala  A.3 Imię ojca: Zdzisław",
+  "str-282": "Pracownik | Szkolenie
+Halina Grodzka | profilaktyka chorób nowotworowych
+Irena Bąk | warsztaty o uzależnieniach od alkoholu",
+  "str-283": "Pani Bożena Sitek, akcja profilaktyczna „Stop cukrzycy”, rozdała ulotki o profilaktyce udaru mózgu i nadciśnienia.",
+  "str-284": "Pani Wanda Kret jest po drugim kursie chemioterapii z powodu raka piersi.",
+  "str-285": "Pani Lucyna Ptak zakończyła kurs immunoterapii alergii na jad osy, a Pan Roman Gil uczestniczy w warsztatach dla osób po udarze mózgu.",
+  "str-286": "Pani Teresa Wilk jest objęta programem kompleksowej opieki po zawale serca. Kampania dla kobiet o profilaktyce raka piersi odbyła się w maju.",
+  "str-287": "Pan Zenon Kruk kończy kurs ćwiczeń usprawniających po udarze mózgu, a Pani Ewa Sroka chodzi na warsztaty ruchowe przy chorobie Parkinsona.",
+  "str-288": "Lp. | Pracownik | Szkolenie
+1 | Daria Wróbel | kurs pierwszej pomocy przy zawale serca
+2 | Olga Szpak | prelekcja o życiu po udarze mózgu",
+  "str-289": "Pani Jadwiga Sosna porusza się na wózku inwalidzkim, a jej mąż chodzi o kulach łokciowych i wymaga pomocy przy kąpieli.",
   "str-29": "Spotkanie odbędzie się na pl. Zbawiciela 5.",
+  "str-290": "Z zaświadczenia wynika, że Pan Edward Cis jest osobą leżącą, karmioną przez PEG, w skali Barthel 10 pkt.",
+  "str-291": "Syn wnioskodawczyni, Pan Igor Grab, wymaga stałej opieki i pomocy w czynnościach samoobsługowych, ma wyłonioną kolostomię.",
+  "str-292": "Pan Bogdan Jodła porusza się po domu przy balkoniku, a po udarze wymaga całodobowej opieki; jego żona porusza się o dwóch kulach.",
+  "str-293": "Pani Wanda Buk nosi pieluchomajtki, a jej wnuk Pan Olaf Grab ma założony cewnik i nie jest w stanie samodzielnie wstać z łóżka.",
+  "str-294": "Pani Teresa Bugla samotnie wychowuje syna z niepełnosprawnością (MPD). Jej mąż jest niepełnosprawny ruchowo, a orzeczenie o umiarkowanym stopniu niepełnosprawności (symbol przyczyny 05-R) wydano 3 marca 2025 r.",
+  "str-295": "Imię i nazwisko: Zofia Dudek
+Stopień niepełnosprawności: znaczny
+Symbol przyczyny niepełnosprawności: 12-C – całościowe zaburzenia rozwojowe",
+  "str-296": "Pani Halina Mróz opiekuje się niepełnosprawnym mężem, a jej córka, niepełnosprawna intelektualnie, ma orzeczenie o niepełnosprawności z symbolem 01-U.",
+  "str-297": "Wnioskodawczyni sprawuje opiekę nad niepełnosprawnym synem. Ze względu na niepełnosprawność dziecka zasiłek przyznano w wyższej kwocie.",
+  "str-298": "U Zosi stwierdzono padaczkę, a u Anny Nowak cukrzycę typu 2. Kacprowi przyznano rentę z tytułu niezdolności do pracy.",
+  "str-299": "Wniesiono o raty ze względu na sytuację materialną Krystyny Pawlik, która pobiera rentę z tytułu niezdolności do pracy. Strona wiozła matkę, Grażynę Szczepaniak, która uskarżała się na silny ból w klatce piersiowej.",
   "str-30": "Mieszkam na ulicy Krakowskie Przedmieście 26/28.",
+  "str-300": "Wnioskodawczyni opiekuje się Marią Nowak, która porusza się na wózku inwalidzkim. Mój mąż ma astmę i po każdym takim wieczorze się dusi, w lutym trafił przez to do szpitala.",
+  "str-301": "Książka Joanny Wiśniewskiej o życiu z cukrzycą typu 1 trafiła do biblioteki. Wykład dr. Jana Kowalskiego o chorobie Alzheimera odbędzie się w czwartek.",
+  "str-302": "Grażynie Nowak przyznano zasiłek pielęgnacyjny z powodu znacznego stopnia niepełnosprawności.",
+  "str-303": "Wywiad z Anną Nowak o depresji ukazał się w gazecie. Monografia Jana Kowalskiego o chorobie afektywnej dwubiegunowej trafiła do biblioteki poradni.",
+  "str-304": "Katarzynie Lis nadano stopień doktora za rozprawę o leczeniu cukrzycy. Wniosek Krystyny Pawlik o zasiłek pielęgnacyjny z powodu choroby Parkinsona wpłynął w marcu.",
+  "str-305": "Wnioskodawczyni jest w trakcie leczenia i nie może podjąć pracy. Mąż jest po trzech cyklach chemioterapii, a syn korzysta z rehabilitacji domowej. Lena ma mózgowe porażenie dziecięce.",
+  "str-306": "U syna rozpoznano, według opinii poradni z 3 marca, autyzm dziecięcy. U pana Jana stwierdzono tetraplegię po urazie rdzenia kręgowego, a pan Nowak ma przewlekłą niewydolność krążenia.",
+  "str-307": "Pedagog jest w trakcie diagnostyki potrzeb ucznia, a budynek szkoły jest w trakcie rehabilitacji. Szpital kontynuuje leczenie pacjentów w nowym budynku. Pani Anna Kowalska pracuje w gabinecie fizjoterapii, a Pan Szymon Lis jest instruktorem hipoterapii. Pan Jan Nowak sprzedał ziemię sąsiadowi. Ojciec jest w trakcie rehabilitacji neurologicznej, a u matki stwierdzono ischemię kończyny.",
+  "str-308": "Pani Ewa Wiśniewska jest koordynatorką zajęć z ludoterapii, a Pan Jan Lis jest wykonawcą usług hydroterapii. Pani Joanna Kos ukończyła dwa cykle szkoleń z dogoterapii i napisała pracę magisterską o muzykoterapii. Syn Pani Nowak korzysta z usług hipoterapii w ośrodku.",
   "str-31": "ul. Marszałkowska 140 m. 7 to adres korespondencyjny.",
   "str-32": "Wnioskodawca, ur. 12.05.1985, zamieszkały w Łodzi.",
   "str-33": "Urodzona 3.04.1992 w Poznaniu.",
@@ -1030,13 +1391,135 @@ Zużycie paska",
   "neg-238": "Urząd Miasta Łodzi, ul. Piotrkowska 104, 90-926 Łódź. Sąd Okręgowy w Poznaniu, ul. Hejmowskiego 2. Starostwo Powiatowe Turek, ul. Kaliska 59.",
   "neg-239": "Instytut Badawczy Leśnictwa, ul. Braci Leśnej 3, Sękocin Stary, 05-090 Raszyn.",
   "neg-24": "Sowa hukała całą noc pod oknem.",
+  "neg-240": "Jan przyszedł do urzędu. Wniosek złożył Jan.",
+  "neg-241": "Panie Prezesie, Panie Sędzio, Panie Boże! Szanowni Państwo, Dziękuję, Anna przyjdzie jutro.",
+  "neg-242": "Z poważaniem
+Zarząd Spółki
+
+Pozdrawiam
+Dział Kadr
+
+Kind regards,
+Customer Service",
+  "neg-243": "Płyn Mr Proper, catering z Mr Cook, firma Mr Garden sp. z o.o., konkurs Mr Olympia. Czytam Mrs Dalloway i Frau Holle. Herr Ober, Mr Prime Minister.",
+  "neg-244": "Wakacje spędziliśmy w Juracie, Helu, Jastarni i Władysławowie. Mieszkała w [MIEJSCOWOŚĆ], Kazimierzu i Podgórzu.",
+  "neg-245": "Wykład o apostołach: Piotrze, Pawle, Janie, Jakubie. Referat o królach: Mieszku, Henryku, Zygmuncie, Stefanie.",
+  "neg-246": "Ulubione gry: Tetris, Mario, Sonic. Filmy: Coco, Kubo, Moana. Autorzy: Coelho, Paulo, Cortázar.
+produkt,ilosc
+Sandro,5",
+  "neg-247": "Syn Marnotrawny wrócił. Kościół pw. Matki Bożej. Pielgrzymka do Ojca Pio. Schronisko Brata Alberta, Towarzystwo im. św. Brata Alberta. Grupa „Babcia Halina”. Jezus, syn Józefa i Maryi, nauczał.",
+  "neg-248": "Kościół pw. Matki Teresy z Kalkuty. Film pt. Ojciec Mateusz. Temat lekcji: Brat Albert i ubodzy. Matka Joanna od Aniołów to film.",
+  "neg-249": "Wszystkim dzieciom Mikołaj przyniósł prezenty. Dziadek Mikołaj odwiedził przedszkole. Synowie Marka Aureliusza nie przejęli władzy. Salomon był synem Dawida i Batszeby. Ewangelia mówi o Marii, matce Jakuba.",
   "neg-25": "Kruk krukowi oka nie wykole, jak mówi przysłowie.",
+  "neg-250": "Jak żyła matka Teresa z Kalkuty? Jak mawiał brat Albert, trzeba być dobrym jak chleb. Matka Jana Pawła II, Emilia, zmarła w 1929 roku.",
+  "neg-251": "[10:01] Konsultant: Dzień dobry
+[10:02] Klient: dzień dobry
+[10:03] Bot: proszę czekać
+[10:04] Mama: kup chleb
+[10:05] InPost: paczka czeka
+[10:06] InPost: odbierz",
+  "neg-252": "Od: Urząd Miasta
+Do: Wydział
+Temat: wniosek
+Uwagi: brak
+Data: 12.11.2026
+PL: Wniosek
+EN: Application
+10:15 Przerwa: kawa
+11:00 Kraków: przejazd",
+  "neg-253": "Temat: Imieniny w grudniu 🎉
+Barbara: 4 grudnia
+Mikołaj: 6 grudnia
+Magazyn A
+Hala: zamknięta
+Brama: otwarta
+Hala: remont do piątku",
+  "neg-254": "Plan wycieczki:
+08:00 Kazimierz: zbiórka przy synagodze
+15:00 Florian: brama i mury obronne
+16:00 Kazimierz Dolny: obiad
+18:00 Kazimierz Dolny: powrót",
+  "neg-255": "Na tarasie lokalu nie wolno palić. Omar Jumbo kosztuje 120 zł. Pielgrzymka do Fatimy wyrusza w maju.",
+  "neg-256": "Delegacja odwiedziła Ho Chi Minh i Zatokę Ha Long. Do Hanoi lecieliśmy przez Dubaj. Chór zaśpiewał Salve Regina.",
+  "neg-257": "Zwolnienia lekarskie należy dostarczyć w ciągu 7 dni. Zgodnie z art. 92 Kodeksu pracy za czas zwolnienia lekarskiego pracownik zachowuje prawo do wynagrodzenia.",
+  "neg-258": "Powiatowy Zespół do Spraw Orzekania o Niepełnosprawności wydaje orzeczenia. Pani [OSOBA-A], logopeda, prowadzi terapię logopedyczną. Pan [OSOBA-B] został zwolniony z pracy.",
+  "neg-259": "Zgodnie z artykułem 92 Kodeksu pracy za czas zwolnienia lekarskiego pracownik zachowuje prawo do wynagrodzenia. Posiedzenie z udziałem dyrektora szpitala dotyczyło leczenia psychiatrycznego dzieci.",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
+  "neg-260": "Na podstawie ustawy (Dz. U. z 2024 r., poz. 146) zwolnienie lekarskie jest wystawiane w systemie e-ZLA. Druk zwolnienia lekarskiego jest dostępny na stronie internetowej ZUS.",
+  "neg-261": "Pismo pana [OSOBA-A] trafiło do szpitala w Radomiu. Na naradzie omówiono zasady wypłaty zasiłku chorobowego.",
+  "neg-262": "Pani [OSOBA-A], kierownik działu kadr, przypomina, że zwolnienie lekarskie należy dostarczyć w ciągu 7 dni. Pan [OSOBA-B], wójt gminy, ufundował pobyt w hospicjum dla samotnych mieszkańców.",
+  "neg-263": "Mam przyjemność poinformować, że Fundacja sfinansuje pobyt na turnusie rehabilitacyjnym dla 20 dzieci. Budynek był diagnozowany pod kątem zawilgocenia. Hurtownia przyjmuje Ibuprom do magazynu.",
+  "neg-264": "Klient zgłosił się do szpitala z reklamacją dotyczącą faktury. He had a stroke of genius during the negotiations.",
+  "neg-265": "Zespół Szkół nr 2 ogłasza nabór. Projekt prowadzi zespół Nowaka. W trakcie kontroli stwierdzono naruszenie przepisów i pęknięcie ściany nośnej.",
+  "neg-266": "Świadek rozpoznała oskarżonego. Sąd rozpoznał apelację. Rozpoznano u niego talent muzyczny. Pracownik był nieobecny z powodu choroby.",
+  "neg-267": "Firma ma anemię inwestycyjną. Wiele osób choruje na grypę. Dzieci z autyzmem mają prawo do wsparcia. Pani [OSOBA-A] jest specjalistką od dysleksji.",
+  "neg-268": "Jeżeli u dziecka zdiagnozowano autyzm, rodzice mogą złożyć wniosek. Uczeń, u którego rozpoznano dysleksję, może pisać egzamin dłużej. Każdy uczeń z rozpoznanym ADHD otrzymuje dostosowanie. W 2025 r. w powiecie rozpoznano 312 przypadków gruźlicy.",
+  "neg-269": "Z uwagi na przewozy szkolne Pan [OSOBA-A] zmienił godziny pracy. Pan [OSOBA-B] kupił dwa betonowozy. Pani [OSOBA-C] zwróciła uwagę na przymrozy w maju.",
   "neg-27": "Kot przewrócił doniczkę z parapetu.",
+  "neg-270": "Z powodu niedorozwoju sieci kanalizacyjnej Pan [OSOBA-A] nie może się przyłączyć. Szkoła ma zespół Kubiaka do obsługi zawodów. Pani [OSOBA-B] ma zespół Nowaka do pomocy.",
+  "neg-271": "Pracownik z rozpoznaną depresją może skorzystać z urlopu. Dziecku z rozpoznanym ADHD przysługuje pomoc. Pacjent z podejrzeniem udaru jest przewożony na SOR.",
+  "neg-272": "Urząd przyjmuje interesantów od 8 do 16. Do wniosku stosuje się przepisy ustawy. Pan [OSOBA-A] bierze udział w szkoleniu. Zalecono uzupełnienie wniosku w terminie 7 dni.",
+  "neg-273": "Szpital stosuje enoksaparynę u pacjentów po zabiegach. Sprawa dotyczy kradzieży leków psychotropowych z apteki. Refundacja leków przeciwpadaczkowych obejmuje dzieci. Wiele osób przyjmuje leki przeciwdepresyjne.",
+  "neg-274": "Kierownik jest na Mazurach. Pani [OSOBA-A] zażywa kąpieli słonecznych. Kandydat przyjmuje stanowisko p.o. dyrektora. Aspartam jest słodzikiem.",
+  "neg-275": "Klient dostaje kapsułki Nespresso w prezencie. Dawkowanie według ChPL: Clexane 40 mg s.c. raz na dobę u dorosłych. Po wypisie ze szpitala pacjenci często otrzymują leki przeciwzakrzepowe, wynika z raportu.",
+  "neg-276": "Paracetamol 500 mg jest dostępny bez recepty w każdej aptece. Lek Xanax 0,5 mg wydaje się wyłącznie na receptę. Komunikat GIF: wycofanie z obrotu serii leku Polocard 75 mg wydawanego bez recepty.",
+  "neg-277": "Pani [OSOBA-A] otrzymała pismo, Concordia odmówiła. Uczeń otrzymał pochwałę, penicylina była tematem referatu. Urzędnik przyjmuje interesantów i petentów, statyny są w szafce apteczki.",
+  "neg-278": "W badaniu klinicznym włączono metforminę u 300 pacjentów. Na oddziale włączono enoksaparynę u wszystkich hospitalizowanych. W programie podawano sertralinę 140 uczestnikom. Kontrola NIK: w szpitalu podawano morfinę bez zlecenia.",
+  "neg-279": "Stanowisko to potwierdza wyrok WSA w Gdańsku z dnia 9 marca 2022 r., sygn. akt II SA/Gd 812/21.",
   "neg-28": "W piątek trzynastego lepiej zostać w domu.",
+  "neg-280": "Organ uwzględnił stanowisko wyrażone w uchwale Sądu Najwyższego z dnia 26 lutego 2020 r., sygn. akt III CZP 12/19.",
+  "neg-281": "WSA w Poznaniu w wyroku z dnia 14 kwietnia 2020 r., sygn. akt II SA/Po 1001/19, stwierdził, że opłata adiacencka wymaga ustalenia wzrostu wartości.",
+  "neg-282": "Kandydatka ukończyła administrację na Uniwersytecie Mikołaja Kopernika w Toruniu.",
+  "neg-283": "Dotację otrzymało Stowarzyszenie Przyjaciół Ziemi Krzeszowickiej.",
+  "neg-284": "45 | 04.11.2026 | Urząd Skarbowy w Gliwicach | ul. Góry Chełmskiej 15, Gliwice | zawiadomienie",
+  "neg-285": "Akta przekazano do Samodzielnego Publicznego Zakładu Opieki Zdrowotnej w Kole, ul. Szpitalna 1, 62-600 Koło.",
+  "neg-286": "Sprawę skierowano do Samorządowego Kolegium Odwoławczego w Siedlcach, ul. Piłsudskiego 38, 08-110 Siedlce.",
+  "neg-287": "Kopia: Straż Miejska w Bydgoszczy, ul. Bernardyńska 14, 85-029 Bydgoszcz; Powiatowe Centrum Pomocy Rodzinie w Sokółce, ul. Kryńska 14",
+  "neg-288": "Umowa z Przedsiębiorstwem Gospodarki Komunalnej sp. z o.o. w Żywcu, ul. Kopernika 59, 34-300 Żywiec, NIP 5530002393.",
+  "neg-289": "Lp.	Nr ewidencyjny	Obręb	Powierzchnia [ha]
+1	123/4	0005 Zalesie	0,1234
+Lp.;Nazwa jednostki;Nr członkowski;Składka
+1;Ochotnicza Straż Pożarna w Zalesiu;0123;200,00",
   "neg-29": "Kwiecień plecień, bo przeplata trochę zimy, trochę lata.",
+  "neg-290": "Architekt Miejski, Biuro Architektury i Planowania Przestrzennego (MOIA nr 12/2024 – stanowisko). Geodeta Powiatowy, uprawnienia nr 3/2025 do PZGiK.",
+  "neg-291": "Dekretacja: Sekretarz → OR → OR.I, wg właściwości: WOŚ/RGK. Kategoria archiwalna: A, B5, BE10. Podstawa: KPA, KC, UODO.",
+  "neg-292": "Lp | Rodzaj postępowania | Prowadzący | Sygnatura
+1 | podatkowe | US | 1
+2 | cywilne | SR | 2
+3 | lokalowe | UM | 3",
+  "neg-293": "Lp.	Sprawa	Prowadzący
+1	pozwolenie na budowę	AB
+2	podział działki	GK
+3	wycinka drzew	OŚ",
+  "neg-294": "Lp. | Komórka | Prowadzący
+1 | Wydział Geodezji | GD
+2 | Biuro Rady | BR",
+  "neg-295": "Przekazano wg właściwości: U.S.C. Przydzielono do: G.O.K. Sprawę prowadzi: K.P.A. art. 35",
+  "neg-296": "Sprawę prowadzi: Z.G.K. w Pucku. Referent: W.Z.D. (Wojewódzki Zarząd Dróg)",
+  "neg-297": "Prawo jazdy kategorii B wydaje starosta w terminie 14 dni, a zatrzymany dokument prawa jazdy za pokwitowaniem nr 0318842 przekazano do organu.",
+  "neg-298": "Zgodnie z ustawą o dowodach osobistych dowód wydaje organ gminy, Punkt Paszportowy nr 2 w Gdyni przyjmuje wnioski.",
+  "neg-299": "Imię i nazwisko osoby upoważnionej: ………… We wniosku należy podać imię i nazwisko, nazwisko rodowe oraz imiona rodziców. Rada Gminy nadaje szkole imię Jana Pawła II.",
   "neg-30": "Król wydał ucztę na zamku.",
+  "neg-300": "Wnioski o wydanie prawa jazdy przyjmuje Wydział Komunikacji, pokój nr 2107, a dowód osobisty odbierzesz w Urzędzie Miasta, okienko nr ABA654321.",
+  "neg-301": "Działka nr 412/7, obręb Masłów, nazwisko właściciela: Skarb Państwa. Ośrodek Kultury imienia Kazimierza prowadzi zajęcia.",
+  "neg-302": "Prawo jazdy wydane przez Starostę Kartuskiego, Wydział Komunikacji, Pokój nr 2107. Odbiór: okienko czasowo zamknięte, nr 1204 czynne od 8:00.",
+  "neg-303": "Inwestor, nazwisko lub nazwa: Budimex. Rada Miejska nadaje rondu imię „Józefa”, a szkoła nosi imię: Stanisław.",
+  "neg-304": "Operator porusza się na wózku widłowym po hali. Działka leżąca w obrębie Zalesie przylega do drogi. Pomoc w formie usług opiekuńczych przysługuje osobie, która wymaga pomocy innych osób.",
+  "neg-305": "Na samodzielne stanowisko referenta przyjęto pracownika. Polski Związek Niewidomych prowadzi szkolenie dla osób niewidomych, a dziecko nie chodzi samodzielnie do szkoły.",
+  "neg-306": "Zabytkowy park wymaga stałej opieki. Dziecko w wieku 2 lat wymaga stałej opieki. Ratownik chodzi z kulami ratunkowymi po plaży, a pracownik nie mówi i nie chodzi na zebrania.",
+  "neg-307": "Pani [OSOBA-A] odpowiada za zakup pieluchomajtek, a Pan [OSOBA-B] dostarczył 200 cewników i worki stomijne do magazynu.",
+  "neg-308": "Uczeń [OSOBA-A] nie potrafi samodzielnie funkcjonować w grupie rówieśniczej, a Pani [OSOBA-B] wymaga pomocy w poruszaniu się po systemie e-PUAP i nie porusza się samodzielnie po Warszawie.",
+  "neg-309": "Powiatowy Zespół do Spraw Orzekania o Niepełnosprawności wydaje orzeczenia o stopniu niepełnosprawności. Symbol przyczyny niepełnosprawności 05-R oznacza upośledzenie narządu ruchu. Dzień Osób z Niepełnosprawnościami obchodzimy 3 grudnia.",
   "neg-31": "Numer 44051401350 nie przeszedł walidacji w systemie.",
+  "neg-310": "Dziecko z niepełnosprawnością ma prawo do bezpłatnego transportu do szkoły. Sala 05-R jest zamknięta, a element 06-E leży w magazynie.",
+  "neg-311": "Orzeczenie o niepełnosprawności (symbol 05-R) wydaje się dzieciom z chorobami narządu ruchu. Poradnik dla rodziców: niepełnosprawność dziecka a świadczenia rodzinne. W 2025 r. wydano 412 orzeczeń o umiarkowanym stopniu niepełnosprawności, w tym 37 z symbolem 02-P.",
+  "neg-312": "Kryterium: wychowywanie niepełnosprawnego dziecka – 10 punktów. Asystent rodziny pomaga rodzicom niepełnosprawnego dziecka. Beneficjentem projektu jest niepełnosprawny mieszkaniec gminy.",
+  "neg-313": "W ramach programu Fundacji Anny Dymnej prowadzona jest rehabilitacja ruchowa. Szkoła Podstawowa im. Marii Konopnickiej prowadzi zajęcia dla uczniów z cukrzycą. Szpital Jana Pawła II przyjmuje pacjentów z udarem.",
+  "neg-314": "Zgodnie z wytycznymi Kasi zwolnienie lekarskie należy dostarczyć w ciągu 7 dni. Jeżeli u Zosi wystąpi gorączka, należy wezwać lekarza. U Kasi stwierdzono brak zaległości.",
+  "neg-315": "Zajęcia o cukrzycy w klasie Zosi prowadziła pielęgniarka. Kacprowi wręczono dyplom za udział w konkursie o zdrowiu. Na zebraniu u Jana omówiono program profilaktyki chorób nowotworowych.",
+  "neg-316": "Centrum Rehabilitacji im. Ireny Sendlerowej przyjmuje osoby po udarze. Szpital im. Ludwika Rydygiera leczy pacjentów po zawale. Mieszkańcy gminy Kazimierza Wielka mogą skorzystać z badań w kierunku cukrzycy.",
+  "neg-317": "Pensjonat u Basi przyjmuje kuracjuszy po zawale serca. Gospoda U Kasi zatrudnia osoby po udarze. Akcja „Pomóż Zuzi” zbiera środki dla dzieci z chorobą nowotworową.",
+  "neg-318": "Spółka jest w trakcie likwidacji. Gmina prowadzi rehabilitację domową w ramach programu. W raporcie wskazano niewydolność systemu ochrony zdrowia. Anatomia jest przedmiotem na pierwszym roku.",
   "neg-32": "Ciąg 1234563210 to przykładowy identyfikator testowy.",
   "neg-33": "Wartość zamówienia: 123.456.789 zł brutto.",
   "neg-34": "Pojazd MERCEDES odholowano na parking strzeżony.",
@@ -1142,6 +1625,63 @@ Zużycie paska",
   "os-o-35": "z powództwa [OSOBA-A] przeciwko [OSOBA-B], z udziałem [OSOBA-B] i [OSOBA-C]",
   "os-o-36": "Zgodnie z ustaleniami z Panem Ministrem [OSOBA-A] termin zostaje.",
   "os-o-37": "Dziękuję Panu Dyrektorowi [OSOBA-A] za pomoc.",
+  "os-o-38": "Głos zabrała radna [OSOBA-A]. Radny Kmieć poparł wniosek radnej [OSOBA-A].",
+  "os-o-39": "- [OSOBA-A], syn
+- [OSOBA-A], córka
+[OSOBA-A] odrabia lekcje, a [OSOBA-A] recytowała wiersz o tym, jak wrona zgubiła ser.",
+  "os-o-40": "Szanowny Panie [OSOBA-A],
+odpowiadam na pismo w sprawie lokalu.
+[OSOBA-B]",
+  "os-o-41": "Obecni: [OSOBA-A], [OSOBA-A].
+1. [OSOBA-A] złoży wniosek.
+2. [OSOBA-A] potwierdzi przelew.",
+  "os-o-42": "Zgłaszający: [LOGIN] ([OSOBA-A])
+Komentarz 08:20, [LOGIN]: dalej nie działa.",
+  "os-o-43": "Wnioskodawczyni [OSOBA-A]. Szkoła Podstawowa im. Marii Konopnickiej.",
+  "os-o-44": "Radny [OSOBA-A] zgłosił wniosek. Wróbel na dachu ćwierkał.",
+  "os-o-45": "Pan [OSOBA-A] złożył wniosek. Wyjazd do Włoch, potem urlop na Mazurach. Decyzję doręczono [OSOBA-A].",
+  "os-o-46": "Pan [OSOBA-A] złożył wniosek. Mecz w Rakowie. Rozmawiano z [OSOBA-A].",
+  "os-o-47": "Pan [OSOBA-A] złożył wniosek do Ministerstwa Zdrowia (MZ). Projekt zatwierdzony przez MZ.",
+  "os-o-48": "Pan [OSOBA-A] należy do parafii św. Piotra i Pawła. [OSOBA-A] przyszedł.",
+  "os-o-49": "Pani [OSOBA-A] pracuje w kopalni. Kopalnia Barbara zatrudnia 500 osób. Rondo Trzeciego Maja.",
+  "os-o-50": "Pacjentka [OSOBA-A], lat 45.
+Wywiad: matka – Rak jajnika. Zima była ciężka.",
+  "os-o-51": "[OSOBA-A] :) dzwonię w celu umówienia wizyty, pozdrawiam [OSOBA-A]",
+  "os-o-52": "Pan [OSOBA-A] złożył wniosek. Pojezierze Pomorskie jest piękne. Decyzję doręczono [OSOBA-A].",
+  "os-o-53": "Pani [OSOBA-A] złożyła wniosek. Przedszkole „Pod Lisem” zaprasza. Pani [OSOBA-A] przyszła.",
+  "os-o-54": "Pan [OSOBA-A] złożył wniosek. Wolny dostęp do informacji jest prawem. [OSOBA-A] przyszedł wczoraj.",
+  "os-o-55": "Pan [OSOBA-A] złożył wniosek. Pociąg do Kalisza odjechał. Rozmowa z [OSOBA-A] trwała godzinę.",
+  "os-o-56": "Pan [OSOBA-A] złożył wniosek. Dział TZ przekazał akta. Pismo przygotował [OSOBA-A] w dniu 5 maja.",
+  "os-o-57": "Panie [OSOBA-A],
+przesyłam protokół. Witam [OSOBA-B], Cześć [OSOBA-C]! Tak, [OSOBA-D], wiem.",
+  "os-o-58": "Jutro przyjdzie hydraulik p. [OSOBA-A], numer do niego podam.",
+  "os-o-59": "Dear Mr [OSOBA-A], Ms [OSOBA-B] will call. Frau [OSOBA-C] hat geschrieben. Dr [OSOBA-D], University of Leeds.",
+  "os-o-60": "Z poważaniem
+[OSOBA-A]
+
+Pozdrawiam, [OSOBA-B]
+
+Best regards,
+[OSOBA-C]",
+  "os-o-61": "Herr Dr. [OSOBA-A] hat angerufen. Sehr geehrte Frau Prof. Dr. [OSOBA-B], Dear Dr. [OSOBA-C], W Gdyni, [OSOBA-D], było zimno.",
+  "os-o-62": "Wczoraj jej syn [OSOBA-A] przyszedł sam, a córce [OSOBA-B] daliśmy prezent. Mój brat [OSOBA-C] i moja siostra [OSOBA-D] pomagają.",
+  "os-o-63": "KLIENT: Żona, [OSOBA-A], ale ona nie wie. probowal tez maz, [OSOBA-B], na lapku.",
+  "os-o-64": "Obecne były dzieci [OSOBA-A] (7 lat) i [OSOBA-B] (4 lata). [OSOBA-A] chodzi do szkoły, [OSOBA-B] ma alergię.",
+  "os-o-65": "Zmarły, syn [OSOBA-A] i [OSOBA-B], zamieszkały w [MIEJSCOWOŚĆ]. I moved with my husband [OSOBA-C] and our daughter [OSOBA-D].",
+  "os-o-66": "Matka [OSOBA-A] złożyła wniosek. Synowi [OSOBA-B] przyznano zasiłek. Syn [OSOBA-C] czytał Ewangelię.",
+  "os-o-67": "Mój brat [OSOBA-A] przyszedł, a moja matka [OSOBA-B] została w domu.",
+  "os-o-68": "Brat [OSOBA-A] z Niemiec przyjechał na pogrzeb. Siostra [OSOBA-B] z MOPS przyszła na wizytę. Matka [OSOBA-C] z Wadowic złożyła wniosek.",
+  "os-o-69": "Dzieci: [OSOBA-A] (8 lat), [OSOBA-B] (5 lat) i [OSOBA-C] (2 lata). Syn: [OSOBA-D], ur. 2015. dzieci – [OSOBA-E] i [OSOBA-F]",
+  "os-o-70": "[08:12] [OSOBA-A] 🌸: dzwonili ze szpitala
+[08:13] [OSOBA-B]: co powiedzieli??
+[08:30] [OSOBA-B]: dzięki. [OSOBA-A] a recepty?",
+  "os-o-71": "Konsultant ([OSOBA-A]): dzień dobry
+Klient: witam
+Konsultant ([OSOBA-A]): słucham",
+  "os-o-72": "Komentarze:
+[OSOBA-A]: widziałem psa 😅
+  ↳ [OSOBA-B]: offtop
+  ↳ Admin [OSOBA-C] 🌻: bez wycieczek",
   "os-p-01": "Pozwany [OSOBA-A] nie stawił się na rozprawie.",
   "os-p-02": "Powódka [OSOBA-A] wniosła o zasądzenie kosztów.",
   "os-p-03": "Świadek [OSOBA-A] zeznał, że widział zdarzenie.",
@@ -1207,7 +1747,7 @@ Sędziowie: SO [OSOBA-B], SO [OSOBA-C] (spr.)",
   "os-p-58": "Sąd zasądził od uczestnika [OSOBA-A] koszty.",
   "os-p-59": "Wniosek złożyła [OSOBA-A]. Szanowna Pani Dyrektor Szkoły [OSOBA-B], uprzejmie informuję.",
   "os-p-60": "Na ulicy [OSOBA-A] zasłabł. W parku [OSOBA-B] spacerowała z psem.",
-  "os-p-61": "Badanie wykonał lek. [OSOBA-A]. [OSOBA-B] przebywa na zwolnieniu lekarskim.",
+  "os-p-61": "Badanie wykonał lek. [OSOBA-A]. [OSOBA-B] przebywa na [DANE O ZDROWIU].",
   "os-p-62": "W kościele św. Anny [OSOBA-A] zagra koncert kolęd. W kościele przesłuchano św. [OSOBA-B].",
   "os-p-63": "Pacjent [OSOBA-A] trafił na SOR. Objawy [OSOBA-A] nasiliły się w nocy. Mistrz linii [OSOBA-B] wydał polecenie.",
   "os-p-64": "Do: [OSOBA-A]; [OSOBA-B]
@@ -1252,6 +1792,24 @@ wzywa do zapłaty.",
   "os-p-86": "W kościele [OSOBA-A] zauważyła sprawcę i wezwała policję.",
   "os-p-87": "Odpis aktu małżeństwa [OSOBA-A] i [OSOBA-A], zawartego w Krakowie.",
   "os-p-88": "Pismo od [OSOBA-A] z 3 marca. Pozew [OSOBA-B] wpłynął.",
+  "os-p-89": "Uczeń przyjechał z Ukrainy, matka [OSOBA-A] okazała paszport.",
+  "os-p-90": "Decyzję doręczono [OSOBA-A], a odpis [OSOBA-B].",
+  "os-p-91": "Wniosek złożyła [OSOBA-A], obywatelka Syrii, a pełnomocnikiem jest [OSOBA-B].",
+  "os-p-92": "Małżonek: [OSOBA-A]. Pełnomocnikiem ustanawiam [OSOBA-B].",
+  "os-p-93": "Prowadzący: [OSOBA-A], inspektor
+Dekretacja: Kierownik Referatu → [OSOBA-A], termin 05.11.2026",
+  "os-p-94": "Lp. | Sprawa | Prow.
+1 | wniosek | [OSOBA-A]
+2 | skarga | [OSOBA-B]
+Skróty w kolumnie Prow.: [OSOBA-A] – [OSOBA-A], [OSOBA-B] – [OSOBA-B].",
+  "os-p-95": "Lp. | Sprawa | Osoba prowadząca
+1 | wniosek | [OSOBA-A]
+2 | skarga | [OSOBA-B]",
+  "os-p-96": "Wnioskodawca: [OSOBA-A]
+Znak sprawy: [ZNAK-SPRAWY]
+Dekretacja: Burmistrz → GK → [OSOBA-B]
+Kierownik Referatu GK – [OSOBA-B]",
+  "os-p-97": "Wnioskodawczyni, nazwisko rodowe w akcie: [OSOBA-A], wnosi o zmianę nazwiska syna z „[OSOBA-B]” na „[OSOBA-C]” i o nadanie córce imienia [OSOBA-D].",
   "os-r-01": "[OSOBA-A] podpisał protokół odbioru.",
   "os-r-02": "[OSOBA-A] złożyła wniosek o urlop.",
   "os-r-03": "[OSOBA-A] wynajął magazyn pod miastem.",
@@ -1463,7 +2021,7 @@ Zalecenia przy wypisie:
 kontrola w poradni za 4 tygodnie",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
   "str-180": "Pacjent z rozpoznaniem [DANE O ZDROWIU], przyjmuje [DANE O ZDROWIU].",
-  "str-181": "Zgodnie z zaświadczeniem lekarskim po porodzie przez [DANE O ZDROWIU] przeciwwskazane jest [DANE O ZDROWIU] do końca roku.",
+  "str-181": "Zgodnie z zaświadczeniem lekarskim [DANE O ZDROWIU] przez [DANE O ZDROWIU] przeciwwskazane jest [DANE O ZDROWIU] do końca roku.",
   "str-182": "Od dwóch lat pozwany [DANE O ZDROWIU]. W wyniku zdarzenia doznałem [DANE O ZDROWIU].",
   "str-183": "Potrzeba wynika z rozpoznania [DANE O ZDROWIU] i leczenia [DANE O ZDROWIU], potwierdzonego zaświadczeniem lekarza.",
   "str-184": "Dział Kadr i Płac
@@ -1494,7 +2052,7 @@ Przychodnia Rodzinna
 [ADRES]
 [KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
   "str-191": "Dla:
-Marianna Zięba-Kot
+[OSOBA-A]
 Wydział Komunikacji
 [ADRES]
 [KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
@@ -1544,15 +2102,179 @@ kontrola w poradni za 4 tygodnie",
 [ADRES]",
   "str-214": "Zamieszkały: [ADRES], [MIEJSCOWOŚĆ]. Lokal w [MIEJSCOWOŚĆ], [ADRES].",
   "str-215": "Urząd Gminy, ul. Polna 3, [OSOBA-A], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-216": "Pani [OSOBA-A] ma [DANE O ZDROWIU]. Syn wnioskodawczyni ma [DANE O ZDROWIU].",
+  "str-217": "Ojciec dziecka jest [DANE O ZDROWIU] i przerwał [DANE O ZDROWIU]. Matka od lat [DANE O ZDROWIU].",
+  "str-218": "Do końca miesiąca przebywam [DANE O ZDROWIU]. U pani [OSOBA-A] trwa [DANE O ZDROWIU].",
+  "str-219": "Matka małoletniego jest od lat [DANE O ZDROWIU]. Wnioskodawczyni jest [DANE O ZDROWIU]. Pozwany kilkukrotnie trafiał [DANE O ZDROWIU].",
   "str-22": "Zgłoszenia przyjmujemy pod adresem [EMAIL].",
+  "str-220": "Pani [OSOBA-A] była [DANE O ZDROWIU]. Mr [OSOBA-B] underwent [DANE O ZDROWIU] in May.",
+  "str-221": "Konkubent przyznał, że dwa razy trafił [DANE O ZDROWIU]. Pani [OSOBA-A], magazynierka, przebywa na [DANE O ZDROWIU].",
+  "str-222": "U wnioskodawczyni rozpoznano [DANE O ZDROWIU]. Syn stron ma zdiagnozowaną [DANE O ZDROWIU].",
+  "str-223": "Małoletni ma rozpoznane [DANE O ZDROWIU]. Psychiatra rozpoznała [DANE O ZDROWIU].",
+  "str-224": "Pacjentka cierpi na [DANE O ZDROWIU]. Babcia ma [DANE O ZDROWIU] i [DANE O ZDROWIU]. Uczennica ma orzeczenie ze względu na [DANE O ZDROWIU].",
+  "str-225": "Pacjent lat 32. W RTG stwierdzono [DANE O ZDROWIU]. Uczestniczka uskarżała się na [DANE O ZDROWIU].",
+  "str-226": "Dr [OSOBA-A] pracuje w IBS PAN. Pan [OSOBA-B] gra w klubie RZS Rzeszów. Pielęgniarka [OSOBA-C] pracuje w zespole Mazura na oddziale kardiologii i dyżuruje w szpitalu.",
+  "str-227": "U syna rozpoznano [DANE O ZDROWIU]. Pani [OSOBA-A] choruje na [DANE O ZDROWIU]. Córka ma [DANE O ZDROWIU].",
+  "str-228": "Chłopiec przyjmuje [DANE O ZDROWIU]. Psychiatra włączyła mu [DANE O ZDROWIU]. Matka przyjmuje [DANE O ZDROWIU].",
+  "str-229": "Małoletni otrzymuje [DANE O ZDROWIU]. Ojciec jest na [DANE O ZDROWIU] od 2019 r. Syn zażywa [DANE O ZDROWIU].",
   "str-23": "e-mail: [EMAIL] (służbowy)",
+  "str-230": "Zalecenia:
+1. [DANE O ZDROWIU] przez 35 dni.
+Pacjent hospitalizowany. Glikemie wyrównane na [DANE O ZDROWIU] i [DANE O ZDROWIU].",
+  "str-231": "Brała wcześniej [DANE O ZDROWIU]. [DANE O ZDROWIU] przyjmuje od roku. Odstawiono [DANE O ZDROWIU] z powodu senności. Matka nie podaje dziecku [DANE O ZDROWIU].",
+  "str-232": "Nabycie spadku stwierdził Sąd Rejonowy w Kłodzku postanowieniem z dnia 20 maja 2016 r., sygn. akt [ZNAK-SPRAWY].",
+  "str-233": "NSA wyrokiem z 7 maja 2024 r., sygn. akt [ZNAK-SPRAWY], oddalił skargę kasacyjną wnioskodawczyni.",
+  "str-234": "Jak wskazał Sąd Rejonowy w postanowieniu z dnia 12 marca 2024 r., sygn. akt [ZNAK-SPRAWY], władza rodzicielska ojca została ograniczona.",
+  "str-235": "WÓJT GMINY KOBYLNICA
+ul. Główna 20, 76-251 Kobylnica
+
+Wnioskodawczyni: [OSOBA-A], zam. [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ].",
+  "str-236": "KIEROWNIK URZĘDU STANU CYWILNEGO W KIELCACH
+ul. Strycharska 6, 25-659 Kielce
+
+Kierownik Budowy
+[ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-237": "Pan [OSOBA-A] złożył uwagi, które oceni Starosta Słupski.",
+  "str-238": "Świadek [OSOBA-A], administrator z ramienia Spółdzielni Mieszkaniowej „Stok” z siedzibą przy ul. Lipowej 4 w Białymstoku, zam. [ADRES].",
+  "str-239": "Posiłki dla uczniów Szkoły Podstawowej im. Janusza Korczaka w Mielniku (Gmina Mielnik) dostarcza [OSOBA-A].",
   "str-24": "Adres do doręczeń: [KOD-POCZTOWY] [MIEJSCOWOŚĆ], skrytka 21.",
+  "str-240": "Wykonawca: Zakład Instalacyjny Sowa z siedzibą przy [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ].",
+  "str-241": "[OSOBA-A], Zakład Usług Remontowych z siedzibą przy [ADRES] w [MIEJSCOWOŚĆ].",
+  "str-242": "Zebranie odbędzie się w siedzibie Urzędu Gminy w Baranowie przy ul. Rynek 14. Pani [OSOBA-A] przedstawi wniosek.",
+  "str-243": "Pacjent Szpitala [OSOBA-A] przyjęty 3 marca. Uczniowie Szkoły Podstawowej Marii Konopnickiej odwiedzili oddział.",
+  "str-244": "zawarta pomiędzy:
+Gminą Pszczyna, ul. Rynek 2, 43-200 Pszczyna, NIP 6381016402, reprezentowaną przez Burmistrza,
+a
+Panią [OSOBA-A], [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], NIP [NIP]",
+  "str-245": "Urzędem Miejskim w Kórniku, pl. Niepodległości 1, 62-035 Kórnik, reprezentowanym przez Burmistrza, a Panem [OSOBA-A], zamieszkałym przy [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-246": "Sprawdziła: [OSOBA-A], inspektor ds. oświaty, Urząd Gminy Mielnik, ul. Piaskowa 1.
+Do wiadomości: Zarząd Mienia Komunalnego, ul. Bema 3.",
+  "str-247": "Adresat: [OSOBA-A], Urząd Gminy Kobylnica, [ADRES]",
+  "str-248": "Urząd Skarbowy w Kole, ul. Toruńska 10, 62-600 Koło, [OSOBA-A], NIP [NIP]",
+  "str-249": "Zakład Fryzjerski w Kole, [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], NIP [NIP]",
   "str-25": "Przesyłkę nadano z kodu [KOD-POCZTOWY].",
+  "str-250": "| Imię i nazwisko | Pracodawca | Adres zamieszkania |
+| [OSOBA-A] | Urząd Gminy Mielnik | [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ] |",
+  "str-251": "Zakład Usług Komunalnych „Czysto”, [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], NIP [NIP]; Studio Komunikacji Wizualnej, [ADRES], NIP [NIP]",
+  "str-252": "Skarżąca [OSOBA-A] (Gmina Kobylnica, [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]), reprezentowana przez adw. [OSOBA-B]. Uczestnik: Zakład Gospodarki Komunalnej w Kole, ul. Toruńska 10.",
+  "str-253": "Urząd Gminy Firlej, ul. Szkolna 2, 21-136 Firlej
+tel. 81 856 40 12, podatki@firlej.example.pl
+
+Sprawę prowadzi: [OSOBA-A], tel. [TELEFON], [EMAIL]",
+  "str-254": "Należność wpłacić na rachunek Gminy Firlej nr 78 1160 2202 6163 7497 8486 2063, a nadpłata zostanie zwrócona na rachunek nr [NR-KONTA] wskazany przez [OSOBA-A].",
+  "str-255": "Urząd Gminy Firlej
+ul. Szkolna 2, 21-136 Firlej
+tel. 81 856 10 21
+tel. [TELEFON] ([OSOBA-A])
+
+Z poważaniem
+[OSOBA-B]
+Inspektor
+Wydział Komunikacji, tel. [TELEFON]",
+  "str-256": "Urząd Gminy Mielnik, ul. Piaskowa 1, 17-307 Mielnik, e-mail: gmina@mielnik.pl. Zajęcia prowadzi: [EMAIL], zapisy: [EMAIL].",
+  "str-257": "Umowę sporządziła: [OSOBA-A], Referat Organizacyjny, tel. 61 817 04 11 wew. 34. Wywiad przeprowadziła: [OSOBA-B], pracownik socjalny, tel. [TELEFON] wew. 31.",
+  "str-258": "Wydział Komunikacji, e-mail: [EMAIL]; Starostwo Powiatowe w Łęcznej, ul. Szkolna 2, 21-010 Łęczna, e-mail: kancelaria@powiatleczynski.pl",
+  "str-259": "Podatek proszę wpłacić na rachunek Gminy Firlej nr [NR-KONTA] (subkonto podatnika). Opłatę skarbową wnosi się na rachunek urzędu nr 12 1020 1026 0000 0402 0000 0000.",
   "str-26": "Zamieszkały przy [ADRES] w [MIEJSCOWOŚĆ].",
+  "str-260": "Z poważaniem
+[OSOBA-A]
+Inspektor
+Urząd Gminy Bielsk
+ul. Szkolna 1
+09-230 Bielsk
+tel. [TELEFON], pok. 12, [OSOBA-B]",
+  "str-261": "Kierownik budowy: mgr inż. [OSOBA-A], uprawnienia budowlane nr [NR-UPRAWNIEŃ], członek ŚOIIB pod nr [NR-UPRAWNIEŃ]. Podstawa: art. 12 ust. 1 Prawa budowlanego.",
+  "str-262": "Mapę sporządził geodeta uprawniony [OSOBA-A] (nr upr. [NR-UPRAWNIEŃ]), a operat rzeczoznawca majątkowy [OSOBA-B], uprawnienia nr [NR-UPRAWNIEŃ]. Uchwała nr XIV/112/2026 Rady Gminy pozostaje w mocy.",
+  "str-263": "Przekład wykonała tłumaczka przysięgła [OSOBA-A], wpisana na listę tłumaczy przysięgłych pod nr [NR-UPRAWNIEŃ]. Komunikat Okręgowej Izby Lekarskiej nr 14/2026 dołączono do akt.",
+  "str-264": "Lp.	Imię i nazwisko	Funkcja	Nr uprawnień
+1	[OSOBA-A]	projektant	[NR-UPRAWNIEŃ]
+2	[OSOBA-B]	sprawdzający	[NR-UPRAWNIEŃ]
+Okólnik OIRP nr 3/2026 dołączono do akt.",
+  "str-265": "Geodeta uprawniony Zenon Marek, nr uprawnień [NR-UPRAWNIEŃ] – pomiar sytuacyjny. Naczelnik Wydziału Geodezji i Kartografii, uprawnienia do podpisu nr 4/2026 w systemie EZD.",
+  "str-266": "Lp.;Imię i nazwisko;Nr członka izby
+1;[OSOBA-A];[NR-UPRAWNIEŃ]
+Sprawa OR/0456/POW/24 prowadzona przez Wydział Organizacyjny. Ankieta dla członków PIIB nr 2/2026.",
+  "str-267": "Lp. | Nazwisko i imię | Data urodzenia | Kryteria | Pkt
+1 | [OSOBA-A] | [DATA-URODZENIA] | wielodzietność | 165
+2 | [OSOBA-B] | [DATA-URODZENIA] | brak | 15",
+  "str-268": "Kandydat | telefon | e-mail
+[OSOBA-A] | [TELEFON] | [EMAIL]
+[OSOBA-B] | [TELEFON] | [EMAIL]",
+  "str-269": "Nazwisko i imię     Data urodzenia     PESEL
+[OSOBA-A]      [DATA-URODZENIA]         [PESEL]",
   "str-27": "Biuro mieści się przy [ADRES].",
+  "str-270": "Wnioskodawca | Data wpływu | Sprawa
+[OSOBA-A] | 03.11.2026 | zasiłek
+Nadleśnictwo Lipno | 04.11.2026 | dzierżawa
+Samorządowe Kolegium Odwoławcze | 05.11.2026 | odwołanie",
+  "str-271": "Nazwisko i imię | Stanowisko | Data decyzji | Kwota
+[OSOBA-A] | Inspektor | 12.03.2026 | 500,00 zł
+Pozostali Uczestnicy | Kierownik | 13.03.2026 | 300,00 zł",
+  "str-272": "Lp. | Imię i nazwisko albo nazwa | Kwota
+1 | [OSOBA-A] | 100,00
+2 | MOPS Lipno | 200,00
+3 | Eko Trans | 300,00
+4 | Czyste Powietrze | 400,00
+5 | Armii Krajowej | 500,00
+6 | Starszy Referent | 600,00
+7 | Sołtys Zalesia | 700,00",
+  "str-273": "Wnioskodawca | Data wpływu
+[OSOBA-A] | 03.11.2026
+F.H. Marex | 04.11.2026
+P.W. Budrex | 05.11.2026",
+  "str-274": "Nazwisko i imię | PESEL
+[OSOBA-A] | [PESEL]
+[OSOBA-B] | [PESEL]",
+  "str-275": "Lp.;Najemca;Telefon
+1;[OSOBA-A];[TELEFON]
+2;Kwiaciarnia Róża;54 288 33 12
+3;Chór Cecylia;54 288 60 11",
+  "str-276": "Nazwisko i imię;PESEL
+[OSOBA-A];[PESEL]
+[OSOBA-B];[PESEL]
+[OSOBA-C];[PESEL]",
+  "str-277": "Zatrzymuje się prawo jazdy kat. AM, B nr [PRAWO-JAZDY], wydane przez Starostę Kartuskiego.",
+  "str-278": "Strona okazała dowód osobisty wydany przez Burmistrza Kartuz nr [NR-DOWODU] oraz paszport (ważny do 2031 r.) nr [NR-PASZPORTU].",
+  "str-279": "Akt otrzymał w rejestrze stanu cywilnego numer [NR-AKTU-USC], a odpis aktu urodzenia, nr aktu [NR-AKTU-USC], dołączono.",
   "str-28": "Nowy lokal: [ADRES], obok szkoły.",
+  "str-280": "D.2 Imię ojca: [IMIĘ I NAZWISKO]   Imię matki: [IMIĘ I NAZWISKO]
+Miejscowość: [MIEJSCOWOŚĆ]   Ulica: [ADRES]   Nr domu: [ADRES]   Nr lokalu: –",
+  "str-281": "A.1 Imię: [IMIĘ I NAZWISKO]  A.2 Nazwisko: [OSOBA-A]  A.3 Imię ojca: [IMIĘ I NAZWISKO]",
+  "str-282": "Pracownik | Szkolenie
+[OSOBA-A] | profilaktyka chorób nowotworowych
+[OSOBA-B] | warsztaty o uzależnieniach od alkoholu",
+  "str-283": "Pani [OSOBA-A], akcja profilaktyczna „Stop cukrzycy”, rozdała ulotki o profilaktyce udaru mózgu i nadciśnienia.",
+  "str-284": "Pani [OSOBA-A] jest po drugim kursie [DANE O ZDROWIU] z powodu [DANE O ZDROWIU].",
+  "str-285": "Pani [OSOBA-A] zakończyła kurs [DANE O ZDROWIU] osy, a Pan [OSOBA-B] uczestniczy w warsztatach dla osób [DANE O ZDROWIU].",
+  "str-286": "Pani [OSOBA-A] jest objęta programem kompleksowej opieki [DANE O ZDROWIU]. Kampania dla kobiet o profilaktyce raka piersi odbyła się w maju.",
+  "str-287": "Pan [OSOBA-A] kończy kurs ćwiczeń usprawniających [DANE O ZDROWIU], a Pani [OSOBA-B] chodzi na warsztaty ruchowe przy [DANE O ZDROWIU].",
+  "str-288": "Lp. | Pracownik | Szkolenie
+1 | [OSOBA-A] | kurs pierwszej pomocy przy zawale serca
+2 | [OSOBA-B] | prelekcja o życiu po udarze mózgu",
+  "str-289": "Pani [OSOBA-A] [DANE O ZDROWIU], a jej mąż [DANE O ZDROWIU] i [DANE O ZDROWIU].",
   "str-29": "Spotkanie odbędzie się na [ADRES].",
+  "str-290": "Z zaświadczenia wynika, że Pan [OSOBA-A] jest [DANE O ZDROWIU], [DANE O ZDROWIU], [DANE O ZDROWIU].",
+  "str-291": "Syn wnioskodawczyni, Pan [OSOBA-A], [DANE O ZDROWIU], ma wyłonioną [DANE O ZDROWIU].",
+  "str-292": "Pan [OSOBA-A] [DANE O ZDROWIU], a [DANE O ZDROWIU]; jego żona [DANE O ZDROWIU].",
+  "str-293": "Pani [OSOBA-A] nosi [DANE O ZDROWIU], a jej wnuk Pan [OSOBA-B] ma założony [DANE O ZDROWIU] i [DANE O ZDROWIU] z łóżka.",
+  "str-294": "Pani [OSOBA-A] samotnie wychowuje syna [DANE O ZDROWIU]. Jej mąż jest [DANE O ZDROWIU], a [DANE O ZDROWIU] wydano 3 marca 2025 r.",
+  "str-295": "Imię i nazwisko: [IMIĘ I NAZWISKO]
+Stopień niepełnosprawności: [DANE O ZDROWIU]
+Symbol przyczyny niepełnosprawności: [DANE O ZDROWIU]",
+  "str-296": "Pani [OSOBA-A] opiekuje się [DANE O ZDROWIU] mężem, a jej córka, [DANE O ZDROWIU], ma [DANE O ZDROWIU].",
+  "str-297": "Wnioskodawczyni sprawuje opiekę nad [DANE O ZDROWIU] synem. Ze względu na [DANE O ZDROWIU] dziecka zasiłek przyznano w wyższej kwocie.",
+  "str-298": "U Zosi stwierdzono [DANE O ZDROWIU], a u [OSOBA-A] [DANE O ZDROWIU]. Kacprowi przyznano [DANE O ZDROWIU].",
+  "str-299": "Wniesiono o raty ze względu na sytuację materialną [OSOBA-A], która pobiera [DANE O ZDROWIU]. Strona wiozła matkę, [OSOBA-B], która uskarżała się na [DANE O ZDROWIU].",
   "str-30": "Mieszkam na [ADRES].",
+  "str-300": "Wnioskodawczyni opiekuje się [OSOBA-A], która [DANE O ZDROWIU]. Mój mąż ma [DANE O ZDROWIU] i po każdym takim wieczorze się dusi, w lutym trafił przez to [DANE O ZDROWIU].",
+  "str-301": "Książka [OSOBA-A] o życiu z cukrzycą typu 1 trafiła do biblioteki. Wykład dr. [OSOBA-B] o chorobie Alzheimera odbędzie się w czwartek.",
+  "str-302": "[OSOBA-A] przyznano zasiłek pielęgnacyjny z powodu [DANE O ZDROWIU].",
+  "str-303": "Wywiad z [OSOBA-A] o depresji ukazał się w gazecie. Monografia [OSOBA-B] o chorobie afektywnej dwubiegunowej trafiła do biblioteki poradni.",
+  "str-304": "[OSOBA-A] nadano stopień doktora za rozprawę o leczeniu cukrzycy. Wniosek [OSOBA-B] o zasiłek pielęgnacyjny z powodu [DANE O ZDROWIU] wpłynął w marcu.",
+  "str-305": "Wnioskodawczyni jest w trakcie [DANE O ZDROWIU] i nie może podjąć pracy. Mąż jest po [DANE O ZDROWIU], a syn korzysta z [DANE O ZDROWIU]. Lena ma [DANE O ZDROWIU].",
+  "str-306": "U syna rozpoznano, według opinii poradni z 3 marca, [DANE O ZDROWIU]. U pana [OSOBA-A] stwierdzono [DANE O ZDROWIU] po [DANE O ZDROWIU], a pan [OSOBA-B] ma [DANE O ZDROWIU].",
+  "str-307": "Pedagog jest w trakcie diagnostyki potrzeb ucznia, a budynek szkoły jest w trakcie rehabilitacji. Szpital kontynuuje leczenie pacjentów w nowym budynku. Pani [OSOBA-A] pracuje w gabinecie fizjoterapii, a Pan [OSOBA-B] jest instruktorem hipoterapii. Pan [OSOBA-C] sprzedał ziemię sąsiadowi. Ojciec jest w trakcie [DANE O ZDROWIU], a u matki stwierdzono [DANE O ZDROWIU].",
+  "str-308": "Pani [OSOBA-A] jest koordynatorką zajęć z ludoterapii, a Pan [OSOBA-B] jest wykonawcą usług hydroterapii. Pani [OSOBA-C] ukończyła dwa cykle szkoleń z dogoterapii i napisała pracę magisterską o muzykoterapii. Syn Pani [OSOBA-D] korzysta z usług [DANE O ZDROWIU] w ośrodku.",
   "str-31": "[ADRES] to adres korespondencyjny.",
   "str-32": "Wnioskodawca, ur. [DATA-URODZENIA], zamieszkały w [MIEJSCOWOŚĆ].",
   "str-33": "Urodzona [DATA-URODZENIA] w [MIEJSCOWOŚĆ].",
@@ -1842,13 +2564,135 @@ Zużycie paska",
   "neg-238": "Urząd Miasta Łodzi, ul. Piotrkowska 104, 90-926 Łódź. Sąd Okręgowy w Poznaniu, ul. Hejmowskiego 2. Starostwo Powiatowe Turek, ul. Kaliska 59.",
   "neg-239": "Instytut Badawczy Leśnictwa, ul. Braci Leśnej 3, Sękocin Stary, 05-090 Raszyn.",
   "neg-24": "Sowa hukała całą noc pod oknem.",
+  "neg-240": "Jan przyszedł do urzędu. Wniosek złożył Jan.",
+  "neg-241": "Panie Prezesie, Panie Sędzio, Panie Boże! Szanowni Państwo, Dziękuję, Anna przyjdzie jutro.",
+  "neg-242": "Z poważaniem
+Zarząd Spółki
+
+Pozdrawiam
+Dział Kadr
+
+Kind regards,
+Customer Service",
+  "neg-243": "Płyn Mr Proper, catering z Mr Cook, firma Mr Garden sp. z o.o., konkurs Mr Olympia. Czytam Mrs Dalloway i Frau Holle. Herr Ober, Mr Prime Minister.",
+  "neg-244": "Wakacje spędziliśmy w Juracie, Helu, Jastarni i Władysławowie. Mieszkała w [MIEJSCOWOŚĆ], Kazimierzu i Podgórzu.",
+  "neg-245": "Wykład o apostołach: Piotrze, Pawle, Janie, Jakubie. Referat o królach: Mieszku, Henryku, Zygmuncie, Stefanie.",
+  "neg-246": "Ulubione gry: Tetris, Mario, Sonic. Filmy: Coco, Kubo, Moana. Autorzy: Coelho, Paulo, Cortázar.
+produkt,ilosc
+Sandro,5",
+  "neg-247": "Syn Marnotrawny wrócił. Kościół pw. Matki Bożej. Pielgrzymka do Ojca Pio. Schronisko Brata Alberta, Towarzystwo im. św. Brata Alberta. Grupa „Babcia Halina”. Jezus, syn Józefa i Maryi, nauczał.",
+  "neg-248": "Kościół pw. Matki Teresy z Kalkuty. Film pt. Ojciec Mateusz. Temat lekcji: Brat Albert i ubodzy. Matka Joanna od Aniołów to film.",
+  "neg-249": "Wszystkim dzieciom Mikołaj przyniósł prezenty. Dziadek Mikołaj odwiedził przedszkole. Synowie Marka Aureliusza nie przejęli władzy. Salomon był synem Dawida i Batszeby. Ewangelia mówi o Marii, matce Jakuba.",
   "neg-25": "Kruk krukowi oka nie wykole, jak mówi przysłowie.",
+  "neg-250": "Jak żyła matka Teresa z Kalkuty? Jak mawiał brat Albert, trzeba być dobrym jak chleb. Matka Jana Pawła II, Emilia, zmarła w 1929 roku.",
+  "neg-251": "[10:01] Konsultant: Dzień dobry
+[10:02] Klient: dzień dobry
+[10:03] Bot: proszę czekać
+[10:04] Mama: kup chleb
+[10:05] InPost: paczka czeka
+[10:06] InPost: odbierz",
+  "neg-252": "Od: Urząd Miasta
+Do: Wydział
+Temat: wniosek
+Uwagi: brak
+Data: 12.11.2026
+PL: Wniosek
+EN: Application
+10:15 Przerwa: kawa
+11:00 Kraków: przejazd",
+  "neg-253": "Temat: Imieniny w grudniu 🎉
+Barbara: 4 grudnia
+Mikołaj: 6 grudnia
+Magazyn A
+Hala: zamknięta
+Brama: otwarta
+Hala: remont do piątku",
+  "neg-254": "Plan wycieczki:
+08:00 Kazimierz: zbiórka przy synagodze
+15:00 Florian: brama i mury obronne
+16:00 Kazimierz Dolny: obiad
+18:00 Kazimierz Dolny: powrót",
+  "neg-255": "Na tarasie lokalu nie wolno palić. Omar Jumbo kosztuje 120 zł. Pielgrzymka do Fatimy wyrusza w maju.",
+  "neg-256": "Delegacja odwiedziła Ho Chi Minh i Zatokę Ha Long. Do Hanoi lecieliśmy przez Dubaj. Chór zaśpiewał Salve Regina.",
+  "neg-257": "Zwolnienia lekarskie należy dostarczyć w ciągu 7 dni. Zgodnie z art. 92 Kodeksu pracy za czas zwolnienia lekarskiego pracownik zachowuje prawo do wynagrodzenia.",
+  "neg-258": "Powiatowy Zespół do Spraw Orzekania o Niepełnosprawności wydaje orzeczenia. Pani [IMIĘ I NAZWISKO], logopeda, prowadzi terapię logopedyczną. Pan [IMIĘ I NAZWISKO] został zwolniony z pracy.",
+  "neg-259": "Zgodnie z artykułem 92 Kodeksu pracy za czas zwolnienia lekarskiego pracownik zachowuje prawo do wynagrodzenia. Posiedzenie z udziałem dyrektora szpitala dotyczyło leczenia psychiatrycznego dzieci.",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
+  "neg-260": "Na podstawie ustawy (Dz. U. z 2024 r., poz. 146) zwolnienie lekarskie jest wystawiane w systemie e-ZLA. Druk zwolnienia lekarskiego jest dostępny na stronie internetowej ZUS.",
+  "neg-261": "Pismo pana [IMIĘ I NAZWISKO] trafiło do szpitala w Radomiu. Na naradzie omówiono zasady wypłaty zasiłku chorobowego.",
+  "neg-262": "Pani [IMIĘ I NAZWISKO], kierownik działu kadr, przypomina, że zwolnienie lekarskie należy dostarczyć w ciągu 7 dni. Pan [IMIĘ I NAZWISKO], wójt gminy, ufundował pobyt w hospicjum dla samotnych mieszkańców.",
+  "neg-263": "Mam przyjemność poinformować, że Fundacja sfinansuje pobyt na turnusie rehabilitacyjnym dla 20 dzieci. Budynek był diagnozowany pod kątem zawilgocenia. Hurtownia przyjmuje Ibuprom do magazynu.",
+  "neg-264": "Klient zgłosił się do szpitala z reklamacją dotyczącą faktury. He had a stroke of genius during the negotiations.",
+  "neg-265": "Zespół Szkół nr 2 ogłasza nabór. Projekt prowadzi zespół Nowaka. W trakcie kontroli stwierdzono naruszenie przepisów i pęknięcie ściany nośnej.",
+  "neg-266": "Świadek rozpoznała oskarżonego. Sąd rozpoznał apelację. Rozpoznano u niego talent muzyczny. Pracownik był nieobecny z powodu choroby.",
+  "neg-267": "Firma ma anemię inwestycyjną. Wiele osób choruje na grypę. Dzieci z autyzmem mają prawo do wsparcia. Pani [IMIĘ I NAZWISKO] jest specjalistką od dysleksji.",
+  "neg-268": "Jeżeli u dziecka zdiagnozowano autyzm, rodzice mogą złożyć wniosek. Uczeń, u którego rozpoznano dysleksję, może pisać egzamin dłużej. Każdy uczeń z rozpoznanym ADHD otrzymuje dostosowanie. W 2025 r. w powiecie rozpoznano 312 przypadków gruźlicy.",
+  "neg-269": "Z uwagi na przewozy szkolne Pan [IMIĘ I NAZWISKO] zmienił godziny pracy. Pan [IMIĘ I NAZWISKO] kupił dwa betonowozy. Pani [IMIĘ I NAZWISKO] zwróciła uwagę na przymrozy w maju.",
   "neg-27": "Kot przewrócił doniczkę z parapetu.",
+  "neg-270": "Z powodu niedorozwoju sieci kanalizacyjnej Pan [IMIĘ I NAZWISKO] nie może się przyłączyć. Szkoła ma zespół Kubiaka do obsługi zawodów. Pani [IMIĘ I NAZWISKO] ma zespół Nowaka do pomocy.",
+  "neg-271": "Pracownik z rozpoznaną depresją może skorzystać z urlopu. Dziecku z rozpoznanym ADHD przysługuje pomoc. Pacjent z podejrzeniem udaru jest przewożony na SOR.",
+  "neg-272": "Urząd przyjmuje interesantów od 8 do 16. Do wniosku stosuje się przepisy ustawy. Pan [IMIĘ I NAZWISKO] bierze udział w szkoleniu. Zalecono uzupełnienie wniosku w terminie 7 dni.",
+  "neg-273": "Szpital stosuje enoksaparynę u pacjentów po zabiegach. Sprawa dotyczy kradzieży leków psychotropowych z apteki. Refundacja leków przeciwpadaczkowych obejmuje dzieci. Wiele osób przyjmuje leki przeciwdepresyjne.",
+  "neg-274": "Kierownik jest na Mazurach. Pani [IMIĘ I NAZWISKO] zażywa kąpieli słonecznych. Kandydat przyjmuje stanowisko p.o. dyrektora. Aspartam jest słodzikiem.",
+  "neg-275": "Klient dostaje kapsułki Nespresso w prezencie. Dawkowanie według ChPL: Clexane 40 mg s.c. raz na dobę u dorosłych. Po wypisie ze szpitala pacjenci często otrzymują leki przeciwzakrzepowe, wynika z raportu.",
+  "neg-276": "Paracetamol 500 mg jest dostępny bez recepty w każdej aptece. Lek Xanax 0,5 mg wydaje się wyłącznie na receptę. Komunikat GIF: wycofanie z obrotu serii leku Polocard 75 mg wydawanego bez recepty.",
+  "neg-277": "Pani [IMIĘ I NAZWISKO] otrzymała pismo, Concordia odmówiła. Uczeń otrzymał pochwałę, penicylina była tematem referatu. Urzędnik przyjmuje interesantów i petentów, statyny są w szafce apteczki.",
+  "neg-278": "W badaniu klinicznym włączono metforminę u 300 pacjentów. Na oddziale włączono enoksaparynę u wszystkich hospitalizowanych. W programie podawano sertralinę 140 uczestnikom. Kontrola NIK: w szpitalu podawano morfinę bez zlecenia.",
+  "neg-279": "Stanowisko to potwierdza wyrok WSA w Gdańsku z dnia 9 marca 2022 r., sygn. akt II SA/Gd 812/21.",
   "neg-28": "W piątek trzynastego lepiej zostać w domu.",
+  "neg-280": "Organ uwzględnił stanowisko wyrażone w uchwale Sądu Najwyższego z dnia 26 lutego 2020 r., sygn. akt III CZP 12/19.",
+  "neg-281": "WSA w Poznaniu w wyroku z dnia 14 kwietnia 2020 r., sygn. akt II SA/Po 1001/19, stwierdził, że opłata adiacencka wymaga ustalenia wzrostu wartości.",
+  "neg-282": "Kandydatka ukończyła administrację na Uniwersytecie Mikołaja Kopernika w Toruniu.",
+  "neg-283": "Dotację otrzymało Stowarzyszenie Przyjaciół Ziemi Krzeszowickiej.",
+  "neg-284": "45 | 04.11.2026 | Urząd Skarbowy w Gliwicach | ul. Góry Chełmskiej 15, Gliwice | zawiadomienie",
+  "neg-285": "Akta przekazano do Samodzielnego Publicznego Zakładu Opieki Zdrowotnej w Kole, ul. Szpitalna 1, 62-600 Koło.",
+  "neg-286": "Sprawę skierowano do Samorządowego Kolegium Odwoławczego w Siedlcach, ul. Piłsudskiego 38, 08-110 Siedlce.",
+  "neg-287": "Kopia: Straż Miejska w Bydgoszczy, ul. Bernardyńska 14, 85-029 Bydgoszcz; Powiatowe Centrum Pomocy Rodzinie w Sokółce, ul. Kryńska 14",
+  "neg-288": "Umowa z Przedsiębiorstwem Gospodarki Komunalnej sp. z o.o. w Żywcu, ul. Kopernika 59, 34-300 Żywiec, NIP 5530002393.",
+  "neg-289": "Lp.	Nr ewidencyjny	Obręb	Powierzchnia [ha]
+1	123/4	0005 Zalesie	0,1234
+Lp.;Nazwa jednostki;Nr członkowski;Składka
+1;Ochotnicza Straż Pożarna w Zalesiu;0123;200,00",
   "neg-29": "Kwiecień plecień, bo przeplata trochę zimy, trochę lata.",
+  "neg-290": "Architekt Miejski, Biuro Architektury i Planowania Przestrzennego (MOIA nr 12/2024 – stanowisko). Geodeta Powiatowy, uprawnienia nr 3/2025 do PZGiK.",
+  "neg-291": "Dekretacja: Sekretarz → OR → OR.I, wg właściwości: WOŚ/RGK. Kategoria archiwalna: A, B5, BE10. Podstawa: KPA, KC, UODO.",
+  "neg-292": "Lp | Rodzaj postępowania | Prowadzący | Sygnatura
+1 | podatkowe | US | 1
+2 | cywilne | SR | 2
+3 | lokalowe | UM | 3",
+  "neg-293": "Lp.	Sprawa	Prowadzący
+1	pozwolenie na budowę	AB
+2	podział działki	GK
+3	wycinka drzew	OŚ",
+  "neg-294": "Lp. | Komórka | Prowadzący
+1 | Wydział Geodezji | GD
+2 | Biuro Rady | BR",
+  "neg-295": "Przekazano wg właściwości: U.S.C. Przydzielono do: G.O.K. Sprawę prowadzi: K.P.A. art. 35",
+  "neg-296": "Sprawę prowadzi: Z.G.K. w Pucku. Referent: W.Z.D. (Wojewódzki Zarząd Dróg)",
+  "neg-297": "Prawo jazdy kategorii B wydaje starosta w terminie 14 dni, a zatrzymany dokument prawa jazdy za pokwitowaniem nr 0318842 przekazano do organu.",
+  "neg-298": "Zgodnie z ustawą o dowodach osobistych dowód wydaje organ gminy, Punkt Paszportowy nr 2 w Gdyni przyjmuje wnioski.",
+  "neg-299": "Imię i nazwisko osoby upoważnionej: ………… We wniosku należy podać imię i nazwisko, nazwisko rodowe oraz imiona rodziców. Rada Gminy nadaje szkole imię Jana Pawła II.",
   "neg-30": "Król wydał ucztę na zamku.",
+  "neg-300": "Wnioski o wydanie prawa jazdy przyjmuje Wydział Komunikacji, pokój nr 2107, a dowód osobisty odbierzesz w Urzędzie Miasta, okienko nr ABA654321.",
+  "neg-301": "Działka nr 412/7, obręb Masłów, nazwisko właściciela: Skarb Państwa. Ośrodek Kultury imienia Kazimierza prowadzi zajęcia.",
+  "neg-302": "Prawo jazdy wydane przez Starostę Kartuskiego, Wydział Komunikacji, Pokój nr 2107. Odbiór: okienko czasowo zamknięte, nr 1204 czynne od 8:00.",
+  "neg-303": "Inwestor, nazwisko lub nazwa: Budimex. Rada Miejska nadaje rondu imię „Józefa”, a szkoła nosi imię: Stanisław.",
+  "neg-304": "Operator porusza się na wózku widłowym po hali. Działka leżąca w obrębie Zalesie przylega do drogi. Pomoc w formie usług opiekuńczych przysługuje osobie, która wymaga pomocy innych osób.",
+  "neg-305": "Na samodzielne stanowisko referenta przyjęto pracownika. Polski Związek Niewidomych prowadzi szkolenie dla osób niewidomych, a dziecko nie chodzi samodzielnie do szkoły.",
+  "neg-306": "Zabytkowy park wymaga stałej opieki. Dziecko w wieku 2 lat wymaga stałej opieki. Ratownik chodzi z kulami ratunkowymi po plaży, a pracownik nie mówi i nie chodzi na zebrania.",
+  "neg-307": "Pani [IMIĘ I NAZWISKO] odpowiada za zakup pieluchomajtek, a Pan [IMIĘ I NAZWISKO] dostarczył 200 cewników i worki stomijne do magazynu.",
+  "neg-308": "Uczeń [IMIĘ I NAZWISKO] nie potrafi samodzielnie funkcjonować w grupie rówieśniczej, a Pani [IMIĘ I NAZWISKO] wymaga pomocy w poruszaniu się po systemie e-PUAP i nie porusza się samodzielnie po Warszawie.",
+  "neg-309": "Powiatowy Zespół do Spraw Orzekania o Niepełnosprawności wydaje orzeczenia o stopniu niepełnosprawności. Symbol przyczyny niepełnosprawności 05-R oznacza upośledzenie narządu ruchu. Dzień Osób z Niepełnosprawnościami obchodzimy 3 grudnia.",
   "neg-31": "Numer 44051401350 nie przeszedł walidacji w systemie.",
+  "neg-310": "Dziecko z niepełnosprawnością ma prawo do bezpłatnego transportu do szkoły. Sala 05-R jest zamknięta, a element 06-E leży w magazynie.",
+  "neg-311": "Orzeczenie o niepełnosprawności (symbol 05-R) wydaje się dzieciom z chorobami narządu ruchu. Poradnik dla rodziców: niepełnosprawność dziecka a świadczenia rodzinne. W 2025 r. wydano 412 orzeczeń o umiarkowanym stopniu niepełnosprawności, w tym 37 z symbolem 02-P.",
+  "neg-312": "Kryterium: wychowywanie niepełnosprawnego dziecka – 10 punktów. Asystent rodziny pomaga rodzicom niepełnosprawnego dziecka. Beneficjentem projektu jest niepełnosprawny mieszkaniec gminy.",
+  "neg-313": "W ramach programu Fundacji Anny Dymnej prowadzona jest rehabilitacja ruchowa. Szkoła Podstawowa im. Marii Konopnickiej prowadzi zajęcia dla uczniów z cukrzycą. Szpital Jana Pawła II przyjmuje pacjentów z udarem.",
+  "neg-314": "Zgodnie z wytycznymi Kasi zwolnienie lekarskie należy dostarczyć w ciągu 7 dni. Jeżeli u Zosi wystąpi gorączka, należy wezwać lekarza. U Kasi stwierdzono brak zaległości.",
+  "neg-315": "Zajęcia o cukrzycy w klasie Zosi prowadziła pielęgniarka. Kacprowi wręczono dyplom za udział w konkursie o zdrowiu. Na zebraniu u Jana omówiono program profilaktyki chorób nowotworowych.",
+  "neg-316": "Centrum Rehabilitacji im. Ireny Sendlerowej przyjmuje osoby po udarze. Szpital im. Ludwika Rydygiera leczy pacjentów po zawale. Mieszkańcy gminy Kazimierza Wielka mogą skorzystać z badań w kierunku cukrzycy.",
+  "neg-317": "Pensjonat u Basi przyjmuje kuracjuszy po zawale serca. Gospoda U Kasi zatrudnia osoby po udarze. Akcja „Pomóż Zuzi” zbiera środki dla dzieci z chorobą nowotworową.",
+  "neg-318": "Spółka jest w trakcie likwidacji. Gmina prowadzi rehabilitację domową w ramach programu. W raporcie wskazano niewydolność systemu ochrony zdrowia. Anatomia jest przedmiotem na pierwszym roku.",
   "neg-32": "Ciąg 1234563210 to przykładowy identyfikator testowy.",
   "neg-33": "Wartość zamówienia: 123.456.789 zł brutto.",
   "neg-34": "Pojazd MERCEDES odholowano na parking strzeżony.",
@@ -1954,6 +2798,63 @@ Zużycie paska",
   "os-o-35": "z powództwa [IMIĘ I NAZWISKO] przeciwko [IMIĘ I NAZWISKO], z udziałem [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO]",
   "os-o-36": "Zgodnie z ustaleniami z Panem Ministrem [IMIĘ I NAZWISKO] termin zostaje.",
   "os-o-37": "Dziękuję Panu Dyrektorowi [IMIĘ I NAZWISKO] za pomoc.",
+  "os-o-38": "Głos zabrała radna [IMIĘ I NAZWISKO]. Radny Kmieć poparł wniosek radnej [IMIĘ I NAZWISKO].",
+  "os-o-39": "- [IMIĘ I NAZWISKO], syn
+- [IMIĘ I NAZWISKO], córka
+[IMIĘ I NAZWISKO] odrabia lekcje, a [IMIĘ I NAZWISKO] recytowała wiersz o tym, jak wrona zgubiła ser.",
+  "os-o-40": "Szanowny Panie [IMIĘ I NAZWISKO],
+odpowiadam na pismo w sprawie lokalu.
+[IMIĘ I NAZWISKO]",
+  "os-o-41": "Obecni: [IMIĘ I NAZWISKO], [IMIĘ I NAZWISKO].
+1. [IMIĘ I NAZWISKO] złoży wniosek.
+2. [IMIĘ I NAZWISKO] potwierdzi przelew.",
+  "os-o-42": "Zgłaszający: [LOGIN] ([IMIĘ I NAZWISKO])
+Komentarz 08:20, [LOGIN]: dalej nie działa.",
+  "os-o-43": "Wnioskodawczyni [IMIĘ I NAZWISKO]. Szkoła Podstawowa im. Marii Konopnickiej.",
+  "os-o-44": "Radny [IMIĘ I NAZWISKO] zgłosił wniosek. Wróbel na dachu ćwierkał.",
+  "os-o-45": "Pan [IMIĘ I NAZWISKO] złożył wniosek. Wyjazd do Włoch, potem urlop na Mazurach. Decyzję doręczono [IMIĘ I NAZWISKO].",
+  "os-o-46": "Pan [IMIĘ I NAZWISKO] złożył wniosek. Mecz w Rakowie. Rozmawiano z [IMIĘ I NAZWISKO].",
+  "os-o-47": "Pan [IMIĘ I NAZWISKO] złożył wniosek do Ministerstwa Zdrowia (MZ). Projekt zatwierdzony przez MZ.",
+  "os-o-48": "Pan [IMIĘ I NAZWISKO] należy do parafii św. Piotra i Pawła. [IMIĘ I NAZWISKO] przyszedł.",
+  "os-o-49": "Pani [IMIĘ I NAZWISKO] pracuje w kopalni. Kopalnia Barbara zatrudnia 500 osób. Rondo Trzeciego Maja.",
+  "os-o-50": "Pacjentka [IMIĘ I NAZWISKO], lat 45.
+Wywiad: matka – Rak jajnika. Zima była ciężka.",
+  "os-o-51": "[IMIĘ I NAZWISKO] :) dzwonię w celu umówienia wizyty, pozdrawiam [IMIĘ I NAZWISKO]",
+  "os-o-52": "Pan [IMIĘ I NAZWISKO] złożył wniosek. Pojezierze Pomorskie jest piękne. Decyzję doręczono [IMIĘ I NAZWISKO].",
+  "os-o-53": "Pani [IMIĘ I NAZWISKO] złożyła wniosek. Przedszkole „Pod Lisem” zaprasza. Pani [IMIĘ I NAZWISKO] przyszła.",
+  "os-o-54": "Pan [IMIĘ I NAZWISKO] złożył wniosek. Wolny dostęp do informacji jest prawem. [IMIĘ I NAZWISKO] przyszedł wczoraj.",
+  "os-o-55": "Pan [IMIĘ I NAZWISKO] złożył wniosek. Pociąg do Kalisza odjechał. Rozmowa z [IMIĘ I NAZWISKO] trwała godzinę.",
+  "os-o-56": "Pan [IMIĘ I NAZWISKO] złożył wniosek. Dział TZ przekazał akta. Pismo przygotował [IMIĘ I NAZWISKO] w dniu 5 maja.",
+  "os-o-57": "Panie [IMIĘ I NAZWISKO],
+przesyłam protokół. Witam [IMIĘ I NAZWISKO], Cześć [IMIĘ I NAZWISKO]! Tak, [IMIĘ I NAZWISKO], wiem.",
+  "os-o-58": "Jutro przyjdzie hydraulik p. [IMIĘ I NAZWISKO], numer do niego podam.",
+  "os-o-59": "Dear Mr [IMIĘ I NAZWISKO], Ms [IMIĘ I NAZWISKO] will call. Frau [IMIĘ I NAZWISKO] hat geschrieben. Dr [IMIĘ I NAZWISKO], University of Leeds.",
+  "os-o-60": "Z poważaniem
+[IMIĘ I NAZWISKO]
+
+Pozdrawiam, [IMIĘ I NAZWISKO]
+
+Best regards,
+[IMIĘ I NAZWISKO]",
+  "os-o-61": "Herr Dr. [IMIĘ I NAZWISKO] hat angerufen. Sehr geehrte Frau Prof. Dr. [IMIĘ I NAZWISKO], Dear Dr. [IMIĘ I NAZWISKO], W Gdyni, [IMIĘ I NAZWISKO], było zimno.",
+  "os-o-62": "Wczoraj jej syn [IMIĘ I NAZWISKO] przyszedł sam, a córce [IMIĘ I NAZWISKO] daliśmy prezent. Mój brat [IMIĘ I NAZWISKO] i moja siostra [IMIĘ I NAZWISKO] pomagają.",
+  "os-o-63": "KLIENT: Żona, [IMIĘ I NAZWISKO], ale ona nie wie. probowal tez maz, [IMIĘ I NAZWISKO], na lapku.",
+  "os-o-64": "Obecne były dzieci [IMIĘ I NAZWISKO] (7 lat) i [IMIĘ I NAZWISKO] (4 lata). [IMIĘ I NAZWISKO] chodzi do szkoły, [IMIĘ I NAZWISKO] ma alergię.",
+  "os-o-65": "Zmarły, syn [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO], zamieszkały w [MIEJSCOWOŚĆ]. I moved with my husband [IMIĘ I NAZWISKO] and our daughter [IMIĘ I NAZWISKO].",
+  "os-o-66": "Matka [IMIĘ I NAZWISKO] złożyła wniosek. Synowi [IMIĘ I NAZWISKO] przyznano zasiłek. Syn [IMIĘ I NAZWISKO] czytał Ewangelię.",
+  "os-o-67": "Mój brat [IMIĘ I NAZWISKO] przyszedł, a moja matka [IMIĘ I NAZWISKO] została w domu.",
+  "os-o-68": "Brat [IMIĘ I NAZWISKO] z Niemiec przyjechał na pogrzeb. Siostra [IMIĘ I NAZWISKO] z MOPS przyszła na wizytę. Matka [IMIĘ I NAZWISKO] z Wadowic złożyła wniosek.",
+  "os-o-69": "Dzieci: [IMIĘ I NAZWISKO] (8 lat), [IMIĘ I NAZWISKO] (5 lat) i [IMIĘ I NAZWISKO] (2 lata). Syn: [IMIĘ I NAZWISKO], ur. 2015. dzieci – [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO]",
+  "os-o-70": "[08:12] [IMIĘ I NAZWISKO] 🌸: dzwonili ze szpitala
+[08:13] [IMIĘ I NAZWISKO]: co powiedzieli??
+[08:30] [IMIĘ I NAZWISKO]: dzięki. [IMIĘ I NAZWISKO] a recepty?",
+  "os-o-71": "Konsultant ([IMIĘ I NAZWISKO]): dzień dobry
+Klient: witam
+Konsultant ([IMIĘ I NAZWISKO]): słucham",
+  "os-o-72": "Komentarze:
+[IMIĘ I NAZWISKO]: widziałem psa 😅
+  ↳ [IMIĘ I NAZWISKO]: offtop
+  ↳ Admin [IMIĘ I NAZWISKO] 🌻: bez wycieczek",
   "os-p-01": "Pozwany [IMIĘ I NAZWISKO] nie stawił się na rozprawie.",
   "os-p-02": "Powódka [IMIĘ I NAZWISKO] wniosła o zasądzenie kosztów.",
   "os-p-03": "Świadek [IMIĘ I NAZWISKO] zeznał, że widział zdarzenie.",
@@ -2019,7 +2920,7 @@ Sędziowie: SO [IMIĘ I NAZWISKO], SO [IMIĘ I NAZWISKO] (spr.)",
   "os-p-58": "Sąd zasądził od uczestnika [IMIĘ I NAZWISKO] koszty.",
   "os-p-59": "Wniosek złożyła [IMIĘ I NAZWISKO]. Szanowna Pani Dyrektor Szkoły [IMIĘ I NAZWISKO], uprzejmie informuję.",
   "os-p-60": "Na ulicy [IMIĘ I NAZWISKO] zasłabł. W parku [IMIĘ I NAZWISKO] spacerowała z psem.",
-  "os-p-61": "Badanie wykonał lek. [IMIĘ I NAZWISKO]. [IMIĘ I NAZWISKO] przebywa na zwolnieniu lekarskim.",
+  "os-p-61": "Badanie wykonał lek. [IMIĘ I NAZWISKO]. [IMIĘ I NAZWISKO] przebywa na [DANE O ZDROWIU].",
   "os-p-62": "W kościele św. Anny [IMIĘ I NAZWISKO] zagra koncert kolęd. W kościele przesłuchano św. [IMIĘ I NAZWISKO].",
   "os-p-63": "Pacjent [IMIĘ I NAZWISKO] trafił na SOR. Objawy [IMIĘ I NAZWISKO] nasiliły się w nocy. Mistrz linii [IMIĘ I NAZWISKO] wydał polecenie.",
   "os-p-64": "Do: [IMIĘ I NAZWISKO]; [IMIĘ I NAZWISKO]
@@ -2064,6 +2965,24 @@ wzywa do zapłaty.",
   "os-p-86": "W kościele [IMIĘ I NAZWISKO] zauważyła sprawcę i wezwała policję.",
   "os-p-87": "Odpis aktu małżeństwa [IMIĘ I NAZWISKO] i [IMIĘ I NAZWISKO], zawartego w Krakowie.",
   "os-p-88": "Pismo od [IMIĘ I NAZWISKO] z 3 marca. Pozew [IMIĘ I NAZWISKO] wpłynął.",
+  "os-p-89": "Uczeń przyjechał z Ukrainy, matka [IMIĘ I NAZWISKO] okazała paszport.",
+  "os-p-90": "Decyzję doręczono [IMIĘ I NAZWISKO], a odpis [IMIĘ I NAZWISKO].",
+  "os-p-91": "Wniosek złożyła [IMIĘ I NAZWISKO], obywatelka Syrii, a pełnomocnikiem jest [IMIĘ I NAZWISKO].",
+  "os-p-92": "Małżonek: [IMIĘ I NAZWISKO]. Pełnomocnikiem ustanawiam [IMIĘ I NAZWISKO].",
+  "os-p-93": "Prowadzący: [IMIĘ I NAZWISKO], inspektor
+Dekretacja: Kierownik Referatu → [IMIĘ I NAZWISKO], termin 05.11.2026",
+  "os-p-94": "Lp. | Sprawa | Prow.
+1 | wniosek | [IMIĘ I NAZWISKO]
+2 | skarga | [IMIĘ I NAZWISKO]
+Skróty w kolumnie Prow.: [IMIĘ I NAZWISKO] – [IMIĘ I NAZWISKO], [IMIĘ I NAZWISKO] – [IMIĘ I NAZWISKO].",
+  "os-p-95": "Lp. | Sprawa | Osoba prowadząca
+1 | wniosek | [IMIĘ I NAZWISKO]
+2 | skarga | [IMIĘ I NAZWISKO]",
+  "os-p-96": "Wnioskodawca: [IMIĘ I NAZWISKO]
+Znak sprawy: [ZNAK-SPRAWY]
+Dekretacja: Burmistrz → GK → [IMIĘ I NAZWISKO]
+Kierownik Referatu GK – [IMIĘ I NAZWISKO]",
+  "os-p-97": "Wnioskodawczyni, nazwisko rodowe w akcie: [IMIĘ I NAZWISKO], wnosi o zmianę nazwiska syna z „[IMIĘ I NAZWISKO]” na „[IMIĘ I NAZWISKO]” i o nadanie córce imienia [IMIĘ I NAZWISKO].",
   "os-r-01": "[IMIĘ I NAZWISKO] podpisał protokół odbioru.",
   "os-r-02": "[IMIĘ I NAZWISKO] złożyła wniosek o urlop.",
   "os-r-03": "[IMIĘ I NAZWISKO] wynajął magazyn pod miastem.",
@@ -2275,7 +3194,7 @@ Zalecenia przy wypisie:
 kontrola w poradni za 4 tygodnie",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
   "str-180": "Pacjent z rozpoznaniem [DANE O ZDROWIU], przyjmuje [DANE O ZDROWIU].",
-  "str-181": "Zgodnie z zaświadczeniem lekarskim po porodzie przez [DANE O ZDROWIU] przeciwwskazane jest [DANE O ZDROWIU] do końca roku.",
+  "str-181": "Zgodnie z zaświadczeniem lekarskim [DANE O ZDROWIU] przez [DANE O ZDROWIU] przeciwwskazane jest [DANE O ZDROWIU] do końca roku.",
   "str-182": "Od dwóch lat pozwany [DANE O ZDROWIU]. W wyniku zdarzenia doznałem [DANE O ZDROWIU].",
   "str-183": "Potrzeba wynika z rozpoznania [DANE O ZDROWIU] i leczenia [DANE O ZDROWIU], potwierdzonego zaświadczeniem lekarza.",
   "str-184": "Dział Kadr i Płac
@@ -2306,7 +3225,7 @@ Przychodnia Rodzinna
 [ADRES]
 [KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
   "str-191": "Dla:
-Marianna Zięba-Kot
+[IMIĘ I NAZWISKO]
 Wydział Komunikacji
 [ADRES]
 [KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
@@ -2356,15 +3275,179 @@ kontrola w poradni za 4 tygodnie",
 [ADRES]",
   "str-214": "Zamieszkały: [ADRES], [MIEJSCOWOŚĆ]. Lokal w [MIEJSCOWOŚĆ], [ADRES].",
   "str-215": "Urząd Gminy, ul. Polna 3, [IMIĘ I NAZWISKO], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-216": "Pani [IMIĘ I NAZWISKO] ma [DANE O ZDROWIU]. Syn wnioskodawczyni ma [DANE O ZDROWIU].",
+  "str-217": "Ojciec dziecka jest [DANE O ZDROWIU] i przerwał [DANE O ZDROWIU]. Matka od lat [DANE O ZDROWIU].",
+  "str-218": "Do końca miesiąca przebywam [DANE O ZDROWIU]. U pani [IMIĘ I NAZWISKO] trwa [DANE O ZDROWIU].",
+  "str-219": "Matka małoletniego jest od lat [DANE O ZDROWIU]. Wnioskodawczyni jest [DANE O ZDROWIU]. Pozwany kilkukrotnie trafiał [DANE O ZDROWIU].",
   "str-22": "Zgłoszenia przyjmujemy pod adresem [EMAIL].",
+  "str-220": "Pani [IMIĘ I NAZWISKO] była [DANE O ZDROWIU]. Mr [IMIĘ I NAZWISKO] underwent [DANE O ZDROWIU] in May.",
+  "str-221": "Konkubent przyznał, że dwa razy trafił [DANE O ZDROWIU]. Pani [IMIĘ I NAZWISKO], magazynierka, przebywa na [DANE O ZDROWIU].",
+  "str-222": "U wnioskodawczyni rozpoznano [DANE O ZDROWIU]. Syn stron ma zdiagnozowaną [DANE O ZDROWIU].",
+  "str-223": "Małoletni ma rozpoznane [DANE O ZDROWIU]. Psychiatra rozpoznała [DANE O ZDROWIU].",
+  "str-224": "Pacjentka cierpi na [DANE O ZDROWIU]. Babcia ma [DANE O ZDROWIU] i [DANE O ZDROWIU]. Uczennica ma orzeczenie ze względu na [DANE O ZDROWIU].",
+  "str-225": "Pacjent lat 32. W RTG stwierdzono [DANE O ZDROWIU]. Uczestniczka uskarżała się na [DANE O ZDROWIU].",
+  "str-226": "Dr [IMIĘ I NAZWISKO] pracuje w IBS PAN. Pan [IMIĘ I NAZWISKO] gra w klubie RZS Rzeszów. Pielęgniarka [IMIĘ I NAZWISKO] pracuje w zespole Mazura na oddziale kardiologii i dyżuruje w szpitalu.",
+  "str-227": "U syna rozpoznano [DANE O ZDROWIU]. Pani [IMIĘ I NAZWISKO] choruje na [DANE O ZDROWIU]. Córka ma [DANE O ZDROWIU].",
+  "str-228": "Chłopiec przyjmuje [DANE O ZDROWIU]. Psychiatra włączyła mu [DANE O ZDROWIU]. Matka przyjmuje [DANE O ZDROWIU].",
+  "str-229": "Małoletni otrzymuje [DANE O ZDROWIU]. Ojciec jest na [DANE O ZDROWIU] od 2019 r. Syn zażywa [DANE O ZDROWIU].",
   "str-23": "e-mail: [EMAIL] (służbowy)",
+  "str-230": "Zalecenia:
+1. [DANE O ZDROWIU] przez 35 dni.
+Pacjent hospitalizowany. Glikemie wyrównane na [DANE O ZDROWIU] i [DANE O ZDROWIU].",
+  "str-231": "Brała wcześniej [DANE O ZDROWIU]. [DANE O ZDROWIU] przyjmuje od roku. Odstawiono [DANE O ZDROWIU] z powodu senności. Matka nie podaje dziecku [DANE O ZDROWIU].",
+  "str-232": "Nabycie spadku stwierdził Sąd Rejonowy w Kłodzku postanowieniem z dnia 20 maja 2016 r., sygn. akt [ZNAK-SPRAWY].",
+  "str-233": "NSA wyrokiem z 7 maja 2024 r., sygn. akt [ZNAK-SPRAWY], oddalił skargę kasacyjną wnioskodawczyni.",
+  "str-234": "Jak wskazał Sąd Rejonowy w postanowieniu z dnia 12 marca 2024 r., sygn. akt [ZNAK-SPRAWY], władza rodzicielska ojca została ograniczona.",
+  "str-235": "WÓJT GMINY KOBYLNICA
+ul. Główna 20, 76-251 Kobylnica
+
+Wnioskodawczyni: [IMIĘ I NAZWISKO], zam. [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ].",
+  "str-236": "KIEROWNIK URZĘDU STANU CYWILNEGO W KIELCACH
+ul. Strycharska 6, 25-659 Kielce
+
+Kierownik Budowy
+[ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-237": "Pan [IMIĘ I NAZWISKO] złożył uwagi, które oceni Starosta Słupski.",
+  "str-238": "Świadek [IMIĘ I NAZWISKO], administrator z ramienia Spółdzielni Mieszkaniowej „Stok” z siedzibą przy ul. Lipowej 4 w Białymstoku, zam. [ADRES].",
+  "str-239": "Posiłki dla uczniów Szkoły Podstawowej im. Janusza Korczaka w Mielniku (Gmina Mielnik) dostarcza [IMIĘ I NAZWISKO].",
   "str-24": "Adres do doręczeń: [KOD-POCZTOWY] [MIEJSCOWOŚĆ], skrytka 21.",
+  "str-240": "Wykonawca: Zakład Instalacyjny Sowa z siedzibą przy [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ].",
+  "str-241": "[IMIĘ I NAZWISKO], Zakład Usług Remontowych z siedzibą przy [ADRES] w [MIEJSCOWOŚĆ].",
+  "str-242": "Zebranie odbędzie się w siedzibie Urzędu Gminy w Baranowie przy ul. Rynek 14. Pani [IMIĘ I NAZWISKO] przedstawi wniosek.",
+  "str-243": "Pacjent Szpitala [IMIĘ I NAZWISKO] przyjęty 3 marca. Uczniowie Szkoły Podstawowej Marii Konopnickiej odwiedzili oddział.",
+  "str-244": "zawarta pomiędzy:
+Gminą Pszczyna, ul. Rynek 2, 43-200 Pszczyna, NIP 6381016402, reprezentowaną przez Burmistrza,
+a
+Panią [IMIĘ I NAZWISKO], [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], NIP [NIP]",
+  "str-245": "Urzędem Miejskim w Kórniku, pl. Niepodległości 1, 62-035 Kórnik, reprezentowanym przez Burmistrza, a Panem [IMIĘ I NAZWISKO], zamieszkałym przy [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]",
+  "str-246": "Sprawdziła: [IMIĘ I NAZWISKO], inspektor ds. oświaty, Urząd Gminy Mielnik, ul. Piaskowa 1.
+Do wiadomości: Zarząd Mienia Komunalnego, ul. Bema 3.",
+  "str-247": "Adresat: [IMIĘ I NAZWISKO], Urząd Gminy Kobylnica, [ADRES]",
+  "str-248": "Urząd Skarbowy w Kole, ul. Toruńska 10, 62-600 Koło, [IMIĘ I NAZWISKO], NIP [NIP]",
+  "str-249": "Zakład Fryzjerski w Kole, [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], NIP [NIP]",
   "str-25": "Przesyłkę nadano z kodu [KOD-POCZTOWY].",
+  "str-250": "| Imię i nazwisko | Pracodawca | Adres zamieszkania |
+| [IMIĘ I NAZWISKO] | Urząd Gminy Mielnik | [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ] |",
+  "str-251": "Zakład Usług Komunalnych „Czysto”, [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], NIP [NIP]; Studio Komunikacji Wizualnej, [ADRES], NIP [NIP]",
+  "str-252": "Skarżąca [IMIĘ I NAZWISKO] (Gmina Kobylnica, [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]), reprezentowana przez adw. [IMIĘ I NAZWISKO]. Uczestnik: Zakład Gospodarki Komunalnej w Kole, ul. Toruńska 10.",
+  "str-253": "Urząd Gminy Firlej, ul. Szkolna 2, 21-136 Firlej
+tel. 81 856 40 12, podatki@firlej.example.pl
+
+Sprawę prowadzi: [IMIĘ I NAZWISKO], tel. [TELEFON], [EMAIL]",
+  "str-254": "Należność wpłacić na rachunek Gminy Firlej nr 78 1160 2202 6163 7497 8486 2063, a nadpłata zostanie zwrócona na rachunek nr [NR-KONTA] wskazany przez [IMIĘ I NAZWISKO].",
+  "str-255": "Urząd Gminy Firlej
+ul. Szkolna 2, 21-136 Firlej
+tel. 81 856 10 21
+tel. [TELEFON] ([IMIĘ I NAZWISKO])
+
+Z poważaniem
+[IMIĘ I NAZWISKO]
+Inspektor
+Wydział Komunikacji, tel. [TELEFON]",
+  "str-256": "Urząd Gminy Mielnik, ul. Piaskowa 1, 17-307 Mielnik, e-mail: gmina@mielnik.pl. Zajęcia prowadzi: [EMAIL], zapisy: [EMAIL].",
+  "str-257": "Umowę sporządziła: [IMIĘ I NAZWISKO], Referat Organizacyjny, tel. 61 817 04 11 wew. 34. Wywiad przeprowadziła: [IMIĘ I NAZWISKO], pracownik socjalny, tel. [TELEFON] wew. 31.",
+  "str-258": "Wydział Komunikacji, e-mail: [EMAIL]; Starostwo Powiatowe w Łęcznej, ul. Szkolna 2, 21-010 Łęczna, e-mail: kancelaria@powiatleczynski.pl",
+  "str-259": "Podatek proszę wpłacić na rachunek Gminy Firlej nr [NR-KONTA] (subkonto podatnika). Opłatę skarbową wnosi się na rachunek urzędu nr 12 1020 1026 0000 0402 0000 0000.",
   "str-26": "Zamieszkały przy [ADRES] w [MIEJSCOWOŚĆ].",
+  "str-260": "Z poważaniem
+[IMIĘ I NAZWISKO]
+Inspektor
+Urząd Gminy Bielsk
+ul. Szkolna 1
+09-230 Bielsk
+tel. [TELEFON], pok. 12, [IMIĘ I NAZWISKO]",
+  "str-261": "Kierownik budowy: mgr inż. [IMIĘ I NAZWISKO], uprawnienia budowlane nr [NR-UPRAWNIEŃ], członek ŚOIIB pod nr [NR-UPRAWNIEŃ]. Podstawa: art. 12 ust. 1 Prawa budowlanego.",
+  "str-262": "Mapę sporządził geodeta uprawniony [IMIĘ I NAZWISKO] (nr upr. [NR-UPRAWNIEŃ]), a operat rzeczoznawca majątkowy [IMIĘ I NAZWISKO], uprawnienia nr [NR-UPRAWNIEŃ]. Uchwała nr XIV/112/2026 Rady Gminy pozostaje w mocy.",
+  "str-263": "Przekład wykonała tłumaczka przysięgła [IMIĘ I NAZWISKO], wpisana na listę tłumaczy przysięgłych pod nr [NR-UPRAWNIEŃ]. Komunikat Okręgowej Izby Lekarskiej nr 14/2026 dołączono do akt.",
+  "str-264": "Lp.	Imię i nazwisko	Funkcja	Nr uprawnień
+1	[IMIĘ I NAZWISKO]	projektant	[NR-UPRAWNIEŃ]
+2	[IMIĘ I NAZWISKO]	sprawdzający	[NR-UPRAWNIEŃ]
+Okólnik OIRP nr 3/2026 dołączono do akt.",
+  "str-265": "Geodeta uprawniony Zenon Marek, nr uprawnień [NR-UPRAWNIEŃ] – pomiar sytuacyjny. Naczelnik Wydziału Geodezji i Kartografii, uprawnienia do podpisu nr 4/2026 w systemie EZD.",
+  "str-266": "Lp.;Imię i nazwisko;Nr członka izby
+1;[IMIĘ I NAZWISKO];[NR-UPRAWNIEŃ]
+Sprawa OR/0456/POW/24 prowadzona przez Wydział Organizacyjny. Ankieta dla członków PIIB nr 2/2026.",
+  "str-267": "Lp. | Nazwisko i imię | Data urodzenia | Kryteria | Pkt
+1 | [IMIĘ I NAZWISKO] | [DATA-URODZENIA] | wielodzietność | 165
+2 | [IMIĘ I NAZWISKO] | [DATA-URODZENIA] | brak | 15",
+  "str-268": "Kandydat | telefon | e-mail
+[IMIĘ I NAZWISKO] | [TELEFON] | [EMAIL]
+[IMIĘ I NAZWISKO] | [TELEFON] | [EMAIL]",
+  "str-269": "Nazwisko i imię     Data urodzenia     PESEL
+[IMIĘ I NAZWISKO]      [DATA-URODZENIA]         [PESEL]",
   "str-27": "Biuro mieści się przy [ADRES].",
+  "str-270": "Wnioskodawca | Data wpływu | Sprawa
+[IMIĘ I NAZWISKO] | 03.11.2026 | zasiłek
+Nadleśnictwo Lipno | 04.11.2026 | dzierżawa
+Samorządowe Kolegium Odwoławcze | 05.11.2026 | odwołanie",
+  "str-271": "Nazwisko i imię | Stanowisko | Data decyzji | Kwota
+[IMIĘ I NAZWISKO] | Inspektor | 12.03.2026 | 500,00 zł
+Pozostali Uczestnicy | Kierownik | 13.03.2026 | 300,00 zł",
+  "str-272": "Lp. | Imię i nazwisko albo nazwa | Kwota
+1 | [IMIĘ I NAZWISKO] | 100,00
+2 | MOPS Lipno | 200,00
+3 | Eko Trans | 300,00
+4 | Czyste Powietrze | 400,00
+5 | Armii Krajowej | 500,00
+6 | Starszy Referent | 600,00
+7 | Sołtys Zalesia | 700,00",
+  "str-273": "Wnioskodawca | Data wpływu
+[IMIĘ I NAZWISKO] | 03.11.2026
+F.H. Marex | 04.11.2026
+P.W. Budrex | 05.11.2026",
+  "str-274": "Nazwisko i imię | PESEL
+[IMIĘ I NAZWISKO] | [PESEL]
+[IMIĘ I NAZWISKO] | [PESEL]",
+  "str-275": "Lp.;Najemca;Telefon
+1;[IMIĘ I NAZWISKO];[TELEFON]
+2;Kwiaciarnia Róża;54 288 33 12
+3;Chór Cecylia;54 288 60 11",
+  "str-276": "Nazwisko i imię;PESEL
+[IMIĘ I NAZWISKO];[PESEL]
+[IMIĘ I NAZWISKO];[PESEL]
+[IMIĘ I NAZWISKO];[PESEL]",
+  "str-277": "Zatrzymuje się prawo jazdy kat. AM, B nr [PRAWO-JAZDY], wydane przez Starostę Kartuskiego.",
+  "str-278": "Strona okazała dowód osobisty wydany przez Burmistrza Kartuz nr [NR-DOWODU] oraz paszport (ważny do 2031 r.) nr [NR-PASZPORTU].",
+  "str-279": "Akt otrzymał w rejestrze stanu cywilnego numer [NR-AKTU-USC], a odpis aktu urodzenia, nr aktu [NR-AKTU-USC], dołączono.",
   "str-28": "Nowy lokal: [ADRES], obok szkoły.",
+  "str-280": "D.2 Imię ojca: [IMIĘ I NAZWISKO]   Imię matki: [IMIĘ I NAZWISKO]
+Miejscowość: [MIEJSCOWOŚĆ]   Ulica: [ADRES]   Nr domu: [ADRES]   Nr lokalu: –",
+  "str-281": "A.1 Imię: [IMIĘ I NAZWISKO]  A.2 Nazwisko: [IMIĘ I NAZWISKO]  A.3 Imię ojca: [IMIĘ I NAZWISKO]",
+  "str-282": "Pracownik | Szkolenie
+[IMIĘ I NAZWISKO] | profilaktyka chorób nowotworowych
+[IMIĘ I NAZWISKO] | warsztaty o uzależnieniach od alkoholu",
+  "str-283": "Pani [IMIĘ I NAZWISKO], akcja profilaktyczna „Stop cukrzycy”, rozdała ulotki o profilaktyce udaru mózgu i nadciśnienia.",
+  "str-284": "Pani [IMIĘ I NAZWISKO] jest po drugim kursie [DANE O ZDROWIU] z powodu [DANE O ZDROWIU].",
+  "str-285": "Pani [IMIĘ I NAZWISKO] zakończyła kurs [DANE O ZDROWIU] osy, a Pan [IMIĘ I NAZWISKO] uczestniczy w warsztatach dla osób [DANE O ZDROWIU].",
+  "str-286": "Pani [IMIĘ I NAZWISKO] jest objęta programem kompleksowej opieki [DANE O ZDROWIU]. Kampania dla kobiet o profilaktyce raka piersi odbyła się w maju.",
+  "str-287": "Pan [IMIĘ I NAZWISKO] kończy kurs ćwiczeń usprawniających [DANE O ZDROWIU], a Pani [IMIĘ I NAZWISKO] chodzi na warsztaty ruchowe przy [DANE O ZDROWIU].",
+  "str-288": "Lp. | Pracownik | Szkolenie
+1 | [IMIĘ I NAZWISKO] | kurs pierwszej pomocy przy zawale serca
+2 | [IMIĘ I NAZWISKO] | prelekcja o życiu po udarze mózgu",
+  "str-289": "Pani [IMIĘ I NAZWISKO] [DANE O ZDROWIU], a jej mąż [DANE O ZDROWIU] i [DANE O ZDROWIU].",
   "str-29": "Spotkanie odbędzie się na [ADRES].",
+  "str-290": "Z zaświadczenia wynika, że Pan [IMIĘ I NAZWISKO] jest [DANE O ZDROWIU], [DANE O ZDROWIU], [DANE O ZDROWIU].",
+  "str-291": "Syn wnioskodawczyni, Pan [IMIĘ I NAZWISKO], [DANE O ZDROWIU], ma wyłonioną [DANE O ZDROWIU].",
+  "str-292": "Pan [IMIĘ I NAZWISKO] [DANE O ZDROWIU], a [DANE O ZDROWIU]; jego żona [DANE O ZDROWIU].",
+  "str-293": "Pani [IMIĘ I NAZWISKO] nosi [DANE O ZDROWIU], a jej wnuk Pan [IMIĘ I NAZWISKO] ma założony [DANE O ZDROWIU] i [DANE O ZDROWIU] z łóżka.",
+  "str-294": "Pani [IMIĘ I NAZWISKO] samotnie wychowuje syna [DANE O ZDROWIU]. Jej mąż jest [DANE O ZDROWIU], a [DANE O ZDROWIU] wydano 3 marca 2025 r.",
+  "str-295": "Imię i nazwisko: [IMIĘ I NAZWISKO]
+Stopień niepełnosprawności: [DANE O ZDROWIU]
+Symbol przyczyny niepełnosprawności: [DANE O ZDROWIU]",
+  "str-296": "Pani [IMIĘ I NAZWISKO] opiekuje się [DANE O ZDROWIU] mężem, a jej córka, [DANE O ZDROWIU], ma [DANE O ZDROWIU].",
+  "str-297": "Wnioskodawczyni sprawuje opiekę nad [DANE O ZDROWIU] synem. Ze względu na [DANE O ZDROWIU] dziecka zasiłek przyznano w wyższej kwocie.",
+  "str-298": "U Zosi stwierdzono [DANE O ZDROWIU], a u [IMIĘ I NAZWISKO] [DANE O ZDROWIU]. Kacprowi przyznano [DANE O ZDROWIU].",
+  "str-299": "Wniesiono o raty ze względu na sytuację materialną [IMIĘ I NAZWISKO], która pobiera [DANE O ZDROWIU]. Strona wiozła matkę, [IMIĘ I NAZWISKO], która uskarżała się na [DANE O ZDROWIU].",
   "str-30": "Mieszkam na [ADRES].",
+  "str-300": "Wnioskodawczyni opiekuje się [IMIĘ I NAZWISKO], która [DANE O ZDROWIU]. Mój mąż ma [DANE O ZDROWIU] i po każdym takim wieczorze się dusi, w lutym trafił przez to [DANE O ZDROWIU].",
+  "str-301": "Książka [IMIĘ I NAZWISKO] o życiu z cukrzycą typu 1 trafiła do biblioteki. Wykład dr. [IMIĘ I NAZWISKO] o chorobie Alzheimera odbędzie się w czwartek.",
+  "str-302": "[IMIĘ I NAZWISKO] przyznano zasiłek pielęgnacyjny z powodu [DANE O ZDROWIU].",
+  "str-303": "Wywiad z [IMIĘ I NAZWISKO] o depresji ukazał się w gazecie. Monografia [IMIĘ I NAZWISKO] o chorobie afektywnej dwubiegunowej trafiła do biblioteki poradni.",
+  "str-304": "[IMIĘ I NAZWISKO] nadano stopień doktora za rozprawę o leczeniu cukrzycy. Wniosek [IMIĘ I NAZWISKO] o zasiłek pielęgnacyjny z powodu [DANE O ZDROWIU] wpłynął w marcu.",
+  "str-305": "Wnioskodawczyni jest w trakcie [DANE O ZDROWIU] i nie może podjąć pracy. Mąż jest po [DANE O ZDROWIU], a syn korzysta z [DANE O ZDROWIU]. Lena ma [DANE O ZDROWIU].",
+  "str-306": "U syna rozpoznano, według opinii poradni z 3 marca, [DANE O ZDROWIU]. U pana [IMIĘ I NAZWISKO] stwierdzono [DANE O ZDROWIU] po [DANE O ZDROWIU], a pan [IMIĘ I NAZWISKO] ma [DANE O ZDROWIU].",
+  "str-307": "Pedagog jest w trakcie diagnostyki potrzeb ucznia, a budynek szkoły jest w trakcie rehabilitacji. Szpital kontynuuje leczenie pacjentów w nowym budynku. Pani [IMIĘ I NAZWISKO] pracuje w gabinecie fizjoterapii, a Pan [IMIĘ I NAZWISKO] jest instruktorem hipoterapii. Pan [IMIĘ I NAZWISKO] sprzedał ziemię sąsiadowi. Ojciec jest w trakcie [DANE O ZDROWIU], a u matki stwierdzono [DANE O ZDROWIU].",
+  "str-308": "Pani [IMIĘ I NAZWISKO] jest koordynatorką zajęć z ludoterapii, a Pan [IMIĘ I NAZWISKO] jest wykonawcą usług hydroterapii. Pani [IMIĘ I NAZWISKO] ukończyła dwa cykle szkoleń z dogoterapii i napisała pracę magisterską o muzykoterapii. Syn Pani [IMIĘ I NAZWISKO] korzysta z usług [DANE O ZDROWIU] w ośrodku.",
   "str-31": "[ADRES] to adres korespondencyjny.",
   "str-32": "Wnioskodawca, ur. [DATA-URODZENIA], zamieszkały w [MIEJSCOWOŚĆ].",
   "str-33": "Urodzona [DATA-URODZENIA] w [MIEJSCOWOŚĆ].",
@@ -2703,13 +3786,135 @@ Zużycie paska",
   "neg-238": "Urząd Miasta Łodzi, ul. Piotrkowska 104, 90-926 Łódź. Sąd Okręgowy w Poznaniu, ul. Hejmowskiego 2. Starostwo Powiatowe Turek, ul. Kaliska 59.",
   "neg-239": "Instytut Badawczy Leśnictwa, ul. Braci Leśnej 3, Sękocin Stary, 05-090 Raszyn.",
   "neg-24": "Sowa hukała całą noc pod oknem.",
+  "neg-240": "Jan przyszedł do urzędu. Wniosek złożył Jan.",
+  "neg-241": "Panie Prezesie, Panie Sędzio, Panie Boże! Szanowni Państwo, Dziękuję, Anna przyjdzie jutro.",
+  "neg-242": "Z poważaniem
+Zarząd Spółki
+
+Pozdrawiam
+Dział Kadr
+
+Kind regards,
+Customer Service",
+  "neg-243": "Płyn Mr Proper, catering z Mr Cook, firma Mr Garden sp. z o.o., konkurs Mr Olympia. Czytam Mrs Dalloway i Frau Holle. Herr Ober, Mr Prime Minister.",
+  "neg-244": "Wakacje spędziliśmy w Juracie, Helu, Jastarni i Władysławowie. Mieszkała w <<miejsce>>, Kazimierzu i Podgórzu.",
+  "neg-245": "Wykład o apostołach: Piotrze, Pawle, Janie, Jakubie. Referat o królach: Mieszku, Henryku, Zygmuncie, Stefanie.",
+  "neg-246": "Ulubione gry: Tetris, Mario, Sonic. Filmy: Coco, Kubo, Moana. Autorzy: Coelho, Paulo, Cortázar.
+produkt,ilosc
+Sandro,5",
+  "neg-247": "Syn Marnotrawny wrócił. Kościół pw. Matki Bożej. Pielgrzymka do Ojca Pio. Schronisko Brata Alberta, Towarzystwo im. św. Brata Alberta. Grupa „Babcia Halina”. Jezus, syn Józefa i Maryi, nauczał.",
+  "neg-248": "Kościół pw. Matki Teresy z Kalkuty. Film pt. Ojciec Mateusz. Temat lekcji: Brat Albert i ubodzy. Matka Joanna od Aniołów to film.",
+  "neg-249": "Wszystkim dzieciom Mikołaj przyniósł prezenty. Dziadek Mikołaj odwiedził przedszkole. Synowie Marka Aureliusza nie przejęli władzy. Salomon był synem Dawida i Batszeby. Ewangelia mówi o Marii, matce Jakuba.",
   "neg-25": "Kruk krukowi oka nie wykole, jak mówi przysłowie.",
+  "neg-250": "Jak żyła matka Teresa z Kalkuty? Jak mawiał brat Albert, trzeba być dobrym jak chleb. Matka Jana Pawła II, Emilia, zmarła w 1929 roku.",
+  "neg-251": "[10:01] Konsultant: Dzień dobry
+[10:02] Klient: dzień dobry
+[10:03] Bot: proszę czekać
+[10:04] Mama: kup chleb
+[10:05] InPost: paczka czeka
+[10:06] InPost: odbierz",
+  "neg-252": "Od: Urząd Miasta
+Do: Wydział
+Temat: wniosek
+Uwagi: brak
+Data: 12.11.2026
+PL: Wniosek
+EN: Application
+10:15 Przerwa: kawa
+11:00 Kraków: przejazd",
+  "neg-253": "Temat: Imieniny w grudniu 🎉
+Barbara: 4 grudnia
+Mikołaj: 6 grudnia
+Magazyn A
+Hala: zamknięta
+Brama: otwarta
+Hala: remont do piątku",
+  "neg-254": "Plan wycieczki:
+08:00 Kazimierz: zbiórka przy synagodze
+15:00 Florian: brama i mury obronne
+16:00 Kazimierz Dolny: obiad
+18:00 Kazimierz Dolny: powrót",
+  "neg-255": "Na tarasie lokalu nie wolno palić. Omar Jumbo kosztuje 120 zł. Pielgrzymka do Fatimy wyrusza w maju.",
+  "neg-256": "Delegacja odwiedziła Ho Chi Minh i Zatokę Ha Long. Do Hanoi lecieliśmy przez Dubaj. Chór zaśpiewał Salve Regina.",
+  "neg-257": "Zwolnienia lekarskie należy dostarczyć w ciągu 7 dni. Zgodnie z art. 92 Kodeksu pracy za czas zwolnienia lekarskiego pracownik zachowuje prawo do wynagrodzenia.",
+  "neg-258": "Powiatowy Zespół do Spraw Orzekania o Niepełnosprawności wydaje orzeczenia. Pani <<osoba>>, logopeda, prowadzi terapię logopedyczną. Pan <<osoba>> został zwolniony z pracy.",
+  "neg-259": "Zgodnie z artykułem 92 Kodeksu pracy za czas zwolnienia lekarskiego pracownik zachowuje prawo do wynagrodzenia. Posiedzenie z udziałem dyrektora szpitala dotyczyło leczenia psychiatrycznego dzieci.",
   "neg-26": "Dudek to ptak o charakterystycznym czubie.",
+  "neg-260": "Na podstawie ustawy (Dz. U. z 2024 r., poz. 146) zwolnienie lekarskie jest wystawiane w systemie e-ZLA. Druk zwolnienia lekarskiego jest dostępny na stronie internetowej ZUS.",
+  "neg-261": "Pismo pana <<osoba>> trafiło do szpitala w Radomiu. Na naradzie omówiono zasady wypłaty zasiłku chorobowego.",
+  "neg-262": "Pani <<osoba>>, kierownik działu kadr, przypomina, że zwolnienie lekarskie należy dostarczyć w ciągu 7 dni. Pan <<osoba>>, wójt gminy, ufundował pobyt w hospicjum dla samotnych mieszkańców.",
+  "neg-263": "Mam przyjemność poinformować, że Fundacja sfinansuje pobyt na turnusie rehabilitacyjnym dla 20 dzieci. Budynek był diagnozowany pod kątem zawilgocenia. Hurtownia przyjmuje Ibuprom do magazynu.",
+  "neg-264": "Klient zgłosił się do szpitala z reklamacją dotyczącą faktury. He had a stroke of genius during the negotiations.",
+  "neg-265": "Zespół Szkół nr 2 ogłasza nabór. Projekt prowadzi zespół Nowaka. W trakcie kontroli stwierdzono naruszenie przepisów i pęknięcie ściany nośnej.",
+  "neg-266": "Świadek rozpoznała oskarżonego. Sąd rozpoznał apelację. Rozpoznano u niego talent muzyczny. Pracownik był nieobecny z powodu choroby.",
+  "neg-267": "Firma ma anemię inwestycyjną. Wiele osób choruje na grypę. Dzieci z autyzmem mają prawo do wsparcia. Pani <<osoba>> jest specjalistką od dysleksji.",
+  "neg-268": "Jeżeli u dziecka zdiagnozowano autyzm, rodzice mogą złożyć wniosek. Uczeń, u którego rozpoznano dysleksję, może pisać egzamin dłużej. Każdy uczeń z rozpoznanym ADHD otrzymuje dostosowanie. W 2025 r. w powiecie rozpoznano 312 przypadków gruźlicy.",
+  "neg-269": "Z uwagi na przewozy szkolne Pan <<osoba>> zmienił godziny pracy. Pan <<osoba>> kupił dwa betonowozy. Pani <<osoba>> zwróciła uwagę na przymrozy w maju.",
   "neg-27": "Kot przewrócił doniczkę z parapetu.",
+  "neg-270": "Z powodu niedorozwoju sieci kanalizacyjnej Pan <<osoba>> nie może się przyłączyć. Szkoła ma zespół Kubiaka do obsługi zawodów. Pani <<osoba>> ma zespół Nowaka do pomocy.",
+  "neg-271": "Pracownik z rozpoznaną depresją może skorzystać z urlopu. Dziecku z rozpoznanym ADHD przysługuje pomoc. Pacjent z podejrzeniem udaru jest przewożony na SOR.",
+  "neg-272": "Urząd przyjmuje interesantów od 8 do 16. Do wniosku stosuje się przepisy ustawy. Pan <<osoba>> bierze udział w szkoleniu. Zalecono uzupełnienie wniosku w terminie 7 dni.",
+  "neg-273": "Szpital stosuje enoksaparynę u pacjentów po zabiegach. Sprawa dotyczy kradzieży leków psychotropowych z apteki. Refundacja leków przeciwpadaczkowych obejmuje dzieci. Wiele osób przyjmuje leki przeciwdepresyjne.",
+  "neg-274": "Kierownik jest na Mazurach. Pani <<osoba>> zażywa kąpieli słonecznych. Kandydat przyjmuje stanowisko p.o. dyrektora. Aspartam jest słodzikiem.",
+  "neg-275": "Klient dostaje kapsułki Nespresso w prezencie. Dawkowanie według ChPL: Clexane 40 mg s.c. raz na dobę u dorosłych. Po wypisie ze szpitala pacjenci często otrzymują leki przeciwzakrzepowe, wynika z raportu.",
+  "neg-276": "Paracetamol 500 mg jest dostępny bez recepty w każdej aptece. Lek Xanax 0,5 mg wydaje się wyłącznie na receptę. Komunikat GIF: wycofanie z obrotu serii leku Polocard 75 mg wydawanego bez recepty.",
+  "neg-277": "Pani <<osoba>> otrzymała pismo, Concordia odmówiła. Uczeń otrzymał pochwałę, penicylina była tematem referatu. Urzędnik przyjmuje interesantów i petentów, statyny są w szafce apteczki.",
+  "neg-278": "W badaniu klinicznym włączono metforminę u 300 pacjentów. Na oddziale włączono enoksaparynę u wszystkich hospitalizowanych. W programie podawano sertralinę 140 uczestnikom. Kontrola NIK: w szpitalu podawano morfinę bez zlecenia.",
+  "neg-279": "Stanowisko to potwierdza wyrok WSA w Gdańsku z dnia 9 marca 2022 r., sygn. akt II SA/Gd 812/21.",
   "neg-28": "W piątek trzynastego lepiej zostać w domu.",
+  "neg-280": "Organ uwzględnił stanowisko wyrażone w uchwale Sądu Najwyższego z dnia 26 lutego 2020 r., sygn. akt III CZP 12/19.",
+  "neg-281": "WSA w Poznaniu w wyroku z dnia 14 kwietnia 2020 r., sygn. akt II SA/Po 1001/19, stwierdził, że opłata adiacencka wymaga ustalenia wzrostu wartości.",
+  "neg-282": "Kandydatka ukończyła administrację na Uniwersytecie Mikołaja Kopernika w Toruniu.",
+  "neg-283": "Dotację otrzymało Stowarzyszenie Przyjaciół Ziemi Krzeszowickiej.",
+  "neg-284": "45 | 04.11.2026 | Urząd Skarbowy w Gliwicach | ul. Góry Chełmskiej 15, Gliwice | zawiadomienie",
+  "neg-285": "Akta przekazano do Samodzielnego Publicznego Zakładu Opieki Zdrowotnej w Kole, ul. Szpitalna 1, 62-600 Koło.",
+  "neg-286": "Sprawę skierowano do Samorządowego Kolegium Odwoławczego w Siedlcach, ul. Piłsudskiego 38, 08-110 Siedlce.",
+  "neg-287": "Kopia: Straż Miejska w Bydgoszczy, ul. Bernardyńska 14, 85-029 Bydgoszcz; Powiatowe Centrum Pomocy Rodzinie w Sokółce, ul. Kryńska 14",
+  "neg-288": "Umowa z Przedsiębiorstwem Gospodarki Komunalnej sp. z o.o. w Żywcu, ul. Kopernika 59, 34-300 Żywiec, NIP 5530002393.",
+  "neg-289": "Lp.	Nr ewidencyjny	Obręb	Powierzchnia [ha]
+1	123/4	0005 Zalesie	0,1234
+Lp.;Nazwa jednostki;Nr członkowski;Składka
+1;Ochotnicza Straż Pożarna w Zalesiu;0123;200,00",
   "neg-29": "Kwiecień plecień, bo przeplata trochę zimy, trochę lata.",
+  "neg-290": "Architekt Miejski, Biuro Architektury i Planowania Przestrzennego (MOIA nr 12/2024 – stanowisko). Geodeta Powiatowy, uprawnienia nr 3/2025 do PZGiK.",
+  "neg-291": "Dekretacja: Sekretarz → OR → OR.I, wg właściwości: WOŚ/RGK. Kategoria archiwalna: A, B5, BE10. Podstawa: KPA, KC, UODO.",
+  "neg-292": "Lp | Rodzaj postępowania | Prowadzący | Sygnatura
+1 | podatkowe | US | 1
+2 | cywilne | SR | 2
+3 | lokalowe | UM | 3",
+  "neg-293": "Lp.	Sprawa	Prowadzący
+1	pozwolenie na budowę	AB
+2	podział działki	GK
+3	wycinka drzew	OŚ",
+  "neg-294": "Lp. | Komórka | Prowadzący
+1 | Wydział Geodezji | GD
+2 | Biuro Rady | BR",
+  "neg-295": "Przekazano wg właściwości: U.S.C. Przydzielono do: G.O.K. Sprawę prowadzi: K.P.A. art. 35",
+  "neg-296": "Sprawę prowadzi: Z.G.K. w Pucku. Referent: W.Z.D. (Wojewódzki Zarząd Dróg)",
+  "neg-297": "Prawo jazdy kategorii B wydaje starosta w terminie 14 dni, a zatrzymany dokument prawa jazdy za pokwitowaniem nr 0318842 przekazano do organu.",
+  "neg-298": "Zgodnie z ustawą o dowodach osobistych dowód wydaje organ gminy, Punkt Paszportowy nr 2 w Gdyni przyjmuje wnioski.",
+  "neg-299": "Imię i nazwisko osoby upoważnionej: ………… We wniosku należy podać imię i nazwisko, nazwisko rodowe oraz imiona rodziców. Rada Gminy nadaje szkole imię Jana Pawła II.",
   "neg-30": "Król wydał ucztę na zamku.",
+  "neg-300": "Wnioski o wydanie prawa jazdy przyjmuje Wydział Komunikacji, pokój nr 2107, a dowód osobisty odbierzesz w Urzędzie Miasta, okienko nr ABA654321.",
+  "neg-301": "Działka nr 412/7, obręb Masłów, nazwisko właściciela: Skarb Państwa. Ośrodek Kultury imienia Kazimierza prowadzi zajęcia.",
+  "neg-302": "Prawo jazdy wydane przez Starostę Kartuskiego, Wydział Komunikacji, Pokój nr 2107. Odbiór: okienko czasowo zamknięte, nr 1204 czynne od 8:00.",
+  "neg-303": "Inwestor, nazwisko lub nazwa: Budimex. Rada Miejska nadaje rondu imię „Józefa”, a szkoła nosi imię: Stanisław.",
+  "neg-304": "Operator porusza się na wózku widłowym po hali. Działka leżąca w obrębie Zalesie przylega do drogi. Pomoc w formie usług opiekuńczych przysługuje osobie, która wymaga pomocy innych osób.",
+  "neg-305": "Na samodzielne stanowisko referenta przyjęto pracownika. Polski Związek Niewidomych prowadzi szkolenie dla osób niewidomych, a dziecko nie chodzi samodzielnie do szkoły.",
+  "neg-306": "Zabytkowy park wymaga stałej opieki. Dziecko w wieku 2 lat wymaga stałej opieki. Ratownik chodzi z kulami ratunkowymi po plaży, a pracownik nie mówi i nie chodzi na zebrania.",
+  "neg-307": "Pani <<osoba>> odpowiada za zakup pieluchomajtek, a Pan <<osoba>> dostarczył 200 cewników i worki stomijne do magazynu.",
+  "neg-308": "Uczeń <<osoba>> nie potrafi samodzielnie funkcjonować w grupie rówieśniczej, a Pani <<osoba>> wymaga pomocy w poruszaniu się po systemie e-PUAP i nie porusza się samodzielnie po Warszawie.",
+  "neg-309": "Powiatowy Zespół do Spraw Orzekania o Niepełnosprawności wydaje orzeczenia o stopniu niepełnosprawności. Symbol przyczyny niepełnosprawności 05-R oznacza upośledzenie narządu ruchu. Dzień Osób z Niepełnosprawnościami obchodzimy 3 grudnia.",
   "neg-31": "Numer 44051401350 nie przeszedł walidacji w systemie.",
+  "neg-310": "Dziecko z niepełnosprawnością ma prawo do bezpłatnego transportu do szkoły. Sala 05-R jest zamknięta, a element 06-E leży w magazynie.",
+  "neg-311": "Orzeczenie o niepełnosprawności (symbol 05-R) wydaje się dzieciom z chorobami narządu ruchu. Poradnik dla rodziców: niepełnosprawność dziecka a świadczenia rodzinne. W 2025 r. wydano 412 orzeczeń o umiarkowanym stopniu niepełnosprawności, w tym 37 z symbolem 02-P.",
+  "neg-312": "Kryterium: wychowywanie niepełnosprawnego dziecka – 10 punktów. Asystent rodziny pomaga rodzicom niepełnosprawnego dziecka. Beneficjentem projektu jest niepełnosprawny mieszkaniec gminy.",
+  "neg-313": "W ramach programu Fundacji Anny Dymnej prowadzona jest rehabilitacja ruchowa. Szkoła Podstawowa im. Marii Konopnickiej prowadzi zajęcia dla uczniów z cukrzycą. Szpital Jana Pawła II przyjmuje pacjentów z udarem.",
+  "neg-314": "Zgodnie z wytycznymi Kasi zwolnienie lekarskie należy dostarczyć w ciągu 7 dni. Jeżeli u Zosi wystąpi gorączka, należy wezwać lekarza. U Kasi stwierdzono brak zaległości.",
+  "neg-315": "Zajęcia o cukrzycy w klasie Zosi prowadziła pielęgniarka. Kacprowi wręczono dyplom za udział w konkursie o zdrowiu. Na zebraniu u Jana omówiono program profilaktyki chorób nowotworowych.",
+  "neg-316": "Centrum Rehabilitacji im. Ireny Sendlerowej przyjmuje osoby po udarze. Szpital im. Ludwika Rydygiera leczy pacjentów po zawale. Mieszkańcy gminy Kazimierza Wielka mogą skorzystać z badań w kierunku cukrzycy.",
+  "neg-317": "Pensjonat u Basi przyjmuje kuracjuszy po zawale serca. Gospoda U Kasi zatrudnia osoby po udarze. Akcja „Pomóż Zuzi” zbiera środki dla dzieci z chorobą nowotworową.",
+  "neg-318": "Spółka jest w trakcie likwidacji. Gmina prowadzi rehabilitację domową w ramach programu. W raporcie wskazano niewydolność systemu ochrony zdrowia. Anatomia jest przedmiotem na pierwszym roku.",
   "neg-32": "Ciąg 1234563210 to przykładowy identyfikator testowy.",
   "neg-33": "Wartość zamówienia: 123.456.789 zł brutto.",
   "neg-34": "Pojazd MERCEDES odholowano na parking strzeżony.",
@@ -2815,6 +4020,63 @@ Zużycie paska",
   "os-o-35": "z powództwa <<osoba>> przeciwko <<osoba>>, z udziałem <<osoba>> i <<osoba>>",
   "os-o-36": "Zgodnie z ustaleniami z Panem Ministrem <<osoba>> termin zostaje.",
   "os-o-37": "Dziękuję Panu Dyrektorowi <<osoba>> za pomoc.",
+  "os-o-38": "Głos zabrała radna <<osoba>>. Radny Kmieć poparł wniosek radnej <<osoba>>.",
+  "os-o-39": "- <<osoba>>, syn
+- <<osoba>>, córka
+<<osoba>> odrabia lekcje, a <<osoba>> recytowała wiersz o tym, jak wrona zgubiła ser.",
+  "os-o-40": "Szanowny Panie <<osoba>>,
+odpowiadam na pismo w sprawie lokalu.
+<<osoba>>",
+  "os-o-41": "Obecni: <<osoba>>, <<osoba>>.
+1. <<osoba>> złoży wniosek.
+2. <<osoba>> potwierdzi przelew.",
+  "os-o-42": "Zgłaszający: [LOGIN] (<<osoba>>)
+Komentarz 08:20, [LOGIN]: dalej nie działa.",
+  "os-o-43": "Wnioskodawczyni <<osoba>>. Szkoła Podstawowa im. Marii Konopnickiej.",
+  "os-o-44": "Radny <<osoba>> zgłosił wniosek. Wróbel na dachu ćwierkał.",
+  "os-o-45": "Pan <<osoba>> złożył wniosek. Wyjazd do Włoch, potem urlop na Mazurach. Decyzję doręczono <<osoba>>.",
+  "os-o-46": "Pan <<osoba>> złożył wniosek. Mecz w Rakowie. Rozmawiano z <<osoba>>.",
+  "os-o-47": "Pan <<osoba>> złożył wniosek do Ministerstwa Zdrowia (MZ). Projekt zatwierdzony przez MZ.",
+  "os-o-48": "Pan <<osoba>> należy do parafii św. Piotra i Pawła. <<osoba>> przyszedł.",
+  "os-o-49": "Pani <<osoba>> pracuje w kopalni. Kopalnia Barbara zatrudnia 500 osób. Rondo Trzeciego Maja.",
+  "os-o-50": "Pacjentka <<osoba>>, lat 45.
+Wywiad: matka – Rak jajnika. Zima była ciężka.",
+  "os-o-51": "<<osoba>> :) dzwonię w celu umówienia wizyty, pozdrawiam <<osoba>>",
+  "os-o-52": "Pan <<osoba>> złożył wniosek. Pojezierze Pomorskie jest piękne. Decyzję doręczono <<osoba>>.",
+  "os-o-53": "Pani <<osoba>> złożyła wniosek. Przedszkole „Pod Lisem” zaprasza. Pani <<osoba>> przyszła.",
+  "os-o-54": "Pan <<osoba>> złożył wniosek. Wolny dostęp do informacji jest prawem. <<osoba>> przyszedł wczoraj.",
+  "os-o-55": "Pan <<osoba>> złożył wniosek. Pociąg do Kalisza odjechał. Rozmowa z <<osoba>> trwała godzinę.",
+  "os-o-56": "Pan <<osoba>> złożył wniosek. Dział TZ przekazał akta. Pismo przygotował <<osoba>> w dniu 5 maja.",
+  "os-o-57": "Panie <<osoba>>,
+przesyłam protokół. Witam <<osoba>>, Cześć <<osoba>>! Tak, <<osoba>>, wiem.",
+  "os-o-58": "Jutro przyjdzie hydraulik p. <<osoba>>, numer do niego podam.",
+  "os-o-59": "Dear Mr <<osoba>>, Ms <<osoba>> will call. Frau <<osoba>> hat geschrieben. Dr <<osoba>>, University of Leeds.",
+  "os-o-60": "Z poważaniem
+<<osoba>>
+
+Pozdrawiam, <<osoba>>
+
+Best regards,
+<<osoba>>",
+  "os-o-61": "Herr Dr. <<osoba>> hat angerufen. Sehr geehrte Frau Prof. Dr. <<osoba>>, Dear Dr. <<osoba>>, W Gdyni, <<osoba>>, było zimno.",
+  "os-o-62": "Wczoraj jej syn <<osoba>> przyszedł sam, a córce <<osoba>> daliśmy prezent. Mój brat <<osoba>> i moja siostra <<osoba>> pomagają.",
+  "os-o-63": "KLIENT: Żona, <<osoba>>, ale ona nie wie. probowal tez maz, <<osoba>>, na lapku.",
+  "os-o-64": "Obecne były dzieci <<osoba>> (7 lat) i <<osoba>> (4 lata). <<osoba>> chodzi do szkoły, <<osoba>> ma alergię.",
+  "os-o-65": "Zmarły, syn <<osoba>> i <<osoba>>, zamieszkały w <<miejsce>>. I moved with my husband <<osoba>> and our daughter <<osoba>>.",
+  "os-o-66": "Matka <<osoba>> złożyła wniosek. Synowi <<osoba>> przyznano zasiłek. Syn <<osoba>> czytał Ewangelię.",
+  "os-o-67": "Mój brat <<osoba>> przyszedł, a moja matka <<osoba>> została w domu.",
+  "os-o-68": "Brat <<osoba>> z Niemiec przyjechał na pogrzeb. Siostra <<osoba>> z MOPS przyszła na wizytę. Matka <<osoba>> z Wadowic złożyła wniosek.",
+  "os-o-69": "Dzieci: <<osoba>> (8 lat), <<osoba>> (5 lat) i <<osoba>> (2 lata). Syn: <<osoba>>, ur. 2015. dzieci – <<osoba>> i <<osoba>>",
+  "os-o-70": "[08:12] <<osoba>> 🌸: dzwonili ze szpitala
+[08:13] <<osoba>>: co powiedzieli??
+[08:30] <<osoba>>: dzięki. <<osoba>> a recepty?",
+  "os-o-71": "Konsultant (<<osoba>>): dzień dobry
+Klient: witam
+Konsultant (<<osoba>>): słucham",
+  "os-o-72": "Komentarze:
+<<osoba>>: widziałem psa 😅
+  ↳ <<osoba>>: offtop
+  ↳ Admin <<osoba>> 🌻: bez wycieczek",
   "os-p-01": "Pozwany <<osoba>> nie stawił się na rozprawie.",
   "os-p-02": "Powódka <<osoba>> wniosła o zasądzenie kosztów.",
   "os-p-03": "Świadek <<osoba>> zeznał, że widział zdarzenie.",
@@ -2880,7 +4142,7 @@ Sędziowie: SO <<osoba>>, SO <<osoba>> (spr.)",
   "os-p-58": "Sąd zasądził od uczestnika <<osoba>> koszty.",
   "os-p-59": "Wniosek złożyła <<osoba>>. Szanowna Pani Dyrektor Szkoły <<osoba>>, uprzejmie informuję.",
   "os-p-60": "Na ulicy <<osoba>> zasłabł. W parku <<osoba>> spacerowała z psem.",
-  "os-p-61": "Badanie wykonał lek. <<osoba>>. <<osoba>> przebywa na zwolnieniu lekarskim.",
+  "os-p-61": "Badanie wykonał lek. <<osoba>>. <<osoba>> przebywa na [DANE O ZDROWIU].",
   "os-p-62": "W kościele św. Anny <<osoba>> zagra koncert kolęd. W kościele przesłuchano św. <<osoba>>.",
   "os-p-63": "Pacjent <<osoba>> trafił na SOR. Objawy <<osoba>> nasiliły się w nocy. Mistrz linii <<osoba>> wydał polecenie.",
   "os-p-64": "Do: <<osoba>>; <<osoba>>
@@ -2925,6 +4187,24 @@ wzywa do zapłaty.",
   "os-p-86": "W kościele <<osoba>> zauważyła sprawcę i wezwała policję.",
   "os-p-87": "Odpis aktu małżeństwa <<osoba>> i <<osoba>>, zawartego w Krakowie.",
   "os-p-88": "Pismo od <<osoba>> z 3 marca. Pozew <<osoba>> wpłynął.",
+  "os-p-89": "Uczeń przyjechał z Ukrainy, matka <<osoba>> okazała paszport.",
+  "os-p-90": "Decyzję doręczono <<osoba>>, a odpis <<osoba>>.",
+  "os-p-91": "Wniosek złożyła <<osoba>>, obywatelka Syrii, a pełnomocnikiem jest <<osoba>>.",
+  "os-p-92": "Małżonek: <<osoba>>. Pełnomocnikiem ustanawiam <<osoba>>.",
+  "os-p-93": "Prowadzący: <<osoba>>, inspektor
+Dekretacja: Kierownik Referatu → <<osoba>>, termin 05.11.2026",
+  "os-p-94": "Lp. | Sprawa | Prow.
+1 | wniosek | <<osoba>>
+2 | skarga | <<osoba>>
+Skróty w kolumnie Prow.: <<osoba>> – <<osoba>>, <<osoba>> – <<osoba>>.",
+  "os-p-95": "Lp. | Sprawa | Osoba prowadząca
+1 | wniosek | <<osoba>>
+2 | skarga | <<osoba>>",
+  "os-p-96": "Wnioskodawca: <<osoba>>
+Znak sprawy: [ZNAK-SPRAWY]
+Dekretacja: Burmistrz → GK → <<osoba>>
+Kierownik Referatu GK – <<osoba>>",
+  "os-p-97": "Wnioskodawczyni, nazwisko rodowe w akcie: <<osoba>>, wnosi o zmianę nazwiska syna z „<<osoba>>” na „<<osoba>>” i o nadanie córce imienia <<osoba>>.",
   "os-r-01": "<<osoba>> podpisał protokół odbioru.",
   "os-r-02": "<<osoba>> złożyła wniosek o urlop.",
   "os-r-03": "<<osoba>> wynajął magazyn pod miastem.",
@@ -3136,7 +4416,7 @@ Zalecenia przy wypisie:
 kontrola w poradni za 4 tygodnie",
   "str-18": "Numer telefonu [TELEFON] jest nieaktualny.",
   "str-180": "Pacjent z rozpoznaniem [DANE O ZDROWIU], przyjmuje [DANE O ZDROWIU].",
-  "str-181": "Zgodnie z zaświadczeniem lekarskim po porodzie przez [DANE O ZDROWIU] przeciwwskazane jest [DANE O ZDROWIU] do końca roku.",
+  "str-181": "Zgodnie z zaświadczeniem lekarskim [DANE O ZDROWIU] przez [DANE O ZDROWIU] przeciwwskazane jest [DANE O ZDROWIU] do końca roku.",
   "str-182": "Od dwóch lat pozwany [DANE O ZDROWIU]. W wyniku zdarzenia doznałem [DANE O ZDROWIU].",
   "str-183": "Potrzeba wynika z rozpoznania [DANE O ZDROWIU] i leczenia [DANE O ZDROWIU], potwierdzonego zaświadczeniem lekarza.",
   "str-184": "Dział Kadr i Płac
@@ -3167,7 +4447,7 @@ Przychodnia Rodzinna
 <<adres>>
 <<kod>> <<miejsce>>",
   "str-191": "Dla:
-Marianna Zięba-Kot
+<<osoba>>
 Wydział Komunikacji
 <<adres>>
 <<kod>> <<miejsce>>",
@@ -3217,15 +4497,179 @@ kontrola w poradni za 4 tygodnie",
 <<adres>>",
   "str-214": "Zamieszkały: <<adres>>, <<miejsce>>. Lokal w <<miejsce>>, <<adres>>.",
   "str-215": "Urząd Gminy, ul. Polna 3, <<osoba>>, <<kod>> <<miejsce>>",
+  "str-216": "Pani <<osoba>> ma [DANE O ZDROWIU]. Syn wnioskodawczyni ma [DANE O ZDROWIU].",
+  "str-217": "Ojciec dziecka jest [DANE O ZDROWIU] i przerwał [DANE O ZDROWIU]. Matka od lat [DANE O ZDROWIU].",
+  "str-218": "Do końca miesiąca przebywam [DANE O ZDROWIU]. U pani <<osoba>> trwa [DANE O ZDROWIU].",
+  "str-219": "Matka małoletniego jest od lat [DANE O ZDROWIU]. Wnioskodawczyni jest [DANE O ZDROWIU]. Pozwany kilkukrotnie trafiał [DANE O ZDROWIU].",
   "str-22": "Zgłoszenia przyjmujemy pod adresem [EMAIL].",
+  "str-220": "Pani <<osoba>> była [DANE O ZDROWIU]. Mr <<osoba>> underwent [DANE O ZDROWIU] in May.",
+  "str-221": "Konkubent przyznał, że dwa razy trafił [DANE O ZDROWIU]. Pani <<osoba>>, magazynierka, przebywa na [DANE O ZDROWIU].",
+  "str-222": "U wnioskodawczyni rozpoznano [DANE O ZDROWIU]. Syn stron ma zdiagnozowaną [DANE O ZDROWIU].",
+  "str-223": "Małoletni ma rozpoznane [DANE O ZDROWIU]. Psychiatra rozpoznała [DANE O ZDROWIU].",
+  "str-224": "Pacjentka cierpi na [DANE O ZDROWIU]. Babcia ma [DANE O ZDROWIU] i [DANE O ZDROWIU]. Uczennica ma orzeczenie ze względu na [DANE O ZDROWIU].",
+  "str-225": "Pacjent lat 32. W RTG stwierdzono [DANE O ZDROWIU]. Uczestniczka uskarżała się na [DANE O ZDROWIU].",
+  "str-226": "Dr <<osoba>> pracuje w IBS PAN. Pan <<osoba>> gra w klubie RZS Rzeszów. Pielęgniarka <<osoba>> pracuje w zespole Mazura na oddziale kardiologii i dyżuruje w szpitalu.",
+  "str-227": "U syna rozpoznano [DANE O ZDROWIU]. Pani <<osoba>> choruje na [DANE O ZDROWIU]. Córka ma [DANE O ZDROWIU].",
+  "str-228": "Chłopiec przyjmuje [DANE O ZDROWIU]. Psychiatra włączyła mu [DANE O ZDROWIU]. Matka przyjmuje [DANE O ZDROWIU].",
+  "str-229": "Małoletni otrzymuje [DANE O ZDROWIU]. Ojciec jest na [DANE O ZDROWIU] od 2019 r. Syn zażywa [DANE O ZDROWIU].",
   "str-23": "e-mail: [EMAIL] (służbowy)",
+  "str-230": "Zalecenia:
+1. [DANE O ZDROWIU] przez 35 dni.
+Pacjent hospitalizowany. Glikemie wyrównane na [DANE O ZDROWIU] i [DANE O ZDROWIU].",
+  "str-231": "Brała wcześniej [DANE O ZDROWIU]. [DANE O ZDROWIU] przyjmuje od roku. Odstawiono [DANE O ZDROWIU] z powodu senności. Matka nie podaje dziecku [DANE O ZDROWIU].",
+  "str-232": "Nabycie spadku stwierdził Sąd Rejonowy w Kłodzku postanowieniem z dnia 20 maja 2016 r., sygn. akt [ZNAK-SPRAWY].",
+  "str-233": "NSA wyrokiem z 7 maja 2024 r., sygn. akt [ZNAK-SPRAWY], oddalił skargę kasacyjną wnioskodawczyni.",
+  "str-234": "Jak wskazał Sąd Rejonowy w postanowieniu z dnia 12 marca 2024 r., sygn. akt [ZNAK-SPRAWY], władza rodzicielska ojca została ograniczona.",
+  "str-235": "WÓJT GMINY KOBYLNICA
+ul. Główna 20, 76-251 Kobylnica
+
+Wnioskodawczyni: <<osoba>>, zam. <<adres>>, <<kod>> <<miejsce>>.",
+  "str-236": "KIEROWNIK URZĘDU STANU CYWILNEGO W KIELCACH
+ul. Strycharska 6, 25-659 Kielce
+
+Kierownik Budowy
+<<adres>>, <<kod>> <<miejsce>>",
+  "str-237": "Pan <<osoba>> złożył uwagi, które oceni Starosta Słupski.",
+  "str-238": "Świadek <<osoba>>, administrator z ramienia Spółdzielni Mieszkaniowej „Stok” z siedzibą przy ul. Lipowej 4 w Białymstoku, zam. <<adres>>.",
+  "str-239": "Posiłki dla uczniów Szkoły Podstawowej im. Janusza Korczaka w Mielniku (Gmina Mielnik) dostarcza <<osoba>>.",
   "str-24": "Adres do doręczeń: <<kod>> <<miejsce>>, skrytka 21.",
+  "str-240": "Wykonawca: Zakład Instalacyjny Sowa z siedzibą przy <<adres>>, <<kod>> <<miejsce>>.",
+  "str-241": "<<osoba>>, Zakład Usług Remontowych z siedzibą przy <<adres>> w <<miejsce>>.",
+  "str-242": "Zebranie odbędzie się w siedzibie Urzędu Gminy w Baranowie przy ul. Rynek 14. Pani <<osoba>> przedstawi wniosek.",
+  "str-243": "Pacjent Szpitala <<osoba>> przyjęty 3 marca. Uczniowie Szkoły Podstawowej Marii Konopnickiej odwiedzili oddział.",
+  "str-244": "zawarta pomiędzy:
+Gminą Pszczyna, ul. Rynek 2, 43-200 Pszczyna, NIP 6381016402, reprezentowaną przez Burmistrza,
+a
+Panią <<osoba>>, <<adres>>, <<kod>> <<miejsce>>, NIP [NIP]",
+  "str-245": "Urzędem Miejskim w Kórniku, pl. Niepodległości 1, 62-035 Kórnik, reprezentowanym przez Burmistrza, a Panem <<osoba>>, zamieszkałym przy <<adres>>, <<kod>> <<miejsce>>",
+  "str-246": "Sprawdziła: <<osoba>>, inspektor ds. oświaty, Urząd Gminy Mielnik, ul. Piaskowa 1.
+Do wiadomości: Zarząd Mienia Komunalnego, ul. Bema 3.",
+  "str-247": "Adresat: <<osoba>>, Urząd Gminy Kobylnica, <<adres>>",
+  "str-248": "Urząd Skarbowy w Kole, ul. Toruńska 10, 62-600 Koło, <<osoba>>, NIP [NIP]",
+  "str-249": "Zakład Fryzjerski w Kole, <<adres>>, <<kod>> <<miejsce>>, NIP [NIP]",
   "str-25": "Przesyłkę nadano z kodu <<kod>>.",
+  "str-250": "| Imię i nazwisko | Pracodawca | Adres zamieszkania |
+| <<osoba>> | Urząd Gminy Mielnik | <<adres>>, <<kod>> <<miejsce>> |",
+  "str-251": "Zakład Usług Komunalnych „Czysto”, <<adres>>, <<kod>> <<miejsce>>, NIP [NIP]; Studio Komunikacji Wizualnej, <<adres>>, NIP [NIP]",
+  "str-252": "Skarżąca <<osoba>> (Gmina Kobylnica, <<adres>>, <<kod>> <<miejsce>>), reprezentowana przez adw. <<osoba>>. Uczestnik: Zakład Gospodarki Komunalnej w Kole, ul. Toruńska 10.",
+  "str-253": "Urząd Gminy Firlej, ul. Szkolna 2, 21-136 Firlej
+tel. 81 856 40 12, podatki@firlej.example.pl
+
+Sprawę prowadzi: <<osoba>>, tel. [TELEFON], [EMAIL]",
+  "str-254": "Należność wpłacić na rachunek Gminy Firlej nr 78 1160 2202 6163 7497 8486 2063, a nadpłata zostanie zwrócona na rachunek nr [NR-KONTA] wskazany przez <<osoba>>.",
+  "str-255": "Urząd Gminy Firlej
+ul. Szkolna 2, 21-136 Firlej
+tel. 81 856 10 21
+tel. [TELEFON] (<<osoba>>)
+
+Z poważaniem
+<<osoba>>
+Inspektor
+Wydział Komunikacji, tel. [TELEFON]",
+  "str-256": "Urząd Gminy Mielnik, ul. Piaskowa 1, 17-307 Mielnik, e-mail: gmina@mielnik.pl. Zajęcia prowadzi: [EMAIL], zapisy: [EMAIL].",
+  "str-257": "Umowę sporządziła: <<osoba>>, Referat Organizacyjny, tel. 61 817 04 11 wew. 34. Wywiad przeprowadziła: <<osoba>>, pracownik socjalny, tel. [TELEFON] wew. 31.",
+  "str-258": "Wydział Komunikacji, e-mail: [EMAIL]; Starostwo Powiatowe w Łęcznej, ul. Szkolna 2, 21-010 Łęczna, e-mail: kancelaria@powiatleczynski.pl",
+  "str-259": "Podatek proszę wpłacić na rachunek Gminy Firlej nr [NR-KONTA] (subkonto podatnika). Opłatę skarbową wnosi się na rachunek urzędu nr 12 1020 1026 0000 0402 0000 0000.",
   "str-26": "Zamieszkały przy <<adres>> w <<miejsce>>.",
+  "str-260": "Z poważaniem
+<<osoba>>
+Inspektor
+Urząd Gminy Bielsk
+ul. Szkolna 1
+09-230 Bielsk
+tel. [TELEFON], pok. 12, <<osoba>>",
+  "str-261": "Kierownik budowy: mgr inż. <<osoba>>, uprawnienia budowlane nr [NR-UPRAWNIEŃ], członek ŚOIIB pod nr [NR-UPRAWNIEŃ]. Podstawa: art. 12 ust. 1 Prawa budowlanego.",
+  "str-262": "Mapę sporządził geodeta uprawniony <<osoba>> (nr upr. [NR-UPRAWNIEŃ]), a operat rzeczoznawca majątkowy <<osoba>>, uprawnienia nr [NR-UPRAWNIEŃ]. Uchwała nr XIV/112/2026 Rady Gminy pozostaje w mocy.",
+  "str-263": "Przekład wykonała tłumaczka przysięgła <<osoba>>, wpisana na listę tłumaczy przysięgłych pod nr [NR-UPRAWNIEŃ]. Komunikat Okręgowej Izby Lekarskiej nr 14/2026 dołączono do akt.",
+  "str-264": "Lp.	Imię i nazwisko	Funkcja	Nr uprawnień
+1	<<osoba>>	projektant	[NR-UPRAWNIEŃ]
+2	<<osoba>>	sprawdzający	[NR-UPRAWNIEŃ]
+Okólnik OIRP nr 3/2026 dołączono do akt.",
+  "str-265": "Geodeta uprawniony Zenon Marek, nr uprawnień [NR-UPRAWNIEŃ] – pomiar sytuacyjny. Naczelnik Wydziału Geodezji i Kartografii, uprawnienia do podpisu nr 4/2026 w systemie EZD.",
+  "str-266": "Lp.;Imię i nazwisko;Nr członka izby
+1;<<osoba>>;[NR-UPRAWNIEŃ]
+Sprawa OR/0456/POW/24 prowadzona przez Wydział Organizacyjny. Ankieta dla członków PIIB nr 2/2026.",
+  "str-267": "Lp. | Nazwisko i imię | Data urodzenia | Kryteria | Pkt
+1 | <<osoba>> | <<data>> | wielodzietność | 165
+2 | <<osoba>> | <<data>> | brak | 15",
+  "str-268": "Kandydat | telefon | e-mail
+<<osoba>> | [TELEFON] | [EMAIL]
+<<osoba>> | [TELEFON] | [EMAIL]",
+  "str-269": "Nazwisko i imię     Data urodzenia     PESEL
+<<osoba>>      <<data>>         <<pesel>>",
   "str-27": "Biuro mieści się przy <<adres>>.",
+  "str-270": "Wnioskodawca | Data wpływu | Sprawa
+<<osoba>> | 03.11.2026 | zasiłek
+Nadleśnictwo Lipno | 04.11.2026 | dzierżawa
+Samorządowe Kolegium Odwoławcze | 05.11.2026 | odwołanie",
+  "str-271": "Nazwisko i imię | Stanowisko | Data decyzji | Kwota
+<<osoba>> | Inspektor | 12.03.2026 | 500,00 zł
+Pozostali Uczestnicy | Kierownik | 13.03.2026 | 300,00 zł",
+  "str-272": "Lp. | Imię i nazwisko albo nazwa | Kwota
+1 | <<osoba>> | 100,00
+2 | MOPS Lipno | 200,00
+3 | Eko Trans | 300,00
+4 | Czyste Powietrze | 400,00
+5 | Armii Krajowej | 500,00
+6 | Starszy Referent | 600,00
+7 | Sołtys Zalesia | 700,00",
+  "str-273": "Wnioskodawca | Data wpływu
+<<osoba>> | 03.11.2026
+F.H. Marex | 04.11.2026
+P.W. Budrex | 05.11.2026",
+  "str-274": "Nazwisko i imię | PESEL
+<<osoba>> | <<pesel>>
+<<osoba>> | <<pesel>>",
+  "str-275": "Lp.;Najemca;Telefon
+1;<<osoba>>;[TELEFON]
+2;Kwiaciarnia Róża;54 288 33 12
+3;Chór Cecylia;54 288 60 11",
+  "str-276": "Nazwisko i imię;PESEL
+<<osoba>>;<<pesel>>
+<<osoba>>;<<pesel>>
+<<osoba>>;<<pesel>>",
+  "str-277": "Zatrzymuje się prawo jazdy kat. AM, B nr [PRAWO-JAZDY], wydane przez Starostę Kartuskiego.",
+  "str-278": "Strona okazała dowód osobisty wydany przez Burmistrza Kartuz nr [NR-DOWODU] oraz paszport (ważny do 2031 r.) nr [NR-PASZPORTU].",
+  "str-279": "Akt otrzymał w rejestrze stanu cywilnego numer [NR-AKTU-USC], a odpis aktu urodzenia, nr aktu [NR-AKTU-USC], dołączono.",
   "str-28": "Nowy lokal: <<adres>>, obok szkoły.",
+  "str-280": "D.2 Imię ojca: <<osoba>>   Imię matki: <<osoba>>
+Miejscowość: <<miejsce>>   Ulica: <<adres>>   Nr domu: <<adres>>   Nr lokalu: –",
+  "str-281": "A.1 Imię: <<osoba>>  A.2 Nazwisko: <<osoba>>  A.3 Imię ojca: <<osoba>>",
+  "str-282": "Pracownik | Szkolenie
+<<osoba>> | profilaktyka chorób nowotworowych
+<<osoba>> | warsztaty o uzależnieniach od alkoholu",
+  "str-283": "Pani <<osoba>>, akcja profilaktyczna „Stop cukrzycy”, rozdała ulotki o profilaktyce udaru mózgu i nadciśnienia.",
+  "str-284": "Pani <<osoba>> jest po drugim kursie [DANE O ZDROWIU] z powodu [DANE O ZDROWIU].",
+  "str-285": "Pani <<osoba>> zakończyła kurs [DANE O ZDROWIU] osy, a Pan <<osoba>> uczestniczy w warsztatach dla osób [DANE O ZDROWIU].",
+  "str-286": "Pani <<osoba>> jest objęta programem kompleksowej opieki [DANE O ZDROWIU]. Kampania dla kobiet o profilaktyce raka piersi odbyła się w maju.",
+  "str-287": "Pan <<osoba>> kończy kurs ćwiczeń usprawniających [DANE O ZDROWIU], a Pani <<osoba>> chodzi na warsztaty ruchowe przy [DANE O ZDROWIU].",
+  "str-288": "Lp. | Pracownik | Szkolenie
+1 | <<osoba>> | kurs pierwszej pomocy przy zawale serca
+2 | <<osoba>> | prelekcja o życiu po udarze mózgu",
+  "str-289": "Pani <<osoba>> [DANE O ZDROWIU], a jej mąż [DANE O ZDROWIU] i [DANE O ZDROWIU].",
   "str-29": "Spotkanie odbędzie się na <<adres>>.",
+  "str-290": "Z zaświadczenia wynika, że Pan <<osoba>> jest [DANE O ZDROWIU], [DANE O ZDROWIU], [DANE O ZDROWIU].",
+  "str-291": "Syn wnioskodawczyni, Pan <<osoba>>, [DANE O ZDROWIU], ma wyłonioną [DANE O ZDROWIU].",
+  "str-292": "Pan <<osoba>> [DANE O ZDROWIU], a [DANE O ZDROWIU]; jego żona [DANE O ZDROWIU].",
+  "str-293": "Pani <<osoba>> nosi [DANE O ZDROWIU], a jej wnuk Pan <<osoba>> ma założony [DANE O ZDROWIU] i [DANE O ZDROWIU] z łóżka.",
+  "str-294": "Pani <<osoba>> samotnie wychowuje syna [DANE O ZDROWIU]. Jej mąż jest [DANE O ZDROWIU], a [DANE O ZDROWIU] wydano 3 marca 2025 r.",
+  "str-295": "Imię i nazwisko: <<osoba>>
+Stopień niepełnosprawności: [DANE O ZDROWIU]
+Symbol przyczyny niepełnosprawności: [DANE O ZDROWIU]",
+  "str-296": "Pani <<osoba>> opiekuje się [DANE O ZDROWIU] mężem, a jej córka, [DANE O ZDROWIU], ma [DANE O ZDROWIU].",
+  "str-297": "Wnioskodawczyni sprawuje opiekę nad [DANE O ZDROWIU] synem. Ze względu na [DANE O ZDROWIU] dziecka zasiłek przyznano w wyższej kwocie.",
+  "str-298": "U Zosi stwierdzono [DANE O ZDROWIU], a u <<osoba>> [DANE O ZDROWIU]. Kacprowi przyznano [DANE O ZDROWIU].",
+  "str-299": "Wniesiono o raty ze względu na sytuację materialną <<osoba>>, która pobiera [DANE O ZDROWIU]. Strona wiozła matkę, <<osoba>>, która uskarżała się na [DANE O ZDROWIU].",
   "str-30": "Mieszkam na <<adres>>.",
+  "str-300": "Wnioskodawczyni opiekuje się <<osoba>>, która [DANE O ZDROWIU]. Mój mąż ma [DANE O ZDROWIU] i po każdym takim wieczorze się dusi, w lutym trafił przez to [DANE O ZDROWIU].",
+  "str-301": "Książka <<osoba>> o życiu z cukrzycą typu 1 trafiła do biblioteki. Wykład dr. <<osoba>> o chorobie Alzheimera odbędzie się w czwartek.",
+  "str-302": "<<osoba>> przyznano zasiłek pielęgnacyjny z powodu [DANE O ZDROWIU].",
+  "str-303": "Wywiad z <<osoba>> o depresji ukazał się w gazecie. Monografia <<osoba>> o chorobie afektywnej dwubiegunowej trafiła do biblioteki poradni.",
+  "str-304": "<<osoba>> nadano stopień doktora za rozprawę o leczeniu cukrzycy. Wniosek <<osoba>> o zasiłek pielęgnacyjny z powodu [DANE O ZDROWIU] wpłynął w marcu.",
+  "str-305": "Wnioskodawczyni jest w trakcie [DANE O ZDROWIU] i nie może podjąć pracy. Mąż jest po [DANE O ZDROWIU], a syn korzysta z [DANE O ZDROWIU]. Lena ma [DANE O ZDROWIU].",
+  "str-306": "U syna rozpoznano, według opinii poradni z 3 marca, [DANE O ZDROWIU]. U pana <<osoba>> stwierdzono [DANE O ZDROWIU] po [DANE O ZDROWIU], a pan <<osoba>> ma [DANE O ZDROWIU].",
+  "str-307": "Pedagog jest w trakcie diagnostyki potrzeb ucznia, a budynek szkoły jest w trakcie rehabilitacji. Szpital kontynuuje leczenie pacjentów w nowym budynku. Pani <<osoba>> pracuje w gabinecie fizjoterapii, a Pan <<osoba>> jest instruktorem hipoterapii. Pan <<osoba>> sprzedał ziemię sąsiadowi. Ojciec jest w trakcie [DANE O ZDROWIU], a u matki stwierdzono [DANE O ZDROWIU].",
+  "str-308": "Pani <<osoba>> jest koordynatorką zajęć z ludoterapii, a Pan <<osoba>> jest wykonawcą usług hydroterapii. Pani <<osoba>> ukończyła dwa cykle szkoleń z dogoterapii i napisała pracę magisterską o muzykoterapii. Syn Pani <<osoba>> korzysta z usług [DANE O ZDROWIU] w ośrodku.",
   "str-31": "<<adres>> to adres korespondencyjny.",
   "str-32": "Wnioskodawca, ur. <<data>>, zamieszkały w <<miejsce>>.",
   "str-33": "Urodzona <<data>> w <<miejsce>>.",
@@ -3509,13 +4953,92 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "neg-238": "",
   "neg-239": "",
   "neg-24": "",
+  "neg-240": "",
+  "neg-241": "",
+  "neg-242": "",
+  "neg-243": "",
+  "neg-244": "MIEJSCOWOSC:1",
+  "neg-245": "",
+  "neg-246": "",
+  "neg-247": "",
+  "neg-248": "",
+  "neg-249": "",
   "neg-25": "",
+  "neg-250": "",
+  "neg-251": "",
+  "neg-252": "",
+  "neg-253": "",
+  "neg-254": "",
+  "neg-255": "",
+  "neg-256": "",
+  "neg-257": "",
+  "neg-258": "IMIE:2",
+  "neg-259": "",
   "neg-26": "",
+  "neg-260": "",
+  "neg-261": "IMIE:1",
+  "neg-262": "IMIE:2",
+  "neg-263": "",
+  "neg-264": "",
+  "neg-265": "",
+  "neg-266": "",
+  "neg-267": "IMIE:1",
+  "neg-268": "",
+  "neg-269": "IMIE:3",
   "neg-27": "",
+  "neg-270": "IMIE:2",
+  "neg-271": "",
+  "neg-272": "IMIE:1",
+  "neg-273": "",
+  "neg-274": "IMIE:1",
+  "neg-275": "",
+  "neg-276": "",
+  "neg-277": "IMIE:1",
+  "neg-278": "",
+  "neg-279": "",
   "neg-28": "",
+  "neg-280": "",
+  "neg-281": "",
+  "neg-282": "",
+  "neg-283": "",
+  "neg-284": "",
+  "neg-285": "",
+  "neg-286": "",
+  "neg-287": "",
+  "neg-288": "",
+  "neg-289": "",
   "neg-29": "",
+  "neg-290": "",
+  "neg-291": "",
+  "neg-292": "",
+  "neg-293": "",
+  "neg-294": "",
+  "neg-295": "",
+  "neg-296": "",
+  "neg-297": "",
+  "neg-298": "",
+  "neg-299": "",
   "neg-30": "",
+  "neg-300": "",
+  "neg-301": "",
+  "neg-302": "",
+  "neg-303": "",
+  "neg-304": "",
+  "neg-305": "",
+  "neg-306": "",
+  "neg-307": "IMIE:2",
+  "neg-308": "IMIE:2",
+  "neg-309": "",
   "neg-31": "",
+  "neg-310": "",
+  "neg-311": "",
+  "neg-312": "",
+  "neg-313": "",
+  "neg-314": "",
+  "neg-315": "",
+  "neg-316": "",
+  "neg-317": "",
+  "neg-318": "",
   "neg-32": "",
   "neg-33": "",
   "neg-34": "",
@@ -3621,6 +5144,41 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "os-o-35": "IMIE:4",
   "os-o-36": "IMIE:1",
   "os-o-37": "IMIE:1",
+  "os-o-38": "IMIE:2",
+  "os-o-39": "IMIE:4",
+  "os-o-40": "IMIE:2",
+  "os-o-41": "IMIE:4",
+  "os-o-42": "IMIE:1 LOGIN:2",
+  "os-o-43": "IMIE:1",
+  "os-o-44": "IMIE:1",
+  "os-o-45": "IMIE:2",
+  "os-o-46": "IMIE:2",
+  "os-o-47": "IMIE:1",
+  "os-o-48": "IMIE:2",
+  "os-o-49": "IMIE:1",
+  "os-o-50": "IMIE:1",
+  "os-o-51": "IMIE:2",
+  "os-o-52": "IMIE:2",
+  "os-o-53": "IMIE:2",
+  "os-o-54": "IMIE:2",
+  "os-o-55": "IMIE:2",
+  "os-o-56": "IMIE:2",
+  "os-o-57": "IMIE:4",
+  "os-o-58": "IMIE:1",
+  "os-o-59": "IMIE:4",
+  "os-o-60": "IMIE:3",
+  "os-o-61": "IMIE:4",
+  "os-o-62": "IMIE:4",
+  "os-o-63": "IMIE:2",
+  "os-o-64": "IMIE:4",
+  "os-o-65": "MIEJSCOWOSC:1 IMIE:4",
+  "os-o-66": "IMIE:3",
+  "os-o-67": "IMIE:2",
+  "os-o-68": "IMIE:3",
+  "os-o-69": "IMIE:6",
+  "os-o-70": "IMIE:4",
+  "os-o-71": "IMIE:2",
+  "os-o-72": "IMIE:3",
   "os-p-01": "IMIE:1",
   "os-p-02": "IMIE:1",
   "os-p-03": "IMIE:1",
@@ -3681,7 +5239,7 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "os-p-58": "IMIE:1",
   "os-p-59": "IMIE:2",
   "os-p-60": "IMIE:2",
-  "os-p-61": "IMIE:2",
+  "os-p-61": "ZDROWIE:1 IMIE:2",
   "os-p-62": "IMIE:2",
   "os-p-63": "IMIE:3",
   "os-p-64": "IMIE:4",
@@ -3709,6 +5267,15 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "os-p-86": "IMIE:1",
   "os-p-87": "IMIE:2",
   "os-p-88": "IMIE:2",
+  "os-p-89": "IMIE:1",
+  "os-p-90": "IMIE:2",
+  "os-p-91": "IMIE:2",
+  "os-p-92": "IMIE:2",
+  "os-p-93": "IMIE:2",
+  "os-p-94": "IMIE:6",
+  "os-p-95": "IMIE:2",
+  "os-p-96": "ZNAK-SPRAWY:1 IMIE:3",
+  "os-p-97": "IMIE:4",
   "os-r-01": "IMIE:1",
   "os-r-02": "IMIE:1",
   "os-r-03": "IMIE:1",
@@ -3867,7 +5434,7 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "str-179": "ZDROWIE:4",
   "str-18": "TELEFON:1",
   "str-180": "ZDROWIE:2",
-  "str-181": "ZDROWIE:2",
+  "str-181": "ZDROWIE:3",
   "str-182": "ZDROWIE:2",
   "str-183": "ZDROWIE:2",
   "str-184": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
@@ -3878,7 +5445,7 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "str-189": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
   "str-19": "TELEFON:1",
   "str-190": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
-  "str-191": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
+  "str-191": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
   "str-192": "IMIE:1",
   "str-193": "ZDROWIE:1",
   "str-194": "ZDROWIE:1 IMIE:1",
@@ -3905,15 +5472,108 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "str-213": "ADRES:1",
   "str-214": "ADRES:2 MIEJSCOWOSC:2",
   "str-215": "KOD-POCZTOWY:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-216": "ZDROWIE:2 IMIE:1",
+  "str-217": "ZDROWIE:3",
+  "str-218": "ZDROWIE:3 IMIE:1",
+  "str-219": "ZDROWIE:3",
   "str-22": "EMAIL:1",
+  "str-220": "ZDROWIE:2 IMIE:2",
+  "str-221": "ZDROWIE:2 IMIE:1",
+  "str-222": "ZDROWIE:2",
+  "str-223": "ZDROWIE:2",
+  "str-224": "ZDROWIE:4",
+  "str-225": "ZDROWIE:2",
+  "str-226": "IMIE:3",
+  "str-227": "ZDROWIE:3 IMIE:1",
+  "str-228": "ZDROWIE:3",
+  "str-229": "ZDROWIE:3",
   "str-23": "EMAIL:1",
+  "str-230": "ZDROWIE:3",
+  "str-231": "ZDROWIE:4",
+  "str-232": "ZNAK-SPRAWY:1",
+  "str-233": "ZNAK-SPRAWY:1",
+  "str-234": "ZNAK-SPRAWY:1",
+  "str-235": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-236": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
+  "str-237": "IMIE:1",
+  "str-238": "ADRES:1 IMIE:1",
+  "str-239": "IMIE:1",
   "str-24": "KOD-POCZTOWY:1 MIEJSCOWOSC:1",
+  "str-240": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
+  "str-241": "ADRES:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-242": "IMIE:1",
+  "str-243": "IMIE:1",
+  "str-244": "NIP:1 KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-245": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-246": "IMIE:1",
+  "str-247": "ADRES:1 IMIE:1",
+  "str-248": "NIP:1 IMIE:1",
+  "str-249": "NIP:1 KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
   "str-25": "KOD-POCZTOWY:1",
+  "str-250": "IMIE:1 KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
+  "str-251": "NIP:2 KOD-POCZTOWY:1 ADRES:2 MIEJSCOWOSC:1",
+  "str-252": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:2",
+  "str-253": "EMAIL:1 TELEFON:1 IMIE:1",
+  "str-254": "IBAN:1 IMIE:1",
+  "str-255": "TELEFON:2 IMIE:2",
+  "str-256": "EMAIL:2",
+  "str-257": "TELEFON:1 IMIE:2",
+  "str-258": "EMAIL:1",
+  "str-259": "NR-KONTA:1",
   "str-26": "ADRES:1 MIEJSCOWOSC:1",
+  "str-260": "TELEFON:1 IMIE:2",
+  "str-261": "NR-UPRAWNIEN:2 IMIE:1",
+  "str-262": "NR-UPRAWNIEN:2 IMIE:2",
+  "str-263": "NR-UPRAWNIEN:1 IMIE:1",
+  "str-264": "IMIE:2 NR-UPRAWNIEN:2",
+  "str-265": "NR-UPRAWNIEN:1",
+  "str-266": "IMIE:1 NR-UPRAWNIEN:1",
+  "str-267": "IMIE:2 DATA-UR:2",
+  "str-268": "EMAIL:2 IMIE:2 TELEFON:2",
+  "str-269": "IMIE:1 DATA-UR:1 PESEL:1",
   "str-27": "ADRES:1",
+  "str-270": "IMIE:1",
+  "str-271": "IMIE:1",
+  "str-272": "IMIE:1",
+  "str-273": "IMIE:1",
+  "str-274": "IMIE:2 PESEL:2",
+  "str-275": "IMIE:1 TELEFON:1",
+  "str-276": "IMIE:3 PESEL:3",
+  "str-277": "PRAWO-JAZDY:1",
+  "str-278": "DOWOD:1 PASZPORT:1",
+  "str-279": "AKT-USC:2",
   "str-28": "ADRES:1",
+  "str-280": "IMIE:2 MIEJSCOWOSC:1 ADRES:2",
+  "str-281": "IMIE:3",
+  "str-282": "IMIE:2",
+  "str-283": "IMIE:1",
+  "str-284": "ZDROWIE:2 IMIE:1",
+  "str-285": "ZDROWIE:3 IMIE:2",
+  "str-286": "ZDROWIE:1 IMIE:1",
+  "str-287": "ZDROWIE:2 IMIE:2",
+  "str-288": "IMIE:2",
+  "str-289": "ZDROWIE:3 IMIE:1",
   "str-29": "ADRES:1",
+  "str-290": "ZDROWIE:3 IMIE:1",
+  "str-291": "ZDROWIE:2 IMIE:1",
+  "str-292": "ZDROWIE:4 IMIE:1",
+  "str-293": "ZDROWIE:3 IMIE:2",
+  "str-294": "ZDROWIE:3 IMIE:1",
+  "str-295": "IMIE:1 ZDROWIE:2",
+  "str-296": "ZDROWIE:3 IMIE:1",
+  "str-297": "ZDROWIE:2",
+  "str-298": "ZDROWIE:3 IMIE:1",
+  "str-299": "ZDROWIE:2 IMIE:2",
   "str-30": "ADRES:1",
+  "str-300": "ZDROWIE:3 IMIE:1",
+  "str-301": "IMIE:2",
+  "str-302": "ZDROWIE:1 IMIE:1",
+  "str-303": "IMIE:2",
+  "str-304": "ZDROWIE:1 IMIE:2",
+  "str-305": "ZDROWIE:4",
+  "str-306": "ZDROWIE:4 IMIE:2",
+  "str-307": "ZDROWIE:2 IMIE:3",
+  "str-308": "ZDROWIE:1 IMIE:4",
   "str-31": "ADRES:1",
   "str-32": "DATA-UR:1 MIEJSCOWOSC:1",
   "str-33": "DATA-UR:1 MIEJSCOWOSC:1",
@@ -4196,13 +5856,92 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "neg-238": "",
   "neg-239": "",
   "neg-24": "",
+  "neg-240": "",
+  "neg-241": "",
+  "neg-242": "",
+  "neg-243": "",
+  "neg-244": "MIEJSCOWOSC:1",
+  "neg-245": "",
+  "neg-246": "",
+  "neg-247": "",
+  "neg-248": "",
+  "neg-249": "",
   "neg-25": "",
+  "neg-250": "",
+  "neg-251": "",
+  "neg-252": "",
+  "neg-253": "",
+  "neg-254": "",
+  "neg-255": "",
+  "neg-256": "",
+  "neg-257": "",
+  "neg-258": "IMIE:2",
+  "neg-259": "",
   "neg-26": "",
+  "neg-260": "",
+  "neg-261": "IMIE:1",
+  "neg-262": "IMIE:2",
+  "neg-263": "",
+  "neg-264": "",
+  "neg-265": "",
+  "neg-266": "",
+  "neg-267": "IMIE:1",
+  "neg-268": "",
+  "neg-269": "IMIE:3",
   "neg-27": "",
+  "neg-270": "IMIE:2",
+  "neg-271": "",
+  "neg-272": "IMIE:1",
+  "neg-273": "",
+  "neg-274": "IMIE:1",
+  "neg-275": "",
+  "neg-276": "",
+  "neg-277": "IMIE:1",
+  "neg-278": "",
+  "neg-279": "",
   "neg-28": "",
+  "neg-280": "",
+  "neg-281": "",
+  "neg-282": "",
+  "neg-283": "",
+  "neg-284": "",
+  "neg-285": "",
+  "neg-286": "",
+  "neg-287": "",
+  "neg-288": "",
+  "neg-289": "",
   "neg-29": "",
+  "neg-290": "",
+  "neg-291": "",
+  "neg-292": "",
+  "neg-293": "",
+  "neg-294": "",
+  "neg-295": "",
+  "neg-296": "",
+  "neg-297": "",
+  "neg-298": "",
+  "neg-299": "",
   "neg-30": "",
+  "neg-300": "",
+  "neg-301": "",
+  "neg-302": "",
+  "neg-303": "",
+  "neg-304": "",
+  "neg-305": "",
+  "neg-306": "",
+  "neg-307": "IMIE:2",
+  "neg-308": "IMIE:2",
+  "neg-309": "",
   "neg-31": "",
+  "neg-310": "",
+  "neg-311": "",
+  "neg-312": "",
+  "neg-313": "",
+  "neg-314": "",
+  "neg-315": "",
+  "neg-316": "",
+  "neg-317": "",
+  "neg-318": "",
   "neg-32": "",
   "neg-33": "",
   "neg-34": "",
@@ -4308,6 +6047,41 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "os-o-35": "IMIE:4",
   "os-o-36": "IMIE:1",
   "os-o-37": "IMIE:1",
+  "os-o-38": "IMIE:2",
+  "os-o-39": "IMIE:4",
+  "os-o-40": "IMIE:2",
+  "os-o-41": "IMIE:4",
+  "os-o-42": "IMIE:1 LOGIN:2",
+  "os-o-43": "IMIE:1",
+  "os-o-44": "IMIE:1",
+  "os-o-45": "IMIE:2",
+  "os-o-46": "IMIE:2",
+  "os-o-47": "IMIE:1",
+  "os-o-48": "IMIE:2",
+  "os-o-49": "IMIE:1",
+  "os-o-50": "IMIE:1",
+  "os-o-51": "IMIE:2",
+  "os-o-52": "IMIE:2",
+  "os-o-53": "IMIE:2",
+  "os-o-54": "IMIE:2",
+  "os-o-55": "IMIE:2",
+  "os-o-56": "IMIE:2",
+  "os-o-57": "IMIE:4",
+  "os-o-58": "IMIE:1",
+  "os-o-59": "IMIE:4",
+  "os-o-60": "IMIE:3",
+  "os-o-61": "IMIE:4",
+  "os-o-62": "IMIE:4",
+  "os-o-63": "IMIE:2",
+  "os-o-64": "IMIE:4",
+  "os-o-65": "MIEJSCOWOSC:1 IMIE:4",
+  "os-o-66": "IMIE:3",
+  "os-o-67": "IMIE:2",
+  "os-o-68": "IMIE:3",
+  "os-o-69": "IMIE:6",
+  "os-o-70": "IMIE:4",
+  "os-o-71": "IMIE:2",
+  "os-o-72": "IMIE:3",
   "os-p-01": "IMIE:1",
   "os-p-02": "IMIE:1",
   "os-p-03": "IMIE:1",
@@ -4368,7 +6142,7 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "os-p-58": "IMIE:1",
   "os-p-59": "IMIE:2",
   "os-p-60": "IMIE:2",
-  "os-p-61": "IMIE:2",
+  "os-p-61": "ZDROWIE:1 IMIE:2",
   "os-p-62": "IMIE:2",
   "os-p-63": "IMIE:3",
   "os-p-64": "IMIE:4",
@@ -4396,6 +6170,15 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "os-p-86": "IMIE:1",
   "os-p-87": "IMIE:2",
   "os-p-88": "IMIE:2",
+  "os-p-89": "IMIE:1",
+  "os-p-90": "IMIE:2",
+  "os-p-91": "IMIE:2",
+  "os-p-92": "IMIE:2",
+  "os-p-93": "IMIE:2",
+  "os-p-94": "IMIE:6",
+  "os-p-95": "IMIE:2",
+  "os-p-96": "ZNAK-SPRAWY:1 IMIE:3",
+  "os-p-97": "IMIE:4",
   "os-r-01": "IMIE:1",
   "os-r-02": "IMIE:1",
   "os-r-03": "IMIE:1",
@@ -4554,7 +6337,7 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "str-179": "ZDROWIE:4",
   "str-18": "TELEFON:1",
   "str-180": "ZDROWIE:2",
-  "str-181": "ZDROWIE:2",
+  "str-181": "ZDROWIE:3",
   "str-182": "ZDROWIE:2",
   "str-183": "ZDROWIE:2",
   "str-184": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
@@ -4565,7 +6348,7 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "str-189": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
   "str-19": "TELEFON:1",
   "str-190": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
-  "str-191": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
+  "str-191": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
   "str-192": "IMIE:1",
   "str-193": "ZDROWIE:1",
   "str-194": "ZDROWIE:1 IMIE:1",
@@ -4592,15 +6375,108 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "str-213": "ADRES:1",
   "str-214": "ADRES:2 MIEJSCOWOSC:2",
   "str-215": "KOD-POCZTOWY:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-216": "ZDROWIE:2 IMIE:1",
+  "str-217": "ZDROWIE:3",
+  "str-218": "ZDROWIE:3 IMIE:1",
+  "str-219": "ZDROWIE:3",
   "str-22": "EMAIL:1",
+  "str-220": "ZDROWIE:2 IMIE:2",
+  "str-221": "ZDROWIE:2 IMIE:1",
+  "str-222": "ZDROWIE:2",
+  "str-223": "ZDROWIE:2",
+  "str-224": "ZDROWIE:4",
+  "str-225": "ZDROWIE:2",
+  "str-226": "IMIE:3",
+  "str-227": "ZDROWIE:3 IMIE:1",
+  "str-228": "ZDROWIE:3",
+  "str-229": "ZDROWIE:3",
   "str-23": "EMAIL:1",
+  "str-230": "ZDROWIE:3",
+  "str-231": "ZDROWIE:4",
+  "str-232": "ZNAK-SPRAWY:1",
+  "str-233": "ZNAK-SPRAWY:1",
+  "str-234": "ZNAK-SPRAWY:1",
+  "str-235": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-236": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
+  "str-237": "IMIE:1",
+  "str-238": "ADRES:1 IMIE:1",
+  "str-239": "IMIE:1",
   "str-24": "KOD-POCZTOWY:1 MIEJSCOWOSC:1",
+  "str-240": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
+  "str-241": "ADRES:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-242": "IMIE:1",
+  "str-243": "IMIE:1",
+  "str-244": "NIP:1 KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-245": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
+  "str-246": "IMIE:1",
+  "str-247": "ADRES:1 IMIE:1",
+  "str-248": "NIP:1 IMIE:1",
+  "str-249": "NIP:1 KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
   "str-25": "KOD-POCZTOWY:1",
+  "str-250": "IMIE:1 KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1",
+  "str-251": "NIP:2 KOD-POCZTOWY:1 ADRES:2 MIEJSCOWOSC:1",
+  "str-252": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:2",
+  "str-253": "EMAIL:1 TELEFON:1 IMIE:1",
+  "str-254": "IBAN:1 IMIE:1",
+  "str-255": "TELEFON:2 IMIE:2",
+  "str-256": "EMAIL:2",
+  "str-257": "TELEFON:1 IMIE:2",
+  "str-258": "EMAIL:1",
+  "str-259": "NR-KONTA:1",
   "str-26": "ADRES:1 MIEJSCOWOSC:1",
+  "str-260": "TELEFON:1 IMIE:2",
+  "str-261": "NR-UPRAWNIEN:2 IMIE:1",
+  "str-262": "NR-UPRAWNIEN:2 IMIE:2",
+  "str-263": "NR-UPRAWNIEN:1 IMIE:1",
+  "str-264": "IMIE:2 NR-UPRAWNIEN:2",
+  "str-265": "NR-UPRAWNIEN:1",
+  "str-266": "IMIE:1 NR-UPRAWNIEN:1",
+  "str-267": "IMIE:2 DATA-UR:2",
+  "str-268": "EMAIL:2 IMIE:2 TELEFON:2",
+  "str-269": "IMIE:1 DATA-UR:1 PESEL:1",
   "str-27": "ADRES:1",
+  "str-270": "IMIE:1",
+  "str-271": "IMIE:1",
+  "str-272": "IMIE:1",
+  "str-273": "IMIE:1",
+  "str-274": "IMIE:2 PESEL:2",
+  "str-275": "IMIE:1 TELEFON:1",
+  "str-276": "IMIE:3 PESEL:3",
+  "str-277": "PRAWO-JAZDY:1",
+  "str-278": "DOWOD:1 PASZPORT:1",
+  "str-279": "AKT-USC:2",
   "str-28": "ADRES:1",
+  "str-280": "IMIE:2 MIEJSCOWOSC:1 ADRES:2",
+  "str-281": "IMIE:3",
+  "str-282": "IMIE:2",
+  "str-283": "IMIE:1",
+  "str-284": "ZDROWIE:2 IMIE:1",
+  "str-285": "ZDROWIE:3 IMIE:2",
+  "str-286": "ZDROWIE:1 IMIE:1",
+  "str-287": "ZDROWIE:2 IMIE:2",
+  "str-288": "IMIE:2",
+  "str-289": "ZDROWIE:3 IMIE:1",
   "str-29": "ADRES:1",
+  "str-290": "ZDROWIE:3 IMIE:1",
+  "str-291": "ZDROWIE:2 IMIE:1",
+  "str-292": "ZDROWIE:4 IMIE:1",
+  "str-293": "ZDROWIE:3 IMIE:2",
+  "str-294": "ZDROWIE:3 IMIE:1",
+  "str-295": "IMIE:1 ZDROWIE:2",
+  "str-296": "ZDROWIE:3 IMIE:1",
+  "str-297": "ZDROWIE:2",
+  "str-298": "ZDROWIE:3 IMIE:1",
+  "str-299": "ZDROWIE:2 IMIE:2",
   "str-30": "ADRES:1",
+  "str-300": "ZDROWIE:3 IMIE:1",
+  "str-301": "IMIE:2",
+  "str-302": "ZDROWIE:1 IMIE:1",
+  "str-303": "IMIE:2",
+  "str-304": "ZDROWIE:1 IMIE:2",
+  "str-305": "ZDROWIE:4",
+  "str-306": "ZDROWIE:4 IMIE:2",
+  "str-307": "ZDROWIE:2 IMIE:3",
+  "str-308": "ZDROWIE:1 IMIE:4",
   "str-31": "ADRES:1",
   "str-32": "DATA-UR:1 MIEJSCOWOSC:1",
   "str-33": "DATA-UR:1 MIEJSCOWOSC:1",

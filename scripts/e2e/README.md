@@ -163,6 +163,32 @@ Przy błędzie zrzut całej strony trafia do `test-results/e2e/` (w CI jako arte
 `PARAWAN_CHROMIUM` ze ścieżką do innej binarki Chromium włącza testy starego silnika
 (`skip: LEGACY_SKIP`); stare przeglądarki pobiera `manual/pobierz-przegladarki.mjs`.
 
+## Rozmiar i skład pliku
+
+Rozmiar pliku nie ma budżetu wygody: tej pilnuje pomiar czasu startu (`scripts/perf/README.md`).
+Tu zostają dwie bramki bez przeglądarki:
+
+- **Sufit pocztowy** (`smoke.test.mjs`): `apps/web/dist/index.html` ma najwyżej
+  `MAX_MAIL_ATTACHMENT_BYTES` = 7 120 614 B (`helpers.mjs`). Tyle mieści się jako załącznik
+  w domyślnym limicie wiadomości Exchange on-premises 10 MB
+  (https://learn.microsoft.com/en-us/exchange/mail-flow/message-size-limits) po kodowaniu base64
+  w wierszach po 76 znaków z CRLF (RFC 2045, §6.8), z 256 000 B na treść maila i podpis
+  (założenie). Do 2026-11-15 stał tu `MAX_WEB_BYTES` = 2 600 000 B bez uzasadnienia; zamiana jest
+  świadoma, a rozrost kodu łapie wcześniej czas startu.
+- **Skład** (`sklad.test.mjs`): wtyczka `apps/web/build/sklad.ts` liczy przy buildzie z mapy
+  źródeł bajty każdego modułu po minifikacji i zapisuje `apps/web/dist/sklad.json` (mapa i ten
+  plik nie trafiają do wydania, a `index.html` jest bajt w bajt taki sam jak bez wtyczki). Test
+  sprawdza, że `sklad.json` pochodzi z tego samego buildu (SHA-256) i że: żaden moduł nie wszedł
+  dwa razy (także inną pisownią ścieżki), żaden pakiet nie jest z dwóch miejsc instalacji, rdzeń
+  jest tylko z `packages/core/src`, z pdf.js są dokładnie `legacy/build/pdf.mjs`
+  i `legacy/build/pdf.worker.mjs`, a z `node_modules` tylko pakiety z `ALLOWED_PACKAGES`
+  (`pdfjs-dist`, `fflate`; nowa zależność w pliku wymaga dopisania). Każdy moduł pdf.js jest nie
+  większy niż jego `*.min.mjs` tej samej wersji w `node_modules`. Każdy URI `data:` dłuższy niż
+  4 096 znaków to jeden z fontów z `apps/web/src/fonts`, każdy dokładnie raz. Przy
+  `PARAWAN_WEB_HTML` (kopia pliku bez `sklad.json` z tego samego buildu) reguły ze `sklad.json`
+  są pomijane z powodem, a reguła `data:` działa zawsze. Grupy bajtów (`grupy` w `sklad.json`)
+  są tylko do odczytu, bez progów.
+
 ## Konwencje dla kolejnych zmian w aplikacji
 
 - Każdy pakiet, który zmienia zachowanie aplikacji, dopisuje swoje scenariusze do

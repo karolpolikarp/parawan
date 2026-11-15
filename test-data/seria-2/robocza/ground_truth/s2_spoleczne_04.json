@@ -1,0 +1,274 @@
+{
+  "id": "s2_spoleczne_04",
+  "template": "spoleczne",
+  "title": "Notatka z wizyty asystenta rodziny (GOPS)",
+  "seed": null,
+  "traps": [
+    "adres wiejski bez ulicy („Pustyny 112”)",
+    "nazwisko w liczbie mnogiej („Lorencowie”)",
+    "inicjały w liście ustaleń (P.L., M.L.)",
+    "zdrobnienia Zuzia, Zuzi, Antek, Antka",
+    "patronka w nazwie szkoły do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "Gminny Ośrodek Pomocy Społecznej w Krościenku Wyżnym",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Szkolna 3",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "38-422",
+      "type": "POSTAL",
+      "expect": "policy",
+      "note": "kod pocztowy wspólny dla ośrodka i osoby",
+      "count": 2
+    },
+    {
+      "text": "Krościenko Wyżne",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i siedziby",
+      "count": 2
+    },
+    {
+      "text": "Lorencowie",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko w liczbie mnogiej",
+      "count": 1
+    },
+    {
+      "text": "Pustyny 112",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres wiejski bez ulicy",
+      "count": 1
+    },
+    {
+      "text": "AR/14/2025",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer karty rodziny",
+      "count": 1
+    },
+    {
+      "text": "Patrycja Lorenc",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zuzanna",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię",
+      "count": 1
+    },
+    {
+      "text": "Antoni",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię",
+      "count": 1
+    },
+    {
+      "text": "Stanisława Lorenc",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marcin Lorenc",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Holandii",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "kraj pracy ojca",
+      "count": 1
+    },
+    {
+      "text": "Patrycji",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "24. tydzień ciąży",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "ciąża",
+      "count": 1
+    },
+    {
+      "text": "ciążę",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "druga wzmianka o ciąży",
+      "count": 1
+    },
+    {
+      "text": "bóle kręgosłupa",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zuzia",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie",
+      "count": 1
+    },
+    {
+      "text": "Szkoły Podstawowej im. Marii Konopnickiej w Krościenku Wyżnym",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patronka w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "Renata Fil",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "trudności z koncentracją",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "nadwrażliwość na dźwięki",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "zaburzeń integracji sensorycznej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Antek",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie",
+      "count": 1
+    },
+    {
+      "text": "alergię na białko mleka krowiego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "udaru",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "niedowład prawej ręki",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "cukrzycę insulinozależną",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "P.L.",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "inicjały w liście ustaleń",
+      "count": 1
+    },
+    {
+      "text": "M.L.",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "inicjały w liście ustaleń",
+      "count": 1
+    },
+    {
+      "text": "Antka",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "Zuzi",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "696 118 450",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "patrycja.lorenc@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+31 6 4128 7730",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "zagraniczny numer",
+      "count": 1
+    },
+    {
+      "text": "Kamil Dudek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "13 435 70 12",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon służbowy asystenta",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,267 @@
+{
+  "id": "s3_usc-ewidencja_08",
+  "template": "usc-ewidencja",
+  "title": "Decyzja o odmowie wymeldowania osoby osadzonej",
+  "seed": null,
+  "traps": [
+    "pobyt w zakładzie karnym i koniec kary jako dane o wyrokach",
+    "zdrobnienie imienia w cudzysłowie („Heniek”) i samo imię zmarłej matki",
+    "ulica Zgierska w adresie osoby i miejscowość Zgierz obok",
+    "adres zakładu karnego z patronką ulicy do zachowania",
+    "sygnatura sprawy karnej (polityka) i cytowany wyrok NSA (keep)"
+  ],
+  "entities": [
+    {
+      "text": "ul. Zachodnia 47",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "91-066",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Łódź",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i urzędu",
+      "count": 3
+    },
+    {
+      "text": "WSOiK-II.5344.302.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "1188/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer decyzji",
+      "count": 1
+    },
+    {
+      "text": "Ryszarda Pawlaka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "wnioskodawca",
+      "count": 1
+    },
+    {
+      "text": "71041485994",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Okrzei 7 m. 3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "95-100",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zgierz",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Henryka Pawlaka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "strona",
+      "count": 1
+    },
+    {
+      "text": "75120178733",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "01.12.1975",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Zgierska 160 m. 22",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "nazwa ulicy od miejscowości",
+      "count": 1
+    },
+    {
+      "text": "91-320",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "LD1M/01479305/7",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Leokadii",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zmarła matka, samo imię",
+      "count": 1
+    },
+    {
+      "text": "Henryk Pawlak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Zakładzie Karnym w Sieradzu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Orzeszkowej 5",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "adres zakładu, patronka ulicy",
+      "count": 1
+    },
+    {
+      "text": "17 lipca 2025",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "początek pobytu w zakładzie karnym (dane o wyrokach)",
+      "count": 1
+    },
+    {
+      "text": "odbywa karę pozbawienia wolności",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "dane o wyrokach skazujących",
+      "count": 1
+    },
+    {
+      "text": "II K 412/24",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy karnej strony",
+      "count": 1
+    },
+    {
+      "text": "16 stycznia 2028",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "koniec kary",
+      "count": 1
+    },
+    {
+      "text": "leczyła się w poradni leczenia uzależnień od alkoholu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zdzisław Kmiecik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "świadek",
+      "count": 1
+    },
+    {
+      "text": "ul. Zgierska 160 m. 21",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres świadka",
+      "count": 1
+    },
+    {
+      "text": "Heniek",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie imienia",
+      "count": 1
+    },
+    {
+      "text": "Adrian Kubacki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "policjant, świadek",
+      "count": 1
+    },
+    {
+      "text": "Komisariatu Policji VII w Łodzi",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "II OSK 2254/18",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "Wojewody Łódzkiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Barbara Stępniak",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędnik podpisujący w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Ryszard Pawlak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "793 260 114",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zakład Karny w Sieradzu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "w adresie doręczenia osadzonego",
+      "count": 1
+    }
+  ]
+}

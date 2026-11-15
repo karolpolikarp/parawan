@@ -1,0 +1,219 @@
+{
+  "id": "s3_komunikacja-srodowisko_08",
+  "template": "komunikacja-srodowisko",
+  "title": "Zawiadomienie o wszczęciu postępowania w sprawie psa rasy agresywnej",
+  "seed": null,
+  "traps": [
+    "dane małoletniego pokrzywdzonego i obrażenia",
+    "imię psa (do zachowania)",
+    "patron w adresie urzędu",
+    "numer prawa wykonywania zawodu lekarza weterynarii",
+    "numer mikroczipa jako policy",
+    "nazwisko Wilk"
+  ],
+  "entities": [
+    {
+      "text": "BURMISTRZ MIASTA ŻYRARDOWA",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "pl. Jana Pawła II 1",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w adresie urzędu",
+      "count": 1
+    },
+    {
+      "text": "Komendy Powiatowej Policji w Żyrardowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szpitala Powiatowego w Żyrardowie",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Powiatowy Lekarz Weterynarii w Żyrardowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Komenda Powiatowa Policji w Żyrardowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rocky",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "imię psa",
+      "count": 1
+    },
+    {
+      "text": "amerykański staffordshire terier",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "rasa psa",
+      "count": 1
+    },
+    {
+      "text": "GKM.6140.9.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "616093900412873",
+      "type": "SERIAL_NUMBER",
+      "expect": "policy",
+      "note": "numer mikroczipa psa wskazuje właściciela",
+      "count": 1
+    },
+    {
+      "text": "Michał Wilk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Michałowi Wilkowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Okrzei 38",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "96-300",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Żyrardów",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i siedziba urzędu",
+      "count": 3
+    },
+    {
+      "text": "90101237713",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szymona Nowickiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletni",
+      "count": 1
+    },
+    {
+      "text": "ul. Okrzei 41 m. 6",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "rany kąsanej lewego podudzia",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "profilaktykę poekspozycyjną przeciw wściekliźnie",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Karolina Nowicka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "698 230 541",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Iwonę Słowik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "14/0937",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer prawa wykonywania zawodu lekarza weterynarii",
+      "count": 1
+    },
+    {
+      "text": "Haliny Wysockiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "512 003 917",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Artur Pietrzyk",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędnik w funkcji",
+      "count": 1
+    },
+    {
+      "text": "2/2024",
+      "type": "DOC_NUMBER",
+      "expect": "policy",
+      "note": "numer zezwolenia wydanego osobie",
+      "count": 1
+    },
+    {
+      "text": "został zaopatrzony na SOR",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "pomoc medyczna udzielona małoletniemu",
+      "count": 1
+    }
+  ]
+}

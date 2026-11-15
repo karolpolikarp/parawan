@@ -5,11 +5,13 @@
 // z apps/web), zapisuje wyniki do test-data/wyniki/<wersja>/<profil>/<wejście>/<id>.txt
 // i z opcją --eval uruchamia eval.py dla każdego katalogu.
 //
-// Użycie: node scripts/eval/run-eval.mjs [--eval] [--out KATALOG] [--profile domyslny|pseudonimy]
+// Użycie: node scripts/eval/run-eval.mjs [--eval] [--set KATALOG] [--out KATALOG] [--profile domyslny|pseudonimy]
+// --set: inny zestaw o tym samym układzie (txt/, opcjonalnie docx/, ground_truth/); eval.py zawsze z
+// test-data/anonimizator-testy, klucz z ground_truth/ wskazanego zestawu.
 // Runner nie łączy się z siecią: fetch jest podmieniony na funkcję rzucającą błąd.
 
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -21,13 +23,14 @@ globalThis.XMLHttpRequest = undefined;
 globalThis.WebSocket = undefined;
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const SET = join(ROOT, 'test-data/anonimizator-testy');
+const EVAL_PY = join(ROOT, 'test-data/anonimizator-testy/eval.py');
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(name);
 const opt = (name) => {
   const i = args.indexOf(name);
   return i >= 0 ? args[i + 1] : undefined;
 };
+const SET = resolve(opt('--set') ?? join(ROOT, 'test-data/anonimizator-testy'));
 
 const PROFILES = {
   domyslny: {}, // ustawienia aplikacji po pierwszym uruchomieniu: wszystkie typy, bez pseudonimów
@@ -63,26 +66,27 @@ async function loadEngine() {
 }
 
 function runEval(dir) {
-  const r = spawnSync('python', [join(SET, 'eval.py'), dir, '--report', join(dir, 'raport')], { encoding: 'utf8' });
+  const r = spawnSync('python', [EVAL_PY, dir, '--gt', join(SET, 'ground_truth'), '--report', join(dir, 'raport')], { encoding: 'utf8' });
   if (r.status !== 0) throw new Error(`eval.py: ${r.stderr || r.stdout}`);
   const rep = JSON.parse(readFileSync(join(dir, 'raport.json'), 'utf8'));
   // eval.py uznaje za numerowane tylko znaczniki z cyfrą; etykiety [OSOBA-A] liczymy osobno.
   let lettered = 0;
-  for (const f of readdirSync(dir).filter((n) => /^\d.*\.txt$/.test(n))) {
+  for (const f of readdirSync(dir).filter((n) => n.endsWith('.txt') && !n.startsWith('raport'))) {
     lettered += (readFileSync(join(dir, f), 'utf8').match(/\[OSOBA-[A-Z]{1,3}\]/g) ?? []).length;
   }
   return { rep, lettered };
 }
 
 const engine = await loadEngine();
-const out = resolve(opt('--out') ?? join(ROOT, 'test-data/wyniki', version()));
+const setName = opt('--set') ? `-${SET.split(/[\\/]/).filter(Boolean).slice(-2).join('-')}` : '';
+const out = resolve(opt('--out') ?? join(ROOT, 'test-data/wyniki', `${version()}${setName}`));
 const profiles = opt('--profile') ? [opt('--profile')] : Object.keys(PROFILES);
 const summary = [];
 
 for (const profile of profiles) {
   const options = PROFILES[profile];
   if (!options) throw new Error(`Nieznany profil: ${profile}`);
-  for (const input of ['txt', 'docx']) {
+  for (const input of ['txt', 'docx'].filter((i) => existsSync(join(SET, i)))) {
     const dir = join(out, profile, input);
     rmSync(dir, { recursive: true, force: true });
     mkdirSync(dir, { recursive: true });

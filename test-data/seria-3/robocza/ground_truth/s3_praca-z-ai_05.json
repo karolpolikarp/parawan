@@ -1,0 +1,310 @@
+{
+  "id": "s3_praca-z-ai_05",
+  "template": "praca-z-ai",
+  "title": "Polecenie do AI: grupowanie wycinka z rejestru korespondencji referatu podatków",
+  "seed": null,
+  "traps": [
+    "tabela z separatorami „|” i inicjałami pracowników w kolumnie",
+    "fałszywy PESEL jako ID dokumentu w EZD",
+    "dane spółki obok danych rolnika z NIP osoby",
+    "spadkobiercy z nazwiskiem w kilku przypadkach",
+    "dane o zdrowiu w kolumnie Uwagi (leczenie męża, niepełnosprawność syna)",
+    "adres urzędu skarbowego do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "Renata Mazur",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Szpitalna 8 m. 12",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "44-190",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Knurów",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "Leszek",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "mąż tylko z imienia",
+      "count": 1
+    },
+    {
+      "text": "w trakcie leczenia onkologicznego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "na zwolnieniu lekarskim",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "niezdolność do pracy",
+      "count": 1
+    },
+    {
+      "text": "Centrum Onkologii w Gliwicach",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "placówka ujawnia rodzaj leczenia",
+      "count": 1
+    },
+    {
+      "text": "ES",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "inicjały pracownika w kolumnie",
+      "count": 5
+    },
+    {
+      "text": "TB",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "inicjały pracownika w kolumnie",
+      "count": 4
+    },
+    {
+      "text": "Hydro-Bud Sp. z o.o.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Dworcowa 31",
+      "type": "COMPANY_ADDRESS",
+      "expect": "policy",
+      "note": "adres spółki",
+      "count": 1
+    },
+    {
+      "text": "Zabrze",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu spółki",
+      "count": 1
+    },
+    {
+      "text": "6738610475",
+      "type": "NIP_COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zbigniew Pyka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "rolnik",
+      "count": 1
+    },
+    {
+      "text": "Szczygłowice",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "ul. Ułańska 4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "691 304 558",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL91 1240 1037 1536 7774 2491 8465",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "6083546465",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "NIP rolnika",
+      "count": 1
+    },
+    {
+      "text": "Gerardzie Kuli",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "spadkodawca w miejscowniku",
+      "count": 1
+    },
+    {
+      "text": "Gabriela Kula",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Piotr Kula",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Niepodległości 50",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "44-194",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "GL1G/43742383/1",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "SR w Gliwicach",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "I Ns 1188/25",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy spadkowej osób",
+      "count": 1
+    },
+    {
+      "text": "Urząd Skarbowy w Gliwicach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Góry Chełmskiej 15",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Gliwice",
+      "type": "INSTITUTION_CITY",
+      "expect": "keep",
+      "note": "miejscowość z adresu urzędu",
+      "count": 1
+    },
+    {
+      "text": "Renaty Mazur",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "49154379631",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "ID dokumentu w EZD, 11 cyfr bez poprawnej sumy PESEL",
+      "count": 1
+    },
+    {
+      "text": "Samorządowe Kolegium Odwoławcze w Katowicach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "SKO.FP/415/2/26",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer decyzji SKO",
+      "count": 1
+    },
+    {
+      "text": "Marka Ociepki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "odwołujący się podatnik",
+      "count": 1
+    },
+    {
+      "text": "Teresa Bugla",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "tbugla65@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "81070866822",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "syna z niepełnosprawnością (MPD)",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "niepełnosprawność dziecka",
+      "count": 1
+    },
+    {
+      "text": "Ewa Szołtysek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownica referatu",
+      "count": 1
+    },
+    {
+      "text": "Tomasz Bajer",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik referatu",
+      "count": 1
+    }
+  ]
+}

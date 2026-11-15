@@ -1,0 +1,183 @@
+{
+  "id": "s3_podatki_02",
+  "template": "podatki",
+  "title": "Upomnienie w podatku od nieruchomości dla małżonków",
+  "seed": null,
+  "traps": [
+    "nazwisko dwuczłonowe z łącznikiem w trzech przypadkach",
+    "fałszywy PESEL jako numer karty kontowej",
+    "rachunek nadawcy wpłaty (mask) obok rachunku gminy (keep)",
+    "drugi adres osoby jako garaż w budynku wielostanowiskowym",
+    "imienny e-mail i służbowy telefon referenta"
+  ],
+  "entities": [
+    {
+      "text": "Urząd Miasta Rzeszowa",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wydział Księgowości Podatkowej",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Rynek 1",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "35-064",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rzeszów",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby, także w adresie urzędu i dacie",
+      "count": 4
+    },
+    {
+      "text": "FK-W.3122.2.1844.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer upomnienia",
+      "count": 1
+    },
+    {
+      "text": "92047122460",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "11 cyfr numeru karty kontowej bez poprawnej sumy PESEL",
+      "count": 1
+    },
+    {
+      "text": "Beata Szczepańska-Wróbel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe",
+      "count": 2
+    },
+    {
+      "text": "Rafał Wróbel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "79013056265",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "77110880150",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Podkarpacka 17 m. 9",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "35-082",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Podkarpackiej 17",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres lokalu, przedmiot opodatkowania",
+      "count": 1
+    },
+    {
+      "text": "ul. Strzelniczej 4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "garaż osoby jako drugi adres",
+      "count": 1
+    },
+    {
+      "text": "PL31105000992541336785327805",
+      "type": "IBAN_INSTITUTION",
+      "expect": "keep",
+      "note": "rachunek gminy do wpłat",
+      "count": 1
+    },
+    {
+      "text": "69 1050 0099 5337 0087 8325 3138",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "rachunek nadawcy wpłaty",
+      "count": 1
+    },
+    {
+      "text": "604 118 372",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Beacie Szczepańskiej-Wróbel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rafałowi Wróblowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Iwona Hałas",
+      "type": "OFFICIAL",
+      "expect": "policy",
+      "note": "kierownik podpisujący z upoważnienia organu",
+      "count": 1
+    },
+    {
+      "text": "Paweł Dudek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "urzędnik sporządzający",
+      "count": 1
+    },
+    {
+      "text": "17 875 42 19",
+      "type": "PHONE_INSTITUTION",
+      "expect": "policy",
+      "note": "służbowy numer referenta",
+      "count": 1
+    },
+    {
+      "text": "p.dudek@rzeszow.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "imienny służbowy e-mail",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,225 @@
+{
+  "id": "s3_zamowienia-umowy_07",
+  "template": "zamowienia-umowy",
+  "title": "Nota księgowa obciążeniowa – kara umowna dla wykonawcy JDG",
+  "seed": null,
+  "traps": [
+    "numer faktury, numer noty i fałszywy PESEL jako numer referencyjny",
+    "nazwisko dwuczłonowe i firma JDG z nazwiskiem (STOPKA-BUD)",
+    "dane o zdrowiu pracownika i kierownika robót w uzasadnieniu noty",
+    "numer uprawnień budowlanych ze ukośnikami",
+    "numer drogi powiatowej i nazwa potoku do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "Powiatowy Zarząd Dróg w Nowym Targu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "ul. Szaflarska 87",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "34-400",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "7477283054",
+      "type": "NIP_COMPANY",
+      "expect": "policy",
+      "note": "NIP jednostki",
+      "count": 1
+    },
+    {
+      "text": "NK/27/2026",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer noty",
+      "count": 1
+    },
+    {
+      "text": "STOPKA-BUD",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "fragment firmy JDG z nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "Jan Stopka-Gąsior",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe",
+      "count": 2
+    },
+    {
+      "text": "ul. Za Torem 4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "34-433",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ostrowsko",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "4563810062",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "861022472",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PZD.272.18.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer umowy",
+      "count": 1
+    },
+    {
+      "text": "1652K",
+      "type": "ROAD",
+      "expect": "keep",
+      "note": "numer drogi powiatowej",
+      "count": 1
+    },
+    {
+      "text": "potokiem Lepietnica",
+      "type": "PLACE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mateusz Ch.",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "imię i dwie litery nazwiska",
+      "count": 1
+    },
+    {
+      "text": "złamanie podudzia",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "hospitalizacja do 25 sierpnia",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "chorobę kierownika robót",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "ogólna informacja o chorobie konkretnej osoby",
+      "count": 1
+    },
+    {
+      "text": "Michała Wodzińskiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "MAP/0219/POOD/08",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer uprawnień budowlanych",
+      "count": 1
+    },
+    {
+      "text": "Piotr Liszka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inspektor nadzoru",
+      "count": 1
+    },
+    {
+      "text": "FV 41/09/2026",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer faktury",
+      "count": 1
+    },
+    {
+      "text": "60 1240 1037 5522 7068 9918 5318",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "rachunek JDG",
+      "count": 1
+    },
+    {
+      "text": "72974190029",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "11 cyfr bez poprawnej sumy PESEL",
+      "count": 1
+    },
+    {
+      "text": "Bożena Chrobak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik jednostki",
+      "count": 2
+    },
+    {
+      "text": "18 266 21 05",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon pracownika",
+      "count": 1
+    },
+    {
+      "text": "ksiegowosc@example.pl",
+      "type": "EMAIL_INSTITUTION",
+      "expect": "policy",
+      "note": "skrzynka funkcyjna",
+      "count": 1
+    },
+    {
+      "text": "Stanisław Kalata",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "dyrektor w funkcji",
+      "count": 1
+    },
+    {
+      "text": "j.stopka@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

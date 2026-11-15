@@ -1,0 +1,247 @@
+{
+  "id": "s3_oswiata_10",
+  "template": "oswiata",
+  "title": "Decyzja o dofinansowaniu kosztów kształcenia młodocianego pracownika",
+  "seed": null,
+  "traps": [
+    "firma JDG z nazwiskiem pracodawcy",
+    "NIP i REGON osoby fizycznej prowadzącej działalność",
+    "rachunek przedsiębiorcy będącego osobą fizyczną",
+    "alergia jako powód rozwiązania umowy z innym pracownikiem",
+    "kwota pomocy de minimis",
+    "patron w adresie urzędu"
+  ],
+  "entities": [
+    {
+      "text": "BURMISTRZ MIASTA KŁODZKA",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "pl. Bolesława Chrobrego 1",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w adresie urzędu",
+      "count": 1
+    },
+    {
+      "text": "57-300",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "OR.4161.9.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "Henryka Kubalę",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "biernik",
+      "count": 1
+    },
+    {
+      "text": "Stolarstwo Kubala",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "firma JDG z nazwiskiem",
+      "count": 2
+    },
+    {
+      "text": "ul. Zdrojowa 44",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres działalności osoby fizycznej",
+      "count": 1
+    },
+    {
+      "text": "57-320",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Polanica-Zdrój",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "9065324891",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "NIP przedsiębiorcy JDG",
+      "count": 1
+    },
+    {
+      "text": "711378739",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "REGON przedsiębiorcy JDG",
+      "count": 1
+    },
+    {
+      "text": "Mateusza Sroki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "3 lutego 2008",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "08220393357",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kościelna 12",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "57-314",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szalejów Górny",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "64124010377297345653570439",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "rachunek przedsiębiorcy będącego osobą fizyczną",
+      "count": 1
+    },
+    {
+      "text": "Branżowej Szkole I Stopnia nr 2 w Kłodzku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Izby Rzemieślniczej w Wałbrzychu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "1874/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer świadectwa czeladniczego",
+      "count": 1
+    },
+    {
+      "text": "Łukasz Kubala",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "27 450,12 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "pomoc de minimis przedsiębiorcy",
+      "count": 1
+    },
+    {
+      "text": "Olafa Lasotę",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "biernik",
+      "count": 1
+    },
+    {
+      "text": "alergia kontaktowa na pył drzewny",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "przeciwwskazaniach do pracy przy obróbce drewna",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Olafa Lasoty",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dopełniacz",
+      "count": 1
+    },
+    {
+      "text": "74 868 21 09",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon przedsiębiorcy JDG",
+      "count": 1
+    },
+    {
+      "text": "stolarstwo.kubala@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Samorządowego Kolegium Odwoławczego w Wałbrzychu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Burmistrza Miasta Kłodzka",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Renata Skowron",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "naczelnik w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Henryk Kubala",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

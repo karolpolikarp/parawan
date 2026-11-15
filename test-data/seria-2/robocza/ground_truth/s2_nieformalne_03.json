@@ -1,0 +1,240 @@
+{
+  "id": "s2_nieformalne_03",
+  "template": "nieformalne",
+  "title": "Transkrypcja rozmowy z infolinią banku",
+  "seed": null,
+  "traps": [
+    "PESEL dyktowany w grupach ze spacjami",
+    "data urodzenia, telefon i e-mail słownie",
+    "imię w wołaczu („panie Ryszardzie”, „pani Moniko”)",
+    "stary i nowy adres w mowie potocznej",
+    "kraj i miasto z opisu transakcji do zachowania",
+    "nazwisko dwuczłonowe"
+  ],
+  "entities": [
+    {
+      "text": "Monika",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "konsultantka, samo imię",
+      "count": 1
+    },
+    {
+      "text": "Moniko",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz",
+      "count": 1
+    },
+    {
+      "text": "Ryszard Szymański",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ryszardzie",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz imienia",
+      "count": 2
+    },
+    {
+      "text": "Barbara",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "żona, samo imię",
+      "count": 1
+    },
+    {
+      "text": "Basia",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie",
+      "count": 1
+    },
+    {
+      "text": "Joanna Szymańska-Kur",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe",
+      "count": 1
+    },
+    {
+      "text": "56 04 12 986 34",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dyktowany w grupach ze spacjami",
+      "count": 1
+    },
+    {
+      "text": "Dwunasty kwietnia pięćdziesiąt sześć",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia słownie",
+      "count": 1
+    },
+    {
+      "text": "tysiąc dziewięćset pięćdziesiątego szóstego",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "rok urodzenia słownie",
+      "count": 1
+    },
+    {
+      "text": "ulica Grochowska 221 mieszkania 17",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "poprzedni adres, w mowie potocznej",
+      "count": 1
+    },
+    {
+      "text": "04-077",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ulica Patriotów 98a",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "04-946",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "ryszard kropka szym małpa example kropka pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "e-mail podany słownie",
+      "count": 1
+    },
+    {
+      "text": "ryszard.szym@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "sześćset jeden, dwieście dwadzieścia, trzysta trzydzieści dziewięć",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon słownie",
+      "count": 1
+    },
+    {
+      "text": "601 220 339",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL86 1020 2892 2742 2642 3202 6786",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "zawału",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "mam rozrusznik",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "po tym zawale",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Warszawa",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "Wawer",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "dzielnica zamieszkania",
+      "count": 1
+    },
+    {
+      "text": "Banku Pekao S.A.",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bank Pekao",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Marsa 56",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "adres oddziału",
+      "count": 1
+    },
+    {
+      "text": "Holandii",
+      "type": "TRAVEL_CITY",
+      "expect": "keep",
+      "note": "kraj w opisie transakcji",
+      "count": 3
+    },
+    {
+      "text": "Radomia",
+      "type": "TRAVEL_CITY",
+      "expect": "keep",
+      "note": "miasto niezwiązane z adresem",
+      "count": 1
+    },
+    {
+      "text": "7710",
+      "type": "CARD_LAST4",
+      "expect": "policy",
+      "note": "ostatnie 4 cyfry karty",
+      "count": 1
+    },
+    {
+      "text": "RK/2026/558213",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer reklamacji",
+      "count": 1
+    },
+    {
+      "text": "K-2231",
+      "type": "EMPLOYEE_ID",
+      "expect": "policy",
+      "note": "identyfikator konsultantki",
+      "count": 1
+    }
+  ]
+}

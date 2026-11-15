@@ -232,7 +232,7 @@ test('„Zasłoń zaznaczenie” w wyniku: numer księgi wieczystej jako [DANE] 
 });
 
 test('samą klawiaturą: „Anną” zaznaczona Shift+strzałkami w polu źródła i „Zostaw jawne” Enterem na znaczniku', async (t) => {
-  const text = 'Pan Jan Kowalski przyszedł z żoną Anną.\nPani Annasz czekała. Anną zajmie się sekretariat.\nPESEL 44051401359.';
+  const text = 'Pan Jan Kowalski przyszedł z koleżanką Anną.\nPani Annasz czekała. Anną zajmie się sekretariat.\nPESEL 44051401359.';
   await withApp(browser, t, '', async (app) => {
     const { page } = app;
     await paste(page, text);
@@ -259,7 +259,7 @@ test('samą klawiaturą: „Anną” zaznaczona Shift+strzałkami w polu źród�
     await page.keyboard.press('Tab'); // „wszystkie wystąpienia”
     await page.keyboard.press('Tab'); // „Zasłoń”
     await page.keyboard.press('Enter');
-    await app.waitForOutput('z żoną [IMIĘ I NAZWISKO].');
+    await app.waitForOutput('z koleżanką [IMIĘ I NAZWISKO].');
     let out = await app.output();
     assert.ok(out.includes('[IMIĘ I NAZWISKO] zajmie się'), out);
     assert.ok(!out.includes('Anną'), out);
@@ -281,7 +281,7 @@ test('samą klawiaturą: „Anną” zaznaczona Shift+strzałkami w polu źród�
     await page.keyboard.press('Enter');
     await page.keyboard.press('Enter'); // „Zostaw jawne” na ręcznym: Anną znów jawna w tym miejscu
     out = await app.output();
-    assert.ok(out.includes('z żoną Anną.'), out);
+    assert.ok(out.includes('z koleżanką Anną.'), out);
     assert.ok(out.includes('[IMIĘ I NAZWISKO] zajmie się'), out);
     assert.ok(out.includes('[PESEL]'), out);
   });

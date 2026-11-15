@@ -1,0 +1,169 @@
+{
+  "id": "s3_skargi-wnioski_08",
+  "template": "skargi-wnioski",
+  "title": "Uchwała rady gminy w sprawie rozpatrzenia skargi na kierownika ośrodka pomocy społecznej",
+  "seed": null,
+  "traps": [
+    "nazwa gminy Czarna w nazwach organów i w adresie pocztowym osoby",
+    "kierownik ośrodka jako osoba, której dotyczy skarga (mask), obok przewodniczącego rady w funkcji (policy)",
+    "członkowie rodziny skarżącej: leczenie odwykowe męża i niepełnosprawność córki",
+    "samo imię małoletniej",
+    "dochód na osobę w rodzinie jako dane finansowe"
+  ],
+  "entities": [
+    {
+      "text": "RADY GMINY CZARNA",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kierownika Gminnego Ośrodka Pomocy Społecznej w Czarnej",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "stanowisko jednoznacznie wskazujące osobę",
+      "count": 3
+    },
+    {
+      "text": "Komisji Skarg, Wniosków i Petycji",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Komisja Skarg, Wniosków i Petycji",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rada Gminy Czarna",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rady Gminy Czarna",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Danuty Mikołajczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "skarżąca",
+      "count": 2
+    },
+    {
+      "text": "Wiesław Chmura",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "przewodniczący rady w funkcji",
+      "count": 2
+    },
+    {
+      "text": "Stara Jastrząbka 77",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres wiejski bez ulicy",
+      "count": 1
+    },
+    {
+      "text": "39-215",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bożeny Dulęby",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "kierownik, której dotyczy skarga",
+      "count": 1
+    },
+    {
+      "text": "Dulęba",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 1
+    },
+    {
+      "text": "Stefanii Kras",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sąsiadka",
+      "count": 1
+    },
+    {
+      "text": "Henryk Mikołajczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "mąż skarżącej",
+      "count": 1
+    },
+    {
+      "text": "przebywa na leczeniu odwykowym w ośrodku stacjonarnym",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "leczenie uzależnienia członka rodziny",
+      "count": 1
+    },
+    {
+      "text": "Natalia",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię małoletniej córki",
+      "count": 1
+    },
+    {
+      "text": "orzeczenie o niepełnosprawności z powodu autyzmu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wymaga stałej opieki",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "stan zdrowia małoletniej córki",
+      "count": 1
+    },
+    {
+      "text": "1 412,50 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "dochód na osobę w rodzinie",
+      "count": 1
+    },
+    {
+      "text": "Samorządowego Kolegium Odwoławczego w Rzeszowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Grzegorz Trela",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik socjalny przeprowadzający wywiad w sprawie rodziny",
+      "count": 1
+    },
+    {
+      "text": "Fundacji Pomocy Rodzinom „Przystań” w Dębicy",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "organizacja pozarządowa",
+      "count": 1
+    }
+  ]
+}

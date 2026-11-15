@@ -1,0 +1,253 @@
+{
+  "id": "s2_decyzja_05",
+  "template": "decyzja",
+  "title": "Decyzja o warunkach zabudowy",
+  "seed": null,
+  "traps": [
+    "nazwisko Mróz w firmie JDG i słowo „mróz”",
+    "liczba mnoga nazwiska („Pawlikowie”, „Pawlików”)",
+    "numer wpisu architekta na listę izby",
+    "przymiotnik „Wielickiego” w nazwie instytucji",
+    "adres wiejski bez ulicy"
+  ],
+  "entities": [
+    {
+      "text": "BURMISTRZ MIASTA I GMINY WIELICZKA",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rynek Górny 1",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "32-020",
+      "type": "POSTAL",
+      "expect": "policy",
+      "note": "kod wspólny dla urzędu i adresów osób",
+      "count": 3
+    },
+    {
+      "text": "Wieliczka",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i siedziba organu",
+      "count": 5
+    },
+    {
+      "text": "BU.6730.412.2026.AW",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dz.U. z 2024 r. poz. 1130",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "publikator",
+      "count": 1
+    },
+    {
+      "text": "Grzegorza Mroza",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "MRÓZ-BUD Usługi Ogólnobudowlane",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "firma JDG z nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "8017376139",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "NIP osoby fizycznej",
+      "count": 1
+    },
+    {
+      "text": "756141092",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "REGON JDG",
+      "count": 1
+    },
+    {
+      "text": "ul. Słowackiego 9",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "patron w adresie osoby",
+      "count": 1
+    },
+    {
+      "text": "działce nr 845/3",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "działka inwestora",
+      "count": 1
+    },
+    {
+      "text": "obręb Grabówki",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "obręb ewidencyjny, zarazem miejscowość sąsiadów",
+      "count": 1
+    },
+    {
+      "text": "KR1I/35527620/4",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "mgr inż. arch. Natalia Jurek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "architekt",
+      "count": 1
+    },
+    {
+      "text": "Małopolskiej Okręgowej Izby Architektów RP",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "MP-0731",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer członkowski izby architektów",
+      "count": 1
+    },
+    {
+      "text": "845/4",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "działka sąsiadów",
+      "count": 1
+    },
+    {
+      "text": "Barbara i Leszek Pawlikowie",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małżonkowie, liczba mnoga",
+      "count": 1
+    },
+    {
+      "text": "Grabówki 61",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres wiejski bez ulicy",
+      "count": 1
+    },
+    {
+      "text": "Igor Pawlik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dziecko sąsiadów",
+      "count": 1
+    },
+    {
+      "text": "zaburzenia ze spektrum autyzmu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "dane o zdrowiu dziecka",
+      "count": 1
+    },
+    {
+      "text": "hałas",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Leszek Pawlik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "mróz",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, nazwisko Mróz",
+      "count": 1
+    },
+    {
+      "text": "Państwa Pawlików",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dopełniacz liczby mnogiej",
+      "count": 1
+    },
+    {
+      "text": "Zarządem Dróg Powiatu Wielickiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Samorządowego Kolegium Odwoławczego w Krakowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "698 117 340",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "mroz.bud@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "inż. Agnieszka Wawrzyniak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis z upoważnienia",
+      "count": 1
+    },
+    {
+      "text": "Grzegorz Mróz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "rozdzielnik",
+      "count": 1
+    },
+    {
+      "text": "Barbara Pawlik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "rozdzielnik",
+      "count": 1
+    },
+    {
+      "text": "Zarząd Dróg Powiatu Wielickiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

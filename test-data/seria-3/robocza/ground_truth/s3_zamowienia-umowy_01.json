@@ -1,0 +1,330 @@
+{
+  "id": "s3_zamowienia-umowy_01",
+  "template": "zamowienia-umowy",
+  "title": "Protokół z wyboru najkorzystniejszej oferty (usługi geodezyjne, JDG)",
+  "seed": null,
+  "traps": [
+    "nazwisko dwuczłonowe z łącznikiem (Wróbel-Kostrzewa) i mąż o drugim członie nazwiska",
+    "firma JDG z imieniem i nazwiskiem oraz skrótem GEOMAR",
+    "stan zdrowia oferenta w uzasadnieniu odrzucenia oferty",
+    "sygnatura KIO i numer działki gminnej do zachowania",
+    "samo nazwisko w dopełniaczu (Pana Zająca), miejscowość Baranowo"
+  ],
+  "entities": [
+    {
+      "text": "Urząd Gminy Rokietnica",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Golęcińska 1",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ZP.271.2.14.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy zamówienia",
+      "count": 1
+    },
+    {
+      "text": "Zarządzeniem nr 112/2025",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "akt prawa wewnętrznego",
+      "count": 1
+    },
+    {
+      "text": "działka nr 412/7",
+      "type": "PARCEL",
+      "expect": "keep",
+      "note": "działka gminna",
+      "count": 1
+    },
+    {
+      "text": "Kiekrz",
+      "type": "PLACE",
+      "expect": "keep",
+      "note": "obręb ewidencyjny nieruchomości gminnej",
+      "count": 1
+    },
+    {
+      "text": "Jolantę Pawlak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik urzędu",
+      "count": 1
+    },
+    {
+      "text": "Jolanta Pawlak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik urzędu",
+      "count": 2
+    },
+    {
+      "text": "Grzegorz Sowa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik urzędu",
+      "count": 2
+    },
+    {
+      "text": "Dawid Nowicki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik urzędu",
+      "count": 2
+    },
+    {
+      "text": "Biuletynie Informacji Publicznej",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "GEOMAR",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "fragment firmy JDG (od imienia)",
+      "count": 1
+    },
+    {
+      "text": "Marek Zając",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "imię i nazwisko w firmie JDG",
+      "count": 1
+    },
+    {
+      "text": "os. Słoneczne 14/3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "62-081",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Baranowo",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "4332716765",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "916948773",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Halina Wróbel-Kostrzewa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe, także w firmie JDG",
+      "count": 2
+    },
+    {
+      "text": "ul. Kasztanowa 9",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "64-500",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szamotuły",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "3166340664",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "023397910",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "GeoTeam Sp. z o.o.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Grunwaldzka 182",
+      "type": "COMPANY_ADDRESS",
+      "expect": "policy",
+      "note": "siedziba spółki",
+      "count": 1
+    },
+    {
+      "text": "8551607127",
+      "type": "NIP_COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tomasz Kruk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "21874",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer świadectwa uprawnień geodezyjnych",
+      "count": 1
+    },
+    {
+      "text": "ul. Wiejska 3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "62-091",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mrowino",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "5683299193",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "t.kruk.geo@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "zawale serca",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "stan zdrowia oferenta w uzasadnieniu odrzucenia",
+      "count": 1
+    },
+    {
+      "text": "pobycie w szpitalu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "hospitalizacja oferenta w uzasadnieniu odrzucenia",
+      "count": 1
+    },
+    {
+      "text": "Halinę Wróbel-Kostrzewę",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Pawła Kostrzewę",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "605 218 447",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "pomiar.szamotuly@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "skrzynka firmy JDG",
+      "count": 1
+    },
+    {
+      "text": "PL89 1090 1014 8584 8229 4590 6842",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "rachunek JDG",
+      "count": 1
+    },
+    {
+      "text": "Tomasza Kruka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zająca",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "KIO 3871/23",
+      "type": "COURT_CASE",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "Leszek Majchrzak",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "wójt w funkcji organu zatwierdzającego",
+      "count": 1
+    }
+  ]
+}

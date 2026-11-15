@@ -1,0 +1,253 @@
+{
+  "id": "s3_oswiata_02",
+  "template": "oswiata",
+  "title": "Odwołanie ojca od rozstrzygnięcia komisji rekrutacyjnej przedszkola",
+  "seed": null,
+  "traps": [
+    "nazwisko dwuczłonowe i nazwisko panieńskie tej samej osoby",
+    "zdrobnienie Oliwka",
+    "patron w adresie przedszkola (zostaje), patron ulicy w adresie babci (maskować)",
+    "cytowany wyrok WSA (zostaje) obok znaku sprawy",
+    "dane o zdrowiu babci, która nie jest stroną"
+  ],
+  "entities": [
+    {
+      "text": "Tomasz Rejman",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "ul. Hetmańska 41/7",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "35-078",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rzeszów",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i siedziby",
+      "count": 3
+    },
+    {
+      "text": "721 408 553",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "t.rejman@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Przedszkola Publicznego nr 33 w Rzeszowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "al. Tadeusza Rejtana 3",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron ulicy w adresie instytucji",
+      "count": 1
+    },
+    {
+      "text": "35-326",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Przedszkolu Publicznym nr 33",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Oliwii Rejman",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "19 października 2022",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "22301945666",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PP33.4430.2.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy rekrutacyjnej",
+      "count": 1
+    },
+    {
+      "text": "Kacper Rejman",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "2 marca 2021",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Misie",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "nazwa grupy",
+      "count": 1
+    },
+    {
+      "text": "412/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "pozycja dziennika podawczego",
+      "count": 1
+    },
+    {
+      "text": "Karolina Rejman-Stępień",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe",
+      "count": 2
+    },
+    {
+      "text": "91042782784",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "pielęgniarka anestezjologiczna",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "stanowisko, quasi-identyfikator",
+      "count": 1
+    },
+    {
+      "text": "Centrum Medycznym Podkarpacie w Rzeszowie",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "pracodawca",
+      "count": 1
+    },
+    {
+      "text": "Karolina Stępień",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko panieńskie",
+      "count": 1
+    },
+    {
+      "text": "1312/2015",
+      "type": "CIVIL_RECORD",
+      "expect": "mask",
+      "note": "numer aktu małżeństwa",
+      "count": 1
+    },
+    {
+      "text": "Halina Rejman",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Haliny Rejman",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tyczynie",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "ul. Mickiewicza 9",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "patron ulicy w adresie osoby",
+      "count": 1
+    },
+    {
+      "text": "udar niedokrwienny mózgu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "niedowładem prawostronnym",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wojewódzki Sąd Administracyjny w Rzeszowie",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "II SA/Rz 1187/21",
+      "type": "CASE_NUMBER",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "Oliwki",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie, samo imię",
+      "count": 1
+    },
+    {
+      "text": "Baranówka",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "osiedle zamieszkania",
+      "count": 1
+    }
+  ]
+}

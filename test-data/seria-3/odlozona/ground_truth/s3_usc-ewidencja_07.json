@@ -1,0 +1,330 @@
+{
+  "id": "s3_usc-ewidencja_07",
+  "template": "usc-ewidencja",
+  "title": "Protokół zapewnienia o braku przeszkód do zawarcia małżeństwa",
+  "seed": null,
+  "traps": [
+    "imiona i nazwisko rozdzielone („Jakub Andrzej, nazwisko Gołąb”), nazwisko w cudzysłowie",
+    "trzy nazwiska jednej osoby: rodowe, z pierwszego małżeństwa i przyszłe",
+    "nazwiska rodowe matek po „z domu” (Pałka, Lewandowska)",
+    "miejscowość Kowale w adresie (zwykłe słowo w liczbie mnogiej) i obiekt ślubu z adresem (polityka)",
+    "niepełnosprawność narzeczonego i sygnatura sprawy rozwodowej"
+  ],
+  "entities": [
+    {
+      "text": "ul. Nowe Ogrody 8/12",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "80-803",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Gdańsk",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i urzędu",
+      "count": 2
+    },
+    {
+      "text": "USC.5341.2.1974.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "Jakub Andrzej",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imiona narzeczonego",
+      "count": 1
+    },
+    {
+      "text": "Gołąb",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko narzeczonego i przyszłe nazwisko żony",
+      "count": 4
+    },
+    {
+      "text": "30.01.1988",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "88013052058",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "JNW978473",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Chlebnicka 14/3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "80-830",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Andrzeja",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię ojca",
+      "count": 1
+    },
+    {
+      "text": "Ewy",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię matki",
+      "count": 1
+    },
+    {
+      "text": "Pałka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko rodowe matki",
+      "count": 1
+    },
+    {
+      "text": "Paulina Maria",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imiona narzeczonej",
+      "count": 1
+    },
+    {
+      "text": "Szymańska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko z pierwszego małżeństwa",
+      "count": 1
+    },
+    {
+      "text": "Kubiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko rodowe",
+      "count": 1
+    },
+    {
+      "text": "06.06.1990",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kwidzynie",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce urodzenia i zawarcia pierwszego małżeństwa",
+      "count": 2
+    },
+    {
+      "text": "90060680003",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "BSY200582",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Lawendowa 2C/5",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "80-180",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kowale",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Henryka",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię ojca",
+      "count": 1
+    },
+    {
+      "text": "Ireny",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię matki",
+      "count": 1
+    },
+    {
+      "text": "Lewandowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko rodowe matki",
+      "count": 1
+    },
+    {
+      "text": "Pauliny Szymańskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "2817/2012",
+      "type": "CIVIL_RECORD",
+      "expect": "mask",
+      "note": "numer aktu małżeństwa",
+      "count": 1
+    },
+    {
+      "text": "Sądu Okręgowego w Gdańsku",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "XV RC 845/22",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy rozwodowej strony",
+      "count": 1
+    },
+    {
+      "text": "Dworze Oliwskim",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "miejsce ślubu",
+      "count": 1
+    },
+    {
+      "text": "ul. Bytowskiej 4",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "adres obiektu, nie osoby",
+      "count": 1
+    },
+    {
+      "text": "osobą głuchą",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "niepełnosprawność",
+      "count": 1
+    },
+    {
+      "text": "polskim języku migowym",
+      "type": "HEALTH",
+      "expect": "policy",
+      "note": "pośrednio ujawnia niepełnosprawność słuchu",
+      "count": 1
+    },
+    {
+      "text": "Marzena Ciesielska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "tłumaczka PJM",
+      "count": 1
+    },
+    {
+      "text": "501 773 284",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Konrada Gołąba",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "świadek, brat",
+      "count": 1
+    },
+    {
+      "text": "RYK857742",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kingę Wróblewską",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "świadek",
+      "count": 1
+    },
+    {
+      "text": "APP319966",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "662 049 918",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "609 515 271",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "jakub.golab@test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ilona Kurpiewska",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędnik podpisujący w funkcji",
+      "count": 1
+    }
+  ]
+}

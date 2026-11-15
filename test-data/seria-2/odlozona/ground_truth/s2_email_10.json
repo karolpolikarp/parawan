@@ -1,0 +1,282 @@
+{
+  "id": "s2_email_10",
+  "template": "email",
+  "title": "Fundacja: grafik wolontariuszy do wielu adresatów, autoodpowiedź dwujęzyczna i zgoda rodzica",
+  "seed": null,
+  "traps": [
+    "lista adresatów w formacie „Nazwisko Imię <e-mail>”",
+    "PESEL niepełnoletniego obok numeru polisy z 11 cyfr bez sumy PESEL",
+    "dwujęzyczna autoodpowiedź (angielski i polski)",
+    "nazwisko Kruk i słowo „kruk”",
+    "dane o zdrowiu niepełnoletniego (alergia, lek ratunkowy)",
+    "instytucja partnerska i adres sklepu (zachować / polityka), imię i nazwisko obcego pochodzenia"
+  ],
+  "entities": [
+    {
+      "text": "Lidia Tomaszewska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "matka niepełnoletniego",
+      "count": 3
+    },
+    {
+      "text": "lidia.tomaszewska@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Dorota Kruk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "koordynatorka",
+      "count": 4
+    },
+    {
+      "text": "dkruk@most.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "służbowy e-mail osoby",
+      "count": 2
+    },
+    {
+      "text": "Tomaszewski Igor",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "kolejność nazwisko, imię",
+      "count": 2
+    },
+    {
+      "text": "igor.t2009@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "rok urodzenia w adresie",
+      "count": 2
+    },
+    {
+      "text": "Doroto",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz",
+      "count": 1
+    },
+    {
+      "text": "Igora",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "silną alergię na orzeszki ziemne",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "dane o zdrowiu niepełnoletniego",
+      "count": 1
+    },
+    {
+      "text": "adrenalinę we wstrzykiwaczu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek ratunkowy",
+      "count": 1
+    },
+    {
+      "text": "600 204 913",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Hubert Czarnecki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "hubert.czarnecki@test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Doroty Kruk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dopełniacz",
+      "count": 1
+    },
+    {
+      "text": "Czarnecki Hubert",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "kolejność nazwisko, imię",
+      "count": 1
+    },
+    {
+      "text": "Sobczak Wiktoria",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "kolejność nazwisko, imię",
+      "count": 1
+    },
+    {
+      "text": "wiki.sobczak@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bondarenko Ksenia",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko obcego pochodzenia, kolejność nazwisko, imię",
+      "count": 1
+    },
+    {
+      "text": "k.bondarenko@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wiktoria Sobczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "512 008 377",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Igor Tomaszewski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "niepełnoletni",
+      "count": 1
+    },
+    {
+      "text": "798 441 262",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ksenia Bondarenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wiktorią",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię w narzędniku",
+      "count": 1
+    },
+    {
+      "text": "Igorze",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz",
+      "count": 1
+    },
+    {
+      "text": "09250602732",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL niepełnoletniego",
+      "count": 1
+    },
+    {
+      "text": "Kseniu",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz imienia obcego pochodzenia",
+      "count": 1
+    },
+    {
+      "text": "664 305 118",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "służbowa komórka osoby",
+      "count": 1
+    },
+    {
+      "text": "koordynatorka wolontariatu",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Fundacja Most",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "organizacja pozarządowa",
+      "count": 1
+    },
+    {
+      "text": "ul. Lipowa 40",
+      "type": "COMPANY_ADDRESS",
+      "expect": "policy",
+      "note": "adres fundacji",
+      "count": 1
+    },
+    {
+      "text": "15-427",
+      "type": "COMPANY_POSTAL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Białystok",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu fundacji",
+      "count": 1
+    },
+    {
+      "text": "ul. Wasilkowskiej 12",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "adres sklepu, miejsce zbiórki",
+      "count": 1
+    },
+    {
+      "text": "Bankiem Żywności w Białymstoku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "organizacja partnerska",
+      "count": 1
+    },
+    {
+      "text": "92760909173",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "numer polisy, 11 cyfr bez poprawnej sumy PESEL",
+      "count": 1
+    },
+    {
+      "text": "kruk",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo równe nazwisku",
+      "count": 1
+    }
+  ]
+}

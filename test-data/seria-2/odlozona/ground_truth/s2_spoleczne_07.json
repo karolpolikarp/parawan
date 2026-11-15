@@ -1,0 +1,232 @@
+{
+  "id": "s2_spoleczne_07",
+  "template": "spoleczne",
+  "title": "Orzeczenie o potrzebie kształcenia specjalnego",
+  "seed": null,
+  "traps": [
+    "patron z inicjałem w nazwie szpitala (im. T. Marciniaka) do zachowania",
+    "nazwa przedszkola w cudzysłowie",
+    "zdrobnienie Lenka",
+    "choroba zmarłej matki jako dana o zdrowiu",
+    "samo imię terapeutki (Agata)"
+  ],
+  "entities": [
+    {
+      "text": "Poradni Psychologiczno-Pedagogicznej nr 6 we Wrocławiu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Powstańców Śląskich 95",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "53-332",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wrocław",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby, miejsca urodzenia i siedziby",
+      "count": 4
+    },
+    {
+      "text": "117/2026/2027",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "Ewelina Struk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Paweł Fic",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Teodora Bartnicka-Lis",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe z członem Lis",
+      "count": 1
+    },
+    {
+      "text": "autyzm",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Lena Dziewulska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "30.04.2020 r.",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "20243052941",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Grabiszyńska 233/15",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "53-234",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Przedszkole nr 128 „Pod Kasztanem” we Wrocławiu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "nazwa przedszkola w cudzysłowie",
+      "count": 1
+    },
+    {
+      "text": "Krzysztof Dziewulski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "784 902 315",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "k.dziewulski@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "zmarła w 2022 r. na ostrą białaczkę szpikową",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "choroba i śmierć matki",
+      "count": 1
+    },
+    {
+      "text": "Irena Dziewulska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dolnośląskim Szpitalu Specjalistycznym im. T. Marciniaka",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron z inicjałem w nazwie szpitala",
+      "count": 1
+    },
+    {
+      "text": "całościowe zaburzenie rozwoju",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "F84.0",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "Lenka",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie",
+      "count": 1
+    },
+    {
+      "text": "echolalią",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "nadwrażliwość słuchową i dotykową",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "alergię na orzechy arachidowe",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "terapii integracji sensorycznej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Agatę",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię terapeutki",
+      "count": 1
+    },
+    {
+      "text": "nadwrażliwości słuchowej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "druga wzmianka, w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "Dolnośląskiego Kuratora Oświaty",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,267 @@
+{
+  "id": "s2_decyzja_04",
+  "template": "decyzja",
+  "title": "Decyzja wojewody o zezwoleniu na pobyt czasowy i pracę",
+  "seed": null,
+  "traps": [
+    "nieodmienne nazwisko ukraińskie przy odmienianych imionach",
+    "miejsce urodzenia za granicą („w Winnicy”)",
+    "pracodawca z NIP spółki",
+    "nazwisko pełnomocnika będące słowem (Sroka)",
+    "ulica z patronem w adresie urzędu i w nazwie szkoły"
+  ],
+  "entities": [
+    {
+      "text": "WOJEWODA DOLNOŚLĄSKI",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "pl. Powstańców Warszawy 1",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "50-153",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wrocław",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i urzędu",
+      "count": 4
+    },
+    {
+      "text": "SOC-II.6151.18734.2026.KM",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dz.U. z 2025 r. poz. 1691",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "publikator",
+      "count": 1
+    },
+    {
+      "text": "Dz.U. z 2025 r. poz. 1079",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "publikator",
+      "count": 1
+    },
+    {
+      "text": "Olenie Kovalchuk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "imię odmienione, nazwisko nie",
+      "count": 1
+    },
+    {
+      "text": "obywatelce Ukrainy",
+      "type": "NATIONALITY",
+      "expect": "policy",
+      "note": "obywatelstwo strony",
+      "count": 1
+    },
+    {
+      "text": "23 lutego 1991",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "w Winnicy",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "miejsce urodzenia",
+      "count": 1
+    },
+    {
+      "text": "TA6935198",
+      "type": "PASSPORT",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "91022367981",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Legnickiej 48b m. 7",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "miejscownik",
+      "count": 1
+    },
+    {
+      "text": "54-203",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Dolnośląskie Zakłady Mechaniczne DOZAMET sp. z o.o.",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "pracodawca",
+      "count": 2
+    },
+    {
+      "text": "8971903468",
+      "type": "NIP_COMPANY",
+      "expect": "policy",
+      "note": "NIP spółki",
+      "count": 1
+    },
+    {
+      "text": "Pani Kovalchuk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 1
+    },
+    {
+      "text": "operatorki wózka widłowego",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "5 860,00 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "wynagrodzenie",
+      "count": 1
+    },
+    {
+      "text": "Tarasem Kovalchukiem",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "mąż, narzędnik",
+      "count": 1
+    },
+    {
+      "text": "YE3722806",
+      "type": "PASSPORT",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Maksyma Kovalchuka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletni syn",
+      "count": 1
+    },
+    {
+      "text": "9 maja 2016",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia dziecka",
+      "count": 1
+    },
+    {
+      "text": "Szkoły Podstawowej nr 118 im. Jana Kochanowskiego we Wrocławiu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "r.pr. Bartłomiej Sroka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pełnomocnik, nazwisko jak ptak",
+      "count": 2
+    },
+    {
+      "text": "WR-2817",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer wpisu radcy prawnego",
+      "count": 1
+    },
+    {
+      "text": "jest w 24. tygodniu ciąży",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Komendanta Placówki Straży Granicznej we Wrocławiu-Strachowicach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szefa Urzędu do Spraw Cudzoziemców",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wojewody Dolnośląskiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "olena.kovalchuk91@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+48 731 552 086",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Katarzyna Mielczarek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis z upoważnienia",
+      "count": 1
+    },
+    {
+      "text": "Olena Kovalchuk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "rozdzielnik",
+      "count": 1
+    },
+    {
+      "text": "ul. Legnicka 48b m. 7",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "rozdzielnik",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,295 @@
+{
+  "id": "s2_dwujezyczne_01",
+  "template": "dwujezyczne",
+  "title": "Umowa o dzieło dwujęzyczna (PL/EN) z brytyjskim zamawiającym",
+  "seed": null,
+  "traps": [
+    "ta sama osoba w odmianie polskiej („Martą Wróbel”, „Olivera Hastingsa”) i w mianowniku w akapicie angielskim",
+    "IBAN w dwóch formatach: NRB ze spacjami bez PL i PL bez spacji",
+    "data urodzenia po angielsku (July 14, 1991) obok dat umowy (March 5, 2026, April 30, 2026), które zostają",
+    "telefon +44 z brytyjskiej puli testowej i polski +48 w tym samym akapicie",
+    "siedziba spółki w Leeds z brytyjskim kodem pocztowym (polityka), kod BIC i sąd do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "Olivera Hastingsa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Oliver Hastings",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Martą Wróbel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marta Wróbel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "14 lipca 1991",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "July 14, 1991",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia w formacie angielskim",
+      "count": 1
+    },
+    {
+      "text": "91071415802",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "8950563526",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "NIP osoby fizycznej",
+      "count": 2
+    },
+    {
+      "text": "ul. Zakopiańskiej 61/12",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Zakopiańska 61/12",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "30-418",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "39 1050 0099 7635 6752 0648 6602",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "NRB ze spacjami, bez PL",
+      "count": 1
+    },
+    {
+      "text": "PL39105000997635675206486602",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "IBAN PL bez spacji",
+      "count": 1
+    },
+    {
+      "text": "Priya Raman",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "+44 113 496 0732",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon brytyjski",
+      "count": 2
+    },
+    {
+      "text": "priya.raman@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "+48 601 448 219",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "m.wrobel@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Tomasz Gajewski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "świadek",
+      "count": 1
+    },
+    {
+      "text": "ul. Lea 114/3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "30-133",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Nowym Sączu",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce urodzenia",
+      "count": 1
+    },
+    {
+      "text": "Nowy Sącz",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce urodzenia",
+      "count": 1
+    },
+    {
+      "text": "Kraków",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i miejsce zawarcia umowy",
+      "count": 4
+    },
+    {
+      "text": "Northbridge Analytics Ltd",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "14 Calder Row",
+      "type": "COMPANY_ADDRESS",
+      "expect": "policy",
+      "note": "adres siedziby spółki",
+      "count": 2
+    },
+    {
+      "text": "LS1 4QP",
+      "type": "COMPANY_ADDRESS",
+      "expect": "policy",
+      "note": "brytyjski kod pocztowy siedziby spółki",
+      "count": 2
+    },
+    {
+      "text": "Leeds",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "siedziba spółki",
+      "count": 3
+    },
+    {
+      "text": "09876543",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "numer spółki w rejestrze brytyjskim",
+      "count": 2
+    },
+    {
+      "text": "dyrektora zarządzającego",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Managing Director",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kierowniczka projektu",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Project Manager",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sąd Okręgowy w Krakowie",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "ALBPPLPW",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "kod BIC banku",
+      "count": 1
+    },
+    {
+      "text": "7/2026",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer umowy",
+      "count": 2
+    },
+    {
+      "text": "March 5, 2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "data umowy, nie data urodzenia",
+      "count": 1
+    },
+    {
+      "text": "April 30, 2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "termin wykonania",
+      "count": 1
+    },
+    {
+      "text": "5 marca 2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "30 kwietnia 2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

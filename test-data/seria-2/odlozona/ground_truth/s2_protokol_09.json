@@ -1,0 +1,205 @@
+{
+  "id": "s2_protokol_09",
+  "template": "protokol",
+  "title": "Protokół z nadzwyczajnego posiedzenia rady pedagogicznej liceum",
+  "seed": null,
+  "traps": [
+    "nazwisko Wieczorek i „wieczorek zapoznawczy”",
+    "patron w nazwie liceum (im. Kazimierza Jagiellończyka)",
+    "uczeń wymieniany samym nazwiskiem w dopełniaczu i celowniku",
+    "dane szczególne opisowo (środki odurzające, leczenie uzależnień)",
+    "inicjały w ustaleniach",
+    "dyrektor w funkcji jako polityka"
+  ],
+  "entities": [
+    {
+      "text": "Rady Pedagogicznej II Liceum Ogólnokształcącego im. Kazimierza Jagiellończyka w Elblągu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "Komenda Miejska Policji w Elblągu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Samorządu Uczniowskiego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Uniwersytetu Warmińsko-Mazurskiego w Olsztynie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wieczorku",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo obok nazwiska Wieczorek",
+      "count": 1
+    },
+    {
+      "text": "wieczorek",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo obok nazwiska Wieczorek",
+      "count": 1
+    },
+    {
+      "text": "Wiktor Żmuda",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "dyrektor szkoły w funkcji",
+      "count": 2
+    },
+    {
+      "text": "Klaudia Jóźwiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Łucja Wieczorek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Fabiana Sieradzkiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "08232733356",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "posiadaniem środków odurzających",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "podejrzenie przestępstwa",
+      "count": 1
+    },
+    {
+      "text": "korzysta z terapii w poradni leczenia uzależnień",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Barbara Dziadosz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pedagog szkolna",
+      "count": 1
+    },
+    {
+      "text": "Nikola Szczepańska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Gabriela Sieradzka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "784 220 916",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "g.sieradzka@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Fabian Sieradzki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Arkadiusz Pluta",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Sieradzkim",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w narzędniku",
+      "count": 1
+    },
+    {
+      "text": "Sieradzkiemu",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w celowniku",
+      "count": 1
+    },
+    {
+      "text": "Sebastiana Lisowskiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Julii Fabisiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletnia",
+      "count": 1
+    },
+    {
+      "text": "09300424628",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL małoletniej",
+      "count": 1
+    },
+    {
+      "text": "ŁW",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "BD",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

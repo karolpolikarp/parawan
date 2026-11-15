@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-11-14T00:06:59.919Z",
+  "generatedAt": "2026-11-15T05:15:57.777Z",
   "seed": 20260704,
   "coreVersion": "0.30.0",
-  "casesTotal": 638,
-  "mustMaskTotal": 826,
-  "mustKeepTotal": 1037,
+  "casesTotal": 854,
+  "mustMaskTotal": 1200,
+  "mustKeepTotal": 1533,
   "skippedLayers": [
     {
       "name": "core+spacy",
@@ -26,35 +26,35 @@
     {
       "name": "T0+T1 core",
       "desc": "redactPII(): regex, sumy kontrolne i słownik (in-process, offline)",
-      "elapsedMs": 432,
+      "elapsedMs": 985,
       "changedVsCore": null,
-      "recall": 0.9818401937046005,
-      "precision": 0.9990356798457087,
-      "f1": 0.990363301926102,
+      "recall": 0.9875,
+      "precision": 0.9993476842791911,
+      "f1": 0.993388517936364,
       "agg": {
-        "maskTotal": 826,
-        "maskHit": 811,
-        "keepTotal": 1037,
-        "keepHit": 1036
+        "maskTotal": 1200,
+        "maskHit": 1185,
+        "keepTotal": 1533,
+        "keepHit": 1532
       },
       "perCategory": {
         "osoby-podstawowe": {
           "recall": 1,
           "precision": 1,
           "f1": 1,
-          "maskTotal": 242,
-          "maskHit": 242,
-          "keepTotal": 149,
-          "keepHit": 149
+          "maskTotal": 266,
+          "maskHit": 266,
+          "keepTotal": 166,
+          "keepHit": 166
         },
         "osoby-odmiana": {
           "recall": 1,
           "precision": 1,
           "f1": 1,
-          "maskTotal": 45,
-          "maskHit": 45,
-          "keepTotal": 41,
-          "keepHit": 41
+          "maskTotal": 149,
+          "maskHit": 149,
+          "keepTotal": 111,
+          "keepHit": 111
         },
         "osoby-rzadkie": {
           "recall": 1,
@@ -69,19 +69,19 @@
           "recall": 1,
           "precision": 1,
           "f1": 1,
-          "maskTotal": 458,
-          "maskHit": 458,
-          "keepTotal": 322,
-          "keepHit": 322
+          "maskTotal": 704,
+          "maskHit": 704,
+          "keepTotal": 491,
+          "keepHit": 491
         },
         "negatywy": {
           "recall": null,
-          "precision": 0.9978354978354979,
+          "precision": 0.9985754985754985,
           "f1": null,
           "maskTotal": 0,
           "maskHit": 0,
-          "keepTotal": 462,
-          "keepHit": 461
+          "keepTotal": 702,
+          "keepHit": 701
         },
         "osoby-rzadkie-ner": {
           "recall": 0.21052631578947367,
@@ -3484,6 +3484,1086 @@
         },
         {
           "id": "str-215",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-38",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-39",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-40",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-41",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-42",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-240",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-43",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-44",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-45",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-46",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-47",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-48",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-49",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-50",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-51",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-52",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-53",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-54",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-55",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-56",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-57",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-58",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-59",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-60",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-241",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-242",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-243",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-244",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-245",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-246",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-61",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-62",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-63",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-64",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-65",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-247",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-248",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-249",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-66",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-250",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-67",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-68",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-69",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-70",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-71",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-o-72",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-251",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-252",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-253",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-254",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-p-89",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-p-90",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-p-91",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-p-92",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-255",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-256",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-216",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-217",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-218",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-257",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-258",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-219",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-220",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-259",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-260",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-261",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-262",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-263",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-264",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-221",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-222",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-223",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-224",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-225",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-265",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-266",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-267",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-268",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-226",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-227",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-269",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-270",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-271",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-228",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-229",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-230",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-272",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-273",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-274",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-231",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-275",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-276",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-277",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-278",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-279",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-280",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-232",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-233",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-281",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-234",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-235",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-236",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-237",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-238",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-239",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-282",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-283",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-240",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-241",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-242",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-243",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-244",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-245",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-246",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-247",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-284",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-285",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-248",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-249",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-250",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-286",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-287",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-288",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-251",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-252",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-253",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-254",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-255",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-256",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-257",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-258",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-259",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-260",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-261",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-262",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-263",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-264",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-265",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-266",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-289",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-290",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-267",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-268",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-269",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-270",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-271",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-272",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-273",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-274",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-275",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-276",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-p-93",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-p-94",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-291",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-292",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-293",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-294",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-295",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-p-95",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-p-96",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-296",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-277",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-278",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-279",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-297",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-298",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-280",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-p-97",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-299",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-300",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-301",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-281",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-302",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-303",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-282",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-283",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-284",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-285",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-286",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-287",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-288",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-289",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-290",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-291",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-304",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-305",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-292",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-306",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-293",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-307",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-308",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-294",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-295",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-309",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-310",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-296",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-311",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-312",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-297",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-298",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-299",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-300",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-313",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-314",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-315",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-316",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-301",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-302",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-303",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-304",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-317",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-305",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-306",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-318",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-307",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-308",
           "leaked": [],
           "eaten": []
         }

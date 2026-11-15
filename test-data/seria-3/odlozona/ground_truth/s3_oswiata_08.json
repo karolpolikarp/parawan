@@ -1,0 +1,282 @@
+{
+  "id": "s3_oswiata_08",
+  "template": "oswiata",
+  "title": "Protokół komisji egzaminacyjnej na stopień nauczyciela mianowanego",
+  "seed": null,
+  "traps": [
+    "nazwisko Bąk w tytule projektu („Bąk ziemny”)",
+    "nazwisko Gruszka obok słowa „gruszki”",
+    "zdrobnienie imienia w nazwie kanału („panią Olą”)",
+    "eksperci i członkowie komisji z inicjałami w podpisach",
+    "zabieg kardiochirurgiczny w uzasadnieniu przedłużenia stażu",
+    "patron w nazwie szkoły"
+  ],
+  "entities": [
+    {
+      "text": "Urzędzie Miasta i Gminy w Końskich",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Partyzantów 1",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "141/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer zarządzenia",
+      "count": 1
+    },
+    {
+      "text": "Burmistrza Miasta i Gminy Końskie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Burmistrzowi Miasta i Gminy Końskie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rafał Ziętek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Grażyna Smolarczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Leszek Pawlak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Joanna Mazur-Kita",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe",
+      "count": 3
+    },
+    {
+      "text": "Mirosław Kumor",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Szkoły Podstawowej nr 2 im. Stefana Żeromskiego w Końskich",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "Szkole Podstawowej nr 2 im. Stefana Żeromskiego w Końskich",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "pracodawca nauczycielki",
+      "count": 1
+    },
+    {
+      "text": "Zarządu Oddziału ZNP w Końskich",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Aleksandry Bąk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "11 kwietnia 1994",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Skarżysku-Kamiennej",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce urodzenia",
+      "count": 1
+    },
+    {
+      "text": "94041105608",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Południowa 8 m. 12",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "26-220",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Stąporków",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "nauczycielki przyrody i biologii",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "stanowisko",
+      "count": 1
+    },
+    {
+      "text": "Elżbiety Gruszki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "opiekun stażu",
+      "count": 1
+    },
+    {
+      "text": "zabiegu kardiochirurgicznym",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wszczepienie zastawki aortalnej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Aleksandra Bąk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "gruszki",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko Gruszka",
+      "count": 1
+    },
+    {
+      "text": "Bąk ziemny",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "nazwa owada w tytule projektu, nie nazwisko",
+      "count": 1
+    },
+    {
+      "text": "Olą",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie imienia w nazwie kanału",
+      "count": 1
+    },
+    {
+      "text": "Aleksandrze Bąk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "698 117 204",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "a.bak@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "R. Ziętek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis",
+      "count": 1
+    },
+    {
+      "text": "G. Smolarczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis",
+      "count": 1
+    },
+    {
+      "text": "L. Pawlak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis",
+      "count": 1
+    },
+    {
+      "text": "J. Mazur-Kita",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis",
+      "count": 1
+    },
+    {
+      "text": "M. Kumor",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis",
+      "count": 1
+    },
+    {
+      "text": "Monika Wilk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "protokolantka",
+      "count": 1
+    },
+    {
+      "text": "zwolnieniu lekarskim",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "niezdolność do pracy z powodu choroby",
+      "count": 1
+    }
+  ]
+}

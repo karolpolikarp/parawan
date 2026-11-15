@@ -1,0 +1,44 @@
+CEIDG-1
+WNIOSEK O ZMIANĘ WPISU W CEIDG — ZAWIESZENIE WYKONYWANIA DZIAŁALNOŚCI GOSPODARCZEJ
+Urząd Miasta Lublin, Wydział Spraw Administracyjnych, Plac Króla Władysława Łokietka 1, 20-109 Lublin
+
+01. RODZAJ WNIOSKU
+[ ] wpis   [ ] zmiana danych   [X] zawieszenie   [ ] wznowienie   [ ] wykreślenie
+Identyfikator wpisu: 62376500600
+
+02. DANE PRZEDSIĘBIORCY
+PESEL: 90110317952
+Nazwisko: KAVALIOU
+Imię: ALIAKSANDR
+Imiona rodziców: SIARHEI, ALENA
+Data urodzenia: 03/11/1990
+Obywatelstwo: białoruskie
+Dokument: paszport nr HG6016189
+NIP: 6234469350      REGON: 674261069
+Firma:
+TRANS-KAV Aliaksandr Kavaliou
+
+03. ADRES DO DORĘCZEŃ
+ul. Związkowa 5/19
+20-148 Lublin
+Telefon: +48 698 330 251
+E-mail: biuro.transkav@test.pl
+
+04. ZAWIESZENIE
+Data rozpoczęcia zawieszenia: 01.12.2026
+Okres zawieszenia: [X] na czas nieokreślony   [ ] do dnia ........
+Przyczyna (informacyjnie, pole nieobowiązkowe): długotrwała rehabilitacja po złamaniu kręgosłupa lędźwiowego (wypadek drogowy z 9.10.2026).
+
+05. INFORMACJE DODATKOWE
+Jedyny pojazd firmy, ciągnik siodłowy Volvo FH 460 o numerze rejestracyjnym LU 66350, VIN E3V74JH75E77F51BL, zostaje odstawiony na parking przy bazie Lubelskiego Centrum Logistycznego.
+Wspólnik w spółce cywilnej: brak. Pracownicy: kierowca Ihar Shapavalau, umowa rozwiązana 30.11.2026.
+
+06. PEŁNOMOCNIK
+Wniosek składa pełnomocnik: adw. Dorota Lisiecka-Bem, Kancelaria Adwokacka w Lublinie, ul. Krakowskie Przedmieście 39/4, 20-076 Lublin, nr wpisu LUB/Adw/1187.
+Pełnomocnictwo w załączeniu, opłata skarbowa 17 zł uiszczona.
+
+07. OŚWIADCZENIE
+Oświadczam, że w okresie zawieszenia nie będę wykonywał działalności gospodarczej. Kawał drogi przejechałem z tą firmą i liczę na wznowienie.
+Lublin, 24.11.2026
+Za przedsiębiorcę: Dorota Lisiecka-Bem
+(podpis przedsiębiorcy na pełnomocnictwie: A. Kavaliou)

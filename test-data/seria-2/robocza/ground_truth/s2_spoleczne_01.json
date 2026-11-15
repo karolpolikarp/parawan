@@ -1,0 +1,379 @@
+{
+  "id": "s2_spoleczne_01",
+  "template": "spoleczne",
+  "title": "Rodzinny wywiad środowiskowy (MOPR)",
+  "seed": null,
+  "traps": [
+    "zdrobnienia imion dzieci (Kuba, Ola, Kuby)",
+    "nazwisko Wrona i słowo „wrona” w wierszyku",
+    "samo nazwisko w dopełniaczu („pani Wrony”, „Pana Sęka”)",
+    "patron ulicy w adresie ośrodka do zachowania",
+    "uzależnienie konkubenta opisane cytatem"
+  ],
+  "entities": [
+    {
+      "text": "Miejski Ośrodek Pomocy Rodzinie w Lublinie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Jana Pawła II 18",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w nazwie ulicy przy adresie ośrodka",
+      "count": 1
+    },
+    {
+      "text": "20-535",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "MOPR-F4.5131.77.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "Lublin",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i siedziby",
+      "count": 3
+    },
+    {
+      "text": "Ewa Wrona",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "89041263409",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kalinowszczyzna 54 m. 12",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "20-201",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "512 448 903",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Damian Sęk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "14.06.1986",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "86061436712",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jakub Wrona",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "3.09.2014",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "14290374336",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szkoły Podstawowej nr 24 w Lublinie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Aleksandra Wrona",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "27.02.2019",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "19222791081",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Przedszkola nr 31",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zarządu Nieruchomości Komunalnych",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "poradni zdrowia psychicznego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "leczenie psychiatryczne opisowo",
+      "count": 1
+    },
+    {
+      "text": "depresji nawracającej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "escitalopram",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "Ewy",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "Kuba",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie imienia Jakub",
+      "count": 2
+    },
+    {
+      "text": "astmę oskrzelową",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ola",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie imienia Aleksandra",
+      "count": 2
+    },
+    {
+      "text": "wczesnego wspomagania rozwoju",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "opinia o wczesnym wspomaganiu rozwoju dziecka",
+      "count": 1
+    },
+    {
+      "text": "opóźniony rozwój mowy",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "pije za dużo",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "nadużywanie alkoholu opisowo",
+      "count": 1
+    },
+    {
+      "text": "izby wytrzeźwień",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "pobyt w izbie wytrzeźwień",
+      "count": 1
+    },
+    {
+      "text": "uzależnienia od alkoholu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wrony",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "2 940 zł netto",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "dochód osoby",
+      "count": 1
+    },
+    {
+      "text": "Kuby",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "Rafał Mazurek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Halina Pietrzak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kruczkowskiego 7/3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "21-040",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Świdnik",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "81 751 22 06",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "endoprotezie biodra",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wrona",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko Wrona",
+      "count": 1
+    },
+    {
+      "text": "Teresę",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię wychowawczyni",
+      "count": 1
+    },
+    {
+      "text": "41 1140 2004 4816 5168 6032 3647",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sęka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "Miejskiej Komisji Rozwiązywania Problemów Alkoholowych w Lublinie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Monika Dziedzic",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "81 466 50 21",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon służbowy pracownika",
+      "count": 1
+    },
+    {
+      "text": "m.dziedzic@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

@@ -12,6 +12,804 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+**Osoba, której imię i nazwisko Parawan już zakrył, znika też tam, gdzie pismo podaje ją inaczej: samym nazwiskiem w odmianie, samym imieniem, zdrobnieniem, inicjałami albo loginem.**
+
+- **Raz rozpoznana osoba zakryta w całym piśmie.** Gdy pismo podaje osobę z pewną kotwicą (imię
+  i nazwisko, „Pani Nowak”, pole „Imię i nazwisko:”), dalsze wzmianki o niej też znikają: samo
+  nazwisko w odmianie i wersalikami („radna Elżbieta Sowa” → „radnej Sowy”, „wstrzymała się (1):
+  Sowa”, „A. Kmieć”, „ZASTĘPSTWO: WILK R.”), samo imię w odmianie i w wołaczu („Szanowny Panie
+  Henryku”, „zgłoszenie Pauliny”), zdrobnienie („Jakub Wrona” → „Kuba”, „Kuby”; „Aleksandra” → „Ola”,
+  „Bartosz” → „Bartek”, „Bartkiem”), inicjały jednej osoby („P.L. złoży wniosek”, „dyżur – KB”)
+  i login z imienia i nazwiska („amazur”, „@kzielinska”). W czacie, SMS-ie i zgłoszeniu helpdesku
+  także imię pisane małą literą („dzieki panie piotrze”, „pozdrawiam aga”). Z pseudonimami wzmianka
+  dostaje tę samą etykietę co osoba. Na drugiej serii 100 pism (część robocza) zakrytych danych jest
+  78,8% zamiast 72,7%, bez nowych nadmiarowych zakryć.
+- **Bez osoby w piśmie i w nazwach nic się nie zmienia.** Samo „Jan” albo „Kuba” bez imienia
+  i nazwiska w piśmie zostaje. Patron zostaje także wtedy, gdy osoba z pisma ma to samo imię („ul.
+  Jana Pawła II”, „im. Marii Konopnickiej”, „list św. Pawła”), tak samo nazwa z nazwiskiem („Hotel
+  Lis”, „Dworzec Kaliski”), region i państwo („na Mazury”, „na Kubę”), data („3 Maja”) i nazwisko
+  będące zwykłym słowem na początku zdania, małą literą albo jako wartość pola („Wróbel na dachu”,
+  „jak wrona zgubiła ser”, „Zawód: Kowal”). Gołe wersaliki tylko w miejscu osoby („przez BWK”,
+  „– KB”), więc „do akceptacji MZ” zostaje.
+- **Kraj, miejscowość, urząd i święty o brzmieniu osoby z pisma zostają jawne.** Przy Panu Marku
+  Włochu zostaje „wyjazd do Włoch”, przy Ewie Czech „towar z Czech” i „w Czechach”, przy Agnieszce
+  Mazur „wakacje na Mazurach”, przy Janie Raku „mecz w Rakowie”, a przy Marcinie Długoszu „mieszka
+  przy Długosza 7”. Zostają też skróty urzędów i skróty rozwinięte w piśmie („Ministerstwo Zdrowia
+  (MZ)”, „zatwierdzony przez MZ”, „wydał MF”, „Platforma Obywatelska (PO)”, „Kraj: PL”), święci
+  i świątynie („parafii św. Piotra i Pawła”, „Kościół Piotra i Pawła”), nazwy rzeczy i tytuły
+  („Rondo Trzeciego Maja”, „Kopalnia Barbara”, „Ave Maria”, „Polisa Warty”, „Kino Andrzej”, „Bajka
+  o Jasiu i Małgosi”), imię jako miejsce albo dzień („z Helu”, „po Kazimierzu”, „paczki na Mikołaja”)
+  oraz nazwisko lub zdrobnienie w znaczeniu zwykłego słowa („Kamień węgielny”, „Zima była ciężka”,
+  „Latem”, „matka – Rak jajnika”, „Sowy polują”, „Kuba to wyspa”, „Hala sportowa”, „w celu”,
+  „natka pietruszki”). Celownik nazwiska znika jak pozostałe formy („przyznano zasiłek Kowalowi”,
+  „Radnemu Dębowi”).
+- **Formy, które nie mogą dotyczyć osoby z pisma, zostają jawne.** Przy Panu Piotrze Pomorskim
+  zostaje „Pojezierze Pomorskie”, przy Pani Annie Tatrzańskiej „Tatrzańskie szlaki”, bo forma na
+  -skie nie odnosi się do osoby. Nazwisko kobiety na spółgłoskę się nie odmienia, więc przy Pani
+  Marii Lis zostaje „Przedszkole »Pod Lisem«”, a przy Pani Annie Bałtyk „port nad Bałtykiem”.
+  Nazwisko-przymiotnik na początku zdania przed rzeczownikiem to zwykłe słowo („Wolny dostęp do
+  informacji”, „Nowa ustawa wchodzi w życie”, „Mostek na rzece”), a przed orzeczeniem dalej osoba
+  („Wolny przyszedł”). Miasto o brzmieniu nazwiska zostaje w każdej formie po przyimku („pociąg do
+  Kalisza”, „wyjazd do Opola”), a „rozmowa z Kaliszem” znika. Zostają też symbole działów
+  w kształcie inicjałów („Dział TZ”, „wydział TZ”, „materiał PS”) i „Ewangelia według Jana”.
+- **Imię w zwrocie do osoby i w podpisie znika także wtedy, gdy pismo nie podaje nazwiska.** Wołacz
+  imienia po „Panie” („Panie Marku”, „Szanowny Panie Stanisławie”, „dziękuję, panie Ryszardzie”), po
+  powitaniu albo podziękowaniu („Cześć Ewo,”, „Hej Kasiu!”, „Witam Zbyszku,”, „Drogi Pawle,”), między
+  przecinkami („Tak, Marku, wiem”) i na początku wiersza („Kasiu,”, „> Agnieszko!”). Formy wołacza
+  powstają z imion i zdrobnień w słowniku, z obocznościami („Jacek” → „Jacku”, „Paweł” → „Pawle”,
+  „Kacper” → „Kacprze”, „Ola” → „Olu”, „Heniek” → „Heńku”). Znika też imię po skrócie „p.” („hydraulik
+  p. Marek”), nazwisko po obcym tytule („Dear Mr Brandt”, „Ms Sabine Krüger”, „Herr Müller”, „Frau
+  Professor Schmidt”), „Dr Helen Carter” oraz imię i nazwisko w wierszu pod formułą pożegnalną
+  („Pozdrawiam, Kuba”, „Z wyrazami szacunku / Kowalski”, „Best regards, / Tomasz”, „Kind regards /
+  Mit freundlichen Grüßen / Matthias Brandt”). Takie imię zakrywa też dalsze wzmianki tej osoby.
+  Z pseudonimami zwrot dostaje etykietę adresata o tym imieniu („Do: Ewa Nowak / Pani Ewo,”), a podpis
+  samym imieniem etykietę nadawcy („Od: Jakub Nowak … Pozdrawiam, Kuba”). Adresatka „Pani Ewo” i
+  podpisana pod pismem „Ewa Nowak” to dwie osoby, więc mają osobne etykiety, tak samo uczennica „Ewa
+  Nowak” z treści pisma. Po obcym tytule znika tylko nazwisko albo imię ze słownika albo wyraz po
+  powitaniu („Dear Mr Dalloway,”), także za stopniem z kropką („Herr Dr. Müller”, „Frau Prof. Dr.
+  Weber”, „Sehr geehrte Frau Dr. Becker,”, „Dear Dr. Smith,”), więc zostają marki, utwory i role („płyn Mr Proper”,
+  „catering z Mr Cook”, „firma Mr Garden sp. z o.o.”, „Mr Olympia”, „Mrs Dalloway”, „Frau Holle”,
+  „Mr. Smith Goes to Washington”, „Herr Ober”, „Mr Prime Minister”, „Dr. Oetker”). Zostaje też
+  wyliczenie miejsc („w Juracie, Helu, Jastarni”, „w Krakowie, Kazimierzu, Podgórzu”), wyliczenie
+  imion w miejscowniku, równym u mężczyzn wołaczowi („Wykład o apostołach: Piotrze, Pawle, Janie”,
+  „Kazanie o Piotrze, Pawle i Janie”, „o świętym Wojciechu, Stanisławie”), nazwy na -o w wyliczeniu
+  i tabeli („Ulubione gry: Tetris, Mario, Sonic”, „Filmy: Coco, Kubo, Moana”, „Autorzy: Coelho,
+  Paulo”, wiersz CSV „Mario,3”), role i zwroty bez imienia
+  („Panie Prezesie”, „Panie Sędzio”, „Panie Boże”, „Szanowni Państwo”, „Herr Doktor”), mianownik po
+  przecinku („Dziękuję, Anna przyjdzie jutro”), „Halo,” oraz podpis instytucji („Z poważaniem /
+  Zarząd Spółki”, „Pozdrawiam / Dział Kadr”, „Kind regards, / Customer Service”). Na części roboczej drugiej serii zakrytych danych jest 78,9%
+  zamiast 78,8%, bez nowych nadmiarowych zakryć; większość zwrotów z tej serii zakrywało już
+  rozlanie osoby z pisma.
+- **Imię członka rodziny albo podopiecznego znika, choć pismo nie podaje nazwiska.** Imię
+  i zdrobnienie w każdym przypadku tuż za słowem pokrewieństwa lub opieki (syn, córka, mąż, żona,
+  matka, ojciec, brat, siostra, babcia, dziadek, wnuk, ciocia, wujek, konkubent, partner, opiekun,
+  podopieczny, dzieci): „jej syn Kuba”, „córce Oli”, „widziałem syna Jakuba”, „moja siostra Ewelina”,
+  „mój syn Antoś”, wtrącenie po przecinku („Żona, Barbara, ale…”, „maz, Grzesiek, na lapku”, „auto
+  mojego chlopaka, Kuby”), wyliczenie („dzieci Zuzanna (7 lat) i Antoni (4 lata)”, „mama Kasia, tata
+  Marek i brat Tomek”), imiona rodziców bez osoby przed nimi („syn Władysława i Genowefy”, „synu Jana
+  i Marii”), etykieta z dwukropkiem albo myślnikiem, jak w formularzach i notatkach („Dzieci: Oliwia
+  (8 lat), Filip (5 lat) i Tymon (2 lata)”, „Syn: Piotr, ur. 2015”, „dzieci – Oliwia i Filip”),
+  etykieta w czacie („Ciocia Grażka:”) i tekst angielski („my husband Paweł”, „our
+  daughter Zofia”). Takie imię zakrywa też dalsze wzmianki („Zuzanna” → „Zuzia”, „Zuzi”; „Antoni” →
+  „Antek”, „Antka”). Dawniej działało to tylko za zakrytą osobą („[…], syn Józefa i Marii”), więc
+  zmienia się wcześniejsze ustalenie, że „Mój syn Józef ma pięć lat” zostaje jawne. Jawne zostają
+  tytuły zakonne, patroni i postacie sakralne, czyli słowo pokrewieństwa z wielkiej litery w środku
+  zdania, po „im.” albo „św.” („Schronisko Brata Alberta”, „im. św. Brata Alberta”, „Dom Pomocy
+  im. Matki Teresy”, „Pielgrzymka do Ojca Pio”, „Matka Boża”, „Syn Marnotrawny”, „Jezus, syn Józefa
+  i Maryi”), nazwa w cudzysłowie („grupa »Babcia Halina«”, „serial »Ojciec Mateusz«”) i nazwa firmy
+  („Wnuczka Wiktoria Sp. z o.o.”). Tytuł zakonny przed znanym świętym albo imieniem z przydomkiem
+  zostaje jawny w każdym miejscu zdania, także na jego początku, po numerze listy, dwukropku, myślniku
+  i skrócie „pw.”, „pt.”, „tzw.”, „zob.” („Kościół pw. Matki Teresy z Kalkuty”, „film pt. Ojciec
+  Mateusz”, „Temat lekcji: Brat Albert i ubodzy”, „Matka Joanna od Aniołów to film”). Tak samo
+  tytuł pisany małą literą, jak każe ortografia („jak żyła matka Teresa z Kalkuty”, „Jak mawiał brat
+  Albert”, „ofiara, którą złożył ojciec Maksymilian”), chyba że przed nim stoi „mój”, „jej”, „naszego”
+  („mój brat Albert”, „moja matka Teresa” to krewni i znikają). Przydomek z „z” chroni tytuł tylko
+  przy świętym albo przy mieście spoza Polski, więc krewny z kraju, instytucji czy małego miasta
+  znika („Brat Piotr z Niemiec”, „Siostra Ewa z MOPS”, „Matka Anna z Wadowic”). Jawne zostaje też
+  imię papieża i króla z liczebnikiem po kilku imionach („Matka Jana Pawła II, Emilia”). Jawny zostaje
+  też Mikołaj z przedszkola („Wszystkim dzieciom Mikołaj przyniósł prezenty”, „Dziadek Mikołaj
+  odwiedził przedszkole”) i każde imię, które jest podmiotem zdania, a nie krewnym („Wczoraj synowi
+  Marek kupił rower”), oraz postacie historyczne i biblijne („Synowie Marka Aureliusza”,
+  „synem Dawida i Batszeby”, „Ewangelia mówi o Marii, matce Jakuba”). Na części
+  roboczej drugiej serii zakrytych danych jest 80,8% zamiast 78,9%, bez nowych nadmiarowych zakryć.
+- **Imię autora wiadomości w czacie, SMS-ach, komentarzach i transkrypcji znika, choć pismo nie
+  podaje nazwiska.** Imię, zdrobnienie albo imię z inicjałem przed dwukropkiem na początku wiersza
+  eksportu rozmowy to osoba: „[08:12] Kasia 🌸: dzwonili ze szpitala”, „12:04 Tomasz: cześć”,
+  „2026-10-01 09:14 Zbyszek: czynsz”, „[12.11.2026, 08:12:33] Ania: jestem”, „Konsultant (Marek):
+  dzień dobry”, w wątku komentarzy „↳ Szymon P.: offtop” i „↳ Admin Wiesia 🌻: bez wycieczek”,
+  w rozmowie bez godzin, w której mówcy wracają naprzemiennie („- Ola: będę o 5”, „- Ja: ok”,
+  „- Ola: super”). W eksporcie ze znacznikami czasu znika też samo nazwisko mówcy, gdy
+  wraca w kilku wierszach („[08:00] Nowak: kup chleb”). Takie imię zakrywa dalsze wzmianki w treści,
+  także małą literą („kasia a recepty?”), a z pseudonimami mówca i wzmianka mają tę samą etykietę.
+  Jawne zostają role mówcy („Konsultant:”, „KLIENT:”, „Bot:”, „System:”, „Ja:”, „InPost:”),
+  pokrewieństwo bez imienia („Mama:”, „Tata:”), etykiety pól i nagłówki („Od:”, „Temat:”, „Uwagi:”,
+  „Data:”, „PL:”/„EN:”), punkty porządku obrad z godziną („10:15 Przerwa: kawa”, „11:00 Kraków:
+  przejazd”), zdanie z wyrazem przed dwukropkiem („Marek powiedział: tak”) i imię będące zwykłym
+  słowem użyte raz („Hala: sportowa nr 2”, „- Kuba: wyspa na Karaibach”). Lista „Pole: wartość”
+  nie jest rozmową, nawet z emotikoną, powtórzoną etykietą albo godziną: lista imienin w e-mailu
+  („Temat: Imieniny w grudniu 🎉”, „Barbara: 4 grudnia”), wyjazdów („Jordan: marzec”), czytań
+  („Jan: 3,16”), magazynu („Hala: zamknięta”, „Brama: otwarta”, „Hala: remont”), scenariusz jasełek
+  („Józef: Nie ma miejsca w gospodzie.”) i program wycieczki („08:00 Kazimierz: zbiórka”, „15:00
+  Florian: brama”, „16:00 Kazimierz Dolny: powrót”, „18:00 Sylwester: bal”) zostają jawne, także gdy
+  etykieta wraca („08:00 Kazimierz: zbiórka”, „14:00 Kazimierz: obiad”, „08:00 Róża: otwarta”,
+  „20:00 Róża: zamknięta”). Rozmową jest dopiero wymiana, w której co najmniej dwie osoby mówią jak
+  w rozmowie (pytanie, powitanie, „tak”, „ok”), więc jawne zostają też dzielnice, sale i oddziały
+  („Kazimierz: zwiedzanie synagog”, „Podgórze: obiad”, „Kazimierz: kolacja”), plan przekazany
+  w cytacie e-maila („> Kazimierz: zwiedzanie”) i ewangeliści w planie lekcji religii, a zwykły czat
+  o parafii albo kolędzie („[10:00] Paweł: ślub w parafii”) zakrywa wszystkich mówców. Na
+  części roboczej drugiej serii zakrytych danych jest 82,7% zamiast 80,8%, bez nowych nadmiarowych zakryć.
+- **Imiona cudzoziemców z pism urzędowych znikają tak jak polskie.** Słownik zna częste imiona
+  ukraińskie, białoruskie i rosyjskie w zapisie polskim i paszportowym („matka Oksana Burek”,
+  „doręczono Ołeksandrowi Melnykowi”, „pełnomocnictwo dla Dmytra Kowalenki”, „OLEKSANDR MELNYK”,
+  „Svitlana Bondarenko”, „Iryna Kovalenko”), arabskie („Fatima Haddad”, „Ahmed”, „Mohammed”)
+  i indyjskie („Priya Raman”), a także polskie, których brakowało („Oliwier Zając”, „Eryk Wilk”,
+  „Daria Nowak”, „Marianna Zięba-Kot” w bloku adresata). Imię i nazwisko wietnamskie Parawan
+  rozpoznaje po układzie sylab, także z diakrytyką: „Małżonek: Tran Thi Hoa”, „ustanawiam Do Minh
+  Tuan”, „Nguyễn Văn Hùng”, „Thanh Nguyen” w podpisie. Jawne zostają słowa i nazwy zbieżne
+  z imionami: „na tarasie”, „ZIELONY TARAS”, „Omar Jumbo”, „pielgrzymka do Fatimy”, „Salve Regina”,
+  „Król Zygmunt August”, „Ho Chi Minh”, „Zatoka Ha Long”, „Do Hanoi lecieliśmy”, „obraz Van Gogha”.
+  Na części roboczej drugiej serii zakrytych danych jest 83,5% zamiast 82,7%, bez nowych
+  nadmiarowych zakryć.
+- **Zdarzenie zdrowotne konkretnej osoby znika razem z tym, czego dotyczy.** Zwolnienie lekarskie
+  z okresem („ma zwolnienie lekarskie do 27.11”, „przebywa na zwolnieniu lekarskim od 3 do 17 marca”,
+  „jestem na L4”, „(e-ZLA)”), zasiłek chorobowy („6 dni zasiłku chorobowego”), urlop dla poratowania
+  zdrowia, orzeczenie o niepełnosprawności, o stopniu niepełnosprawności z symbolem („umiarkowany
+  stopień niepełnosprawności, symbol 05-R (choroby narządu ruchu)”), o niezdolności do samodzielnej
+  egzystencji i o potrzebie kształcenia specjalnego, opinia o wczesnym wspomaganiu rozwoju, leczenie
+  i terapia z rodzajem („leczy się w poradni zdrowia psychicznego”, „przebywał na leczeniu
+  odwykowym”, „terapię integracji sensorycznej”, „korzysta z pomocy psychologa szkolnego”), pobyt
+  w szpitalu, sanatorium i izbie wytrzeźwień, zabieg z opisem („po operacji biodra”, „po zabiegu
+  usunięcia pęcherzyka żółciowego”, „po endoprotezie biodra”, „od czasu udaru”), ciąża z tygodniem
+  („w 34. tygodniu ciąży”, „24. tydzień ciąży, ciążę prowadzi lekarz”), uzależnienie od substancji
+  („jest uzależniony od amfetaminy”) i dializy. Rozpoznawane są też formy, którymi pisma opisują
+  leczenie najczęściej: imiesłów („jest od lat leczona psychiatrycznie”, „był operowany na
+  przepuklinę”, „była hospitalizowana w klinice kardiologii”, „jest dializowany”), zabieg nazwany
+  jednym słowem albo z narządem („przeszła mastektomię”, „przeszedł zabieg koronarografii”, „po
+  przeszczepie nerki”, „po amputacji nogi”, „po wszczepieniu rozrusznika serca”, „po poronieniu”),
+  pobyt na oddziale z jego specjalnością, w zakładzie leczniczym, na detoksie i turnusie
+  rehabilitacyjnym („kilkukrotnie trafiał do izby wytrzeźwień”), renta z tytułu niezdolności do
+  pracy, urlop zdrowotny, „niepełnosprawny w stopniu znacznym”, „pod stałą opieką neurologa”,
+  „przyjmuje sertralinę” oraz te same zdarzenia po angielsku w pismach dwujęzycznych („is on sick
+  leave until 30 November”, „underwent knee surgery”, „is 24 weeks pregnant”). „Nie może pracować”
+  i „wymaga opieki” po spójniku nie robią już z opisu faktu przepisu („przebywa na zwolnieniu
+  lekarskim i nie może pracować”). Zakrywana jest sama fraza: osoba, nazwa szpitala pisana wielką
+  literą i reszta zdania zostają. Na części roboczej drugiej serii zakrytych danych jest 87,3%
+  zamiast 83,5% (dane o zdrowiu: 74 wycieki zamiast 125), bez nowych nadmiarowych zakryć.
+- **Przepis, pouczenie i nazwa urzędu o zdrowiu zostają jawne.** „Zwolnienia lekarskie należy
+  dostarczyć w ciągu 7 dni”, „art. 92 Kodeksu pracy”, „Jeżeli pracownik przebywa na zwolnieniu…”,
+  „osobom ze znacznym lub umiarkowanym stopniem niepełnosprawności”, „Powiatowy Zespół do Spraw
+  Orzekania o Niepełnosprawności”, „Poradnia Leczenia Uzależnień prowadzi terapię”, terapeuta, który
+  „prowadzi terapię logopedyczną”, kadrowa, która „przyjmuje zwolnienia lekarskie”, pusta opcja
+  formularza „[ ] dziecko z orzeczeniem o niepełnosprawności”, a także „zwolniony z pracy”,
+  „zwolnienie warunkowe”, „po operacji bankowej” i „firma uzależniona od dostawcy”. Jawne zostają
+  też zdania, w których zdrowie jest tematem pisma, a nie zdarzeniem z życia osoby („zasady wypłaty
+  zasiłku chorobowego”, „Druk zwolnienia lekarskiego jest dostępny na stronie internetowej ZUS”,
+  „Mam pytanie o urlop dla poratowania zdrowia”, „kolejki do psychoterapii w powiecie”, „certyfikat
+  z psychoterapii”, „Czy dziecko posiada orzeczenie? TAK / NIE”), pismo, przesyłka i delegacja, które
+  „trafiły do szpitala”, pobyt „jako kapelan” albo „z wizytą”, „po zabiegu usunięcia drzew”, zdania
+  z „z udziałem”, „z działem płac”, „artykułem 92”, „rozdziałem 4”, pozycja przepisu, tabeli
+  i pakietu przetargu („Dz. U. z 2024 r., poz. 146”, „Pakiet 2, poz. 3: endoprotezy…”), podmiot
+  zbiorowy („Pracownicy obsługują e-ZLA”) i statystyka („Według danych GUS co trzeci pracownik…”).
+  Osoba w zdaniu musi być tą, której zdarzenie dotyczy: urzędnik z funkcją we wtrąceniu („Pani Anna
+  Nowak, kierownik działu kadr, przypomina, że zwolnienie lekarskie należy…”, „inspektor ZUS wydała
+  decyzję w sprawie renty”), lekarz, logopeda i fundator („Dr Anna Kowalska zajmuje się leczeniem
+  onkologicznym dzieci”, „wójt gminy ufundował pobyt w hospicjum dla samotnych mieszkańców”,
+  „udostępnia salę na mityngi AA”) i autor pisma w innej roli („Mam przyjemność poinformować…”,
+  „przesyłam mój raport o absencji chorobowej”, „od lat wydaję orzeczenia”, „Mam doświadczenie
+  w psychoterapii”) nie są pacjentem. Jawne zostają też pobyt w szpitalu w innym celu („zgłosił się
+  do szpitala z reklamacją”, „na rozmowę kwalifikacyjną”, „na staż”, „konserwator przebywał
+  w szpitalu od 8:00 do 16:00, naprawiając windy”, „Teczka Pana Nowaka leży w szpitalu”), imiesłów
+  przy rzeczy albo bez dopowiedzenia medycznego („Budynek był diagnozowany”, „Dron był operowany
+  przez strażaka”, „Teren był napromieniowany”, „został rehabilitowany po wyroku z czasów PRL”),
+  „zwolnienie dyscyplinarne”, bezosobowe „Na tym oddziale leczy się seniorów”, lek przy instytucji
+  („Hurtownia przyjmuje Ibuprom”) i angielskie „a stroke of genius”, „His access was disabled”,
+  „the hospital cafeteria”, „the disability pension reform”.
+- **Rozpoznanie choroby znika także wtedy, gdy choroby nie ma na liście Parawana.** Po słowach, którymi
+  pisma podają rozpoznanie („rozpoznano”, „zdiagnozowano u niej”, „ma rozpoznane”, „z rozpoznanym”,
+  „w wywiadzie:”, „stwierdzono u powoda”, „z powodu”, „ze względu na”, „leczenie”, „skarży się na”,
+  „stan po”) znika nazwa choroby do końca frazy, razem ze stopniem, dopowiedzeniem i kodem: „U
+  wnioskodawczyni rozpoznano toczeń rumieniowaty układowy”, „ma rozpoznane zaburzenia ze spektrum
+  autyzmu (6A02)”, „rozpoznała zespół hiperkinetyczny z zaburzeniami uwagi (F90.0)”, „z powodu
+  zaawansowanej choroby otępiennej”, „z powodu depresji nawracającej (F33.1)”, „z powodu
+  zwolnienia lekarskiego (grypa z powikłaniami)”, „uskarżała się na ból karku”. Nazwę choroby
+  Parawan poznaje też po budowie słowa („retinopatia”, „fibromialgia”, „mukowiscydoza”, „dysleksja”,
+  „niedowład”, „niedosłuch”, „demencja”), po skrócie („ADHD”, „PTSD”, „POChP”), po nazwisku w nazwie
+  zespołu („zespół Aspergera”, „zespół Downa”) i po określeniu choroby albo zaburzeń („choroba
+  nerek”, „zaburzenia integracji sensorycznej”, „opóźniony rozwój mowy”, „alergia na białko mleka
+  krowiego”). Choroba z listy znika przy konkretnej osobie także bez słowa medycznego („Pani Tereska
+  ma nadciśnienie tętnicze”, „mój syn ma autyzm”, „Babcia ma demencję”), uraz z wyrazem między nazwą
+  a częścią ciała i z końcem wiersza („złamanie trzonu kości piszczelowej lewej z przemieszczeniem”,
+  „stłuczenie odcinka szyjnego kręgosłupa”), wiersz pod nagłówkiem „Rozpoznanie” bez dwukropka
+  w opinii poradni, kod ICD-10 z podkategorią w nawiasie i kod ICD-11 po kotwicy („rozpoznanie
+  6A02”), a po angielsku „underwent treatment for acute lymphoblastic leukaemia” i „a moderate
+  hearing impairment”. Zakrywana jest sama nazwa: kotwica, osoba i reszta zdania zostają. Na części
+  roboczej drugiej serii zakrytych danych jest 90,1% zamiast 87,3% (dane o zdrowiu: 36 wycieków
+  zamiast 74), bez nowych nadmiarowych zakryć.
+- **Zespół ludzi, stwierdzenie urzędowe i przenośnia zostają jawne.** „Zespół Szkół nr 2”, „Zespół
+  Zarządzania Kryzysowego”, „Zespół Pieśni i Tańca”, „zespół Nowaka rozpoznał
+  problem”, „stwierdzono naruszenie przepisów”, „pęknięcie ściany nośnej”, „złamanie wału silnika”,
+  „wady prawne umowy”, „Świadek rozpoznała oskarżonego”, „Sąd rozpoznał apelację”, „ma rozpoznane
+  potrzeby mieszkańców”, „rozpoznano u niego talent muzyczny”, „z powodu podejrzenia popełnienia
+  przestępstwa”, „W wywiadzie dla radia”, „wywiad środowiskowy”, „nieobecny z powodu choroby”,
+  „skarży się na hałas”, „anemia inwestycyjna”, „alergia na biurokrację”, „diagnoza”, „prognoza”,
+  „nostalgia”, „sympatia”, „glukoza”, rzeka Odra i kod niebędący kodem choroby („sala A12”, „kod
+  rabatowy F32A”). Zostaje też choroba jako temat albo przy grupie („Wiele osób choruje na grypę”,
+  „Objawy grypy to gorączka i kaszel”, „Dzieci z autyzmem mają prawo…”, „leczenie cukrzycy
+  u dzieci”, „poradnia przyjmuje pacjentów z cukrzycą typu 1 i astmą”), specjalista od choroby
+  („specjalistka od autyzmu i dysleksji”) i obserwacja zachowania bez rozpoznania („jest drażliwy
+  i ma trudności z koncentracją”). „O każdej porze” nie robi już z opisu faktu przepisu. Słowa
+  z polskim rdzeniem przed „-oza” nie są chorobą: „przewozy szkolne”, „odpowiada za przewozy
+  pasażerskie”, „opóźnienia w przewozie”, „betonowozy i szambowozy”, „przymrozy w maju”. „Niedorozwój”
+  jest chorobą tylko z rodzajem albo narządem („niedorozwój umysłowy”, „niedorozwój kończyny
+  dolnej”), więc „niedorozwój sieci kanalizacyjnej”, „rynku pracy” i „komunikacji publicznej” w piśmie
+  gminy zostają. Zespół z nazwiskiem po „ma” jest chorobą tylko u osoby i bez dopowiedzenia
+  o pracy: „Syn ma zespół Aspergera” znika, a „Szkoła ma zespół Kubiaka do obsługi zawodów”, „Pan
+  Kowalski ma zespół Kowalczyka w dziale IT” i „ma zespół Nowaka do pomocy przy inwentaryzacji”
+  zostają.
+- **Rozpoznanie w przepisie, regule i statystyce zostaje jawne, także po słowie „rozpoznano”.**
+  Warunek („Jeżeli u dziecka zdiagnozowano autyzm, rodzice mogą złożyć wniosek”, „Gdy u pacjenta
+  rozpoznano gruźlicę, lekarz zgłasza…”), zdanie o każdym takim przypadku („Uczeń, u którego
+  rozpoznano dysleksję, może pisać egzamin dłużej”, „Pracownik, u którego stwierdzono chorobę
+  zawodową, ma prawo do odszkodowania”, „Każdy uczeń z rozpoznanym ADHD otrzymuje dostosowanie”,
+  „Osobom z rozpoznaną padaczką nie wydaje się prawa jazdy”) i dane zbiorcze („rozpoznano 312
+  przypadków gruźlicy”, „wzrost zachorowań na boreliozę”) nie mówią o konkretnej osobie. Ta sama
+  zasada działa dla chorób z listy („Jeżeli u dziecka zdiagnozowano astmę…”), a także dla roli
+  w liczbie pojedynczej z orzeczeniem przepisu: „Pracownik z rozpoznaną depresją może skorzystać
+  z urlopu”, „Pracodawca może skierować pracownika z rozpoznaną depresją na badanie”, „Kandydat
+  z rozpoznaną padaczką nie może uzyskać prawa jazdy”, „Dziecku z rozpoznanym ADHD przysługuje
+  pomoc”, „Pacjent z podejrzeniem udaru jest przewożony na SOR”. Przy osobie z nazwy, krewnym
+  i zdarzeniu choroba dalej znika („Syn z rozpoznanym autyzmem ma prawo do asystenta”, „Pracownik
+  z rozpoznaną depresją wrócił do pracy w marcu”). Zdarzenie zostaje
+  zakryte: „Gdy u syna zdiagnozowano autyzm, rozpoczęliśmy terapię”, „Pacjentka, u której rozpoznano
+  boreliozę, została przyjęta na oddział”. Skrót choroby w nazwie instytucji, firmy albo klubu
+  („IBS PAN”, „Instytut IBS”, „klub RZS Rzeszów”, „OCD Consulting”, „Fundacja AIDS Healthcare”)
+  i zespół ludzi z nazwiskiem w piśmie szpitala („pracuje w zespole Mazura na oddziale kardiologii”,
+  „członek zespołu Kubiaka w przychodni”) też zostają; zespół z nazwiskiem jest chorobą po słowie
+  rozpoznania albo przyczyny i przy osobie, która go ma („rozpoznano zespół Downa”, „ze względu na
+  zespół Aspergera”, „dziecko z zespołem Retta”).
+- **Lek, który osoba przyjmuje, znika także bez dawki i spoza słownika Parawana.** Po czasowniku
+  przyjmowania albo zlecenia („przyjmuje”, „zażywa”, „stosuje”, „bierze”, „otrzymuje”, „jest na”,
+  „włączył”, „ordynowano”, „zalecił mu”, „przepisano”) znika nazwa substancji, którą Parawan poznaje
+  po końcówce międzynarodowej nazwy leku (-pryl, -sartan, -olol, -statyna, -prazol, -azepam,
+  -mycyna, -paryna, -fenidat i podobne): „Chłopiec przyjmuje metylofenidat”, „lekarz włączył
+  metylofenidat”, „Podopieczny stosuje rysperydon”, „Wnioskodawczyni bierze kwetiapinę
+  i klonazepam”. Znika też insulina i metadon („chcą, żeby brała insulinę”, „Ojciec jest na
+  insulinie”, „Matka przyjmuje metadon”), grupa leków przy osobie („Małoletni otrzymuje leki
+  przeciwpadaczkowe”, „przyjmuje leki przeciwpsychotyczne (olanzapina)”, „zasiłek na zakup leków
+  przeciwpadaczkowych po wypisie ze szpitala”) i nazwa handlowa po postaci leku albo po „zażywa”
+  („zażywa tabletki Relanium”). Droga podania przy dawce wystarcza obok samej osoby albo samego
+  słowa medycznego i znika razem z dawką („Pan Nowak: Enoksaparyna 40 mg s.c. raz dziennie”,
+  „Pacjentowi ordynowano haloperydol 5 mg i.m.”), podobnie jak dawkowanie „2 razy w tygodniu”.
+  Kolejny lek w wyliczeniu po zakrytym leku znika razem z nim („na insulinie aspart i glarginie”,
+  „metformina 850 2x dziennie i insulina glargine wieczorem, kod recepty przyjdzie smsem”). Na
+  części roboczej drugiej serii zakrytych danych jest 90,7% zamiast 90,1% (dane o zdrowiu: 28
+  wycieków zamiast 36), bez nowych nadmiarowych zakryć.
+- **Lek znika też w szyku, przeczeniu i zapisie zlecenia z karty.** Przysłówek i droga podania przed
+  lekiem nie przerywają rozpoznania, a droga podania znika razem z lekiem („Brała wcześniej
+  fluoksetynę”, „Zalecono mu doustnie amoksycylinę”, „Pani X stosuje dopochwowo progesteron”).
+  Znika lek w zleceniu bezosobowym albo z drogą podania („Włączono enoksaparynę s.c. raz dziennie”,
+  „Odstawiono klonazepam z powodu senności”, „Lekarz ordynował furosemid dożylnie”), lek przed
+  czasownikiem („Kwetiapinę przyjmuje od roku”), po przeczeniu i czasowniku fazowym („nie przyjmuje
+  regularnie przepisanej olanzapiny”, „Przestała brać leki przeciwpsychotyczne”, „Matka nie podaje
+  dziecku leków przeciwpadaczkowych”), po recepcie i zaleceniu przyjmowania („Wypisano receptę na
+  rywaroksaban”, „zalecono przyjmowanie sertraliny”, „kontynuację leczenia pantoprazolem”), lek po
+  zakrytym leczeniu w całości („jest leczona lamotryginą”) i w wyliczeniu („przyjmuje kwas foliowy
+  i lewotyroksynę”, „wenlafaksynę, obecnie duloksetynę”). Parawan poznaje więcej substancji po
+  budowie nazwy (cefalosporyny „cef-”, „-wir”, „-mab”, „-nib”, „-zonid”, „-nizon”, sól „walproinian
+  sodu”, tamsulosyna, heparyna), grupę leków po przedrostku („leki przeciwretrowirusowe”, „tabletki
+  antykoncepcyjne”, „na sterydach wziewnych”, „leki na serce”), postać leku z substancją („inhalator
+  z salbutamolem”) i lek w zdaniu angielskim pisma dwujęzycznego („The patient is taking sertraline”,
+  „He is on antidepressants”).
+- **Postać leku bez nazwy leku i tekst o leku bez pacjenta zostają jawne.** Wyraz z wielkiej litery po
+  słowach „tabletki”, „kapsułki”, „syrop”, „lek” nie wystarcza: „Klient dostaje kapsułki Nespresso”,
+  „Dziecko bierze tabletki Haribo”, „Pan Nowak przyjmuje lek Ministerstwa jako dowód”. Potrzebna jest
+  nazwa leku albo kotwica medyczna. Dawkowanie z ChPL, ulotki, standardu, wykazu i załącznika
+  przetargowego zostaje („Dawkowanie według ChPL: Clexane 40 mg s.c. raz na dobę u dorosłych”), tak
+  samo zdanie o grupie i z raportu („Po wypisie ze szpitala pacjenci często otrzymują leki
+  przeciwzakrzepowe, wynika z raportu”, „Na oddziale pacjentom podawano heparynę”, „Statyny przyjmuje
+  co trzeci Polak”) i czasownik bez leku („przestał brać udział”, „podaje mu obiad”, „Zalecono mu
+  doustnie wodę”, „Wypisano receptę na nazwisko córki”).
+- **Czasownik bez leku, instytucja i obrót lekami zostają jawne.** „Urząd przyjmuje interesantów”,
+  „stosuje się przepisy”, „bierze udział w szkoleniu”, „Zalecono uzupełnienie wniosku”, „Podano do
+  publicznej wiadomości”, „Wójt przyjmuje Pana Kowalskiego”, „Sołtys otrzymuje Order Uśmiechu”,
+  „Dyrektor jest na urlopie”, „zażywa kąpieli słonecznych”, „p.o. dyrektora”, „bierze platynę
+  z magazynu”, „aspartam”. Zostaje lek przy instytucji i w obrocie („Szpital stosuje enoksaparynę
+  u pacjentów”, „Apteka przyjmuje recepty na leki przeciwdepresyjne”, „kradzież leków
+  psychotropowych z apteki przez Jana Kowalskiego”, „obrót lekami psychotropowymi”, „Refundacja leków
+  przeciwpadaczkowych dla dzieci”) i w zdaniu ogólnym („Wiele osób przyjmuje leki przeciwdepresyjne”,
+  „Kto przyjmuje insulinę, powinien mieć glukometr”, „Pacjent może przyjmować leki przeciwzakrzepowe
+  tylko pod kontrolą”).
+- **Komunikat o leku, nazwa ubezpieczyciela i sprawozdanie z badania zostają jawne.** Lek z dawką
+  „bez recepty” albo „na receptę” to kategoria leku z komunikatu GIF, ulotki czy ogłoszenia apteki
+  („Paracetamol 500 mg jest dostępny bez recepty”, „Lek Xanax 0,5 mg wydaje się wyłącznie na
+  receptę”). Recepta wskazuje lek osoby dopiero przy tej osobie albo jako jej recepta („kod recepty
+  przyjdzie smsem”, „odebrała e-receptę na Concor 5 mg”). Nazwa leku ze słownika znika tylko
+  w swojej odmianie, więc „Concordia” w piśmie o rencie czy odszkodowaniu zostaje („Concordia
+  odmówiła”, „Concordia Ubezpieczenia potwierdziła polisę”), a „na Concorze” dalej znika. Lek, po
+  którym stoi orzeczenie, zaczyna nowe zdanie i nie jest pozycją wyliczenia („Uczeń otrzymał
+  pochwałę, penicylina była tematem referatu”, „przyjmuje interesantów i petentów, statyny są
+  w szafce”). Zostaje też zlecenie bezosobowe w sprawozdaniu, kontroli i badaniu („W badaniu
+  klinicznym włączono metforminę u 300 pacjentów”, „W programie podawano sertralinę 140
+  uczestnikom”, „Kontrola NIK: w szpitalu podawano morfinę bez zlecenia”). Wszystkie leki
+  wyliczenia przy osobie znikają razem („bierze sertralinę, lamotryginę i insulinę”).
+- **Długie pismo bez kropek z wieloma nazwami chorób nie spowalnia już redakcji.** Wiersz z tysiącami
+  nazw chorób, tabela JSON z opisami zdrowia albo długi log z adresami IP i liczbami przechodzi kilka
+  do kilkunastu razy szybciej. Wynik redakcji jest taki sam jak wcześniej.
+- **Sygnatura wyroku NSA, WSA, Sądu Najwyższego, TK, KIO albo TSUE, na który urząd się powołuje,
+  zostaje jawna, także po „sygn. akt”.** W uzasadnieniu decyzji czy odpowiedzi na skargę AI widzi
+  teraz, które orzeczenie przywołano: „Stanowisko to potwierdza wyrok NSA z dnia 12 maja 2021 r.,
+  sygn. akt II OSK 2408/18” zostaje bez zmian (wcześniej „sygn. akt [ZNAK-SPRAWY]”), tak samo
+  „WSA w Poznaniu w wyroku …, sygn. akt II SA/Po 1001/19, stwierdził, że…”, „SKO w Rzeszowie odwołuje
+  się do wyroku NSA …”, „Kwestia ta była przedmiotem uchwały siedmiu sędziów NSA …, sygn. akt I FPS
+  1/20”, „(por. wyrok …, sygn. akt KIO 3871/23)”, wyrok TK „sygn. akt K 38/13” i TSUE „sygn. C-615/21”.
+  Zdanie musi zapowiadać cytat przed sygnaturą albo po niej („por.”, „podobnie”, „stanowisko”,
+  „przywołuje”, „według”, „jak wynika z”, „stwierdził, że”). Sygnatura sądu rejonowego, okręgowego
+  i apelacyjnego (C, Ns, Nsm, RC, K, W, U, GU, Co, Ca, ACa, AKa, AUa) dalej znika, bo wskazuje sprawę
+  konkretnej osoby: „Jak wskazał Sąd Rejonowy …, sygn. akt [ZNAK-SPRAWY], władza rodzicielska …”.
+  Znika też sygnatura NSA czy WSA, gdy w tym samym zdaniu jest osoba albo jej sprawa („…, sygn. akt
+  [ZNAK-SPRAWY], skarga Janiny Pawlak była niezasadna”, „Szanowny Panie, jak wskazał NSA …”,
+  rozstrzygnięcie, rola strony, „do akt sprawy przekazano m.in. wyrok …”), także po łamaniu wiersza
+  z PDF-u, oraz gdy zdanie obok łączy osobę z wyrokiem albo skargą („Pani Ewa Wróbel złożyła
+  skargę na decyzję. Jak wskazał WSA …, sygn. akt [ZNAK-SPRAWY], …”). Na trzeciej serii pism (część
+  robocza) nadmiarowych zakryć jest 53 zamiast 64, na drugiej 34 zamiast 37, bez nowych wycieków.
+- **Adres urzędu pod nagłówkiem z organem zostaje jawny, tak samo nazwa własna w nazwie
+  instytucji.** Pismo zaczynające się od „WÓJT GMINY KOBYLNICA⏎ul. Główna 20, 76-251 Kobylnica”
+  zostaje bez zmian (wcześniej „[ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]”), tak samo pod „STAROSTA
+  KŁODZKI”, „BURMISTRZ MIASTA I GMINY NIEPOŁOMICE”, „KIEROWNIK URZĘDU STANU CYWILNEGO W KIELCACH”,
+  „Państwowy Powiatowy Inspektor Sanitarny”, „Zastępca Wójta Gminy”, „Sekretarz Gminy”, „Komendant
+  Straży Miejskiej”, pod komórką („Sekcja Świadczeń Rodzinnych”) i pod adresatem w dwóch wierszach
+  („Dyrektor⏎Przedszkola Publicznego nr 33 w Rzeszowie⏎al. Tadeusza Rejtana 3”). Numer budynku
+  z półpauzą („ul. Koraszewskiego 7–9”) też liczy się jako adres siedziby. Organ z przymiotnikiem od
+  powiatu albo województwa to urząd, także gdy strona ma to samo nazwisko: „Pan [IMIĘ I NAZWISKO]
+  … oceni Starosta Słupski” (wcześniej „Starosta [IMIĘ I NAZWISKO]”), „do Wojewody Mazowieckiego”,
+  „Starosta Tarnowski”. Zostaje patron i kraina w nazwie („na Uniwersytecie Mikołaja Kopernika”,
+  „Stowarzyszenie Przyjaciół Ziemi Krzeszowickiej”, „Szkoła Podstawowa Marii Konopnickiej”: tylko
+  znana postać, bo „Pacjent Szpitala [IMIĘ I NAZWISKO]” czy „dyrektor Szkoły Podstawowej [IMIĘ
+  I NAZWISKO]” to osoba w roli przy placówce), miejscowość o brzmieniu nazwiska, gdy pismo
+  nazywa ją miejscowością („Szkoła Podstawowa … w Mielniku”, „Mielnik, 18 sierpnia 2026 r.”, „17-307
+  Mielnik”), i siedziba w zdaniu („Spółdzielni Mieszkaniowej „Słoneczny Stok” z siedzibą przy ul.
+  Henryka Sienkiewicza 54”, „w siedzibie przedszkola przy ul. Kasztanowej 14”). Dalej znika adres
+  pod stanowiskiem w firmie albo funkcją bez urzędu („Kierownik Budowy”, „Dyrektor Handlowy”,
+  „Inspektor Nadzoru”, „Kurator”), pod organem z nazwiskiem („Burmistrz Kowalski”, „Dyrektor Jan
+  Kowalski”), siedziba firmy osoby („Jan Kowalski, prowadzący działalność … z siedzibą przy ul.
+  Polnej 3”, „Szkoła Jazdy Lis z siedzibą przy [ADRES]”, „Wykonawca: Zakład Instalacyjny Kozioł
+  z siedzibą przy [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]”, „[IMIĘ I NAZWISKO], Zakład Usług
+  Remontowych z siedzibą przy [ADRES]”) oraz nazwisko po roli osoby („Sędzia Tarnowski”,
+  „Starosta Kowalski”). Siedzibę w zdaniu daje tylko nazwa urzędu, sądu, spółdzielni albo placówki
+  z numerem lub przymiotnikiem organu, bez osoby w tym samym zdaniu; adres kończący zdanie zostaje
+  jawny także wtedy, gdy następne zdanie wymienia stronę („… w siedzibie Urzędu Gminy w Baranowie
+  przy ul. Rynek 14. Pani [IMIĘ I NAZWISKO] przedstawi wniosek.”). Imię i nazwisko
+  urzędnika pod nagłówkiem dalej znika. Na trzeciej serii pism (część robocza) nadmiarowych zakryć
+  jest 31 zamiast 53, na drugiej 31 zamiast 34, bez nowych wycieków.
+- **Gmina, powiat czy urząd jako strona umowy zostaje jawna razem z adresem, NIP-em i REGON-em,
+  a druga strona dalej znika.** Umowa „zawarta pomiędzy: Gminą Pszczyna, ul. Rynek 2, 43-200
+  Pszczyna, reprezentowaną przez Zastępcę Burmistrza Pszczyny…” zostaje bez zmian (wcześniej „Gminą
+  [MIEJSCOWOŚĆ], [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]”), tak samo „Gminą Miasta Sanoka, Rynek 1,
+  38-500 Sanok, NIP 3871652842”, „Urzędem Miejskim w Kórniku, pl. Niepodległości 1, 62-035 Kórnik,
+  NIP …, REGON …”, „Powiatem Kłodzkim”, „Miastem Stołecznym Warszawa”, „Skarbem Państwa – Starostą
+  Kłodzkim” i „Gmina Kobylnica, ul. …, reprezentowana przez Wójta”. Druga strona umowy znika jak
+  dotąd: „a Panią [IMIĘ I NAZWISKO], [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], NIP [NIP]”, także firma
+  osoby („BK-CATERING [IMIĘ I NAZWISKO], [ADRES], …, NIP [NIP]”, „Szkoła Jazdy Lis, [ADRES]”). Sama
+  „Gmina Kobylnica” nad adresem albo przed nim, bez reprezentanta, dalej liczy się jako część adresu
+  osoby.
+- **Nazwa urzędu w środku wiersza też odsłania jego adres.** Adres zostaje jawny po dwukropku („Do
+  wiadomości: Zarząd Mienia Komunalnego, ul. Jana Klemensa Branickiego 3/5”, „Miejsce składania: Urząd
+  Miejski w Kartuzach, ul. Jana Pawła II 1”), po numerze punktu („4. Starostwo Powiatowe w Wieliczce,
+  Wydział Geodezji, Kartografii i Katastru, ul. Józefa Piłsudskiego 25”), po przecinku („pok. 12, Urząd
+  Miejski w Andrychowie, ul. Rynek 15”), za stanowiskiem urzędnika („[IMIĘ I NAZWISKO], inspektor ds.
+  oświaty, Urząd Gminy Mielnik, ul. Piaskowa 1”), w zdaniu („przekazano do Samodzielnego Publicznego
+  Zakładu Opieki Zdrowotnej w Kole, ul. Szpitalna 1”) i w kolumnie tabeli obok nazwy urzędu („| Urząd
+  Skarbowy w Gliwicach | ul. Góry Chełmskiej 15, Gliwice |”). Rynek bez „ul.” („Rynek 1”) też jest
+  adresem. Adres dalej znika, gdy przed nazwą stoi osoba bez stanowiska („Adresat: [IMIĘ I NAZWISKO],
+  Urząd Gminy Kobylnica, [ADRES]”), gdy osoba stoi w tym samym zdaniu („…, [ADRES], przez Pana [IMIĘ
+  I NAZWISKO]”), w kolumnie adresu ucznia obok szkoły i przy firmie osoby („Zakład Stolarski [IMIĘ
+  I NAZWISKO], [ADRES]”). Na trzeciej serii pism (część robocza) nadmiarowych zakryć jest 16 zamiast
+  31, na drugiej 20 zamiast 31, bez nowych wycieków.
+- **Kolegium odwoławcze, KRUS, straż miejska, biblioteka, centrum pomocy rodzinie i spółka komunalna
+  to też urzędy, w każdym przypadku.** Zostaje jawne „Sprawę skierowano do Samorządowego Kolegium
+  Odwoławczego w Siedlcach, ul. Piłsudskiego 38, 08-110 Siedlce” (wcześniej „… w [MIEJSCOWOŚĆ],
+  [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]”), tak samo „Kasa Rolniczego Ubezpieczenia Społecznego Oddział
+  Regionalny w Rzeszowie, ul. Partyzantów 12”, „Straż Miejska w Bydgoszczy, ul. Bernardyńska 14”,
+  „Gminna Biblioteka Publiczna w Jabłonnej”, „Powiatowe Centrum Pomocy Rodzinie w Sokółce”, „umowa
+  z Miejskim Przedsiębiorstwem Komunikacyjnym sp. z o.o., ul. Kasprzaka 2”, „Przedsiębiorstwo
+  Wodociągów i Kanalizacji”, „Pomiędzy Powiatem Bialskim, …, REGON 030237366” i „W imieniu Gminy
+  Miasta Radomia, ul. Kilińskiego 30, …, NIP 7962839123”.
+- **NIP i adres osoby obok urzędu dalej znikają.** Osoba na liście za urzędem nie dostaje jego
+  statusu: „Urząd Skarbowy w Kole, ul. Toruńska 10, [IMIĘ I NAZWISKO], NIP [NIP]”. Gabinet, studio,
+  zakład usługowy, dom weselny czy centrum urody z samą miejscowością po „w” to działalność osoby,
+  więc znika NIP i adres („Zakład Fryzjerski w Kole, [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], NIP
+  [NIP]”, „Gabinet Weterynaryjny w Kole, [ADRES], …”). Przy instytucie, ośrodku czy przychodni
+  z samą miejscowością znika NIP („Instytut Urody w Kole, ul. Polna 3, NIP [NIP]”). Jawny zostaje
+  NIP szkoły z numerem i spółki komunalnej. W tabeli adres znika, gdy
+  w wierszu przed urzędem stoi osoba albo kolumna nazywa się „Adres zamieszkania” czy „Adres do
+  korespondencji” („| [IMIĘ I NAZWISKO] | Urząd Gminy Mielnik | [ADRES], [KOD-POCZTOWY]
+  [MIEJSCOWOŚĆ] |”), a „mieszkaniec Gminy Kobylnica, [ADRES]” zostaje zakryty.
+- **Słowo z nazwy usługi komunalnej nie robi z firmy osoby urzędu.** Jawna zostaje tylko stała nazwa
+  jednostki, na której nazwa się kończy: „Zakład Gospodarki Komunalnej w Kole, ul. Polna 3”, „Zakład
+  Ubezpieczeń Społecznych Oddział w Kole”, „Przedsiębiorstwo Wodociągów i Kanalizacji”, „Ośrodek Sportu
+  i Rekreacji”, „Dom Kultury”, „Zakład Komunalny w Kole”. Firma z takim słowem w nazwie dalej znika
+  razem z adresem i NIP-em: „Zakład Usług Komunalnych „Czysto”, [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ],
+  NIP [NIP]”, tak samo „Centrum Kultury Fizycznej „Atleta””, „Studio Komunikacji Wizualnej”, „Przychodnia
+  Opieki Zdrowotnej „Rodzina”” i „Zakład Wodociągów i Kanalizacji Usługi”.
+- **Adres osoby w gminie przy jej pełnomocniku dalej znika.** „Skarżąca [IMIĘ I NAZWISKO] (Gmina
+  Kobylnica, [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]), reprezentowana przez adw. [IMIĘ I NAZWISKO]”
+  i „Skarżący [IMIĘ I NAZWISKO]; Gmina Kobylnica, [ADRES], reprezentowany przez radcę prawnego”: gmina
+  jest stroną tylko wtedy, gdy „reprezentowana” zgadza się z nią rodzajem i przed nią nie stoi osoba.
+- **Telefon, e-mail i rachunek urzędu zostają jawne, więc AI może je wpisać do odpowiedzi.** Numer
+  pod nagłówkiem urzędu („Urząd Gminy Firlej, ul. Szkolna 2, 21-136 Firlej⏎tel. 81 856 40 12,
+  podatki@firlej.example.pl”, wcześniej „tel. [TELEFON], [EMAIL]”), za etykietą („Sekretariat: tel.
+  22 123 45 67”, „Centrala, tel. …”, „tel. sekretariatu: …”, infolinia 800 i 801) i przy komórce urzędu
+  z numerem wewnętrznym („Referat Organizacyjny, tel. 61 817 04 11 wew. 34”) zostaje jawny, także
+  w kolejnych wystąpieniach w piśmie. Skrzynka funkcyjna zostaje w domenie urzędu albo szkoły
+  („sekretariat@sp2.kartuzy.pl”, „iod@um.gliwice.pl”), pod nagłówkiem, przy nazwie komórki („Do:
+  Wydział Finansowy <finanse@example.pl>”) i po „ogólny adres”. Rachunek przy nazwie urzędu też: „na
+  rachunek Gminy Firlej nr 78 1160 2202 6163 7497 8486 2063”, „na rachunek Starostwa Powiatowego
+  w Kłodzku nr …”, „na rachunek Miasta Gliwice nr …”, „na rachunek urzędu nr …” (wcześniej „nr
+  [NR-KONTA]”). Na trzeciej serii pism (część robocza) nadmiarowych zakryć jest 2 zamiast 16, na
+  drugiej 17 zamiast 20, bez nowych wycieków.
+- **Telefon, e-mail i rachunek osoby obok urzędu dalej znikają.** Komórka w nagłówku urzędu, imienny
+  adres w domenie urzędu („a.siwiec@starakamionka.example.pl”) i numer przy nazwisku pracownika bez
+  numeru wewnętrznego („Sprawę prowadzi: [IMIĘ I NAZWISKO], Referat Podatków, tel. [TELEFON]”,
+  „[IMIĘ I NAZWISKO], inspektor, Urząd Gminy Mielnik, ul. Piaskowa 1, tel. [TELEFON]”) zostają
+  zakryte. Numer pracownika zostaje zakryty także wtedy, gdy jego imię i nazwisko stoi w wierszu nad
+  komórką („Z poważaniem⏎[IMIĘ I NAZWISKO]⏎Inspektor⏎Wydział Komunikacji, tel. [TELEFON]”) albo za
+  numerem („tel. [TELEFON] ([IMIĘ I NAZWISKO])” pod numerem centrali, który zostaje jawny). Skrzynka
+  z nazwiskiem albo imieniem w domenie znika przy każdej nazwie skrzynki i w każdej domenie poza
+  gov.pl: „biuro@korepetycje-kowalska.edu.pl”, „biuro@przedszkole-nowak.pl”, „komunikacja@kowalski.pl”
+  i „biuro@annanowak.pl” dają „[EMAIL]”. Gmina o nazwie równej nazwisku („Urząd Gminy Mielnik,
+  ul. Piaskowa 1, 17-307 Mielnik, e-mail: gmina@mielnik.pl”) zostaje jawna, bo ta sama nazwa stoi
+  w nagłówku urzędu jako miejscowość. Rachunek strony („na rachunek
+  Rodzica nr [NR-KONTA]”, „na rachunek bankowy wnioskodawczyni nr [NR-KONTA]”, „na mój rachunek”),
+  indywidualny rachunek podatnika („na indywidualny rachunek Gminy Firlej nr [NR-KONTA]”, „…,
+  przypisany podatnikowi”) i rachunek wynajmującego czy dzierżawcy znikają jak dotąd.
+- **Skrzynka z nazwiskiem pisanym bez polskich znaków, subkonto podatnika i numer urzędnika z podpisu
+  nad adresem urzędu dalej znikają.** Domena zawsze jest bez ogonków, więc nazwisko i imię w niej
+  porównujemy z ich zapisem bez polskich znaków, a nazwisko spoza słownika rozpoznajemy po końcówce:
+  „Urząd Gminy Firlej, e-mail: sekretariat@wisniewski.pl”, „komunikacja@zielinski.pl”,
+  „biuro@lukaszkaminski.pl”, „biuro@krol.pl”, „biuro@przedszkole-wrzesniewska.pl” i
+  „biuro@sad-brzeczyszczykiewicz.pl” dają „[EMAIL]”, także przy członie szkoły, przedszkola czy sądu.
+  Skrzynka powiatu z jego nazwą („kancelaria@powiatleczynski.pl” pod nagłówkiem starostwa) zostaje
+  jawna. Subkonto i rachunek z zaimkiem adresata przy nazwie gminy znikają: „na rachunek Gminy Firlej
+  nr [NR-KONTA] (subkonto podatnika)”, „…: [NR-KONTA] – jest to Pana numer subkonta”, „Numer Pana
+  konta podatkowego: rachunek Gminy Firlej [NR-KONTA]”, „nr [NR-KONTA] (subkonto [IMIĘ I
+  NAZWISKO])”; „W odpowiedzi na Pana wniosek … na rachunek Gminy Firlej nr 78 1160 …” zostaje jawne.
+  Numer z osobą dalej w tym samym wierszu znika także za pokojem, godzinami czy wersalikami
+  („Wydział Komunikacji, tel. [TELEFON], pok. 12, [IMIĘ I NAZWISKO]”, „tel. [TELEFON] – [IMIĘ
+  I NAZWISKO]” zamiast jawnego numeru przy „ANNA NOWAK”), a numer urzędnika pod podpisem także nad
+  adresem z ulicą („Zbigniew Pawlak⏎Kierownik Referatu⏎Urząd Miasta Kalisza, ul. Główny Rynek 20,
+  tel. 62 765 43 21” daje „tel. [TELEFON]”). Nagłówek urzędu bez podpisu nad nim i numer z numerem
+  wewnętrznym zostają jawne.
+- **Numer uprawnień budowlanych, numer członka izby i wpis tłumacza, geodety czy rzeczoznawcy
+  znikają przy osobie tak jak PWZ.** Wcześniej w decyzji o pozwoleniu na budowę, operacie
+  i protokole zostawały jawne numery projektantów i biegłych. Teraz „mgr inż. Adam Kos,
+  uprawnienia nr SLK/0456/POOK/10, członek Śląskiej Okręgowej Izby Inżynierów Budownictwa nr
+  SLK/BO/7781/11” daje „mgr inż. [IMIĘ I NAZWISKO], uprawnienia nr [NR-UPRAWNIEŃ], członek …
+  nr [NR-UPRAWNIEŃ]”. Tak samo znikają „nr ewid. upr. SLK/1234/POOK/08”, „IARP nr 1234”,
+  „członek MOIIB pod nr MAP/BO/1234/05”, numer uprawnień geodety i rzeczoznawcy majątkowego
+  („uprawnienia nr 23011”, „świadectwo nadania uprawnień zawodowych nr 15873”, „nr upr. 23456”),
+  wpis tłumacza przysięgłego („nr wpisu na listę TP/0912/15”), biegłego rewidenta i doradcy
+  podatkowego, wpis radcy i adwokata za wtrąceniem („(Okręgowa Rada Adwokacka w Lublinie, nr
+  wpisu LUB/Adw/0457)”, „r. pr. Jan Kot (wpis GD-1287)”), świadectwo kwalifikacyjne, licencja
+  zawodowa i legitymacja studencka. Znika też numer w tabeli zespołu projektowego wklejonej
+  z Worda albo Excela (kolumna „Nr uprawnień” czy „Nr członka izby”, komórki rozdzielone TAB-em,
+  średnikiem albo kreską), numer zapisany wersalikami („UPRAWNIENIA BUDOWLANE NR PDK/0444/PWOS/12”),
+  numer przed podpisem po myślniku albo w nawiasie („nr 9876 (zakres 1)”, „… – mgr inż. Adrian
+  Łoś”), „nr członkowski”, „nr w rejestrze”, „numer na liście tłumaczy” i „(IARP 2231)” zaraz po
+  osobie. Numer musi stać przy zawodzie w tym samym wierszu, więc jawne zostają przepisy („art. 12
+  ust. 1”), decyzja i uchwała („Decyzja o nadaniu uprawnień nr 12/2024”, „Uchwała nr XII/123/2024
+  w sprawie uprawnień”), adres i komunikat izby („Okręgowa Izba Radców Prawnych, ul. Długa nr
+  125”, „Komunikat Okręgowej Izby Lekarskiej nr 12/2024”), dokument i wydarzenie izby bez osoby
+  („posiedzenie ORA nr 12/2024”, „szkolenie KIDP nr 2024/05”, „okólnik OIRP nr 3/2024”), wpis do
+  rejestru aptek, placówek czy OSK, wpis w dzienniku budowy („kierownik budowy – wpis nr 1235”),
+  uprawnienia pracowników urzędu do systemu i do podpisu („Naczelnik Wydziału Architektury
+  i Budownictwa, uprawnienia do podpisu nr 4/2025”, „Wydział Geodezji i Kartografii, uprawnienia
+  dostępu nr 3/2025”), umowa, świadectwo pracy i świadectwo charakterystyki energetycznej.
+  Kolumna „Nr uprawnień”, „Nr członka” albo „Uprawnienia” liczy się tylko w wierszu z osobą
+  albo zawodem, więc wykaz działek („Lp.⇥Nr ewidencyjny⇥Obręb⇥Powierzchnia”, „123/4”), środków
+  trwałych, pojazdów i jednostek OSP czy spółdzielni zostaje jawny. Jawne zostają też znak sprawy
+  i numer umowy w kształcie numeru uprawnień („Sprawa OR/0456/POW/24”, „Umowa nr
+  RPO/0123/POIS/2021”), dokument izby dla członków i nazwa komórki przed skrótem izby („Ankieta
+  dla członków PIIB nr 2/2026”, „Biuro Architektury i Planowania Przestrzennego (MOIA nr 12/2024
+  – stanowisko)”), stanowisko urzędu („Geodeta Powiatowy, uprawnienia nr 3/2025 do PZGiK”) i wpis
+  do ewidencji placówek. Na
+  trzeciej serii 50 pism (część robocza) wycieków jest 142 zamiast 158, bez nowych nadmiarowych
+  zakryć.
+- **Tabela wklejona z Worda jako tekst znika w każdym wierszu, także bez linii „---” pod
+  nagłówkiem.** Wcześniej tabelę z kreskami „|” Parawan rozpoznawał tylko w zapisie Markdown
+  (kreski na obu końcach i wiersz „---”), więc w protokole komisji rekrutacyjnej czy liście
+  kandydatów zostawały jawne daty urodzenia i część osób. Teraz „Lp. | Nazwisko i imię | Data
+  urodzenia | Pkt” z wierszem „3 | Czerniak Zofia | 22.11.2022 | 165” daje „3 | [IMIĘ I NAZWISKO] |
+  [DATA-URODZENIA] | 165”. Tak samo działają kolumny wyrównane spacjami (kopia z PDF-a), kolumna
+  nazwana rolą („Kandydat”, „Uczeń”, „Wnioskodawca”, „Pracownik”), nagłówek „Imię i nazwisko
+  ucznia” i telefon stacjonarny w kolumnie „telefon” („H. Gąsienica-Ryś | 33 874 12 09” →
+  „[IMIĘ I NAZWISKO] | [TELEFON]”). W tabeli, w której Parawan rozpoznał osobę, znika też osoba
+  z jednym inicjałem („H. Gąsienica-Ryś”) i osoba spoza słownika imion („Liu Wei”), ta druga tylko
+  w wierszu z PESEL-em o poprawnej sumie albo z datą urodzenia. Jawne zostają kolumny bez danych
+  osoby (punkty, kryteria, data decyzji, kwota, stanowisko) i podmioty w kolumnie osób, także na
+  liście „Imię i nazwisko albo nazwa” beneficjentów czy kontrahentów: „MOPS Lipno”, „Eko Trans”,
+  „Czyste Powietrze”, „Armii Krajowej”, „Hotel Zamek”, „F.H. Marex”, „Nadleśnictwo Lipno”,
+  „Samorządowe Kolegium Odwoławcze”. Stanowisko w kolumnie osób („Starszy Referent”, „Kierowca
+  Autobusu”, „Tłumacz Przysięgły”, „Sołtys Zalesia”) zostaje jawne także w tabeli CSV, gdzie
+  wcześniej „Sołtys Zalesia;dieta” pod „Nazwisko i imię” dawało „[IMIĘ I NAZWISKO];dieta”, a numer
+  telefonu w wierszu stanowiska zostaje razem z nim. Pod nagłówkiem roli („Wnioskodawca”,
+  „Najemca”, „Beneficjent”, „Podatnik”, „Uczestnik”) w urzędzie stoją też firmy i organizacje,
+  więc osobę potwierdza tam dopiero komórka złożona z samych imion, nazwisk ze słownika
+  i inicjałów: „Kwiaciarnia Róża;lokal 4;54 288 33 12”, „Pensjonat Agata”, „Chór Cecylia”, „Bar
+  Mleczny Basia” zostają jawne, a z nimi telefon podmiotu, a w „F.H.U. Marex Jan Nowak” znika
+  tylko „Jan Nowak”. Nazwisko utworzone od funkcji w szyku „Nazwisko Imię” znika w całości:
+  „Wójtowicz Natan;02070803628” i „Sołtysik Teofil” dają „[IMIĘ I NAZWISKO]”, nie „[IMIĘ
+  I NAZWISKO] Natan”, a w wierszu z datą urodzenia także „Marszałek Wit” i „Kanclerz Iwo”. Tabela
+  bez kolumny osoby („Lp. | Nazwa podmiotu | Kwota”) się nie zmienia. Na
+  trzeciej serii 50 pism (część robocza) wycieków jest 126 zamiast 142, bez nowych nadmiarowych
+  zakryć.
+- **Inicjały pracownika w metryce i rejestrze z EZD znikają: w dekretacji, w kolumnie „Prow.”
+  i w legendzie skrótów.** Wcześniej „Dekretacja: Kierownik Referatu → MK” zostawiało inicjały
+  inspektor, choć jej pełne imię i nazwisko stało wiersz wyżej przy „Prowadzący:”, a w rejestrze
+  korespondencji wklejonym z Excela kolumna „Prow.” z „ES” i „TB” zostawała jawna razem z legendą
+  „Skróty w kolumnie Prow.: ES – Ewa Szołtysek”. Teraz to „Dekretacja: Kierownik Referatu →
+  [IMIĘ I NAZWISKO]”, „… | [IMIĘ I NAZWISKO]” w kolumnie i „[IMIĘ I NAZWISKO] – [IMIĘ
+  I NAZWISKO]” w legendzie. W kolumnie „Prow.”, „Prowadzący”, „Referent” albo „Załatwiający”
+  inicjały znikają tylko wtedy, gdy w piśmie jest osoba o tych inicjałach, bo w wykazach
+  i rejestrach stoi tam często organ albo komórka prowadząca: „Prowadzący | US”, „Prowadzący |
+  GK” przy znaku „GK.6220.1.2026” i „Referent | UM” zostają bez zmian. Bez osoby w piśmie dwie
+  wersaliki zakrywa tylko kolumna „Osoba prowadząca”, „Pracownik prowadzący” albo „Pracownik”,
+  w której wszystkie komórki to inicjały, bez skrótu instytucji i bez symbolu komórki z tego
+  pisma; „ND”, „BD” i „TAK” zostają. Po strzałce dekretacji, po „Dekretacja:”, „Zadekretowano
+  do:”, „Przydzielono do:”, „wg właściwości:” i w kolumnach „Ref.” i „Dekretacja” inicjały,
+  także z kropkami, znikają tylko przy osobie z pisma, bo tam stoi też komórka albo organ:
+  „Dekretacja: Sekretarz → OR → OR.I, wg właściwości: WOŚ/RGK” i „Przekazano wg właściwości:
+  U.S.C.” zostają bez zmian. Jawne zostają też symbole JRWA, kategorie archiwalne („A”, „B5”,
+  „BE10”), skróty ustaw („KPA”, „K.P.A. art. 35”, „KC”, „UODO”) i strzałka poza dekretacją
+  („Warszawa → Kraków”, „etap I → II”). Symbol komórki z tego pisma wygrywa ze stroną o tych
+  samych inicjałach: przy wnioskodawcy Grzegorzu Kowalu i znaku „GK.6220.1.2026”
+  „Dekretacja: Burmistrz → GK”, kolumna „Referent | GK” i „Kierownik Referatu GK – [IMIĘ
+  I NAZWISKO]” w legendzie zostawiają symbol referatu jawny. Skrót jednostki w polu „Sprawę
+  prowadzi:” albo „Referent:” też zostaje: „Sprawę prowadzi: Z.G.K. w Pucku” i „Referent: W.Z.D.
+  (Wojewódzki Zarząd Dróg)” bez zmian, a „Sprawę prowadzi: A.S., tel. wew. 21” daje
+  „[IMIĘ I NAZWISKO], tel. wew. 21”. Na
+  trzeciej serii 50 pism (część robocza) wycieków jest 116 zamiast 126, bez nowych nadmiarowych
+  zakryć.
+- **Numer prawa jazdy, dowodu, paszportu, KRS i aktu stanu cywilnego znika także wtedy, gdy między
+  nazwą dokumentu a numerem stoi wtrącenie.** Wcześniej „prawo jazdy kat. AM, B nr 44411/23/1586”,
+  „Prawo jazdy okazał, nr 18957/11/1031”, „dowodem osobistym wydanym przez Prezydenta Miasta
+  Krakowa nr ABC123456”, „paszport (ważny do 2030 r.) nr AB1234567”, „KRS (Sąd Rejonowy dla
+  Krakowa-Śródmieścia, XI Wydział Gospodarczy) pod numerem 0000123456” i „odpisu aktu urodzenia
+  dziecka, nr aktu 0612/2021” zostawiały numer jawny. Teraz to „prawo jazdy kat. AM, B nr
+  [PRAWO-JAZDY]”, „… nr [NR-DOWODU]”, „… nr [NR-PASZPORTU]”, „pod numerem [KRS]” i „nr aktu
+  [NR-AKTU-USC]”. Wtrąceniem może być kategoria, organ wydający, data ważności w nawiasie albo
+  czasownik, w jednym zdaniu i bez cyfr poza nawiasem, a numer musi stać po „nr” albo „numer”
+  i mieć kształt danego dokumentu. Numer aktu w rejestrze stanu cywilnego
+  („1661011/00/AU/1995/001061”) znika po samym kształcie, także po „akt otrzymał numer”. Jawne
+  zostają numery innych dokumentów i spraw we wtrąceniu („Prawo jazdy kategorii B wydaje starosta
+  …, wniosek nr 123/2024”, „zatrzymał dokument prawa jazdy za pokwitowaniem nr 0318842”, „notatkę nr
+  123/2026”), przepis o dokumencie („ustawą o dowodach osobistych”) i nazwa punktu („Punkt
+  Paszportowy nr 2”). Jawne zostają też dane urzędu po nazwie dokumentu: gdy tuż przed „nr” stoi
+  zwykły rzeczownik, numer należy do niego („Wnioski o wydanie prawa jazdy przyjmuje Wydział
+  Komunikacji, pokój nr 1011.”, „sala nr 2014”, „stanowisko nr 1204”, „JRWA symbol nr 5430”,
+  „skrytka nr ESP12345”, „Dowód osobisty odbierzesz w Urzędzie Miasta, okienko nr …”). Tak samo
+  wielką literą i po organie wydającym („Prawo jazdy wydane przez Starostę Kartuskiego, Wydział
+  Komunikacji, Pokój nr 2107.”, „…, Stanowisko nr 1204”, „Kancelaria Ogólna nr 1014”, „KRS prowadzony
+  przez Sąd Rejonowy …, XI Wydział Gospodarczy, Sala nr …”) i przy lokalu opisanym imiesłowem
+  („Odbiór prawa jazdy: stanowisko czasowo zamknięte, nr 1204 czynne od 8:00.”).
+- **Imię, nazwisko i adres w formularzu spłaszczonym do jednego wiersza i w prozie znikają.**
+  Wcześniej z deklaracji wklejonej jako tekst „D.2 Imię ojca: Leon   Imię matki: Gertruda” dawało
+  „D.2 Imię ojca: [IMIĘ I NAZWISKO] matki: Gertruda”, a „Miejscowość: Kiełpino   Ulica: Kartuska
+  Nr domu: 41A” zostawało jawne. Teraz każde pole wiersza dostaje swoją maskę, także po średniku
+  i z numeracją części deklaracji („D.2”, „1.4.”): „Imię ojca: [IMIĘ I NAZWISKO]   Imię matki:
+  [IMIĘ I NAZWISKO]”, „Ulica: [ADRES]   Nr domu: [ADRES]”, „Imię: [IMIĘ I NAZWISKO] Nazwisko:
+  [IMIĘ I NAZWISKO] PESEL: [PESEL]”, „Imiona rodziców: [IMIĘ I NAZWISKO], [IMIĘ I NAZWISKO]”. W
+  prozie znika wartość po nazwie pola osoby: „nazwisko rodowe w akcie: [IMIĘ I NAZWISKO].”,
+  „nazwisko rodowe matki „[IMIĘ I NAZWISKO]””, zmiana nazwiska „z „[IMIĘ I NAZWISKO]” na „[IMIĘ
+  I NAZWISKO]””, „o nadanie dziecku imienia [IMIĘ I NAZWISKO].” i „zapamiętałam jedynie imię:
+  [IMIĘ I NAZWISKO].”. Jawne zostają puste pola („Imię: ………”), pouczenia („Imię i nazwisko: należy
+  wpisać drukowanymi literami.”, „należy podać imię i nazwisko oraz adres”), urząd albo rola pod
+  etykietą osoby w jednym wierszu („Nazwisko: Urząd Skarbowy   Adres: …”), Skarb Państwa pod
+  etykietą nazwiska („Działka nr 123/4, obręb Bodzentyn, nazwisko właściciela: Skarb Państwa.”,
+  „Nazwisko: Skarb Państwa”), patron („nadać szkole imię Jana Pawła II”, „Nagroda imienia Zofii”,
+  „Dom Kultury imienia Juliana.”, „Muzeum imienia Stanisława.”), także w cudzysłowie, po dwukropku
+  i przy zmianie patrona w uchwale („Nadaje się rondu imię „Józefa”.”, „Szkoła nosi imię: Józef.”,
+  „Zmiana imienia patrona z „Stanisław” na „Jan”.”), zmiana nazwy ulicy („z „Polna” na „Lipowa””)
+  i firma pod etykietą osoby albo podmiotu („Inwestor, nazwisko lub nazwa: Budimex.”). Imię bez dwukropka znika tylko w zdaniu o nadaniu albo zmianie imienia osoby, w formie
+  słownikowej („o zmianę imienia [IMIĘ I NAZWISKO].”, „Wpisano imię [IMIĘ I NAZWISKO].”). Numer pola
+  deklaracji przed kolejną etykietą należy do etykiety: „1.1. Imię: Bożydar 1.2. Nazwisko: Pękala” daje
+  „1.1. Imię: [IMIĘ I NAZWISKO] 1.2. Nazwisko: [IMIĘ I NAZWISKO]”, a „D.2 Imię: Jan  D.3 Nazwisko:
+  Kowalski  D.4 Imię ojca: Piotr” daje „D.2 Imię: [IMIĘ I NAZWISKO]  D.3 Nazwisko: [IMIĘ I NAZWISKO]
+  D.4 Imię ojca: [IMIĘ I NAZWISKO]”. Na
+  trzeciej serii 50 pism (część robocza) wycieków jest 104 zamiast 116, bez nowych nadmiarowych
+  zakryć.
+- **Temat szkolenia, programu, kampanii i ulotki zostaje jawny także przy osobie.** W wykazie
+  szkoleń pracowników „Jan Kowalski | profilaktyka chorób nowotworowych” dawało „[IMIĘ I NAZWISKO]
+  | profilaktyka chorób [DANE O ZDROWIU]”, a „akcja profilaktyczna „Stop cukrzycy”” i „ulotki
+  o profilaktyce udaru mózgu i nadciśnienia” traciły nazwę choroby. Teraz po słowie tematu
+  (profilaktyka, szkolenie, kurs, warsztaty, program, kampania, prelekcja, konferencja, ulotka,
+  akcja, pogadanka, webinar, badania przesiewowe) nazwa choroby zostaje: „[IMIĘ I NAZWISKO] |
+  profilaktyka chorób nowotworowych”, „Warsztaty o uzależnieniach od alkoholu”, „Konferencja:
+  choroba Alzheimera w opiece społecznej”, „zgłosiła się do programu badań przesiewowych w kierunku
+  raka piersi”. Fakt o osobie dalej znika: „po drugim kursie [DANE O ZDROWIU] z powodu [DANE
+  O ZDROWIU]”, „profilaktykę przeciwzakrzepową z powodu [DANE O ZDROWIU]”, „W ramach programu badań
+  przesiewowych zdiagnozowano u niej [DANE O ZDROWIU]”, „Podczas szkolenia Pan [IMIĘ I NAZWISKO]
+  doznał [DANE O ZDROWIU]”, a program lekowy, warsztaty terapii zajęciowej i akcja serca nie są
+  tematem. Tematem nie jest też leczenie w złożeniu, opieka i grupa chorych: „zakończyła kurs
+  [DANE O ZDROWIU] osy” (immunoterapii alergii na jad), „jest objęta programem kompleksowej opieki
+  [DANE O ZDROWIU]”, „uczestniczy w warsztatach dla osób [DANE O ZDROWIU]”, „chodzi na warsztaty
+  z [DANE O ZDROWIU]”, a „Kampania dla kobiet o profilaktyce raka piersi” zostaje jawna. Przyczyna
+  albo stan w środku opisu zajęć też przerywa temat: „kończy kurs ćwiczeń usprawniających [DANE
+  O ZDROWIU]” (po udarze mózgu), „chodzi na warsztaty ruchowe przy [DANE O ZDROWIU]”, „kurs zabiegów
+  w leczeniu [DANE O ZDROWIU]”, „programem żywienia klinicznego w trakcie [DANE O ZDROWIU]”.
+  Z „o” albo odbiorcami bez choroby temat zostaje: „prelekcja o życiu po udarze mózgu”, „kurs dla
+  opiekunów przy chorobie Parkinsona”, a „kurs pierwszej pomocy przy zawale serca” w wykazie szkoleń
+  jak dotąd.
+- **Opis sprawności osoby w wywiadzie, wniosku i karcie DPS znika jako dana o zdrowiu, a opieka
+  nad dzieckiem, zabytkiem czy ogrodem zostaje jawna.** Wcześniej „Pani [IMIĘ I NAZWISKO] porusza
+  się na wózku inwalidzkim”, „porusza się po domu przy balkoniku”, „Pan [IMIĘ I NAZWISKO] jest
+  osobą leżącą” i „wymaga karmienia przez gastrostomię” zostawały jawne, choć mówią o chorobie albo
+  niepełnosprawności tej osoby. Teraz znika sama fraza, a osoba i reszta zdania zostają: „Pani
+  [IMIĘ I NAZWISKO] [DANE O ZDROWIU] po urazie rdzenia kręgowego”, „Ojciec wnioskodawczyni [DANE
+  O ZDROWIU] i [DANE O ZDROWIU]” (chodzi o kulach łokciowych, wymaga pomocy przy kąpieli),
+  „Podopieczny jest [DANE O ZDROWIU]” (niesamodzielny w zakresie samoobsługi). Tak samo znika
+  poruszanie się z trudem przy pomocy kuli albo o dwóch kulach, wózek inwalidzki także elektryczny,
+  osoba leżąca, przykuta do łóżka i niesamodzielna, pomoc w myciu, ubieraniu i poruszaniu się,
+  „nie jest w stanie samodzielnie się ubrać ani umyć”, karmienie przez PEG lub sondę, stomia,
+  pieluchomajtki, cewnik i tlenoterapia domowa przy osobie, która je ma, nosi albo z nich korzysta
+  („Pan [IMIĘ I NAZWISKO] ma założony [DANE O ZDROWIU]”, „korzysta z [DANE O ZDROWIU]”), osoba
+  niewidoma i niesłysząca, „nie słyszy i nie
+  mówi”, wynik w skali Barthel („w skali Barthela uzyskał 30 pkt”) i „znacznie ograniczona zdolność
+  do samodzielnej egzystencji”. Sama „stała opieka” znika tylko przy chorobie, urazie albo innej
+  danej o zdrowiu w tym lub poprzednim zdaniu („Pan [IMIĘ I NAZWISKO] po wylewie [DANE O
+  ZDROWIU]”). Jawne zostają: „Zabytek wymaga stałej opieki i nadzoru”, „Ogród wymaga stałej opieki
+  ogrodnika”, „Dziecko w wieku 2 lat wymaga stałej opieki”, „Pani … potrzebuje stałej opieki nad
+  dziećmi w czasie pracy zmianowej”, „Wnioskodawca wymaga pomocy osób trzecich przy remoncie
+  mieszkania”, „wymaga pomocy przy kąpieli dzieci”, „Pan … porusza się na wózku golfowym”, „Babcia
+  chodzi z laską trekkingową po górach”, „Pan … jest osobą niesamodzielną finansowo”, „Dziecko nie
+  chodzi samodzielnie, bo ma dopiero 10 miesięcy”, „Pan … nie wstaje z łóżka przed dziesiątą”,
+  „Pracownik nie mówi i nie chodzi na zebrania”, „pomaga osobom niewidomym w zakupach”, kategorie
+  skali oceny („| 2 | porusza się przy balkoniku | 1 |”) oraz definicje, warunki i opis procedury
+  („Lekarz orzecznik ocenia, czy badany wymaga stałej opieki”, „Gdy podopieczny wymaga karmienia
+  przez PEG, opiekun przechodzi szkolenie”). Jawny zostaje też sprzęt jako towar albo przedmiot
+  pracy („Przedmiot zamówienia: worki stomijne i cewniki urologiczne”, „odpowiada za zakup
+  pieluchomajtek”, „Pielęgniarka … wymienia cewniki mieszkańcom”, „przekazał tlenoterapię domową do
+  rozliczenia z NFZ”) oraz niesamodzielność poza domem bez choroby w pobliżu: „Uczeń nie potrafi
+  samodzielnie funkcjonować w grupie rówieśniczej”, „nie jest w stanie samodzielnie wstać rano bez
+  budzika”, „wymaga pomocy w poruszaniu się po systemie e-PUAP”, „nie porusza się samodzielnie po
+  Warszawie, bo nie zna miasta”. Przestrzeń domowa dalej znika razem z frazą: „Matka [DANE
+  O ZDROWIU] po mieszkaniu” (nie jest w stanie samodzielnie poruszać się), „Ojciec [DANE O ZDROWIU]
+  z łóżka”. Na trzeciej serii 50 pism (część robocza) wycieków
+  jest 97 zamiast 104 (danych o zdrowiu 46 zamiast 53), bez nowych nadmiarowych zakryć.
+- **Niepełnosprawność dziecka, męża czy matki i symbol przyczyny z orzeczenia znikają, a nazwa
+  zespołu orzekającego, ustawa i program PFRON zostają jawne.** Wcześniej „samotnie wychowuje syna
+  z niepełnosprawnością (MPD)”, „Ze względu na niepełnosprawność dziecka” i „orzeczenie … zaliczające
+  syna do osób niepełnosprawnych” zostawały jawne, a przy „orzeczeniu o umiarkowanym stopniu
+  niepełnosprawności (symbol przyczyny 05-R)” znikał sam stopień, a symbol zostawał. Teraz: „syna
+  [DANE O ZDROWIU]”, „Ze względu na [DANE O ZDROWIU] dziecka”, „zaliczające syna [DANE O ZDROWIU]”,
+  „Syn wnioskodawczyni jest [DANE O ZDROWIU] od urodzenia”, „Mąż jest [DANE O ZDROWIU]” (osobą
+  niepełnosprawną ruchowo), „orzeczenie o [DANE O ZDROWIU], wydano 23 września 2026 r.” (stopień
+  razem z symbolem 10-N w jednej masce). Znika też przymiotnik przed krewnym i w dopowiedzeniu:
+  „opiekuje się [DANE O ZDROWIU] matką”, „sprawuje opiekę nad [DANE O ZDROWIU] synem”, „jej
+  dziecko jest [DANE O ZDROWIU]”, „Wnuk jest [DANE O ZDROWIU]” (dzieckiem niepełnosprawnym), „Mąż
+  Pani …, [DANE O ZDROWIU], nie pracuje” (niepełnosprawny ruchowo), „ma [DANE O ZDROWIU]”
+  (orzeczoną niepełnosprawność), „został zakwalifikowany [DANE O ZDROWIU]”, „uznano [DANE
+  O ZDROWIU]” (za osobę niepełnosprawną). Symbol przyczyny znika razem z frazą orzeczenia także po
+  „z symbolem”, „o symbolu” i „symbole przyczyny”: „Dziecko ma [DANE O ZDROWIU]” zamiast „Dziecko ma
+  [DANE O ZDROWIU] z symbolem 12-C”. Poza frazą znika z opisem po myślniku i kilka naraz:
+  „(symbol przyczyny niepełnosprawności [DANE O ZDROWIU]; dziecko w spektrum…)”, pola „Symbol
+  przyczyny niepełnosprawności: [DANE O ZDROWIU]” (05-R, 10-N), „Przyczyna niepełnosprawności:
+  [DANE O ZDROWIU]” i „Stopień niepełnosprawności: [DANE O ZDROWIU]”. Wskazanie z orzeczenia
+  o konieczności stałej opieki albo współudziału opiekuna w leczeniu dziecka znika razem ze stanem,
+  z którego wynika: „Orzeczenie zawiera wskazanie [DANE O ZDROWIU] syna”. Orzeczenie z numerem
+  albo datą („nr 214/2025”, „z dnia 3 lipca 2024 r.”) mówi o osobie także obok cytatu przepisu:
+  „orzeczenie nr 214/2025 o potrzebie kształcenia specjalnego ze względu na [DANE O ZDROWIU]”;
+  data wydania, termin ważności z datą i „bezterminowe” tylko poza zdaniem przepisu. Jawne zostają
+  przepis, warunek świadczenia, statystyka i tytuł, także z symbolem albo terminem bez daty:
+  „Osoba posiadająca orzeczenie o umiarkowanym stopniu niepełnosprawności z symbolem 05-R może
+  otrzymać kartę parkingową”, „W 2025 r. wydano 412 orzeczeń o umiarkowanym stopniu
+  niepełnosprawności, w tym 37 z symbolem 02-P”, „Tabela 3. … według symbolu przyczyny: 05-R –
+  120, 10-N – 44”, „orzeczeniem o znacznym stopniu niepełnosprawności, ważnym do dnia złożenia
+  wniosku”, „Orzeczenie … może być bezterminowe”, „wydane dnia 1 stycznia 1998 r. lub wcześniej
+  zachowuje ważność”, „Wskazanie konieczności stałego współudziału … zawiera orzeczenie wydane po
+  ukończeniu przez dziecko 3 lat”, „Poradnik dla rodziców: niepełnosprawność dziecka a świadczenia
+  rodzinne”, „Rodzic niepełnosprawnego dziecka może otrzymać świadczenie”. Jawne zostają też:
+  „Powiatowy Zespół do Spraw Orzekania o Niepełnosprawności”, „ustawa o rehabilitacji zawodowej
+  i społecznej oraz zatrudnianiu osób niepełnosprawnych”, „Program PFRON „Aktywny samorząd””, „Dzień
+  Osób z Niepełnosprawnościami”, objaśnienie kodu („Symbol przyczyny niepełnosprawności 05-R oznacza
+  upośledzenie narządu ruchu”, „np. 05-R lub 10-N”), kod bez słowa „symbol” albo w innym kształcie
+  („Sala 05-R”, „element 06-E”), „Dziecko z niepełnosprawnością ma prawo do bezpłatnego transportu”,
+  „rodzin dzieci z niepełnosprawnościami”, „w przypadku niepełnosprawności dziecka wymiar urlopu
+  wydłuża się” w cytacie Kodeksu pracy oraz „Świadczenie pielęgnacyjne przysługuje, jeżeli
+  orzeczenie zawiera wskazanie konieczności stałej … opieki”. Przymiotnik przed krewnym znika
+  tylko wtedy, gdy w zdaniu jest osoba poza samym krewnym (imię i nazwisko, Pan, Pani,
+  wnioskodawczyni, „jej”, dorosły krewny, „opiekuję się”, „ze względu na … ustalono”), więc
+  kryterium, przepis, program, tytuł i opis grupy zostają jawne: „Kryterium: wychowywanie
+  niepełnosprawnego dziecka – 10 punktów”, „Przetarg: dowóz niepełnosprawnego dziecka…”, „Zasiłek
+  pielęgnacyjny dla niepełnosprawnego dziecka wynosi 215,84 zł”, „Program jest przeznaczony dla
+  osób opiekujących się niepełnosprawnym dzieckiem” (także w notatce z nazwiskiem w zdaniu obok),
+  „Konferencja „Niepełnosprawny syn, niepełnosprawna córka…””, „Beneficjentem projektu jest
+  niepełnosprawny mieszkaniec gminy”, „W klasie jest niepełnosprawne dziecko” i „W polu 12 wpisz,
+  czy dziecko jest niepełnosprawne (tak/nie)”. Na trzeciej serii 50 pism (część
+  robocza) wycieków jest 83 zamiast 97 (danych o zdrowiu 32 zamiast 46), bez nowych nadmiarowych
+  zakryć.
+- **Dane o zdrowiu osoby podanej imieniem w odmianie znikają: „U Zosi stwierdzono…”, „sytuację
+  materialną Krystyny Pawlik, która utrzymuje się z renty…”, „Kacprowi przyznano…”.** Wcześniej
+  osobę z imieniem w dopełniaczu, celowniku albo narzędniku Parawan widział tylko po „Pan” albo
+  „Pani”, więc fakt o zdrowiu w tym samym zdaniu zostawał jawny. Teraz: „U Zosi stwierdzono [DANE
+  O ZDROWIU]”, „U [IMIĘ I NAZWISKO] stwierdzono [DANE O ZDROWIU]” (cukrzycę typu 2), „Dotyczy
+  [IMIĘ I NAZWISKO], u której stwierdzono [DANE O ZDROWIU]”, „…materialną [IMIĘ I NAZWISKO], która
+  utrzymuje się z [DANE O ZDROWIU]” (renty z tytułu niezdolności do pracy), „wiozła matkę, [IMIĘ
+  I NAZWISKO], która uskarżała się na [DANE O ZDROWIU]” (silny ból w klatce piersiowej),
+  „opiekuje się [IMIĘ I NAZWISKO], która [DANE O ZDROWIU]” (porusza się na wózku inwalidzkim),
+  „Zosi wystawiono [DANE O ZDROWIU]”, „Kacprowi przyznano [DANE O ZDROWIU]”, „[DANE O ZDROWIU]
+  [IMIĘ I NAZWISKO] obejmuje 14 dni” (zwolnienie lekarskie Jana Kowalskiego), „[DANE O ZDROWIU]
+  Kacpra wydano w 2025 r.” (imię i czasownik po zakrytej danej nie wchodzą do jej maski). Objaw z natężeniem i miejscem („silny ból w klatce piersiowej”, „silne
+  bóle głowy”) znika w całości, a pobyt w szpitalu po wtrąceniu („trafił przez to do szpitala”,
+  „po każdym takim wieczorze się dusi, w lutym trafił…”) dalej należy do osoby z początku zdania.
+  Jawne zostają patron, adres i nazwa instytucji („Fundacji Anny Dymnej”, „im. Marii
+  Konopnickiej”, „Szpital Jana Pawła II”, „szpitala św. Józefa”), autor polecenia („Zgodnie
+  z decyzją Anny Nowak zasiłek chorobowy wypłaca pracodawca”), samo imię w przepisie i warunku
+  („Zgodnie z wytycznymi Kasi zwolnienie lekarskie należy dostarczyć…”, „Jeżeli u Zosi wystąpi
+  gorączka, należy…”), sprawy bez faktu medycznego („U Kasi stwierdzono brak zaległości”, „Zosi
+  przyznano stypendium”) i temat zajęć („Zajęcia o cukrzycy w klasie Zosi prowadziła
+  pielęgniarka”). Jawny zostaje też patron po „im.” i „ul.” („Szpital im. Ludwika Rydygiera leczy
+  pacjentów po zawale”, „Hospicjum przy ul. Heleny Modrzejewskiej przyjmuje osoby po udarze”),
+  patron i nazwa po rzeczowniku szkoły, szpitala czy gminy („Uczniowie szkoły Marii Konopnickiej
+  z orzeczeniem o niepełnosprawności mogą…”, „Mieszkańcy gminy Kazimierza Wielka mogą skorzystać
+  z badań w kierunku cukrzycy”) oraz autor książki, filmu czy wykładu, także z tytułem („Wykład dr.
+  [IMIĘ I NAZWISKO] o chorobie Alzheimera”). Osoba na początku zdania przed czasownikiem
+  bezosobowym kotwiczy dane o zdrowiu: „[IMIĘ I NAZWISKO] przyznano zasiłek pielęgnacyjny z powodu
+  [DANE O ZDROWIU]” (Grażynie Nowak, znacznego stopnia niepełnosprawności). Imię, po którym stoi
+  „o” z tematem, to autor albo rozmówca, więc temat zostaje jawny: „Wywiad z [IMIĘ I NAZWISKO]
+  o depresji ukazał się w gazecie”, „Monografia [IMIĘ I NAZWISKO] o chorobie afektywnej
+  dwubiegunowej…”, „Zaproszenie na spotkanie z [IMIĘ I NAZWISKO] o życiu z cukrzycą”. Prośba
+  dalej należy do osoby: „Wniosek [IMIĘ I NAZWISKO] o zasiłek pielęgnacyjny z powodu [DANE
+  O ZDROWIU]”. Jawny zostaje też temat rozprawy i badań („[IMIĘ I NAZWISKO] nadano stopień
+  doktora za rozprawę o leczeniu cukrzycy”, „przyznano grant na badania nad cukrzycą”), lokal
+  z imieniem („Pensjonat u Basi przyjmuje kuracjuszy po zawale serca”, „Gospoda U Kasi”) i imię
+  w tytule akcji („Akcja „Pomóż Zuzi” zbiera środki dla dzieci z chorobą nowotworową”). Na trzeciej serii 50 pism (część robocza) wycieków jest 80 zamiast 83 (danych
+  o zdrowiu 29 zamiast 32), bez nowych nadmiarowych zakryć.
+- **Ślad leczenia osoby znika także bez nazwy choroby, a schorzenie spoza słownika Parawan
+  rozpoznaje po budowie słowa.** Wcześniej w wywiadzie i we wniosku zostawało jawne to, że ktoś
+  się leczy, choć nazwa choroby była zakryta albo jej nie było. Teraz: „jest w trakcie [DANE
+  O ZDROWIU]” (leczenia), „jest po [DANE O ZDROWIU]” (trzech cyklach chemioterapii; „po chemii”,
+  „po przeszczepie”), „korzysta z [DANE O ZDROWIU]” (rehabilitacji domowej), „od września jest [DANE
+  O ZDROWIU]” (rehabilitowana pięć razy w tygodniu), „była [DANE O ZDROWIU]” (hospitalizowana od
+  3 do 12 marca 2026 r.), „pozostaje [DANE O ZDROWIU]” (pod opieką pielęgniarki środowiskowej),
+  „kontrole w [DANE O ZDROWIU]” (poradni diabetologicznej), „do dojazdów na [DANE O ZDROWIU]”,
+  „jest dwa tygodnie [DANE O ZDROWIU]” (po operacji wszczepienia bypassów). Wtrącenie między
+  słowem a chorobą zostaje jawne, a choroba znika: „U syna rozpoznano, według opinii poradni
+  z 3 marca, [DANE O ZDROWIU]”, „była [DANE O ZDROWIU] — według zaświadczenia z 3 marca — [DANE
+  O ZDROWIU]” (leczona onkologicznie). Schorzenie spoza słownika po końcówce i konstrukcji:
+  tetraplegia, hiperglikemia, laryngektomia, endoprotezoplastyka, hipoterapia, „mózgowe porażenie
+  dziecięce”, „porażenie nerwu twarzowego”, „przewlekła niewydolność krążenia”, „uraz rdzenia
+  kręgowego”, „objawy fobii szkolnej”, a po przecinku dalsza nazwa z wyliczenia („[DANE
+  O ZDROWIU], obniżone napięcie mięśniowe”). Zostają jawne: „Spółka jest w trakcie likwidacji”,
+  „Gmina prowadzi rehabilitację domową”, „rehabilitacja zawodowa”, „studia z fizjoterapii”,
+  „kolejki do fizjoterapii”, „socjoterapia”, „niewydolność systemu”, „niewydolność wychowawcza”,
+  „zaburzenia krążenia informacji”, „Zespół Szkół”, „Warsztat Terapii Zajęciowej”, anatomia jako
+  przedmiot, proza, „akademia”, „premia”, „mikroskopia”. Diagnostyka i rehabilitacja w toku znikają
+  tylko z dopowiedzeniem medycznym i przy osobie: „Ojciec jest w trakcie [DANE O ZDROWIU]”
+  (diagnostyki kardiologicznej), a „Pedagog jest w trakcie diagnostyki potrzeb ucznia”, „Poradnia
+  jest w trakcie diagnostyki przesiewowej”, „Budynek jest w trakcie rehabilitacji”, „Szpital
+  kontynuuje leczenie pacjentów” i „chodzi na rehabilitację zawodową w ramach programu PFRON”
+  zostają. Terapia jako zawód, kwalifikacja, usługa, metoda pracy, temat i placówka zostaje jawna:
+  „instruktor hipoterapii”, „koordynatorka zajęć z ludoterapii”, „absolwentka fizjoterapii”,
+  „ukończyła dwa cykle szkoleń z dogoterapii”, „ma uprawnienia z zakresu kinezyterapii”, „oferta
+  Pana Kowalskiego na usługi fizjoterapii”, „wykonawca usług hydroterapii”, „jest terapeutką
+  i stosuje muzykoterapię w pracy z dziećmi”, „pracę magisterską o muzykoterapii”, „konferencja
+  o fizjoterapii”, „właścicielka salonu aromaterapii”, „sprzedaje sprzęt do magnetoterapii”,
+  „zatrudniona w dziale fizjoterapii”, „ośrodek hipoterapii”. Ta sama terapia u uczestnika,
+  klienta i pacjenta dalej znika: „korzysta z zajęć z [DANE O ZDROWIU]” (dogoterapii), „korzysta
+  z usług [DANE O ZDROWIU]” (fizjoterapii), „jest uczestniczką warsztatów z [DANE O ZDROWIU]”,
+  „stosuje [DANE O ZDROWIU] u noworodka”, „rozmawiałam z lekarzem o [DANE O ZDROWIU] syna”,
+  „kurs [DANE O ZDROWIU]” (fizjoterapii po udarze). Ziemia rolnika nie jest daną o zdrowiu: „posiada ziemię
+  o powierzchni 5 ha”, „dzierżawi ziemię od gminy”, „pracuje w podziemiach kopalni”, „drzemią po
+  obiedzie” zostają, a „ischemia” znika. Na trzeciej serii 50 pism (część robocza) wycieków jest
+  66 zamiast 80 (danych o zdrowiu 15 zamiast 29), bez nowych nadmiarowych zakryć.
+- **Pierwsze wklejone pismo i każda następna zmiana mają wynik od razu.** Parawan przygotowuje
+  silnik zaraz po otwarciu pliku, a nie przy pierwszym piśmie. Wcześniej pierwsze przeliczenie
+  trwało kilka razy dłużej niż kolejne, a pauza przed następnym rosła od niego do pół sekundy
+  i więcej na wolniejszym komputerze, więc wynik zostawał chwilę przy poprzednim tekście.
+- **DLA-IOD-I-IT.txt ostrzega przed filtrem załączników w poczcie.** Gdy dział IT dopisał typ html
+  do filtru załączników w Defender for Office 365, Parawan.html nie dojdzie mailem nawet pod inną
+  nazwą. Notka radzi wtedy dysk sieciowy.
+
 ## v0.47.0 — 2026-11-14
 
 **Parawan zakrywa dane o zdrowiu, numery uprawnień zawodowych, karty pobytu i aktów stanu cywilnego, a adres urzędu w nagłówku pisma zostawia jawny.**

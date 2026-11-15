@@ -1,0 +1,289 @@
+{
+  "id": "s2_ocr_05",
+  "template": "ocr",
+  "title": "Wypis aktu notarialnego umowy sprzedaży lokalu (skan po OCR)",
+  "seed": null,
+  "traps": [
+    "ś→s i ą→a w nazwiskach (Jasinski, Zajac)",
+    "PESEL złamany łącznikiem na końcu wiersza",
+    "księga wieczysta z wtrąconymi spacjami",
+    "dowód osobisty z literami O zamiast zer",
+    "adres kancelarii notarialnej do zachowania, adres sprzedawanego lokalu do zamaskowania",
+    "nagłówek „Rep. A” na każdej stronie"
+  ],
+  "entities": [
+    {
+      "text": "Kancelarii Notarialnej",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Świdnickiej 12",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "adres kancelarii notarialnej",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy dla\nWrocławia-Krzyków",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "nazwa sądu złamana końcem wiersza",
+      "count": 1
+    },
+    {
+      "text": "Ministra Sprawiedliwości",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rep. A nr 4521/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer repertorium w nagłówku każdej strony",
+      "count": 3
+    },
+    {
+      "text": "Wrocławiu",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby, lokalu i kancelarii",
+      "count": 4
+    },
+    {
+      "text": "Wrocław",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Oleśnicy",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osób",
+      "count": 1
+    },
+    {
+      "text": "Oleśnica",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "612 000 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "cena nieruchomości",
+      "count": 1
+    },
+    {
+      "text": "Beatą Konieczną",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "notariusz",
+      "count": 1
+    },
+    {
+      "text": "Beata Konieczna",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pieczątka /-/",
+      "count": 1
+    },
+    {
+      "text": "BEATA KONIECZNA",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pieczęć wersalikami",
+      "count": 1
+    },
+    {
+      "text": "Henryk Jasinski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "ś odczytane jako s",
+      "count": 1
+    },
+    {
+      "text": "Henryk Jasiński",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "Władysława i Stefanii",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imiona rodziców",
+      "count": 1
+    },
+    {
+      "text": "30 stycznia 1949",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "4901300-\n   2955",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL złamany łącznikiem na końcu wiersza",
+      "count": 1
+    },
+    {
+      "text": "WDJ 578158",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "seria i numer rozdzielone spacją",
+      "count": 1
+    },
+    {
+      "text": "ul. Tadeusza Kościuszki 88/3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "patron ulicy w adresie osoby",
+      "count": 1
+    },
+    {
+      "text": "50-0l1",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "l zamiast 1",
+      "count": 1
+    },
+    {
+      "text": "Paulina Zajac",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "ą odczytane jako a",
+      "count": 1
+    },
+    {
+      "text": "Paulina Zając",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mirosława i Ewy",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imiona rodziców",
+      "count": 1
+    },
+    {
+      "text": "91051717667",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "BNX798339",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dawid Zając",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dawid Zajac",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "ą odczytane jako a",
+      "count": 1
+    },
+    {
+      "text": "Jerzego i Lidii",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imiona rodziców",
+      "count": 1
+    },
+    {
+      "text": "89090251936",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "SNE26OOO7",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "litery O zamiast zer; po odczycie SNE260007",
+      "count": 1
+    },
+    {
+      "text": "ul. Wojska Polskiego 15A",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "56-4OO",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "O zamiast 0",
+      "count": 1
+    },
+    {
+      "text": "ul. Ślężnej 102",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres sprzedawanego lokalu osoby (z nr 15)",
+      "count": 1
+    },
+    {
+      "text": "WR1K/7267 8795/7",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "spacja w numerze księgi",
+      "count": 1
+    },
+    {
+      "text": "Paulinie Zając",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dawidowi Zającowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "16 2490 0005 2003 8699 6784 9179",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Agnieszka Jasińska-Rudnik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe",
+      "count": 1
+    }
+  ]
+}

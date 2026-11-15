@@ -1,0 +1,233 @@
+{
+  "id": "s2_nieformalne_10",
+  "template": "nieformalne",
+  "title": "Czat na żywo z obsługą hurtowni budowlanej",
+  "seed": null,
+  "traps": [
+    "bot o imieniu Maks do zachowania",
+    "firma JDG wersalikami z imieniem i nazwiskiem",
+    "NIP sklejony z prefiksem PL jako EORI",
+    "adres firmy będący adresem zamieszkania",
+    "IP sesji w nagłówku czatu",
+    "numer faktury i numery reklamacji obok danych"
+  ],
+  "entities": [
+    {
+      "text": "kamil.wojcik.remonty@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "203.0.113.58",
+      "type": "IP",
+      "expect": "mask",
+      "note": "IP sesji klienta",
+      "count": 1
+    },
+    {
+      "text": "Bartek",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "konsultant, zdrobnienie",
+      "count": 8
+    },
+    {
+      "text": "bartek",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "małą literą",
+      "count": 1
+    },
+    {
+      "text": "B. Sikora",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał imienia z nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "USŁUGI REMONTOWE KAMIL WÓJCIK",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "firma JDG z imieniem i nazwiskiem, wersaliki",
+      "count": 1
+    },
+    {
+      "text": "5422262943",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "NIP osoby fizycznej z JDG",
+      "count": 1
+    },
+    {
+      "text": "PL5422262943",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "EORI = PL + NIP, NIP sklejony z prefiksem",
+      "count": 1
+    },
+    {
+      "text": "ul. Pomorska 152 lok 3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres firmy i zamieszkania",
+      "count": 1
+    },
+    {
+      "text": "90-224",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kamila Wójcika",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "biernik",
+      "count": 1
+    },
+    {
+      "text": "Kamil",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz w formie mianownika",
+      "count": 1
+    },
+    {
+      "text": "08 1050 0099 1600 9434 0446 8029",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rafał",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "kurier, samo imię",
+      "count": 1
+    },
+    {
+      "text": "BM2564446",
+      "type": "PASSPORT",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "789-004-311",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marzena",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "żona, samo imię",
+      "count": 1
+    },
+    {
+      "text": "664 902 113",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Łódź",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Hurtownia Budmax24",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "CH-77812",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer sesji czatu",
+      "count": 1
+    },
+    {
+      "text": "2026/10/88412",
+      "type": "ORDER_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "RKL-30917",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer reklamacji",
+      "count": 1
+    },
+    {
+      "text": "ID 4471",
+      "type": "EMPLOYEE_ID",
+      "expect": "policy",
+      "note": "identyfikator konsultanta",
+      "count": 1
+    },
+    {
+      "text": "Maks",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "nazwa bota, nie osoba",
+      "count": 3
+    },
+    {
+      "text": "FV/BM/2026/10/5521",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer faktury",
+      "count": 1
+    },
+    {
+      "text": "Krajowa Administracja Skarbowa",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Izbie Administracji Skarbowej w Łodzi",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Niemiec",
+      "type": "TRAVEL_CITY",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dreźnie",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "miejsce pracy osoby (budowa od grudnia)",
+      "count": 1
+    },
+    {
+      "text": "Chrome 130",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "przeglądarka",
+      "count": 1
+    }
+  ]
+}

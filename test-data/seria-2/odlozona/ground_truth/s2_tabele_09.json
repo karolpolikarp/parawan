@@ -1,0 +1,197 @@
+{
+  "id": "s2_tabele_09",
+  "template": "tabele",
+  "title": "Grafik dyżurów ochotniczej straży pożarnej (CSV, średnik)",
+  "seed": null,
+  "traps": [
+    "skrót „dh” przed imieniem i nazwiskiem w komórkach",
+    "puste pola (;;) i nagłówek małymi literami",
+    "nazwisko Kłos obok rzeczownika „kłos”, nazwiska Rzepka i Grzyb",
+    "numer prawa jazdy i tablica prywatnego auta poza tabelą",
+    "daty ISO dyżurów do zachowania (nie są datami urodzenia)"
+  ],
+  "entities": [
+    {
+      "text": "Ochotnicza Straż Pożarna w Barczewie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Mickiewicza 21",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w nazwie ulicy",
+      "count": 1
+    },
+    {
+      "text": "11-010",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Barczewo",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "siedziba jednostki",
+      "count": 1
+    },
+    {
+      "text": "Rafał Ozga",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Seweryn Kłos",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko = rzeczownik",
+      "count": 3
+    },
+    {
+      "text": "Kinga Rzepka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Bartosz Kołodziej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "Emil Wąsik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "Ludwik Szyszko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Natalia Kowalczuk-Grzyb",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe",
+      "count": 1
+    },
+    {
+      "text": "509 114 270",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "+48 727 300 815",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "23694/13/1065",
+      "type": "DRIVING_LICENSE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "29917/08/1327",
+      "type": "DRIVING_LICENSE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "NOL 47812",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "prywatny samochód strażaka",
+      "count": 1
+    },
+    {
+      "text": "Mirosław Gąsior",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "złamanie kości promieniowej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "niezdolny do akcji",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "skutek urazu",
+      "count": 1
+    },
+    {
+      "text": "Joanna Szyszko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "to samo nazwisko co dowódca",
+      "count": 1
+    },
+    {
+      "text": "kłos",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "rzeczownik, nie nazwisko",
+      "count": 1
+    },
+    {
+      "text": "Komendy Miejskiej PSP w Olsztynie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "2027-01-02",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "data dyżuru",
+      "count": 1
+    },
+    {
+      "text": "2027-01-10",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "data dyżuru",
+      "count": 1
+    },
+    {
+      "text": "Leszek Bałdyga",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "naczelnik",
+      "count": 1
+    },
+    {
+      "text": "89 514 83 02",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

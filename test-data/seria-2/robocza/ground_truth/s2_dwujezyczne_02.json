@@ -1,0 +1,275 @@
+{
+  "id": "s2_dwujezyczne_02",
+  "template": "dwujezyczne",
+  "title": "CV brytyjskiego inżyniera mieszkającego w Gdańsku (EN/PL)",
+  "seed": null,
+  "traps": [
+    "nazwisko Smith i zwykłe słowo „smith” (kowal) w zainteresowaniach",
+    "brytyjskie prawo jazdy SMITH803057D99XY zawiera nazwisko wersalikami i zakodowaną datę urodzenia",
+    "data urodzenia po angielsku (March 5, 1987) bez polskiej etykiety",
+    "dwa telefony w jednej linii: +48 i +44 7700 (brytyjska pula testowa)",
+    "dane o zdrowiu opisowo w dwóch językach (niedosłuch, aparaty słuchowe)",
+    "uczelnie i miasta wyjazdów służbowych do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "Daniel Smith",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "March 5, 1987",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia w formacie angielskim",
+      "count": 1
+    },
+    {
+      "text": "ul. Grunwaldzka 212/7",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "80-266",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+48 512 330 914",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+44 7700 900417",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "brytyjska komórka",
+      "count": 1
+    },
+    {
+      "text": "dsmith87@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "87030533759",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL cudzoziemca",
+      "count": 1
+    },
+    {
+      "text": "BK2548095",
+      "type": "RESIDENCE_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "SMITH803057D99XY",
+      "type": "DRIVING_LICENSE",
+      "expect": "mask",
+      "note": "brytyjskie prawo jazdy, zawiera nazwisko i datę urodzenia",
+      "count": 1
+    },
+    {
+      "text": "moderate hearing impairment",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "hearing aids",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "umiarkowany niedosłuch",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "aparaty słuchowe",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ewa Kozłowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Helen Carter",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "h.carter@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+44 113 496 0215",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+48 58 300 41 27",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "smith",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "kowal, zwykłe słowo angielskie",
+      "count": 1
+    },
+    {
+      "text": "University of Leeds",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Uniwersytet Gdański",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Esbjerg",
+      "type": "TRAVEL_CITY",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rotterdam",
+      "type": "TRAVEL_CITY",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Parlamentu Europejskiego i Rady",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Gdańsk",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i siedziba pracodawcy",
+      "count": 2
+    },
+    {
+      "text": "British",
+      "type": "NATIONALITY",
+      "expect": "policy",
+      "note": "obywatelstwo",
+      "count": 1
+    },
+    {
+      "text": "brytyjskie",
+      "type": "NATIONALITY",
+      "expect": "policy",
+      "note": "obywatelstwo",
+      "count": 2
+    },
+    {
+      "text": "Baltic Turbine Services Sp. z o.o.",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "pracodawca, quasi-identyfikator",
+      "count": 2
+    },
+    {
+      "text": "Humber Offshore Engineering Ltd",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tyne Steelworks Ltd",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Hull",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miasto dawnego pracodawcy",
+      "count": 1
+    },
+    {
+      "text": "Newcastle upon Tyne",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miasto dawnego pracodawcy",
+      "count": 1
+    },
+    {
+      "text": "Wdzydze Kiszewskie",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "miejsce wolontariatu, quasi-identyfikator",
+      "count": 1
+    },
+    {
+      "text": "Senior Design Engineer",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Starszy inżynier konstruktor",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Engineering Director",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,302 @@
+{
+  "id": "s3_budownictwo_04",
+  "template": "budownictwo",
+  "title": "Postanowienie o wszczęciu rozgraniczenia z zawiadomieniem stron",
+  "seed": null,
+  "traps": [
+    "nazwisko Kamień obok słów „kamienie graniczne” i „kamienia granicznego”",
+    "zmarły właściciel z ewidencji i nieznani spadkobiercy",
+    "celownik Zawadzie i firma JDG GEO-ZAWADA z NIP-em osoby",
+    "wykaz stron z adresami, pełnomocnik z innego miasta",
+    "sygnatura sprawy o naruszenie posiadania (policy) i sąd do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "Józefa Kamienia",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Józef Kamień",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko jak słowo „kamień”",
+      "count": 2
+    },
+    {
+      "text": "ul. Nadwiślańska 27",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "86-071",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 4
+    },
+    {
+      "text": "TO1C/78739878/5",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "księga wieczysta wskazuje właściciela",
+      "count": 1
+    },
+    {
+      "text": "Mirosławy Dudek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tadeusza Dudka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Tadeusz Dudek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Mirosława Dudek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Henryka Bąka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "zmarły właściciel z ewidencji",
+      "count": 2
+    },
+    {
+      "text": "Henryk Bąk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Patrycji Zawadzie",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "celownik z oboczością d/dz",
+      "count": 1
+    },
+    {
+      "text": "Patrycja Zawada",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "23011",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer uprawnień geodety",
+      "count": 1
+    },
+    {
+      "text": "GEO-ZAWADA",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "firma JDG z nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "3782673966",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "NIP geodety prowadzącej JDG",
+      "count": 1
+    },
+    {
+      "text": "600 318 442",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "694 205 118",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Nadwiślańska 25",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Pawła Dudka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Rybaki 9/2",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "87-100",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "p.dudek@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Czarże",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i nazwa obrębu",
+      "count": 5
+    },
+    {
+      "text": "Toruń",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "214/2",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka wnioskodawcy",
+      "count": 2
+    },
+    {
+      "text": "214/1",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka sąsiadów",
+      "count": 2
+    },
+    {
+      "text": "215",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka zmarłego właściciela",
+      "count": 2
+    },
+    {
+      "text": "zmarłego w 2021 r.",
+      "type": "DATE_DEATH",
+      "expect": "policy",
+      "note": "rok śmierci właściciela",
+      "count": 1
+    },
+    {
+      "text": "I C 455/19",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy sądowej stron",
+      "count": 1
+    },
+    {
+      "text": "GKN.6830.3.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "Grzegorz Lipiński",
+      "type": "OFFICIAL",
+      "expect": "policy",
+      "note": "wójt podpisujący postanowienie",
+      "count": 1
+    },
+    {
+      "text": "wspólności majątkowej małżeńskiej",
+      "type": "FAMILY_STATUS",
+      "expect": "policy",
+      "note": "ujawnia, że właściciele działki 214/1 są małżeństwem",
+      "count": 1
+    },
+    {
+      "text": "WÓJT GMINY DĄBROWA CHEŁMIŃSKA",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Bydgoska 23",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "86-070",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sądem Rejonowym w Chełmnie",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sądu Rejonowego w Chełmnie",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Starostwo Powiatowe w Chełmnie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kamienie graniczne",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko Kamień",
+      "count": 1
+    },
+    {
+      "text": "kamienia granicznego",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko Kamienia",
+      "count": 1
+    }
+  ]
+}

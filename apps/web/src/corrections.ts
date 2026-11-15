@@ -1,7 +1,7 @@
 /**
  * Ręczna korekta wyniku (bez DOM, więc testowalna w vitest). Urzędnik zostawia jawne to, co
  * automat zasłonił niepotrzebnie (podpis wójta, osoba „z up.”), i zasłania to, co automat
- * przeoczył (numer księgi wieczystej, „z żoną Anną”). Decyzje to lista w kolejności podjęcia;
+ * przeoczył (numer księgi wieczystej, „z koleżanką Anną”). Decyzje to lista w kolejności podjęcia;
  * applyCorrections nakłada je na zakresy z alignSpans przy każdym przeliczeniu, więc zmiana
  * „Co maskować” albo „Rozróżniaj osoby” nie gubi poprawek. Późniejsza decyzja wygrywa.
  *

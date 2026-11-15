@@ -1,5 +1,6 @@
 // Wzorce e-maila, reguły PII wewnątrz URL-i (parametry, ścieżki profili) i przebieg passEmail.
-import { type RedactCtx } from '../context.js';
+import { protectSpan, type RedactCtx } from '../context.js';
+import { institutionEmailAt } from '../guards/institution-contact.js';
 import { type PiiType } from '../types.js';
 
 // Polskie litery w części lokalnej i domenie: „piotr.wiśniewski@…" maskujemy w całości, a nie od „ś".
@@ -57,9 +58,17 @@ const RE_URLENC_FILE_NAME = /%40[\d.-]+\.[A-Za-z]{2,}$/;
 export function passEmail(ctx: RedactCtx): void {
   if (!ctx.on('EMAIL')) return;
   const full = ctx.text;
+  // Skrzynka funkcyjna urzędu (sekretariat@, podatki@ w nagłówku, w domenie urzędu, „ogólny adres”)
+  // zostaje jawna pod sentinelem, także w kolejnych wystąpieniach tego samego adresu.
+  const office = new Set<string>();
   ctx.text = full.replace(RE_EMAIL_CHAIN, (chain: string, chainAt: number) =>
     chain.replace(RE_EMAIL, (m: string, at: number) => {
       if (isGitRemote(full, chainAt + at, m)) return m;
+      const key = m.toLowerCase();
+      if (office.has(key) || institutionEmailAt(full, chainAt + at, m, ctx.personProbe)) {
+        office.add(key);
+        return protectSpan(ctx, m);
+      }
       return ctx.hit('EMAIL');
     }),
   );

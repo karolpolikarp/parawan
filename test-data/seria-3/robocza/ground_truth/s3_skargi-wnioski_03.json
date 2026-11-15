@@ -1,0 +1,184 @@
+{
+  "id": "s3_skargi-wnioski_03",
+  "template": "skargi-wnioski",
+  "title": "Wniosek o udostępnienie informacji publicznej",
+  "seed": null,
+  "traps": [
+    "nazwisko Wróbel wnioskodawcy i słowo „wróbel” w nazwie gatunku ptaka",
+    "e-mail z nazwiskiem bez polskich znaków",
+    "sygnatura cytowanego wyroku NSA do zachowania",
+    "fałszywy PESEL jako identyfikator zgłoszenia, obok adresu IP",
+    "dane karne osoby trzeciej (skazanie) jako dane szczególne",
+    "numer działki i obręb jako położenie nieruchomości"
+  ],
+  "entities": [
+    {
+      "text": "Teodor Wróbel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "ul. Szkolna 14",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "62-023",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Borówiec",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "691 207 553",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon z prefiksem +48",
+      "count": 1
+    },
+    {
+      "text": "Burmistrz Gminy Kórnik",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Urząd Miejski w Kórniku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "pl. Niepodległości 1",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "62-035",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Norbertem Pilarskim",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "osoba fizyczna, z którą zawarto umowę",
+      "count": 1
+    },
+    {
+      "text": "został prawomocnie skazany za jazdę pod wpływem alkoholu",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "dane o wyroku skazującym osoby trzeciej",
+      "count": 1
+    },
+    {
+      "text": "Sekretarzowi Gminy",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "stanowisko pozwalające wskazać osobę",
+      "count": 1
+    },
+    {
+      "text": "Skarbnikowi Gminy",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "stanowisko pozwalające wskazać osobę",
+      "count": 1
+    },
+    {
+      "text": "wróbel",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "nazwa ptaka, a nie nazwisko Wróbel",
+      "count": 1
+    },
+    {
+      "text": "Huberta Stachowiaka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inwestor, adresat decyzji WZ",
+      "count": 1
+    },
+    {
+      "text": "działki nr 211/7, obręb Bnin",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "numer działki inwestora",
+      "count": 1
+    },
+    {
+      "text": "Genowefę Talarczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sąsiadka, autorka innej skargi",
+      "count": 1
+    },
+    {
+      "text": "GK.1431.58.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak poprzedniego wniosku",
+      "count": 1
+    },
+    {
+      "text": "Ilonę Wróbel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "żona wnioskodawcy",
+      "count": 1
+    },
+    {
+      "text": "Naczelny Sąd Administracyjny",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "III OSK 4097/21",
+      "type": "CASE_NUMBER",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "t.wrobel@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "e-mail z nazwiskiem bez polskich znaków",
+      "count": 1
+    },
+    {
+      "text": "65081597754",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "identyfikator zgłoszenia, 11 cyfr bez poprawnej sumy PESEL",
+      "count": 1
+    },
+    {
+      "text": "198.51.100.87",
+      "type": "IP",
+      "expect": "mask",
+      "note": "adres IP nadawcy wniosku",
+      "count": 1
+    }
+  ]
+}

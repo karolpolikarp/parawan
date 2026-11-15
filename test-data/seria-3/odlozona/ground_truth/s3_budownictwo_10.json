@@ -1,0 +1,316 @@
+{
+  "id": "s3_budownictwo_10",
+  "template": "budownictwo",
+  "title": "Odwołanie sąsiadów od decyzji o warunkach zabudowy hali",
+  "seed": null,
+  "traps": [
+    "pismo strony (adwokat), a nie urzędu: odwołujący w nagłówku z PESEL",
+    "dane o zdrowiu dziecka i seniora jako argument w sprawie budowlanej, wiek osoby",
+    "nazwiska jak zwykłe słowa: Mróz, Grzyb; nazwisko Kubica nieodmienne u kobiety i odmienione u dziecka",
+    "spółka z KRS i NIP (policy), prezes zarządu z imienia i nazwiska",
+    "sygnatura NSA i adres urzędu do zachowania, ulica odwołujących bez numeru (policy)"
+  ],
+  "entities": [
+    {
+      "text": "Marek Kubica",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "80091486459",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Aleksandra Kubica",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko nieodmienne u kobiety",
+      "count": 1
+    },
+    {
+      "text": "83020435601",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Nyska 58",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "48-201",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Stefan Mróz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko jak słowo „mróz”",
+      "count": 2
+    },
+    {
+      "text": "45031763577",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Nyska 64",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Natalię Grzyb",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Natalia Grzyb",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Piastowska 17/2",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres kancelarii adwokata",
+      "count": 1
+    },
+    {
+      "text": "45-081",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "dziesięcioletniego",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "wiek dziecka",
+      "count": 1
+    },
+    {
+      "text": "Filipa Kubicy",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dziecko, dopełniacz",
+      "count": 1
+    },
+    {
+      "text": "7 maja 2016",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia dziecka",
+      "count": 1
+    },
+    {
+      "text": "astmę oskrzelową",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "poradni alergologicznej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ma 81 lat",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "wiek osoby",
+      "count": 1
+    },
+    {
+      "text": "przewlekłą obturacyjną chorobę płuc",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "korzysta z koncentratora tlenu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Robert Halicki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "prezes zarządu spółki",
+      "count": 1
+    },
+    {
+      "text": "77 441 20 86",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon kancelarii adwokata",
+      "count": 1
+    },
+    {
+      "text": "kancelaria.grzyb@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "OPO/Adw/0457",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer wpisu na listę adwokatów",
+      "count": 1
+    },
+    {
+      "text": "Prudnik",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i siedziby urzędu",
+      "count": 3
+    },
+    {
+      "text": "Opole",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu kancelarii",
+      "count": 2
+    },
+    {
+      "text": "LOGIS-PARK sp. z o.o.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "0000476651",
+      "type": "KRS",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "1120528224",
+      "type": "NIP_COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "1311/2",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka inwestora",
+      "count": 1
+    },
+    {
+      "text": "1311/3",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka inwestora",
+      "count": 1
+    },
+    {
+      "text": "1312",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka inwestora",
+      "count": 1
+    },
+    {
+      "text": "1310/4",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka odwołujących",
+      "count": 1
+    },
+    {
+      "text": "1309",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka odwołującego",
+      "count": 1
+    },
+    {
+      "text": "28/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer zaskarżonej decyzji",
+      "count": 1
+    },
+    {
+      "text": "RIG.6730.15.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "ul. Nyskiej",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "ulica zamieszkania odwołujących bez numeru",
+      "count": 1
+    },
+    {
+      "text": "Samorządowe Kolegium Odwoławcze w Opolu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Burmistrza Prudnika",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "ul. Kościuszki 3",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w adresie urzędu",
+      "count": 1
+    },
+    {
+      "text": "48-200",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "II OSK 1012/20",
+      "type": "CASE_LAW",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,225 @@
+{
+  "id": "s3_zamowienia-umowy_04",
+  "template": "zamowienia-umowy",
+  "title": "Pełnomocnictwo JDG dla męża do podpisania umowy z gminą, z adnotacją urzędową",
+  "seed": null,
+  "traps": [
+    "adres wiejski bez ulicy (Osłowo 21)",
+    "uczniowie jako imię i inicjał z dietą i alergią",
+    "firma JDG z inicjałami (BK-CATERING)",
+    "patron w nazwie szkoły, kod PKD z kropkami",
+    "mąż o tym samym nazwisku w celowniku i mianowniku"
+  ],
+  "entities": [
+    {
+      "text": "Beata Kaczmarczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "także w firmie JDG",
+      "count": 3
+    },
+    {
+      "text": "82021156708",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "BK-CATERING",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "fragment firmy JDG z inicjałami",
+      "count": 1
+    },
+    {
+      "text": "Osłowo 21",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres wiejski bez ulicy",
+      "count": 2
+    },
+    {
+      "text": "17-307",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "4873212757",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "251053520",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rafałowi Kaczmarczykowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "celownik",
+      "count": 1
+    },
+    {
+      "text": "03.12.1979",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "79120341098",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "XEB114442",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Szkoły Podstawowej im. Janusza Korczaka w Mielniku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "OŚW.271.3.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer zapytania ofertowego",
+      "count": 1
+    },
+    {
+      "text": "PL70102028925014930429396798",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "rachunek JDG, PL bez spacji",
+      "count": 1
+    },
+    {
+      "text": "Kacpra W.",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "uczeń: imię i inicjał nazwiska",
+      "count": 1
+    },
+    {
+      "text": "celiakia",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "dieta bezglutenowa",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zuzannę M.",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "uczennica: imię i inicjał nazwiska",
+      "count": 1
+    },
+    {
+      "text": "alergia na orzechy arachidowe",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ryzyko wstrząsu anafilaktycznego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Irenie Sawickiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Urzędu Gminy Mielnik",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rafał Kaczmarczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "56.21.Z",
+      "type": "PKD",
+      "expect": "keep",
+      "note": "kod PKD",
+      "count": 1
+    },
+    {
+      "text": "+48 697 330 158",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "rafal.kaczmarczyk@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marta Ziobro",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik urzędu",
+      "count": 1
+    },
+    {
+      "text": "Urząd Gminy Mielnik",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Piaskowa 1",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "85 657 40 12",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon pracownika urzędu",
+      "count": 1
+    }
+  ]
+}

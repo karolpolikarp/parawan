@@ -1,0 +1,345 @@
+{
+  "id": "s2_protokol_01",
+  "template": "protokol",
+  "title": "Protokół z sesji Rady Gminy",
+  "seed": null,
+  "traps": [
+    "radni wymieniani samym nazwiskiem w różnych przypadkach (Wróbel, Wróbla, Sowa, Sowy, Elżbiecie Sowie)",
+    "imienne głosowanie jako lista gołych nazwisk, w tym Dudek, Kurek, Pyrek",
+    "nazwiska będące zwykłymi słowami obok tych słów: Grzyb i „grzyb”, Piątek i „w piątek”",
+    "nazwa wsi w adresie osoby (Rajbrot 214) i w nazwie instytucji (OSP w Rajbrocie)",
+    "wójt i skarbnik w funkcji jako decyzja polityki",
+    "numery uchwał i numer drogi gminnej do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "Rady Gminy Lipnica Murowana",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Urzędu Gminy",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ochotniczej Straży Pożarnej w Rajbrocie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "nazwa wsi w nazwie instytucji",
+      "count": 2
+    },
+    {
+      "text": "Rządowego Funduszu Rozwoju Dróg",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Gminny Ośrodek Pomocy Społecznej",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wojewodzie Małopolskiemu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Biuletynie Informacji Publicznej",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Uchwałę nr XIV/112/2026",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer uchwały",
+      "count": 1
+    },
+    {
+      "text": "Uchwałę nr XIV/113/2026",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer uchwały",
+      "count": 1
+    },
+    {
+      "text": "280614K",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer drogi gminnej",
+      "count": 1
+    },
+    {
+      "text": "piątek",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "dzień tygodnia obok nazwiska Piątek",
+      "count": 1
+    },
+    {
+      "text": "grzyb",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo obok nazwiska Grzyb",
+      "count": 1
+    },
+    {
+      "text": "Stanisław Ryba",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "wójt w funkcji",
+      "count": 2
+    },
+    {
+      "text": "Teresa Gąsior",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "skarbnik gminy w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Lipnicy Górnej",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "nazwa sołectwa",
+      "count": 1
+    },
+    {
+      "text": "Rajbrotu",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "nazwa wsi",
+      "count": 1
+    },
+    {
+      "text": "Lipnica Górna",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Henryk Mazur",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "przewodniczący rady",
+      "count": 2
+    },
+    {
+      "text": "Bożena Sikora",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "po zabiegu kardiochirurgicznym",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "stan zdrowia radnej",
+      "count": 1
+    },
+    {
+      "text": "Zenon Pałka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krystyna Chmiel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sołtys",
+      "count": 1
+    },
+    {
+      "text": "Tomaszowi Wróblowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sowa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 3
+    },
+    {
+      "text": "Elżbiecie Sowie",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kmieć",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 3
+    },
+    {
+      "text": "Sowy",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "Wróbel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 2
+    },
+    {
+      "text": "Zdzisław Piątek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "os. Słoneczne 4/2",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "32-724",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "604 218 337",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "choroby nowotworowej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "choroba członka rodziny",
+      "count": 1
+    },
+    {
+      "text": "Piątkowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w celowniku",
+      "count": 1
+    },
+    {
+      "text": "Halina Grzyb",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rajbrot 214",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres wiejski bez ulicy",
+      "count": 1
+    },
+    {
+      "text": "Wróbla",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "Bielecka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lista głosowania",
+      "count": 1
+    },
+    {
+      "text": "Dudek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lista głosowania",
+      "count": 1
+    },
+    {
+      "text": "Fijałkowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lista głosowania",
+      "count": 1
+    },
+    {
+      "text": "Hajduk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lista głosowania",
+      "count": 1
+    },
+    {
+      "text": "Jarosz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lista głosowania",
+      "count": 1
+    },
+    {
+      "text": "Kurek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lista głosowania",
+      "count": 1
+    },
+    {
+      "text": "Lenart",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lista głosowania",
+      "count": 1
+    },
+    {
+      "text": "Nalepa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lista głosowania",
+      "count": 1
+    },
+    {
+      "text": "Pyrek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 2
+    },
+    {
+      "text": "Agata Wilk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "protokolantka",
+      "count": 1
+    }
+  ]
+}

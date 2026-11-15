@@ -1,0 +1,233 @@
+{
+  "id": "s3_praca-z-ai_08",
+  "template": "praca-z-ai",
+  "title": "Polecenie do AI: tłumaczenie i odpowiedź na angielski e-mail cudzoziemki w sprawie zameldowania",
+  "seed": null,
+  "traps": [
+    "tekst po angielsku z polskim adresem i PESEL",
+    "paszport i numer karty pobytu",
+    "imię dziecka w tekście angielskim bez nazwiska",
+    "ciąża jako dana o zdrowiu po angielsku",
+    "funkcyjny adres e-mail urzędu i sygnatura cytowanego wyroku NSA",
+    "nazwisko w narzędniku („p. Czaplą”) i inicjał imienia w podpisie"
+  ],
+  "entities": [
+    {
+      "text": "Olena Kovalenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "cudzoziemka, wnioskodawczyni",
+      "count": 2
+    },
+    {
+      "text": "olena.kovalenko@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ewidencja@example.pl",
+      "type": "EMAIL_INSTITUTION",
+      "expect": "keep",
+      "note": "funkcyjny adres urzędu",
+      "count": 1
+    },
+    {
+      "text": "citizen of Ukraine",
+      "type": "NATIONALITY",
+      "expect": "policy",
+      "note": "obywatelstwo",
+      "count": 1
+    },
+    {
+      "text": "UKR",
+      "type": "NATIONALITY",
+      "expect": "policy",
+      "note": "status w rejestrze PESEL ujawnia obywatelstwo",
+      "count": 1
+    },
+    {
+      "text": "85122497781",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "CT4423862",
+      "type": "PASSPORT",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Chełm",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "Andrii Kovalenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "mąż",
+      "count": 1
+    },
+    {
+      "text": "Sofiia",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię dziecka bez nazwiska",
+      "count": 3
+    },
+    {
+      "text": "30.03.2017",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "17233059664",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Ogrodowa 21 m. 4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "22-100",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Henryk Czapla",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "właściciel lokalu",
+      "count": 1
+    },
+    {
+      "text": "RP4417286",
+      "type": "RESIDENCE_CARD",
+      "expect": "mask",
+      "note": "numer karty pobytu",
+      "count": 1
+    },
+    {
+      "text": "Lublin",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "miejsce wydania karty",
+      "count": 1
+    },
+    {
+      "text": "OSM Chełmianka",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "pracodawca",
+      "count": 1
+    },
+    {
+      "text": "ZUS",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "in the 7th month of pregnancy",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "ciąża po angielsku",
+      "count": 1
+    },
+    {
+      "text": "Paulina Wołoszyn",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarka",
+      "count": 1
+    },
+    {
+      "text": "5016356",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer prawa wykonywania zawodu lekarza",
+      "count": 1
+    },
+    {
+      "text": "+48 731 402 119",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "O. Kovalenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał imienia w podpisie",
+      "count": 1
+    },
+    {
+      "text": "Lubelski Urząd Wojewódzki w Lublinie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Czaplą",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w narzędniku",
+      "count": 1
+    },
+    {
+      "text": "82 565 19 30",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "NSA",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "II OSK 2713/19",
+      "type": "CASE_CITATION",
+      "expect": "keep",
+      "note": "sygnatura cytowanego wyroku",
+      "count": 1
+    },
+    {
+      "text": "Łucja Pawelec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "urzędniczka",
+      "count": 1
+    },
+    {
+      "text": "Wydział Spraw Obywatelskich",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

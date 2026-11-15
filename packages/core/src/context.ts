@@ -44,8 +44,15 @@ export interface RedactCtx {
   /** Loginy z kotwic innych niż etykieta „Login:" (parametr URL-a, klucz JSON/XML, ścieżka
    *  profilu, log sshd); passLogin rozlewa je na resztę dokumentu i zapamiętane URL-e. */
   loginSeeds: Set<string>;
+  /** Imiona i nazwiska (małe litery) zakryte w etykiecie mówcy czatu albo transkrypcji; dla nasion
+   *  rozlania są kotwicą jak „Pan/Pani” (patrz passPersonSpeaker). */
+  speakerNames: Set<string>;
   /** Ulice siedzib instytucji schowane pod sentinelem na czas przebiegów adresu. */
   institutionStreets: string[];
+  /** Wiersze tabeli rozdzielanej (numer wiersza tekstu → wstawiona maska), w których passDelimitedTable
+   *  zakrył osobę, i liczba wierszy tekstu w tamtej chwili. Przebieg zdrowia bierze taki wiersz za
+   *  wiersz z imieniem i nazwiskiem, które przed zakryciem stało w nim jawnie. */
+  tablePersonRows?: { lines: number; rows: Map<number, string> };
   /** Sonda osób dla strażnika siedziby instytucji (brak w samej sondzie, żeby nie było rekurencji). */
   personProbe?: PersonProbe;
 }

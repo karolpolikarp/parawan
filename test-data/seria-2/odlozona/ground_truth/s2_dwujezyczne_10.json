@@ -1,0 +1,394 @@
+{
+  "id": "s2_dwujezyczne_10",
+  "template": "dwujezyczne",
+  "title": "Karta wypisowa ze szkockiego szpitala z roboczym tłumaczeniem (EN/PL)",
+  "seed": null,
+  "traps": [
+    "numer CHI zawiera datę urodzenia (0909574426), PESEL obok",
+    "nazwisko dwuczłonowe córki (Sikora-Grant) obok matki z tym samym pierwszym członem",
+    "eponim w badaniu („Holter”, „Holtera”) i patron w nazwie szpitala (St Columba's) do zachowania lub polityki",
+    "rozpoznania i leki w dwóch językach z kodami ICD-10",
+    "adres pobytu w UK z kodem EH4 5BW obok adresu szpitala z kodem EH6 4AA (do zachowania)",
+    "lekarz w funkcji z numerem GMC, przychodnia z adresem do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "Halina Sikora",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mrs Sikora",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko z tytułem",
+      "count": 1
+    },
+    {
+      "text": "9 September 1957",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia w formacie brytyjskim",
+      "count": 1
+    },
+    {
+      "text": "09.09.1957",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "57090905827",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "0909574426",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "numer CHI (szkocki identyfikator pacjenta, zawiera datę urodzenia)",
+      "count": 1
+    },
+    {
+      "text": "ul. Nadbystrzycka 27/15",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "20-618",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "3 Marchfield Terrace",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres pobytu za granicą",
+      "count": 1
+    },
+    {
+      "text": "EH4 5BW",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "szkocki kod pocztowy",
+      "count": 1
+    },
+    {
+      "text": "Monika Sikora-Grant",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe",
+      "count": 2
+    },
+    {
+      "text": "+44 7700 900862",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "monika.sg@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Fiona MacLeod",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarz prowadzący",
+      "count": 2
+    },
+    {
+      "text": "7012345",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer GMC lekarza",
+      "count": 1
+    },
+    {
+      "text": "Robert Wysocki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarz rodzinny",
+      "count": 2
+    },
+    {
+      "text": "NSTEMI",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zawał mięśnia sercowego bez uniesienia odcinka ST",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "I21.4",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "atrial fibrillation",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "migotanie przedsionków",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "I48.9",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "Type 2 diabetes",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Cukrzyca typu 2",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "E11.9",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "chest pain",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "bólem w klatce piersiowej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "90% stenosis of the LAD",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "90% zwężenie gałęzi przedniej zstępującej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "drug-eluting stent",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "stent uwalniający lek",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ticagrelor 90 mg",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "apixaban 5 mg",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "metformin 1 g",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "aspirin 75 mg",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "atorvastatin 80 mg",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "Coronary angiography",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "zabieg diagnostyczny wykonany u pacjentki",
+      "count": 1
+    },
+    {
+      "text": "Koronarografia",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "zabieg diagnostyczny wykonany u pacjentki",
+      "count": 1
+    },
+    {
+      "text": "Holter",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "eponim w nazwie badania",
+      "count": 1
+    },
+    {
+      "text": "Holtera",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "eponim w nazwie badania",
+      "count": 1
+    },
+    {
+      "text": "NHS Lothian",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Department of Cardiology",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "40 Ferry Road",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "EH6 4AA",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Głęboka 11",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "20-612",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "2 February 2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "9 February 2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "3 February 2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "St Columba's General Hospital",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "placówka z patronem",
+      "count": 1
+    },
+    {
+      "text": "Przychodnia Rodzinna „Czechów”",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Lublin",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i siedziba przychodni",
+      "count": 3
+    },
+    {
+      "text": "Edinburgh",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość szpitala i pobytu osoby",
+      "count": 2
+    },
+    {
+      "text": "Consultant Cardiologist",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

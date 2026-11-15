@@ -1,0 +1,191 @@
+{
+  "id": "s2_email_08",
+  "template": "email",
+  "title": "Uczelnia: studentka prosi o przedłużenie terminu, promotor i dziekanat odpowiadają",
+  "seed": null,
+  "traps": [
+    "nazwisko poety (Mickiewicz) w temacie pracy do zachowania",
+    "patron w nazwie uczelni, adres uczelni do zachowania",
+    "kod pocztowy uczelni i studentki w tym samym mieście",
+    "numer albumu (polityka), inicjały promotora w podpisie",
+    "dane o zdrowiu psychicznym i hospitalizacji, psychiatra z imienia i nazwiska",
+    "cytowanie trzypoziomowe i tytuły naukowe przy nazwisku"
+  ],
+  "entities": [
+    {
+      "text": "Iwona Krupa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownica dziekanatu",
+      "count": 2
+    },
+    {
+      "text": "iwona.krupa@umk.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "służbowy e-mail osoby",
+      "count": 1
+    },
+    {
+      "text": "Oliwia Chmielewska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 4
+    },
+    {
+      "text": "oliwia.chmielewska@stud.umk.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Wiesław Jankowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "promotor",
+      "count": 2
+    },
+    {
+      "text": "wjankowski@umk.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Oliwio",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz",
+      "count": 2
+    },
+    {
+      "text": "W.J.",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "inicjały w podpisie",
+      "count": 1
+    },
+    {
+      "text": "depresji",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "w szpitalu na oddziale dziennym",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "hospitalizacja",
+      "count": 1
+    },
+    {
+      "text": "Ilona Wysocka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "psychiatra leczący studentkę",
+      "count": 1
+    },
+    {
+      "text": "29.11.2002",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "02312944803",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Szosa Chełmińska 140/7",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "87-118",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+48 733 509 218",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "301455",
+      "type": "STUDENT_ID",
+      "expect": "policy",
+      "note": "numer albumu",
+      "count": 2
+    },
+    {
+      "text": "Toruń",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i uczelni",
+      "count": 2
+    },
+    {
+      "text": "specjalistka ds. toku studiów",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "56 611 35 22",
+      "type": "PHONE_INSTITUTION",
+      "expect": "policy",
+      "note": "telefon dziekanatu",
+      "count": 1
+    },
+    {
+      "text": "Uniwersytet Mikołaja Kopernika w Toruniu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie uczelni",
+      "count": 1
+    },
+    {
+      "text": "Dziekanat Wydziału Humanistycznego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Fosa Staromiejska 3",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "87-100",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mickiewicza",
+      "type": "HISTORICAL_PERSON",
+      "expect": "keep",
+      "note": "poeta jako temat pracy, nie osoba z pisma",
+      "count": 1
+    }
+  ]
+}

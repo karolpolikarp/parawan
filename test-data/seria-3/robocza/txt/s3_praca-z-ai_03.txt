@@ -1,0 +1,22 @@
+Zrób z tego tabelę (kolumny: właściciel, pojazd, nr rej., VIN, czego brakuje, termin). Potem napisz krótkie wezwanie do uzupełnienia braków osobno dla każdej osoby, z pouczeniem z art. 64 § 2 kpa i terminem 7 dni.
+
+Od: Krzysztof Malinowski <k.malinowski@example.pl>
+Wysłano: wtorek, 3 listopada 2026 09:14
+Do: Wydział Finansowy <finanse@example.pl>
+DW: Iwona Sadurska <i.sadurska@example.pl>
+Temat: RE: wpłaty za rejestrację – zaległe sprawy z października
+
+Iwonko, Pani Basia z kasy prosiła o zestawienie, więc wklejam, co mam w trzech zawieszonych sprawach (KM.5410.1187.2026, KM.5410.1203.2026, KM.5410.1219.2026):
+
+1) ob. Paweł Jaworski, PESEL 78012191232, zam. Stare Juchy, ul. Ełcka 9, tel. 698 230 514. Przerejestrowanie Skody Octavii z 2019 r., VIN XXDB6C79AWE75N9KZ, dotychczasowy nr rej. EL 7530N. Zapłacił za tablice, ale nie ma opłaty ewidencyjnej 0,50 zł (serio). Prawo jazdy okazał, nr 18957/11/1031, chociaż do rejestracji niepotrzebne.
+
+2) p. Natalia Wysocka (z d. Ciszewska), PESEL 90041702982, dowód osobisty ENH648321, zam. ul. Gen. Józefa Bema 17/3, 19-400 Olecko. Sprowadzony z Niemiec Ford Focus, VIN 1YULD7V3PVT9SMVZ0. Brak tłumaczenia niemieckiego dowodu rejestracyjnego i potwierdzenia zapłaty akcyzy. Pani Wysockiej mówiłem dwa razy przez telefon, numer 507 118 642. Mąż, Adrian Wysocki, przychodził z upoważnieniem, ale niepodpisanym.
+
+3) Auto-Handel Mirosław Pawlak, NIP 8135755088, ul. Przemysłowa 22, Ełk. Rejestracja czasowa VW Passata, VIN A1DEUMV7GTLUF8RVU. Faktura FV/2026/10/0457 jest, brakuje pełnomocnictwa dla pracownika, który złożył wniosek (p. Kamil Rogowski). Właściciel firmy twierdzi, że pełnomocnictwo wysłał mailem z adresu auto.pawlak@test.pl, ale nic do nas nie doszło.
+
+Wpłaty proszę sprawdzać na rachunek Starostwa (ten z BIP-u). Jakby co, jestem pod wew. 214.
+
+Pozdrawiam
+Krzysztof Malinowski
+podinspektor, Wydział Komunikacji i Transportu
+Starostwo Powiatowe w Ełku, ul. Marszałka Józefa Piłsudskiego 4, 19-300 Ełk

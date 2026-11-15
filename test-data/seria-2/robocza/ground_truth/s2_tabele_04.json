@@ -1,0 +1,190 @@
+{
+  "id": "s2_tabele_04",
+  "template": "tabele",
+  "title": "Harmonogram dyżurów lekarskich (tabela Markdown)",
+  "seed": null,
+  "traps": [
+    "patron w nazwie szpitala i ulicy siedziby",
+    "nazwisko wersalikami z inicjałem po nazwisku (WILK R.)",
+    "ten sam PWZ i telefon w kilku wierszach",
+    "puste komórki i myślnik zamiast lekarza",
+    "dane o zdrowiu lekarki w uwagach pod tabelą"
+  ],
+  "entities": [
+    {
+      "text": "Szpital Miejski im. dr. Aleksandra Majkowskiego w Kartuzach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szpitala",
+      "count": 1
+    },
+    {
+      "text": "Oddział Chorób Wewnętrznych",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Floriana Ceynowy 7, 83-300 Kartuzy",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w nazwie ulicy",
+      "count": 1
+    },
+    {
+      "text": "Mateusz Kalinowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Iga Ostrowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "Ryszard Wilk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "WILK R.",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko wersalikami + inicjał",
+      "count": 1
+    },
+    {
+      "text": "Kacper Formela",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "8283289",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer prawa wykonywania zawodu lekarza",
+      "count": 1
+    },
+    {
+      "text": "4447100",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer prawa wykonywania zawodu lekarza",
+      "count": 1
+    },
+    {
+      "text": "5451752",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer prawa wykonywania zawodu lekarza",
+      "count": 2
+    },
+    {
+      "text": "8024017",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer prawa wykonywania zawodu lekarza",
+      "count": 1
+    },
+    {
+      "text": "501 220 318",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "698 431 007",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "512 774 905",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "604 115 260",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Joannę Hinz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "przebywa na zwolnieniu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "zwolnienie lekarskie lekarki",
+      "count": 1
+    },
+    {
+      "text": "po zabiegu usunięcia pęcherzyka żółciowego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Hubert Stencel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szpitalny Oddział Ratunkowy",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dział Kadr",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bogdan Lewandowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "ordynator",
+      "count": 1
+    },
+    {
+      "text": "Teresa Ruszkowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wew. 214",
+      "type": "PHONE_EXT",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

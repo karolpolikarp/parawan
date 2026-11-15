@@ -1,0 +1,232 @@
+{
+  "id": "s3_skargi-wnioski_02",
+  "template": "skargi-wnioski",
+  "title": "Odpowiedź starosty na skargę dotyczącą zespołu do spraw orzekania o niepełnosprawności",
+  "seed": null,
+  "traps": [
+    "eponim w nazwie choroby (choroba Parkinsona) jako dane o zdrowiu, nie osoba",
+    "drugi, błędnie wpisany adres skarżącego różniący się kolejnością cyfr",
+    "nazwisko dwuczłonowe córki zawierające nazwisko ojca (Baran-Kozieł)",
+    "fałszywy PESEL jako numer wniosku w systemie EKSMOON",
+    "urzędnicy podpisujący i prowadzący sprawę w funkcji obok pracownicy, której dotyczy skarga"
+  ],
+  "entities": [
+    {
+      "text": "Starostwo Powiatowe w Lublinie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Spokojna 9",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "20-074",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "OR.1510.31.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy skargowej",
+      "count": 1
+    },
+    {
+      "text": "Zdzisław Baran",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "ul. Lubartowska 58",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "21-025",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Niemce",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "Marty Baran-Kozieł",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "córka i pełnomocniczka; nazwisko dwuczłonowe",
+      "count": 1
+    },
+    {
+      "text": "Marta Baran-Kozieł",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Powiatowy Zespół do Spraw Orzekania o Niepełnosprawności w Lublinie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "32787777382",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "numer wniosku, 11 cyfr bez poprawnej sumy PESEL",
+      "count": 1
+    },
+    {
+      "text": "Iwony Szczepańskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownica, której dotyczy skarga",
+      "count": 1
+    },
+    {
+      "text": "Iwonie Szczepańskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szczepańska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 2
+    },
+    {
+      "text": "07.03.1948",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "chorobę Parkinsona",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "eponim w nazwie choroby",
+      "count": 1
+    },
+    {
+      "text": "G20",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "stan po wszczepieniu endoprotezy stawu biodrowego lewego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Lubartowska 85",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "błędnie wpisany adres skarżącego",
+      "count": 1
+    },
+    {
+      "text": "Agnieszka Wrzosek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarz przewodniczący składu orzekającego, z numerem PWZ",
+      "count": 1
+    },
+    {
+      "text": "4502729",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "poradni neurologicznej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "leczenie neurologiczne skarżącego",
+      "count": 1
+    },
+    {
+      "text": "umiarkowanym stopniu niepełnosprawności",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "10-N",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "symbol przyczyny niepełnosprawności (choroby neurologiczne)",
+      "count": 1
+    },
+    {
+      "text": "Stefana Grzesiaka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sąsiad wskazany w skardze",
+      "count": 1
+    },
+    {
+      "text": "Krzysztof Jaworski",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędnik podpisujący pismo w funkcji",
+      "count": 1
+    },
+    {
+      "text": "marta.bk@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "607-441-290",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon z łącznikami",
+      "count": 1
+    },
+    {
+      "text": "Ewelina Duda",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "pracownik prowadzący sprawę w funkcji",
+      "count": 1
+    },
+    {
+      "text": "81 528 66 40",
+      "type": "PHONE_EXT",
+      "expect": "policy",
+      "note": "telefon urzędu z numerem wewnętrznym",
+      "count": 1
+    }
+  ]
+}

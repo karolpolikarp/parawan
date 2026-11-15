@@ -1,0 +1,232 @@
+{
+  "id": "s3_komunikacja-srodowisko_05",
+  "template": "komunikacja-srodowisko",
+  "title": "Notatka straży miejskiej z interwencji z mandatami",
+  "seed": null,
+  "traps": [
+    "nazwisko Mróz obok słowa „mróz”",
+    "dwie osoby o nazwisku Leśniak (najemca i właścicielka auta)",
+    "dane o zdrowiu zgłaszającej i stan po alkoholu",
+    "dwa adresy w tym samym budynku",
+    "strażnicy z numerami służbowymi jako policy"
+  ],
+  "entities": [
+    {
+      "text": "STRAŻ MIEJSKA WROCŁAWIA",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Gwiaździsta 8",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "53-413",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zarządowi Zasobu Komunalnego we Wrocławiu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "mróz",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko Mróz",
+      "count": 1
+    },
+    {
+      "text": "OT-K/7714/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer interwencji",
+      "count": 1
+    },
+    {
+      "text": "Rafał Kubacki",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "strażnik miejski w funkcji",
+      "count": 2
+    },
+    {
+      "text": "Oliwia Sroka",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "strażnik miejski w funkcji",
+      "count": 1
+    },
+    {
+      "text": "0417",
+      "type": "PROF_ID",
+      "expect": "policy",
+      "note": "numer służbowy strażnika",
+      "count": 1
+    },
+    {
+      "text": "1288",
+      "type": "PROF_ID",
+      "expect": "policy",
+      "note": "numer służbowy strażnika",
+      "count": 1
+    },
+    {
+      "text": "Lucyny Barańskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "zgłaszająca",
+      "count": 1
+    },
+    {
+      "text": "ul. Powstańców Śląskich 102 m. 9",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "504 773 219",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "operacji wszczepienia bypassów",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Powstańców Śląskich 102 m. 11",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dawid Leśniak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "03.02.1999 r.",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "99020368812",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "CMJ227316",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Oleśnicy",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "ul. Wojska Polskiego 5 m. 2",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wyczuwalna była woń alkoholu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "stan po spożyciu alkoholu",
+      "count": 1
+    },
+    {
+      "text": "4471902",
+      "type": "DOC_NUMBER",
+      "expect": "policy",
+      "note": "numer mandatu",
+      "count": 1
+    },
+    {
+      "text": "4471903",
+      "type": "DOC_NUMBER",
+      "expect": "policy",
+      "note": "numer mandatu",
+      "count": 1
+    },
+    {
+      "text": "Kacper Mróz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "DW 5K418",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Audi A4",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Arleta Leśniak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Henryk Bąk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "świadek",
+      "count": 1
+    },
+    {
+      "text": "71 338 42 15",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "mówił bełkotliwie",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "objaw nietrzeźwości osoby",
+      "count": 1
+    }
+  ]
+}

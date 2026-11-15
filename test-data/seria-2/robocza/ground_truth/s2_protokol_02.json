@@ -1,0 +1,240 @@
+{
+  "id": "s2_protokol_02",
+  "template": "protokol",
+  "title": "Protokół z zebrania wspólnoty mieszkaniowej",
+  "seed": null,
+  "traps": [
+    "adres budynku wspólnoty jest adresem wszystkich właścicieli (decyzja polityki)",
+    "nazwiska z łącznikiem w bierniku i dopełniaczu (Wiśniewską-Kruk, Wiśniewskiej-Kruk)",
+    "nazwisko Szczygieł i ptak „szczygieł” w tym samym piśmie",
+    "rachunek do zwrotu nadpłaty bez prefiksu PL",
+    "numer fabryczny wodomierza wyglądający jak PESEL (zła suma kontrolna)",
+    "numer księgi wieczystej lokalu i inicjały w załączniku"
+  ],
+  "entities": [
+    {
+      "text": "ul. Grunwaldzkiej 207",
+      "type": "ADDRESS",
+      "expect": "policy",
+      "note": "adres budynku wspólnoty, wskazuje wszystkich właścicieli",
+      "count": 1
+    },
+    {
+      "text": "Gdańsku",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość budynku",
+      "count": 1
+    },
+    {
+      "text": "Bałtycki Serwis Nieruchomości sp. z o.o.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "zarządca",
+      "count": 1
+    },
+    {
+      "text": "6825274224",
+      "type": "NIP_COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "4 870,15 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "zaległość konkretnego właściciela",
+      "count": 1
+    },
+    {
+      "text": "37295928385",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "numer wodomierza bez poprawnej sumy PESEL",
+      "count": 1
+    },
+    {
+      "text": "Uchwała nr 1/2026",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Uchwała nr 2/2026",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "szczygieł",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "ptak obok nazwiska Szczygieł",
+      "count": 1
+    },
+    {
+      "text": "wróbli",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Beatę Wiśniewską-Kruk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Macieja Szczygła",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ryszard Kos",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jadwiga Lewandowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marian Lewandowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Olena Bondarenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Beata Wiśniewska-Kruk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Piotr Zieliński",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "Wiesława Zielińskiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Maciej Szczygieł",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "Dariusz Pawlak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Oleny Bondarenko",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "89 1090 1014 5564 4469 9652 4788",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "NRB bez prefiksu PL",
+      "count": 1
+    },
+    {
+      "text": "Kosa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "Ryszardowi Kosowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zofii Marczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "po wypadku porusza się na wózku inwalidzkim",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "58 341 22 07",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "GD1G/84673375/2",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "księga wieczysta lokalu osoby",
+      "count": 1
+    },
+    {
+      "text": "501 777 093",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "m.szczygiel@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "BWK",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "inicjały przewodniczącej",
+      "count": 1
+    }
+  ]
+}

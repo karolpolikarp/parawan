@@ -81,8 +81,10 @@ export const RE_DATE_VALUE = new RegExp(
   String.raw`\d{1,2}[.\-/]\d{1,2}[.\-/]\d{2,4}|\d{4}-\d{2}-\d{2}|\d{1,2}\s+(?:${MONTHS_GEN})\s+\d{4}`,
   'i',
 );
-/** Zdejmuje numerację („12. ”, „3) ”) i białe znaki z brzegów. */
-export const stripFormPrefix = (s: string): string => s.replace(/^[ \t]*\d+[.)][ \t]*/, '').trim();
+/** Skarb Państwa (osoba prawna, najczęstszy właściciel w decyzjach o nieruchomościach) pod etykietą osoby. */
+export const RE_STATE_TREASURY_VALUE = /^Skarb(?:em|u|owi)?[ \t]+Państwa(?!\p{L})/u;
+/** Zdejmuje numerację („12. ”, „3) ”, część i pole deklaracji „D.2 ”, „1.4. ”) i białe znaki z brzegów. */
+export const stripFormPrefix = (s: string): string => s.replace(/^[ \t]*(?:(?:[A-Z]|\d+)(?:\.\d+)+\.?[ \t]+|\d+[.)][ \t]*)/, '').trim();
 /**
  * Etykieta bez wartości po „:” i bez końcowej podpowiedzi w nawiasie („Nazwisko (rodowe): …” →
  * „Nazwisko”). Skan liniowy zamiast `s.replace(/\s*:.*$/, '').replace(/\s*\([^)]*\)\s*$/, '')`, bo ten

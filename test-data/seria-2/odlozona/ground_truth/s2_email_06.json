@@ -1,0 +1,233 @@
+{
+  "id": "s2_email_06",
+  "template": "email",
+  "title": "Przychodnia: córka pisze w imieniu matki o wyniki, rejestracja odpowiada",
+  "seed": null,
+  "traps": [
+    "eponim w nazwie choroby (Hashimoto) jako część danych o zdrowiu, nie osoba",
+    "patron w nazwie przychodni i w nazwie ulicy przychodni",
+    "kody ICD-10 i leki w odpowiedzi rejestracji",
+    "lekarz z numerem PWZ, nazwisko lekarza w narzędniku",
+    "podpis zdrobnieniem „Wera”, samo imię rejestratorki",
+    "skrzynka funkcyjna rejestracji (polityka)"
+  ],
+  "entities": [
+    {
+      "text": "Weronika Gawron-Pawlak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe",
+      "count": 2
+    },
+    {
+      "text": "weronika.gp@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Rafał Mazurek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarz",
+      "count": 1
+    },
+    {
+      "text": "5009434",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer PWZ lekarza",
+      "count": 1
+    },
+    {
+      "text": "604 318 772",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon pacjentki",
+      "count": 1
+    },
+    {
+      "text": "I10",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "E06.3",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "ramipryl 5 mg",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "kontrola ciśnienia dwa razy dziennie",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "zalecenie lekarskie",
+      "count": 1
+    },
+    {
+      "text": "Kinga",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię rejestratorki",
+      "count": 1
+    },
+    {
+      "text": "Elżbieta Gawron",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pacjentka",
+      "count": 1
+    },
+    {
+      "text": "ela.gawron61@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Elżbiety Gawron",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dopełniacz",
+      "count": 1
+    },
+    {
+      "text": "61060850923",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "nadciśnienie tętnicze",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "niedoczynność tarczycy",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "choroby Hashimoto",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "eponim w nazwie choroby, nie osoba",
+      "count": 1
+    },
+    {
+      "text": "holter ciśnieniowy",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "badanie",
+      "count": 1
+    },
+    {
+      "text": "Mazurkiem",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko lekarza w narzędniku",
+      "count": 1
+    },
+    {
+      "text": "ul. Kapelanka 41/17",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "30-347",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "792 640 115",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wera",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "podpis zdrobnieniem",
+      "count": 1
+    },
+    {
+      "text": "Kraków",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i przychodni",
+      "count": 2
+    },
+    {
+      "text": "rejestracja@przychodnia-ruczaj.example.pl",
+      "type": "EMAIL_FUNCTIONAL",
+      "expect": "policy",
+      "note": "skrzynka funkcyjna",
+      "count": 2
+    },
+    {
+      "text": "Przychodnia Lekarska Ruczaj im. dr. Józefa Dietla",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "placówka z patronem w nazwie",
+      "count": 1
+    },
+    {
+      "text": "poradni kardiologicznej",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "rodzaj poradni zdradza schorzenie",
+      "count": 1
+    },
+    {
+      "text": "ul. Ludwika Solskiego 30",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w nazwie ulicy przychodni",
+      "count": 1
+    },
+    {
+      "text": "30-363",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "12 266 81 90",
+      "type": "PHONE_INSTITUTION",
+      "expect": "policy",
+      "note": "telefon przychodni",
+      "count": 1
+    },
+    {
+      "text": "Internetowym Koncie Pacjenta",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "nazwa usługi publicznej",
+      "count": 1
+    }
+  ]
+}

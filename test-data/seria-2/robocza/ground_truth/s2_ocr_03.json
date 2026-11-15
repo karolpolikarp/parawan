@@ -1,0 +1,275 @@
+{
+  "id": "s2_ocr_03",
+  "template": "ocr",
+  "title": "Karta informacyjna leczenia szpitalnego (skan po OCR)",
+  "seed": null,
+  "traps": [
+    "PESEL z pól formularza: cyfry rozdzielone spacjami",
+    "m odczytane jako rn w nazwisku (Szyrnański)",
+    "patron w nazwie szpitala do zachowania",
+    "skala Glasgow (nazwa miasta) i ICD z błędem OCR",
+    "fałszywy PESEL jako numer księgi głównej",
+    "nazwisko lekarki złamane łącznikiem w podpisie"
+  ],
+  "entities": [
+    {
+      "text": "Szpital Miejski im. Mikołaja Kopernika w Gdańsku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szpitala",
+      "count": 2
+    },
+    {
+      "text": "Oddział Chirurgii Urazowo-Ortopedycznej",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Nowe Ogrody 1-6",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "80-803",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Narodowym Funduszem Zdrowia",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Glasgow",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "nazwa skali, nie osoba ani miejsce",
+      "count": 1
+    },
+    {
+      "text": "66869409447",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "numer księgi głównej, 11 cyfr bez poprawnej sumy PESEL",
+      "count": 1
+    },
+    {
+      "text": "2026/ORT/04417",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer karty",
+      "count": 1
+    },
+    {
+      "text": "Gdańsk",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu pacjenta i szpitala",
+      "count": 2
+    },
+    {
+      "text": "Bartosz Szyrnański",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "m odczytane jako rn",
+      "count": 1
+    },
+    {
+      "text": "Bartosz Szymański",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nagłówek strony 2",
+      "count": 1
+    },
+    {
+      "text": "9 3 1 2 0 9 1 4 8 3 0",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "cyfry z kratek formularza rozdzielone spacjami",
+      "count": 1
+    },
+    {
+      "text": "93120914830",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Grunwaldzka 2l1/4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "l zamiast 1",
+      "count": 1
+    },
+    {
+      "text": "8O-266",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "O zamiast 0",
+      "count": 1
+    },
+    {
+      "text": "Irena Szymańska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "5O8 33l 902",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "O zamiast 0, l zamiast 1",
+      "count": 1
+    },
+    {
+      "text": "Złamanie trzonu kości piszczelowej lewej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "złamanie\ntrzonu kości piszczelowej lewej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "rozpoznanie złamane końcem wiersza",
+      "count": 1
+    },
+    {
+      "text": "S82.2",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "El0.9",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10 E10.9 z błędem OCR",
+      "count": 1
+    },
+    {
+      "text": "Cukrzyca typu l",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "l zamiast 1",
+      "count": 1
+    },
+    {
+      "text": "F84.5",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "Zespół Aspergera",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "eponim jako rozpoznanie pacjenta",
+      "count": 1
+    },
+    {
+      "text": "zespół Aspergera",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "insulinie aspart",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "glarginie",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek (insulina glargine)",
+      "count": 1
+    },
+    {
+      "text": "Enoksaparyna",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "Chodzenie o kulach łokciowych",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "zalecenie ujawnia uraz",
+      "count": 1
+    },
+    {
+      "text": "zespolenie śródszpikowe",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "zabieg",
+      "count": 1
+    },
+    {
+      "text": "Zwolnienie lekarskie",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "zwolnienie lekarskie pacjenta",
+      "count": 1
+    },
+    {
+      "text": "Joannie Marczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarz POZ",
+      "count": 1
+    },
+    {
+      "text": "Natalia Paw-\nlicka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko złamane łącznikiem w kolumnie podpisu",
+      "count": 1
+    },
+    {
+      "text": "Leszek Grabowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "L. Grabowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał i nazwisko w pieczątce",
+      "count": 1
+    },
+    {
+      "text": "6557337",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer PWZ",
+      "count": 1
+    },
+    {
+      "text": "9969683",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer PWZ",
+      "count": 1
+    }
+  ]
+}

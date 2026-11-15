@@ -1,0 +1,11 @@
+Jestem inspektorem ochrony danych w urzędzie. Oceń na podstawie poniższego zgłoszenia, czy to naruszenie trzeba zgłosić Prezesowi UODO w ciągu 72 godzin (art. 33 RODO), czy wystarczy wpis do wewnętrznego rejestru naruszeń. Potem napisz zawiadomienie do osoby, której dane dotyczą (art. 34 RODO), prostym językiem, bez straszenia.
+
+Zgłoszenie wewnętrzne nr 7/2026 (formularz w intranecie)
+Zgłaszająca: Kamila Jankowska, Referat Świadczeń Rodzinnych, pok. 105, wew. 245
+Data i godzina zdarzenia: 12.11.2026, 13:22, stacja robocza UM-RSR-05, adres IP 192.0.2.6
+Opis: Wysłałam skan decyzji o przyznaniu świadczenia pielęgnacyjnego dla p. Wiesławy Rutkowskiej (PESEL 66022783262, ul. Stryjewskiego 3 m. 9, 84-300 Lębork) na adres w.rutkowski@example.com zamiast w.rutkowska@example.com. Podpowiedź adresów w Outlooku podsunęła innego adresata. To pan Wiesław Rutkowski z Nowej Wsi Lęborskiej, który w zeszłym roku pisał do nas w sprawie dodatku węglowego. Nie są spokrewnieni.
+Decyzja zawierała uzasadnienie z opisem stanu zdrowia syna wnioskodawczyni, Damiana (PESEL 95050314870): stwardnienie rozsiane, porusza się na wózku, wymaga cewnikowania i całodobowej opieki, znaczny stopień niepełnosprawności ze wskazaniem konieczności stałej opieki. Na ostatniej stronie był numer rachunku do wypłaty: PL97 1020 2892 2617 8575 8173 3760.
+O 14:05 zadzwoniłam do pana Rutkowskiego (tel. 600 271 845). Powiedział, że maila nie otwierał i go usunął. Poprosiłam o potwierdzenie na piśmie, odpisał mailem o 14:40: „Usunąłem, nie czytałem. W. R.”
+Kierowniczka referatu, Wanda Okońska, wie o zdarzeniu. Wycofanie wiadomości w Outlooku nie zadziałało, bo adres był zewnętrzny.
+
+Moje uwagi robocze: Pani Rutkowska jeszcze nic nie wie. Dowód osobisty nie był w załączniku. Podobne zdarzenie mieliśmy w marcu (zgłoszenie nr 2/2026), wtedy nie zgłaszaliśmy do UODO.

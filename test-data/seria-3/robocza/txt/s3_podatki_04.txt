@@ -1,0 +1,45 @@
+DEKLARACJA O WYSOKOŚCI OPŁATY ZA GOSPODAROWANIE ODPADAMI KOMUNALNYMI (DO-1)
+dla nieruchomości, na której zamieszkują mieszkańcy
+
+Podstawa prawna: art. 6m ust. 1 i 2 ustawy z dnia 13 września 1996 r. o utrzymaniu czystości i porządku w gminach.
+Miejsce składania: Urząd Miejski w Kartuzach, ul. Jana Pawła II 1, pokój 105 (Biuro Obsługi Interesanta).
+
+A. ORGAN WŁAŚCIWY: Burmistrz Kartuz
+
+B. OKOLICZNOŚCI ZŁOŻENIA DEKLARACJI
+[ ] pierwsza deklaracja   [X] zmiana danych   [ ] korekta
+Data zaistnienia zmiany: 03.01.2026. Przyczyna: urodzenie dziecka i zamieszkanie teściowej.
+
+C. SKŁADAJĄCY: [ ] właściciel   [X] współwłaściciel   [ ] użytkownik wieczysty
+
+D. DANE SKŁADAJĄCEGO
+D.1 Nazwisko i imię: FORMELA Kazimierz
+D.2 Imię ojca: Leon   Imię matki: Gertruda
+D.3 PESEL: 84090216491
+D.4 Telefon: 512 846 093   E-mail: kformela84@example.pl
+D.5 Adres zamieszkania:
+   Miejscowość: Kiełpino   Ulica: Kartuska   Nr domu: 41A   Nr lokalu: –
+   Kod pocztowy: 83-307   Poczta: Kiełpino
+
+E. DANE POZOSTAŁYCH WSPÓŁWŁAŚCICIELI
+E.1 Nazwisko i imię: KONKOL Danuta   PESEL: 87021956167   Adres: jak w części D.5
+
+F. NIERUCHOMOŚĆ, NA KTÓREJ POWSTAJĄ ODPADY
+Adres: jak w części D.5. Numer działki ewidencyjnej: 157/12, obręb Kiełpino.
+
+G. OŚWIADCZENIE O KOMPOSTOWNIKU
+[X] posiadam kompostownik przydomowy i kompostuję w nim bioodpady stanowiące odpady komunalne.
+
+H. WYLICZENIE OPŁATY
+H.1 Liczba osób zamieszkujących nieruchomość: 6
+H.2 Stawka opłaty: 33,00 zł od osoby miesięcznie
+H.3 Zwolnienie z tytułu kompostownika: 6 × 2,00 zł = 12,00 zł
+H.4 Miesięczna opłata: 6 × 33,00 zł − 12,00 zł = 186,00 zł
+Opłatę wnosi się bez wezwania do 15. dnia każdego miesiąca.
+
+I. PODPIS SKŁADAJĄCEGO
+Kiełpino, 9 lutego 2026 r.   Kazimierz Formela
+
+J. ADNOTACJE ORGANU
+Data wpływu: 10.02.2026. Przyjęła: Ewelina Bach, podinspektor.
+Uwagi: według ewidencji ludności pod adresem z części D.5 zameldowanych jest 7 osób: składający, Danuta Konkol, ich dzieci Szymon Formela (ur. 2019) i Hanna Formela (ur. 03.01.2026), teściowa składającego Irena Konkol oraz brat składającego Bernard Formela. Składający wyjaśnił telefonicznie, że brat od 2024 r. mieszka i pracuje w Stavanger w Norwegii, dlatego nie został ujęty w liczbie osób. Wyjaśnienie przyjęto, deklarację zaksięgowano bez wezwania do korekty. Ustalono zgodność oświadczenia o kompostowniku z protokołem kontroli z 2025 r. Kopię adnotacji przekazać do referatu księgowości podatkowej z prośbą o przeliczenie opłaty za luty i wysłanie informacji na e-mail składającego.

@@ -7,7 +7,7 @@ import { passCity } from './passes/city.js';
 import { passDriverLicense, passIdCard, passKrs, passPassport, passPlate, passPostal } from './passes/documents.js';
 import { passEmail } from './passes/email.js';
 import { finalizePersons, passApplyOwnMasks, passJsonRequote, passRestoreJsonEscapes, passRestoreUrls } from './passes/finalize.js';
-import { passFormFields } from './passes/forms.js';
+import { passFormFields, passInlineFieldValues } from './passes/forms.js';
 import { passHealth } from './passes/health.js';
 import { hasKsefAnchor, passKsef, passKw, passZnakSprawy } from './passes/kw-ksef-case.js';
 import { passLogin } from './passes/login.js';
@@ -15,8 +15,12 @@ import { passIp, passMac, passTokens, passVin } from './passes/network.js';
 import { passAccount, passCard, passIban, passNip, passPesel, passPhone, passRegon } from './passes/numeric.js';
 import { passPersonInitialsAfterAnchor } from './passes/person-initials.js';
 import { passPersonMaidenAfterMask, passPersonMixedCase, passPersonOcrMix, passPersonOcrPair, passPersonOcrTitle, passPersonParents } from './passes/person-caps-ocr.js';
+import { passPersonKinship } from './passes/person-kin.js';
 import { passPersonPairs, passProtectFictional } from './passes/person-pairs.js';
-import { passPersonForeign, passPersonHomographAnchor, passPersonInitial, passPersonRoleComplement, passPersonSoloDict, passPersonSoloMorph, passPersonStrongTrigger, passPersonTrigger } from './passes/person-triggers.js';
+import { passPersonPropagate } from './passes/person-propagate.js';
+import { passPersonSpeaker } from './passes/person-speaker.js';
+import { passPersonForeignTitle, passPersonPDotName, passPersonSignature, passPersonVocative } from './passes/person-vocative.js';
+import { passPersonForeign, passPersonHomographAnchor, passPersonVietnamese, passPersonInitial, passPersonRoleComplement, passPersonSoloDict, passPersonSoloMorph, passPersonStrongTrigger, passPersonTrigger } from './passes/person-triggers.js';
 import { passProtectJsonEscapes, passProtectUrls } from './passes/protect.js';
 import { passCivilRecord, passProfessionalNumber, passResidenceCard } from './passes/registers.js';
 import { passDelimitedTable, passStructured } from './passes/structured.js';
@@ -81,7 +85,7 @@ function redactWith(input: string, options: RedactOptions | undefined, withProbe
     return `[OSOBA-${label}]`;
   };
 
-  const ctx: RedactCtx = { text: input, raw: input, ksefAnchor: hasKsefAnchor(input), on, bump, hit, M, personMask, pseudonyms: !!personLabels, maskedSurnames, protectedUrls: [], jsonEscapes: false, loginSeeds: new Set(), institutionStreets: [] };
+  const ctx: RedactCtx = { text: input, raw: input, ksefAnchor: hasKsefAnchor(input), on, bump, hit, M, personMask, pseudonyms: !!personLabels, maskedSurnames, protectedUrls: [], jsonEscapes: false, loginSeeds: new Set(), speakerNames: new Set(), institutionStreets: [] };
   // Sonda osób dla strażnika siedziby instytucji: te same typy, bez pseudonimów i własnych masek,
   // bez kolejnej sondy w środku. Wynik zapamiętany, bo kod, ulica i miejscowość pytają o te same wiersze.
   if (withProbe) {
@@ -111,6 +115,7 @@ function redactWith(input: string, options: RedactOptions | undefined, withProbe
   passIp(ctx);
   passVin(ctx);
   passFormFields(ctx);
+  passInlineFieldValues(ctx); // pole osoby w prozie i w środku wiersza („nazwisko rodowe matki: …”)
   passStructured(ctx);
   passDelimitedTable(ctx);
   passLogin(ctx);
@@ -158,11 +163,23 @@ function redactWith(input: string, options: RedactOptions | undefined, withProbe
 
   // Faza 4: imię i nazwisko (heurystyka)
   passProtectFictional(ctx);
+  // Imię i nazwisko wietnamskie po układzie sylab, zanim nazwisko ze słownika („Nguyen”) weźmie samo siebie.
+  passPersonVietnamese(ctx);
   passPersonMixedCase(ctx); // przed wyzwalaczem „Pan/Pani”: inaczej wyzwalacz bierze imię, a nazwisko zostaje jawne
   passPersonRoleComplement(ctx);
   passPersonPairs(ctx);
   passPersonTrigger(ctx);
   passPersonStrongTrigger(ctx);
+  // Zwrot do osoby i podpis po parach i wyzwalaczach: „Mr/Herr” + nazwisko, „p. Marek”, wołacz
+  // („Panie Marku”, „Cześć Ewo,”, „Kasiu,”), imię pod „Pozdrawiam”. Przed nazwiskiem samodzielnym,
+  // żeby „Mr Nowak” i podpis „Anna Nowak” trafiły do jednej maski.
+  passPersonForeignTitle(ctx);
+  passPersonPDotName(ctx);
+  passPersonVocative(ctx);
+  passPersonSignature(ctx);
+  // Etykieta mówcy w czacie i transkrypcji („[08:12] Kasia:”, „Konsultant (Marek):”): imię bez nazwiska
+  // na pozycji mówcy. Po parach („Kasia Nowak:” bierze para), przed nazwiskiem samodzielnym.
+  passPersonSpeaker(ctx);
   passPersonSoloDict(ctx);
   passPersonInitial(ctx);
   passPersonHomographAnchor(ctx);
@@ -173,7 +190,12 @@ function redactWith(input: string, options: RedactOptions | undefined, withProbe
   passPersonOcrMix(ctx);
   passPersonMaidenAfterMask(ctx);
   passPersonParents(ctx);
+  passPersonKinship(ctx); // po rodzicach za maską: tamten przebieg zna skróty „s.” i „c.”
   passPersonInitialsAfterAnchor(ctx); // po osobach, przed finalizePersons: relabelPersons numeruje też te maski
+  // Osoba potwierdzona pewną kotwicą (para, „Pan/Pani”, pole) zakryta też w innych wzmiankach: samo
+  // nazwisko, samo imię i zdrobnienie, inicjały, login. Po wszystkich przebiegach osobowych, bo nasiona
+  // czyta z ich masek; przed finalizePersons, który domyka imię przy masce i numeruje etykiety.
+  passPersonPropagate(ctx);
 
   // Faza 5: domknięcia osób, stabilna numeracja, przywrócenie URL-i i ucieczek
   finalizePersons(ctx);

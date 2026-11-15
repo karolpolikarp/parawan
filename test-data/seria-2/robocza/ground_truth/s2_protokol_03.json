@@ -1,0 +1,310 @@
+{
+  "id": "s2_protokol_03",
+  "template": "protokol",
+  "title": "Protokół z posiedzenia komisji przetargowej",
+  "seed": null,
+  "traps": [
+    "firma JDG z imieniem i nazwiskiem (RAK-DROG Usługi Drogowe Marcin Rak) oraz nazwisko w dopełniaczu poza firmą",
+    "nazwisko Mróz w firmie i słowo „mróz” w treści, nazwisko Lipiec i miesiąc „lipca”",
+    "ulica z patronem w adresie zamawiającego (ul. gen. Józefa Bema)",
+    "inicjał z nazwiskiem w podpisie (A. Kubiak)",
+    "dane spółki i znak sprawy jako polityka",
+    "dane o zdrowiu członka komisji w nawiasie"
+  ],
+  "entities": [
+    {
+      "text": "Zarząd Dróg Powiatowych w Olsztynie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zarządu Dróg Powiatowych w Olsztynie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. gen. Józefa Bema 4",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w adresie instytucji",
+      "count": 1
+    },
+    {
+      "text": "10-516",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "1418N",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer drogi powiatowej",
+      "count": 1
+    },
+    {
+      "text": "Krajowej Izby Odwoławczej",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Platformie e-Zamówienia",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "mróz",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo obok nazwiska Mróz",
+      "count": 1
+    },
+    {
+      "text": "lipca",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "miesiąc obok nazwiska Lipiec",
+      "count": 1
+    },
+    {
+      "text": "ZDP.261.14.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "Wiesław Borkowski",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "kierownik zamawiającego w funkcji",
+      "count": 2
+    },
+    {
+      "text": "Przedsiębiorstwo Drogowe „Warmia-Asfalt” sp. z o.o.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Przemysłowa 12",
+      "type": "COMPANY_ADDRESS",
+      "expect": "policy",
+      "note": "adres spółki",
+      "count": 1
+    },
+    {
+      "text": "11-001",
+      "type": "COMPANY_POSTAL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dywity",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "siedziba spółki",
+      "count": 1
+    },
+    {
+      "text": "7433728932",
+      "type": "NIP_COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Barczewo",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i z nazwy drogi",
+      "count": 2
+    },
+    {
+      "text": "Biskupiec",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Jarosław Borowiec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "przewodniczący komisji",
+      "count": 3
+    },
+    {
+      "text": "Aneta Kubiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Leszek Gołąb",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Wanda Rak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "grypa z powikłaniami",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wandę Rak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "RAK-DROG Usługi Drogowe Marcin Rak",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "pełna firma JDG",
+      "count": 1
+    },
+    {
+      "text": "Kronowo 27A",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres JDG = adres osoby",
+      "count": 1
+    },
+    {
+      "text": "11-010",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "6367412952",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "718737851",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "512 330 418",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "rakdrog@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zakład Usług Komunalnych Grażyna Mróz",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "pełna firma JDG",
+      "count": 1
+    },
+    {
+      "text": "ul. Mazurska 3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "11-300",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "7423202677",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Oskar Lipiec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "OL-2471",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer wpisu radcy prawnego",
+      "count": 1
+    },
+    {
+      "text": "Wandy Rak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marcina Raka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Oskara Lipca",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL37 1940 1076 6927 6612 3927 6090",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "rachunek JDG",
+      "count": 1
+    },
+    {
+      "text": "A. Kubiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał imienia + nazwisko",
+      "count": 1
+    }
+  ]
+}

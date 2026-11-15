@@ -1,0 +1,261 @@
+{
+  "id": "s2_formularz_10",
+  "template": "formularz",
+  "title": "Wniosek o dowód osobisty dla dziecka",
+  "seed": null,
+  "traps": [
+    "imiona rodziców i nazwisko rodowe matki w polach wersalikami",
+    "nazwisko panieńskie po „z d.”",
+    "urzędniczka o nazwisku podobnym do rodowego matki",
+    "dwa telefony w jednym polu",
+    "dane o zdrowiu dziecka w adnotacji o zdjęciu",
+    "miejsce urodzenia wersalikami jako miasto"
+  ],
+  "entities": [
+    {
+      "text": "Kierownik Urzędu Stanu Cywilnego w Szczecinie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wydział Ewidencji Ludności i Dowodów Osobistych",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "pl. Armii Krajowej 1",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "70-456",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szczecin",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i urzędu",
+      "count": 3
+    },
+    {
+      "text": "UTR/0128/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer zgłoszenia utraty",
+      "count": 1
+    },
+    {
+      "text": "BENALI",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko arabskie (Maghreb) wersalikami",
+      "count": 2
+    },
+    {
+      "text": "AMIRA ZOFIA",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imiona dziecka w kolejnym wierszu",
+      "count": 1
+    },
+    {
+      "text": "KARIM",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię ojca",
+      "count": 1
+    },
+    {
+      "text": "AGATA",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię matki",
+      "count": 1
+    },
+    {
+      "text": "SZULC",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko rodowe matki",
+      "count": 1
+    },
+    {
+      "text": "02.10.2017",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia dziecka",
+      "count": 1
+    },
+    {
+      "text": "SZCZECIN",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejsce urodzenia wersalikami",
+      "count": 1
+    },
+    {
+      "text": "17300223208",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "MDF160797",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "utracony dowód dziecka",
+      "count": 1
+    },
+    {
+      "text": "polskie, francuskie",
+      "type": "NATIONALITY",
+      "expect": "policy",
+      "note": "podwójne obywatelstwo",
+      "count": 1
+    },
+    {
+      "text": "Agata Benali",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szulc",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko panieńskie po „z d.”",
+      "count": 1
+    },
+    {
+      "text": "86082350082",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "FPF209158",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Jagiellońska 67 lok. 2",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "70-382",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "91 433 18 06",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "607 504 911",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "agata.benali@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Karim Benali",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "84061190474",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "alergię kontaktową na nikiel",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "L23.0",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "Marianne Benali",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "francuskie imię",
+      "count": 1
+    },
+    {
+      "text": "Lyonie",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość zamieszkania babci za granicą",
+      "count": 1
+    },
+    {
+      "text": "Ewa Szulcowa",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędniczka w funkcji, nazwisko podobne do rodowego matki",
+      "count": 1
+    },
+    {
+      "text": "starszy referent",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "WEL.5340.2.311.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "A. Benali",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis z inicjałem",
+      "count": 1
+    }
+  ]
+}

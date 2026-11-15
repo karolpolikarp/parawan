@@ -1,0 +1,240 @@
+{
+  "id": "s2_sad_09",
+  "template": "sad",
+  "title": "Zawiadomienie o terminie rozprawy i zobowiązanie w sprawie o alimenty",
+  "seed": null,
+  "traps": [
+    "rachunek bankowy sądu do zachowania obok rachunku matki",
+    "telefon i e-mail sądu do zachowania",
+    "dane małoletniej powódki i jej choroba",
+    "nazwisko Sroka w odmianie (Sroki, Sroce)",
+    "partnerka i drugie dziecko pozwanego",
+    "fałszywy PESEL jako kod sprawy w systemie"
+  ],
+  "entities": [
+    {
+      "text": "Sąd Rejonowy w Zielonej Górze",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kożuchowska 8",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "adres siedziby sądu",
+      "count": 1
+    },
+    {
+      "text": "65-364",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "68 322 05 10",
+      "type": "PHONE_INSTITUTION",
+      "expect": "keep",
+      "note": "telefon sekretariatu sądu",
+      "count": 1
+    },
+    {
+      "text": "rodzinny@sr-zielonagora.example.pl",
+      "type": "EMAIL_INSTITUTION",
+      "expect": "keep",
+      "note": "e-mail sekretariatu sądu",
+      "count": 1
+    },
+    {
+      "text": "III RC 288/26",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura akt sprawy",
+      "count": 1
+    },
+    {
+      "text": "24017747489",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "11 cyfr bez poprawnej sumy kontrolnej PESEL, kod sprawy",
+      "count": 1
+    },
+    {
+      "text": "Dawid Sroka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pozwany",
+      "count": 1
+    },
+    {
+      "text": "ul. Ciepielowska 16 m. 3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "66-200",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Świebodzin",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Nikoli Sroki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletnia",
+      "count": 1
+    },
+    {
+      "text": "Sylwię Bielecką",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "matka małoletniej",
+      "count": 1
+    },
+    {
+      "text": "Dawidowi Sroce",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pozwany",
+      "count": 1
+    },
+    {
+      "text": "Nikola Sroka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletnia",
+      "count": 1
+    },
+    {
+      "text": "21 stycznia 2019",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia małoletniej",
+      "count": 1
+    },
+    {
+      "text": "19212146569",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL małoletniej",
+      "count": 1
+    },
+    {
+      "text": "Sulechowie",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "ul. Licealnej 4 m. 12",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "astmę oskrzelową",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "choroba dziecka",
+      "count": 1
+    },
+    {
+      "text": "operator wózka widłowego",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "stanowisko, quasi-identyfikator",
+      "count": 1
+    },
+    {
+      "text": "Lubuskie Magazyny Centralne sp. z o.o.",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "pracodawca pozwanego",
+      "count": 1
+    },
+    {
+      "text": "6 800 zł netto",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "dochód osoby",
+      "count": 1
+    },
+    {
+      "text": "Klaudią Mazurek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "partnerka pozwanego",
+      "count": 1
+    },
+    {
+      "text": "Filipem",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię dziecka",
+      "count": 1
+    },
+    {
+      "text": "Sylwii Bieleckiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "matka małoletniej",
+      "count": 1
+    },
+    {
+      "text": "PL40114020046276113728328944",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "rachunek osoby fizycznej",
+      "count": 1
+    },
+    {
+      "text": "785 330 912",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sądu Rejonowego w Zielonej Górze",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL46 1010 1704 9306 5366 2848 5520",
+      "type": "IBAN_INSTITUTION",
+      "expect": "keep",
+      "note": "rachunek dochodów sądu",
+      "count": 1
+    },
+    {
+      "text": "Ilony Ciupy",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "sędzia w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Bartosz Kubik",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędnik sądowy w funkcji",
+      "count": 1
+    }
+  ]
+}

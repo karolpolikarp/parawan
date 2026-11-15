@@ -133,6 +133,25 @@ export function isAsciiSurname(word: string): boolean {
   return /(?:sk|ck|dzk)a$/.test(w) && asciiSurnames.has(`${w.slice(0, -1)}i`);
 }
 
+let asciiHomographs: Set<string> | null = null;
+let asciiNonSurnameAdj: Set<string> | null = null;
+/**
+ * Czy wyraz ASCII (człon domeny, login) to nazwisko zapisane bez polskich znaków: ze słownika, także
+ * homograf („krol”, „wojcik”), a z `morph` również po samej końcówce -ski/-cki/-dzki/-icz/-czyk
+ * („wrzesniewska”, „brzeczyszczykiewicz”), poza przymiotnikami ze stoplisty („polska”, „slaski”).
+ * Słowniki trzymają formy z ogonkami, więc „zielinski” nie trafiłby w nie wprost.
+ */
+export function isAsciiSurnameShaped(word: string, morph: boolean): boolean {
+  const w = word.toLowerCase();
+  if (w.length < 3 || /[^a-z]/.test(w)) return false;
+  if (isAsciiSurname(w)) return true;
+  asciiHomographs ??= new Set([...HOMOGRAPH_SURNAMES].map(foldAscii));
+  if (asciiHomographs.has(w)) return true;
+  if (!morph || w.length < 5 || !SURNAME_SUFFIX.test(w) || RE_NICZA_ADJ.test(w) || RE_LICZA_VERB.test(w)) return false;
+  asciiNonSurnameAdj ??= new Set([...NON_SURNAME_ADJ].filter((a) => !NOUN_PLURAL_ONLY.has(a)).map(foldAscii));
+  return !asciiNonSurnameAdj.has(w) && !asciiNonSurnameAdj.has(adjBase(w) ?? w);
+}
+
 /**
  * Sufiksy nazwiskowe w mianowniku i częstych przypadkach: -ski/-cki/-dzki, -icz (z -wicz/-owicz/-ewicz),
  * -czyk. Wyrazy pospolite prawie ich nie mają, poza przymiotnikami, które odsiewa NON_SURNAME_ADJ.

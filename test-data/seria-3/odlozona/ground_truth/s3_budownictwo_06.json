@@ -1,0 +1,358 @@
+{
+  "id": "s3_budownictwo_06",
+  "template": "budownictwo",
+  "title": "Zawiadomienie o wszczęciu postępowania z wykazem stron",
+  "seed": null,
+  "traps": [
+    "wykaz stron w tabeli z tabulatorami, adresy i numery działek w jednym wierszu",
+    "firma JDG z imieniem i nazwiskiem oraz NIP i REGON przedsiębiorcy",
+    "małoletnia współwłaścicielka z datą urodzenia i krótkie nazwisko Gil",
+    "adres do doręczeń elektronicznych zamiast adresu pocztowego",
+    "11-cyfrowy numer wniosku bez sumy PESEL do zachowania, adres urzędu powtórzony w wykazie"
+  ],
+  "entities": [
+    {
+      "text": "Grzegorza Kruka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KRUK-DOM Grzegorz Kruk",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "pełna firma JDG z imieniem i nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "1585814918",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "NIP przedsiębiorcy JDG",
+      "count": 1
+    },
+    {
+      "text": "337964843",
+      "type": "REGON_PERSON",
+      "expect": "mask",
+      "note": "REGON przedsiębiorcy JDG",
+      "count": 1
+    },
+    {
+      "text": "ul. Zemborzycka 88",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres JDG",
+      "count": 1
+    },
+    {
+      "text": "20-445",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kinga Rogalska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "LBS/0077/PWOA/18",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer uprawnień budowlanych",
+      "count": 1
+    },
+    {
+      "text": "LB-0815",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer członkowski izby architektów",
+      "count": 1
+    },
+    {
+      "text": "Elżbieta Stachura",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "ul. Nałęczowska 31 m. 2",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "20-701",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 4
+    },
+    {
+      "text": "Wiktor Gil",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "krótkie nazwisko",
+      "count": 1
+    },
+    {
+      "text": "Marzena Gil",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Nałęczowska 29",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Zofia Szpak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletnia",
+      "count": 1
+    },
+    {
+      "text": "9 kwietnia 2013",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia dziecka",
+      "count": 1
+    },
+    {
+      "text": "ul. Krochmalna 7/14",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "20-401",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Konrad Szpak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Ryszard Pękala",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "AE:PL-48213-77059-HRWJT-24",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres do doręczeń elektronicznych osoby",
+      "count": 1
+    },
+    {
+      "text": "pobytu w szpitalu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Doroty Mazur",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Głęboka 12/40",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "20-612",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "691 204 557",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zofii Szpak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "15/3",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka inwestora",
+      "count": 1
+    },
+    {
+      "text": "15/4",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka inwestora",
+      "count": 1
+    },
+    {
+      "text": "15/2",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "16",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "15/5",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "14/1",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "15/1",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka wspólnoty",
+      "count": 1
+    },
+    {
+      "text": "Dziesiąta",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "nazwa obrębu",
+      "count": 1
+    },
+    {
+      "text": "Wspólnota Mieszkaniowa Nieruchomości przy ul. Nałęczowskiej 33",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "wspólnota mieszkaniowa jako strona",
+      "count": 1
+    },
+    {
+      "text": "ul. Nałęczowska 33",
+      "type": "ADDRESS",
+      "expect": "policy",
+      "note": "adres budynku wspólnoty",
+      "count": 1
+    },
+    {
+      "text": "AB-II.6740.1.2318.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "Agata Wnuk",
+      "type": "OFFICIAL",
+      "expect": "policy",
+      "note": "pracownik udzielający informacji",
+      "count": 1
+    },
+    {
+      "text": "81 466 26 40",
+      "type": "PHONE_INSTITUTION",
+      "expect": "policy",
+      "note": "służbowy telefon urzędu",
+      "count": 1
+    },
+    {
+      "text": "Piotr Żurek",
+      "type": "OFFICIAL",
+      "expect": "policy",
+      "note": "dyrektor wydziału podpisujący pismo",
+      "count": 1
+    },
+    {
+      "text": "PREZYDENT MIASTA LUBLIN",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Wieniawska 14",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "20-071",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Lubelskiej Okręgowej Izby Architektów RP",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Gmina Lublin",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "21",
+      "type": "PARCEL",
+      "expect": "keep",
+      "note": "działka drogowa gminy",
+      "count": 1
+    },
+    {
+      "text": "51358332410",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "11 cyfr numeru wniosku bez poprawnej sumy PESEL",
+      "count": 1
+    }
+  ]
+}

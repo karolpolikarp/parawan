@@ -52,6 +52,16 @@ export const KOD_MASK_SRC = escapeRe(MASK['KOD-POCZTOWY']);
 export const DUR_MASK_SRC = escapeRe(MASK['DATA-UR']);
 export const REJ_MASK_SRC = escapeRe(MASK['NR-REJESTRACYJNY']);
 
+/**
+ * Tani warunek wstępny (flaga u) przed wzorcem, którego trafienie zaczyna się wielką literą: poniżej
+ * U+00C0 wielkie litery (\p{Lu}) to tylko A–Z, więc znak spoza tej klasy dwóch przedziałów trafienia
+ * nie zaczyna. V8 sprawdza \p{Lu} i \p{L} na każdej pozycji tekstu kilka razy wolniej niż taką klasę.
+ */
+export const UPPER_AHEAD = String.raw`(?=[A-ZÀ-\u{10FFFF}])`;
+/** To samo dla wzorca, którego trafienie zaczyna się literą (\p{L}): poniżej U+00AA litery to tylko A–Z i a–z. */
+export const LETTER_AHEAD = String.raw`(?=[A-Za-zª-\u{10FFFF}])`;
+/** To samo dla małej litery (\p{Ll}): poniżej U+00AA małe litery to tylko a–z. */
+export const LOWER_AHEAD = String.raw`(?=[a-zª-\u{10FFFF}])`;
 export const RE_CHAR_LL = /\p{Ll}/u;
 export const RE_CHAR_LU = /\p{Lu}/u;
 export const RE_CHAR_L = /\p{L}/u;

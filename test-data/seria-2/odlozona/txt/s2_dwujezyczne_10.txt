@@ -1,0 +1,35 @@
+St Columba's General Hospital, NHS Lothian
+Department of Cardiology, 40 Ferry Road, Edinburgh EH6 4AA
+
+DISCHARGE SUMMARY / KARTA INFORMACYJNA LECZENIA SZPITALNEGO
+(tłumaczenie robocze dla lekarza w Polsce / working translation for the doctor in Poland)
+
+Patient / Pacjentka: Halina Sikora
+Date of birth / Data urodzenia: 9 September 1957 (09.09.1957)
+PESEL: 57090905827
+CHI number: 0909574426
+Home address / Adres zamieszkania: ul. Nadbystrzycka 27/15, 20-618 Lublin, Poland
+Address in the UK / Adres pobytu w UK: 3 Marchfield Terrace, Edinburgh EH4 5BW (daughter's home / dom córki)
+Next of kin / Osoba bliska: Monika Sikora-Grant (daughter / córka), +44 7700 900862, monika.sg@example.com
+
+Admitted / Przyjęcie: 2 February 2026. Discharged / Wypis: 9 February 2026.
+Consultant / Lekarz prowadzący: Dr Fiona MacLeod, Consultant Cardiologist, GMC 7012345
+
+Diagnoses / Rozpoznania
+1. NSTEMI / Zawał mięśnia sercowego bez uniesienia odcinka ST (I21.4)
+2. Newly diagnosed atrial fibrillation / Nowo rozpoznane migotanie przedsionków (I48.9)
+3. Type 2 diabetes / Cukrzyca typu 2 (E11.9)
+
+Course / Przebieg
+EN: Mrs Sikora presented with chest pain while visiting her daughter. Coronary angiography on 3 February 2026 showed a 90% stenosis of the LAD and one drug-eluting stent was implanted. 24-hour Holter monitoring confirmed paroxysmal atrial fibrillation.
+PL: Pacjentka zgłosiła się z bólem w klatce piersiowej podczas pobytu u córki. Koronarografia wykonana 3 lutego 2026 r. wykazała 90% zwężenie gałęzi przedniej zstępującej; wszczepiono jeden stent uwalniający lek. 24-godzinne badanie Holtera potwierdziło napadowe migotanie przedsionków.
+
+Medication on discharge / Leki przy wypisie
+aspirin 75 mg once daily; ticagrelor 90 mg twice daily; apixaban 5 mg twice daily; atorvastatin 80 mg at night; metformin 1 g twice daily
+
+Follow-up / Dalsze postępowanie
+EN: Cardiology review in Poland within 4 to 6 weeks. No driving for 4 weeks. The patient's GP in Poland: lek. Robert Wysocki, Przychodnia Rodzinna „Czechów”, ul. Głęboka 11, 20-612 Lublin.
+PL: Kontrola kardiologiczna w Polsce w ciągu 4 do 6 tygodni. Zakaz prowadzenia pojazdów przez 4 tygodnie. Lekarz rodzinny w Polsce: lek. Robert Wysocki, Przychodnia Rodzinna „Czechów”, ul. Głęboka 11, 20-612 Lublin.
+
+Signed / Podpisano: Dr Fiona MacLeod
+Tłumaczenie robocze / Working translation: Monika Sikora-Grant

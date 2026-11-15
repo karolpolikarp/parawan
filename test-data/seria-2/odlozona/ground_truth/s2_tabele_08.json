@@ -1,0 +1,253 @@
+{
+  "id": "s2_tabele_08",
+  "template": "tabele",
+  "title": "Wykaz osób zakwalifikowanych do najmu lokalu komunalnego (Markdown z wyrównaniem kolumn)",
+  "seed": null,
+  "traps": [
+    "nazwisko przed imieniem bez wersalików",
+    "same imiona członków rodziny w komórce",
+    "ulica 3 Maja wygląda jak data",
+    "dane o zdrowiu i uzależnieniu w kolumnie Uwagi",
+    "nazwisko w odmianie poza tabelą (Józefa Łapińskiego), inicjał z nazwiskiem w składzie komisji"
+  ],
+  "entities": [
+    {
+      "text": "Urząd Miasta w Hajnówce",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Referat Gospodarki Lokalowej",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Referatu Gospodarki Lokalowej",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Aleksandra Zina 1",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w nazwie ulicy",
+      "count": 1
+    },
+    {
+      "text": "17-200",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Hajnówka",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "siedziba urzędu, miejscowość adresów osób",
+      "count": 2
+    },
+    {
+      "text": "XLI/312/26",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer uchwały",
+      "count": 1
+    },
+    {
+      "text": "Sacharczuk Mikołaj",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko przed imieniem",
+      "count": 1
+    },
+    {
+      "text": "Swietłana",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię członka rodziny",
+      "count": 1
+    },
+    {
+      "text": "Daniel",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię dziecka",
+      "count": 1
+    },
+    {
+      "text": "12 l.",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "wiek dziecka",
+      "count": 1
+    },
+    {
+      "text": "ul. Białowieska 41 m. 3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wasiluk Nina",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Lipowa 2A",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "porusza się na wózku inwalidzkim",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Grygoruk Piotr",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ewelina",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "7 l.",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "wiek dziecka",
+      "count": 1
+    },
+    {
+      "text": "po eksmisji, obecnie w noclegowni",
+      "type": "SOCIAL",
+      "expect": "policy",
+      "note": "eksmisja i bezdomność",
+      "count": 1
+    },
+    {
+      "text": "Kiryluk-Bajko Alla",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe przed imieniem",
+      "count": 1
+    },
+    {
+      "text": "Wiktor",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Zinaida Kiryluk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. 3 Maja 15/8",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "nazwa ulicy podobna do daty",
+      "count": 1
+    },
+    {
+      "text": "Łapiński Józef",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Piłsudskiego 7 m. 22",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "patron w nazwie ulicy, ale adres osoby",
+      "count": 1
+    },
+    {
+      "text": "uzależnienie od alkoholu, terapia ukończona w 2025 r.",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Józefa Łapińskiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "odmiana",
+      "count": 1
+    },
+    {
+      "text": "opinii terapeuty prowadzącego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "terapia uzależnienia osoby z poz. 5",
+      "count": 1
+    },
+    {
+      "text": "Irena Bazylewicz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "85 682 20 41",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "i.bazylewicz@hajnowka.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Halina Szymaniuk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "W. Romaniuk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał + nazwisko",
+      "count": 1
+    },
+    {
+      "text": "A. Karpiuk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał + nazwisko",
+      "count": 1
+    }
+  ]
+}

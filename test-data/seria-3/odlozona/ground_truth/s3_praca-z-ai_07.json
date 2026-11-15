@@ -1,0 +1,212 @@
+{
+  "id": "s3_praca-z-ai_07",
+  "template": "praca-z-ai",
+  "title": "Polecenie do AI: odpowiedź na e-mail matki w sprawie zwrotu kosztów dowozu dziecka",
+  "seed": null,
+  "traps": [
+    "metadane formularza BIP z adresem IP",
+    "samo imię dziecka w mianowniku obok pełnego w dopełniaczu",
+    "eponim w rozpoznaniu (zespół Aspergera) i patronka w nazwie szkoły",
+    "nazwa handlowa leku",
+    "sygnatura cytowanego wyroku WSA",
+    "adres wiejski bez ulicy („z Wilkanowa 46”)"
+  ],
+  "entities": [
+    {
+      "text": "Sylwia Domańska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "matka",
+      "count": 2
+    },
+    {
+      "text": "sylwia.domanska@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "198.51.100.163",
+      "type": "IP",
+      "expect": "mask",
+      "note": "adres IP nadawcy formularza",
+      "count": 1
+    },
+    {
+      "text": "Oliwera Domańskiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dziecko",
+      "count": 1
+    },
+    {
+      "text": "09.01.2019",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "19210968176",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szkole Podstawowej nr 3 im. Marii Konopnickiej w Kłodzku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patronka w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "Oliwer",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię dziecka",
+      "count": 2
+    },
+    {
+      "text": "orzeczenie o potrzebie kształcenia specjalnego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "orzeczenie ujawnia niepełnosprawność dziecka",
+      "count": 1
+    },
+    {
+      "text": "288/2025/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer orzeczenia poradni",
+      "count": 1
+    },
+    {
+      "text": "Poradni Psychologiczno-Pedagogicznej w Kłodzku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "autyzm, w tym zespół Aspergera",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "eponim w rozpoznaniu",
+      "count": 1
+    },
+    {
+      "text": "padaczkę",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Depakine Chrono",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "nazwa handlowa leku",
+      "count": 1
+    },
+    {
+      "text": "dostaje napadów",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "objaw opisowo",
+      "count": 1
+    },
+    {
+      "text": "Wilkanowa 46",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres wiejski bez ulicy",
+      "count": 1
+    },
+    {
+      "text": "Toyota Yaris",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "DKL 47C82",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marcin Domański",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "ojciec",
+      "count": 1
+    },
+    {
+      "text": "Legnicy",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość zamieszkania ojca",
+      "count": 1
+    },
+    {
+      "text": "Danuta Rejman",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "wychowawczyni",
+      "count": 1
+    },
+    {
+      "text": "783 552 019",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "OS.4440.7.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "referent",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kinga Bartosik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "urzędniczka",
+      "count": 1
+    },
+    {
+      "text": "WSA we Wrocławiu",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "IV SA/Wr 312/24",
+      "type": "CASE_CITATION",
+      "expect": "keep",
+      "note": "sygnatura cytowanego wyroku",
+      "count": 1
+    },
+    {
+      "text": "Prawa oświatowego",
+      "type": "LEGAL_ACT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

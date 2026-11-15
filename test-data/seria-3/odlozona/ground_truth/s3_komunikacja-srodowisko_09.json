@@ -1,0 +1,275 @@
+{
+  "id": "s3_komunikacja-srodowisko_09",
+  "template": "komunikacja-srodowisko",
+  "title": "Decyzja o odmowie wydania karty parkingowej",
+  "seed": null,
+  "traps": [
+    "symbole niepełnosprawności z ustawy (do zachowania) obok symbolu przy osobie",
+    "choroby i sprzęt medyczny opisowo",
+    "sygnatura cytowanego wyroku WSA",
+    "zięć z tablicą rejestracyjną",
+    "pełnomocnik z dowodem osobistym i adresem",
+    "numer orzeczenia jako policy"
+  ],
+  "entities": [
+    {
+      "text": "Powiatowy Zespół do Spraw Orzekania o Niepełnosprawności w Olsztynie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Głowackiego 17",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "nazwisko w nazwie ulicy urzędu",
+      "count": 1
+    },
+    {
+      "text": "10-447",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wojewódzkiego Zespołu do Spraw Orzekania o Niepełnosprawności w Olsztynie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "04-O",
+      "type": "LEGAL_REF",
+      "expect": "keep",
+      "note": "symbol z przepisu, nie dotyczy osoby",
+      "count": 1
+    },
+    {
+      "text": "05-R",
+      "type": "LEGAL_REF",
+      "expect": "keep",
+      "note": "symbol z przepisu, nie dotyczy osoby",
+      "count": 1
+    },
+    {
+      "text": "10-N",
+      "type": "LEGAL_REF",
+      "expect": "keep",
+      "note": "symbol z przepisu, nie dotyczy osoby",
+      "count": 1
+    },
+    {
+      "text": "II SA/Ol 512/21",
+      "type": "COURT_CASE_CITED",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "PZON.5440.2.287.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "OL-PZON/0912/2025",
+      "type": "DOC_NUMBER",
+      "expect": "policy",
+      "note": "numer orzeczenia o niepełnosprawności",
+      "count": 1
+    },
+    {
+      "text": "Teresa Ołdakowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Teresie Ołdakowskiej",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Spacerowa 4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "11-001",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dywity",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "2 lutego 1958 r.",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "58020247082",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Agatę Bielawską",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Agata Bielawska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "orzeczeniem o umiarkowanym stopniu niepełnosprawności",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "stopień niepełnosprawności osoby",
+      "count": 1
+    },
+    {
+      "text": "07-S",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "symbol przyczyny niepełnosprawności osoby",
+      "count": 2
+    },
+    {
+      "text": "przewlekłą obturacyjną chorobę płuc w stadium III",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "niewydolność serca w klasie III według NYHA",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "korzysta z koncentratora tlenu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krzysztof Bielawski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "NOL 4R218",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Toyota Corolla",
+      "type": "VEHICLE_MODEL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "JGE749467",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kołobrzeska 12 m. 30",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "10-444",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "501 772 640",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "agata.bielawska@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Danuta Kwiatkowska",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "urzędnik w funkcji",
+      "count": 1
+    },
+    {
+      "text": "287/KP/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer decyzji",
+      "count": 1
+    },
+    {
+      "text": "wskazanie o znacznie ograniczonej możliwości samodzielnego poruszania się",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "wskazanie z orzeczenia osoby",
+      "count": 1
+    },
+    {
+      "text": "po ostatnim zaostrzeniu choroby",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "nie przejdzie bez odpoczynku więcej niż 50 metrów",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "ograniczenie ruchowe osoby",
+      "count": 1
+    }
+  ]
+}

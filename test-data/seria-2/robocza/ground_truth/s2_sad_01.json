@@ -1,0 +1,282 @@
+{
+  "id": "s2_sad_01",
+  "template": "sad",
+  "title": "Protokół rozprawy cywilnej o odszkodowanie za zalanie lokalu",
+  "seed": null,
+  "traps": [
+    "nazwisko Mróz i słowo „mróz”",
+    "nazwisko Kurek i słowo „kurek”",
+    "zdrobnienie imienia (Tereska)",
+    "fałszywy PESEL jako numer zgłoszenia szkody",
+    "cytowane orzecznictwo SN do zachowania",
+    "skład sądu jako decyzja polityki"
+  ],
+  "entities": [
+    {
+      "text": "I C 1482/25",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura akt sprawy",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy Lublin-Zachód w Lublinie",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Boczna Lubomelskiej 13",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "adres siedziby sądu",
+      "count": 1
+    },
+    {
+      "text": "20-070",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marek Stępień",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "sędzia w składzie sądu, osoba w funkcji",
+      "count": 2
+    },
+    {
+      "text": "Joanna Dudek",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "protokolant, osoba w funkcji",
+      "count": 2
+    },
+    {
+      "text": "Teresy Mróz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Teresa Mróz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Damianowi Kurkowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Damian Kurek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "58062324600",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "92021160193",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kwiatowa 18 m. 4",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kwiatowa 18 m. 7",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "ten sam budynek, inny lokal",
+      "count": 1
+    },
+    {
+      "text": "21-040",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Świdnik",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "Świdniku",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość zamieszkania świadka",
+      "count": 1
+    },
+    {
+      "text": "Pauliną Grabowską",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pełnomocnik strony",
+      "count": 1
+    },
+    {
+      "text": "Paulina Grabowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pełnomocnik strony",
+      "count": 1
+    },
+    {
+      "text": "LUB/Adw/0457",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer wpisu na listę adwokatów",
+      "count": 1
+    },
+    {
+      "text": "Ewa Pawlak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "świadek",
+      "count": 2
+    },
+    {
+      "text": "damian.k77@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "601 482 935",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL55 1940 1076 8270 7362 0698 6643",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sądu Najwyższego",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "II CSK 123/19",
+      "type": "CASE_LAW",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "III CZP 31/11",
+      "type": "CASE_LAW",
+      "expect": "keep",
+      "note": "sygnatura cytowanej uchwały",
+      "count": 1
+    },
+    {
+      "text": "mróz",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko Mróz",
+      "count": 1
+    },
+    {
+      "text": "kurek",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko Kurek",
+      "count": 1
+    },
+    {
+      "text": "Spółdzielnia Mieszkaniowa „Zielone Wzgórze”",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Towarzystwu Ubezpieczeń Lubelska Tarcza S.A.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "DOM/7731/2025",
+      "type": "POLICY_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "37289353674",
+      "type": "FAKE_PESEL",
+      "expect": "keep",
+      "note": "11 cyfr bez poprawnej sumy kontrolnej PESEL, numer zgłoszenia szkody",
+      "count": 1
+    },
+    {
+      "text": "art. 233 § 1 k.k.",
+      "type": "LEGAL_REF",
+      "expect": "keep",
+      "note": "przepis",
+      "count": 1
+    },
+    {
+      "text": "Tereska",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie imienia powódki",
+      "count": 2
+    },
+    {
+      "text": "nadciśnienie tętnicze",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kurka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "Romana Ciesielskiego",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "biegły sądowy w funkcji",
+      "count": 1
+    }
+  ]
+}

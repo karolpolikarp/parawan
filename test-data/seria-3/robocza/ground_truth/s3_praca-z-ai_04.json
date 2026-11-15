@@ -1,0 +1,281 @@
+{
+  "id": "s3_praca-z-ai_04",
+  "template": "praca-z-ai",
+  "title": "Polecenie do AI: poprawa stylistyki roboczej notatki w sprawie wymeldowania",
+  "seed": null,
+  "traps": [
+    "potoczna forma nazwiska „Kowalczykowa” i inicjał „Pani K.”",
+    "adres osoby bez „ul.” („z Lipowej 5”)",
+    "zdrobnienia imion (Darek, Lenkę) i imię ojca po „s.”",
+    "pobyt w zakładzie karnym i wyrok jako dane szczególne, nazwa zakładu jako decyzja polityki",
+    "nazwisko Wnuk w podpisie i słowo „wnuk” w tekście"
+  ],
+  "entities": [
+    {
+      "text": "SO.5343.19.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kowalczykowa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "potoczna forma nazwiska",
+      "count": 2
+    },
+    {
+      "text": "Lipowej 5",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres osoby bez „ul.”",
+      "count": 1
+    },
+    {
+      "text": "Irena Kowalczyk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "wnioskodawczyni",
+      "count": 1
+    },
+    {
+      "text": "14.03.1958",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "58031408122",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KR1W/33920641/0",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "604 557 120",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dariusza Kowalczyka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Mariana",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię ojca po „s.”",
+      "count": 1
+    },
+    {
+      "text": "02.11.1987",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "87110242270",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Darek",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie",
+      "count": 1
+    },
+    {
+      "text": "odsiaduje karę",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "pozbawienie wolności",
+      "count": 1
+    },
+    {
+      "text": "wyrok za kradzieże",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "skazanie",
+      "count": 1
+    },
+    {
+      "text": "z więzienia",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "pozbawienie wolności opisowo",
+      "count": 1
+    },
+    {
+      "text": "Zakładzie Karnym w Wadowicach",
+      "type": "INSTITUTION",
+      "expect": "policy",
+      "note": "nazwa zakładu karnego przy osobie ujawnia pozbawienie wolności",
+      "count": 1
+    },
+    {
+      "text": "ZFR033791",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "K.",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "inicjał nazwiska „Pani K.”",
+      "count": 1
+    },
+    {
+      "text": "Jadwigą Nowicką",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sąsiadka, świadek",
+      "count": 1
+    },
+    {
+      "text": "Lipowej 7",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres świadka bez „ul.”",
+      "count": 1
+    },
+    {
+      "text": "33 870 21 44",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Monika",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "była żona tylko z imienia",
+      "count": 1
+    },
+    {
+      "text": "wnuk",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, nazwisko Wnuk w podpisie",
+      "count": 1
+    },
+    {
+      "text": "Szymon",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wnuk tylko z imienia",
+      "count": 1
+    },
+    {
+      "text": "Bielsku",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "miejsce nauki",
+      "count": 1
+    },
+    {
+      "text": "Rafał Kamiński",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dzielnicowy",
+      "count": 1
+    },
+    {
+      "text": "KP w Andrychowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "D. Kowalczyka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał imienia i nazwisko",
+      "count": 1
+    },
+    {
+      "text": "Lenkę",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie imienia dziecka",
+      "count": 1
+    },
+    {
+      "text": "Darka",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Moniki",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "30.03.2017",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia dziecka",
+      "count": 1
+    },
+    {
+      "text": "jest po chemii",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "leczenie onkologiczne potocznie",
+      "count": 1
+    },
+    {
+      "text": "Urząd Miejski w Andrychowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Rynek 15",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bogumiła Wnuk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "urzędniczka, nazwisko będące zwykłym słowem",
+      "count": 1
+    },
+    {
+      "text": "Referat Spraw Obywatelskich",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

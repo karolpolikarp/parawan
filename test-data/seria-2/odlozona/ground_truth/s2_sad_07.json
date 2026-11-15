@@ -1,0 +1,261 @@
+{
+  "id": "s2_sad_07",
+  "template": "sad",
+  "title": "Wyrok sądu pracy z uzasadnieniem (rozwiązanie umowy bez wypowiedzenia)",
+  "seed": null,
+  "traps": [
+    "ławnicy w składzie sądu",
+    "firma JDG pracodawcy z imieniem i nazwiskiem oraz NIP osoby fizycznej",
+    "nazwisko Krupa i słowo „krupa”",
+    "ciąża i choroba jako dane o zdrowiu",
+    "samo nazwisko w bierniku (Domańską) i samo imię dziecka",
+    "adres zakładu bez ulicy (wieś i numer)"
+  ],
+  "entities": [
+    {
+      "text": "IV P 133/26",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura akt sprawy",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy w Rzeszowie",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Lidia Szela",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "sędzia w składzie sądu, osoba w funkcji",
+      "count": 2
+    },
+    {
+      "text": "Zofia Kustra",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "ławnik, osoba w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Bolesław Pyrcz",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "ławnik, osoba w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Dominika Wais",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "protokolant, osoba w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Wiesławy Gołąb",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "powódka",
+      "count": 2
+    },
+    {
+      "text": "Wiesława Gołąb",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "powódka",
+      "count": 1
+    },
+    {
+      "text": "Wiesławie Gołąb",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "powódka",
+      "count": 1
+    },
+    {
+      "text": "Adrianowi Kmieciowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pozwany, przedsiębiorca jednoosobowy",
+      "count": 1
+    },
+    {
+      "text": "Sady Kmieć Adrian Kmieć",
+      "type": "JDG_NAME",
+      "expect": "mask",
+      "note": "pełna firma JDG z imieniem i nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "Adriana Kmiecia",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pozwany",
+      "count": 1
+    },
+    {
+      "text": "Czudcu",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Czudca",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby, inny przypadek",
+      "count": 1
+    },
+    {
+      "text": "ul. Rynek 14",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kacpra",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię dziecka powódki",
+      "count": 1
+    },
+    {
+      "text": "brygadzistki sortowni owoców",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "stanowisko, quasi-identyfikator",
+      "count": 1
+    },
+    {
+      "text": "4 650 zł brutto miesięcznie",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "wynagrodzenie osoby",
+      "count": 1
+    },
+    {
+      "text": "Lubenia 212",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres zakładu przedsiębiorcy jednoosobowego",
+      "count": 1
+    },
+    {
+      "text": "3595958376",
+      "type": "NIP_PERSON",
+      "expect": "mask",
+      "note": "NIP przedsiębiorcy jednoosobowego",
+      "count": 1
+    },
+    {
+      "text": "Łukasz Fedak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pełnomocnik strony",
+      "count": 1
+    },
+    {
+      "text": "RZ-3021",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer wpisu na listę radców",
+      "count": 1
+    },
+    {
+      "text": "14. tygodniu ciąży",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "ciąża",
+      "count": 1
+    },
+    {
+      "text": "zespołu cieśni nadgarstka prawego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "w ciąży",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "ciąża powódki, drugie wystąpienie",
+      "count": 1
+    },
+    {
+      "text": "Marzena Domańska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "świadek",
+      "count": 1
+    },
+    {
+      "text": "kierowniczka sortowni",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "stanowisko świadka",
+      "count": 1
+    },
+    {
+      "text": "Jolanta Krupa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "świadek",
+      "count": 1
+    },
+    {
+      "text": "krupa",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo (krupa śnieżna), a nie nazwisko Krupa",
+      "count": 1
+    },
+    {
+      "text": "Domańską",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w bierniku",
+      "count": 1
+    },
+    {
+      "text": "art. 52 § 1 pkt 1 k.p.",
+      "type": "LEGAL_REF",
+      "expect": "keep",
+      "note": "przepis",
+      "count": 1
+    },
+    {
+      "text": "Sąd Najwyższy",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "III PK 28/19",
+      "type": "CASE_LAW",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "I PK 213/18",
+      "type": "CASE_LAW",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "art. 177 § 1 k.p.",
+      "type": "LEGAL_REF",
+      "expect": "keep",
+      "note": "przepis",
+      "count": 1
+    }
+  ]
+}

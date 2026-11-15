@@ -1,0 +1,303 @@
+{
+  "id": "s2_sad_03",
+  "template": "sad",
+  "title": "Postanowienie sądu rodzinnego o ograniczeniu władzy rodzicielskiej",
+  "seed": null,
+  "traps": [
+    "dane dwojga małoletnich (PESEL, daty urodzenia, samo imię)",
+    "nazwisko Zając w wielu przypadkach i słowo „zającem”",
+    "dane o zdrowiu dziecka i matki (ADHD, F90.0, depresja)",
+    "zagraniczny numer telefonu",
+    "kurator i asystent rodziny w funkcji",
+    "szkoła z patronem jako quasi-identyfikator dziecka"
+  ],
+  "entities": [
+    {
+      "text": "III Nsm 207/26",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura akt sprawy",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy w Nowym Sączu",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Elżbieta Obrochta",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "sędzia w składzie sądu, osoba w funkcji",
+      "count": 2
+    },
+    {
+      "text": "Wiktor Baliga",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "protokolant, osoba w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Oliwiera Zająca",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletni",
+      "count": 1
+    },
+    {
+      "text": "Oliwierem Zającem",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletni",
+      "count": 1
+    },
+    {
+      "text": "Oliwier",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię małoletniego",
+      "count": 2
+    },
+    {
+      "text": "14 kwietnia 2016",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia małoletniego",
+      "count": 1
+    },
+    {
+      "text": "16241457734",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL małoletniego",
+      "count": 1
+    },
+    {
+      "text": "Leny Zając",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletnia",
+      "count": 1
+    },
+    {
+      "text": "Leną Zając",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "małoletnia",
+      "count": 1
+    },
+    {
+      "text": "Lena",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię małoletniej",
+      "count": 1
+    },
+    {
+      "text": "30 sierpnia 2020",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia małoletniej",
+      "count": 1
+    },
+    {
+      "text": "20283084342",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL małoletniej",
+      "count": 1
+    },
+    {
+      "text": "Natalii Zając",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Natalię Zając",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Natalia Zając",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Kamila Zająca",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "Kamil Zając",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Prokuratury Rejonowej w Nowym Sączu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szkoły Podstawowej nr 7 im. Kornela Makuszyńskiego w Nowym Sączu",
+      "type": "INSTITUTION",
+      "expect": "policy",
+      "note": "szkoła małoletniego, quasi-identyfikator; patron w nazwie",
+      "count": 1
+    },
+    {
+      "text": "ADHD",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "rozpoznanie u dziecka",
+      "count": 1
+    },
+    {
+      "text": "F90.0",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "Poradni Psychologiczno-Pedagogicznej nr 1 w Nowym Sączu",
+      "type": "INSTITUTION",
+      "expect": "policy",
+      "note": "placówka, pod której opieką jest dziecko",
+      "count": 1
+    },
+    {
+      "text": "ul. Papieskiej 41",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Chełmcu",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 2
+    },
+    {
+      "text": "depresji poporodowej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "+31 6 4127 3390",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "zagraniczny numer telefonu",
+      "count": 1
+    },
+    {
+      "text": "Doroty Łabudy",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "kurator zawodowy w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Stanisława Zając",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "babka małoletnich",
+      "count": 1
+    },
+    {
+      "text": "ul. Marcinkowickiej 15",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Miejskiego Ośrodka Pomocy Społecznej w Nowym Sączu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Beata Kmiecik",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "asystent rodziny w funkcji",
+      "count": 1
+    },
+    {
+      "text": "zającem",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko Zając",
+      "count": 1
+    },
+    {
+      "text": "Opiniodawczego Zespołu Sądowych Specjalistów",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szymona Pieczkę",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pełnomocnik strony",
+      "count": 1
+    },
+    {
+      "text": "KR-2210",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer wpisu na listę radców",
+      "count": 1
+    },
+    {
+      "text": "Sąd Najwyższy",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "III CSK 118/18",
+      "type": "CASE_LAW",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "art. 109 § 2 pkt 5 k.r.o.",
+      "type": "LEGAL_REF",
+      "expect": "keep",
+      "note": "przepis",
+      "count": 1
+    },
+    {
+      "text": "poradni zdrowia psychicznego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "zobowiązanie matki do leczenia psychiatrycznego",
+      "count": 1
+    }
+  ]
+}

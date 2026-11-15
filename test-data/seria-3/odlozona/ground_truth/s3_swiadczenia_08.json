@@ -1,0 +1,345 @@
+{
+  "id": "s3_swiadczenia_08",
+  "template": "swiadczenia",
+  "title": "Rodzinny wywiad środowiskowy w sprawie specjalnego zasiłku opiekuńczego",
+  "seed": null,
+  "traps": [
+    "adresy wiejskie bez ulicy (Hryniewicze 27, Hryniewicze 31)",
+    "dane o zdrowiu opisowo i leki bez dawek",
+    "uzależnienie członka rodziny i leczenie odwykowe",
+    "samo imię w miejscowniku („na Ireneuszu”)",
+    "patron w nazwie zakładu opiekuńczego do zachowania",
+    "inicjał z nazwiskiem w podpisie pracownika"
+  ],
+  "entities": [
+    {
+      "text": "Gminny Ośrodek Pomocy Społecznej w Bielsku Podlaskim",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kleszczelowska 3",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "17-100",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bielsk Podlaski",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 3
+    },
+    {
+      "text": "GOPS.5231.12.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Hryniewicze 27",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres wiejski bez ulicy",
+      "count": 2
+    },
+    {
+      "text": "17-106",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Michał Sawicki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik socjalny",
+      "count": 1
+    },
+    {
+      "text": "Ireneusz Wasiluk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "68022456153",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kawaler",
+      "type": "FAMILY_STATUS",
+      "expect": "policy",
+      "note": "stan cywilny",
+      "count": 1
+    },
+    {
+      "text": "mechanik maszyn rolniczych",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "zawód",
+      "count": 1
+    },
+    {
+      "text": "85 730 19 42",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon stacjonarny",
+      "count": 1
+    },
+    {
+      "text": "667 102 389",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Nadzieja Wasiluk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "imię będące zwykłym słowem",
+      "count": 2
+    },
+    {
+      "text": "6 listopada 1941",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "41110688087",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "orzeczeniem o znacznym stopniu niepełnosprawności",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "leżąca",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "złamaniu szyjki kości udowej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "niewydolnością serca NYHA III",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "otępieniem naczyniowym",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "pieluchomajtek",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ośrodka Zdrowia w Orli",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Rolniczej Spółdzielni Produkcyjnej „Narew”",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "były pracodawca",
+      "count": 1
+    },
+    {
+      "text": "3,42 ha przeliczeniowych",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "gospodarstwo rolne",
+      "count": 1
+    },
+    {
+      "text": "1 022,46 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "dochód osoby",
+      "count": 1
+    },
+    {
+      "text": "1 978,30 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "emerytura",
+      "count": 1
+    },
+    {
+      "text": "348,22 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "dodatek pielęgnacyjny",
+      "count": 1
+    },
+    {
+      "text": "Jan Wasiluk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "65050914196",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "renta z tytułu niezdolności do pracy",
+      "type": "HEALTH",
+      "expect": "policy",
+      "note": "pośrednio o zdrowiu",
+      "count": 1
+    },
+    {
+      "text": "1 410,00 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "renta",
+      "count": 1
+    },
+    {
+      "text": "Ireneuszu",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię",
+      "count": 1
+    },
+    {
+      "text": "odleżynie w okolicy kości krzyżowej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "furosemid",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "bisoprolol",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "memantyna",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "jest uzależniony od alkoholu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "dane wrażliwe",
+      "count": 1
+    },
+    {
+      "text": "leczeniu odwykowym",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "w szpitalu w Choroszczy",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "szpital psychiatryczny, pośrednio o zdrowiu",
+      "count": 1
+    },
+    {
+      "text": "Halina Ołdakowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sołtys",
+      "count": 1
+    },
+    {
+      "text": "Mikołaj Kiryluk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sąsiad",
+      "count": 1
+    },
+    {
+      "text": "Hryniewicze 31",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres sąsiada bez ulicy",
+      "count": 1
+    },
+    {
+      "text": "1 586,33 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "dochód na osobę",
+      "count": 1
+    },
+    {
+      "text": "Zakładzie Opiekuńczo-Leczniczym im. św. Jana Pawła II w Hajnówce",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie zakładu",
+      "count": 1
+    },
+    {
+      "text": "M. Sawicki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał + nazwisko",
+      "count": 1
+    }
+  ]
+}

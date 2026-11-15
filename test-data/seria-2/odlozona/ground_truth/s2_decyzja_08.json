@@ -1,0 +1,232 @@
+{
+  "id": "s2_decyzja_08",
+  "template": "decyzja",
+  "title": "Decyzja nadzoru budowlanego nakazująca rozbiórkę",
+  "seed": null,
+  "traps": [
+    "nazwisko Kruk i słowo „kruk”",
+    "małżonkowie w celowniku i liczbie mnogiej („Państwu Markowi Kaczmarkowi”, „Kaczmarkowie”)",
+    "adres inwestycji tożsamy z adresem zamieszkania",
+    "dane o zdrowiu sąsiada i renta po wypadku",
+    "cytowany wyrok WSA"
+  ],
+  "entities": [
+    {
+      "text": "POWIATOWY INSPEKTOR NADZORU BUDOWLANEGO\nDLA MIASTA POZNANIA",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "nazwa w dwóch wierszach",
+      "count": 1
+    },
+    {
+      "text": "ul. Gronowa 20",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "61-655",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Poznań",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i urzędu",
+      "count": 4
+    },
+    {
+      "text": "PINB-II.5160.214.2025.SN",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dz.U. z 2025 r. poz. 418",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "publikator",
+      "count": 1
+    },
+    {
+      "text": "działce nr 112/7",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "działka inwestorów",
+      "count": 1
+    },
+    {
+      "text": "obręb Naramowice",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "obręb ewidencyjny",
+      "count": 1
+    },
+    {
+      "text": "PO1P/19227297/5",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Markowi Kaczmarkowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "celownik",
+      "count": 1
+    },
+    {
+      "text": "79100389591",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Beacie Kaczmarek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "celownik, nazwisko nieodmienne",
+      "count": 1
+    },
+    {
+      "text": "81042111262",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Rubież 46A",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres inwestycji = adres zamieszkania",
+      "count": 2
+    },
+    {
+      "text": "61-612",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "działką nr 112/8",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "działka sąsiada",
+      "count": 1
+    },
+    {
+      "text": "Zbigniewa Kruka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Rubież 46B",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "zbyszek.k58@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "astmy oskrzelowej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Państwo Kaczmarkowie",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "liczba mnoga",
+      "count": 1
+    },
+    {
+      "text": "Beata Kaczmarek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Dariusz Olejnik",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "wykonawca, osoba trzecia",
+      "count": 1
+    },
+    {
+      "text": "jest od roku na rencie po wypadku",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "kruk",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "ptak, nazwisko Kruk",
+      "count": 1
+    },
+    {
+      "text": "Wojewódzkiego Sądu Administracyjnego w Poznaniu",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "IV SA/Po 512/23",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "sygnatura cytowanego orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "Wielkopolskiego Wojewódzkiego Inspektora Nadzoru Budowlanego w Poznaniu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "inż. Sylwia Nowicka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis z upoważnienia",
+      "count": 1
+    },
+    {
+      "text": "Marek Kaczmarek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "rozdzielnik",
+      "count": 1
+    },
+    {
+      "text": "Zbigniew Kruk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "rozdzielnik",
+      "count": 1
+    }
+  ]
+}

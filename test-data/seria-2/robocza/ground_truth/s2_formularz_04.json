@@ -1,0 +1,289 @@
+{
+  "id": "s2_formularz_04",
+  "template": "formularz",
+  "title": "Karta zgłoszenia dziecka do żłobka",
+  "seed": null,
+  "traps": [
+    "imię i nazwisko dziecka w kolejnych wierszach wersalikami",
+    "nazwisko białoruskie Zhuk i słowo „żukiem”",
+    "imię „Nadzieja” jest zwykłym słowem",
+    "telefon przychodni do zachowania obok telefonów rodziców",
+    "dane o zdrowiu dziecka w polach formularza",
+    "patron ulicy w adresie żłobka"
+  ],
+  "entities": [
+    {
+      "text": "Żłobek Miejski nr 3 „Pod Kasztanem” w Gdańsku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Wita Stwosza 41",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w nazwie ulicy instytucji",
+      "count": 1
+    },
+    {
+      "text": "80-308",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ALISA",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię dziecka wersalikami w kolejnym wierszu",
+      "count": 1
+    },
+    {
+      "text": "PAWLAK-ZHUK",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe polsko-białoruskie",
+      "count": 1
+    },
+    {
+      "text": "11 lutego 2025 r.",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia dziecka słownie",
+      "count": 1
+    },
+    {
+      "text": "25221153623",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dziecka",
+      "count": 1
+    },
+    {
+      "text": "ul. Startowa 9 m. 27",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "80-461",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Gdańsk",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby, siedziby i podpisu",
+      "count": 3
+    },
+    {
+      "text": "Hanna Zhuk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "białoruskie nazwisko spoza słownika",
+      "count": 2
+    },
+    {
+      "text": "19.06.1993",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "93061949728",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "MW1826225",
+      "type": "PASSPORT",
+      "expect": "mask",
+      "note": "paszport białoruski",
+      "count": 1
+    },
+    {
+      "text": "+48 509 772 130",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon w kolejnym wierszu",
+      "count": 1
+    },
+    {
+      "text": "hanna.zhuk93@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Centrum Usług Wspólnych Baltic Shared Services",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "specjalistka ds. płac",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krzysztof Pawlak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "90090265977",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "58 341 09 77",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "numer stacjonarny do pracy",
+      "count": 1
+    },
+    {
+      "text": "664 280 315",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "terminal kontenerowy Baltic Hub",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "operator suwnicy",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Maksym Pawlak-Zhuk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "rodzeństwo, ukraińsko-białoruskie imię",
+      "count": 1
+    },
+    {
+      "text": "Biedronki",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "nazwa grupy żłobkowej",
+      "count": 1
+    },
+    {
+      "text": "alergia na białko mleka krowiego, dieta bezmleczna",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "atopowe zapalenie skóry, stosowany emolient dwa razy dziennie",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "nie, odroczone przez lekarza",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "brak szczepień, dana o zdrowiu",
+      "count": 1
+    },
+    {
+      "text": "Marta Ziółkowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarka z imienia i nazwiska",
+      "count": 1
+    },
+    {
+      "text": "Przychodnia Zaspa",
+      "type": "HEALTHCARE_FACILITY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "58 552 18 40",
+      "type": "INSTITUTION_PHONE",
+      "expect": "keep",
+      "note": "telefon przychodni",
+      "count": 1
+    },
+    {
+      "text": "Teresa Pawlak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "osoba upoważniona",
+      "count": 1
+    },
+    {
+      "text": "SKA361174",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "601 993 552",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Nadzieja Zhuk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "imię „Nadzieja” to też zwykłe słowo",
+      "count": 1
+    },
+    {
+      "text": "Alisa",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię dziecka w zdaniu",
+      "count": 1
+    },
+    {
+      "text": "żukiem",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zabawka, zbieżne z nazwiskiem Zhuk",
+      "count": 1
+    },
+    {
+      "text": "kasztanem",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,240 @@
+{
+  "id": "s2_nieformalne_01",
+  "template": "nieformalne",
+  "title": "Czat rodzinny w komunikatorze o opiece nad babcią",
+  "seed": null,
+  "traps": [
+    "pseudonimy z emotikonami w nagłówkach wiadomości",
+    "PESEL bez etykiety jako osobna wiadomość",
+    "telefon bez formatowania",
+    "imiona i nazwisko małymi literami, zdrobnienia w odmianie",
+    "szpital z patronem i adres MOPS do zachowania",
+    "data urodzenia ze skróconym rokiem"
+  ],
+  "entities": [
+    {
+      "text": "Kasia",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "pseudonim w czacie z emotikoną",
+      "count": 11
+    },
+    {
+      "text": "kasia",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię małą literą",
+      "count": 1
+    },
+    {
+      "text": "Tomek",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "pseudonim w czacie, zdrobnienie",
+      "count": 10
+    },
+    {
+      "text": "Grażka",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie w nazwie kontaktu „Ciocia Grażka”",
+      "count": 7
+    },
+    {
+      "text": "Hala",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie w nazwie grupy",
+      "count": 1
+    },
+    {
+      "text": "halina pietrzak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "imię i nazwisko małymi literami",
+      "count": 1
+    },
+    {
+      "text": "Bielecki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "lekarz, samo nazwisko",
+      "count": 1
+    },
+    {
+      "text": "Ela",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "pracownica MOPS, samo imię",
+      "count": 1
+    },
+    {
+      "text": "Zosi",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "sąsiadka, zdrobnienie w dopełniaczu",
+      "count": 1
+    },
+    {
+      "text": "zosia",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "zdrobnienie małą literą",
+      "count": 1
+    },
+    {
+      "text": "41030524605",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL bez etykiety, sam w wiadomości",
+      "count": 1
+    },
+    {
+      "text": "5 marca 41",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia ze skróconym rokiem",
+      "count": 1
+    },
+    {
+      "text": "os. Złotego Wieku 14/22",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "31-617",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "609 245 781",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "602114387",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon bez formatowania",
+      "count": 1
+    },
+    {
+      "text": "513 880 214",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "55 1940 1076 8270 7362 0698 6643",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "NRB bez PL",
+      "count": 1
+    },
+    {
+      "text": "udar niedokrwienny",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "lewa ręka słabsza",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "cukrzyca typu 2",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "brała insulinę",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "metformina 850",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "insulina glargine",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "przewlekła choroba nerek 3 stopnia",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "nerkach",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "choroba nerek wspomniana bez rozpoznania („nie wie o nerkach”)",
+      "count": 2
+    },
+    {
+      "text": "Kraków",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Szpital Specjalistyczny im. Ludwika Rydygiera w Krakowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szpitala",
+      "count": 1
+    },
+    {
+      "text": "Miejski Ośrodek Pomocy Społecznej w Krakowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "MOPS",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "skrót instytucji",
+      "count": 1
+    },
+    {
+      "text": "ul. Józefińska 14",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "adres MOPS",
+      "count": 1
+    },
+    {
+      "text": "IKP",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "Internetowe Konto Pacjenta",
+      "count": 1
+    }
+  ]
+}

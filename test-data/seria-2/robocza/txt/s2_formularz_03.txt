@@ -1,0 +1,57 @@
+CEIDG-1
+WNIOSEK O WPIS DO CENTRALNEJ EWIDENCJI I INFORMACJI O DZIAŁALNOŚCI GOSPODARCZEJ
+Złożony w: Urząd Gminy Lesznowola, ul. Gminna 60, 05-506 Lesznowola
+Numer wniosku w systemie: 69488286630
+
+01. RODZAJ WNIOSKU
+[X] wniosek o wpis do CEIDG     [ ] zmiana wpisu     [ ] zawieszenie
+
+02. DANE WNIOSKODAWCY
+01. PESEL: 82080547718
+02. Data urodzenia: 1982-08-05
+03. Nazwisko:
+NGUYEN
+04. Imię: THANH          05. Drugie imię: VAN
+06. Nazwisko rodowe: NGUYEN
+07. Imię ojca: HUNG      08. Imię matki: MAI
+09. Obywatelstwo: [ ] polskie  [X] inne: wietnamskie
+10. Dokument potwierdzający prawo pobytu: karta pobytu nr RP9049697, ważna do 18.03.2029
+11. Posiadam wspólność majątkową z małżonkiem: [X] tak  [ ] nie
+Małżonek: Tran Thi Hoa, PESEL 86120177363
+
+03. DANE KONTAKTOWE
+Telefon: 503 117 942
+Adres e-mail: thanh.bistro@example.pl
+Strona internetowa: brak
+
+04. ADRES ZAMIESZKANIA
+Województwo: mazowieckie   Powiat: piaseczyński   Gmina: Lesznowola
+Ulica, nr: ul. Szkolna 23/4
+Kod pocztowy: 05-500     Miejscowość: Mysiadło
+
+05. DANE FIRMY
+Firma przedsiębiorcy:
+Nguyen Van Thanh Bistro Pho Hanoi
+NIP: 2850609467          REGON: 917732006
+Przewidywana liczba pracujących: 2
+
+06. MIEJSCE WYKONYWANIA DZIAŁALNOŚCI
+Stałe miejsce: Centrum Handlowe GD Center, hala C, boks 112, ul. Nadrzeczna 6, 05-552 Wólka Kosowska
+
+07. RODZAJE DZIAŁALNOŚCI (PKD 2025)
+Przeważający: 56.11.Z Restauracje i inne stałe placówki gastronomiczne
+Pozostałe: 56.21.Z, 47.29.Z
+
+08. RACHUNEK BANKOWY FIRMOWY
+PL11109010146641848579209682
+
+09. PEŁNOMOCNIK
+Pełnomocnikiem do spraw CEIDG ustanawiam Do Minh Tuan, tel. 692 004 815, który pomagał przy tłumaczeniu dokumentów. Zupa pho i sajgonki to główne dania w karcie.
+
+10. OŚWIADCZENIA
+[X] Oświadczam, że nie mam zakazu prowadzenia działalności gospodarczej.
+[X] Wybieram formę opodatkowania: ryczałt od przychodów ewidencjonowanych.
+[X] Nie jestem objęty orzeczonym zakazem.
+
+Wniosek przyjęła: Krystyna Wilk, inspektor ds. działalności gospodarczej
+Mysiadło, 06.11.2026                 Thanh Nguyen

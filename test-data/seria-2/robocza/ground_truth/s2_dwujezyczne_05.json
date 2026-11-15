@@ -1,0 +1,247 @@
+{
+  "id": "s2_dwujezyczne_05",
+  "template": "dwujezyczne",
+  "title": "List referencyjny promotorki z tłumaczeniem przysięgłym na angielski",
+  "seed": null,
+  "traps": [
+    "nazwisko tłumacza Lis w odmianie („Krzysztofa Lisa”) obok słowa „lisa” (zwierzę) w tytule pracy",
+    "ta sama osoba w dopełniaczu polskim, z „Pan”/„pan Michał” i z „Mr” w tłumaczeniu",
+    "dane o zdrowiu w dwóch językach (białaczka)",
+    "telefon sekretariatu zakładu (instytucja) obok prywatnych danych kandydata",
+    "data urodzenia po polsku i po angielsku (February 3, 2001), daty pisma do zachowania",
+    "numer albumu studenta jako polityka, numer tłumacza przysięgłego do zamaskowania"
+  ],
+  "entities": [
+    {
+      "text": "Michała Zielińskiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Michał Zieliński",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "pan Michał",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię z „pan”",
+      "count": 1
+    },
+    {
+      "text": "Mr Zieliński",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko z tytułem",
+      "count": 2
+    },
+    {
+      "text": "3 lutego 2001",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "February 3, 2001",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia w formacie angielskim",
+      "count": 1
+    },
+    {
+      "text": "ostrej białaczki limfoblastycznej",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "acute lymphoblastic leukaemia",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "mzielinski01@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "+48 512 090 334",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Barbara Nowicka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "autorka listu",
+      "count": 2
+    },
+    {
+      "text": "barbara.nowicka@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Krzysztof Lis",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "tłumacz przysięgły",
+      "count": 1
+    },
+    {
+      "text": "Krzysztofa Lisa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "TP/2417/11",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer na liście tłumaczy przysięgłych",
+      "count": 1
+    },
+    {
+      "text": "lisa",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwierzę, zwykłe słowo",
+      "count": 2
+    },
+    {
+      "text": "Uniwersytet Wrocławski",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Wydział Nauk Biologicznych",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Faculty of Biological Sciences",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Przybyszewskiego 63",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "51-148",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Wageningen University & Research",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Polskiego Towarzystwa Zoologicznego",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ministra Sprawiedliwości",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "71 375 40 21",
+      "type": "INSTITUTION_PHONE",
+      "expect": "keep",
+      "note": "telefon sekretariatu zakładu",
+      "count": 2
+    },
+    {
+      "text": "2 marca 2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "March 2, 2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "6 marca 2026",
+      "type": "DATE",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Wrocław",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "siedziba uczelni i miejsce sporządzenia",
+      "count": 6
+    },
+    {
+      "text": "254117",
+      "type": "STUDENT_ID",
+      "expect": "policy",
+      "note": "numer albumu",
+      "count": 2
+    },
+    {
+      "text": "118/2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer repertorium tłumacza",
+      "count": 1
+    },
+    {
+      "text": "Kierowniczka Zakładu Ekologii Kręgowców",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Head of the Department of Vertebrate Ecology",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

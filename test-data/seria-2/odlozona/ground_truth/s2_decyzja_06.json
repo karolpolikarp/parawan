@@ -1,0 +1,281 @@
+{
+  "id": "s2_decyzja_06",
+  "template": "decyzja",
+  "title": "Decyzja o przyznaniu świadczenia pielęgnacyjnego",
+  "seed": null,
+  "traps": [
+    "eponim w nazwie choroby (choroba Alzheimera) i patron w nazwie szpitala",
+    "nazwa ulicy będąca nazwą osiedla („Antoniuk Fabryczny”) podobna do nazwiska",
+    "adres wiejski bez ulicy i odmiana nazwy wsi („w Bondarach”)",
+    "nazwisko kobiety nieodmienne obok odmienionego imienia",
+    "numer orzeczenia o niepełnosprawności"
+  ],
+  "entities": [
+    {
+      "text": "Gminny Ośrodek Pomocy Społecznej w Michałowie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Białostocka 9",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "16-050",
+      "type": "POSTAL",
+      "expect": "policy",
+      "note": "kod wspólny dla urzędu i adresu strony",
+      "count": 3
+    },
+    {
+      "text": "Michałowo",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "poczta strony i siedziba organu",
+      "count": 4
+    },
+    {
+      "text": "GOPS.ŚR.5220.37.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dz.U. z 2024 r. poz. 323",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "publikator",
+      "count": 1
+    },
+    {
+      "text": "Burmistrza Michałowa",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Piotra Iwaniuka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Piotrowi Iwaniukowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bondary 27",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "adres wiejski bez ulicy",
+      "count": 2
+    },
+    {
+      "text": "72051940297",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "3 287,00 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "kwota świadczenia",
+      "count": 1
+    },
+    {
+      "text": "Nadzieją Iwaniuk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "narzędnik, nazwisko nieodmienne",
+      "count": 1
+    },
+    {
+      "text": "46120866409",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Transport Drzewny Puszcza sp. z o.o.",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "były pracodawca",
+      "count": 1
+    },
+    {
+      "text": "kierowca",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "8 grudnia 1946",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "orzeczeniem o znacznym stopniu niepełnosprawności",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Powiatowy Zespół do Spraw Orzekania o Niepełnosprawności w Białymstoku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PZON.8140.1174.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer orzeczenia o niepełnosprawności",
+      "count": 1
+    },
+    {
+      "text": "Szpitala Wojewódzkiego im. Jędrzeja Śniadeckiego w Białymstoku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szpitala",
+      "count": 1
+    },
+    {
+      "text": "chorobę Alzheimera w stadium umiarkowanym",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "eponim",
+      "count": 1
+    },
+    {
+      "text": "G30.1",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "kod ICD-10",
+      "count": 1
+    },
+    {
+      "text": "cukrzycę typu 2",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "wymaga stałej pomocy przy jedzeniu, ubieraniu i przyjmowaniu leków i nie może pozostawać bez opieki w nocy",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "opis niesamodzielności matki",
+      "count": 1
+    },
+    {
+      "text": "Mikołaj Iwaniuk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "brat",
+      "count": 1
+    },
+    {
+      "text": "ul. Antoniuk Fabryczny 23 m. 40",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "nazwa ulicy przypomina nazwisko",
+      "count": 1
+    },
+    {
+      "text": "Pani Iwaniuk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 1
+    },
+    {
+      "text": "Weronika Iwaniuk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "wnuczka",
+      "count": 1
+    },
+    {
+      "text": "w Bondarach",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscownik nazwy wsi strony",
+      "count": 1
+    },
+    {
+      "text": "Aleksander Kondratiuk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownik socjalny",
+      "count": 1
+    },
+    {
+      "text": "Pan Iwaniuk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko",
+      "count": 1
+    },
+    {
+      "text": "PL21 1090 1014 5813 3743 3873 1365",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "IBAN z prefiksem PL i spacjami",
+      "count": 1
+    },
+    {
+      "text": "Samorządowego Kolegium Odwoławczego w Białymstoku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "85 718 30 44",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "telefon stacjonarny strony",
+      "count": 1
+    },
+    {
+      "text": "piotr.iwaniuk@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Halina Bazylewicz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "podpis z upoważnienia",
+      "count": 1
+    },
+    {
+      "text": "Piotr Iwaniuk",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "rozdzielnik",
+      "count": 1
+    }
+  ]
+}

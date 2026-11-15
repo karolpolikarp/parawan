@@ -488,8 +488,11 @@ const RE_MAIDEN_NEXT_FIELD = new RegExp(
 // reguła par z „z domu" jej nie widzi. Po masce „z domu" to jawna kotwica: Titlecase przechodzi po
 // stopliście instytucji, wersaliki muszą być potwierdzone („JAN KOWALSKI Z DOMU WYSZEDŁ RANO" to zdanie).
 // „domu" tylko małymi albo wielkimi literami: „z Domu Pomocy Społecznej" to instytucja.
+// Odstęp przed „z" to „(?:[ \t]*[,(])?[ \t\n]*": ten sam język co „[ \t]*[,(]?[ \t\n]*", ale bez
+// dwóch kwantyfikatorów spacji tuż po sobie, które długi ciąg spacji za maską dzieliły na
+// wszystkie sposoby (czas kwadratowy).
 const RE_MAIDEN_AFTER_MASK = new RegExp(
-  `(${PERSON_MASK_SRC})([ \\t]*[,(]?[ \\t\\n]*[Zz][ \\t\\n]+(?:domu|DOMU|d\\.|D\\.)[ \\t]+)` +
+  `(${PERSON_MASK_SRC})((?:[ \\t]*[,(])?[ \\t\\n]*[Zz][ \\t\\n]+(?:domu|DOMU|d\\.|D\\.)[ \\t]+)` +
     `([${PL_UP}][${PL_LO}]+(?:-[${PL_UP}][${PL_LO}]+)?|[${PL_UP}]{2,}(?:-[${PL_UP}]{2,})?)(?![${NM_BOUND}0-9-])`,
   'g',
 );

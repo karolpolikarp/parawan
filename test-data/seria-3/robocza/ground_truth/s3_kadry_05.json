@@ -1,0 +1,198 @@
+{
+  "id": "s3_kadry_05",
+  "template": "kadry",
+  "title": "Wniosek ojca o urlop wychowawczy z adnotacjami kadr",
+  "seed": null,
+  "traps": [
+    "dane o zdrowiu dziecka (niepełnosprawność, MPD, rehabilitacja)",
+    "PESEL i data urodzenia dziecka obok PESEL matki",
+    "samo imię dziecka na początku zdania",
+    "numer aktu urodzenia z zerem wiodącym",
+    "nazwisko Kłos będące zwykłym słowem",
+    "organ i adres urzędu do zachowania przy tym samym mieście co adres wnioskodawcy"
+  ],
+  "entities": [
+    {
+      "text": "Michał Sobieraj",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "ul. Tadeusza Kościuszki 40 m. 15",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "patron w ulicy adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "24-100",
+      "type": "POSTAL",
+      "expect": "policy",
+      "note": "ten sam kod dla pracownika i urzędu",
+      "count": 2
+    },
+    {
+      "text": "501 337 284",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "msobieraj@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Prezydent Miasta Puławy",
+      "type": "JOB_TITLE",
+      "expect": "keep",
+      "note": "organ, bez nazwiska",
+      "count": 1
+    },
+    {
+      "text": "Urząd Miasta Puławy",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Lubelska 5",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Leną Sobieraj",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dziecko, narzędnik",
+      "count": 1
+    },
+    {
+      "text": "6 kwietnia 2021",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "data urodzenia dziecka",
+      "count": 1
+    },
+    {
+      "text": "21240642766",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "PESEL dziecka",
+      "count": 1
+    },
+    {
+      "text": "orzeczeniem o niepełnosprawności",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "niepełnosprawność dziecka",
+      "count": 1
+    },
+    {
+      "text": "Powiatowy Zespół do Spraw Orzekania o Niepełnosprawności w Puławach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Lena",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię dziecka",
+      "count": 1
+    },
+    {
+      "text": "mózgowe porażenie dziecięce",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "rehabilitowana pięć razy w tygodniu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Paulina Sobieraj",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "matka dziecka",
+      "count": 1
+    },
+    {
+      "text": "91051465768",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szpitalu Specjalistycznym w Puławach",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "pracodawca matki",
+      "count": 1
+    },
+    {
+      "text": "0612/2021",
+      "type": "CIVIL_RECORD",
+      "expect": "mask",
+      "note": "numer aktu urodzenia",
+      "count": 1
+    },
+    {
+      "text": "kopia orzeczenia o niepełnosprawności",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "załącznik ujawniający niepełnosprawność",
+      "count": 1
+    },
+    {
+      "text": "inspektor, Wydział Geodezji i Gospodarki Nieruchomościami",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "niepełnosprawności dziecka",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "niepełnosprawność dziecka w adnotacji kadr",
+      "count": 1
+    },
+    {
+      "text": "Ewa Kłos",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko Kłos, zwykłe słowo",
+      "count": 1
+    },
+    {
+      "text": "Tomasz Jarosz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Anna Pacholec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

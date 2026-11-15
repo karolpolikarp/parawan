@@ -1,0 +1,295 @@
+{
+  "id": "s3_budownictwo_08",
+  "template": "budownictwo",
+  "title": "Wypis z rejestru gruntów dla komornika",
+  "seed": null,
+  "traps": [
+    "imiona rodziców w wypisie z ewidencji, samodzielne imiona (Edward, Irena, Zenon, Wiesława)",
+    "nazwisko Krawiec i dopełniacz Krawca, samo nazwisko po „Pani”",
+    "PESEL osoby trzeciej, której dotyczy odmowa",
+    "numer producenta rolnego ARiMR (9 cyfr jak REGON, bez etykiety REGON)",
+    "symbole klas gleb i numery działek obok danych podmiotowych, adres kancelarii komornika do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "Łukasz Krawiec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko jak nazwa zawodu",
+      "count": 2
+    },
+    {
+      "text": "Edward",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię ojca w wypisie",
+      "count": 1
+    },
+    {
+      "text": "Irena",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię matki w wypisie",
+      "count": 1
+    },
+    {
+      "text": "79100558199",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kłeckowska 40 m. 6",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "62-202",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dorota Krawiec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Zenon",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię ojca w wypisie",
+      "count": 1
+    },
+    {
+      "text": "Wiesława",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "imię matki w wypisie",
+      "count": 1
+    },
+    {
+      "text": "82011941200",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Wierzbowa 3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "62-203",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PO1G/57343361/3",
+      "type": "LAND_REGISTER",
+      "expect": "mask",
+      "note": "księga wieczysta wskazuje właściciela",
+      "count": 1
+    },
+    {
+      "text": "Łukasza Krawca",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dopełniacz z wypadnięciem e",
+      "count": 1
+    },
+    {
+      "text": "071245839",
+      "type": "FARMER_ID",
+      "expect": "mask",
+      "note": "numer producenta rolnego ARiMR",
+      "count": 1
+    },
+    {
+      "text": "Genowefy Kubiak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "48052729924",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "607 993 114",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Pani Krawiec",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko po „Pani” (w kluczu z tytułem, bo samo „Krawiec” występuje też w pełnych imionach i nazwiskach)",
+      "count": 1
+    },
+    {
+      "text": "Gniezno",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 5
+    },
+    {
+      "text": "Łabiszynek",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby i nazwa obrębu",
+      "count": 2
+    },
+    {
+      "text": "G.183",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer jednostki rejestrowej",
+      "count": 2
+    },
+    {
+      "text": "77/3",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka dłużnika",
+      "count": 1
+    },
+    {
+      "text": "77/5",
+      "type": "PARCEL",
+      "expect": "policy",
+      "note": "działka zabudowana domem",
+      "count": 2
+    },
+    {
+      "text": "Km 1452/26",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy egzekucyjnej",
+      "count": 1
+    },
+    {
+      "text": "I Ns 615/25",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy o podział majątku",
+      "count": 1
+    },
+    {
+      "text": "jest rozwiedziona z dłużnikiem",
+      "type": "FAMILY_STATUS",
+      "expect": "policy",
+      "note": "stan cywilny i relacja z dłużnikiem",
+      "count": 1
+    },
+    {
+      "text": "przebywa za granicą",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "miejsce pobytu dłużnika",
+      "count": 1
+    },
+    {
+      "text": "Jarosław Wieczorek",
+      "type": "OFFICIAL",
+      "expect": "policy",
+      "note": "komornik w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Anna Cichocka",
+      "type": "OFFICIAL",
+      "expect": "policy",
+      "note": "geodeta powiatowy podpisujący pismo",
+      "count": 1
+    },
+    {
+      "text": "GKN.6642.1.4417.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "mieszka wyłącznie ona z dwójką dzieci",
+      "type": "FAMILY_STATUS",
+      "expect": "policy",
+      "note": "sytuacja rodzinna i miejsce zamieszkania dzieci",
+      "count": 1
+    },
+    {
+      "text": "STAROSTA GNIEŹNIEŃSKI",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Papieża Pawła VI 9",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron w adresie instytucji",
+      "count": 1
+    },
+    {
+      "text": "62-200",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Komornik Sądowy przy Sądzie Rejonowym w Gnieźnie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Kancelaria Komornicza nr II w Gnieźnie",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Tumska 6/2",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "adres kancelarii komorniczej",
+      "count": 1
+    },
+    {
+      "text": "Sądem Rejonowym w Gnieźnie",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "RIIIb",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "symbol klasy gleby",
+      "count": 1
+    }
+  ]
+}

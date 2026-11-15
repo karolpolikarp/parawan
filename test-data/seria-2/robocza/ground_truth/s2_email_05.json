@@ -1,0 +1,233 @@
+{
+  "id": "s2_email_05",
+  "template": "email",
+  "title": "Kancelaria adwokacka: odpowiedź klientowi z przekazaną wiadomością od drugiej strony",
+  "seed": null,
+  "traps": [
+    "sygnatura sprawy klienta (polityka) i sygnatura cytowanej uchwały SN (do zachowania)",
+    "sąd i jego adres do zachowania",
+    "numer wpisu adwokatki w stopce, skrzynka kancelarii (polityka)",
+    "Gmail „Forwarded message” w cytacie, nagłówki po angielsku",
+    "dane o zdrowiu klienta rzucone mimochodem (dializy)",
+    "nazwisko drugiej strony w kilku przypadkach i podpis „S. Kubacki”"
+  ],
+  "entities": [
+    {
+      "text": "Natalia Ostrowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "adwokatka, pełnomocnik",
+      "count": 2
+    },
+    {
+      "text": "Stanisław Kubacki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "stanislaw.kubacki@test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "Malinowskim",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w narzędniku",
+      "count": 1
+    },
+    {
+      "text": "Stanisławie",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "wołacz",
+      "count": 1
+    },
+    {
+      "text": "Malinowskiego",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w dopełniaczu",
+      "count": 2
+    },
+    {
+      "text": "POZ/Adw/1873",
+      "type": "PROF_ID",
+      "expect": "mask",
+      "note": "numer wpisu na listę adwokatów",
+      "count": 1
+    },
+    {
+      "text": "58012351779",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PYZ986643",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Jana III Sobieskiego 27/41",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "patron w nazwie ulicy adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "62-030",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL96 1160 2202 7865 6925 9595 8377",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "503 911 640",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "na dializach",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "dane o zdrowiu mimochodem",
+      "count": 1
+    },
+    {
+      "text": "S. Kubacki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał imienia i nazwisko w podpisie",
+      "count": 1
+    },
+    {
+      "text": "Jerzy Malinowski",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "druga strona",
+      "count": 2
+    },
+    {
+      "text": "jmalinowski.bud@example.com",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Bartosz Lewicki",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "691 455 202",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Luboń",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "I C 482/26",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy klienta",
+      "count": 1
+    },
+    {
+      "text": "kancelaria@ostrowska-adwokaci.example.pl",
+      "type": "EMAIL_FUNCTIONAL",
+      "expect": "policy",
+      "note": "skrzynka kancelarii z nazwiskiem w domenie",
+      "count": 1
+    },
+    {
+      "text": "Ostrowska i Wspólnicy Kancelaria Adwokacka sp.p.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "nazwa spółki z nazwiskiem",
+      "count": 1
+    },
+    {
+      "text": "ul. Ratajczaka 19/3",
+      "type": "COMPANY_ADDRESS",
+      "expect": "policy",
+      "note": "adres kancelarii",
+      "count": 1
+    },
+    {
+      "text": "61-814",
+      "type": "COMPANY_POSTAL",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "61 852 30 44",
+      "type": "PHONE_COMPANY",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sąd Rejonowy Poznań-Stare Miasto w Poznaniu",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Młyńska 1a",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "adres sądu",
+      "count": 1
+    },
+    {
+      "text": "61-729",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "III CZP 151/22",
+      "type": "CASE_CITED",
+      "expect": "keep",
+      "note": "sygnatura cytowanej uchwały",
+      "count": 1
+    },
+    {
+      "text": "Sądu Najwyższego",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    }
+  ]
+}

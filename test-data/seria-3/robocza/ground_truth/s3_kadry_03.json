@@ -1,0 +1,170 @@
+{
+  "id": "s3_kadry_03",
+  "template": "kadry",
+  "title": "Świadectwo pracy pracownicy socjalnej",
+  "seed": null,
+  "traps": [
+    "nazwisko Mróz jako zwykłe słowo i nazwisko rodowe w nawiasie",
+    "data urodzenia w formacie z kropkami obok wielu dat okresów zatrudnienia",
+    "zajęcie komornicze: komornik w funkcji, sygnatura Km i kwoty (policy)",
+    "liczba dni niezdolności do pracy (policy) w treści formularza",
+    "patron w nazwie ulicy siedziby i nazwa sądu pracy do zachowania",
+    "kod pocztowy wspólny dla siedziby i adresu pracownicy"
+  ],
+  "entities": [
+    {
+      "text": "Miejski Ośrodek Pomocy Społecznej w Ełku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Kilińskiego 31",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "nazwisko patrona w nazwie ulicy siedziby",
+      "count": 1
+    },
+    {
+      "text": "19-300",
+      "type": "POSTAL",
+      "expect": "policy",
+      "note": "ten sam kod w adresie siedziby i w adresie pracownicy",
+      "count": 2
+    },
+    {
+      "text": "Ełk",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miasto siedziby i adresu pracownicy",
+      "count": 3
+    },
+    {
+      "text": "626873893",
+      "type": "REGON_COMPANY",
+      "expect": "policy",
+      "note": "REGON jednostki",
+      "count": 1
+    },
+    {
+      "text": "Bożena Mróz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko Mróz jest zwykłym słowem",
+      "count": 2
+    },
+    {
+      "text": "Leśniak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko rodowe",
+      "count": 1
+    },
+    {
+      "text": "03.02.1972",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "72020343180",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Miejskim Ośrodku Pomocy Społecznej w Ełku",
+      "type": "EMPLOYER",
+      "expect": "policy",
+      "note": "pracodawca w miejscowniku",
+      "count": 1
+    },
+    {
+      "text": "starszy specjalista pracy socjalnej",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "za okres 33 dni",
+      "type": "HEALTH",
+      "expect": "policy",
+      "note": "liczba dni niezdolności do pracy z powodu choroby",
+      "count": 1
+    },
+    {
+      "text": "Wojciecha Ostrowskiego",
+      "type": "PERSON",
+      "expect": "policy",
+      "note": "komornik sądowy w funkcji",
+      "count": 1
+    },
+    {
+      "text": "Km 418/26",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy egzekucyjnej",
+      "count": 1
+    },
+    {
+      "text": "12 640,00 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "kwota zadłużenia pracownicy",
+      "count": 1
+    },
+    {
+      "text": "7 915,36 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "pozostała kwota zajęcia",
+      "count": 1
+    },
+    {
+      "text": "Sądu Rejonowego w Ełku IV Wydziału Pracy i Ubezpieczeń Społecznych",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Armii Krajowej 15/3",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "87 610 25 44",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Renata Gołębiewska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Krzysztof Wołosz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "dyrektor w podpisie",
+      "count": 1
+    },
+    {
+      "text": "Adam Mróz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "mąż pracownicy",
+      "count": 1
+    }
+  ]
+}

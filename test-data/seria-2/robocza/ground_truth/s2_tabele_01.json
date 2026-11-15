@@ -1,0 +1,232 @@
+{
+  "id": "s2_tabele_01",
+  "template": "tabele",
+  "title": "Lista płac piekarni (kolumny rozdzielone tabulatorem)",
+  "seed": null,
+  "traps": [
+    "nazwiska wersalikami przed imieniem w jednej komórce",
+    "nazwisko Piekarz obok stanowiska „piekarz”",
+    "nazwisko dwuczłonowe z łącznikiem wersalikami (ZAJĄC-MROCZEK)",
+    "pusta komórka rachunku i wiersz sumy RAZEM",
+    "sygnatura komornicza i sąd do zachowania"
+  ],
+  "entities": [
+    {
+      "text": "Piekarnia Złoty Kłos sp. z o.o.",
+      "type": "COMPANY",
+      "expect": "policy",
+      "note": "pracodawca, spółka",
+      "count": 1
+    },
+    {
+      "text": "ul. Młyńska 8, 62-200 Gniezno",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "siedziba spółki",
+      "count": 1
+    },
+    {
+      "text": "3571873786",
+      "type": "NIP_COMPANY",
+      "expect": "policy",
+      "note": "NIP spółki",
+      "count": 1
+    },
+    {
+      "text": "Nazwisko i imię",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "nagłówek kolumny",
+      "count": 1
+    },
+    {
+      "text": "NOWICKA Ewa",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko wersalikami przed imieniem",
+      "count": 1
+    },
+    {
+      "text": "PIEKARZ Grzegorz",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko będące nazwą zawodu",
+      "count": 1
+    },
+    {
+      "text": "SOWIŃSKI Dawid",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ZAJĄC-MROCZEK Halina",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko dwuczłonowe wersalikami",
+      "count": 1
+    },
+    {
+      "text": "BIAŁEK Oskar",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "84031124603",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "79070260197",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "03212551779",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "68103050920",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "91051744816",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL94 1050 0099 6206 9866 4337 2893",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "97 1020 2892 3674 1295 2762 9132",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "51114020045825274226423202",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "PL96 1160 2202 7865 6925 9595 8377",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "piekarz",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "stanowisko i zwykłe słowo, nie nazwisko",
+      "count": 2
+    },
+    {
+      "text": "4 dni zasiłku chorobowego",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "absencja chorobowa przy osobie",
+      "count": 1
+    },
+    {
+      "text": "Dawid Sowiński",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "MJG099779",
+      "type": "ID_CARD",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "KM 1432/25",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy komorniczej",
+      "count": 1
+    },
+    {
+      "text": "potrącenie komornicze",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "egzekucja komornicza wobec osoby z poz. 4",
+      "count": 1
+    },
+    {
+      "text": "Sądzie Rejonowym w Gnieźnie",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marta Głowacka",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "specjalistka ds. kadr i płac",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "stanowisko",
+      "count": 1
+    },
+    {
+      "text": "61 424 18 07",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "m.glowacka@zlotyklos.example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "J. Ratajczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "inicjał imienia + nazwisko",
+      "count": 1
+    },
+    {
+      "text": "Leszek Mroczek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko zawarte w nazwisku dwuczłonowym z tabeli",
+      "count": 1
+    }
+  ]
+}

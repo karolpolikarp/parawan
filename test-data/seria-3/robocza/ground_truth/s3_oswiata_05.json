@@ -1,0 +1,275 @@
+{
+  "id": "s3_oswiata_05",
+  "template": "oswiata",
+  "title": "Decyzja o przyznaniu stypendium szkolnego o charakterze socjalnym",
+  "seed": null,
+  "traps": [
+    "celownik imienia i nazwiska ucznia („Bartoszowi Pietrzakowi”)",
+    "same imiona dzieci w uzasadnieniu",
+    "ustawowy katalog okoliczności z art. 90d (alkoholizm) do zachowania",
+    "kara pozbawienia wolności ojca (dane szczególne)",
+    "dochód rodziny",
+    "patroni w nazwach szkół"
+  ],
+  "entities": [
+    {
+      "text": "Gminny Ośrodek Pomocy Społecznej w Sędziejowicach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Spółdzielcza 10",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "98-160",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "GOPS.4416.37.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "XXXI/214/2024",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer uchwały",
+      "count": 1
+    },
+    {
+      "text": "Moniki Pietrzak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marzeninie",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "ul. Pabianicka 63",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "98-161",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Marzenin",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Bartoszowi Pietrzakowi",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "celownik",
+      "count": 1
+    },
+    {
+      "text": "5 marca 2015",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "15230514838",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Szkoły Podstawowej im. Marii Dąbrowskiej w Sędziejowicach",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "Natalii Pietrzak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "20 lipca 2010",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "10272041522",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Liceum Ogólnokształcącego im. Władysława Reymonta w Łasku",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie szkoły",
+      "count": 1
+    },
+    {
+      "text": "PL08124010372123582584486586",
+      "type": "IBAN",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Monika Pietrzak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Bartosz",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię",
+      "count": 1
+    },
+    {
+      "text": "Natalia",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię",
+      "count": 2
+    },
+    {
+      "text": "Wiktor",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię",
+      "count": 1
+    },
+    {
+      "text": "Leokadia Sobczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Leokadii Sobczak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "2 436,50 zł",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "dochód rodziny",
+      "count": 1
+    },
+    {
+      "text": "487,30 zł na osobę",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "dochód na osobę",
+      "count": 1
+    },
+    {
+      "text": "1 512,40 zł netto",
+      "type": "FINANCIAL",
+      "expect": "policy",
+      "note": "dochód osoby",
+      "count": 1
+    },
+    {
+      "text": "orzeczenie o niepełnosprawności",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "niepełnosprawność konkretnego dziecka",
+      "count": 1
+    },
+    {
+      "text": "mózgowym porażeniem dziecięcym",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Dariusz Pietrzak",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "odbywa karę pozbawienia wolności",
+      "type": "SENSITIVE",
+      "expect": "mask",
+      "note": "dane o wyroku skazującym",
+      "count": 1
+    },
+    {
+      "text": "Zakładzie Karnym w Sieradzu",
+      "type": "INSTITUTION",
+      "expect": "policy",
+      "note": "instytucja, ale wskazuje miejsce pobytu osoby",
+      "count": 1
+    },
+    {
+      "text": "alkoholizmu lub narkomanii",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "ustawowy katalog okoliczności, nie dotyczy osoby",
+      "count": 1
+    },
+    {
+      "text": "Samorządowego Kolegium Odwoławczego w Sieradzu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Jolanta Pawlikowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "kierownik w funkcji",
+      "count": 1
+    },
+    {
+      "text": "niepełnosprawność dziecka",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "niepełnosprawność konkretnego dziecka w uzasadnieniu",
+      "count": 1
+    }
+  ]
+}

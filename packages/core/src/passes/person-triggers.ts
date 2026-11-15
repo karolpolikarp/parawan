@@ -1,9 +1,9 @@
 // Przebiegi osobowe z kotwicą: „Pan/Pani” i rola, self-ID, inicjał, tytuł przed homografem, obce imię
 // z łącznikiem oraz samodzielne nazwisko ze słownika albo z morfologii.
 import { COMMON_NOUN_LOOKALIKES, DIMINUTIVE_LOOKALIKES, homographBase, isCompoundAdjective, isConfirmedSurname, isGeoAdjective, looksLikeSurname, NON_SURNAME_ADJ, normalizeSurnameKey, surnameBase, surnameShaped } from '../surnames.js';
-import { CAP_WORD, NM_BOUND, NM_LO, NM_UP, PL_LO, PL_UP, PRECEDED_BY_CAP } from '../charset.js';
+import { CAP_WORD, NM_BOUND, NM_LO, NM_UP, PERSON_MASK_SRC, PL_LO, PL_UP, PRECEDED_BY_CAP } from '../charset.js';
 import { JSON_ESC_PUA_EOL, type RedactCtx, VI_GIVEN_SENTINEL } from '../context.js';
-import { FORM_LABEL_WORDS, isEmptyFormValue } from '../dict/forms.js';
+import { FORM_LABEL_WORDS, isEmptyFormValue, RE_STATE_TREASURY_VALUE } from '../dict/forms.js';
 import { TABLE_HEADER_WORDS } from '../dict/headers.js';
 import { FOREIGN_GIVEN_NAMES, isFirstNameGenitive, isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
@@ -97,6 +97,8 @@ export function passPersonTrigger(ctx: RedactCtx): void {
       if (tab > 0) return onMatch(m.slice(0, m.length - name.length + tab), kw, sep, name.slice(0, tab), offset, str) + name.slice(tab);
       // wypełniacz wykazu albo szablonu („Nazwisko: Wakat”)
       if (isEmptyFormValue(name.trim())) return m;
+      // Skarb Państwa pod etykietą nazwiska („Nazwisko: Skarb Państwa”) to osoba prawna
+      if (RE_STATE_TREASURY_VALUE.test(name.trim())) return m;
     }
     const { parts, words, s } = splitAfterRoles(name);
     if (s >= words.length) return m;
@@ -223,9 +225,59 @@ export function passPersonSoloDict(ctx: RedactCtx): void {
     if (precededByEponym(ctx.text, offset)) return m;
     if (precededByAdminLabel(ctx.text, offset)) return m; // „Powiat: …”, „Gmina: …”
     if (afterNonPersonContext(ctx.text, offset, m, ctx.maskedSurnames)) return m;
+    if (placeLocativeAfterW(ctx, m, offset) || placeDateLineAt(ctx, m, offset)) return m;
     ctx.bump('IMIE');
     return ctx.personMask(m);
   });
+}
+
+// Data za przecinkiem w wierszu miejsca i daty pisma („Mielnik, 18 sierpnia 2026 r.”, „Mielnik, dnia
+// 3.02.2026”): słownie, cyframi z kropką, łącznikiem albo ukośnikiem.
+const RE_DATE_AFTER_PLACE = /^,[ \t]*(?:dnia[ \t]+|dn\.[ \t]*)?\d{1,2}(?:[ \t]+\p{Ll}{3,}|[ \t]*[./-][ \t]*\d{1,2}[ \t]*[./-])[ \t]*\d{4}/u;
+const RE_LINE_START_BEFORE = /(?:^|\n)[ \t]*$/u;
+// Kod pocztowy tuż przed wyrazem („17-307 Mielnik”): za kodem stoi poczta, nigdy osoba.
+const RE_POSTAL_BEFORE = /(?<!\d)\d{2}-\d{3}[ \t]+$/u;
+// Miejscowość nazwana w samym piśmie: wyraz za kodem pocztowym albo za „Gmina/Gminy/Gminą” i „Urząd
+// Gminy” („17-307 Mielnik”, „Urząd Gminy Mielnik”). Liczone raz na pismo, na oryginalnym wejściu.
+const RE_DOC_PLACE = /(?:(?<!\d)\d{2}-\d{3}|(?<!\p{L})Gmin(?:a|y|ie|ą))[ \t]+(\p{Lu}\p{Ll}+)(?![\p{L}-])/gu;
+const docPlacesMemo = new WeakMap<RedactCtx, Set<string>>();
+function docPlaces(ctx: RedactCtx): Set<string> {
+  let set = docPlacesMemo.get(ctx);
+  if (!set) {
+    set = new Set<string>();
+    for (const mm of ctx.raw.matchAll(RE_DOC_PLACE)) set.add(mm[1].toLowerCase());
+    docPlacesMemo.set(ctx, set);
+  }
+  return set;
+}
+/** Czy nazwisko ze słownika (w formie podstawowej) to też miejscowość: ze słownika albo nazwana w piśmie
+ *  za kodem pocztowym czy po „Gminy” („Mielnik”, „Rudnik”)? */
+function cityBase(ctx: RedactCtx, ml: string): boolean {
+  const base = surnameBase(ml) || ml;
+  if (POLISH_CITIES.has(ml) || POLISH_CITIES.has(base)) return true;
+  const places = docPlaces(ctx);
+  return places.has(ml) || places.has(base);
+}
+/** Czy nazwisko ze słownika stoi na miejscu miejscowości: za kodem pocztowym („17-307 Mielnik”) albo
+ *  samo na początku wiersza z przecinkiem i datą, gdy to też miejscowość („Mielnik, 18 sierpnia 2026 r.”)? */
+function placeDateLineAt(ctx: RedactCtx, m: string, offset: number): boolean {
+  const t = ctx.text;
+  const before = t.slice(Math.max(0, offset - 12), offset);
+  if (RE_POSTAL_BEFORE.test(before)) return true;
+  if (!RE_DATE_AFTER_PLACE.test(t.slice(offset + m.length, offset + m.length + 40))) return false;
+  return RE_LINE_START_BEFORE.test(before) && cityBase(ctx, m.toLowerCase());
+}
+// Przyimek „w/we” tuż przed wyrazem (ta sama linia, same spacje).
+const RE_W_BEFORE = /(?<!\p{L})[Ww]e?[ \t]+$/u;
+/** Czy nazwisko ze słownika w miejscowniku stoi po „w” jako nazwa miejscowości („Szkoła Podstawowa
+ *  w Mielniku”, „Urząd Gminy w Rudniku”)? Tylko gdy forma podstawowa to też miejscowość ze słownika.
+ *  Nazwisko osoby rozpoznanej już w piśmie („Pani Anna Rudnik mieszka w Rudniku”) dalej idzie pod maskę:
+ *  przy wątpliwości maska. */
+function placeLocativeAfterW(ctx: RedactCtx, m: string, offset: number): boolean {
+  const ml = m.toLowerCase();
+  if (!/(?:ku|iu|ie|cu|dzu)$/u.test(ml) || surnameBase(ml) === ml) return false;
+  if (!RE_W_BEFORE.test(ctx.text.slice(Math.max(0, offset - 4), offset))) return false;
+  return !ctx.maskedSurnames.has(normalizeSurnameKey(m)) && cityBase(ctx, ml);
 }
 
 /** Czy `w2` po kotwicy inicjału to nazwisko (słownik, końcówka, homograf) w kontekście osobowym? */
@@ -317,6 +369,88 @@ export function passPersonForeign(ctx: RedactCtx): void {
     ctx.bump('IMIE');
     return ctx.personMask(last);
   });
+  passVietnameseGivenAtMask(ctx);
+}
+
+// Imię i nazwisko wietnamskie bez kotwicy („Małżonek: Tran Thi Hoa”, „ustanawiam Do Minh Tuan”,
+// „Thanh Nguyen”). Rozpoznaje je układ: same sylaby wietnamskie, nazwisko rodowe na początku albo
+// na końcu i co najmniej dwie sylaby, które nie są wyrazem polskim ani angielskim (albo jedna przy
+// członie „Thi/Van” w trzech wyrazach). Sylaby wieloznaczne („Do”, „Nam”, „Long”, „Mai”, „Van”) same
+// nie wystarczą, więc „Ho Chi Minh”, „Ha Long” i „Le Van” zostają jawne. Porównanie bez diakrytyki.
+const VI_SURNAMES = new Set<string>(
+  'nguyen tran le pham hoang huynh phan vu vo dang bui do ho ngo duong ly trinh dinh truong lam mai dao cao luong'.split(' '),
+);
+const VI_DISTINCT = new Set<string>(
+  (
+    'nguyen tran pham hoang huynh phan dang bui ngo duong trinh dinh truong thi minh tuan thanh hoa huong ' +
+    'linh trang ngoc phuong hanh thao hien khanh quang hieu thuy nguyet tuyet duc cuong viet quoc xuan tien ' +
+    'trung kien khoa phuc vinh thang tung nhung giang loan nhan thuong huu'
+  ).split(' '),
+);
+const VI_AMBIGUOUS = new Set<string>(
+  'van le do ho vo vu ly lam mai dao cao luong hai lan nam long an ha my son tam hung dung binh chi yen anh thu hau dat hong kim lien nga hang quynh hue bao'.split(' '),
+);
+const VI_MIDDLE = new Set<string>(['thi', 'van']);
+const viFold = (w: string): string => w.normalize('NFD').replace(/\p{M}/gu, '').replace(/[đĐ]/g, 'd').toLowerCase();
+const RE_VI_RUN = new RegExp(`(?<![${NM_BOUND}\\d])[${NM_UP}][${NM_LO}${NM_UP}]{0,6}(?:[ \\t]+[${NM_UP}][${NM_LO}${NM_UP}]{0,6}){1,5}(?![${NM_BOUND}\\d-])`, 'g');
+/** Okno wyrazów run[i..j) to imię i nazwisko wietnamskie? Zwraca indeks nazwiska w oknie albo -1. */
+function viNameWindow(f: string[]): number {
+  if (f.some((w) => !VI_DISTINCT.has(w) && !VI_AMBIGUOUS.has(w))) return -1;
+  const distinct = f.filter((w) => VI_DISTINCT.has(w)).length;
+  const ok = f.length === 2 ? distinct === 2 : distinct >= 2 || (distinct === 1 && f.slice(1, -1).some((w) => VI_MIDDLE.has(w)));
+  if (!ok) return -1;
+  if (VI_SURNAMES.has(f[0])) return 0;
+  return VI_SURNAMES.has(f[f.length - 1]) ? f.length - 1 : -1;
+}
+/** Imię i nazwisko wietnamskie rozpoznane po układzie sylab. Przed parami i nazwiskiem ze słownika: inaczej
+ *  samo „Nguyen” trafia pod maskę, a „Thi Lan” zostaje jawne. */
+export function passPersonVietnamese(ctx: RedactCtx): void {
+  if (!ctx.on('IMIE')) return;
+  ctx.text = ctx.text.replace(RE_VI_RUN, (m) => {
+    const { parts, words } = splitWords(m);
+    const folded = words.map(viFold);
+    // najdłuższe okno od lewej (najwyżej cztery wyrazy)
+    for (let i = 0; i < words.length - 1; i++) {
+      for (let len = Math.min(4, words.length - i); len >= 2; len--) {
+        const k = viNameWindow(folded.slice(i, i + len));
+        if (k < 0) continue;
+        ctx.bump('IMIE');
+        return `${parts.slice(0, 2 * i).join('')}${ctx.personMask(words[i + k])}${parts.slice(2 * (i + len) - 1).join('')}`;
+      }
+    }
+    return m;
+  });
+}
+
+// Imię wietnamskie przy masce osoby, gdy nazwisko zakrył wcześniej inny przebieg (pole „Nazwisko:”,
+// rozlanie osoby): „Thanh [OSOBA]”, „[OSOBA] Thi Lan”. Wyrazy tylko przez spację, same sylaby
+// wietnamskie, w tym co najmniej jedna typowa dla imienia („Thanh”, „Thi”, „Minh”), nie dla nazwiska.
+const VI_WORD = `[${NM_UP}][${NM_LO}${NM_UP}]{0,6}`;
+const RE_VI_BEFORE_MASK = new RegExp(`(?<![${NM_BOUND}\\d])((?:${VI_WORD}[ \\t]+){1,3})(${PERSON_MASK_SRC})`, 'g');
+const RE_VI_AFTER_MASK = new RegExp(`(${PERSON_MASK_SRC})((?:[ \\t]+${VI_WORD}){1,3})(?![${NM_BOUND}\\d-])`, 'g');
+const viGivenRun = (ws: string[]): boolean => {
+  const f = ws.map(viFold);
+  return f.every((w) => VI_DISTINCT.has(w) || VI_AMBIGUOUS.has(w)) && f.some((w) => VI_DISTINCT.has(w) && !VI_SURNAMES.has(w));
+};
+function passVietnameseGivenAtMask(ctx: RedactCtx): void {
+  ctx.text = ctx.text.replace(RE_VI_BEFORE_MASK, (m, run: string, mask: string) => {
+    const { parts, words } = splitWords(run.trimEnd());
+    // najdłuższy przyrostek z samych sylab wietnamskich
+    for (let i = 0; i < words.length; i++) {
+      if (!viGivenRun(words.slice(i))) continue;
+      return `${parts.slice(0, 2 * i).join('')}${mask}`;
+    }
+    return m;
+  });
+  ctx.text = ctx.text.replace(RE_VI_AFTER_MASK, (m, mask: string, run: string) => {
+    const { parts, words } = splitWords(run.trim());
+    for (let n = words.length; n >= 1; n--) {
+      if (!viGivenRun(words.slice(0, n))) continue;
+      const rest = parts.slice(2 * n - 1).join('');
+      return `${mask}${rest}`;
+    }
+    return m;
+  });
 }
 
 /**
@@ -390,6 +524,7 @@ export function passPersonSoloMorph(ctx: RedactCtx): void {
     if (precededByEponym(t, offset)) return m;
     if (precededByAdminLabel(t, offset)) return m;
     if (afterNonPersonContext(t, offset, m, ctx.maskedSurnames)) return m;
+    if (placeLocativeAfterW(ctx, m, offset) || placeDateLineAt(ctx, m, offset)) return m;
     ctx.bump('IMIE');
     return ctx.personMask(first);
   });

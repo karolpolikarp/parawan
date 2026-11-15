@@ -109,8 +109,45 @@ export const FICTIONAL_PII = [
   ['numer księgi wieczystej z decyzji w testach korekty', 'OS1W/00045123'],
 ];
 
-/** Górna granica rozmiaru pliku aplikacji w bajtach (dziś ok. 2,32 MB po silniku z v0.46.24; zapas na kolejne pakiety). */
-export const MAX_WEB_BYTES = 2_400_000;
+/**
+ * Twardy sufit rozmiaru Parawan.html: plik ma przejść jako załącznik przez domyślny limit
+ * wiadomości Exchange Server 2016/2019/SE on-premises, 10 MB (MaxSendSize i MaxReceiveSize,
+ * konektor wysyłki: https://learn.microsoft.com/en-us/exchange/mail-flow/message-size-limits).
+ * To najniższa udokumentowana granica wśród sprawdzonych kanałów:
+ * - Gmail, konto prywatne: załączniki do 25 MB (https://support.google.com/mail/answer/6584);
+ * - Exchange Online: domyślnie 35 MB wysyłka, 36 MB odbiór
+ *   (https://learn.microsoft.com/en-us/office365/servicedescriptions/exchange-online-service-description/exchange-online-limits);
+ * - ePUAP, pismo ogólne: łącznie 150 MB załączników (https://www.gov.pl/web/gov/wyslij-pismo-ogolne).
+ * Limitów EZD RP i e-Doręczeń nie sprawdzono w ich dokumentacji, więc ich tu nie ma.
+ * 10 MB liczone dziesiętnie (10 000 000 B), bo tak wychodzi ostrożniej (przy 1024² sufit byłby
+ * ok. 7,47 MB).
+ * Bramka nie mierzy wygody, tej pilnuje czas startu (scripts/perf), tylko to, czy plik w ogóle
+ * dojdzie mailem. Zastąpiła dawny MAX_WEB_BYTES = 2 600 000 B, który nie wynikał z niczego.
+ */
+export const EXCHANGE_LIMIT_B = 10_000_000;
+/** Treść maila i podpis z logo obok załącznika. Założenie, nie pomiar. */
+export const MAIL_MARGIN_B = 256_000;
+/**
+ * Bajty załącznika w MIME: base64 (4 znaki na każde 3 bajty, z dopełnieniem) w wierszach po
+ * najwyżej 76 znaków zakończonych CRLF (RFC 2045, §6.8: https://www.rfc-editor.org/rfc/rfc2045#section-6.8).
+ * W przybliżeniu ×4/3 ×78/76.
+ */
+export function mimeAttachmentBytes(size) {
+  const b64 = 4 * Math.ceil(size / 3);
+  return b64 + 2 * Math.ceil(b64 / 76);
+}
+/**
+ * Największy plik, którego załącznik z MAIL_MARGIN_B mieści się w EXCHANGE_LIMIT_B: 7 120 614 B.
+ * Przybliżenie (10 000 000 - 256 000) × 76/78 × 3/4 daje 7 120 615 B, dokładne liczenie wierszy
+ * i dopełnienia base64 o bajt mniej.
+ */
+export const MAX_MAIL_ATTACHMENT_BYTES = (() => {
+  const budget = EXCHANGE_LIMIT_B - MAIL_MARGIN_B;
+  let n = Math.floor((((budget * 76) / 78) * 3) / 4);
+  while (mimeAttachmentBytes(n) > budget) n--;
+  while (mimeAttachmentBytes(n + 1) <= budget) n++;
+  return n;
+})();
 
 /**
  * Ścieżka do innej binarki Chromium (np. snapshot 109 z pobierz-przegladarki.mjs). Testy

@@ -1,0 +1,253 @@
+{
+  "id": "s3_oswiata_07",
+  "template": "oswiata",
+  "title": "Skierowanie starosty do specjalnego ośrodka szkolno-wychowawczego",
+  "seed": null,
+  "traps": [
+    "nazwisko Gazda obok słowa „gazdówkę”",
+    "forma mnoga nazwiska („Państwo Gazdowie”)",
+    "patron w nazwie ośrodka i ulicy starostwa",
+    "leki i rozpoznanie przy dziecku",
+    "e-mail z nazwiskiem w liczbie mnogiej"
+  ],
+  "entities": [
+    {
+      "text": "STAROSTA NOWOTARSKI",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "ul. Bolesława Wstydliwego 14",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "patron ulicy w adresie urzędu",
+      "count": 1
+    },
+    {
+      "text": "34-400",
+      "type": "INSTITUTION_POSTAL",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "EK.4430.29.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "Bożena Gazda",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 2
+    },
+    {
+      "text": "Stanisław Gazda",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "",
+      "count": 3
+    },
+    {
+      "text": "ul. Długa 112",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "34-404",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Ludźmierz",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Kamilę Gazdę",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "biernik",
+      "count": 1
+    },
+    {
+      "text": "30 listopada 2012",
+      "type": "DATE_BIRTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "12313076748",
+      "type": "PESEL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Specjalnego Ośrodka Szkolno-Wychowawczego im. Jana Pawła II w Rabce-Zdroju",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "patron w nazwie ośrodka",
+      "count": 2
+    },
+    {
+      "text": "PPP.ZO.4312.88.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "numer orzeczenia",
+      "count": 1
+    },
+    {
+      "text": "Poradni Psychologiczno-Pedagogicznej w Nowym Targu",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "niepełnosprawność intelektualną w stopniu umiarkowanym",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "padaczkę lekooporną z napadami ogniskowymi",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "walproinianem sodu",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "lewetyracetamem",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "lek",
+      "count": 1
+    },
+    {
+      "text": "Kamila",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "samo imię",
+      "count": 1
+    },
+    {
+      "text": "Szkole Podstawowej w Ludźmierzu",
+      "type": "INSTITUTION",
+      "expect": "policy",
+      "note": "szkoła w małej miejscowości zamieszkania",
+      "count": 1
+    },
+    {
+      "text": "Agaty Sral",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "psycholog poradni",
+      "count": 1
+    },
+    {
+      "text": "gazdówkę",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo, a nie nazwisko Gazda",
+      "count": 1
+    },
+    {
+      "text": "KNT 51EP",
+      "type": "PLATE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "668 302 471",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "gazdowie.ludzmierz@test.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Gazdowie",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "nazwisko w liczbie mnogiej",
+      "count": 1
+    },
+    {
+      "text": "Krzysztof Faber",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "starosta w funkcji",
+      "count": 1
+    },
+    {
+      "text": "ul. Orkana 31",
+      "type": "INSTITUTION_ADDRESS",
+      "expect": "keep",
+      "note": "adres ośrodka",
+      "count": 1
+    },
+    {
+      "text": "Wójt Gminy Nowy Targ",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Halina Klimowska",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "pracownica starostwa",
+      "count": 1
+    },
+    {
+      "text": "18 266 13 45",
+      "type": "PHONE",
+      "expect": "policy",
+      "note": "służbowy telefon urzędnika",
+      "count": 1
+    },
+    {
+      "text": "zajęcia rewalidacyjne i opiekę pielęgniarską",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "zalecenia z orzeczenia dla dziecka",
+      "count": 1
+    },
+    {
+      "text": "nauczanie indywidualne",
+      "type": "HEALTH",
+      "expect": "policy",
+      "note": "nauczanie indywidualne pośrednio wskazuje stan zdrowia",
+      "count": 1
+    }
+  ]
+}

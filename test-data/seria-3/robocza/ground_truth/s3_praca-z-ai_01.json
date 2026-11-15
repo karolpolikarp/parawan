@@ -1,0 +1,218 @@
+{
+  "id": "s3_praca-z-ai_01",
+  "template": "praca-z-ai",
+  "title": "Polecenie do AI: odpowiedź na skargę na spalanie odpadów (metryka EZD, skarga, notatka)",
+  "seed": null,
+  "traps": [
+    "nazwisko Wróbel i słowa „wróble”, „gołębie” obok nazwiska Gołębiowski",
+    "inicjały prowadzącej w dekretacji EZD (MK)",
+    "mąż skarżącej tylko z imienia, z chorobą i pobytem w szpitalu",
+    "sąsiad bez imienia w dopełniaczu („u Barana”) i forma rodzinna „Wróbelowie”",
+    "sygnatura cytowanego wyroku WSA obok sygnatury sprawy cywilnej stron"
+  ],
+  "entities": [
+    {
+      "text": "Halina Wróbel",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "skarżąca",
+      "count": 2
+    },
+    {
+      "text": "ul. Polna 14",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "32-005",
+      "type": "POSTAL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Niepołomice",
+      "type": "CITY",
+      "expect": "policy",
+      "note": "miejscowość z adresu osoby",
+      "count": 1
+    },
+    {
+      "text": "Marta Kurek",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "urzędniczka prowadząca w metryce EZD",
+      "count": 1
+    },
+    {
+      "text": "MK",
+      "type": "PERSON_INITIALS",
+      "expect": "mask",
+      "note": "inicjały w dekretacji",
+      "count": 1
+    },
+    {
+      "text": "inspektor",
+      "type": "JOB_TITLE",
+      "expect": "policy",
+      "note": "stanowisko urzędnika",
+      "count": 1
+    },
+    {
+      "text": "Zdzisław Baran",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "sąsiad, którego dotyczy skarga",
+      "count": 1
+    },
+    {
+      "text": "ul. Polna 16",
+      "type": "ADDRESS",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Stefan",
+      "type": "PERSON_FIRSTNAME",
+      "expect": "mask",
+      "note": "mąż skarżącej tylko z imienia",
+      "count": 1
+    },
+    {
+      "text": "przewlekłą obturacyjną chorobę płuc",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "choroba męża",
+      "count": 1
+    },
+    {
+      "text": "się dusi",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "objaw opisowo",
+      "count": 1
+    },
+    {
+      "text": "trafił przez to do szpitala",
+      "type": "HEALTH",
+      "expect": "mask",
+      "note": "hospitalizacja opisowo",
+      "count": 1
+    },
+    {
+      "text": "Bochni",
+      "type": "LOCATION",
+      "expect": "policy",
+      "note": "miejsce hospitalizacji",
+      "count": 1
+    },
+    {
+      "text": "604 218 337",
+      "type": "PHONE",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "h.wrobel@example.pl",
+      "type": "EMAIL",
+      "expect": "mask",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Gołębiowskim",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "strażnik miejski, samo nazwisko w narzędniku",
+      "count": 1
+    },
+    {
+      "text": "Barana",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "samo nazwisko w dopełniaczu",
+      "count": 2
+    },
+    {
+      "text": "Wróbelowie",
+      "type": "PERSON",
+      "expect": "mask",
+      "note": "forma rodzinna nazwiska",
+      "count": 1
+    },
+    {
+      "text": "gołębie",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo obok nazwiska Gołębiowski",
+      "count": 1
+    },
+    {
+      "text": "wróble",
+      "type": "COMMON_WORD",
+      "expect": "keep",
+      "note": "zwykłe słowo obok nazwiska Wróbel",
+      "count": 1
+    },
+    {
+      "text": "Straży Miejskiej",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Referat Ochrony Środowiska",
+      "type": "INSTITUTION",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "Sądzie Rejonowym w Wieliczce",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "WSA w Krakowie",
+      "type": "COURT",
+      "expect": "keep",
+      "note": "",
+      "count": 1
+    },
+    {
+      "text": "II SA/Kr 1532/21",
+      "type": "CASE_CITATION",
+      "expect": "keep",
+      "note": "sygnatura cytowanego wyroku",
+      "count": 1
+    },
+    {
+      "text": "I C 412/25",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "sygnatura sprawy cywilnej stron",
+      "count": 1
+    },
+    {
+      "text": "OŚ.1431.27.2026",
+      "type": "CASE_NUMBER",
+      "expect": "policy",
+      "note": "znak sprawy",
+      "count": 1
+    },
+    {
+      "text": "14/2026",
+      "type": "DOC_NUMBER",
+      "expect": "keep",
+      "note": "numer protokołu kontroli",
+      "count": 1
+    }
+  ]
+}
