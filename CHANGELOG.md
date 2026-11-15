@@ -479,6 +479,10 @@ działają na GitHubie od chwili wypchnięcia tagów.
   adresem z ulicą („Zbigniew Pawlak⏎Kierownik Referatu⏎Urząd Miasta Kalisza, ul. Główny Rynek 20,
   tel. 62 765 43 21” daje „tel. [TELEFON]”). Nagłówek urzędu bez podpisu nad nim i numer z numerem
   wewnętrznym zostają jawne.
+- **Pierwsze wklejone pismo i każda następna zmiana mają wynik od razu.** Parawan przygotowuje
+  silnik zaraz po otwarciu pliku, a nie przy pierwszym piśmie. Wcześniej pierwsze przeliczenie
+  trwało kilka razy dłużej niż kolejne, a pauza przed następnym rosła od niego do pół sekundy
+  i więcej na wolniejszym komputerze, więc wynik zostawał chwilę przy poprzednim tekście.
 
 ## v0.47.0 — 2026-11-14
 

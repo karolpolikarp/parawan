@@ -1663,10 +1663,24 @@ let lastUpdateMs = 0; // zmierzony czas ostatniego przeliczenia (redakcja, rende
 // Przeliczenie dłuższe niż to blokuje kartę zauważalnie: najpierw pokazujemy „Analizuję…”.
 const SLOW_UPDATE_MS = 300;
 
+// Pierwsze wywołanie silnika po otwarciu pliku płaci raz za przygotowanie wzorców (napisy, przy
+// których szuka się trafień, i kompilacja wyrażeń): przy krótkim piśmie kilka razy więcej niż każde
+// następne. Ten narzut nie może wejść do pomiaru kosztu, bo pauza przed kolejnym przeliczeniem
+// rosłaby od niego do pół sekundy i więcej na wolnym komputerze. Silnik rozgrzewa się więc na
+// przykładowym piśmie zaraz po starcie (osobne zadanie, gdy pole jest jeszcze puste), a najpóźniej
+// przed pierwszym przeliczeniem, poza pomiarem.
+let engineWarm = false;
+function warmEngine(): void {
+  if (engineWarm) return;
+  engineWarm = true;
+  redactPII(EXAMPLE_TEXT);
+}
+
 function update(): void {
   clearTimeout(updateTimer);
   updateTimer = undefined;
   updatePending = false;
+  if (input.value.trim()) warmEngine();
   const t0 = performance.now();
   const text = input.value;
   updateSrcMeta(text);
@@ -2662,6 +2676,9 @@ if (matchMedia('(pointer: coarse) and (max-width: 600px)').matches) {
 initTips();
 
 update();
+// Rozgrzewka silnika (warmEngine) w osobnym zadaniu: strona jest już gotowa, a pierwsze wklejenie
+// liczy się tak szybko jak następne.
+setTimeout(warmEngine, 0);
 
 // Ostatnia instrukcja startu: pasek „Parawan nie uruchomił się” (#boot-fail w index.html) znika
 // dopiero tutaj. Gdy silnik nie sparsuje modułu (Chromium starsze niż 94, tryb Internet Explorera)
