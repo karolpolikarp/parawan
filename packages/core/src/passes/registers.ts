@@ -132,8 +132,11 @@ const RE_BARE_ANCHOR = new RegExp(String.raw`^${LAWYER_ANCHOR}[\s,:(]*$`);
  * to najwyżej dwa wiersze bez pustej linii, a wiersz z zawodem kończy się na osobie. Numer dalej w zdaniu („adwokat, sprawa KR-2020”) zostaje jawny. Samo „nr wpisu”
  * bez zawodu to za mało: wpis do CEIDG, BDO czy rejestru żłobków też ma numer.
  */
+// Odstępy przed numerem jako „[ \t]*(?:[,:][ \t]*)?(?:\([ \t]*)?” zamiast „[ \t]*[,:]?[ \t]*\(?[ \t]*”:
+// ten sam język i te same grupy, ale bez kilku kwantyfikatorów spacji obok siebie. Długi ciąg
+// spacji za „adwokat” dzielony na wszystkie sposoby dawał czas sześcienny (4000 spacji: 12 s).
 const RE_LAWYER = new RegExp(
-  String.raw`((?<![${WORD}])${LAWYER_ANCHOR}(?:[ \t]+${PERSON_WORD}){0,3}(?:[ \t]*[,:]?[ \t]*\(?[ \t]*(?:${LAWYER_ENTRY}[ \t]*:?[ \t]*\(?[ \t]*)?|[ \t]*\r?\n[ \t]*(?:${LAWYER_ENTRY}[ \t]*:?[ \t]*|(?=(?:${LAWYER_NUMBER})[ \t]*(?:\r?\n|$)))))(${LAWYER_NUMBER})(?![${WORD}]|[-/]\d)${LAWYER_END}`,
+  String.raw`((?<![${WORD}])${LAWYER_ANCHOR}(?:[ \t]+${PERSON_WORD}){0,3}(?:[ \t]*(?:[,:][ \t]*)?(?:\([ \t]*)?(?:${LAWYER_ENTRY}[ \t]*(?::[ \t]*)?(?:\([ \t]*)?)?|[ \t]*\r?\n[ \t]*(?:${LAWYER_ENTRY}[ \t]*(?::[ \t]*)?|(?=(?:${LAWYER_NUMBER})[ \t]*(?:\r?\n|$)))))(${LAWYER_NUMBER})(?![${WORD}]|[-/]\d)${LAWYER_END}`,
   'g',
 );
 
@@ -176,7 +179,7 @@ const REG_NOT_UNIT = String.raw`(?![ \t]*(?:r\.|rok|roku|zł|PLN|%|tys|os\.|osó
  */
 const REG_END = String.raw`(?=\t|[ \t]*(?:[(),;:|]|\.(?![\d${LETTER}])|\r?\n|$)|[ \t]+[–—-](?:[ \t]|$)|[ \t]+(?:${ciAlt(['i', 'oraz', 'w', 'do', 'na', 'bez', 'z', 'ze'])}|${ciAlt(['wydan', 'nadan', 'specjaln'])}${L})[ \t])`;
 const RE_REGISTER = new RegExp(
-  String.raw`(?<![${WORD}])${REG_KEY}((?:${REG_GAP_WORD}){0,8}?)([ \t]*[,:(]?[ \t]*(?:(?:${ciAlt(['pod', 'o'])})[ \t]+)?(?:(${NR})[ \t]*:?[ \t]*)?)${REG_VALUE}(?![${WORD}]|[-/][${WORD}]|[.,][\d${LETTER}])${REG_NOT_UNIT}${REG_END}`,
+  String.raw`(?<![${WORD}])${REG_KEY}((?:${REG_GAP_WORD}){0,8}?)([ \t]*(?:[,:(][ \t]*)?(?:(?:${ciAlt(['pod', 'o'])})[ \t]+)?(?:(${NR})[ \t]*(?::[ \t]*)?)?)${REG_VALUE}(?![${WORD}]|[-/][${WORD}]|[.,][\d${LETTER}])${REG_NOT_UNIT}${REG_END}`,
   'g',
 );
 /**

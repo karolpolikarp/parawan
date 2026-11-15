@@ -434,8 +434,10 @@ function maskCityInCsvAndTerytFields(ctx: RedactCtx): void {
 }
 
 const ADDR_ANCHOR = `(?:${ADR_MASK_SRC}|ul\\.|al\\.|os\\.|pl\\.)`;
-// Miejscowość przed adresem bez kodu pocztowego („Warszawa, ul. …").
-const RE_CITY_BEFORE_ADDR = new RegExp(`${CITY_START}(${CITY_RUN})([ \\t]*,?[ \\t]+)(${ADDR_ANCHOR})`, 'g');
+// Miejscowość przed adresem bez kodu pocztowego („Warszawa, ul. …"). Odstęp „(?:[ \t]*,)?[ \t]+”
+// to ten sam język co „[ \t]*,?[ \t]+”, bez dwóch kwantyfikatorów spacji obok siebie (długi ciąg
+// spacji za wyrazem z wielkiej litery dzielony na wszystkie sposoby dawał czas kwadratowy).
+const RE_CITY_BEFORE_ADDR = new RegExp(`${CITY_START}(${CITY_RUN})((?:[ \\t]*,)?[ \\t]+)(${ADDR_ANCHOR})`, 'g');
 // Miasto w osobnym wierszu tuż nad adresem („Warszawa⏎Hoża 41"). Cały wiersz musi być miastem
 // ze słownika: „Wydział Kontroli⏎ul. …" nie jest.
 const RE_CITY_LINE_ABOVE_ADDR = new RegExp(`(?<=^|\\n)([ \\t]*)(${CITY_RUN})(?=[ \\t]*\\r?\\n[ \\t]*${ADDR_ANCHOR})`, 'g');
