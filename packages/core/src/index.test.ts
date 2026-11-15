@@ -13525,7 +13525,8 @@ test('Seria 3: stan funkcjonalny osoby z choroby lub niepełnosprawności znika,
     ['Babcia jest obłożnie chora i nie wstaje z łóżka.', `Babcia jest ${H} i ${H}.`],
     [
       'Orzeczenie zawiera wskazanie konieczności stałej lub długotrwałej opieki lub pomocy innej osoby w związku ze znacznie ograniczoną możliwością samodzielnej egzystencji syna.',
-      `Orzeczenie zawiera wskazanie konieczności stałej lub długotrwałej opieki lub pomocy innej osoby w związku ze ${H} syna.`,
+      // od kroku W6 wskazanie z orzeczenia (pkt 7) i stan, z którego wynika, to jedna maska
+      `Orzeczenie zawiera wskazanie ${H} syna.`,
     ],
   ]);
   keep([
@@ -13723,4 +13724,70 @@ test('Seria 3: niemożność samoobsługi z dopełnieniem spoza domu i „porusz
     'Pan Kowalski nie porusza się samodzielnie po Warszawie, bo nie zna miasta.',
     'Pan Kowalski nie chodzi samodzielnie po mieście, gubi się w komunikacji.',
   ]);
+});
+
+test('Seria 3: niepełnosprawność krewnego i osoby bez stopnia oraz symbol przyczyny z orzeczenia znikają, a przepis, statystyka, tytuł i kod spoza orzeczenia zostają', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    ['Pani Teresa Bugla samotnie wychowuje syna z niepełnosprawnością (MPD).', `Pani ${N} samotnie wychowuje syna ${H}.`],
+    ['Syn wnioskodawczyni jest niepełnosprawny od urodzenia.', `Syn wnioskodawczyni jest ${H} od urodzenia.`],
+    ['Mąż jest niepełnosprawny ruchowo, a córka uczęszcza do przedszkola.', `Mąż jest ${H}, a córka uczęszcza do przedszkola.`],
+    ['Wnuk jest dzieckiem niepełnosprawnym.', `Wnuk jest ${H}.`],
+    ['Mąż Pani Ewy Lis, niepełnosprawny ruchowo, nie pracuje.', `Mąż Pani ${N}, ${H}, nie pracuje.`],
+    ['Pani Zofia Wrona została zakwalifikowana do umiarkowanego stopnia niepełnosprawności.', `Pani ${N} została zakwalifikowana do ${H}.`],
+    ['4. Orzeczenie o umiarkowanym stopniu niepełnosprawności, symbol przyczyny 10-N, wydano 23 września 2026 r.', `4. Orzeczenie o ${H}, wydano 23 września 2026 r.`],
+    ['Imię i nazwisko: Zofia Dudek\nSymbol przyczyny niepełnosprawności: 12-C – całościowe zaburzenia rozwojowe', `Imię i nazwisko: ${N}\nSymbol przyczyny niepełnosprawności: ${H}`],
+  ]);
+  keep([
+    'Powiatowy Zespół do Spraw Orzekania o Niepełnosprawności wydaje orzeczenia o stopniu niepełnosprawności.',
+    'Symbol przyczyny niepełnosprawności 05-R oznacza upośledzenie narządu ruchu.',
+    'W 2025 r. wydano 412 orzeczeń o umiarkowanym stopniu niepełnosprawności, w tym 37 z symbolem 02-P.',
+    'Poradnik dla rodziców: niepełnosprawność dziecka a świadczenia rodzinne.',
+    'Dziecko z niepełnosprawnością ma prawo do bezpłatnego transportu do szkoły.',
+    'Sala 05-R jest zamknięta, a element 06-E leży w magazynie.',
+    'Świadczenie pielęgnacyjne przysługuje, jeżeli orzeczenie zawiera wskazanie konieczności stałej lub długotrwałej opieki lub pomocy innej osoby.',
+  ]);
+});
+
+test('Seria 3: niepełnosprawność przed krewnym znika tylko przy osobie w zdaniu poza samym krewnym, a kryterium, przepis, program, tytuł i przydawka po łączniku zostają', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    ['Pani Anna Nowak opiekuje się niepełnosprawną matką.', `Pani ${N} opiekuje się ${H} matką.`],
+    ['Wnioskodawczyni sprawuje opiekę nad niepełnosprawnym synem.', `Wnioskodawczyni sprawuje opiekę nad ${H} synem.`],
+    ['Jej niepełnosprawny syn uczęszcza do szkoły specjalnej.', `Jej ${H} syn uczęszcza do szkoły specjalnej.`],
+    ['Opiekuję się niepełnosprawnym mężem od 2019 r.', `Opiekuję się ${H} mężem od 2019 r.`],
+    ['Matka opiekuje się niepełnosprawnym synem.', `Matka opiekuje się ${H} synem.`],
+    ['Ze względu na niepełnosprawność dziecka i wielodzietność stypendium ustalono w kwocie wyższej.', `Ze względu na ${H} dziecka i wielodzietność stypendium ustalono w kwocie wyższej.`],
+    ['Przyznano zasiłek z uwagi na niepełnosprawność syna.', `Przyznano zasiłek z uwagi na ${H} syna.`],
+    ['Mam niepełnosprawne dziecko i nie mogę pracować.', `Mam ${H} dziecko i nie mogę pracować.`],
+  ]);
+  keep([
+    'Kryterium: wychowywanie niepełnosprawnego dziecka – 10 punktów.',
+    'Przetarg: dowóz niepełnosprawnego dziecka do Specjalnego Ośrodka Szkolno-Wychowawczego w roku szkolnym 2026/2027.',
+    'Asystent rodziny pomaga rodzicom niepełnosprawnego dziecka w załatwianiu spraw urzędowych.',
+    'Matka niepełnosprawnego dziecka nie musi rezygnować z pracy – wyrok Trybunału Konstytucyjnego.',
+    'Konferencja „Niepełnosprawny syn, niepełnosprawna córka – rodzina w kryzysie” odbędzie się 12 maja.',
+    'Niepełnosprawność dziecka nie wyklucza przyjęcia do żłobka gminnego.',
+    'Kryteria rekrutacji: niepełnosprawność dziecka, niepełnosprawność rodzica, samotne wychowywanie.',
+    'Pomiędzy rodzeństwem niepełnosprawność syna wpływa na organizację życia rodzinnego – tak piszą autorzy poradnika.',
+    'Beneficjentem projektu jest niepełnosprawny mieszkaniec gminy w wieku 18–64 lata.',
+    'W klasie jest niepełnosprawne dziecko, dlatego zatrudniono nauczyciela wspomagającego.',
+    'Pierwszeństwo w przyjęciu do przedszkola ma niepełnosprawne dziecko oraz dziecko z rodziny wielodzietnej.',
+    'W polu 12 wpisz, czy dziecko jest niepełnosprawne (tak/nie).',
+    'Zasiłek pielęgnacyjny dla niepełnosprawnego dziecka wynosi 215,84 zł miesięcznie.',
+    'Urlop wychowawczy z powodu niepełnosprawności dziecka wydłuża się do 36 miesięcy.',
+    'Rozdział 3. Niepełnosprawne dziecko w systemie oświaty',
+    'Film „Mój niepełnosprawny brat” zdobył nagrodę na festiwalu w Gdyni.',
+    'Stowarzyszenie prowadzi grupę wsparcia dla osób opiekujących się niepełnosprawną matką lub ojcem.',
+    'Pomoc kierujemy do rodzin, w których wychowuje się niepełnosprawne dziecko.',
+    'Jak rozmawiać z niepełnosprawnym synem o dorosłości – spotkanie w poradni.',
+    'Pani Dyrektor, uprzejmie informuję, że niepełnosprawność dziecka nie jest przeszkodą w rekrutacji.',
+    'Świadczenie otrzymuje matka lub ojciec niepełnosprawnego dziecka.',
+    'Na stronie urzędu opublikowano poradnik o niepełnosprawnym dziecku w przedszkolu.',
+    'Dziecko jest niepełnosprawne, jeśli posiada orzeczenie.',
+  ]);
+  // osoba w sąsiednim zdaniu notatki nie robi z opisu programu faktu o niej
+  expect(
+    redactPII('Pani Maria Wiśniewska zgłosiła się w sprawie opieki wytchnieniowej. Program jest przeznaczony dla osób opiekujących się niepełnosprawnym dzieckiem lub dorosłym.').redacted,
+  ).toBe(`Pani ${N} zgłosiła się w sprawie opieki wytchnieniowej. Program jest przeznaczony dla osób opiekujących się niepełnosprawnym dzieckiem lub dorosłym.`);
 });

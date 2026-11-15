@@ -675,6 +675,58 @@ działają na GitHubie od chwili wypchnięcia tagów.
   O ZDROWIU] po mieszkaniu” (nie jest w stanie samodzielnie poruszać się), „Ojciec [DANE O ZDROWIU]
   z łóżka”. Na trzeciej serii 50 pism (część robocza) wycieków
   jest 97 zamiast 104 (danych o zdrowiu 46 zamiast 53), bez nowych nadmiarowych zakryć.
+- **Niepełnosprawność dziecka, męża czy matki i symbol przyczyny z orzeczenia znikają, a nazwa
+  zespołu orzekającego, ustawa i program PFRON zostają jawne.** Wcześniej „samotnie wychowuje syna
+  z niepełnosprawnością (MPD)”, „Ze względu na niepełnosprawność dziecka” i „orzeczenie … zaliczające
+  syna do osób niepełnosprawnych” zostawały jawne, a przy „orzeczeniu o umiarkowanym stopniu
+  niepełnosprawności (symbol przyczyny 05-R)” znikał sam stopień, a symbol zostawał. Teraz: „syna
+  [DANE O ZDROWIU]”, „Ze względu na [DANE O ZDROWIU] dziecka”, „zaliczające syna [DANE O ZDROWIU]”,
+  „Syn wnioskodawczyni jest [DANE O ZDROWIU] od urodzenia”, „Mąż jest [DANE O ZDROWIU]” (osobą
+  niepełnosprawną ruchowo), „orzeczenie o [DANE O ZDROWIU], wydano 23 września 2026 r.” (stopień
+  razem z symbolem 10-N w jednej masce). Znika też przymiotnik przed krewnym i w dopowiedzeniu:
+  „opiekuje się [DANE O ZDROWIU] matką”, „sprawuje opiekę nad [DANE O ZDROWIU] synem”, „jej
+  dziecko jest [DANE O ZDROWIU]”, „Wnuk jest [DANE O ZDROWIU]” (dzieckiem niepełnosprawnym), „Mąż
+  Pani …, [DANE O ZDROWIU], nie pracuje” (niepełnosprawny ruchowo), „ma [DANE O ZDROWIU]”
+  (orzeczoną niepełnosprawność), „został zakwalifikowany [DANE O ZDROWIU]”, „uznano [DANE
+  O ZDROWIU]” (za osobę niepełnosprawną). Symbol przyczyny znika razem z frazą orzeczenia także po
+  „z symbolem”, „o symbolu” i „symbole przyczyny”: „Dziecko ma [DANE O ZDROWIU]” zamiast „Dziecko ma
+  [DANE O ZDROWIU] z symbolem 12-C”. Poza frazą znika z opisem po myślniku i kilka naraz:
+  „(symbol przyczyny niepełnosprawności [DANE O ZDROWIU]; dziecko w spektrum…)”, pola „Symbol
+  przyczyny niepełnosprawności: [DANE O ZDROWIU]” (05-R, 10-N), „Przyczyna niepełnosprawności:
+  [DANE O ZDROWIU]” i „Stopień niepełnosprawności: [DANE O ZDROWIU]”. Wskazanie z orzeczenia
+  o konieczności stałej opieki albo współudziału opiekuna w leczeniu dziecka znika razem ze stanem,
+  z którego wynika: „Orzeczenie zawiera wskazanie [DANE O ZDROWIU] syna”. Orzeczenie z numerem
+  albo datą („nr 214/2025”, „z dnia 3 lipca 2024 r.”) mówi o osobie także obok cytatu przepisu:
+  „orzeczenie nr 214/2025 o potrzebie kształcenia specjalnego ze względu na [DANE O ZDROWIU]”;
+  data wydania, termin ważności z datą i „bezterminowe” tylko poza zdaniem przepisu. Jawne zostają
+  przepis, warunek świadczenia, statystyka i tytuł, także z symbolem albo terminem bez daty:
+  „Osoba posiadająca orzeczenie o umiarkowanym stopniu niepełnosprawności z symbolem 05-R może
+  otrzymać kartę parkingową”, „W 2025 r. wydano 412 orzeczeń o umiarkowanym stopniu
+  niepełnosprawności, w tym 37 z symbolem 02-P”, „Tabela 3. … według symbolu przyczyny: 05-R –
+  120, 10-N – 44”, „orzeczeniem o znacznym stopniu niepełnosprawności, ważnym do dnia złożenia
+  wniosku”, „Orzeczenie … może być bezterminowe”, „wydane dnia 1 stycznia 1998 r. lub wcześniej
+  zachowuje ważność”, „Wskazanie konieczności stałego współudziału … zawiera orzeczenie wydane po
+  ukończeniu przez dziecko 3 lat”, „Poradnik dla rodziców: niepełnosprawność dziecka a świadczenia
+  rodzinne”, „Rodzic niepełnosprawnego dziecka może otrzymać świadczenie”. Jawne zostają też:
+  „Powiatowy Zespół do Spraw Orzekania o Niepełnosprawności”, „ustawa o rehabilitacji zawodowej
+  i społecznej oraz zatrudnianiu osób niepełnosprawnych”, „Program PFRON „Aktywny samorząd””, „Dzień
+  Osób z Niepełnosprawnościami”, objaśnienie kodu („Symbol przyczyny niepełnosprawności 05-R oznacza
+  upośledzenie narządu ruchu”, „np. 05-R lub 10-N”), kod bez słowa „symbol” albo w innym kształcie
+  („Sala 05-R”, „element 06-E”), „Dziecko z niepełnosprawnością ma prawo do bezpłatnego transportu”,
+  „rodzin dzieci z niepełnosprawnościami”, „w przypadku niepełnosprawności dziecka wymiar urlopu
+  wydłuża się” w cytacie Kodeksu pracy oraz „Świadczenie pielęgnacyjne przysługuje, jeżeli
+  orzeczenie zawiera wskazanie konieczności stałej … opieki”. Przymiotnik przed krewnym znika
+  tylko wtedy, gdy w zdaniu jest osoba poza samym krewnym (imię i nazwisko, Pan, Pani,
+  wnioskodawczyni, „jej”, dorosły krewny, „opiekuję się”, „ze względu na … ustalono”), więc
+  kryterium, przepis, program, tytuł i opis grupy zostają jawne: „Kryterium: wychowywanie
+  niepełnosprawnego dziecka – 10 punktów”, „Przetarg: dowóz niepełnosprawnego dziecka…”, „Zasiłek
+  pielęgnacyjny dla niepełnosprawnego dziecka wynosi 215,84 zł”, „Program jest przeznaczony dla
+  osób opiekujących się niepełnosprawnym dzieckiem” (także w notatce z nazwiskiem w zdaniu obok),
+  „Konferencja „Niepełnosprawny syn, niepełnosprawna córka…””, „Beneficjentem projektu jest
+  niepełnosprawny mieszkaniec gminy”, „W klasie jest niepełnosprawne dziecko” i „W polu 12 wpisz,
+  czy dziecko jest niepełnosprawne (tak/nie)”. Na trzeciej serii 50 pism (część
+  robocza) wycieków jest 83 zamiast 97 (danych o zdrowiu 32 zamiast 46), bez nowych nadmiarowych
+  zakryć.
 - **Pierwsze wklejone pismo i każda następna zmiana mają wynik od razu.** Parawan przygotowuje
   silnik zaraz po otwarciu pliku, a nie przy pierwszym piśmie. Wcześniej pierwsze przeliczenie
   trwało kilka razy dłużej niż kolejne, a pauza przed następnym rosła od niego do pół sekundy

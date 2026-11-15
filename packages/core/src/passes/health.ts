@@ -182,7 +182,7 @@ const SP8 = '[ \\t]{1,8}';
 const NLA = `(?![${LETTER}])`;
 /** Końcówki czasu przeszłego po „ł” („chorował”, „chorowała”, „chorowałem”) i przypadków żeńskich („terapia”, „terapię”). */
 const PAST = '(?:a|em|am)?';
-const AYEA = '(?:a|y|ę|ą)';
+const AYEA = '[ayęą]';
 /** Pierwsza litera wielka albo mała, reszta małymi (fraza na początku zdania, nie w nazwie własnej). */
 const cap = (w: string): string => `[${w[0]}${w[0].toUpperCase()}]${w.slice(1)}`;
 /** Okno kontekstu wokół trafienia: zdanie ze zdaniem obok, ale nie dalej niż tyle znaków. */
@@ -227,7 +227,7 @@ const NOT_GENERIC_SUBJECT = `(?<!(?:${GENERIC_SUBJECT}[ \\t]{0,8},?[ \\t]{0,8}kt
  * konkretna osoba. „Każdego dnia przyjmuje…” nie ma rzeczownika osobowego, więc zostaje osobą.
  */
 const RE_POPULATION_SUBJECT = new RegExp(
-  `${NOT_LETTER_BEFORE}(?:każd${L}|większoś${L}|wiel(?:e|u)|wszys${L}|niektór${L}|część|połow${L}|coraz${SP}więcej|co${SP}[${LO}]+[iy]|około|ok\\.|blisko|ponad|prawie|kilk${L}|\\d[\\d \\t,.%]*(?:mln|tys\\.)?)${SP}(?:[${LO}]+(?:ych|ich|ej|y|a|e)${SP})?` +
+  `${NOT_LETTER_BEFORE}(?:każd${L}|większoś${L}|wiel[eu]|wszys${L}|niektór${L}|część|połow${L}|coraz${SP}więcej|co${SP}[${LO}]+[iy]|około|ok\\.|blisko|ponad|prawie|kilk${L}|\\d[\\d \\t,.%]*(?:mln|tys\\.)?)${SP}(?:[${LO}]+(?:ych|ich|ej|y|a|e)${SP})?` +
     `(?:osób|osoby|osoba|ludzi|pacjent${L}|chor(?:y|zy|ych)|Pola(?:k|ków|cy)|Polek|dzieci|dziecko|kobiet${L}|mężczy(?:zn|źni|zna)|pracowni(?:k|ków|cy|ca)|mieszkańc${L}|mieszkaniec|seniorów|senior|dorosłych|dorosły|uczniów|uczeń|uczennica|ubezpieczon(?:y|a|ych)|kandydat${L}|kierowc${L}|student${L}|żołnierz${L}|funkcjonariusz${L}|podopieczn${L}|wychowan(?:ek|ków|kowie))(?:${SP}[${LETTER}]+){0,3}${SP0}$`,
   'i',
 );
@@ -240,7 +240,7 @@ const STRONG = [
   `rozpoznano(?!${SP0},?${SP0}(?:że|iż|przychod|przychód|koszt|odpis|rezerw|strat|zysk|aktyw|zobowiąz|należnoś|podat|wynik|wartoś|utrat)${L})`,
   'rozpoznan[aoy][ \\t]+u',
   'hospitalizowan(?:y|a|ego|ej)',
-  `${NOT_GENERIC_SUBJECT}(?:choruj(?:e|ę)|chorował${PAST})`,
+  `${NOT_GENERIC_SUBJECT}(?:choruj[eę]|chorował${PAST})`,
   `${NOT_GENERIC_SUBJECT}cierpi(?:ał|ała|ałem|ałam|ę)?${SP}na`,
   `${NOT_GENERIC_SUBJECT}doznał${PAST}`,
   // Imiesłów „leczony”, „leczona” stoi też w przepisach i programach („może być leczona”), więc
@@ -425,7 +425,7 @@ const isGenericRule = (sentence: string): boolean =>
 
 /** Czasownik o przyjmowaniu leku przez osobę („przyjmuje”, „zalecił”); „zaleca się” i „stosuje się do” nie. */
 const RE_DRUG_VERB = new RegExp(
-  `${NOT_LETTER_BEFORE}(?:zalecił(?:a)?|zalecono|zaleca(?:m)?(?!${SP}się)|przyjmuj(?:e|ę)|przyjmował${PAST}|stosuj(?:e|ę)(?!${SP}się)|stosował${PAST}(?!${SP}się)|zażyw(?:a|am)|zażywał${PAST}|bierze|biorę|brał${PAST}|włączył(?:a)?|włączono|ordynował(?:a)?|ordynowano|przepisał(?:a)?|przepisano|wypisał(?:a)?|wypisano|(?<!bez${SP8})recept(?:ę|a|y|ą)${SP}na|na${SP}recepcie)${NOT_LETTER_AFTER}`,
+  `${NOT_LETTER_BEFORE}(?:zalecił(?:a)?|zalecono|zaleca(?:m)?(?!${SP}się)|przyjmuj[eę]|przyjmował${PAST}|stosuj[eę](?!${SP}się)|stosował${PAST}(?!${SP}się)|zażyw(?:a|am)|zażywał${PAST}|bierze|biorę|brał${PAST}|włączył(?:a)?|włączono|ordynował(?:a)?|ordynowano|przepisał(?:a)?|przepisano|wypisał(?:a)?|wypisano|(?<!bez${SP8})recept[ęayą]${SP}na|na${SP}recepcie)${NOT_LETTER_AFTER}`,
   'i',
 );
 /**
@@ -442,7 +442,7 @@ const RE_RX_DOC = new RegExp(
  * smsem”) i czynność pacjenta na recepcie („wykupiła receptę”, „odebrałem e-receptę”, „dostał receptę”).
  */
 const RE_RX_OWN = new RegExp(
-  `${NOT_LETTER_BEFORE}(?:(?:kod(?:em|u)?|numer(?:em|u)?|nr|PIN)${SP}(?:e-?)?recept(?:y|ą)|(?:wykupił|kupił|odebrał|zrealizował|dostał|otrzymał)${PAST}${SP}(?:e-?)?recept(?:ę|y))${NOT_LETTER_AFTER}`,
+  `${NOT_LETTER_BEFORE}(?:(?:kod(?:em|u)?|numer(?:em|u)?|nr|PIN)${SP}(?:e-?)?recept[yą]|(?:wykupił|kupił|odebrał|zrealizował|dostał|otrzymał)${PAST}${SP}(?:e-?)?recept[ęy])${NOT_LETTER_AFTER}`,
   'i',
 );
 
@@ -562,7 +562,7 @@ const SIDE = '(?:(?:lew|praw)(?:ej|ego|ych)[ \\t]+)?';
 const TECH_AFTER = `(?!${SP}(?:schodow|brukow|instalacj|dźwig|żuraw|maszyn|rur|wodn|kanalizac|gazow|hydraulic|urządze|pojazd|most|konstrukc|słup|fundament|cylindr|strop|belk|ścian|dach|wał|silnik|tłok|kolumn|filar|dźwigar|kratownic|stalow|betonow|żelbet|nośn|krokw|balustrad|robot|stoł|stół|krzes|łóżk|mebl|kran|zawor|okn|drzwi|wysięgnik|koparki|ładowark)${L})`;
 const ADJ = `[${LO}]{3,}(?:ej|ego|ych|ich|nej|owej|owego|nego)`;
 const BODY_ACC =
-  `(?:(?:lew|praw)(?:ą|y|e|a)${SP})?(?:nogę|nogi|rękę|ręce|kostkę|bark|kolano|nadgarstek|łokieć|palec|palce|kciuk|żebro|żebra|obojczyk|` +
+  `(?:(?:lew|praw)[ąyea]${SP})?(?:nogę|nogi|rękę|ręce|kostkę|bark|kolano|nadgarstek|łokieć|palec|palce|kciuk|żebro|żebra|obojczyk|` +
   `kość(?:${SP}${ADJ})?|kręgosłup|staw(?:${SP}${ADJ})?|nos|szczękę|żuchwę|biodro|stopę|ramię|przedramię|udo|piszczel|` +
   `więzadło(?:${SP}${ADJ}){0,2}|ścięgno(?:${SP}Achillesa)?|łąkotkę|miednicę|łopatkę)`;
 const BODY_LOC = '(?:[ \\t]+(?:w|we)[ \\t]+(?:kostce|kolanie|nadgarstku|łokciu|barku|biodrze|stawie|udzie|kostkach|kolanach))?';
@@ -690,10 +690,10 @@ const PHRASES: Phrase[] = [
   ),
   // choroby
   dx(phrase(
-    `cukrzyc(?:a|y|ę|ą|e|o)(?:${SP}typu${SP}(?:1|2|I{1,2}|pierwszego|drugiego)|${SP}ciążow${L})?(?:${SP}(?:insulinozależn|insulinoniezależn)${L})?(?:${SP}bez${SP}powikłań)?`,
+    `cukrzyc[ayęąeo](?:${SP}typu${SP}(?:1|2|I{1,2}|pierwszego|drugiego)|${SP}ciążow${L})?(?:${SP}(?:insulinozależn|insulinoniezależn)${L})?(?:${SP}bez${SP}powikłań)?`,
   )),
   dx(phrase(
-    `epizod${L}${SP}depresyjn${L}(?:${SP}(?:umiarkowan|łagodn|ciężk)${L})?|depresj(?:a|i|ę|ą)(?!${SP}(?:(?:na|w|we)${SP})?(?:gospodar|ekonomi|teren|baryczn|termiczn|geograficzn|tektoniczn|rynk|rynek|koniunktur|giełd|branż|sektor|przemyś|budownictw|nieruchomoś|handl|eksport|finans)${L})|zaburzeni${L}${SP}(?:depresyjn|lękow|afektywn|psychotyczn|adaptacyjn|osobowości|odżywiania)${L}`,
+    `epizod${L}${SP}depresyjn${L}(?:${SP}(?:umiarkowan|łagodn|ciężk)${L})?|depresj[aięą](?!${SP}(?:(?:na|w|we)${SP})?(?:gospodar|ekonomi|teren|baryczn|termiczn|geograficzn|tektoniczn|rynk|rynek|koniunktur|giełd|branż|sektor|przemyś|budownictw|nieruchomoś|handl|eksport|finans)${L})|zaburzeni${L}${SP}(?:depresyjn|lękow|afektywn|psychotyczn|adaptacyjn|osobowości|odżywiania)${L}`,
   )),
   dx(phrase(`nadciśnieni${L}(?:${SP}tętnicz${L}(?:${SP}samoistn${L})?)?(?!${SP}(?:wody|gazu|powietrza|pary|oleju|instalacj${L}|układu|(?:w|we)${SP}(?:instalacji|układzie|zbiorniku|rurociągu|sieci|kotle|przewodzie|przewodach|rurze|rurach|komorze|cylindrze|pompie|zaworze|systemie|obwodzie|linii|kolektorze|naczyniu|kanale|turbinie|sprężarce|siłowniku|hydraulice|oponie|oponach|ogumieniu)))`)),
   dx(phrase(`astm(?:a|y|ę|ą|ie)(?:${SP}oskrzelow${L})?`)),
@@ -788,7 +788,7 @@ const EV_DATE = String.raw`(?:\d{1,2}[./]\d{1,2}(?:[./](?:\d{4}|\d{2}))?|\d{1,2}
 /** Okres tuż po frazie: „od 3 do 17 marca”, „do 27.11”, „od 1.03.2026 r”, „przez 25 dni”. */
 const PERIOD = String.raw`(?:${SP}(?:od${SP}(?:${EV_DATE}|\d{1,2})${SP})?do${SP}${EV_DATE}|${SP}od${SP}${EV_DATE}(?:${SP}do${SP}${EV_DATE})?|${SP}przez${SP}\d{1,3}${SP}(?:dni|tygodnie|tygodni|miesiąc|miesiące|miesięcy))?`;
 /** Przymiotnik rodzaju leczenia („psychiatryczne”, „odwykowym”, „logopedycznej”). */
-const TREAT_ADJ = `(?:psychiatryczn|odwykow|onkologiczn|szpitaln|psychologiczn|psychoterapeutyczn|logopedyczn|neurologopedyczn|antydepresyjn|przeciwnowotworow|paliatywn|hospicyjn|dializacyjn|kardiologiczn|neurologiczn|diabetologiczn|endokrynologiczn|hematologiczn|nefrologiczn|reumatologiczn|ortopedyczn|ginekologiczn|położnicz|chirurgiczn|neurochirurgiczn|kardiochirurgiczn|internistyczn|pediatryczn|geriatryczn|okulistyczn|laryngologiczn|urologiczn|dermatologiczn|pulmonologiczn|gastroenterologiczn|detoksykacyjn|toksykologiczn|rehabilitacyjn|zakaźn|ratunkow|urazow|psychiatr)[${LO}]*`;
+const TREAT_ADJ = `(?:(?:onko|psycho|kardio|neuro|diabeto|endokryno|hemato|nefro|reumato|gineko|laryngo|uro|dermato|pulmono|gastroentero|toksyko)logiczn|(?:psychoterapeuty|logopedy|neurologopedy|ortopedy|chirurgi|neurochirurgi|kardiochirurgi|internisty|pediatry|geriatry|okulisty)czn|odwykow|szpitaln|antydepresyjn|przeciwnowotworow|paliatywn|hospicyjn|dializacyjn|położnicz|detoksykacyjn|rehabilitacyjn|zakaźn|ratunkow|urazow|psychiatr)[${LO}]*`;
 /** Specjalność w dopełniaczu po placówce („w klinice kardiologii”, „na oddziale intensywnej terapii”). */
 const SPECIALTY_GEN = `(?:kardiologii|neurologii|psychiatrii|onkologii|ginekologii|położnictwa|chirurgii|neurochirurgii|kardiochirurgii|ortopedii|traumatologii|pediatrii|neonatologii|geriatrii|okulistyki|laryngologii|otolaryngologii|urologii|dermatologii|pulmonologii|gastroenterologii|nefrologii|hematologii|reumatologii|endokrynologii|diabetologii|toksykologii|rehabilitacji|detoksykacji|intensywnej${WS}terapii|chorób${WS}(?:wewnętrznych|zakaźnych|płuc|serca|psychicznych))(?:${WS}(?:dziecięcej|dorosłych|ogólnej|naczyniowej|klinicznej))?`;
 /** Placówka opisana małą literą przez rodzaj leczenia („w poradni zdrowia psychicznego”); nazwa własna zostaje. */
@@ -796,7 +796,15 @@ const PLACE_MED = `(?:poradni|przychodni|szpitalu|klinice|ośrodku|oddziale|cent
 const DEGREE = '(?:lekk|umiarkowan|znaczn)(?:i|y|ym|ego|im)';
 const DIS_STEP = `stop(?:ień|nia|niu|niem)${WS}niepełnosprawności`;
 /** Symbol przyczyny niepełnosprawności z opisem w nawiasie („symbol 05-R (choroby narządu ruchu)”). */
-const DIS_SYMBOL = String.raw`(?:,?${WS}symbol(?:em)?${WS}(?:przyczyny${WS}niepełnosprawności${WS})?\d{2}-[A-Z](?:${WS}\([^()\n]{1,60}\))?)?`;
+const DIS_CODE = '(?:01-U|02-P|03-L|04-O|05-R|06-E|07-S|08-T|09-M|10-N|11-I|12-C)(?![\\w-])';
+/** Opis po symbolu: w nawiasie albo po myślniku („05-R (choroby narządu ruchu)”, „12-C – całościowe zaburzenia rozwojowe”). */
+const DIS_DESC = `(?:${WS}\\([^()\\n]{1,60}\\)|${SP4}[–—-]${SP4}[${LO}]{3,}(?:${SP4}[${LO}]+){0,4})?`;
+/** Jeden symbol albo kilka przyczyn naraz („05-R, 10-N”). */
+const DIS_CODES = `${DIS_CODE}${DIS_DESC}(?:(?:${SP0}[,;/]${SP0}|${SP}(?:i|oraz|lub)${SP})${DIS_CODE}${DIS_DESC}){0,3}`;
+/** Etykieta kodu: „symbol(e) przyczyny niepełnosprawności”, „Przyczyna niepełnosprawności:”, „symbol niepełnosprawności”. */
+const DIS_LABEL = `(?:${cap('symbol')}(?:em|u|e)?(?:${WS}przyczyny)?|${cap('przyczyn')}[ayą])(?:${WS}niepełnosprawności)?[ \\t]{0,4}:?${WS}`;
+/** Symbol przyczyny przy frazie orzeczenia: po przecinku, „z symbolem”, „o symbolu” albo w nawiasie („(05-R)”). */
+const DIS_SYMBOL = `(?:,?${WS}(?:[zo]${WS})?${DIS_LABEL}${DIS_CODES}|${SP0}\\(${SP0}(?:${DIS_LABEL})?${DIS_CODES}${SP0}\\))?`;
 const SELF_CARE = `samodzie[l1]n(?:ej|ego)${WS}egzystencji`;
 const INCAPACITY = `niezdolności${WS}do${WS}(?:pracy(?:${WS}i${WS}${SELF_CARE})?|${SELF_CARE})`;
 /**
@@ -821,7 +829,8 @@ const MED_ACTION = '(?:usunięci|przeszczep|wszczepieni|wymian|resekcj|amputacj|
 const MED_WORD = `(?:${SIDE}(?:${ANATOMY})${NLA}${TECH_AFTER}|[${LO}]*(?:${MED_STEM})[${LO}]*|(?<![${LETTER}])(?:${ORGAN})[${LO}]*)`;
 const MED_FIRST = `(?:${MED_WORD}|${MED_ACTION}[${LO}]{0,4}${WS}(?:(?:lew|praw)(?:ej|ego|ych)${WS})?${MED_WORD})`;
 /** Dalsze wyrazy dopowiedzenia w dopełniaczu albo miejscowniku („usunięcia pęcherzyka żółciowego”). */
-const OBJ_STOP_EV = '(?:i|oraz|a|ale|lecz|lub|albo|od|przez|w|we|z|ze|po|do|na|u|dla|co|jak|już|się|nie|bo|więc|ponieważ|według|mimo|przy|dnia)';
+const OBJ_STOP_BASE = 'i|oraz|a|ale|lecz|lub|albo|od|przez|w|we|z|ze|po|do|na|u|dla|co|jak|już|się|nie|bo|więc|ponieważ|według|mimo';
+const OBJ_STOP_EV = `(?:${OBJ_STOP_BASE}|przy|dnia)`;
 const MED_MORE = `(?:${WS}(?!${OBJ_STOP_EV}${NLA})[${LO}]{2,}(?:a|y|ego|ej|ych|ich|u|ów|i|ym|im))${'{0,3}'}`;
 /**
  * Nazwa zabiegu medycznego sama z siebie, rozpoznawana po budowie słowa: -ektomia („mastektomię”,
@@ -886,7 +895,7 @@ const namedIn = (sentence: string): boolean =>
  * Imiesłów („przebywający na zwolnieniu”) opisuje każdego, kogo to dotyczy, więc nie jest tu formą osoby.
  */
 const RE_SELF_FRAME = new RegExp(
-  `${NOT_LETTER_BEFORE}(?:(?:przebyw(?:a|am|ał|ała|ałem|ałam)|jest|jestem|był|była|byłem|byłam)${SP4}(?:na|po|w)|przebyw(?:a|am|ał|ała|ałem|ałam)|(?:ma|mam|miał|miała)(?:${SP4}(?:zaplanowan|wyznaczon|stwierdzon|rozpoznan|przyznan|orzeczon|wystawion|zalecon)[${LO}]{1,3})?|posiada|dostarczył${PAST}|przedstawił${PAST}|otrzymał${PAST}|legitymuj(?:e|ę)${SP}się)${SP4}$`,
+  `${NOT_LETTER_BEFORE}(?:(?:przebyw(?:a|am|ał|ała|ałem|ałam)|jest|jestem|był|była|byłem|byłam)${SP4}(?:na|po|w)|przebyw(?:a|am|ał|ała|ałem|ałam)|(?:ma|mam|miał|miała)(?:${SP4}(?:zaplanowan|wyznaczon|stwierdzon|rozpoznan|przyznan|orzeczon|wystawion|zalecon)[${LO}]{1,3})?|posiada|dostarczył${PAST}|przedstawił${PAST}|otrzymał${PAST}|legitymuj[eę]${SP}się)${SP4}$`,
 );
 const selfFrame = (whole: string, offset: number): boolean => mtest(RE_SELF_FRAME, whole.slice(Math.max(0, offset - 40), offset));
 /**
@@ -907,8 +916,8 @@ const RE_EV_PERSON = new RegExp(
     'uczestni(?:k|ka|kowi|czka|czki|czce)',
     'chłop(?:iec|ca|cu)',
     'dziewczyn(?:ka|ki|ce|kę|ką)',
-    'matkę|ojczym(?:a)?|macoch[a-ząćęłńóśźż]*|konkubent(?:a|ka|ki)?|babci(?:a|ę|ą)?|dziad(?:ek|ka|kowi)',
-    'brat(?:a|u)?|siostr(?:a|y|ze|ę|ą)|wnu(?:k|ka|czka|czki)|teś(?:ć|cia|ciowa|ciowej)',
+    'matkę|ojczym(?:a)?|macoch[a-ząćęłńóśźż]*|konkubent(?:a|ka|ki)?|babci[aęą]?|dziad(?:ek|ka|kowi)',
+    'brat[au]?|siostr(?:a|y|ze|ę|ą)|wnu(?:k|ka|czka|czki)|teś(?:ć|cia|ciowa|ciowej)',
   ].join('|')})${NOT_LETTER_AFTER}`,
   'i',
 );
@@ -1143,6 +1152,8 @@ interface HealthEvent {
   subject?: boolean;
   /** Zdarzenie zapisane po angielsku: kotwicą jest osoba w zdaniu angielskim (patrz enAnchor). */
   en?: boolean;
+  /** Niepełnosprawność: konkretne orzeczenie w zdaniu (numer, data, symbol przyczyny) wskazuje osobę mimo cytatu przepisu. */
+  doc?: boolean;
 }
 const ev = (src: string, opts: Omit<HealthEvent, 're'> = {}): HealthEvent => ({
   re: new RegExp(`${NOT_LETTER_BEFORE}(?:${src})${NOT_LETTER_AFTER}`, 'g'),
@@ -1152,6 +1163,58 @@ const RE_DEGREE_LIST_BEFORE = new RegExp(`${DEGREE}${SP0}(?:lub|albo|i|oraz|,|/)
 const RE_DEGREE_LIST_AFTER = new RegExp(`^${SP0}(?:lub|albo|i|oraz|,|/)${SP0}${DEGREE}`);
 const degreeList = (whole: string, offset: number, m: string): boolean =>
   mtest(RE_DEGREE_LIST_BEFORE, whole.slice(Math.max(0, offset - 30), offset)) || mtest(RE_DEGREE_LIST_AFTER, whole.slice(offset + m.length, offset + m.length + 30));
+/**
+ * Konkretne orzeczenie: wartość przy orzeczeniu albo przy jego masce. Numer i data („nr 214/2025”,
+ * „z dnia 3 lipca”: grupa 1), data wydania, termin ważności z datą, „bezterminowe”. Słowo bez
+ * wartości („ważne do dnia wskazanego”) i data progu („wydane dnia … lub wcześniej”) to przepis.
+ */
+const RE_DOC_CONCRETE = new RegExp(
+  `(?:${NOT_LETTER_BEFORE}${cap('orzeczeni')}[${LO}]*|\\])(?:${SP4}[^ \\t\\n.;]{1,40}){0,8}?${SP4}(?:(nr\\.?|numer|z${SP4}dnia)|(?:wydan|ważn)[${LO}]{1,3}${SP4}(?:do${SP4})?(?:dnia${SP4})?)${SP0}[\\d[](?![^;\\n]{0,30}${NOT_LETTER_BEFORE}(?:lub|albo)${SP}(?:wcześniej|później)${NLA})|${NOT_LETTER_BEFORE}bezterminow[eay]${NLA}`,
+);
+const RE_DIS_CODE = new RegExp(DIS_CODE);
+const RE_DOC_SUBJECT = /^[ \t"„(–-]*(?:\d{1,2}[.)][ \t]*)?Orzeczeni/;
+/** Bezosobowe zdanie przepisu („wydaje się osobie”, „dołącza się orzeczenie”). */
+const RE_IMPERSONAL = new RegExp(`${NOT_LETTER_BEFORE}(?:wydaj|dołącz|przyznaj|ustal|uznaj|wskazuj|stosuj)[${LO}]{1,2}${SP}się${NLA}`, 'i');
+/**
+ * Niepełnosprawność bez kotwicy osoby, ale przy konkretnym orzeczeniu. Numer i data wskazują osobę
+ * mimo cytatu przepisu; słabszy znak (data wydania, „bezterminowe”, symbol przy frazie, nie sam kod
+ * w zdaniu) tylko poza przepisem, warunkiem, statystyką i zdaniem bezosobowym.
+ */
+function docConcrete(m: string, sentence: string, rest: string): boolean {
+  if (mtest(RE_QUESTION, sentence)) return false;
+  const d = RE_DOC_CONCRETE.exec(sentence);
+  if (d?.[1]) return true;
+  // sam symbol liczy się przy frazie, ale nie w podmiocie zdania ogólnego („Orzeczenie … z symbolem 05-R uprawnia do…”)
+  if (!d && (/^\d/.test(m) || !mtest(RE_DIS_CODE, m) || (mtest(RE_DOC_SUBJECT, sentence) && /^[^.;\n]*?[a-ząćęłńóśźż]{3}/.test(rest)))) return false;
+  return !(isGenericRule(sentence) || [RE_NORMATIVE, RE_NORMATIVE_WEAK, RE_IF, RE_STATS, RE_IMPERSONAL].some((r) => mtest(r, sentence)));
+}
+/**
+ * Kod poza frazą orzeczenia: objaśnienie („symbol 05-R oznacza…”), liczba przy kodzie w zestawieniu
+ * („05-R – 120”) i zdanie bez orzeczenia, stopnia, etykiety „przyczyny” ani zakrytej frazy zdrowia zostają.
+ */
+const RE_CODE_DEF = new RegExp(`^(?:${SP}(?:oznacza|obejmuje|dotyczy)${NLA}|${SP0}[–—:-]?${SP0}\\d)`);
+const RE_DIS_CONTEXT = /orzecz|niepełnospr|stopni/i;
+const symbolReject = (w: string, o: number, m: string, st: number[], mask: string): boolean => {
+  const s = sentenceAt(w, st, o, o + m.length);
+  return mtest(RE_CODE_DEF, w.slice(o + m.length, o + m.length + 12)) || !(mtest(RE_DIS_CONTEXT, s) || /przyczyn/i.test(w.slice(Math.max(0, o - 30), o)) || s.includes(mask));
+};
+/** Krewny w liczbie pojedynczej przed albo po frazie niepełnosprawności („syna z niepełnosprawnością”, „niepełnosprawną matką”). */
+const KIN_ADULT = '(?:syn(?:a|owi|em)?|córk(?:a|i|ę|ą|ce)|mąż|męż(?:a|owi|em)|żon(?:a|y|ę|ą|ie)|ojc(?:a|u|em)|ojciec|matk(?:a|i|ę|ą|ce)|brat(?:a|u|em)?|siostr(?:a|y|ę|ą|ze)|wnu(?:k(?:a|iem|owi)?|czk(?:a|i|ę|ą|ce))|małoletni(?:ego|ej|a)?)';
+const KIN_SG = `(?:${KIN_ADULT}|dzieck(?:o|a|u|iem))`;
+/** Temat zamiast faktu: tytuł z dwukropkiem („Poradnik dla rodziców: …”) i zestawienie „niepełnosprawność dziecka a świadczenia”. */
+const RE_TITLE_LINE = /(?:poradnik|broszur|ulotk|temat|tytuł|konferencj|szkoleni|warsztat)[^:\n]{0,40}:[ \t]*$/i;
+const RE_VERSUS = new RegExp(`^${WS}${KIN_SG}${SP}a${SP}(?!(?:także|też|ponadto|również|nie)${NLA})[${LO}]`);
+/** Próg wieku z przepisu („po ukończeniu przez dziecko 3 lat”) bez dorosłego krewnego ani osoby z nazwy. */
+const RE_AGE_RULE = new RegExp(`${NOT_LETTER_BEFORE}ukończeni[ua]${SP}(?:przez${SP}[${LO}]+${SP})?\\d{1,2}${SP}(?:lat|roku)`);
+const RE_KIN_ADULT = new RegExp(`${NOT_LETTER_BEFORE}${KIN_ADULT}${NLA}`, 'i');
+const kinReject = (w: string, o: number, m: string, st: number[]): boolean => {
+  const s = sentenceAt(w, st, o, o + m.length);
+  return (
+    mtest(RE_TITLE_LINE, w.slice(Math.max(0, o - 60), o)) ||
+    mtest(RE_VERSUS, w.slice(o + m.length, o + m.length + 30)) ||
+    (mtest(RE_AGE_RULE, s) && !mtest(RE_KIN_ADULT, s) && namePairAt(s) < 0)
+  );
+};
 /** Tytuł dokumentu („karta informacyjna leczenia szpitalnego”) i kształcenie terapeutów („szkoła psychoterapii”). */
 const RE_TITLE_BEFORE = new RegExp(`(?:informacyjn${L}|szkoł${L}|kurs${L}|szkoleni${L}|studi${L}|certyfikat${L}|dyplom${L}|ofert${L}|program${L}|zakres${L}|koszt${L}|finansowani${L}|refundacj${L})(?:${SP}(?:z|ze|w${SP}zakresie))?${SP}$`, 'i');
 const titleBefore = (whole: string, offset: number): boolean => mtest(RE_TITLE_BEFORE, whole.slice(Math.max(0, offset - 40), offset));
@@ -1174,7 +1237,7 @@ const placeBefore = (whole: string, offset: number): boolean => mtest(RE_PLACE_B
  */
 const PERSON_WORD = `(?:jego|jej|ich|mojego|mojej|mego|mej|swojego|swojej|swego|pana|pani|syna|córki|męża|żony|ojca|matki|dziecka|pracownika|pracownicy|wnioskodawcy|wnioskodawczyni|ucznia|uczennicy|małoletni${L}|ubezpieczon${L}|pozwan${L}|powoda|powódki|skarżąc${L})`;
 const RE_TOPIC_BEFORE = new RegExp(
-  `${NOT_LETTER_BEFORE}(?:zasad${L}|pytani(?:e|a|em|u)(?:${SP}o)?|zapyta${L}${SP}o|kolejk${L}(?:${SP}(?:do|na))?|dostęp(?:u|em)?${SP}do|dostępnoś${L}|informacj${L}(?:${SP}(?:o|na${SP}temat|dotycząc${L}))?|informuj${L}${SP}o|druk${L}|formularz${L}|wzor(?:u|em|y|ów)|wzór|system${L}|rozliczeni${L}|rozlicza${L}|wypłat${L}|wypłaca${L}|przyznawani${L}|przyznani${L}|udzielani${L}|wystawiani${L}|kwesti${L}|dotycząc${L}|dotycz(?:y|ą|ył|yła|yło|yły)|temat${L}|z${SP}zakresu|w${SP}zakresie|wnios(?:ki|ków|kami|kach)${SP}o|odwołani(?:a|ach|om)${SP}od|liczb${L}|statystyk${L}|kosztów|koszt(?:y|u)?|finansowani${L}|refundacj${L}|organizacj${L}|obsług${L}|obsługuj${L}|ewidencj${L}|rejestr${L}|opisano|opis(?:u|ie)?|zestawieni${L}|wykaz${L}|procedur${L}|wykorzystywani${L}|wykorzystani${L}|kontrol(?:a|i|ę|ą)|o${SP}zasadach|za${SP}(?:okres|czas)|w${SP}sprawie|co${SP}do|na${SP}temat|omawia${L}|omówi${L}|omówił${L}|dyskutow${L}|przedyskutow${L}|rozmawia${L}${SP}o|analizow${L}|przeanalizow${L}|opracow${L}|referow${L}|prezentow${L}|zaprezentow${L}|raport${L}(?:${SP}o)?|sprawozdani${L}|analiz${L}|wskaźnik${L}|brak(?:u|iem)?|zajęci(?:a|ach|om)${SP}z)` +
+  `${NOT_LETTER_BEFORE}(?:zasad${L}|pytani(?:e|a|em|u)(?:${SP}o)?|zapyta${L}${SP}o|kolejk${L}(?:${SP}(?:do|na))?|dostęp(?:u|em)?${SP}do|dostępnoś${L}|informacj${L}(?:${SP}(?:o|na${SP}temat|dotycząc${L}))?|informuj${L}${SP}o|druk${L}|formularz${L}|wzor(?:u|em|y|ów)|wzór|system${L}|rozliczeni${L}|rozlicza${L}|wypłat${L}|wypłaca${L}|przyznawani${L}|przyznani${L}|udzielani${L}|wystawiani${L}|kwesti${L}|dotycząc${L}|dotycz(?:y|ą|ył|yła|yło|yły)|temat${L}|z${SP}zakresu|w${SP}zakresie|wnios(?:ki|ków|kami|kach)${SP}o|odwołani(?:a|ach|om)${SP}od|liczb${L}|statystyk${L}|kosztów|koszt[yu]?|finansowani${L}|refundacj${L}|organizacj${L}|obsług${L}|obsługuj${L}|ewidencj${L}|rejestr${L}|opisano|opis(?:u|ie)?|zestawieni${L}|wykaz${L}|procedur${L}|wykorzystywani${L}|wykorzystani${L}|kontrol[aięą]|o${SP}zasadach|za${SP}(?:okres|czas)|w${SP}sprawie|co${SP}do|na${SP}temat|omawia${L}|omówi${L}|omówił${L}|dyskutow${L}|przedyskutow${L}|rozmawia${L}${SP}o|analizow${L}|przeanalizow${L}|opracow${L}|referow${L}|prezentow${L}|zaprezentow${L}|raport${L}(?:${SP}o)?|sprawozdani${L}|analiz${L}|wskaźnik${L}|brak(?:u|iem)?|zajęci(?:a|ach|om)${SP}z)` +
     `(?:${SP}(?!${PERSON_WORD}${NLA})(?:[${LO}]{3,}|z|ze|w|we|o|na|do|u|po)){0,3}${SP}$`,
   'i',
 );
@@ -1190,7 +1253,7 @@ function topicBefore(whole: string, offset: number, m: string): boolean {
  * „Delegacja radnych przebywała w szpitalu”): pismo, rzecz, grupa albo instytucja, a nie pacjent.
  */
 const RE_THING_SUBJECT = new RegExp(
-  `^[ \\t"„(]*(?:(?:wczoraj|dziś|dzisiaj|następnie|potem|ponadto|również|także|natomiast|jednak|ostatecznie|niezwłocznie)${SP})?(?:pism|przesyłk|paczk|list(?:y|u)?${NLA}|wnios(?:ek|ku|kiem|ki|ków|kami)${NLA}|skarg|zgłoszeni|dokument|korespondencj|faktur|decyzj|spraw(?:a|y)${NLA}|dostaw|transport|sprzęt|aparat|urządzeni|karetk|delegacj|komisj|kontrol|ekip|grup|zesp[oó]ł|zamówieni|darowizn|dotacj|środk|pieniądz|informacj|odpowied|zawiadomieni|wezwani|zapytani|towar|lek(?:i|ów)?${NLA}|szczepionk|próbk|materiał|odpad|pojazd|samochód|autobus|wycieczk|zbiórk|kwot|wizytacj|kurier|personel|zarząd|chorob|schorzeni|nowotw|depresj|zaburzeni|infekcj|problem|usterk|awari|błąd|błęd|maszyn|dźwig|system|sieć|sieci|metod|urząd|urzęd|placówk|gmin|spółk|firm|instytucj)${L}${NLA}`,
+  `^[ \\t"„(]*(?:(?:wczoraj|dziś|dzisiaj|następnie|potem|ponadto|również|także|natomiast|jednak|ostatecznie|niezwłocznie)${SP})?(?:pism|przesyłk|paczk|list[yu]?${NLA}|wnios(?:ek|ku|kiem|ki|ków|kami)${NLA}|skarg|zgłoszeni|dokument|korespondencj|faktur|decyzj|spraw[ay]${NLA}|dostaw|transport|sprzęt|aparat|urządzeni|karetk|delegacj|komisj|kontrol|ekip|grup|zesp[oó]ł|zamówieni|darowizn|dotacj|środk|pieniądz|informacj|odpowied|zawiadomieni|wezwani|zapytani|towar|lek(?:i|ów)?${NLA}|szczepionk|próbk|materiał|odpad|pojazd|samochód|autobus|wycieczk|zbiórk|kwot|wizytacj|kurier|personel|zarząd|chorob|schorzeni|nowotw|depresj|zaburzeni|infekcj|problem|usterk|awari|błąd|błęd|maszyn|dźwig|system|sieć|sieci|metod|urząd|urzęd|placówk|gmin|spółk|firm|instytucj)${L}${NLA}`,
   'i',
 );
 /** Cel pobytu po miejscu: praca albo wizyta („jako kapelan”, „z wizytą”, „na spotkaniu”, „w celu kontroli”). */
@@ -1207,11 +1270,11 @@ function thingSubject(whole: string, offset: number, m: string, starts: number[]
 /** Pytanie formularza („Czy dziecko posiada orzeczenie? TAK / NIE”): treść druku, a nie fakt o osobie. */
 const RE_QUESTION = /^[ \t"„(]*(?:\d{1,2}[.)][ \t]*)?czy(?![a-ząćęłńóśźż])[^?\n]*\?/i;
 
-const STAY_VERB = `(?:[pP]rzebywa(?:m|sz|ją|ł|ła|łem|łam|li|ły|jąc[${LO}]{0,3})?|[lL]eży|[lL]eżał[${LO}]{0,3}|[tT]rafiał[${LO}]{0,3}|[tT]rafia|[tT]rafił[${LO}]{0,3}|[tT]rafi|[pP]ozostaje|[pP]ozostawał[${LO}]{0,3}|[sS]kierowan(?:y|a)|[zZ]głosił[${LO}]{0,3}${SP4}się|[pP]rzyjęt[${LO}]{1,3}|[uU]mieszczon[${LO}]{1,3}|[hH]ospitalizowan[${LO}]{1,3}|[oO]dwiezion[${LO}]{1,3}|[pP]rzewiezion[${LO}]{1,3})`;
-const STAY_PLACE = `(?:szpital(?:u|a)?|klini(?:ka|ki|kę|ce)(?:${WS}${SPECIALTY_GEN})?|hospicjum|sanatorium|uzdrowisku|izb(?:y|ie|ę)${WS}(?:wytrzeźwień|przyjęć)|oddzia(?:ł|łu|le)${WS}(?:${TREAT_ADJ}|${SPECIALTY_GEN})|OIOM(?:-ie|-u)?|detoks(?:ie|u)?|odwyk(?:u)?|turnus(?:ie|u)?${WS}rehabilitacyjn(?:ym|ego|y)|zakład(?:zie|u)?${WS}(?:opiekuńczo-|pielęgnacyjno-)?(?:lecznicz|opiekuńcz)(?:ym|ego|y)(?:${WS}dla${WS}osób${WS}uzależnionych(?:${WS}od${WS}${SUBST})?)?|ośrod(?:ek|ka|ku)${WS}(?:(?:leczenia|terapii)${WS}uzależnie(?:ń|nia)|(?:odwykow|detoksykacyjn|terapeutyczn|rehabilitacyjn)[${LO}]*))(?:${WS}(?:psychiatryczn|neurologiczn|onkologiczn|uzdrowiskow|rehabilitacyjn|zakaźn|dziecięc|odwykow|domow|stacjonarn|dzienn|całodobow|zamknięt|specjalistyczn|kliniczn|wojewódzk|powiatow|miejsk|uniwersyteck|regionaln|rejonow|ogóln|wielospecjalistyczn)[${LO}]*)?`;
+const STAY_VERB = `(?:[pP]rzebywa(?:m|sz|ją|ł|ła|łem|łam|li|ły|jąc[${LO}]{0,3})?|[lL]eży|[lL]eżał[${LO}]{0,3}|[tT]rafiał[${LO}]{0,3}|[tT]rafia|[tT]rafił[${LO}]{0,3}|[tT]rafi|[pP]ozostaje|[pP]ozostawał[${LO}]{0,3}|[sS]kierowan[ya]|[zZ]głosił[${LO}]{0,3}${SP4}się|[pP]rzyjęt[${LO}]{1,3}|[uU]mieszczon[${LO}]{1,3}|[hH]ospitalizowan[${LO}]{1,3}|[oO]dwiezion[${LO}]{1,3}|[pP]rzewiezion[${LO}]{1,3})`;
+const STAY_PLACE = `(?:szpital[ua]?|klini(?:ka|ki|kę|ce)(?:${WS}${SPECIALTY_GEN})?|hospicjum|sanatorium|uzdrowisku|izb(?:y|ie|ę)${WS}(?:wytrzeźwień|przyjęć)|oddzia(?:ł|łu|le)${WS}(?:${TREAT_ADJ}|${SPECIALTY_GEN})|OIOM(?:-ie|-u)?|detoks(?:ie|u)?|odwyk(?:u)?|turnus(?:ie|u)?${WS}rehabilitacyjn(?:ym|ego|y)|zakład(?:zie|u)?${WS}(?:opiekuńczo-|pielęgnacyjno-)?(?:lecznicz|opiekuńcz)(?:ym|ego|y)(?:${WS}dla${WS}osób${WS}uzależnionych(?:${WS}od${WS}${SUBST})?)?|ośrod(?:ek|ka|ku)${WS}(?:(?:leczenia|terapii)${WS}uzależnie(?:ń|nia)|(?:odwykow|detoksykacyjn|terapeutyczn|rehabilitacyjn)[${LO}]*))(?:${WS}(?:psychiatryczn|neurologiczn|onkologiczn|uzdrowiskow|rehabilitacyjn|zakaźn|dziecięc|odwykow|domow|stacjonarn|dzienn|całodobow|zamknięt|specjalistyczn|kliniczn|wojewódzk|powiatow|miejsk|uniwersyteck|regionaln|rejonow|ogóln|wielospecjalistyczn)[${LO}]*)?`;
 
 /** Leczenie i terapia z rodzajem („leczenia odwykowego”, „terapię integracji sensorycznej”, „psychoterapię”). */
-const TREATMENT = `${cap('lecz')}(?:enie|enia|eniu|eniem)${WS}(?:${TREAT_ADJ}|${ADDICTION}|(?:w|we)${WS}${PLACE_MED})|${cap('terapi')}(?:a|i|ę|ą)${WS}(?:${TREAT_ADJ}|integracji${WS}sensorycznej|${ADDICTION}|ręki)|${cap('psychoterapi')}(?:a|i|ę|ą)`;
+const TREATMENT = `${cap('lecz')}(?:enie|enia|eniu|eniem)${WS}(?:${TREAT_ADJ}|${ADDICTION}|(?:w|we)${WS}${PLACE_MED})|${cap('terapi')}[aięą]${WS}(?:${TREAT_ADJ}|integracji${WS}sensorycznej|${ADDICTION}|ręki)|${cap('psychoterapi')}[aięą]`;
 
 const RE_L4_PLACE = new RegExp(
   `${NOT_LETTER_BEFORE}(?:lini|hal|sektor|stref|poziom|bram|budyn|sal|magazyn|regał|kabin|peron|tor|blok|modu|segment|warstw|wariant|model)${L}${SP8}L-?4`,
@@ -1293,12 +1356,70 @@ const EV_OBJ = `(?!${OBJ_STOP_EV}${NLA})[${LO}]{3,}`;
 const COPULA = `(?:${'jest|był|była|jestem|byłem|byłam|jesteś|zostaje|został|została|zostałem|zostałam|pozostaje|będzie'.split('|').map(cap).join('|')})`;
 /** Do dwóch okoliczników między łącznikiem a imiesłowem („jest od lat leczony”, „był w 2023 r. operowany”). */
 const ADV_GAP = String.raw`(?:(?:(?:od|przez|w|we|od${SP}\d{4}|do)${SP4}[${LO}\d]{1,12}(?:${SP4}r\.)?|[${LO}]{3,14})${SP8}){0,2}`;
+/** Krewny doklejony do frazy, z krewnym współrzędnym („niepełnosprawną matką lub ojcem”), i krewny przed „z niepełnosprawnością”. */
+const RE_KIN_AFTER = new RegExp(`^${WS}${KIN_SG}${NLA}(?:${SP0}(?:,|lub|albo|i|oraz)${SP0}${KIN_SG}${NLA})?`, 'i');
+const RE_KIN_BEFORE = new RegExp(`${NOT_LETTER_BEFORE}${KIN_SG}${SP4}$`, 'i');
+/** Wyraz tuż przed frazą („Matka niepełnosprawnego dziecka”, „rodzicom …”) nazywa kategorię, a nie osobę. */
+const RE_WORD_BEFORE = new RegExp(`(?:[${LETTER}]+${SP}(?:lub|albo|i|oraz)${SP})?[${LETTER}]+${SP0}$`);
+const RE_OWNER_BEFORE = new RegExp(`${NOT_LETTER_BEFORE}je(?:j|go)${SP4}$`, 'i');
+/**
+ * Osoba poza doklejonym krewnym: strona sprawy, zaimek podmiotu, dorosły krewny, pierwsza osoba,
+ * czynność urzędu w sprawie („ustalono”, „przyznano”), „Pan”, „Pani” (bez urzędu po nich).
+ */
+const RE_KIN_PERSON = new RegExp(`${NOT_LETTER_BEFORE}(?:wnioskodaw[${LO}]*|podopieczn[${LO}]*|świadczeniobiorc[${LO}]*|on|ona|${KIN_ADULT})${NLA}`, 'i');
+/** Pierwsza osoba w tym samym członie („opiekuję się …”, „mam …”). */
+const RE_KIN_FIRST = new RegExp(`${NOT_LETTER_BEFORE}(?:mam|jestem|mogę|muszę|[${LO}]{3,}uję)${NLA}`, 'i');
+/** Rozstrzygnięcie w sprawie uzasadnione frazą: przyczyna przed nią i czynność urzędu w tym samym członie („ze względu na … stypendium ustalono”). */
+const RE_KIN_REASON = new RegExp(`(?:ze?${SP}względu${SP}na|z${SP}uwagi${SP}na|z${SP}powodu|w${SP}związku${SP}ze?)${SP}$`, 'i');
+const RE_KIN_DEED = new RegExp(`${NOT_LETTER_BEFORE}[${LO}]{3,}(?<!świ)(?:ono|ano|ęto)${NLA}`, 'i');
+const RE_KIN_PAN = new RegExp(`(?<![${LETTER}])(?:Pan|Pani|Pana|Panią|Panu|Panem)${NLA}(?!${SP}${OFFICE}${NLA})`);
+/** Pytanie zależne i pole wyboru („wpisz, czy dziecko jest niepełnosprawne (tak/nie)”), tytuł w cudzysłowie. */
+const RE_KIN_ASK = new RegExp(`(?:${NOT_LETTER_BEFORE}czy${SP}[^.;:!?\\n]{0,40}|„[^”"\\n]{0,80})$`, 'i');
+const RE_YES_NO = /(?<![\p{L}])tak[ \t]*\/[ \t]*nie(?![\p{L}])/iu;
+const RE_COPULA_END = new RegExp(`${COPULA}${SP8}${ADV_GAP}$`);
+/** Orzecznik kończy człon („jest niepełnosprawny od urodzenia”, „, a…”); rzeczownik po nim to przydawka („jest niepełnosprawne dziecko”). */
+const RE_PRED_END = new RegExp(
+  `^(?:${SP0}(?:[^${LETTER} \\t]|$)|${WS}(?:[${UP}]|${OBJ_STOP_EV}${NLA}|[${LO}]+(?:nie|wo)${NLA}))`,
+);
+/**
+ * Niepełnosprawność przy krewnym albo po łączniku. Krewny doklejony do frazy („niepełnosprawnego
+ * dziecka”, „syna z niepełnosprawnością”) nie jest kotwicą, bo tak samo brzmi kryterium, przepis
+ * i tytuł („wychowywanie niepełnosprawnego dziecka – 10 punktów”); potrzebna jest osoba w zdaniu
+ * poza nim: dzierżawca tuż przed, osoba z nazwy, strona, „Pan”, „Pani”, dorosły krewny, zakryta już
+ * dana o zdrowiu, a w tym samym członie pierwsza osoba albo czynność urzędu. Po łączniku przymiotnik z rzeczownikiem
+ * („jest niepełnosprawny mieszkaniec”) to przydawka, a nie orzeczenie o osobie.
+ */
+function kinTopic(w: string, o: number, m: string, st: number[], mask: string): boolean {
+  if (kinReject(w, o, m, st)) return true;
+  const to = o + m.length;
+  const s = sentenceAt(w, st, o, to);
+  const before = w.slice(Math.max(0, o - 90), o);
+  if (mtest(RE_KIN_ASK, before) || mtest(RE_YES_NO, s)) return true;
+  // definicja z warunkiem po frazie („Dziecko jest niepełnosprawne, jeśli posiada orzeczenie”)
+  if (mtest(RE_IF, s) && namedAt(w, o, s).length === 0 && !mtest(RE_KIN_PAN, s)) return true;
+  const ka = /^niepełnosprawn/i.test(m) ? RE_KIN_AFTER.exec(w.slice(to, to + 40)) : null;
+  const kb = !ka && /^z[ \t]/.test(m) ? RE_KIN_BEFORE.exec(before) : null;
+  if (!ka && !kb) return mtest(RE_COPULA_END, w.slice(Math.max(0, o - 60), o)) && !mtest(RE_PRED_END, w.slice(to, to + 30));
+  let a = o;
+  let b = to;
+  if (ka) {
+    a -= RE_WORD_BEFORE.exec(before)?.[0].length ?? 0;
+    b += ka[0].length;
+  } else if (kb) a -= kb[0].length;
+  const own = w.slice(Math.max(0, (ka ? o : a) - 20), ka ? o : a);
+  if (mtest(RE_OWNER_BEFORE, own) || mtest(RE_MY_BEFORE, own) || s.includes(mask) || namedAt(w, o, s).length > 0) return false;
+  const i = sentenceIndex(st, o);
+  const rest = `${w.slice(Math.max(st[i], o - SPAN, 0), a)} ${w.slice(b, Math.min(i + 1 < st.length ? st[i + 1] : w.length, to + SPAN))}`;
+  const left = w.slice(Math.max(0, a - 80), a);
+  const clause = `${left.slice(left.search(/[^,;:(–—]*$/)).split(/(?<![\p{L}])(?:że|iż)(?![\p{L}])/u).pop()} ${w.slice(b, b + 80).split(/[,;:)–—]/)[0]}`;
+  return !(mtest(RE_KIN_PERSON, rest) || mtest(RE_KIN_PAN, rest) || mtest(RE_KIN_FIRST, clause) || (mtest(RE_KIN_REASON, w.slice(Math.max(0, a - 30), o)) && mtest(RE_KIN_DEED, clause)));
+}
 /** Okolicznik między czasownikiem pobytu a miejscem („przebywa obecnie w szpitalu”, „trafiał kilkukrotnie na oddział”). */
 const STAY_ADV = String.raw`(?:(?:obecnie|ponownie|nadal|wciąż|kilkukrotnie|wielokrotnie|dwukrotnie|trzykrotnie|często|ostatnio|stale|czasowo|okresowo|aktualnie|już|jeszcze|wtedy|wówczas|od${SP4}[${LO}\d]{2,12})${SP8})?`;
 
 /** Przysłówek rodzaju leczenia („leczona psychiatrycznie”, „operowany laparoskopowo”); „przyrodniczo”, „ekologicznie” nie. */
-const MED_ADV = `(?:psychiatrycznie|neurologicznie|onkologicznie|kardiologicznie|psychologicznie|psychoterapeutycznie|ortopedycznie|dermatologicznie|laryngologicznie|ginekologicznie|urologicznie|endokrynologicznie|diabetologicznie|hematologicznie|nefrologicznie|reumatologicznie|pulmonologicznie|gastroenterologicznie|okulistycznie|chirurgicznie|internistycznie|laparoskopowo|endoskopowo|artroskopowo|odwykowo|ambulatoryjnie|szpitalnie|stacjonarnie|farmakologicznie|operacyjnie|zachowawczo|paliatywnie|objawowo|przewlekle)${NLA}`;
-const PART_AMBIG = `(?:lecz(?:ony|ona)|(?:operowan|zoperowan|diagnozowan|rehabilitowan|napromieniowan)(?:y|a))`;
+const MED_ADV = `(?:(?:(?:neuro|onko|kardio|psycho|dermato|laryngo|gineko|uro|endokryno|diabeto|hemato|nefro|reumato|pulmono|gastroentero|farmako)logicz|(?:psychiatry|psychoterapeuty|ortopedy|okulisty|internisty|chirurgi)cz|ambulatoryj|szpital|stacjonar|operacyj|paliatyw)nie|(?:laparo|endo|artro)skopowo|odwykowo|zachowawczo|objawowo|przewlekle)${NLA}`;
+const PART_AMBIG = `(?:lecz(?:ony|ona)|(?:operowan|zoperowan|diagnozowan|rehabilitowan|napromieniowan)[ya])`;
 /** Dopowiedzenie imiesłowu: miejsce leczenia, specjalista albo przyczyna („z powodu…”, „na…”, „w kierunku…”). */
 const PART_COMPL = `(?:${WS}(?:w|we|na)${WS}(?:${STAY_PLACE}|${PLACE_MED})|${WS}u${WS}(?:${SPEC_RE})|${WS}(?:z${WS}powodu|na|w${WS}kierunku)(?:${WS}${EV_OBJ}){1,3})`;
 const RE_PART_PLACE = new RegExp(`${NOT_LETTER_BEFORE}(?:${MED_ADV}|u${WS}(?:${SPEC_RE})|(?:w|we|na)${WS}(?:${STAY_PLACE}|${PLACE_MED}))`, 'i');
@@ -1354,7 +1475,7 @@ const MED_PURPOSE = `(?:leczeni|obserwacj|chemi|reanim|cesarsk|cięci|hospitaliz
 const RE_MED_PURPOSE = new RegExp(`^${MED_PURPOSE}`, 'i');
 const RE_PURPOSE_PREP = new RegExp(`^${SP0}(?:[${LO}]{3,}(?:ym|im|ego|ej)${SP4})?(w${SP}sprawie|z|ze|na|do)${SP4}([${LO}]{3,})`, 'i');
 const RE_MED_INSTR =
-  /^(?:bólem|bólami|urazem|urazami|podejrzeniem|objawami|gorączką|raną|ranami|obrażeniami|rozpoznaniem|diagnozą|złamaniem|zawałem|udarem|krwotokiem|dusznością|dusznościami|zapaleniem|skierowaniem|zatruciem|oparzeniem|oparzeniami|krwawieniem|wymiotami|omdleniem|drgawkami|infekcją|zakażeniem|wysoką|silnym|silnymi|silną|ostrym|ostrymi|ostrą|nagłym|nagłą|ciężkim|ciężkimi|ciężką|dzieckiem|synem|córką|matką|ojcem|żoną|mężem|wnukiem|wnuczką|bratem|siostrą|karetką|pogotowiem|helikopterem|śmigłowcem|zespołem|krwią|temperaturą|ciśnieniem|niewydolnością|zaostrzeniem|nawrotem|nowotworem|guzem|ciążą)$/i;
+  /^(?:ból(?:em|ami)|uraz(?:em|ami)|podejrzeniem|objawami|gorączką|ran(?:ą|ami)|obrażeniami|rozpoznaniem|diagnozą|złamaniem|zawałem|udarem|krwotokiem|duszności(?:ą|ami)|zapaleniem|skierowaniem|zatruciem|oparzeni(?:em|ami)|krwawieniem|wymiotami|omdleniem|drgawkami|infekcją|zakażeniem|wysoką|(?:siln|ostr)(?:ym|ymi|ą)|ciężk(?:im|imi|ą)|nagł(?:ym|ą)|dzieckiem|synem|córką|matką|ojcem|żoną|mężem|wnu(?:kiem|czką)|bratem|siostrą|karetką|pogotowiem|helikopterem|śmigłowcem|zespołem|krwią|temperaturą|ciśnieniem|niewydolnością|zaostrzeniem|nawrotem|nowotworem|guzem|ciążą)$/i;
 const RE_WORK_TIME = /od[ \t]+\d{1,2}[:.]\d{2}[ \t]+do[ \t]+\d{1,2}[:.]\d{2}|w[ \t]+godzinach|(?<![a-ząćęłńóśźż])codziennie|na[ \t]+zmian/i;
 const RE_GERUND = new RegExp(`${NOT_LETTER_BEFORE}[${LO}]{3,}ąc${NLA}`, 'i');
 const RE_MED_AFTER = /z[ \t]+powodu|po[ \t]+(?:zawale|udarze|wypadku|operacji|zabiegu|urazie|upadku|porodzie|próbie|pobiciu|przedawkowaniu)|w[ \t]+(?:stanie|ciężkim)|z[ \t]+(?:urazem|obrażeniami|podejrzeniem|bólem|gorączką|zawałem|udarem|złamaniem)/i;
@@ -1428,7 +1549,7 @@ const FN_NOT = `${cap('nie')}${WS}(?:mówi|chodzi|siedzi|słyszy|widzi|porusza${
 const FN_SELF = `(?:się${WS})?(?:(?:porusza|przemieszcza|ubiera|wstawa)ć|chodzić|funkcjonować|egzystować|ubrać|u?myć|jeść|wstać|siedzieć|kąpać)(?:${WS}się)?`;
 /** Posiadacz albo pacjent przed sprzętem („ma założony”, „nosi”, „korzysta z”, „z”); wyraz przed sprzętem nie jest bezokolicznikiem („ma zamówić cewnik”). */
 const FN_HAVE = `(?<=(?<![${LETTER}])(?:ma|mam|miał[ao]?|posiada|nosi|nosił[ao]?|stosuj[eę]|stosował[ao]?|stosowan[aey](?:${SP8}(?:jest|był[ao]?))?|używa|używał[ao]?|korzyst(?:a|ał[ao]?)${SP8}z|zaopatrzon[yaą]${SP8}w|(?:jest|był[ao]?)${SP8}na|ze?)${SP8}(?:(?![${LO}]*ć${NLA})[${LO}]{3,14}${SP8})?)`;
-const FN_DEV = `(?:gastro|kolo|ileo|uro|tracheo)?stomi(?:a|i|ę|ą)|work(?:i|ów|ami)${WS}stomijn[${LO}]{1,3}|pieluchomajt[${LO}]{2,4}|cewnik(?:a|iem)?|tlenoterapi[${LO}]{1,2}(?:${WS}domow[${LO}]{1,3})?`;
+const FN_DEV = `(?:gastro|kolo|ileo|uro|tracheo)?stomi[aięą]|work(?:i|ów|ami)${WS}stomijn[${LO}]{1,3}|pieluchomajt[${LO}]{2,4}|cewnik(?:a|iem)?|tlenoterapi[${LO}]{1,2}(?:${WS}domow[${LO}]{1,3})?`;
 /** Sygnał zdrowia obok opieki i niesamodzielności: choroba, uraz, niepełnosprawność, leczenie; małą literą i w liczbie pojedynczej, bo „Polski Związek Niewidomych” i „osób niewidomych” nie mówią o tej osobie. */
 const RE_FN_CUE = new RegExp(
   `${NOT_LETTER_BEFORE}(?:[cC]hor(?:ob|y|a|ej|uj|ow|zy)|zdrow|niepełnospraw|schorz|udar|wylew|zawał|operac|amputac|złama|uraz|wypad|demencj|otępi|niedowład|paraliż|sparaliż|porażeni|rehabilit|medyczn|pielęgn|hospicj|(?:leżąc|niesamodzieln|niewidom|niesłysząc)(?:a|y|ą|ego|ej)${NLA})`,
@@ -1526,28 +1647,45 @@ const EVENTS: HealthEvent[] = [
   // zasiłek chorobowy, świadczenie rehabilitacyjne, urlop dla poratowania zdrowia i zdrowotny, absencja
   // chorobowa, renta z tytułu niezdolności do pracy
   ev(
-    String.raw`(?:\d{1,3}${SP}dni${SP})?${cap('zasił')}(?:ek${WS}chorobowy|ku${WS}chorobowego|kiem${WS}chorobowym)${PERIOD}|${cap('świadczeni')}(?:e|a|u|em)${WS}rehabilitacyjn(?:e|ego|ym)${PERIOD}|${cap('urlop')}(?:u|em|ie)?${WS}(?:dla${WS}poratowania${WS}zdrowia|zdrowotn(?:y|ego|ym))${PERIOD}|${cap('absencj')}(?:a|i|ę|ą)${WS}chorobow(?:a|ej|ą)|(?:${cap('rent')}${AYEA}|${cap('renci')}e)${WS}(?:z${WS}tytułu${WS}${INCAP_KIND}niezdolności${WS}do${WS}pracy|(?:chorobow|inwalidzk)(?:a|ej|ą|ę|iej))`,
+    String.raw`(?:\d{1,3}${SP}dni${SP})?${cap('zasił')}(?:ek${WS}chorobowy|ku${WS}chorobowego|kiem${WS}chorobowym)${PERIOD}|${cap('świadczeni')}(?:e|a|u|em)${WS}rehabilitacyjn(?:e|ego|ym)${PERIOD}|${cap('urlop')}(?:u|em|ie)?${WS}(?:dla${WS}poratowania${WS}zdrowia|zdrowotn(?:y|ego|ym))${PERIOD}|${cap('absencj')}[aięą]${WS}chorobow(?:a|ej|ą)|(?:${cap('rent')}${AYEA}|${cap('renci')}e)${WS}(?:z${WS}tytułu${WS}${INCAP_KIND}niezdolności${WS}do${WS}pracy|(?:chorobow|inwalidzk)(?:a|ej|ą|ę|iej))`,
   ),
   // orzeczenie o niepełnosprawności, stopniu, niezdolności, potrzebie kształcenia specjalnego; opinia WWR
   ev(
-    `${cap('orzeczeni')}(?:e|a|u|em)${WS}(?:lekarza${WS}orzecznika(?:${WS}ZUS)?${WS})?o${WS}(?:${DEGREE}${WS}${DIS_STEP}|niepełnosprawności|${INCAP_KIND}${INCAPACITY}|potrzebie${WS}(?:kształcenia${WS}specjalnego|zajęć${WS}rewalidacyjno-wychowawczych|indywidualnego${WS}(?:obowiązkowego${WS}rocznego${WS}przygotowania${WS}przedszkolnego|nauczania|przygotowania${WS}przedszkolnego)))${DIS_SYMBOL}|${cap('opini')}(?:a|i|ę|ą)${WS}o${WS}potrzebie${WS}wczesnego${WS}wspomagania${WS}rozwoju|wczesn(?:e|ego|ym)${WS}wspomagani(?:e|a|u|em)${WS}rozwoju`,
+    `${cap('orzeczeni')}(?:e|a|u|em)${WS}(?:lekarza${WS}orzecznika(?:${WS}ZUS)?${WS})?o${WS}(?:${DEGREE}${WS}${DIS_STEP}|niepełnosprawności|${INCAP_KIND}${INCAPACITY}|potrzebie${WS}(?:kształcenia${WS}specjalnego|zajęć${WS}rewalidacyjno-wychowawczych|indywidualnego${WS}(?:obowiązkowego${WS}rocznego${WS}przygotowania${WS}przedszkolnego|nauczania|przygotowania${WS}przedszkolnego)))${DIS_SYMBOL}|${cap('opini')}[aięą]${WS}o${WS}potrzebie${WS}wczesnego${WS}wspomagania${WS}rozwoju|wczesn(?:e|ego|ym)${WS}wspomagani(?:e|a|u|em)${WS}rozwoju`,
   ),
   // stopień niepełnosprawności przy osobie; wyliczenie stopni w pouczeniu („znacznym lub umiarkowanym”) zostaje
-  ev(`${DEGREE}${WS}${DIS_STEP}${DIS_SYMBOL}`, { reject: degreeList }),
+  ev(`${DEGREE}${WS}${DIS_STEP}${DIS_SYMBOL}`, { reject: degreeList, doc: true }),
+  // symbol przyczyny poza frazą orzeczenia („symbol przyczyny niepełnosprawności 12-C – całościowe zaburzenia
+  // rozwojowe”, pole „Przyczyna niepełnosprawności: 05-R”) przy osobie albo za zakrytą frazą; objaśnienie
+  // kodu i zestawienie liczb przy kodach zostają
+  ev(`(?<=${DIS_LABEL})${DIS_CODES}`, { doc: true, reject: symbolReject }),
+  // niepełnosprawność krewnego i osoby bez stopnia: „niepełnosprawność dziecka”, „niepełnosprawną matką”
+  // (krewny zostaje jawny), „syna z niepełnosprawnością (MPD)”, „dziecko jest niepełnosprawne”, „jest
+  // dzieckiem niepełnosprawnym”, „, niepełnosprawny ruchowo,”, „zaliczające syna do osób niepełnosprawnych”,
+  // „uznała … za osobę niepełnosprawną”; „dzieci z niepełnosprawnością” to grupa, tytuł i próg wieku to temat
+  ev(
+    `${cap('niepełnosprawn')}(?:oś(?:ć|ci|cią)|ą|ym|ego|ej|y|a|e|emu)(?:${WS}${DIS_KIND})?(?=${WS}${KIN_SG}${NLA})|(?<=(?<![${LETTER}])${KIN_SG}${SP4})z${WS}niepełnosprawnością(?:${WS}${DIS_KIND})?(?:${WS}w${WS}stopniu${WS}${DEGREE})?(?:${SP0}\\([${UP}]{2,6}\\))?|(?<=${COPULA}${SP8}${ADV_GAP})(?:(?:osobą|dzieckiem)${WS})?niepełnosprawn(?:y|a|ą|e|ym)(?:${WS}${DIS_KIND})?(?:${WS}w${WS}stopniu${WS}${DEGREE})?|niepełnosprawn(?:y|a|ą|ego|ej|emu|ym)${WS}${DIS_KIND}(?:${WS}w${WS}stopniu${WS}${DEGREE})?|(?<=(?<![${LETTER}])(?:zalicz|zakwalifikow|uzna)[${LO}]{0,8}${SP4}(?:[${LETTER}]{2,14}${SP4}){0,3})(?:do${WS}(?:osób${WS}niepełnosprawnych|(?:lekkiego|umiarkowanego|znacznego)${WS}stopnia${WS}niepełnosprawności)|za${WS}osobę${WS}niepełnosprawną)|(?<=${cap('stopi')}eń${WS}niepełnosprawności[ \\t]{0,4}:[ \\t]{0,4})${DEGREE}`,
+    { subject: true, doc: true, reject: kinTopic },
+  ),
+  // wskazania w orzeczeniu (pkt 7 i 8): stała opieka innej osoby, współudział opiekuna w leczeniu dziecka
+  ev(
+    `${cap('konieczno')}(?:ść|ści|ścią)${WS}stałe(?:j|go)${WS}(?:lub${WS}długotrwałej${WS})?(?:opieki${WS}lub${WS}pomocy${WS}innej${WS}osoby|współudziału${WS}na${WS}co${WS}dzień${WS}opiekuna${WS}dziecka${WS}w${WS}procesie${WS}jego${WS}leczenia,${WS}rehabilitacji${WS}i${WS}edukacji)`,
+    { doc: true, reject: kinReject },
+  ),
   // stwierdzona i orzeczona niepełnosprawność, szyk odwrócony („niepełnosprawny w stopniu znacznym”),
   // rodzaj niepełnosprawności („z niepełnosprawnością intelektualną”), niezdolność do pracy
   ev(
-    `${cap('stwierdzon')}(?:o|a|ą)${WS}niepełnosprawnoś(?:ć|ci)(?:${WS}${DIS_KIND})?(?:${WS}w${WS}stopniu${WS}${DEGREE})?|${cap('orzeczon')}(?:o|a|ą)${WS}(?:${DEGREE}${WS})?${DIS_STEP}|niepełnosprawn(?:y|a|ego|ej|emu|ym|ą)${WS}(?:${DIS_KIND}${WS})?w${WS}stopniu${WS}${DEGREE}|niepełnosprawnoś(?:ć|cią|ci)${WS}${DIS_KIND}(?:${WS}w${WS}stopniu${WS}${DEGREE})?|(?:(?:całkowicie|częściowo|trwale|okresowo)${WS})?niezdoln(?:y|a|ego|ej|emu|ym|ą)${WS}do${WS}(?:pracy(?:${WS}i${WS}${SELF_CARE})?|${SELF_CARE})${PERIOD}`,
-    { reject: degreeList },
+    `(?:${cap('stwierdzon')}|${cap('orzeczon')})[oaą]${WS}niepełnosprawnoś(?:ć|ci)(?:${WS}${DIS_KIND})?(?:${WS}w${WS}stopniu${WS}${DEGREE})?|${cap('orzeczon')}[oaą]${WS}(?:${DEGREE}${WS})?${DIS_STEP}|niepełnosprawn(?:y|a|ego|ej|emu|ym|ą)${WS}(?:${DIS_KIND}${WS})?w${WS}stopniu${WS}${DEGREE}|niepełnosprawnoś(?:ć|cią|ci)${WS}${DIS_KIND}(?:${WS}w${WS}stopniu${WS}${DEGREE})?|(?:(?:całkowicie|częściowo|trwale|okresowo)${WS})?niezdoln(?:y|a|ego|ej|emu|ym|ą)${WS}do${WS}(?:pracy(?:${WS}i${WS}${SELF_CARE})?|${SELF_CARE})${PERIOD}`,
+    { reject: degreeList, doc: true },
   ),
   // leczenie po czasowniku osoby („przebywał na leczeniu odwykowym”, „przerwał terapię uzależnienia”,
   // „podjęła leczenie psychiatryczne”): czasownik w liczbie pojedynczej wskazuje osobę sam
   ev(
-    `(?<=(?:${STAY_VERB}|podj(?:ął|ęła|ąłem|ęłam)|kontynuuj(?:e|ę)|kontynuował[${LO}]{0,3}|przerwa(?:ł|ła|łem|łam)|rozpocz(?:ął|ęła|ąłem|ęłam)|zakończy(?:ł|ła|łem|łam)|skierowan(?:y|a|ego|ej))${SP8}(?:(?:na|do)${SP8})?)(?:${TREATMENT})`,
+    `(?<=(?:${STAY_VERB}|podj(?:ął|ęła|ąłem|ęłam)|kontynuuj[eę]|kontynuował[${LO}]{0,3}|przerwa(?:ł|ła|łem|łam)|rozpocz(?:ął|ęła|ąłem|ęłam)|zakończy(?:ł|ła|łem|łam)|skierowan(?:y|a|ego|ej))${SP8}(?:(?:na|do)${SP8})?)(?:${TREATMENT})`,
     { self: true, reject: (w, o) => titleBefore(w, o) || placeBefore(w, o) },
   ),
   // „jest uzależniony od amfetaminy”: łącznik z przymiotnikiem w liczbie pojedynczej
-  ev(`(?<=(?:jest|był|była|jestem|byłem|byłam|pozostaje)${SP8}(?:[${LO}]{2,12}${SP8})?)uzależnion(?:y|a)${WS}od${WS}${SUBST}`, { self: true }),
+  ev(`(?<=(?:jest|był|była|jestem|byłem|byłam|pozostaje)${SP8}(?:[${LO}]{2,12}${SP8})?)uzależnion[ya]${WS}od${WS}${SUBST}`, { self: true }),
   // leczenie i terapia z rodzajem („leczenia odwykowego”, „terapię integracji sensorycznej”, „psychoterapię”);
   // po nazwie placówki („poradni leczenia uzależnień”) to nazwa placówki
   ev(TREATMENT, { reject: (w, o) => titleBefore(w, o) || providerBefore(w, o) || placeBefore(w, o) }),
@@ -1559,7 +1697,7 @@ const EVENTS: HealthEvent[] = [
   // imiesłów jednoznacznie medyczny po łączniku w liczbie pojedynczej („była hospitalizowana w klinice
   // kardiologii”, „jest dializowany”, „został zaintubowany”); „może być leczona” (przepis) nie ma łącznika osobowego
   ev(
-    `(?<=${COPULA}${SP8}${ADV_GAP})(?:hospitalizowan|dializowan|reanimowan|intubowan|zaintubowan|cewnikowan)(?:y|a)(?:${WS}(?:w|we|na)${WS}${STAY_PLACE})?(?:${WS}(?:z${WS}powodu|na|w${WS}kierunku)(?:${WS}${EV_OBJ}){1,3})?`,
+    `(?<=${COPULA}${SP8}${ADV_GAP})(?:hospitalizowan|dializowan|reanimowan|intubowan|zaintubowan|cewnikowan)[ya](?:${WS}(?:w|we|na)${WS}${STAY_PLACE})?(?:${WS}(?:z${WS}powodu|na|w${WS}kierunku)(?:${WS}${EV_OBJ}){1,3})?`,
     { self: true, subject: true },
   ),
   // imiesłów dwuznaczny („operowany”, „diagnozowany”, „rehabilitowany”, „leczony”, „napromieniowany”: silnik,
@@ -1571,7 +1709,7 @@ const EVENTS: HealthEvent[] = [
   ),
   // bez dopowiedzenia imiesłów mówi o zdrowiu tylko przy człowieku jako podmiocie („Pani Nowak była
   // operowana”, „Syn jest leczony”); „rehabilitowany” bez dopowiedzenia to zwykle rehabilitacja prawna
-  ev(`(?<=${COPULA}${SP8}${ADV_GAP})(?:lecz(?:ony|ona)|(?:operowan|zoperowan|diagnozowan|napromieniowan)(?:y|a))`, {
+  ev(`(?<=${COPULA}${SP8}${ADV_GAP})(?:lecz(?:ony|ona)|(?:operowan|zoperowan|diagnozowan|napromieniowan)[ya])`, {
     self: true,
     subject: true,
     reject: (w, o, m, st) => eventSubject(w, st, o, o + m.length, RE_COPULA_TAIL) !== 'person' || agentNotMedical(w.slice(o + m.length, o + m.length + 60)),
@@ -1596,7 +1734,7 @@ const EVENTS: HealthEvent[] = [
   // zabieg po czasowniku osoby („przeszedł zabieg koronarografii”, „przeszła mastektomię”, „miała w lutym
   // zabieg usunięcia macicy”, „ma wszczepiony rozrusznik”)
   ev(
-    `(?<=(?:przeszedł|przeszła|przeszedłem|przeszłam|przejdzie|przechodzi|przebył[${LO}]{0,3}|miał|miała|miałem|miałam|ma|mam|będzie${SP4}miał[${LO}]{0,2}|wykonano${SP4}(?:mu|jej)|przeprowadzono${SP4}(?:mu|jej))${SP8}(?:(?:w|we)${SP4}[${LO}]{3,12}${SP8}|(?:planowo|niedawno|ponownie|wczoraj|dziś|niedawno)${SP8})?)(?:(?:zabieg|operację)${WS}${MED_OBJ}|${PROC})${MED_MORE}|(?<=(?:ma|mam|miał|miała)${SP8})wszczepion(?:y|ą|e)${WS}${MED_WORD}${MED_MORE}`,
+    `(?<=(?:przeszedł|przeszła|przeszedłem|przeszłam|przejdzie|przechodzi|przebył[${LO}]{0,3}|miał|miała|miałem|miałam|ma|mam|będzie${SP4}miał[${LO}]{0,2}|wykonano${SP4}(?:mu|jej)|przeprowadzono${SP4}(?:mu|jej))${SP8}(?:(?:w|we)${SP4}[${LO}]{3,12}${SP8}|(?:planowo|niedawno|ponownie|wczoraj|dziś|niedawno)${SP8})?)(?:(?:zabieg|operację)${WS}${MED_OBJ}|${PROC})${MED_MORE}|(?<=(?:ma|mam|miał|miała)${SP8})wszczepion[yąe]${WS}${MED_WORD}${MED_MORE}`,
     { subject: true },
   ),
   // „jestem po operacji”, „jest po zabiegu” bez dopowiedzenia, na końcu zdania albo przed spójnikiem
@@ -1652,7 +1790,7 @@ const EVENTS: HealthEvent[] = [
   // „opieka nad osobą leżącą” bez osoby to rodzaj opieki, a nie fakt o kimś
   ev(
     `(?:${cap('porusz')}(?:anie|ając[${LO}]{1,3})${WS}się|${cap('chodzeni')}e)${FN_GAP}(?:${FN_AID})|${cap('korzyst')}[${LO}]{1,4}${WS}z${WS}(?:wózka${WS}inwalidzkiego|balkonika|chodzika|kul${WS}łokciowych)` +
-      `|(?<!nad${SP4})(?:osob(?:a|ą|ę)|podopieczn[${LO}]{1,3})${WS}(?:${FN_DEG}${WS})?(?:leżąc|niesamodzieln)(?:a|ą|y|ym)${FN_SCOPE}${FN_POS}|(?<=${COPULA}${SP8}(?:[${LO}]{3,12}${SP8})?)leżąc(?:y|a)${FN_POS}|${FN_DEG}${WS}niesamodzieln[${LO}]{1,3}${FN_SCOPE}${FN_POS}|obłożnie${WS}chor[${LO}]{1,3}|przykut(?:y|a|ą|ego|ej)${WS}do${WS}(?:łóżka|wózka)` +
+      `|(?<!nad${SP4})(?:osob[aąę]|podopieczn[${LO}]{1,3})${WS}(?:${FN_DEG}${WS})?(?:leżąc|niesamodzieln)(?:a|ą|y|ym)${FN_SCOPE}${FN_POS}|(?<=${COPULA}${SP8}(?:[${LO}]{3,12}${SP8})?)leżąc[ya]${FN_POS}|${FN_DEG}${WS}niesamodzieln[${LO}]{1,3}${FN_SCOPE}${FN_POS}|obłożnie${WS}chor[${LO}]{1,3}|przykut(?:y|a|ą|ego|ej)${WS}do${WS}(?:łóżka|wózka)` +
       `|(?:${cap('karmi')}|${cap('żywi')})(?:on[yaeą]|eni(?:e|a|u|em))${FN_FEED}` +
       `|(?:niewidom|niedowidząc|słabowidząc|niesłysząc|niedosłysząc)(?:y|a|ą|ego|ej|emu|ym)|${cap('nie')}${WS}kontroluje${WS}potrzeb${WS}fizjologicznych` +
       `|(?:znacznie${WS})?ograniczon(?:a|ej|ą)${WS}(?:możliwoś(?:ć|ci|cią)|zdolnoś(?:ć|ci|cią)${WS}do)${WS}${SELF_CARE}`,
@@ -1660,22 +1798,22 @@ const EVENTS: HealthEvent[] = [
   ),
   // skala Barthel z wynikiem przy osobie („35 pkt w skali Barthel”, „w skali Barthela uzyskał 30 pkt”)
   ev(
-    `\\d{1,3}${WS}${FN_PKT}${WS}(?:w|wg)${WS}skali${WS}Barthel(?:a)?|(?:(?:w|wg)${WS})?skal(?:a|i|ę|ą)${WS}Barthel(?:a)?(?:${SP0}[-–:]?${SP0}|(?:${WS}[${LO}]{2,12}(?:ł|ła|ło)|${WS}wynosi){1,2}${WS})\\d{1,3}(?![-–]\\d)(?:${WS}${FN_PKT})?`,
+    `\\d{1,3}${WS}${FN_PKT}${WS}(?:w|wg)${WS}skali${WS}Barthel(?:a)?|(?:(?:w|wg)${WS})?skal[aięą]${WS}Barthel(?:a)?(?:${SP0}[-–:]?${SP0}|(?:${WS}[${LO}]{2,12}(?:ł|ła|ło)|${WS}wynosi){1,2}${WS})\\d{1,3}(?![-–]\\d)(?:${WS}${FN_PKT})?`,
     { subject: true, reject: fnGeneric },
   ),
   // niesamodzielność po łączniku i to, czego osoba nie robi („jest niesamodzielna.”, „nie mówi i nie chodzi”,
   // „nie wstaje z łóżka”): na końcu członu albo z sygnałem zdrowia obok, bo „nie chodzi na zebrania”,
   // „nie wstaje z łóżka przed dziesiątą” i „niesamodzielna przy obsłudze klienta” nie mówią o zdrowiu
   ev(
-    `(?<=${COPULA}${SP8}(?:[${LO}]{3,12}${SP8})?)niesamodzieln(?:y|a)${FN_SCOPE}${FN_POS}|${FN_NOT}(?:(?:${SP0},|${WS}i)${WS}${FN_NOT})+|${cap('nie')}${WS}(?:chodzi|siedzi|porusza${WS}się)${WS}samodzielnie|${cap('nie')}${WS}(?:komunikuje${WS}się${WS}werbalnie|wstaje${WS}z${WS}łóżka)`,
+    `(?<=${COPULA}${SP8}(?:[${LO}]{3,12}${SP8})?)niesamodzieln[ya]${FN_SCOPE}${FN_POS}|${FN_NOT}(?:(?:${SP0},|${WS}i)${WS}${FN_NOT})+|${cap('nie')}${WS}(?:chodzi|siedzi|porusza${WS}się)${WS}samodzielnie|${cap('nie')}${WS}(?:komunikuje${WS}się${WS}werbalnie|wstaje${WS}z${WS}łóżka)`,
     { subject: true, reject: fnTail },
   ),
   // Pisma dwujęzyczne: te same zdarzenia po angielsku, z kotwicą osoby w zdaniu angielskim (enAnchor).
   ...EN_EVENTS,
 ];
 
-/** Statystyka: „według danych GUS co trzeci pracownik…”, „odsetek”, „średnio” (procent zostaje, bo stoi też w liście płac). */
-const RE_STATS = new RegExp(`${NOT_LETTER_BEFORE}(?:według${SP}danych|dan(?:e|ych)${SP}(?:GUS|ZUS|NFZ|PFRON)|statystyk${L}|odset(?:ek|ka|ku)|średnio|przeciętnie)${NLA}`, 'i');
+/** Statystyka: „według danych GUS co trzeci pracownik…”, „odsetek”, „średnio”, „wydano 412 orzeczeń” (procent zostaje, bo stoi też w liście płac). */
+const RE_STATS = new RegExp(`${NOT_LETTER_BEFORE}(?:według${SP}danych|dan(?:e|ych)${SP}(?:GUS|ZUS|NFZ|PFRON)|statystyk${L}|odset(?:ek|ka|ku)|średnio|przeciętnie|\\d+${SP}orzeczeń)${NLA}`, 'i');
 /**
  * Kotwica zdarzenia. Osoba musi być tą, której zdarzenie dotyczy, i stać przy frazie, a nie gdziekolwiek
  * w zdaniu:
@@ -1848,13 +1986,15 @@ function maskEventsOnce(ctx: RedactCtx, mask: string): void {
       if (e.en) return enAnchor(whole, starts, offset, to) ? ctx.hit('ZDROWIE') : m;
       if (topicBefore(whole, offset, m) || (e.subject && thingSubject(whole, offset, m, starts))) return m;
       if (e.afterMask && !sentenceAt(whole, starts, offset, to).includes(mask)) return m;
+      if (e.doc && docConcrete(m, sentenceAt(whole, starts, offset, to), whole.slice(to, to + 60))) return ctx.hit('ZDROWIE');
       const self = e.self || selfFrame(whole, offset) || (mtest(RE_PREP_START, m) && mtest(RE_COPULA_BEFORE, whole.slice(Math.max(0, offset - 16), offset)));
       return eventAnchor(whole, starts, offset, to, mask, self) ? ctx.hit('ZDROWIE') : m;
     });
   }
-  // „rehabilitacja po [zabiegu]”, „leczenie po [udarze]”: rzeczownik przed zakrytym zdarzeniem wchodzi do maski
+  // „rehabilitacja po [zabiegu]”, „leczenie po [udarze]”: rzeczownik przed zakrytym zdarzeniem wchodzi do maski;
+  // „[wskazanie opieki] w związku ze [stanem]” to jedna fraza orzeczenia
   const M = escapeRe(mask);
-  ctx.text = replaceTracked(ctx.text, new RegExp(`${NOT_LETTER_BEFORE}(?:${cap('rehabilitacj')}(?:a|i|ę|ą)|${cap('lecz')}(?:enie|enia|eniu|eniem))${WS}po${WS}${M}`, 'g'), () => mask, phraseIndex(), followEdits);
+  ctx.text = replaceTracked(ctx.text, new RegExp(`${NOT_LETTER_BEFORE}(?:${cap('rehabilitacj')}[aięą]|${cap('lecz')}(?:enie|enia|eniu|eniem))${WS}po${WS}${M}|${M}${WS}w${WS}związku${WS}ze?${WS}${M}`, 'g'), () => mask, phraseIndex(), followEdits);
 }
 
 /* ── Okno kontekstu ── */
@@ -2247,7 +2387,7 @@ function mergeIcdInParens(ctx: RedactCtx, mask: string): void {
  * aż do przyimka albo znaku interpunkcji. „Brak przeciwwskazań do pracy” zostaje.
  */
 const RE_CONTRAINDICATION = new RegExp(
-  `${NOT_LETTER_BEFORE}(przeciwwskazan(?:e|a|y)${SP}(?:(?:jest|są|będzie|było)${SP})?)([${LO}]+(?:nie|cie)(?:${SP}(?!(?:do|przez|w|we|na|od|po|z|ze|i|oraz|lub|albo|bez|dla|przy)${NOT_LETTER_AFTER})[${LO}]+){0,2})${NOT_LETTER_AFTER}`,
+  `${NOT_LETTER_BEFORE}(przeciwwskazan[eay]${SP}(?:(?:jest|są|będzie|było)${SP})?)([${LO}]+(?:nie|cie)(?:${SP}(?!(?:do|przez|w|we|na|od|po|z|ze|i|oraz|lub|albo|bez|dla|przy)${NOT_LETTER_AFTER})[${LO}]+){0,2})${NOT_LETTER_AFTER}`,
   'gi',
 );
 
@@ -2338,15 +2478,15 @@ const genericBefore = (whole: string, offset: number): boolean => {
  * konkretnej osobie w liczbie pojedynczej; podmiot ogólny („Pacjenci, którzy chorują…”, „kto choruje…”)
  * i reguła ogólna zostają, a „cierpi na brak czasu” to nie choroba.
  */
-const OBJ_STOP = '(?:i|oraz|a|ale|lecz|lub|albo|od|przez|w|we|z|ze|po|do|na|u|dla|co|jak|już|się|nie|bo|więc|ponieważ|któr[a-ząćęłńóśźż]*|według|mimo)';
+const OBJ_STOP = `(?:${OBJ_STOP_BASE}|któr[a-ząćęłńóśźż]*)`;
 const OBJ_WORD = `(?!${OBJ_STOP}${NLA})[${LETTER}][${LETTER}-]*`;
 const OBJ_NOT = `(?!(?:to|coś|nic|wszystko|brak${L}|nią|niego|nie|tym|tę|tą|ten)${NLA})`;
 const RE_SUFFER = new RegExp(
-  String.raw`(${NOT_LETTER_BEFORE}${NOT_GENERIC_SUBJECT}(?:choruj(?:e|ę)|chorował${PAST}|cierpi(?:ał|ała|ałem|ałam|ę)?)${SP}na${SP})${OBJ_NOT}(${OBJ_WORD}(?:${SP}${OBJ_WORD}){0,5})(?![${LETTER}\d])`,
+  String.raw`(${NOT_LETTER_BEFORE}${NOT_GENERIC_SUBJECT}(?:choruj[eę]|chorował${PAST}|cierpi(?:ał|ała|ałem|ałam|ę)?)${SP}na${SP})${OBJ_NOT}(${OBJ_WORD}(?:${SP}${OBJ_WORD}){0,5})(?![${LETTER}\d])`,
   'gi',
 );
 const RE_SURGERY = new RegExp(
-  String.raw`(${NOT_LETTER_BEFORE}${NOT_GENERIC_SUBJECT}(?:przeszedł(?:em)?|przeszła(?:m)?)${SP})(operacj(?:ę|e)(?:${SP}${OBJ_WORD}){0,4})(?![${LETTER}\d])`,
+  String.raw`(${NOT_LETTER_BEFORE}${NOT_GENERIC_SUBJECT}(?:przeszedł(?:em)?|przeszła(?:m)?)${SP})(operacj[ęe](?:${SP}${OBJ_WORD}){0,4})(?![${LETTER}\d])`,
   'gi',
 );
 /** Czasownik w pierwszej osobie („choruję”, „chorowałam”, „przeszedłem”) wskazuje autora pisma. */
@@ -2548,7 +2688,7 @@ function maskDrugs(ctx: RedactCtx): void {
  * zaleceniem pokontrolnym, więc tu wymaga dopełnienia osobowego. „Przyjmuje się”, „stosuje się”
  * (ulotka, instrukcja) i podmiot ogólny („kto przyjmuje…”) zostają.
  */
-const DOSE_VERB = `${NOT_GENERIC_SUBJECT}(?:przyjmuj(?:e|ę)|przyjmował${PAST}|zażyw(?:a|am)|zażywał${PAST}|stosuj(?:e|ę)|stosował${PAST}|otrzymuj(?:e|ę)|otrzymywał${PAST}|zalecono|zalecił(?:a)?${SP}(?:mu|jej|mi|mnie|pacjent(?:owi|ce)|choremu|chorej|synowi|córce|dziecku|pracowni(?:kowi|cy)|wnioskodaw(?:cy|czyni)|ubezpieczon(?:emu|ej)|poszkodowan(?:emu|ej)))(?!${SP}się)`;
+const DOSE_VERB = `${NOT_GENERIC_SUBJECT}(?:przyjmuj[eę]|przyjmował${PAST}|zażyw(?:a|am)|zażywał${PAST}|stosuj[eę]|stosował${PAST}|otrzymuj[eę]|otrzymywał${PAST}|zalecono|zalecił(?:a)?${SP}(?:mu|jej|mi|mnie|pacjent(?:owi|ce)|choremu|chorej|synowi|córce|dziecku|pracowni(?:kowi|cy)|wnioskodaw(?:cy|czyni)|ubezpieczon(?:emu|ej)|poszkodowan(?:emu|ej)))(?!${SP}się)`;
 const DOSE_WORD = `(?!(?:się|w|we|z|ze|na|do|po|od|i|oraz|lub|albo|nie|co|to|jest|był|była|dawk${L}|ilości|ok|około)${NLA})[${LETTER}][${LETTER}-]{1,30}`;
 const RE_DOSE_SENTENCE = new RegExp(
   String.raw`(${NOT_LETTER_BEFORE}(?:${DOSE_VERB})${SP})((?:${DOSE_WORD}${SP}){0,2}${DOSE_WORD}${DRUG_FORM}${SP}(${NUM}(?:${SP0}\/${SP0}${NUM})?[ \t]?(${UNIT})(?:${SP0}\/${SP0}(?:ml|dobę|d|24[ \t]?h))?${NLA})(${DOSING}))`,
@@ -2655,7 +2795,7 @@ const DRUG_CLASS =
   `(?<![${LETTER}])(?:${LEK_FAMILY}${SP}(?:${LEK_CLASS_ADJ}|na${SP}${LEK_FOR})|(?:środk(?:i|ów|ami|om|ach)|preparat(?:y|ów|ami|om|ach))${SP}${DRUG_CLASS_ADJ}` +
   `|${DRUG_CLASS_NOUN})(?:(?:${SP0},${SP0}|${SP}(?:i|oraz|lub|albo)${SP})${DRUG_CLASS_ADJ}){0,2}(?:${SP}(?:wziewn|doustn|dożyln|podskórn|domięśniow|miejscow)[${LO}]{1,3})?(?![${LETTER}\\d])`;
 /** Postać leku przed nazwą handlową („przyjmuje lek Concerta”, „zażywa tabletki Relanium”). */
-const DRUG_FORM_NOUN = `(?:lek(?:i|u)?|preparat(?:y|u)?|tabletk[${LO}]{0,3}|kapsułk[${LO}]{0,3}|krople|syrop|zastrzyk(?:i|ów)?)`;
+const DRUG_FORM_NOUN = `(?:lek[iu]?|preparat[yu]?|tabletk[${LO}]{0,3}|kapsułk[${LO}]{0,3}|krople|syrop|zastrzyk(?:i|ów)?)`;
 /** Postać leku z substancją („inhalator z salbutamolem”, „maść z hydrokortyzonem”, „krople do oczu z latanoprostem”). */
 const DRUG_DEVICE = `(?:inhalator${L}|inhalacj${L}|maś(?:ć|ci)|krem${L}|żel${L}|plast(?:ry|rów|er|rami|rach)|krop(?:le|li|lami)|czop(?:ki|ków|kami)|wlew${L}|zastrzyk${L}|aerozol${L})(?:${SP}do${SP}(?:oczu|nosa|uszu|ucha|oka))?${SP}z(?:e)?${SP}(?:${DRUG_NAME}|${INN_WORD})`;
 /** Sól po nazwie substancji („walproinian sodu”, „lewotyroksyna sodowa”) należy do nazwy leku. */
@@ -2664,7 +2804,7 @@ const BARE_DRUG = `(?:(?:${DRUG_NAME}|${INN_WORD})${DRUG_SALT}|${INSULIN_WORD}|$
 /** Czasownik fazowy przed bezokolicznikiem („przestała brać”, „zaczął przyjmować”, „odmawia stosowania”). */
 const PHASE_DRUG_VERB = `(?:przestał${PAST}|przestaje|zaczął|zaczęła|zaczyna|odmawia|odmówił(?:a)?|zaprzestał(?:a)?)${SP}(?:brać|przyjmować|zażywać|stosować|przyjmowania|zażywania|stosowania|brania)`;
 /** Lek, który przyjmuje sama osoba: podmiot czasownika to pacjent („jest na insulinie” też). */
-const SELF_DRUG_VERB = `${NOT_GENERIC_SUBJECT}(?:przyjmuj(?:e|ę)|przyjmował${PAST}|przyjął|przyjęła|zażyw(?:a|am)|zażywał${PAST}|zażył${PAST}|stosuj(?:e|ę)|stosował${PAST}|bierze|biorę|brał${PAST}|otrzymuj(?:e|ę)|otrzymywał${PAST}|otrzymał${PAST}|dostaj(?:e|ę)|dostawał${PAST}|dostał${PAST}|(?:jest|jestem|był|była|byłem|byłam|pozostaje)${SP}na|${PHASE_DRUG_VERB})`;
+const SELF_DRUG_VERB = `${NOT_GENERIC_SUBJECT}(?:przyjmuj[eę]|przyjmował${PAST}|przyjął|przyjęła|zażyw(?:a|am)|zażywał${PAST}|zażył${PAST}|stosuj[eę]|stosował${PAST}|bierze|biorę|brał${PAST}|otrzymuj[eę]|otrzymywał${PAST}|otrzymał${PAST}|dostaj[eę]|dostawał${PAST}|dostał${PAST}|(?:jest|jestem|był|była|byłem|byłam|pozostaje)${SP}na|${PHASE_DRUG_VERB})`;
 /** Odbiorca leku w celowniku („zalecił mu”, „podaje dziecku”, „ordynowano pacjentce”). */
 const DRUG_DATIVE = `(?:mu|jej|mi|mnie|dziecku|synowi|córce|pacjent(?:owi|ce)|choremu|chorej|matce|ojcu|mężowi|żonie|wnukowi|wnuczce|podopieczn(?:emu|ej)|małoletni(?:emu|ej))`;
 /**
@@ -2672,7 +2812,7 @@ const DRUG_DATIVE = `(?:mu|jej|mi|mnie|dziecku|synowi|córce|pacjent(?:owi|ce)|c
  * w zdaniu, w celowniku albo w zapisie zlecenia (forma bezosobowa, droga podania, dawkowanie).
  * „Podaje” i „podał” tylko z celownikiem („podaje mu insulinę”), bo „podał adres” to co innego.
  */
-const RX_DRUG_VERB = `(?:(?:włączył(?:a)?|włączono|ordynował(?:a)?|ordynowano|zalecił(?:a)?|zalecono|przepisał(?:a)?|przepisano|odstawił(?:a)?|odstawiono|podano|podawano)(?:${SP}${DRUG_DATIVE})?|(?:podaj(?:e|ę)|podawał(?:a)?|podał(?:a)?)${SP}${DRUG_DATIVE}|(?:wypisał(?:a)?|wypisano|przepisał(?:a)?|przepisano|wystawił(?:a)?|wystawiono)(?:${SP}${DRUG_DATIVE})?${SP}(?:e-?)?recept(?:ę|y)${SP}na)`;
+const RX_DRUG_VERB = `(?:(?:włączył(?:a)?|włączono|ordynował(?:a)?|ordynowano|zalecił(?:a)?|zalecono|przepisał(?:a)?|przepisano|odstawił(?:a)?|odstawiono|podano|podawano)(?:${SP}${DRUG_DATIVE})?|(?:podaj[eę]|podawał(?:a)?|podał(?:a)?)${SP}${DRUG_DATIVE}|(?:wypisał(?:a)?|wypisano|przepisał(?:a)?|przepisano|wystawił(?:a)?|wystawiono)(?:${SP}${DRUG_DATIVE})?${SP}(?:e-?)?recept[ęy]${SP}na)`;
 /** Rzeczownik czynności między zleceniem a lekiem („zalecono przyjmowanie sertraliny”, „kontynuację leczenia pantoprazolem”). */
 const RX_NOMINAL = `(?:${SP}(?:przyjmowanie|stosowanie|zażywanie|podawanie|włączenie|odstawienie|leczenie|kontynuacj[ęa](?:${SP}(?:leczenia|przyjmowania|stosowania))?|(?:zmniejszenie|zwiększenie|zmian[ęa])${SP}dawki))?`;
 /**
@@ -2809,7 +2949,7 @@ function maskBareDrugs(ctx: RedactCtx, mask: string): void {
 const RE_SELF_VERB_AT = new RegExp(`(?<![${LETTER}])(?:${SELF_DRUG_VERB})(?!${SP}się)${NLA}`, 'gi');
 const RE_DRUG_BEFORE_VERB = new RegExp(`(${DRUG_NAME}|${INSULIN_WORD}|${INN_WORD}|${DRUG_CLASS})(?:${DRUG_ADV})${SP}$`, 'i');
 const RE_POST_SUBJECT = new RegExp(
-  `^${SP}(?:(?:każd|większoś|wiel(?:e|u)|wszys|niektór|część|połow|kilk|coraz|około|ponad|prawie|blisko)${L}|co${SP}[${LO}]+[iy]|\\d|pacjenci|chorzy|ludzie|osoby|dzieci|kobiety|mężczyźni|seniorzy|Polacy|szpital${L}|aptek${L}|przychodni${L}|poradni${L}|oddział${L}|NFZ|firm${L}|placówk${L}|ośrod${L})${NLA}`,
+  `^${SP}(?:(?:każd|większoś|wiel[eu]|wszys|niektór|część|połow|kilk|coraz|około|ponad|prawie|blisko)${L}|co${SP}[${LO}]+[iy]|\\d|pacjenci|chorzy|ludzie|osoby|dzieci|kobiety|mężczyźni|seniorzy|Polacy|szpital${L}|aptek${L}|przychodni${L}|poradni${L}|oddział${L}|NFZ|firm${L}|placówk${L}|ośrod${L})${NLA}`,
   'i',
 );
 function maskDrugFirst(ctx: RedactCtx, mask: string): void {
@@ -2958,7 +3098,7 @@ const RE_DX_TOPIC = new RegExp(
 /** Określenia stopnia tuż przed nazwą („umiarkowany ”, „przewlekłą ”), pomijane przy szukaniu czasownika osoby. */
 const RE_SEV_TAIL = new RegExp(`(?:(?<![${LETTER}])(?:przewlekł|ostr|zaawansowan|ciężk|lekk|umiarkowan|znaczn|głębok|wrodzon|obustronn|jednostronn)${L}${SP4}){1,2}$`, 'i');
 /** Używanie urządzenia medycznego przez osobę („noszę aparaty słuchowe”, „używa aparatu”). */
-const RE_DEVICE_VERB = new RegExp(`${NOT_LETTER_BEFORE}(?:nosz(?:ę|e)|nosi|nosił${L}|używa(?:m)?|używał${L})${SP4}$`, 'i');
+const RE_DEVICE_VERB = new RegExp(`${NOT_LETTER_BEFORE}(?:nosz[ęe]|nosi|nosił${L}|używa(?:m)?|używał${L})${SP4}$`, 'i');
 /**
  * Zespół z nazwiskiem albo choroba z określeniem: imię po „zespół” („zespół Piotra Kosa”) to zespół
  * ludzi tej osoby, a nie zespół chorobowy.
@@ -3014,7 +3154,7 @@ const RE_MED_W = new RegExp(
   'i',
 );
 const RE_ADJ_OBL_W = new RegExp(`^[${LO}]{3,}(?:ej|ego|ych|ymi|ym|ich|imi|im)$`);
-const RE_ADJ_NOM_W = new RegExp(`^[${LO}]{3,}(?:n|w|t|ł|l|r|cz|sk|ck)(?:y|a|e)$`);
+const RE_ADJ_NOM_W = new RegExp(`^[${LO}]{3,}(?:n|w|t|ł|l|r|cz|sk|ck)[yae]$`);
 const RE_VERB_W = /(?:ywa|iwa|awa|ała|iła|yła|ęła|ąła|eła|uje|ują|ał|ił|ył)$/;
 /** Dopełniacz techniczny po części ciała („ramienia dźwigu”, „stopy fundamentowej”): to nie uraz. */
 const RE_TECH_W = new RegExp(`^${TECH_AFTER.slice('(?![ \\t]+'.length, -1)}$`, 'i');
@@ -3223,7 +3363,7 @@ const RE_DX_PERSON_BEFORE = new RegExp(`(?<![${LETTER}])${DX_PERSON_U}${SP4}$`, 
  * „z powodu awarii”, „leczenie nowotworów w Polsce” zostają).
  */
 const RE_DX_WEAK = new RegExp(
-  String.raw`${NOT_LETTER_BEFORE}(?:stwierdz(?:ono|ił|iła|ili|iły)|stwierdzon(?:o|y|a|e)|podejrzeni(?:e|a|em|u)(?:${SP4}(?:o|na))?|objaw(?:y|ami|ów)|z${SP4}powodu|ze${SP4}względu${SP4}na|z${SP4}uwagi${SP4}na|w${SP4}związku${SP4}z|w${SP4}przebiegu|na${SP4}skutek|wskutek|leczeni(?:e|a|u|em)|(?:uskarża|skarży|uskarżał|skarżył)(?:a)?${SP4}się${SP4}na|stan(?:u|em|ie)?${SP4}po|diagnoz(?:a|ę|y|ie)(?:${SP4}w${SP4}kierunku)?|rozpoznani(?:e|a|em|u))${NLA}(?:${SP4}(${DX_PERSON_U}))?${SP0}:?(?=[ \t\n])`,
+  String.raw`${NOT_LETTER_BEFORE}(?:stwierdz(?:ono|ił|iła|ili|iły)|stwierdzon[oyae]|podejrzeni(?:e|a|em|u)(?:${SP4}(?:o|na))?|objaw(?:y|ami|ów)|z${SP4}powodu|ze${SP4}względu${SP4}na|z${SP4}uwagi${SP4}na|w${SP4}związku${SP4}z|w${SP4}przebiegu|na${SP4}skutek|wskutek|leczeni(?:e|a|u|em)|(?:uskarża|skarży|uskarżał|skarżył)(?:a)?${SP4}się${SP4}na|stan(?:u|em|ie)?${SP4}po|diagnoz(?:a|ę|y|ie)(?:${SP4}w${SP4}kierunku)?|rozpoznani(?:e|a|em|u))${NLA}(?:${SP4}(${DX_PERSON_U}))?${SP0}:?(?=[ \t\n])`,
   'gi',
 );
 
@@ -3274,9 +3414,9 @@ const RE_DX_COUNT_BEFORE = new RegExp(
  * więc ich tu nie ma.
  */
 const DX_RULE_ROLE =
-  '(?:pracowni(?:k|ka|kowi|kiem|ca|cy|cę|cą)|kandydat(?:a|owi|em|ka|ki|ce|kę|ką)?|osob(?:a|y|ie|ę|ą)|ucz(?:eń|nia|niowi|niem)|uczennic(?:a|y|ę|ą)|' +
-  'dzieck(?:o|a|iem|u)|pacjent(?:a|owi|em|ka|ki|ce|kę|ką)?|chor(?:y|ego|emu|ym|a|ej|ą)|student(?:a|owi|em|ka|ki|ce|kę|ką)?|kierowc(?:a|y|ę|ą)|' +
-  'żołnierz(?:a|owi|em)?|funkcjonariusz(?:a|owi|em)?|świadczeniobiorc(?:a|y|ę|ą)|beneficjent(?:a|owi|em|ka|ki|ce|kę|ką)?|podopieczn(?:y|ego|emu|ym|a|ej|ą)|' +
+  '(?:pracowni(?:k|ka|kowi|kiem|ca|cy|cę|cą)|kandydat(?:a|owi|em|ka|ki|ce|kę|ką)?|osob(?:a|y|ie|ę|ą)|ucz(?:eń|nia|niowi|niem)|uczennic[ayęą]|' +
+  'dzieck(?:o|a|iem|u)|pacjent(?:a|owi|em|ka|ki|ce|kę|ką)?|chor(?:y|ego|emu|ym|a|ej|ą)|student(?:a|owi|em|ka|ki|ce|kę|ką)?|kierowc[ayęą]|' +
+  'żołnierz(?:a|owi|em)?|funkcjonariusz(?:a|owi|em)?|świadczeniobiorc[ayęą]|beneficjent(?:a|owi|em|ka|ki|ce|kę|ką)?|podopieczn(?:y|ego|emu|ym|a|ej|ą)|' +
   'wychowan(?:ek|ka|kowi|kiem)|osadzon(?:y|ego|emu|ym)|klient(?:a|owi|em|ka|ki|ce|kę|ką)?|mieszkan(?:iec|ca|cowi|cem|ka|ki|ce|kę|ką)|' +
   'cudzoziem(?:iec|ca|cowi|cem|ka|ki|ce|kę|ką)|dorosł(?:y|ego|emu|ym)|senior(?:a|owi|em|ka|ki)?)';
 /** Rola tuż przed kotwicą „z rozpoznaną”, „z podejrzeniem”, „z” (z jednym przymiotnikiem między nimi). */
@@ -3292,7 +3432,7 @@ const RE_DX_ROLE_BEFORE = new RegExp(
  */
 const RE_DX_RULE_PRED = new RegExp(
   `${NOT_LETTER_BEFORE}(?:może|mogą|można|musi|muszą|powin(?:ien|na|no|ni|ny)|ma${SP4}prawo|mają${SP4}prawo|przysługuj${L}|należy|zostaje|zostają|` +
-    `(?:jest|są)${SP4}(?!(?:hospitaliz|obserwow|monitorow|diagnozow|konsultow|rehabilitow|lecz)[${LO}]*)[${LO}]{3,}(?:ywan|iwan|owan|awan|żon|szon)(?:y|a|e|i))${NLA}`,
+    `(?:jest|są)${SP4}(?!(?:hospitaliz|obserwow|monitorow|diagnozow|konsultow|rehabilitow|lecz)[${LO}]*)[${LO}]{3,}(?:ywan|iwan|owan|awan|żon|szon)[yaei])${NLA}`,
   'i',
 );
 /**
@@ -3392,7 +3532,7 @@ const RE_ZESP_EPONYM = new RegExp(`^${cap('zesp')}(?:ół|ołu|ołem|ole)${WS}[$
 const RE_EPONYM_LEAD = new RegExp(
   `${NOT_LETTER_BEFORE}(?:(?:rozpozna|zdiagnozowa)(?:no|ła|ł|li|ły|ny|na|ne|nym|ną|nego|nej)|stwierdzon(?:o|y|ym|ego|ej)|(ma|mam|miał(?:a)?|mają|mieli|posiada)|(?:cierpi|choruj)(?:e|ący|ąca|ącego|ącej)?${SP4}na|` +
     `z${SP4}powodu|ze${SP4}względu${SP4}na|z${SP4}uwagi${SP4}na|w${SP4}przebiegu|na${SP4}skutek|wskutek|w${SP4}wywiadzie|objaw(?:y|ami|ów)|podejrzeni(?:e|a|em|u)(?:${SP4}(?:o|na))?|rozpoznani(?:e|a|em|u)|diagnoz(?:a|ę|y|ie|ą)|leczeni(?:e|a|u|em)|stan(?:u|em|ie)?${SP4}po|` +
-    `(?:dzieck(?:o|a|iem)|syn(?:a|em)?|córk(?:a|i|ą)|pacjent(?:a|em|ka|ki|ką)?|chłop(?:iec|ca|cem)|dziewczyn(?:ka|ki|ką)|ucz(?:eń|nia|niem)|uczennic(?:a|y|ą)|małoletni(?:ego|ej|m|a)?|wnu(?:k|ka|kiem|czka|czki)|niemowl(?:ę|ęcia)|chor(?:y|ego|ej|ym))${SP4}z)` +
+    `(?:dzieck(?:o|a|iem)|syn(?:a|em)?|córk[aią]|pacjent(?:a|em|ka|ki|ką)?|chłop(?:iec|ca|cem)|dziewczyn(?:ka|ki|ką)|ucz(?:eń|nia|niem)|uczennic[ayą]|małoletni(?:ego|ej|m|a)?|wnu(?:k|ka|kiem|czka|czki)|niemowl(?:ę|ęcia)|chor(?:y|ego|ej|ym))${SP4}z)` +
     `(?:${SP4}u${SP4}[${LETTER}]+(?:${SP4}[${UP}][${LO}]+)?)?(?:${SP4}${DX_SEV}){0,2}${SP0}:?${SP0}$`,
   'i',
 );
@@ -3402,7 +3542,7 @@ const RE_EPONYM_LEAD = new RegExp(
  * osoby („Dyrektor ma zespół Nowaka”) mają zespół ludzi.
  */
 const RE_EPONYM_SUBJ = new RegExp(
-  `${NOT_LETTER_BEFORE}(?:on|ona|ono|oni|one|dzieck(?:o|a)|dzieci|syn|córka|chłopiec|dziewczynka|dziewczyna|uczeń|uczennica|pacjent(?:ka)?|chor(?:y|a)|wnu(?:k|czka)|niemowlę|bliźni(?:ak|aczka|ęta)|brat|siostra|małoletni(?:a)?|podopieczn(?:y|a)|wychowan(?:ek|ka))${NOT_LETTER_AFTER}`,
+  `${NOT_LETTER_BEFORE}(?:on|ona|ono|oni|one|dzieck[oa]|dzieci|syn|córka|chłopiec|dziewczynka|dziewczyna|uczeń|uczennica|pacjent(?:ka)?|chor[ya]|wnu(?:k|czka)|niemowlę|bliźni(?:ak|aczka|ęta)|brat|siostra|małoletni(?:a)?|podopieczn[ya]|wychowan(?:ek|ka))${NOT_LETTER_AFTER}`,
   'i',
 );
 /**
