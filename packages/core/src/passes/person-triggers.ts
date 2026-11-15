@@ -223,9 +223,59 @@ export function passPersonSoloDict(ctx: RedactCtx): void {
     if (precededByEponym(ctx.text, offset)) return m;
     if (precededByAdminLabel(ctx.text, offset)) return m; // „Powiat: …”, „Gmina: …”
     if (afterNonPersonContext(ctx.text, offset, m, ctx.maskedSurnames)) return m;
+    if (placeLocativeAfterW(ctx, m, offset) || placeDateLineAt(ctx, m, offset)) return m;
     ctx.bump('IMIE');
     return ctx.personMask(m);
   });
+}
+
+// Data za przecinkiem w wierszu miejsca i daty pisma („Mielnik, 18 sierpnia 2026 r.”, „Mielnik, dnia
+// 3.02.2026”): słownie, cyframi z kropką, łącznikiem albo ukośnikiem.
+const RE_DATE_AFTER_PLACE = /^,[ \t]*(?:dnia[ \t]+|dn\.[ \t]*)?\d{1,2}(?:[ \t]+\p{Ll}{3,}|[ \t]*[./-][ \t]*\d{1,2}[ \t]*[./-])[ \t]*\d{4}/u;
+const RE_LINE_START_BEFORE = /(?:^|\n)[ \t]*$/u;
+// Kod pocztowy tuż przed wyrazem („17-307 Mielnik”): za kodem stoi poczta, nigdy osoba.
+const RE_POSTAL_BEFORE = /(?<!\d)\d{2}-\d{3}[ \t]+$/u;
+// Miejscowość nazwana w samym piśmie: wyraz za kodem pocztowym albo za „Gmina/Gminy/Gminą” i „Urząd
+// Gminy” („17-307 Mielnik”, „Urząd Gminy Mielnik”). Liczone raz na pismo, na oryginalnym wejściu.
+const RE_DOC_PLACE = /(?:(?<!\d)\d{2}-\d{3}|(?<!\p{L})Gmin(?:a|y|ie|ą))[ \t]+(\p{Lu}\p{Ll}+)(?![\p{L}-])/gu;
+const docPlacesMemo = new WeakMap<RedactCtx, Set<string>>();
+function docPlaces(ctx: RedactCtx): Set<string> {
+  let set = docPlacesMemo.get(ctx);
+  if (!set) {
+    set = new Set<string>();
+    for (const mm of ctx.raw.matchAll(RE_DOC_PLACE)) set.add(mm[1].toLowerCase());
+    docPlacesMemo.set(ctx, set);
+  }
+  return set;
+}
+/** Czy nazwisko ze słownika (w formie podstawowej) to też miejscowość: ze słownika albo nazwana w piśmie
+ *  za kodem pocztowym czy po „Gminy” („Mielnik”, „Rudnik”)? */
+function cityBase(ctx: RedactCtx, ml: string): boolean {
+  const base = surnameBase(ml) || ml;
+  if (POLISH_CITIES.has(ml) || POLISH_CITIES.has(base)) return true;
+  const places = docPlaces(ctx);
+  return places.has(ml) || places.has(base);
+}
+/** Czy nazwisko ze słownika stoi na miejscu miejscowości: za kodem pocztowym („17-307 Mielnik”) albo
+ *  samo na początku wiersza z przecinkiem i datą, gdy to też miejscowość („Mielnik, 18 sierpnia 2026 r.”)? */
+function placeDateLineAt(ctx: RedactCtx, m: string, offset: number): boolean {
+  const t = ctx.text;
+  const before = t.slice(Math.max(0, offset - 12), offset);
+  if (RE_POSTAL_BEFORE.test(before)) return true;
+  if (!RE_DATE_AFTER_PLACE.test(t.slice(offset + m.length, offset + m.length + 40))) return false;
+  return RE_LINE_START_BEFORE.test(before) && cityBase(ctx, m.toLowerCase());
+}
+// Przyimek „w/we” tuż przed wyrazem (ta sama linia, same spacje).
+const RE_W_BEFORE = /(?<!\p{L})[Ww]e?[ \t]+$/u;
+/** Czy nazwisko ze słownika w miejscowniku stoi po „w” jako nazwa miejscowości („Szkoła Podstawowa
+ *  w Mielniku”, „Urząd Gminy w Rudniku”)? Tylko gdy forma podstawowa to też miejscowość ze słownika.
+ *  Nazwisko osoby rozpoznanej już w piśmie („Pani Anna Rudnik mieszka w Rudniku”) dalej idzie pod maskę:
+ *  przy wątpliwości maska. */
+function placeLocativeAfterW(ctx: RedactCtx, m: string, offset: number): boolean {
+  const ml = m.toLowerCase();
+  if (!/(?:ku|iu|ie|cu|dzu)$/u.test(ml) || surnameBase(ml) === ml) return false;
+  if (!RE_W_BEFORE.test(ctx.text.slice(Math.max(0, offset - 4), offset))) return false;
+  return !ctx.maskedSurnames.has(normalizeSurnameKey(m)) && cityBase(ctx, ml);
 }
 
 /** Czy `w2` po kotwicy inicjału to nazwisko (słownik, końcówka, homograf) w kontekście osobowym? */
@@ -472,6 +522,7 @@ export function passPersonSoloMorph(ctx: RedactCtx): void {
     if (precededByEponym(t, offset)) return m;
     if (precededByAdminLabel(t, offset)) return m;
     if (afterNonPersonContext(t, offset, m, ctx.maskedSurnames)) return m;
+    if (placeLocativeAfterW(ctx, m, offset) || placeDateLineAt(ctx, m, offset)) return m;
     ctx.bump('IMIE');
     return ctx.personMask(first);
   });

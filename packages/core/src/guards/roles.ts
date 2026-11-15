@@ -185,7 +185,7 @@ export const PROPER_NAME_HEADS = new Set<string>(
     'kościół bazylika katedra kaplica klasztor sanktuarium cmentarz pomnik kopiec hejnał jarmark ' +
     'festiwal konkurs turniej noc ocean morze kanał półwysep zatoka wyspa jezioro puszcza ' +
     'las ogród pałac zamek brama wieża dworzec traktat pokój układ pakt sobór synod kongres bitwa ' +
-    'powstanie wyżyna nizina kotlina pojezierze pustynia szlak trakt'
+    'powstanie wyżyna nizina kotlina pojezierze pustynia szlak trakt ziemia kraina'
   ).split(/\s+/),
 );
 // Wyraz z wielkiej litery za jedną spacją (strażnik nazwy instytucji w parze).
@@ -264,7 +264,7 @@ export function properNamePairIsPerson(ctx: RedactCtx, t: string, offset: number
 }
 // Rodzaj głów z PROPER_NAME_HEADS (pozostałe są męskie): przymiotnik-człon nazwy uzgadnia się z nim.
 const PROPER_NAME_HEADS_FEM = new Set<string>(
-  'bazylika katedra kaplica noc zatoka wyspa puszcza brama wieża bitwa wyżyna nizina kotlina pustynia'.split(' '),
+  'bazylika katedra kaplica noc zatoka wyspa puszcza brama wieża bitwa wyżyna nizina kotlina pustynia ziemia kraina'.split(' '),
 );
 const PROPER_NAME_HEADS_NEUT = new Set<string>('sanktuarium morze jezioro powstanie pojezierze'.split(' '));
 /** Czy wyraz to przymiotnik uzgodniony z rodzajem głowy nazwy („Jezioro Bielskie”)? */

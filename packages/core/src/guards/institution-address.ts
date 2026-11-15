@@ -3,7 +3,7 @@
 // zostają jawne. Kotwica jest wąska, bo wyciek adresu osoby jest gorszy niż nadmiarowa maska.
 import { isFirstNameGenitive, isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { MULTIWORD_CITIES, POLISH_CITIES } from '../dict/places.js';
-import { HOMOGRAPH_SURNAMES, homographBase, looksLikeSurname, surnameBase } from '../surnames.js';
+import { HOMOGRAPH_SURNAMES, homographBase, isGeoAdjective, looksLikeSurname, surnameBase } from '../surnames.js';
 import { MASK } from '../types.js';
 
 // Pierwszy człon nazwy instytucji publicznej albo jednostki organizacyjnej (mianownik, jak
@@ -11,18 +11,70 @@ import { MASK } from '../types.js';
 // jednoosobowych firm z nazwiskiem właściciela. Bez „Gmina” i „Dzielnica”: to zwykły człon adresu
 // osoby („Gmina Kobylnica⏎ul. Polna 3”), a urząd i tak zaczyna się od „Urząd Gminy”.
 // Człony mocne nazywają tylko jednostki publiczne albo działy większej organizacji.
+// Dopełniacz tych członów zaczyna drugi wiersz nagłówka pod organem („Dyrektor⏎Przedszkola
+// Publicznego nr 33”, „Kierownik⏎Urzędu Stanu Cywilnego”).
 const STRONG_HEADS = new Set<string>(
   (
     'urząd wydział dział departament ministerstwo sąd prokuratura komenda komisariat spółdzielnia ' +
     'szpital uniwersytet politechnika starostwo kuratorium inspektorat izba oddział referat delegatura ' +
-    'zarząd rada archiwum'
+    'zarząd rada archiwum sekcja ' +
+    'urzędu wydziału działu departamentu ministerstwa sądu prokuratury komendy komisariatu spółdzielni ' +
+    'szpitala uniwersytetu politechniki starostwa inspektoratu izby oddziału referatu delegatury ' +
+    'zarządu rady archiwum sekcji'
   ).split(' '),
 );
+// Organ jednoosobowy albo funkcja kierującego jednostką na początku nagłówka („WÓJT GMINY KOBYLNICA”,
+// „STAROSTA KŁODZKI”, „Kierownik Urzędu Stanu Cywilnego w Kielcach”, „Państwowy Powiatowy Inspektor
+// Sanitarny”, „Zastępca Burmistrza”, „Dyrektor⏎Szkoły Podstawowej nr 3”). Pismo wydaje urząd, więc
+// adres pod takim nagłówkiem to siedziba. Imię i nazwisko w wierszu („Dyrektor Jan Kowalski”) albo
+// ogon właściciela („Dyrektor Kowalski”) dalej odbiera mu tę rolę. Bez kuratora, pełnomocnika
+// i komornika: kuratorem i pełnomocnikiem strony bywa osoba prywatna z adresem zamieszkania.
+// Organy terytorialne stoją z nazwą jednostki albo przymiotnikiem od niej („Burmistrz Pszczyny”,
+// „Wojewoda Mazowiecki”); nazwisko za nimi („Burmistrz Kowalski”) odcina ogon właściciela.
+const TERRITORIAL_HEADS = new Set<string>(
+  'wójt burmistrz prezydent starosta marszałek wojewoda wicewojewoda wicestarosta wiceburmistrz wiceprezydent wicemarszałek'.split(' '),
+);
+// Funkcje kierującego jednostką: organem są tylko z dopełniaczem jednostki albo organu w tym samym
+// wierszu („Kierownik Urzędu Stanu Cywilnego”, „Zastępca Wójta”, „Sekretarz Gminy”, „Dyrektor
+// Miejskiego Ośrodka”). „Kierownik Budowy” czy „Dyrektor Handlowy” to stanowisko w firmie. Sam wyraz
+// w wierszu („Dyrektor⏎Przedszkola Publicznego nr 33”) ma stopień 1 i liczy się tylko z nazwą pod nim.
+const UNIT_HEADS = new Set<string>(
+  'kierownik kierowniczka naczelnik naczelniczka dyrektor dyrektorka wicedyrektor komendant zastępca sekretarz skarbnik'.split(' '),
+);
+// Dopełniacz organu po „Zastępca”, „Sekretarz” czy „Skarbnik” („Zastępca Wójta”, „Skarbnik Miasta”).
+const ORGAN_GENITIVES = new Set<string>(
+  'wójta burmistrza prezydenta starosty marszałka wojewody straży urzędu biura centrum zespołu ośrodka szkoły przedszkola'.split(' '),
+);
+// Inspektor jest organem tylko z przymiotnikiem urzędu („Państwowy Powiatowy Inspektor Sanitarny”,
+// „Powiatowy Inspektor Nadzoru Budowlanego”, „Okręgowy Inspektor Pracy”); sam „Inspektor Nadzoru”
+// bywa osobą prywatną z uprawnieniami.
+const RE_INSPECTOR_ORGAN = /^(?:(?:Państwow|Powiatow|Wojewódzk|Główn|Okręgow|Graniczn|Weterynaryjn)\p{L}*[ \t]+){1,2}Inspektor(?!\p{L})/iu;
+const RE_OFFICE_ADJ_WORD = /^(?:Publiczn|Miejsk|Gminn|Powiatow|Wojewódzk|Samorządow|Państwow|Główn|Okręgow|Rejonow|Krajow|Regionaln|Komunaln)\p{L}*$/iu;
+// Organ terytorialny, po którym przymiotnik od powiatu albo województwa to nazwa urzędu
+// („STAROSTA KŁODZKI”, „Wojewoda Mazowiecki”), a nie nazwisko właściciela.
+const TERRITORIAL_ORGANS = new Set<string>('starosta wojewoda wicestarosta wicewojewoda marszałek'.split(' '));
+
+/** Stopień nagłówka z organem: 2 dla organu z jednostką („Wójt Gminy Firlej”, „Kierownik Referatu
+ *  Podatków”), 1 dla samej funkcji w wierszu („Dyrektor”), 0 gdy wiersz nie zaczyna się organem. */
+function organLevel(ws: string[]): NameLevel {
+  const lower = ws.map((w) => w.toLowerCase().replace(/[,.;]+$/u, ''));
+  if (RE_INSPECTOR_ORGAN.test(ws.join(' '))) return 2;
+  const first = lower[0];
+  if (TERRITORIAL_HEADS.has(first)) return ws.length > 1 ? 2 : 0;
+  if (!UNIT_HEADS.has(first)) return 0;
+  if (ws.length === 1) return 1;
+  const next = lower[1];
+  if (STRONG_HEADS.has(next) || WEAK_HEADS.has(next) || PLACE_GOVERNORS.has(next) || ORGAN_GENITIVES.has(next)) return 2;
+  return RE_OFFICE_ADJ_WORD.test(next) ? 2 : 0;
+}
 // Człony słabe tak samo zaczynają nazwę firmy jednoosobowej („Szkoła Jazdy KOWALSKI”, „Przychodnia
 // Weterynaryjna Wilk”, „Żłobek Domowy Ewy”), więc same nie robią z adresu siedziby. Potrzebny jest
 // znacznik placówki publicznej (RE_PUBLIC_MARKER).
 const WEAK_HEADS = new Set<string>(
-  'szkoła ośrodek przychodnia instytut akademia żłobek przedszkole poradnia gabinet studio'.split(' '),
+  (
+    'szkoła ośrodek przychodnia instytut akademia żłobek przedszkole poradnia gabinet studio zespół ' +
+    'szkoły ośrodka przychodni instytutu akademii żłobka przedszkola poradni zespołu'
+  ).split(' '),
 );
 // Znacznik placówki publicznej przy słabym członie: numer, patron, miejscowość po „w”, przymiotnik
 // organu prowadzącego, SP ZOZ, uczelnia, ośrodek pomocy społecznej. „Niepubliczne”
@@ -117,6 +169,7 @@ function ownerTail(ws: string[], strong: boolean): boolean {
   if (!/^\p{Lu}/u.test(tail) || /\d/u.test(tail)) return false;
   if (PLACE_GOVERNORS.has(lower[end - 2])) return false;
   const bare = lower[end - 1];
+  if (TERRITORIAL_ORGANS.has(lower[end - 2]) && isGeoAdjective(bare)) return false;
   if (OFFICE_ACRONYMS.has(bare) || RE_ROMAN.test(tail)) return false;
   // Skrót pisany mieszanie („ARiMR”, „PGNiG”) to nazwa urzędu albo spółki, nie nazwisko.
   if (RE_MIXED_ACRONYM.test(tail)) return false;
@@ -183,10 +236,12 @@ export function institutionNameLevel(line: string): NameLevel {
     .slice(0, 3)
     .filter((w) => /^\p{Lu}/u.test(w))
     .map((w) => w.toLowerCase());
-  const strong = heads.some((w) => STRONG_HEADS.has(w));
-  if (!strong && !heads.some((w) => WEAK_HEADS.has(w))) return 0;
+  const organ = organLevel(ws);
+  const strong = organ === 2 || heads.some((w) => STRONG_HEADS.has(w));
+  if (!strong && organ === 0 && !heads.some((w) => WEAK_HEADS.has(w))) return 0;
   if (ws.some((w) => /^\p{Ll}/u.test(w) && !NAME_LOWER_WORDS.has(w.toLowerCase()))) return 0;
   if (hasFirstName(ws) || ownerTail(ws, strong)) return 0;
+  if (organ === 1) return 1;
   return strong || RE_PUBLIC_MARKER.test(s) ? 2 : 1;
 }
 
@@ -302,6 +357,124 @@ const RE_INLINE_INSTITUTION = /(?:(?<![^\n])|[\n(]|(?<!(?<!\p{L})(?:[Uu]l|[Aa]l|
 // Sala z numerem w budynku przy ulicy („sala 214, budynek przy ul. Królewskiej 27”): miejsce
 // spotkania w gmachu instytucji, nie mieszkanie.
 const RE_ROOM_IN_BUILDING = /(?<!\p{L})sal[aię][ \t]+(?:nr[ \t]*)?\d+[a-z]?[ \t]*,[ \t]*(?:w[ \t]+)?(?:budyn\p{L}*|gmach\p{L}*)[ \t]+przy[ \t]+$/giu;
+// Siedziba w zdaniu: „z siedzibą przy ul. …”, „z siedzibą w Białymstoku przy ul. …”, „w siedzibie
+// przedszkola przy ul. …”. Grupa 1 to wyrazy po „w siedzibie” (właściciel siedziby), bez niej właściciel
+// stoi przed „z siedzibą”.
+const RE_SEAT_BEFORE_STREET =
+  /(?<!\p{L})(?:[Zz][ \t]+siedzibą|[Ww][ \t]+siedzibie((?:[ \t]+[^\s,;:()]+){1,5}?)?)(?:[ \t]+w[ \t]+\p{Lu}[\p{L}-]*(?:[ \t]+\p{Lu}[\p{L}-]*)?[ \t]*,?)?[ \t]+(?:przy[ \t]+)?$/gu;
+// Ogólne odesłanie do jednostki małą literą po „w siedzibie” („w siedzibie przedszkola”, „w siedzibie
+// urzędu gminy”, „w siedzibie ośrodka pomocy społecznej”). Tylko dopełniacze jednostek publicznych:
+// bez zakładu, centrum, akademii, fundacji, gabinetu i firmy, bo tak nazywa się też działalność osoby.
+const SEAT_GENERIC_HEADS = new Set<string>(
+  (
+    'urzędu starostwa sądu prokuratury komendy komisariatu spółdzielni szkoły przedszkola żłobka szpitala ' +
+    'uniwersytetu politechniki biblioteki zarządu inspektoratu kuratorium izby gminy ośrodka organu ' +
+    'wydziału referatu delegatury oddziału archiwum'
+  ).split(' '),
+);
+// Dalsze wyrazy takiego odesłania: jednostka podziału, „pomocy społecznej”, przymiotnik urzędu.
+const SEAT_GENERIC_TAIL = new Set<string>('gminy miasta powiatu województwa pomocy społecznej rodzinie stanu cywilnego'.split(' '));
+// Osoba w zdaniu przy siedzibie: zwrot grzecznościowy albo maska osoby z wcześniejszego przebiegu.
+const RE_PERSON_TITLE = /(?<!\p{L})(?:Pan|Pani|Pana|Panu|Panią|Panem|Państwo|Państwa)(?!\p{L})/u;
+// Granica zdania: kropka, wykrzyknik albo pytajnik po słowie (nie po skrócie „ul.” czy „nr”) albo
+// po liczbie, przed wielką literą.
+const RE_SENTENCE_END = /(?<=\p{Ll}{3}|\d|[”"»)])[.!?](?=[ \t]+\p{Lu}|[ \t]*$)/gu;
+// Ta sama granica na początku odcinka, gdy znak przed nią (numer domu) został za cięciem.
+const RE_SENTENCE_END_LEAD = /^[ \t]*[.!?](?=[ \t]+\p{Lu}|[ \t]*$)/u;
+
+/** Czy w odcinku zdania stoi osoba: maska osoby, imię w mianowniku, „Pan”/„Pani” albo osoba,
+ *  którą zamaskuje sonda? */
+function personInSentence(parts: string[], probe?: PersonProbe): boolean {
+  const live = parts.map((p) => p.trim()).filter((p) => p.length > 0);
+  for (const p of live) {
+    if (RE_PERSON_MASK.test(p) || RE_PERSON_TITLE.test(p) || hasFirstName(p.split(/[ \t]+/))) return true;
+  }
+  return probeFindsPerson(probe, live);
+}
+
+/** Czy nazwa po „w siedzibie” to jednostka publiczna: nazwa własna stopnia 2 („Urzędu Gminy
+ *  w Mielniku”) albo ogólne odesłanie małą literą („przedszkola”, „urzędu gminy”)? */
+function seatGenericOwner(seg: string): boolean {
+  const ws = seg.trim().split(/[ \t]+/);
+  if (/^\p{Lu}/u.test(ws[0])) return institutionNameLevel(seg) === 2;
+  if (!SEAT_GENERIC_HEADS.has(ws[0])) return false;
+  return ws.slice(1).every((w) => SEAT_GENERIC_TAIL.has(w) || NAME_LOWER_WORDS.has(w) || RE_PUBLIC_ADJ_WORD.test(w));
+}
+
+/** Czy siedziba z dopasowania RE_SEAT_BEFORE_STREET należy do instytucji? Po „w siedzibie” stoi
+ *  jednostka publiczna, a przed „z siedzibą” nazwa stopnia 2 z institutionNameLevel (urząd, sąd,
+ *  spółdzielnia, szkoła z numerem, przedszkole miejskie), więc nazwa firmy jednoosobowej („Szkoła
+ *  Jazdy Lis”, „Zakład Usługowy KOWALSKI”, „Przychodnia Weterynaryjna Wilk”) siedziby nie daje: ma
+ *  słaby człon bez znacznika, ogon właściciela albo w ogóle nie jest nazwą jednostki. Do tego w tym
+ *  samym zdaniu przed nazwą i za adresem nie może stać osoba („Jan Kowalski, Zakład …”, „… przy
+ *  ul. Polnej 3 prowadzi Pan Jan Kowalski”). Wyjątek: nazwa z mocnym członem połączona z osobą
+ *  wyrazem z małej litery („Pana Marka Sienkiewicza, administratora z ramienia Spółdzielni
+ *  Mieszkaniowej”): to jednostka, w której osoba pełni funkcję, a nie jej firma. */
+function seatOfInstitution(t: string, from: number, offset: number, seat: RegExpExecArray, probe?: PersonProbe): boolean {
+  const lineFrom = Math.max(from, seat.index - 100);
+  const before = t.slice(lineFrom, seat.index);
+  const sentence = before.slice(sentenceStart(before));
+  let personParts: string[];
+  let linked = false;
+  if (seat[1] !== undefined) {
+    if (!seatGenericOwner(seat[1])) return false;
+    personParts = [sentence, seat[1]];
+  } else {
+    const cut = Math.max(
+      before.lastIndexOf(','),
+      before.lastIndexOf(';'),
+      before.lastIndexOf(':'),
+      before.lastIndexOf('('),
+      before.lastIndexOf('|'),
+      before.lastIndexOf('\n'),
+      sentenceStart(before) - 1,
+    );
+    const ws = before.slice(cut + 1).trim().split(/[ \t]+/);
+    let start = -1;
+    for (let i = 0; i < ws.length && start < 0; i++) {
+      if (/^\p{Lu}/u.test(ws[i]) && institutionNameLevel(ws.slice(i).join(' ')) === 2) start = i;
+    }
+    if (start < 0) return false;
+    const name = ws.slice(start);
+    const prefix = ws.slice(0, start);
+    // Przed nazwą wyrazy małą literą („z ramienia”, „prezes”): nazwa zależy od nich, nie jest dopowiedzeniem.
+    linked = prefix.length > 0 && prefix.every((w) => !/^\p{Lu}/u.test(w)) && strongName(name);
+    personParts = [before.slice(sentenceStart(before), cut + 1) + ' ' + prefix.join(' '), name.join(' ')];
+  }
+  const after = sentenceAfterStreet(t, offset);
+  if (personInSentence([after], probe)) return false;
+  return linked ? !personInSentence([personParts[1]], probe) : !personInSentence(personParts, probe);
+}
+
+/** Początek ostatniego zdania w odcinku (0, gdy w odcinku nie ma granicy zdania). */
+function sentenceStart(s: string): number {
+  let start = 0;
+  RE_SENTENCE_END.lastIndex = 0;
+  for (let m = RE_SENTENCE_END.exec(s); m; m = RE_SENTENCE_END.exec(s)) start = m.index + 1;
+  return start;
+}
+
+/** Czy nazwa ma mocny człon albo organ stopnia 2 („Spółdzielni Mieszkaniowej”, „Urzędu Gminy”)? */
+function strongName(ws: string[]): boolean {
+  const heads = ws.slice(0, 3).map((w) => w.toLowerCase());
+  return organLevel(ws) === 2 || heads.some((w) => STRONG_HEADS.has(w));
+}
+
+/** Reszta zdania za ulicą z numerem (najwyżej 120 znaków, do końca wiersza albo zdania). */
+function sentenceAfterStreet(t: string, offset: number): string {
+  let s = t.slice(offset, offset + 160);
+  const eol = s.indexOf('\n');
+  if (eol >= 0) s = s.slice(0, eol);
+  RE_STREET_AT.lastIndex = 0;
+  const m = RE_STREET_AT.exec(s);
+  if (m) s = s.slice(m[0].length);
+  // Kropka tuż za numerem domu („przy ul. Rynek 14. Pani Anna Kot…”): lookbehind RE_SENTENCE_END
+  // nie widzi cyfry sprzed odcinka, więc granicę zdania na samym początku łapie RE_SENTENCE_END_LEAD.
+  if (RE_SENTENCE_END_LEAD.test(s)) return '';
+  RE_SENTENCE_END.lastIndex = 0;
+  const end = RE_SENTENCE_END.exec(s);
+  return end ? s.slice(0, end.index) : s;
+}
 // Okno przed adresem, w którym szukają wyrażenia tego wiersza. Nazwa ma najwyżej 100 znaków, ulica
 // przed kodem około 80 (bez spacji), więc dalej nic nie sięga. Bez okna każde wywołanie przeszukiwało
 // wiersz od początku, a dokument w jednym długim wierszu dawał czas kwadratowy (280 KB: 30 s).
@@ -369,6 +542,8 @@ export function institutionStreetAt(t: string, offset: number, probe?: PersonPro
   // Pusty początek wiersza liczony od prawdziwego początku wiersza, nie od okna.
   if (blankBetween(t, from, offset) && blankBetween(t, lineStart(), from)) return institutionHeaderAbove(t, lineStart(), probe);
   if (execTail(RE_ROOM_IN_BUILDING, t, from, offset)) return true;
+  const seat = execTail(RE_SEAT_BEFORE_STREET, t, from, offset);
+  if (seat) return seatOfInstitution(t, from, offset, seat, probe);
   const m = execTail(RE_INLINE_INSTITUTION, t, from, offset);
   // Za przecinkiem siedzibę daje tylko nazwa stopnia 2 („Szkoła Jazdy Lis, ul. Lipowa 8” to firma).
   if (!m || institutionNameLevel(m[1]) < 2) return false;
@@ -384,8 +559,11 @@ export function institutionStreetAt(t: string, offset: number, probe?: PersonPro
 // „im. Henryka Sienkiewicza” zostaje przy dotychczasowych regułach adresu.
 const STREET_TITLE = String.raw`(?:gen|ks|św|kard|marsz|prof|dr|bp|abp|płk|ppłk|kpt|por|mjr|bł|hetm|kmdr|adm|inż)\.`;
 /** Ulica z numerem domu: skrót albo pełne słowo, nazwa (także z liczbą albo stopniem na początku:
- *  „3 Maja”, „gen. Władysława Andersa”, „św. Jana”) i numer, ewentualnie drugi po ukośniku. */
-export const STREET_SRC = String.raw`(?<!\p{L})(?:[Uu]l\.|[Aa]l\.|[Pp]l\.|[Oo]s\.|(?:[Uu]lica|[Aa]lej[ae]|[Pp]lac|[Oo]siedle)(?!\p{L}))[ \t]*(?:\d+[ \t]+|${STREET_TITLE}[ \t]*)?\p{Lu}[^\n,:;()]{0,60}?[ \t]\d+[a-zA-Z]?(?:[ \t]*[/-][ \t]*\d+[a-zA-Z]?)?(?![\d\p{L}])`;
+ *  „3 Maja”, „gen. Władysława Andersa”, „św. Jana”) i numer, ewentualnie drugi po ukośniku, łączniku
+ *  albo półpauzie („Koraszewskiego 7–9”). */
+export const STREET_SRC = String.raw`(?<!\p{L})(?:[Uu]l\.|[Aa]l\.|[Pp]l\.|[Oo]s\.|(?:[Uu]lica|[Aa]lej[ae]|[Pp]lac|[Oo]siedle)(?!\p{L}))[ \t]*(?:\d+[ \t]+|${STREET_TITLE}[ \t]*)?\p{Lu}[^\n,:;()]{0,60}?[ \t]\d+[a-zA-Z]?(?:[ \t]*[/–-][ \t]*\d+[a-zA-Z]?)?(?![\d\p{L}])`;
+// Ulica z numerem od pozycji (do odcięcia jej od reszty zdania za siedzibą).
+const RE_STREET_AT = new RegExp(STREET_SRC, 'uy');
 // Pokój, piętro czy wejście za numerem („ul. Piotrkowska 104, pok. 12”) to część siedziby.
 const ROOM_TAIL = String.raw`(?:[ \t]*,[ \t]*(?:pok\.|pokój|p\.|piętro|wejście|budynek|bud\.)[^\n,]{0,30})?`;
 const RE_STREET_LINE = new RegExp(String.raw`^[ \t]*(${STREET_SRC})${ROOM_TAIL}[ \t]*,?[ \t]*\r?$`, 'u');

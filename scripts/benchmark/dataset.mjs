@@ -1318,6 +1318,21 @@ export function buildDataset() {
   // Zapowiedź cytatu po sygnaturze („…, sygn. akt …, stwierdził, że”) i repertorium sądu powszechnego.
   neg('WSA w Poznaniu w wyroku z dnia 14 kwietnia 2020 r., sygn. akt II SA/Po 1001/19, stwierdził, że opłata adiacencka wymaga ustalenia wzrostu wartości.', ['II SA/Po 1001/19']);
   str('Jak wskazał Sąd Rejonowy w postanowieniu z dnia 12 marca 2024 r., sygn. akt III Nsm 123/23, władza rodzicielska ojca została ograniczona.', ['III Nsm 123/23'], ['Sąd Rejonowy']);
+  // Organ jednoosobowy i komórka w nagłówku: adres siedziby jawny, adres osoby zakryty. Nazwa własna
+  // w nazwie instytucji (patron uczelni, kraina, miejscowość w nazwie szkoły) i siedziba w zdaniu.
+  str('WÓJT GMINY KOBYLNICA\nul. Główna 20, 76-251 Kobylnica\n\nWnioskodawczyni: Halina Szczepaniak, zam. ul. Polna 3, 76-200 Słupsk.', ['Halina Szczepaniak', 'ul. Polna 3', '76-200'], ['ul. Główna 20', '76-251']);
+  str('KIEROWNIK URZĘDU STANU CYWILNEGO W KIELCACH\nul. Strycharska 6, 25-659 Kielce\n\nKierownik Budowy\nul. Lipowa 3, 25-001 Kielce', ['ul. Lipowa 3', '25-001'], ['ul. Strycharska 6', '25-659']);
+  str('Pan Roman Słupski złożył uwagi, które oceni Starosta Słupski.', ['Roman Słupski'], ['Starosta Słupski']);
+  str('Świadek Marek Nowak, administrator z ramienia Spółdzielni Mieszkaniowej „Stok” z siedzibą przy ul. Lipowej 4 w Białymstoku, zam. ul. Polna 8 m. 2.', ['Marek Nowak', 'ul. Polna 8 m. 2'], ['ul. Lipowej 4']);
+  str('Posiłki dla uczniów Szkoły Podstawowej im. Janusza Korczaka w Mielniku (Gmina Mielnik) dostarcza Beata Kaczmarczyk.', ['Beata Kaczmarczyk'], ['Janusza Korczaka w Mielniku']);
+  neg('Kandydatka ukończyła administrację na Uniwersytecie Mikołaja Kopernika w Toruniu.', ['Uniwersytecie Mikołaja Kopernika']);
+  neg('Dotację otrzymało Stowarzyszenie Przyjaciół Ziemi Krzeszowickiej.', ['Ziemi Krzeszowickiej']);
+  // Siedziba firmy osoby w zdaniu zostaje zakryta: nazwa z nazwiskiem albo homografem i osoba przed nazwą.
+  str('Wykonawca: Zakład Instalacyjny Sowa z siedzibą przy ul. Wodnej 2, 21-100 Lubartów.', ['ul. Wodnej 2', '21-100'], ['Wykonawca']);
+  str('Tomasz Bielecki, Zakład Usług Remontowych z siedzibą przy ul. Cichej 7 w Lublinie.', ['Tomasz Bielecki', 'ul. Cichej 7'], ['Zakład Usług Remontowych']);
+  // Adres siedziby kończy zdanie, a następne wymienia stronę; imię po nazwie placówki bez „im.” to osoba.
+  str('Zebranie odbędzie się w siedzibie Urzędu Gminy w Baranowie przy ul. Rynek 14. Pani Anna Kot przedstawi wniosek.', ['Anna Kot'], ['ul. Rynek 14']);
+  str('Pacjent Szpitala Jana Wróbla przyjęty 3 marca. Uczniowie Szkoły Podstawowej Marii Konopnickiej odwiedzili oddział.', ['Jana Wróbla'], ['Marii Konopnickiej']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

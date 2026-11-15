@@ -12050,3 +12050,207 @@ test('zdrowie klasa 10: przysłówek, szyk, przeczenie, zlecenie bezosobowe, pos
     { types: ['ZDROWIE'] },
   );
 });
+
+test('nagłówek z organem jednoosobowym albo komórką: adres siedziby jawny, adres osoby zakryty', () => {
+  const jawne: [string, string[]][] = [
+    ['WÓJT GMINY KOBYLNICA\nul. Główna 20, 76-251 Kobylnica\n\nKobylnica, 21 października 2026 r.', ['ul. Główna 20', '76-251 Kobylnica']],
+    ['BURMISTRZ MIASTA I GMINY NIEPOŁOMICE\nPlac Zwycięstwa 13, 32-005 Niepołomice', ['Plac Zwycięstwa 13', '32-005']],
+    ['STAROSTA KŁODZKI\nul. Stefana Okrzei 1, 57-300 Kłodzko', ['ul. Stefana Okrzei 1', '57-300']],
+    ['KIEROWNIK URZĘDU STANU CYWILNEGO W KIELCACH\nul. Strycharska 6, 25-659 Kielce', ['ul. Strycharska 6', '25-659']],
+    ['URZĄD STANU CYWILNEGO W OPOLU\nul. Koraszewskiego 7–9, 45-011 Opole', ['ul. Koraszewskiego 7–9', '45-011']],
+    ['Dyrektor\nPrzedszkola Publicznego nr 33 w Rzeszowie\nal. Tadeusza Rejtana 3\n35-326 Rzeszów', ['al. Tadeusza Rejtana 3', '35-326']],
+    ['Ośrodek Pomocy Społecznej w Zgorzelcu\nSekcja Świadczeń Rodzinnych\nul. Bohaterów Getta 8, 59-900 Zgorzelec', ['ul. Bohaterów Getta 8', '59-900']],
+    ['Zastępca Wójta Gminy Mielnik\nul. Piaskowa 1\n17-307 Mielnik', ['ul. Piaskowa 1', '17-307 Mielnik']],
+    ['Państwowy Powiatowy Inspektor Sanitarny w Kłodzku\nul. Wyspiańskiego 2\n57-300 Kłodzko', ['ul. Wyspiańskiego 2', '57-300']],
+    ['Komendant Straży Miejskiej w Lublinie\nul. Podwale 3a\n20-117 Lublin', ['ul. Podwale 3a', '20-117']],
+    ['Sekretarz Gminy\nul. Polna 3\n30-001 Kraków', ['ul. Polna 3', '30-001']],
+    ['Burmistrz Pszczyny\nul. Rynek 2\n43-200 Pszczyna', ['ul. Rynek 2', '43-200']],
+  ];
+  for (const [t, keep] of jawne) {
+    const r = redactPII(t).redacted;
+    for (const k of keep) expect(r, t).toContain(k);
+  }
+  // Stanowisko w firmie, sama funkcja, organ z nazwiskiem albo osoba nad blokiem: adres zakryty.
+  const zakryte: [string, string[]][] = [
+    ['Kierownik Budowy\nul. Polna 3\n30-001 Kraków', ['ul. Polna 3', '30-001']],
+    ['Dyrektor Handlowy\nul. Polna 3\n30-001 Kraków', ['ul. Polna 3']],
+    ['Inspektor Nadzoru\nul. Polna 3\n30-001 Kraków', ['ul. Polna 3', '30-001']],
+    ['Kurator\nul. Polna 3\n30-001 Kraków', ['ul. Polna 3', '30-001']],
+    ['Skarbnik\nul. Polna 3', ['ul. Polna 3']],
+    ['Dyrektor, ul. Polna 3, 30-001 Kraków', ['ul. Polna 3', '30-001']],
+    ['Wnioskodawca:\nPrezes\nul. Polna 3', ['ul. Polna 3']],
+    ['Dyrektor Jan Kowalski\nul. Polna 3\n30-001 Kraków', ['Kowalski', 'ul. Polna 3', '30-001']],
+    ['Burmistrz Kowalski\nul. Rynek 2\n43-200 Pszczyna', ['Kowalski', 'ul. Rynek 2', '43-200']],
+    ['Jan Kowalski\nSekretarz Gminy\nul. Polna 3\n30-001 Kraków', ['Kowalski', 'ul. Polna 3', '30-001']],
+    ['Pan\nJan Kowalski\nKierownik Budowy\nul. Polna 3\n30-001 Kraków', ['Kowalski', 'ul. Polna 3', '30-001']],
+  ];
+  for (const [t, gone] of zakryte) {
+    const r = redactPII(t).redacted;
+    for (const g of gone) expect(r, t).not.toContain(g);
+  }
+  // Nagłówek urzędu i dane strony w jednym piśmie.
+  const r = redactPII('WÓJT GMINY KOBYLNICA\nul. Główna 20, 76-251 Kobylnica\n\nWnioskodawczyni: Halina Szczepaniak, zam. ul. Polna 3, 76-200 Słupsk.').redacted;
+  expect(r).toContain('ul. Główna 20, 76-251 Kobylnica');
+  for (const g of ['Szczepaniak', 'ul. Polna 3', '76-200']) expect(r).not.toContain(g);
+});
+
+test('organ terytorialny z przymiotnikiem od powiatu albo województwa to urząd, nie osoba', () => {
+  const r1 = redactPII('Pan Roman Słupski przesłał uwagi. Organ wyjaśnił Romanowi Słupskiemu, że odległości oceni Starosta Słupski.').redacted;
+  expect(r1).toContain('Starosta Słupski');
+  expect(r1).not.toContain('Roman Słupski');
+  expect(r1).not.toContain('Romanowi');
+  const r2 = redactPII('Wniosek Jana Tarnowskiego. Decyzję wyda Starosta Tarnowski, a odwołanie rozpatrzy Wojewoda Małopolski.').redacted;
+  expect(r2).toContain('Starosta Tarnowski');
+  expect(r2).toContain('Wojewoda Małopolski');
+  expect(r2).not.toContain('Jana Tarnowskiego');
+  const r3 = redactPII('Jan Mazowiecki złożył wniosek do Wojewody Mazowieckiego za pośrednictwem Starosty Kłodzkiego.').redacted;
+  expect(r3).toContain('do Wojewody Mazowieckiego za pośrednictwem Starosty Kłodzkiego');
+  expect(r3).not.toContain('Jan Mazowiecki');
+  // Sędzia i starosta z nazwiskiem spoza przymiotników od miejsc to osoby.
+  expect(redactPII('Sędzia Tarnowski oddalił wniosek.').redacted).not.toContain('Tarnowski');
+  expect(redactPII('Sprawę prowadzi Starosta Kowalski.').redacted).not.toContain('Kowalski');
+});
+
+test('nazwa własna w nazwie instytucji (patron, kraina, miejscowość) nie jest osobą sprawy', () => {
+  const jawne = [
+    'Kandydatka ukończyła administrację na Uniwersytecie Mikołaja Kopernika w Toruniu.',
+    'Posiłki dla uczniów Szkoły Podstawowej im. Janusza Korczaka w Mielniku (Gmina Mielnik).',
+    'Dotację otrzymało Stowarzyszenie Przyjaciół Ziemi Krzeszowickiej.',
+    'Fundacją Anny Dymnej kieruje zarząd.',
+    'Pacjentka leży w Szpitalu Wojewódzkim im. Jana Pawła II w Krakowie.',
+  ];
+  for (const t of jawne) expect(redactPII(t).redacted, t).toBe(t);
+  // Miejscowość z nazwiskiem-homografem w nagłówku daty, gdy pismo nazywa ją miejscowością.
+  const r = redactPII('Mielnik, 18 sierpnia 2026 r.\n\nPani Beata Kaczmarczyk, adres: Osłowo 21, 17-307 Mielnik.').redacted;
+  expect(r.startsWith('Mielnik, 18 sierpnia 2026 r.')).toBe(true);
+  expect(r).not.toContain('Kaczmarczyk');
+  // Bez dowodu, że to miejscowość, albo przy osobie o tym nazwisku: maska.
+  expect(redactPII('Kowalski, 18.08.2026').redacted).not.toContain('Kowalski');
+  expect(redactPII('Mieszkam w Nowaku.').redacted).not.toContain('Nowaku');
+  expect(redactPII('Pan Jan Mielnik, zam. 17-307 Mielnik. Szkoła w Mielniku.').redacted).not.toContain('Mielniku');
+  expect(redactPII('W przychodni Anny Nowak przyjęto pacjenta.').redacted).not.toContain('Nowak');
+  expect(redactPII('Uczeń Szkoły Podstawowej Anny Nowak.').redacted).not.toContain('Nowak');
+});
+
+test('siedziba instytucji w zdaniu jawna, siedziba firmy osoby zakryta', () => {
+  const r1 = redactPII(
+    'Świadek Pan Marek Sienkiewicz, administrator z ramienia Spółdzielni Mieszkaniowej „Słoneczny Stok” z siedzibą przy ul. Henryka Sienkiewicza 54 w Białymstoku, zam. ul. Polna 8 m. 2.',
+  ).redacted;
+  expect(r1).toContain('z siedzibą przy ul. Henryka Sienkiewicza 54');
+  expect(r1).not.toContain('Marek');
+  expect(r1).not.toContain('ul. Polna 8');
+  expect(redactPII('Lista zostanie wywieszona w siedzibie przedszkola przy ul. Kasztanowej 14 w Lesznie.').redacted).toContain('ul. Kasztanowej 14');
+  expect(redactPII('Spotkanie odbędzie się w siedzibie Urzędu Gminy w Mielniku przy ul. Piaskowej 1.').redacted).toContain('ul. Piaskowej 1');
+  for (const t of [
+    'Jan Kowalski, prowadzący działalność pod firmą „Kowal” z siedzibą przy ul. Polnej 3.',
+    'Zakład Stolarski Jan Kowalski z siedzibą przy ul. Polnej 3 w Lublinie.',
+    'Wspólnota Mieszkaniowa Jana Kowalskiego z siedzibą przy ul. Polnej 3.',
+    'Spotkanie odbędzie się w siedzibie Pana Kowalskiego przy ul. Polnej 3.',
+  ]) {
+    const r = redactPII(t).redacted;
+    expect(r, t).not.toContain('ul. Polnej 3');
+    expect(r, t).not.toContain('Kowalsk');
+  }
+});
+
+test('siedziba w zdaniu: nazwa firmy jednoosobowej i osoba w zdaniu nie odkrywają adresu', () => {
+  // Nazwa firmy osoby zaczyna się tak samo jak placówka („Szkoła”, „Zakład”, „Centrum”, „Akademia”),
+  // a ogon to nazwisko, homograf, wersaliki albo imię w dopełniaczu. Adres zostaje zakryty jak przed
+  // regułą siedziby w zdaniu, także kod i miejscowość za nim.
+  const firms: Array<[string, string]> = [
+    ['Szkoła Jazdy Lis z siedzibą przy ul. Lipowej 8', 'ul. Lipowej 8'],
+    ['Przychodnia Weterynaryjna Wilk z siedzibą przy ul. Leśnej 4', 'ul. Leśnej 4'],
+    ['Akademia Tańca KOWALSKI z siedzibą przy ul. Ogrodowej 11', 'ul. Ogrodowej 11'],
+    ['Zakład Usługowy KOWALSKI z siedzibą przy ul. Ogrodowej 11 w Kielcach', 'ul. Ogrodowej 11'],
+    ['Zakład Pogrzebowy Kwiatek z siedzibą przy ul. Cmentarnej 4', 'ul. Cmentarnej 4'],
+    ['Zakład Usług Pogrzebowych Mazur z siedzibą w Lublinie przy ul. Spokojnej 2', 'ul. Spokojnej 2'],
+    ['Centrum Szkoleniowe Sowa z siedzibą przy ul. Mądrej 1', 'ul. Mądrej 1'],
+    ['Zakład Fryzjerski Bogusława z siedzibą przy ul. Ładnej 1', 'ul. Ładnej 1'],
+    ['Firma Zakład Remontowy Baran z siedzibą przy ul. Polnej 3, NIP 123-456-32-18', 'ul. Polnej 3'],
+    ['Wykonawca: Zakład Instalacyjny Kozioł z siedzibą przy ul. Wodnej 2, 21-100 Lubartów', 'ul. Wodnej 2'],
+    ['Pani Anna Lis, właścicielka szkoły jazdy, Szkoła Jazdy Lis z siedzibą przy ul. Lipowej 8', 'ul. Lipowej 8'],
+    ['Pan Wilk prowadzi gabinet. Przychodnia Weterynaryjna Wilk z siedzibą przy ul. Leśnej 4', 'ul. Leśnej 4'],
+    ['Zakład usługowy z siedzibą przy ul. Polnej 3 prowadzi Pan Jan Kowalski.', 'ul. Polnej 3'],
+    ['| 3 | Szkoła Jazdy Lis z siedzibą przy ul. Lipowej 8 | |', 'ul. Lipowej 8'],
+    ['Jan Kowalski, Zakład Usług Remontowych z siedzibą przy ul. Polnej 3 w Lublinie.', 'ul. Polnej 3'],
+    ['Wnioskodawca: Jan Kowalski, Zakład Usług Remontowych z siedzibą przy ul. Polnej 3.', 'ul. Polnej 3'],
+    ['Kowalski Jan, Zakład Remontowy z siedzibą przy ul. Polnej 3.', 'ul. Polnej 3'],
+    ['Przedsiębiorca Jan Kowalski; Zakład Produkcyjny z siedzibą przy ul. Polnej 3.', 'ul. Polnej 3'],
+    ['Jan Kowalski, Szkoła Podstawowa nr 3 z siedzibą przy ul. Polnej 3.', 'ul. Polnej 3'],
+    ['Spotkanie odbędzie się w siedzibie szkoły jazdy przy ul. Polnej 3.', 'ul. Polnej 3'],
+  ];
+  for (const [t, street] of firms) {
+    const r = redactPII(t).redacted;
+    expect(r, t).not.toContain(street);
+    expect(r, t).toContain('[ADRES]');
+  }
+  expect(redactPII('Zakład Usługowy KOWALSKI z siedzibą przy ul. Ogrodowej 11 w Kielcach').redacted).not.toContain('Kielcach');
+  const koziol = redactPII('Wykonawca: Zakład Instalacyjny Kozioł z siedzibą przy ul. Wodnej 2, 21-100 Lubartów').redacted;
+  expect(koziol).not.toContain('21-100');
+  expect(koziol).not.toContain('Lubartów');
+  expect(redactPII('Jan Kowalski, Zakład Usług Remontowych z siedzibą przy ul. Polnej 3 w Lublinie.').redacted).not.toContain('Lublinie');
+  // Osoba po adresie w tym samym zdaniu też zabiera siedzibę, a sam urząd w zdaniu ją daje.
+  const school = redactPII('Szkoła Podstawowa nr 3 z siedzibą przy ul. Polnej 3 prowadzi zajęcia, dyrektor Pan Jan Kowalski.').redacted;
+  expect(school).not.toContain('ul. Polnej 3');
+  expect(school).not.toContain('Kowalski');
+  const court = redactPII('Sąd Rejonowy w Lublinie z siedzibą przy ul. Krakowskie Przedmieście 43 rozpoznał sprawę.').redacted;
+  expect(court).toContain('ul. Krakowskie Przedmieście 43');
+});
+
+test('imię po nazwie placówki bez „im.” to osoba w roli, patron tylko ze słownika par', () => {
+  // Pracownik, uczeń, pacjent albo podopieczny placówki z nazwiskiem-homografem: osoba zakryta.
+  const osoby: Array<[string, string]> = [
+    ['Zgłoszenie od dyrektor Szkoły Podstawowej Anny Lis.', 'Lis'],
+    ['Skarga na nauczycielkę Szkoły Podstawowej Marię Lis.', 'Lis'],
+    ['Podpisała: dyrektor Technikum Joanny Sowy.', 'Sowy'],
+    ['Pacjentka Szpitala Ewy Kozioł.', 'Kozioł'],
+    ['Pacjent Szpitala Jana Wróbla przyjęty 3 marca.', 'Wróbla'],
+    ['Uczestnik Ośrodka Jana Wilka w Lublinie.', 'Wilka'],
+    ['Podopieczny Ośrodka Adama Kruka.', 'Kruka'],
+    ['Wychowawczyni Przedszkola Marty Sikory.', 'Sikory'],
+    ['Pracownica Biblioteki Ewy Mazur.', 'Mazur'],
+    ['Opiekun Hospicjum Piotra Gołębia.', 'Gołębia'],
+    ['W Szkole Anny Lis prowadzonej przez nią samą przekazano dokumenty.', 'Lis'],
+    ['Ośrodku Anny Lis przekazano dokumenty.', 'Lis'],
+    ['Kontrola Teatru Anny Lis wykazała braki.', 'Lis'],
+    ['W Bibliotece Anny Lis odbyło się spotkanie.', 'Lis'],
+    ['Szkoła Podstawowa Anny Lis z siedzibą przy ul. Polnej 3.', 'Lis'],
+    ['Pacjent Szpitala Jana Dąbrowskiego.', 'Dąbrowskiego'],
+    ['Uczeń Szkoły Podstawowej Jana Kowalskiego.', 'Kowalskiego'],
+  ];
+  for (const [t, gone] of osoby) {
+    const r = redactPII(t).redacted;
+    expect(r, t).not.toContain(gone);
+    expect(r, t).toContain('[IMIĘ I NAZWISKO]');
+  }
+  // Znany patron w nazwie placówki zostaje jawny, osoba obok dalej zakryta.
+  const r = redactPII('Uczniowie Szkoły Podstawowej Marii Konopnickiej w Lesznie. Wniosek złożyła Pani Anna Lis.').redacted;
+  expect(r).toContain('Szkoły Podstawowej Marii Konopnickiej');
+  expect(r).not.toContain('Anna Lis');
+  expect(redactPII('Kandydatka ukończyła studia na Uniwersytecie Adama Mickiewicza w Poznaniu.').redacted).toContain('Adama Mickiewicza');
+});
+
+test('siedziba w zdaniu: adres kończący zdanie jawny, osoba w następnym zdaniu zakryta', () => {
+  const cases: Array<[string, string, string]> = [
+    ['Zebranie odbędzie się w siedzibie Urzędu Gminy w Baranowie przy ul. Rynek 14. Pani Anna Kot przedstawi wniosek.', 'ul. Rynek 14', 'Kot'],
+    ['Sąd Rejonowy w Lublinie z siedzibą przy ul. Krakowskie Przedmieście 43. Pan Jan Lis złożył pozew.', 'ul. Krakowskie Przedmieście 43', 'Lis'],
+    ['Spotkanie w siedzibie urzędu gminy przy ul. Brzozowej 4. Pan Jan Lis przybył.', 'ul. Brzozowej 4', 'Lis'],
+    ['Spotkanie w siedzibie urzędu gminy przy ul. Brzozowej 4! Pan Jan Lis przybył.', 'ul. Brzozowej 4', 'Lis'],
+  ];
+  for (const [t, keep, gone] of cases) {
+    const r = redactPII(t).redacted;
+    expect(r, t).toContain(keep);
+    expect(r, t).not.toContain(gone);
+  }
+  // Firma osoby z tym samym układem: adres dalej zakryty.
+  for (const t of [
+    'Zakład usługowy z siedzibą przy ul. Polnej 3. Prowadzi go Pan Jan Kowalski.',
+    'Szkoła Jazdy Lis z siedzibą przy ul. Lipowej 8. Pani Anna Lis prowadzi kursy.',
+  ]) {
+    const r = redactPII(t).redacted;
+    expect(r, t).toContain('[ADRES]');
+    expect(r, t).not.toMatch(/ul\. (?:Polnej 3|Lipowej 8)/u);
+  }
+  // Kropka po numerze przed małą literą („3. piętro”) nie kończy zdania: osoba za nią dalej liczy się do zdania.
+  expect(redactPII('Zakład usługowy z siedzibą przy ul. Polnej 3. piętro, prowadzi Pan Jan Kowalski.').redacted).not.toContain('ul. Polnej 3');
+});

@@ -352,6 +352,35 @@ działają na GitHubie od chwili wypchnięcia tagów.
   z PDF-u, oraz gdy zdanie obok łączy osobę z wyrokiem albo skargą („Pani Ewa Wróbel złożyła
   skargę na decyzję. Jak wskazał WSA …, sygn. akt [ZNAK-SPRAWY], …”). Na trzeciej serii pism (część
   robocza) nadmiarowych zakryć jest 53 zamiast 64, na drugiej 34 zamiast 37, bez nowych wycieków.
+- **Adres urzędu pod nagłówkiem z organem zostaje jawny, tak samo nazwa własna w nazwie
+  instytucji.** Pismo zaczynające się od „WÓJT GMINY KOBYLNICA⏎ul. Główna 20, 76-251 Kobylnica”
+  zostaje bez zmian (wcześniej „[ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]”), tak samo pod „STAROSTA
+  KŁODZKI”, „BURMISTRZ MIASTA I GMINY NIEPOŁOMICE”, „KIEROWNIK URZĘDU STANU CYWILNEGO W KIELCACH”,
+  „Państwowy Powiatowy Inspektor Sanitarny”, „Zastępca Wójta Gminy”, „Sekretarz Gminy”, „Komendant
+  Straży Miejskiej”, pod komórką („Sekcja Świadczeń Rodzinnych”) i pod adresatem w dwóch wierszach
+  („Dyrektor⏎Przedszkola Publicznego nr 33 w Rzeszowie⏎al. Tadeusza Rejtana 3”). Numer budynku
+  z półpauzą („ul. Koraszewskiego 7–9”) też liczy się jako adres siedziby. Organ z przymiotnikiem od
+  powiatu albo województwa to urząd, także gdy strona ma to samo nazwisko: „Pan [IMIĘ I NAZWISKO]
+  … oceni Starosta Słupski” (wcześniej „Starosta [IMIĘ I NAZWISKO]”), „do Wojewody Mazowieckiego”,
+  „Starosta Tarnowski”. Zostaje patron i kraina w nazwie („na Uniwersytecie Mikołaja Kopernika”,
+  „Stowarzyszenie Przyjaciół Ziemi Krzeszowickiej”, „Szkoła Podstawowa Marii Konopnickiej”: tylko
+  znana postać, bo „Pacjent Szpitala [IMIĘ I NAZWISKO]” czy „dyrektor Szkoły Podstawowej [IMIĘ
+  I NAZWISKO]” to osoba w roli przy placówce), miejscowość o brzmieniu nazwiska, gdy pismo
+  nazywa ją miejscowością („Szkoła Podstawowa … w Mielniku”, „Mielnik, 18 sierpnia 2026 r.”, „17-307
+  Mielnik”), i siedziba w zdaniu („Spółdzielni Mieszkaniowej „Słoneczny Stok” z siedzibą przy ul.
+  Henryka Sienkiewicza 54”, „w siedzibie przedszkola przy ul. Kasztanowej 14”). Dalej znika adres
+  pod stanowiskiem w firmie albo funkcją bez urzędu („Kierownik Budowy”, „Dyrektor Handlowy”,
+  „Inspektor Nadzoru”, „Kurator”), pod organem z nazwiskiem („Burmistrz Kowalski”, „Dyrektor Jan
+  Kowalski”), siedziba firmy osoby („Jan Kowalski, prowadzący działalność … z siedzibą przy ul.
+  Polnej 3”, „Szkoła Jazdy Lis z siedzibą przy [ADRES]”, „Wykonawca: Zakład Instalacyjny Kozioł
+  z siedzibą przy [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]”, „[IMIĘ I NAZWISKO], Zakład Usług
+  Remontowych z siedzibą przy [ADRES]”) oraz nazwisko po roli osoby („Sędzia Tarnowski”,
+  „Starosta Kowalski”). Siedzibę w zdaniu daje tylko nazwa urzędu, sądu, spółdzielni albo placówki
+  z numerem lub przymiotnikiem organu, bez osoby w tym samym zdaniu; adres kończący zdanie zostaje
+  jawny także wtedy, gdy następne zdanie wymienia stronę („… w siedzibie Urzędu Gminy w Baranowie
+  przy ul. Rynek 14. Pani [IMIĘ I NAZWISKO] przedstawi wniosek.”). Imię i nazwisko
+  urzędnika pod nagłówkiem dalej znika. Na trzeciej serii pism (część robocza) nadmiarowych zakryć
+  jest 31 zamiast 53, na drugiej 31 zamiast 34, bez nowych wycieków.
 
 ## v0.47.0 — 2026-11-14
 
