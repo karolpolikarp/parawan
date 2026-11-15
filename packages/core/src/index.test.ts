@@ -11383,7 +11383,7 @@ test('zdrowie klasa 3: zdarzenie zdrowotne przy osobie (zwolnienie, orzeczenie, 
     ['Do końca miesiąca przebywam w sanatorium po operacji kręgosłupa.', `Do końca miesiąca przebywam ${Z}.`],
     ['Pan Nowak jest po operacji, wraca w poniedziałek.', `Pan ${N} jest ${Z}, wraca w poniedziałek.`],
     ['Pracownik od zawału serca pracuje na pół etatu.', `Pracownik ${Z} pracuje na pół etatu.`],
-    ['Babcia porusza się o kulach po endoprotezie biodra.', `Babcia porusza się o kulach po ${Z}.`],
+    ['Babcia porusza się o kulach po endoprotezie biodra.', `Babcia ${Z} po ${Z}.`],
     // ciąża z tygodniem, ciąża zagrożona, dalsza wzmianka w tym samym zdaniu
     ['Pani Maria Nowak jest w 20. tygodniu ciąży, ciąża zagrożona.', `Pani ${N} jest ${Z}, ${Z}.`],
     ['U pani Ewy Kos trwa 30. tydzień ciąży, ciążę prowadzi lekarz rodzinny.', `U pani ${N} trwa ${Z}, ${Z} prowadzi lekarz rodzinny.`],
@@ -11465,7 +11465,7 @@ test('zdrowie klasa 3: imiesłów, zabieg po budowie słowa, pobyt, angielski; t
     ['Matka małoletniego przeszła mastektomię w ubiegłym roku.', `Matka małoletniego przeszła ${Z} w ubiegłym roku.`],
     ['Pan Damian Kos przeszedł zabieg koronarografii.', `Pan ${N} przeszedł ${Z}.`],
     ['Wnioskodawczyni jest po przeszczepie nerki.', `Wnioskodawczyni jest ${Z}.`],
-    ['Dziadek dzieci porusza się na wózku po amputacji nogi.', `Dziadek dzieci porusza się na wózku ${Z}.`],
+    ['Dziadek dzieci porusza się na wózku po amputacji nogi.', `Dziadek dzieci ${Z}.`],
     ['Babcia małoletniej jest po wszczepieniu rozrusznika serca.', `Babcia małoletniej jest ${Z}.`],
     ['Pani Elżbieta Kurek miała w lutym zabieg usunięcia macicy.', `Pani ${N} miała w lutym ${Z}.`],
     ['Pani Sylwia Tomczak przebywała na oddziale ginekologicznym po poronieniu.', `Pani ${N} przebywała ${Z}.`],
@@ -11482,7 +11482,7 @@ test('zdrowie klasa 3: imiesłów, zabieg po budowie słowa, pobyt, angielski; t
     // słowa reguły po spójniku nie blokują opisu faktu
     ['Mąż wnioskodawczyni przebywa na zwolnieniu lekarskim i nie może pracować.', `Mąż wnioskodawczyni przebywa na ${Z} i nie może pracować.`],
     ['Matka dzieci jest po udarze niedokrwiennym i wymaga opieki.', `Matka dzieci jest ${Z} i wymaga opieki.`],
-    ['Ojciec jest po operacji biodra i każdego dnia chodzi o kulach.', `Ojciec jest ${Z} i każdego dnia chodzi o kulach.`],
+    ['Ojciec jest po operacji biodra i każdego dnia chodzi o kulach.', `Ojciec jest ${Z} i każdego dnia ${Z}.`],
     ['Uczeń ma orzeczenie o potrzebie kształcenia specjalnego, więc może korzystać z dowozu.', `Uczeń ma ${Z}, więc może korzystać z dowozu.`],
     // pisma dwujęzyczne
     ['Ms Anna Kowalska is on sick leave until 30 November.', `Ms ${N} is ${Z}.`],
@@ -11718,7 +11718,7 @@ test('zdrowie klasa 4: rozpoznanie po kotwicy, nazwa choroby po budowie słowa, 
     ['Pacjentka cierpi na fibromialgię i neuropatię cukrzycową.', `Pacjentka cierpi na ${Z} i ${Z}.`],
     ['Z opinii poradni wynika, że Julia ma dysleksję rozwojową i dyskalkulię.', `Z opinii poradni wynika, że Julia ma ${Z} i ${Z}.`],
     ['Podopieczna ma niedowład lewostronny po udarze krwotocznym mózgu.', `Podopieczna ma ${Z}.`],
-    ['Babcia ma demencję i wymaga stałej opieki.', `Babcia ma ${Z} i wymaga stałej opieki.`],
+    ['Babcia ma demencję i wymaga stałej opieki.', `Babcia ma ${Z} i ${Z}.`],
     ['Antek ma alergię na białko mleka krowiego, wymaga specjalnej diety.', `Antek ma ${Z}, wymaga specjalnej diety.`],
     ['PL: Mam umiarkowany niedosłuch i noszę aparaty słuchowe.', `PL: Mam ${Z} i noszę ${Z}.`],
     // choroba z listy przy osobie i czasowniku „ma”, stopień przed nazwą i kod po niej w tej samej masce
@@ -13503,5 +13503,224 @@ test('Seria 3: przyczyna lub stan w środku odcinka po słowie tematu („po”,
     'Pani [IMIĘ I NAZWISKO] prowadziła warsztaty o diecie przy cukrzycy.',
     'Pan [IMIĘ I NAZWISKO] ukończył kurs dla opiekunów przy chorobie Parkinsona.',
     'Warsztaty „Jak rozmawiać z osobą po udarze” dla wolontariuszy.',
+  ]);
+});
+
+test('Seria 3: stan funkcjonalny osoby z choroby lub niepełnosprawności znika, a wózek widłowy, położenie, stanowisko i przepis zostają', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    ['Pani Ewelina Wrzesińska porusza się na wózku inwalidzkim po urazie rdzenia kręgowego.', `Pani ${N} ${H} po urazie rdzenia kręgowego.`],
+    ['Wnioskodawcy wskazali, że Pani Irena Kmieć porusza się na wózku inwalidzkim i podjazd jest jedyną drogą.', `Wnioskodawcy wskazali, że Pani ${N} ${H} i podjazd jest jedyną drogą.`],
+    ['– stan po upadku w domu (2025), porusza się przy balkoniku,', `– stan po upadku w domu (2025), ${H},`],
+    ['Ojciec wnioskodawczyni chodzi o kulach łokciowych i wymaga pomocy przy kąpieli.', `Ojciec wnioskodawczyni ${H} i ${H}.`],
+    ['Z zaświadczenia wynika, że Pan Jan Zając jest osobą leżącą od dwóch lat.', `Z zaświadczenia wynika, że Pan ${N} jest ${H} od dwóch lat.`],
+    ['Matka jest całkowicie niesamodzielna i wymaga stałej opieki.', `Matka jest ${H} i ${H}.`],
+    ['Dziecko wymaga karmienia przez gastrostomię i codziennej opieki rodzica.', `Dziecko ${H} i codziennej opieki rodzica.`],
+    ['Pan Jan Kowalski ma wyłonioną kolostomię i korzysta z pieluchomajtek.', `Pan ${N} ma wyłonioną ${H} i korzysta z ${H}.`],
+    ['Pani Anna Nowak uzyskała 15 pkt w skali Barthel.', `Pani ${N} uzyskała ${H}.`],
+    ['Pani Anna Nowak jest niewidoma od urodzenia.', `Pani ${N} jest ${H} od urodzenia.`],
+    ['Córka nie mówi i nie chodzi, porusza się z pomocą drugiej osoby.', `Córka ${H}, ${H}.`],
+    ['U Pana Jana Wójcika stosowana jest tlenoterapia domowa.', `U Pana ${N} stosowana jest ${H}.`],
+    ['Pan Jan Lis nie jest w stanie samodzielnie się poruszać.', `Pan ${N} ${H}.`],
+    ['Babcia jest obłożnie chora i nie wstaje z łóżka.', `Babcia jest ${H} i ${H}.`],
+    [
+      'Orzeczenie zawiera wskazanie konieczności stałej lub długotrwałej opieki lub pomocy innej osoby w związku ze znacznie ograniczoną możliwością samodzielnej egzystencji syna.',
+      `Orzeczenie zawiera wskazanie konieczności stałej lub długotrwałej opieki lub pomocy innej osoby w związku ze ${H} syna.`,
+    ],
+  ]);
+  keep([
+    'Pomoc w formie usług opiekuńczych przysługuje osobie samotnej, która z powodu wieku wymaga pomocy innych osób.',
+    'Operator porusza się na wózku widłowym po hali magazynowej.',
+    'Matka porusza się z wózkiem dziecięcym po osiedlu.',
+    'Działka leżąca w obrębie Zalesie jest niezabudowana.',
+    'Dokumenty leżące na biurku przekazano do archiwum.',
+    'Na stanowisku samodzielnego referenta zatrudniono pracownika.',
+    'Samodzielne stanowisko ds. kadr prowadzi ewidencję.',
+    'Lokal mieszkalny jest niesamodzielny, ma wspólną łazienkę.',
+    'Budynek wymaga stałej opieki konserwatorskiej.',
+    'Polski Związek Niewidomych zorganizował spotkanie.',
+    'Szkolenie z pierwszej pomocy dla osób niewidomych odbędzie się w maju.',
+    'Dziecko nie chodzi samodzielnie do szkoły, odprowadza je babcia.',
+    'Osoby poruszające się na wózkach inwalidzkich mogą korzystać z windy.',
+    'Każdy, kto porusza się na wózku inwalidzkim, może skorzystać z podjazdu.',
+    'Usługi opiekuńcze obejmują pomoc w czynnościach dnia codziennego.',
+    'Świadczenie pielęgnacyjne przysługuje, jeżeli dziecko wymaga stałej opieki.',
+    'Ocena w skali Barthel 0-40 pkt uprawnia do świadczenia.',
+    'Wyroby medyczne, w tym pieluchomajtki, są refundowane przez NFZ na zlecenie lekarza.',
+    'Inspektor porusza się z pomocą nawigacji po terenie gminy.',
+    'Pracownik porusza się po budowie samochodem służbowym.',
+  ]);
+});
+
+test('Seria 3: stan funkcjonalny w bardzo długim wierszu ze spacjami ma koszt liniowy', () => {
+  const unit = 'Pan jest      porusza  się      wymaga     nie   ';
+  const t1 = performance.now();
+  redactPII(unit.repeat(2000));
+  const a = performance.now() - t1;
+  const t2 = performance.now();
+  redactPII(unit.repeat(8000));
+  const b = performance.now() - t2;
+  expect(b).toBeLessThan(Math.max(a * 8, 400));
+});
+
+test('Seria 3: stan funkcjonalny ze sprzętem, samoobsługą i zmysłami w nowych sformułowaniach znika', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    ['Pani Anna Nowak porusza się po domu przy balkoniku.', `Pani ${N} ${H}.`],
+    ['Pan Jan Kowalski porusza się z trudem, przy pomocy kuli.', `Pan ${N} ${H}.`],
+    ['Wnioskodawca porusza się o dwóch kulach.', `Wnioskodawca ${H}.`],
+    ['Ojciec porusza się na wózku elektrycznym.', `Ojciec ${H}.`],
+    ['Pani Anna Nowak porusza się z pomocą kul łokciowych.', `Pani ${N} ${H}.`],
+    ['Pani Anna Nowak przemieszcza się wyłącznie z pomocą drugiej osoby.', `Pani ${N} ${H}.`],
+    ['Badana porusza się o lasce, chód niepewny.', `Badana ${H}, chód niepewny.`],
+    ['Podopieczny jest niesamodzielny w zakresie samoobsługi.', `Podopieczny jest ${H}.`],
+    ['Mieszkaniec pokoju 5 jest całkowicie niesamodzielny, karmiony przez sondę.', `Mieszkaniec pokoju 5 jest ${H}, ${H}.`],
+    ['Matka wymaga pomocy w poruszaniu się po mieszkaniu.', `Matka ${H} po mieszkaniu.`],
+    ['Matka jest niesamodzielna i wymaga stałej opieki.', `Matka jest ${H} i ${H}.`],
+    ['Pan Jan Kowalski w skali Barthela uzyskał 30 pkt.', `Pan ${N} ${H}.`],
+    ['Pani Anna Nowak ma znacznie ograniczoną zdolność do samodzielnej egzystencji.', `Pani ${N} ma ${H}.`],
+    ['Pan Jan Kowalski nie jest w stanie samodzielnie się ubrać ani umyć.', `Pan ${N} ${H}.`],
+    ['Syn nie potrafi samodzielnie chodzić.', `Syn ${H}.`],
+    ['Córka nie słyszy i nie mówi.', `Córka ${H}.`],
+    ['Dziadek jest przykuty do łóżka.', `Dziadek jest ${H}.`],
+    ['Babcia nie wstaje z łóżka od czasu złamania szyjki kości udowej.', `Babcia ${H} od czasu ${H}.`],
+    ['Mieszka z matką, która jest leżąca od czasu udaru.', `Mieszka z matką, która jest ${H}.`],
+    ['Mam córkę, która jest niewidoma.', `Mam córkę, która jest ${H}.`],
+    ['Mama ma wyłonioną urostomię.', `Mama ma wyłonioną ${H}.`],
+    ['Pacjentka wymaga tlenoterapii domowej.', `Pacjentka ${H}.`],
+    ['Pani Anna Nowak jest osobą leżącą... od trzech lat.', `Pani ${N} jest ${H}... od trzech lat.`],
+  ]);
+});
+
+test('Seria 3: stan funkcjonalny tylko przy człowieku i ze zdrowiem: rzecz, małe dziecko, sprzęt innego rodzaju, inna sprawa, zdanie ogólne i skala zostają', () => {
+  const noHealth = (texts: string[]): void => {
+    for (const t of texts) expect(redactPII(t).redacted, t).not.toContain('[DANE O ZDROWIU]');
+  };
+  noHealth([
+    // podmiot nie jest człowiekiem
+    'Zabytek wymaga stałej opieki i nadzoru.',
+    'Zabytkowy park wymaga stałej opieki.',
+    'Kościół wymaga stałej opieki i nadzoru.',
+    'Ogród wymaga stałej opieki ogrodnika.',
+    'Pies wymaga stałej opieki weterynaryjnej.',
+    'Projekt wymaga stałej opieki merytorycznej koordynatora.',
+    'Strona internetowa wymaga stałej opieki administratora.',
+    'Mieszkanie wymaga stałej pomocy przy utrzymaniu czystości.',
+    'Stanowisko wymaga stałej pomocy innych pracowników przy rozładunku.',
+    'Stowarzyszenie nie jest w stanie samodzielnie funkcjonować bez wolontariuszy.',
+    'Rodzina wymaga stałej pomocy asystenta rodziny.',
+    // opieka z wieku dziecka, z nieznajomości języka, przy remoncie, nad dziećmi
+    'Małoletni syn wymaga stałej opieki matki, dlatego Pani Anna Nowak nie podjęła pracy.',
+    'Dziecko w wieku 2 lat wymaga stałej opieki.',
+    'Córka (3 lata) wymaga całodobowej opieki, żłobek nie ma miejsc.',
+    'Pan Jan Nowak wymaga stałej pomocy w sprawach urzędowych, bo nie zna języka polskiego.',
+    'Pani Anna Nowak potrzebuje stałej opieki nad dziećmi w czasie pracy zmianowej.',
+    'Pani Anna Nowak potrzebuje stałej pomocy w opiece nad trójką dzieci.',
+    'Pan Jan Kowalski wymaga stałej pomocy w prowadzeniu gospodarstwa domowego po wyjeździe żony.',
+    'Wnioskodawca wymaga pomocy osób trzecich przy remoncie mieszkania.',
+    'Pan Jan Kowalski potrzebuje pomocy innych osób przy przeprowadzce.',
+    'Pani Anna Nowak wymaga pomocy przy kąpieli dzieci, bo mąż pracuje za granicą.',
+    'Pani Anna Nowak wymaga pomocy przy myciu okien.',
+    'Stażystka jest niesamodzielna i wymaga stałej pomocy innych osób przy obsłudze klienta.',
+    // zdanie ogólne, definicja, procedura, warunek, pytanie
+    'Osoba niesamodzielna to osoba, która z powodu stanu zdrowia wymaga stałej pomocy w czynnościach dnia codziennego.',
+    'Lekarz orzecznik ocenia, czy badany wymaga stałej lub długotrwałej opieki i pomocy innej osoby.',
+    'Pierwszeństwo ma kandydat, który wymaga stałej opieki i pomocy osób trzecich.',
+    'Wniosek może złożyć opiekun osoby, która jest leżąca i wymaga całodobowej opieki.',
+    'Gdy podopieczny wymaga karmienia przez PEG, opiekun przechodzi szkolenie.',
+    'Nauczycielka jest niedosłysząca? Nie wiem, pytam tylko o procedurę.',
+    // sprzęt innego rodzaju
+    'Pan Jan Nowak porusza się na wózku golfowym po terenie ośrodka.',
+    'Pan Jan Nowak porusza się na wózku akumulatorowym w hali.',
+    'Pan Jan Nowak jeździ na wózku ręcznym w magazynie.',
+    'Babcia chodzi z laską trekkingową po górach.',
+    'Ksiądz chodzi z laską pasterską w procesji.',
+    'Ratownik chodzi z kulami ratunkowymi po plaży.',
+    'Pan Jan Nowak chodzi z kulami do kręgielni w każdy czwartek.',
+    'Pani Anna Nowak porusza się na wózku elektrycznym marki Kaabo.',
+    'Pan Jan Nowak porusza się z pomocą drugiej osoby w trudnym terenie podczas szkolenia survivalowego.',
+    // niesamodzielność w innej dziedzinie, norma rozwojowa, cel i czas
+    'Pan Jan Nowak jest osobą niesamodzielną finansowo.',
+    'Pani Anna Nowak jest osobą niesamodzielną mieszkaniowo, mieszka u rodziców.',
+    'Pracownik jest całkowicie niesamodzielny w obsłudze programu Płatnik.',
+    'Dziecko nie chodzi samodzielnie, bo ma dopiero 10 miesięcy.',
+    'Pan Jan Nowak nie wstaje z łóżka przed dziesiątą, bo pracuje na nocną zmianę.',
+    'Pan Jan Kowalski nie mówi i nie chodzi na zebrania wspólnoty.',
+    'Pracownik nie mówi i nie chodzi na zebrania.',
+    'Pan Jan Nowak nie mówi, nie chodzi na zebrania i nie odbiera telefonów.',
+    'Świadek nie widzi i nie słyszy niczego z balkonu.',
+    'Dziecko nie potrafi samodzielnie chodzić do szkoły, bo droga jest niebezpieczna.',
+    // grupa w celowniku, skala oceny
+    'Pani Anna Nowak jest wolontariuszką i pomaga osobom niewidomym w zakupach.',
+    'Pomagamy osobom niewidomym i słabowidzącym w dotarciu do urzędu.',
+    '| Lp. | Kategoria | Punkty |\n| 1 | osoba leżąca | 0 |\n| 2 | porusza się przy balkoniku | 1 |',
+    'Komisja ocenia samodzielność: osoba leżąca – 0 pkt, osoba chodząca – 2 pkt.',
+  ]);
+});
+
+test('Seria 3: stan funkcjonalny ze sprzętem, opieką i łańcuchem „nie …” na długim powtórzeniu ma koszt liniowy', () => {
+  for (const unit of ['Pan Nowak porusza się z trudem, po domu bardzo wolno przy ', 'Matka nie mówi, nie chodzi, nie siedzi, ', 'wymaga stałej i długotrwałej opieki lub pomocy innej osoby przy myciu, ubieraniu i ']) {
+    const t1 = performance.now();
+    redactPII(unit.repeat(1000));
+    const a = performance.now() - t1;
+    const t2 = performance.now();
+    redactPII(unit.repeat(4000));
+    const b = performance.now() - t2;
+    expect(b).toBeLessThan(Math.max(a * 8, 400));
+  }
+});
+
+test('Seria 3: sprzęt i zabieg przy posiadaczu albo pacjencie znikają, a ten sam sprzęt jako towar, dostawa i przedmiot pracy zostaje', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    ['Pani Genowefa Lis nosi pieluchomajtki z powodu nietrzymania moczu.', `Pani ${N} nosi ${H} z powodu nietrzymania moczu.`],
+    ['Wnioskodawczyni stosuje tlenoterapię domową.', `Wnioskodawczyni stosuje ${H}.`],
+    ['Pan Jan Nowak ma założony cewnik.', `Pan ${N} ma założony ${H}.`],
+    ['Pani Anna Nowak korzysta z worków stomijnych.', `Pani ${N} korzysta z ${H}.`],
+    ['Pacjentka jest na tlenoterapii domowej.', `Pacjentka jest na ${H}.`],
+  ]);
+  const noHealth = (texts: string[]): void => {
+    for (const t of texts) expect(redactPII(t).redacted, t).not.toContain('[DANE O ZDROWIU]');
+  };
+  noHealth([
+    'Osoba do kontaktu: Anna Nowak. Przedmiot zamówienia: worki stomijne i cewniki urologiczne.',
+    'Pani Nowak odpowiada za zakup pieluchomajtek dla mieszkańców.',
+    'Pan Jan Kowalski z firmy MedPol dostarczył 200 cewników i pieluchomajtki do magazynu.',
+    'Pani Nowak, magazynierka, przyjęła dostawę cewników i worków stomijnych.',
+    'Pielęgniarka Anna Nowak wymienia cewniki mieszkańcom zgodnie z harmonogramem.',
+    'Opiekunka środowiskowa Anna Nowak wykonuje czynności przy osobach leżących, w tym zmianę pieluchomajtek.',
+    'Pan Kowalski przekazał tlenoterapię domową do rozliczenia z NFZ.',
+    'Pacjentka cewnika nie miała; pielęgniarka przyniosła cewnik do gabinetu zabiegowego.',
+    'Pani Nowak ma zamówić cewnik dla oddziału.',
+    'Kierownik Jan Nowak zatwierdził przetarg na pieluchomajtki i worki stomijne.',
+  ]);
+});
+
+test('Seria 3: niemożność samoobsługi z dopełnieniem spoza domu i „poruszanie się po” miejscu bez sygnału zdrowia zostają, a przestrzeń domowa i przyczyna medyczna dalej znikają', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    ['Matka nie jest w stanie samodzielnie poruszać się po mieszkaniu.', `Matka ${H} po mieszkaniu.`],
+    ['Ojciec nie może samodzielnie wstać z łóżka.', `Ojciec ${H} z łóżka.`],
+    ['Po udarze ojciec nie jest w stanie samodzielnie chodzić po schodach.', `Po udarze ojciec ${H} po schodach.`],
+    ['Pani Anna Nowak nie jest w stanie samodzielnie funkcjonować bez pomocy osób trzecich.', `Pani ${N} ${H} bez pomocy osób trzecich.`],
+    ['Pan Jan Kowalski nie porusza się samodzielnie po mieszkaniu.', `Pan ${N} ${H} po mieszkaniu.`],
+  ]);
+  const noHealth = (texts: string[]): void => {
+    for (const t of texts) expect(redactPII(t).redacted, t).not.toContain('[DANE O ZDROWIU]');
+  };
+  noHealth([
+    'Uczeń nie potrafi samodzielnie funkcjonować w grupie rówieśniczej, często wchodzi w konflikty.',
+    'Stażysta nie potrafi samodzielnie funkcjonować w zespole.',
+    'Pracownik nie może samodzielnie funkcjonować w systemie SAP bez szkolenia.',
+    'Chłopiec nie jest w stanie samodzielnie siedzieć w ławce przez całą lekcję, wierci się.',
+    'Pan Kowalski nie jest w stanie samodzielnie wstać rano bez budzika.',
+    'Pan Kowalski nie jest w stanie samodzielnie wstać o piątej na pociąg.',
+    'Pani Nowak nie może samodzielnie wstać z pracy przed 16:00.',
+    'Uczennica nie potrafi samodzielnie się ubrać po lekcji WF, bo się spieszy.',
+    'Pan Kowalski nie potrafi samodzielnie wstać bez budzika.',
+    'Pani Nowak wymaga pomocy w poruszaniu się po systemie e-PUAP.',
+    'Pani Nowak potrzebuje pomocy w poruszaniu się po nowym budynku urzędu.',
+    'Pan Kowalski nie porusza się samodzielnie po Warszawie, bo nie zna miasta.',
+    'Pan Kowalski nie chodzi samodzielnie po mieście, gubi się w komunikacji.',
   ]);
 });

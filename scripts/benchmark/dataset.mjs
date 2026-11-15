@@ -1443,6 +1443,19 @@ export function buildDataset() {
   // Przyczyna lub stan w środku odcinka po słowie tematu przerywa temat; „o …” i odbiorcy bez choroby go zostawiają.
   str('Pan Zenon Kruk kończy kurs ćwiczeń usprawniających po udarze mózgu, a Pani Ewa Sroka chodzi na warsztaty ruchowe przy chorobie Parkinsona.', ['Zenon Kruk', 'po udarze mózgu', 'Ewa Sroka', 'chorobie Parkinsona'], ['kurs ćwiczeń usprawniających', 'warsztaty ruchowe przy']);
   str('Lp. | Pracownik | Szkolenie\n1 | Daria Wróbel | kurs pierwszej pomocy przy zawale serca\n2 | Olga Szpak | prelekcja o życiu po udarze mózgu', ['Daria Wróbel', 'Olga Szpak'], ['pierwszej pomocy przy zawale serca', 'prelekcja o życiu po udarze mózgu']);
+  // Stan funkcjonalny osoby z choroby lub niepełnosprawności (wywiad, karta DPS, wniosek o świadczenie).
+  str('Pani Jadwiga Sosna porusza się na wózku inwalidzkim, a jej mąż chodzi o kulach łokciowych i wymaga pomocy przy kąpieli.', ['Jadwiga Sosna', 'porusza się na wózku inwalidzkim', 'chodzi o kulach łokciowych', 'wymaga pomocy przy kąpieli'], ['a jej mąż']);
+  str('Z zaświadczenia wynika, że Pan Edward Cis jest osobą leżącą, karmioną przez PEG, w skali Barthel 10 pkt.', ['Edward Cis', 'osobą leżącą', 'karmioną przez PEG', 'skali Barthel 10'], ['Z zaświadczenia wynika']);
+  str('Syn wnioskodawczyni, Pan Igor Grab, wymaga stałej opieki i pomocy w czynnościach samoobsługowych, ma wyłonioną kolostomię.', ['Igor Grab', 'wymaga stałej opieki i pomocy w czynnościach samoobsługowych', 'kolostomię'], ['Syn wnioskodawczyni']);
+  neg('Operator porusza się na wózku widłowym po hali. Działka leżąca w obrębie Zalesie przylega do drogi. Pomoc w formie usług opiekuńczych przysługuje osobie, która wymaga pomocy innych osób.', ['wózku widłowym', 'Działka leżąca w obrębie', 'wymaga pomocy innych osób']);
+  neg('Na samodzielne stanowisko referenta przyjęto pracownika. Polski Związek Niewidomych prowadzi szkolenie dla osób niewidomych, a dziecko nie chodzi samodzielnie do szkoły.', ['samodzielne stanowisko', 'Polski Związek Niewidomych', 'osób niewidomych', 'nie chodzi samodzielnie do szkoły']);
+  // Stan funkcjonalny tylko przy człowieku i ze zdrowiem: sprzęt bez innego przymiotnika, opieka z sygnałem zdrowia.
+  str('Pan Bogdan Jodła porusza się po domu przy balkoniku, a po udarze wymaga całodobowej opieki; jego żona porusza się o dwóch kulach.', ['Bogdan Jodła', 'porusza się po domu przy balkoniku', 'wymaga całodobowej opieki', 'porusza się o dwóch kulach'], ['jego żona']);
+  neg('Zabytkowy park wymaga stałej opieki. Dziecko w wieku 2 lat wymaga stałej opieki. Ratownik chodzi z kulami ratunkowymi po plaży, a pracownik nie mówi i nie chodzi na zebrania.', ['Zabytkowy park wymaga stałej opieki', 'Dziecko w wieku 2 lat wymaga stałej opieki', 'chodzi z kulami ratunkowymi', 'nie chodzi na zebrania']);
+  // Sprzęt medyczny tylko przy posiadaczu lub pacjencie; jako towar i przedmiot pracy zostaje. Samoobsługa poza domem i „po” miejscu bez zdrowia zostają.
+  str('Pani Wanda Buk nosi pieluchomajtki, a jej wnuk Pan Olaf Grab ma założony cewnik i nie jest w stanie samodzielnie wstać z łóżka.', ['Wanda Buk', 'pieluchomajtki', 'Olaf Grab', 'cewnik', 'nie jest w stanie samodzielnie wstać'], ['a jej wnuk']);
+  neg('Pani Anna Nowak odpowiada za zakup pieluchomajtek, a Pan Jan Kowalski dostarczył 200 cewników i worki stomijne do magazynu.', ['zakup pieluchomajtek', '200 cewników', 'worki stomijne']);
+  neg('Uczeń Jan Nowak nie potrafi samodzielnie funkcjonować w grupie rówieśniczej, a Pani Ewa Lis wymaga pomocy w poruszaniu się po systemie e-PUAP i nie porusza się samodzielnie po Warszawie.', ['nie potrafi samodzielnie funkcjonować w grupie', 'pomocy w poruszaniu się po systemie', 'nie porusza się samodzielnie po Warszawie']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

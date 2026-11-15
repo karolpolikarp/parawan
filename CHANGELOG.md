@@ -639,6 +639,42 @@ działają na GitHubie od chwili wypchnięcia tagów.
   Z „o” albo odbiorcami bez choroby temat zostaje: „prelekcja o życiu po udarze mózgu”, „kurs dla
   opiekunów przy chorobie Parkinsona”, a „kurs pierwszej pomocy przy zawale serca” w wykazie szkoleń
   jak dotąd.
+- **Opis sprawności osoby w wywiadzie, wniosku i karcie DPS znika jako dana o zdrowiu, a opieka
+  nad dzieckiem, zabytkiem czy ogrodem zostaje jawna.** Wcześniej „Pani [IMIĘ I NAZWISKO] porusza
+  się na wózku inwalidzkim”, „porusza się po domu przy balkoniku”, „Pan [IMIĘ I NAZWISKO] jest
+  osobą leżącą” i „wymaga karmienia przez gastrostomię” zostawały jawne, choć mówią o chorobie albo
+  niepełnosprawności tej osoby. Teraz znika sama fraza, a osoba i reszta zdania zostają: „Pani
+  [IMIĘ I NAZWISKO] [DANE O ZDROWIU] po urazie rdzenia kręgowego”, „Ojciec wnioskodawczyni [DANE
+  O ZDROWIU] i [DANE O ZDROWIU]” (chodzi o kulach łokciowych, wymaga pomocy przy kąpieli),
+  „Podopieczny jest [DANE O ZDROWIU]” (niesamodzielny w zakresie samoobsługi). Tak samo znika
+  poruszanie się z trudem przy pomocy kuli albo o dwóch kulach, wózek inwalidzki także elektryczny,
+  osoba leżąca, przykuta do łóżka i niesamodzielna, pomoc w myciu, ubieraniu i poruszaniu się,
+  „nie jest w stanie samodzielnie się ubrać ani umyć”, karmienie przez PEG lub sondę, stomia,
+  pieluchomajtki, cewnik i tlenoterapia domowa przy osobie, która je ma, nosi albo z nich korzysta
+  („Pan [IMIĘ I NAZWISKO] ma założony [DANE O ZDROWIU]”, „korzysta z [DANE O ZDROWIU]”), osoba
+  niewidoma i niesłysząca, „nie słyszy i nie
+  mówi”, wynik w skali Barthel („w skali Barthela uzyskał 30 pkt”) i „znacznie ograniczona zdolność
+  do samodzielnej egzystencji”. Sama „stała opieka” znika tylko przy chorobie, urazie albo innej
+  danej o zdrowiu w tym lub poprzednim zdaniu („Pan [IMIĘ I NAZWISKO] po wylewie [DANE O
+  ZDROWIU]”). Jawne zostają: „Zabytek wymaga stałej opieki i nadzoru”, „Ogród wymaga stałej opieki
+  ogrodnika”, „Dziecko w wieku 2 lat wymaga stałej opieki”, „Pani … potrzebuje stałej opieki nad
+  dziećmi w czasie pracy zmianowej”, „Wnioskodawca wymaga pomocy osób trzecich przy remoncie
+  mieszkania”, „wymaga pomocy przy kąpieli dzieci”, „Pan … porusza się na wózku golfowym”, „Babcia
+  chodzi z laską trekkingową po górach”, „Pan … jest osobą niesamodzielną finansowo”, „Dziecko nie
+  chodzi samodzielnie, bo ma dopiero 10 miesięcy”, „Pan … nie wstaje z łóżka przed dziesiątą”,
+  „Pracownik nie mówi i nie chodzi na zebrania”, „pomaga osobom niewidomym w zakupach”, kategorie
+  skali oceny („| 2 | porusza się przy balkoniku | 1 |”) oraz definicje, warunki i opis procedury
+  („Lekarz orzecznik ocenia, czy badany wymaga stałej opieki”, „Gdy podopieczny wymaga karmienia
+  przez PEG, opiekun przechodzi szkolenie”). Jawny zostaje też sprzęt jako towar albo przedmiot
+  pracy („Przedmiot zamówienia: worki stomijne i cewniki urologiczne”, „odpowiada za zakup
+  pieluchomajtek”, „Pielęgniarka … wymienia cewniki mieszkańcom”, „przekazał tlenoterapię domową do
+  rozliczenia z NFZ”) oraz niesamodzielność poza domem bez choroby w pobliżu: „Uczeń nie potrafi
+  samodzielnie funkcjonować w grupie rówieśniczej”, „nie jest w stanie samodzielnie wstać rano bez
+  budzika”, „wymaga pomocy w poruszaniu się po systemie e-PUAP”, „nie porusza się samodzielnie po
+  Warszawie, bo nie zna miasta”. Przestrzeń domowa dalej znika razem z frazą: „Matka [DANE
+  O ZDROWIU] po mieszkaniu” (nie jest w stanie samodzielnie poruszać się), „Ojciec [DANE O ZDROWIU]
+  z łóżka”. Na trzeciej serii 50 pism (część robocza) wycieków
+  jest 97 zamiast 104 (danych o zdrowiu 46 zamiast 53), bez nowych nadmiarowych zakryć.
 - **Pierwsze wklejone pismo i każda następna zmiana mają wynik od razu.** Parawan przygotowuje
   silnik zaraz po otwarciu pliku, a nie przy pierwszym piśmie. Wcześniej pierwsze przeliczenie
   trwało kilka razy dłużej niż kolejne, a pauza przed następnym rosła od niego do pół sekundy
