@@ -1674,6 +1674,9 @@ function warmEngine(): void {
   if (engineWarm) return;
   engineWarm = true;
   redactPII(EXAMPLE_TEXT);
+  // Znacznik dla pomiaru czasu startu (scripts/perf/start.mjs): aplikacja gotowa, silnik rozgrzany.
+  // Zostaje w pamięci karty, nic nie wysyła i niczego nie zmienia w działaniu.
+  performance.mark('parawan:gotowe');
 }
 
 function update(): void {
@@ -2678,6 +2681,10 @@ initTips();
 // Rozgrzewka silnika (warmEngine) w osobnym zadaniu, czyli po starcie: strona jest już gotowa,
 // a pierwsze wklejenie liczy się tak szybko jak następne.
 setTimeout(warmEngine, 0);
+
+// Znacznik „widać interfejs” dla scripts/perf/start.mjs. Mikrozadanie wykona się zaraz po tym
+// skrypcie, czyli po ostatniej instrukcji startu niżej, a przed rozgrzewką z setTimeout.
+queueMicrotask(() => performance.mark('parawan:ui'));
 
 update();
 
