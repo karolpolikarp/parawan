@@ -135,3 +135,25 @@ testy na własnych zdaniach).
 Część odłożona serii 3 zyskała o połowę mniej wycieków niż robocza (−17% wobec −34%). Rozmiar pliku
 aplikacji: 2 586 975 B przy limicie 2 600 000 B; dalsze reguły muszą być oszczędne albo trzeba
 odchudzić czytnik PDF.
+
+## Po naprawie zdrowia w sprawach świadczeń i oświaty (W5, W6, W8, W14, W1)
+
+Commity `6112854` (temat szkolenia, programu i kampanii zostaje jawny), `a37b448` (stan funkcjonalny),
+`f6f912d` (niepełnosprawność bez stopnia, u krewnego, symbol przyczyny), `586d74b` (osoba podana imieniem
+w przypadku zależnym), `7c76919` (ślad leczenia bez choroby, fraza z wtrąceniem, schorzenie spoza
+słownika po budowie słowa; terapia jako zawód, usługa i temat zostaje jawna).
+
+| zestaw | recall przed | recall po | wycieki | nadmiarowe |
+|---|---:|---:|---:|---:|
+| seria 3, robocza | 91,6% | **94,7%** | 104 → 66 (zdrowie 53 → 15) | 2 / 358 |
+| seria 3, odłożona | 89,8% | **90,9%** | 120 → 107 (zdrowie 47 z 124) | 36 / 340 |
+| seria 2, robocza | 91,4% | **91,6%** | 116 → 113 | 17 / 359 |
+| seria 2, odłożona | 77,6% | **78,1%** | 307 → 299 | 41 / 320 |
+| pierwszy zestaw | 99,5% | 99,5% | 5 | 0 / 117 |
+
+Różnica między częściami jest tu największa: w części roboczej wycieki zdrowia spadły o 72%, w odłożonej
+wycieki ogółem o 11%. Język zdrowia w pismach jest bardzo zróżnicowany, a reguły nadal częściowo trafiają
+w słownictwo pism roboczych. Następny krok dla zdrowia warto projektować na nowej, czwartej serii.
+
+Rozmiar pliku aplikacji: 2 599 852 B przy limicie 2 600 000 B (zapas 148 B). Dalsze reguły wymagają
+decyzji o rozmiarze (lżejszy czytnik PDF albo wyższy limit).
