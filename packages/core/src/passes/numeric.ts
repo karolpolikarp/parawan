@@ -2,6 +2,7 @@
 // Najdłuższe ciągi cyfr idą pierwsze (IBAN 26 → PESEL 11 → NIP 10 → REGON), krótsze potem.
 import { maskAfterLabel, type RedactCtx } from '../context.js';
 import { type PiiType } from '../types.js';
+import { institutionIdAt } from '../guards/institution-address.js';
 import { CURRENCY_CODES, precededByLegalRef, precededByNonPhoneLabel } from '../guards/numbers.js';
 import { isValidCard, isValidIban, isValidNip, isValidPesel, isValidRegon14, isValidRegon9 } from '../validators.js';
 import { countOf, windowMemo } from '../util.js';
@@ -208,8 +209,15 @@ const RE_FOREIGN_FIELD_WORD =
  * Nie scalać z maskAfterLabel: tam etykieta wystarcza, tu decydują jeszcze wiersz etykiety, układ
  * grup i suma kontrolna.
  */
-function maskSpacedAfterLabel(ctx: RedactCtx, re: RegExp, type: PiiType, valid: (d: string) => boolean): void {
+function maskSpacedAfterLabel(
+  ctx: RedactCtx,
+  re: RegExp,
+  type: PiiType,
+  valid: (d: string) => boolean,
+  keep?: (off: number, str: string) => boolean,
+): void {
   ctx.text = ctx.text.replace(re, (m, kw: string, sep: string, val: string, off: number, str: string) => {
+    if (keep?.(off + kw.length + sep.length, str)) return m;
     // Słowa etykiety tylko z tego samego wiersza i tylko opisujące ten numer („PESEL pacjenta:").
     // Pierwsze słowo to sama etykieta.
     if (kw.includes('\n') || kw.split(/\s+/).slice(1).some((w) => RE_FOREIGN_FIELD_WORD.test(w))) return m;
@@ -236,16 +244,30 @@ const RE_NIP = new RegExp(`(?<![\\d])${NIP_VALUE}(?![\\d])`, 'g');
 const RE_NIP_LABELED = labeledRe('nip', NIP_VALUE);
 // Inne grupowanie albo cyfry w kratkach („NIP: 5 2 6 0 2 5 0 2 7 4").
 const RE_NIP_SPACED = spacedLabeledRe('nip', String.raw`(?:PL[- ]?)?\d(?:[ \t|-]{0,3}\d){9}`);
+// NIP i REGON instytucji tuż za jej nazwą i adresem („Gminą Miasta Sanoka, Rynek 1, 38-500 Sanok,
+// NIP …”, „Urzędem Miejskim w Kórniku, pl. …, NIP …, REGON …”) zostają jawne: to dane podmiotu,
+// które urzędnik przepisuje do odpowiedzi. Firma osoby i osoba przed numerem dalej pod maską.
+const institutionId =
+  (ctx: RedactCtx) =>
+  (off: number, str: string): boolean =>
+    institutionIdAt(str, off, ctx.personProbe);
+function maskLabeledUnlessInstitution(ctx: RedactCtx, re: RegExp, type: PiiType): void {
+  const keep = institutionId(ctx);
+  ctx.text = ctx.text.replace(re, (m, kw: string, sep: string, _val: string, off: number, str: string) =>
+    keep(off + kw.length + sep.length, str) ? m : `${kw}${sep}${ctx.hit(type)}`,
+  );
+}
 export function passNip(ctx: RedactCtx): void {
   if (!ctx.on('NIP')) return;
+  const keep = institutionId(ctx);
   // Prefiks „PL" idzie pod maskę razem z numerem; isValidNip i tak liczy tylko cyfry.
-  ctx.text = ctx.text.replace(RE_NIP, (m, offset: number) => {
-    if (precededByLegalRef(ctx.text, offset) || !isValidNip(m)) return m;
+  ctx.text = ctx.text.replace(RE_NIP, (m, offset: number, str: string) => {
+    if (precededByLegalRef(ctx.text, offset) || !isValidNip(m) || keep(offset, str)) return m;
     return ctx.hit('NIP');
   });
   // Silna etykieta: maska mimo złej sumy.
-  maskAfterLabel(ctx, RE_NIP_LABELED, 'NIP');
-  maskSpacedAfterLabel(ctx, RE_NIP_SPACED, 'NIP', isValidNip);
+  maskLabeledUnlessInstitution(ctx, RE_NIP_LABELED, 'NIP');
+  maskSpacedAfterLabel(ctx, RE_NIP_SPACED, 'NIP', isValidNip, keep);
 }
 
 const RE_REGON_LABELED = labeledRe('regon', String.raw`\d{14}|\d{9}`);
@@ -253,15 +275,16 @@ const RE_REGON_SPACED = spacedLabeledRe('regon', String.raw`\d(?:[ \t|-]{0,3}\d)
 export function passRegon(ctx: RedactCtx): void {
   if (!ctx.on('REGON')) return;
   // Bez etykiety tylko 14 cyfr z poprawną sumą; 9 cyfr wymaga etykiety.
-  ctx.text = ctx.text.replace(/(?<![\d])\d{14}(?![\d])/g, (m) => {
-    if (isValidRegon14(m)) {
+  const keep = institutionId(ctx);
+  ctx.text = ctx.text.replace(/(?<![\d])\d{14}(?![\d])/g, (m, offset: number, str: string) => {
+    if (isValidRegon14(m) && !keep(offset, str)) {
       return ctx.hit('REGON');
     }
     return m;
   });
   // Silna etykieta: 9 lub 14 cyfr, maska mimo złej sumy.
-  maskAfterLabel(ctx, RE_REGON_LABELED, 'REGON');
-  maskSpacedAfterLabel(ctx, RE_REGON_SPACED, 'REGON', (d) => (d.length === 14 ? isValidRegon14(d) : isValidRegon9(d)));
+  maskLabeledUnlessInstitution(ctx, RE_REGON_LABELED, 'REGON');
+  maskSpacedAfterLabel(ctx, RE_REGON_SPACED, 'REGON', (d) => (d.length === 14 ? isValidRegon14(d) : isValidRegon9(d)), keep);
 }
 
 // Karta tylko z kontekstem karty: Luhn z prefiksem sieci przechodzi też dla IMEI, EAN, numerów

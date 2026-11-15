@@ -381,6 +381,60 @@ działają na GitHubie od chwili wypchnięcia tagów.
   przy ul. Rynek 14. Pani [IMIĘ I NAZWISKO] przedstawi wniosek.”). Imię i nazwisko
   urzędnika pod nagłówkiem dalej znika. Na trzeciej serii pism (część robocza) nadmiarowych zakryć
   jest 31 zamiast 53, na drugiej 31 zamiast 34, bez nowych wycieków.
+- **Gmina, powiat czy urząd jako strona umowy zostaje jawna razem z adresem, NIP-em i REGON-em,
+  a druga strona dalej znika.** Umowa „zawarta pomiędzy: Gminą Pszczyna, ul. Rynek 2, 43-200
+  Pszczyna, reprezentowaną przez Zastępcę Burmistrza Pszczyny…” zostaje bez zmian (wcześniej „Gminą
+  [MIEJSCOWOŚĆ], [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]”), tak samo „Gminą Miasta Sanoka, Rynek 1,
+  38-500 Sanok, NIP 3871652842”, „Urzędem Miejskim w Kórniku, pl. Niepodległości 1, 62-035 Kórnik,
+  NIP …, REGON …”, „Powiatem Kłodzkim”, „Miastem Stołecznym Warszawa”, „Skarbem Państwa – Starostą
+  Kłodzkim” i „Gmina Kobylnica, ul. …, reprezentowana przez Wójta”. Druga strona umowy znika jak
+  dotąd: „a Panią [IMIĘ I NAZWISKO], [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], NIP [NIP]”, także firma
+  osoby („BK-CATERING [IMIĘ I NAZWISKO], [ADRES], …, NIP [NIP]”, „Szkoła Jazdy Lis, [ADRES]”). Sama
+  „Gmina Kobylnica” nad adresem albo przed nim, bez reprezentanta, dalej liczy się jako część adresu
+  osoby.
+- **Nazwa urzędu w środku wiersza też odsłania jego adres.** Adres zostaje jawny po dwukropku („Do
+  wiadomości: Zarząd Mienia Komunalnego, ul. Jana Klemensa Branickiego 3/5”, „Miejsce składania: Urząd
+  Miejski w Kartuzach, ul. Jana Pawła II 1”), po numerze punktu („4. Starostwo Powiatowe w Wieliczce,
+  Wydział Geodezji, Kartografii i Katastru, ul. Józefa Piłsudskiego 25”), po przecinku („pok. 12, Urząd
+  Miejski w Andrychowie, ul. Rynek 15”), za stanowiskiem urzędnika („[IMIĘ I NAZWISKO], inspektor ds.
+  oświaty, Urząd Gminy Mielnik, ul. Piaskowa 1”), w zdaniu („przekazano do Samodzielnego Publicznego
+  Zakładu Opieki Zdrowotnej w Kole, ul. Szpitalna 1”) i w kolumnie tabeli obok nazwy urzędu („| Urząd
+  Skarbowy w Gliwicach | ul. Góry Chełmskiej 15, Gliwice |”). Rynek bez „ul.” („Rynek 1”) też jest
+  adresem. Adres dalej znika, gdy przed nazwą stoi osoba bez stanowiska („Adresat: [IMIĘ I NAZWISKO],
+  Urząd Gminy Kobylnica, [ADRES]”), gdy osoba stoi w tym samym zdaniu („…, [ADRES], przez Pana [IMIĘ
+  I NAZWISKO]”), w kolumnie adresu ucznia obok szkoły i przy firmie osoby („Zakład Stolarski [IMIĘ
+  I NAZWISKO], [ADRES]”). Na trzeciej serii pism (część robocza) nadmiarowych zakryć jest 16 zamiast
+  31, na drugiej 20 zamiast 31, bez nowych wycieków.
+- **Kolegium odwoławcze, KRUS, straż miejska, biblioteka, centrum pomocy rodzinie i spółka komunalna
+  to też urzędy, w każdym przypadku.** Zostaje jawne „Sprawę skierowano do Samorządowego Kolegium
+  Odwoławczego w Siedlcach, ul. Piłsudskiego 38, 08-110 Siedlce” (wcześniej „… w [MIEJSCOWOŚĆ],
+  [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]”), tak samo „Kasa Rolniczego Ubezpieczenia Społecznego Oddział
+  Regionalny w Rzeszowie, ul. Partyzantów 12”, „Straż Miejska w Bydgoszczy, ul. Bernardyńska 14”,
+  „Gminna Biblioteka Publiczna w Jabłonnej”, „Powiatowe Centrum Pomocy Rodzinie w Sokółce”, „umowa
+  z Miejskim Przedsiębiorstwem Komunikacyjnym sp. z o.o., ul. Kasprzaka 2”, „Przedsiębiorstwo
+  Wodociągów i Kanalizacji”, „Pomiędzy Powiatem Bialskim, …, REGON 030237366” i „W imieniu Gminy
+  Miasta Radomia, ul. Kilińskiego 30, …, NIP 7962839123”.
+- **NIP i adres osoby obok urzędu dalej znikają.** Osoba na liście za urzędem nie dostaje jego
+  statusu: „Urząd Skarbowy w Kole, ul. Toruńska 10, [IMIĘ I NAZWISKO], NIP [NIP]”. Gabinet, studio,
+  zakład usługowy, dom weselny czy centrum urody z samą miejscowością po „w” to działalność osoby,
+  więc znika NIP i adres („Zakład Fryzjerski w Kole, [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], NIP
+  [NIP]”, „Gabinet Weterynaryjny w Kole, [ADRES], …”). Przy instytucie, ośrodku czy przychodni
+  z samą miejscowością znika NIP („Instytut Urody w Kole, ul. Polna 3, NIP [NIP]”). Jawny zostaje
+  NIP szkoły z numerem i spółki komunalnej. W tabeli adres znika, gdy
+  w wierszu przed urzędem stoi osoba albo kolumna nazywa się „Adres zamieszkania” czy „Adres do
+  korespondencji” („| [IMIĘ I NAZWISKO] | Urząd Gminy Mielnik | [ADRES], [KOD-POCZTOWY]
+  [MIEJSCOWOŚĆ] |”), a „mieszkaniec Gminy Kobylnica, [ADRES]” zostaje zakryty.
+- **Słowo z nazwy usługi komunalnej nie robi z firmy osoby urzędu.** Jawna zostaje tylko stała nazwa
+  jednostki, na której nazwa się kończy: „Zakład Gospodarki Komunalnej w Kole, ul. Polna 3”, „Zakład
+  Ubezpieczeń Społecznych Oddział w Kole”, „Przedsiębiorstwo Wodociągów i Kanalizacji”, „Ośrodek Sportu
+  i Rekreacji”, „Dom Kultury”, „Zakład Komunalny w Kole”. Firma z takim słowem w nazwie dalej znika
+  razem z adresem i NIP-em: „Zakład Usług Komunalnych „Czysto”, [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ],
+  NIP [NIP]”, tak samo „Centrum Kultury Fizycznej „Atleta””, „Studio Komunikacji Wizualnej”, „Przychodnia
+  Opieki Zdrowotnej „Rodzina”” i „Zakład Wodociągów i Kanalizacji Usługi”.
+- **Adres osoby w gminie przy jej pełnomocniku dalej znika.** „Skarżąca [IMIĘ I NAZWISKO] (Gmina
+  Kobylnica, [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]), reprezentowana przez adw. [IMIĘ I NAZWISKO]”
+  i „Skarżący [IMIĘ I NAZWISKO]; Gmina Kobylnica, [ADRES], reprezentowany przez radcę prawnego”: gmina
+  jest stroną tylko wtedy, gdy „reprezentowana” zgadza się z nią rodzajem i przed nią nie stoi osoba.
 
 ## v0.47.0 — 2026-11-14
 

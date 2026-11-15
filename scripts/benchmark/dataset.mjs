@@ -1333,6 +1333,28 @@ export function buildDataset() {
   // Adres siedziby kończy zdanie, a następne wymienia stronę; imię po nazwie placówki bez „im.” to osoba.
   str('Zebranie odbędzie się w siedzibie Urzędu Gminy w Baranowie przy ul. Rynek 14. Pani Anna Kot przedstawi wniosek.', ['Anna Kot'], ['ul. Rynek 14']);
   str('Pacjent Szpitala Jana Wróbla przyjęty 3 marca. Uczniowie Szkoły Podstawowej Marii Konopnickiej odwiedzili oddział.', ['Jana Wróbla'], ['Marii Konopnickiej']);
+  // Jednostka samorządu i urząd jako strona umowy w narzędniku: nazwa, adres i NIP jawne, druga strona
+  // (osoba albo jej firma) zakryta. Nazwa instytucji w środku wiersza: po dwukropku, numerze punktu,
+  // za stanowiskiem urzędnika, w zdaniu i w komórce tabeli.
+  str('zawarta pomiędzy:\nGminą Pszczyna, ul. Rynek 2, 43-200 Pszczyna, NIP 6381016402, reprezentowaną przez Burmistrza,\na\nPanią Ewą Mróz, ul. Polna 3, 43-200 Pszczyna, NIP 5260250274', ['Ewą Mróz', 'ul. Polna 3', '5260250274'], ['ul. Rynek 2', '6381016402']);
+  str('Urzędem Miejskim w Kórniku, pl. Niepodległości 1, 62-035 Kórnik, reprezentowanym przez Burmistrza, a Panem Adamem Wilkiem, zamieszkałym przy ul. Leśnej 4, 62-035 Kórnik', ['Adamem Wilkiem', 'ul. Leśnej 4'], ['pl. Niepodległości 1', '62-035 Kórnik, reprezentowanym']);
+  str('Sprawdziła: Marta Ziobro, inspektor ds. oświaty, Urząd Gminy Mielnik, ul. Piaskowa 1.\nDo wiadomości: Zarząd Mienia Komunalnego, ul. Bema 3.', ['Marta Ziobro'], ['ul. Piaskowa 1', 'ul. Bema 3']);
+  str('Adresat: Jan Kowalski, Urząd Gminy Kobylnica, ul. Polna 3', ['Jan Kowalski', 'ul. Polna 3'], ['Urząd Gminy Kobylnica']);
+  neg('45 | 04.11.2026 | Urząd Skarbowy w Gliwicach | ul. Góry Chełmskiej 15, Gliwice | zawiadomienie', ['ul. Góry Chełmskiej 15', 'Gliwice']);
+  neg('Akta przekazano do Samodzielnego Publicznego Zakładu Opieki Zdrowotnej w Kole, ul. Szpitalna 1, 62-600 Koło.', ['ul. Szpitalna 1', '62-600 Koło']);
+  // Osoba na liście za instytucją, działalność osoby z samą miejscowością po „w” i osoba w komórce
+  // tabeli przed urzędem: NIP i adres osoby zakryte. Kolegium, kasa, straż, centrum i przedsiębiorstwo
+  // komunalne to instytucje we wszystkich przypadkach.
+  str('Urząd Skarbowy w Kole, ul. Toruńska 10, 62-600 Koło, Anna Nowak, NIP 6661234567', ['Anna Nowak', '6661234567'], ['ul. Toruńska 10']);
+  str('Zakład Fryzjerski w Kole, ul. Polna 3, 62-600 Koło, NIP 6661234567', ['ul. Polna 3', '62-600', '6661234567'], ['Zakład Fryzjerski']);
+  str('| Imię i nazwisko | Pracodawca | Adres zamieszkania |\n| Jan Kowalski | Urząd Gminy Mielnik | ul. Polna 3, 17-307 Mielnik |', ['Jan Kowalski', 'ul. Polna 3', '17-307'], ['Urząd Gminy Mielnik']);
+  neg('Sprawę skierowano do Samorządowego Kolegium Odwoławczego w Siedlcach, ul. Piłsudskiego 38, 08-110 Siedlce.', ['ul. Piłsudskiego 38', '08-110']);
+  neg('Kopia: Straż Miejska w Bydgoszczy, ul. Bernardyńska 14, 85-029 Bydgoszcz; Powiatowe Centrum Pomocy Rodzinie w Sokółce, ul. Kryńska 14', ['ul. Bernardyńska 14', 'ul. Kryńska 14']);
+  neg('Umowa z Przedsiębiorstwem Gospodarki Komunalnej sp. z o.o. w Żywcu, ul. Kopernika 59, 34-300 Żywiec, NIP 5530002393.', ['ul. Kopernika 59', '5530002393']);
+  // Dziedzina usługi w nazwie firmy osoby („Usług Komunalnych”, „Kultury Fizycznej”, „Komunikacji
+  // Wizualnej”) i osoba przed gminą za nawiasem: adres i NIP zakryte. Stała nazwa jednostki jawna.
+  str('Zakład Usług Komunalnych „Czysto”, ul. Polna 3, 62-600 Koło, NIP 6661234567; Studio Komunikacji Wizualnej, ul. Lipowa 8, NIP 5260250274', ['ul. Polna 3', '6661234567', 'ul. Lipowa 8', '5260250274'], ['Zakład Usług Komunalnych']);
+  str('Skarżąca Anna Nowak (Gmina Kobylnica, ul. Polna 3, 76-251 Kobylnica), reprezentowana przez adw. Piotra Lisa. Uczestnik: Zakład Gospodarki Komunalnej w Kole, ul. Toruńska 10.', ['Anna Nowak', 'ul. Polna 3', '76-251', 'Piotra Lisa'], ['ul. Toruńska 10']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

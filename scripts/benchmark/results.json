@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-11-15T02:50:19.805Z",
+  "generatedAt": "2026-11-15T04:04:26.804Z",
   "seed": 20260704,
   "coreVersion": "0.30.0",
-  "casesTotal": 749,
-  "mustMaskTotal": 1002,
-  "mustKeepTotal": 1313,
+  "casesTotal": 763,
+  "mustMaskTotal": 1026,
+  "mustKeepTotal": 1335,
   "skippedLayers": [
     {
       "name": "core+spacy",
@@ -26,16 +26,16 @@
     {
       "name": "T0+T1 core",
       "desc": "redactPII(): regex, sumy kontrolne i słownik (in-process, offline)",
-      "elapsedMs": 920,
+      "elapsedMs": 923,
       "changedVsCore": null,
-      "recall": 0.9850299401197605,
-      "precision": 0.9992383853769993,
-      "f1": 0.9920832926331757,
+      "recall": 0.9853801169590644,
+      "precision": 0.9992509363295881,
+      "f1": 0.9922670542520167,
       "agg": {
-        "maskTotal": 1002,
-        "maskHit": 987,
-        "keepTotal": 1313,
-        "keepHit": 1312
+        "maskTotal": 1026,
+        "maskHit": 1011,
+        "keepTotal": 1335,
+        "keepHit": 1334
       },
       "perCategory": {
         "osoby-podstawowe": {
@@ -69,19 +69,19 @@
           "recall": 1,
           "precision": 1,
           "f1": 1,
-          "maskTotal": 523,
-          "maskHit": 523,
-          "keepTotal": 378,
-          "keepHit": 378
+          "maskTotal": 547,
+          "maskHit": 547,
+          "keepTotal": 390,
+          "keepHit": 390
         },
         "negatywy": {
           "recall": null,
-          "precision": 0.9983443708609272,
+          "precision": 0.998371335504886,
           "f1": null,
           "maskTotal": 0,
           "maskHit": 0,
-          "keepTotal": 604,
-          "keepHit": 603
+          "keepTotal": 614,
+          "keepHit": 613
         },
         "osoby-rzadkie-ner": {
           "recall": 0.21052631578947367,
@@ -4039,6 +4039,76 @@
         },
         {
           "id": "str-243",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-244",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-245",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-246",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-247",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-284",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-285",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-248",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-249",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-250",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-286",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-287",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-288",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-251",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "str-252",
           "leaked": [],
           "eaten": []
         }

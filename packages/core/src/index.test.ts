@@ -12254,3 +12254,265 @@ test('siedziba w zdaniu: adres kończący zdanie jawny, osoba w następnym zdani
   // Kropka po numerze przed małą literą („3. piętro”) nie kończy zdania: osoba za nią dalej liczy się do zdania.
   expect(redactPII('Zakład usługowy z siedzibą przy ul. Polnej 3. piętro, prowadzi Pan Jan Kowalski.').redacted).not.toContain('ul. Polnej 3');
 });
+test('nazwa instytucji w środku wiersza: po dwukropku, numerze punktu, przecinku, w zdaniu i w komórce tabeli', () => {
+  const keep: Array<[string, string[]]> = [
+    ['Do wiadomości: Zarząd Mienia Komunalnego, ul. Jana Klemensa Branickiego 3/5', ['ul. Jana Klemensa Branickiego 3/5']],
+    ['Miejsce składania: Urząd Miejski w Kartuzach, ul. Jana Pawła II 1, pokój 105.', ['ul. Jana Pawła II 1']],
+    ['Wnioskodawca: Gminny Ośrodek Pomocy Społecznej w Kobylnicy, ul. Główna 20, 76-251 Kobylnica', ['ul. Główna 20', '76-251 Kobylnica']],
+    ['2. Zakład Gospodarki Komunalnej sp. z o.o., ul. Leśna 4, 11-200 Bartoszyce', ['ul. Leśna 4', '11-200 Bartoszyce']],
+    ['Rozprawa: 23.11, godz. 10:00, pok. 12, Urząd Miejski w Andrychowie, ul. Rynek 15.', ['ul. Rynek 15']],
+    [
+      '4. Starostwo Powiatowe w Wieliczce, Wydział Geodezji, Kartografii i Katastru, ul. Józefa Piłsudskiego 25 (aktualizacja)',
+      ['ul. Józefa Piłsudskiego 25'],
+    ],
+    ['45 | 04.11.2026 | Urząd Skarbowy w Gliwicach | ul. Góry Chełmskiej 15, Gliwice | zawiadomienie', ['ul. Góry Chełmskiej 15, Gliwice']],
+    ['Akta przekazano do Samodzielnego Publicznego Zakładu Opieki Zdrowotnej w Kole, ul. Szpitalna 1, 62-600 Koło.', ['ul. Szpitalna 1', '62-600 Koło']],
+    ['Pismo skierowano do Urzędu Skarbowego w Kole, ul. Polna 5. Pani Anna Nowak odebrała je osobiście.', ['ul. Polna 5']],
+  ];
+  for (const [t, parts] of keep) {
+    const r = redactPII(t).redacted;
+    for (const p of parts) expect(r, t).toContain(p);
+  }
+  // Urzędnik w funkcji: miejsce pracy jawne, osoba zakryta.
+  const z = redactPII('Sprawdziła: Marta Ziobro, inspektor ds. oświaty, Urząd Gminy Mielnik, ul. Piaskowa 1, tel. 85 657 40 12').redacted;
+  expect(z).toContain('Urząd Gminy Mielnik, ul. Piaskowa 1');
+  expect(z).not.toContain('Ziobro');
+  // Osoba przed nazwą bez stanowiska, osoba w zdaniu, kolumna adresu osoby i firma osoby: adres zakryty.
+  for (const t of [
+    'Adresat: Jan Kowalski, Urząd Gminy Kobylnica, ul. Polna 3',
+    'Pani Anna Nowak, przedstawicielka, Urząd Gminy Kobylnica, ul. Polna 3',
+    'Jan Kowalski, uczeń Szkoły Podstawowej nr 3, ul. Polna 3, 62-600 Koło',
+    'Pismo skierowano do Urzędu Skarbowego w Kole, ul. Polna 3, przez Pana Jana Nowaka.',
+    'mieszka obok Szkoły Podstawowej nr 3, ul. Polna 3',
+    '| Lp | Imię i nazwisko | Szkoła | Adres |\n| 1 | Jan Kowalski | Szkoła Podstawowa nr 3 | ul. Polna 3 |',
+    '41 | 02.11.2026 | Anna Kowalska | ul. Polna 3, 44-100 Gliwice | wniosek',
+    'Wydział Komunikacji, Jan Nowak, ul. Polna 3',
+    'Zakład Stolarski Nowak, ul. Polna 3, 00-001 Warszawa',
+    'Gmina Kobylnica, ul. Polna 3, 76-251 Kobylnica',
+    'mieszkaniec Gminy Kobylnica, ul. Polna 3',
+  ]) {
+    const r = redactPII(t).redacted;
+    expect(r, t).not.toContain('ul. Polna 3');
+    expect(r, t).not.toMatch(/Kowalsk|Nowak|Jana/u);
+  }
+});
+test('jednostka samorządu i urząd jako strona umowy: nazwa, adres, NIP i REGON jawne, druga strona zakryta', () => {
+  const umowa =
+    'zawarta pomiędzy:\nGminą Pszczyna, ul. Rynek 2, 43-200 Pszczyna, reprezentowaną przez Zastępcę Burmistrza Pszczyny – Pana Jacka Ochmańskiego,\n' +
+    'a\nPanią Ewą Mróz, zamieszkałą w Pszczynie przy ul. Polnej 3, 43-200 Pszczyna, PESEL 85010112345.';
+  const r = redactPII(umowa).redacted;
+  expect(r).toContain('Gminą Pszczyna, ul. Rynek 2, 43-200 Pszczyna, reprezentowaną przez Zastępcę Burmistrza Pszczyny');
+  expect(r).not.toMatch(/Ochmańsk|Mróz|Polnej 3|85010112345/u);
+  const keep: Array<[string, string]> = [
+    [
+      'Gminą Miasta Sanoka, Rynek 1, 38-500 Sanok, NIP 3871652842, reprezentowaną przez Agatę Rusin – Zastępcę Burmistrza Miasta,',
+      'Gminą Miasta Sanoka, Rynek 1, 38-500 Sanok, NIP 3871652842, reprezentowaną',
+    ],
+    [
+      'Urzędem Miejskim w Kórniku, pl. Niepodległości 1, 62-035 Kórnik, NIP 6798339326, REGON 672556487, reprezentowanym przez Burmistrza',
+      'Urzędem Miejskim w Kórniku, pl. Niepodległości 1, 62-035 Kórnik, NIP 6798339326, REGON 672556487',
+    ],
+    ['Gminą Łaszczów, ul. Szkolna 4, 22-650 Łaszczów, reprezentowaną przez Wójta Gminy', 'Gminą Łaszczów, ul. Szkolna 4, 22-650 Łaszczów'],
+    ['Powiatem Kłodzkim, ul. Okrzei 1, 57-300 Kłodzko, reprezentowanym przez Zarząd Powiatu', 'Powiatem Kłodzkim, ul. Okrzei 1, 57-300 Kłodzko'],
+    ['Skarbem Państwa – Starostą Kłodzkim, ul. Okrzei 1, 57-300 Kłodzko,', 'Skarbem Państwa – Starostą Kłodzkim, ul. Okrzei 1, 57-300 Kłodzko'],
+    ['Miastem Stołecznym Warszawa, pl. Bankowy 3/5, 00-950 Warszawa, NIP 5252248481', 'pl. Bankowy 3/5, 00-950 Warszawa, NIP 5252248481'],
+    ['Gmina Kobylnica, ul. Główna 20, 76-251 Kobylnica, reprezentowana przez Wójta', 'Gmina Kobylnica, ul. Główna 20, 76-251 Kobylnica'],
+    ['umowa zawarta z Gminą Pszczyna, ul. Rynek 2, 43-200 Pszczyna, reprezentowaną przez Burmistrza', 'ul. Rynek 2, 43-200 Pszczyna'],
+  ];
+  for (const [t, part] of keep) expect(redactPII(t).redacted, t).toContain(part);
+  // Osoba i firma osoby jako druga strona: adres, NIP i REGON zakryte, także w tym samym wierszu co gmina.
+  const masked: Array<[string, string]> = [
+    [
+      'Gminą Pszczyna, ul. Rynek 2, 43-200 Pszczyna, NIP 6381016402, reprezentowaną przez Burmistrza, a Panią Ewą Mróz, ul. Polna 3, 43-200 Pszczyna, NIP 5260250274',
+      'a Panią [IMIĘ I NAZWISKO], [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], NIP [NIP]',
+    ],
+    [
+      'Skarbem Państwa – Starostą Kłodzkim, ul. Okrzei 1, 57-300 Kłodzko, a Janem Nowakiem, ul. Długa 5, 57-300 Kłodzko, PESEL 85010112345',
+      'a [IMIĘ I NAZWISKO], [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], PESEL [PESEL]',
+    ],
+    ['Jan Nowak, Rynek 5, 38-500 Sanok, NIP 3871652842', '[IMIĘ I NAZWISKO], [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], NIP [NIP]'],
+    ['zam. Rynek 5, 38-500 Sanok', 'zam. [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]'],
+    ['BK-CATERING Anna Nowak, ul. Polna 3, 00-001 Warszawa, NIP 5260250274', 'BK-CATERING [IMIĘ I NAZWISKO], [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], NIP [NIP]'],
+    ['Szkoła Jazdy Lis, ul. Lipowa 8, 20-001 Lublin, NIP 5260250274', 'Szkoła Jazdy Lis, [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], NIP [NIP]'],
+    ['Przychodnia Weterynaryjna Wilk, ul. Polna 3, 00-001 Warszawa, REGON 123456785', '[ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], REGON [REGON]'],
+    [
+      'Zakład Usług Remontowych Jan Kowalski, ul. Polna 3, 00-001 Warszawa, NIP 5260250274',
+      'Zakład Usług Remontowych [IMIĘ I NAZWISKO], [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], NIP [NIP]',
+    ],
+  ];
+  for (const [t, want] of masked) expect(redactPII(t).redacted, t).toContain(want);
+  // Ponowny przebieg nie zmienia wyniku (strona umowy w pseudonimach też jawna).
+  const p = redactPII(umowa, { pseudonyms: true }).redacted;
+  expect(p).toContain('Gminą Pszczyna, ul. Rynek 2, 43-200 Pszczyna');
+  expect(redactPII(r).redacted).toBe(r);
+});
+test('NIP i REGON przy instytucji: osoba na liście za nazwą zostaje zakryta, numer też', () => {
+  // Między nazwą a numerem tylko ulica, kod z pocztą i inne numery; sama miejscowość tylko przed kodem.
+  for (const t of [
+    'Urząd Skarbowy w Kole, ul. Toruńska 10, Jan Kowalski, NIP 6661234567',
+    'Urząd Skarbowy w Kole, ul. Toruńska 10, 62-600 Koło, Anna Nowak, NIP 6661234567, REGON 123456785',
+    'Starostwo Powiatowe w Kłodzku, ul. Okrzei 1, 57-300 Kłodzko, Jan Kowalski, ul. Polna 3, 57-300 Kłodzko, NIP 6661234567',
+    'Spółdzielnia Mieszkaniowa w Kole, ul. Polna 3, Jan Kowalski, ul. Leśna 2, NIP 6661234567',
+    'Gminą Kobylnica, ul. Polna 3, 76-251 Kobylnica, Kowalski, NIP 6661234567',
+    'Gminą Kobylnica, ul. Polna 3, Ewa Lis, NIP 6661234567',
+    'Gminą Kobylnica, ul. Polna 3, Janem Kowalskim, NIP 6661234567',
+    'Gminą Kobylnica, Słupsk, Kowalska, NIP 6661234567',
+    'Urząd Gminy Rybno, ul. Jeziorna 4, Nowak, NIP 6661234567',
+    'Urzędem Gminy Kobylnica, ul. Polna 3, 76-251 Kobylnica, Pani Ewa Lis, NIP 6661234567',
+  ]) {
+    const r = redactPII(t).redacted;
+    expect(r, t).not.toMatch(/6661234567|123456785|Kowalsk|Nowak|Lis(?!\p{L})|Polna 3, 57|Leśna 2/u);
+  }
+  // Instytucja z pocztą we wsi: miejscowość przed kodem dalej jawna razem z numerem.
+  const r = redactPII('Instytut Badawczy Leśnictwa, ul. Braci Leśnej 3, Sękocin Stary, 05-090 Raszyn, NIP 5250008181').redacted;
+  expect(r).toContain('Sękocin Stary, 05-090 Raszyn, NIP 5250008181');
+});
+test('NIP i adres działalności osoby z samą miejscowością po „w” zostają zakryte', () => {
+  for (const t of [
+    'Gabinet Weterynaryjny w Kole, ul. Polna 3, 62-600 Koło, NIP 6661234567',
+    'Studio Urody w Kole, ul. Polna 3, NIP 6661234567',
+    'Instytut Urody w Kole, ul. Polna 3, NIP 6661234567',
+    'Ośrodek Szkolenia Kierowców w Kole, ul. Polna 3, NIP 6661234567',
+    'Zespół Muzyczny w Kole, ul. Polna 3, NIP 6661234567',
+    'Gabinet Stomatologiczny w Kole, ul. Polna 3, 62-600 Koło, NIP 6661234567 (właścicielka Anna Nowak)',
+    'Przychodnia Rodzinna w Kole, ul. Polna 3, NIP 6661234567',
+    'Gabinet Kosmetyczny w Kole, ul. Polna 3, REGON 123456785',
+  ]) {
+    expect(redactPII(t).redacted, t).not.toMatch(/6661234567|123456785|Nowak/u);
+  }
+  // Zakład, centrum, dom i przedsiębiorstwo bez znacznika jednostki publicznej: adres też zakryty.
+  for (const t of [
+    'Zakład Fryzjerski w Kole, ul. Polna 3, 62-600 Koło, NIP 6661234567',
+    'Zakład Pogrzebowy w Kole, ul. Polna 3, 62-600 Koło, NIP 6661234567, właściciel Jan Kowalski',
+    'Zakład Usług Remontowych w Kole, ul. Polna 3, NIP 6661234567',
+    'Jan Kowalski, kierownik, Zakład Usługowy w Kole, ul. Polna 3, 62-600 Koło, NIP 6661234567',
+    'Niepubliczny Zakład Opieki Zdrowotnej w Kole, ul. Polna 3, NIP 6661234567',
+    'Dom Weselny w Kole, ul. Polna 3, 62-600 Koło',
+    'Centrum Urody w Słupsku, ul. Polna 3, 76-200 Słupsk, NIP 6661234567',
+  ]) {
+    const r = redactPII(t).redacted;
+    expect(r, t).not.toMatch(/6661234567|ul\. Polna 3|62-600|76-200|Kowalski/u);
+  }
+  // Szkoła z numerem i spółka komunalna: NIP jednostki jawny.
+  const keep: Array<[string, string]> = [
+    ['Szkoła Podstawowa nr 12 w Radomiu, ul. Gagarina 3, 26-600 Radom, NIP 7962500111', 'ul. Gagarina 3, 26-600 Radom, NIP 7962500111'],
+    ['Zakład Gospodarki Mieszkaniowej w Pile, ul. Kossaka 2, 64-920 Piła', 'ul. Kossaka 2, 64-920 Piła'],
+    [
+      'Umowa zawarta z Przedsiębiorstwem Gospodarki Komunalnej sp. z o.o. w Żywcu, ul. Kopernika 59, 34-300 Żywiec, NIP 5530002393.',
+      'ul. Kopernika 59, 34-300 Żywiec, NIP 5530002393',
+    ],
+  ];
+  for (const [t, part] of keep) expect(redactPII(t).redacted, t).toContain(part);
+});
+test('wiersz tabeli: osoba w komórce przed urzędem albo kolumna adresu zamieszkania zakrywa adres', () => {
+  for (const t of [
+    '| Imię i nazwisko | Pracodawca | Adres zamieszkania |\n| Jan Kowalski | Urząd Gminy Mielnik | ul. Polna 3, 17-307 Mielnik |',
+    '| Kowalski Jan | Starostwo Powiatowe w Kole | ul. Polna 3 | 601 234 567 |',
+    '| Jan Kowalski | Urząd Gminy Mielnik | ul. Polna 3, 17-307 Mielnik |',
+    '| Lp. | Wnioskodawca | Urząd | Adres |\n| 1 | Anna Nowak | Urząd Miasta Kalisza | ul. Polna 3 |',
+    '| Pracownik | Zakład pracy | Adres do korespondencji |\n| --- | --- | --- |\n| Anna Wilk | Starostwo Powiatowe w Pile | ul. Polna 3, 64-920 Piła |',
+  ]) {
+    const r = redactPII(t).redacted;
+    expect(r, t).not.toMatch(/ul\. Polna 3|17-307|64-920|Kowalsk|Nowak|Wilk/u);
+  }
+  // Tabela urzędów bez osoby: adres siedziby jawny.
+  const r = redactPII('| Organ | Adres siedziby |\n| --- | --- |\n| Urząd Stanu Cywilnego w Kutnie | ul. Królewska 3, 99-300 Kutno |').redacted;
+  expect(r).toContain('ul. Królewska 3');
+});
+test('instytucje spoza listy członów i w przypadku zależnym: adres siedziby jawny, adres osoby obok zakryty', () => {
+  const keep: Array<[string, string[]]> = [
+    ['Sprawę skierowano do Samorządowego Kolegium Odwoławczego w Siedlcach, ul. Piłsudskiego 38, 08-110 Siedlce.', ['ul. Piłsudskiego 38', '08-110']],
+    ['2. Kasa Rolniczego Ubezpieczenia Społecznego Oddział Regionalny w Rzeszowie, ul. Partyzantów 12, 35-959 Rzeszów', ['ul. Partyzantów 12', '35-959']],
+    ['Kopia: Straż Miejska w Bydgoszczy, ul. Bernardyńska 14, 85-029 Bydgoszcz', ['ul. Bernardyńska 14', '85-029']],
+    ['Wykonawca: Przedsiębiorstwo Gospodarki Komunalnej w Sanoku, ul. Jana Pawła II 59, 38-500 Sanok', ['ul. Jana Pawła II 59', '38-500']],
+    ['umowa z Miejskim Przedsiębiorstwem Komunikacyjnym sp. z o.o., ul. Kasprzaka 2, 26-600 Radom', ['ul. Kasprzaka 2', '26-600']],
+    ['Informacje: Powiatowe Centrum Pomocy Rodzinie w Sokółce, ul. Kryńska 14, tel. w godzinach pracy.', ['ul. Kryńska 14']],
+    ['Zgłoszenie przyjęła Gminna Biblioteka Publiczna w Jabłonnej, ul. Modlińska 102, 05-110 Jabłonna.', ['ul. Modlińska 102', '05-110']],
+    ['Dostawca: Przedsiębiorstwo Wodociągów i Kanalizacji, ul. Wodna 3, 62-600 Koło', ['ul. Wodna 3']],
+    ['Pismo do Miejskiego Ośrodka Sportu i Rekreacji w Pruszkowie, ul. Bohaterów Warszawy 4, 05-800 Pruszków.', ['ul. Bohaterów Warszawy 4']],
+    ['Pomiędzy Powiatem Bialskim, ul. Brzeska 41, 21-500 Biała Podlaska, REGON 030237366, zwanym dalej Zamawiającym', ['ul. Brzeska 41', '030237366']],
+    ['W imieniu Gminy Miasta Radomia, ul. Kilińskiego 30, 26-600 Radom, NIP 7962839123', ['ul. Kilińskiego 30', '7962839123']],
+    ['Dom Pomocy Społecznej w Kalnicy, ul. Kalnica 1, 38-604 Baligród', ['ul. Kalnica 1', '38-604']],
+  ];
+  for (const [t, parts] of keep) {
+    const r = redactPII(t).redacted;
+    for (const p of parts) expect(r, t).toContain(p);
+  }
+  for (const t of [
+    'mieszkaniec Gminy Kobylnica, ul. Polna 3',
+    'działka położona na terenie Gminy Kobylnica, ul. Polna 3',
+    'Jan Kowalski, Kasa Rolniczego Ubezpieczenia Społecznego, ul. Polna 3',
+    'Kasa Rolniczego Ubezpieczenia Społecznego, Kowalski, ul. Polna 3',
+    'Straż Miejska w Kole, ul. Toruńska 1, Jan Kowalski, ul. Polna 3, NIP 6661234567',
+  ]) {
+    const r = redactPII(t).redacted;
+    expect(r, t).not.toMatch(/ul\. Polna 3|6661234567|Kowalsk/u);
+  }
+});
+test('dziedzina usługi nie robi z firmy osoby jednostki publicznej: adres, NIP i REGON zakryte', () => {
+  const N = 'NIP 6661234567';
+  // Nazwa działalności osoby z wyrazem dziedziny („Kultury”, „Komunikacji”, „Opieki Zdrowotnej”,
+  // „Oczyszczania”, „Usług Komunalnych”) albo z dalszym dopowiedzeniem za stałą nazwą jednostki.
+  for (const t of [
+    `Zakład Usług Komunalnych „Czysto”, ul. Polna 3, 62-600 Koło, ${N}`,
+    'Zakład Usług Komunalnych „Czysto”, ul. Polna 3, 62-600 Koło',
+    `Przedsiębiorstwo Usług Komunalnych JANBUD, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Przedsiębiorstwo Usługowo-Handlowe Komunalnik, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Centrum Kultury Fizycznej „Atleta”, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Dom Kultury Fizycznej i Tańca „Salsa”, ul. Polna 3, 62-600 Koło, ${N}`,
+    'Dom Kultury Fizycznej, ul. Polna 3, 62-600 Koło',
+    `Instytut Kultury Ciała, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Studio Komunikacji Wizualnej, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Agencja Komunikacji Wizualnej, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Szkoła Jazdy Komunikacja, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Ośrodek Szkolenia Kierowców Komunikacja, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Przedsiębiorstwo Oczyszczania „Czysty Dom”, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Gabinet Opieki Zdrowotnej Dla Zwierząt, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Przychodnia Opieki Zdrowotnej „Rodzina”, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Studio Kultury Fizycznej w Kole, ul. Polna 3, 62-600 Koło, ${N}`,
+    `Gabinet Kultury Fizycznej, ul. Polna 3, ${N}`,
+    'Centrum Komunikacji Biznesowej w Kole, ul. Polna 3, REGON 123456785',
+    `Dom Opieki Zdrowotnej „Złota Jesień”, ul. Polna 3, ${N}`,
+    `Centrum Opieki Zdrowotnej, ul. Polna 3, ${N}`,
+    `Zakład Wodociągów i Kanalizacji Usługi, ul. Polna 3, ${N}`,
+    `Przedsiębiorstwo Gospodarki Odpadami „Eko”, ul. Polna 3, ${N}`,
+  ]) {
+    const r = redactPII(t).redacted;
+    expect(r, t).not.toMatch(/ul\. Polna 3|62-600|6661234567|123456785/u);
+  }
+  // Stała nazwa jednostki komunalnej, na której nazwa się kończy: siedziba i numer jawne.
+  const keep: Array<[string, string[]]> = [
+    [`Zakład Gospodarki Komunalnej, ul. Polna 3, 62-600 Koło, ${N}`, ['ul. Polna 3', '6661234567']],
+    ['Zakład Gospodarki Komunalnej w Kole, ul. Polna 3, 62-600 Koło', ['ul. Polna 3', '62-600']],
+    ['Przedsiębiorstwo Wodociągów i Kanalizacji w Kole, ul. Polna 3, 62-600 Koło', ['ul. Polna 3', '62-600']],
+    ['Zakład Ubezpieczeń Społecznych, ul. Polna 3, 62-600 Koło', ['ul. Polna 3', '62-600']],
+    ['Zakład Ubezpieczeń Społecznych Oddział w Kole, ul. Polna 3, 62-600 Koło', ['ul. Polna 3', '62-600']],
+    [`Dom Kultury, ul. Polna 3, 62-600 Koło, ${N}`, ['ul. Polna 3', '6661234567']],
+    ['Centrum Kultury w Kole, ul. Polna 3, 62-600 Koło', ['ul. Polna 3', '62-600']],
+    ['Zakład Komunalny w Kole, ul. Polna 3, 62-600 Koło', ['ul. Polna 3', '62-600']],
+    [`Miejskie Przedsiębiorstwo Komunikacyjne sp. z o.o., ul. Polna 3, 62-600 Koło, ${N}`, ['ul. Polna 3', '6661234567']],
+  ];
+  for (const [t, parts] of keep) {
+    const r = redactPII(t).redacted;
+    for (const p of parts) expect(r, t).toContain(p);
+  }
+});
+test('jednostka samorządu w mianowniku: stroną tylko z reprezentantem zgodnym rodzajem i bez osoby przed nią', () => {
+  // Osoba przed nazwą za nawiasem, średnikiem albo kropką, „reprezentowany” przy gminie: adres i NIP osoby zakryte.
+  for (const t of [
+    'Skarżąca Anna Nowak (Gmina Kobylnica, ul. Polna 3, 76-251 Kobylnica), reprezentowana przez adw. Piotra Lisa.',
+    'Powódka Anna Nowak (Gmina Kobylnica, ul. Polna 3, 76-251 Kobylnica) reprezentowana przez r.pr. Piotra Lisa.',
+    'Wnioskodawca: Jan Kowalski (Gmina Rybno, ul. Polna 3), reprezentowany przez pełnomocnika',
+    'Uczestnik postępowania: Kowalski (Gmina Kobylnica, ul. Polna 3), reprezentowany przez adwokata.',
+    'Skarżący Jan Kowalski; Gmina Kobylnica, ul. Polna 3, 76-251 Kobylnica, reprezentowany przez radcę prawnego.',
+    'Skarżąca Anna Nowak; Gmina Kobylnica, ul. Polna 3, 76-251 Kobylnica, reprezentowana przez radcę prawnego.',
+    'Uczestnik: Jan Kowalski. Gmina Rybno, ul. Polna 3, reprezentowany przez kuratora.',
+    'Skarżąca Anna Nowak (Gmina Kobylnica, ul. Polna 3, NIP 6661234567), reprezentowana przez adw. Lisa',
+  ]) {
+    const r = redactPII(t).redacted;
+    expect(r, t).not.toMatch(/ul\. Polna 3|76-251|6661234567|Nowak|Kowalsk/u);
+  }
+  // Gmina jako strona z reprezentantem w tym samym wierszu: siedziba i NIP jawne.
+  const r = redactPII('Gmina Pszczyna, ul. Rynek 2, 43-200 Pszczyna, NIP 6381016402, reprezentowana przez Burmistrza Pszczyny').redacted;
+  expect(r).toContain('ul. Rynek 2, 43-200 Pszczyna, NIP 6381016402');
+});
