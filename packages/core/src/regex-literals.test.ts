@@ -1,6 +1,6 @@
 // Filtr napisów gwarancji i przeszukiwanie przy nich: wynik zawsze ten sam co zwykłe replace.
 import { expect, test } from 'vitest';
-import { LiteralIndex, literalsPresent, nearSearchable, replaceNear, replaceTracked, requiredLiterals } from './regex-literals';
+import { LiteralIndex, literalsPresent, NearMatcher, nearSearchable, replaceNear, replaceTracked, requiredLiterals } from './regex-literals';
 
 const LETTER = 'a-ząćęłńóśźżA-ZĄĆĘŁŃÓŚŹŻ';
 const WS = String.raw`(?:[ \t]{1,4}|[ \t]{0,4}\r?\n[ \t]{0,8})`;
@@ -128,6 +128,25 @@ test('regex-literals: indeks po zmianach zgadza się z indeksem liczonym od nowa
       for (const re of PATTERNS) {
         if (!index.covers(re)) continue;
         for (let p = 0; p <= text.length; p += 1 + Math.floor(r() * 11)) expect(index.next(re, p)).toBe(fresh.next(re, p));
+      }
+    }
+  }
+});
+
+test('regex-literals: NearMatcher.next(p) to pierwsze trafienie od p, jak exec z lastIndex = p', () => {
+  const r = rng(13);
+  for (let k = 0; k < 200; k++) {
+    const text = randomText(r, 40);
+    for (const re of PATTERNS) {
+      const g = new RegExp(re.source, re.flags.includes('g') ? re.flags : `${re.flags}g`);
+      const near = new NearMatcher(text, re);
+      // rosnące p, jak w pętli exec (stan budżetu przenosi się między wywołaniami)
+      for (let p = 0; p <= text.length; p += 1 + Math.floor(r() * 9)) {
+        g.lastIndex = p;
+        const want = g.exec(text);
+        const got = near.next(p);
+        expect(got?.index ?? -1).toBe(want?.index ?? -1);
+        expect(got?.[0] ?? null).toBe(want?.[0] ?? null);
       }
     }
   }
