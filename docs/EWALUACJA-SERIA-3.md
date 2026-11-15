@@ -115,3 +115,23 @@ nazwiskiem w części lokalnej lub domenie, rachunek strony („na mój rachunek
 Część odłożona serii 3 zyskała o połowę mniej niż robocza (−48% wobec −97%). To ten sam wzorzec
 co przy osobach i zdrowiu w serii 2: część reguł trafia w sformułowania z pism roboczych. Pozostałe
 nadmiarowe w części odłożonej przejrzeć przy następnej serii, bez strojenia do niej.
+
+## Po naprawie numerów i struktury pism (W2, W3, W4, W11, W12)
+
+Commity `0a81552` (uprawnienia i wpisy zawodowe), `dd9c68c` (tabela z „|” bez `---`), `6135d17`
+(inicjały w dekretacji i kolumnie prowadzącego), `09d7dc1` (kotwica dokumentu z wtrąceniem, pole osoby
+w prozie i spłaszczonym formularzu), `2f8d44c` (dwie regresje wykryte pomiarem na serii 2 odłożonej:
+zdrowie w wierszu tabeli, której osobę zakrył przebieg tabel, i inicjały ze statusem „OK” w kolumnie;
+testy na własnych zdaniach).
+
+| zestaw | recall przed | recall po | wycieki | nadmiarowe |
+|---|---:|---:|---:|---:|
+| seria 3, robocza | 87,3% | **91,6%** | 158 → 104 | 2 / 358 |
+| seria 3, odłożona | 87,7% | **89,8%** | 145 → 120 | 36 / 340 |
+| seria 2, robocza | 90,7% | **91,4%** | 125 → 116 | 17 / 359 |
+| seria 2, odłożona | 77,3% | **77,6%** | 311 → 307 | 41 / 320 |
+| pierwszy zestaw | 99,5% | 99,5% | 5 | 0 / 117 |
+
+Część odłożona serii 3 zyskała o połowę mniej wycieków niż robocza (−17% wobec −34%). Rozmiar pliku
+aplikacji: 2 586 975 B przy limicie 2 600 000 B; dalsze reguły muszą być oszczędne albo trzeba
+odchudzić czytnik PDF.
