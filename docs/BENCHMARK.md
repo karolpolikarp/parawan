@@ -1,8 +1,8 @@
 # Benchmark anonimizacji: precision i recall
 
-- **Data uruchomienia:** 2026-11-14
+- **Data uruchomienia:** 2026-11-15
 - **Wersja rdzenia (`anonimizator`):** 0.30.0
-- **Zbiór ewaluacyjny:** 732 syntetycznych zdań (deterministyczny, seed `20260704`), 984 elementów do zamaskowania (mustMask), 1294 elementów do zachowania (mustKeep)
+- **Zbiór ewaluacyjny:** 738 syntetycznych zdań (deterministyczny, seed `20260704`), 987 elementów do zamaskowania (mustMask), 1300 elementów do zachowania (mustKeep)
 - **Reprodukcja:** `npm run build -w anonimizator && node scripts/benchmark/run.mjs`
 
 ## Metodologia
@@ -20,7 +20,7 @@ Wszystkie identyfikatory w zbiorze mają **poprawne sumy kontrolne** policzone w
 (PESEL, NIP, REGON, IBAN mod-97, nr dowodu), a negatywy zawierają m.in. ciągi o celowo
 **błędnych** sumach kontrolnych, które silnik ma zostawić w spokoju.
 
-Liczności kategorii: osoby-podstawowe: 92, osoby-odmiana: 72, osoby-rzadkie: 28, strukturalne: 231, negatywy: 278, osoby-rzadkie-ner: 19, osoby-slownik: 12.
+Liczności kategorii: osoby-podstawowe: 92, osoby-odmiana: 72, osoby-rzadkie: 28, strukturalne: 234, negatywy: 281, osoby-rzadkie-ner: 19, osoby-slownik: 12.
 
 ### Warstwy
 
@@ -33,7 +33,7 @@ Liczności kategorii: osoby-podstawowe: 92, osoby-odmiana: 72, osoby-rzadkie: 28
 
 | Warstwa | Recall (łącznie) | Precision-proxy (łącznie) | F1 | Porażki (przypadki) | Czas | Wynik ≠ core |
 |---|---|---|---|---|---|---|
-| T0+T1 core | 98.5% (969/984) | 99.9% (1293/1294) | 99.2% | 16 | 0.8 s | — |
+| T0+T1 core | 98.5% (972/987) | 99.9% (1299/1300) | 99.2% | 16 | 0.9 s | — |
 
 F1 liczone jako średnia harmoniczna recall i precision-proxy (łącznie po wszystkich kategoriach
 z oboma rodzajami elementów; kategoria „negatywy" nie ma recall, więc nie wchodzi do składowej recall).

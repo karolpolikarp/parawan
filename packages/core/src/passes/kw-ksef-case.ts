@@ -1,7 +1,8 @@
 // Przebiegi numeru KSeF, numeru księgi wieczystej i znaku sprawy. Biegną przed NIP-em
 // i krótszymi detektorami, żeby maskować całe numery, a nie ich fragmenty.
 import { PL_LO, PL_UP } from '../charset.js';
-import { maskAfterLabel, type RedactCtx } from '../context.js';
+import type { RedactCtx } from '../context.js';
+import { isFirstNameLike } from '../dict/names.js';
 import { isValidKw, isValidNip } from '../validators.js';
 
 // Numer KSeF: NIP wystawcy (albo „M" + 9 cyfr) + data + 12 znaków hex (w KSeF 1.0 rozbite 6+6)
@@ -247,9 +248,334 @@ const ZNAK_VALUE =
   `|[A-Za-z0-9${PL_UP}${PL_LO}]+(?:[.\\-/][A-Za-z0-9${PL_UP}${PL_LO}]+)+`;
 const RE_ZNAK_LABELED = new RegExp(`\\b(${ZNAK_LABEL})([ \\t]*:?[ \\t]*)(${ZNAK_VALUE})`, 'gi');
 
+/**
+ * Repertoria sądów, których orzeczenia cytuje się jako linię orzeczniczą: NSA i WSA (OSK, FSK, GSK,
+ * uchwały OPS/FPS/GPS, zażalenia OZ/FZ/GZ, SA/xx, SAB/xx), Sąd Najwyższy (CSK, CSKP, CZP, CNP, UK,
+ * USK, USKP, UZP, PSKP, KK, KZP, PK, Izba Kontroli NSNc/NSNk…), KIO i TSUE (C-…/21, T-…/20). Repertoria sądów
+ * powszechnych (C, Ca, ACa, Nc, Ns, Nsm, RC, RNs, Co, K, W, U, AUa, P, GU…) dotyczą spraw konkretnych
+ * osób, więc ich sygnatura zostaje zakryta także z zapowiedzią cytatu. Wielkość liter ma znaczenie:
+ * dwuliterowe repertoria SN, które wersalikami zlewają się z repertoriami sądów powszechnych
+ * (CZ/Cz, KZ/Kz, CO/Co, KO/Ko, UZ/Uz, PZ/Pz), są pominięte.
+ */
+const RE_CITEABLE_REPERTORY = new RegExp(
+  '^(?:[IVX]{1,4}[ \\t]+(?:OSK|FSK|GSK|OPS|FPS|GPS|OZ|FZ|GZ|OPK|FPK|GPK|CSKP?|CZP|CNPP?|USKP?|UZP|UK|PSKP?|KK|KZP|PK|PZP|NSN\\p{Ll}|NSK|NKRS|(?:SAB?|SO)/\\p{L}{2,3})[ \\t]+\\d' +
+    '|KIO(?:/[A-Z]{2,4})?[ \\t]+\\d|[CTF]-\\d{1,4}/\\d{2})',
+  'u',
+);
+/** Sygnatura Trybunału Konstytucyjnego (bez numeru wydziału): tylko przy „Trybunał”/„TK” w zdaniu. */
+const RE_TK_REPERTORY = /^(?:K|P|SK|U|Kp|Ts|Tw|Pp|Kpt)[ \t]+\d+\/\d{2}/;
+const RE_TK_WORD = /(?<!\p{L})(?:trybuna\p{L}*|TK)(?!\p{L})/iu;
+/** Czasownik tezy z „że” („stwierdził, że”, „uznała przy tym, że”): po nim następuje teza sądu. */
+const THESIS =
+  '(?:wskaz|podkreśl|zauważ|przypomn|przypomin|stwierdz|wyjaśn|uzna|uznaj|przyj|przesądz|zaznacz|akcentuj|orzek|wywi[óo]d)\\p{L}*,?[ \\t]+(?:\\p{L}+[ \\t]+){0,2}?że(?!\\p{L})';
+const RE_THESIS = new RegExp(THESIS, 'iu');
+/** Rodzaj orzeczenia albo sąd w zdaniu („w wyroku z dnia…”, „uchwała SN”, „NSA wyjaśnił”). */
+const RE_RULING_WORD =
+  /(?<!\p{L})(?:wyrok|postanowieni|uchwał|uchwale(?!\p{L})|orzecz|orzek|NSA(?!\p{L})|WSA(?!\p{L})|SN(?!\p{L})|KIO(?!\p{L})|TSUE(?!\p{L})|trybuna)/iu;
+/**
+ * Zapowiedź cytatu w zdaniu z sygnaturą, przed nią albo po niej. Są to zwroty, którymi pismo
+ * urzędowe przywołuje cudze orzeczenie jako argument, a nie dokument z akt: odesłanie („por.”,
+ * „zob.”, „vide”), porównanie („podobnie”, „analogicznie”, „tak też”), linia orzecznicza
+ * („orzecznictwo”, „stanowisko”, „pogląd”, „teza”, „utrwalony”, „wyrażony”, „przyjęty”), przywołanie
+ * („przywołuje”, „powołuje się na”, „odwołuje się do”, „wskazuje na wyrok”, „według”, „wynika z”,
+ * „przedmiotem uchwały”, „wypowiedział się”, „zwrócił uwagę”, „podziela”) oraz czasownik tezy
+ * z „że” („stwierdził, że”, „wyjaśnił, że”, „uznał, że”, „podkreślił, że”, „przesądził, że”).
+ * Samo „m.in.” czy „np.” cytatu nie dowodzi: tak wylicza się też dokumenty w aktach sprawy.
+ */
+const RE_CITE_MARKER = new RegExp(
+  `(?<!\\p{L})(?:${[
+    'por\\.',
+    'zob\\.',
+    'vide',
+    'tak (?:też|samo|również)',
+    'podobnie',
+    'analogicz',
+    'w podobnej sprawie',
+    'w tej kwestii',
+    'na tle',
+    'orzecznictw',
+    'orzecznicz',
+    'stanowisk',
+    'utrwalon',
+    'pogląd',
+    'wyrażon',
+    'przyjęt',
+    'potwierdz',
+    'tez(?:a|y|ie|ę|ą)(?!\\p{L})',
+    'przywoł',
+    'powoł\\p{L}*[ \\t]+się',
+    'odwoł\\p{L}*[ \\t]+się',
+    'według',
+    'wedle',
+    'wynika(?:ją)?[ \\t]+z',
+    'przedmiotem[ \\t]+(?:uchwał|rozważań|analiz|wyrok|orzecz|postanowie)',
+    'wypowiedzia\\p{L}*',
+    'zwr(?:ó|a)ci\\p{L}*[ \\t]+uwag',
+    'zwraca\\p{L}*[ \\t]+uwag',
+    'podziel',
+    'warto[ \\t]+(?:przywoł|wskaz|przytocz)',
+    'przytocz',
+    'wskaz\\p{L}*(?:[ \\t]+należy)?[ \\t]+na[ \\t]+(?:wyrok|uchwał|postanowieni|orzecz|stanowisk|pogląd)',
+    '(?:jak|co)[ \\t]+(?:to[ \\t]+)?(?:już[ \\t]+)?(?:trafnie[ \\t]+|słusznie[ \\t]+)?(?:wskaz|podkreśl|zauważ|stwierdz|wyjaśn|przyj|wynik|zaznacz|potwierdz)',
+    THESIS,
+    'tak(?:[ \\t]*:|[ \\t]+(?:m\\.[ \\t]?in\\.|np\\.|NSA|WSA|SN|TK|KIO|TSUE|sąd|trybuna))',
+  ].join('|')})|(?<!\\p{L})(?:LEX|Legalis|CBOSA|ONSA|OSNC|OSNK|OSNP|OSP|OTK|ZOTSiS)(?!\\p{L})`,
+  'iu',
+);
+/**
+ * Ślad sprawy osoby w zdaniu z sygnaturą (przed albo po niej): zwrot do adresata („pan”, „panie”,
+ * „pani”, „państwo”), rola strony (powód, wnioskodawczyni, ubezpieczony, podatnik, skazany,
+ * małoletni…), rozstrzygnięcie o osobie (uchylił, oddalił, zasądził, przysądził, ukarano, eksmitowano,
+ * ogłoszono upadłość, umieszczenie, uznany za winnego, alimenty, władza rodzicielska, przywrócenie
+ * do pracy), dokument z akt (odpis, przedłożył, załączył, „do akt”, „w aktach”), przedmiot sprawy
+ * („w przedmiocie”, „dotyczący”, „na korzyść”, „na rzecz”, „przeciwko”, „wobec”) i „z powództwa”,
+ * „z wniosku”, „ze skargi”, „w jej sprawie”. Lista nie musi być pełna: jawne zostają tylko
+ * repertoria linii orzeczniczej (RE_CITEABLE_REPERTORY), a nazwa osoby w okolicy zawsze zakrywa.
+ * OWN_ROLES to role i zwrot do adresata bez ogólnego „strona”, które pada też w tezach sądów.
+ */
+const OWN_ROLES = [
+  'pan(?:a|i|ie|u|em|ią|owie)?(?!\\p{L})',
+  'państw',
+  'pańsk',
+  'szanown',
+  'pow(?:ód|oda|odowi|odem|odów|odami|odom|ódk|ódce)',
+  'pozwan',
+  'wnioskodaw',
+  'uczestni[kc]',
+  'oskarżon',
+  'obwinion',
+  'skazan',
+  'ubezpieczon',
+  'odwołując',
+  'dłużni[kc]',
+  'wierzyciel',
+  'podatni[kc]',
+  'płatni[kc]',
+  'skarżąc',
+  'skarżon',
+  'zaskarżon',
+  'pokrzywdzon',
+  'spadkobierc',
+  'spadkodawc',
+  'małoletn',
+  'nieletn',
+];
+const RE_OWN_ROLE = new RegExp(`(?<!\\p{L})(?:${OWN_ROLES.join('|')})`, 'iu');
+const RE_OWN_CASE = new RegExp(
+  `(?<!\\p{L})(?:${[
+    ...OWN_ROLES,
+    'stron(?:a|y|ie|ę|ą|om|ami)?(?!\\p{L})',
+    'uchyl',
+    'oddal',
+    'zasądz',
+    'przysądz',
+    'przyzna',
+    'umorz',
+    'odrzuc',
+    'uniewinni',
+    'skaza',
+    'ukara',
+    'eksmit',
+    'upadłoś',
+    'umieszcz',
+    'winn(?:ym|ego|ą|a)(?!\\p{L})',
+    'aliment',
+    'władz\\p{L}*[ \\t]+rodziciel',
+    'piecz\\p{L}*[ \\t]+zastępcz',
+    'kurator',
+    'przywr(?:ó|a)c\\p{L}*[ \\t]+do[ \\t]+pracy',
+    'stwierdz\\p{L}*[ \\t]+nabyci',
+    'zmieni(?:ł|ła|ło|li|ono|ając|on)',
+    'uwzględni\\p{L}*[ \\t]+(?:skarg|apelac|odwoła|wnios|powództw|zażal|kasac)',
+    'prawomocn',
+    'ponown',
+    'wykonuj',
+    'wykonując',
+    'w wykonaniu',
+    'odpis',
+    'przedłoż',
+    'załącz',
+    'dołącz',
+    'przedstawi(?:ł|ła|ło|li|ono|ając|a(?!\\p{L}))',
+    'przesyła',
+    'przekaza',
+    'doręcz',
+    'do akt',
+    'w aktach',
+    'akt(?:a|ach)?[ \\t]+sprawy',
+    'dot\\.',
+    'dotycz\\p{L}*[ \\t]+(?:\\p{L}+[ \\t]+){0,2}?(?:jej|jego|ich|pan|pani|państw|mnie|moj|nasz|wasz|niniejsz|przedmiotow|tej[ \\t]+spraw)',
+    'w przedmiocie',
+    'na korzyść',
+    'z powództwa',
+    'z wniosku',
+    'z odwołania',
+    'ze skargi',
+    'przeciwko',
+    'wobec',
+    'na rzecz',
+    'zapad\\p{L}*[ \\t]+w[ \\t]+sprawie',
+    'w (?:jej|jego|ich|tej|niniejszej|przedmiotowej|pana|pani|państwa) sprawie',
+  ].join('|')})|(?<!\\p{L})w sprawie(?:[ \\t]+(?:o|z))?[ \\t]*$`,
+  'iu',
+);
+/** „w sprawie Jana Kowalskiego”, „skarga Janiny Pawlak”: nazwa własna po „w sprawie” i „skarga”. */
+const RE_CASE_OF_NAME =
+  /(?<!\p{L})(?:[Ww] sprawie|[Ss]karg\p{L}*)[ \t]+(?:\p{Lu}\p{Ll}|[Pp]an|[Ss]tron|[Ww]nios|[Ss]karżąc)/u;
+/** Zwrot do adresata: „pan”, „pani”, „państwo” bez nazwiska po nim („informuję Panią”, „Szanowna Pani,”). */
+const RE_ADDRESSEE = /(?<!\p{L})(?:[Pp]an(?:a|i|ie|u|em|ią|owie)?|[Pp]aństw\p{L}*|[Ss]zanown\p{L}*)(?!\p{L})(?![ \t]+\p{Lu})/u;
+/** „Pan Kozieł”, „Pani Ewy Wróbel”: osoba nazwana z grzecznościowym zwrotem. */
+const RE_PAN_NAME = /(?<!\p{L})[Pp]an(?:a|i|ie|u|em|ią)?[ \t]+\p{Lu}\p{Ll}/u;
+/** Słowa wiążące zdanie obok z orzeczeniem albo sprawą sądową („Wyrok zapadł…”, „złożyła skargę”). */
+const RE_CASE_LINK =
+  /(?<!\p{L})(?:wyrok|wyrocz|spraw|skarg|sąd|sądz|orzecz|postanowi|uchwał|apelac|kasac|odwoła|wnios|powództw|pozew|pozwu|pozwem)/iu;
+/** Wyraz z wielkiej litery przed następnym wyrazem z wielkiej litery („Tomasza Wrony”, „Ewy Wróbel”). */
+const RE_CAP_PAIR = /(?<!\p{L})(\p{Lu}\p{Ll}+)(?=[ \t\r\n]+\p{Lu}\p{Ll})/gu;
+
+/** Imię (także odmienione) przed wyrazem z wielkiej litery: osoba w okolicy sygnatury. */
+function hasPersonName(s: string): boolean {
+  RE_CAP_PAIR.lastIndex = 0;
+  for (let m = RE_CAP_PAIR.exec(s); m; m = RE_CAP_PAIR.exec(s)) if (isFirstNameLike(m[1])) return true;
+  return false;
+}
+/** Osoba w wycinku: zwrot do adresata, „Pani Nowak”, imię z nazwiskiem, „w sprawie Jana…”. */
+function personNamed(s: string): boolean {
+  return RE_ADDRESSEE.test(s) || RE_PAN_NAME.test(s) || RE_CASE_OF_NAME.test(s) || hasPersonName(s);
+}
+/** Ślad sprawy osoby w zdaniu z sygnaturą: słowo sprawy, rola albo osoba. */
+function ownCase(s: string): boolean {
+  return RE_OWN_CASE.test(s) || personNamed(s);
+}
+/**
+ * Zdanie przed i po zdaniu z sygnaturą: zwrot do adresata albo osoba razem ze słowem sprawy
+ * sądowej („Pani Ewa Wróbel złożyła skargę.”, „Wyrok zapadł ze skargi Pani Ewy Wróbel.”). Sama
+ * osoba bez takiego słowa („Organ zbadał zarzuty Pana Kozła.”) nie wiąże z nią cytatu.
+ */
+function neighbourCase(s: string): boolean {
+  if (RE_ADDRESSEE.test(s)) return true;
+  if (!(RE_PAN_NAME.test(s) || hasPersonName(s) || RE_CASE_OF_NAME.test(s))) return false;
+  return RE_CASE_LINK.test(s);
+}
+
+/** Kandydat na koniec zdania: kropka, wykrzyknik albo pytajnik przed wielką literą. */
+const RE_SENTENCE_STOP = /[.!?](?=[ \t\r\n]+[A-ZĄĆĘŁŃÓŚŹŻ])/gu;
+/**
+ * Skróty, po których kropka nie kończy zdania („z dnia 24 maja 2018 r. Naczelny Sąd…”, „art. 7”,
+ * „Dz. U.”, „sygn.”, „ust.”, „poz.”). Jedna albo dwie litery przed kropką też nie kończą zdania.
+ */
+const ABBREV = new Set<string>(
+  'art ust poz pkt lit sygn akt tj zm późn nr str tzw ww wyd red zał tys mln mld ok godz prof ' +
+    'dr hab inż mgr im ul al pl os św por zob np tj tzn cyt dot ozn sp zw ds wz cdn bm br ub'.split(' '),
+);
+const RE_WORD_BEFORE_DOT = /(\p{L}+)\.$/u;
+/** Pozycje końców zdań w wycinku (indeks znaku po kropce), z pominięciem skrótów. */
+function sentenceStops(s: string): number[] {
+  const out: number[] = [];
+  RE_SENTENCE_STOP.lastIndex = 0;
+  for (let m = RE_SENTENCE_STOP.exec(s); m; m = RE_SENTENCE_STOP.exec(s)) {
+    if (m[0] === '.') {
+      const w = RE_WORD_BEFORE_DOT.exec(s.slice(Math.max(0, m.index - 12), m.index + 1));
+      if (w && (w[1].length <= 2 || ABBREV.has(w[1].toLowerCase()))) continue;
+    }
+    out.push(m.index + 1);
+  }
+  return out;
+}
+/** Granica akapitu: pusty wiersz. Pojedyncze łamanie wiersza (PDF, Word) nie kończy zdania. */
+const RE_PARAGRAPH = /\n[ \t]*\r?\n/g;
+/** Twarde łamanie wiersza dla zapowiedzi cytatu: następny wiersz nie zaczyna się małą literą ani cyfrą. */
+const RE_HARD_NEWLINE = /\n(?![ \t]*[\p{Ll}\d])/gu;
+/** Porównanie z inną sprawą: „por.”, „zob.”, „vide”, „podobnie”, „analogicznie”, „tak też”. */
+const RE_COMPARISON =
+  /(?<!\p{L})(?:por\.|zob\.|vide(?!\p{L})|podobn\p{L}*|analogiczn\p{L}*|tak (?:też|samo|również)|w podobnej sprawie)/iu;
+/** Nawias otwierający cytat („(por. wyrok…”, „(zob. postanowienie…”). */
+const RE_CITE_PAREN = /^\([ \t]*(?:por\.|zob\.|vide|tak|podobnie)/i;
+/** Zasięg wycinka z każdej strony etykiety (zdanie z sygnaturą i zdania obok). */
+const CITE_WINDOW = 300;
+
+function lastMatchEnd(re: RegExp, s: string): number {
+  re.lastIndex = 0;
+  let end = -1;
+  for (let m = re.exec(s); m; m = re.exec(s)) end = m.index + m[0].length;
+  return end;
+}
+function firstMatchIndex(re: RegExp, s: string): number {
+  re.lastIndex = 0;
+  const m = re.exec(s);
+  return m ? m.index : -1;
+}
+
+/**
+ * Sygnatura cytowanego orzeczenia, a nie sprawy osoby. Wszystkie warunki naraz:
+ * 1) repertorium sądu, którego orzeczenia tworzą linię orzeczniczą (NSA, WSA, SN, TK, KIO, TSUE);
+ * 2) w zdaniu z sygnaturą stoi rodzaj orzeczenia albo sąd oraz zapowiedź cytatu, przed sygnaturą
+ *    albo po niej („Sąd X w wyroku …, sygn. akt …, stwierdził, że”);
+ * 3) w zdaniu nie ma śladu sprawy osoby (rola, rozstrzygnięcie o osobie, dokument z akt, zwrot do
+ *    adresata, imię i nazwisko), a w zdaniu przed i po nim nie ma zwrotu do adresata ani imienia
+ *    z nazwiskiem powiązanego ze sprawą („Wyrok zapadł ze skargi …”, „… złożyła skargę”).
+ * Zdanie liczy się do pustego wiersza: łamanie wiersza z PDF-u czy Worda go nie ucina. Nawias
+ * z „por.”/„zob.” zawęża zdanie do siebie („…Pana Zająca … (por. wyrok …)”).
+ */
+function isCitedRuling(t: string, offset: number, end: number, value: string): boolean {
+  const tk = RE_TK_REPERTORY.test(value);
+  if (!tk && !RE_CITEABLE_REPERTORY.test(value)) return false;
+  // Wycinek w granicach akapitu.
+  let wideBefore = t.slice(Math.max(0, offset - CITE_WINDOW), offset);
+  const par = lastMatchEnd(RE_PARAGRAPH, wideBefore);
+  if (par >= 0) wideBefore = wideBefore.slice(par);
+  let wideAfter = t.slice(end, end + CITE_WINDOW);
+  const parA = firstMatchIndex(RE_PARAGRAPH, wideAfter);
+  if (parA >= 0) wideAfter = wideAfter.slice(0, parA);
+  // Zdanie z sygnaturą i po jednym zdaniu z każdej strony.
+  const stopsB = sentenceStops(wideBefore);
+  const curStart = stopsB.length ? stopsB[stopsB.length - 1] : 0;
+  const prevStart = stopsB.length > 1 ? stopsB[stopsB.length - 2] : 0;
+  const stopsA = sentenceStops(wideAfter);
+  const curEnd = stopsA.length ? stopsA[0] : wideAfter.length;
+  const nextEnd = stopsA.length > 1 ? stopsA[1] : wideAfter.length;
+  let before = wideBefore.slice(curStart);
+  let after = wideAfter.slice(0, curEnd);
+  const neighbours = `${wideBefore.slice(prevStart, curStart)} ${wideAfter.slice(curEnd, nextEnd)}`;
+  // Nawias z „por.”/„zob.”: cytat to sam nawias.
+  const paren = before.lastIndexOf('(');
+  const inParen = paren >= 0 && !before.includes(')', paren) && RE_CITE_PAREN.test(before.slice(paren));
+  if (inParen) {
+    before = before.slice(paren);
+    const close = after.indexOf(')');
+    if (close >= 0) after = after.slice(0, close);
+  }
+  // Teza sądu po „stwierdził, że” mówi o prawie, nie o stronie: sprawdzamy w niej tylko osobę
+  // i jej rolę (imię z nazwiskiem, zwrot do adresata, wnioskodawczyni, skarżący), a nie słowa
+  // rozstrzygnięcia („nie mógł odrzucić oferty”, „organ uchyla decyzję”).
+  const thesis = RE_THESIS.exec(after);
+  const afterCore = thesis ? after.slice(0, thesis.index + thesis[0].length) : after;
+  const thesisText = thesis ? after.slice(thesis.index + thesis[0].length) : '';
+  if (ownCase(before) || ownCase(afterCore) || personNamed(thesisText) || RE_OWN_ROLE.test(thesisText))
+    return false;
+  // Porównanie („podobnie”, „por.”, „analogicznie”) mówi o innej sprawie niż ta z pisma, więc osoba
+  // ze zdania obok nie wiąże się z cytatem; w samym zdaniu z sygnaturą ślad osoby dalej zakrywa.
+  if (!inParen && !RE_COMPARISON.test(`${before} ${after}`) && neighbourCase(neighbours)) return false;
+  // Zapowiedź cytatu i rodzaj orzeczenia szukane tylko w wierszu sygnatury i jego miękkich
+  // przedłużeniach: nagłówek pisma w wierszu wyżej cytatu nie zapowiada.
+  const hardB = lastMatchEnd(RE_HARD_NEWLINE, before);
+  const strictBefore = hardB >= 0 ? before.slice(hardB) : before;
+  const hardA = firstMatchIndex(RE_HARD_NEWLINE, after);
+  const strictAfter = hardA >= 0 ? after.slice(0, hardA) : after;
+  const sentence = `${strictBefore} ${strictAfter}`;
+  if (tk && !RE_TK_WORD.test(sentence)) return false;
+  return RE_RULING_WORD.test(sentence) && RE_CITE_MARKER.test(sentence);
+}
+
 // Biegnie wcześnie, żeby zamaskować cały znak, zanim kod pocztowy czy telefon odgryzą jego cyfry.
+// Sygnatura cytowanego orzeczenia zostaje jawna: to podstawa prawna, nie znak sprawy strony.
 export function passZnakSprawy(ctx: RedactCtx): void {
   if (!ctx.on('ZNAK-SPRAWY')) return;
   ctx.text = ctx.text.replace(RE_ZNAK_JRWA, () => ctx.hit('ZNAK-SPRAWY'));
-  maskAfterLabel(ctx, RE_ZNAK_LABELED, 'ZNAK-SPRAWY');
+  ctx.text = ctx.text.replace(
+    RE_ZNAK_LABELED,
+    (m: string, kw: string, sep: string, value: string, offset: number, t: string): string =>
+      /^sygn/i.test(kw) && isCitedRuling(t, offset, offset + m.length, value)
+        ? m
+        : `${kw}${sep}${ctx.hit('ZNAK-SPRAWY')}`,
+  );
 }

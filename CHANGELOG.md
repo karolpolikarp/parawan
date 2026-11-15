@@ -335,6 +335,23 @@ działają na GitHubie od chwili wypchnięcia tagów.
 - **Długie pismo bez kropek z wieloma nazwami chorób nie spowalnia już redakcji.** Wiersz z tysiącami
   nazw chorób, tabela JSON z opisami zdrowia albo długi log z adresami IP i liczbami przechodzi kilka
   do kilkunastu razy szybciej. Wynik redakcji jest taki sam jak wcześniej.
+- **Sygnatura wyroku NSA, WSA, Sądu Najwyższego, TK, KIO albo TSUE, na który urząd się powołuje,
+  zostaje jawna, także po „sygn. akt”.** W uzasadnieniu decyzji czy odpowiedzi na skargę AI widzi
+  teraz, które orzeczenie przywołano: „Stanowisko to potwierdza wyrok NSA z dnia 12 maja 2021 r.,
+  sygn. akt II OSK 2408/18” zostaje bez zmian (wcześniej „sygn. akt [ZNAK-SPRAWY]”), tak samo
+  „WSA w Poznaniu w wyroku …, sygn. akt II SA/Po 1001/19, stwierdził, że…”, „SKO w Rzeszowie odwołuje
+  się do wyroku NSA …”, „Kwestia ta była przedmiotem uchwały siedmiu sędziów NSA …, sygn. akt I FPS
+  1/20”, „(por. wyrok …, sygn. akt KIO 3871/23)”, wyrok TK „sygn. akt K 38/13” i TSUE „sygn. C-615/21”.
+  Zdanie musi zapowiadać cytat przed sygnaturą albo po niej („por.”, „podobnie”, „stanowisko”,
+  „przywołuje”, „według”, „jak wynika z”, „stwierdził, że”). Sygnatura sądu rejonowego, okręgowego
+  i apelacyjnego (C, Ns, Nsm, RC, K, W, U, GU, Co, Ca, ACa, AKa, AUa) dalej znika, bo wskazuje sprawę
+  konkretnej osoby: „Jak wskazał Sąd Rejonowy …, sygn. akt [ZNAK-SPRAWY], władza rodzicielska …”.
+  Znika też sygnatura NSA czy WSA, gdy w tym samym zdaniu jest osoba albo jej sprawa („…, sygn. akt
+  [ZNAK-SPRAWY], skarga Janiny Pawlak była niezasadna”, „Szanowny Panie, jak wskazał NSA …”,
+  rozstrzygnięcie, rola strony, „do akt sprawy przekazano m.in. wyrok …”), także po łamaniu wiersza
+  z PDF-u, oraz gdy zdanie obok łączy osobę z wyrokiem albo skargą („Pani Ewa Wróbel złożyła
+  skargę na decyzję. Jak wskazał WSA …, sygn. akt [ZNAK-SPRAWY], …”). Na trzeciej serii pism (część
+  robocza) nadmiarowych zakryć jest 53 zamiast 64, na drugiej 34 zamiast 37, bez nowych wycieków.
 
 ## v0.47.0 — 2026-11-14
 

@@ -1308,6 +1308,17 @@ export function buildDataset() {
   neg('Pani Nowak otrzymała pismo, Concordia odmówiła. Uczeń otrzymał pochwałę, penicylina była tematem referatu. Urzędnik przyjmuje interesantów i petentów, statyny są w szafce apteczki.', ['Concordia', 'penicylina', 'statyny']);
   neg('W badaniu klinicznym włączono metforminę u 300 pacjentów. Na oddziale włączono enoksaparynę u wszystkich hospitalizowanych. W programie podawano sertralinę 140 uczestnikom. Kontrola NIK: w szpitalu podawano morfinę bez zlecenia.', ['metforminę', 'enoksaparynę', 'sertralinę', 'morfinę']);
 
+  // SYGNATURA CYTOWANEGO ORZECZENIA (seria 3, klasa N2): linia orzecznicza po „sygn. akt” przy
+  // zapowiedzi cytatu zostaje jawna; sprawa osoby i repertorium sądu powszechnego zakryte.
+  neg('Stanowisko to potwierdza wyrok WSA w Gdańsku z dnia 9 marca 2022 r., sygn. akt II SA/Gd 812/21.', ['II SA/Gd 812/21']);
+  neg('Organ uwzględnił stanowisko wyrażone w uchwale Sądu Najwyższego z dnia 26 lutego 2020 r., sygn. akt III CZP 12/19.', ['III CZP 12/19']);
+  str('Nabycie spadku stwierdził Sąd Rejonowy w Kłodzku postanowieniem z dnia 20 maja 2016 r., sygn. akt I Ns 377/16.', ['I Ns 377/16'], ['postanowieniem']);
+  // Wyrok w sprawie strony (rozstrzygnięcie, rola strony) bez zapowiedzi cytatu: sygnatura zakryta.
+  str('NSA wyrokiem z 7 maja 2024 r., sygn. akt I OSK 2210/22, oddalił skargę kasacyjną wnioskodawczyni.', ['I OSK 2210/22'], ['NSA']);
+  // Zapowiedź cytatu po sygnaturze („…, sygn. akt …, stwierdził, że”) i repertorium sądu powszechnego.
+  neg('WSA w Poznaniu w wyroku z dnia 14 kwietnia 2020 r., sygn. akt II SA/Po 1001/19, stwierdził, że opłata adiacencka wymaga ustalenia wzrostu wartości.', ['II SA/Po 1001/19']);
+  str('Jak wskazał Sąd Rejonowy w postanowieniu z dnia 12 marca 2024 r., sygn. akt III Nsm 123/23, władza rodzicielska ojca została ograniczona.', ['III Nsm 123/23'], ['Sąd Rejonowy']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {

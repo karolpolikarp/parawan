@@ -1510,6 +1510,235 @@ test('sygnatura sądowa BEZ kotwicy (cytowane orzecznictwo) NIE jest maskowana',
   const t = 'Orzeczenie w sprawie III CZP 45/22 oraz wyrok I OSK 1122/21.';
   expect(redactPII(t).redacted).toBe(t);
 });
+test('sygnatura cytowanego orzeczenia po „sygn. akt” zostaje jawna, osoba w zdaniu obok zakryta', () => {
+  const jawne = [
+    'Ocena ta odpowiada stanowisku NSA wyrażonemu w wyroku z dnia 12 maja 2021 r., sygn. akt II OSK 2408/18.',
+    'Stanowisko to potwierdza wyrok WSA w Gdańsku z dnia 9 marca 2022 r., sygn. akt II SA/Gd 812/21.',
+    'W podobnej sprawie Wojewódzki Sąd Administracyjny w Rzeszowie w wyroku z dnia 9 grudnia 2021 r., sygn. akt II SA/Rz 1187/21, uznał, że komisja powinna wezwać rodzica.',
+    'Organ uwzględnił stanowisko Trybunału Konstytucyjnego wyrażone w wyroku z dnia 21 października 2014 r., sygn. akt K 38/13.',
+    'Sąd uwzględnił stanowisko wyrażone w uchwale Sądu Najwyższego z dnia 26 lutego 2020 r., sygn. akt III CZP 12/19, dotyczącej spadku.',
+    'Zob. wyrok TSUE z dnia 1 października 2019 r., sygn. C-673/17.',
+    'Potwierdza to m.in. w wyroku NSA z dnia 8 listopada 2018 r., sygn. akt I OSK 2213/17, oraz w wyroku WSA w Gdańsku z dnia 21 czerwca 2023 r., sygn. akt II SAB/Gd 54/23.',
+  ];
+  for (const t of jawne) expect(redactPII(t).redacted).toBe(t);
+  // Nawias z „por.” zawęża zdanie: zwrot „Pana” poza nawiasem nie czyni cytatu sprawą strony.
+  const kio = redactPII(
+    'Na pytanie Pana Jana Zająca odpowiedziano, że wagi kryteriów nie mogły się zmienić (por. wyrok z 12 stycznia 2024 r., sygn. akt KIO 3871/23).',
+  ).redacted;
+  expect(kio).toContain('sygn. akt KIO 3871/23');
+  expect(kio).not.toContain('Zająca');
+  const nsa = redactPII(
+    'Stanowisko to potwierdza wyrok NSA z dnia 12 marca 2020 r., sygn. akt I OSK 2087/19. Świadczenie pobrał Jan Kowalski, PESEL 44051401359.',
+  ).redacted;
+  expect(nsa).toContain('I OSK 2087/19');
+  expect(nsa).not.toContain('Kowalski');
+  expect(nsa).not.toContain('44051401359');
+});
+test('sygnatura sprawy strony po „sygn.” dalej zakryta, także przy wyroku i postanowieniu', () => {
+  const zakryte: [string, string][] = [
+    ['Sygn. akt: I C 123/24', 'I C 123/24'],
+    ['Sygn. akt II SA/Kr 123/24', 'II SA/Kr 123/24'],
+    ['Był uprzednio karany wyrokiem Sądu Rejonowego w Ostródzie z dnia 8 czerwca 2022 r., sygn. II K 512/21, za kradzież.', 'II K 512/21'],
+    ['Nabycie spadku stwierdził Sąd Rejonowy w Krakowie postanowieniem z 18 listopada 2024 r., sygn. akt I Ns 1542/24.', 'I Ns 1542/24'],
+    ['Wyrokiem Sądu Rejonowego w Gnieźnie z dnia 14 lutego 2024 r., sygn. akt III RC 212/23, zasądzono alimenty.', 'III RC 212/23'],
+    ['Wyrokiem z dnia 3 marca 2024 r., sygn. akt II SA/Kr 123/24, WSA w Krakowie uchylił zaskarżoną decyzję Wójta.', 'II SA/Kr 123/24'],
+    ['WSA w wyroku z dnia 3 marca 2024 r., sygn. akt II SA/Kr 123/24, oddalił Pana skargę.', 'II SA/Kr 123/24'],
+    ['Dotyczy: wyroku WSA w Krakowie z dnia 3 marca 2024 r., sygn. akt II SA/Kr 123/24', 'II SA/Kr 123/24'],
+    ['Informuję, że w sprawie o sygn. akt I C 123/24 wyznaczono termin rozprawy.', 'I C 123/24'],
+    ['Wyrok NSA w sprawie o sygn. II OSK 12/20 zapadł w Pani sprawie.', 'II OSK 12/20'],
+    ['Sprawa toczy się przed Sądem Rejonowym w Nowym Sączu pod sygn. akt II W 1432/26.', 'II W 1432/26'],
+  ];
+  for (const [t, sygn] of zakryte) {
+    const r = redactPII(t).redacted;
+    expect(r, t).toContain('[ZNAK-SPRAWY]');
+    expect(r, t).not.toContain(sygn);
+  }
+});
+test('wyrok w sprawie strony (rozstrzygnięcie, wykonanie, rola strony) bez zapowiedzi cytatu: sygnatura zakryta', () => {
+  // Samo repertorium sądu (OSK, SA/Kr, ACa, AUa, USK) nie dowodzi cytatu: w piśmie ZUS, SKO czy
+  // gminy to zwykle własna sprawa strony. Jawność tylko przy zapowiedzi cytatu i bez śladu strony.
+  const zakryte: [string, string][] = [
+    ['Wnioskodawczyni przedłożyła wyrok SA w Gdańsku z dnia 3 marca 2023 r., sygn. akt III AUa 456/22, przyznający jej rentę rodzinną.', 'III AUa 456/22'],
+    ['W wykonaniu wyroku SA w Lublinie z dnia 3 marca 2024 r., sygn. akt III AUa 1234/23, Zakład przyznaje ubezpieczonej Annie Nowak emeryturę.', 'III AUa 1234/23'],
+    ['Wykonując wyrok WSA w Krakowie z dnia 3 marca 2024 r., sygn. akt II SA/Kr 123/24, Kolegium ponownie rozpatrzyło odwołanie Jana Kowalskiego.', 'II SA/Kr 123/24'],
+    ['Wyrokiem WSA w Warszawie z dnia 3 marca 2024 r., sygn. akt VIII SA/Wa 321/24, uwzględniono skargę Jana Kowalskiego na decyzję Burmistrza.', 'VIII SA/Wa 321/24'],
+    ['Sąd przesyła odpis wyroku z dnia 3 marca 2024 r., sygn. akt I ACa 123/24, wydanego w sprawie z powództwa Jana Kowalskiego.', 'I ACa 123/24'],
+    ['Sąd Najwyższy wyrokiem z dnia 3 marca 2024 r., sygn. akt V KK 12/24, uniewinnił Jana Kowalskiego.', 'V KK 12/24'],
+    ['Nadpłata zostanie zwrócona zgodnie z wyrokiem WSA w Krakowie z dnia 3 marca 2024 r., sygn. akt I SA/Kr 66/24, na rachunek podatnika.', 'I SA/Kr 66/24'],
+    ['Wyrok w sprawie pana Jana Kowalskiego, sygn. akt II SA/Po 55/24, jest prawomocny.', 'II SA/Po 55/24'],
+    ['W wyroku SA w Lublinie z dnia 3 marca 2024 r., sygn. akt I ACa 12/24, pani Anna Nowak uzyskała zadośćuczynienie.', 'I ACa 12/24'],
+    ['WYROK W IMIENIU RZECZYPOSPOLITEJ POLSKIEJ sygn. akt I ACa 123/24 Sąd Apelacyjny w Krakowie z powództwa Jana Kowalskiego', 'I ACa 123/24'],
+    ['Wyrok z dnia 5 maja 2024 r. Sygn. akt I ACa 123/24. Sąd Apelacyjny w Krakowie po rozpoznaniu apelacji', 'I ACa 123/24'],
+    ['Postanowienie z dnia 5 maja 2024 r., sygn. akt III CZP 77/24 w sprawie z wniosku Jana Kowalskiego', 'III CZP 77/24'],
+    ['Wyrok wydany pod sygn. akt II AKa 12/24 wobec Jana Kowalskiego.', 'II AKa 12/24'],
+    ['Pan Jan Kowalski wniósł skargę kasacyjną. W wyroku NSA z dnia 3 marca 2024 r., sygn. akt II OSK 1/24, sąd oddalił skargę kasacyjną.', 'II OSK 1/24'],
+    ['Organ wskazuje (por. wyrok SA w Krakowie z dnia 3 marca 2024 r., sygn. akt I ACa 900/23, wydany w sprawie powoda Jana Kowalskiego).', 'I ACa 900/23'],
+    ['Wojewódzki Sąd Administracyjny w Krakowie wyrokiem z dnia 12 marca 2024 r., sygn. akt II SA/Kr 1501/23, uchylił decyzję Samorządowego Kolegium Odwoławczego.', 'II SA/Kr 1501/23'],
+    ['Rozpatrując ponownie sprawę po wyroku WSA w Lublinie z dnia 5 lutego 2024 r., sygn. akt III SA/Lu 610/23, organ ustalił, że wnioskodawca spełnia warunki.', 'III SA/Lu 610/23'],
+    ['NSA wyrokiem z 7 maja 2024 r., sygn. akt I OSK 2210/22, oddalił skargę kasacyjną wnioskodawczyni.', 'I OSK 2210/22'],
+    ['Organ wykonuje wyrok WSA w Gliwicach z dnia 3 marca 2024 r., sygn. akt II SA/Gl 77/24, którym uchylono decyzję o odmowie przyznania zasiłku.', 'II SA/Gl 77/24'],
+    ['Wyrokiem SA w Lublinie z dnia 3 marca 2024 r., sygn. akt III AUa 301/23, zmieniono decyzję ZUS i przyznano wnioskodawczyni emeryturę.', 'III AUa 301/23'],
+    ['Wyrokiem SA w Krakowie z dnia 3 marca 2024 r., sygn. akt I ACa 77/23, zasądzono od Gminy na rzecz powoda Adama Wrony kwotę 5000 zł.', 'I ACa 77/23'],
+    ['Wnioskodawczyni Maria Lis wskazała na wyrok SN z dnia 3 marca 2024 r., sygn. akt I USK 12/23, wydany w jej sprawie.', 'I USK 12/23'],
+    ['Stanowisko Pana Jana Kowalskiego potwierdza wyrok WSA w Krakowie z dnia 3 marca 2024 r., sygn. akt II SA/Kr 12/24.', 'II SA/Kr 12/24'],
+    ['Podobnie orzekł WSA w Krakowie w sprawie Jana Kowalskiego, w wyroku z dnia 3 marca 2024 r., sygn. akt II SA/Kr 13/24.', 'II SA/Kr 13/24'],
+  ];
+  for (const [t, sygn] of zakryte) {
+    const r = redactPII(t).redacted;
+    expect(r, t).toContain('[ZNAK-SPRAWY]');
+    expect(r, t).not.toContain(sygn);
+  }
+  // Osoba obok zostaje zakryta niezależnie od sygnatury.
+  const r = redactPII('Wyrokiem SA w Krakowie z dnia 3 marca 2024 r., sygn. akt I ACa 77/23, zasądzono na rzecz powoda Adama Wrony kwotę.').redacted;
+  expect(r).not.toContain('Wrony');
+});
+test('cytat z zapowiedzią („potwierdził”, „jak wskazał”, „pogląd”, „organ wskazuje, że”) zostaje jawny', () => {
+  const jawne = [
+    'Na marginesie organ wskazuje, że w wyroku z dnia 15 lutego 2023 r., sygn. akt III SA/Gd 811/22, Wojewódzki Sąd Administracyjny w Gdańsku podkreślił, że decyzja o odroczeniu wymaga oceny opinii poradni.',
+    'Bezczynność organu podlega kontroli sądowej, co potwierdził Naczelny Sąd Administracyjny m.in. w wyroku z dnia 2 grudnia 2021 r., sygn. akt II OSK 123/21.',
+    'Jak wskazał NSA w wyroku z dnia 2 grudnia 2021 r., sygn. akt II OSK 123/21, organ ma obowiązek wyjaśnić stan faktyczny.',
+    'Zgodnie z poglądem wyrażonym w wyroku NSA z dnia 2 grudnia 2021 r., sygn. akt II OSK 123/21, termin ma charakter materialny.',
+  ];
+  for (const t of jawne) expect(redactPII(t).redacted, t).toBe(t);
+});
+test('sygnatura sprawy osoby zakryta mimo zapowiedzi cytatu: repertorium sądu powszechnego, osoba w zdaniu lub obok, akta sprawy', () => {
+  // Jawne zostają tylko repertoria linii orzeczniczej (NSA, WSA, SN, TK, KIO, TSUE). Sygnatura sądu
+  // powszechnego (Nsm, Ns, K, W, GU, RNs, RC, C, U, Co, Ca, ACa, AKa) wskazuje sprawę konkretnej osoby.
+  const zakryte = [
+  'Jak wskazał Sąd Rejonowy w Nowym Sączu w postanowieniu z dnia 12 marca 2024 r., sygn. akt III Nsm 123/23, władza rodzicielska Tomasza Wrony została ograniczona.',
+  'Organ podkreśla, że w postanowieniu z dnia 3 maja 2022 r., sygn. akt I Ns 456/22, Sąd Rejonowy stwierdził nabycie spadku po Janie Kowalskim.',
+  'Organ zauważa, że w wyroku z dnia 4 lipca 2022 r., sygn. akt XIV K 100/22, Michał Duda został uznany za winnego.',
+  'Organ wskazał, że w wyroku z dnia 1 lutego 2024 r., sygn. akt II W 55/24, ukarano Dariusza Michalaka grzywną.',
+  'Podobnie w postanowieniu z dnia 2 marca 2023 r., sygn. akt V GU 12/23, ogłoszono upadłość konsumencką Teresy Kaczmarek.',
+  'Między innymi w postanowieniu z dnia 2 marca 2023 r., sygn. akt III RNs 11/23, sąd zarządził umieszczenie Kamila Wójcika w zakładzie leczniczym.',
+  'Potwierdza to wyrok Sądu Rejonowego w Gnieźnie z dnia 2 marca 2023 r., sygn. akt III RC 45/23, ustalający alimenty na córkę Piotra Nowaka.',
+  'Stanowisko organu potwierdza orzeczenie z dnia 2 marca 2023 r., sygn. akt IV Nsm 12/23, w przedmiocie umieszczenia Oliwii Nowak w pieczy zastępczej.',
+  'Tak też w wyroku z dnia 2 marca 2023 r., sygn. akt I C 777/23 eksmitowano Romana Górę.',
+  'Jak zauważył Sąd Rejonowy w wyroku z dnia 2 marca 2024 r., sygn. akt I C 4/24, Wiktoria Sobczak zajmuje lokal bez tytułu prawnego.',
+  'Jak przyjął Sąd Najwyższy w wyroku z dnia 2 marca 2023 r., sygn. akt I USKP 12/22, świadczenie Karoliny Wiśniewskiej nie przysługuje.',
+  'Jak wskazał WSA w Łodzi w wyroku z dnia 2 marca 2024 r., sygn. akt II SA/Łd 900/23, skarga Janiny Pawlak była niezasadna.',
+  'Jak wskazał NSA w wyroku z dnia 2 marca 2024 r., sygn. akt II OSK 900/23, wydanym po rozpoznaniu skargi Anny Kowalskiej, organ błędnie ustalił stan faktyczny.',
+  'Podobnie orzekł WSA w Krakowie w wyroku z dnia 2 marca 2024 r., sygn. akt II SA/Kr 901/23, wydanym na skutek skargi Wiesława Banasia.',
+  'Szanowny Panie, jak wskazał Sąd w wyroku z dnia 1.01.2024 r., sygn. akt I C 2/24, należność została spłacona.',
+  'Szanowny Panie, jak wskazał NSA w wyroku z dnia 1.01.2024 r., sygn. akt II OSK 2/24, należność została spłacona.',
+  'Jak wskazał WSA w Gliwicach w wyroku z dnia 3 marca 2024 r., sygn. akt II SA/Gl 55/23. Wyrok zapadł w sprawie ze skargi Pani Ewy Wróbel.',
+  'Pani Ewa Wróbel złożyła skargę na decyzję. Jak wskazał WSA w Gliwicach w wyroku z dnia 3 marca 2024 r., sygn. akt II SA/Gl 55/23, decyzja była wadliwa.',
+  'Szanowna Pani, informuję że sprawa toczy się. Jak wskazał Sąd w wyroku z dnia 3 marca 2024 r., sygn. akt I C 3/24, roszczenie jest zasadne.',
+  'Szanowna Pani, informuję że sprawa toczy się. Jak wskazał NSA w wyroku z dnia 3 marca 2024 r., sygn. akt II OSK 3/24, roszczenie jest zasadne.',
+  'Jak wskazał Sąd w postanowieniu z dnia 2 lutego 2023 r., sygn. akt III Nsm 400/22,\nmałoletni Igor Kaczmarczyk pozostaje pod nadzorem kuratora.',
+  'Jak wskazał NSA w wyroku z dnia 2 lutego 2023 r., sygn. akt II OSK 400/22,\nmałoletni Igor Kaczmarczyk pozostaje pod nadzorem kuratora.',
+  'Do akt sprawy przekazano m.in. wyrok Sądu Okręgowego w Krakowie z dnia 3 marca 2024 r., sygn. akt IV U 44/23, dotyczący Krystyny Zając.',
+  'W aktach znajduje się m.in. postanowienie z dnia 3 marca 2024 r., sygn. akt I Co 12/23, o przysądzeniu własności lokalu Janowi Kowalskiemu.',
+  'Według orzecznictwa sądowego, np. wyrok SR w Bochni z dnia 3 marca 2023 r., sygn. akt I C 1/23 dotyczący najmu Jana Mroza.',
+  'Do akt sprawy przekazano m.in. wyrok NSA z dnia 3 marca 2024 r., sygn. akt II OSK 44/23.',
+  'W aktach znajduje się m.in. wyrok WSA w Krakowie z dnia 3 marca 2024 r., sygn. akt II SA/Kr 44/23.',
+  'Jak wskazał NSA w wyroku z dnia 3 marca 2024 r., sygn. akt I OSK 7/24, decyzja dotycząca Pana Adama Nowaka była prawidłowa.',
+  'Organ wskazuje, że w wyroku z dnia 3 marca 2024 r., sygn. akt II SA/Po 7/24, WSA w Poznaniu przywrócił termin Marii Lis.',
+  'Jak stwierdził NSA w wyroku z dnia 3 marca 2024 r., sygn. akt II OSK 8/24, na korzyść skarżącego przemawia stan faktyczny.',
+  'Jak wskazał Sąd Najwyższy w wyroku z dnia 3 marca 2024 r., sygn. akt I PK 8/24, Sąd przywrócił powoda do pracy.',
+  'Stanowisko to potwierdza wyrok SA w Krakowie z dnia 3 marca 2024 r., sygn. akt I ACa 8/24.',
+  'Por. wyrok Sądu Apelacyjnego w Katowicach z dnia 7 grudnia 2017 r., sygn. akt II AKa 401/17.',
+  'Jak wskazał Sąd Okręgowy w wyroku z dnia 3 marca 2024 r., sygn. akt IV U 8/24, ZUS błędnie ustalił kapitał.',
+  'Jak wskazał NSA w wyroku z dnia 3 marca 2024 r., sygn. akt II OSK 9/24, Jan Kowalski nie miał interesu prawnego.',
+  'NSA w wyroku z dnia 3 marca 2024 r., sygn. akt II OSK 5/24, uznał, że skarga kasacyjna wnioskodawczyni jest niezasadna.',
+  'WSA w Krakowie w wyroku z dnia 3 marca 2024 r., sygn. akt II SA/Kr 5/24, stwierdził, że Pan nie wykazał interesu prawnego.',
+  'Jak wskazał NSA w wyroku z dnia 3 marca 2024 r., sygn. akt II OSK 6/24, decyzja wobec Pani była wadliwa.',
+  'Sąd Najwyższy w wyroku z dnia 3 marca 2024 r., sygn. akt II USKP 6/24, przyjął, że ubezpieczona Anna Nowak ma prawo do emerytury.',
+  'Organ powołuje się na wyrok WSA w Krakowie z dnia 3 marca 2024 r., sygn. akt II SA/Kr 7/24, wydany w Pani sprawie.',
+  'Pan Jan Kowalski wskazał na wyrok NSA z dnia 3 marca 2024 r., sygn. akt II OSK 8/24, wydany w jego sprawie.',
+  'Jak wskazał NSA w wyroku z dnia 3 marca 2024 r., sygn. akt II OSK 9/24, skarżąca Maria Lis nie miała racji.',
+  'NSA w wyroku z dnia 3 marca 2024 r., sygn. akt I OSK 10/24, orzekł o odmowie zameldowania Jana Kowalskiego.',
+  'W sprawie zakończonej wyrokiem NSA z dnia 3 marca 2024 r., sygn. akt I OSK 11/24, wnioskodawca uzyskał pozwolenie.',
+  'Jak wskazał NSA w wyroku z dnia 3 marca 2024 r., sygn. akt I OSK 12/24, Panu nie przysługuje zwrot.',
+  'Szanowni Państwo, jak wskazał NSA w wyroku z dnia 3 marca 2024 r., sygn. akt I OSK 13/24, opłata jest należna.',
+  'Pan Adam Nowak złożył skargę\nkasacyjną. Por. wyrok NSA z dnia 3 marca 2024 r., sygn. akt I OSK 14/24, oddalający skargę.',
+  'Wyrokiem z dnia 3 marca 2024 r. Naczelny Sąd Administracyjny, sygn. akt I OSK 15/24, uchylił zaskarżony wyrok.',
+  'Podobnie orzekł Sąd Okręgowy w Krakowie w wyroku z dnia 3 marca 2021 r., sygn. akt II Ca 1544/20.',
+  'm.in. w wyroku NSA z dnia 8 listopada 2018 r., sygn. akt I OSK 2213/17.',
+  ];
+  const sygn = (t: string): string => /sygn\.?(?:[ \t]*akt)?[ \t]+([^,;)\n]+?\d+\/\d{2})/i.exec(t)?.[1] ?? '';
+  for (const t of zakryte) {
+    const r = redactPII(t).redacted;
+    expect(sygn(t), t).not.toBe('');
+    expect(r, t).toContain('[ZNAK-SPRAWY]');
+    expect(r, t).not.toContain(sygn(t));
+  }
+  // Osoba w zdaniu z sygnaturą zostaje zakryta.
+  expect(redactPII(zakryte[0]).redacted).not.toContain('Wrony');
+});
+test('cytat orzeczenia NSA, WSA, SN, TK, KIO i TSUE jawny w różnym szyku i u różnych organów', () => {
+  // Zapowiedź cytatu przed albo po sygnaturze („…, sygn. akt …, stwierdził, że”), wersaliki, nawias,
+  // „o sygn.”, łamanie wiersza, „r.” po dacie przed nazwą sądu.
+  const jawne = [
+  'WSA w Poznaniu w wyroku z dnia 14 kwietnia 2020 r., sygn. akt II SA/Po 1001/19, stwierdził, że opłata adiacencka wymaga ustalenia wzrostu wartości.',
+  'Sąd Najwyższy w wyroku z dnia 3 marca 2021 r., sygn. akt III PSKP 12/21, wyjaśnił, że pracodawca musi wskazać przyczynę.',
+  'Sąd Najwyższy w wyroku z dnia 3 marca 2021 r., sygn. akt I PK 12/20, wyjaśnił, że pracodawca musi wskazać przyczynę.',
+  'Krajowa Izba Odwoławcza w wyroku z dnia 5 maja 2022 r., sygn. akt KIO 1122/22, uznała, że zamawiający nie mógł odrzucić oferty.',
+  'SKO w Rzeszowie odwołuje się do wyroku NSA z dnia 4 lutego 2021 r., sygn. akt II OSK 3320/18.',
+  'Powiatowy Inspektor Nadzoru Budowlanego przywołuje wyrok NSA z dnia 4 lutego 2021 r., sygn. akt II OSK 1234/19.',
+  'Prezydent Miasta Bydgoszczy powołuje się na wyrok WSA w Bydgoszczy z dnia 4 lutego 2021 r., sygn. akt II SA/Bd 455/20.',
+  'KRUS wyjaśnia, że według Sądu Najwyższego (wyrok z dnia 4 lutego 2021 r., sygn. akt II USKP 45/21) okres ten nie podlega doliczeniu.',
+  'Jak wynika z wyroku WSA w Warszawie z dnia 4 lutego 2021 r., sygn. akt VIII SA/Wa 455/20, opłata ma charakter publicznoprawny.',
+  'W tej kwestii wypowiedział się NSA w wyroku z dnia 4 lutego 2021 r., sygn. akt I FSK 455/20.',
+  'Kwestia ta była przedmiotem uchwały siedmiu sędziów NSA z dnia 2 marca 2020 r., sygn. akt I FPS 1/20.',
+  'W WYROKU Z DNIA 24 MAJA 2018 R., SYGN. AKT II OSK 1505/16, NACZELNY SĄD ADMINISTRACYJNY PODKREŚLIŁ, ŻE WARUNKI ZABUDOWY WIĄŻĄ ORGAN.',
+  'Wskazać należy na wyrok TSUE z dnia 7 września 2023 r., sygn. C-615/21.',
+  'W wyroku z dnia 24 maja 2018 r. Naczelny Sąd Administracyjny, sygn. akt II OSK 1505/16, stwierdził, że warunki zabudowy wiążą organ.',
+  'Wojewódzki Sąd Administracyjny w Białymstoku w wyroku z dnia 3 marca 2022 r., sygn. akt II SA/Bk 77/22, podkreślił, że gmina ma obowiązek wyjaśnić sprawę.',
+  'WSA w Kielcach w wyroku z dnia 3 marca 2022 r. (sygn. akt II SA/Ke 77/22) przesądził, że opłata za odpady zależy od liczby mieszkańców.',
+  'Dyrektor Izby Administracji Skarbowej w Katowicach wskazuje na wyrok NSA z dnia 3 marca 2022 r., sygn. akt II FSK 777/20, w którym przyjęto, że ulga nie przysługuje.',
+  'Trybunał Konstytucyjny w wyroku z dnia 3 marca 2022 r., sygn. akt SK 17/20, orzekł, że przepis jest niezgodny z Konstytucją.',
+  'Zgodnie z tezą wyroku NSA z dnia 3 marca 2022 r., sygn. akt I OSK 77/21, obowiązek meldunkowy ma charakter ewidencyjny.',
+  'Organ podziela pogląd Sądu Najwyższego wyrażony w uchwale z dnia 3 marca 2022 r., sygn. akt III CZP 77/21.',
+  'Marszałek Województwa zwraca uwagę na wyrok NSA z dnia 3 marca 2022 r., sygn. akt II GSK 77/21, dotyczący kar pieniężnych.',
+  'Kierownik USC przywołuje uchwałę NSA z dnia 3 marca 2022 r., sygn. akt II OPS 1/21.',
+  'Analogicznie orzekł WSA w Olsztynie w wyroku z dnia 3 marca 2022 r., sygn. akt II SA/Ol 77/22.',
+  'Spółka komunalna powołuje się na wyrok SN z dnia 3 marca 2022 r., sygn. akt II CSKP 77/22, zgodnie z którym opłata nie jest odszkodowaniem.',
+  'W wyroku z dnia 12 stycznia 2021 r. o sygn. akt II SA/Po 12/20 WSA w Poznaniu wyjaśnił, że zaświadczenie nie jest decyzją.',
+  'Na tle podobnego stanu faktycznego Naczelny Sąd Administracyjny w wyroku z dnia 3 marca 2022 r., sygn. akt I OSK 701/21, uznał, że gmina nie może odmówić.',
+  'Kierownik GOPS wskazuje, że zgodnie z orzecznictwem (wyrok WSA w Lublinie z dnia 3 marca 2022 r., sygn. akt II SA/Lu 70/22) dochód ustala się z miesiąca poprzedzającego.',
+  'Organ zwrócił uwagę, że NSA w wyroku z dnia 3 marca 2022 r., sygn. akt I OSK 702/21, uznał zaświadczenie za niewiążące.',
+  'Jak trafnie zauważył WSA w Szczecinie w wyroku z dnia 3 marca 2022 r., sygn. akt II SA/Sz 70/22, organ nie może przerzucać ciężaru dowodu.',
+  'Straż Miejska wskazuje, że w wyroku z dnia 3 marca 2022 r., sygn. akt II SA/Wr 70/22, WSA we Wrocławiu przyjął, że pojazd bez tablic można usunąć.',
+  'Pogląd ten podzielił Sąd Najwyższy w postanowieniu z dnia 3 marca 2022 r., sygn. akt I CSK 70/21.',
+  'SKO w Białymstoku przypomina, że w wyroku NSA z dnia 3 marca 2022 r., sygn. akt II OSK 70/20, wskazano na obowiązek uzgodnienia.',
+  'Stanowisko takie zajął Wojewódzki Sąd Administracyjny w Opolu w wyroku z dnia 3 marca 2022 r., sygn. akt II SA/Op 70/22.',
+  'Organ powołuje się na utrwaloną linię orzeczniczą, np. wyrok NSA z dnia 3 marca 2022 r., sygn. akt II OSK 71/20.',
+  'Wojewoda wyjaśnia, że według NSA (wyrok z dnia 3 marca 2022 r., sygn. akt II OSK 72/20) uchwała rady wymaga uzasadnienia.',
+  'Sąd Najwyższy w uchwale z dnia 3 marca 2022 r., sygn. akt III UZP 7/21, przesądził, że dodatek przysługuje.',
+  'Krajowa Izba Odwoławcza w wyroku z dnia 3 marca 2022 r. (sygn. akt KIO 707/22) stwierdziła, że wykonawca powinien wyjaśnić cenę.',
+  'Jak podkreślił WSA w Gorzowie Wielkopolskim w wyroku z dnia 3 marca 2022 r., sygn. akt II SA/Go 70/22, gmina ma obowiązek wyjaśnić sprawę.',
+  'Trybunał Konstytucyjny w wyroku z dnia 3 marca 2022 r., sygn. akt P 7/20, uznał, że przepis jest zgodny z Konstytucją.',
+  'Por. wyrok NSA z dnia 3 marca 2022 r., sygn. akt I GSK 70/21, LEX nr 1234567.',
+  'Tak NSA w wyroku z dnia 3 marca 2022 r., sygn. akt I OSK 703/21.',
+  'Wskazać należy na stanowisko Sądu Najwyższego zawarte w wyroku z dnia 3 marca 2022 r., sygn. akt II KK 70/21.',
+  'Jak wskazał NSA w wyroku z dnia 2 marca 2024 r., sygn. akt II OSK 77/23,\norgan musi wyjaśnić wątpliwości.',
+  'W orzecznictwie przyjmuje się (zob. wyrok WSA w Rzeszowie z dnia 3 marca 2022 r., sygn. akt II SA/Rz 70/22), że termin jest instrukcyjny.',
+  ];
+  for (const t of jawne) expect(redactPII(t).redacted, t).toBe(t);
+  // Dane osoby obok cytatu dalej zakryte.
+  const r = redactPII(
+    'Jak wskazał NSA w wyroku z dnia 2 marca 2024 r., sygn. akt II OSK 77/23, organ musi wyjaśnić wątpliwości. Oświadczenie podpisał Jan Kowalski, tel. 601 448 213.',
+  ).redacted;
+  expect(r).toContain('II OSK 77/23');
+  expect(r).not.toContain('Kowalski');
+  expect(r).not.toContain('601 448 213');
+});
+test('sygnatury w długim wierszu bez znaków nowej linii: czas liniowy', () => {
+  const time = (s: string): number => {
+    const t0 = performance.now();
+    redactPII(s, { types: ['ZNAK-SPRAWY'] });
+    return performance.now() - t0;
+  };
+  const line = (n: number): string =>
+    Array.from({ length: n }, (_, i) =>
+      i % 2 ? 'Sygn. akt I C 1/20; ' : 'wyrok NSA z 2020 r., sygn. akt II OSK 1/20, oraz ',
+    ).join('');
+  redactPII(line(200), { types: ['ZNAK-SPRAWY'] });
+  const t1 = Math.min(time(line(1000)), time(line(1000)));
+  const t4 = time(line(4000));
+  expect(t4 / t1).toBeLessThan(6);
+});
 
 test('KRS z wypełniaczem „pod numerem" maskowany', () => {
   const r = redactPII('spółkę wpisaną do KRS pod numerem 0000123456.');
