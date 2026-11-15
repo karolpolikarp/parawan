@@ -13413,3 +13413,23 @@ test('W12: pole osoby w środku bardzo długiego wiersza bez złamań ma koszt l
   const b = performance.now() - t2;
   expect(b).toBeLessThan(Math.max(a * 8, 400));
 });
+
+test('Seria 3: dana o zdrowiu w wierszu tabeli z osobą zakrytą przez przebieg tabeli znika jak przy jawnym imieniu i nazwisku', () => {
+  const H = '[DANE O ZDROWIU]';
+  const tsv = 'Pracownik\tŚwiadczenie\tKwota\nJadwiga Mroczek\tbony na święta\t300,00\nTeresa Kowalczyk\tzapomoga po chemioterapii\t2 000,00\n';
+  const out = redactPII(tsv).redacted;
+  expect(out).toBe(`Pracownik\tŚwiadczenie\tKwota\n${N}\tbony na święta\t300,00\n${N}\tzapomoga po ${H}\t2 000,00\n`);
+  // ponowna redakcja wyniku niczego nie dokłada (kotwica pochodzi z przebiegu tabeli, nie z maski)
+  expect(redactPII(out).redacted).toBe(out);
+  expect(redactPII(tsv, { pseudonyms: true }).redacted).toContain(`zapomoga po ${H}`);
+  // tabela bez kolumny osób („Oddział”) to wykaz świadczeń, a nie dana konkretnej osoby
+  keep(['Oddział\tŚwiadczenie\nOnkologia\tchemioterapia\nKardiologia\tkoronarografia\n']);
+});
+
+test('Seria 3: inicjały „O.K.” w kolumnie „Odpowiedzialni” przy osobie z pisma o tych inicjałach znikają, a sam status „OK” zostaje', () => {
+  expect(redactPII('Z wnioskiem wystąpił Oskar Kamiński.\nNr | Zadanie | Odpowiedzialni | Termin\n1 | złożenie wniosku o dodatek | O.K. | 12.01.2027\n').redacted).toBe(
+    `Z wnioskiem wystąpił ${N}.\nNr | Zadanie | Odpowiedzialni | Termin\n1 | złożenie wniosku o dodatek | ${N} | 12.01.2027\n`,
+  );
+  // bez osoby o inicjałach O.K. w piśmie „OK” w kolumnie to status wiersza
+  keep(['Z wnioskiem wystąpiła [IMIĘ I NAZWISKO].\nNr | Zadanie | Odpowiedzialni | Termin\n1 | kontrola dokumentów | OK | 12.01.2027\n']);
+});

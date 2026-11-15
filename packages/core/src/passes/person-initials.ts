@@ -365,11 +365,12 @@ function scanPersonColumns(
           const lead = cell.text.length - cell.text.trimStart().length;
           for (const t of val.matchAll(RE_CELL_ONE)) {
             const letters = lettersOf(t[0]);
-            // odpowiedź albo status w wierszu („ND”, „BD”) nie mówi nic o kolumnie
+            hits.push([cell.start + lead + (t.index ?? 0), t[0]]);
+            // Odpowiedź albo status w wierszu („ND”, „BD”, „OK”) nie mówi nic o kolumnie, ale sam
+            // dalej idzie do decide: „O.K.” przy Oliwii Kubiak z pisma to ona, jak po „odp.”.
             if (CELL_STATUS.has(letters)) continue;
             if (orgLike(letters)) org = true;
             if (letters.length !== 2) personal = false;
-            hits.push([cell.start + lead + (t.index ?? 0), t[0]]);
           }
           continue;
         }

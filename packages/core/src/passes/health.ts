@@ -161,6 +161,10 @@ function clearMemo(): void {
   startsText = null;
   startsValue = [];
   phraseIndexValue?.clear();
+  tableRows = undefined;
+  tableRowsText = null;
+  tableRowsStarts = [];
+  tableRowIndex = -1;
 }
 
 const LO = 'a-ząćęłńóśźż';
@@ -354,7 +358,41 @@ const hasPerson = (w: string): boolean => mtest(RE_PERSON, w) || mtest(RE_PERSON
  * w tym samym zdaniu (nazwisko prezesa w zdaniu obok nie robi z raportu karty pacjenta).
  */
 const personNear = (text: string, sentence: string, from: number, to: number): boolean =>
-  hasPerson(personWindow(text, from, to)) || (namePairAt(sentence) >= 0 && !mtest(RE_NAME_NOT_PATIENT, sentence));
+  hasPerson(personWindow(text, from, to)) || ((namePairAt(sentence) >= 0 || tablePersonRowAt(text, from)) && !mtest(RE_NAME_NOT_PATIENT, sentence));
+/** Wiersze tabeli, w których passDelimitedTable zakrył osobę (patrz RedactCtx.tablePersonRows). */
+let tableRows: RedactCtx['tablePersonRows'];
+let tableRowsText: string | null = null;
+let tableRowsStarts: number[] = [];
+/** Numer wiersza z ostatniego trafienia tablePersonRowAt. */
+let tableRowIndex = -1;
+/**
+ * Czy pozycja leży w wierszu tabeli z osobą zakrytą przez passDelimitedTable: tam przed zakryciem
+ * stało imię i nazwisko, które w innym tekście daje namePairAt. Kotwica pochodzi z przebiegu tabeli
+ * tego samego wywołania, a nie z samej maski w tekście, więc ponowna redakcja wyniku jej nie ma
+ * (idempotencja). Wiersz liczy się tylko wtedy, gdy liczba wierszy tekstu się nie zmieniła i wiersz
+ * dalej ma tę maskę.
+ */
+function tablePersonRowAt(text: string, at: number): boolean {
+  if (!tableRows) return false;
+  if (tableRowsText !== text) {
+    tableRowsText = text;
+    tableRowsStarts = [0];
+    for (let i = text.indexOf('\n'); i >= 0; i = text.indexOf('\n', i + 1)) tableRowsStarts.push(i + 1);
+  }
+  if (tableRowsStarts.length !== tableRows.lines) return false;
+  let lo = 0;
+  let hi = tableRowsStarts.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (tableRowsStarts[mid] <= at) lo = mid;
+    else hi = mid - 1;
+  }
+  const mask = tableRows.rows.get(lo);
+  if (mask === undefined) return false;
+  tableRowIndex = lo;
+  const end = lo + 1 < tableRowsStarts.length ? tableRowsStarts[lo + 1] : text.length;
+  return text.slice(tableRowsStarts[lo], end).includes(mask);
+}
 /**
  * Zdanie o grupie ludzi albo o kodzie ze słownika: imię i nazwisko w nim to prelegent czy autor,
  * a nie pacjent („Jan Kowalski omówił rozpoznanie astmy u dzieci”, „Kod J45 oznacza astmę; Jan
@@ -943,6 +981,18 @@ const patientNamed = memo(function patientNamed(sentence: string): [number, numb
   }
   return out;
 });
+/**
+ * Osoby z nazwy w zdaniu (patientNamed) i, w wierszu tabeli z osobą zakrytą przez passDelimitedTable,
+ * jej maska w miejscu imienia i nazwiska, które przed zakryciem dawało tu przedział.
+ */
+function namedAt(text: string, from: number, sentence: string): [number, number][] {
+  const named = patientNamed(sentence);
+  if (!tablePersonRowAt(text, from)) return named;
+  const mask = tableRows?.rows.get(tableRowIndex) ?? '';
+  const out = named.slice();
+  for (let i = sentence.indexOf(mask); mask && i >= 0; i = sentence.indexOf(mask, i + mask.length)) out.push([i, i + mask.length]);
+  return out;
+}
 const spanIn = (spans: [number, number][], a: number, b: number): boolean => spans.some(([x, y]) => x >= a && y <= b);
 /**
  * Pierwsza osoba w zdaniu podrzędnym z frazą: czasownik przeszły albo „u mnie” w nim, albo „mój”,
@@ -1468,7 +1518,7 @@ function eventAnchor(text: string, starts: number[], from: number, to: number, m
   if (isGenericRule(sentence) || populationSubject(text, starts, from) || mtest(RE_QUESTION, sentence)) return false;
   if (mtest(RE_GENERIC_RULE, sentence) && !mtest(RE_PERSON_CS, sentence) && namePairAt(sentence) < 0 && !mtest(RE_POSSESSIVE, sentence)) return false;
   const after = sentence.slice(t);
-  const named = patientNamed(sentence);
+  const named = namedAt(text, from, sentence);
   const owner = named.some(([a]) => a >= t && a <= t + 3);
   const [ca, cb] = boundsAt(sentence, f, t, RE_CLAUSE_BREAK);
   const [sa, sb] = boundsAt(sentence, f, t, RE_SUB_BREAK);
@@ -2711,7 +2761,7 @@ function medicalPersonContext(text: string, starts: number[], from: number, to: 
   // osoba z nazwy (poza urzędnikiem i lekarzem) tylko w tym samym zdaniu; rola, krewny i zaimek w oknie;
   // samo „pacjent” tylko poza regulaminem
   const patient = mtest(RE_PATIENT_WORD, w) && !mtest(RE_NORMATIVE, w);
-  return patientNamed(sentence).length > 0 || mtest(RE_PERSON_THIRD, w) || mtest(RE_EV_PERSON, w) || patient;
+  return namedAt(text, from, sentence).length > 0 || mtest(RE_PERSON_THIRD, w) || mtest(RE_EV_PERSON, w) || patient;
 }
 
 /** Określenie stopnia, przebiegu i rodzaju przy nazwie choroby („ostrej”, „nawracającej”, „prawostronnym”). */
@@ -3244,6 +3294,7 @@ export function passHealth(ctx: RedactCtx): void {
 }
 function passHealthWith(ctx: RedactCtx): void {
   const mask = ctx.M.ZDROWIE;
+  tableRows = ctx.tablePersonRows;
   maskSections(ctx);
   maskDrugs(ctx);
   maskDoseSentences(ctx);

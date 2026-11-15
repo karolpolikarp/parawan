@@ -594,6 +594,7 @@ export function passDelimitedTable(ctx: RedactCtx): void {
       // wiersza. Kolumna innej osoby („Imię matki") go nie dostaje.
       const surCells = values.filter((v, i) => kinds[i] === 'surname' && !RE_TABLE_OTHER_PERSON_COL.test(names[i]) && /^\p{Lu}[\p{L}-]+$/u.test(v.trim()) && !isEmptyFormValue(v.trim()) && !isPersonRoleValue(v.trim().toLowerCase()));
       const rowSur = ctx.pseudonyms && surCells.length === 1 ? surCells[0].trim() : '';
+      let personMask = '';
       cells.forEach((c, i) => {
         const raw = texts[i];
         const value = values[i];
@@ -611,10 +612,17 @@ export function passDelimitedTable(ctx: RedactCtx): void {
         const at = c.start + raw.indexOf(value);
         out += line.slice(last, at) + mask;
         last = at + value.length;
+        if (tablePersonCell(kind)) personMask ||= mask;
       });
       if (last) {
         lines[ri] = out + line.slice(last);
         changed = true;
+      }
+      // Imię i nazwisko tego wiersza znika przed przebiegiem zdrowia, a przy osobie z tabeli
+      // („Kowalska Anna | zapomoga: choroba nowotworowa”) jest ono kotwicą danej o zdrowiu.
+      if (personMask) {
+        ctx.tablePersonRows ??= { lines: lines.length, rows: new Map() };
+        ctx.tablePersonRows.rows.set(ri, personMask);
       }
     }
     h = r - 1;
