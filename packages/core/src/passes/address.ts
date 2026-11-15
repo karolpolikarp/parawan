@@ -1,7 +1,7 @@
 // Adresy: ulice ze skrótem i bez, ulice z patronem w dopełniaczu, adres po etykiecie zamieszkania
 // i przed kodem pocztowym, kod pocztowy bez myślnika.
 import { surnameShaped } from '../surnames.js';
-import { ADR_MASK_SRC, CAP_CITY, KOD_MASK_SRC, MONTHS_GEN, PL_LO, PL_UP } from '../charset.js';
+import { ADR_MASK_SRC, CAP_CITY, KOD_MASK_SRC, MONTHS_GEN, PL_LO, PL_UP, UPPER_AHEAD } from '../charset.js';
 import { indexToLetters, INSTITUTION_STREET_CLOSE, INSTITUTION_STREET_OPEN, lettersToIndex, maskKeepPrefix, PATRON_STREET_MARK, RE_INSTITUTION_STREET_SENTINEL, type RedactCtx } from '../context.js';
 import { isFirstNameGenitive, isFirstNameLike, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
@@ -222,7 +222,7 @@ const PATRON_STREET_TITLES =
   String.raw`Kardynała|Marszałka|Prymasa|Generała|Gen\.|Ks\.|Księdza|Biskupa|Króla|Hetmana|Prezydenta|Prof\.|Profesora|Dr\.|Doktora|Majora|Pułkownika|Rotmistrza|Kapitana|Porucznika`;
 // Odstępy w nazwie i przed numerem tylko spacjami: tabulator to granica komórki TSV, a liczba
 // z sąsiedniej komórki („SP nr 1⇥Jana Pawła II⇥12") to nie numer domu.
-const PATRON_STREET_NAME_SRC = String.raw`(?<![\p{L}\p{N}])(?:(?<!\.)|(?<=(?<!\p{L})im\.))(?:(?:${PATRON_STREET_TITLES}) +)?(\p{Lu}\p{Ll}+)(?: +(\p{Lu}\p{Ll}+))? +(\p{Lu}\p{Ll}+(?:-\p{Lu}\p{Ll}+)?)`;
+const PATRON_STREET_NAME_SRC = String.raw`${UPPER_AHEAD}(?<![\p{L}\p{N}])(?:(?<!\.)|(?<=(?<!\p{L})im\.))(?:(?:${PATRON_STREET_TITLES}) +)?(\p{Lu}\p{Ll}+)(?: +(\p{Lu}\p{Ll}+))? +(\p{Lu}\p{Ll}+(?:-\p{Lu}\p{Ll}+)?)`;
 const PATRON_STREET_HEAD_SRC = PATRON_STREET_NAME_SRC + String.raw`(?: +[IVX]{1,4})?`;
 // Liczba przed jednostką powierzchni („Mieszkanie Jana Nowaka 48 m2", „… 2 ha") to metraż, a „m"
 // bez kropki to lokal tylko ze spacją przed numerem („30 m 2"). Lokal „m."/„lok." także wersalikami.
@@ -237,7 +237,7 @@ const RE_PATRON_STREET_NO_CTX = new RegExp(
 // To samo wersalikami („W LOKALU PRZY JANA PAWŁA II 30/2 W GORLICACH") z tą samą kotwicą co tryb
 // „ctx". Drugi człon nie bywa liczbą rzymską (ta stoi za nim). Bez kotwicy para zostaje osobą.
 const RE_PATRON_STREET_CAPS = new RegExp(
-  String.raw`(?<![\p{L}\p{N}.])(\p{Lu}{2,})(?: +(\p{Lu}{2,}))? +(?![IVX]{1,4}(?!\p{L}))(\p{Lu}{2,}(?:-\p{Lu}{2,})?)(?: +[IVX]{1,4})?(?: +(?:POD +)?NR\.?)?${PATRON_STREET_NUM_SRC}(?![\p{L}\p{N}])`,
+  String.raw`${UPPER_AHEAD}(?<![\p{L}\p{N}.])(\p{Lu}{2,})(?: +(\p{Lu}{2,}))? +(?![IVX]{1,4}(?!\p{L}))(\p{Lu}{2,}(?:-\p{Lu}{2,})?)(?: +[IVX]{1,4})?(?: +(?:POD +)?NR\.?)?${PATRON_STREET_NUM_SRC}(?![\p{L}\p{N}])`,
   'gu',
 );
 const RE_PATRON_STREET_NO = new RegExp(PATRON_STREET_SRC + ADDR_END_AHEAD, 'gu');

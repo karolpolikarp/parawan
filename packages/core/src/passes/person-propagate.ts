@@ -3,7 +3,7 @@
 // dopasowanie tekstu po przebiegach do wejścia. Rozwinięcie: samo nazwisko w odmianie i wersalikami,
 // samo imię w odmianie i ze zdrobnieniem, inicjały jednej osoby i login z imienia i nazwiska.
 import { foldAscii, HOMOGRAPH_SURNAMES, homographBase, normalizeSurnameKey, surnameBase, surnameShaped } from '../surnames.js';
-import { PERSON_MASK_SRC } from '../charset.js';
+import { LETTER_AHEAD, LOWER_AHEAD, PERSON_MASK_SRC, UPPER_AHEAD } from '../charset.js';
 import type { RedactCtx } from '../context.js';
 import { COLLIDING_NAME_FORMS, FIRST_NAME_DIMINUTIVES, FOREIGN_GIVEN_NAMES, firstNameOfBareVocative, isFirstNameLike, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { POLISH_CITIES } from '../dict/places.js';
@@ -532,7 +532,7 @@ const RE_PAN_BEFORE = /(?<!\p{L})(?:pan|pani|pana|panu|panem|panią|panie|p\.)[ 
 
 // Wyraz i opcjonalny inicjał za nim („WILK R.”, „Szymon P.”), o ile po inicjale nie stoi kolejny wyraz
 // z wielkiej litery (wtedy to inicjał następnej osoby).
-const RE_WORD = /(?<![\p{L}\d_@#/\\.\]-])(\p{L}+(?:-\p{L}+)*)(?![\p{L}\d_@/\\-]|[._][\p{L}\d[])( \p{Lu}\.(?![\p{L}\d])(?![ \t]+\p{Lu}))?/gu;
+const RE_WORD = new RegExp(LETTER_AHEAD + /(?<![\p{L}\d_@#/\\.\]-])(\p{L}+(?:-\p{L}+)*)(?![\p{L}\d_@/\\-]|[._][\p{L}\d[])( \p{Lu}\.(?![\p{L}\d])(?![ \t]+\p{Lu}))?/u.source, 'gu');
 
 /** Maska nasiona najbliższego przed pozycją (pseudonimy: ta sama etykieta), a bez wzmianki pierwsza. */
 function nearestMask(t: string, offset: number, cands: Seed[]): string {
@@ -693,19 +693,35 @@ function propagateNames(ctx: RedactCtx, seeds: Seed[]): void {
   if (!bySurname.size && !byFirst.size) return;
   const informal = isInformal(ctx.raw);
   // wyraz użyty w piśmie małą literą jest tu też słowem pospolitym („grzyb”), jak homograf
-  const lowerInDoc = new Set(ctx.text.match(RE_LOWER_WORD) ?? []);
+  // liczone dopiero przy pierwszym pytaniu, z tego samego tekstu (ctx.text zmienia się po replace)
+  const docText = ctx.text;
+  let lowerWordSet: Set<string> | null = null;
+  const lowerInDoc = (): Set<string> => {
+    lowerWordSet ??= new Set(docText.match(RE_LOWER_WORD) ?? []);
+    return lowerWordSet;
+  };
   let lowerStemSet: Set<string> | null = null;
   const lowerStems = (): Set<string> => {
     if (!lowerStemSet) {
       lowerStemSet = new Set<string>();
-      for (const w of lowerInDoc) {
+      for (const w of lowerInDoc()) {
         const c = w.length >= 3 ? canonPart(w) : null;
         if (c) lowerStemSet.add(c);
       }
     }
     return lowerStemSet;
   };
-  const isSeedSurname = (w: string): boolean => bySurname.has(canonSurname(w) ?? '');
+  // rdzeń nazwiska liczony raz na wyraz: te same wyrazy wracają w piśmie wiele razy
+  const canonMemo = new Map<string, string | null>();
+  const canonOf = (w: string): string | null => {
+    let c = canonMemo.get(w);
+    if (c === undefined) {
+      c = canonSurname(w);
+      canonMemo.set(w, c);
+    }
+    return c;
+  };
+  const isSeedSurname = (w: string): boolean => bySurname.has(canonOf(w) ?? '');
   // za wyrazem może stać imię albo nazwisko tej samej osoby („Wróbel Tomasz”, „BEATA KONIECZNA”)
   const nextOk = (w: string): boolean => isFirstNameLike(w) || byFirst.has(w.toLowerCase()) || isSeedSurname(w);
   // Wersaliki: sąsiad z tej samej osoby. Dla nazwiska imię, inicjał albo maska; dla imienia tylko
@@ -728,14 +744,14 @@ function propagateNames(ctx: RedactCtx, seeds: Seed[]): void {
     if (!lowerWord && !caps && !/^\p{Lu}\p{Ll}+(?:-\p{Lu}\p{Ll}+)*$/u.test(m)) return whole;
     const ml = m.toLowerCase();
     // nazwisko
-    const canon = lowerWord ? null : canonSurname(m);
+    const canon = lowerWord ? null : canonOf(m);
     const sCands = canon ? bySurname.get(canon) : undefined;
     if (canon && sCands && !(isFirstNameLike(m) && !sCands.some((s) => s.surnameForm && isFirstNameLike(s.surnameForm))) && !masculinePlural(ml, sCands)) {
       const seedForm = sCands.some((s) => s.surnameForm?.toLowerCase() === ml);
       // Homograf: nazwisko z listy wyrazów pospolitych albo o rdzeniu wyrazu użytego w piśmie małą
       // literą („Kamień” przy „kamienia”, „Rak” przy „raka”).
       const homograph =
-        sCands.every((s) => s.homograph) || HOMOGRAPH_SURNAMES.has(ml) || lowerInDoc.has(ml) || nounSurnameStems.has(canon) || lowerStems().has(canon);
+        sCands.every((s) => s.homograph) || HOMOGRAPH_SURNAMES.has(ml) || lowerInDoc().has(ml) || nounSurnameStems.has(canon) || lowerStems().has(canon);
       const near = t.slice(Math.max(0, offset - 24), offset);
       const after = t.slice(offset + m.length, offset + m.length + 30);
       const adjectival = RE_ADJ_SURNAME.test(ml) || RE_ADJ_SURNAME_PL.test(ml);
@@ -767,7 +783,7 @@ function propagateNames(ctx: RedactCtx, seeds: Seed[]): void {
       if (ml.length < 3) return whole;
       if (wordLikeNameForm(ml) && !RE_PAN_BEFORE.test(t.slice(Math.max(0, offset - 8), offset))) return whole;
     } else if (
-      (nounNameForm(ml) || COUNTRY_NAME_FORMS.has(ml) || lowerInDoc.has(ml)) &&
+      (nounNameForm(ml) || COUNTRY_NAME_FORMS.has(ml) || lowerInDoc().has(ml)) &&
       (atSentenceStart(t, offset) || RE_PUNCT_START_BEFORE.test(t.slice(Math.max(0, offset - 4), offset))) &&
       // „Kuba to wyspa”, „Kuba leży na Karaibach”: państwo; „Kuba choruje”, „Kuba przyszedł”: osoba
       !(COUNTRY_NAME_FORMS.has(ml) && !RE_COUNTRY_PREDICATE_AFTER.test(t.slice(offset + m.length, offset + m.length + 30)))
@@ -788,7 +804,7 @@ function propagateNames(ctx: RedactCtx, seeds: Seed[]): void {
   mergeNewMasks(ctx);
 }
 // Wyraz małą literą w prozie, nie człon adresu, loginu ani ścieżki.
-const RE_LOWER_WORD = /(?<![\p{L}\d.@_/\\-])\p{Ll}+(?![\p{L}\d@_/\\-]|\.\p{L})/gu;
+const RE_LOWER_WORD = new RegExp(LOWER_AHEAD + /(?<![\p{L}\d.@_/\\-])\p{Ll}+(?![\p{L}\d@_/\\-]|\.\p{L})/u.source, 'gu');
 const RE_PERSON_MASK_JUST_BEFORE = new RegExp(`(?:${PERSON_MASK_SRC})[ \\t]+$`);
 
 // Znacznik nowej maski na czas scalania z sąsiednią maską tej samej osoby.
@@ -814,7 +830,7 @@ function mergeNewMasks(ctx: RedactCtx): void {
 }
 
 // Inicjały z kropkami („P.W.”, „Z. K.”) i bez („PD”, „BWK”), gdy pasują do dokładnie jednej osoby.
-const RE_INITIALS = /(?<![\p{L}\d.@_/\\-])(?:(\p{Lu})\.[ \t]?(\p{Lu})\.(?:[ \t]?(\p{Lu})\.)?|(\p{Lu}{2,3}))(?![\p{L}\d@_/\\-]|\.\p{L})/gu;
+const RE_INITIALS = new RegExp(UPPER_AHEAD + /(?<![\p{L}\d.@_/\\-])(?:(\p{Lu})\.[ \t]?(\p{Lu})\.(?:[ \t]?(\p{Lu})\.)?|(\p{Lu}{2,3}))(?![\p{L}\d@_/\\-]|\.\p{L})/u.source, 'gu');
 const RE_ROMAN = /^[IVXLCDM]+$/;
 const RE_BARE_INI_SLOT = /(?:(?<!\p{L})(?:przez|dla|wg|według)|[–—:(]|(?<![\p{L}\d])-|\p{Ll}{2,}(?:uje|je|ał|ała|ił|iła|ył|yła|ęła|li|ły))[ \t]*$/u;
 // Rzeczownik na -ał w miejscu czasownika: „dział”, „wydział” (czasowniki „widział”, „wiedział” mają e/i
@@ -834,7 +850,7 @@ const OFFICE_ABBR = new Set<string>(
     .filter((a) => /^\p{Lu}{2,3}$/u.test(a)),
 );
 // Definicja skrótu w piśmie: wyrazy z wielkiej litery (z łącznikami „i/w/do…”) i skrót w nawiasie.
-const RE_ABBR_DEF = /((?:\p{Lu}\p{L}*[ \t]+(?:(?:i|w|we|z|ze|do|na|dla|ds\.|oraz|pod|nad|przy)[ \t]+)?){1,7})\((\p{Lu}[\p{L}]{1,7})\)/gu;
+const RE_ABBR_DEF = new RegExp(UPPER_AHEAD + /((?:\p{Lu}\p{L}*[ \t]+(?:(?:i|w|we|z|ze|do|na|dla|ds\.|oraz|pod|nad|przy)[ \t]+)?){1,7})\((\p{Lu}[\p{L}]{1,7})\)/u.source, 'gu');
 /** Skróty rozwinięte w piśmie: litery skrótu są kolejnymi inicjałami wyrazów przed nawiasem albo powtarzają wyraz. */
 function definedAbbreviations(raw: string): Set<string> {
   const out = new Set<string>();
