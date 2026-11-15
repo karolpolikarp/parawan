@@ -102,10 +102,18 @@ Sam benchmark nie wystarcza — sprawdzaj zmiany wieloagentowo/adwersarialnie na
 
 Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i diakrytyką).
 
-## Stan (2026-11-14)
+## Stan (2026-11-15)
 
-- `main` = v0.47.0 (wydane 2026-11-14: tag, Release i kopia na domenie zgodne, suma
-  `da65c1ec…`). Ewaluacja na 50 fikcyjnych pismach: `npm run eval`, `docs/EWALUACJA.md`
+- `main` = v0.47.0 + PR #29 (scalony 2026-11-15, niewydany: pobierany plik to dalej v0.47.0).
+  PR #29: serie 2 i 3 pism (`test-data/seria-2`, `seria-3`, części robocza i odłożona; opisy
+  w `docs/EWALUACJA-SERIA-2.md`, `-SERIA-3.md`). Seria 3 robocza: recall 87,3% → 94,7%, nadmiarowe
+  64 → 2 na 358; odłożona 87,7% → 90,9%, 69 → 36. Ewaluacja serii: `node scripts/eval/run-eval.mjs
+  --eval --set test-data/seria-3/robocza --profile domyslny`. Części odłożonej nie używać do strojenia.
+- Bramki pliku: sufit rozmiaru z limitu poczty Exchange (7 120 614 B), strażnik składu
+  (`scripts/e2e/sklad.test.mjs`), job CI `start` (czas startu, nieblokujący; dziś 1,8× wolniej niż
+  v0.47.0, Backlog 9). Opis: `docs/WYDANIE.md`, „Rozmiar i czas startu”.
+- v0.47.0 wydane 2026-11-14: tag, Release i kopia na domenie zgodne, suma
+  `da65c1ec…`. Ewaluacja na 50 fikcyjnych pismach: `npm run eval`, `docs/EWALUACJA.md`
   (recall 89,2% → 99,5%, nadmiarowe 30 → 0). Rdzeń i `parawan` 0.30.0 czekają na npm
   (Backlog 4). Handoff: `docs/handoff-2026-11-14.md`.
 - Testy wydajności rdzenia z progiem czasu sprawdzaj też na Node 20 (CI): V8 z Node 24 ukrywa
