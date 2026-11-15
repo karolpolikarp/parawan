@@ -2675,10 +2675,11 @@ if (matchMedia('(pointer: coarse) and (max-width: 600px)').matches) {
 // Dymki: opisy dla czytników ekranu, „?” w summary, Esc i dociskanie do krawędzi (tips.ts).
 initTips();
 
-update();
-// Rozgrzewka silnika (warmEngine) w osobnym zadaniu: strona jest już gotowa, a pierwsze wklejenie
-// liczy się tak szybko jak następne.
+// Rozgrzewka silnika (warmEngine) w osobnym zadaniu, czyli po starcie: strona jest już gotowa,
+// a pierwsze wklejenie liczy się tak szybko jak następne.
 setTimeout(warmEngine, 0);
+
+update();
 
 // Ostatnia instrukcja startu: pasek „Parawan nie uruchomił się” (#boot-fail w index.html) znika
 // dopiero tutaj. Gdy silnik nie sparsuje modułu (Chromium starsze niż 94, tryb Internet Explorera)
