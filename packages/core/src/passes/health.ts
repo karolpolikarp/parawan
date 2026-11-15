@@ -18,6 +18,7 @@
 import type { RedactCtx } from '../context.js';
 import { NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { type Edit, LiteralIndex, literalsPresent, nearSearchable, type Replacer, replaceNear, replaceTracked } from '../regex-literals.js';
+import { sentenceStartsOf, updateSentenceStarts } from '../sentence-starts.js';
 import { escapeRe } from '../util.js';
 
 /*
@@ -141,8 +142,8 @@ function gatePasses(re: RegExp, text: string): boolean {
  */
 function replacePhrase(text: string, re: RegExp, fn: Replacer): string {
   const index = phraseIndex();
-  if (nearSearchable(re)) return replaceNear(text, re, fn, index);
-  return literalsPresent(re, text) && gatePasses(re, text) ? replaceTracked(text, re, fn, index) : text;
+  if (nearSearchable(re)) return replaceNear(text, re, fn, index, followEdits);
+  return literalsPresent(re, text) && gatePasses(re, text) ? replaceTracked(text, re, fn, index, followEdits) : text;
 }
 /**
  * Wspólny indeks napisów wzorców fraz i zdarzeń (budowany raz, przy pierwszym użyciu): między
@@ -1619,7 +1620,7 @@ function maskEventsOnce(ctx: RedactCtx, mask: string): void {
   }
   // „rehabilitacja po [zabiegu]”, „leczenie po [udarze]”: rzeczownik przed zakrytym zdarzeniem wchodzi do maski
   const M = escapeRe(mask);
-  ctx.text = replaceTracked(ctx.text, new RegExp(`${NOT_LETTER_BEFORE}(?:${cap('rehabilitacj')}(?:a|i|ę|ą)|${cap('lecz')}(?:enie|enia|eniu|eniem))${WS}po${WS}${M}`, 'g'), () => mask, phraseIndex());
+  ctx.text = replaceTracked(ctx.text, new RegExp(`${NOT_LETTER_BEFORE}(?:${cap('rehabilitacj')}(?:a|i|ę|ą)|${cap('lecz')}(?:enie|enia|eniu|eniem))${WS}po${WS}${M}`, 'g'), () => mask, phraseIndex(), followEdits);
 }
 
 /* ── Okno kontekstu ── */
@@ -1639,11 +1640,14 @@ function sentenceStarts(text: string): number[] {
   startsValue = sentenceStartsOf(text);
   return startsValue;
 }
-function sentenceStartsOf(text: string): number[] {
-  const starts = [0];
-  const re = new RegExp(`\\n|[.!?][ \\t]+(?=[${UP}\\[])`, 'g');
-  for (let m = re.exec(text); m; m = re.exec(text)) starts.push(m.index + m[0].length);
-  return starts;
+/**
+ * Po podmianie w tekście, dla którego znane są początki zdań: początki przeliczone tylko w okolicy
+ * zmian (updateSentenceStarts), więc następne zapytanie o nowy tekst nie przeszukuje go od nowa.
+ */
+function followEdits(oldText: string, newText: string, edits: readonly Edit[]): void {
+  if (startsText === null || startsText !== oldText) return;
+  startsValue = updateSentenceStarts(startsValue, newText, edits);
+  startsText = newText;
 }
 
 /** Indeks zdania, w którym leży pozycja (wyszukiwanie binarne). */
@@ -2106,7 +2110,7 @@ function maskPhrasesOnce(ctx: RedactCtx, mask: string): boolean {
       if (isGenericRule(sentence) || populationSubject(whole, st, from)) return m;
       const person = mtest(RE_FIRST_PERSON_VERB, pre) || mtest(RE_PATIENT_WORD, sentence) || personNear(whole, sentence, from, to);
       return person ? `${pre}${ctx.hit('ZDROWIE')}` : m;
-    }, phraseIndex());
+    }, phraseIndex(), followEdits);
   }
   maskEventsOnce(ctx, mask);
   maskDiagnoses(ctx, mask);
@@ -2114,7 +2118,7 @@ function maskPhrasesOnce(ctx: RedactCtx, mask: string): boolean {
   ctx.text = replaceNear(ctx.text, RE_CONTRAINDICATION, (m: string, pre: string, _act: string, offset: number, whole: string) => {
     if (!medicalAnchored(whole, sentenceStarts(whole), offset, offset + pre.length, mask)) return m;
     return `${pre}${ctx.hit('ZDROWIE')}`;
-  }, phraseIndex());
+  }, phraseIndex(), followEdits);
   return ctx.text !== before;
 }
 
@@ -3176,9 +3180,11 @@ function maskDiagnoses(ctx: RedactCtx, mask: string): void {
     }
     parts.push(text.slice(pos));
     ctx.text = parts.join('');
-    // indeks napisów fraz przesunięty o te same zmiany (gdy opisywał ten tekst)
+    // indeks napisów fraz i początki zdań przesunięte o te same zmiany (gdy opisywały ten tekst)
     const index = phraseIndex();
-    if (index.isFor(text)) index.update(ctx.text, spans.map(([a, b]): Edit => [a, b - a, mask.length]));
+    const edits = spans.map(([a, b]): Edit => [a, b - a, mask.length]);
+    if (index.isFor(text)) index.update(ctx.text, edits);
+    followEdits(text, ctx.text, edits);
   }
 }
 

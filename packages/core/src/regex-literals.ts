@@ -631,9 +631,12 @@ export class LiteralIndex {
 export type Replacer = (match: string, ...rest: never[]) => string;
 type AnyReplacer = (...args: unknown[]) => string;
 
-export function replaceNear(text: string, re: RegExp, fn: Replacer, index?: LiteralIndex): string {
+/** Powiadomienie o podmianie: stary tekst, nowy i zmiany (rosnąco, w położeniach starego tekstu). */
+export type EditListener = (oldText: string, newText: string, edits: readonly Edit[]) => void;
+
+export function replaceNear(text: string, re: RegExp, fn: Replacer, index?: LiteralIndex, onEdits?: EditListener): string {
   const f = finderOf(re);
-  if (!f || !re.global || re.unicode || f.shortest < NEAR_MIN_LITERAL) return replaceTracked(text, re, fn, index);
+  if (!f || !re.global || re.unicode || f.shortest < NEAR_MIN_LITERAL) return replaceTracked(text, re, fn, index, onEdits);
   const idx = index?.covers(re) ? index : undefined;
   if (idx) idx.sync(text);
   // Praca w trybie przy napisach najwyżej ułamek zwykłego przeszukiwania: próba od pozycji (flaga y)
@@ -707,6 +710,7 @@ export function replaceNear(text: string, re: RegExp, fn: Replacer, index?: Lite
   if (!edits.length) return text;
   const result = out + text.slice(last);
   idx?.update(result, edits);
+  onEdits?.(text, result, edits);
   return result;
 }
 
@@ -714,8 +718,9 @@ export function replaceNear(text: string, re: RegExp, fn: Replacer, index?: Lite
  * Zwykłe text.replace(re, fn) dla wyrażenia z flagą g, które przy okazji przesuwa indeks napisów
  * (gdy opisywał ten tekst) zamiast przeszukiwać go od nowa przy następnym użyciu.
  */
-export function replaceTracked(text: string, re: RegExp, fn: Replacer, index?: LiteralIndex): string {
-  if (!index?.isFor(text) || !re.global) return text.replace(re, fn as AnyReplacer);
+export function replaceTracked(text: string, re: RegExp, fn: Replacer, index?: LiteralIndex, onEdits?: EditListener): string {
+  const idx = index?.isFor(text) ? index : undefined;
+  if ((!idx && !onEdits) || !re.global) return text.replace(re, fn as AnyReplacer);
   const edits: Edit[] = [];
   const result = text.replace(re, (...args: unknown[]) => {
     const r = String((fn as AnyReplacer)(...args));
@@ -724,6 +729,7 @@ export function replaceTracked(text: string, re: RegExp, fn: Replacer, index?: L
     return r;
   });
   if (!edits.length) return text;
-  index.update(result, edits);
+  idx?.update(result, edits);
+  onEdits?.(text, result, edits);
   return result;
 }
