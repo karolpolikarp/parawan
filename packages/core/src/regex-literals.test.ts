@@ -135,6 +135,7 @@ test('regex-literals: indeks po zmianach zgadza się z indeksem liczonym od nowa
 
 test('regex-literals: NearMatcher.next(p) to pierwsze trafienie od p, jak exec z lastIndex = p', () => {
   const r = rng(13);
+  const diffs: string[] = [];
   for (let k = 0; k < 200; k++) {
     const text = randomText(r, 40);
     for (const re of PATTERNS) {
@@ -145,9 +146,11 @@ test('regex-literals: NearMatcher.next(p) to pierwsze trafienie od p, jak exec z
         g.lastIndex = p;
         const want = g.exec(text);
         const got = near.next(p);
-        expect(got?.index ?? -1).toBe(want?.index ?? -1);
-        expect(got?.[0] ?? null).toBe(want?.[0] ?? null);
+        // różnice zbierane w tablicy: ćwierć miliona wywołań expect trwało na CI z Node 20 ponad 5 s
+        if ((got?.index ?? -1) !== (want?.index ?? -1) || (got?.[0] ?? null) !== (want?.[0] ?? null))
+          diffs.push(`${re.source} @${p} w ${JSON.stringify(text)}: ${got?.index ?? -1}/${got?.[0]} zamiast ${want?.index ?? -1}/${want?.[0]}`);
       }
     }
   }
+  expect(diffs).toEqual([]);
 });
