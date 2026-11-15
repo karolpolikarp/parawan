@@ -17,6 +17,7 @@
 // Ogólne zdania o zdrowiu bez nazwy choroby („Dane o zdrowiu pacjenta przetwarza…”) zostają.
 import type { RedactCtx } from '../context.js';
 import { NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
+import { type Edit, LiteralIndex, literalsPresent, nearSearchable, type Replacer, replaceNear, replaceTracked } from '../regex-literals.js';
 import { escapeRe } from '../util.js';
 
 /*
@@ -132,11 +133,33 @@ function gatePasses(re: RegExp, text: string): boolean {
   }
   return g === NO_GATE || g.test(text);
 }
+/**
+ * Podmiana trafień wzorca fraz albo zdarzeń. Wzorzec z napisami gwarancji (regex-literals) jest
+ * przeszukiwany tylko przy nich: bez pełnego przebiegu po tekście i bez bramki. Inny idzie przez
+ * filtr napisów (gdy je ma, ale krótkie), bramkę i zwykłe replace. Wynik w każdej drodze jest ten sam
+ * co text.replace(re, fn).
+ */
+function replacePhrase(text: string, re: RegExp, fn: Replacer): string {
+  const index = phraseIndex();
+  if (nearSearchable(re)) return replaceNear(text, re, fn, index);
+  return literalsPresent(re, text) && gatePasses(re, text) ? replaceTracked(text, re, fn, index) : text;
+}
+/**
+ * Wspólny indeks napisów wzorców fraz i zdarzeń (budowany raz, przy pierwszym użyciu): między
+ * kolejnymi wzorcami tekst zmienia się tylko w zakrytych miejscach, więc indeks przesuwa się zamiast
+ * przeszukiwać cały tekst dla każdego wzorca.
+ */
+let phraseIndexValue: LiteralIndex | null = null;
+function phraseIndex(): LiteralIndex {
+  phraseIndexValue ??= new LiteralIndex([...EVENTS.map((e) => e.re), ...PHRASES.map((p) => p.re), RE_SUFFER, RE_SURGERY, RE_CONTRAINDICATION]);
+  return phraseIndexValue;
+}
 function clearMemo(): void {
   for (const m of memoTests.values()) m.clear();
   for (const m of memoFns.values()) m.clear();
   startsText = null;
   startsValue = [];
+  phraseIndexValue?.clear();
 }
 
 const LO = 'a-ząćęłńóśźż';
@@ -1580,11 +1603,10 @@ const RE_COPULA_BEFORE = new RegExp(`${NOT_LETTER_BEFORE}(?:jest|jestem|był|by�
 /** Jeden przebieg zdarzeń zdrowotnych (w punkcie stałym razem z frazami). */
 function maskEventsOnce(ctx: RedactCtx, mask: string): void {
   for (const e of EVENTS) {
-    if (!gatePasses(e.re, ctx.text)) continue;
-    const starts = sentenceStarts(ctx.text);
-    ctx.text = ctx.text.replace(e.re, (m: string, ...args: unknown[]) => {
+    ctx.text = replacePhrase(ctx.text, e.re, (m: string, ...args: unknown[]) => {
       const offset = args[args.length - 2] as number;
       const whole = args[args.length - 1] as string;
+      const starts = sentenceStarts(whole);
       if (inProperName(whole, offset, m) || genericBefore(whole, offset)) return m;
       if (uncheckedOption(whole, offset) || e.reject?.(whole, offset, m, starts)) return m;
       const to = offset + m.length;
@@ -1597,7 +1619,7 @@ function maskEventsOnce(ctx: RedactCtx, mask: string): void {
   }
   // „rehabilitacja po [zabiegu]”, „leczenie po [udarze]”: rzeczownik przed zakrytym zdarzeniem wchodzi do maski
   const M = escapeRe(mask);
-  ctx.text = ctx.text.replace(new RegExp(`${NOT_LETTER_BEFORE}(?:${cap('rehabilitacj')}(?:a|i|ę|ą)|${cap('lecz')}(?:enie|enia|eniu|eniem))${WS}po${WS}${M}`, 'g'), mask);
+  ctx.text = replaceTracked(ctx.text, new RegExp(`${NOT_LETTER_BEFORE}(?:${cap('rehabilitacj')}(?:a|i|ę|ą)|${cap('lecz')}(?:enie|enia|eniu|eniem))${WS}po${WS}${M}`, 'g'), () => mask, phraseIndex());
 }
 
 /* ── Okno kontekstu ── */
@@ -1607,7 +1629,12 @@ let startsText: string | null = null;
 let startsValue: number[] = [];
 function sentenceStarts(text: string): number[] {
   // ten sam tekst między przebiegami (nic nie zamaskowano) nie wymaga ponownego liczenia; tablica tylko do odczytu
-  if (text === startsText) return startsValue;
+  // Ten sam tekst bywa innym obiektem (replace przekazuje spłaszczoną kopię): po równej treści
+  // zapamiętany zostaje nowy obiekt, więc kolejne pytania rozstrzyga porównanie tożsamości.
+  if (text === startsText) {
+    startsText = text;
+    return startsValue;
+  }
   startsText = text;
   startsValue = sentenceStartsOf(text);
   return startsValue;
@@ -2051,11 +2078,10 @@ function maskPhraseList(ctx: RedactCtx, mask: string, late: boolean): void {
     const lateOnly = p.anchor === diseaseAnchor || p.anchor === namedAnchor || p.anchor === morphAnchor || p.anchor === acronymAnchor;
     if (late ? p.self || !(lateOnly || (p.late && !p.anchor)) : lateOnly) continue;
     const anchor = late ? (p.anchor ?? diseaseAnchor) : (p.anchor ?? medicalAnchored);
-    if (!gatePasses(p.re, ctx.text)) continue;
-    const starts = sentenceStarts(ctx.text);
-    ctx.text = ctx.text.replace(p.re, (m: string, ...args: unknown[]) => {
+    ctx.text = replacePhrase(ctx.text, p.re, (m: string, ...args: unknown[]) => {
       const offset = args[args.length - 2] as number;
       const whole = args[args.length - 1] as string;
+      const starts = sentenceStarts(whole);
       if (inProperName(whole, offset, m)) return m;
       if (!p.self && genericBefore(whole, offset)) return m;
       // grupa tuż po nazwie („leczenie cukrzycy u dzieci”, „astma wśród uczniów”): mowa o grupie, nie o osobie
@@ -2072,24 +2098,23 @@ function maskPhrasesOnce(ctx: RedactCtx, mask: string): boolean {
   const before = ctx.text;
   maskPhraseList(ctx, mask, false);
   for (const re of [RE_SUFFER, RE_SURGERY]) {
-    const st = sentenceStarts(ctx.text);
-    ctx.text = ctx.text.replace(re, (m: string, pre: string, obj: string, offset: number, whole: string) => {
+    ctx.text = replaceNear(ctx.text, re, (m: string, pre: string, obj: string, offset: number, whole: string) => {
+      const st = sentenceStarts(whole);
       const from = offset + pre.length;
       const to = from + obj.length;
       const sentence = sentenceAt(whole, st, from, to);
       if (isGenericRule(sentence) || populationSubject(whole, st, from)) return m;
       const person = mtest(RE_FIRST_PERSON_VERB, pre) || mtest(RE_PATIENT_WORD, sentence) || personNear(whole, sentence, from, to);
       return person ? `${pre}${ctx.hit('ZDROWIE')}` : m;
-    });
+    }, phraseIndex());
   }
   maskEventsOnce(ctx, mask);
   maskDiagnoses(ctx, mask);
   maskPhraseList(ctx, mask, true);
-  const starts = sentenceStarts(ctx.text);
-  ctx.text = ctx.text.replace(RE_CONTRAINDICATION, (m: string, pre: string, _act: string, offset: number, whole: string) => {
-    if (!medicalAnchored(whole, starts, offset, offset + pre.length, mask)) return m;
+  ctx.text = replaceNear(ctx.text, RE_CONTRAINDICATION, (m: string, pre: string, _act: string, offset: number, whole: string) => {
+    if (!medicalAnchored(whole, sentenceStarts(whole), offset, offset + pre.length, mask)) return m;
     return `${pre}${ctx.hit('ZDROWIE')}`;
-  });
+  }, phraseIndex());
   return ctx.text !== before;
 }
 
@@ -3140,6 +3165,9 @@ function maskDiagnoses(ctx: RedactCtx, mask: string): void {
     }
     parts.push(text.slice(pos));
     ctx.text = parts.join('');
+    // indeks napisów fraz przesunięty o te same zmiany (gdy opisywał ten tekst)
+    const index = phraseIndex();
+    if (index.isFor(text)) index.update(ctx.text, spans.map(([a, b]): Edit => [a, b - a, mask.length]));
   }
 }
 
