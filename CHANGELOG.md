@@ -542,6 +542,33 @@ działają na GitHubie od chwili wypchnięcia tagów.
   bez kolumny osoby („Lp. | Nazwa podmiotu | Kwota”) się nie zmienia. Na
   trzeciej serii 50 pism (część robocza) wycieków jest 126 zamiast 142, bez nowych nadmiarowych
   zakryć.
+- **Inicjały pracownika w metryce i rejestrze z EZD znikają: w dekretacji, w kolumnie „Prow.”
+  i w legendzie skrótów.** Wcześniej „Dekretacja: Kierownik Referatu → MK” zostawiało inicjały
+  inspektor, choć jej pełne imię i nazwisko stało wiersz wyżej przy „Prowadzący:”, a w rejestrze
+  korespondencji wklejonym z Excela kolumna „Prow.” z „ES” i „TB” zostawała jawna razem z legendą
+  „Skróty w kolumnie Prow.: ES – Ewa Szołtysek”. Teraz to „Dekretacja: Kierownik Referatu →
+  [IMIĘ I NAZWISKO]”, „… | [IMIĘ I NAZWISKO]” w kolumnie i „[IMIĘ I NAZWISKO] – [IMIĘ
+  I NAZWISKO]” w legendzie. W kolumnie „Prow.”, „Prowadzący”, „Referent” albo „Załatwiający”
+  inicjały znikają tylko wtedy, gdy w piśmie jest osoba o tych inicjałach, bo w wykazach
+  i rejestrach stoi tam często organ albo komórka prowadząca: „Prowadzący | US”, „Prowadzący |
+  GK” przy znaku „GK.6220.1.2026” i „Referent | UM” zostają bez zmian. Bez osoby w piśmie dwie
+  wersaliki zakrywa tylko kolumna „Osoba prowadząca”, „Pracownik prowadzący” albo „Pracownik”,
+  w której wszystkie komórki to inicjały, bez skrótu instytucji i bez symbolu komórki z tego
+  pisma; „ND”, „BD” i „TAK” zostają. Po strzałce dekretacji, po „Dekretacja:”, „Zadekretowano
+  do:”, „Przydzielono do:”, „wg właściwości:” i w kolumnach „Ref.” i „Dekretacja” inicjały,
+  także z kropkami, znikają tylko przy osobie z pisma, bo tam stoi też komórka albo organ:
+  „Dekretacja: Sekretarz → OR → OR.I, wg właściwości: WOŚ/RGK” i „Przekazano wg właściwości:
+  U.S.C.” zostają bez zmian. Jawne zostają też symbole JRWA, kategorie archiwalne („A”, „B5”,
+  „BE10”), skróty ustaw („KPA”, „K.P.A. art. 35”, „KC”, „UODO”) i strzałka poza dekretacją
+  („Warszawa → Kraków”, „etap I → II”). Symbol komórki z tego pisma wygrywa ze stroną o tych
+  samych inicjałach: przy wnioskodawcy Grzegorzu Kowalu i znaku „GK.6220.1.2026”
+  „Dekretacja: Burmistrz → GK”, kolumna „Referent | GK” i „Kierownik Referatu GK – [IMIĘ
+  I NAZWISKO]” w legendzie zostawiają symbol referatu jawny. Skrót jednostki w polu „Sprawę
+  prowadzi:” albo „Referent:” też zostaje: „Sprawę prowadzi: Z.G.K. w Pucku” i „Referent: W.Z.D.
+  (Wojewódzki Zarząd Dróg)” bez zmian, a „Sprawę prowadzi: A.S., tel. wew. 21” daje
+  „[IMIĘ I NAZWISKO], tel. wew. 21”. Na
+  trzeciej serii 50 pism (część robocza) wycieków jest 116 zamiast 126, bez nowych nadmiarowych
+  zakryć.
 - **Pierwsze wklejone pismo i każda następna zmiana mają wynik od razu.** Parawan przygotowuje
   silnik zaraz po otwarciu pliku, a nie przy pierwszym piśmie. Wcześniej pierwsze przeliczenie
   trwało kilka razy dłużej niż kolejne, a pauza przed następnym rosła od niego do pół sekundy

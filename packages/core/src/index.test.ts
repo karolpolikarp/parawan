@@ -9235,6 +9235,163 @@ test('inicjały po kotwicy: regresje z weryfikacji (firmy, skróty, tytuły, tab
   }
 });
 
+test('W4: inicjały pracownika w dekretacji, kolumnie „Prow.” i legendzie skrótów z EZD', () => {
+  const P = MASK.IMIE;
+  const cases: [string, string][] = [
+    // strzałka dekretacji i pola metryki: inicjały osoby z pisma
+    [
+      'Prowadzący: Marta Kurek, inspektor\nDekretacja: Kierownik Referatu → MK, termin 05.11.2026',
+      `Prowadzący: ${P}, inspektor\nDekretacja: Kierownik Referatu → ${P}, termin 05.11.2026`,
+    ],
+    ['Obecni: Anna Sadowska, Marek Kowal.\ndekretacja: AS → MK', `Obecni: ${P}, ${P}.\ndekretacja: ${P} → ${P}`],
+    ['Obecni: Anna Sadowska, Marek Kowal.\nPrzekazano wg właściwości: AS/MK', `Obecni: ${P}, ${P}.\nPrzekazano wg właściwości: ${P}/${P}`],
+    ['Dekretacja: Burmistrz → OR -> MK\nSprawę prowadzi: Marek Kowal', `Dekretacja: Burmistrz → OR -> ${P}\nSprawę prowadzi: ${P}`],
+    ['Zespół: Jan Nowak.\nDekretowano do: JN, termin 7 dni', `Zespół: ${P}.\nDekretowano do: ${P}, termin 7 dni`],
+    // kolumna z nagłówkiem osobowym, w której wszystkie komórki to inicjały osób: znikają także bez
+    // osoby w piśmie, odpowiedzi i statusy zostają
+    [
+      'Lp. | Sprawa | Osoba prowadząca\n1 | wniosek | ES\n2 | skarga | TB\n3 | ankieta | ND',
+      `Lp. | Sprawa | Osoba prowadząca\n1 | wniosek | ${P}\n2 | skarga | ${P}\n3 | ankieta | ND`,
+    ],
+    ['Lp.\tSprawa\tPracownik prowadzący\n1\twniosek\tES\n2\tskarga\tMR', `Lp.\tSprawa\tPracownik prowadzący\n1\twniosek\t${P}\n2\tskarga\t${P}`],
+    // gołe „Prowadzący”, „Prow.”, „Referent”: inicjały osoby z pisma
+    [
+      'Uczestnicy: Ewa Szołtysek, Tomasz Bajer.\nLp. | Sprawa | Prowadzący\n1 | wniosek | ES\n2 | skarga | TB\n3 | ankieta | ND',
+      `Uczestnicy: ${P}, ${P}.\nLp. | Sprawa | Prowadzący\n1 | wniosek | ${P}\n2 | skarga | ${P}\n3 | ankieta | ND`,
+    ],
+    [
+      'Zespół: Paweł Sowa, Urszula Miler.\nLp. | Sprawa | Referent\n1 | wniosek | UM\n2 | skarga | PS',
+      `Zespół: ${P}, ${P}.\nLp. | Sprawa | Referent\n1 | wniosek | ${P}\n2 | skarga | ${P}`,
+    ],
+    // pola osobowe: zapis z kropkami wystarcza jak po „odp.”
+    ['Referent: A.S.', `Referent: ${P}`],
+    ['Sprawę prowadzi: M.K., tel. wew. 21', `Sprawę prowadzi: ${P}, tel. wew. 21`],
+    ['Pracownik | Stanowisko\nAS | inspektor\nMK | referent', `Pracownik | Stanowisko\n${P} | inspektor\n${P} | referent`],
+    // kolumna dekretacji: inicjały po strzałce przy osobie z pisma, komórka zostaje
+    [
+      'Uczestnicy: Anna Sadowska, Marek Kowal.\nLp. | Sprawa | Dekretacja\n1 | wniosek | WOŚ → MK\n2 | skarga | Kierownik → AS',
+      `Uczestnicy: ${P}, ${P}.\nLp. | Sprawa | Dekretacja\n1 | wniosek | WOŚ → ${P}\n2 | skarga | Kierownik → ${P}`,
+    ],
+    // legenda skrótów rozwija inicjały w osobę
+    [
+      'Skróty w kolumnie Prow.: ES – Ewa Szołtysek, TB – Tomasz Bajer (podinspektorzy).',
+      `Skróty w kolumnie Prow.: ${P} – ${P}, ${P} – ${P} (podinspektorzy).`,
+    ],
+    ['MK – Maria Kowalska, inspektor\nSprawę prowadzi: MK', `${P} – ${P}, inspektor\nSprawę prowadzi: ${P}`],
+    ['MK = Maria Kowalska', `${P} = ${P}`],
+    // dopisek i mówca z dwukropkiem to nie legenda
+    ['PS: Paweł Sowa prosi o kontakt.', `PS: ${P} prosi o kontakt.`],
+  ];
+  for (const [t, want] of cases) expect(redactPII(t).redacted, t).toBe(want);
+  keep([
+    // komórki, symbole JRWA, kategorie archiwalne i skróty ustaw zostają
+    'Dekretacja: Sekretarz → OR → OR.I, wg właściwości: WOŚ/RGK',
+    'Dekretacja: Burmistrz → WOŚ → RGK',
+    'Dekretacja: Burmistrz → Sekretarz → Kierownik USC',
+    'przekazano do załatwienia → BRM, wg właściwości → OR',
+    'Zadekretowano na: OŚ',
+    'Kategoria A, B5, BE10. Podstawa: KPA, KC, UODO. Komórki: WOŚ, RGK, OR, USC, BRM.',
+    'Symbol | Kat. arch. | Ref.\n0012 | A | OR\n2310 | BE10 | KD',
+    'Lp. | Sprawa | Dekretacja\n1 | wniosek | WOŚ → MK\n2 | skarga | Kierownik → AS',
+    // gołe inicjały po strzałce i polu metryki bez osoby w piśmie (komórka albo osoba: nie wiadomo)
+    'dekretacja: AB → CD',
+    'Referent: AS',
+    // strzałka poza dekretacją
+    'Etap I → II → III; Warszawa → Kraków; ZUS → US',
+    'Warszawa → Kraków → MK',
+    // kolumna „Prow.” w wyciągu bankowym to prowizja
+    'Data | Opis | Prow.\n01.11 | przelew | 1,20\n02.11 | wypłata | ND',
+    'Prow.: m.in. sprawy USC',
+  ]);
+});
+
+test('W4: kolumna „Prowadzący” i pola dekretacji z organem albo komórką zostają jawne', () => {
+  keep([
+    // gołe „Prowadzący”, „Prow.”, „Referent”, „Załatwiający” bez osoby w piśmie: organ albo komórka
+    'Lp. | Sprawa | Prow.\n1 | wniosek | ES\n2 | skarga | TB\n3 | ankieta | ND',
+    'Lp.\tSprawa\tProwadzący\n1\twniosek\tES\n2\tskarga\tKW',
+    'Lp | Rodzaj postępowania | Prowadzący | Sygnatura\n1 | podatkowe | US | 1\n2 | cywilne | SR | 2\n3 | apelacja | SO | 3\n4 | lokalowe | UM | 4\n5 | wieczysta | KW | 5',
+    'Lp | Zadanie inwestycyjne | Prowadzący | Kwota\n1 | droga gminna | UG | 10 000 zł\n2 | szkoła | UM | 20 000 zł\n3 | chodnik | ZD | 30 000 zł\n4 | kanalizacja | GK | 40 000 zł',
+    'Lp.\tData wpływu\tSprawa\tProwadzący\n1\t03.11.2026\tpozwolenie na budowę\tAB\n2\t04.11.2026\tpodział działki\tGK\n3\t05.11.2026\twycinka drzew\tOŚ\n4\t06.11.2026\trejestracja pojazdu\tKM',
+    'Lp | Sprawa | Referent | Termin\n1 | zasiłek | PS | 7 dni\n2 | świadczenie | SP | 14 dni\n3 | dodatek | OPS | 30 dni',
+    'Lp | Sprawa | Prowadzący\n1 | dotacja | UE\n2 | wniosek | PL',
+    'Lp | Sprawa | Załatwiający\n1 | zajęcie pasa | GK',
+    'Lp. | Sprawa | Referent\n1 | wniosek | UM',
+    'Lp. | Komórka | Prowadzący\n1 | Wydział Geodezji | GD\n2 | Referat Rolnictwa | RR\n3 | Biuro Rady | BR',
+    // nagłówek osobowy, ale w kolumnie stoi skrót instytucji albo symbol komórki z tego pisma
+    'Lp | Sprawa | Pracownik\n1 | a | NN\n2 | b | UE\n3 | c | WZ',
+    'Wydział Geodezji i Kartografii (GD)\nLp | Sprawa | Pracownik\n1 | mapa | GD\n2 | podział | GD',
+    // po dekretacji, przydziale i właściwości stoi komórka albo organ, także z kropkami
+    'Przekazano wg właściwości: U.S.C.',
+    'Przydzielono do: G.O.K.',
+    'Dekretacja: R.O.',
+    'Przydzielono dla: W.O.Ś.',
+    'Zadekretowano do: G.K., termin 14 dni',
+    'Dekretacja: Burmistrz → R.O. → W.O.Ś.',
+    // po zapisie z kropkami stoi przepis albo skrót kodeksu
+    'Sprawę prowadzi: K.P.A. art. 35',
+    'Referent: K.C. § 2',
+  ]);
+  // symbol komórki stoi w znaku sprawy tej samej tabeli (sam znak sprawy ma własną maskę)
+  for (const s of [
+    'Znak sprawy\tReferent\tStatus\nOR.1431.1.2026\tOR\tw toku\nGK.6220.2.2026\tGK\tzakończona',
+    'Lp. | Znak | Prowadzący\n1 | GK.6220.1.2026 | GK\n2 | OR.1431.2.2026 | OR\n3 | OŚ.6220.3.2026 | OŚ',
+    'Lp. | Znak | Osoba prowadząca\n1 | GK.6220.1.2026 | GK\n2 | OR.1431.2.2026 | OR\n3 | OŚ.6220.3.2026 | OŚ',
+    'Lp. | Znak | Pracownik prowadzący\n1 | GK.6220.1.2026 | GK\n2 | OR.1431.2.2026 | MK',
+  ])
+    expect(redactPII(s).redacted, s).not.toContain(MASK.IMIE);
+});
+
+test('W4: symbol komórki z pisma wygrywa z osobą o tych samych inicjałach, skrót jednostki w polu metryki zostaje', () => {
+  const P = MASK.IMIE;
+  // po strzałce i polach dekretacji, przydziału, właściwości oraz w kolumnie tabeli symbol komórki
+  // z tego pisma zostaje jawny także przy stronie o tych inicjałach
+  const cases: [string, string][] = [
+    ['Wnioskodawca: Grzegorz Kowal\nZnak sprawy: GK.6220.1.2026\nDekretacja: Burmistrz → GK', 'Dekretacja: Burmistrz → GK'],
+    ['Strona: Oskar Śliwa. Znak: OŚ.6131.4.2026\nDekretacja: Wójt → OŚ', 'Dekretacja: Wójt → OŚ'],
+    ['Znak: RG.7021.1.2026, Robert Gil\nPrzydzielono do: RG', 'Przydzielono do: RG'],
+    ['Znak: BR.0003.1.2026, Radny Bartosz Ryba\nwg właściwości: BR', 'wg właściwości: BR'],
+    ['Znak: OR.1431.2.2026, Olga Rak\nReferent | Sprawa\nOR | dostęp do informacji', '\nOR | dostęp do informacji'],
+    ['Znak: KD.1110.1.2026, Karolina Dąb\nProwadzący | Termin\nKD | 14 dni', '\nKD | 14 dni'],
+    ['Wydział Geodezji (GD), Pan Gustaw Dyl\nRef. | Kwota\nGD | 100', '\nGD | 100'],
+    ['Pracownik | Sprawa\nGK | GK.6220.1.2026\nMK | wniosek\nUczestnicy: Grzegorz Kowal', '\nGK |'],
+    // legenda: inicjały po słowie komórki i symbol z pisma to nie skrót osoby
+    ['Znak: GK.6831.2.2026\nKierownik Referatu GK – Grzegorz Kowalski', 'Kierownik Referatu GK – '],
+    ['Kierownik Wydziału OR – Olga Rak', 'Kierownik Wydziału OR – '],
+    ['Znak: GK.6220.1.2026\nGK – Grzegorz Kowalski', 'GK – '],
+  ];
+  for (const [t, part] of cases) {
+    const r = redactPII(t).redacted;
+    expect(r, t).toContain(part);
+    expect(r, t).toContain(P);
+  }
+  // osoba bez symbolu komórki w piśmie dalej znika po strzałce, w kolumnie i w legendzie
+  for (const [t, want] of [
+    ['Znak: GK.6220.1.2026, Marek Kowal\nDekretacja: Burmistrz → GK → MK', `Znak: [ZNAK-SPRAWY], ${P}\nDekretacja: Burmistrz → GK → ${P}`],
+    ['Znak: OR.1431.2.2026, Olga Rak, Marek Kowal\nReferent | Sprawa\nMK | wniosek', `Znak: [ZNAK-SPRAWY], ${P}, ${P}\nReferent | Sprawa\n${P} | wniosek`],
+    ['Kierownik Referatu → MK – Marek Kowal', `Kierownik Referatu → ${P} – ${P}`],
+    ['Znak: GK.6220.1.2026\nMK – Maria Kowalska', `Znak: [ZNAK-SPRAWY]\n${P} – ${P}`],
+  ] as [string, string][])
+    expect(redactPII(t).redacted, t).toBe(want);
+  // pola „Sprawę prowadzi:”, „Referent:”: trzy litery z kropkami przed miejscowością, nawiasem
+  // z rozwinięciem albo na końcu pola to skrót jednostki
+  keep([
+    'Sprawę prowadzi: Z.G.K. w Pucku',
+    'Sprawę prowadzi: P.Z.D. w Kartuzach',
+    'Referent: W.Z.D. (Wojewódzki Zarząd Dróg)',
+    'Sprawę prowadzi: Z.G.K.',
+    'Sprawę prowadzi: Z.G.K.\nTermin: 30 dni',
+    'Osoba prowadząca: M.O.P.S. w Lęborku',
+  ]);
+  for (const [t, want] of [
+    ['Sprawę prowadzi: A.S., tel. wew. 21', `Sprawę prowadzi: ${P}, tel. wew. 21`],
+    ['Referent: J.K. w Pucku', `Referent: ${P} w Pucku`],
+    ['Sprawę prowadzi: J.K.', `Sprawę prowadzi: ${P}`],
+    ['Uczestnik: Anna Sadowska-Kowal\nSprawę prowadzi: A.S.K. w Pucku', `Uczestnik: ${P}\nSprawę prowadzi: ${P} w Pucku`],
+  ] as [string, string][])
+    expect(redactPII(t).redacted, t).toBe(want);
+});
+
 test('tytuł urzędu w formie zależnej po „Panem/Panu” i „Niebieska Karta” to nie osoby', () => {
   keep([
     'Zgodnie z ustaleniami z Panem Ministrem termin nie może zostać przesunięty.',

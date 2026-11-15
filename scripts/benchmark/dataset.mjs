@@ -1399,6 +1399,22 @@ export function buildDataset() {
   // z telefonem. Nazwisko utworzone od funkcji („Wójtowicz”, „Sołtysik”) znika w całości.
   str('Lp.;Najemca;Telefon\n1;Kowalska Anna;600 100 200\n2;Kwiaciarnia Róża;54 288 33 12\n3;Chór Cecylia;54 288 60 11', ['Kowalska Anna', '600 100 200'], ['Kwiaciarnia Róża', '54 288 33 12', 'Chór Cecylia', '54 288 60 11']);
   str('Nazwisko i imię;PESEL\nKowalski Jan;80031212345\nWójtowicz Natan;02070803628\nSołtysik Teofil;85010112345', ['Kowalski Jan', 'Wójtowicz Natan', 'Sołtysik Teofil'], ['PESEL']);
+  // Metryka i rejestr z EZD: inicjały pracownika po strzałce dekretacji, w kolumnie pracownika
+  // („Prow.”) i w legendzie skrótów znikają; komórki, kategorie archiwalne i skróty ustaw zostają.
+  osp('Prowadzący: Marta Kurek, inspektor\nDekretacja: Kierownik Referatu → MK, termin 05.11.2026', ['Marta Kurek', '→ MK'], ['Kierownik Referatu', '05.11.2026']);
+  osp('Lp. | Sprawa | Prow.\n1 | wniosek | ES\n2 | skarga | TB\nSkróty w kolumnie Prow.: ES – Ewa Szołtysek, TB – Tomasz Bajer.', ['| ES', '| TB', 'ES –', 'TB –', 'Ewa Szołtysek', 'Tomasz Bajer'], ['Prow.', 'wniosek']);
+  neg('Dekretacja: Sekretarz → OR → OR.I, wg właściwości: WOŚ/RGK. Kategoria archiwalna: A, B5, BE10. Podstawa: KPA, KC, UODO.', ['→ OR → OR.I', 'WOŚ/RGK', 'A, B5, BE10', 'KPA, KC, UODO']);
+  // Gołe „Prowadzący”/„Referent” w wykazie albo rejestrze to często organ lub komórka prowadząca:
+  // bez osoby w piśmie zostają. Nagłówek osobowy z samymi inicjałami osób zakrywa je i bez osoby.
+  neg('Lp | Rodzaj postępowania | Prowadzący | Sygnatura\n1 | podatkowe | US | 1\n2 | cywilne | SR | 2\n3 | lokalowe | UM | 3', ['| US |', '| SR |', '| UM |']);
+  neg('Lp.\tSprawa\tProwadzący\n1\tpozwolenie na budowę\tAB\n2\tpodział działki\tGK\n3\twycinka drzew\tOŚ', ['budowę\tAB', 'działki\tGK', 'drzew\tOŚ']);
+  neg('Lp. | Komórka | Prowadzący\n1 | Wydział Geodezji | GD\n2 | Biuro Rady | BR', ['| GD', '| BR']);
+  neg('Przekazano wg właściwości: U.S.C. Przydzielono do: G.O.K. Sprawę prowadzi: K.P.A. art. 35', ['U.S.C.', 'G.O.K.', 'K.P.A. art. 35']);
+  osp('Lp. | Sprawa | Osoba prowadząca\n1 | wniosek | ES\n2 | skarga | TB', ['| ES', '| TB'], ['Osoba prowadząca', 'wniosek']);
+  // Symbol komórki z pisma po strzałce dekretacji, w kolumnie i w legendzie wygrywa ze stroną o tych
+  // samych inicjałach; skrót jednostki w polu „Sprawę prowadzi:” zostaje.
+  osp('Wnioskodawca: Grzegorz Kowal\nZnak sprawy: GK.6220.1.2026\nDekretacja: Burmistrz → GK → MN\nKierownik Referatu GK – Marek Nowak', ['Grzegorz Kowal', '→ MN', 'Marek Nowak'], ['→ GK', 'Referatu GK']);
+  neg('Sprawę prowadzi: Z.G.K. w Pucku. Referent: W.Z.D. (Wojewódzki Zarząd Dróg)', ['Z.G.K. w Pucku', 'W.Z.D. (Wojewódzki']);
 
   // ── Kontrola spójności zbioru ──
   const ids = new Set();

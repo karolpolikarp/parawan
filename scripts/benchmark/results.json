@@ -2,9 +2,9 @@
   "generatedAt": "2026-11-15T05:15:57.777Z",
   "seed": 20260704,
   "coreVersion": "0.30.0",
-  "casesTotal": 789,
-  "mustMaskTotal": 1078,
-  "mustKeepTotal": 1381,
+  "casesTotal": 799,
+  "mustMaskTotal": 1091,
+  "mustKeepTotal": 1406,
   "skippedLayers": [
     {
       "name": "core+spacy",
@@ -28,24 +28,24 @@
       "desc": "redactPII(): regex, sumy kontrolne i słownik (in-process, offline)",
       "elapsedMs": 985,
       "changedVsCore": null,
-      "recall": 0.9860853432282004,
-      "precision": 0.999275887038378,
-      "f1": 0.9926367967985309,
+      "recall": 0.9862511457378552,
+      "precision": 0.9992887624466572,
+      "f1": 0.9927271497525537,
       "agg": {
-        "maskTotal": 1078,
-        "maskHit": 1063,
-        "keepTotal": 1381,
-        "keepHit": 1380
+        "maskTotal": 1091,
+        "maskHit": 1076,
+        "keepTotal": 1406,
+        "keepHit": 1405
       },
       "perCategory": {
         "osoby-podstawowe": {
           "recall": 1,
           "precision": 1,
           "f1": 1,
-          "maskTotal": 249,
-          "maskHit": 249,
-          "keepTotal": 157,
-          "keepHit": 157
+          "maskTotal": 262,
+          "maskHit": 262,
+          "keepTotal": 165,
+          "keepHit": 165
         },
         "osoby-odmiana": {
           "recall": 1,
@@ -76,12 +76,12 @@
         },
         "negatywy": {
           "recall": null,
-          "precision": 0.9983818770226537,
+          "precision": 0.9984251968503937,
           "f1": null,
           "maskTotal": 0,
           "maskHit": 0,
-          "keepTotal": 618,
-          "keepHit": 617
+          "keepTotal": 635,
+          "keepHit": 634
         },
         "osoby-rzadkie-ner": {
           "recall": 0.21052631578947367,
@@ -4239,6 +4239,56 @@
         },
         {
           "id": "str-276",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-p-93",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-p-94",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-291",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-292",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-293",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-294",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-295",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-p-95",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "os-p-96",
+          "leaked": [],
+          "eaten": []
+        },
+        {
+          "id": "neg-296",
           "leaked": [],
           "eaten": []
         }

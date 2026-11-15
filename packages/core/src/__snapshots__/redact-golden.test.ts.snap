@@ -307,6 +307,20 @@ Lp.;Nazwa jednostki;Nr członkowski;Składka
 1;Ochotnicza Straż Pożarna w Zalesiu;0123;200,00",
   "neg-29": "Kwiecień plecień, bo przeplata trochę zimy, trochę lata.",
   "neg-290": "Architekt Miejski, Biuro Architektury i Planowania Przestrzennego (MOIA nr 12/2024 – stanowisko). Geodeta Powiatowy, uprawnienia nr 3/2025 do PZGiK.",
+  "neg-291": "Dekretacja: Sekretarz → OR → OR.I, wg właściwości: WOŚ/RGK. Kategoria archiwalna: A, B5, BE10. Podstawa: KPA, KC, UODO.",
+  "neg-292": "Lp | Rodzaj postępowania | Prowadzący | Sygnatura
+1 | podatkowe | US | 1
+2 | cywilne | SR | 2
+3 | lokalowe | UM | 3",
+  "neg-293": "Lp.	Sprawa	Prowadzący
+1	pozwolenie na budowę	AB
+2	podział działki	GK
+3	wycinka drzew	OŚ",
+  "neg-294": "Lp. | Komórka | Prowadzący
+1 | Wydział Geodezji | GD
+2 | Biuro Rady | BR",
+  "neg-295": "Przekazano wg właściwości: U.S.C. Przydzielono do: G.O.K. Sprawę prowadzi: K.P.A. art. 35",
+  "neg-296": "Sprawę prowadzi: Z.G.K. w Pucku. Referent: W.Z.D. (Wojewódzki Zarząd Dróg)",
   "neg-30": "Król wydał ucztę na zamku.",
   "neg-31": "Numer 44051401350 nie przeszedł walidacji w systemie.",
   "neg-32": "Ciąg 1234563210 to przykładowy identyfikator testowy.",
@@ -587,6 +601,19 @@ wzywa do zapłaty.",
   "os-p-90": "Decyzję doręczono Ołeksandrowi Melnykowi, a odpis Svitlanie Bondarenko.",
   "os-p-91": "Wniosek złożyła Fatima Haddad, obywatelka Syrii, a pełnomocnikiem jest Oliwier Zając.",
   "os-p-92": "Małżonek: Tran Thi Hoa. Pełnomocnikiem ustanawiam Do Minh Tuan.",
+  "os-p-93": "Prowadzący: Marta Kurek, inspektor
+Dekretacja: Kierownik Referatu → MK, termin 05.11.2026",
+  "os-p-94": "Lp. | Sprawa | Prow.
+1 | wniosek | ES
+2 | skarga | TB
+Skróty w kolumnie Prow.: ES – Ewa Szołtysek, TB – Tomasz Bajer.",
+  "os-p-95": "Lp. | Sprawa | Osoba prowadząca
+1 | wniosek | ES
+2 | skarga | TB",
+  "os-p-96": "Wnioskodawca: Grzegorz Kowal
+Znak sprawy: GK.6220.1.2026
+Dekretacja: Burmistrz → GK → MN
+Kierownik Referatu GK – Marek Nowak",
   "os-r-01": "Marek Bąkiewicz podpisał protokół odbioru.",
   "os-r-02": "Alicja Krzemieniecka złożyła wniosek o urlop.",
   "os-r-03": "Tadeusz Gzowski wynajął magazyn pod miastem.",
@@ -1393,6 +1420,20 @@ Lp.;Nazwa jednostki;Nr członkowski;Składka
 1;Ochotnicza Straż Pożarna w Zalesiu;0123;200,00",
   "neg-29": "Kwiecień plecień, bo przeplata trochę zimy, trochę lata.",
   "neg-290": "Architekt Miejski, Biuro Architektury i Planowania Przestrzennego (MOIA nr 12/2024 – stanowisko). Geodeta Powiatowy, uprawnienia nr 3/2025 do PZGiK.",
+  "neg-291": "Dekretacja: Sekretarz → OR → OR.I, wg właściwości: WOŚ/RGK. Kategoria archiwalna: A, B5, BE10. Podstawa: KPA, KC, UODO.",
+  "neg-292": "Lp | Rodzaj postępowania | Prowadzący | Sygnatura
+1 | podatkowe | US | 1
+2 | cywilne | SR | 2
+3 | lokalowe | UM | 3",
+  "neg-293": "Lp.	Sprawa	Prowadzący
+1	pozwolenie na budowę	AB
+2	podział działki	GK
+3	wycinka drzew	OŚ",
+  "neg-294": "Lp. | Komórka | Prowadzący
+1 | Wydział Geodezji | GD
+2 | Biuro Rady | BR",
+  "neg-295": "Przekazano wg właściwości: U.S.C. Przydzielono do: G.O.K. Sprawę prowadzi: K.P.A. art. 35",
+  "neg-296": "Sprawę prowadzi: Z.G.K. w Pucku. Referent: W.Z.D. (Wojewódzki Zarząd Dróg)",
   "neg-30": "Król wydał ucztę na zamku.",
   "neg-31": "Numer 44051401350 nie przeszedł walidacji w systemie.",
   "neg-32": "Ciąg 1234563210 to przykładowy identyfikator testowy.",
@@ -1671,6 +1712,19 @@ wzywa do zapłaty.",
   "os-p-90": "Decyzję doręczono [OSOBA-A], a odpis [OSOBA-B].",
   "os-p-91": "Wniosek złożyła [OSOBA-A], obywatelka Syrii, a pełnomocnikiem jest [OSOBA-B].",
   "os-p-92": "Małżonek: [OSOBA-A]. Pełnomocnikiem ustanawiam [OSOBA-B].",
+  "os-p-93": "Prowadzący: [OSOBA-A], inspektor
+Dekretacja: Kierownik Referatu → [OSOBA-A], termin 05.11.2026",
+  "os-p-94": "Lp. | Sprawa | Prow.
+1 | wniosek | [OSOBA-A]
+2 | skarga | [OSOBA-B]
+Skróty w kolumnie Prow.: [OSOBA-A] – [OSOBA-A], [OSOBA-B] – [OSOBA-B].",
+  "os-p-95": "Lp. | Sprawa | Osoba prowadząca
+1 | wniosek | [OSOBA-A]
+2 | skarga | [OSOBA-B]",
+  "os-p-96": "Wnioskodawca: [OSOBA-A]
+Znak sprawy: [ZNAK-SPRAWY]
+Dekretacja: Burmistrz → GK → [OSOBA-B]
+Kierownik Referatu GK – [OSOBA-B]",
   "os-r-01": "[OSOBA-A] podpisał protokół odbioru.",
   "os-r-02": "[OSOBA-A] złożyła wniosek o urlop.",
   "os-r-03": "[OSOBA-A] wynajął magazyn pod miastem.",
@@ -2477,6 +2531,20 @@ Lp.;Nazwa jednostki;Nr członkowski;Składka
 1;Ochotnicza Straż Pożarna w Zalesiu;0123;200,00",
   "neg-29": "Kwiecień plecień, bo przeplata trochę zimy, trochę lata.",
   "neg-290": "Architekt Miejski, Biuro Architektury i Planowania Przestrzennego (MOIA nr 12/2024 – stanowisko). Geodeta Powiatowy, uprawnienia nr 3/2025 do PZGiK.",
+  "neg-291": "Dekretacja: Sekretarz → OR → OR.I, wg właściwości: WOŚ/RGK. Kategoria archiwalna: A, B5, BE10. Podstawa: KPA, KC, UODO.",
+  "neg-292": "Lp | Rodzaj postępowania | Prowadzący | Sygnatura
+1 | podatkowe | US | 1
+2 | cywilne | SR | 2
+3 | lokalowe | UM | 3",
+  "neg-293": "Lp.	Sprawa	Prowadzący
+1	pozwolenie na budowę	AB
+2	podział działki	GK
+3	wycinka drzew	OŚ",
+  "neg-294": "Lp. | Komórka | Prowadzący
+1 | Wydział Geodezji | GD
+2 | Biuro Rady | BR",
+  "neg-295": "Przekazano wg właściwości: U.S.C. Przydzielono do: G.O.K. Sprawę prowadzi: K.P.A. art. 35",
+  "neg-296": "Sprawę prowadzi: Z.G.K. w Pucku. Referent: W.Z.D. (Wojewódzki Zarząd Dróg)",
   "neg-30": "Król wydał ucztę na zamku.",
   "neg-31": "Numer 44051401350 nie przeszedł walidacji w systemie.",
   "neg-32": "Ciąg 1234563210 to przykładowy identyfikator testowy.",
@@ -2755,6 +2823,19 @@ wzywa do zapłaty.",
   "os-p-90": "Decyzję doręczono [IMIĘ I NAZWISKO], a odpis [IMIĘ I NAZWISKO].",
   "os-p-91": "Wniosek złożyła [IMIĘ I NAZWISKO], obywatelka Syrii, a pełnomocnikiem jest [IMIĘ I NAZWISKO].",
   "os-p-92": "Małżonek: [IMIĘ I NAZWISKO]. Pełnomocnikiem ustanawiam [IMIĘ I NAZWISKO].",
+  "os-p-93": "Prowadzący: [IMIĘ I NAZWISKO], inspektor
+Dekretacja: Kierownik Referatu → [IMIĘ I NAZWISKO], termin 05.11.2026",
+  "os-p-94": "Lp. | Sprawa | Prow.
+1 | wniosek | [IMIĘ I NAZWISKO]
+2 | skarga | [IMIĘ I NAZWISKO]
+Skróty w kolumnie Prow.: [IMIĘ I NAZWISKO] – [IMIĘ I NAZWISKO], [IMIĘ I NAZWISKO] – [IMIĘ I NAZWISKO].",
+  "os-p-95": "Lp. | Sprawa | Osoba prowadząca
+1 | wniosek | [IMIĘ I NAZWISKO]
+2 | skarga | [IMIĘ I NAZWISKO]",
+  "os-p-96": "Wnioskodawca: [IMIĘ I NAZWISKO]
+Znak sprawy: [ZNAK-SPRAWY]
+Dekretacja: Burmistrz → GK → [IMIĘ I NAZWISKO]
+Kierownik Referatu GK – [IMIĘ I NAZWISKO]",
   "os-r-01": "[IMIĘ I NAZWISKO] podpisał protokół odbioru.",
   "os-r-02": "[IMIĘ I NAZWISKO] złożyła wniosek o urlop.",
   "os-r-03": "[IMIĘ I NAZWISKO] wynajął magazyn pod miastem.",
@@ -3610,6 +3691,20 @@ Lp.;Nazwa jednostki;Nr członkowski;Składka
 1;Ochotnicza Straż Pożarna w Zalesiu;0123;200,00",
   "neg-29": "Kwiecień plecień, bo przeplata trochę zimy, trochę lata.",
   "neg-290": "Architekt Miejski, Biuro Architektury i Planowania Przestrzennego (MOIA nr 12/2024 – stanowisko). Geodeta Powiatowy, uprawnienia nr 3/2025 do PZGiK.",
+  "neg-291": "Dekretacja: Sekretarz → OR → OR.I, wg właściwości: WOŚ/RGK. Kategoria archiwalna: A, B5, BE10. Podstawa: KPA, KC, UODO.",
+  "neg-292": "Lp | Rodzaj postępowania | Prowadzący | Sygnatura
+1 | podatkowe | US | 1
+2 | cywilne | SR | 2
+3 | lokalowe | UM | 3",
+  "neg-293": "Lp.	Sprawa	Prowadzący
+1	pozwolenie na budowę	AB
+2	podział działki	GK
+3	wycinka drzew	OŚ",
+  "neg-294": "Lp. | Komórka | Prowadzący
+1 | Wydział Geodezji | GD
+2 | Biuro Rady | BR",
+  "neg-295": "Przekazano wg właściwości: U.S.C. Przydzielono do: G.O.K. Sprawę prowadzi: K.P.A. art. 35",
+  "neg-296": "Sprawę prowadzi: Z.G.K. w Pucku. Referent: W.Z.D. (Wojewódzki Zarząd Dróg)",
   "neg-30": "Król wydał ucztę na zamku.",
   "neg-31": "Numer 44051401350 nie przeszedł walidacji w systemie.",
   "neg-32": "Ciąg 1234563210 to przykładowy identyfikator testowy.",
@@ -3888,6 +3983,19 @@ wzywa do zapłaty.",
   "os-p-90": "Decyzję doręczono <<osoba>>, a odpis <<osoba>>.",
   "os-p-91": "Wniosek złożyła <<osoba>>, obywatelka Syrii, a pełnomocnikiem jest <<osoba>>.",
   "os-p-92": "Małżonek: <<osoba>>. Pełnomocnikiem ustanawiam <<osoba>>.",
+  "os-p-93": "Prowadzący: <<osoba>>, inspektor
+Dekretacja: Kierownik Referatu → <<osoba>>, termin 05.11.2026",
+  "os-p-94": "Lp. | Sprawa | Prow.
+1 | wniosek | <<osoba>>
+2 | skarga | <<osoba>>
+Skróty w kolumnie Prow.: <<osoba>> – <<osoba>>, <<osoba>> – <<osoba>>.",
+  "os-p-95": "Lp. | Sprawa | Osoba prowadząca
+1 | wniosek | <<osoba>>
+2 | skarga | <<osoba>>",
+  "os-p-96": "Wnioskodawca: <<osoba>>
+Znak sprawy: [ZNAK-SPRAWY]
+Dekretacja: Burmistrz → GK → <<osoba>>
+Kierownik Referatu GK – <<osoba>>",
   "os-r-01": "<<osoba>> podpisał protokół odbioru.",
   "os-r-02": "<<osoba>> złożyła wniosek o urlop.",
   "os-r-03": "<<osoba>> wynajął magazyn pod miastem.",
@@ -4653,6 +4761,12 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "neg-289": "",
   "neg-29": "",
   "neg-290": "",
+  "neg-291": "",
+  "neg-292": "",
+  "neg-293": "",
+  "neg-294": "",
+  "neg-295": "",
+  "neg-296": "",
   "neg-30": "",
   "neg-31": "",
   "neg-32": "",
@@ -4887,6 +5001,10 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "os-p-90": "IMIE:2",
   "os-p-91": "IMIE:2",
   "os-p-92": "IMIE:2",
+  "os-p-93": "IMIE:2",
+  "os-p-94": "IMIE:6",
+  "os-p-95": "IMIE:2",
+  "os-p-96": "ZNAK-SPRAWY:1 IMIE:3",
   "os-r-01": "IMIE:1",
   "os-r-02": "IMIE:1",
   "os-r-03": "IMIE:1",
@@ -5491,6 +5609,12 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "neg-289": "",
   "neg-29": "",
   "neg-290": "",
+  "neg-291": "",
+  "neg-292": "",
+  "neg-293": "",
+  "neg-294": "",
+  "neg-295": "",
+  "neg-296": "",
   "neg-30": "",
   "neg-31": "",
   "neg-32": "",
@@ -5725,6 +5849,10 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "os-p-90": "IMIE:2",
   "os-p-91": "IMIE:2",
   "os-p-92": "IMIE:2",
+  "os-p-93": "IMIE:2",
+  "os-p-94": "IMIE:6",
+  "os-p-95": "IMIE:2",
+  "os-p-96": "ZNAK-SPRAWY:1 IMIE:3",
   "os-r-01": "IMIE:1",
   "os-r-02": "IMIE:1",
   "os-r-03": "IMIE:1",
