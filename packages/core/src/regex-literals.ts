@@ -50,10 +50,13 @@ const SPECIAL = /[.*+?^${}()|[\]\\/-]/;
 const zero = (): Node => ({ E: new Set(['']), L: null, max: 0, alpha: NONE });
 const anyChar = (alpha: Alpha): Node => ({ E: null, L: null, max: 1, alpha });
 
+/** Najdłuższy napis w zbiorze: dłuższy nie zawęża filtra, a jego składanie kosztuje. */
+const MAX_LEN = 32;
 function cross(a: Set<string>, b: Set<string>): Set<string> | null {
   const out = new Set<string>();
   for (const x of a) {
     for (const y of b) {
+      if (x.length + y.length > MAX_LEN) return null;
       out.add(x + y);
       if (out.size > MAX_SET) return null;
     }

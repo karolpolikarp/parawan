@@ -749,7 +749,20 @@ function propagateNames(ctx: RedactCtx, seeds: Seed[]): void {
     return ok(a) || ok(b);
   };
   const mark = (mask: string): string => `${NEW_MASK_MARK}${mask}`;
-  ctx.text = ctx.text.replace(wordRe(byFirst, surnameHeads), (whole: string, m: string, ini: string | undefined, offset: number, t: string) => {
+  // Wyraz zmienia się tylko z rdzeniem nazwiska z nasion albo jako forma imienia z nasion, więc jego
+  // pierwsza mała litera należy do głów: pierwszych liter rdzeni (także przed zamianą z SOFT) i form
+  // imion. Wyraz zaczynający się inną literą ASCII zostaje bez zmian bez dalszych sprawdzeń.
+  const asciiHead = new Uint8Array(128);
+  const markHead = (c: string): void => {
+    const k = c.charCodeAt(0);
+    if (k < 128) asciiHead[k] = 1;
+  };
+  for (const h of surnameHeads) markHead(h);
+  for (const [c, soft] of Object.entries(SOFT)) if (surnameHeads.has(soft)) markHead(c);
+  for (const f of byFirst.keys()) markHead(f[0]);
+  ctx.text = ctx.text.replace(RE_WORD, (whole: string, m: string, ini: string | undefined, offset: number, t: string) => {
+    const c0 = m.charCodeAt(0);
+    if (c0 < 128 && !asciiHead[c0 >= 65 && c0 <= 90 ? c0 + 32 : c0]) return whole;
     const ml = m.toLowerCase();
     const lowerWord = m === ml;
     const caps = !lowerWord && m.length > 1 && m === m.toUpperCase();
@@ -813,29 +826,6 @@ function propagateNames(ctx: RedactCtx, seeds: Seed[]): void {
     return mark(nearestMask(t, offset, fCands));
   });
   mergeNewMasks(ctx);
-}
-/**
- * RE_WORD tylko dla wyrazów, które mogą być nazwiskiem albo imieniem nasion. Wyraz zmienia się
- * w przebiegu tylko z rdzeniem nazwiska z nasion (pierwsza litera rdzenia to pierwsza mała litera
- * wyrazu albo jej odpowiednik z SOFT) albo z formą imienia z nasion, więc jego pierwsza litera po
- * zmianie na małe należy do zbioru głów. Wymóg z przodu: litera ASCII z tego zbioru (obie wielkości)
- * albo dowolny znak spoza ASCII; pozostałe wyrazy i tak zostałyby bez zmian. Pominięcie wyrazu niczego
- * nie przesuwa: początek trafienia RE_WORD nie leży w poprzednim trafieniu, poza literą „ X.” za
- * wyrazem, a sama wielka litera (jak „J”) i tak zostaje bez zmian.
- */
-const wordRes = new Map<string, RegExp>();
-function wordRe(byFirst: Map<string, Seed[]>, surnameHeads: Set<string>): RegExp {
-  const heads = new Set(surnameHeads);
-  for (const [c, soft] of Object.entries(SOFT)) if (surnameHeads.has(soft)) heads.add(c);
-  for (const f of byFirst.keys()) heads.add(f[0]);
-  const ascii = [...heads].filter((c) => c >= 'a' && c <= 'z').sort().map((c) => c + c.toUpperCase()).join('');
-  let re = wordRes.get(ascii);
-  if (!re) {
-    re = new RegExp(String.raw`(?=[${ascii}\u0080-\u{10FFFF}])` + RE_WORD.source, 'gu');
-    if (wordRes.size > 64) wordRes.clear();
-    wordRes.set(ascii, re);
-  }
-  return re;
 }
 // Wyraz małą literą w prozie, nie człon adresu, loginu ani ścieżki.
 const RE_LOWER_WORD = new RegExp(LOWER_AHEAD + /(?<![\p{L}\d.@_/\\-])\p{Ll}+(?![\p{L}\d@_/\\-]|\.\p{L})/u.source, 'gu');
