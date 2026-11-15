@@ -2584,15 +2584,26 @@ function maskDrugClasses(ctx: RedactCtx, mask: string): void {
  * należy do tej samej frazy i znika razem z nią, tak samo lek po przysłówku w wyliczeniu („[lek], obecnie
  * duloksetynę”). Tylko wyraz o kształcie leku, nie dowolny rzeczownik.
  */
+// Wzorce zależą tylko od maski: budowane raz na maskę (słownik leków kompiluje się długo).
+const drugAfterMaskRes = new Map<string, [RegExp, RegExp]>();
 function maskDrugAfterMask(ctx: RedactCtx, mask: string): void {
-  const shape = `(?:${DRUG_NAME}|${INSULIN_WORD}|${INSULIN_ALONE}|${INN_WORD}|${DRUG_CLASS})`;
-  // Lek z orzeczeniem tuż po nim to podmiot nowego zdania („[astma], sertralina jest omawiana”), nie wyliczenie.
-  const reJoin = new RegExp(String.raw`${escapeRe(mask)}[ \t]+${shape}(?!${PRED_AFTER})`, 'g');
+  // oba wzorce zaczynają się maską: bez niej w tekście nie ma trafień
+  if (!ctx.text.includes(mask)) return;
+  let res = drugAfterMaskRes.get(mask);
+  if (!res) {
+    const shape = `(?:${DRUG_NAME}|${INSULIN_WORD}|${INSULIN_ALONE}|${INN_WORD}|${DRUG_CLASS})`;
+    // Lek z orzeczeniem tuż po nim to podmiot nowego zdania („[astma], sertralina jest omawiana”), nie wyliczenie.
+    const join = new RegExp(String.raw`${escapeRe(mask)}[ \t]+${shape}(?!${PRED_AFTER})`, 'g');
+    const list = new RegExp(
+      String.raw`(${escapeRe(mask)}(?:[ \t]*,[ \t]*|[ \t]*\([ \t]*|[ \t]+(?:i|oraz|lub|albo|a[ \t]+także)[ \t]+)(?:na[ \t]+)?(?:(?:teraz|potem|też|także|również|[${LO}]{2,16}(?:nie|wo|ej))[ \t]+)?)(${shape})(?!${PRED_AFTER})`,
+      'g',
+    );
+    if (drugAfterMaskRes.size > 8) drugAfterMaskRes.clear();
+    res = [join, list];
+    drugAfterMaskRes.set(mask, res);
+  }
+  const [reJoin, re] = res;
   ctx.text = ctx.text.replace(reJoin, mask);
-  const re = new RegExp(
-    String.raw`(${escapeRe(mask)}(?:[ \t]*,[ \t]*|[ \t]*\([ \t]*|[ \t]+(?:i|oraz|lub|albo|a[ \t]+także)[ \t]+)(?:na[ \t]+)?(?:(?:teraz|potem|też|także|również|[${LO}]{2,16}(?:nie|wo|ej))[ \t]+)?)(${shape})(?!${PRED_AFTER})`,
-    'g',
-  );
   for (let round = 0; round < 3; round++) {
     const before = ctx.text;
     ctx.text = ctx.text.replace(re, (_m: string, pre: string) => `${pre}${ctx.hit('ZDROWIE')}`);
