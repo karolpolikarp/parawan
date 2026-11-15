@@ -929,7 +929,32 @@ Do wiadomości: Zarząd Mienia Komunalnego, ul. Bema 3.",
 | Jan Kowalski | Urząd Gminy Mielnik | ul. Polna 3, 17-307 Mielnik |",
   "str-251": "Zakład Usług Komunalnych „Czysto”, ul. Polna 3, 62-600 Koło, NIP [NIP]; Studio Komunikacji Wizualnej, ul. Lipowa 8, NIP [NIP]",
   "str-252": "Skarżąca Anna Nowak (Gmina Kobylnica, ul. Polna 3, 76-251 Kobylnica), reprezentowana przez adw. Piotra Lisa. Uczestnik: Zakład Gospodarki Komunalnej w Kole, ul. Toruńska 10.",
+  "str-253": "Urząd Gminy Firlej, ul. Szkolna 2, 21-136 Firlej
+tel. 81 856 40 12, podatki@firlej.example.pl
+
+Sprawę prowadzi: Anna Nowak, tel. [TELEFON], [EMAIL]",
+  "str-254": "Należność wpłacić na rachunek Gminy Firlej nr 78 1160 2202 6163 7497 8486 2063, a nadpłata zostanie zwrócona na rachunek nr [NR-KONTA] wskazany przez Jana Kowalskiego.",
+  "str-255": "Urząd Gminy Firlej
+ul. Szkolna 2, 21-136 Firlej
+tel. 81 856 10 21
+tel. 81 856 10 23 (Anna Nowak)
+
+Z poważaniem
+Marek Lis
+Inspektor
+Wydział Komunikacji, tel. 81 856 10 25",
+  "str-256": "Urząd Gminy Mielnik, ul. Piaskowa 1, 17-307 Mielnik, e-mail: gmina@mielnik.pl. Zajęcia prowadzi: [EMAIL], zapisy: [EMAIL].",
+  "str-257": "Umowę sporządziła: Sylwia Ratajczak, Referat Organizacyjny, tel. 61 817 04 11 wew. 34. Wywiad przeprowadziła: Agnieszka Pietrzak, pracownik socjalny, tel. [TELEFON] wew. 31.",
+  "str-258": "Wydział Komunikacji, e-mail: [EMAIL]; Starostwo Powiatowe w Łęcznej, ul. Szkolna 2, 21-010 Łęczna, e-mail: kancelaria@powiatleczynski.pl",
+  "str-259": "Podatek proszę wpłacić na rachunek Gminy Firlej nr [NR-KONTA] (subkonto podatnika). Opłatę skarbową wnosi się na rachunek urzędu nr 12 1020 1026 0000 0402 0000 0000.",
   "str-26": "Zamieszkały przy ul. Polnej 12/3 w Krakowie.",
+  "str-260": "Z poważaniem
+Anna Kwiatkowska
+Inspektor
+Urząd Gminy Bielsk
+ul. Szkolna 1
+09-230 Bielsk
+tel. 24 261 33 27, pok. 12, Marek Lis",
   "str-27": "Biuro mieści się przy al. Jerozolimskich 44.",
   "str-28": "Nowy lokal: os. Piastów 3/12, obok szkoły.",
   "str-29": "Spotkanie odbędzie się na pl. Zbawiciela 5.",
@@ -1934,7 +1959,32 @@ Do wiadomości: Zarząd Mienia Komunalnego, ul. Bema 3.",
 | [OSOBA-A] | Urząd Gminy Mielnik | [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ] |",
   "str-251": "Zakład Usług Komunalnych „Czysto”, [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], NIP [NIP]; Studio Komunikacji Wizualnej, [ADRES], NIP [NIP]",
   "str-252": "Skarżąca [OSOBA-A] (Gmina Kobylnica, [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]), reprezentowana przez adw. [OSOBA-B]. Uczestnik: Zakład Gospodarki Komunalnej w Kole, ul. Toruńska 10.",
+  "str-253": "Urząd Gminy Firlej, ul. Szkolna 2, 21-136 Firlej
+tel. 81 856 40 12, podatki@firlej.example.pl
+
+Sprawę prowadzi: [OSOBA-A], tel. [TELEFON], [EMAIL]",
+  "str-254": "Należność wpłacić na rachunek Gminy Firlej nr 78 1160 2202 6163 7497 8486 2063, a nadpłata zostanie zwrócona na rachunek nr [NR-KONTA] wskazany przez [OSOBA-A].",
+  "str-255": "Urząd Gminy Firlej
+ul. Szkolna 2, 21-136 Firlej
+tel. 81 856 10 21
+tel. [TELEFON] ([OSOBA-A])
+
+Z poważaniem
+[OSOBA-B]
+Inspektor
+Wydział Komunikacji, tel. [TELEFON]",
+  "str-256": "Urząd Gminy Mielnik, ul. Piaskowa 1, 17-307 Mielnik, e-mail: gmina@mielnik.pl. Zajęcia prowadzi: [EMAIL], zapisy: [EMAIL].",
+  "str-257": "Umowę sporządziła: [OSOBA-A], Referat Organizacyjny, tel. 61 817 04 11 wew. 34. Wywiad przeprowadziła: [OSOBA-B], pracownik socjalny, tel. [TELEFON] wew. 31.",
+  "str-258": "Wydział Komunikacji, e-mail: [EMAIL]; Starostwo Powiatowe w Łęcznej, ul. Szkolna 2, 21-010 Łęczna, e-mail: kancelaria@powiatleczynski.pl",
+  "str-259": "Podatek proszę wpłacić na rachunek Gminy Firlej nr [NR-KONTA] (subkonto podatnika). Opłatę skarbową wnosi się na rachunek urzędu nr 12 1020 1026 0000 0402 0000 0000.",
   "str-26": "Zamieszkały przy [ADRES] w [MIEJSCOWOŚĆ].",
+  "str-260": "Z poważaniem
+[OSOBA-A]
+Inspektor
+Urząd Gminy Bielsk
+ul. Szkolna 1
+09-230 Bielsk
+tel. [TELEFON], pok. 12, [OSOBA-B]",
   "str-27": "Biuro mieści się przy [ADRES].",
   "str-28": "Nowy lokal: [ADRES], obok szkoły.",
   "str-29": "Spotkanie odbędzie się na [ADRES].",
@@ -2939,7 +2989,32 @@ Do wiadomości: Zarząd Mienia Komunalnego, ul. Bema 3.",
 | [IMIĘ I NAZWISKO] | Urząd Gminy Mielnik | [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ] |",
   "str-251": "Zakład Usług Komunalnych „Czysto”, [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ], NIP [NIP]; Studio Komunikacji Wizualnej, [ADRES], NIP [NIP]",
   "str-252": "Skarżąca [IMIĘ I NAZWISKO] (Gmina Kobylnica, [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]), reprezentowana przez adw. [IMIĘ I NAZWISKO]. Uczestnik: Zakład Gospodarki Komunalnej w Kole, ul. Toruńska 10.",
+  "str-253": "Urząd Gminy Firlej, ul. Szkolna 2, 21-136 Firlej
+tel. 81 856 40 12, podatki@firlej.example.pl
+
+Sprawę prowadzi: [IMIĘ I NAZWISKO], tel. [TELEFON], [EMAIL]",
+  "str-254": "Należność wpłacić na rachunek Gminy Firlej nr 78 1160 2202 6163 7497 8486 2063, a nadpłata zostanie zwrócona na rachunek nr [NR-KONTA] wskazany przez [IMIĘ I NAZWISKO].",
+  "str-255": "Urząd Gminy Firlej
+ul. Szkolna 2, 21-136 Firlej
+tel. 81 856 10 21
+tel. [TELEFON] ([IMIĘ I NAZWISKO])
+
+Z poważaniem
+[IMIĘ I NAZWISKO]
+Inspektor
+Wydział Komunikacji, tel. [TELEFON]",
+  "str-256": "Urząd Gminy Mielnik, ul. Piaskowa 1, 17-307 Mielnik, e-mail: gmina@mielnik.pl. Zajęcia prowadzi: [EMAIL], zapisy: [EMAIL].",
+  "str-257": "Umowę sporządziła: [IMIĘ I NAZWISKO], Referat Organizacyjny, tel. 61 817 04 11 wew. 34. Wywiad przeprowadziła: [IMIĘ I NAZWISKO], pracownik socjalny, tel. [TELEFON] wew. 31.",
+  "str-258": "Wydział Komunikacji, e-mail: [EMAIL]; Starostwo Powiatowe w Łęcznej, ul. Szkolna 2, 21-010 Łęczna, e-mail: kancelaria@powiatleczynski.pl",
+  "str-259": "Podatek proszę wpłacić na rachunek Gminy Firlej nr [NR-KONTA] (subkonto podatnika). Opłatę skarbową wnosi się na rachunek urzędu nr 12 1020 1026 0000 0402 0000 0000.",
   "str-26": "Zamieszkały przy [ADRES] w [MIEJSCOWOŚĆ].",
+  "str-260": "Z poważaniem
+[IMIĘ I NAZWISKO]
+Inspektor
+Urząd Gminy Bielsk
+ul. Szkolna 1
+09-230 Bielsk
+tel. [TELEFON], pok. 12, [IMIĘ I NAZWISKO]",
   "str-27": "Biuro mieści się przy [ADRES].",
   "str-28": "Nowy lokal: [ADRES], obok szkoły.",
   "str-29": "Spotkanie odbędzie się na [ADRES].",
@@ -3993,7 +4068,32 @@ Do wiadomości: Zarząd Mienia Komunalnego, ul. Bema 3.",
 | <<osoba>> | Urząd Gminy Mielnik | <<adres>>, <<kod>> <<miejsce>> |",
   "str-251": "Zakład Usług Komunalnych „Czysto”, <<adres>>, <<kod>> <<miejsce>>, NIP [NIP]; Studio Komunikacji Wizualnej, <<adres>>, NIP [NIP]",
   "str-252": "Skarżąca <<osoba>> (Gmina Kobylnica, <<adres>>, <<kod>> <<miejsce>>), reprezentowana przez adw. <<osoba>>. Uczestnik: Zakład Gospodarki Komunalnej w Kole, ul. Toruńska 10.",
+  "str-253": "Urząd Gminy Firlej, ul. Szkolna 2, 21-136 Firlej
+tel. 81 856 40 12, podatki@firlej.example.pl
+
+Sprawę prowadzi: <<osoba>>, tel. [TELEFON], [EMAIL]",
+  "str-254": "Należność wpłacić na rachunek Gminy Firlej nr 78 1160 2202 6163 7497 8486 2063, a nadpłata zostanie zwrócona na rachunek nr [NR-KONTA] wskazany przez <<osoba>>.",
+  "str-255": "Urząd Gminy Firlej
+ul. Szkolna 2, 21-136 Firlej
+tel. 81 856 10 21
+tel. [TELEFON] (<<osoba>>)
+
+Z poważaniem
+<<osoba>>
+Inspektor
+Wydział Komunikacji, tel. [TELEFON]",
+  "str-256": "Urząd Gminy Mielnik, ul. Piaskowa 1, 17-307 Mielnik, e-mail: gmina@mielnik.pl. Zajęcia prowadzi: [EMAIL], zapisy: [EMAIL].",
+  "str-257": "Umowę sporządziła: <<osoba>>, Referat Organizacyjny, tel. 61 817 04 11 wew. 34. Wywiad przeprowadziła: <<osoba>>, pracownik socjalny, tel. [TELEFON] wew. 31.",
+  "str-258": "Wydział Komunikacji, e-mail: [EMAIL]; Starostwo Powiatowe w Łęcznej, ul. Szkolna 2, 21-010 Łęczna, e-mail: kancelaria@powiatleczynski.pl",
+  "str-259": "Podatek proszę wpłacić na rachunek Gminy Firlej nr [NR-KONTA] (subkonto podatnika). Opłatę skarbową wnosi się na rachunek urzędu nr 12 1020 1026 0000 0402 0000 0000.",
   "str-26": "Zamieszkały przy <<adres>> w <<miejsce>>.",
+  "str-260": "Z poważaniem
+<<osoba>>
+Inspektor
+Urząd Gminy Bielsk
+ul. Szkolna 1
+09-230 Bielsk
+tel. [TELEFON], pok. 12, <<osoba>>",
   "str-27": "Biuro mieści się przy <<adres>>.",
   "str-28": "Nowy lokal: <<adres>>, obok szkoły.",
   "str-29": "Spotkanie odbędzie się na <<adres>>.",
@@ -4806,7 +4906,15 @@ exports[`golden: lista found — pseudonimizacja 1`] = `
   "str-250": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
   "str-251": "NIP:2 KOD-POCZTOWY:1 ADRES:2 MIEJSCOWOSC:1",
   "str-252": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:2",
+  "str-253": "EMAIL:1 TELEFON:1 IMIE:1",
+  "str-254": "IBAN:1 IMIE:1",
+  "str-255": "TELEFON:2 IMIE:2",
+  "str-256": "EMAIL:2",
+  "str-257": "TELEFON:1 IMIE:2",
+  "str-258": "EMAIL:1",
+  "str-259": "NR-KONTA:1",
   "str-26": "ADRES:1 MIEJSCOWOSC:1",
+  "str-260": "TELEFON:1 IMIE:2",
   "str-27": "ADRES:1",
   "str-28": "ADRES:1",
   "str-29": "ADRES:1",
@@ -5618,7 +5726,15 @@ exports[`golden: lista found — wariant domyślny 1`] = `
   "str-250": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:1",
   "str-251": "NIP:2 KOD-POCZTOWY:1 ADRES:2 MIEJSCOWOSC:1",
   "str-252": "KOD-POCZTOWY:1 ADRES:1 MIEJSCOWOSC:1 IMIE:2",
+  "str-253": "EMAIL:1 TELEFON:1 IMIE:1",
+  "str-254": "IBAN:1 IMIE:1",
+  "str-255": "TELEFON:2 IMIE:2",
+  "str-256": "EMAIL:2",
+  "str-257": "TELEFON:1 IMIE:2",
+  "str-258": "EMAIL:1",
+  "str-259": "NR-KONTA:1",
   "str-26": "ADRES:1 MIEJSCOWOSC:1",
+  "str-260": "TELEFON:1 IMIE:2",
   "str-27": "ADRES:1",
   "str-28": "ADRES:1",
   "str-29": "ADRES:1",

@@ -435,6 +435,50 @@ działają na GitHubie od chwili wypchnięcia tagów.
   Kobylnica, [ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]), reprezentowana przez adw. [IMIĘ I NAZWISKO]”
   i „Skarżący [IMIĘ I NAZWISKO]; Gmina Kobylnica, [ADRES], reprezentowany przez radcę prawnego”: gmina
   jest stroną tylko wtedy, gdy „reprezentowana” zgadza się z nią rodzajem i przed nią nie stoi osoba.
+- **Telefon, e-mail i rachunek urzędu zostają jawne, więc AI może je wpisać do odpowiedzi.** Numer
+  pod nagłówkiem urzędu („Urząd Gminy Firlej, ul. Szkolna 2, 21-136 Firlej⏎tel. 81 856 40 12,
+  podatki@firlej.example.pl”, wcześniej „tel. [TELEFON], [EMAIL]”), za etykietą („Sekretariat: tel.
+  22 123 45 67”, „Centrala, tel. …”, „tel. sekretariatu: …”, infolinia 800 i 801) i przy komórce urzędu
+  z numerem wewnętrznym („Referat Organizacyjny, tel. 61 817 04 11 wew. 34”) zostaje jawny, także
+  w kolejnych wystąpieniach w piśmie. Skrzynka funkcyjna zostaje w domenie urzędu albo szkoły
+  („sekretariat@sp2.kartuzy.pl”, „iod@um.gliwice.pl”), pod nagłówkiem, przy nazwie komórki („Do:
+  Wydział Finansowy <finanse@example.pl>”) i po „ogólny adres”. Rachunek przy nazwie urzędu też: „na
+  rachunek Gminy Firlej nr 78 1160 2202 6163 7497 8486 2063”, „na rachunek Starostwa Powiatowego
+  w Kłodzku nr …”, „na rachunek Miasta Gliwice nr …”, „na rachunek urzędu nr …” (wcześniej „nr
+  [NR-KONTA]”). Na trzeciej serii pism (część robocza) nadmiarowych zakryć jest 2 zamiast 16, na
+  drugiej 17 zamiast 20, bez nowych wycieków.
+- **Telefon, e-mail i rachunek osoby obok urzędu dalej znikają.** Komórka w nagłówku urzędu, imienny
+  adres w domenie urzędu („a.siwiec@starakamionka.example.pl”) i numer przy nazwisku pracownika bez
+  numeru wewnętrznego („Sprawę prowadzi: [IMIĘ I NAZWISKO], Referat Podatków, tel. [TELEFON]”,
+  „[IMIĘ I NAZWISKO], inspektor, Urząd Gminy Mielnik, ul. Piaskowa 1, tel. [TELEFON]”) zostają
+  zakryte. Numer pracownika zostaje zakryty także wtedy, gdy jego imię i nazwisko stoi w wierszu nad
+  komórką („Z poważaniem⏎[IMIĘ I NAZWISKO]⏎Inspektor⏎Wydział Komunikacji, tel. [TELEFON]”) albo za
+  numerem („tel. [TELEFON] ([IMIĘ I NAZWISKO])” pod numerem centrali, który zostaje jawny). Skrzynka
+  z nazwiskiem albo imieniem w domenie znika przy każdej nazwie skrzynki i w każdej domenie poza
+  gov.pl: „biuro@korepetycje-kowalska.edu.pl”, „biuro@przedszkole-nowak.pl”, „komunikacja@kowalski.pl”
+  i „biuro@annanowak.pl” dają „[EMAIL]”. Gmina o nazwie równej nazwisku („Urząd Gminy Mielnik,
+  ul. Piaskowa 1, 17-307 Mielnik, e-mail: gmina@mielnik.pl”) zostaje jawna, bo ta sama nazwa stoi
+  w nagłówku urzędu jako miejscowość. Rachunek strony („na rachunek
+  Rodzica nr [NR-KONTA]”, „na rachunek bankowy wnioskodawczyni nr [NR-KONTA]”, „na mój rachunek”),
+  indywidualny rachunek podatnika („na indywidualny rachunek Gminy Firlej nr [NR-KONTA]”, „…,
+  przypisany podatnikowi”) i rachunek wynajmującego czy dzierżawcy znikają jak dotąd.
+- **Skrzynka z nazwiskiem pisanym bez polskich znaków, subkonto podatnika i numer urzędnika z podpisu
+  nad adresem urzędu dalej znikają.** Domena zawsze jest bez ogonków, więc nazwisko i imię w niej
+  porównujemy z ich zapisem bez polskich znaków, a nazwisko spoza słownika rozpoznajemy po końcówce:
+  „Urząd Gminy Firlej, e-mail: sekretariat@wisniewski.pl”, „komunikacja@zielinski.pl”,
+  „biuro@lukaszkaminski.pl”, „biuro@krol.pl”, „biuro@przedszkole-wrzesniewska.pl” i
+  „biuro@sad-brzeczyszczykiewicz.pl” dają „[EMAIL]”, także przy członie szkoły, przedszkola czy sądu.
+  Skrzynka powiatu z jego nazwą („kancelaria@powiatleczynski.pl” pod nagłówkiem starostwa) zostaje
+  jawna. Subkonto i rachunek z zaimkiem adresata przy nazwie gminy znikają: „na rachunek Gminy Firlej
+  nr [NR-KONTA] (subkonto podatnika)”, „…: [NR-KONTA] – jest to Pana numer subkonta”, „Numer Pana
+  konta podatkowego: rachunek Gminy Firlej [NR-KONTA]”, „nr [NR-KONTA] (subkonto [IMIĘ I
+  NAZWISKO])”; „W odpowiedzi na Pana wniosek … na rachunek Gminy Firlej nr 78 1160 …” zostaje jawne.
+  Numer z osobą dalej w tym samym wierszu znika także za pokojem, godzinami czy wersalikami
+  („Wydział Komunikacji, tel. [TELEFON], pok. 12, [IMIĘ I NAZWISKO]”, „tel. [TELEFON] – [IMIĘ
+  I NAZWISKO]” zamiast jawnego numeru przy „ANNA NOWAK”), a numer urzędnika pod podpisem także nad
+  adresem z ulicą („Zbigniew Pawlak⏎Kierownik Referatu⏎Urząd Miasta Kalisza, ul. Główny Rynek 20,
+  tel. 62 765 43 21” daje „tel. [TELEFON]”). Nagłówek urzędu bez podpisu nad nim i numer z numerem
+  wewnętrznym zostają jawne.
 
 ## v0.47.0 — 2026-11-14
 

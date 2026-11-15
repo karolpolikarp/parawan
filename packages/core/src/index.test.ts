@@ -12516,3 +12516,189 @@ test('jednostka samorządu w mianowniku: stroną tylko z reprezentantem zgodnym 
   const r = redactPII('Gmina Pszczyna, ul. Rynek 2, 43-200 Pszczyna, NIP 6381016402, reprezentowana przez Burmistrza Pszczyny').redacted;
   expect(r).toContain('ul. Rynek 2, 43-200 Pszczyna, NIP 6381016402');
 });
+
+// ── Kontakt i rachunek instytucji (seria 3, klasy N4 i N6): dane urzędu jawne, dane osoby obok zakryte ──
+test('telefon i e-mail urzędu w nagłówku, za etykietą centrali albo przy komórce urzędu zostają jawne', () => {
+  const keep: Array<[string, string[]]> = [
+    ['WÓJT GMINY FIRLEJ\nUrząd Gminy Firlej, ul. Szkolna 2, 21-136 Firlej\ntel. 81 856 40 12, podatki@firlej.example.pl', ['81 856 40 12', 'podatki@firlej.example.pl']],
+    ['Szkoła Podstawowa nr 2 w Kartuzach\nul. Klasztorna 11, 83-300 Kartuzy\ntel. 58 681 24 07', ['58 681 24 07']],
+    ['Sąd Okręgowy w Bydgoszczy\nI Wydział Cywilny\nul. Wały Jagiellońskie 2, 85-128 Bydgoszcz\ntel. 52 325 31 40, e-mail: cywilny1@so-bydgoszcz.example.pl', ['52 325 31 40', 'cywilny1@so-bydgoszcz.example.pl']],
+    ['Urząd Gminy Firlej, ul. Szkolna 2, 21-136 Firlej, tel. 81 856 40 12', ['81 856 40 12']],
+    ['Umowę sporządziła: Sylwia Ratajczak, Referat Organizacyjny, tel. 61 817 04 11 wew. 34', ['61 817 04 11']],
+    ['Wydział Komunikacji, tel. 22 443 12 10', ['22 443 12 10']],
+    ['Sekretariat: tel. 22 123 45 67. Centrala, tel. 22 123 45 00. Tel. sekretariatu szkoły: 58 681 24 07. Infolinia: tel. 801 400 987.', ['22 123 45 67', '22 123 45 00', '58 681 24 07', '801 400 987']],
+    ['Do: Wydział Finansowy <finanse@example.pl>', ['finanse@example.pl']],
+    ['Pytania kandydatów kieruję na ogólny adres sekretariat@starakamionka.example.pl.', ['sekretariat@starakamionka.example.pl']],
+    ['Wnioski przyjmuje sekretariat@sp2.kartuzy.pl oraz iod@um.gliwice.pl.', ['sekretariat@sp2.kartuzy.pl', 'iod@um.gliwice.pl']],
+  ];
+  for (const [t, parts] of keep) {
+    const r = redactPII(t).redacted;
+    for (const p of parts) expect(r, t).toContain(p);
+  }
+  // Ten sam numer niżej przy pracowniku to dalej numer szkoły.
+  const school = redactPII('Szkoła Podstawowa nr 2 w Kartuzach\nul. Klasztorna 11, 83-300 Kartuzy\ntel. 58 681 24 07\n\nSprawę prowadziła: Aneta Wenta, sekretarz szkoły, tel. 58 681 24 07 wew. 21').redacted;
+  expect(school).toBe('Szkoła Podstawowa nr 2 w Kartuzach\nul. Klasztorna 11, 83-300 Kartuzy\ntel. 58 681 24 07\n\nSprawę prowadziła: [IMIĘ I NAZWISKO], sekretarz szkoły, tel. 58 681 24 07 wew. 21');
+});
+test('telefon i e-mail osoby obok danych urzędu zostają zakryte', () => {
+  const masked: Array<[string, string]> = [
+    // adres osoby nad kontaktem, komórka w nagłówku urzędu, imienna skrzynka w domenie urzędu
+    ['Jan Kowalski\nul. Polna 3\n00-001 Wieś\ntel. 22 123 45 67, biuro@kowalski.pl', '[IMIĘ I NAZWISKO]\n[ADRES]\n[KOD-POCZTOWY] [MIEJSCOWOŚĆ]\ntel. [TELEFON], [EMAIL]'],
+    ['Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\ntel. 601 234 567', 'Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\ntel. [TELEFON]'],
+    ['Kontakt: jan.kowalski@ug-firlej.pl, a.siwiec@starakamionka.example.pl', 'Kontakt: [EMAIL], [EMAIL]'],
+    // telefon przy nazwisku pracownika bez numeru wewnętrznego to jego bezpośredni numer
+    ['Sprawę prowadzi: Anna Nowak, tel. 22 123 45 67', 'Sprawę prowadzi: [IMIĘ I NAZWISKO], tel. [TELEFON]'],
+    ['Sprawę prowadzi: Anna Nowak, Referat Podatków, tel. 22 123 45 67', 'Sprawę prowadzi: [IMIĘ I NAZWISKO], Referat Podatków, tel. [TELEFON]'],
+    ['Wywiad przeprowadziła: Agnieszka Pietrzak, starszy pracownik socjalny, tel. 62 765 44 12 wew. 31', 'Wywiad przeprowadziła: [IMIĘ I NAZWISKO], starszy pracownik socjalny, tel. [TELEFON] wew. 31'],
+    ['Sprawdziła: Marta Ziobro, inspektor, Urząd Gminy Mielnik, ul. Piaskowa 1, tel. 85 657 40 12', 'Sprawdziła: [IMIĘ I NAZWISKO], inspektor, Urząd Gminy Mielnik, ul. Piaskowa 1, tel. [TELEFON]'],
+    ['Anna Nowak\ninspektor\nUrząd Gminy Firlej\ntel. 81 856 40 12', '[IMIĘ I NAZWISKO]\ninspektor\nUrząd Gminy Firlej\ntel. [TELEFON]'],
+    ['Sekretariat: Anna Nowak, tel. 22 123 45 67', 'Sekretariat: [IMIĘ I NAZWISKO], tel. [TELEFON]'],
+    // skrzynka ogólna firmy z nazwiskiem w domenie, skrzynka bez kontekstu urzędu
+    ['Biuro Rachunkowe Anna Nowak\nul. Polna 3, 00-001 Wieś\ntel. 22 123 45 67, biuro@nowak-biuro.pl', 'Biuro Rachunkowe [IMIĘ I NAZWISKO]\n[ADRES], [KOD-POCZTOWY] [MIEJSCOWOŚĆ]\ntel. [TELEFON], [EMAIL]'],
+    ['Do: Michał Dudek <sekretariat@example.pl>', 'Do: [IMIĘ I NAZWISKO] <[EMAIL]>'],
+  ];
+  for (const [t, want] of masked) expect(redactPII(t).redacted, t).toBe(want);
+});
+test('rachunek urzędu przy jego nazwie jawny, rachunek strony i indywidualny rachunek podatnika zakryte', () => {
+  const NR = '78 1160 2202 6163 7497 8486 2063';
+  const keep = [
+    `Zobowiązanie płatne na rachunek Gminy Firlej nr ${NR}, z podaniem numeru karty podatnika.`,
+    `Należność wpłacić na rachunek Starostwa Powiatowego w Kłodzku nr ${NR} w terminie 14 dni.`,
+    `Opłatę wnosi się na rachunek Miejskiego Zarządu Dróg w Toruniu nr ${NR}.`,
+    'Wpłaty należy dokonać na rachunek Gminy Miasto Rzeszów nr PL31105000992541336785327805, podając numer upomnienia.',
+    'Wpłat należy dokonywać na rachunek Miasta Gliwice nr PL53 1240 1037 5039 1130 6191 9257.',
+    `Opłatę skarbową wnosi się na rachunek urzędu nr ${NR}.`,
+  ];
+  for (const t of keep) expect(redactPII(t).redacted, t).toBe(t);
+  // Zwrot do adresata gdzie indziej w zdaniu albo w piśmie nie robi z rachunku gminy rachunku osoby.
+  const keepAddress = [
+    `W odpowiedzi na Pana wniosek nr GK.123 informuję, że opłatę należy wnieść na rachunek Gminy Firlej nr ${NR}.`,
+    `Opłatę należy wnieść na rachunek Gminy Firlej nr ${NR}.\nPana wniosek zostanie rozpatrzony w terminie.`,
+    `Decyzja indywidualna: opłatę należy wnieść na rachunek Gminy Firlej nr ${NR}.`,
+  ];
+  for (const t of keepAddress) expect(redactPII(t).redacted, t).toContain(NR);
+  const masked: Array<[string, string]> = [
+    [`Czynsz płatny na rachunek Wynajmującego nr ${NR}.`, 'Czynsz płatny na rachunek Wynajmującego nr [NR-KONTA].'],
+    [`Należność przekazywana na rachunek Rodzica nr ${NR}.`, 'Należność przekazywana na rachunek Rodzica nr [NR-KONTA].'],
+    [`Świadczenie wypłaca się na rachunek bankowy wnioskodawczyni nr ${NR}.`, 'Świadczenie wypłaca się na rachunek bankowy wnioskodawczyni nr [NR-KONTA].'],
+    [`Proszę o przelew na mój rachunek ${NR}.`, 'Proszę o przelew na mój rachunek [NR-KONTA].'],
+    [`Podatek wpłacać na indywidualny rachunek Gminy Firlej nr ${NR}.`, 'Podatek wpłacać na indywidualny rachunek Gminy Firlej nr [NR-KONTA].'],
+    [`Wpłaty na rachunek Gminy Firlej nr ${NR}, przypisany podatnikowi.`, 'Wpłaty na rachunek Gminy Firlej nr [NR-KONTA], przypisany podatnikowi.'],
+    [`Zwrot na rachunek Jana Kowalskiego nr ${NR}.`, 'Zwrot na rachunek [IMIĘ I NAZWISKO] nr [NR-KONTA].'],
+    // subkonto podatnika i zaimek adresata przy rachunku gminy, osoba za numerem
+    [`Należność proszę wpłacić na rachunek Gminy Firlej nr ${NR} (subkonto podatnika).`, 'Należność proszę wpłacić na rachunek Gminy Firlej nr [NR-KONTA] (subkonto podatnika).'],
+    [`Rachunek Gminy Firlej: ${NR} – jest to Pana numer subkonta.`, 'Rachunek Gminy Firlej: [NR-KONTA] – jest to Pana numer subkonta.'],
+    [`Proszę wpłacić na rachunek Gminy Firlej nr ${NR}, właściwy wyłącznie dla Pani.`, 'Proszę wpłacić na rachunek Gminy Firlej nr [NR-KONTA], właściwy wyłącznie dla Pani.'],
+    [`Numer Pana konta podatkowego: rachunek Gminy Firlej ${NR}`, 'Numer Pana konta podatkowego: rachunek Gminy Firlej [NR-KONTA]'],
+    [`Twój rachunek: rachunek Gminy Firlej nr ${NR}.`, 'Twój rachunek: rachunek Gminy Firlej nr [NR-KONTA].'],
+    [`Wpłaty na rachunek Gminy Firlej nr ${NR}, nadany dla podatnika Jana Kowalskiego.`, 'Wpłaty na rachunek Gminy Firlej nr [NR-KONTA], nadany dla podatnika [IMIĘ I NAZWISKO].'],
+    [`Wpłaty na rachunek Gminy Firlej nr ${NR} (subkonto Jana Kowalskiego).`, 'Wpłaty na rachunek Gminy Firlej nr [NR-KONTA] (subkonto [IMIĘ I NAZWISKO]).'],
+    ['Proszę wpłacić na rachunek urzędu: PL78116022026163749784862063 (rachunek Jana Kowalskiego).', 'Proszę wpłacić na rachunek urzędu: [NR-KONTA] (rachunek [IMIĘ I NAZWISKO]).'],
+    [`Wpłaty na rachunek Gminy Firlej nr ${NR} – ANNA NOWAK.`, 'Wpłaty na rachunek Gminy Firlej nr [NR-KONTA] – [IMIĘ I NAZWISKO].'],
+  ];
+  for (const [t, want] of masked) expect(redactPII(t).redacted, t).toBe(want);
+  // Rachunek gminy i rachunek strony w jednym zdaniu.
+  expect(redactPII(`Wpłata na rachunek Gminy Firlej nr ${NR}, zwrot nadpłaty na rachunek nr PL02 1240 1037 4507 9523 1154 4257.`).redacted).toBe(
+    `Wpłata na rachunek Gminy Firlej nr ${NR}, zwrot nadpłaty na rachunek nr [NR-KONTA].`,
+  );
+});
+test('telefon urzędnika z podpisu w wierszu nad komórką albo z nazwiskiem za numerem zostaje zakryty', () => {
+  const masked: Array<[string, string]> = [
+    ['Anna Nowak\nReferat Podatków, tel. 81 856 10 23', '[IMIĘ I NAZWISKO]\nReferat Podatków, tel. [TELEFON]'],
+    ['Kontakt: Anna Nowak\nWydział Komunikacji, tel. 22 845 12 34', 'Kontakt: [IMIĘ I NAZWISKO]\nWydział Komunikacji, tel. [TELEFON]'],
+    ['Z poważaniem\nAnna Nowak\nInspektor\nWydział Komunikacji, tel. 32 238 54 11', 'Z poważaniem\n[IMIĘ I NAZWISKO]\nInspektor\nWydział Komunikacji, tel. [TELEFON]'],
+    // osoba za numerem w bloku siedziby: bezpośredni numer tej osoby, numer centrali obok jawny
+    ['Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\ntel. 81 856 10 21\ntel. 81 856 10 23 (Anna Nowak)', 'Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\ntel. 81 856 10 21\ntel. [TELEFON] ([IMIĘ I NAZWISKO])'],
+    ['Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\ntel. 81 856 10 21\nWydział Komunikacji, tel. 81 856 10 24 – Anna Nowak', 'Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\ntel. 81 856 10 21\nWydział Komunikacji, tel. [TELEFON] – [IMIĘ I NAZWISKO]'],
+    // podpis nad adresem urzędu z ulicą: w tym samym wierszu i w bloku kilku wierszy
+    ['Zbigniew Pawlak\nKierownik Referatu\nUrząd Miasta Kalisza, ul. Główny Rynek 20, tel. 62 765 43 21', '[IMIĘ I NAZWISKO]\nKierownik Referatu\nUrząd Miasta Kalisza, ul. Główny Rynek 20, tel. [TELEFON]'],
+    ['Z poważaniem\nAnna Kwiatkowska\nInspektor\nUrząd Gminy Bielsk\nul. Szkolna 1\n09-230 Bielsk\ntel. 24 261 33 27', 'Z poważaniem\n[IMIĘ I NAZWISKO]\nInspektor\nUrząd Gminy Bielsk\nul. Szkolna 1\n09-230 Bielsk\ntel. [TELEFON]'],
+    ['Anna Kwiatkowska\nInspektor\nUrząd Gminy Bielsk\nul. Szkolna 1, 09-230 Bielsk, tel. 24 261 33 27', '[IMIĘ I NAZWISKO]\nInspektor\nUrząd Gminy Bielsk\nul. Szkolna 1, 09-230 Bielsk, tel. [TELEFON]'],
+    // osoba za numerem także za pokojem, godzinami i pisana wersalikami
+    ['Wydział Komunikacji, tel. 32 445 12 92, pok. 12, Anna Nowak', 'Wydział Komunikacji, tel. [TELEFON], pok. 12, [IMIĘ I NAZWISKO]'],
+    ['Wydział Komunikacji, tel. 32 445 12 92 (pok. 112) – Anna Nowak', 'Wydział Komunikacji, tel. [TELEFON] (pok. 112) – [IMIĘ I NAZWISKO]'],
+    ['Referat Podatków, tel. 81 857 70 23, w godz. 7.30–15.30, Anna Nowak', 'Referat Podatków, tel. [TELEFON], w godz. 7.30–15.30, [IMIĘ I NAZWISKO]'],
+    ['Wydział Komunikacji, tel. 32 445 12 92 - ANNA NOWAK', 'Wydział Komunikacji, tel. [TELEFON] - [IMIĘ I NAZWISKO]'],
+  ];
+  for (const [t, want] of masked) expect(redactPII(t).redacted, t).toBe(want);
+  // Komórka urzędu w wierszu pod nagłówkiem urzędu, bez osoby nad nią, i centrala z numerem wewnętrznym zostają jawne.
+  const keep = [
+    'Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\nReferat Podatków, tel. 81 856 10 23',
+    'Anna Nowak\nReferat Podatków, tel. 81 856 10 23 wew. 21',
+    'Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\ntel. 81 856 10 21 wew. 34 (Anna Nowak)',
+  ];
+  for (const t of keep) expect(redactPII(t).redacted, t).toContain(t.includes('wew. 21') ? '81 856 10 23 wew. 21' : t.includes('wew. 34') ? '81 856 10 21 wew. 34' : '81 856 10 23');
+});
+test('numer urzędu bez osoby za nim i nagłówek urzędu w kilku wierszach zostają jawne', () => {
+  const keep: Array<[string, string]> = [
+    ['Wydział Komunikacji, tel. 32 445 12 92, pok. 12, w godz. 7.30–15.30', '32 445 12 92'],
+    ['Wydział Komunikacji, tel. 32 445 12 92 (pon.–pt. 7.30–15.30)', '32 445 12 92'],
+    ['URZĄD GMINY BIELSK\nul. Szkolna 1\n09-230 Bielsk\ntel. 24 261 33 27', '24 261 33 27'],
+    ['Kalisz, 12.03.2026\n\nURZĄD MIASTA KALISZA\nul. Główny Rynek 20\n62-800 Kalisz\ntel. 62 765 43 21', '62 765 43 21'],
+    ['Anna Kwiatkowska\nInspektor\nUrząd Gminy Bielsk\nul. Szkolna 1\n09-230 Bielsk\ntel. 24 261 33 27 wew. 21', '24 261 33 27 wew. 21'],
+  ];
+  for (const [t, part] of keep) expect(redactPII(t).redacted, t).toContain(part);
+  // Osoba stoi dopiero za kolejnym numerem: zakryty jest jej numer, a nie pierwszy.
+  expect(redactPII('Wydział Komunikacji, tel. 32 445 12 92, Wydział Podatków, tel. 32 445 12 93 – Anna Nowak').redacted).toBe(
+    'Wydział Komunikacji, tel. 32 445 12 92, Wydział Podatków, tel. [TELEFON] – [IMIĘ I NAZWISKO]',
+  );
+});
+test('skrzynka z nazwiskiem albo imieniem w domenie zostaje zakryta także w edu.pl i przy nazwie urzędu', () => {
+  const masked: Array<[string, string]> = [
+    ['Proszę pisać na: biuro@korepetycje-kowalska.edu.pl', 'Proszę pisać na: [EMAIL]'],
+    ['Wydział Komunikacji, e-mail: komunikacja@kowalski.pl', 'Wydział Komunikacji, e-mail: [EMAIL]'],
+    ['Dział Kadr, e-mail: kadry@kowalski-transport.pl', 'Dział Kadr, e-mail: [EMAIL]'],
+    ['Urząd Gminy Firlej <sekretariat@kowalski.pl>', 'Urząd Gminy Firlej <[EMAIL]>'],
+    ['Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\nbiuro@annanowak.pl', 'Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\n[EMAIL]'],
+    // nazwisko i imię z polskimi literami zapisane w domenie bez nich
+    ['Urząd Gminy Firlej, e-mail: sekretariat@wisniewski.pl', 'Urząd Gminy Firlej, e-mail: [EMAIL]'],
+    ['Wydział Komunikacji, e-mail: komunikacja@zielinski.pl', 'Wydział Komunikacji, e-mail: [EMAIL]'],
+    ['Urząd Gminy Firlej, e-mail: kadry@wojcik-transport.pl', 'Urząd Gminy Firlej, e-mail: [EMAIL]'],
+    ['Urząd Gminy Firlej, e-mail: biuro@lukaszkaminski.pl', 'Urząd Gminy Firlej, e-mail: [EMAIL]'],
+    ['WÓJT GMINY FIRLEJ\nul. Szkolna 2, 21-136 Firlej\ne-mail: biuro@krol.pl', 'WÓJT GMINY FIRLEJ\nul. Szkolna 2, 21-136 Firlej\ne-mail: [EMAIL]'],
+    ['Wnioskodawca: Jan Wiśniewski, e-mail: biuro@przedszkole-wisniewski.pl', 'Wnioskodawca: [IMIĘ I NAZWISKO], e-mail: [EMAIL]'],
+    ['Pani Małgorzata Dąbrowska, e-mail: biuro@szkola-dabrowska.pl', 'Pani [IMIĘ I NAZWISKO], e-mail: [EMAIL]'],
+    ['Wnioskodawca: Jan Kozłowski, e-mail: biuro@sp1-kozlowski.pl', 'Wnioskodawca: [IMIĘ I NAZWISKO], e-mail: [EMAIL]'],
+    // nazwisko spoza słownika po samej końcówce, także obok członu szkoły, przedszkola czy sądu
+    ['Kontakt: biuro@przedszkole-wrzesniewska.pl', 'Kontakt: [EMAIL]'],
+    ['Kontakt: biuro@szkola-jezykowa-brzozowska.pl', 'Kontakt: [EMAIL]'],
+    ['Kontakt: biuro@sad-brzeczyszczykiewicz.pl', 'Kontakt: [EMAIL]'],
+  ];
+  for (const [t, want] of masked) expect(redactPII(t).redacted, t).toBe(want);
+  // Miejscowość w nagłówku (Nowa Wieś) nie czyni nazwiska z domeny nazwą miejsca.
+  expect(redactPII('Urząd Gminy Nowa Wieś\nul. Szkolna 2, 21-136 Nowa Wieś\nbiuro@nowak.pl').redacted).toMatch(/\n\[EMAIL\]$/u);
+  const kindergarten = redactPII('Przedszkole Niepubliczne Anny Nowak\nul. Polna 3, 21-136 Firlej\nbiuro@przedszkole-nowak.pl').redacted;
+  expect(kindergarten).not.toContain('nowak');
+  expect(kindergarten).toContain('[EMAIL]');
+  // Gmina o nazwie równej nazwisku (Firlej, Mielnik): ta sama nazwa w nagłówku urzędu, więc skrzynka jawna.
+  const keep: Array<[string, string]> = [
+    ['Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\ntel. 81 856 10 21\ne-mail: sekretariat@ug-firlej.pl', 'sekretariat@ug-firlej.pl'],
+    ['Urząd Gminy Mielnik\nul. Piaskowa 1, 17-307 Mielnik\ne-mail: gmina@mielnik.pl', 'gmina@mielnik.pl'],
+    ['Szkoła Podstawowa nr 2 w Kaliszu\nsekretariat@sp2.kalisz.pl', 'sekretariat@sp2.kalisz.pl'],
+    ['Wnioski przyjmuje sekretariat@kowalski.gov.pl.', 'sekretariat@kowalski.gov.pl'],
+    // nazwa powiatu to przymiotnik na -ski; nazwa gminy bez polskich znaków albo z ruchomym „e”
+    ['STAROSTWO POWIATOWE W ŁĘCZNEJ\nul. Szkolna 2, 21-010 Łęczna\ne-mail: kancelaria@powiatleczynski.pl', 'kancelaria@powiatleczynski.pl'],
+    ['STAROSTWO POWIATOWE W ŁĘCZNEJ\nul. Szkolna 2, 21-010 Łęczna\ne-mail: sekretariat@powiat.leczynski.pl', 'sekretariat@powiat.leczynski.pl'],
+    ['URZĄD GMINY JABŁONNA\nul. Szkolna 2, 05-110 Jabłonna\ne-mail: sekretariat@jablonna.pl', 'sekretariat@jablonna.pl'],
+    ['URZĄD MIEJSKI W TURKU\nul. Kaliska 59, 62-700 Turek\ne-mail: sekretariat@turek.pl', 'sekretariat@turek.pl'],
+  ];
+  for (const [t, part] of keep) expect(redactPII(t).redacted, t).toContain(part);
+});
+test('kontakt i rachunek urzędu w długim tekście bez złamań wiersza: czas rośnie liniowo', () => {
+  const units = [
+    'Urząd Gminy Firlej ul. Szkolna 2, 21-136 Firlej, tel. 81 856 10 21; ',
+    'Opłatę wnieść na rachunek Gminy Firlej nr 12 1020 1026 0000 0402 0000 0000; ',
+    'Wydział Komunikacji, e-mail: komunikacja@gmina-firlej.pl, tel. 81 856 10 22; ',
+  ];
+  for (const u of units) {
+    redactPII(u.repeat(200));
+    const time = (n: number): number => {
+      const t0 = performance.now();
+      redactPII(u.repeat(n));
+      return performance.now() - t0;
+    };
+    const small = time(1000);
+    const big = time(8000);
+    // Ośmiokrotnie dłuższy tekst: liniowo około 8×, kwadratowo około 64×.
+    expect(big, u).toBeLessThan(Math.max(small, 15) * 16);
+  }
+});

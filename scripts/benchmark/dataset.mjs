@@ -1356,6 +1356,18 @@ export function buildDataset() {
   str('Zakład Usług Komunalnych „Czysto”, ul. Polna 3, 62-600 Koło, NIP 6661234567; Studio Komunikacji Wizualnej, ul. Lipowa 8, NIP 5260250274', ['ul. Polna 3', '6661234567', 'ul. Lipowa 8', '5260250274'], ['Zakład Usług Komunalnych']);
   str('Skarżąca Anna Nowak (Gmina Kobylnica, ul. Polna 3, 76-251 Kobylnica), reprezentowana przez adw. Piotra Lisa. Uczestnik: Zakład Gospodarki Komunalnej w Kole, ul. Toruńska 10.', ['Anna Nowak', 'ul. Polna 3', '76-251', 'Piotra Lisa'], ['ul. Toruńska 10']);
 
+  // Kontakt i rachunek urzędu (seria 3, N4 i N6): numer centrali, skrzynka funkcyjna i rachunek
+  // gminy jawne; telefon przy nazwisku, imienny e-mail i rachunek strony zakryte.
+  str('Urząd Gminy Firlej, ul. Szkolna 2, 21-136 Firlej\ntel. 81 856 40 12, podatki@firlej.example.pl\n\nSprawę prowadzi: Anna Nowak, tel. 81 856 40 33, a.nowak@firlej.example.pl', ['Anna Nowak', '81 856 40 33', 'a.nowak@firlej.example.pl'], ['81 856 40 12', 'podatki@firlej.example.pl']);
+  str('Należność wpłacić na rachunek Gminy Firlej nr 78 1160 2202 6163 7497 8486 2063, a nadpłata zostanie zwrócona na rachunek nr PL02 1240 1037 4507 9523 1154 4257 wskazany przez Jana Kowalskiego.', ['PL02 1240 1037 4507 9523 1154 4257', 'Jana Kowalskiego'], ['78 1160 2202 6163 7497 8486 2063']);
+  str('Urząd Gminy Firlej\nul. Szkolna 2, 21-136 Firlej\ntel. 81 856 10 21\ntel. 81 856 10 23 (Anna Nowak)\n\nZ poważaniem\nMarek Lis\nInspektor\nWydział Komunikacji, tel. 81 856 10 25', ['81 856 10 23', 'Anna Nowak', 'Marek Lis', '81 856 10 25'], ['81 856 10 21']);
+  str('Urząd Gminy Mielnik, ul. Piaskowa 1, 17-307 Mielnik, e-mail: gmina@mielnik.pl. Zajęcia prowadzi: biuro@korepetycje-kowalska.edu.pl, zapisy: sekretariat@kowalski-transport.pl.', ['biuro@korepetycje-kowalska.edu.pl', 'sekretariat@kowalski-transport.pl'], ['gmina@mielnik.pl']);
+  str('Umowę sporządziła: Sylwia Ratajczak, Referat Organizacyjny, tel. 61 817 04 11 wew. 34. Wywiad przeprowadziła: Agnieszka Pietrzak, pracownik socjalny, tel. 62 765 44 12 wew. 31.', ['Sylwia Ratajczak', 'Agnieszka Pietrzak', '62 765 44 12'], ['61 817 04 11']);
+  // Nazwisko w domenie bez polskich znaków, subkonto podatnika i podpis nad adresem urzędu.
+  str('Wydział Komunikacji, e-mail: komunikacja@zielinski.pl; Starostwo Powiatowe w Łęcznej, ul. Szkolna 2, 21-010 Łęczna, e-mail: kancelaria@powiatleczynski.pl', ['komunikacja@zielinski.pl'], ['kancelaria@powiatleczynski.pl']);
+  str('Podatek proszę wpłacić na rachunek Gminy Firlej nr 78 1160 2202 6163 7497 8486 2063 (subkonto podatnika). Opłatę skarbową wnosi się na rachunek urzędu nr 12 1020 1026 0000 0402 0000 0000.', ['78 1160 2202 6163 7497 8486 2063'], ['12 1020 1026 0000 0402 0000 0000']);
+  str('Z poważaniem\nAnna Kwiatkowska\nInspektor\nUrząd Gminy Bielsk\nul. Szkolna 1\n09-230 Bielsk\ntel. 24 261 33 27, pok. 12, Marek Lis', ['Anna Kwiatkowska', '24 261 33 27', 'Marek Lis'], ['ul. Szkolna 1']);
+
   // ── Kontrola spójności zbioru ──
   const ids = new Set();
   for (const c of cases) {
