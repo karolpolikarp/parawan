@@ -16,7 +16,7 @@
 //    poradnik, przepis, OWU, przetarg czy raport („leczenie nowotworów w Polsce”) zostają jawne.
 // Ogólne zdania o zdrowiu bez nazwy choroby („Dane o zdrowiu pacjenta przetwarza…”) zostają.
 import type { RedactCtx } from '../context.js';
-import { NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
+import { isFirstNameGenitive, isFirstNameLike, isMaleFirstNameGenitive, NOUN_LIKE_FIRST_NAMES, POLISH_FIRST_NAMES } from '../dict/names.js';
 import { type Edit, LiteralIndex, literalsPresent, NearMatcher, nearSearchable, type Replacer, replaceNear, replaceTracked } from '../regex-literals.js';
 import { sentenceStartsOf, updateSentenceStarts } from '../sentence-starts.js';
 import { isConfirmedSurname, looksLikeSurname } from '../surnames.js';
@@ -360,7 +360,61 @@ const namePairAt = memo(function namePairAt(s: string): number {
     // para zachodzi na siebie („Pacjentka Maria Kowalska”): następny wyraz zaczyna kolejną parę
     RE_CAP_PAIR.lastIndex = m.index + m[1].length;
   }
-  return -1;
+  return obliqueNamed(s)[0]?.[0] ?? -1;
+});
+/**
+ * Imię w przypadku zależnym jako przedziały [a, b): z nazwiskiem („Krystyny Pawlik”, „Grażynę Szczepaniak”),
+ * po „u” („U Zosi stwierdzono”), w środku zdania („orzeczenie Kacpra”, „opiekuje się Jankiem”) i przed
+ * czasownikiem bezosobowym („Zosi wystawiono”). Odpada adres i patron („ul. Marii Konopnickiej”,
+ * „Konopnickiej 5”, „św. Jana”, „szkoły Marii Konopnickiej”, „gminy Kazimierza Wielka”), autor polecenia
+ * („z upoważnienia Anny Nowak”) i dzieła („Książka Jolanty Nowak o…”, „Wykład dr. Jana Kowalskiego”), lekarz
+ * z tytułem, nazwa z wielkich liter przed imieniem („Fundacji Anny Dymnej”), dwa imiona („Jana Pawła”),
+ * mianownik, imię, które jest też rzeczownikiem („Róży”, „Pole”), i imię w przepisie albo w zdaniu
+ * o grupie („Mieszkańcy… mogą”). Odrzucona para nie oddaje nazwiska dalszemu szukaniu („im. Ireny Sendlerowej”).
+ */
+const RE_OBL_NAME = new RegExp(`(?<![${LETTER}.])(?:([${UP}][${LO}]+)${SP}[${UP}][${LO}]{2,}(?:-[${UP}][${LO}]+)?|(?:([Uu])${SP})?([${UP}][${LO}]{2,})(?!${SP}[${UP}]))${NLA}(?![ \t]?\d)`, 'g');
+const RE_OBL_PREV = new RegExp(`(?:(?<![${LETTER}])(?:ul|al|os|pl|im|św|bł|ks|ulic|alej|plac|imieni|decyzj|poleceni|upoważnieni|zarządzeni|zleceni|podpis|wytyczn)[${LO}]*\.?|(?<=[${LETTER},;)][ \t]{1,4})(?!Pan(?:i|u|ią|a|em)?[ \t])[${UP}][${LETTER}]*|\d)${SP0}$`);
+/** Instytucja, miejsce i dzieło przed imieniem: patron, nazwa miejscowości albo autor, a nie osoba z faktem o zdrowiu. */
+const RE_OBL_NOUN = new RegExp(
+  `${NOT_LETTER_BEFORE}(?:szkoł|szkol|szpital|lice|gimnazj|przedszkol|żłob|burs|internat|uniwersytet|akademi|politechni|hospic|osiedl|pomnik|fundacj|stowarzysz|towarzyst|centr|instytut|klinik|poradni|ośrod|zesp[oó]ł|parafi|kości|muze|bibliotek|teatr|klub|związk|sanktuari|park|gmin|powiat|wojew|sołectw|nagrod|stypendi|książk|poradnik|film|reportaż|artykuł|wykład|prelekcj|referat|publikacj|audycj|felieton|spektakl|podcast|esej|wiersz)${L}(?:${SP}(?:dr|prof|doc|hab|mgr|inż|lek|med|ks)\\.?){0,4}${SP0}$`,
+  'i',
+);
+/** Zdanie o grupie („Mieszkańcy… mogą”, „wszyscy”): imię w nim to nazwa; „nie można jej zostawić” mówi o osobie. */
+const RE_OBL_RULE = new RegExp(`${NOT_LETTER_BEFORE}(?:mogą|wszys(?:cy|tkie))${NLA}`, 'i');
+const RE_OBL_MID = new RegExp(`[${LO},][ \t]{1,4}$`);
+const RE_OBL_IMPERS = new RegExp(`^${SP}(?:nie${SP})?[${LO}]{3,}(?:ono|ano|ęto|yto|ito)${NLA}`);
+/** Temat po imieniu („Wywiad z Anną Nowak o depresji”, „Monografia Jana Kowalskiego o chorobie”): „o” z miejscownikiem robi z osoby autora lub rozmówcę; „o zasiłek”, „o świadczenie” (biernik) to prośba. */
+const RE_OBL_ABOUT = new RegExp(`^${SP}o${SP}(?!jej|swo)[${LO}]+(?:[uiy]|ach|ej|ym|im|[^nc]ie|[^i]e)${NLA}`);
+/** Lokal z nazwą „u Basi” („Pensjonat u Basi”, „barze U Kasi”): rzeczownik z wielkiej litery przed „u”, który nie jest czynnością („Badanie u Zosi”), albo „U” w środku zdania. */
+const RE_OBL_VENUE = new RegExp(`(?:[${UP}][${LO}]*(?<!(?:[nc]ie|cj[aęi]|oz[aęy]|tyk[aęi]|y))${SP}u|[${LETTER},]${SP}U)${SP}$`);
+/** Imię na końcu krótkiego tytułu akcji, zbiórki lub programu w cudzysłowie („Pomóż Zuzi”, „Uśmiech dla Hani”); cytat wypowiedzi jest dłuższy. */
+const RE_QUOTE_OPEN = /[„«“"][^„«“”»"\n]{0,24}$/;
+const RE_QUOTE_CLOSE = /^[^„«“”»"\n]{0,8}[”»“"]/;
+/** Imię w dowolnym przypadku („Zosi”, „Kacpra”, „Kacprowi”, „Jankiem”). */
+const nameForm = (lw: string): boolean => isFirstNameLike(lw) || isFirstNameGenitive(lw) || isMaleFirstNameGenitive(lw.replace(/(?:owi|em)$/, 'a'));
+const NOUN_STEMS = [...NOUN_LIKE_FIRST_NAMES].map((n) => n.slice(0, -1));
+const obliqueNamed = memo(function obliqueNamed(s: string): [number, number][] {
+  const out: [number, number][] = [];
+  RE_OBL_NAME.lastIndex = 0;
+  for (let m = RE_OBL_NAME.exec(s); m; m = RE_OBL_NAME.exec(s)) {
+    const w = m[1] ?? m[3];
+    const lw = w.toLowerCase();
+    const at = m.index + (m[2] ? m[0].length - w.length : 0);
+    const before = s.slice(Math.max(0, at - 32), at);
+    const form = nameForm(lw);
+    const impers = mtest(RE_OBL_IMPERS, s.slice(m.index + m[0].length, m.index + m[0].length + 28));
+    // Para na początku tekstu bez nic przed nią bywa patronem lub autorem uciętym na skrócie („im. | Ludwika
+    // Rydygiera leczy”, „dr. | Jana Kowalskiego o…”): osobą jest tylko przed czasownikiem bezosobowym („Grażynie Nowak przyznano”).
+    const ok = m[1]
+      ? !isGivenName(w) && !isFirstNameLike(m[0].slice(w.length).trim().split('-')[0]) && (impers || /\S/.test(before))
+      : !POLISH_FIRST_NAMES.has(lw) && !mtest(RE_NORMATIVE, s) && !NOUN_STEMS.some((n) => lw.startsWith(n)) && (!!m[2] || mtest(RE_OBL_MID, before) || impers);
+    const named = !mtest(RE_OBL_PREV, before) && !mtest(RE_PATRON_BEFORE, before) && !mtest(RE_OBL_NOUN, before) && !mtest(RE_CLINICIAN_BEFORE, before);
+    const author = mtest(RE_OBL_ABOUT, s.slice(m.index + m[0].length, m.index + m[0].length + 40)) || (!!m[2] && mtest(RE_OBL_VENUE, s.slice(Math.max(0, m.index - 30), at))) || (mtest(RE_QUOTE_OPEN, before) && mtest(RE_QUOTE_CLOSE, s.slice(m.index + m[0].length)));
+    if (ok && form && named && !author && !mtest(RE_OBL_RULE, s)) out.push([m.index, m.index + m[0].length]);
+    // para z imieniem to jedna nazwa (osoba, patron, autor): jej nazwisko nie zaczyna nowego dopasowania
+    if (m[1] && !form) RE_OBL_NAME.lastIndex = m.index + w.length;
+  }
+  return out;
 });
 const hasPerson = (w: string): boolean => mtest(RE_PERSON, w) || mtest(RE_PERSON_CS, w);
 /**
@@ -854,7 +908,7 @@ const RE_NORMATIVE = new RegExp(
  * niej w tym samym członie („Zwolnienie pracownika może być kontrolowane”); po spójniku zaczyna się
  * nowe orzeczenie o tej samej osobie („przebywa na zwolnieniu i nie może pracować”).
  */
-const RE_NORMATIVE_WEAK = new RegExp(`${NOT_LETTER_BEFORE}(?:może|mogą|można|wymagan${L}|wymaga|każd${L}(?!${SP}(?:dnia|dzień|roku|tygodnia|miesiąca|razem|razie|wieczór|rano|nocy|porze|porę|godzinie|chwili|chwilę))|wszys(?:cy|tkie|tkich))${NLA}`, 'i');
+const RE_NORMATIVE_WEAK = new RegExp(`${NOT_LETTER_BEFORE}(?:może|mogą|można|wymagan${L}|wymaga|każd${L}(?!${SP}(?:t(?:ak)?(?:ym|im|ej|iej)${SP})?(?:dnia|dzień|roku|tygodnia|miesiąca|razem|razie|wieczór|wieczorze|rano|nocy|porze|porę|godzinie|chwili|chwilę))|wszys(?:cy|tkie|tkich))${NLA}`, 'i');
 const RE_COORD = new RegExp(`(?:[,;:–]|${NOT_LETTER_BEFORE}(?:i|oraz|a|ale|lecz|więc|dlatego|ponieważ|bo|gdyż|zatem|przez${SP}co)${NLA})`, 'i');
 function weakNormative(sentence: string, from: number, to: number): boolean {
   if (mtest(RE_NORMATIVE_WEAK, sentence.slice(0, from))) return true;
@@ -1006,6 +1060,7 @@ const patientNamed = memo(function patientNamed(sentence: string): [number, numb
       if (!patron && (isGivenName(m[1]) || isGivenName(m[2]))) keep(m.index, m.index + m[0].length);
       RE_CAP_PAIR.lastIndex = m.index + m[1].length;
     }
+    for (const [a, b] of obliqueNamed(sentence)) keep(a, b);
   }
   return out;
 });
@@ -1415,7 +1470,7 @@ function kinTopic(w: string, o: number, m: string, st: number[], mask: string): 
   return !(mtest(RE_KIN_PERSON, rest) || mtest(RE_KIN_PAN, rest) || mtest(RE_KIN_FIRST, clause) || (mtest(RE_KIN_REASON, w.slice(Math.max(0, a - 30), o)) && mtest(RE_KIN_DEED, clause)));
 }
 /** Okolicznik między czasownikiem pobytu a miejscem („przebywa obecnie w szpitalu”, „trafiał kilkukrotnie na oddział”). */
-const STAY_ADV = String.raw`(?:(?:obecnie|ponownie|nadal|wciąż|kilkukrotnie|wielokrotnie|dwukrotnie|trzykrotnie|często|ostatnio|stale|czasowo|okresowo|aktualnie|już|jeszcze|wtedy|wówczas|od${SP4}[${LO}\d]{2,12})${SP8})?`;
+const STAY_ADV = String.raw`(?:(?:obecnie|ponownie|nadal|wciąż|kilkukrotnie|wielokrotnie|dwukrotnie|trzykrotnie|często|ostatnio|stale|czasowo|okresowo|aktualnie|już|jeszcze|wtedy|wówczas|przez${SP4}to|od${SP4}[${LO}\d]{2,12})${SP8})?`;
 
 /** Przysłówek rodzaju leczenia („leczona psychiatrycznie”, „operowany laparoskopowo”); „przyrodniczo”, „ekologicznie” nie. */
 const MED_ADV = `(?:(?:(?:neuro|onko|kardio|psycho|dermato|laryngo|gineko|uro|endokryno|diabeto|hemato|nefro|reumato|pulmono|gastroentero|farmako)logicz|(?:psychiatry|psychoterapeuty|ortopedy|okulisty|internisty|chirurgi)cz|ambulatoryj|szpital|stacjonar|operacyj|paliatyw)nie|(?:laparo|endo|artro)skopowo|odwykowo|zachowawczo|objawowo|przewlekle)${NLA}`;
@@ -2068,10 +2123,13 @@ function personWindow(text: string, from: number, to: number): string {
 function medicalAnchored(text: string, starts: number[], from: number, to: number, mask?: string): boolean {
   const w = windowAt(text, starts, from, to);
   const sentence = sentenceAt(text, starts, from, to);
-  if (mask !== undefined && w.includes(mask)) return true;
+  // temat dzieła po „o” albo „nad” („za rozprawę o leczeniu cukrzycy”, „Wykład o cukrzycy”) nie wiąże choroby
+  // z osobą ani z maską obok; „kurs zabiegów w leczeniu…” bez „o” to leczenie (patrz RE_OFFER_NOT)
+  const topic = /[ \t](?:o|nad)[ \t]/.test(RE_DX_TOPIC.exec(text.slice(Math.max(0, from - 70), from))?.[0] ?? '');
+  if (mask !== undefined && w.includes(mask) && !topic) return true;
   if (isGenericRule(sentence) || populationSubject(text, starts, from)) return false;
   if (mtest(RE_STRONG, w)) return true;
-  return mtest(RE_WEAK, w) && personNear(text, sentence, from, to);
+  return mtest(RE_WEAK, w) && personNear(text, sentence, from, to) && !topic;
 }
 
 /* ── Sekcje karty informacyjnej ── */
@@ -2570,6 +2628,8 @@ function mergeAfterMask(ctx: RedactCtx, mask: string): void {
     const before = ctx.text;
     ctx.text = ctx.text.replace(reDesc, (m: string, desc: string) => {
       const d = desc.replace(/^[ \t]*(?:[-–][ \t]*)?/, '');
+      // imię po masce to osoba („orzeczenie o niepełnosprawności Kacpra wydano”), a nie opis kodu
+      if (nameForm(d.split(/[ \t-]/)[0].toLowerCase())) return m;
       // Znana nazwa choroby na początku opisu: tylko ona, reszta zdania („wymaga kontroli”) zostaje.
       const known = Math.max(0, ...PHRASE_AT_START.map((re) => re.exec(d)?.[0].length ?? 0));
       if (known) return `${mask}${d.slice(known)}`;
@@ -2591,6 +2651,8 @@ const RE_DRUG_GENERAL = new RegExp(
   `${NOT_LETTER_BEFORE}(?:zgodnie${SP}z${SP}ulotk${L}|recept${SP}na|mln|stosować)${NOT_LETTER_AFTER}`,
   'i',
 );
+/** Zdanie ogólne o leku bez osoby. */
+const drugGeneral = (s: string): boolean => mtest(RE_DRUG_GENERAL, s) && !hasPerson(s) && namePairAt(s) < 0;
 /**
  * Dokument o leku, a nie o pacjencie: charakterystyka produktu (ChPL), ulotka, standard, wytyczne,
  * rekomendacja, wykaz, załącznik, przetarg, receptariusz, program lekowy, raport, protokół kontroli.
@@ -2662,7 +2724,7 @@ function maskDrugs(ctx: RedactCtx): void {
     const sentence = sentenceAt(whole, starts, offset, to);
     if (mtest(RE_PRICE, sentence)) return m;
     if (mtest(RE_DRUG_EXAMPLE_BEFORE, whole.slice(Math.max(0, offset - 80), offset))) return m;
-    if (mtest(RE_DRUG_GENERAL, sentence) && !hasPerson(sentence) && namePairAt(sentence) < 0) return m;
+    if (drugGeneral(sentence)) return m;
     if (populationSubject(whole, starts, offset)) return m;
     // Droga podania przy dawce („Enoksaparyna 40 mg s.c.”) wzmacnia kotwicę, ale jej nie zastępuje:
     // wystarcza wtedy sama osoba albo samo słowo medyczne pacjenta, a dawkowanie z ChPL, ulotki,
@@ -2713,7 +2775,7 @@ function maskDoseSentences(ctx: RedactCtx): void {
       const sentence = sentenceAt(whole, starts, from, to);
       if (mtest(RE_PRICE, sentence) || isGenericRule(sentence) || populationSubject(whole, starts, from)) return m;
       if (mtest(RE_DRUG_EXAMPLE_BEFORE, whole.slice(Math.max(0, offset - 80), offset))) return m;
-      if (mtest(RE_DRUG_GENERAL, sentence) && !hasPerson(sentence) && namePairAt(sentence) < 0) return m;
+      if (drugGeneral(sentence)) return m;
       // „g” i „ml” stoją też w dawkach nawozu, smaru, mleka czy diety: potrzebna postać leku („syrop”),
       // lek ze słownika albo nazwa handlowa (wielka litera) przy słownictwie medycznym w oknie.
       if (!mtest(RE_UNIT_DRUG_ONLY, unit)) {
@@ -2742,7 +2804,7 @@ function maskVerbDrugs(ctx: RedactCtx, mask: string): void {
     const to = from + drug.length;
     const sentence = sentenceAt(whole, starts, from, to);
     if (mtest(RE_PRICE, sentence) || mtest(RE_DRUG_EXAMPLE_BEFORE, whole.slice(Math.max(0, offset - 80), offset))) return m;
-    if (mtest(RE_DRUG_GENERAL, sentence) && !hasPerson(sentence) && namePairAt(sentence) < 0) return m;
+    if (drugGeneral(sentence)) return m;
     // Podmiot przed czasownikiem musi być człowiekiem albo domyślny („Hurtownia przyjmuje Ibuprom”,
     // „a szpital stosuje sertralinę” to instytucja; „Pani Kos przyjmuje”, „Od roku przyjmuje” to osoba).
     const kind = eventSubject(whole, starts, offset, from);
@@ -2885,7 +2947,7 @@ function impersonalAtInstitution(text: string, starts: number[], rx: string, fro
 function bareDrugRejected(whole: string, starts: number[], offset: number, from: number, to: number): boolean {
   const sentence = sentenceAt(whole, starts, from, to);
   if (mtest(RE_PRICE, sentence) || mtest(RE_DRUG_EXAMPLE_BEFORE, whole.slice(Math.max(0, offset - 80), offset))) return true;
-  if (mtest(RE_DRUG_GENERAL, sentence) && !hasPerson(sentence) && namePairAt(sentence) < 0) return true;
+  if (drugGeneral(sentence)) return true;
   return generalDrug(whole, starts, from, to);
 }
 
@@ -3091,12 +3153,13 @@ function diseaseAnchor(text: string, starts: number[], from: number, to: number,
 }
 /** Choroba jako temat wypowiedzi, nauki albo działania dla wszystkich („lekcja o cukrzycy”, „izolacja przy COVID-19”). */
 const RE_DX_TOPIC = new RegExp(
-  `${NOT_LETTER_BEFORE}(?:artykuł|referat|lekcj|wykład|prelekcj|prezentacj|konferencj|szkoleni|kurs|webinar|broszur|ulotk|poradnik|kampani|szczepie|szczepionk)${L}` +
-    `(?:${SP}(?!${PERSON_WORD}${NLA})(?:[${LO}]{3,}|z|ze|w|we|o|na|do|u|po|przy)){0,3}${SP}$`,
+  `${NOT_LETTER_BEFORE}(?:artykuł|referat|lekcj|wykład|prelekcj|prezentacj|konferencj|szkoleni|kurs|webinar|broszur|ulotk|poradnik|kampani|szczepie|szczepionk|zaję(?:cia|ć)(?:${SP}[${LO}]{3,})?${SP}o|za${SP}[${LO}]{3,}${SP}o|badani${L}${SP}nad)${L}` +
+    `(?:${SP}(?!${PERSON_WORD}${NLA})(?:[${LO}]{3,}|z|ze|w|we|o|na|do|u|po|przy|i)){0,3}${SP}$`,
   'i',
 );
 /** Określenia stopnia tuż przed nazwą („umiarkowany ”, „przewlekłą ”), pomijane przy szukaniu czasownika osoby. */
-const RE_SEV_TAIL = new RegExp(`(?:(?<![${LETTER}])(?:przewlekł|ostr|zaawansowan|ciężk|lekk|umiarkowan|znaczn|głębok|wrodzon|obustronn|jednostronn)${L}${SP4}){1,2}$`, 'i');
+const SEV_CORE = 'przewlekł|ostr|zaawansowan|ciężk|lekk|umiarkowan|znaczn|głębok|wrodzon';
+const RE_SEV_TAIL = new RegExp(`(?:(?<![${LETTER}])(?:${SEV_CORE}|obustronn|jednostronn)${L}${SP4}){1,2}$`, 'i');
 /** Używanie urządzenia medycznego przez osobę („noszę aparaty słuchowe”, „używa aparatu”). */
 const RE_DEVICE_VERB = new RegExp(`${NOT_LETTER_BEFORE}(?:nosz[ęe]|nosi|nosił${L}|używa(?:m)?|używał${L})${SP4}$`, 'i');
 /**
@@ -3134,8 +3197,9 @@ function medicalPersonContext(text: string, starts: number[], from: number, to: 
 }
 
 /** Określenie stopnia, przebiegu i rodzaju przy nazwie choroby („ostrej”, „nawracającej”, „prawostronnym”). */
-const DX_SEV = `(?:przewlekł|ostr|zaawansowan|ciężk|lekk|umiarkowan|znaczn|głębok|wrodzon|nabyt|nawracając|postępując|łagodn|złośliw|samoistn|pierwotn|wtórn|obustronn|jednostronn|prawostronn|lewostronn|mieszan|rozwojow|dziecięc|wczesnodziecięc|atypow|niedokrwienn|krwotoczn|limfoblastyczn|szpikow|rozsian|zaostrzon|utrwalon|napadow|nadciśnieniow|cukrzycow|alergiczn|atopow|ciążow|insulinozależn|insulinoniezależn|oddechow|moczow|bakteryjn|wirusow|odbiorcz|przewodzeniow|obturacyjn|rumieniow|układow|ropn|sezonow|żołądkow|jelitow|pokarmow|skórn|płucn|stawow)${L}`;
-const RE_SEV_W = new RegExp(`^(?:${DX_SEV})$`, 'i');
+const DX_SEV = `(?:${SEV_CORE}|nabyt|nawracając|postępując|łagodn|złośliw|samoistn|pierwotn|wtórn|obustronn|jednostronn|prawostronn|lewostronn|mieszan|rozwojow|dziecięc|wczesnodziecięc|atypow|niedokrwienn|krwotoczn|limfoblastyczn|szpikow|rozsian|zaostrzon|utrwalon|napadow|nadciśnieniow|cukrzycow|alergiczn|atopow|ciążow|insulinozależn|insulinoniezależn|oddechow|moczow|bakteryjn|wirusow|odbiorcz|przewodzeniow|obturacyjn|rumieniow|układow|ropn|sezonow|żołądkow|jelitow|pokarmow|skórn|płucn|stawow)${L}`;
+/** Stopień przed nazwą, także natężenie objawu („silny ból”); po masce „silnym” nie jest wyrazem medycznym. */
+const RE_LEAD_W = new RegExp(`^(?:${DX_SEV}|siln[yaeą]${L})$`, 'i');
 const RE_MORPH_W = new RegExp(`^(?:${DX_MORPH})$`, 'i');
 const RE_ACR_W = new RegExp(`^(?:${DX_ACRONYM})$`);
 const RE_EPONYM_W = new RegExp(`^${EPONYM}$`);
@@ -3230,7 +3294,7 @@ function dxSpan(s: string, opts: { free?: boolean; cont?: boolean } = {}): numbe
   let end = 0;
   if (!opts.cont) {
     let lead = 0;
-    while (i < toks.length && lead < 2 && toks[i].gap && toks[i].kind === 'word' && mtest(RE_SEV_W, toks[i].t) && !dxHeadKind(toks[i], s.slice(toks[i].a), false)) {
+    while (i < toks.length && lead < 2 && toks[i].gap && toks[i].kind === 'word' && mtest(RE_LEAD_W, toks[i].t) && !dxHeadKind(toks[i], s.slice(toks[i].a), false)) {
       i++;
       lead++;
     }
@@ -3279,7 +3343,7 @@ function dxSpan(s: string, opts: { free?: boolean; cont?: boolean } = {}): numbe
       joined = true;
       continue;
     }
-    if (/^(?:z|ze|o)$/.test(w) || (w === 'na' && head === 'allergy') || (w === 'w' && /^(?:obrębie|przebiegu|stadium)$/i.test(next?.t ?? ''))) {
+    if (/^(?:z|ze|o)$/.test(w) || (w === 'na' && head === 'allergy') || (w === 'w' && /^(?:obrębie|przebiegu|stadium|klatce|okolicy|odcinku)$/i.test(next?.t ?? ''))) {
       if (!next?.gap || (next.kind !== 'word' && next.kind !== 'mask')) break;
       if (opts.cont && next.kind === 'word' && !(isMedTok(next) || dxHeadKind(next, s.slice(next.a), false) || mtest(RE_HEAD_SYMPTOM_W, next.t))) break;
       freeNext = opts.cont ? 0 : 2;

@@ -13791,3 +13791,128 @@ test('Seria 3: niepełnosprawność przed krewnym znika tylko przy osobie w zdan
     redactPII('Pani Maria Wiśniewska zgłosiła się w sprawie opieki wytchnieniowej. Program jest przeznaczony dla osób opiekujących się niepełnosprawnym dzieckiem lub dorosłym.').redacted,
   ).toBe(`Pani ${N} zgłosiła się w sprawie opieki wytchnieniowej. Program jest przeznaczony dla osób opiekujących się niepełnosprawnym dzieckiem lub dorosłym.`);
 });
+
+test('Seria 3: osoba w przypadku zależnym („U Zosi”, „Krystyny Pawlik, która”, „Kacprowi przyznano”) kotwiczy dane o zdrowiu, a patron, adres, instytucja, autor polecenia, temat zajęć i przepis zostają', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    ['U Zosi stwierdzono padaczkę.', `U Zosi stwierdzono ${H}.`],
+    ['U Kacpra stwierdzono astmę oskrzelową.', `U Kacpra stwierdzono ${H}.`],
+    ['U Anny Nowak stwierdzono cukrzycę typu 2.', `U ${N} stwierdzono ${H}.`],
+    ['Dotyczy Anny Nowak, u której stwierdzono cukrzycę typu 2.', `Dotyczy ${N}, u której stwierdzono ${H}.`],
+    ['Wniesiono o raty ze względu na sytuację materialną Krystyny Pawlik, która utrzymuje się z renty z tytułu niezdolności do pracy.', `Wniesiono o raty ze względu na sytuację materialną ${N}, która utrzymuje się z ${H}.`],
+    ['Wskazał, że strona wiozła matkę, Grażynę Szczepaniak, która uskarżała się na silny ból w klatce piersiowej.', `Wskazał, że strona wiozła matkę, ${N}, która uskarżała się na ${H}.`],
+    ['Wnioskodawczyni opiekuje się Marią Nowak, która porusza się na wózku inwalidzkim.', `Wnioskodawczyni opiekuje się ${N}, która ${H}.`],
+    ['Dotyczy Haliny Nowak, która jest osobą leżącą.', `Dotyczy ${N}, która jest ${H}.`],
+    ['Zosi wystawiono zwolnienie lekarskie do 15 marca.', `Zosi wystawiono ${H}.`],
+    ['Kacprowi przyznano rentę z tytułu niezdolności do pracy.', `Kacprowi przyznano ${H}.`],
+    ['Orzeczenie o niepełnosprawności Kacpra wydano w 2025 r.', `${H} Kacpra wydano w 2025 r.`],
+    ['Zwolnienie lekarskie Jana Kowalskiego obejmuje 14 dni.', `${H} ${N} obejmuje 14 dni.`],
+    ['Mój mąż ma astmę i po każdym takim wieczorze się dusi, w lutym trafił przez to do szpitala.', `Mój mąż ma ${H} i po każdym takim wieczorze się dusi, w lutym trafił przez to ${H}.`],
+    ['Matka uskarżała się na silne bóle głowy.', `Matka uskarżała się na ${H}.`],
+    // natężenie objawu nie jest wyrazem medycznym po masce: „z silnym wsparciem” zostaje
+    ['Pani Kowalska trafiła do szpitala z silnym wsparciem rodziny.', `Pani ${N} trafiła ${H} z silnym wsparciem rodziny.`],
+    ['Córka chodzi na zajęcia terapeutyczne z powodu ADHD.', `Córka chodzi na zajęcia terapeutyczne z powodu ${H}.`],
+    // autor polecenia i osoba z funkcją nie są pacjentem
+    ['Zgodnie z decyzją Anny Nowak zasiłek chorobowy wypłaca pracodawca.', `Zgodnie z decyzją ${N} zasiłek chorobowy wypłaca pracodawca.`],
+    ['Grupę wsparcia dla osób po udarze prowadzi Anna Nowak, psycholog.', `Grupę wsparcia dla osób po udarze prowadzi ${N}, psycholog.`],
+    ['Pacjent ma wizytę u dr Anny Nowak w poradni kardiologicznej.', `Pacjent ma wizytę u dr ${N} w poradni kardiologicznej.`],
+  ]);
+  keep([
+    'W ramach programu Fundacji Anny Dymnej prowadzona jest rehabilitacja ruchowa.',
+    'Szkoła Podstawowa im. Marii Konopnickiej prowadzi zajęcia dla uczniów z cukrzycą.',
+    'Szpital Jana Pawła II przyjmuje pacjentów z udarem.',
+    'Na oddziale szpitala św. Józefa leczy się pacjentów z udarem.',
+    'Zgodnie z wytycznymi Kasi zwolnienie lekarskie należy dostarczyć w ciągu 7 dni.',
+    'Jeżeli u Zosi wystąpi gorączka, należy wezwać lekarza.',
+    'Jeżeli u Kacpra pojawią się drgawki, należy podać lek i wezwać pogotowie.',
+    'Uczeń, u którego stwierdzono dysleksję, może pisać egzamin dłużej.',
+    'Osoba, która choruje na cukrzycę, może złożyć wniosek o kartę parkingową.',
+    'U Kasi stwierdzono brak zaległości.',
+    'U Marka stwierdzono uchybienia w rozliczeniu.',
+    'Na zebraniu u Jana omówiono program profilaktyki chorób nowotworowych.',
+    'Zajęcia o cukrzycy w klasie Zosi prowadziła pielęgniarka.',
+    'Zosi przyznano stypendium za wyniki w nauce.',
+    'Kacprowi wręczono dyplom za udział w konkursie o zdrowiu.',
+    'Na prośbę Zosi wychowawczyni zmieniła miejsce w ławce.',
+    'Do Zosi dzwoniła pielęgniarka z przychodni w sprawie szczepienia.',
+    'Raport o leczeniu uzależnień przygotował zespół pod kierunkiem Piotra.',
+  ]);
+  // ponowna redakcja wyniku nie zakrywa niczego więcej (kotwicą jest imię, a nie maska osoby)
+  for (const t of ['Wnioskodawczyni opiekuje się Marią Nowak, która porusza się na wózku inwalidzkim.', 'U Anny Nowak stwierdzono cukrzycę typu 2.']) {
+    const once = redactPII(t).redacted;
+    expect(redactPII(once).redacted, t).toBe(once);
+  }
+});
+
+test('Seria 3: patron po „im.” i „ul.”, instytucja, gmina i autor dzieła w dopełniaczu nie kotwiczą danych o zdrowiu, a osoba przed czasownikiem bezosobowym tak', () => {
+  const H = '[DANE O ZDROWIU]';
+  keep([
+    // patron po skrócie: zdanie dzieli się na „im.”, więc para stoi na początku tekstu
+    'Centrum Rehabilitacji im. Ireny Sendlerowej przyjmuje osoby po udarze.',
+    'Dom Pomocy Społecznej im. Jana Kochanowskiego przyjmuje osoby po udarze.',
+    'Hospicjum im. Marii Curie-Skłodowskiej przyjmuje osoby z chorobą nowotworową.',
+    'Hospicjum przy ul. Heleny Modrzejewskiej przyjmuje osoby po udarze.',
+    'Szpital im. Ludwika Rydygiera leczy pacjentów po zawale.',
+    'Oddział Szpitala im. Mikołaja Kopernika przyjmuje pacjentów z chorobą nowotworową.',
+    'Oddział onkologii Centrum Onkologii im. Marii Skłodowskiej-Curie przyjmuje pacjentów z chorobą nowotworową.',
+    // nazwa miejscowości z imienia i zdanie o grupie
+    'Mieszkańcy gminy Kazimierza Wielka mogą skorzystać z bezpłatnych badań w kierunku cukrzycy.',
+    'Mieszkańcy powiatu Kazimierza Wielka chorujący na cukrzycę mogą zgłosić się na badania.',
+    'Liceum Stefana Żeromskiego prowadzi zajęcia dla uczniów z cukrzycą.',
+  ]);
+  masked([
+    // patron bez „im.” po rzeczowniku instytucji: nazwa zakryta jak dotąd, zdrowie grupy jawne
+    ['Pacjenci szpitala Jana Bożego z depresją mogą korzystać z terapii grupowej.', `Pacjenci szpitala ${N} z depresją mogą korzystać z terapii grupowej.`],
+    ['Uczniowie szkoły Marii Konopnickiej z orzeczeniem o niepełnosprawności mogą korzystać z dowozu.', `Uczniowie szkoły ${N} z orzeczeniem o niepełnosprawności mogą korzystać z dowozu.`],
+    ['Stowarzyszenie Anny Nowak pomaga osobom po udarze.', `Stowarzyszenie ${N} pomaga osobom po udarze.`],
+    // autor dzieła, też z tytułem przed imieniem
+    ['Książka Jolanty Wiśniewskiej o życiu z cukrzycą typu 1 trafiła do szkolnej biblioteki.', `Książka ${N} o życiu z cukrzycą typu 1 trafiła do szkolnej biblioteki.`],
+    ['Film Agnieszki Holland o depresji obejrzeli uczniowie klasy 8.', `Film ${N} o depresji obejrzeli uczniowie klasy 8.`],
+    ['Reportaż Ewy Nowak o osobach z chorobą Alzheimera zdobył nagrodę.', `Reportaż ${N} o osobach z chorobą Alzheimera zdobył nagrodę.`],
+    ['Wykład dr. Jana Kowalskiego o chorobie Alzheimera odbędzie się w czwartek.', `Wykład dr. ${N} o chorobie Alzheimera odbędzie się w czwartek.`],
+    ['Artykuł prof. Marii Zielińskiej o leczeniu astmy ukazał się w czasopiśmie.', `Artykuł prof. ${N} o leczeniu astmy ukazał się w czasopiśmie.`],
+    // osoba na początku zdania przed czasownikiem bezosobowym i w domu z wywiadu
+    ['Grażynie Nowak przyznano zasiłek pielęgnacyjny z powodu znacznego stopnia niepełnosprawności.', `${N} przyznano zasiłek pielęgnacyjny z powodu ${H}.`],
+    ['Wywiad przeprowadzono w domu Krystyny Pawlik, która jest osobą leżącą.', `Wywiad przeprowadzono w domu ${N}, która jest ${H}.`],
+  ]);
+});
+
+test('Seria 3: imię przed „o” z tematem to autor lub rozmówca, a lokal „u Basi”, tytuł akcji w cudzysłowie i temat rozprawy nie kotwiczą danych o zdrowiu', () => {
+  const H = '[DANE O ZDROWIU]';
+  masked([
+    // „o” z miejscownikiem po imieniu: temat dzieła lub rozmowy, osoba zakryta, choroba jawna
+    ['Wywiad z Anną Nowak o depresji ukazał się w gazecie.', `Wywiad z ${N} o depresji ukazał się w gazecie.`],
+    ['Rozmowa z Janem Kowalskim o depresji ukazała się w lokalnej gazecie.', `Rozmowa z ${N} o depresji ukazała się w lokalnej gazecie.`],
+    ['Monografia Jana Kowalskiego o chorobie afektywnej dwubiegunowej trafiła do biblioteki poradni.', `Monografia ${N} o chorobie afektywnej dwubiegunowej trafiła do biblioteki poradni.`],
+    ['Opracowanie Anny Nowak o leczeniu cukrzycy przekazano radnym.', `Opracowanie ${N} o leczeniu cukrzycy przekazano radnym.`],
+    ['Wspomnienia Jana Kowalskiego o chorobie Alzheimera czytamy na lekcji polskiego.', `Wspomnienia ${N} o chorobie Alzheimera czytamy na lekcji polskiego.`],
+    ['Biografia Marii Kowalskiej o życiu ze stwardnieniem rozsianym trafiła do księgarni.', `Biografia ${N} o życiu ze stwardnieniem rozsianym trafiła do księgarni.`],
+    ['Zaproszenie na spotkanie z Anną Nowak o życiu z cukrzycą.', `Zaproszenie na spotkanie z ${N} o życiu z cukrzycą.`],
+    ['Webinar z Anną Nowak o autyzmie odbędzie się w piątek.', `Webinar z ${N} o autyzmie odbędzie się w piątek.`],
+    ['Opinia Anny Nowak o leczeniu depresji została przyjęta.', `Opinia ${N} o leczeniu depresji została przyjęta.`],
+    // temat rozprawy, pracy i badań przy osobie w celowniku
+    ['Katarzynie Lis nadano stopień doktora za rozprawę o leczeniu cukrzycy.', `${N} nadano stopień doktora za rozprawę o leczeniu cukrzycy.`],
+    ['Dr. Annie Nowak przyznano grant na badania nad cukrzycą.', `Dr. ${N} przyznano grant na badania nad cukrzycą.`],
+    ['Pani Lis napisała artykuł o leczeniu cukrzycy.', `Pani ${N} napisała artykuł o leczeniu cukrzycy.`],
+    // „o” z biernikiem to prośba, a zaimek przy temacie wskazuje osobę: dane o zdrowiu dalej zakryte
+    ['Wniosek Krystyny Pawlik o zasiłek pielęgnacyjny z powodu choroby Parkinsona wpłynął w marcu.', `Wniosek ${N} o zasiłek pielęgnacyjny z powodu ${H} wpłynął w marcu.`],
+    ['Rozmawiano z Krystyną Pawlik o jej chorobie Parkinsona.', `Rozmawiano z ${N} o jej ${H}.`],
+    ['Pani Lis jest w trakcie leczenia cukrzycy.', `Pani ${N} jest w trakcie leczenia ${H}.`],
+  ]);
+  keep([
+    'Spotkanie z Zosią o cukrzycy w szkole.',
+    'Pensjonat u Basi przyjmuje kuracjuszy po zawale serca.',
+    'Bar u Józka zatrudnia osoby po udarze.',
+    'Gospoda U Kasi przyjmuje gości po udarze.',
+    'Kawiarnia u Zosi zatrudnia osoby z niepełnosprawnością intelektualną.',
+    'Akcja „Pomóż Zuzi” zbiera środki dla dzieci z chorobą nowotworową.',
+    'Zbiórka "Dla Kacpra" zbiera na leczenie dzieci z autyzmem.',
+    'Program „Uśmiech Hani” wspiera dzieci z cukrzycą.',
+  ]);
+  masked([
+    // osoba poza tytułem i „u” po czynności lub na początku zdania dalej kotwiczą
+    ['Kacprowi rozpoznano białaczkę, trwa zbiórka „Pomóż Kacprowi”.', `Kacprowi rozpoznano ${H}, trwa zbiórka „Pomóż Kacprowi”.`],
+    ['Podczas wizyty u Zosi stwierdzono cukrzycę.', `Podczas wizyty u Zosi stwierdzono ${H}.`],
+    ['U Zosi stwierdzono cukrzycę.', `U Zosi stwierdzono ${H}.`],
+  ]);
+});

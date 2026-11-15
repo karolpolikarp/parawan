@@ -727,6 +727,43 @@ działają na GitHubie od chwili wypchnięcia tagów.
   czy dziecko jest niepełnosprawne (tak/nie)”. Na trzeciej serii 50 pism (część
   robocza) wycieków jest 83 zamiast 97 (danych o zdrowiu 32 zamiast 46), bez nowych nadmiarowych
   zakryć.
+- **Dane o zdrowiu osoby podanej imieniem w odmianie znikają: „U Zosi stwierdzono…”, „sytuację
+  materialną Krystyny Pawlik, która utrzymuje się z renty…”, „Kacprowi przyznano…”.** Wcześniej
+  osobę z imieniem w dopełniaczu, celowniku albo narzędniku Parawan widział tylko po „Pan” albo
+  „Pani”, więc fakt o zdrowiu w tym samym zdaniu zostawał jawny. Teraz: „U Zosi stwierdzono [DANE
+  O ZDROWIU]”, „U [IMIĘ I NAZWISKO] stwierdzono [DANE O ZDROWIU]” (cukrzycę typu 2), „Dotyczy
+  [IMIĘ I NAZWISKO], u której stwierdzono [DANE O ZDROWIU]”, „…materialną [IMIĘ I NAZWISKO], która
+  utrzymuje się z [DANE O ZDROWIU]” (renty z tytułu niezdolności do pracy), „wiozła matkę, [IMIĘ
+  I NAZWISKO], która uskarżała się na [DANE O ZDROWIU]” (silny ból w klatce piersiowej),
+  „opiekuje się [IMIĘ I NAZWISKO], która [DANE O ZDROWIU]” (porusza się na wózku inwalidzkim),
+  „Zosi wystawiono [DANE O ZDROWIU]”, „Kacprowi przyznano [DANE O ZDROWIU]”, „[DANE O ZDROWIU]
+  [IMIĘ I NAZWISKO] obejmuje 14 dni” (zwolnienie lekarskie Jana Kowalskiego), „[DANE O ZDROWIU]
+  Kacpra wydano w 2025 r.” (imię i czasownik po zakrytej danej nie wchodzą do jej maski). Objaw z natężeniem i miejscem („silny ból w klatce piersiowej”, „silne
+  bóle głowy”) znika w całości, a pobyt w szpitalu po wtrąceniu („trafił przez to do szpitala”,
+  „po każdym takim wieczorze się dusi, w lutym trafił…”) dalej należy do osoby z początku zdania.
+  Jawne zostają patron, adres i nazwa instytucji („Fundacji Anny Dymnej”, „im. Marii
+  Konopnickiej”, „Szpital Jana Pawła II”, „szpitala św. Józefa”), autor polecenia („Zgodnie
+  z decyzją Anny Nowak zasiłek chorobowy wypłaca pracodawca”), samo imię w przepisie i warunku
+  („Zgodnie z wytycznymi Kasi zwolnienie lekarskie należy dostarczyć…”, „Jeżeli u Zosi wystąpi
+  gorączka, należy…”), sprawy bez faktu medycznego („U Kasi stwierdzono brak zaległości”, „Zosi
+  przyznano stypendium”) i temat zajęć („Zajęcia o cukrzycy w klasie Zosi prowadziła
+  pielęgniarka”). Jawny zostaje też patron po „im.” i „ul.” („Szpital im. Ludwika Rydygiera leczy
+  pacjentów po zawale”, „Hospicjum przy ul. Heleny Modrzejewskiej przyjmuje osoby po udarze”),
+  patron i nazwa po rzeczowniku szkoły, szpitala czy gminy („Uczniowie szkoły Marii Konopnickiej
+  z orzeczeniem o niepełnosprawności mogą…”, „Mieszkańcy gminy Kazimierza Wielka mogą skorzystać
+  z badań w kierunku cukrzycy”) oraz autor książki, filmu czy wykładu, także z tytułem („Wykład dr.
+  [IMIĘ I NAZWISKO] o chorobie Alzheimera”). Osoba na początku zdania przed czasownikiem
+  bezosobowym kotwiczy dane o zdrowiu: „[IMIĘ I NAZWISKO] przyznano zasiłek pielęgnacyjny z powodu
+  [DANE O ZDROWIU]” (Grażynie Nowak, znacznego stopnia niepełnosprawności). Imię, po którym stoi
+  „o” z tematem, to autor albo rozmówca, więc temat zostaje jawny: „Wywiad z [IMIĘ I NAZWISKO]
+  o depresji ukazał się w gazecie”, „Monografia [IMIĘ I NAZWISKO] o chorobie afektywnej
+  dwubiegunowej…”, „Zaproszenie na spotkanie z [IMIĘ I NAZWISKO] o życiu z cukrzycą”. Prośba
+  dalej należy do osoby: „Wniosek [IMIĘ I NAZWISKO] o zasiłek pielęgnacyjny z powodu [DANE
+  O ZDROWIU]”. Jawny zostaje też temat rozprawy i badań („[IMIĘ I NAZWISKO] nadano stopień
+  doktora za rozprawę o leczeniu cukrzycy”, „przyznano grant na badania nad cukrzycą”), lokal
+  z imieniem („Pensjonat u Basi przyjmuje kuracjuszy po zawale serca”, „Gospoda U Kasi”) i imię
+  w tytule akcji („Akcja „Pomóż Zuzi” zbiera środki dla dzieci z chorobą nowotworową”). Na trzeciej serii 50 pism (część robocza) wycieków jest 80 zamiast 83 (danych
+  o zdrowiu 29 zamiast 32), bez nowych nadmiarowych zakryć.
 - **Pierwsze wklejone pismo i każda następna zmiana mają wynik od razu.** Parawan przygotowuje
   silnik zaraz po otwarciu pliku, a nie przy pierwszym piśmie. Wcześniej pierwsze przeliczenie
   trwało kilka razy dłużej niż kolejne, a pauza przed następnym rosła od niego do pół sekundy
