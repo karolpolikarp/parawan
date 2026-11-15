@@ -857,9 +857,37 @@ function flatUnit(street: string): boolean {
   const d = Number(m[2]) - Number(m[1]);
   return !(d === 2 || d === 4 || d === 6);
 }
+/** Decyzje strażnika dla jednego tekstu. Ulicę i kod tego samego adresu oceniają kolejno przebieg
+ *  kodu, dwa przebiegi miejscowości i ochrona ulic, zwykle na tym samym tekście (pod adresem
+ *  instytucji nic się nie zmienia), więc decyzja liczona raz na pozycję. Wynik zależy tylko od
+ *  tekstu, pozycji i sondy (sonda jest deterministyczna i ma własną pamięć), dlatego pamięć należy
+ *  do sondy i zeruje się przy każdej zmianie tekstu. */
+type TextMemo = { text: string; street: Map<number, boolean>; postal: Map<number, boolean> };
+const textMemos = new WeakMap<PersonProbe, TextMemo>();
+function textMemo(t: string, probe: PersonProbe | undefined): TextMemo | undefined {
+  if (!probe) return undefined;
+  let memo = textMemos.get(probe);
+  // `!==` porównuje treść: ten sam tekst przychodzi w kolejnym przebiegu jako inny obiekt. Pamięć
+  // zapisuje wtedy nowy obiekt, więc dalsze wywołania w tym przebiegu kończą porównanie na
+  // tożsamości zamiast czytać cały tekst.
+  if (memo === undefined || memo.text !== t) {
+    memo = { text: t, street: new Map(), postal: new Map() };
+    textMemos.set(probe, memo);
+  } else memo.text = t;
+  return memo;
+}
 /** Czy ulica zaczynająca się na pozycji `offset` to adres siedziby instytucji? Sonda osób (z redact.ts)
  *  sprawdza, czy w nazwie albo nad nią nie stoi osoba, którą zamaskują dopiero przebiegi osób. */
 export function institutionStreetAt(t: string, offset: number, probe?: PersonProbe): boolean {
+  const memo = textMemo(t, probe);
+  let r = memo?.street.get(offset);
+  if (r === undefined) {
+    r = institutionStreetNow(t, offset, probe);
+    memo?.street.set(offset, r);
+  }
+  return r;
+}
+function institutionStreetNow(t: string, offset: number, probe?: PersonProbe): boolean {
   const { from, lineStart } = windowBefore(t, offset);
   if (RE_RESIDENCE_LABEL.test(t.slice(Math.max(from, offset - 40), offset))) return false;
   // Numer mieszkania („m. 3”, „lok. 9”, „3/5”, także po przecinku: „3, m. 14”) wskazuje lokal
@@ -910,6 +938,15 @@ function localitySegment(seg: string | undefined, probe?: PersonProbe): boolean 
 /** Czy kod pocztowy na pozycji `offset` należy do adresu siedziby instytucji? Tylko razem z ulicą
  *  tej siedziby: w wierszu wyżej albo przed przecinkiem w tym samym wierszu. */
 export function institutionPostalAt(t: string, offset: number, probe?: PersonProbe): boolean {
+  const memo = textMemo(t, probe);
+  let r = memo?.postal.get(offset);
+  if (r === undefined) {
+    r = institutionPostalNow(t, offset, probe);
+    memo?.postal.set(offset, r);
+  }
+  return r;
+}
+function institutionPostalNow(t: string, offset: number, probe?: PersonProbe): boolean {
   const win = windowBefore(t, offset);
   if (blankBetween(t, win.from, offset) && blankBetween(t, win.lineStart(), win.from)) {
     const lineStart = win.lineStart();
