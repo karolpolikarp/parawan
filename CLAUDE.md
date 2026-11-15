@@ -138,6 +138,17 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 7. Znane ograniczenia z `docs/EWALUACJA.md` poz. 2–11 (m.in. parafia bez „w”, EZD pod numerem,
    „Niebieska wstążka”, „Mariackim”); Niebieska Karta jako typ: ROADMAP poz. 28.
 8. Trudniejsza seria testowa: tabele, OCR, tekst angielski, inne szablony niż 10 z generatora.
+   Zrobione serie 2 i 3 (`docs/EWALUACJA-SERIA-2.md`, `-SERIA-3.md`); następna, czwarta, pod zdrowie,
+   bo tam reguły najsłabiej przenoszą się na pisma odłożone.
+9. Czas startu na słabym PC wzrósł po seriach 2 i 3: „gotowe” 1,8× wolniej niż v0.47.0 (CI 2026-11-15,
+   job `start`). Główne koszty: przygotowanie wzorców w `regex-literals.ts` i wymuszony układ
+   (`offsetHeight`) w `main.ts`. Po ok. 10 przebiegach z CV ≤ 5% przełączyć job `start` na blokujący.
+10. 46 wzorców z dwoma kwantyfikatorami odstępu wokół opcjonalnego znaku (lista ze skryptu sondy
+    spacji, sesja 2026-11-15): sprawdzić resztę sondą długiego ciągu spacji, przepisać kwadratowe.
+11. Niestabilny e2e „obcy plik z dysku zapisuje mask-disabled=pesel” (raz timeout na CI 2026-11-15,
+    lokalnie zawsze zielony): znaleźć przyczynę, nie powtarzać przebiegu w ciemno.
+12. Decyzja: nowy typ danych szczególnych (karalność, wyznanie, ubezwłasnowolnienie, Niebieska Karta;
+    klasa W7 serii 3, ROADMAP poz. 28).
 
 ## Znane problemy
 
