@@ -106,11 +106,13 @@ Sam benchmark nie wystarcza — sprawdzaj zmiany wieloagentowo/adwersarialnie na
 
 Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i diakrytyką).
 
-## Stan (2026-11-15)
+## Stan (2026-11-23)
 
+- `main` = v0.48.1 (2026-11-23, PR #31): szybszy start, „gotowe” ×4 −15…−19% wobec v0.48.0, wynik
+  bajt w bajt ten sam. Rdzeń i `parawan` 0.31.1 czekają na npm (Backlog 4).
 - 2026-11-22, przegląd `/powrot` (`STATUS.md`): produkcja działa, CI zielone, bez zmian od 15.11.
   Rozgrzebane: gałąź `fix/tarnowski-przymiotnik` (Backlog 3), PR #30 Dependabota (Backlog 13).
-- `main` = v0.48.0 (wydane 2026-11-15, rdzeń i `parawan` 0.31.0 czekają na npm, Backlog 4).
+- v0.48.0 wydane 2026-11-15.
   Zawiera PR #29: serie 2 i 3 pism (`test-data/seria-2`, `seria-3`, części robocza i odłożona; opisy
   w `docs/EWALUACJA-SERIA-2.md`, `-SERIA-3.md`). Seria 3 robocza: recall 87,3% → 94,7%, nadmiarowe
   64 → 2 na 358; odłożona 87,7% → 90,9%, 69 → 36. Ewaluacja serii: `node scripts/eval/run-eval.mjs
@@ -145,7 +147,7 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
    (nazwa instytucji lub geografii po przymiotniku, np. „Starosta Tarnowski”, „Ziemia Tarnowska”).
    Usunięcie ze słownika dawało wycieki („Sędzia Tarnowski”), cofnięte w 380586a.
 4. Publikacja npm z komputera autora (2FA): `npm login`, potem `npm publish -w anonimizator`
-   i `npm publish -w parawan`. 0.29.14 i 0.30.0 nie wyszły; publikować od razu 0.31.0 (v0.48.0).
+   i `npm publish -w parawan`. 0.29.14 i 0.30.0 nie wyszły; publikować od razu 0.31.1 (v0.48.1).
    Powrót: `npm view anonimizator version`.
 5. Część „Właściciel” z `docs/WYDANIE.md` dla v0.47.0 (czytnik ekranu, Word, wydruk PDF).
 6. Opcje polityki z `docs/EWALUACJA.md` (dane firm, miejscowość, numery spraw, profile „Do pracy”

@@ -12,7 +12,14 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+## v0.48.1 — 2026-11-23
+
 **Parawan szybciej startuje: na słabym komputerze jest gotowy do pracy wyraźnie wcześniej, a wynik anonimizacji się nie zmienia.**
+
+Pilność: zalecana
+
+Na komputerze średniej klasy (procesor 4× wolniejszy niż komputer testowy) Parawan jest gotowy
+do pracy po ok. 2,0 s zamiast 2,5 s w v0.48.0. Rdzeń 0.31.1 (paczki `anonimizator` i `parawan`).
 
 - **Szybszy start.** Moduł do czytania PDF uruchamia się dopiero, gdy otworzysz pierwszy PDF, a nie
   przy każdym otwarciu pliku. Wzorce danych o zdrowiu są przygotowane już w pliku, więc aplikacja
@@ -2898,7 +2905,8 @@ Przegląd stabilizacyjny:
 - Opcjonalny lokalny NER (spaCy PL): usługa `services/ner` (Docker) + klient
   `anonimizator/ner` (fail-safe, circuit breaker).
 
-[Unreleased]: https://github.com/karolpolikarp/parawan/compare/v0.48.0...HEAD
+[Unreleased]: https://github.com/karolpolikarp/parawan/compare/v0.48.1...HEAD
+[v0.48.1]: https://github.com/karolpolikarp/parawan/compare/v0.48.0...v0.48.1
 [v0.48.0]: https://github.com/karolpolikarp/parawan/compare/v0.47.0...v0.48.0
 [v0.47.0]: https://github.com/karolpolikarp/parawan/compare/v0.46.27...v0.47.0
 [v0.46.27]: https://github.com/karolpolikarp/parawan/compare/v0.46.26...v0.46.27
