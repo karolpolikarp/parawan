@@ -24,6 +24,10 @@ NIGDY zewnętrzny `<link>`. Warstwa AI (NER/LLM) mieszka w OSOBNYM repo-dodatku
   - `guards/*.ts`: strażniki kontekstu wspólne dla kilku przebiegów;
   - `dict/*.ts` i `surnames.ts`: słowniki (imiona, miejscowości, pola formularzy, konta, nagłówki
     kolumn) oraz nazwiska z morfologią;
+  - `regex-literals.ts`: napisy gwarancji wzorców (filtr wstępny przebiegu zdrowia); jego wyniki
+    analizy są policzone w buildzie w `regex-literals-table.ts` (plik generowany: po zmianie wzorców
+    w `passes/health.ts` uruchom `npm run gen:literals -w anonimizator` między dwoma buildami
+    rdzenia; nieaktualną tablicę łapie `regex-literals-table.test.ts`);
   - `validators.ts`: sumy kontrolne; `charset.ts`, `person-patterns.ts`, `util.ts`: wspólne wzorce
     i narzędzia tekstowe; `struct-keys.ts`: klucze XML/JSON; `context.ts`: stan redakcji
     (`RedactCtx`) i sentinele PUA; `types.ts`: `PiiType`, `MASK`, `HUMAN_LABEL`, opcje;
@@ -102,9 +106,13 @@ Sam benchmark nie wystarcza — sprawdzaj zmiany wieloagentowo/adwersarialnie na
 
 Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i diakrytyką).
 
-## Stan (2026-11-15)
+## Stan (2026-11-23)
 
-- `main` = v0.48.0 (wydane 2026-11-15, rdzeń i `parawan` 0.31.0 czekają na npm, Backlog 4).
+- `main` = v0.48.1 (2026-11-23, PR #31): szybszy start, „gotowe” ×4 −15…−19% wobec v0.48.0, wynik
+  bajt w bajt ten sam. Rdzeń i `parawan` 0.31.1 czekają na npm (Backlog 4).
+- 2026-11-22, przegląd `/powrot` (`STATUS.md`): produkcja działa, CI zielone, bez zmian od 15.11.
+  Rozgrzebane: gałąź `fix/tarnowski-przymiotnik` (Backlog 3), PR #30 Dependabota (Backlog 13).
+- v0.48.0 wydane 2026-11-15.
   Zawiera PR #29: serie 2 i 3 pism (`test-data/seria-2`, `seria-3`, części robocza i odłożona; opisy
   w `docs/EWALUACJA-SERIA-2.md`, `-SERIA-3.md`). Seria 3 robocza: recall 87,3% → 94,7%, nadmiarowe
   64 → 2 na 358; odłożona 87,7% → 90,9%, 69 → 36. Ewaluacja serii: `node scripts/eval/run-eval.mjs
@@ -139,7 +147,7 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
    (nazwa instytucji lub geografii po przymiotniku, np. „Starosta Tarnowski”, „Ziemia Tarnowska”).
    Usunięcie ze słownika dawało wycieki („Sędzia Tarnowski”), cofnięte w 380586a.
 4. Publikacja npm z komputera autora (2FA): `npm login`, potem `npm publish -w anonimizator`
-   i `npm publish -w parawan`. 0.29.14 i 0.30.0 nie wyszły; publikować od razu 0.31.0 (v0.48.0).
+   i `npm publish -w parawan`. 0.29.14 i 0.30.0 nie wyszły; publikować od razu 0.31.1 (v0.48.1).
    Powrót: `npm view anonimizator version`.
 5. Część „Właściciel” z `docs/WYDANIE.md` dla v0.47.0 (czytnik ekranu, Word, wydruk PDF).
 6. Opcje polityki z `docs/EWALUACJA.md` (dane firm, miejscowość, numery spraw, profile „Do pracy”
@@ -149,15 +157,23 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 8. Trudniejsza seria testowa: tabele, OCR, tekst angielski, inne szablony niż 10 z generatora.
    Zrobione serie 2 i 3 (`docs/EWALUACJA-SERIA-2.md`, `-SERIA-3.md`); następna, czwarta, pod zdrowie,
    bo tam reguły najsłabiej przenoszą się na pisma odłożone.
-9. Czas startu na słabym PC wzrósł po seriach 2 i 3: „gotowe” 1,8× wolniej niż v0.47.0 (CI 2026-11-15,
-   job `start`). Główne koszty: przygotowanie wzorców w `regex-literals.ts` i wymuszony układ
-   (`offsetHeight`) w `main.ts`. Po ok. 10 przebiegach z CV ≤ 5% przełączyć job `start` na blokujący.
+9. Czas startu na słabym PC: gałąź `perf/czas-startu` (2026-11-22) daje „gotowe” ×4 −15…−19% wobec
+   v0.48.0 (leniwy pdf.js, analiza wzorców z buildu, bez drugiej analizy), wynik bajt w bajt ten sam.
+   Dalej (pomiary w `STATUS.md`): `content-visibility` kart pod pierwszym ekranem (LCP −56 ms ×4, wymaga
+   /sprawdz-ui i wydruku), wyrażenia z poziomu modułu leniwie (rdzeń −110…−200 ms ×4, niezmierzone
+   w pełnym pliku). Po wydaniu przestawić kotwicę `scripts/perf/kalibracja.json`; po ok. 10 przebiegach
+   z CV ≤ 5% przełączyć job `start` na blokujący.
 10. 46 wzorców z dwoma kwantyfikatorami odstępu wokół opcjonalnego znaku (lista ze skryptu sondy
     spacji, sesja 2026-11-15): sprawdzić resztę sondą długiego ciągu spacji, przepisać kwadratowe.
 11. Niestabilny e2e „obcy plik z dysku zapisuje mask-disabled=pesel” (raz timeout na CI 2026-11-15,
     lokalnie zawsze zielony): znaleźć przyczynę, nie powtarzać przebiegu w ciemno.
 12. Decyzja: nowy typ danych szczególnych (karalność, wyznanie, ubezwłasnowolnienie, Niebieska Karta;
     klasa W7 serii 3, ROADMAP poz. 28).
+13. PR #30 Dependabota (biome 2.6.8, axe-core, playwright, vite; CI zielone): sprawdzić nowe reguły
+    biome i zgodność przeglądarek, scalić. Powrót: PR zamknięty.
+14. Sprzątanie zdalnych gałęzi: `docs/stan-po-serii-3` (scalona) i 3 gałęzie Dependabota po
+    zamkniętych PR.
+Uwaga do 3: praca leży na gałęzi `fix/tarnowski-przymiotnik` (3 commity z 2026-11-14, bez PR).
 
 ## Znane problemy
 

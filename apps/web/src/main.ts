@@ -38,7 +38,10 @@ import {
   protocolTitle,
   textForDownload,
 } from './output';
-import { extractPdfText } from './pdf';
+// pdf.js (ok. 1,7 MB, trzy czwarte kodu pliku) startuje dopiero przy pierwszym PDF: przy otwarciu
+// pliku jego moduły tylko się parsują, a nie wykonują (Backlog 9, czas startu). Build dalej daje
+// jeden plik, bo vite-plugin-singlefile wkleja dynamiczny import do tego samego skryptu.
+const extractPdfText = async (bytes: Uint8Array): Promise<string> => (await import('./pdf')).extractPdfText(bytes);
 import { buildMinimalPdf } from './pdf-fixture';
 import {
   CAT_LABELS,
