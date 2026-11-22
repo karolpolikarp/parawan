@@ -12,6 +12,14 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+**Parawan szybciej startuje: na słabym komputerze jest gotowy do pracy wyraźnie wcześniej, a wynik anonimizacji się nie zmienia.**
+
+- **Szybszy start.** Moduł do czytania PDF uruchamia się dopiero, gdy otworzysz pierwszy PDF, a nie
+  przy każdym otwarciu pliku. Wzorce danych o zdrowiu są przygotowane już w pliku, więc aplikacja
+  nie liczy ich przy starcie i nie robi tego dwa razy. Pierwszy PDF otwiera się o ułamek sekundy
+  dłużej niż następne. Wynik anonimizacji jest identyczny co do znaku (sprawdzone na wszystkich
+  seriach pism i w benchmarku). Plik urósł o ok. 27 kB.
+
 ## v0.48.0 — 2026-11-15
 
 **Parawan zostawia jawne dane urzędu, a zakrywa więcej danych osoby: tę samą osobę w całym piśmie, dane o zdrowiu ze świadczeń i oświaty, numery uprawnień, tabele i inicjały w dekretacji.**
