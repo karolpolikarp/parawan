@@ -35,6 +35,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest run",
+    "gen:literals": "node scripts/gen-literals.mjs",
     "prepublishOnly": "npm run build && npm run test"
   },
   "keywords": [

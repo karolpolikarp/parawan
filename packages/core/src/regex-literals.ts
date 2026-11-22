@@ -1,6 +1,7 @@
 // Napisy, z których co najmniej jeden musi wystąpić w każdym trafieniu wyrażenia (filtr wstępny),
 // i wyszukiwanie trafień tylko w pobliżu tych napisów.
 
+import { LITERAL_TABLE } from './regex-literals-table.js';
 import { escapeRe } from './util.js';
 
 /** Największy zbiór wariantów trzymany dla jednego fragmentu wyrażenia. */
@@ -383,16 +384,80 @@ function analyze(re: RegExp): Cand | null {
 }
 
 /**
+ * Wynik analizy w postaci, którą da się zapisać: napisy gwarancji w kolejności zbioru, `n` i alfabet
+ * jako lista źródeł klas znaków (null: dowolne znaki).
+ */
+export type LiteralFacts = { set: readonly string[]; n: number; cls: readonly string[] | null };
+
+/** Analiza liczona od nowa, z pominięciem tablicy z buildu (dla generatora tablicy i testów). */
+export function analyzeFresh(re: RegExp): LiteralFacts | null {
+  const c = analyze(re);
+  // Źródła alfabetu posortowane: kolejność bitów w ATOMS zależy od tego, co proces analizował
+  // wcześniej, a tablica z buildu ma wychodzić tak samo przy każdym przebiegu generatora.
+  // Alfabet testuje jeden znak (^(?:a|b)$), więc kolejność alternatyw nie zmienia dopasowania.
+  return c ? { set: [...c.set], n: c.n, cls: c.cls === null ? null : atomSources(c.cls).sort() } : null;
+}
+
+/**
+ * Klucz wyrażenia w tablicy z buildu: dwa niezależne skróty 32-bitowe źródła z flagami i jego
+ * długość. Tablica nie trzyma samych źródeł, bo wzorce leków i fraz zdrowia mają razem setki tysięcy
+ * znaków i podwoiłyby się w pliku.
+ */
+export function literalTableKey(re: RegExp): string {
+  const s = `${re.source}\u0000${re.flags}`;
+  let a = 0x811c9dc5;
+  let b = 5381;
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charCodeAt(i);
+    a = Math.imul(a ^ c, 0x01000193);
+    b = Math.imul(b, 33) ^ c;
+  }
+  return `${(a >>> 0).toString(36)}.${(b >>> 0).toString(36)}.${s.length.toString(36)}`;
+}
+
+/** Wyrażenia, których nie było w tablicy z buildu (liczone od nowa); tablicę odświeża gen:literals. */
+const tableMisses = new Set<string>();
+/** Klucze i źródła wyrażeń, które ominęły tablicę z buildu od startu procesu. */
+export function literalTableMisses(): ReadonlyArray<readonly [key: string, source: string, flags: string]> {
+  return [...tableMisses].map((j) => JSON.parse(j) as [string, string, string]);
+}
+/** Wszystkie wyrażenia, o które pytano analizę od startu procesu (dla generatora tablicy). */
+const asked = new Set<RegExp>();
+export function analyzedPatterns(): RegExp[] {
+  return [...asked];
+}
+
+/**
+ * Analiza wyrażenia: najpierw tablica policzona w buildzie (`regex-literals-table.ts`), przy braku
+ * wpisu liczona od nowa. Nieaktualna tablica tylko spowalnia start, wyniku nie zmienia, bo wpis
+ * nieznanego wyrażenia nie istnieje; zgodność wpisów z analizą pilnuje regex-literals-table.test.ts.
+ */
+function literalFacts(re: RegExp): LiteralFacts | null {
+  if (re.unicode || re.flags.includes('v')) return null;
+  const key = literalTableKey(re);
+  asked.add(re);
+  const pre = LITERAL_TABLE[key];
+  if (pre !== undefined) {
+    if (pre === 0) return null;
+    return { n: pre[0] < 0 ? INF : pre[0], cls: pre[1], set: pre[2] };
+  }
+  tableMisses.add(JSON.stringify([key, re.source, re.flags]));
+  return analyzeFresh(re);
+}
+
+/**
  * Napisy (małymi literami), z których co najmniej jeden występuje w tekście (bez względu na wielkość
  * liter), ilekroć wyrażenie ma w nim trafienie; null, gdy takiej gwarancji nie ma albo składnia wykracza
  * poza obsługiwaną (wtedy filtr przepuszcza każdy tekst).
  */
 export function requiredLiterals(re: RegExp): string[] | null {
-  const c = analyze(re);
+  const c = literalFacts(re);
   return c ? [...c.set] : null;
 }
 
 type Finder = {
+  /** Napisy gwarancji w kolejności zbioru (od niej zależy kolejność alternatyw w `lit`). */
+  set: readonly string[];
   /** Napisy gwarancji, szukane bez względu na wielkość liter. */
   lit: RegExp;
   /** Najdalszy początek napisu od początku trafienia. */
@@ -410,16 +475,17 @@ const finders = new Map<RegExp, Finder | null>();
 function finderOf(re: RegExp): Finder | null {
   let f = finders.get(re);
   if (f !== undefined) return f;
-  const c = analyze(re);
+  const c = literalFacts(re);
   const base = re.flags.replace(/[gy]/g, '');
   f = c
     ? {
-        lit: new RegExp([...c.set].map(escapeRe).join('|'), 'gi'),
+        set: c.set,
+        lit: new RegExp(c.set.map(escapeRe).join('|'), 'gi'),
         n: c.n,
-        cls: c.cls === null ? null : new RegExp(`^(?:${atomSources(c.cls).join('|') || '(?!)'})$`, re.ignoreCase ? 'i' : ''),
+        cls: c.cls === null ? null : new RegExp(`^(?:${c.cls.join('|') || '(?!)'})$`, re.ignoreCase ? 'i' : ''),
         sticky: new RegExp(re.source, `${base}y`),
         global: new RegExp(re.source, `${base}g`),
-        shortest: Math.min(...[...c.set].map((x) => x.length)),
+        shortest: Math.min(...c.set.map((x) => x.length)),
       }
     : null;
   finders.set(re, f);
@@ -469,7 +535,8 @@ export class LiteralIndex {
     for (const re of regexes) {
       if (this.ids.has(re) || !nearSearchable(re)) continue;
       this.ids.set(re, sets.length);
-      sets.push([...(analyze(re) as Cand).set]);
+      // nearSearchable już przeanalizowało wyrażenie: napisy z jego Finder, bez drugiej analizy
+      sets.push([...(finderOf(re) as Finder).set]);
     }
     const all = [...new Set(sets.flat())].sort((a, b) => b.length - a.length || (a < b ? -1 : 1));
     for (const [k, l] of all.entries()) this.litId.set(l, k);

@@ -8,7 +8,8 @@
       "scripts/**/*.mjs",
       "!**/dist",
       "!**/__snapshots__",
-      "!**/*.d.ts"
+      "!**/*.d.ts",
+      "!packages/core/src/regex-literals-table.ts"
     ]
   },
   "formatter": {
