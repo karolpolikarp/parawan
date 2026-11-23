@@ -12,6 +12,14 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+## v0.48.2 — 2026-11-23
+
+**Na słabym komputerze okno Parawana pojawia się wcześniej, a wynik anonimizacji się nie zmienia.**
+
+Pilność: zwykła
+
+Rdzeń bez zmian (0.31.1).
+
 - **Okno widać wcześniej.** Silnik rozpoznawania danych wczytuje się dopiero po pokazaniu okna,
   a nie przed nim. Na komputerze średniej klasy (procesor 4× wolniejszy niż komputer testowy)
   okno pojawia się po ok. 1,2 s zamiast 1,4 s. Gotowość do pracy bez zmian (ok. 2,0 s): tekst
@@ -2911,7 +2919,8 @@ Przegląd stabilizacyjny:
 - Opcjonalny lokalny NER (spaCy PL): usługa `services/ner` (Docker) + klient
   `anonimizator/ner` (fail-safe, circuit breaker).
 
-[Unreleased]: https://github.com/karolpolikarp/parawan/compare/v0.48.1...HEAD
+[Unreleased]: https://github.com/karolpolikarp/parawan/compare/v0.48.2...HEAD
+[v0.48.2]: https://github.com/karolpolikarp/parawan/compare/v0.48.1...v0.48.2
 [v0.48.1]: https://github.com/karolpolikarp/parawan/compare/v0.48.0...v0.48.1
 [v0.48.0]: https://github.com/karolpolikarp/parawan/compare/v0.47.0...v0.48.0
 [v0.47.0]: https://github.com/karolpolikarp/parawan/compare/v0.46.27...v0.47.0
