@@ -633,9 +633,11 @@ test('Ctrl+Enter zaraz po otwarciu pliku, przed wczytaniem rdzenia, kopiuje wyni
           let loaded = false;
           window.setTimeout = (fn, ms, ...a) => st(fn, !loaded && !ms ? 400 : ms, ...a);
           document.addEventListener('DOMContentLoaded', () => {
+            // Firefox uruchamia skrypt także w pustym dokumencie przed nawigacją: tam nie ma pola.
+            const input = document.getElementById('input');
+            if (!input) return;
             loaded = true;
             window.__parawanEarly = performance.getEntriesByName('parawan:gotowe').length === 0;
-            const input = document.getElementById('input');
             input.value = 'PESEL 44051401359';
             input.dispatchEvent(new Event('input', { bubbles: true }));
             document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', ctrlKey: true, bubbles: true }));
