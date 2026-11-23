@@ -1,15 +1,19 @@
 {
- "kotwica": "v0.48.0",
- "sha256": "467a9c7ae578843829d9ff4b067a9bf9d13897b54b8573795b97071c5aab9cb9",
+ "kotwica": "v0.48.2",
+ "sha256": "83f4db00b068841eb861cb94c4b84e26bc1b43c76da6a011eb27cf6afc3e62eb",
  "maszyna": "komputer odniesienia: i7-13700KF, 64 GB RAM, Windows 11, Chromium z Playwright 1.64.1 headless, file://",
- "data": "2026-11-15",
- "komenda": "node scripts/perf/start.mjs Parawan.html --rate 1 --runs 11 --json; to samo z --rate 4",
+ "data": "2026-11-23",
+ "komenda": "przeplot z v0.48.0: node scripts/perf/start.mjs Parawan.html --rate 1 --runs 5 --json (5 par), to samo z --rate 4 (4 pary); wartość = wartość v0.48.0 z poprzedniej kalibracji × mediana stosunków par",
  "metoda": "znacznik",
  "rate": 4,
- "gotowe_x1_ms": 440,
- "ui_x4_ms": 1404,
- "lcp_x4_ms": 1488,
- "gotowe_x4_ms": 2238,
- "porownanie": ["ui", "lcp", "gotowe"],
- "uwaga": "v0.48.0 rozgrzewa silnik przy starcie i ma znaczniki performance.mark, więc próg względny obejmuje też „gotowe”. Poprzednia kotwica v0.47.0: ui ×4 1575 ms, LCP ×4 1696 ms, gotowe ×4 1924 ms (metoda „obserwator”, bez rozgrzewki przy starcie)."
+ "gotowe_x1_ms": 352,
+ "ui_x4_ms": 1068,
+ "lcp_x4_ms": 1153,
+ "gotowe_x4_ms": 1785,
+ "porownanie": [
+  "ui",
+  "lcp",
+  "gotowe"
+ ],
+ "uwaga": "Maszyna odniesienia była lekko obciążona (v0.48.0 ×1 449–472 ms przy 440 ms w kalibracji), więc wartości przeliczone z przeplatanych par wobec v0.48.0, a nie z pojedynczej serii. Stosunki v0.48.2/v0.48.0: ×1 „gotowe” 0,800 (CV serii ok. 1%); ×4 ui 0,761, LCP 0,775, „gotowe” 0,798. Rzutowanie z joba start na CI (PR #33) dało ×4 1016 / 1101 / 1652 ms, czyli o 5–8% mniej: wpisane wartości lokalne są ostrzejsze. Poprzednia kotwica v0.48.0: gotowe ×1 440 ms, ui ×4 1404, LCP ×4 1488, gotowe ×4 2238 ms."
 }
