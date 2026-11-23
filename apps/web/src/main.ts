@@ -1,4 +1,4 @@
-import { redactPII, type PiiFinding, type PiiType } from 'anonimizator';
+import type { PiiFinding, PiiType } from 'anonimizator';
 import { escapeHtml, guessAligned } from './compare';
 import {
   afterSourceEdit,
@@ -1672,21 +1672,52 @@ const SLOW_UPDATE_MS = 300;
 // rosłaby od niego do pół sekundy i więcej na wolnym komputerze. Silnik rozgrzewa się więc na
 // przykładowym piśmie zaraz po starcie (osobne zadanie, gdy pole jest jeszcze puste), a najpóźniej
 // przed pierwszym przeliczeniem, poza pomiarem.
-let engineWarm = false;
-function warmEngine(): void {
-  if (engineWarm) return;
-  engineWarm = true;
-  redactPII(EXAMPLE_TEXT);
-  // Znacznik dla pomiaru czasu startu (scripts/perf/start.mjs): aplikacja gotowa, silnik rozgrzany.
-  // Zostaje w pamięci karty, nic nie wysyła i niczego nie zmienia w działaniu.
-  performance.mark('parawan:gotowe');
+//
+// Rdzeń wczytuje się dynamicznym importem dopiero w rozgrzewce, a nie razem z tym skryptem: moduły
+// rdzenia przy wykonaniu budują setki wyrażeń i słowników (przy CPU ×4 ok. 250 ms), a pierwszy ekran
+// nic z nich nie potrzebuje. Import zostaje w tym samym pliku (vite-plugin-singlefile), tak jak
+// pdf.js. `engine` jest ustawiany dopiero po rozgrzewce, więc jest gotowy do pomiaru kosztu.
+type Engine = typeof import('anonimizator');
+let engine: Engine | null = null;
+let engineLoad: Promise<void> | null = null;
+// Pasek „Parawan nie uruchomił się” znika w ostatniej instrukcji startu, a rdzeń wykonuje się
+// później. Gdy to on rzuci wyjątek, pasek wraca (i jak przy starcie pokazuje się po 4 s).
+const bootFailBar = document.getElementById('boot-fail');
+function warmEngine(): Promise<void> {
+  engineLoad ??= import('anonimizator')
+    .then((m) => {
+      m.redactPII(EXAMPLE_TEXT);
+      engine = m;
+      // Znacznik dla pomiaru czasu startu (scripts/perf/start.mjs): aplikacja gotowa, silnik rozgrzany.
+      // Zostaje w pamięci karty, nic nie wysyła i niczego nie zmienia w działaniu.
+      performance.mark('parawan:gotowe');
+    })
+    .catch((e: unknown) => {
+      if (bootFailBar) document.body.prepend(bootFailBar);
+      throw e;
+    });
+  return engineLoad;
 }
 
 function update(): void {
   clearTimeout(updateTimer);
   updateTimer = undefined;
   updatePending = false;
-  if (input.value.trim()) warmEngine();
+  const eng = engine;
+  if (!eng && input.value.trim()) {
+    // Tekst przed końcem rozgrzewki (wklejony w pierwszej chwili po otwarciu pliku): liczymy go
+    // zaraz po niej. Kilka takich wywołań przelicza tylko raz, bo pierwsze zeruje updatePending.
+    updatePending = true;
+    setBusy(true);
+    warmEngine().then(
+      () => {
+        setBusy(false);
+        if (updatePending) update();
+      },
+      () => setBusy(false),
+    );
+    return;
+  }
   const t0 = performance.now();
   const text = input.value;
   updateSrcMeta(text);
@@ -1726,7 +1757,8 @@ function update(): void {
     return;
   }
   fieldValue = text;
-  const { redacted, found } = redactPII(text, {
+  // Tu pole nie jest puste, więc rdzeń jest wczytany (wyżej: !eng przy niepustym tekście wychodzi).
+  const { redacted, found } = (eng as Engine).redactPII(text, {
     types: activeTypes(),
     pseudonyms: pseudonymsBox.checked,
   });
@@ -1782,9 +1814,25 @@ function updateNow(): void {
   );
 }
 
-/** Przed kopiowaniem i pobraniem: wynik musi odpowiadać temu, co jest w polu w tej chwili. */
+/**
+ * Przed kopiowaniem i pobraniem: wynik musi odpowiadać temu, co jest w polu w tej chwili.
+ * Przed końcem rozgrzewki (rdzeń jeszcze się wczytuje) tylko ją zleca i wyniku jeszcze nie ma;
+ * wtedy przyciski wyniku są wyłączone, a skrót klawiszowy czeka przez settledUpdate().
+ */
 function flushPendingUpdate(): void {
   if (updatePending) update();
+}
+
+/** Jak flushPendingUpdate, ale gdy rdzeń jeszcze się wczytuje, czeka na niego i na wynik. */
+async function settledUpdate(): Promise<void> {
+  if (!engine && (updatePending || input.value.trim())) {
+    try {
+      await warmEngine();
+    } catch {
+      return; // pasek „nie uruchomił się” wrócił (warmEngine), wyniku nie będzie
+    }
+  }
+  flushPendingUpdate();
 }
 
 // Formularz wokół pola źródła jest tylko dla autocomplete="off" (index.html). Enter w polu
@@ -2581,12 +2629,13 @@ window.addEventListener('drop', (e) => {
 });
 
 // Ctrl/Cmd+Enter — kopiuj wynik. Najpierw dokończ odłożone przeliczenie: tuż po wklejeniu do
-// pustego pola przycisk jest jeszcze wyłączony, a click() na wyłączonym nic nie robi.
+// pustego pola przycisk jest jeszcze wyłączony, a click() na wyłączonym nic nie robi. W pierwszej
+// chwili po otwarciu pliku czeka też na rdzeń (settledUpdate); schowek przyjmuje zapis jeszcze
+// kilka sekund po naciśnięciu klawisza.
 document.addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
     e.preventDefault();
-    flushPendingUpdate();
-    copyBtn.click();
+    void settledUpdate().then(() => copyBtn.click());
   }
 });
 
@@ -2683,6 +2732,8 @@ initTips();
 
 // Rozgrzewka silnika (warmEngine) w osobnym zadaniu, czyli po starcie: strona jest już gotowa,
 // a pierwsze wklejenie liczy się tak szybko jak następne.
+// Wyjątek rdzenia przywraca pasek (warmEngine) i trafia do konsoli jako nieobsłużona obietnica,
+// tak jak wcześniej wyjątek przy starcie.
 setTimeout(warmEngine, 0);
 
 // Znacznik „widać interfejs” dla scripts/perf/start.mjs. Mikrozadanie wykona się zaraz po tym

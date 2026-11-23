@@ -157,12 +157,15 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 8. Trudniejsza seria testowa: tabele, OCR, tekst angielski, inne szablony niż 10 z generatora.
    Zrobione serie 2 i 3 (`docs/EWALUACJA-SERIA-2.md`, `-SERIA-3.md`); następna, czwarta, pod zdrowie,
    bo tam reguły najsłabiej przenoszą się na pisma odłożone.
-9. Czas startu na słabym PC: gałąź `perf/czas-startu` (2026-11-22) daje „gotowe” ×4 −15…−19% wobec
-   v0.48.0 (leniwy pdf.js, analiza wzorców z buildu, bez drugiej analizy), wynik bajt w bajt ten sam.
-   Dalej (pomiary w `STATUS.md`): `content-visibility` kart pod pierwszym ekranem (LCP −56 ms ×4, wymaga
-   /sprawdz-ui i wydruku), wyrażenia z poziomu modułu leniwie (rdzeń −110…−200 ms ×4, niezmierzone
-   w pełnym pliku). Po wydaniu przestawić kotwicę `scripts/perf/kalibracja.json`; po ok. 10 przebiegach
-   z CV ≤ 5% przełączyć job `start` na blokujący.
+9. Czas startu na słabym PC: v0.48.1 (2026-11-23) dało „gotowe” ×4 −15…−23% wobec v0.48.0. Gałąź
+   `perf/leniwe-wyrazenia`: rdzeń wczytywany dynamicznym importem po pokazaniu okna, okno/LCP ×4
+   −13…−16%, „gotowe” bez zmian (praca przechodzi do rozgrzewki). Odrzucone pomiarem i przeglądem:
+   `content-visibility` kart (LCP i „gotowe” w szumie, psuje skok do `#ograniczenia` i zrzuty
+   fullPage testu a11y), leniwe wyrażenia w rdzeniu (508 z 660 nieużywane w rozgrzewce, ok. 60 ms ×4,
+   setki miejsc). Dalej: pdf.js jako `<script type="text/plain">` (górna granica ui ×4 −494 ms, zmiana
+   CSP). Ctrl+P w pierwszej sekundzie po wklejeniu drukuje bez wyniku (beforeprint nie czeka na
+   rdzeń). Kotwicę `scripts/perf/kalibracja.json` przestawić na v0.48.1 przy spokojnej maszynie
+   (2026-11-23 CV 53% przez obciążenie); po ok. 10 przebiegach z CV ≤ 5% job `start` blokujący.
 10. 46 wzorców z dwoma kwantyfikatorami odstępu wokół opcjonalnego znaku (lista ze skryptu sondy
     spacji, sesja 2026-11-15): sprawdzić resztę sondą długiego ciągu spacji, przepisać kwadratowe.
 11. Niestabilny e2e „obcy plik z dysku zapisuje mask-disabled=pesel” (raz timeout na CI 2026-11-15,
@@ -173,6 +176,11 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
     biome i zgodność przeglądarek, scalić. Powrót: PR zamknięty.
 14. Sprzątanie zdalnych gałęzi: `docs/stan-po-serii-3` (scalona) i 3 gałęzie Dependabota po
     zamkniętych PR.
+15. `publikacja.test.ts` „adnotacja i protokół…” trwa ok. 2 s przy limicie 5 s; przy obciążonej
+    maszynie (równoległe testy) przekracza limit. Przyspieszyć albo nadać jawny limit z uzasadnieniem.
+    To samo w rdzeniu: `index.test.ts` „klasa 9: ocena kształtu rozmowy w czasie liniowym” raz dała
+    stosunek 6,14 i 6,42 przy progu 6 na CI (2026-11-23, PR #32, rdzeń bez zmian). Na Node 20 lokalnie
+    przed v0.48.1 i po: 3,7–5,2, czyli liniowo, ale próg bez zapasu na szum runnera.
 Uwaga do 3: praca leży na gałęzi `fix/tarnowski-przymiotnik` (3 commity z 2026-11-14, bez PR).
 
 ## Znane problemy
