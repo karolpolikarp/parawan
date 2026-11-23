@@ -113,6 +113,9 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 
 - `main` = v0.48.2 + PR #34 (2026-11-23): kotwica czasu startu v0.48.2, testy z progiem czasu przez
   `packages/core/src/pomiar-czasu.ts` (Backlog 15). Handoff: `docs/handoff-2026-11-23.md`.
+- Dashboard skuteczności do prezentacji (artefakt claude.ai, prywatny):
+  https://claude.ai/artifact/VBqTqKtwi37gSsm2PKBxit. Ewaluacja 2026-11-23: 90,4% na 250 pismach,
+  84,1% na odłożonych, nadmiarowe 6,4%. Odświeżenie danych: opis w handoffie.
 - v0.48.2 (2026-11-23, PR #32, #33): okno ×4 o ok. 0,2 s wcześniej (rdzeń przez dynamiczny
   import po pokazaniu okna), rdzeń bez zmian.
 - v0.48.1 (2026-11-23, PR #31): szybszy start, „gotowe” ×4 −15…−19% wobec v0.48.0, wynik
