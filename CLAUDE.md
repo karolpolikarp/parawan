@@ -32,6 +32,9 @@ NIGDY zewnętrzny `<link>`. Warstwa AI (NER/LLM) mieszka w OSOBNYM repo-dodatku
     i narzędzia tekstowe; `struct-keys.ts`: klucze XML/JSON; `context.ts`: stan redakcji
     (`RedactCtx`) i sentinele PUA; `types.ts`: `PiiType`, `MASK`, `HUMAN_LABEL`, opcje;
   - `http.ts`, `breaker.ts`: wspólne wywołania HTTP i wyłącznik awaryjny klientów NER/LLM;
+  - `pomiar-czasu.ts`: tylko dla testów (rdzeń i web), poza dist: `bestTimes` (minimum z pomiarów
+    na przemian krótki/długi, z dopomiarowaniem, gdy wynik nie mieści się w progu) i `fastestMs`
+    dla testów czasu. Każdy nowy test z progiem czasu przez te funkcje, nie własny pomiar;
   - `index.ts`: tylko reeksporty publicznego API. Zbiór eksportów i graf importów (tylko w dół,
     bez cykli) pilnuje `struktura.test.ts`, a wynik `redactPII` zamraża `redact-golden.test.ts`.
 
@@ -121,14 +124,15 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
   --eval --set test-data/seria-3/robocza --profile domyslny`. Części odłożonej nie używać do strojenia.
 - Handoff: `docs/handoff-2026-11-15.md` (start: Backlog 9, czas startu).
 - Bramki pliku: sufit rozmiaru z limitu poczty Exchange (7 120 614 B), strażnik składu
-  (`scripts/e2e/sklad.test.mjs`), job CI `start` (czas startu, nieblokujący; dziś 1,8× wolniej niż
-  v0.47.0, Backlog 9). Opis: `docs/WYDANIE.md`, „Rozmiar i czas startu”.
+  (`scripts/e2e/sklad.test.mjs`), job CI `start` (czas startu, nieblokujący, kotwica v0.48.2 od
+  2026-11-23, Backlog 9). Opis: `docs/WYDANIE.md`, „Rozmiar i czas startu”.
 - v0.47.0 wydane 2026-11-14: tag, Release i kopia na domenie zgodne, suma
   `da65c1ec…`. Ewaluacja na 50 fikcyjnych pismach: `npm run eval`, `docs/EWALUACJA.md`
   (recall 89,2% → 99,5%, nadmiarowe 30 → 0). Rdzeń i `parawan` 0.30.0 czekają na npm
   (Backlog 4). Handoff: `docs/handoff-2026-11-14.md`.
 - Testy wydajności rdzenia z progiem czasu sprawdzaj też na Node 20 (CI): V8 z Node 24 ukrywa
   kwadratowy lookbehind z nieograniczonym odstępem (`(?<=jest[ 	]+)`).
+  Pomiar tylko przez `pomiar-czasu.ts` (Backlog 15), nie przez własne `performance.now()`.
 - W toku: nowy landing (`/frontend`), kierunek „Sosna o poranku”. Próbki poza repo w
   `E:\parawan-landing-proby\`. Handoff: `docs/handoff-2026-11-01.md`.
 
@@ -166,8 +170,8 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
    fullPage testu a11y), leniwe wyrażenia w rdzeniu (508 z 660 nieużywane w rozgrzewce, ok. 60 ms ×4,
    setki miejsc). Dalej: pdf.js jako `<script type="text/plain">` (górna granica ui ×4 −494 ms, zmiana
    CSP). Ctrl+P w pierwszej sekundzie po wklejeniu drukuje bez wyniku (beforeprint nie czeka na
-   rdzeń). Kotwicę `scripts/perf/kalibracja.json` przestawić na v0.48.1 przy spokojnej maszynie
-   (2026-11-23 CV 53% przez obciążenie); po ok. 10 przebiegach z CV ≤ 5% job `start` blokujący.
+   rdzeń). Kotwica `scripts/perf/kalibracja.json` = v0.48.2 (2026-11-23, przeliczona z par wobec
+   v0.48.0); po ok. 10 przebiegach z CV ≤ 5% job `start` blokujący.
 10. 46 wzorców z dwoma kwantyfikatorami odstępu wokół opcjonalnego znaku (lista ze skryptu sondy
     spacji, sesja 2026-11-15): sprawdzić resztę sondą długiego ciągu spacji, przepisać kwadratowe.
 11. Niestabilny e2e „obcy plik z dysku zapisuje mask-disabled=pesel” (raz timeout na CI 2026-11-15,
@@ -178,11 +182,16 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
     biome i zgodność przeglądarek, scalić. Powrót: PR zamknięty.
 14. Sprzątanie zdalnych gałęzi: `docs/stan-po-serii-3` (scalona) i 3 gałęzie Dependabota po
     zamkniętych PR.
-15. `publikacja.test.ts` „adnotacja i protokół…” trwa ok. 2 s przy limicie 5 s; przy obciążonej
-    maszynie (równoległe testy) przekracza limit. Przyspieszyć albo nadać jawny limit z uzasadnieniem.
-    To samo w rdzeniu: `index.test.ts` „klasa 9: ocena kształtu rozmowy w czasie liniowym” raz dała
-    stosunek 6,14 i 6,42 przy progu 6 na CI (2026-11-23, PR #32, rdzeń bez zmian). Na Node 20 lokalnie
-    przed v0.48.1 i po: 3,7–5,2, czyli liniowo, ale próg bez zapasu na szum runnera.
+15. Progi czasu w testach: zrobione 2026-11-23 (gałąź `chore/kotwica-0.48.2`). Wszystkie testy z progiem
+    czasu w rdzeniu (`index.test.ts`, `zdrowie.test.ts`) i web (`spans`, `docx`, `docx-inventory`)
+    mierzą przez `packages/core/src/pomiar-czasu.ts` (`bestTimes` z dopomiarowaniem, `fastestMs`),
+    progi bez zmian. Pod obciążeniem (4 rdzenie, Node 20, pełny zestaw rdzenia w tle, 20 przebiegów
+    testów czasu): przed 3/20 przebiegów z porażką (6,03; 6,14; 6,99 przy progu 6), po 0/20.
+    Czułość: sztuczny składnik kwadratowy 25% przy krótkim wejściu pada w 29 z 30 wywołań, 50%
+    w 30 z 30; przywrócony skan od początku wiersza w G7 i w klasie 9 daje 18,6 i 17,4.
+    `publikacja.test.ts` „adnotacja i protokół…”: ponad 90% czasu to ok. 1700 wywołań redactPII
+    na zbiorze benchmarku, więc jawny limit 60 s z uzasadnieniem. Zostało: obserwować CI po scaleniu
+    (jeśli test czasu padnie mimo dopomiarowania, zapisać stosunek i liczbę rund).
 Uwaga do 3: praca leży na gałęzi `fix/tarnowski-przymiotnik` (3 commity z 2026-11-14, bez PR).
 
 ## Znane problemy

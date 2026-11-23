@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { strToU8, zipSync } from 'fflate';
 import { expect, test } from 'vitest';
+import { fastestMs, LIMIT_TESTU_CZASU } from '../../../packages/core/src/pomiar-czasu';
 import { extractDocxText } from './docx';
 import { type DocxInventory, docxEmptyBodyError, docxInventoryNote, inventoryDocx } from './docx-inventory';
 import { FileReadError } from './files';
@@ -205,10 +206,9 @@ test('ukryty tekst: uszkodzony dokument z dziesiątkami tysięcy niedomkniętych
     'word/document.xml': doc(body),
     'word/styles.xml': stylesXml(style('paragraph', 'Ukryty', VANISH)),
   });
-  const t0 = performance.now();
   expect(inventoryDocx(zip).hidden).toBe(1);
-  expect(performance.now() - t0).toBeLessThan(1500);
-});
+  expect(fastestMs(() => inventoryDocx(zip), 1500)).toBeLessThan(1500);
+}, LIMIT_TESTU_CZASU);
 
 test('ukryty stylem: dawne formatowanie w śledzonej zmianie i znak akapitu się nie liczą, inny prefiks tak', () => {
   const styles = stylesXml(style('character', 'Ukryty', VANISH) + style('paragraph', 'UkrytyAkapit', VANISH));
@@ -342,13 +342,14 @@ test('limit: części dodatkowe mają razem ten sam limit co document.xml (bomba
   const files: Record<string, Uint8Array> = { 'word/document.xml': doc(para('Treść.')) };
   for (let i = 1; i <= 26; i++) files[`word/header${i}.xml`] = big;
   const zip = zipSync(files);
-  const t0 = performance.now();
-  expect(() => inventoryDocx(zip)).toThrow(/zbyt duży albo uszkodzony/);
-  expect(() => inventoryDocx(zip)).toThrow(FileReadError);
-  expect(performance.now() - t0).toBeLessThan(3000);
+  const ms = fastestMs(() => {
+    expect(() => inventoryDocx(zip)).toThrow(/zbyt duży albo uszkodzony/);
+    expect(() => inventoryDocx(zip)).toThrow(FileReadError);
+  }, 3000);
+  expect(ms).toBeLessThan(3000);
   // treść główna i tak się wczytuje
   expect(extractDocxText(zip)).toBe('Treść.');
-});
+}, LIMIT_TESTU_CZASU);
 
 const DGM = 'http://schemas.openxmlformats.org/drawingml/2006/diagram';
 const A = 'http://schemas.openxmlformats.org/drawingml/2006/main';

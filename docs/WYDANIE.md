@@ -104,6 +104,13 @@ już rozgrzewa silnik przy starcie i ma znaczniki `performance.mark` (każde po 
 `"porownanie": ["ui", "lcp", "gotowe"]`. Pominięcie kroku nie psuje bramki: próg względny mierzy
 wtedy zmiany od starszego wydania, co jest ostrzejsze.
 
+Gdy komputer odniesienia jest obciążony (poprzednia kotwica ×1 wychodzi wyraźnie powyżej
+`gotowe_x1_ms`, a CV serii ×4 powyżej 5%), nie wpisuj median z pojedynczej serii. Mierz na zmianę
+starą kotwicę i nowe wydanie (np. 5 par ×1 i 4 pary ×4, każda po `--runs 5`) i wpisz wartość starej
+kotwicy z `kalibracja.json` pomnożoną przez medianę stosunków par. Przeplot znosi dryf obciążenia
+tak samo jak w bramce. Metodę i stosunki zapisz w polach `komenda` i `uwaga` (przykład: kotwica
+v0.48.2).
+
 Gdy bramka czasu nie przechodzi, zajrzyj do profilu CPU, a nie do bajtów: według pomiaru
 z 2026-11-15 najwięcej czasu idzie na rozgrzewkę rdzenia, `regex-literals.ts` (85 ms przy ×1)
 i wymuszony układ przez `offsetHeight` w `main.ts` (ok. 103 ms przy ×1); pdf.js to 66% bajtów,

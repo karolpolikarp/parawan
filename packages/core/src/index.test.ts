@@ -14,26 +14,19 @@ import {
 } from './index';
 import { HISTORIC_SURNAMES_GEN, historicSurnameGenitive } from './passes/person-caps-ocr';
 import { RE_ADDRESS_ANCHOR_BEFORE } from './passes/person-vocative';
+import { bestTimes, fastestMs, LIMIT_TESTU_CZASU } from './pomiar-czasu';
 import { MASK, type PiiType } from './types';
 
 // Wszystkie typy oprócz danych o zdrowiu: dla testów reguł osób i formularzy na tekstach z nazwą
 // choroby, którą przy ustawieniach domyślnych zakrywa maska [DANE O ZDROWIU].
 const BEZ_ZDROWIA = { types: (Object.keys(MASK) as PiiType[]).filter((t) => t !== 'ZDROWIE') };
 
-// Czasy dwóch przebiegów (krótkiego i długiego wejścia) do testów czasu liniowego. Każdy rozmiar
-// liczy się jako minimum z kilku powtórzeń, na przemian krótki i długi: minimum odcina pauzy GC
-// i obciążenie od plików testów biegnących równolegle, a naprzemienność rozkłada dryf maszyny
-// na oba rozmiary. Jeden pomiar długiego wejścia dawał w CI stosunek 6,6–6,8 przy kodzie
-// liniowym (lokalnie ok. 4), a kod kwadratowy i tak daje kilkanaście.
-function bestTimes<T>(time: (input: T) => number, small: T, big: T, reps = 3): [number, number] {
-  let a = Infinity;
-  let b = Infinity;
-  for (let i = 0; i < reps; i++) {
-    a = Math.min(a, time(small));
-    b = Math.min(b, time(big));
-  }
-  return [a, b];
-}
+// Czas jednej redakcji z domyślnymi ustawieniami (testy czasu liniowego, patrz pomiar-czasu.ts).
+const timeRedact = (s: string): number => {
+  const t0 = performance.now();
+  redactPII(s);
+  return performance.now() - t0;
+};
 
 // Buduje poprawny IBAN z kodu kraju + BBAN (liczymy cyfry kontrolne mod 97),
 // żeby test nie zależał od zapamiętanego wektora.
@@ -1750,9 +1743,9 @@ test('sygnatury w długim wierszu bez znaków nowej linii: czas liniowy', () => 
       i % 2 ? 'Sygn. akt I C 1/20; ' : 'wyrok NSA z 2020 r., sygn. akt II OSK 1/20, oraz ',
     ).join('');
   redactPII(line(200), { types: ['ZNAK-SPRAWY'] });
-  const [t1, t4] = bestTimes(time, line(1000), line(4000));
+  const [t1, t4] = bestTimes(time, line(1000), line(4000), 6);
   expect(t4 / t1).toBeLessThan(6);
-});
+}, LIMIT_TESTU_CZASU);
 
 test('KRS z wypełniaczem „pod numerem" maskowany', () => {
   const r = redactPII('spółkę wpisaną do KRS pod numerem 0000123456.');
@@ -2496,11 +2489,9 @@ test('czas liniowy na patologicznych wejściach (każde < 500 ms przy ~100 tys. 
     'znak sprawy': 'AB.'.repeat(30_000),
   };
   for (const [name, text] of Object.entries(inputs)) {
-    const t0 = performance.now();
-    redactPII(text);
-    expect(performance.now() - t0, name).toBeLessThan(500);
+    expect(fastestMs(() => redactPII(text), 500), name).toBeLessThan(500);
   }
-});
+}, LIMIT_TESTU_CZASU);
 test('e-maile sklejone i w łańcuchu maskowane jak dotąd (szybka ścieżka e-mail)', () => {
   // myślnik należy do klasy części lokalnej, więc drugi adres pochłania go — tak było zawsze
   expect(redactPII('jan@x.pl-anna@y.pl').redacted).toBe('[EMAIL][EMAIL]');
@@ -3644,11 +3635,9 @@ test('b2-fix: czas liniowy w długiej linii bez „\\n" (IP przed kropką, ogon 
     ['ogon miliarda', '| 1 234 567 890 '.repeat(26_000)],
   ];
   for (const [name, text] of inputs) {
-    const t0 = performance.now();
-    redactPII(text);
-    expect(performance.now() - t0, name).toBeLessThan(500);
+    expect(fastestMs(() => redactPII(text), 500), name).toBeLessThan(500);
   }
-});
+}, LIMIT_TESTU_CZASU);
 
 // ── Audyt, partia b3: nadmaskowanie osób i miejsc (eponimy, nazwy własne, marker zamieszkania) ──
 const N = '[IMIĘ I NAZWISKO]';
@@ -6021,11 +6010,10 @@ test('Resztki b5 · próg „i później" w przepisie, celownik „ubezpieczonym
 test('Resztki b5 · wiersz tabeli z brakami „NA" po etykiecie telefonu liczy się liniowo', () => {
   for (const kw of ['Telefon', 'Kontakt', 'tel.', 'Fax']) {
     const text = kw + '      NA'.repeat(16);
-    const t0 = performance.now();
     expect(redactPII(text).redacted).toBe(text);
-    expect(performance.now() - t0).toBeLessThan(500);
+    expect(fastestMs(() => redactPII(text), 500)).toBeLessThan(500);
   }
-});
+}, LIMIT_TESTU_CZASU);
 test('Resztki b4 · adres: niezgodny liczebnik, osoba przed adresem, „miejsc.", łącznik po numerze i metraż lokalu', () => {
   keep([
     'Na ul. Polnej 5 osób zostało rannych.',
@@ -9995,12 +9983,15 @@ test('G1 druga weryfikacja: wyliczenie numerów w jednym przejściu', () => {
     ['karta pobytu RP1234567', ', RP1234567'],
   ]) {
     const n = Math.floor(200_000 / item.length);
-    const t0 = performance.now();
-    const out = redactPII(head + item.repeat(n)).redacted;
-    expect(performance.now() - t0, head).toBeLessThan(2000);
+    const text = head + item.repeat(n);
+    let out = '';
+    const ms = fastestMs(() => {
+      out = redactPII(text).redacted;
+    }, 2000);
+    expect(ms, head).toBeLessThan(2000);
     expect(out.match(/\[NR-/g)?.length, head).toBe(n + 1);
   }
-});
+}, LIMIT_TESTU_CZASU);
 
 // ── Ewaluacja, grupa G: adres siedziby instytucji w nagłówku pisma zostaje ──
 test('G: ulica, kod i miejscowość pod nazwą instytucji albo jej jednostki zostają jawne', () => {
@@ -10185,17 +10176,18 @@ test('G7: długi dokument z adresami instytucji w jednym wierszu w czasie liniow
     Array.from({ length: n }, (_, i) => `(Spółdzielnia Mieszkaniowa „Przyszłość”, ul. Wspólna ${i + 1})`).join(' ');
   redactPII(inline(200)); // rozgrzewka JIT
   // 280 KB w jednym wierszu: dawniej 30 s (każdy adres przeszukiwał wiersz od początku)
-  expect(time(inline(6000))).toBeLessThan(1500);
+  const long = inline(6000);
+  expect(fastestMs(() => redactPII(long), 1500)).toBeLessThan(1500);
   // proporcja zamiast samego progu, żeby nie zależeć od maszyny: czas liniowy daje ok. 4, kwadratowy 16
   for (const [name, gen] of [
     ['inline', inline],
     ['nawias', paren],
   ] as const) {
-    const [t1, t4] = bestTimes(time, gen(1000), gen(4000));
+    const [t1, t4] = bestTimes(time, gen(1000), gen(4000), 6);
     expect(t4 / t1, name).toBeLessThan(6);
   }
   expect(redactPII(paren(4000)).redacted).toBe(paren(4000));
-});
+}, LIMIT_TESTU_CZASU);
 test('G7: powtarzany nagłówek działu z ulicą nie woła pełnej redakcji przy każdym numerze domu', () => {
   const time = (s: string): number => {
     const t0 = performance.now();
@@ -10205,8 +10197,8 @@ test('G7: powtarzany nagłówek działu z ulicą nie woła pełnej redakcji przy
   const blocks = (head: string): string => Array.from({ length: 4000 }, (_, i) => `${head}\nul. Moniuszki ${i + 1}`).join('\n');
   redactPII(blocks('x').slice(0, 5000)); // rozgrzewka JIT
   // ten sam tekst bez nagłówka instytucji (mała litera) jako miara maszyny; dawniej 12 razy wolniej
-  const ratio = Math.min(...[0, 1].map(() => time(blocks('Dział Kadr i Płac')) / time(blocks('dział kadr i płac'))));
-  expect(ratio).toBeLessThan(4);
+  const [base, head] = bestTimes(time, blocks('dział kadr i płac'), blocks('Dział Kadr i Płac'), 4, 2);
+  expect(head / base).toBeLessThan(4);
   // a wynik bez zmian: siedziba jawna, osoba albo adres po kodzie dalej w masce
   masked([
     ['Dział Kadr\nul. Polna 1\nDział Płac\nul. Polna 2', 'Dział Kadr\nul. Polna 1\nDział Płac\nul. Polna 2'],
@@ -10215,7 +10207,7 @@ test('G7: powtarzany nagłówek działu z ulicą nie woła pełnej redakcji przy
     ['Dział Kadr\nul. Polna 1\nW. Nowak\nDział Płac\nul. Polna 2', `Dział Kadr\nul. Polna 1\nW. ${N}\nDział Płac\n${A}`],
     ['ul. Polna 1\nPrzychodnia Lekarska Ewy Nowak\nul. Lipowa 5', `${A}\nPrzychodnia Lekarska ${N}\n${A}`],
   ]);
-});
+}, LIMIT_TESTU_CZASU);
 test('G7: okno strażnika siedziby nie zmienia wyniku przy długim wierszu ani długich spacjach', () => {
   const pad = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit sed do. '.repeat(10);
   masked([
@@ -11003,11 +10995,11 @@ test('podpis: formuła pożegnalna z długim odstępem w czasie liniowym', () =>
     return performance.now() - t0;
   };
   time(1000); // rozgrzewka JIT
-  expect(time(40_000)).toBeLessThan(100);
+  expect(fastestMs(() => time(40_000), 100)).toBeLessThan(100);
   expect(redactPII(`Pozdrawiam${' '.repeat(3)},${' '.repeat(3)}
 Anna`).redacted).toBe(`Pozdrawiam${' '.repeat(3)},${' '.repeat(3)}
 ${N}`);
-});
+}, LIMIT_TESTU_CZASU);
 
 test('klasa 5: imię za rzeczownikiem pokrewieństwa lub opieki to osoba', () => {
   masked([
@@ -11063,8 +11055,8 @@ test('klasa 5: wzorzec pokrewieństwa w czasie liniowym przy długim odstępie',
     return performance.now() - t0;
   };
   time(1000);
-  expect(time(40_000)).toBeLessThan(300);
-});
+  expect(fastestMs(() => time(40_000), 300)).toBeLessThan(300);
+}, LIMIT_TESTU_CZASU);
 test('klasa 5: tytuł zakonny i patron z wielkiej litery w każdej pozycji w zdaniu', () => {
   keep([
     // po skrócie nazwy („pw.”, „pt.”, „tzw.”, „zob.”)
@@ -11298,11 +11290,12 @@ test('klasa 9: ocena kształtu rozmowy w czasie liniowym', () => {
     ['pary', pairs],
     ['pola', fields],
   ] as const) {
-    const [t1, t4] = bestTimes(time, gen(2500), gen(10000));
+    const [t1, t4] = bestTimes(time, gen(2500), gen(10000), 6);
     expect(t4 / t1, name).toBeLessThan(6);
-    expect(time(gen(20000)), name).toBeLessThan(2000);
+    const long = gen(20000);
+    expect(fastestMs(() => redactPII(long), 2000), name).toBeLessThan(2000);
   }
-});
+}, LIMIT_TESTU_CZASU);
 
 test('klasa 12: imiona cudzoziemców z urzędów (UA, BY, RU, arabskie, indyjskie) i brakujące polskie', () => {
   masked([
@@ -11363,9 +11356,9 @@ test('klasa 12: reguła sylab wietnamskich w czasie liniowym', () => {
   };
   const caps = (n: number): string => Array.from({ length: n }, () => 'MINH THANH HOA LAN VAN DO').join(' ');
   redactPII(caps(200));
-  const [t1, t4] = bestTimes(time, caps(1000), caps(4000));
+  const [t1, t4] = bestTimes(time, caps(1000), caps(4000), 6);
   expect(t4 / t1).toBeLessThan(6);
-});
+}, LIMIT_TESTU_CZASU);
 
 test('zdrowie klasa 3: zdarzenie zdrowotne przy osobie (zwolnienie, orzeczenie, leczenie, pobyt, zabieg, ciąża, nałóg)', () => {
   const Z = '[DANE O ZDROWIU]';
@@ -11458,9 +11451,9 @@ test('zdrowie klasa 3: frazy zdarzeń w czasie liniowym (długie odstępy, powt�
   const block = (n: number): string =>
     Array.from({ length: n }, () => `przebywa${' '.repeat(40)}na${' '.repeat(40)}zwolnieniu po operacji kolana orzeczenie o 12. tygodniu ciąży`).join(' ');
   redactPII(block(50));
-  const [t1, t4] = bestTimes(time, block(250), block(1000));
+  const [t1, t4] = bestTimes(time, block(250), block(1000), 6);
   expect(t4 / t1).toBeLessThan(6);
-});
+}, LIMIT_TESTU_CZASU);
 
 test('zdrowie klasa 3: imiesłów, zabieg po budowie słowa, pobyt, angielski; temat pisma i podmiot rzeczowy zostają', () => {
   const Z = '[DANE O ZDROWIU]';
@@ -11565,9 +11558,9 @@ test('zdrowie klasa 3: imiesłowy, zabiegi i temat pisma w czasie liniowym', () 
       () => `jest${' '.repeat(8)}od lat${' '.repeat(8)}leczona po przeszczepie nerki, trafiał${' '.repeat(8)}do szpitala jako zasady wypłaty zasiłku chorobowego ${'a'.repeat(60)}łem z udziałem`,
     ).join(' ');
   redactPII(block(50));
-  const [t1, t4] = bestTimes(time, block(250), block(1000));
+  const [t1, t4] = bestTimes(time, block(250), block(1000), 6);
   expect(t4 / t1).toBeLessThan(6);
-});
+}, LIMIT_TESTU_CZASU);
 
 test('zdrowie klasa 3: rola osoby przy zdarzeniu (urzędnik, świadczeniodawca, autor pisma, rzecz, instytucja)', () => {
   const Z = '[DANE O ZDROWIU]';
@@ -11705,9 +11698,9 @@ test('zdrowie klasa 3: rola osoby, podmiot i cel pobytu w czasie liniowym', () =
         'Pan Jan Nowak, kierownik działu, przypomina, że zwolnienie lekarskie należy dostarczyć. Pan Nowak, konserwator, przebywał w szpitalu od 8:00 do 16:00, naprawiając windy, a córka, która korzysta z pomocy psychologa, prowadzi zajęcia z gimnastyki i terapii ręki; Hurtownia przyjmuje Ibuprom, most był diagnozowany.',
     ).join(' ');
   redactPII(block(50));
-  const [t1, t4] = bestTimes(time, block(250), block(1000));
+  const [t1, t4] = bestTimes(time, block(250), block(1000), 6);
   expect(t4 / t1).toBeLessThan(6);
-});
+}, LIMIT_TESTU_CZASU);
 
 // ── Zdrowie klasa 4: rozpoznanie spoza listy chorób, kod ICD w zdaniu, uraz ──
 test('zdrowie klasa 4: rozpoznanie po kotwicy, nazwa choroby po budowie słowa, kod ICD-10 i ICD-11, uraz', () => {
@@ -11832,9 +11825,9 @@ test('zdrowie klasa 4: fraza rozpoznania w czasie liniowym', () => {
         'U syna rozpoznano zespół hiperkinetyczny z zaburzeniami uwagi (F90.0) i alergię na białko mleka krowiego; stwierdzono złamanie trzonu kości piszczelowej lewej, a Zespół Szkół stwierdził naruszenie zasad z powodu awarii.',
     ).join(' ');
   redactPII(block(50));
-  const [t1, t4] = bestTimes(time, block(250), block(1000));
+  const [t1, t4] = bestTimes(time, block(250), block(1000), 6);
   expect(t4 / t1).toBeLessThan(6);
-});
+}, LIMIT_TESTU_CZASU);
 
 test('zdrowie klasa 4: rozpoznanie w zdaniu ogólnym zostaje (warunek, zdanie względne reguły, kwantyfikator, grupa, dane zbiorcze)', () => {
   keep(
@@ -11919,10 +11912,10 @@ test('zdrowie klasa 4: maski rozpoznań podstawiane w czasie liniowym (długi wi
   for (const unit of ['W wywiadzie: astma. ', 'W wywiadzie nadciśnienie, ']) {
     const text = (n: number): string => unit.repeat(Math.ceil(n / unit.length));
     time(text(20_000));
-    const [t1, t4] = bestTimes(time, text(50_000), text(200_000));
+    const [t1, t4] = bestTimes(time, text(50_000), text(200_000), 6);
     expect(t4 / t1, unit).toBeLessThan(6);
   }
-});
+}, LIMIT_TESTU_CZASU);
 
 test('zdrowie klasa 4: rdzeń polski z „-oz-” (wóz, mróz) i przenośny „niedorozwój” nie są chorobą', () => {
   keep(
@@ -12860,12 +12853,11 @@ test('kontakt i rachunek urzędu w długim tekście bez złamań wiersza: czas r
       redactPII(u.repeat(n));
       return performance.now() - t0;
     };
-    const small = time(1000);
-    const big = time(8000);
+    const [small, big] = bestTimes(time, 1000, 8000, (a, b) => b < Math.max(a, 15) * 16, 1);
     // Ośmiokrotnie dłuższy tekst: liniowo około 8×, kwadratowo około 64×.
     expect(big, u).toBeLessThan(Math.max(small, 15) * 16);
   }
-});
+}, LIMIT_TESTU_CZASU);
 test('numer uprawnień i wpisu zawodowego spoza PWZ maskowany przy zawodzie i kotwicy rejestru', () => {
   masked([
     ['kierownik budowy: mgr inż. Jan Nowak, uprawnienia budowlane nr SLK/1234/POOK/08', `kierownik budowy: mgr inż. ${N}, uprawnienia budowlane nr ${U}`],
@@ -12923,11 +12915,10 @@ test('kotwica rejestru zawodowego w długim tekście bez złamań wiersza: czas 
       redactPII(u.repeat(n));
       return performance.now() - t0;
     };
-    const small = time(1000);
-    const big = time(8000);
+    const [small, big] = bestTimes(time, 1000, 8000, (a, b) => b < Math.max(a, 15) * 16, 1);
     expect(big, u).toBeLessThan(Math.max(small, 15) * 16);
   }
-});
+}, LIMIT_TESTU_CZASU);
 test('skrót izby bez członkostwa i osoby to dokument izby, a nie numer członka', () => {
   keep([
     'Wpis na listę adwokatów – posiedzenie ORA nr 12/2024 z dnia 3 marca 2024 r.',
@@ -13000,11 +12991,10 @@ test('kotwica rejestru zawodowego na długim wierszu bez złamań: okno przed ko
       redactPII(u.repeat(n));
       return performance.now() - t0;
     };
-    const small = time(1000);
-    const big = time(8000);
+    const [small, big] = bestTimes(time, 1000, 8000, (a, b) => b < Math.max(a, 15) * 16, 1);
     expect(big, u).toBeLessThan(Math.max(small, 15) * 16);
   }
-});
+}, LIMIT_TESTU_CZASU);
 test('nagłówek kolumny bez osoby w wierszu: działki, środki trwałe, jednostki i rok zostają jawne', () => {
   keep([
     'Lp.\tNr ewidencyjny\tObręb\tPowierzchnia [ha]\n1\t123/4\t0005 Zalesie\t0,1234',
@@ -13160,10 +13150,9 @@ test('wiersz tabeli z kolumnami ze spacji i długim ciągiem spacji: czas liniow
     redactPII(row(n));
     return performance.now() - t0;
   };
-  const small = time(2000);
-  const big = time(16000);
+  const [small, big] = bestTimes(time, 2000, 16000, (a, b) => b < Math.max(a, 15) * 16, 1);
   expect(big).toBeLessThan(Math.max(small, 15) * 16);
-});
+}, LIMIT_TESTU_CZASU);
 test('kolumna nazwana rolą („Wnioskodawca”, „Najemca”, „Beneficjent”): firma i organizacja zostają jawne z telefonem i NIP-em', () => {
   // Pod nagłówkiem roli w urzędzie stoją też podmioty. Osobę potwierdza komórka, w której każdy
   // wyraz jest imieniem, nazwiskiem ze słownika albo inicjałem; rzeczownik pospolity na początku
@@ -13411,14 +13400,9 @@ test('W12: patron ronda, ulicy i szkoły w uchwale zostaje jawny w cudzysłowie,
 
 test('W12: pole osoby w środku bardzo długiego wiersza bez złamań ma koszt liniowy', () => {
   const unit = 'x, imię: Jan, ';
-  const t1 = performance.now();
-  redactPII(unit.repeat(4000));
-  const a = performance.now() - t1;
-  const t2 = performance.now();
-  redactPII(unit.repeat(16000));
-  const b = performance.now() - t2;
+  const [a, b] = bestTimes(timeRedact, unit.repeat(4000), unit.repeat(16000), (x, y) => y < Math.max(x * 8, 400), 1);
   expect(b).toBeLessThan(Math.max(a * 8, 400));
-});
+}, LIMIT_TESTU_CZASU);
 
 test('Seria 3: dana o zdrowiu w wierszu tabeli z osobą zakrytą przez przebieg tabeli znika jak przy jawnym imieniu i nazwisku', () => {
   const H = '[DANE O ZDROWIU]';
@@ -13561,14 +13545,9 @@ test('Seria 3: stan funkcjonalny osoby z choroby lub niepełnosprawności znika,
 
 test('Seria 3: stan funkcjonalny w bardzo długim wierszu ze spacjami ma koszt liniowy', () => {
   const unit = 'Pan jest      porusza  się      wymaga     nie   ';
-  const t1 = performance.now();
-  redactPII(unit.repeat(2000));
-  const a = performance.now() - t1;
-  const t2 = performance.now();
-  redactPII(unit.repeat(8000));
-  const b = performance.now() - t2;
+  const [a, b] = bestTimes(timeRedact, unit.repeat(2000), unit.repeat(8000), (x, y) => y < Math.max(x * 8, 400), 1);
   expect(b).toBeLessThan(Math.max(a * 8, 400));
-});
+}, LIMIT_TESTU_CZASU);
 
 test('Seria 3: stan funkcjonalny ze sprzętem, samoobsługą i zmysłami w nowych sformułowaniach znika', () => {
   const H = '[DANE O ZDROWIU]';
@@ -13667,15 +13646,10 @@ test('Seria 3: stan funkcjonalny tylko przy człowieku i ze zdrowiem: rzecz, ma�
 
 test('Seria 3: stan funkcjonalny ze sprzętem, opieką i łańcuchem „nie …” na długim powtórzeniu ma koszt liniowy', () => {
   for (const unit of ['Pan Nowak porusza się z trudem, po domu bardzo wolno przy ', 'Matka nie mówi, nie chodzi, nie siedzi, ', 'wymaga stałej i długotrwałej opieki lub pomocy innej osoby przy myciu, ubieraniu i ']) {
-    const t1 = performance.now();
-    redactPII(unit.repeat(1000));
-    const a = performance.now() - t1;
-    const t2 = performance.now();
-    redactPII(unit.repeat(4000));
-    const b = performance.now() - t2;
+    const [a, b] = bestTimes(timeRedact, unit.repeat(1000), unit.repeat(4000), (x, y) => y < Math.max(x * 8, 400), 1);
     expect(b).toBeLessThan(Math.max(a * 8, 400));
   }
-});
+}, LIMIT_TESTU_CZASU);
 
 test('Seria 3: sprzęt i zabieg przy posiadaczu albo pacjencie znikają, a ten sam sprzęt jako towar, dostawa i przedmiot pracy zostaje', () => {
   const H = '[DANE O ZDROWIU]';

@@ -1,5 +1,6 @@
 import { redactPII } from 'anonimizator';
 import { expect, test } from 'vitest';
+import { fastestMs, LIMIT_TESTU_CZASU } from '../../../packages/core/src/pomiar-czasu';
 import { zipSync, strToU8 } from 'fflate';
 import { extractDocxText } from './docx';
 import { FileReadError } from './files';
@@ -216,10 +217,11 @@ test('document.xml z fałszywym, zaniżonym rozmiarem: rozpakowanie przerwane od
   // ok. 1 GB spacji w 6,5 MB, a nagłówek deklaruje tyle, ile przepuszcza filtr proporcji
   const bomb = deflateBomb(head, 4_000_000, tail);
   const lying = zipWithDeflated('word/document.xml', bomb, Math.ceil(bomb.length / 1.2) + 1);
-  const t0 = performance.now();
-  expect(() => extractDocxText(lying)).toThrow(/zbyt duży albo uszkodzony/);
-  expect(performance.now() - t0).toBeLessThan(300);
-});
+  const ms = fastestMs(() => {
+    expect(() => extractDocxText(lying)).toThrow(/zbyt duży albo uszkodzony/);
+  }, 300);
+  expect(ms).toBeLessThan(300);
+}, LIMIT_TESTU_CZASU);
 
 test('wpis zapisany bez kompresji (metoda 0) też jest czytany', () => {
   const zip = zipSync(
@@ -244,11 +246,12 @@ test('tysiące zagnieżdżonych albo niedomkniętych mc:Fallback i w:t: tekst w 
       '<w:t a'.repeat(K) +
       '<w:p><w:r><w:t>B</w:t></w:r></w:p>',
   );
-  const t0 = performance.now();
-  expect(extractDocxText(nested)).toBe('A\nB');
-  expect(extractDocxText(unclosed)).toBe('A\nB');
-  expect(performance.now() - t0).toBeLessThan(500);
-});
+  const ms = fastestMs(() => {
+    expect(extractDocxText(nested)).toBe('A\nB');
+    expect(extractDocxText(unclosed)).toBe('A\nB');
+  }, 500);
+  expect(ms).toBeLessThan(500);
+}, LIMIT_TESTU_CZASU);
 
 test('document.xml z rozmiarem zaniżonym względem skompresowanego odrzucony', () => {
   // pseudolosowe cyfry słabo się kompresują: skompresowany wpis ma kilka KB
@@ -518,10 +521,11 @@ test('tysiące niedomkniętych <w:p, <w:cr i <w:tc oraz otwartych komórek: teks
       '<w:tc>'.repeat(K) +
       '<w:p><w:r><w:t>B</w:t></w:r></w:p>',
   );
-  const t0 = performance.now();
-  expect(extractDocxText(docx)).toBe('A\nB');
-  expect(performance.now() - t0).toBeLessThan(500);
-});
+  const ms = fastestMs(() => {
+    expect(extractDocxText(docx)).toBe('A\nB');
+  }, 500);
+  expect(ms).toBeLessThan(500);
+}, LIMIT_TESTU_CZASU);
 
 test('tysiące pustych komórek obok siebie i zagnieżdżonych oraz niedomkniętych <w:br>: tekst w ułamku sekundy', () => {
   const K = 30_000;
@@ -534,7 +538,8 @@ test('tysiące pustych komórek obok siebie i zagnieżdżonych oraz niedomknięt
       '<w:br a'.repeat(K) +
       '<w:p><w:r><w:t>2</w:t></w:r></w:p>',
   );
-  const t0 = performance.now();
-  expect(extractDocxText(docx)).toBe('1\n\n2');
-  expect(performance.now() - t0).toBeLessThan(500);
-});
+  const ms = fastestMs(() => {
+    expect(extractDocxText(docx)).toBe('1\n\n2');
+  }, 500);
+  expect(ms).toBeLessThan(500);
+}, LIMIT_TESTU_CZASU);

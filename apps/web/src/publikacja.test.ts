@@ -324,7 +324,12 @@ test('adnotacja i protokół nie zawierają podciągu dłuższego niż 3 znaki s
   expect(leaksIn(['Wyłączenia dokonał(a): Kowalski.'], ['Jan Kowalski'])).not.toEqual([]);
   expect(leaksIn(['Znak sprawy: 85071412358'], ['PESEL 85071412358'])).not.toEqual([]);
   expect(leaksIn(['Przemysłowa'], ['ul. Przemysłowa 8'])).not.toEqual([]);
-});
+  // Jawny limit zamiast domyślnych 5 s: ok. 1700 redakcji całego zbioru benchmarku (każdy przypadek
+  // z pseudonimami i bez) to ok. 2 s na komputerze autora, z czego ponad 90% to sam redactPII
+  // (dopasowanie zakresów i n-gramy to ułamek). Skrócenie wymagałoby wyjęcia przypadków albo
+  // jednego z trybów, czyli mniejszego pokrycia. Na runnerze CI (Node 20, pliki równolegle) czas
+  // bywa kilka razy dłuższy. Test nie mierzy wydajności, limit chroni tylko przed zawieszeniem.
+}, 60_000);
 
 // A09: protokół podaje ręczne poprawki samymi liczbami (wartości zostają na ekranie).
 test('protokół: wiersze ręcznej korekty z liczbą fragmentów', () => {
