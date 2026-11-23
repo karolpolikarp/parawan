@@ -179,7 +179,8 @@ test('aplikacja: przykład pisma urzędowego, co zasłania, a co zostawia', () =
   expect(webMain).toContain("import { EXAMPLE_TEXT } from './example';");
   expect(webMain).toContain('  input.value = EXAMPLE_TEXT;');
   expect(webMain).toContain("  replaceSource(EXAMPLE_TEXT, 'Wstawiono przykład w miejsce Twojego tekstu.');");
-  expect(webMain).toContain('  redactPII(EXAMPLE_TEXT);');
+  // rozgrzewka: rdzeń wczytany dynamicznym importem (m), na tym samym przykładzie
+  expect(webMain).toContain('      m.redactPII(EXAMPLE_TEXT);');
   expect(webMain.match(/EXAMPLE_TEXT/g)).toHaveLength(4);
 });
 

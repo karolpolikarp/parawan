@@ -12,6 +12,12 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+- **Okno widać wcześniej.** Silnik rozpoznawania danych wczytuje się dopiero po pokazaniu okna,
+  a nie przed nim. Na komputerze średniej klasy (procesor 4× wolniejszy niż komputer testowy)
+  okno pojawia się po ok. 1,2 s zamiast 1,4 s. Gotowość do pracy bez zmian (ok. 2,0 s): tekst
+  wklejony w pierwszej chwili po otwarciu pliku dostaje wynik zaraz po wczytaniu silnika. Wynik
+  anonimizacji się nie zmienia.
+
 ## v0.48.1 — 2026-11-23
 
 **Parawan szybciej startuje: na słabym komputerze jest gotowy do pracy wyraźnie wcześniej, a wynik anonimizacji się nie zmienia.**
