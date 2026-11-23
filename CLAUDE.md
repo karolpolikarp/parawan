@@ -108,7 +108,9 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 
 ## Stan (2026-11-23)
 
-- `main` = v0.48.1 (2026-11-23, PR #31): szybszy start, „gotowe” ×4 −15…−19% wobec v0.48.0, wynik
+- `main` = v0.48.2 (2026-11-23, PR #32): okno ×4 o ok. 0,2 s wcześniej (rdzeń przez dynamiczny
+  import po pokazaniu okna), rdzeń bez zmian.
+- v0.48.1 (2026-11-23, PR #31): szybszy start, „gotowe” ×4 −15…−19% wobec v0.48.0, wynik
   bajt w bajt ten sam. Rdzeń i `parawan` 0.31.1 czekają na npm (Backlog 4).
 - 2026-11-22, przegląd `/powrot` (`STATUS.md`): produkcja działa, CI zielone, bez zmian od 15.11.
   Rozgrzebane: gałąź `fix/tarnowski-przymiotnik` (Backlog 3), PR #30 Dependabota (Backlog 13).
