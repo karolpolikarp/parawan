@@ -111,7 +111,9 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 
 ## Stan (2026-11-23)
 
-- `main` = v0.48.2 (2026-11-23, PR #32): okno ×4 o ok. 0,2 s wcześniej (rdzeń przez dynamiczny
+- `main` = v0.48.2 + PR #34 (2026-11-23): kotwica czasu startu v0.48.2, testy z progiem czasu przez
+  `packages/core/src/pomiar-czasu.ts` (Backlog 15). Handoff: `docs/handoff-2026-11-23.md`.
+- v0.48.2 (2026-11-23, PR #32, #33): okno ×4 o ok. 0,2 s wcześniej (rdzeń przez dynamiczny
   import po pokazaniu okna), rdzeń bez zmian.
 - v0.48.1 (2026-11-23, PR #31): szybszy start, „gotowe” ×4 −15…−19% wobec v0.48.0, wynik
   bajt w bajt ten sam. Rdzeń i `parawan` 0.31.1 czekają na npm (Backlog 4).
@@ -122,7 +124,6 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
   w `docs/EWALUACJA-SERIA-2.md`, `-SERIA-3.md`). Seria 3 robocza: recall 87,3% → 94,7%, nadmiarowe
   64 → 2 na 358; odłożona 87,7% → 90,9%, 69 → 36. Ewaluacja serii: `node scripts/eval/run-eval.mjs
   --eval --set test-data/seria-3/robocza --profile domyslny`. Części odłożonej nie używać do strojenia.
-- Handoff: `docs/handoff-2026-11-15.md` (start: Backlog 9, czas startu).
 - Bramki pliku: sufit rozmiaru z limitu poczty Exchange (7 120 614 B), strażnik składu
   (`scripts/e2e/sklad.test.mjs`), job CI `start` (czas startu, nieblokujący, kotwica v0.48.2 od
   2026-11-23, Backlog 9). Opis: `docs/WYDANIE.md`, „Rozmiar i czas startu”.
@@ -163,8 +164,8 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 8. Trudniejsza seria testowa: tabele, OCR, tekst angielski, inne szablony niż 10 z generatora.
    Zrobione serie 2 i 3 (`docs/EWALUACJA-SERIA-2.md`, `-SERIA-3.md`); następna, czwarta, pod zdrowie,
    bo tam reguły najsłabiej przenoszą się na pisma odłożone.
-9. Czas startu na słabym PC: v0.48.1 (2026-11-23) dało „gotowe” ×4 −15…−23% wobec v0.48.0. Gałąź
-   `perf/leniwe-wyrazenia`: rdzeń wczytywany dynamicznym importem po pokazaniu okna, okno/LCP ×4
+9. Czas startu na słabym PC: v0.48.1 (2026-11-23) dało „gotowe” ×4 −15…−23% wobec v0.48.0.
+   v0.48.2: rdzeń wczytywany dynamicznym importem po pokazaniu okna, okno/LCP ×4
    −13…−16%, „gotowe” bez zmian (praca przechodzi do rozgrzewki). Odrzucone pomiarem i przeglądem:
    `content-visibility` kart (LCP i „gotowe” w szumie, psuje skok do `#ograniczenia` i zrzuty
    fullPage testu a11y), leniwe wyrażenia w rdzeniu (508 z 660 nieużywane w rozgrzewce, ok. 60 ms ×4,
@@ -182,7 +183,7 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
     biome i zgodność przeglądarek, scalić. Powrót: PR zamknięty.
 14. Sprzątanie zdalnych gałęzi: `docs/stan-po-serii-3` (scalona) i 3 gałęzie Dependabota po
     zamkniętych PR.
-15. Progi czasu w testach: zrobione 2026-11-23 (gałąź `chore/kotwica-0.48.2`). Wszystkie testy z progiem
+15. Progi czasu w testach: zrobione 2026-11-23 (PR #34, w `main`). Wszystkie testy z progiem
     czasu w rdzeniu (`index.test.ts`, `zdrowie.test.ts`) i web (`spans`, `docx`, `docx-inventory`)
     mierzą przez `packages/core/src/pomiar-czasu.ts` (`bestTimes` z dopomiarowaniem, `fastestMs`),
     progi bez zmian. Pod obciążeniem (4 rdzenie, Node 20, pełny zestaw rdzenia w tle, 20 przebiegów
