@@ -178,6 +178,9 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
     zamkniętych PR.
 15. `publikacja.test.ts` „adnotacja i protokół…” trwa ok. 2 s przy limicie 5 s; przy obciążonej
     maszynie (równoległe testy) przekracza limit. Przyspieszyć albo nadać jawny limit z uzasadnieniem.
+    To samo w rdzeniu: `index.test.ts` „klasa 9: ocena kształtu rozmowy w czasie liniowym” raz dała
+    stosunek 6,14 i 6,42 przy progu 6 na CI (2026-11-23, PR #32, rdzeń bez zmian). Na Node 20 lokalnie
+    przed v0.48.1 i po: 3,7–5,2, czyli liniowo, ale próg bez zapasu na szum runnera.
 Uwaga do 3: praca leży na gałęzi `fix/tarnowski-przymiotnik` (3 commity z 2026-11-14, bez PR).
 
 ## Znane problemy
