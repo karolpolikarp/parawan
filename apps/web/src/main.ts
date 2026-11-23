@@ -1814,9 +1814,25 @@ function updateNow(): void {
   );
 }
 
-/** Przed kopiowaniem i pobraniem: wynik musi odpowiadać temu, co jest w polu w tej chwili. */
+/**
+ * Przed kopiowaniem i pobraniem: wynik musi odpowiadać temu, co jest w polu w tej chwili.
+ * Przed końcem rozgrzewki (rdzeń jeszcze się wczytuje) tylko ją zleca i wyniku jeszcze nie ma;
+ * wtedy przyciski wyniku są wyłączone, a skrót klawiszowy czeka przez settledUpdate().
+ */
 function flushPendingUpdate(): void {
   if (updatePending) update();
+}
+
+/** Jak flushPendingUpdate, ale gdy rdzeń jeszcze się wczytuje, czeka na niego i na wynik. */
+async function settledUpdate(): Promise<void> {
+  if (!engine && (updatePending || input.value.trim())) {
+    try {
+      await warmEngine();
+    } catch {
+      return; // pasek „nie uruchomił się” wrócił (warmEngine), wyniku nie będzie
+    }
+  }
+  flushPendingUpdate();
 }
 
 // Formularz wokół pola źródła jest tylko dla autocomplete="off" (index.html). Enter w polu
@@ -2613,12 +2629,13 @@ window.addEventListener('drop', (e) => {
 });
 
 // Ctrl/Cmd+Enter — kopiuj wynik. Najpierw dokończ odłożone przeliczenie: tuż po wklejeniu do
-// pustego pola przycisk jest jeszcze wyłączony, a click() na wyłączonym nic nie robi.
+// pustego pola przycisk jest jeszcze wyłączony, a click() na wyłączonym nic nie robi. W pierwszej
+// chwili po otwarciu pliku czeka też na rdzeń (settledUpdate); schowek przyjmuje zapis jeszcze
+// kilka sekund po naciśnięciu klawisza.
 document.addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
     e.preventDefault();
-    flushPendingUpdate();
-    copyBtn.click();
+    void settledUpdate().then(() => copyBtn.click());
   }
 });
 

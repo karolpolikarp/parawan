@@ -604,6 +604,47 @@ test('DOCX bez tekstu w treści głównej (skan jako obraz): błąd wylicza czę
   });
 });
 
+// Rdzeń wczytuje się dopiero po pokazaniu okna (warmEngine w main.ts). Wklejenie i Ctrl+Enter
+// w tej chwili mają skopiować wynik po wczytaniu rdzenia, a nie zostać zignorowane. Start jest tu
+// sztucznie wydłużony: zadania setTimeout(…, 0) zlecone przed DOMContentLoaded (w tym rozgrzewka)
+// ruszają 400 ms później, a tekst i skrót idą od razu przy DOMContentLoaded.
+test('Ctrl+Enter zaraz po otwarciu pliku, przed wczytaniem rdzenia, kopiuje wynik', async (t) => {
+  await withApp(
+    browser,
+    t,
+    '',
+    async (app) => {
+      const { page } = app;
+      await page.waitForFunction(() => window.__parawanCopied.length > 0, null, { timeout: 15000 });
+      const st = await page.evaluate(() => ({ copied: window.__parawanCopied, early: window.__parawanEarly }));
+      // test ma sens tylko, gdy skrót padł przed końcem rozgrzewki
+      assert.equal(st.early, true, 'rozgrzewka skończyła się przed skrótem, test nic nie sprawdza');
+      assert.equal(st.copied.length, 1);
+      assert.ok(st.copied[0].includes('[PESEL]'), st.copied[0]);
+      assert.ok(!st.copied[0].includes('44051401359'), st.copied[0]);
+    },
+    {
+      prepare: (context) =>
+        context.addInitScript(() => {
+          window.__parawanCopied = [];
+          const cb = { writeText: async (s) => void window.__parawanCopied.push(s) };
+          Object.defineProperty(Navigator.prototype, 'clipboard', { get: () => cb, configurable: true });
+          const st = window.setTimeout;
+          let loaded = false;
+          window.setTimeout = (fn, ms, ...a) => st(fn, !loaded && !ms ? 400 : ms, ...a);
+          document.addEventListener('DOMContentLoaded', () => {
+            loaded = true;
+            window.__parawanEarly = performance.getEntriesByName('parawan:gotowe').length === 0;
+            const input = document.getElementById('input');
+            input.value = 'PESEL 44051401359';
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', ctrlKey: true, bubbles: true }));
+          });
+        }),
+    },
+  );
+});
+
 // Pole źródła stoi w <form autocomplete="off"> (Chrome i Edge 109 zapisywały inaczej jego treść
 // w plikach sesji). Formularz nie może niczego wysłać ani przeładować strony.
 test('pole źródła w formularzu: Enter i Ctrl+Enter nie wysyłają formularza ani nie przeładowują strony', async (t) => {
