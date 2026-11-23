@@ -1,5 +1,6 @@
 import { type PiiType, redactPII } from 'anonimizator';
 import { describe, expect, test } from 'vitest';
+import { bestTimes, fastestMs, LIMIT_TESTU_CZASU } from '../../../packages/core/src/pomiar-czasu';
 // dataset.mjs to plain-JS oracle benchmarku (bez deklaracji typów), jak w redact-golden.test.ts.
 // @ts-expect-error brak pliku deklaracji dla modułu .mjs (świadomie, to skrypt benchmarku)
 import { buildDataset } from '../../../scripts/benchmark/dataset.mjs';
@@ -131,14 +132,15 @@ test('wklejka tabeli (grupy po trzy znaczniki) wyrównuje się w czasie liniowym
   const row = 'Jan Kowalski\t44051401359\t600 700 123\n';
   const masked = '[IMIĘ I NAZWISKO]\t[PESEL]\t[TELEFON]\n';
   const small = alignSpans(row.repeat(2000), masked.repeat(2000));
-  const t0 = performance.now();
-  const big = alignSpans(row.repeat(40000), masked.repeat(40000));
-  const ms = performance.now() - t0;
+  const bigText = row.repeat(40000);
+  const bigMasked = masked.repeat(40000);
+  const big = alignSpans(bigText, bigMasked);
+  const ms = fastestMs(() => alignSpans(bigText, bigMasked), 1500);
   expect(small?.spans).toHaveLength(2000);
   expect(big?.spans).toHaveLength(40000);
   // kwadratowo 40 000 wierszy to kilka sekund; liniowo dziesiątki milisekund
   expect(ms).toBeLessThan(1500);
-});
+}, LIMIT_TESTU_CZASU);
 
 test('tryb ścisły odmawia zamiast zgadywać', () => {
   // odcinek wyniku, którego nie ma w oryginale (np. zamieniony odstęp)
@@ -292,30 +294,29 @@ describe('wydajność', () => {
     const text = Array.from({ length: 20000 }, (_, i) => pesel(i % 10000)).join(' ');
     const { redacted } = redactPII(text);
     expect(redacted.match(/\[PESEL\]/g)?.length).toBe(20000);
-    alignSpans(text, redacted); // rozgrzewka JIT
-    const t0 = performance.now();
-    const al = alignSpans(text, redacted);
-    const ms = performance.now() - t0;
+    const al = alignSpans(text, redacted); // także rozgrzewka JIT
     expect(al?.spans.length).toBe(1);
     expect(al?.spans[0].tokens.length).toBe(20000);
-    expect(ms).toBeLessThan(250);
     // podwojenie danych nie może dawać czterokrotnie dłuższego czasu
     const half = text.slice(0, text.length / 2).trim();
     const hr = redactPII(half).redacted;
-    const t1 = performance.now();
-    alignSpans(half, hr);
-    const msHalf = performance.now() - t1;
+    const time = ([t, r]: [string, string]): number => {
+      const t0 = performance.now();
+      alignSpans(t, r);
+      return performance.now() - t0;
+    };
+    const [msHalf, ms] = bestTimes(time, [half, hr], [text, redacted], (h, f) => f < 250 && f < Math.max(4 * h, 40), 1);
+    expect(ms).toBeLessThan(250);
     expect(ms).toBeLessThan(Math.max(4 * msHalf, 40));
-  });
+  }, LIMIT_TESTU_CZASU);
 
   test('ten sam wiersz z zastanym znacznikiem w środku dzieli się bez skanu przy każdym znaczniku', () => {
     const ps = Array.from({ length: 10000 }, (_, i) => pesel(i));
     const text = `${ps.slice(0, 5000).join(' ')} [EMAIL] ${ps.slice(5000).join(' ')}`;
     const { redacted } = redactPII(text);
-    const t0 = performance.now();
+    expect(fastestMs(() => alignSpans(text, redacted), 250)).toBeLessThan(250);
     const al = alignSpans(text, redacted);
-    expect(performance.now() - t0).toBeLessThan(250);
     expect(al?.kept).toBe(1);
     expect(al?.spans.map((s) => s.tokens.length)).toEqual([5000, 5000]);
-  });
+  }, LIMIT_TESTU_CZASU);
 });

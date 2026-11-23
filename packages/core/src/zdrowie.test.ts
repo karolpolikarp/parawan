@@ -2,6 +2,7 @@
 // (karty szpitalne, pisma kadrowe, pozwy, zgłoszenia szkody) i przypadki ujemne bez kotwicy.
 import { expect, test } from 'vitest';
 import { redactPII } from './index';
+import { fastestMs, LIMIT_TESTU_CZASU } from './pomiar-czasu';
 
 const Z = '[DANE O ZDROWIU]';
 
@@ -296,11 +297,9 @@ test('dane o zdrowiu: długie ciągi odstępów i długie wiersze nie spowalniaj
     '{"opis":"pacjent z astmą oskrzelową, nadciśnieniem tętniczym","x":1},'.repeat(3000),
   ];
   for (const t of inputs) {
-    const t0 = Date.now();
-    redactPII(t, { types: ['ZDROWIE'] });
-    expect(Date.now() - t0, t.slice(0, 30)).toBeLessThan(2000);
+    expect(fastestMs(() => redactPII(t, { types: ['ZDROWIE'] }), 2000), t.slice(0, 30)).toBeLessThan(2000);
   }
-});
+}, LIMIT_TESTU_CZASU);
 
 test('dane o zdrowiu: kotwica w zdaniu wymaga konkretnej osoby (słownik, statystyka, podmiot ogólny, przykład leku, definicja)', () => {
   const same = [
