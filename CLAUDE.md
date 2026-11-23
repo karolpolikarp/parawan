@@ -182,7 +182,7 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
     biome i zgodność przeglądarek, scalić. Powrót: PR zamknięty.
 14. Sprzątanie zdalnych gałęzi: `docs/stan-po-serii-3` (scalona) i 3 gałęzie Dependabota po
     zamkniętych PR.
-15. Progi czasu w testach: zrobione 2026-11-23 na gałęzi `fix/progi-czasu`. Wszystkie testy z progiem
+15. Progi czasu w testach: zrobione 2026-11-23 (gałąź `chore/kotwica-0.48.2`). Wszystkie testy z progiem
     czasu w rdzeniu (`index.test.ts`, `zdrowie.test.ts`) i web (`spans`, `docx`, `docx-inventory`)
     mierzą przez `packages/core/src/pomiar-czasu.ts` (`bestTimes` z dopomiarowaniem, `fastestMs`),
     progi bez zmian. Pod obciążeniem (4 rdzenie, Node 20, pełny zestaw rdzenia w tle, 20 przebiegów
