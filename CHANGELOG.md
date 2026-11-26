@@ -18,6 +18,10 @@ działają na GitHubie od chwili wypchnięcia tagów.
   i przy wyłączonych animacjach strona pokazuje od razu pismo po zasłonięciu. Teksty strony są
   bezosobowe, liczby (29 typów, wyniki pomiaru) bez zmian. Nagłówki w kroju Source Serif 4
   (licencja OFL), wbudowanym w stronę jak pozostałe fonty.
+- **Nowe kolory znaczników w Parawan.html.** Znaczniki mają barwy z tej samej nadmorskiej palety
+  co strona: osoby śliwkowe, kontakt morski, identyfikatory bursztynowe, finanse sosnowe, adres
+  niebieski. Tło znacznika jest pełne, a z lewej stoi pasek w barwie kategorii, więc kategorie
+  różnią się też jasnością, nie tylko odcieniem. Kontrast tekstu znacznika od 6,2:1 do 7,9:1.
 
 ## v0.48.2 — 2026-11-23
 

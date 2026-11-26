@@ -69,12 +69,15 @@
   --gold-deep: #8a5a12; /* bursztynowy TEKST: 5,9:1 na bieli (kickery „Krok N”, liczniki) */
   --gold-cta:  #9d6613; /* tło akcji głównej (Kopiuj) z białym napisem: 4,8:1 */
 
-  /* kategorie PII — jedna rodzina kolorów, przyciemniona dla kontrastu na jasnym tle */
-  --person:  #5b3fa8;
-  --contact: #0c7288;
-  --ident:   #8a5f00;
-  --fin:     #127049;
-  --place:   #2f5fc0;
+  /* kategorie PII, paleta nadmorska „u” (DESIGN.md, ta sama na stronie produktu): tekst / tło
+     znacznika (-b) / pasek z lewej i kropka (-s) / obwódka (-l). Tekst na tle znacznika 6,2–7,9:1,
+     pasek na tle co najmniej 3:1. Jasność paska rośnie od osób do identyfikatorów, więc kategorie
+     różnią się też jasnością, nie tylko odcieniem. */
+  --person:  #6B2D62; --person-b:  #F3E5EF; --person-s:  #4F2148; --person-l:  #DECED9;
+  --contact: #0B5C5E; --contact-b: #DDEEEC; --contact-s: #2F7F7C; --contact-l: #C5D8D6;
+  --ident:   #7A4A06; --ident-b:   #F3ECDD; --ident-s:   #B9791F; --ident-l:   #DDD5C4;
+  --fin:     #2E4E1B; --fin-b:     #E6EDD9; --fin-s:     #34531F; --fin-l:     #CFD7C0;
+  --place:   #2C5689; --place-b:   #E1EAF5; --place-s:   #5F82B5; --place-l:   #C9D4E0;
 
   /* stany — NIEZALEŻNE od kolorów kategorii PII (semantyka kategorii nietykalna) */
   --ok: #127049;
@@ -175,11 +178,11 @@ kbd {
 .ic-s { width: 34px; height: 34px; border-radius: 9px; }
 .ic-s .gi { width: 21px; height: 21px; }
 
-.ic.c-person  { color: var(--person);  border-color: rgba(91,63,168,.30);   background: linear-gradient(180deg, rgba(91,63,168,.13),  rgba(91,63,168,.05)); }
-.ic.c-contact { color: var(--contact); border-color: rgba(14,125,153,.30);  background: linear-gradient(180deg, rgba(14,125,153,.13), rgba(14,125,153,.05)); }
-.ic.c-ident   { color: var(--ident);   border-color: rgba(154,106,0,.30);   background: linear-gradient(180deg, rgba(154,106,0,.13),  rgba(154,106,0,.05)); }
-.ic.c-fin     { color: var(--fin);     border-color: rgba(23,131,90,.30);   background: linear-gradient(180deg, rgba(23,131,90,.13),  rgba(23,131,90,.05)); }
-.ic.c-place   { color: var(--place);   border-color: rgba(47,95,192,.30);   background: linear-gradient(180deg, rgba(47,95,192,.13),  rgba(47,95,192,.05)); }
+.ic.c-person  { color: var(--person);  border-color: var(--person-l); background: var(--person-b); }
+.ic.c-contact { color: var(--contact); border-color: var(--contact-l); background: var(--contact-b); }
+.ic.c-ident   { color: var(--ident);   border-color: var(--ident-l); background: var(--ident-b); }
+.ic.c-fin     { color: var(--fin);     border-color: var(--fin-l); background: var(--fin-b); }
+.ic.c-place   { color: var(--place);   border-color: var(--place-l); background: var(--place-b); }
 
 /* --- przycisk pomocy „?" --- */
 .help {
@@ -463,11 +466,11 @@ details.card::details-content {
 .lg-n { font-size: 11.5px; color: var(--mut); white-space: nowrap; } /* „15” nie odrywa się od „typów” */
 .dot { width: 13px; height: 13px; border-radius: 50%; display: inline-block; flex: none;
   box-shadow: 0 0 0 1px rgba(11,61,46,.12), 0 1px 2px rgba(11,61,46,.25); }
-.dot-person  { background: var(--person); }
-.dot-contact { background: var(--contact); }
-.dot-ident   { background: var(--ident); }
-.dot-fin     { background: var(--fin); }
-.dot-place   { background: var(--place); }
+.dot-person  { background: var(--person-s); }
+.dot-contact { background: var(--contact-s); }
+.dot-ident   { background: var(--ident-s); }
+.dot-fin     { background: var(--fin-s); }
+.dot-place   { background: var(--place-s); }
 
 /* ============ DEMO „Jak to działa" ============ */
 /* Nagłówek u góry (nie pływa nad animacją). Poniżej SCENA: dokument wchodzi z lewej strefy
@@ -674,15 +677,15 @@ textarea.editor-ta.dragover {
 /* znaczniki w WYNIKU */
 .pii {
   font-family: var(--mono); font-size: .87em; font-weight: 650;
-  padding: 1.5px 7px; border-radius: 6px; border: 1px solid;
+  padding: 1.5px 7px; border-radius: 2px 6px 6px 2px; border: 1px solid;
   white-space: nowrap; cursor: pointer; background: none; color: inherit;
   scroll-margin: 60px; /* przy przewijaniu do widoku zostaw oddech u góry */
 }
-.pii-person  { color: var(--person);  border-color: rgba(165,150,232,.5); background: rgba(165,150,232,.10); }
-.pii-contact { color: var(--contact); border-color: rgba(103,200,220,.5); background: rgba(103,200,220,.10); }
-.pii-ident   { color: var(--ident);   border-color: rgba(217,169,73,.5);  background: rgba(217,169,73,.10); }
-.pii-fin     { color: var(--fin);     border-color: rgba(111,199,155,.5); background: rgba(111,199,155,.10); }
-.pii-place   { color: var(--place);   border-color: rgba(126,166,232,.5); background: rgba(126,166,232,.10); }
+.pii-person  { color: var(--person);  border-color: var(--person-l); border-left: 3px solid var(--person-s); background: var(--person-b); }
+.pii-contact { color: var(--contact); border-color: var(--contact-l); border-left: 3px solid var(--contact-s); background: var(--contact-b); }
+.pii-ident   { color: var(--ident);   border-color: var(--ident-l); border-left: 3px solid var(--ident-s); background: var(--ident-b); }
+.pii-fin     { color: var(--fin);     border-color: var(--fin-l); border-left: 3px solid var(--fin-s); background: var(--fin-b); }
+.pii-place   { color: var(--place);   border-color: var(--place-l); border-left: 3px solid var(--place-s); background: var(--place-b); }
 
 /* ── Nawigacja po zamaskowanych fragmentach (przeglądanie wyniku) ── */
 .mask-nav {
@@ -915,11 +918,11 @@ body.file-drag textarea.editor-ta {
 .chip .gi { width: 18px; height: 18px; }
 /* bez przezroczystości: przy .85 licznik „×1” w kolorze typu miał na tle pigułki 3,9–4,3:1 (WCAG 1.4.3) */
 .chip .x { font-family: var(--mono); font-weight: 700; font-size: 11.5px; }
-.ch-person  { color: var(--person);  border-color: rgba(165,150,232,.42); background: rgba(165,150,232,.08); }
-.ch-contact { color: var(--contact); border-color: rgba(103,200,220,.42); background: rgba(103,200,220,.08); }
-.ch-ident   { color: var(--ident);   border-color: rgba(217,169,73,.42);  background: rgba(217,169,73,.08); }
-.ch-fin     { color: var(--fin);     border-color: rgba(111,199,155,.42); background: rgba(111,199,155,.08); }
-.ch-place   { color: var(--place);   border-color: rgba(126,166,232,.42); background: rgba(126,166,232,.08); }
+.ch-person  { color: var(--person);  border-color: var(--person-l); background: var(--person-b); }
+.ch-contact { color: var(--contact); border-color: var(--contact-l); background: var(--contact-b); }
+.ch-ident   { color: var(--ident);   border-color: var(--ident-l); background: var(--ident-b); }
+.ch-fin     { color: var(--fin);     border-color: var(--fin-l); background: var(--fin-b); }
+.ch-place   { color: var(--place);   border-color: var(--place-l); background: var(--place-b); }
 .chip-ok  { color: var(--ok); border-color: rgba(79,192,141,.42); background: rgba(79,192,141,.08); padding: 0 12px; }
 .chip-hint { color: var(--acc); border-color: var(--acc-line); background: var(--acc-soft); padding: 0 12px; font-weight: 500; }
 .stat-total {
@@ -1051,11 +1054,11 @@ td .how strong { color: var(--text); }
   display: inline-block; font-size: 11px; font-weight: 700;
   padding: 3px 10px; border-radius: 999px; border: 1px solid; white-space: nowrap;
 }
-.cp-person  { color: var(--person);  border-color: rgba(165,150,232,.42); background: rgba(165,150,232,.08); }
-.cp-contact { color: var(--contact); border-color: rgba(103,200,220,.42); background: rgba(103,200,220,.08); }
-.cp-ident   { color: var(--ident);   border-color: rgba(217,169,73,.42);  background: rgba(217,169,73,.08); }
-.cp-fin     { color: var(--fin);     border-color: rgba(111,199,155,.42); background: rgba(111,199,155,.08); }
-.cp-place   { color: var(--place);   border-color: rgba(126,166,232,.42); background: rgba(126,166,232,.08); }
+.cp-person  { color: var(--person);  border-color: var(--person-l); background: var(--person-b); }
+.cp-contact { color: var(--contact); border-color: var(--contact-l); background: var(--contact-b); }
+.cp-ident   { color: var(--ident);   border-color: var(--ident-l); background: var(--ident-b); }
+.cp-fin     { color: var(--fin);     border-color: var(--fin-l); background: var(--fin-b); }
+.cp-place   { color: var(--place);   border-color: var(--place-l); background: var(--place-b); }
 
 /* statyczne znaczniki w tabeli nie mają tooltipów — bez mylącego kursora */
 table .pii { cursor: default; }
