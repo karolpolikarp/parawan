@@ -86,7 +86,8 @@ nie tylko odcieniem.
 - Powyżej 960 px scena jest przypięta do ekranu, niżej zasłania się w rytmie przewijania.
 - Pocztówka po wczytaniu raz: parawan rozkłada się panel po panelu od lewego kija, gość za nim chowa
   kapelusz, na znaczek spada stempel (ok. 1,9 s). Drzwi kabin nad tabelą typów i rzędy w
-  „Skuteczności” domykają się przy wejściu w kadr. Liczniki sceny podjeżdżają o 5 px, słońce
+  „Skuteczności” domykają się przy wejściu w kadr, tak samo raz snop latarni przy „Jak sprawdzić”
+  (obrót od morza) i stempel przy pobieraniu (uderza w papier). Liczniki sceny podjeżdżają o 5 px, słońce
   winiety wschodzi płynnie. Bez zapętlonych ozdobników poza dryfem mgły na pocztówce.
 - `prefers-reduced-motion: reduce`: stan końcowy od razu i przycisk „Pokaż pismo przed zasłonięciem”.
 - Bez JavaScriptu: stan końcowy policzony przy budowie tym samym `redactPII`.

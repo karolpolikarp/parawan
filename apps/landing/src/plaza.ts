@@ -305,12 +305,13 @@ export function uruchomScene(): void {
 }
 
 /**
- * Rzędy parawanów w „Skuteczności” rozkładają się od lewego kija, a drzwi kabin nad tabelą typów
- * zamykają się po kolei, gdy wejdą w kadr. Bez ruchu (reduced-motion, brak IntersectionObserver)
+ * Rzędy parawanów w „Skuteczności” rozkładają się od lewego kija, drzwi kabin nad tabelą typów
+ * zamykają się po kolei, snop latarni przy „Jak sprawdzić” obraca się od morza, a stempel przy
+ * pobieraniu spada na swoje miejsce, gdy wejdą w kadr. Każde raz. Bez ruchu (reduced-motion, brak IntersectionObserver)
  * stoją w stanie końcowym od początku.
  */
 export function uruchomRzedy(): void {
-  const rz = [...document.querySelectorAll<HTMLElement>('.rz, .kabiny')];
+  const rz = [...document.querySelectorAll<HTMLElement>('.rz, .kabiny, .latarnia-w, .stempel-pob')];
   if (!rz.length || !document.documentElement.classList.contains('ruch')) return;
   if (!('IntersectionObserver' in window)) {
     for (const f of rz) f.classList.add('widac');

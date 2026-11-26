@@ -456,10 +456,10 @@ export function latarnia(): string {
  * i fale kasownika. Dekoracja (aria-hidden): treść napisu powtarza metryczkę obok.
  */
 export function stempelPob(): string {
-  let s = '<svg class="stempel-pob" viewBox="0 0 340 180" aria-hidden="true" focusable="false"><g class="st-g" fill="none" stroke="#2E6B55" stroke-width="2.4">';
+  let s = '<svg class="stempel-pob" viewBox="0 0 360 180" aria-hidden="true" focusable="false"><g class="st-g" fill="none" stroke="#2E6B55" stroke-width="2.4">';
   s += '<circle cx="90" cy="90" r="80"/><circle cx="90" cy="90" r="56"/>';
   s += '<path id="st-o" d="M90 158 A68 68 0 1 1 90.1 158" stroke="none"/>';
-  s += '<path stroke-linecap="round" d="M150 62 q12 -9 24 0 t24 0 t24 0 t24 0 t24 0 t24 0 M156 78 q12 -9 24 0 t24 0 t24 0 t24 0 t24 0 t24 0 M160 94 q12 -9 24 0 t24 0 t24 0 t24 0 t24 0 t24 0 M156 110 q12 -9 24 0 t24 0 t24 0 t24 0 t24 0 t24 0 M150 126 q12 -9 24 0 t24 0 t24 0 t24 0 t24 0 t24 0"/>';
+  s += '<path stroke-linecap="round" d="M178 62 q12 -9 24 0 t24 0 t24 0 t24 0 t24 0 t24 0 M182 78 q12 -9 24 0 t24 0 t24 0 t24 0 t24 0 t24 0 M184 94 q12 -9 24 0 t24 0 t24 0 t24 0 t24 0 t24 0 M182 110 q12 -9 24 0 t24 0 t24 0 t24 0 t24 0 t24 0 M178 126 q12 -9 24 0 t24 0 t24 0 t24 0 t24 0 t24 0"/>';
   s += '</g><text fill="#2E6B55" font-family="Archivo, sans-serif" font-weight="600" font-size="13.5" letter-spacing="2.6"><textPath href="#st-o">PARAWAN.HTML · DZIAŁA BEZ SIECI ·</textPath></text>';
   s += '<text x="90" y="86" text-anchor="middle" fill="#2E6B55" font-family="\'Source Serif 4\', Georgia, serif" font-weight="600" font-size="26">0 zł</text>';
   s += '<path d="M66 102 q6 -5 12 0 t12 0 t12 0 t12 0" fill="none" stroke="#2E6B55" stroke-width="2.4" stroke-linecap="round"/>';

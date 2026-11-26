@@ -157,9 +157,17 @@ $('demo-clear')?.addEventListener('click', () => {
 const COPY_LABEL = 'Kopiuj wynik';
 let copyTimer: ReturnType<typeof setTimeout> | undefined;
 
+const bezRuchu = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 function flashCopy(text: string, ms: number): void {
   if (!copyLabel) return;
   copyLabel.textContent = text;
+  // nowy napis podjeżdża o 3 px, żeby kliknięcie miało widoczną odpowiedź (tylko transform i opacity)
+  if (!bezRuchu)
+    copyLabel.animate?.([{ transform: 'translateY(3px)', opacity: 0.3 }, { transform: 'none', opacity: 1 }], {
+      duration: 160,
+      easing: 'cubic-bezier(.23, 1, .32, 1)',
+    });
   clearTimeout(copyTimer);
   copyTimer = setTimeout(resetCopyLabel, ms);
 }
