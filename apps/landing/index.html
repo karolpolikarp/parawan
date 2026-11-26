@@ -89,7 +89,7 @@
                 <p class="ad-tyt" aria-hidden="true">Adresat</p>
                 <p class="vh">Adres na odwrocie pocztówki po zasłonięciu:</p>
                 <p class="ad" translate="no"><!--SCENA:ADRES--></p>
-                <p class="ad-podpis">Adresat schował się za parawanem. Zasłonił go ten sam silnik, który siedzi w pliku do pobrania. Adres jest zmyślony, a przed zasłonięciem widać go w piśmie niżej.</p>
+                <p class="ad-podpis">Adresat schował się za parawanem. Adres jest zmyślony; przed zasłonięciem widać go w piśmie niżej.</p>
               </div>
             </div>
           </div>
@@ -109,7 +109,7 @@
               </article>
               <div class="panel">
                 <h2>Parawany stają tylko przy danych</h2>
-                <p>To wezwanie do zapłaty jest zmyślone, a zasłonił je ten sam silnik, który siedzi w pliku do pobrania. Parawan staje przy każdym zasłoniętym fragmencie. Kwota, numer faktury, przepis i sygnatura cytowanego wyroku <strong>zostają na słońcu</strong>, bo nikogo nie wskazują.</p>
+                <p>Wezwanie do zapłaty jest zmyślone. Dane w nim zasłonił ten sam silnik co w Parawan.html. Parawan staje przy każdym zasłoniętym fragmencie. Kwota, numer faktury, przepis i sygnatura cytowanego wyroku <strong>zostają na słońcu</strong>, bo nikogo nie wskazują.</p>
                 <div class="leg-scena">
                   <p class="leg-tyt">Kategorię danej pokazuje znak i kolor znacznika, a nazwę podaje legenda:</p>
                   <ul class="legenda" aria-label="Kategorie danych: znak, kolor i nazwa">
@@ -235,7 +235,7 @@
           <!--IL:KABINY-->
           <div class="tablica">
             <table class="kategorie" role="table">
-              <caption>Co Parawan zasłania. Każda kategoria ma na całej stronie ten sam znak i kolor.</caption>
+              <caption>Co Parawan zasłania. Każda kategoria ma na całej stronie ten sam kolor, a na znacznikach i w tabeli także ten sam znak.</caption>
               <tbody role="rowgroup">
                 <tr role="row"><th scope="row" role="rowheader" class="c-ident"><span class="leg-z" aria-hidden="true"></span><span class="tl ct-ident">Identyfikatory · 19</span></th><td class="wz" role="cell"><mark class="pii pii-ident">[PESEL]</mark></td><td role="cell"><span class="chip-t ct-ident">PESEL</span>, <span class="chip-t ct-ident">NIP</span>, <span class="chip-t ct-ident">REGON</span>, <span class="chip-t ct-ident">nr dowodu</span>, <span class="chip-t ct-ident">nr paszportu</span>, <span class="chip-t ct-ident">numer KRS</span>, <span class="chip-t ct-ident">numer KSeF</span>, <span class="chip-t ct-ident">nr księgi wieczystej</span>, <span class="chip-t ct-ident">znak sprawy</span>, <span class="chip-t ct-ident">nr prawa jazdy</span>, <span class="chip-t ct-ident">nr uprawnień zawodowych</span>, <span class="chip-t ct-ident">nr karty pobytu</span>, <span class="chip-t ct-ident">nr aktu stanu cywilnego</span>, <span class="chip-t ct-ident">nr rejestracyjny</span>, <span class="chip-t ct-ident">VIN</span>, <span class="chip-t ct-ident">adres IP</span>, <span class="chip-t ct-ident">adres MAC</span>, <span class="chip-t ct-ident">token / JWT</span>, <span class="chip-t ct-ident">login</span></td></tr>
                 <tr role="row"><th scope="row" role="rowheader" class="c-fin"><span class="leg-z" aria-hidden="true"></span><span class="tl ct-fin">Finanse · 2</span></th><td class="wz" role="cell"><mark class="pii pii-fin">[NR-KONTA]</mark></td><td role="cell"><span class="chip-t ct-fin">IBAN / nr konta</span>, <span class="chip-t ct-fin">nr karty płatniczej</span></td></tr>
@@ -249,7 +249,7 @@
           <div class="metody">
             <h2>Po czym Parawan poznaje dane</h2>
             <details class="zwin" open>
-              <summary>Pokaż cztery sposoby z przykładami</summary>
+              <summary>Cztery sposoby z przykładami</summary>
               <div class="metody-siatka">
                 <div class="metoda">
                   <div class="m-opis">
@@ -403,9 +403,9 @@ npm run build -w anonimizator-web</code></pre>
             <li><code>opinię biegłego sporządził <mark class="leak">Popescu</mark> w terminie</code> <span class="etk etk-err">przechodzi</span></li>
             <li><code>Pan <mark class="pii pii-person">[IMIĘ I NAZWISKO]</mark> to najsłynniejsza polska epopeja narodowa</code> <span class="etk etk-over">zasłonięte bez potrzeby</span></li>
           </ul>
-          <p class="granice-wstep">Ostatni wiersz to jedyny w pomiarze fragment zasłonięty bez potrzeby: tytuł „Pan Tadeusz” <strong>wzięty za osobę</strong>. Pomiar nie obejmuje siedmiu innych przypadków.</p>
+          <p class="granice-wstep">Ostatni wiersz to jedyny w pomiarze fragment zasłonięty bez potrzeby: tytuł „Pan Tadeusz” <strong>wzięty za osobę</strong>.</p>
           <details class="zwin" open>
-            <summary>Pokaż siedem przypadków poza pomiarem</summary>
+            <summary>Siedem przypadków poza pomiarem</summary>
             <ul class="granice">
               <li>Sygnatura cytowanego wyroku poprzedzona skrótem „sygn.” <strong>zostanie zasłonięta</strong> tak samo jak sygnatura sprawy, której dotyczy pismo, bo reguła ich nie odróżnia.</li>
               <li>Numer zapisany w nietypowy sposób może przejść.</li>

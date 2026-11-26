@@ -651,3 +651,11 @@ test('landing: hasło skuteczności podaje źródło, a notka wynik na pismach o
   expect(sekcja).toContain(`${odl(2)}% danych w serii 2 i ${odl(3)}% w serii 3`);
   expect(sekcja).toContain('docs/EWALUACJA-SERIA-3.md');
 });
+
+test('landing: napis na rozwijanym bloku pasuje do stanu otwartego i zamkniętego', () => {
+  // details.zwin na telefonie startuje zwinięty (main.ts), a tekst <summary> się nie zmienia:
+  // bez czasownika „Pokaż…”, który po rozwinięciu kłamie
+  const summary = [...landingHtml.matchAll(/<summary>([^<]*)<\/summary>/g)].map((m) => m[1]);
+  expect(summary.length).toBeGreaterThan(2);
+  for (const s of summary) expect(s).not.toMatch(/^(Pokaż|Ukryj|Rozwiń|Zwiń)/);
+});
