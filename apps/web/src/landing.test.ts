@@ -622,3 +622,16 @@ test('landing: napisy skryptu strony i podstrony /log/ bezosobowo', () => {
     expect([...widocznyTekst(BEZ_PRZYCISKOW(napisy(src))).matchAll(ROZKAZY)].map((m) => m[0].trim()), nazwa).toEqual([]);
   }
 });
+
+test('landing: bursztyn jako sygnał tylko przy „zostaje na słońcu”, zakreślacz w innej barwie', () => {
+  // DESIGN.md, „Znaczniki”: bursztynowa smuga pod tekstem znaczy fragment, który zostaje. Zakreślacz
+  // obietnic (mark.zak) w tym samym odcieniu dawał temu sygnałowi drugie znaczenie (przegląd 2026-11-26).
+  const hex = landingStyle.match(/--marker:\s*#([0-9A-Fa-f]{6})/)?.[1];
+  expect(hex).toBeTruthy();
+  const [r, g, b] = [0, 2, 4].map((i) => Number.parseInt((hex ?? '').slice(i, i + 2), 16) / 255);
+  const max = Math.max(r, g, b);
+  const d = max - Math.min(r, g, b);
+  const h = d === 0 ? 0 : max === r ? (60 * ((g - b) / d) + 360) % 360 : max === g ? 60 * ((b - r) / d + 2) : 60 * ((r - g) / d + 4);
+  // odcienie od pomarańczu do żółci (bursztyn #B9791F ma ok. 35°, smuga #EBCB93 ok. 38°)
+  expect(d === 0 || h < 15 || h > 65, `--marker #${hex}: odcień ${Math.round(h)}°`).toBe(true);
+});

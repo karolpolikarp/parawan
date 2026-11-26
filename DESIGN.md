@@ -33,7 +33,7 @@ Tokeny w `apps/landing/src/style.css` (`:root`).
 | piasek (scena) | `--piasek` | `#E7E1D2` |
 | tekst drugorzędny | `--szary` | `#4A5A4F` |
 | bursztyn | `--bursztyn` / `--bursztyn-t` / `--bursztyn-p` | `#B9791F` / `#7E5012` / `#EBCB93` |
-| zakreślacz | `--marker` | `#F4DEAE` |
+| zakreślacz (zieleń mgły, nie bursztyn) | `--marker` | `#C3D9CA` |
 
 Kategorie danych (tekst / tło znacznika / pasek i znak / obwódka), te same w aplikacji
 (`apps/web/src/style.css`) i na stronie:

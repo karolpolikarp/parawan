@@ -75,7 +75,8 @@
   --ident-t: #7A4A06; --ident-b: #F3ECDD; --ident-s: #B9791F; --ident-l: #DDD5C4;
   --fin-t: #2E4E1B; --fin-b: #E6EDD9; --fin-s: #34531F; --fin-l: #CFD7C0;
   --place-t: #2C5689; --place-b: #E1EAF5; --place-s: #5F82B5; --place-l: #C9D4E0;
-  --marker: #F4DEAE;
+  /* zakreślacz w zieleni morskiej mgły: bursztynowa smuga pod tekstem znaczy na stronie tylko „zostaje na słońcu” */
+  --marker: #C3D9CA;
   --kresk: repeating-linear-gradient(-45deg, rgba(11, 61, 46, .42) 0 1.5px, transparent 1.5px 5px);
   --serif: 'Source Serif 4', Georgia, serif;
   --sans: 'Archivo', system-ui, sans-serif;
