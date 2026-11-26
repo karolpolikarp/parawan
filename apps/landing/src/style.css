@@ -315,10 +315,12 @@ del { text-decoration-thickness: 1.5px; text-decoration-color: var(--sosna); col
 /* w trakcie: parawan rozkłada się pasami nad oryginałem, potem zwija się do szerokości znacznika */
 .ruch .d:not(.lab) { display: inline-block; position: relative; white-space: nowrap; vertical-align: baseline; width: var(--w, auto); clip-path: inset(-.6em -4px -.5em -4px); }
 .ruch .d:not(.lab) .s {
-  display: flex; position: absolute; left: 2px; right: 2px; top: .1em; bottom: .1em; pointer-events: none; border-radius: 2px; overflow: hidden;
+  display: flex; position: absolute; left: -1px; right: -1px; top: 0; bottom: 0; pointer-events: none; border-radius: 2px; overflow: hidden;
   transform-origin: 50% 100%; transform: scaleY(var(--c, 0));
 }
-/* oryginał znika w całości w chwili, gdy parawan zaczyna rosnąć: żadna klatka nie pokazuje części danych */
+/* oryginał gaśnie w całości, zanim parawan zacznie rosnąć (plaza.ts: --f do q = .1, płótno od q = .1),
+   więc żadna klatka nie pokazuje danej częściowo przykrytej */
+.ruch .d:not(.lab) .o { opacity: calc(1 - var(--f, 0)); }
 .ruch .d.zakryte:not(.lab) .o { visibility: hidden; }
 /* płótno parawanu: panele na przemian ciemniejsze i jaśniejsze, górna krawędź w zygzak, kije między panelami */
 .ruch .d .s i { flex: 1; min-width: 0; background: linear-gradient(90deg, var(--sosna-g), var(--sosna) 70%); box-shadow: inset 1.5px 0 0 var(--sosna-g); }

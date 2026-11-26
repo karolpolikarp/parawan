@@ -5,13 +5,17 @@
  * postęp q = 0 i prowadzi każdą maskę przez trzy fazy, gdy pismo przesuwa się przez ekran.
  *
  * Mechanika jak w próbce E:\parawan-landing-proby\r6-k2 (DESIGN.md: nie zmieniać):
- *  - c = gładko(q / .4): płótno rośnie od dołu nad oryginałem;
+ *  - f = gładko(q / .1): oryginał gaśnie w całości (opacity), zanim stanie nad nim płótno;
+ *  - c = 1 − (1 − (q − .1) / .3)^2,4: płótno rośnie od dołu, szybko wstaje i miękko siada;
  *  - e = gładko((q − .45) / .4): miejsce zwęża się od szerokości oryginału do szerokości znacznika;
- *  - t = (q − .8) / .2: znacznik wysuwa się na płótno od lewej;
- *  - od q ≥ .4 oryginał jest ukryty w całości (visibility), więc żadna klatka nie pokazuje części
- *    danej; od q ≥ 1 maska wraca do zwykłego znacznika `.lab`.
+ *  - t = 1 − (1 − (q − .8) / .2)³: znacznik wysuwa się na płótno od lewej i hamuje u celu;
+ *  - od q ≥ .1 oryginał jest ukryty w całości (visibility) i dopiero wtedy rośnie płótno, więc
+ *    żadna klatka nie pokazuje danej częściowo przykrytej; od q ≥ 1 maska wraca do zwykłego
+ *    znacznika `.lab`.
  * Powyżej 960 px scena stoi przypięta (sticky) na torze 150% wysokości okna, niżej każda maska
- * zasłania się sama, gdy dojdzie do 78% wysokości okna.
+ * zasłania się sama, gdy dojdzie do 78% wysokości okna. Postęp w tym trybie liczy się z pozycji
+ * zapamiętanej przy pomiarze, nie z bieżącej: zwężona maska przesuwa tekst o wiersz, a postęp
+ * z bieżącej pozycji cofałby się wtedy i odsłaniał już zasłoniętą daną.
  *
  * Przy prefers-reduced-motion zostaje stan końcowy i przycisk „Pokaż pismo przed zasłonięciem”.
  */
@@ -22,6 +26,7 @@ const F_FR = ['fragment', 'fragmenty', 'fragmentów'] as const;
 
 const clamp = (x: number): number => (x < 0 ? 0 : x > 1 ? 1 : x);
 const gladko = (x: number): number => x * x * (3 - 2 * x);
+const wyhamuj = (x: number, p: number): number => 1 - (1 - x) ** p;
 
 interface Fragment {
   e: HTMLElement;
@@ -34,6 +39,8 @@ interface Fragment {
   r: number;
   wo: number;
   wl: number;
+  /** górna krawędź na stronie (scrollY + top) z ostatniego pomiaru, dla trybu bez przypięcia */
+  y0: number;
 }
 
 export function uruchomScene(): void {
@@ -66,6 +73,7 @@ export function uruchomScene(): void {
     r: 0,
     wo: 0,
     wl: 0,
+    y0: 0,
   }));
   if (!it.length) return;
   const nM = it.filter((x) => x.maska).length;
@@ -95,15 +103,17 @@ export function uruchomScene(): void {
     return;
   }
 
-  function ustaw(x: Fragment, q: number): void {
+  function ustaw(x: Fragment, q0: number): void {
+    // zaokrąglenie: (1,18 − 1) / ,18 w liczbach zmiennoprzecinkowych to 0,999…, a nie 1
+    const q = Math.round(q0 * 1e4) / 1e4;
     if (q === x.q) return;
     x.q = q;
     x.e.style.setProperty('--q', q.toFixed(3));
     if (!x.maska || !x.o) return;
     const lab = q >= 1;
     if (lab !== x.e.classList.contains('lab')) x.e.classList.toggle('lab', lab);
-    // oryginał chowa się, gdy płótno zaczyna rosnąć: najpierw płótno, potem znika tekst pod nim
-    const zak = !lab && q >= 0.4;
+    // oryginał gaśnie w całości do q = .1 i dopiero wtedy rośnie nad nim płótno
+    const zak = !lab && q >= 0.1;
     if (zak !== x.e.classList.contains('zakryte')) x.e.classList.toggle('zakryte', zak);
     // czytnik ekranu nie dostaje oryginału, który oko widzi już za parawanem
     const ukryj = lab || zak;
@@ -112,24 +122,49 @@ export function uruchomScene(): void {
       else x.o.removeAttribute('aria-hidden');
     }
     if (!lab && x.wo) {
-      const c = gladko(clamp(q / 0.4));
+      const f = gladko(clamp(q / 0.1));
+      const c = zak ? wyhamuj(clamp((q - 0.1) / 0.3), 2.4) : 0;
       const e = gladko(clamp((q - 0.45) / 0.4));
-      const t = clamp((q - 0.8) / 0.2);
+      const t = wyhamuj(clamp((q - 0.8) / 0.2), 3);
+      x.e.style.setProperty('--f', f.toFixed(3));
       x.e.style.setProperty('--c', c.toFixed(3));
       x.e.style.setProperty('--t', t.toFixed(3));
       x.e.style.setProperty('--w', `${(x.wo + (x.wl - x.wo) * e).toFixed(1)}px`);
     }
   }
 
+  // Kartka trzyma wyższą z dwóch wysokości (z oryginałami i ze znacznikami): zwężenie maski
+  // skraca akapit o wiersz, a bez tego cała kartka podskakiwałaby w środku przemiany.
+  function wysokosc(): void {
+    kartka.style.minHeight = '';
+    const maski = it.filter((x) => x.maska);
+    const lab = maski.map((x) => x.e.classList.contains('lab'));
+    const w = maski.map((x) => x.e.style.getPropertyValue('--w'));
+    for (const x of maski) {
+      x.e.classList.remove('lab');
+      x.e.style.removeProperty('--w');
+    }
+    const h0 = kartka.getBoundingClientRect().height;
+    for (const x of maski) x.e.classList.add('lab');
+    const h1 = kartka.getBoundingClientRect().height;
+    maski.forEach((x, i) => {
+      x.e.classList.toggle('lab', lab[i]);
+      if (w[i]) x.e.style.setProperty('--w', w[i]);
+    });
+    kartka.style.minHeight = `${Math.ceil(Math.max(h0, h1))}px`;
+  }
+
   // Szerokość oryginału i znacznika oraz liczba paneli płótna (zależy od szerokości fragmentu).
   function skrzydla(): void {
+    wysokosc();
     for (const x of it) {
       if (!x.maska || !x.s || !x.o || !x.l) continue;
       const lab = x.e.classList.contains('lab');
       if (lab) x.e.classList.remove('lab');
       x.e.style.removeProperty('--w');
       x.wo = x.o.getBoundingClientRect().width;
-      x.wl = x.l.getBoundingClientRect().width + 8;
+      // + 2 × margines 2 px znacznika w stanie końcowym, więc przejście do `.lab` nie skacze
+      x.wl = x.l.getBoundingClientRect().width + 4;
       if (lab) x.e.classList.add('lab');
       const n = Math.max(2, Math.min(7, Math.round(x.wo / 22)));
       if (x.pan !== n) {
@@ -175,6 +210,7 @@ export function uruchomScene(): void {
     for (const x of it) {
       const r = x.e.getClientRects()[0];
       if (!r) continue;
+      x.y0 = r.top + scrollY;
       x.r = (r.top - kr.top + ((r.left - kr.left) / kr.width) * 18) / kr.height;
     }
     const lo = Math.min(...it.map((x) => x.r));
@@ -191,7 +227,8 @@ export function uruchomScene(): void {
   let D = 1000;
   let s0 = 0;
   let ramka = 0;
-  const W = 0.12;
+  // okno jednej maski na torze: ok. 200 px przewijania na 1440 × 900, więcej niż jeden ząbek kółka
+  const W = 0.18;
 
   function przelicz(): void {
     const vh = innerHeight;
@@ -220,10 +257,8 @@ export function uruchomScene(): void {
       const Pp = clamp(p / 0.92) * (1 + W);
       for (const x of it) ustaw(x, clamp((Pp - x.r) / W));
     } else {
-      for (const x of it) {
-        const r = x.e.getBoundingClientRect();
-        ustaw(x, clamp((vh * 0.78 - r.top) / (vh * 0.2)));
-      }
+      // pozycja z pomiaru, nie bieżąca: bez pętli „zwężenie, wiersz wyżej, postęp w tył”
+      for (const x of it) ustaw(x, clamp((vh * 0.78 - (x.y0 - scrollY)) / (vh * 0.2)));
     }
     liczniki();
   }

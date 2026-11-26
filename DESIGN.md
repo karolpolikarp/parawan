@@ -81,7 +81,7 @@ nie tylko odcieniem.
 ## Ruch
 
 - Scena zasłaniania na przewijaniu: trzy fazy na każdy fragment (płótno rośnie, miejsce zwęża się,
-  znacznik wysuwa się). Oryginał znika w chwili, gdy płótno zaczyna rosnąć: żadna klatka nie
+  znacznik wysuwa się). Oryginał gaśnie w całości, zanim płótno zacznie rosnąć: żadna klatka nie
   pokazuje części danej (sprawdza to `scripts/e2e/landing-scena.test.mjs`).
 - Powyżej 960 px scena jest przypięta do ekranu, niżej zasłania się w rytmie przewijania.
 - `prefers-reduced-motion: reduce`: stan końcowy od razu i przycisk „Pokaż pismo przed zasłonięciem”.
