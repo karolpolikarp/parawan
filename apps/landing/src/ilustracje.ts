@@ -97,10 +97,12 @@ interface KolSosny {
   dol?: string;
   gora?: string;
   galaz?: string;
+  /** skala kęp igieł: bliska sosna ma koronę z kilku dużych płaszczyzn, nie z drobnych kępek */
+  kor?: number;
 }
 
 function sosna(x: number, y: number, h: number, s: number, wyg: number, nr: number, seed: number, kol: KolSosny = {}): string {
-  const { igly = '#0B3D2E', jas = '#2E6B55', dol = '#072A20', gora = '#7E5012', galaz = '#7E5012' } = kol;
+  const { igly = '#0B3D2E', jas = '#2E6B55', dol = '#072A20', gora = '#7E5012', galaz = '#7E5012', kor = 1 } = kol;
   const R = los(seed);
   const tx = x + wyg;
   const ty = y - h;
@@ -130,7 +132,7 @@ function sosna(x: number, y: number, h: number, s: number, wyg: number, nr: numb
     const ex = px + st * dl * h * (st > 0 ? 1 : 0.8);
     const ey = py - wz * h;
     galezie += `M${f(px)} ${f(py)} Q ${f((px + ex) / 2)} ${f(py - wz * h * 0.2)} ${f(ex)} ${f(ey)} `;
-    korona += kepa(ex + st * cw * h * 0.12, ey - ch * h * 0.1, cw * h, ch * h * 1.3, R, igly, jas);
+    korona += kepa(ex + st * cw * h * 0.12, ey - ch * h * 0.1, cw * h * kor, ch * h * 1.3 * kor, R, igly, jas);
   }
   o += `<path d="${galezie}" stroke="${galaz}" stroke-width="${f(2.2 * s)}" stroke-linecap="round" fill="none"/>`;
   return o + scal(korona);
@@ -261,7 +263,7 @@ export function pocztowka(): string {
   s += '<path d="M640 610 C 720 560 800 476 920 450 C 1020 432 1110 436 1200 428 L1200 680 L640 680Z" fill="#D9CDB0"/>';
   // dwie sosny na wydmie: dalsza mniejsza w jaśniejszej zieleni, bliższa wychodzi za kadr
   s += sosna(862, 486, 232, 1.15, 22, 0, 3, { igly: '#2E6B55', jas: '#4F8670', dol: '#3B5A4D', gora: '#7E5012', galaz: '#5E4423' });
-  s += sosna(1078, 470, 452, 1.9, 34, 1, 5, { igly: '#0B3D2E', jas: '#2E6B55', dol: '#1C3A30', gora: '#7E5012', galaz: '#1C3A30' });
+  s += sosna(1078, 470, 452, 1.9, 34, 1, 5, { igly: '#0B3D2E', jas: '#2E6B55', dol: '#1C3A30', gora: '#7E5012', galaz: '#1C3A30', kor: 1.4 });
   s += '<path d="M700 600 C 790 540 860 496 960 482 C 1060 468 1130 476 1200 472 L1200 700 L700 700Z" fill="#E5D9BF"/>';
   const trawy: Pkt[] = [
     [866, 512],
@@ -390,6 +392,81 @@ export function przerywnik(): string {
 }
 
 /**
+ * Winieta przy „Jak sprawdzić”: latarnia z pocztówki w zbliżeniu, bo latarnia pilnuje brzegu.
+ * Łuk okna jak w plakacie, płaskie farby: pasy wieży biel i cegła, snop światła dwoma trójkątami
+ * na mgle (klasa `snop`: przy wejściu w kadr obraca się raz od morza, style.css). Dekoracja.
+ */
+export function latarnia(): string {
+  DOKL = 1;
+  const W = 240;
+  const H = 380;
+  let s = `<svg class="latarnia-w" viewBox="0 0 ${W} ${H}" aria-hidden="true" focusable="false"><defs>`;
+  s += `<clipPath id="lt-luk"><path d="M2 ${H - 2} V122 A118 118 0 0 1 ${W - 2} 122 V${H - 2}Z"/></clipPath>`;
+  s += '<pattern id="lt-rm" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(15)"><circle cx="4" cy="4" r="1.2" fill="#6F8C7E"/></pattern></defs>';
+  s += '<g clip-path="url(#lt-luk)">';
+  s += `<rect width="${W}" height="${H}" fill="#CBD6CF"/>`;
+  s += `<path fill="#DCE3DD" d="M0 ${H} V150 H70 V144 H${W} V${H}Z"/>`;
+  s += `<path fill="#E6E6DC" d="M0 ${H} V206 H90 V200 H${W} V${H}Z"/>`;
+  s += `<path fill="#F1EADA" d="M0 ${H} V262 H130 V256 H${W} V${H}Z"/>`;
+  // snop: dwa płaskie trójkąty od laterny, w lewo dłuższy (nad morze)
+  s += '<g class="snop"><path fill="#F7F4EC" d="M120 95 L-40 40 L-40 140Z M120 95 L290 62 L290 124Z"/></g>';
+  s += mewy([
+    [44, 172, 0.9],
+    [72, 160, 0.65],
+  ]);
+  // morze z rastrem za wieżą (wieża stoi na skałach przy brzegu)
+  s += `<rect y="296" width="${W}" height="40" fill="#8AA396"/><rect y="296" width="${W}" height="8" fill="#A8BBB0"/><rect y="310" width="${W}" height="26" fill="url(#lt-rm)" opacity=".6"/>`;
+  // wieża: trapez w pasach, strona od słońca jasna, druga w cieniu (osobne płaskie farby)
+  const x0 = 120;
+  const yG = 124;
+  const yD = 318;
+  const pol = (y: number): number => 19 + ((y - yG) / (yD - yG)) * 15;
+  const pasy = [
+    [yG, 160, '#F7F3EA', '#DDD6C7'],
+    [160, 198, '#8E3B26', '#6E2C1C'],
+    [198, 240, '#F7F3EA', '#DDD6C7'],
+    [240, 280, '#8E3B26', '#6E2C1C'],
+    [280, yD, '#F7F3EA', '#DDD6C7'],
+  ] as const;
+  for (const [a, b, jas, cien] of pasy) {
+    const pa = pol(a);
+    const pb = pol(b);
+    s += `<path fill="${jas}" d="M${f(x0 - pa)} ${a}L${f(x0 + pa * 0.3)} ${a}L${f(x0 + pb * 0.3)} ${b}L${f(x0 - pb)} ${b}Z"/>`;
+    s += `<path fill="${cien}" d="M${f(x0 + pa * 0.3)} ${a}L${f(x0 + pa)} ${a}L${f(x0 + pb)} ${b}L${f(x0 + pb * 0.3)} ${b}Z"/>`;
+  }
+  // okienka i drzwi
+  s += '<path fill="#0B3D2E" d="M116 214h8v14h-8zM116 254h8v12h-8zM110 318v-20q10 -10 20 0v20z"/>';
+  // galeria, laterna ze światłem (ta sama farba co latarnia na pocztówce), kopuła
+  s += '<rect x="92" y="116" width="56" height="9" fill="#93A89C"/><path d="M94 116v-10M104 116v-10M136 116v-10M146 116v-10M92 106h56" stroke="#0B3D2E" stroke-width="2" fill="none"/>';
+  s += '<rect class="laterna" x="106" y="84" width="28" height="22" fill="#F0CB97"/><path d="M115 84v22M125 84v22" stroke="#93A89C" stroke-width="2.4"/>';
+  s += '<path fill="#1C5A45" d="M102 86 Q120 58 138 86Z"/><path d="M120 62v-8" stroke="#1C5A45" stroke-width="2.4" stroke-linecap="round"/>';
+  // skały u stóp wieży
+  s += '<path fill="#93A89C" d="M70 330 L84 308 L100 304 L108 330Z M134 330 L142 302 L160 306 L176 330Z"/>';
+  s += `<path fill="#D9CDB0" d="M0 ${H} V334 C 60 326 130 316 ${W} 330 V${H}Z"/>`;
+  s += `<path fill="#ECE4D2" d="M0 ${H} V352 C 80 346 160 352 ${W} 344 V${H}Z"/>`;
+  s += '<g stroke="#4F7E68" stroke-width="2.2" stroke-linecap="round" fill="none"><path d="M40 344q-3 -10 -8 -18M43 344q1 -12 3 -22M46 344q5 -8 11 -14M196 340q-3 -10 -8 -18M199 340q1 -12 3 -22"/></g>';
+  s += `<rect width="${W}" height="${H}" filter="url(#ziarno-p)" opacity=".38"/></g>`;
+  s += `<path d="M2 ${H - 2} V122 A118 118 0 0 1 ${W - 2} 122 V${H - 2}Z" fill="none" stroke="#0B3D2E" stroke-width="2"/>`;
+  DOKL = 10;
+  return `${s}</svg>`;
+}
+
+/**
+ * Stempel pocztowy w sekcji pobierania: ton w ton na ciemnej sosnie, dwa okręgi, napis po obwodzie
+ * i fale kasownika. Dekoracja (aria-hidden): treść napisu powtarza metryczkę obok.
+ */
+export function stempelPob(): string {
+  let s = '<svg class="stempel-pob" viewBox="0 0 340 180" aria-hidden="true" focusable="false"><g class="st-g" fill="none" stroke="#2E6B55" stroke-width="2.4">';
+  s += '<circle cx="90" cy="90" r="80"/><circle cx="90" cy="90" r="56"/>';
+  s += '<path id="st-o" d="M90 158 A68 68 0 1 1 90.1 158" stroke="none"/>';
+  s += '<path stroke-linecap="round" d="M150 62 q12 -9 24 0 t24 0 t24 0 t24 0 t24 0 t24 0 M156 78 q12 -9 24 0 t24 0 t24 0 t24 0 t24 0 t24 0 M160 94 q12 -9 24 0 t24 0 t24 0 t24 0 t24 0 t24 0 M156 110 q12 -9 24 0 t24 0 t24 0 t24 0 t24 0 t24 0 M150 126 q12 -9 24 0 t24 0 t24 0 t24 0 t24 0 t24 0"/>';
+  s += '</g><text fill="#2E6B55" font-family="Archivo, sans-serif" font-weight="600" font-size="13.5" letter-spacing="2.6"><textPath href="#st-o">PARAWAN.HTML · DZIAŁA BEZ SIECI ·</textPath></text>';
+  s += '<text x="90" y="86" text-anchor="middle" fill="#2E6B55" font-family="\'Source Serif 4\', Georgia, serif" font-weight="600" font-size="26">0 zł</text>';
+  s += '<path d="M66 102 q6 -5 12 0 t12 0 t12 0 t12 0" fill="none" stroke="#2E6B55" stroke-width="2.4" stroke-linecap="round"/>';
+  return `${s}</svg>`;
+}
+
+/**
  * Kabiny plażowe nad tabelą „Typy danych”: jedna na kategorię, w barwie paska kategorii, na
  * drzwiach znak kategorii, pod spodem nazwa. Kolor nigdy nie jest jedynym sygnałem (znak i nazwa).
  * Dekoracja (aria-hidden): tabela tuż pod nią podaje te same kategorie słowami.
@@ -418,6 +495,8 @@ const ILUSTRACJE: Record<string, () => string> = {
   LAS: las,
   PRZERYWNIK: przerywnik,
   KABINY: kabiny,
+  LATARNIA: latarnia,
+  STEMPEL: stempelPob,
 };
 
 export function wstawIlustracje(html: string): string {

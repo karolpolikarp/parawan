@@ -22,6 +22,7 @@ działają na GitHubie od chwili wypchnięcia tagów.
   tabelą typów stoją kabiny plażowe w barwach kategorii ze znakiem na drzwiach, a w wykresie
   skuteczności to, co zostaje na słońcu, ma kolor bursztynu. Po otwarciu strony parawan na pocztówce
   rozkłada się panel po panelu, a drzwi kabin zamykają się, gdy tabela wejdzie w kadr.
+  Przy „Jak sprawdzić” stoi latarnia w łuku okna, a przy pobieraniu pliku stempel pocztowy.
 - **Nowe kolory znaczników w Parawan.html.** Znaczniki mają barwy z tej samej nadmorskiej palety
   co strona: osoby śliwkowe, kontakt morski, identyfikatory bursztynowe, finanse sosnowe, adres
   niebieski. Tło znacznika jest pełne, a z lewej stoi pasek w barwie kategorii, więc kategorie

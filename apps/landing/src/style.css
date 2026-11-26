@@ -503,7 +503,12 @@ del { text-decoration-thickness: 1.5px; text-decoration-color: var(--sosna); col
 /* ══ JAK SPRAWDZIĆ ══ */
 .sprawdz, .iod { padding: 0 0 110px; }
 .sprawdz > .wrap::before, .iod > .wrap::before { content: ""; display: block; border-top: 1.5px solid var(--sosna); margin-bottom: 96px; }
+.sprawdz > .wrap { position: relative; }
 .sprawdz-glowa { max-width: 760px; margin-bottom: 52px; }
+/* winieta: latarnia pilnuje brzegu, stoi w pustym prawym polu obok kroków (dekoracja) */
+.latarnia-w { position: absolute; right: 0; top: 150px; width: clamp(180px, 17vw, 236px); height: auto; }
+/* węższy ekran: mała winieta oblewana przez nagłówek */
+@media (max-width: 1180px) { .latarnia-w { position: static; float: right; width: clamp(76px, 18vw, 150px); margin: 4px 0 12px 18px; } .sprawdz-glowa { max-width: none; } .szlak { clear: both; } }
 .sprawdz-glowa p { color: var(--szary); font-size: 19px; margin-top: 16px; }
 .szlak { list-style: none; margin: 0; padding: 0; counter-reset: k; max-width: 880px; }
 .szlak-dalej { counter-reset: k 2; }
@@ -586,6 +591,8 @@ pre.polecenia { white-space: pre; word-break: normal; }
 /* ══ PLIK PARAWAN.HTML ══ */
 .pobierz { padding: 110px 0; }
 .pobierz h2 { margin-bottom: 40px; color: var(--papier); }
+/* stempel ton w ton nad tekstem dla firm: kasownik z pocztówki w ciemnej sekcji (dekoracja) */
+.stempel-pob { display: block; width: 260px; max-width: 100%; height: auto; margin: -6px 0 34px -6px; transform: rotate(-6deg); }
 .pob-siatka { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: clamp(30px, 5vw, 72px); align-items: start; }
 .bilet { background: var(--papier-j); background-image: var(--ziarno); color: var(--sosna); padding: 30px 34px 34px; border-radius: 3px; box-shadow: 0 26px 44px -26px rgba(0, 0, 0, .5); --fokus: var(--sosna); }
 .metryczka { display: grid; grid-template-columns: minmax(120px, 170px) minmax(0, 1fr); }

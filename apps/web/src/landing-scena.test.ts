@@ -137,6 +137,17 @@ test('ilustracje i ikony wstawiane przy buildzie', () => {
   expect(kab).toHaveLength(5);
   // bursztyn #B9791F tylko na słońcu: w pocztówce nie ma go wcale (pasek kategorii to CSS)
   expect(out.match(/<svg viewBox="0 0 1200 800"[\s\S]*?<\/svg>/)?.[0]).not.toContain('#B9791F');
+  // winiety: latarnia w „Jak sprawdzić” i stempel przy pobieraniu, obie jako dekoracja bez bursztynu
+  for (const [klasa, sekcja] of [
+    ['latarnia-w', 'sprawdz'],
+    ['stempel-pob', 'pobierz'],
+  ]) {
+    const od = out.indexOf(`<svg class="${klasa}"`);
+    const svg = od < 0 ? '' : out.slice(od, out.indexOf('</svg>', od) + 6);
+    expect(svg, klasa).toContain('aria-hidden="true"');
+    expect(svg, klasa).not.toContain('#B9791F');
+    expect(out.indexOf(svg), klasa).toBeGreaterThan(out.indexOf(`id="${sekcja}"`));
+  }
   expect(out).not.toMatch(/<i class="gi" data-i="[^"]+"><\/i>/);
   for (const name of Object.keys(ICONS)) expect(out).toContain(`data-i="${name}" data-done="1"><svg`);
   expect(() => wstawIkony('<i class="gi" data-i="nie-ma"></i>')).toThrow(/nie-ma/);
