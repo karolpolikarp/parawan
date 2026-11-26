@@ -25,7 +25,9 @@ działają na GitHubie od chwili wypchnięcia tagów.
   Obok „Jak sprawdzić” stoi latarnia w łuku okna, a obok pobierania stempel pocztowy. Za pierwszym
   razem snop latarni obraca się od morza, a stempel spada na papier. Wynik pomiaru ma dopisek,
   że to syntetyczne zdania, i wynik na pismach odłożonych do kontroli. W trybie wysokiego kontrastu
-  przyciski i przełącznik „Wynik / Porównanie” mają ramki.
+  przyciski i przełącznik „Wynik / Porównanie” mają ramki. Obrazek podglądu linku (na przykład
+  na LinkedInie i w komunikatorach) to ta sama pocztówka: z przodu plaża z parawanem, na odwrocie
+  nowe hasło i znaczniki ze znakami kategorii.
 - **Nowe kolory znaczników w Parawan.html.** Znaczniki mają barwy z tej samej nadmorskiej palety
   co strona: osoby śliwkowe, kontakt morski, identyfikatory ochrowe, finanse sosnowe, adres
   niebieski. Tło znacznika jest pełne, a z lewej stoi pasek w barwie kategorii, więc kategorie

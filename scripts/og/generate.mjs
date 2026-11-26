@@ -6,21 +6,24 @@
  * Renderuje kartę HTML w headless Chromium (playwright-core). Fonty marki wtapiane
  * base64 z apps/landing/src/fonts (lokalne woff2 — zgodnie z zasadą marki: zero CDN).
  * Znak marki = kopia parawanMark() z apps/landing/src/icons.ts (stałe barwy).
+ * og.png to pocztówka „Sosna o poranku” (DESIGN.md): przód z pocztowka() i znaczek z znaczek()
+ * z apps/landing/src/ilustracje.ts, na odwrocie h1 czytane z apps/landing/index.html.
+ * Po zmianie h1 albo pocztówki uruchom generator ponownie. Wymaga Node 22.18+ (import .ts).
  *
  * Użycie:  node scripts/og/generate.mjs
  */
 import { chromium } from 'playwright-core';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const fontsDir = path.join(root, 'apps', 'landing', 'src', 'fonts');
 const outDir = path.join(root, 'apps', 'landing', 'public');
 
-async function fontFace(file, family, weight) {
+async function fontFace(file, family, weight, style = 'normal') {
   const b64 = (await readFile(path.join(fontsDir, file))).toString('base64');
-  return `@font-face{font-family:'${family}';font-style:normal;font-weight:${weight};src:url(data:font/woff2;base64,${b64}) format('woff2');}`;
+  return `@font-face{font-family:'${family}';font-style:${style};font-weight:${weight};src:url(data:font/woff2;base64,${b64}) format('woff2');}`;
 }
 
 /* Znak marki „Parawan" — kopia parawanMark() z apps/landing/src/icons.ts. */
@@ -46,37 +49,80 @@ const fonts = [
   await fontFace('plexmono-600-latinext.woff2', 'IBM Plex Mono', '600'),
   await fontFace('sourceserif4-latin.woff2', 'Source Serif 4', '400 600'),
   await fontFace('sourceserif4-latinext.woff2', 'Source Serif 4', '400 600'),
+  await fontFace('sourceserif4-italic-latin.woff2', 'Source Serif 4', '400', 'italic'),
+  await fontFace('sourceserif4-italic-latinext.woff2', 'Source Serif 4', '400', 'italic'),
 ].join('\n');
 
-// znacznik jak na stronie i w aplikacji (DESIGN.md, paleta „u”): tekst, tło, pasek z lewej, obwódka
-const chip = (label, color, bg, bar, border) =>
-  `<span style="font-family:'IBM Plex Mono';font-weight:600;font-size:22px;color:${color};background:${bg};box-shadow:inset 6px 0 0 ${bar},inset 0 0 0 2px ${border};border-radius:3px 8px 8px 3px;padding:8px 18px 8px 24px;white-space:nowrap">[${label}]</span>`;
+// Hasło karty = h1 strony (apps/landing/index.html), czytane przy każdym uruchomieniu.
+const indexHtml = await readFile(path.join(root, 'apps', 'landing', 'index.html'), 'utf8');
+const haslo = indexHtml.match(/<h1>([^<]+)<\/h1>/)?.[1];
+if (!haslo) throw new Error('Brak <h1> w apps/landing/index.html');
+
+// Przód pocztówki i znaczek „0 zł” z tych samych funkcji co strona (Node 24 czyta .ts bez kompilacji).
+const { pocztowka, znaczek } = await import(pathToFileURL(path.join(root, 'apps', 'landing', 'src', 'ilustracje.ts')).href);
+// kadr przodu: wielki parawan, słońce i dwie sosny na wydmie; prawy skraj (sam bór) odpada
+const przod = pocztowka()
+  .replace(/^<svg viewBox="0 0 1200 800"[^>]*>/, '<svg viewBox="40 0 1160 800" width="100%" height="100%" preserveAspectRatio="xMinYMid slice" aria-hidden="true">');
+
+// Znaki kategorii, te same co na znacznikach strony (--kg w apps/landing/src/style.css).
+const ZNAK = {
+  ident: '<path fill="none" stroke="currentColor" stroke-width="1.6" d="M4.4 1 3.4 11M8.6 1l-1 10M1 4.2h10.4M.6 7.8H11"/>',
+  person: '<circle cx="6" cy="3.4" r="2.6" fill="currentColor"/><path fill="currentColor" d="M.9 11.8c0-3.2 2.2-4.9 5.1-4.9s5.1 1.7 5.1 4.9z"/>',
+  contact: '<path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" d="M1.6 1.6h8.8c.5 0 .8.3.8.8v5.4c0 .5-.3.8-.8.8H5.4L2.6 11V8.6h-1c-.5 0-.8-.3-.8-.8V2.4c0-.5.3-.8.8-.8z"/>',
+  fin: '<rect x=".9" y="2.6" width="10.2" height="6.8" rx=".6" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="6" cy="6" r="1.7" fill="currentColor"/>',
+  place: '<path fill="currentColor" fill-rule="evenodd" d="M6 .6l5.6 5H10v6H2v-6H.4zM4.9 7.6v4h2.2v-4z"/>',
+};
+// Paleta „u” z DESIGN.md: tekst, tło, pasek, obwódka.
+const KAT = {
+  person: ['#6B2D62', '#F3E5EF', '#4F2148', '#DECED9'],
+  contact: ['#0B5C5E', '#DDEEEC', '#2F7F7C', '#C5D8D6'],
+  ident: ['#7A4A06', '#F3ECDD', '#B9791F', '#DDD5C4'],
+  fin: ['#2E4E1B', '#E6EDD9', '#34531F', '#CFD7C0'],
+  place: ['#2C5689', '#E1EAF5', '#5F82B5', '#C9D4E0'],
+};
+// znacznik jak na stronie: zakładka z kartoteki, pasek z lewej, znak kategorii przed nazwą
+const chip = (label, kat) => {
+  const [t, b, s, l] = KAT[kat];
+  return `<span class="lab" style="color:${t};background:${b};box-shadow:inset 5px 0 0 ${s},inset 0 0 0 1.5px ${l}"><svg viewBox="0 0 12 12" aria-hidden="true">${ZNAK[kat]}</svg>${label}</span>`;
+};
 
 const ogHtml = `<!doctype html><html lang="pl"><head><meta charset="utf-8"><style>
 ${fonts}
 *{margin:0;padding:0;box-sizing:border-box}
-body{width:1200px;height:630px;overflow:hidden;font-family:'Archivo',sans-serif;color:#17251e;background:#F1EEE6;}
-.card{position:relative;height:100%;padding:64px 72px;display:flex;flex-direction:column;justify-content:space-between}
-.brand{display:flex;align-items:center;gap:20px}
-.brand .mk{width:74px;height:66px}
-.brand b{font-family:'Source Serif 4',Georgia,serif;font-size:46px;font-weight:600;letter-spacing:-.01em;color:#0b3d2e}
-h1{font-family:'Source Serif 4',Georgia,serif;font-size:66px;font-weight:600;letter-spacing:-.02em;line-height:1.06;color:#0b3d2e;max-width:1000px;text-wrap:balance}
-.chips{display:flex;flex-wrap:wrap;gap:14px}
-.foot{display:flex;align-items:center;gap:16px;font-family:'IBM Plex Mono';font-weight:600;font-size:22px;color:#566259}
-.foot b{color:#0b3d2e}
-.foot .sep{color:#8a5a12}
+body{width:1200px;height:630px;overflow:hidden;font-family:'Archivo',sans-serif;color:#0B3D2E;background:#DDE3DC;position:relative}
+/* pocztówka lekko przekrzywiona na mgle, jak położona na stole */
+.kartka{position:absolute;left:34px;top:30px;width:1132px;height:570px;background:#FAF8F2;display:flex;padding:14px;gap:0;
+  box-shadow:0 1px 0 #C9D1C8,0 14px 30px -18px rgba(11,61,46,.45);transform:rotate(-.6deg)}
+.przod{flex:none;width:676px;height:542px;overflow:hidden;background:#DCE3DD}
+.odwrot{position:relative;flex:1;padding:20px 24px 16px 32px;display:flex;flex-direction:column}
+.odwrot::before{content:'';position:absolute;left:0;top:26px;bottom:26px;border-left:1.5px solid #D6CDB8}
+.marka{display:flex;align-items:center;gap:14px}
+.marka .mk{width:52px;height:42px}
+.marka b{font-family:'Source Serif 4',Georgia,serif;font-size:34px;font-weight:600;letter-spacing:-.01em}
+.znaczek{position:absolute;right:26px;top:20px;width:76px;height:95px;transform:rotate(3deg)}
+h1{font-family:'Source Serif 4',Georgia,serif;font-size:40px;font-weight:600;letter-spacing:-.018em;line-height:1.1;margin-top:30px;text-wrap:balance}
+.chips{display:flex;flex-wrap:wrap;gap:8px 8px;margin-top:auto}
+.lab{display:inline-flex;align-items:center;gap:8px;font-family:'IBM Plex Mono';font-weight:600;font-size:17px;line-height:1;padding:8px 11px 8px 13px;border-radius:2px 5px 5px 2px;white-space:nowrap}
+.lab svg{width:16px;height:16px;flex:none}
+.adres{margin-top:24px;display:flex;flex-direction:column;gap:10px}
+.adres span{display:block;border-bottom:1.5px solid #D6CDB8;padding-bottom:6px;font-family:'IBM Plex Mono';font-weight:600;font-size:16px;color:#4A5A4F}
+.adres span b{color:#0B3D2E;font-weight:600}
 </style></head><body>
-<div class="card">
-  <div class="brand"><span class="mk">${parawanMark()}</span><b>Parawan</b></div>
-  <h1>Parawan zasłania polskie dane osobowe, zanim tekst trafi do czatu AI</h1>
-  <div class="chips">
-    ${chip('PESEL', '#7A4A06', '#F3ECDD', '#B9791F', '#DDD5C4')}
-    ${chip('IMIĘ I NAZWISKO', '#6B2D62', '#F3E5EF', '#4F2148', '#DECED9')}
-    ${chip('NR-KONTA', '#2E4E1B', '#E6EDD9', '#34531F', '#CFD7C0')}
-    ${chip('ADRES', '#2C5689', '#E1EAF5', '#5F82B5', '#C9D4E0')}
-    ${chip('TELEFON', '#0B5C5E', '#DDEEEC', '#2F7F7C', '#C5D8D6')}
+<div class="kartka">
+  <div class="przod">${przod}</div>
+  <div class="odwrot">
+    <div class="marka"><span class="mk">${parawanMark()}</span><b>Parawan</b></div>
+    <svg class="znaczek" viewBox="0 0 96 120" aria-hidden="true">${znaczek()}</svg>
+    <h1>${haslo}</h1>
+    <div class="chips">
+      ${chip('PESEL', 'ident')}
+      ${chip('IMIĘ I NAZWISKO', 'person')}
+      ${chip('NR-KONTA', 'fin')}
+      ${chip('ADRES', 'place')}
+      ${chip('TELEFON', 'contact')}
+    </div>
+    <div class="adres"><span><b>parawan.karolwilczynski.com</b></span><span>jeden plik HTML, działa bez internetu</span></div>
   </div>
-  <div class="foot"><b>parawan.karolwilczynski.com</b><span class="sep">·</span>jeden plik HTML, działa bez internetu</div>
 </div>
 </body></html>`;
 
