@@ -18,6 +18,9 @@ działają na GitHubie od chwili wypchnięcia tagów.
   i przy wyłączonych animacjach strona pokazuje od razu pismo po zasłonięciu. Teksty strony są
   bezosobowe, liczby (29 typów, wyniki pomiaru) bez zmian. Nagłówki w kroju Source Serif 4
   (licencja OFL), wbudowanym w stronę jak pozostałe fonty.
+  Na pocztówce na pierwszym planie stoi parawan, zza którego widać tylko kapelusz i stopy. Nad
+  tabelą typów stoją kabiny plażowe w barwach kategorii ze znakiem na drzwiach, a w wykresie
+  skuteczności to, co zostaje na słońcu, ma kolor bursztynu.
 - **Nowe kolory znaczników w Parawan.html.** Znaczniki mają barwy z tej samej nadmorskiej palety
   co strona: osoby śliwkowe, kontakt morski, identyfikatory bursztynowe, finanse sosnowe, adres
   niebieski. Tło znacznika jest pełne, a z lewej stoi pasek w barwie kategorii, więc kategorie

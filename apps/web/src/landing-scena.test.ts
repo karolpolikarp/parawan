@@ -126,7 +126,17 @@ test('ilustracje i ikony wstawiane przy buildzie', () => {
   // rzędy (<!--IL:RZEDY-A/B-->) wstawia wstawSkutecznosc, test wyżej
   expect(out).not.toMatch(/<!--IL:(?!RZEDY-[AB]-->)/);
   expect(out).toMatch(/<svg viewBox="0 0 1200 800" role="img" aria-label="Pocztówka: [^"]+„Pozdrowienia znad danych”\.">/);
-  for (const id of ['bor-dal', 'bor-bl', 'sosna-s']) expect(out).toContain(`<symbol id="${id}"`);
+  expect(out).toContain('<symbol id="bor-dal"');
+  // kabiny nad tabelą: kategorie w tej samej kolejności co wiersze tabeli, każda ze znakiem i nazwą
+  const kab = [...out.matchAll(/<li class="kab c-(\w+)"[\s\S]*?<span class="kab-n">([^<]+)<\/span>/g)].map((m) => [m[1], m[2]]);
+  const wiersze = [...out.matchAll(/<th scope="row" role="rowheader" class="c-(\w+)">[\s\S]*?<span class="tl ct-\w+">([^<·]+) ·/g)].map((m) => [
+    m[1],
+    m[2].trim(),
+  ]);
+  expect(kab).toEqual(wiersze);
+  expect(kab).toHaveLength(5);
+  // bursztyn #B9791F tylko na słońcu: w pocztówce nie ma go wcale (pasek kategorii to CSS)
+  expect(out.match(/<svg viewBox="0 0 1200 800"[\s\S]*?<\/svg>/)?.[0]).not.toContain('#B9791F');
   expect(out).not.toMatch(/<i class="gi" data-i="[^"]+"><\/i>/);
   for (const name of Object.keys(ICONS)) expect(out).toContain(`data-i="${name}" data-done="1"><svg`);
   expect(() => wstawIkony('<i class="gi" data-i="nie-ma"></i>')).toThrow(/nie-ma/);

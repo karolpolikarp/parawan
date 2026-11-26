@@ -420,6 +420,26 @@ del { text-decoration-thickness: 1.5px; text-decoration-color: var(--sosna); col
 .typy { padding: 104px 0 110px; }
 .typy-glowa { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px 60px; align-items: end; margin-bottom: 44px; }
 .typy-glowa p { margin: 0; color: var(--szary); max-width: 52ch; }
+/* kabiny plażowe: jedna na kategorię, w barwie paska kategorii, znak na drzwiach, nazwa pod spodem */
+.kabiny { list-style: none; margin: 0 0 30px; padding: 0 0 0 4px; display: flex; gap: clamp(10px, 3.4vw, 46px); align-items: end; }
+.kab { display: flex; flex-direction: column; align-items: center; gap: 8px; width: clamp(52px, 8vw, 84px); }
+.kab-r { position: relative; display: block; width: 100%; }
+.kab svg { width: 100%; height: auto; overflow: visible; }
+.kab-dach, .kab-flaga, .kab-nogi { fill: var(--kt); }
+.kab-sc { fill: var(--ks); }
+.kab-pas { fill: var(--kb); opacity: .55; }
+/* drzwi: ciemne płótno w barwie kategorii, na nim znak kategorii jasnym kolorem */
+.kab-d { position: absolute; left: 34.4%; width: 31.2%; top: 38%; height: 54.8%; background: var(--kt); border-radius: 1px; transform-origin: 0 50%; }
+.kab-d::before { content: ''; position: absolute; left: 18%; right: 18%; top: 14%; aspect-ratio: 1; background: #FAF8F2; -webkit-mask: var(--kg) center / contain no-repeat; mask: var(--kg) center / contain no-repeat; }
+.kab-n { font: 600 13px/1.2 var(--sans); color: var(--kt); white-space: nowrap; }
+/* na telefonie pięć równych kolumn: nazwa może wyjść poza kabinę, ale nie na sąsiednią nazwę */
+@media (max-width: 700px) {
+  .kabiny { gap: 0; padding: 0; margin-bottom: 26px; }
+  .kab { flex: 1 1 0; width: auto; min-width: 0; }
+  .kab-r { width: min(100%, 54px); }
+  .kab-n { font-size: 10.5px; letter-spacing: -.01em; }
+}
+@media (max-width: 360px) { .kab-n { font-size: 9.5px; } }
 .kategorie { width: 100%; border-collapse: collapse; }
 .kategorie caption { caption-side: top; text-align: left; font: 600 14.5px/1.3 var(--sans); color: var(--szary); padding: 0 0 12px; }
 .kategorie tbody { border-top: 1.5px solid var(--sosna); border-bottom: 1.5px solid var(--sosna); }
@@ -492,7 +512,7 @@ pre.polecenia { white-space: pre; word-break: normal; }
 .wynik-glowny { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: end; gap: 6px 40px; margin-bottom: 30px; }
 .duza { display: contents; }
 .duza-l { font: 400 clamp(84px, 11vw, 164px)/.8 var(--serif); letter-spacing: -.035em; color: var(--sosna); grid-row: 1 / 3; }
-.duza-o { font-weight: 500; font-size: clamp(20px, 2vw, 26px); line-height: 1.2; max-width: 20ch; align-self: end; color: var(--bursztyn-t); }
+.duza-o { font-weight: 500; font-size: clamp(20px, 2vw, 26px); line-height: 1.2; max-width: 20ch; align-self: end; color: var(--sosna); }
 .duza-pod { margin: 0; color: var(--szary); max-width: 46ch; align-self: start; }
 .rz { margin: 0; background: var(--papier-j); color: var(--sosna); padding: 26px 28px 18px; border-radius: 3px; box-shadow: 0 0 0 1px var(--linia); }
 .rz-b { margin-top: 22px; }
@@ -501,8 +521,8 @@ pre.polecenia { white-space: pre; word-break: normal; }
 .rz-waski { display: none; }
 .rzedy .p-a { fill: #0B3D2E; }
 .rzedy .p-a2 { fill: #2E6B55; }
-.rzedy .p-b { fill: #6F8676; }
-.rzedy .p-b2 { fill: #7E9384; }
+.rzedy .p-b { fill: #E0A84A; }
+.rzedy .p-b2 { fill: #EBCB93; }
 .rzedy .p-zly { stroke: #0B3D2E; stroke-width: 1.2; }
 .rzedy .kij { fill: #0B3D2E; }
 /* przy wejściu w kadr rzędy rozkładają się od lewego kija jak parawany (plaza.ts dodaje .widac) */
@@ -512,7 +532,7 @@ pre.polecenia { white-space: pre; word-break: normal; }
 .kl { display: inline-block; width: 9px; height: 18px; margin-left: 10px; }
 .kl:first-child { margin-left: 0; }
 .kl-a { background: #0B3D2E; }
-.kl-b { background: #6F8676; }
+.kl-b { background: #E0A84A; box-shadow: inset 0 0 0 1px #7E5012; }
 .kl-zly { background: var(--kresk), var(--papier-j); box-shadow: inset 0 0 0 1.2px #0B3D2E; width: 12px; height: 24px; }
 .miary { width: 100%; max-width: 880px; border-collapse: collapse; margin: 34px 0 0; }
 .miary caption { caption-side: top; text-align: left; font: 600 14.5px/1.3 var(--sans); color: var(--szary); padding: 0 0 10px; }

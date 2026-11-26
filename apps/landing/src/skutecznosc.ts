@@ -83,7 +83,7 @@ export function opisyRzedow(b: Benchmark): { a: string; b: string } {
       `Rzędy parawanów z ${b.mustMask} pasków: ${b.hit} ${plural(b.hit, 'zielony', 'zielone', 'zielonych')}, czyli zasłoniętych, ` +
       `i ${jasne(przeszlo)}, czyli przepuszczonych.`,
     b:
-      `Rzędy z ${b.mustKeep} pasków: ${b.kept} ${plural(b.kept, 'szarozielony', 'szarozielone', 'szarozielonych')}, czyli pozostawionych, ` +
+      `Rzędy z ${b.mustKeep} pasków: ${b.kept} ${plural(b.kept, 'bursztynowy', 'bursztynowe', 'bursztynowych')}, czyli pozostawionych, ` +
       `i ${jasne(nadmiar)}, ${plural(nadmiar, 'zasłonięty', 'zasłonięte', 'zasłoniętych')} bez potrzeby.`,
   };
 }

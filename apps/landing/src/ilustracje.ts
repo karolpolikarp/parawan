@@ -4,8 +4,9 @@
  * funkcje z ziarnem losowania: ten sam build daje ten sam obraz. Moduł nie wchodzi do paczki JS
  * strony (main.ts go nie importuje), więc obrazy są w HTML od razu, także bez JavaScriptu.
  *
- * Paleta: sosna #0B3D2E/#1C5A45/#2E6B55, bursztyn #B9791F/#E0A84A/#7E5012, niebo #DCE3DD→#F4E8D3,
- * słońce #F0CB97 z rastrem, mgła #F1EEE6, cypel #B3C3B9, bór #9EB3A7, morze #8AA396/#A8BBB0,
+ * Paleta: sosna #0B3D2E/#1C5A45/#2E6B55, rdza pni #7E5012, niebo w pasach #DCE3DD/#E6E6DC/#F1EADA,
+ * słońce #EDB86A z rastrem (bursztyn tylko na słońcu, DESIGN.md), mgła #F1EEE6, cypel #B3C3B9,
+ * bór #9EB3A7, morze #8AA396/#A8BBB0,
  * wydma #D9CDB0/#E5D9BF, plaża #ECE4D2. Perspektywa powietrzna: im dalej, tym jaśniej i chłodniej.
  */
 
@@ -59,7 +60,7 @@ function kepaPkt(cx: number, cy: number, w: number, h: number, R: Los, n: number
 const poly = (p: Pkt[], kol: string): string =>
   `<polygon points="${p.map(([x, y]) => `${f(x)},${f(y)}`).join(' ')}" fill="${kol}"/>`;
 
-function kepa(cx: number, cy: number, w: number, h: number, R: Los, kol: string, jas: string | null, n = 26, wiatr = 0.35): string {
+function kepa(cx: number, cy: number, w: number, h: number, R: Los, kol: string, jas: string | null, n = 14, wiatr = 0.35): string {
   // główna płaszczyzna + boczny płat, żeby obrys nie był symetryczną soczewką
   const st = R() > 0.4 ? 1 : -1;
   const p = kepaPkt(cx, cy, w, h, R, n, wiatr);
@@ -99,7 +100,7 @@ interface KolSosny {
 }
 
 function sosna(x: number, y: number, h: number, s: number, wyg: number, nr: number, seed: number, kol: KolSosny = {}): string {
-  const { igly = '#0B3D2E', jas = '#2E6B55', dol = '#072A20', gora = '#B9791F', galaz = '#7E5012' } = kol;
+  const { igly = '#0B3D2E', jas = '#2E6B55', dol = '#072A20', gora = '#7E5012', galaz = '#7E5012' } = kol;
   const R = los(seed);
   const tx = x + wyg;
   const ty = y - h;
@@ -135,41 +136,9 @@ function sosna(x: number, y: number, h: number, s: number, wyg: number, nr: numb
   return o + scal(korona);
 }
 
-// Bór: nieregularna, zębata linia koron na różnych wysokościach, gołe pnie pod spodem.
-function bor(
-  x0: number,
-  x1: number,
-  podst: number,
-  gora: (x: number) => number,
-  rozrzut: number,
-  seed: number,
-  kolKor: string,
-  kolPien: string,
-  grPien: number,
-  skala = 1,
-  n = 18,
-): string {
-  const R = los(seed);
-  let pnie = '';
-  let kor = '';
-  for (let x = x0; x < x1; ) {
-    const top = gora(x) - R() * rozrzut;
-    const lean = (R() - 0.3) * 6 * skala;
-    const gl = (34 + R() * 22) * skala;
-    pnie += `M${f(x)} ${podst} L${f(x + lean)} ${f(top + 6 * skala)} `;
-    const k = 2 + Math.floor(R() * 2.4);
-    for (let j = 0; j < k; j++) {
-      const w = (26 + R() * 26) * skala;
-      const hh = w * (0.32 + R() * 0.1);
-      kor += kepa(x + lean + (R() - 0.3) * 16 * skala, top + (j / k) * gl * 0.7 + R() * 5 * skala, w, hh, R, kolKor, null, n, 0.3);
-    }
-    x += (14 + R() * 16) * skala;
-  }
-  return `<path d="${pnie}" stroke="${kolPien}" stroke-width="${grPien}" fill="none"/>${scal(kor)}`;
-}
-
-// Parawan w perspektywie: n paneli zygzakiem, dwa desenie płótna.
-function parawan(x0: number, y0: number, krok: number, h: number, n: number, uskok: number, desen: string, desen2: string, cien: string, kij: string, gr: number): string {
+// Parawan w perspektywie: n paneli zygzakiem, dwa desenie płótna. Z `kl` każdy panel dostaje
+// klasę `pp` i numer `--i` (pocztówka: panele rozkładają się po kolei od lewego kija, style.css).
+function parawan(x0: number, y0: number, krok: number, h: number, n: number, uskok: number, desen: string, desen2: string, cien: string, kij: string, gr: number, kl = ''): string {
   let pan = '';
   let kije = '';
   const xs = Array.from({ length: n + 1 }, (_, i) => x0 + i * krok);
@@ -177,13 +146,13 @@ function parawan(x0: number, y0: number, krok: number, h: number, n: number, usk
   const sz = `<polygon points="${xs[0] + h * 0.5},${ys[0] + h} ${xs[n] + h * 0.9},${ys[n] + h + 18} ${xs[n] + 4},${ys[n] + h} ${xs[0] + 4},${ys[0] + h}" fill="${cien}"/>`;
   for (let i = 0; i < n; i++) {
     const p = `${xs[i]},${ys[i]} ${xs[i + 1]},${ys[i + 1]} ${xs[i + 1]},${ys[i + 1] + h} ${xs[i]},${ys[i] + h}`;
-    pan += `<polygon points="${p}" fill="url(#${i % 2 ? desen2 : desen})"/>`;
+    pan += `<polygon${kl ? ` class="pp" style="--i:${i}"` : ''} points="${p}" fill="url(#${i % 2 ? desen2 : desen})"/>`;
   }
   pan += `<polyline points="${xs.map((x, i) => `${x},${ys[i]}`).join(' ')}" fill="none" stroke="${kij}" stroke-width="${f(gr * 0.55)}" stroke-linejoin="round"/>`;
   xs.forEach((x, i) => {
     kije += `<line x1="${x}" y1="${ys[i] - gr * 1.6}" x2="${x}" y2="${ys[i] + h + gr * 1.8}" stroke="${kij}" stroke-width="${gr}" stroke-linecap="round"/>`;
   });
-  return sz + pan + kije;
+  return kl ? `<g class="${kl}">${sz}${pan}${kije}</g>` : sz + pan + kije;
 }
 
 // Raster na tarczy słońca: rzędy kropek, średnica rośnie ku dołowi tarczy.
@@ -213,24 +182,35 @@ function odbicie(cx: number, y0: number, y1: number, w0: number, { krok = 10, dm
 }
 
 // Mewy: dwa łuki, skrzydła lekko uniesione. Daleko, więc w szarości mgły.
-function mewy(): string {
-  const ptaki: [number, number, number][] = [
-    [318, 268, 1],
-    [352, 252, 0.8],
-    [905, 214, 1.1],
-    [946, 236, 0.75],
-    [1012, 196, 0.6],
-  ];
+function mewy(ptaki: [number, number, number][], kl = 'mewy', kolor = '#5E7064', gr = 2.6): string {
   const d = ptaki
-    .map(([x, y, s]) => `M${x - 13 * s} ${y + 2 * s} q${7 * s} ${-9 * s} ${13 * s} ${-2 * s} q${6 * s} ${-7 * s} ${13 * s} ${2 * s}`)
+    .map(([x, y, s]) => `M${f(x - 13 * s)} ${f(y + 2 * s)} q${f(7 * s)} ${f(-9 * s)} ${f(13 * s)} ${f(-2 * s)} q${f(6 * s)} ${f(-7 * s)} ${f(13 * s)} ${f(2 * s)}`)
     .join(' ');
-  return `<path class="mewy" d="${d}" fill="none" stroke="#5E7064" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`;
+  return `<path class="${kl}" d="${d}" fill="none" stroke="${kolor}" stroke-width="${gr}" stroke-linecap="round" stroke-linejoin="round"/>`;
+}
+
+// Sylwetka boru jednym obrysem: zęby koron na różnych wysokościach, bez pni (daleki plan).
+function sylweta(x0: number, x1: number, podst: number, gora: (x: number) => number, seed: number, krok: [number, number], zab: number): string {
+  const R = los(seed);
+  let d = `M${x0} ${podst} L${x0} ${f(gora(x0) + 4)}`;
+  for (let x = x0; x < x1; ) {
+    const w = krok[0] + R() * (krok[1] - krok[0]);
+    d += ` L${f(x + w * 0.5)} ${f(gora(x + w / 2) - R() * zab)} L${f(x + w)} ${f(gora(x + w) + 2 + R() * 5)}`;
+    x += w;
+  }
+  return `${d} L${x1} ${podst}Z`;
 }
 
 const ALT_POCZTOWKI =
-  'Pocztówka: poranek nad morzem. Blade słońce tuż nad wodą przecina wstęga mgły. Na wydmie stoją dwie sosny, ' +
-  'w oddali bór i latarnia, a na plaży parawany w zielono-kremowe pasy. Napis: „Pozdrowienia znad danych”.';
+  'Pocztówka: poranek nad morzem. Blade słońce tuż nad wodą przecina wstęga mgły. Na pierwszym planie stoi ' +
+  'parawan w zielono-kremowe pasy: zza niego widać tylko słomkowy kapelusz i stopy, obok leży ręcznik. ' +
+  'Dalej dwie sosny na wydmie, bór i latarnia. Napis: „Pozdrowienia znad danych”.';
 
+/**
+ * Pocztówka jak druk z lat 60.: kilka płaskich farb bez przejść, niebo w pasach ze schodkową
+ * krawędzią, raster słońca przesunięty o włos względem tarczy (paser). Bohater to parawan na
+ * pierwszym planie: wszystko widać, oprócz człowieka za nim. Żadnych liter poza hasłem.
+ */
 export function pocztowka(): string {
   const W = 1200;
   const H = 800;
@@ -238,24 +218,32 @@ export function pocztowka(): string {
   const cx = 560;
   const cy = 452;
   const r = 128;
-  let defs = '<linearGradient id="nb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#DCE3DD"/><stop offset=".62" stop-color="#EDE8DC"/><stop offset="1" stop-color="#F4E8D3"/></linearGradient>';
-  defs += '<radialGradient id="po"><stop offset="0" stop-color="#F3D29E" stop-opacity=".95"/><stop offset="1" stop-color="#F4E8D3" stop-opacity="0"/></radialGradient>';
-  defs += '<pattern id="rm" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(15)"><circle cx="4" cy="4" r="1.2" fill="#6F8C7E"/></pattern>';
+  let defs = '<pattern id="rm" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(15)"><circle cx="4" cy="4" r="1.2" fill="#6F8C7E"/></pattern>';
   defs += '<pattern id="pw-s" width="40" height="10" patternUnits="userSpaceOnUse"><rect width="20" height="10" fill="#0B3D2E"/><rect x="20" width="20" height="10" fill="#FAF7EF"/></pattern>';
-  defs += '<pattern id="pw-s2" width="28" height="10" patternUnits="userSpaceOnUse"><rect width="14" height="10" fill="#0B3D2E"/><rect x="14" width="14" height="10" fill="#FAF7EF"/></pattern>';
-  defs += '<pattern id="pw-b" width="14" height="10" patternUnits="userSpaceOnUse"><rect width="7" height="10" fill="#B9791F"/><rect x="7" width="7" height="10" fill="#FAF7EF"/></pattern>';
-  defs += '<pattern id="pw-b2" width="10" height="10" patternUnits="userSpaceOnUse"><rect width="5" height="10" fill="#B9791F"/><rect x="5" width="5" height="10" fill="#FAF7EF"/></pattern>';
+  defs += '<pattern id="pw-s2" width="32" height="10" patternUnits="userSpaceOnUse"><rect width="16" height="10" fill="#0B3D2E"/><rect x="16" width="16" height="10" fill="#FAF7EF"/></pattern>';
+  defs += '<pattern id="pw-m" width="14" height="10" patternUnits="userSpaceOnUse"><rect width="7" height="10" fill="#2E6B55"/><rect x="7" width="7" height="10" fill="#FAF7EF"/></pattern>';
+  defs += '<pattern id="pw-m2" width="10" height="10" patternUnits="userSpaceOnUse"><rect width="5" height="10" fill="#2E6B55"/><rect x="5" width="5" height="10" fill="#FAF7EF"/></pattern>';
+  defs += '<pattern id="rc" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(-62)"><rect width="22" height="22" fill="#FAF7EF"/><rect width="9" height="22" fill="#2E6B55"/></pattern>';
   defs += `<clipPath id="nad"><rect width="${W}" height="${HOR}"/></clipPath>`;
   defs += '<filter id="ziarno-p" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" seed="4" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .2 0 0 0 0 .22 0 0 0 0 .18 0 0 0 -1.2 .6"/></filter>';
 
   let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${ALT_POCZTOWKI}"><defs>${defs}</defs>`;
-  s += `<rect width="${W}" height="${H}" fill="url(#nb)"/>`;
-  s += `<circle class="poswiata" cx="${cx}" cy="${cy}" r="300" fill="url(#po)"/>`;
-  s += `<g clip-path="url(#nad)"><circle cx="${cx}" cy="${cy}" r="${r}" fill="#EDB86A"/>${raster('tz', cx, cy, r, { kolor: '#C47A2C' })}</g>`;
-  // wstęgi mgły przecinają tarczę; dryfują powoli (style.css, .mgla-w), bez ruchu przy reduced-motion
-  s += '<g class="mgla-w mgla-w1"><path fill="#F4F1EA" opacity=".74" d="M196 420 L520 412 L700 400 L1040 396 L1040 416 L760 420 L560 432 L196 440Z"/></g>';
-  s += '<g class="mgla-w mgla-w2"><path fill="#F4F1EA" opacity=".62" d="M332 354 L600 350 L876 340 L876 352 L640 358 L332 366Z"/></g>';
-  s += mewy();
+  // niebo: trzy płaskie farby, krawędzie schodkami jak przy złym pasowaniu arkuszy
+  s += `<rect width="${W}" height="${H}" fill="#DCE3DD"/>`;
+  s += `<path fill="#E6E6DC" d="M0 ${HOR} L0 262 L310 262 L310 252 L760 252 L760 244 L${W} 244 L${W} ${HOR}Z"/>`;
+  s += `<path fill="#F1EADA" d="M0 ${HOR} L0 372 L240 372 L240 364 L690 364 L690 356 L${W} 356 L${W} ${HOR}Z"/>`;
+  // słońce: tarcza i raster z przesunięciem pasera (+2, −1)
+  s += `<g clip-path="url(#nad)"><circle cx="${cx}" cy="${cy}" r="${r}" fill="#EDB86A"/>${raster('tz', cx + 2, cy - 1, r, { kolor: '#C47A2C' })}</g>`;
+  // wstęgi mgły: pełna farba, krawędź w dwóch uskokach
+  s += '<g class="mgla-w mgla-w1"><path fill="#F4F1EA" d="M196 416 L520 416 L520 410 L1040 410 L1040 424 L760 424 L760 430 L196 430Z"/></g>';
+  s += '<g class="mgla-w mgla-w2"><path fill="#F4F1EA" d="M332 350 L600 350 L600 345 L876 345 L876 354 L640 354 L640 359 L332 359Z"/></g>';
+  s += mewy([
+    [318, 278, 1],
+    [352, 262, 0.8],
+    [742, 214, 1.1],
+    [782, 236, 0.75],
+    [700, 196, 0.6],
+  ]);
   // daleki cypel z latarnią: jasny i chłodny, zatopiony w mgle
   s += `<path d="M0 ${HOR + 2} L0 446 C 60 440 120 444 170 438 C 230 432 280 446 330 456 C 352 462 372 466 384 ${HOR + 2}Z" fill="#B3C3B9"/>`;
   s += '<g><polygon points="196,440 214,440 211,390 199,390" fill="#F7F3EA"/><polygon points="196,440 214,440 213.4,428 196.6,428" fill="#C9A08A"/><polygon points="198,412 212,412 211.6,402 198.4,402" fill="#C9A08A"/><rect x="196" y="384" width="18" height="6" fill="#93A89C"/><rect class="latarnia" x="199" y="374" width="12" height="10" fill="#F0CB97"/><path d="M197 375 Q205 362 213 375Z" fill="#93A89C"/></g>';
@@ -264,40 +252,46 @@ export function pocztowka(): string {
   s += `<rect y="${HOR}" width="${W}" height="22" fill="#A8BBB0"/>`;
   s += `<rect y="${HOR + 50}" width="${W}" height="90" fill="url(#rm)" opacity=".6"/>`;
   s += odbicie(cx, HOR + 2, 596, 120);
-  s += '<g class="mgla-w mgla-w3"><path fill="#F1EEE6" opacity=".7" d="M-40 494 L360 492 L640 496 L800 500 L800 508 L460 512 L-40 516Z"/></g>';
-  // bór za wydmą: daleki plan, jasny, spłaszczony mgłą
+  s += '<g class="mgla-w mgla-w3"><path fill="#F1EEE6" d="M-40 496 L360 496 L360 492 L800 492 L800 504 L460 504 L460 510 L-40 510Z"/></g>';
+  // bór za wydmą: jedna ząbkowana sylwetka, jasna jak w mgle
   const wydma = (x: number): number => 470 - (x - 800) * 0.12;
-  s += bor(808, 1215, 540, (x) => wydma(x) - 84 - Math.sin(x / 47) * 10, 22, 7, '#9EB3A7', '#A9B9AE', 2, 1, 14);
-  s += '<path fill="#F1EEE6" opacity=".72" d="M780 446 L960 432 L1200 424 L1200 450 L960 458 L780 468Z"/>';
+  // bór schodzi do morza po lewej, bez pionowej krawędzi
+  s += `<path fill="#9EB3A7" d="${sylweta(760, 1200, 540, (x) => wydma(x) - 70 - Math.sin(x / 47) * 8 + Math.max(0, 860 - x) * 0.7, 7, [12, 22], 14)}"/>`;
+  s += '<path fill="#F1EEE6" d="M780 452 L960 452 L960 444 L1200 444 L1200 462 L960 462 L960 470 L780 470Z"/>';
   s += '<path d="M640 610 C 720 560 800 476 920 450 C 1020 432 1110 436 1200 428 L1200 680 L640 680Z" fill="#D9CDB0"/>';
-  // dwie sosny na wydmie: bliższy plan, pełna zieleń, rdzawe pnie w porannym świetle
-  s += sosna(1064, 458, 286, 1.35, 24, 1, 5, { igly: '#2E6B55', jas: '#4F8670', dol: '#3B5A4D', gora: '#B9791F', galaz: '#8A5A1E' });
-  s += sosna(872, 482, 236, 1.2, 26, 0, 3, { igly: '#0B3D2E', jas: '#2E6B55', dol: '#1C3A30', gora: '#B9791F', galaz: '#7E5012' });
+  // dwie sosny na wydmie: dalsza mniejsza w jaśniejszej zieleni, bliższa wychodzi za kadr
+  s += sosna(862, 486, 232, 1.15, 22, 0, 3, { igly: '#2E6B55', jas: '#4F8670', dol: '#3B5A4D', gora: '#7E5012', galaz: '#5E4423' });
+  s += sosna(1078, 470, 452, 1.9, 34, 1, 5, { igly: '#0B3D2E', jas: '#2E6B55', dol: '#1C3A30', gora: '#7E5012', galaz: '#1C3A30' });
   s += '<path d="M700 600 C 790 540 860 496 960 482 C 1060 468 1130 476 1200 472 L1200 700 L700 700Z" fill="#E5D9BF"/>';
   const trawy: Pkt[] = [
     [866, 512],
     [890, 506],
-    [1020, 486],
-    [1044, 484],
+    [1000, 490],
     [1150, 482],
   ];
   s += `<g stroke="#4F7E68" stroke-width="2.4" stroke-linecap="round" fill="none">${trawy.map(([x, y]) => `<path d="M${x} ${y} q-4 -14 -10 -26 M${x + 3} ${y} q1 -16 4 -32 M${x + 6} ${y} q6 -12 14 -22"/>`).join('')}</g>`;
   // plaża i linia piany
   s += `<path d="M0 604 C 200 594 420 612 640 604 S 1000 590 1200 606 L1200 ${H} L0 ${H}Z" fill="#ECE4D2"/>`;
   s += '<path class="piana" d="M0 604 C 200 594 420 612 640 604 S 1000 590 1200 606 L1200 612 C 1000 597 820 612 640 610 S 200 600 0 611Z" fill="#FBF8F1"/>';
-  // ślady stóp na piasku od parawanu ku wodzie
+  // ślady stóp od ręcznika ku wodzie
   s += `<g fill="#D8CDB5">${[
-    [520, 700],
-    [548, 690],
-    [574, 676],
-    [604, 668],
-    [630, 655],
-    [662, 648],
+    [640, 724],
+    [664, 710],
+    [684, 694],
+    [710, 682],
+    [730, 666],
+    [756, 654],
   ]
-    .map(([x, y], i) => `<ellipse cx="${x}" cy="${y + (i % 2 ? 6 : 0)}" rx="7" ry="3.2" transform="rotate(-18 ${x} ${y})"/>`)
+    .map(([x, y], i) => `<ellipse cx="${x}" cy="${y + (i % 2 ? 6 : 0)}" rx="7" ry="3.2" transform="rotate(-24 ${x} ${y})"/>`)
     .join('')}</g>`;
-  s += parawan(770, 618, 34, 46, 4, 9, 'pw-b', 'pw-b2', '#D8CDB5', '#0B3D2E', 4);
-  s += parawan(70, 612, 104, 128, 4, 30, 'pw-s', 'pw-s2', '#D8CDB5', '#0B3D2E', 9);
+  s += parawan(800, 626, 34, 46, 4, 9, 'pw-m', 'pw-m2', '#D8CDB5', '#0B3D2E', 4);
+  // ręcznik w pasy, w perspektywie
+  s += '<polygon points="470,748 610,722 700,760 556,800" fill="#D8CDB5" transform="translate(6 6)"/>';
+  s += '<polygon points="470,748 610,722 700,760 556,800" fill="url(#rc)"/>';
+  // gość za parawanem: kapelusz nad płótnem i stopy pod nim (style.css: chowa się po rozłożeniu)
+  s += '<g class="kapelusz" stroke="#7E5012" stroke-width="2.2" stroke-linejoin="round"><ellipse cx="334" cy="484" rx="64" ry="12" fill="#E8D3A0"/><path d="M304 482 Q304 446 334 443 Q364 446 364 482Z" fill="#E8D3A0"/><path d="M305 470 Q334 464 363 470 L364 480 Q334 474 304 480Z" fill="#0B3D2E" stroke="none"/></g>';
+  s += '<g class="stopy" stroke="#A98F5A" stroke-width="1.6"><ellipse cx="318" cy="754" rx="17" ry="7" fill="#F3D9BC"/><ellipse cx="358" cy="760" rx="17" ry="7" fill="#F3D9BC"/></g>';
+  s += parawan(36, 478, 124, 250, 4, 34, 'pw-s', 'pw-s2', '#D8CDB5', '#072A20', 10, 'pw-gl');
   s += '<g class="napis"><text x="68" y="120" font-family="\'Source Serif 4\', Georgia, serif" font-style="italic" font-size="60" fill="#7E5012">Pozdrowienia</text>';
   s += '<text x="62" y="228" font-family="\'Source Serif 4\', Georgia, serif" font-weight="600" font-size="112" letter-spacing="-2.5" fill="#0B3D2E">znad danych</text></g>';
   s += `<rect width="${W}" height="${H}" filter="url(#ziarno-p)" opacity=".38"/>`;
@@ -324,56 +318,96 @@ export function znaczek(): string {
   );
 }
 
-// Symbole lasu: dalszy rząd koron (łuki) i kafel bliższego boru 480 px. Kolor przez fill/color na <use>.
+// Dalszy bór (stopka i przerywnik): ostre trójkątne wierzchołki, kolor przez fill na <use>.
 export function lasSymbole(): string {
   DOKL = 1;
-  const R = los(5);
-  let y = 40;
-  let d = 'M0 104 L0 40';
-  for (let x = 0; x < 1440; x += 16) {
-    const y2 = Math.round(36 + Math.sin(x / 170) * 6 + R() * 8);
-    d += ` Q${x + 8} ${Math.min(y, y2) - 7 - Math.round(R() * 5)} ${x + 16} ${y2}`;
-    y = y2;
+  const d = sylweta(0, 1440, 104, (x) => 50 + Math.sin(x / 170) * 6, 5, [10, 20], 22);
+  DOKL = 10;
+  return `<symbol id="bor-dal" viewBox="0 0 1440 104" preserveAspectRatio="none"><path d="${d}"/></symbol>`;
+}
+
+// Bliższy bór jedną ciągłą sylwetką: płaskie, poszarpane korony sosen na jednym pasie, pod nimi
+// prześwit, w którym co szóste drzewo pokazuje pień.
+function borBliski(seed: number, gora: number, dol: number, ziemia: number): string {
+  const R = los(seed);
+  let gr = `M0 ${dol}`;
+  let dl = '';
+  let pnie = '';
+  let n = 0;
+  for (let x = 0; x < 1440; n++) {
+    const w = 34 + R() * 30;
+    const t = gora + R() * 14;
+    gr += ` L${f(x + w * 0.12)} ${f(t + 6)} L${f(x + w * 0.3)} ${f(t)} L${f(x + w * 0.5)} ${f(t + 3)} L${f(x + w * 0.72)} ${f(t - 2)} L${f(x + w * 0.9)} ${f(t + 5)} L${f(x + w)} ${f(t + 9)}`;
+    dl = ` L${f(x + w)} ${f(dol + R() * 4)} L${f(x + w * 0.5)} ${f(dol - 3 + R() * 6)}${dl}`;
+    if (n % 6 === 2) pnie += `M${f(x + w * 0.5 - 1.5)} ${dol - 4}h3l1 ${ziemia - dol + 4}h-5Z`;
+    x += w;
   }
-  let s = `<symbol id="bor-dal" viewBox="0 0 1440 104"><path d="${d} L1440 104Z"/></symbol>`;
-  const kafel = bor(-12, 492, 104, (x) => 52 + Math.sin(x / 76) * 6, 16, 11, '#1C5A45', '#1C5A45', 2, 0.7, 10)
-    .replace(/ fill="#1C5A45"/g, '')
-    .replace(/stroke="#1C5A45"/g, 'stroke="currentColor"');
-  s += `<symbol id="bor-bl" viewBox="0 0 480 104" overflow="visible">${kafel}</symbol>`;
-  const so = sosna(40, 102, 78, 0.42, 12, 0, 13, { igly: '#1C5A45', jas: null, dol: '#1C5A45', gora: '#1C5A45', galaz: '#1C5A45' })
-    .replace(/ fill="#1C5A45"/g, '')
-    .replace(/stroke="#1C5A45"/g, 'stroke="currentColor"');
-  s += `<symbol id="sosna-s" viewBox="0 0 80 104" overflow="visible">${so}</symbol>`;
+  return `<path d="${gr} L1440 ${dol}${dl}Z${pnie}"/>`;
+}
+
+/**
+ * Stopka: zmierzch, który domyka poranek z pocztówki. Za borem zachodzi słońce z tym samym
+ * rastrem co na pocztówce (bursztyn tylko na słońcu), bliski bór jedną sylwetką, dwie sosny.
+ */
+export function las(): string {
+  DOKL = 1;
+  let s = `<g>${raster('zs', 1118, 64, 46, { krok: 8, dmax: 5, kolor: '#C47A2C', od: 0.1 }).replace('<g ', '<circle cx="1118" cy="64" r="46" fill="#E0A84A"/><g ')}</g>`;
+  s += '<use href="#bor-dal" width="1440" height="104" fill="#B9C7BD"/>';
+  s += `<g fill="#1C5A45">${borBliski(11, 58, 86, 104)}</g>`;
+  const ciemne = { igly: '#1C5A45', jas: null, dol: '#1C5A45', gora: '#1C5A45', galaz: '#1C5A45' };
+  s += sosna(256, 104, 98, 0.5, 12, 0, 13, ciemne) + sosna(1300, 104, 86, 0.46, 10, 1, 17, ciemne);
+  s += '<path d="M0 120 L0 98 C 300 90 560 104 820 96 S 1240 88 1440 98 L1440 120Z" fill="#0B3D2E"/>';
   DOKL = 10;
   return s;
 }
 
-const kafle = (y: number, h: number): string =>
-  [0, 960, 480]
-    .map((x, i) =>
-      i < 2
-        ? `<use href="#bor-bl" x="${x}" y="${y}" width="480" height="${h}"/>`
-        : `<use href="#bor-bl" transform="translate(960 ${y}) scale(-1 1)" width="480" height="${h}"/>`,
-    )
-    .join('');
-
-/** Stopka: bór o poranku; dalszy rząd jasny we mgle, bliższy w zieleni sosny, dwie wyższe sosny. */
-export function las(): string {
-  let s = '<use href="#bor-dal" width="1440" height="104" fill="#B9C7BD"/>';
-  s += '<path d="M0 60 L1440 56 L1440 80 L0 80Z" fill="#E6E8E2" opacity=".72"/>';
-  s += `<g fill="#1C5A45" color="#1C5A45">${kafle(0, 104)}<use href="#sosna-s" x="260" width="80" height="104"/><use href="#sosna-s" transform="translate(1050 0) scale(-1.08 1.04)" width="80" height="104"/></g>`;
-  s += '<path d="M0 120 L0 98 C 300 90 560 104 820 96 S 1240 88 1440 98 L1440 120Z" fill="#0B3D2E"/>';
+/**
+ * Przerywnik przed „Skutecznością”: wydma z płotkiem, dwa małe parawany i mewa. Pas wody z tym
+ * samym rastrem co morze na pocztówce, dół w kolorze tła następnej sekcji.
+ */
+export function przerywnik(): string {
+  DOKL = 1;
+  let s = '<defs><pattern id="pr-rm" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(15)"><circle cx="4" cy="4" r="1.2" fill="#6F8C7E"/></pattern>';
+  s += '<pattern id="pr-a" width="10" height="10" patternUnits="userSpaceOnUse"><rect width="5" height="10" fill="#0B3D2E"/><rect x="5" width="5" height="10" fill="#FAF7EF"/></pattern>';
+  s += '<pattern id="pr-b" width="8" height="10" patternUnits="userSpaceOnUse"><rect width="4" height="10" fill="#0B3D2E"/><rect x="4" width="4" height="10" fill="#FAF7EF"/></pattern></defs>';
+  s += '<use href="#bor-dal" y="26" width="1440" height="80" fill="#9EB3A7"/>';
+  s += '<rect y="92" width="1440" height="26" fill="#A8BBB0"/><rect y="98" width="1440" height="20" fill="url(#pr-rm)" opacity=".7"/>';
+  s += '<path d="M0 150 L0 116 C 260 110 560 108 820 96 C 1020 84 1200 70 1440 72 L1440 150Z" fill="#D9CDB0"/>';
+  // płotek przeciwwydmowy: krótkie kołki wzdłuż zbocza
+  let plot = '';
+  for (let x = 860; x < 1420; x += 15) {
+    // wzdłuż grzbietu wydmy (96 przy x = 820, 70 przy prawym brzegu)
+    const y = 96 - 26 * Math.sin(((x - 820) / 620) * (Math.PI / 2)) + Math.sin(x / 37) * 1.2;
+    plot += `M${x} ${f(y + 3)}l2 -16`;
+  }
+  s += `<path d="${plot}" stroke="#6F8676" stroke-width="2.4" stroke-linecap="round" fill="none"/>`;
+  s += parawan(330, 106, 20, 22, 4, 5, 'pr-a', 'pr-b', '#C8BC9E', '#0B3D2E', 2.4);
+  s += parawan(452, 102, 16, 18, 3, 4, 'pr-b', 'pr-a', '#C8BC9E', '#0B3D2E', 2);
+  s += mewy([[1060, 34, 1.1]], 'mewa', '#56655B', 2.4);
+  s += '<path d="M0 150 L0 132 C 300 126 700 138 1000 130 S 1300 126 1440 132 L1440 150Z" fill="#DDE3DC"/>';
+  DOKL = 10;
   return s;
 }
 
-/** Przerywnik w mgle: daleki bór z tych samych symboli; dół = tło sekcji Skuteczność. */
-export function przerywnik(): string {
-  let s = '<use href="#bor-dal" y="10" width="1440" height="104" fill="#C9D3CB"/>';
-  s += '<path d="M0 62 L1440 54 L1440 70 L0 76Z" fill="#F1EEE6" opacity=".7"/>';
-  s += `<g fill="#AFC0B5" color="#AFC0B5">${kafle(40, 104)}</g>`;
-  s += '<path d="M0 98 L1440 92 L1440 104 L0 110Z" fill="#E9ECE6" opacity=".8"/>';
-  s += '<path d="M0 110 L1440 104 L1440 150 L0 150Z" fill="#DDE3DC"/>';
-  return s;
+/**
+ * Kabiny plażowe nad tabelą „Typy danych”: jedna na kategorię, w barwie paska kategorii, na
+ * drzwiach znak kategorii, pod spodem nazwa. Kolor nigdy nie jest jedynym sygnałem (znak i nazwa).
+ * Dekoracja (aria-hidden): tabela tuż pod nią podaje te same kategorie słowami.
+ */
+const KABINY: [string, string][] = [
+  ['ident', 'Identyfikatory'],
+  ['fin', 'Finanse'],
+  ['contact', 'Kontakt'],
+  ['place', 'Adres'],
+  ['person', 'Osoby'],
+];
+
+export function kabiny(): string {
+  const kab = KABINY.map(
+    ([k, n], i) =>
+      `<li class="kab c-${k}" style="--i:${i}"><span class="kab-r"><svg viewBox="0 0 64 84" focusable="false"><path class="kab-dach" d="M1 24 L32 5 L63 24Z"/><path class="kab-flaga" d="M32 5V-2l9 3-9 3"/><rect class="kab-sc" x="6" y="24" width="52" height="54"/><path class="kab-pas" d="M12 24h5v54h-5zM47 24h5v54h-5z"/><path class="kab-nogi" d="M9 78h4v6H9zM51 78h4v6h-4z"/></svg><span class="kab-d"></span></span><span class="kab-n">${n}</span></li>`,
+  ).join('');
+  return `<ul class="kabiny" aria-hidden="true">${kab}</ul>`;
 }
 
 /** Znaczniki `<!--IL:NAZWA-->` w index.html, każdy dokładnie raz. */
@@ -383,6 +417,7 @@ const ILUSTRACJE: Record<string, () => string> = {
   'LAS-SYMBOLE': lasSymbole,
   LAS: las,
   PRZERYWNIK: przerywnik,
+  KABINY: kabiny,
 };
 
 export function wstawIlustracje(html: string): string {
