@@ -326,7 +326,11 @@ del { text-decoration-thickness: 1.5px; text-decoration-color: var(--sosna); col
   padding: 0 .45em 0 .5em; margin: 0 2px; border-radius: 1px 3px 3px 1px; white-space: nowrap; vertical-align: .02em;
 }
 /* w trakcie: parawan rozkłada się pasami nad oryginałem, potem zwija się do szerokości znacznika */
-.ruch .d:not(.lab) { display: inline-block; position: relative; white-space: nowrap; vertical-align: baseline; width: var(--w, auto); clip-path: inset(-.6em -4px -.5em -4px); }
+.ruch .d:not(.lab) { display: inline-block; position: relative; white-space: nowrap; vertical-align: baseline; clip-path: inset(-.6em -4px -.5em -4px); }
+/* miejsce maski zwęża się (--w z plaza.ts) dopiero nad zgaszonym oryginałem: widoczny oryginał ma
+   zawsze własną szerokość, więc stary pomiar (zmiana rozmiaru okna, font jeszcze w drodze) nie
+   przytnie mu końcówki */
+.ruch .d.zakryte:not(.lab) { width: var(--w, auto); }
 .ruch .d:not(.lab) .s {
   display: flex; position: absolute; left: -1px; right: -1px; top: 0; bottom: 0; pointer-events: none; border-radius: 2px; overflow: hidden;
   transform-origin: 50% 100%; transform: scaleY(var(--c, 0));

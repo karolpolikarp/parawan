@@ -113,6 +113,98 @@ for (const viewport of [
   });
 }
 
+// Zmiana rozmiaru okna, która poszerza pismo (obrót telefonu, próg 400 px): nowy pomiar szerokości
+// przychodzi po 120 ms, a stare miejsce maski nie może w tym czasie przyciąć widocznego oryginału
+// (przegląd 2026-11-26: „Tomasz Kowalcz”, IBAN bez „2874” przez ok. 9 klatek).
+for (const [z, na] of [
+  [
+    { width: 400, height: 800 },
+    { width: 420, height: 800 },
+  ],
+  [
+    { width: 390, height: 844 },
+    { width: 1440, height: 900 },
+  ],
+]) {
+  test(`landing ${z.width} → ${na.width} px: zmiana rozmiaru nie ucina widocznej danej`, async (t) => {
+    await withApp(
+      browser,
+      t,
+      '',
+      async ({ page }) => {
+        await page.waitForLoadState('load');
+        await page.evaluate(() => document.fonts.ready);
+        await page.clock.runFor(200);
+        // kartka w dolnej części ekranu: maski stoją z oryginałem (q = 0)
+        await page.evaluate(() => {
+          const r = document.querySelector('.kartka').getBoundingClientRect();
+          window.scrollTo(0, scrollY + r.top - innerHeight * 0.8);
+        });
+        await page.clock.runFor(40);
+        const przed = await page.evaluate(klatka);
+        assert.deepEqual(przed.problemy, []);
+        assert.ok(przed.widoczne > 0, 'przed zmianą rozmiaru żaden oryginał nie był widoczny');
+        await page.setViewportSize(na);
+        let widoczne = 0;
+        for (let i = 0; i <= 20; i++) {
+          const k = await page.evaluate(klatka);
+          assert.deepEqual(k.problemy, [], `klatka ${i} po zmianie rozmiaru`);
+          widoczne = Math.max(widoczne, k.widoczne);
+          await page.clock.runFor(16);
+        }
+        assert.ok(widoczne > 0, 'po zmianie rozmiaru żaden oryginał nie był widoczny, test niczego nie sprawdził');
+      },
+      { file: LANDING_HTML, viewport: z, reducedMotion: 'no-preference' },
+    );
+  });
+}
+
+// Pierwsze wejście bez fontu w pamięci podręcznej: scena startuje, zanim IBM Plex Mono się wczyta.
+// Pętla prawdziwego requestAnimationFrame (zapamiętanego przed zegarem Playwright) sprawdza każdą
+// klatkę od początku, bez czekania na document.fonts.ready. Wysokie okno: kartka w pierwszym ekranie.
+for (const viewport of [
+  { width: 1440, height: 2200 },
+  { width: 390, height: 2400 },
+]) {
+  test(`landing ${viewport.width}×${viewport.height}: podmiana fontu przy starcie nie ucina danej`, async (t) => {
+    const skrypt = `(() => {
+      const raf = window.requestAnimationFrame.bind(window);
+      const klatka = ${klatka.toString()};
+      window.__scena = { klatki: 0, zRuchem: 0, problemy: [] };
+      const t0 = performance.now();
+      const krok = () => {
+        if (document.documentElement.classList.contains('ruch') && document.querySelector('#tresc .d')) {
+          const k = klatka();
+          window.__scena.zRuchem++;
+          for (const p of k.problemy) window.__scena.problemy.push(document.fonts.status + ': ' + p);
+        }
+        window.__scena.klatki++;
+        if (performance.now() - t0 < 2500) raf(krok);
+      };
+      raf(krok);
+    })();`;
+    await withApp(
+      browser,
+      t,
+      '',
+      async ({ page }) => {
+        await page.waitForLoadState('load');
+        await page.waitForFunction(() => window.__scena && document.fonts.status === 'loaded', null, { polling: 50 });
+        await page.waitForTimeout(400);
+        const s = await page.evaluate(() => window.__scena);
+        assert.ok(s.zRuchem > 0, `pętla nie widziała sceny w ruchu (klatek: ${s.klatki})`);
+        assert.deepEqual(s.problemy, []);
+      },
+      {
+        file: LANDING_HTML,
+        viewport,
+        reducedMotion: 'no-preference',
+        prepare: (context) => context.addInitScript({ content: skrypt }),
+      },
+    );
+  });
+}
+
 test('landing bez JavaScriptu: scena, okno z tekstem i adresat w stanie końcowym', async (t) => {
   await withApp(
     browser,

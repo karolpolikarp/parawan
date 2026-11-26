@@ -11,7 +11,10 @@
  *  - t = 1 − (1 − (q − .8) / .2)³: znacznik wysuwa się na płótno od lewej i hamuje u celu;
  *  - od q ≥ .1 oryginał jest ukryty w całości (visibility) i dopiero wtedy rośnie płótno, więc
  *    żadna klatka nie pokazuje danej częściowo przykrytej; od q ≥ 1 maska wraca do zwykłego
- *    znacznika `.lab`.
+ *    znacznika `.lab`;
+ *  - szerokość --w działa tylko na zgaszonym oryginale (`.zakryte`, style.css): widoczny oryginał
+ *    ma własną szerokość, więc nieaktualny pomiar (zmiana rozmiaru okna przed przeliczeniem po
+ *    120 ms, start sceny przed wczytaniem fontu) nie przytnie mu końcówki.
  * Powyżej 960 px scena stoi przypięta (sticky) na torze 150% wysokości okna, niżej każda maska
  * zasłania się sama, gdy dojdzie do 78% wysokości okna. Postęp w tym trybie liczy się z pozycji
  * zapamiętanej przy pomiarze, nie z bieżącej: zwężona maska przesuwa tekst o wiersz, a postęp
