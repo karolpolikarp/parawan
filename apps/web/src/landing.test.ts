@@ -659,3 +659,10 @@ test('landing: napis na rozwijanym bloku pasuje do stanu otwartego i zamknięteg
   expect(summary.length).toBeGreaterThan(2);
   for (const s of summary) expect(s).not.toMatch(/^(Pokaż|Ukryj|Rozwiń|Zwiń)/);
 });
+
+test('landing: twarda spacja nigdy wewnątrz znacznika HTML', () => {
+  // twarda spacja po jednoliterowym słowie (a, i, w, z…) wstawiona też w „<a href” psuje
+  // znacznik: przeglądarka czyta wtedy „<a&nbsp;href…” jako tekst i gubi odnośnik (2026-11-27)
+  expect(landingHtmlRaw).not.toMatch(/<\/?[a-zA-Z][a-zA-Z0-9-]* /);
+  expect(logStronaSrc).not.toMatch(/<\/?[a-zA-Z][a-zA-Z0-9-]* /);
+});
