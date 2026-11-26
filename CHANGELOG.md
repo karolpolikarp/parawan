@@ -13,7 +13,7 @@ działają na GitHubie od chwili wypchnięcia tagów.
 ## [Unreleased]
 
 - **Nowy wygląd strony parawan.karolwilczynski.com.** Pierwszy ekran to pocztówka znad morza
-  z hasłem i przyciskiem pobierania. Niżej scena z pismem: przy przewijaniu przy każdej danej
+  z hasłem i przyciskiem pobierania. Niżej scena z pismem: w trakcie przewijania nad każdą daną
   rozkłada się parawan, a kwota, przepis i sygnatura wyroku zostają na słońcu. Bez JavaScriptu
   i przy wyłączonych animacjach strona pokazuje od razu pismo po zasłonięciu. Teksty strony są
   bezosobowe, liczby (29 typów, wyniki pomiaru) bez zmian. Nagłówki w kroju Source Serif 4
@@ -22,10 +22,12 @@ działają na GitHubie od chwili wypchnięcia tagów.
   tabelą typów stoją kabiny plażowe w barwach kategorii ze znakiem na drzwiach, a w wykresie
   skuteczności to, co zostaje na słońcu, ma kolor bursztynu. Po otwarciu strony parawan na pocztówce
   rozkłada się panel po panelu, a drzwi kabin zamykają się, gdy tabela wejdzie w kadr.
-  Przy „Jak sprawdzić” stoi latarnia w łuku okna, a przy pobieraniu pliku stempel pocztowy; przy
-  pierwszym wejściu w kadr snop latarni obraca się od morza, a stempel spada na papier.
+  Obok „Jak sprawdzić” stoi latarnia w łuku okna, a obok pobierania stempel pocztowy. Za pierwszym
+  razem snop latarni obraca się od morza, a stempel spada na papier. Wynik pomiaru ma dopisek,
+  że to syntetyczne zdania, i wynik na pismach odłożonych do kontroli. W trybie wysokiego kontrastu
+  przyciski i przełącznik „Wynik / Porównanie” mają ramki.
 - **Nowe kolory znaczników w Parawan.html.** Znaczniki mają barwy z tej samej nadmorskiej palety
-  co strona: osoby śliwkowe, kontakt morski, identyfikatory bursztynowe, finanse sosnowe, adres
+  co strona: osoby śliwkowe, kontakt morski, identyfikatory ochrowe, finanse sosnowe, adres
   niebieski. Tło znacznika jest pełne, a z lewej stoi pasek w barwie kategorii, więc kategorie
   różnią się też jasnością, nie tylko odcieniem. Kontrast tekstu znacznika od 6,2:1 do 7,9:1.
 

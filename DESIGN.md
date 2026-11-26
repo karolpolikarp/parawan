@@ -105,7 +105,10 @@ nie tylko odcieniem.
 - Nie zmieniać mechaniki animacji zasłaniania.
 - Nie pokazywać fragmentu danej w żadnej klatce ani w podpisie (podpis adresu pocztówki nie
   powtarza zasłoniętych danych).
-- Nie używać bursztynu do kategorii ani do zakreślacza.
+- Bursztyn jako sygnał tylko przy „na słońcu”. Jedyny wyjątek to pasek kategorii Identyfikatory,
+  zawsze przy znaku kategorii (patrz „Znaczniki”). Zakreślacz w zieleni mgły, nie w bursztynie
+  (pilnuje tego test w `apps/web/src/landing.test.ts`). W tekstach identyfikatory są „ochrowe”,
+  nie „bursztynowe”.
 - Nie dodawać zewnętrznych fontów, obrazów ani skryptów: strona i plik nie wysyłają żadnych żądań.
 - Nie dodawać obsługi zdarzeń w atrybutach HTML (`onsubmit=` itd.), bo CSP ze skrótem je blokuje.
 - Nie wracać do szablonu „pigułka nad nagłówkiem, siatka kart z ikonami, pasek wielkich liczb”.
