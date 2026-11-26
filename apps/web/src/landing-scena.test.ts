@@ -121,6 +121,20 @@ test('skuteczność: liczby i rzędy parawanów zgodne z docs/BENCHMARK.md', () 
     expect(suma / w).toBe(n);
   }
   expect(o.a).toContain(`${b.hit} zielonych`);
+  // imiesłów zgadza się z liczbą tak samo jak przymiotnik (przegląd 2026-11-26: „1532 bursztynowe,
+  // czyli pozostawionych”); liczby 1, 2–4, 5+ i 22 w obu rzędach
+  const opis = (hit: number, mustMask: number, kept: number, mustKeep: number) =>
+    opisyRzedow({ hit, mustMask, kept, mustKeep });
+  expect(opis(1182, 1200, 1532, 1533).b).toBe(
+    'Rzędy z 1533 pasków: 1532 bursztynowe, czyli pozostawione, i 1 jasny kreskowany, zasłonięty bez potrzeby.',
+  );
+  expect(opis(1182, 1200, 1530, 1533).b).toContain('1530 bursztynowych, czyli pozostawionych, i 3 jasne kreskowane, zasłonięte bez potrzeby');
+  expect(opis(1182, 1200, 1, 2).b).toContain('1 bursztynowy, czyli pozostawiony, i 1 jasny kreskowany, zasłonięty');
+  expect(opis(1182, 1200, 1, 2).a).toBe(
+    'Rzędy parawanów z 1200 pasków: 1182 zielone, czyli zasłonięte, i 18 jasnych kreskowanych, czyli przepuszczonych.',
+  );
+  expect(opis(1, 4, 1, 2).a).toContain('1 zielony, czyli zasłonięty, i 3 jasne kreskowane, czyli przepuszczone.');
+  expect(opis(22, 23, 1, 2).a).toContain('22 zielone, czyli zasłonięte, i 1 jasny kreskowany, czyli przepuszczony.');
   expect(() => wstawSkutecznosc('<p></p>', benchmarkMd)).toThrow(/RZEDY-A/);
 });
 

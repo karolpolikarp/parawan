@@ -73,17 +73,23 @@ export function rzedy(n: number, zle: number, seed: number, tryb: 'A' | 'B', opi
   return `<svg class="rzedy ${klasa}" viewBox="${-1 - (kw - 4)} -8 ${W + 2 + (kw - 4)} ${H + 6}" role="img" aria-label="${esc(opis)}">${s}</svg>`;
 }
 
-/** Opisy obrazów dla czytnika ekranu (liczby z pomiaru, z odmianą po liczebniku). */
+/**
+ * Opisy obrazów dla czytnika ekranu (liczby z pomiaru). Każde słowo zależne od liczby, także
+ * imiesłów („zasłonięte”, „pozostawionych”), idzie przez plural(), bo inaczej przy 2–4
+ * wychodzi „1532 bursztynowe, czyli pozostawionych”.
+ */
 export function opisyRzedow(b: Benchmark): { a: string; b: string } {
   const przeszlo = b.mustMask - b.hit;
   const nadmiar = b.mustKeep - b.kept;
   const jasne = (n: number): string => `${n} ${plural(n, 'jasny kreskowany', 'jasne kreskowane', 'jasnych kreskowanych')}`;
   return {
     a:
-      `Rzędy parawanów z ${b.mustMask} pasków: ${b.hit} ${plural(b.hit, 'zielony', 'zielone', 'zielonych')}, czyli zasłoniętych, ` +
-      `i ${jasne(przeszlo)}, czyli przepuszczonych.`,
+      `Rzędy parawanów z ${b.mustMask} pasków: ${b.hit} ${plural(b.hit, 'zielony', 'zielone', 'zielonych')}, ` +
+      `czyli ${plural(b.hit, 'zasłonięty', 'zasłonięte', 'zasłoniętych')}, ` +
+      `i ${jasne(przeszlo)}, czyli ${plural(przeszlo, 'przepuszczony', 'przepuszczone', 'przepuszczonych')}.`,
     b:
-      `Rzędy z ${b.mustKeep} pasków: ${b.kept} ${plural(b.kept, 'bursztynowy', 'bursztynowe', 'bursztynowych')}, czyli pozostawionych, ` +
+      `Rzędy z ${b.mustKeep} pasków: ${b.kept} ${plural(b.kept, 'bursztynowy', 'bursztynowe', 'bursztynowych')}, ` +
+      `czyli ${plural(b.kept, 'pozostawiony', 'pozostawione', 'pozostawionych')}, ` +
       `i ${jasne(nadmiar)}, ${plural(nadmiar, 'zasłonięty', 'zasłonięte', 'zasłoniętych')} bez potrzeby.`,
   };
 }
