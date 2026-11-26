@@ -3,6 +3,7 @@ import { redactPII } from 'anonimizator';
 import { expect, test } from 'vitest';
 import benchmarkMd from '../../../docs/BENCHMARK.md?raw';
 import dlaRaw from '../../../docs/wydanie/DLA-IOD-I-IT.txt?raw';
+import ewaluacjaSeria3 from '../../../docs/EWALUACJA-SERIA-3.md?raw';
 import coreSrc from '../../../packages/core/src/types.ts?raw';
 import landingHtmlRaw from '../../landing/index.html?raw';
 import landingConfig from '../../landing/vite.config.ts?raw';
@@ -634,4 +635,19 @@ test('landing: bursztyn jako sygnał tylko przy „zostaje na słońcu”, zakre
   const h = d === 0 ? 0 : max === r ? (60 * ((g - b) / d) + 360) % 360 : max === g ? 60 * ((b - r) / d + 2) : 60 * ((r - g) / d + 4);
   // odcienie od pomarańczu do żółci (bursztyn #B9791F ma ok. 35°, smuga #EBCB93 ok. 38°)
   expect(d === 0 || h < 15 || h > 65, `--marker #${hex}: odcień ${Math.round(h)}°`).toBe(true);
+});
+
+test('landing: hasło skuteczności podaje źródło, a notka wynik na pismach odłożonych', () => {
+  // przegląd 2026-11-26: 98,8% stało jako hasło bez dopisku, że to syntetyczne zdania, a notka
+  // mówiła tylko „wynik może wyjść inaczej”, choć pomiar na pismach jest opisany w docs/
+  const sentences = benchmarkMd.match(/Zbiór ewaluacyjny:\*\* (\d+) syntetycznych zdań/)?.[1];
+  const sekcja = block(landingHtml, /<section[^>]*\bid="skutecznosc"[^>]*>[\s\S]*?<\/section>/, '#skutecznosc');
+  expect(sekcja).toContain(`<p class="duza-pod">Pomiar na ${sentences} syntetycznych zdaniach.`);
+  expect(sekcja).not.toContain('może wyjść inaczej');
+  // liczby z ostatniego kroku tabeli w docs/EWALUACJA-SERIA-3.md (części odłożone serii 2 i 3)
+  const odl = (seria: number): string | undefined =>
+    [...ewaluacjaSeria3.matchAll(new RegExp(String.raw`\| seria ${seria}, odłożona \|[^\n]*\*\*([\d,]+)%\*\*`, 'g'))].at(-1)?.[1];
+  expect(odl(2) && odl(3)).toBeTruthy();
+  expect(sekcja).toContain(`${odl(2)}% danych w serii 2 i ${odl(3)}% w serii 3`);
+  expect(sekcja).toContain('docs/EWALUACJA-SERIA-3.md');
 });
