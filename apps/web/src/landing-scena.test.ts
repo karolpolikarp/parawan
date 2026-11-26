@@ -41,6 +41,9 @@ test('scena: każda dana zasłonięta w całości, fragmenty „na słońcu” n
   for (const z of ZOSTAW) {
     expect(PISMO_TEXT, z.t).toContain(z.t);
     expect(redacted, z.t).toContain(z.t);
+    // długi numer z pisma sceny nie wraca w przykładzie okna w innej roli (było: ten sam numer
+    // jako numer faktury w scenie i numer zamówienia w „Co się stało z przykładem”)
+    for (const n of z.t.match(/\d{5,}/g) ?? []) expect(EXAMPLE_TEXT, `${z.n} ${n}`).not.toContain(n);
   }
   // w składzie liczba masek i fragmentów „na słońcu” zgadza się z wynikiem silnika
   const sk = sklad(PISMO_TEXT, redactPII, ZOSTAW);

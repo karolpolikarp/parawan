@@ -91,7 +91,8 @@ export const NAZWA_KAT: Record<Cat, string> = {
 
 /**
  * Pismo w scenie „Parawany stają tylko przy danych” (sekcja #plaza). Zmyślone wezwanie do
- * zapłaty: PESEL i numer konta mają poprawne sumy kontrolne, numer faktury celowo złą. Wynik
+ * zapłaty: PESEL i numer konta mają poprawne sumy kontrolne, numer faktury celowo złą (inny niż
+ * numer zamówienia z EXAMPLE_TEXT: na jednej stronie jeden numer ma jedną rolę). Wynik
  * redactPII liczy przy buildzie wtyczka parawanTresc (vite.config.ts, src/scena.ts), a test
  * apps/web/src/landing-scena.test.ts sprawdza, że każda dana jest zasłonięta w całości.
  * Akapity rozdziela pusta linia: pierwszy to data, drugi adresat, trzeci tytuł, ostatni podpis.
@@ -105,7 +106,7 @@ ul. Długa 7/12
 
 Przedsądowe wezwanie do zapłaty
 
-Działając w imieniu Anny Nowak (PESEL 90031512348), wzywam Pana do zapłaty kwoty 8 400 zł tytułem czynszu za lipiec i sierpień 2026 r. (faktura nr 48213307715). Kwotę proszę wpłacić w ciągu 7 dni od doręczenia na rachunek PL61 1090 1014 0000 0712 1981 2874.
+Działając w imieniu Anny Nowak (PESEL 90031512348), wzywam Pana do zapłaty kwoty 8 400 zł tytułem czynszu za lipiec i sierpień 2026 r. (faktura nr 75104832619). Kwotę proszę wpłacić w ciągu 7 dni od doręczenia na rachunek PL61 1090 1014 0000 0712 1981 2874.
 
 Od dnia wymagalności naliczam odsetki ustawowe za opóźnienie (art. 481 § 1 KC). Sąd Najwyższy w wyroku z 12 marca 2019 r. (II CSK 123/18) potwierdził, że brak odpowiedzi na wezwanie nie wstrzymuje ich biegu.
 
@@ -121,7 +122,7 @@ Ewa Zielińska`;
 export const ZOSTAW: readonly { t: string; n: string }[] = [
   { t: 'Kraków', n: 'miejsce wystawienia' },
   { t: '8 400 zł', n: 'kwota' },
-  { t: '48213307715', n: 'numer faktury' },
+  { t: '75104832619', n: 'numer faktury' },
   { t: 'art. 481 § 1 KC', n: 'przepis' },
   { t: '12 marca 2019 r.', n: 'data wyroku' },
   { t: 'II CSK 123/18', n: 'sygnatura cytowanego wyroku' },
