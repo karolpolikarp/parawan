@@ -12,6 +12,13 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+- **Nowy wygląd strony parawan.karolwilczynski.com.** Pierwszy ekran to pocztówka znad morza
+  z hasłem i przyciskiem pobierania. Niżej scena z pismem: przy przewijaniu przy każdej danej
+  rozkłada się parawan, a kwota, przepis i sygnatura wyroku zostają na słońcu. Bez JavaScriptu
+  i przy wyłączonych animacjach strona pokazuje od razu pismo po zasłonięciu. Teksty strony są
+  bezosobowe, liczby (29 typów, wyniki pomiaru) bez zmian. Nagłówki w kroju Source Serif 4
+  (licencja OFL), wbudowanym w stronę jak pozostałe fonty.
+
 ## v0.48.2 — 2026-11-23
 
 **Na słabym komputerze okno Parawana pojawia się wcześniej, a wynik anonimizacji się nie zmienia.**

@@ -5,11 +5,18 @@
    Kolory i fonty z tokenów strony głównej (style.css).
    ============================================================ */
 
-.log-glowa { padding: 40px 0 28px; }
+.log-glowa { padding: 48px 0 32px; background-color: var(--mgla-j); background-image: var(--ziarno); }
 .log-glowa h1 {
-  font-size: clamp(30px, 1.6vw + 18px, 42px); font-weight: 800; line-height: 1.08; letter-spacing: -.02em;
+  font-family: var(--serif); font-size: clamp(34px, 2vw + 20px, 52px); font-weight: 600; line-height: 1.06; letter-spacing: -.02em;
 }
-.log-glowa .lede { max-width: 70ch; }
+.log-glowa .lede { max-width: 70ch; margin-top: 14px; color: var(--szary); }
+
+/* ── Układ dwukolumnowy: nagłówek i spis na marginesie, treść obok (strona główna go już nie ma) ── */
+.dok-siatka { display: grid; grid-template-columns: minmax(0, 280px) minmax(0, 1fr); gap: 24px 56px; padding-bottom: 72px; }
+.dok-bok h2 { font-size: clamp(28px, 2.4vw, 36px); }
+.dok-bok { align-self: start; position: sticky; top: 16px; }
+.dok-tresc { min-width: 0; }
+.stopka-in { padding-top: 40px; }
 
 /* ── Zakładki: #plan pokazuje się tylko jako cel adresu, wtedy chowa #zmiany ── */
 #plan { display: none; }
@@ -30,7 +37,7 @@
 
 /* ── Spis wersji w lewej kolumnie: przewija się sam, gdy nie mieści się w oknie ── */
 .spis { margin-top: 18px; max-height: calc(100vh - 260px); overflow-y: auto; padding-right: 4px; }
-.spis ul { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+.spis ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 2px; }
 .spis a {
   display: inline-block; padding: 3px 0;
   font: 500 13.5px/1.4 var(--mono); color: var(--mut-2); text-decoration: none;
@@ -40,7 +47,7 @@
 /* ── Wpisy wersji ── */
 .wersja { padding: 28px 0 32px; border-top: 1px solid var(--line-2); }
 .wersja:first-child { border-top: 0; padding-top: 0; }
-.wersja > h3 { font: 800 24px/1.2 var(--sans); letter-spacing: -.01em; }
+.wersja > h3 { font: 600 26px/1.2 var(--serif); letter-spacing: -.01em; }
 .kotw { color: inherit; text-decoration: none; }
 .kotw:hover { text-decoration: underline; }
 .wersja-data {
@@ -65,7 +72,7 @@
   overflow-x: auto; font-size: 13.5px; line-height: 1.5;
 }
 .md pre code { background: none; padding: 0; overflow-wrap: normal; white-space: pre; }
-.md h3 { margin-top: 36px; font: 800 22px/1.25 var(--sans); }
+.md h3 { margin-top: 36px; font: 650 21px/1.25 var(--sans); }
 .md h4 { margin-top: 24px; font: 700 13px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--mut-2); }
 .md > h3:first-child { margin-top: 0; }
 .md .wiodacy { font-size: 17px; line-height: 1.5; }
@@ -89,7 +96,7 @@
 
 /* ── Starsze wersje: każda zwinięta ── */
 .starsze { margin-top: 8px; padding-top: 28px; border-top: 1px solid var(--line-2); }
-.starsze > h3 { font: 800 22px/1.25 var(--sans); }
+.starsze > h3 { font: 600 24px/1.25 var(--serif); }
 .starsze-opis { margin: 6px 0 14px; font-size: 15px; color: var(--mut-2); }
 .wersja-stara { padding: 0; border-top: 1px solid var(--line); }
 .wersja-stara:first-of-type { border-top-color: var(--line-2); }
@@ -113,6 +120,8 @@
 .pusto { font-size: 16px; color: var(--mut-2); }
 
 @media (max-width: 900px) {
+  .dok-siatka { grid-template-columns: 1fr; }
+  .dok-bok { position: static; }
   .spis { max-height: none; overflow: visible; }
   .spis ul { flex-direction: row; flex-wrap: wrap; gap: 6px 8px; }
   .spis a { padding: 4px 8px; border: 1px solid var(--line-2); border-radius: 6px; background: var(--card); }

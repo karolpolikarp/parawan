@@ -3,6 +3,9 @@ import { redactPII } from 'anonimizator';
 import { expect, test } from 'vitest';
 import landingHtml from '../../landing/index.html?raw';
 import landingMain from '../../landing/src/main.ts?raw';
+import { wstawScene } from '../../landing/src/scena';
+import { EXAMPLE_TEXT as LANDING_EXAMPLE } from '../../landing/src/tokens';
+import { statHtml } from '../../landing/src/wynik';
 import webHtml from '../index.html?raw';
 import { EXAMPLE_TEXT } from './example';
 import { ICONS } from './icons';
@@ -28,10 +31,18 @@ test('bez „po lewej” w podpowiedziach (aplikacja i landing)', () => {
   }
 });
 
-test('landing: ten sam napis statystyk demo na starcie i po wyczyszczeniu pola', () => {
-  const idle = landingHtml.match(/id="demo-stat" role="status">([^<]+)</)?.[1];
-  expect(idle).toBeTruthy();
-  expect(landingMain).toContain(`'${idle}'`);
+// Od nowego wyglądu (2026-11-26) okno startuje z przykładem także bez JavaScriptu: build wpisuje
+// w #demo-stat wynik statHtml() dla przykładu (src/scena.ts), a skrypt po starcie liczy ten sam
+// napis tą samą funkcją. Pusty stan zostaje jednym literałem w main.ts. Dawniej w HTML stał pusty
+// stan, a test porównywał go z literałem w main.ts.
+test('landing: napis statystyk okna z buildu = napis skryptu, pusty stan jednym literałem', () => {
+  expect(landingHtml).toMatch(/id="demo-stat" role="status"><!--SCENA:DEMO-STAT--><\/span>/);
+  const built = wstawScene(landingHtml, redactPII);
+  const stat = built.match(/id="demo-stat" role="status">([\s\S]*?)<\/span>/)?.[1];
+  expect(stat).toBe(statHtml(redactPII(LANDING_EXAMPLE).found));
+  expect(stat).toMatch(/^Zasłonięto <b>\d+<\/b> fragment/);
+  expect(landingMain).toContain('statEl.innerHTML = statHtml(found)');
+  expect(landingMain.match(/'Pole „Tekst źródłowy” jest puste\.'/g)).toHaveLength(1);
 });
 
 test('bez obietnic, których silnik nie spełnia', () => {

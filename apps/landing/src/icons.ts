@@ -3,8 +3,10 @@
  * z `currentColor`, więc glif przyjmuje kolor tekstu przycisku. Zero rastrów i zewnętrznych
  * assetów: wszystko wjeżdża inline do jednego pliku HTML.
  *
- * Renderowanie: elementy `<i class="gi" data-i="NAZWA">` są „hydratowane" w main.ts
- * (innerHTML = ICONS[name]). Strona używa ikon tylko w trzech przyciskach demo i w znaku marki;
+ * Renderowanie: build (wtyczka parawan-tresc w vite.config.ts, wstawIkony niżej) wpisuje SVG do
+ * elementów `<i class="gi" data-i="NAZWA">`, więc znak marki i ikony przycisków widać także bez
+ * JavaScriptu. hydrateIcons() w main.ts uzupełnia tylko elementy bez SVG (np. w `vite dev` przed
+ * przeładowaniem). Strona używa ikon tylko w trzech przyciskach okna z tekstem i w znaku marki;
  * test (apps/web/src/landing.test.ts) pilnuje, żeby każda ikona ze strony była tutaj
  * i żeby tu nie zostawały ikony, których strona już nie używa.
  */
@@ -18,8 +20,10 @@ export const ICONS: Record<string, string> = {
   wyczysc: svg('<path d="m15.5 5 3.5 3.5a2 2 0 0 1 0 2.8L12 18.3H7l-2.5-2.5a2 2 0 0 1 0-2.8L12.7 5a2 2 0 0 1 2.8 0z"/><line x1="9" y1="10" x2="14" y2="15"/><line x1="7" y1="21" x2="20" y2="21"/>'),
   kopiuj: svg('<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>'),
 
-  // Znak marki „Parawan" (dwutonowy, stałe barwy), w pasku i w stopce; patrz parawanMark() niżej.
+  // Znak marki „Parawan" (dwutonowy, stałe barwy) w pasku; patrz parawanMark() niżej.
   'parawan-mark': parawanMark(),
+  // ten sam znak na ciemnej stopce: panele tylne w barwie papieru, przednie jak w faviconie
+  'parawan-mark-jasny': parawanMark('#F1EEE6', '#859E97'),
 };
 
 /**
@@ -60,5 +64,17 @@ export function hydrateIcons(root: ParentNode = document): void {
       el.innerHTML = svgMarkup;
       el.dataset.done = '1';
     }
+  });
+}
+
+/**
+ * Wpisuje SVG do pustych `<i class="gi" data-i="NAZWA"></i>` w HTML przy buildzie. Nieznana nazwa
+ * zatrzymuje build (test w landing.test.ts pilnuje tego samego w źródle).
+ */
+export function wstawIkony(html: string): string {
+  return html.replace(/<i class="gi" data-i="([^"]+)"><\/i>/g, (_m, name: string) => {
+    const svgMarkup = ICONS[name];
+    if (!svgMarkup) throw new Error(`parawan-tresc: brak ikony „${name}” w src/icons.ts`);
+    return `<i class="gi" data-i="${name}" data-done="1">${svgMarkup}</i>`;
   });
 }

@@ -3,7 +3,14 @@ import { viteSingleFile } from 'vite-plugin-singlefile';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+// Silnik ze źródeł rdzenia (jak alias „anonimizator” niżej): stan sceny i okna widoczny bez
+// JavaScriptu liczy ten sam redactPII, który działa w Parawan.html.
+import { redactPII } from '../../packages/core/src/index.ts';
 import { cspSkrot } from '../web/src/csp-skrot';
+import { wstawIkony } from './src/icons';
+import { wstawIlustracje } from './src/ilustracje';
+import { wstawScene } from './src/scena';
+import { wstawSkutecznosc } from './src/skutecznosc';
 import { stronaLogu } from './src/log-strona';
 import { wstawWydanie, wydanieZEnv } from './src/wydanie';
 
@@ -45,6 +52,21 @@ const wydanieMeta: Plugin = {
   apply: 'build',
   transformIndexHtml(html) {
     return wstawWydanie(html, wydanieZEnv(process.env));
+  },
+};
+
+// Treść policzona przy buildzie: ilustracje SVG (src/ilustracje.ts), scena z pismem, adres na
+// pocztówce i stan okna z tekstem (src/scena.ts, prawdziwy redactPII) oraz rzędy parawanów
+// z liczbami z docs/BENCHMARK.md (src/skutecznosc.ts), ikony i znak marki (src/icons.ts). Także w `vite dev` (bez apply), żeby
+// podgląd nie miał pustych znaczników. order 'pre': przed wtyczkami, które czytają gotowy HTML.
+const parawanTresc: Plugin = {
+  name: 'parawan-tresc',
+  transformIndexHtml: {
+    order: 'pre',
+    handler(html) {
+      const benchmark = readFileSync(new URL('../../docs/BENCHMARK.md', import.meta.url), 'utf8');
+      return wstawIkony(wstawSkutecznosc(wstawScene(wstawIlustracje(html), redactPII), benchmark));
+    },
   },
 };
 
@@ -99,7 +121,7 @@ const BUILD_TARGET = ['chrome109', 'edge109', 'firefox115', 'safari16.4'];
 export default defineConfig({
   // cspSkrot na końcu: liczy skrót skryptu już wklejonego przez viteSingleFile. logStrona pisze
   // swój plik w writeBundle, czyli i tak po cspSkrot (generateBundle), z gotowego index.html.
-  plugins: [viteSingleFile(), cspMeta, wydanieMeta, logStrona, cspSkrot()],
+  plugins: [viteSingleFile(), parawanTresc, cspMeta, wydanieMeta, logStrona, cspSkrot()],
   base: './',
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? 'dev'),

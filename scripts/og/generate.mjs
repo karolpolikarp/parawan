@@ -44,20 +44,23 @@ const fonts = [
   await fontFace('archivo-latinext.woff2', 'Archivo', '100 900'),
   await fontFace('plexmono-600-latin.woff2', 'IBM Plex Mono', '600'),
   await fontFace('plexmono-600-latinext.woff2', 'IBM Plex Mono', '600'),
+  await fontFace('sourceserif4-latin.woff2', 'Source Serif 4', '400 600'),
+  await fontFace('sourceserif4-latinext.woff2', 'Source Serif 4', '400 600'),
 ].join('\n');
 
-const chip = (label, color, bg, border) =>
-  `<span style="font-family:'IBM Plex Mono';font-weight:600;font-size:22px;color:${color};background:${bg};border:2px solid ${border};border-radius:10px;padding:8px 18px;white-space:nowrap">[${label}]</span>`;
+// znacznik jak na stronie i w aplikacji (DESIGN.md, paleta „u”): tekst, tło, pasek z lewej, obwódka
+const chip = (label, color, bg, bar, border) =>
+  `<span style="font-family:'IBM Plex Mono';font-weight:600;font-size:22px;color:${color};background:${bg};box-shadow:inset 6px 0 0 ${bar},inset 0 0 0 2px ${border};border-radius:3px 8px 8px 3px;padding:8px 18px 8px 24px;white-space:nowrap">[${label}]</span>`;
 
 const ogHtml = `<!doctype html><html lang="pl"><head><meta charset="utf-8"><style>
 ${fonts}
 *{margin:0;padding:0;box-sizing:border-box}
-body{width:1200px;height:630px;overflow:hidden;font-family:'Archivo',sans-serif;color:#17251e;background:#efede6;}
+body{width:1200px;height:630px;overflow:hidden;font-family:'Archivo',sans-serif;color:#17251e;background:#F1EEE6;}
 .card{position:relative;height:100%;padding:64px 72px;display:flex;flex-direction:column;justify-content:space-between}
 .brand{display:flex;align-items:center;gap:20px}
 .brand .mk{width:74px;height:66px}
-.brand b{font-size:44px;font-weight:800;letter-spacing:-.02em;text-transform:uppercase;color:#0b3d2e}
-h1{font-size:62px;font-weight:800;letter-spacing:-.02em;line-height:1.08;color:#0b3d2e;max-width:1000px;text-wrap:balance}
+.brand b{font-family:'Source Serif 4',Georgia,serif;font-size:46px;font-weight:600;letter-spacing:-.01em;color:#0b3d2e}
+h1{font-family:'Source Serif 4',Georgia,serif;font-size:66px;font-weight:600;letter-spacing:-.02em;line-height:1.06;color:#0b3d2e;max-width:1000px;text-wrap:balance}
 .chips{display:flex;flex-wrap:wrap;gap:14px}
 .foot{display:flex;align-items:center;gap:16px;font-family:'IBM Plex Mono';font-weight:600;font-size:22px;color:#566259}
 .foot b{color:#0b3d2e}
@@ -65,13 +68,13 @@ h1{font-size:62px;font-weight:800;letter-spacing:-.02em;line-height:1.08;color:#
 </style></head><body>
 <div class="card">
   <div class="brand"><span class="mk">${parawanMark()}</span><b>Parawan</b></div>
-  <h1>Parawan zasłania polskie dane osobowe, zanim wkleisz tekst do czatu AI</h1>
+  <h1>Parawan zasłania polskie dane osobowe, zanim tekst trafi do czatu AI</h1>
   <div class="chips">
-    ${chip('PESEL', '#8a5f00', 'rgba(217,169,73,.12)', 'rgba(217,169,73,.55)')}
-    ${chip('IMIĘ I NAZWISKO', '#5b3fa8', 'rgba(165,150,232,.12)', 'rgba(165,150,232,.55)')}
-    ${chip('NR-KONTA', '#127049', 'rgba(111,199,155,.12)', 'rgba(111,199,155,.55)')}
-    ${chip('ADRES', '#2f5fc0', 'rgba(126,166,232,.12)', 'rgba(126,166,232,.55)')}
-    ${chip('TELEFON', '#0c7288', 'rgba(103,200,220,.12)', 'rgba(103,200,220,.55)')}
+    ${chip('PESEL', '#7A4A06', '#F3ECDD', '#B9791F', '#DDD5C4')}
+    ${chip('IMIĘ I NAZWISKO', '#6B2D62', '#F3E5EF', '#4F2148', '#DECED9')}
+    ${chip('NR-KONTA', '#2E4E1B', '#E6EDD9', '#34531F', '#CFD7C0')}
+    ${chip('ADRES', '#2C5689', '#E1EAF5', '#5F82B5', '#C9D4E0')}
+    ${chip('TELEFON', '#0B5C5E', '#DDEEEC', '#2F7F7C', '#C5D8D6')}
   </div>
   <div class="foot"><b>parawan.karolwilczynski.com</b><span class="sep">·</span>jeden plik HTML, działa bez internetu</div>
 </div>
@@ -79,7 +82,7 @@ h1{font-size:62px;font-weight:800;letter-spacing:-.02em;line-height:1.08;color:#
 
 const iconHtml = `<!doctype html><html><head><meta charset="utf-8"><style>
 *{margin:0;padding:0}
-body{width:180px;height:180px;overflow:hidden;background:#efede6;display:grid;place-items:center}
+body{width:180px;height:180px;overflow:hidden;background:#F1EEE6;display:grid;place-items:center}
 .mk{width:132px;height:118px}
 </style></head><body><span class="mk">${parawanMark()}</span></body></html>`;
 

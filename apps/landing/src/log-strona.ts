@@ -83,13 +83,13 @@ export function stronaLogu(d: DaneLogu): string {
 
   const starsze = stare.length
     ? `<section class="starsze" aria-labelledby="starsze"><h3 id="starsze">Starsze wersje, od ${escapeHtml(stare[0].tytul)} do ${escapeHtml(stare[stare.length - 1].tytul)}</h3>` +
-      `<p class="starsze-opis">Każda wersja jest zwinięta. Kliknij numer, żeby rozwinąć opis.</p>${stare.map(wpisZwiniety).join('')}</section>`
+      `<p class="starsze-opis">Każda wersja jest zwinięta, a opis rozwija kliknięcie numeru.</p>${stare.map(wpisZwiniety).join('')}</section>`
     : '';
 
   const plan = d.roadmap ? planZRoadmapy(d.roadmap) : null;
   const planTresc = plan
     ? `${plan.wstep ? `<div class="md plan-wstep">${plan.wstep}</div>` : ''}<div class="md plan">${plan.tresc}</div>`
-    : `<p class="pusto">Plan nie jest jeszcze opublikowany. Zajrzyj do <a href="${REPO}" ${zew}>repozytorium</a>.</p>`;
+    : `<p class="pusto">Plan nie jest jeszcze opublikowany. Bieżące prace widać w <a href="${REPO}" ${zew}>repozytorium</a>.</p>`;
 
   const body = twardeSpacje(`    <a href="#tresc" class="vh">Przejdź do treści</a>
     <nav class="pasek" aria-label="Główna">
@@ -138,10 +138,10 @@ export function stronaLogu(d: DaneLogu): string {
       </section>
     </main>
 
-    <footer class="stopka">
+    <footer class="stopka ciemne">
       <div class="wrap">
         <div class="stopka-in">
-          <p class="stopka-marka"><span class="znak"><i class="gi">${parawanMark()}</i></span><span><b>Parawan</b>. Dane za parawanem. Autor: <a href="https://karolwilczynski.com" ${zew}>Karol Wilczyński</a>.</span></p>
+          <p class="stopka-marka"><span class="znak"><i class="gi">${parawanMark('#F1EEE6', '#859E97')}</i></span><span><b>Parawan</b>. Dane za parawanem. Autor: <a href="https://karolwilczynski.com" ${zew}>Karol Wilczyński</a>.</span></p>
           <ul class="stopka-linki">
             <li><a href="../">Strona główna</a></li>
             <li><a href="${REPO}" ${zew}>Kod na GitHubie</a></li>
@@ -149,7 +149,7 @@ export function stronaLogu(d: DaneLogu): string {
             <li><a href="${REPO}/issues" ${zew}>Zgłoś nietrafione wykrycie</a></li>
           </ul>
         </div>
-        <p class="stopka-prawo">Kod: Apache 2.0. Fonty Archivo oraz IBM Plex Mono: SIL OFL 1.1.</p>
+        <p class="stopka-prawo">Kod: Apache 2.0. Fonty Archivo, IBM Plex Mono i Source Serif 4: SIL OFL 1.1.</p>
       </div>
     </footer>
 `);
@@ -160,7 +160,7 @@ export function stronaLogu(d: DaneLogu): string {
     <meta http-equiv="Content-Security-Policy" content="${d.csp}" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light" />
-    <meta name="theme-color" content="#f7f5ef" />
+    <meta name="theme-color" content="#DDE3DC" />
     ${d.ikona}
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <title>Zmiany i plan: Parawan</title>

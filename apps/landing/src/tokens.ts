@@ -78,3 +78,55 @@ Właściwy jest Sąd Rejonowy w Katowicach.`;
 // Żaden token nie zawiera metaznaków regexu, a każdy stoi w nawiasach [...], więc wstawiamy
 // je wprost i kolejność alternatyw nie ma znaczenia.
 export const MASK_TOKEN_RE = new RegExp(`\\[(${[...TOKEN_CAT.keys(), 'OSOBA-[A-Z]+'].join('|')})\\]`, 'g');
+
+/** Kategorie w kolejności legendy (jak MASK_GROUP_DEFS w aplikacji) i ich nazwy na stronie. */
+export const KOLEJNOSC_KAT: readonly Cat[] = ['ident', 'fin', 'contact', 'place', 'person'];
+export const NAZWA_KAT: Record<Cat, string> = {
+  ident: 'Identyfikatory',
+  fin: 'Finanse',
+  contact: 'Kontakt',
+  place: 'Adres',
+  person: 'Osoby',
+};
+
+/**
+ * Pismo w scenie „Parawany stają tylko przy danych” (sekcja #plaza). Zmyślone wezwanie do
+ * zapłaty: PESEL i numer konta mają poprawne sumy kontrolne, numer faktury celowo złą. Wynik
+ * redactPII liczy przy buildzie wtyczka parawanTresc (vite.config.ts, src/scena.ts), a test
+ * apps/web/src/landing-scena.test.ts sprawdza, że każda dana jest zasłonięta w całości.
+ * Akapity rozdziela pusta linia: pierwszy to data, drugi adresat, trzeci tytuł, ostatni podpis.
+ */
+export const PISMO_TEXT = `Kraków, 14 października 2026 r.
+
+Pan
+Tomasz Kowalczyk
+ul. Długa 7/12
+30-512 Kraków
+
+Przedsądowe wezwanie do zapłaty
+
+Działając w imieniu Anny Nowak (PESEL 90031512348), wzywam Pana do zapłaty kwoty 8 400 zł tytułem czynszu za lipiec i sierpień 2026 r. (faktura nr 48213307715). Kwotę proszę wpłacić w ciągu 7 dni od doręczenia na rachunek PL61 1090 1014 0000 0712 1981 2874.
+
+Od dnia wymagalności naliczam odsetki ustawowe za opóźnienie (art. 481 § 1 KC). Sąd Najwyższy w wyroku z 12 marca 2019 r. (II CSK 123/18) potwierdził, że brak odpowiedzi na wezwanie nie wstrzymuje ich biegu.
+
+Po bezskutecznym upływie terminu wniosę pozew do Sądu Rejonowego dla Krakowa-Śródmieścia. W sprawie rat proszę dzwonić pod numer 512 345 678.
+
+Radca prawny
+Ewa Zielińska`;
+
+/**
+ * Fragmenty pisma, które mają zostać „na słońcu” (bez znacznika), z krótkim powodem. Test sceny
+ * sprawdza, że każdy stoi w piśmie i w wyniku silnika bez zmian.
+ */
+export const ZOSTAW: readonly { t: string; n: string }[] = [
+  { t: 'Kraków', n: 'miejsce wystawienia' },
+  { t: '8 400 zł', n: 'kwota' },
+  { t: '48213307715', n: 'numer faktury' },
+  { t: 'art. 481 § 1 KC', n: 'przepis' },
+  { t: '12 marca 2019 r.', n: 'data wyroku' },
+  { t: 'II CSK 123/18', n: 'sygnatura cytowanego wyroku' },
+  { t: 'Sądu Rejonowego dla Krakowa-Śródmieścia', n: 'nazwa sądu' },
+];
+
+/** Adres na odwrocie pocztówki w pierwszym ekranie (zasłonięty przy buildzie). */
+export const ADRES_POCZTOWKI = 'Pan\nTomasz Kowalczyk\nul. Długa 7/12\n30-512 Kraków';
