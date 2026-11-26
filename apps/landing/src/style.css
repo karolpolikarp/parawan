@@ -825,6 +825,16 @@ pre.polecenia { white-space: pre; word-break: normal; }
   .lab, mark.pii, .d.lab .l, .leg-z { forced-color-adjust: none; color: CanvasText; background: Canvas; box-shadow: inset 0 0 0 1px CanvasText; }
   .lab::before, mark.pii::before, .d .l::before, .leg-z::before { background: CanvasText; }
   .dryf, .blysk { display: none; }
+  /* System wycina box-shadow, a ramka (border) zostaje. Wszystko, co obrys, stan albo próbkę
+     rysuje cieniem, dostaje tu ramkę w kolorze systemu: przyciski (wypełnione i jasne), aktywny
+     segment „Wynik / Porównanie” z kropką, wyciek w ograniczeniach i próbki legendy rzędów. */
+  .btn, .btn-j, .cta-pob { border: 1.5px solid ButtonText; }
+  a.btn { border-color: LinkText; }
+  .seg button::before { box-shadow: none; border: 1.5px solid CanvasText; box-sizing: border-box; }
+  .seg button[aria-pressed="true"] { border-bottom: 3px solid Highlight; }
+  .seg button[aria-pressed="true"]::before { forced-color-adjust: none; background: CanvasText; border-color: CanvasText; }
+  mark.leak { outline: 1px solid CanvasText; outline-offset: 0; }
+  .kl, .etk-err::before, .dt-err::after, .zostalo caption::before { forced-color-adjust: none; outline: 1px solid CanvasText; }
 }
 
 /* ============ WYDRUK ============
