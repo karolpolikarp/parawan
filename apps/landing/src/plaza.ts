@@ -28,6 +28,16 @@ const clamp = (x: number): number => (x < 0 ? 0 : x > 1 ? 1 : x);
 const gladko = (x: number): number => x * x * (3 - 2 * x);
 const wyhamuj = (x: number, p: number): number => 1 - (1 - x) ** p;
 
+/** Nowa liczba w liczniku podjeżdża o 5 px zamiast podmienić się skokiem (tylko transform i opacity). */
+function tik(el: HTMLElement | null, tekst: string): void {
+  if (!el) return;
+  el.textContent = tekst;
+  el.animate?.([{ transform: 'translateY(5px)', opacity: 0.35 }, { transform: 'none', opacity: 1 }], {
+    duration: 180,
+    easing: 'cubic-bezier(.23, 1, .32, 1)',
+  });
+}
+
 interface Fragment {
   e: HTMLElement;
   maska: boolean;
@@ -140,9 +150,10 @@ export function uruchomScene(): void {
     const maski = it.filter((x) => x.maska);
     const lab = maski.map((x) => x.e.classList.contains('lab'));
     const w = maski.map((x) => x.e.style.getPropertyValue('--w'));
+    // stan q = 0: oryginał w pełnej szerokości zmierzonej w skrzydla() (bez --w miejsce wychodzi szersze)
     for (const x of maski) {
       x.e.classList.remove('lab');
-      x.e.style.removeProperty('--w');
+      x.e.style.setProperty('--w', `${x.wo}px`);
     }
     const h0 = kartka.getBoundingClientRect().height;
     for (const x of maski) x.e.classList.add('lab');
@@ -150,13 +161,13 @@ export function uruchomScene(): void {
     maski.forEach((x, i) => {
       x.e.classList.toggle('lab', lab[i]);
       if (w[i]) x.e.style.setProperty('--w', w[i]);
+      else x.e.style.removeProperty('--w');
     });
     kartka.style.minHeight = `${Math.ceil(Math.max(h0, h1))}px`;
   }
 
   // Szerokość oryginału i znacznika oraz liczba paneli płótna (zależy od szerokości fragmentu).
   function skrzydla(): void {
-    wysokosc();
     for (const x of it) {
       if (!x.maska || !x.s || !x.o || !x.l) continue;
       const lab = x.e.classList.contains('lab');
@@ -175,6 +186,7 @@ export function uruchomScene(): void {
       x.q = -1;
       if (q >= 0) ustaw(x, q);
     }
+    wysokosc();
   }
 
   function liczniki(): void {
@@ -186,13 +198,13 @@ export function uruchomScene(): void {
       else k++;
     }
     if (lA && lA.textContent !== String(m)) {
-      lA.textContent = String(m);
-      if (mA) mA.textContent = String(m);
+      tik(lA, String(m));
+      tik(mA, String(m));
       if (lAt) lAt.textContent = `${plural(m, ...F_PAR)} przy danych`;
     }
     if (lB && lB.textContent !== String(k)) {
-      lB.textContent = String(k);
-      if (mB) mB.textContent = String(k);
+      tik(lB, String(k));
+      tik(mB, String(k));
       if (lBt) lBt.textContent = `${plural(k, ...F_FR)} na słońcu`;
     }
     kItems.forEach((x, i) => lis[i]?.classList.toggle('on', x.q >= 1));
@@ -293,11 +305,12 @@ export function uruchomScene(): void {
 }
 
 /**
- * Rzędy parawanów w „Skuteczności” rozkładają się od lewego kija, gdy wejdą w kadr. Bez ruchu
- * (reduced-motion, brak IntersectionObserver) stoją rozłożone od początku.
+ * Rzędy parawanów w „Skuteczności” rozkładają się od lewego kija, a drzwi kabin nad tabelą typów
+ * zamykają się po kolei, gdy wejdą w kadr. Bez ruchu (reduced-motion, brak IntersectionObserver)
+ * stoją w stanie końcowym od początku.
  */
 export function uruchomRzedy(): void {
-  const rz = [...document.querySelectorAll<HTMLElement>('.rz')];
+  const rz = [...document.querySelectorAll<HTMLElement>('.rz, .kabiny')];
   if (!rz.length || !document.documentElement.classList.contains('ruch')) return;
   if (!('IntersectionObserver' in window)) {
     for (const f of rz) f.classList.add('widac');

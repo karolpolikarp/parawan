@@ -84,6 +84,10 @@ nie tylko odcieniem.
   znacznik wysuwa się). Oryginał gaśnie w całości, zanim płótno zacznie rosnąć: żadna klatka nie
   pokazuje części danej (sprawdza to `scripts/e2e/landing-scena.test.mjs`).
 - Powyżej 960 px scena jest przypięta do ekranu, niżej zasłania się w rytmie przewijania.
+- Pocztówka po wczytaniu raz: parawan rozkłada się panel po panelu od lewego kija, gość za nim chowa
+  kapelusz, na znaczek spada stempel (ok. 1,9 s). Drzwi kabin nad tabelą typów i rzędy w
+  „Skuteczności” domykają się przy wejściu w kadr. Liczniki sceny podjeżdżają o 5 px, słońce
+  winiety wschodzi płynnie. Bez zapętlonych ozdobników poza dryfem mgły na pocztówce.
 - `prefers-reduced-motion: reduce`: stan końcowy od razu i przycisk „Pokaż pismo przed zasłonięciem”.
 - Bez JavaScriptu: stan końcowy policzony przy budowie tym samym `redactPII`.
 
