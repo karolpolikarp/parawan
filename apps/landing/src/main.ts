@@ -247,6 +247,20 @@ addEventListener('hashchange', () => {
   if (det) det.open = true;
 });
 
+/* ── Pasek linków na telefonie przewija się w poziomie. Przeglądarka przesuwa go do linku
+   z fokusem tylko wtedy, gdy link jest całkiem niewidoczny; wystający poza brzeg albo stojący pod
+   wygaszeniem prawego brzegu przesuwa się tu, żeby obrys fokusu był widać w całości. ── */
+const paskLinki = document.querySelector<HTMLElement>('.pasek-linki');
+paskLinki?.addEventListener('focusin', (e) => {
+  if (!(e.target instanceof HTMLElement) || paskLinki.scrollWidth <= paskLinki.clientWidth) return;
+  const rn = paskLinki.getBoundingClientRect();
+  const ra = e.target.getBoundingClientRect();
+  // prawy zapas w polu (style.css: szerszy niż wygaszenie) liczy się jak brzeg
+  const prawy = rn.right - Number.parseFloat(getComputedStyle(paskLinki).paddingRight);
+  if (ra.left < rn.left) paskLinki.scrollLeft -= rn.left - ra.left;
+  else if (ra.right > prawy) paskLinki.scrollLeft += ra.right - prawy;
+});
+
 /* ── Start ── */
 hydrateIcons();
 uruchomScene();

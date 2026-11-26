@@ -654,10 +654,16 @@ pre.polecenia { white-space: pre; word-break: normal; }
 @media (max-width: 1120px) {
   .pasek-in { flex-wrap: wrap; padding-top: 12px; padding-bottom: 12px; row-gap: 4px; }
   /* linki przewijają się w poziomie; wygaszony prawy brzeg podpowiada, że jest ich więcej */
+  /* Pole przewijania ucina wszystko, co wystaje (także obrys fokusu), więc linki mają w nim
+     zapas: 10 px nad i pod (oddany ujemnym marginesem, wysokość paska bez zmian), obrys wchodzi
+     do środka linku, a prawy zapas 44 px jest szerszy niż wygaszenie (40 px), więc ostatni link
+     po przewinięciu do końca stoi poza maską. */
   .pasek-linki {
-    order: 3; width: 100%; margin: 0; overflow-x: auto; gap: 22px; white-space: nowrap; scrollbar-width: none; padding-right: 32px;
+    order: 3; width: calc(100% + 6px); margin: -10px 0 -10px -6px; overflow-x: auto; gap: 10px; white-space: nowrap; scrollbar-width: none; padding: 10px 44px 10px 0;
     -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent);
   }
+  .pasek-linki a { padding: 10px 6px; }
+  .pasek-linki a:focus-visible { outline-offset: -3px; }
   .pasek-pobierz { margin-left: auto; }
   .bohater { padding-top: 14px; --hor: 236px; }
   .kartki { grid-template-columns: minmax(0, .86fr) minmax(0, 1.2fr); }

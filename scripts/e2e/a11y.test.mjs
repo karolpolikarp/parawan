@@ -363,6 +363,56 @@ async function focusMarker(page) {
   assert.ok(onMark, 'Tab z pola wyniku nie przeszedł na znacznik');
 }
 
+// Pasek linków na telefonie przewija się w poziomie (overflow-x) i wygasza prawe 40 px. Pole
+// przewijania ucina, co wystaje, więc obrys fokusu ma się zmieścić w nim w całości, a ostatni
+// link po przewinięciu stać poza wygaszeniem (przegląd 2026-11-26: z obrysu „GitHub ↗” zostawały
+// dwie pionowe kreski, a prawa część linku była przygaszona).
+for (const viewport of [
+  { width: 390, height: 844 },
+  { width: 320, height: 640 },
+]) {
+  test(`landing ${viewport.width} px: fokus na linkach paska mieści się w polu przewijania`, async (t) => {
+    await withApp(
+      browser,
+      t,
+      '',
+      async ({ page }) => {
+        await page.waitForLoadState('load');
+        const linki = await page.locator('.pasek-linki a').count();
+        assert.ok(linki > 3, `linków w pasku: ${linki}`);
+        for (let i = 0; i < linki; i++) {
+          // Tab jak z klawiatury: przeglądarka sama przewija pasek do linku z fokusem
+          if (i === 0) await page.locator('.pasek-linki a').first().focus();
+          else await page.keyboard.press('Tab');
+          await page.waitForTimeout(100);
+          const m = await page.evaluate(() => {
+            const a = document.activeElement;
+            const nav = a.closest('.pasek-linki');
+            const cs = getComputedStyle(a);
+            const o = Number.parseFloat(cs.outlineOffset) + Number.parseFloat(cs.outlineWidth);
+            const ra = a.getBoundingClientRect();
+            const rn = nav.getBoundingClientRect();
+            const ostatni = a === nav.querySelector('a:last-of-type');
+            return {
+              t: a.textContent.trim(),
+              styl: cs.outlineStyle,
+              obrys: [ra.left - o, ra.top - o, ra.right + o, ra.bottom + o].map((v) => Math.round(v * 10) / 10),
+              pole: [rn.left, rn.top, rn.right, rn.bottom].map((v) => Math.round(v * 10) / 10),
+              ostatni,
+            };
+          });
+          assert.notEqual(m.styl, 'none', `${m.t}: fokus bez obrysu`);
+          const [l, tp, r, d] = m.obrys;
+          const [pl, pt, pr, pd] = m.pole;
+          assert.ok(l >= pl - 0.5 && r <= pr + 0.5 && tp >= pt - 0.5 && d <= pd + 0.5, `${m.t}: obrys ${m.obrys} poza polem ${m.pole}`);
+          if (m.ostatni) assert.ok(r <= pr - 40 + 0.5, `${m.t}: ostatni link pod wygaszeniem (${r} > ${pr - 40})`);
+        }
+      },
+      { file: LANDING_HTML, viewport },
+    );
+  });
+}
+
 // Strona produktu w trybie wysokiego kontrastu: system wycina box-shadow, więc obrys przycisku
 // i stan „wciśnięty” w przełączniku widoku muszą stać na ramce (przegląd 2026-11-26: „Wstaw
 // przykład”, „Wyczyść” i „Pobierz Parawan.html” wyglądały jak zwykły tekst, a „Wynik”
