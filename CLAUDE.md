@@ -137,8 +137,9 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 - Testy wydajności rdzenia z progiem czasu sprawdzaj też na Node 20 (CI): V8 z Node 24 ukrywa
   kwadratowy lookbehind z nieograniczonym odstępem (`(?<=jest[ 	]+)`).
   Pomiar tylko przez `pomiar-czasu.ts` (Backlog 15), nie przez własne `performance.now()`.
-- W toku: nowy landing (`/frontend`), kierunek „Sosna o poranku”. Próbki poza repo w
-  `E:\parawan-landing-proby\`. Handoff: `docs/handoff-2026-11-01.md`.
+- W toku (2026-11-26): nowy landing „Sosna o poranku”, wariant „u”, na gałęzi `feat/landing-sosna`.
+  Ustalenia wyglądu i tonu: `DESIGN.md`. Próbki poza repo w `E:\parawan-landing-proby\`.
+  Teksty strony bezosobowo (bez „my”, „wy”, „Twój”).
 
 ## Deploy
 
@@ -150,9 +151,10 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 
 ## Backlog
 
-1. Wybór y/u (kolory kategorii jak w aplikacji czy nowa paleta), potem `DESIGN.md` i przeniesienie
-   próbki do `apps/landing` na gałęzi `feat/landing-sosna`. Powrót: odpowiedź użytkownika.
-2. Przy wyborze „u”: nowa paleta kategorii w `apps/web/src/style.css` (kolory w handoffie).
+1. Nowy landing „Sosna o poranku”: wybrane „u” (2026-11-26), `DESIGN.md` zapisany, próbka
+   przeniesiona do `apps/landing` na gałęzi `feat/landing-sosna` (bez PR). Zostało: przegląd
+   użytkownika, nowy `og.png` (hasło h1 zmienione), PR i deploy na polecenie.
+2. Paleta „u” w aplikacji (`apps/web/src/style.css`): zrobione na `feat/landing-sosna`, czeka na wydanie.
 3. „tarnowski” w słowniku nazwisk i na liście przymiotników: rozróżnienie przez regułę kontekstową
    (nazwa instytucji lub geografii po przymiotniku, np. „Starosta Tarnowski”, „Ziemia Tarnowska”).
    Usunięcie ze słownika dawało wycieki („Sędzia Tarnowski”), cofnięte w 380586a.
