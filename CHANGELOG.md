@@ -12,12 +12,23 @@ działają na GitHubie od chwili wypchnięcia tagów.
 
 ## [Unreleased]
 
+## v0.49.0 — 2026-11-27
+
+**Znaczniki w Parawan.html mają nowe, łatwiej rozróżnialne kolory kategorii, a strona produktu nowy wygląd.**
+
+Pilność: zwykła
+
+Rdzeń bez zmian (0.31.1). Wynik anonimizacji bez zmian.
+
+- **Nowe kolory znaczników w Parawan.html.** Znaczniki mają barwy z tej samej nadmorskiej palety
+  co strona: osoby śliwkowe, kontakt morski, identyfikatory ochrowe, finanse sosnowe, adres
+  niebieski. Tło znacznika jest pełne, a z lewej stoi pasek w barwie kategorii, więc kategorie
+  różnią się odcieniem i jasnością. Kontrast tekstu znacznika od 6,2:1 do 7,9:1.
 - **Nowy wygląd strony parawan.karolwilczynski.com.** Pierwszy ekran to pocztówka znad morza
   z hasłem i przyciskiem pobierania. Niżej scena z pismem: w trakcie przewijania nad każdą daną
   rozkłada się parawan, a kwota, przepis i sygnatura wyroku zostają na słońcu. Bez JavaScriptu
-  i przy wyłączonych animacjach strona pokazuje od razu pismo po zasłonięciu. Teksty strony są
-  bezosobowe, bez haseł z kontrastem i puent na końcu akapitu, liczby (29 typów, wyniki pomiaru)
-  bez zmian. Nagłówki w kroju Source Serif 4
+  i przy wyłączonych animacjach strona pokazuje od razu pismo po zasłonięciu.
+  Liczby (29 typów, wyniki pomiaru) bez zmian. Nagłówki w kroju Source Serif 4
   (licencja OFL), wbudowanym w stronę jak pozostałe fonty.
   Na pocztówce na pierwszym planie stoi parawan, zza którego widać tylko kapelusz i stopy. Nad
   tabelą typów stoją kabiny plażowe w barwach kategorii ze znakiem na drzwiach, a w wykresie
@@ -30,10 +41,6 @@ działają na GitHubie od chwili wypchnięcia tagów.
   przyciski i przełącznik „Wynik / Porównanie” mają ramki. Obrazek podglądu linku (na przykład
   na LinkedInie i w komunikatorach) to ta sama pocztówka: z przodu plaża z parawanem, na odwrocie
   nowe hasło i znaczniki ze znakami kategorii.
-- **Nowe kolory znaczników w Parawan.html.** Znaczniki mają barwy z tej samej nadmorskiej palety
-  co strona: osoby śliwkowe, kontakt morski, identyfikatory ochrowe, finanse sosnowe, adres
-  niebieski. Tło znacznika jest pełne, a z lewej stoi pasek w barwie kategorii, więc kategorie
-  różnią się odcieniem i jasnością. Kontrast tekstu znacznika od 6,2:1 do 7,9:1.
 
 ## v0.48.2 — 2026-11-23
 
@@ -2942,7 +2949,8 @@ Przegląd stabilizacyjny:
 - Opcjonalny lokalny NER (spaCy PL): usługa `services/ner` (Docker) + klient
   `anonimizator/ner` (fail-safe, circuit breaker).
 
-[Unreleased]: https://github.com/karolpolikarp/parawan/compare/v0.48.2...HEAD
+[Unreleased]: https://github.com/karolpolikarp/parawan/compare/v0.49.0...HEAD
+[v0.49.0]: https://github.com/karolpolikarp/parawan/compare/v0.48.2...v0.49.0
 [v0.48.2]: https://github.com/karolpolikarp/parawan/compare/v0.48.1...v0.48.2
 [v0.48.1]: https://github.com/karolpolikarp/parawan/compare/v0.48.0...v0.48.1
 [v0.48.0]: https://github.com/karolpolikarp/parawan/compare/v0.47.0...v0.48.0

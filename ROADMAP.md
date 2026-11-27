@@ -1,6 +1,6 @@
 # Roadmapa Parawana
 
-Stan na 2026-11-23, wersja bazowa v0.48.2 (rdzeń `anonimizator` 0.31.1, w npm także jako `parawan`).
+Stan na 2026-11-27, wersja bazowa v0.49.0 (rdzeń `anonimizator` 0.31.1, w npm także jako `parawan`).
 Każda pozycja ma docelową wersję i rozmiar (S, M, L). Pozycje „Z repozytorium” wynikają z kodu,
 CHANGELOG, dokumentów i PR-ów i podają źródło; „Propozycje” to pomysły spoza tych źródeł.
 
@@ -10,6 +10,8 @@ Zasady, które tu obowiązują: precyzja ważniejsza niż nadmaskowanie, jeden s
 
 ## Teraz
 
+v0.49.0 (2026-11-27): znaczniki w nadmorskiej palecie kategorii, zawsze ze znakiem, i nowy wygląd
+strony produktu („Sosna o poranku”). Rdzeń i wynik anonimizacji bez zmian.
 v0.48.2 (2026-11-23): okno przy CPU ×4 po ok. 1,2 s zamiast 1,4 s (silnik wczytywany po pokazaniu
 okna). v0.48.1 (2026-11-23, rdzeń 0.31.1): szybszy start, przy CPU ×4 „gotowe” po ok. 2,0 s zamiast
 2,5 s w v0.48.0 (leniwy pdf.js, wzorce zdrowia policzone w buildzie). Dalej w tym kierunku: pdf.js

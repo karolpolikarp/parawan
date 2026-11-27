@@ -109,13 +109,12 @@ Sam benchmark nie wystarcza — sprawdzaj zmiany wieloagentowo/adwersarialnie na
 
 Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i diakrytyką).
 
-## Stan (2026-11-26)
+## Stan (2026-11-27)
 
-- Gałąź `feat/landing-sosna` (2026-11-26/27, bez PR, czeka na przegląd użytkownika): nowy landing
-  „Sosna o poranku”, wariant „u”, paleta „u” w aplikacji, poprawki po przeglądzie (a11y, wysoki
-  kontrast, scena bez fragmentu danej, teksty bezosobowo) i nowy `og.png` (generator
-  `scripts/og/generate.mjs` bierze hasło z h1). Ustalenia wyglądu i tonu: `DESIGN.md`. Próbki poza
-  repo w `E:\parawan-landing-proby\`. Handoff: `docs/handoff-2026-11-26.md`.
+- v0.49.0 (2026-11-27, PR #37): nowy landing „Sosna o poranku” (wariant „u”) i paleta „u”
+  w znacznikach aplikacji; rdzeń bez zmian (0.31.1). Ustalenia wyglądu i tonu: `DESIGN.md`,
+  teksty bezosobowo. `og.png` z `scripts/og/generate.mjs` (hasło z h1). Próbki poza repo
+  w `E:\parawan-landing-proby\`. Handoff: `docs/handoff-2026-11-26.md`.
 - `main` = v0.48.2 + PR #34 (2026-11-23): kotwica czasu startu v0.48.2, testy z progiem czasu przez
   `packages/core/src/pomiar-czasu.ts` (Backlog 15). Handoff: `docs/handoff-2026-11-23.md`.
 - Dashboard skuteczności do prezentacji (artefakt claude.ai, prywatny):
@@ -154,11 +153,9 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 
 ## Backlog
 
-1. Nowy landing „Sosna o poranku”: gotowy na gałęzi `feat/landing-sosna` (bez PR), z poprawkami
-   po przeglądzie i nowym `og.png`. Zostało: przegląd użytkownika, potem PR, merge i deploy
-   na polecenie.
-2. Paleta „u” w aplikacji (`apps/web/src/style.css`): zrobione na `feat/landing-sosna`, czeka
-   na PR i wydanie aplikacji.
+1. Landing „Sosna o poranku” i paleta „u”: wydane w v0.49.0 (2026-11-27). Zostało: kotwica
+   czasu startu dla v0.49.0 (`docs/WYDANIE.md`, krok kalibracji), sprawdzenie na prawdziwym iPhonie.
+2. (zrobione w v0.49.0) Paleta „u” w aplikacji.
 3. „tarnowski” w słowniku nazwisk i na liście przymiotników: rozróżnienie przez regułę kontekstową
    (nazwa instytucji lub geografii po przymiotniku, np. „Starosta Tarnowski”, „Ziemia Tarnowska”).
    Usunięcie ze słownika dawało wycieki („Sędzia Tarnowski”), cofnięte w 380586a.
