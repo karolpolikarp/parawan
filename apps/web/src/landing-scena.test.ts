@@ -101,7 +101,7 @@ test('skuteczność: liczby i rzędy parawanów zgodne z docs/BENCHMARK.md', () 
   expect(sekcja).toContain(`jeden z ${b.mustMask} fragmentów, które w pomiarze miały zniknąć`);
   expect(sekcja).toContain(`za parawanem: ${b.hit} `);
   expect(sekcja).toContain(`przeszło: ${b.mustMask - b.hit}</figcaption>`);
-  expect(sekcja).toContain(`<h3>A to, co miało zostać na słońcu: ${b.kept} z ${b.mustKeep}</h3>`);
+  expect(sekcja).toContain(`<h3>Na słońcu miało zostać ${b.mustKeep}, zostało ${b.kept}</h3>`);
   expect(sekcja).toContain(`zostało: ${b.kept} `);
   expect(sekcja).toContain(`zasłonięte bez potrzeby: ${b.mustKeep - b.kept}</figcaption>`);
   // rzędy: każdy pasek to jeden fragment, błędy jako osobne kreskowane paski

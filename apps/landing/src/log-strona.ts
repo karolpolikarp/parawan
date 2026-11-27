@@ -146,7 +146,7 @@ export function stronaLogu(d: DaneLogu): string {
             <li><a href="../">Strona główna</a></li>
             <li><a href="${REPO}" ${zew}>Kod na GitHubie</a></li>
             <li><a href="${REPO}/releases" ${zew}>Lista wydań</a></li>
-            <li><a href="${REPO}/issues" ${zew}>Zgłoś nietrafione wykrycie</a></li>
+            <li><a href="${REPO}/issues" ${zew}>Zgłoś błąd wykrywania</a></li>
           </ul>
         </div>
         <p class="stopka-prawo">Kod: Apache 2.0. Fonty Archivo, IBM Plex Mono i Source Serif 4: SIL OFL 1.1.</p>
