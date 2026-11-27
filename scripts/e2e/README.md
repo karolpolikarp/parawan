@@ -65,6 +65,12 @@ wtyczka `cspSkrot` z `apps/web/src/csp-skrot.ts` na końcu builda. Ten sam modu�
 jako strażnik CSP w `ci.yml`, `release.yml` i `deploy-landing.yml`: `node scripts/e2e/csp.mjs`
 (bez argumentu oba pliki, z `web` albo `landing` jeden).
 
+Scenę „Parawany stają tylko przy danych” na stronie produktu sprawdza `landing-scena.test.mjs`:
+przewija ją klatka po klatce na 1440, 390 i 320 px i pilnuje, że oryginał danej jest widoczny
+tylko w całości (nie przycięty przez maskę ani brzeg kartki) i znika, zanim maska zacznie się
+zwężać. Ten sam plik sprawdza stan strony bez JavaScriptu, przy prefers-reduced-motion
+i rozmiar strony oraz podstrony /log/ (najwyżej 1,3 MB).
+
 Druk sprawdza `wydruk.test.mjs` na prawdziwym PDF-ie z Chromium (`page.pdf()` przy emulacji
 druku), a tekst wyciąga z niego `pdfjs-dist` (wersja legacy, ta sama co w aplikacji). Na wydruku
 ma być sam wynik, w całości i w obu widokach („Wynik” i „Porównanie”), bez pola źródła

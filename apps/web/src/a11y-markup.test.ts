@@ -44,7 +44,7 @@ test('landing: tabele, nagłówki i statystyki demo dla czytnika ekranu', () => 
     for (const tr of rows) expect(tr).toBe('<tr role="row">');
   }
   // metody rozpoznawania mają nagłówki, więc czytnik ekranu przeskakuje między nimi
-  const typy = landingHtml.match(/<section class="dok" id="typy">[\s\S]*?<\/section>/)?.[0] ?? '';
+  const typy = landingHtml.match(/<section[^>]*\bid="typy"[^>]*>[\s\S]*?<\/section>/)?.[0] ?? '';
   expect(typy.match(/<div class="metoda">\s*<div class="m-opis">\s*<h3>/g)).toHaveLength(4);
   // wynik demo przyjmuje fokus: klik w niego i Ctrl+A zaznacza sam wynik, nie całą stronę
   expect(landingHtml).toMatch(/id="demo-output"[^>]*tabindex="0"/);

@@ -109,8 +109,13 @@ Sam benchmark nie wystarcza — sprawdzaj zmiany wieloagentowo/adwersarialnie na
 
 Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i diakrytyką).
 
-## Stan (2026-11-23)
+## Stan (2026-11-26)
 
+- Gałąź `feat/landing-sosna` (2026-11-26/27, bez PR, czeka na przegląd użytkownika): nowy landing
+  „Sosna o poranku”, wariant „u”, paleta „u” w aplikacji, poprawki po przeglądzie (a11y, wysoki
+  kontrast, scena bez fragmentu danej, teksty bezosobowo) i nowy `og.png` (generator
+  `scripts/og/generate.mjs` bierze hasło z h1). Ustalenia wyglądu i tonu: `DESIGN.md`. Próbki poza
+  repo w `E:\parawan-landing-proby\`. Handoff: `docs/handoff-2026-11-26.md`.
 - `main` = v0.48.2 + PR #34 (2026-11-23): kotwica czasu startu v0.48.2, testy z progiem czasu przez
   `packages/core/src/pomiar-czasu.ts` (Backlog 15). Handoff: `docs/handoff-2026-11-23.md`.
 - Dashboard skuteczności do prezentacji (artefakt claude.ai, prywatny):
@@ -137,8 +142,7 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 - Testy wydajności rdzenia z progiem czasu sprawdzaj też na Node 20 (CI): V8 z Node 24 ukrywa
   kwadratowy lookbehind z nieograniczonym odstępem (`(?<=jest[ 	]+)`).
   Pomiar tylko przez `pomiar-czasu.ts` (Backlog 15), nie przez własne `performance.now()`.
-- W toku: nowy landing (`/frontend`), kierunek „Sosna o poranku”. Próbki poza repo w
-  `E:\parawan-landing-proby\`. Handoff: `docs/handoff-2026-11-01.md`.
+- Teksty strony bezosobowo (bez „my”, „wy”, „Twój”), od 2026-11-26.
 
 ## Deploy
 
@@ -150,9 +154,11 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 
 ## Backlog
 
-1. Wybór y/u (kolory kategorii jak w aplikacji czy nowa paleta), potem `DESIGN.md` i przeniesienie
-   próbki do `apps/landing` na gałęzi `feat/landing-sosna`. Powrót: odpowiedź użytkownika.
-2. Przy wyborze „u”: nowa paleta kategorii w `apps/web/src/style.css` (kolory w handoffie).
+1. Nowy landing „Sosna o poranku”: gotowy na gałęzi `feat/landing-sosna` (bez PR), z poprawkami
+   po przeglądzie i nowym `og.png`. Zostało: przegląd użytkownika, potem PR, merge i deploy
+   na polecenie.
+2. Paleta „u” w aplikacji (`apps/web/src/style.css`): zrobione na `feat/landing-sosna`, czeka
+   na PR i wydanie aplikacji.
 3. „tarnowski” w słowniku nazwisk i na liście przymiotników: rozróżnienie przez regułę kontekstową
    (nazwa instytucji lub geografii po przymiotniku, np. „Starosta Tarnowski”, „Ziemia Tarnowska”).
    Usunięcie ze słownika dawało wycieki („Sędzia Tarnowski”), cofnięte w 380586a.

@@ -363,6 +363,119 @@ async function focusMarker(page) {
   assert.ok(onMark, 'Tab z pola wyniku nie przeszedł na znacznik');
 }
 
+// Pasek linków na telefonie przewija się w poziomie (overflow-x) i wygasza prawe 40 px. Pole
+// przewijania ucina, co wystaje, więc obrys fokusu ma się zmieścić w nim w całości, a ostatni
+// link po przewinięciu stać poza wygaszeniem (przegląd 2026-11-26: z obrysu „GitHub ↗” zostawały
+// dwie pionowe kreski, a prawa część linku była przygaszona).
+// Podstrona /log/ nie ma skryptów, więc tam linki łamią się w wiersze (log.css) i ten sam warunek
+// musi zachodzić bez pomocy main.ts.
+for (const [strona, plik] of [
+  ['landing', LANDING_HTML],
+  ['log', path.join(path.dirname(LANDING_HTML), 'log', 'index.html')],
+])
+for (const viewport of [
+  { width: 390, height: 844 },
+  { width: 320, height: 640 },
+]) {
+  test(`${strona} ${viewport.width} px: fokus na linkach paska mieści się w polu przewijania`, async (t) => {
+    await withApp(
+      browser,
+      t,
+      '',
+      async ({ page }) => {
+        await page.waitForLoadState('load');
+        const linki = await page.locator('.pasek-linki a').count();
+        assert.ok(linki > 3, `linków w pasku: ${linki}`);
+        for (let i = 0; i < linki; i++) {
+          // Tab jak z klawiatury: przeglądarka sama przewija pasek do linku z fokusem
+          if (i === 0) await page.locator('.pasek-linki a').first().focus();
+          else await page.keyboard.press('Tab');
+          await page.waitForTimeout(100);
+          const m = await page.evaluate(() => {
+            const a = document.activeElement;
+            const nav = a.closest('.pasek-linki');
+            const cs = getComputedStyle(a);
+            const o = Number.parseFloat(cs.outlineOffset) + Number.parseFloat(cs.outlineWidth);
+            const ra = a.getBoundingClientRect();
+            const rn = nav.getBoundingClientRect();
+            const ostatni = a === nav.querySelector('a:last-of-type');
+            return {
+              t: a.textContent.trim(),
+              styl: cs.outlineStyle,
+              obrys: [ra.left - o, ra.top - o, ra.right + o, ra.bottom + o].map((v) => Math.round(v * 10) / 10),
+              pole: [rn.left, rn.top, rn.right, rn.bottom].map((v) => Math.round(v * 10) / 10),
+              ostatni,
+            };
+          });
+          assert.notEqual(m.styl, 'none', `${m.t}: fokus bez obrysu`);
+          const [l, tp, r, d] = m.obrys;
+          const [pl, pt, pr, pd] = m.pole;
+          assert.ok(l >= pl - 0.5 && r <= pr + 0.5 && tp >= pt - 0.5 && d <= pd + 0.5, `${m.t}: obrys ${m.obrys} poza polem ${m.pole}`);
+          if (m.ostatni) assert.ok(r <= pr - 40 + 0.5, `${m.t}: ostatni link pod wygaszeniem (${r} > ${pr - 40})`);
+        }
+      },
+      { file: plik, viewport },
+    );
+  });
+}
+
+// Strona produktu w trybie wysokiego kontrastu: system wycina box-shadow, więc obrys przycisku
+// i stan „wciśnięty” w przełączniku widoku muszą stać na ramce (przegląd 2026-11-26: „Wstaw
+// przykład”, „Wyczyść” i „Pobierz Parawan.html” wyglądały jak zwykły tekst, a „Wynik”
+// i „Porównanie” nie różniły się niczym).
+for (const viewport of [
+  { width: 1440, height: 900 },
+  { width: 390, height: 844 },
+]) {
+  test(`landing ${viewport.width} px, wysoki kontrast: przyciski mają ramkę, aktywny widok się wyróżnia`, async (t) => {
+    await withApp(
+      browser,
+      t,
+      '',
+      async ({ page }) => {
+        await page.waitForLoadState('load');
+        await page.emulateMedia({ forcedColors: 'active' });
+        assert.ok(await page.evaluate(() => matchMedia('(forced-colors: active)').matches), 'forced-colors nie działa');
+        const r = await page.evaluate(() => {
+          const ramka = (el) => {
+            const cs = getComputedStyle(el);
+            return ['Top', 'Right', 'Bottom', 'Left'].every(
+              (b) => cs[`border${b}Style`] !== 'none' && Number.parseFloat(cs[`border${b}Width`]) >= 1,
+            );
+          };
+          const widoczne = (el) => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
+          const bez = [...document.querySelectorAll('.btn')]
+            .filter((b) => widoczne(b) && !ramka(b))
+            .map((b) => b.textContent.trim().replace(/\s+/g, ' '));
+          const seg = [...document.querySelectorAll('.seg button')].map((b) => {
+            const cs = getComputedStyle(b);
+            const k = getComputedStyle(b, '::before');
+            return {
+              t: b.textContent.trim(),
+              on: b.getAttribute('aria-pressed') === 'true',
+              dol: Number.parseFloat(cs.borderBottomWidth) || 0,
+              kropka: k.backgroundColor,
+            };
+          });
+          return { n: document.querySelectorAll('.btn').length, bez, seg };
+        });
+        assert.ok(r.n > 3, `przycisków na stronie: ${r.n}`);
+        assert.deepEqual(r.bez, [], 'przyciski bez ramki w trybie wysokiego kontrastu');
+        const on = r.seg.filter((s) => s.on);
+        const off = r.seg.filter((s) => !s.on);
+        assert.equal(on.length, 1, JSON.stringify(r.seg));
+        assert.ok(off.length > 0, JSON.stringify(r.seg));
+        for (const s of off) {
+          assert.ok(on[0].dol >= 2 && on[0].dol > s.dol, `aktywny „${on[0].t}” bez kreski wobec „${s.t}”`);
+          assert.notEqual(on[0].kropka, s.kropka, `kropka „${on[0].t}” taka sama jak „${s.t}”`);
+        }
+        await page.locator('#demo').screenshot({ path: path.join(LOOK_DIR, `landing-wysoki-kontrast-${viewport.width}.png`) }).catch(() => {});
+      },
+      { file: LANDING_HTML, viewport },
+    );
+  });
+}
+
 test('wysoki kontrast (forced-colors): znaczniki mają ramkę, fokus na znaczniku ma obrys', async (t) => {
   await withApp(browser, t, '?demo', async (app) => {
     await app.demoReady();

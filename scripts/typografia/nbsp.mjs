@@ -27,7 +27,9 @@ const fixText = (t) => {
     // jednoliterowy spójnik po granicy słowa, po nim ZWYKŁA spacja + niepusty znak → twarda spacja
     t = t.replace(/(^|[\s(„»–—-])([aiouwzAIOUWZ]) (?=\S)/g, (_m, pre, w) => `${pre}${w}${NBSP}`);
   } while (t !== prev); // powtórz, by złapać sąsiadujące spójniki („a i", „i z")
-  return t;
+  // nazwy znaczników rdzenia ([IMIĘ I NAZWISKO], [DANE O ZDROWIU]) zostają ze zwykłymi spacjami,
+  // jak w wyniku silnika: landing.test.ts porównuje je z redactPII znak w znak
+  return t.replace(/\[[^\]]*\]/g, (m) => m.split(NBSP).join(' '));
 };
 
 const out = parts.map((tok) => {

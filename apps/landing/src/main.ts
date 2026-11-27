@@ -1,19 +1,23 @@
 /**
  * Parawan, landing page. Logika strony:
- *  1) demo z PRAWDZIWYM silnikiem `redactPII` (import z rdzenia, wtapiany do jednego pliku):
- *     anonimizacja liczona w przeglądarce, bez żadnego żądania sieciowego;
- *  2) licznik żądań do sieci w punkcie 1 sekcji „Jak sprawdzić” (#net-count), aktualny także
- *     podczas pisania w demo;
- *  3) drobiazgi UI: wersja w metryczce pliku, przełącznik widoku, kopiowanie, hydracja ikon.
+ *  1) okno z tekstem z PRAWDZIWYM silnikiem `redactPII` (import z rdzenia, wtapiany do jednego
+ *     pliku): anonimizacja liczona w przeglądarce, bez żadnego żądania sieciowego;
+ *  2) scena „Parawany stają tylko przy danych” i rzędy w „Skuteczności” (src/plaza.ts);
+ *  3) licznik żądań do sieci w oknie i w punkcie 1 „Jak sprawdzić” (#net-count), aktualny także
+ *     podczas pisania w oknie;
+ *  4) drobiazgi UI: wersja w metryczce pliku, przełącznik widoku, kopiowanie, legenda kategorii,
+ *     bloki zwijane na telefonie.
  *
- * Renderowanie znaczników i widok „Porównanie" są przeniesione z apps/web/src/main.ts,
- * żeby wynik wyglądał identycznie jak w narzędziu (spójność marki).
+ * Bez JavaScriptu strona pokazuje stan końcowy policzony przy buildzie (src/scena.ts). Znaczniki
+ * i widok „Porównanie” (src/wynik.ts) są przeniesione z apps/web, żeby wynik wyglądał jak w pliku.
  */
 import './style.css';
-import { redactPII, type PiiFinding } from 'anonimizator';
+import { redactPII } from 'anonimizator';
 import { hydrateIcons } from './icons';
+import { uruchomRzedy, uruchomScene } from './plaza';
 // Znaczniki, kategorie i przykład z modułu bez DOM, który sprawdzają testy (opis w tokens.ts).
-import { EXAMPLE_TEXT, MASK_TOKEN_RE, maskCategory, typeCategory } from './tokens';
+import { EXAMPLE_TEXT } from './tokens';
+import { licznikKategorii, maskHtml, renderAligned, statHtml } from './wynik';
 
 const $ =<T extends HTMLElement = HTMLElement>(id: string): T | null =>
   document.getElementById(id) as T | null;
@@ -22,101 +26,6 @@ const $ =<T extends HTMLElement = HTMLElement>(id: string): T | null =>
    pliku: przy przycisku pobierania obiecywałaby plik, którego przed tagiem jeszcze nie ma. ── */
 const verEl = $('ver-foot');
 if (verEl) verEl.textContent = typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : 'dev';
-
-/* ── Renderowanie wyniku (znaczniki + widok „Porównanie") — przeniesione z aplikacji ── */
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function maskHtml(name: string): string {
-  return `<mark class="pii pii-${maskCategory(name)}">[${name}]</mark>`;
-}
-
-/*
- * Wyrównanie wyniku z oryginałem (widoki „Wynik” i „Porównanie”). Kopia renderAligned
- * z apps/web/src/compare.ts, tam są testy i pełny opis: zmieniaj obie naraz.
- *  - sam odstęp między dwoma znacznikami nie jest kotwicą (trafiałby w spację wewnątrz
- *    wartości), więc takie znaczniki dostają jeden wspólny przekreślony fragment;
- *  - przekreślony oryginał siedzi w `.orig` z `user-select: none`, więc zaznaczenie
- *    i Ctrl+C w „Porównaniu” dają sam wynik, bez danych osobowych;
- *  - znacznik, który stał już w oryginale, zostaje zwykłym tekstem.
- */
-const GAP_ONLY = /^[^\S\r\n]+$/; // same odstępy poziome: spacje, tabulatory, twarde spacje
-
-function origHtml(orig: string): string {
-  const lines = escapeHtml(orig).split('\n');
-  return lines
-    .map((line, i) =>
-      line ? `<span class="orig"><del>${line}</del>${i === lines.length - 1 ? ' ' : ''}</span>` : '',
-    )
-    .join('\n');
-}
-
-type Pending = { mask: string } | { gap: string };
-
-function renderAligned(original: string, redacted: string, compare: boolean): string {
-  const parts = redacted.split(MASK_TOKEN_RE); // nieparzyste indeksy to nazwy tokenów
-  let html = '';
-  let pos = 0;
-  let group: Pending[] = [];
-
-  const flush = (gapEnd: number): void => {
-    if (group.length) {
-      let orig = original.slice(pos, gapEnd);
-      // znaczniki zastane na końcu grupy („Jan Kowalski [PESEL]”) zostają zwykłym tekstem
-      let tail = '';
-      while (group.length >= 3) {
-        const last = group[group.length - 1];
-        const gap = group[group.length - 2];
-        if (!('mask' in last) || !('gap' in gap)) break;
-        const literal = `[${last.mask}]`;
-        const rest = orig.slice(0, orig.length - literal.length - gap.gap.length);
-        if (!rest || orig !== rest + gap.gap + literal) break;
-        tail = escapeHtml(gap.gap) + escapeHtml(literal) + tail;
-        group.length -= 2;
-        orig = rest;
-      }
-      if (compare && orig) html += origHtml(orig);
-      html += group.map((p) => ('mask' in p ? maskHtml(p.mask) : escapeHtml(p.gap))).join('') + tail;
-      group = [];
-    }
-    pos = gapEnd;
-  };
-
-  for (let i = 0; i < parts.length; i++) {
-    const part = parts[i];
-    if (i % 2 === 1) {
-      const literal = `[${part}]`;
-      if (!group.length && original.startsWith(literal, pos)) {
-        html += escapeHtml(literal);
-        pos += literal.length;
-      } else {
-        group.push({ mask: part });
-      }
-      continue;
-    }
-    if (!part) continue;
-    if (group.length && i + 1 < parts.length && GAP_ONLY.test(part)) {
-      group.push({ gap: part });
-      continue;
-    }
-    const tail = original.length - part.length;
-    const idx =
-      i === parts.length - 1 && tail >= pos && original.endsWith(part)
-        ? tail
-        : original.indexOf(part, pos);
-    flush(idx === -1 ? pos : idx);
-    html += escapeHtml(part);
-    pos += part.length;
-  }
-  flush(original.length);
-  return html;
-}
 
 // Formularz wokół pola źródła jest tylko dla autocomplete="off" (index.html). Enter w polu
 // <input> dopisanym kiedyś do takiego formularza nie może go wysłać ani przeładować strony.
@@ -135,25 +44,13 @@ let compareMode = false;
 let lastRedacted = '';
 let lastInput = ''; // tekst, z którego powstał lastRedacted (do „Porównania”)
 
-/** Polska liczba mnoga: 1 → one; końcówka 2–4 poza 12–14 → few; reszta → many. */
-function plural(n: number, one: string, few: string, many: string): string {
-  if (n === 1) return one;
-  const d = n % 10;
-  const h = n % 100;
-  return d >= 2 && d <= 4 && (h < 12 || h > 14) ? few : many;
-}
+const legN = [...document.querySelectorAll<HTMLElement>('#demo-leg .leg-n')];
 
-function renderStats(found: PiiFinding[]): void {
-  if (!statEl) return;
-  const total = found.reduce((s, f) => s + f.count, 0);
-  if (total === 0) {
-    statEl.innerHTML = 'Nie wykryto danych osobowych w tym tekście.';
-    return;
-  }
-  const cats = new Set(found.map((f) => typeCategory(f.type))).size;
-  statEl.innerHTML =
-    `Zasłonięto <b>${total}</b> ${plural(total, 'fragment', 'fragmenty', 'fragmentów')} ` +
-    `w <b>${cats}</b> ${cats === 1 ? 'kategorii' : 'kategoriach'}.`;
+/** Statystyka i legenda kategorii pod oknem (ten sam napis co w HTML z buildu). */
+function renderStats(found: Parameters<typeof statHtml>[0], redacted: string): void {
+  if (statEl) statEl.innerHTML = statHtml(found);
+  const ile = licznikKategorii(redacted);
+  for (const b of legN) b.textContent = String(ile[b.dataset.k ?? ''] ?? 0);
 }
 
 function renderOutput(): void {
@@ -161,7 +58,7 @@ function renderOutput(): void {
   if (!lastRedacted) {
     outputEl.innerHTML =
       `<span class="placeholder">Tu pojawi się wynik, np. ${maskHtml('IMIĘ I NAZWISKO')}, ` +
-      `tel. ${maskHtml('TELEFON')}. Wpisz coś w polu „Tekst źródłowy” albo kliknij „Wstaw przykład”.</span>`;
+      `tel. ${maskHtml('TELEFON')}. Wystarczy wpisać tekst w polu „Tekst źródłowy” albo użyć przycisku „Wstaw przykład”.</span>`;
     return;
   }
   outputEl.innerHTML = renderAligned(lastInput, lastRedacted, compareMode);
@@ -177,7 +74,8 @@ function analyze(): void {
     lastRedacted = '';
     lastInput = '';
     renderOutput();
-    if (statEl) statEl.textContent = 'Pole „Tekst źródłowy” jest puste.'; // ten sam napis co w index.html
+    if (statEl) statEl.textContent = 'Pole „Tekst źródłowy” jest puste.';
+    for (const b of legN) b.textContent = '0';
     if (copyBtn) copyBtn.disabled = true;
     return;
   }
@@ -187,7 +85,7 @@ function analyze(): void {
   lastRedacted = redacted;
   lastInput = text;
   renderOutput();
-  renderStats(found);
+  renderStats(found, redacted);
   if (copyBtn) copyBtn.disabled = false;
 }
 
@@ -195,7 +93,22 @@ let timer: ReturnType<typeof setTimeout> | undefined;
 input?.addEventListener('input', () => {
   clearTimeout(timer);
   timer = setTimeout(analyze, 120);
+  rosnij();
 });
+
+/* Na telefonie pole źródła rośnie z treścią zamiast przewijać się w środku przewijanej strony. */
+const waskiePole = matchMedia('(max-width: 700px)');
+function rosnij(): void {
+  if (!input) return;
+  if (!waskiePole.matches) {
+    input.style.height = '';
+    return;
+  }
+  input.style.height = 'auto';
+  input.style.height = `${input.scrollHeight + 4}px`;
+}
+waskiePole.addEventListener?.('change', rosnij);
+addEventListener('resize', rosnij);
 
 function setView(compare: boolean): void {
   compareMode = compare;
@@ -226,6 +139,7 @@ $('demo-example')?.addEventListener('click', () => {
   if (!input) return;
   input.value = EXAMPLE_TEXT;
   analyze();
+  rosnij();
   input.focus();
 });
 
@@ -233,6 +147,7 @@ $('demo-clear')?.addEventListener('click', () => {
   if (!input) return;
   input.value = '';
   analyze();
+  rosnij();
   input.focus();
 });
 
@@ -242,9 +157,17 @@ $('demo-clear')?.addEventListener('click', () => {
 const COPY_LABEL = 'Kopiuj wynik';
 let copyTimer: ReturnType<typeof setTimeout> | undefined;
 
+const bezRuchu = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 function flashCopy(text: string, ms: number): void {
   if (!copyLabel) return;
   copyLabel.textContent = text;
+  // nowy napis podjeżdża o 3 px, żeby kliknięcie miało widoczną odpowiedź (tylko transform i opacity)
+  if (!bezRuchu)
+    copyLabel.animate?.([{ transform: 'translateY(3px)', opacity: 0.3 }, { transform: 'none', opacity: 1 }], {
+      duration: 160,
+      easing: 'cubic-bezier(.23, 1, .32, 1)',
+    });
   clearTimeout(copyTimer);
   copyTimer = setTimeout(resetCopyLabel, ms);
 }
@@ -280,24 +203,24 @@ copyBtn?.addEventListener('click', async () => {
     ta.remove();
     prevFocus?.focus({ preventScroll: true }); // select() zabrał fokus do usuniętego pola
     if (ok) flashCopy('Skopiowano ✓', 1600);
-    else flashCopy('Zaznacz wynik i naciśnij Ctrl+C', 4000);
+    else flashCopy('Wynik da się zaznaczyć i skopiować skrótem Ctrl+C', 4000);
   }
 });
 
-/* ── Licznik żądań do sieci w „Jak sprawdzić” (#net-count). Liczy tylko zasoby o schemacie http(s):
+/* ── Licznik żądań do sieci w oknie i w „Jak sprawdzić” (.net-n). Liczy tylko zasoby o schemacie http(s):
    wszystko w tym pliku jest inline (data:), więc licznik powinien wynosić 0. Prowadzi go sama
    strona, dlatego „Jak sprawdzić” nazywa go podglądem i odsyła do zakładki „Sieć”. ── */
 function isExternal(url: string): boolean {
   return /^https?:\/\//i.test(url);
 }
 function updateNetCount(): void {
-  const el = $('net-count');
-  if (!el) return;
+  const els = document.querySelectorAll('.net-n');
+  if (!els.length) return;
   try {
     const n = performance
       .getEntriesByType('resource')
       .filter((e) => isExternal((e as PerformanceResourceTiming).name)).length;
-    el.textContent = String(n);
+    for (const el of els) el.textContent = String(n);
   } catch {
     /* Resource Timing API niedostępne — zostaw 0. */
   }
@@ -309,9 +232,42 @@ try {
   /* PerformanceObserver niedostępny — licznik pozostaje statyczny. */
 }
 
+/* ── Długie bloki (sposoby rozpoznawania, punkty dla IT, przypadki poza pomiarem) na telefonie
+   startują zwinięte. Bez JavaScriptu zostają rozwinięte. ── */
+const waski = matchMedia('(max-width: 700px)');
+function zwin(): void {
+  for (const d of document.querySelectorAll<HTMLDetailsElement>('details.zwin')) d.open = !waski.matches;
+}
+zwin();
+waski.addEventListener?.('change', zwin);
+// link do sekcji wewnątrz zwiniętego bloku (np. #sprawdz z „Dla IOD i IT”) najpierw go rozwija
+addEventListener('hashchange', () => {
+  const cel = location.hash && document.getElementById(location.hash.slice(1));
+  const det = cel ? cel.closest('details') : null;
+  if (det) det.open = true;
+});
+
+/* ── Pasek linków na telefonie przewija się w poziomie. Przeglądarka przesuwa go do linku
+   z fokusem tylko wtedy, gdy link jest całkiem niewidoczny; wystający poza brzeg albo stojący pod
+   wygaszeniem prawego brzegu przesuwa się tu, żeby obrys fokusu był widać w całości. ── */
+const paskLinki = document.querySelector<HTMLElement>('.pasek-linki');
+paskLinki?.addEventListener('focusin', (e) => {
+  if (!(e.target instanceof HTMLElement) || paskLinki.scrollWidth <= paskLinki.clientWidth) return;
+  const rn = paskLinki.getBoundingClientRect();
+  const ra = e.target.getBoundingClientRect();
+  // prawy zapas w polu (style.css: szerszy niż wygaszenie) liczy się jak brzeg
+  const prawy = rn.right - Number.parseFloat(getComputedStyle(paskLinki).paddingRight);
+  if (ra.left < rn.left) paskLinki.scrollLeft -= rn.left - ra.left;
+  else if (ra.right > prawy) paskLinki.scrollLeft += ra.right - prawy;
+});
+
 /* ── Start ── */
 hydrateIcons();
+uruchomScene();
+uruchomRzedy();
 if (input) {
-  input.value = EXAMPLE_TEXT; // pokaż demo od razu — bez wklejania własnych danych
+  input.value = EXAMPLE_TEXT; // przykład od razu, bez wklejania własnych danych (ten sam stan wpisał już build)
   analyze();
+  rosnij();
+  document.fonts?.ready.then(rosnij);
 }

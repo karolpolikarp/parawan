@@ -3,9 +3,12 @@ import { redactPII } from 'anonimizator';
 import { expect, test } from 'vitest';
 import benchmarkMd from '../../../docs/BENCHMARK.md?raw';
 import dlaRaw from '../../../docs/wydanie/DLA-IOD-I-IT.txt?raw';
+import ewaluacjaSeria3 from '../../../docs/EWALUACJA-SERIA-3.md?raw';
 import coreSrc from '../../../packages/core/src/types.ts?raw';
 import landingHtmlRaw from '../../landing/index.html?raw';
 import landingConfig from '../../landing/vite.config.ts?raw';
+import landingMainSrc from '../../landing/src/main.ts?raw';
+import logStronaSrc from '../../landing/src/log-strona.ts?raw';
 import readmeMd from '../../../README.md?raw';
 import { ICONS as LANDING_ICONS } from '../../landing/src/icons';
 import { EXAMPLE_TEXT, MASK_TOKEN_RE, maskCategory, TYPE_MASK, typeCategory } from '../../landing/src/tokens';
@@ -146,7 +149,8 @@ test('landing: obietnice zgodne z tym, jak działa Parawan', () => {
   // ustawienia „Co maskować” zostają w przeglądarce; znika tekst, nie wszystko
   expect(landingHtml).not.toContain('Znika bez śladu');
   expect(landingHtml).not.toContain('Nic nie zostaje.');
-  expect(landingHtml).toContain('Przeglądarka pamięta jedynie Twoje ustawienia');
+  // zdanie bezosobowe od 2026-11-26 (wcześniej „jedynie Twoje ustawienia”), sens ten sam
+  expect(landingHtml).toContain('Przeglądarka pamięta tylko ustawienia, bez treści pism.');
   // Parawan.html to 2 MB zminifikowanego kodu, a nie plik do przeczytania
   expect(landingHtml).not.toContain('możesz go przeczytać w całości');
   // karta płatnicza ma sumę Luhna; w numerze KSeF sprawdzany jest NIP wystawcy
@@ -176,8 +180,11 @@ test('landing: ikony, pasek i kotwice', () => {
   const anchors = [...new Set([...landingHtml.matchAll(/href="#([^"]+)"/g)].map((m) => m[1]))];
   expect(anchors.length).toBeGreaterThanOrEqual(5);
   for (const a of anchors) expect(ids.has(a), `#${a}`).toBe(true);
-  // link „Ograniczenia” prowadzi do nagłówka o tej samej nazwie
-  expect(landingHtml).toContain('<h3 class="ogr-tyt" id="ograniczenia">Ograniczenia</h3>');
+  // link „Ograniczenia” prowadzi do sekcji z nagłówkiem o tej samej nazwie (od nowego wyglądu
+  // „Ograniczenia” to osobna sekcja z h2, a nie h3 w „Skuteczności”)
+  expect(landingHtml).toMatch(
+    /<section[^>]*\bid="ograniczenia"[^>]*>\s*<div class="wrap">\s*<div class="ogr-glowa">\s*<h2>Ograniczenia<\/h2>/,
+  );
 });
 
 test('landing: przykład z demo i przykłady w treści zgodne z silnikiem', () => {
@@ -210,7 +217,7 @@ test('landing: przykład z demo i przykłady w treści zgodne z silnikiem', () =
   }
 
   // (e) pary „zasłania / zostawia / przechodzi” w sekcji #typy
-  const typy = block(landingHtmlRaw, /<section class="dok" id="typy">[\s\S]*?<\/section>/, 'sekcja #typy');
+  const typy = block(landingHtmlRaw, /<section[^>]*\bid="typy"[^>]*>[\s\S]*?<\/section>/, 'sekcja #typy');
   const pairs = [...typy.matchAll(/<dd><code>([\s\S]*?)<\/code><span class="po">→\s<code>([\s\S]*?)<\/code><\/span><\/dd>/g)];
   expect(pairs.length).toBe(4);
   for (const [, input, output] of pairs) expect(redacted(textOf(input)), textOf(input)).toBe(textOf(output));
@@ -302,12 +309,12 @@ const landingStyle = readFileSync(
 const dla = dlaRaw.replace(/\r\n/g, '\n');
 const iodSection = block(
   landingHtml,
-  /<section class="dok" id="dla-iod">[\s\S]*?<\/section>/,
+  /<section[^>]*\bid="dla-iod"[^>]*>[\s\S]*?<\/section>/,
   'sekcja #dla-iod',
 );
 const pobierzSection = block(
   landingHtml,
-  /<section class="dok" id="pobierz">[\s\S]*?<\/section>/,
+  /<section[^>]*\bid="pobierz"[^>]*>[\s\S]*?<\/section>/,
   'sekcja #pobierz',
 );
 
@@ -324,7 +331,8 @@ function metryczka(html: string): Map<string, string> {
 
 test('landing: sekcja „Dla inspektora ochrony danych i działu IT” po #pobierz', () => {
   expect(landingHtml.indexOf('id="dla-iod"')).toBeGreaterThan(landingHtml.indexOf('id="pobierz"'));
-  expect(iodSection).toContain('<div class="wrap dok-siatka">');
+  // nagłówek z odnośnikiem do pliku obok, metryczka pod spodem (dawniej dwie kolumny .dok-siatka)
+  expect(iodSection).toContain('<div class="iod-glowa">');
   expect(iodSection).toContain('<h2>Dla inspektora ochrony danych i działu IT</h2>');
   expect(iodSection).toContain(
     '<p>Skrót opisu z pliku DLA-IOD-I-IT.txt, który jest w każdym wydaniu.</p>',
@@ -400,7 +408,8 @@ test('landing: przeglądarki i suma SHA-256 w #pobierz', () => {
   // suma: znacznik dla builda i polecenia do sprawdzenia
   expect(pobierzSection).toContain('<dt>Suma SHA-256</dt><dd><!--PARAWAN:SUMA-->');
   expect(pobierz.get('Suma SHA-256')).toContain(
-    'Sprawdzisz ją w PowerShellu: Get-FileHash .\\Parawan.html albo w wierszu poleceń: certutil -hashfile Parawan.html SHA256',
+    // bezosobowo od 2026-11-26 (wcześniej „Sprawdzisz ją…”), polecenia bez zmian
+    'Do sprawdzenia w PowerShellu: Get-FileHash .\\Parawan.html albo w wierszu poleceń: certutil -hashfile Parawan.html SHA256',
   );
   expect(landingStyle).toMatch(/\.suma \{[^}]*user-select: all/);
   // polecenia łamią się tylko na spacji: cały <code> w nowrap wchodził przy 901–1080 px na
@@ -462,13 +471,14 @@ test('landing: build wstawia sumę i tag z wydania, a bez nich odsyła do strony
 test('landing: „Jak sprawdzić” zachęca do zmyślonego tekstu i buduje z tagu', () => {
   const sprawdz = block(
     landingHtml,
-    /<section class="dok" id="sprawdz">[\s\S]*?<\/section>/,
+    /<section[^>]*\bid="sprawdz"[^>]*>[\s\S]*?<\/section>/,
     'sekcja #sprawdz',
   );
-  expect(sprawdz).toContain('Wklej w demo dowolny tekst, najlepiej zmyślony, i skopiuj wynik');
+  // zachęta do zmyślonego tekstu, bezosobowo (wcześniej „Wklej w demo dowolny tekst…”)
+  expect(sprawdz).toContain('Po wklejeniu do okna wyżej dowolnego tekstu, najlepiej zmyślonego, i skopiowaniu wyniku');
   expect(sprawdz).not.toContain('własny tekst');
   expect(sprawdz).toContain(
-    '<p class="kroki-pod">Prawdziwe pisma otwieraj w pobranym pliku. Strona w internecie służy do wypróbowania.</p>',
+    '<p class="kroki-pod">Prawdziwe pisma lepiej otwierać w pobranym pliku. Strona w internecie służy do próby.</p>',
   );
   // polecenia budowy na stronie to te same wiersze co w DLA-IOD-I-IT.txt (tag zamiast {{WERSJA}})
   const pre = block(
@@ -495,7 +505,8 @@ test('landing: blok dla firm i urzędów, nagłówki zostają', () => {
     'Parawan.html nie wymaga instalacji ani uprawnień administratora, więc dział IT może go dopuścić bez wdrażania programu. Najprościej położyć jedną kopię tylko do odczytu na dysku sieciowym i dodać skrót albo zakładkę. Aktualizacja to podmiana tego jednego pliku po sprawdzeniu sumy.',
   );
   expect(textOf(firma)).toContain(
-    'Czy wolno go używać w pracy, decyduje Twój urząd. Inspektorowi ochrony danych i działowi IT wyślij plik DLA-IOD-I-IT.txt z wydania. Część skrzynek blokuje załączniki .html, więc sam Parawan wysyłaj jako link.',
+    // bezosobowo od 2026-11-26 (wcześniej „decyduje Twój urząd… wyślij… wysyłaj”), sens ten sam
+    'O tym, czy wolno go używać w pracy, rozstrzyga urząd albo firma. Dla inspektora ochrony danych i działu IT jest w wydaniu plik DLA-IOD-I-IT.txt. Część skrzynek pocztowych odrzuca załączniki .html, więc sam Parawan lepiej przesłać jako link.',
   );
   expect(landingHtml).toContain('<p><b>Bez ściemy.</b> ');
 });
@@ -521,7 +532,7 @@ test('landing: ograniczenia dla urzędu zgodne z silnikiem', () => {
   }
   expect(granice).toContain('W BIP zwykle trzeba je zostawić jawne.');
   expect(granice).toContain(
-    'Parawan nie zmienia oryginalnego pliku. Autor we właściwościach, komentarze i historia zmian zostają w oryginale, więc publikuj nowy dokument z wyniku.',
+    'Parawan nie zmienia oryginalnego pliku. Autor we właściwościach, komentarze i historia zmian zostają w oryginale, więc do publikacji nadaje się nowy dokument utworzony z wyniku.',
   );
   expect(iodSection).toContain('numeru w nietypowym zapisie i tekstu na skanach. Numeru działki celowo nie zasłania.');
   expect(iodSection).not.toContain('numeru księgi wieczystej');
@@ -557,4 +568,101 @@ test('landing: ton nowych fragmentów bez wtrąceń i bez „nas”', () => {
     expect(f).not.toMatch(/(^|[^\p{L}])(nas|nam|nasz\p{L}*|nami)(?!\p{L})/iu);
     expect(f).not.toMatch(/100%|w pełni|po prostu/i);
   }
+});
+
+// Od 2026-11-26 cała strona mówi bezosobowo albo o Parawanie w trzeciej osobie: autor robi projekt
+// sam, więc bez „my”, a czytelnik nie jest adresatem („Twój”, „sprawdzisz”, „Wklej”). Tryb
+// rozkazujący zostaje tylko na przyciskach, odnośnikach i nagłówkach rozwijanych bloków
+// („Pobierz”, „Wstaw przykład”, „Pokaż…”). Rozszerzenie testu wyżej na całą widoczną treść.
+const widocznyTekst = (html: string): string =>
+  textOf(
+    html
+      .replace(/<head>[\s\S]*?<\/head>/, ' ')
+      .replace(/<!--[\s\S]*?-->/g, ' ')
+      .replace(/<(script|style)\b[\s\S]*?<\/\1>/g, ' ')
+      .replace(/<[^>]+>/g, ' '),
+  ).replace(/\s+/g, ' ');
+const BEZ_PRZYCISKOW = (html: string): string => html.replace(/<(a|button|summary)\b[\s\S]*?<\/\1>/g, ' ');
+const ZAIMKI = /(^|[^\p{L}])(my|wy|nas|nam|nami|nasz\p{L}*|wasz\p{L}*|was|wam|ty|tobie|ciebie|cię|twój|twoj\p{L}*|twym|twych)(?!\p{L})/giu;
+const CZASOWNIKI = /\p{L}+(liśmy|łyśmy|liście|łyście|łeś|łaś)(?!\p{L})/giu;
+// 2. osoba czasu teraźniejszego i przyszłego (sprawdzisz, wybierasz, zobaczysz); „Klawisz” to rzeczownik
+const DRUGA_OSOBA = /\p{L}+(isz|ysz|esz|asz)(?!\p{L})/giu;
+const DOZWOLONE = new Set(['klawisz']);
+const ROZKAZY = /(^|[^\p{L}])(wklej|wypróbuj|otwieraj|otwórz|wyłącz|wyjmij|naciśnij|przejdź|popisz|przejrzyj|wklejaj|publikuj|wyślij|wysyłaj|dodawaj|zaznacz|zasłoń|kliknij|zajrzyj|wpisz|sprawdź|pobierz)(?!\p{L})/giu;
+
+function glos(tekst: string): string[] {
+  const zle = [...tekst.matchAll(ZAIMKI), ...tekst.matchAll(CZASOWNIKI)].map((m) => m[0].trim());
+  for (const m of tekst.matchAll(DRUGA_OSOBA)) if (!DOZWOLONE.has(m[0].toLowerCase())) zle.push(m[0]);
+  return zle;
+}
+
+test('landing: cała widoczna treść bezosobowo, bez „my”, „wy” i „Twój”', () => {
+  const tekst = widocznyTekst(landingHtmlRaw).replace(/\u00a0/g, ' ');
+  expect(tekst.length).toBeGreaterThan(5000);
+  expect(glos(tekst)).toEqual([]);
+  expect(tekst).not.toMatch(/ — |100%|w pełni|po prostu/i);
+  // tryb rozkazujący poza przyciskami i odnośnikami
+  const proza = widocznyTekst(BEZ_PRZYCISKOW(landingHtmlRaw)).replace(/\u00a0/g, ' ');
+  expect([...proza.matchAll(ROZKAZY)].map((m) => m[0].trim())).toEqual([]);
+  // strażnik strażnika: dawne zdania wywracają test
+  expect(glos('Przeglądarka pamięta jedynie Twoje ustawienia. Sprawdzisz ją w PowerShellu. Wpisaliśmy go tu.')).toHaveLength(3);
+  expect([...'Naciśnij F12 i przejdź do zakładki.'.matchAll(ROZKAZY)]).toHaveLength(2);
+});
+
+test('landing: napisy skryptu strony i podstrony /log/ bezosobowo', () => {
+  // napisy w cudzysłowach z main.ts i log-strona.ts (komentarze kodu pomijamy)
+  const napisy = (src: string): string =>
+    [...src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '').matchAll(/(['\x60])((?:(?!\1)[^\\\n]|\\.)*)\1/g)]
+      .map((m) => m[2])
+      .join(' ');
+  for (const [nazwa, src] of [
+    ['main.ts', landingMainSrc],
+    ['log-strona.ts', logStronaSrc],
+  ] as const) {
+    expect(glos(widocznyTekst(napisy(src))), nazwa).toEqual([]);
+    expect([...widocznyTekst(BEZ_PRZYCISKOW(napisy(src))).matchAll(ROZKAZY)].map((m) => m[0].trim()), nazwa).toEqual([]);
+  }
+});
+
+test('landing: bursztyn jako sygnał tylko przy „zostaje na słońcu”, zakreślacz w innej barwie', () => {
+  // DESIGN.md, „Znaczniki”: bursztynowa smuga pod tekstem znaczy fragment, który zostaje. Zakreślacz
+  // obietnic (mark.zak) w tym samym odcieniu dawał temu sygnałowi drugie znaczenie (przegląd 2026-11-26).
+  const hex = landingStyle.match(/--marker:\s*#([0-9A-Fa-f]{6})/)?.[1];
+  expect(hex).toBeTruthy();
+  const [r, g, b] = [0, 2, 4].map((i) => Number.parseInt((hex ?? '').slice(i, i + 2), 16) / 255);
+  const max = Math.max(r, g, b);
+  const d = max - Math.min(r, g, b);
+  const h = d === 0 ? 0 : max === r ? (60 * ((g - b) / d) + 360) % 360 : max === g ? 60 * ((b - r) / d + 2) : 60 * ((r - g) / d + 4);
+  // odcienie od pomarańczu do żółci (bursztyn #B9791F ma ok. 35°, smuga #EBCB93 ok. 38°)
+  expect(d === 0 || h < 15 || h > 65, `--marker #${hex}: odcień ${Math.round(h)}°`).toBe(true);
+});
+
+test('landing: hasło skuteczności podaje źródło, a notka wynik na pismach odłożonych', () => {
+  // przegląd 2026-11-26: 98,8% stało jako hasło bez dopisku, że to syntetyczne zdania, a notka
+  // mówiła tylko „wynik może wyjść inaczej”, choć pomiar na pismach jest opisany w docs/
+  const sentences = benchmarkMd.match(/Zbiór ewaluacyjny:\*\* (\d+) syntetycznych zdań/)?.[1];
+  const sekcja = block(landingHtml, /<section[^>]*\bid="skutecznosc"[^>]*>[\s\S]*?<\/section>/, '#skutecznosc');
+  expect(sekcja).toContain(`<p class="duza-pod">Pomiar na ${sentences} syntetycznych zdaniach.`);
+  expect(sekcja).not.toContain('może wyjść inaczej');
+  // liczby z ostatniego kroku tabeli w docs/EWALUACJA-SERIA-3.md (części odłożone serii 2 i 3)
+  const odl = (seria: number): string | undefined =>
+    [...ewaluacjaSeria3.matchAll(new RegExp(String.raw`\| seria ${seria}, odłożona \|[^\n]*\*\*([\d,]+)%\*\*`, 'g'))].at(-1)?.[1];
+  expect(odl(2) && odl(3)).toBeTruthy();
+  expect(sekcja).toContain(`${odl(2)}% danych w serii 2 i ${odl(3)}% w serii 3`);
+  expect(sekcja).toContain('docs/EWALUACJA-SERIA-3.md');
+});
+
+test('landing: napis na rozwijanym bloku pasuje do stanu otwartego i zamkniętego', () => {
+  // details.zwin na telefonie startuje zwinięty (main.ts), a tekst <summary> się nie zmienia:
+  // bez czasownika „Pokaż…”, który po rozwinięciu kłamie
+  const summary = [...landingHtml.matchAll(/<summary>([^<]*)<\/summary>/g)].map((m) => m[1]);
+  expect(summary.length).toBeGreaterThan(2);
+  for (const s of summary) expect(s).not.toMatch(/^(Pokaż|Ukryj|Rozwiń|Zwiń)/);
+});
+
+test('landing: twarda spacja nigdy wewnątrz znacznika HTML', () => {
+  // twarda spacja po jednoliterowym słowie (a, i, w, z…) wstawiona też w „<a href” psuje
+  // znacznik: przeglądarka czyta wtedy „<a&nbsp;href…” jako tekst i gubi odnośnik (2026-11-27)
+  expect(landingHtmlRaw).not.toMatch(/<\/?[a-zA-Z][a-zA-Z0-9-]* /);
+  expect(logStronaSrc).not.toMatch(/<\/?[a-zA-Z][a-zA-Z0-9-]* /);
 });
