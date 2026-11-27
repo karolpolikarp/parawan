@@ -154,8 +154,8 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 ## Backlog
 
 1. Landing „Sosna o poranku” i paleta „u”: wydane w v0.49.0 (2026-11-27). Zostało: kotwica
-   czasu startu dla v0.49.0 (`docs/WYDANIE.md`, krok kalibracji), sprawdzenie na prawdziwym iPhonie.
-2. (zrobione w v0.49.0) Paleta „u” w aplikacji.
+   czasu startu dla v0.49.0 (`docs/WYDANIE.md`, krok kalibracji).
+2. Część „Właściciel” z `docs/WYDANIE.md` dla v0.49.0 i strona na prawdziwym iPhonie/Safari.
 3. „tarnowski” w słowniku nazwisk i na liście przymiotników: rozróżnienie przez regułę kontekstową
    (nazwa instytucji lub geografii po przymiotniku, np. „Starosta Tarnowski”, „Ziemia Tarnowska”).
    Usunięcie ze słownika dawało wycieki („Sędzia Tarnowski”), cofnięte w 380586a.
@@ -187,8 +187,8 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
     klasa W7 serii 3, ROADMAP poz. 28).
 13. PR #30 Dependabota (biome 2.6.8, axe-core, playwright, vite; CI zielone): sprawdzić nowe reguły
     biome i zgodność przeglądarek, scalić. Powrót: PR zamknięty.
-14. Sprzątanie zdalnych gałęzi: `docs/stan-po-serii-3` (scalona) i 3 gałęzie Dependabota po
-    zamkniętych PR.
+14. Sprzątanie zdalnych gałęzi: `docs/stan-po-serii-3`, `feat/landing-sosna` (scalone) i 3 gałęzie
+    Dependabota po zamkniętych PR.
 15. Progi czasu w testach: zrobione 2026-11-23 (PR #34, w `main`). Wszystkie testy z progiem
     czasu w rdzeniu (`index.test.ts`, `zdrowie.test.ts`) i web (`spans`, `docx`, `docx-inventory`)
     mierzą przez `packages/core/src/pomiar-czasu.ts` (`bestTimes` z dopomiarowaniem, `fastestMs`),
