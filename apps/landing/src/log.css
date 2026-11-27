@@ -141,3 +141,13 @@
   .zakladki, .spis { display: none !important; }
   .wersja-stara .md { display: block; }
 }
+
+/* Podstrona nie ma skryptów, więc pasek linków nie przewija się do linku z fokusem (robi to
+   main.ts na stronie głównej). Na węższym ekranie linki łamią się w wiersze zamiast przewijać:
+   obrys fokusu zawsze widać w całości, nic nie stoi pod wygaszeniem brzegu. */
+@media (max-width: 1120px) {
+  body.log .pasek-linki {
+    overflow-x: visible; flex-wrap: wrap; white-space: normal; row-gap: 0; padding-right: 0;
+    -webkit-mask-image: none; mask-image: none;
+  }
+}

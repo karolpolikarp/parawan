@@ -156,8 +156,7 @@ Cała komunikacja, komentarze i teksty UI po polsku (z pełną ortografią i dia
 
 1. Nowy landing „Sosna o poranku”: gotowy na gałęzi `feat/landing-sosna` (bez PR), z poprawkami
    po przeglądzie i nowym `og.png`. Zostało: przegląd użytkownika, potem PR, merge i deploy
-   na polecenie. Otwarte: na `/log/` (bez skryptów) środkowy link paska na telefonie może po Tab
-   stać częściowo za brzegiem paska.
+   na polecenie.
 2. Paleta „u” w aplikacji (`apps/web/src/style.css`): zrobione na `feat/landing-sosna`, czeka
    na PR i wydanie aplikacji.
 3. „tarnowski” w słowniku nazwisk i na liście przymiotników: rozróżnienie przez regułę kontekstową

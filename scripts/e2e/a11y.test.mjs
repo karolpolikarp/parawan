@@ -367,11 +367,17 @@ async function focusMarker(page) {
 // przewijania ucina, co wystaje, więc obrys fokusu ma się zmieścić w nim w całości, a ostatni
 // link po przewinięciu stać poza wygaszeniem (przegląd 2026-11-26: z obrysu „GitHub ↗” zostawały
 // dwie pionowe kreski, a prawa część linku była przygaszona).
+// Podstrona /log/ nie ma skryptów, więc tam linki łamią się w wiersze (log.css) i ten sam warunek
+// musi zachodzić bez pomocy main.ts.
+for (const [strona, plik] of [
+  ['landing', LANDING_HTML],
+  ['log', path.join(path.dirname(LANDING_HTML), 'log', 'index.html')],
+])
 for (const viewport of [
   { width: 390, height: 844 },
   { width: 320, height: 640 },
 ]) {
-  test(`landing ${viewport.width} px: fokus na linkach paska mieści się w polu przewijania`, async (t) => {
+  test(`${strona} ${viewport.width} px: fokus na linkach paska mieści się w polu przewijania`, async (t) => {
     await withApp(
       browser,
       t,
@@ -408,7 +414,7 @@ for (const viewport of [
           if (m.ostatni) assert.ok(r <= pr - 40 + 0.5, `${m.t}: ostatni link pod wygaszeniem (${r} > ${pr - 40})`);
         }
       },
-      { file: LANDING_HTML, viewport },
+      { file: plik, viewport },
     );
   });
 }
